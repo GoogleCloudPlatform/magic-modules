@@ -119,4 +119,5 @@ properties:
     resource: 'Zone'
     imports: 'name'
     description: 'The zone the machine type is defined.'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
     required: true

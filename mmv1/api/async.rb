@@ -16,7 +16,7 @@ require 'api/timeout'
 
 module Api
   # Base class from which other Async classes can inherit.
-  class Async < Api::Object
+  class Async < Google::YamlValidator
     # Describes an operation
     attr_reader :operation
 
@@ -35,27 +35,13 @@ module Api
     end
 
     # Base async operation type
-    class Operation < Api::Object
+    class Operation < Google::YamlValidator
       # Contains information about an long-running operation, to make
       # requests for the state of an operation.
       attr_reader :timeouts
-      attr_reader :result
 
       def validate
-        check :result, type: Result
         check :timeouts, type: Api::Timeouts
-      end
-    end
-
-    # Base result class
-    class Result < Api::Object
-      # Contains information about the result of an Operation
-
-      attr_reader :resource_inside_response
-
-      def validate
-        super
-        check :resource_inside_response, type: :boolean, default: false
       end
     end
   end
@@ -73,13 +59,21 @@ module Api
     # The list of methods where operations are used.
     attr_reader :actions
 
+    def initialize(operation, result, status, error)
+      super()
+      @operation = operation
+      @result = result
+      @status = status
+      @error = error
+    end
+
     def validate
       super
 
       check :operation, type: Operation, required: true
-      check :result, type: Result, required: true
-      check :status, type: Status, required: true
-      check :error, type: Error, required: true
+      check :result, type: Result, default: Result.new
+      check :status, type: Status
+      check :error, type: Error
       check :actions, default: %w[create delete update], type: ::Array, item_type: ::String
       check :include_project, type: :boolean, default: false
     end
@@ -96,13 +90,21 @@ module Api
       # Use this if the resource includes the full operation url.
       attr_reader :full_url
 
+      def initialize(path, base_url, wait_ms, timeouts)
+        super()
+        @path = path
+        @base_url = base_url
+        @wait_ms = wait_ms
+        @timeouts = timeouts
+      end
+
       def validate
         super
 
         check :kind, type: String
-        check :path, type: String, required: true
+        check :path, type: String
         check :base_url, type: String
-        check :wait_ms, type: Integer, required: true
+        check :wait_ms, type: Integer
 
         check :full_url, type: String
 
@@ -111,39 +113,60 @@ module Api
     end
 
     # Represents the results of an Operation request
-    class Result < Async::Result
+    class Result < Google::YamlValidator
       attr_reader :path
+      attr_reader :resource_inside_response
+
+      def initialize(path = nil, resource_inside_response = nil)
+        super()
+        @path = path
+        @resource_inside_response = resource_inside_response
+      end
 
       def validate
         super
 
         check :path, type: String
+        check :resource_inside_response, type: :boolean, default: false
       end
     end
 
     # Provides information to parse the result response to check operation
     # status
-    class Status < Api::Object
+    class Status < Google::YamlValidator
       attr_reader :path
       attr_reader :complete
       attr_reader :allowed
 
+      def initialize(path, complete, allowed)
+        super()
+        @path = path
+        @complete = complete
+        @allowed = allowed
+      end
+
       def validate
         super
-        check :path, type: String, required: true
-        check :allowed, type: Array, item_type: [::String, :boolean], required: true
+        check :path, type: String
+        check :allowed, type: Array, item_type: [::String, :boolean]
       end
     end
 
     # Provides information on how to retrieve errors of the executed operations
-    class Error < Api::Object
+    class Error < Google::YamlValidator
       attr_reader :path
       attr_reader :message
 
+      def initialize(path, message)
+        super()
+        @path = path
+        @message = message
+      end
+
       def validate
         super
-        check :path, type: String, required: true
-        check :message, type: String, required: true
+        check :path, type: String
+        check :message, type: String
       end
     end
   end

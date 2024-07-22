@@ -31,6 +31,14 @@ func dataSourceGoogleRuntimeconfigConfigRead(d *schema.ResourceData, meta interf
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
 	d.SetId(id)
-	return resourceRuntimeconfigConfigRead(d, meta)
+	err = resourceRuntimeconfigConfigRead(d, meta)
+	if err != nil {
+		return err
+	}
+
+	if d.Id() == "" {
+		return fmt.Errorf("%s not found", id)
+	}
+	return nil
 }
 <% end %>

@@ -13,7 +13,9 @@ resource "google_alloydb_instance" "<%= ctx[:primary_resource_id] %>" {
 resource "google_alloydb_cluster" "<%= ctx[:primary_resource_id] %>" {
   cluster_id = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
   location   = "us-central1"
-  network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  network_config {
+    network = google_compute_network.default.id
+  }
 
   initial_user {
     password = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
@@ -23,7 +25,7 @@ resource "google_alloydb_cluster" "<%= ctx[:primary_resource_id] %>" {
 data "google_project" "project" {}
 
 resource "google_compute_network" "default" {
-  name = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
+  name = "<%= ctx[:vars]['network_name'] %>"
 }
 
 resource "google_compute_global_address" "private_ip_alloc" {

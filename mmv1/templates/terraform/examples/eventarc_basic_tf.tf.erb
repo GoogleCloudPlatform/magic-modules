@@ -1,4 +1,3 @@
-# [START eventarc_terraform_enableapis]
 # Used to retrieve project_number later
 data "google_project" "project" {
   provider = google-beta
@@ -18,10 +17,6 @@ resource "google_project_service" "eventarc" {
   disable_on_destroy = false
 }
 
-# [END eventarc_terraform_enableapis]
-
-# [START cloudrun_terraform_deploy_eventarc]
-  
 # Deploy Cloud Run service
 resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
@@ -52,11 +47,6 @@ resource "google_cloud_run_service_iam_member" "allUsers" {
   role     = "roles/run.invoker"
   member   = "allUsers"
 }
-
-
-# [END cloudrun_terraform_deploy_eventarc]
-  
-# [START eventarc_terraform_pubsub]
       
 # Create a Pub/Sub trigger
 resource "google_eventarc_trigger" "<%= ctx[:vars]['trigger_pubsub_tf'] %>" {
@@ -77,18 +67,13 @@ resource "google_eventarc_trigger" "<%= ctx[:vars]['trigger_pubsub_tf'] %>" {
   depends_on = [google_project_service.eventarc]
 }
 
-# [END eventarc_terraform_pubsub]
-# [START eventarc_terraform_auditlog_storage]
-
 # Give default Compute service account eventarc.eventReceiver role
-resource "google_project_iam_binding" "project" {
+resource "google_project_iam_member" "project" {
   provider = google-beta
   project = data.google_project.project.id
   role    = "roles/eventarc.eventReceiver"
 
-  members = [
-    "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
-  ]
+  member = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
 }
     
 # Create an AuditLog for Cloud Storage trigger
@@ -119,6 +104,3 @@ resource "google_eventarc_trigger" "<%= ctx[:vars]['trigger_auditlog_tf'] %>" {
 
   depends_on = [google_project_service.eventarc]
 }
-
-# [END eventarc_terraform_auditlog_storage]
-

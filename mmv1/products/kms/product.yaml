@@ -18,9 +18,8 @@ versions:
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://cloudkms.googleapis.com/v1/
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://cloudkms.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloudkms
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Cloud Key Management Service (KMS) API
-    url: https://console.cloud.google.com/apis/library/cloudkms.googleapis.com/

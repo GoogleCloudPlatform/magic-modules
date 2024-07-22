@@ -78,10 +78,8 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'host'
         description: |
-          The externally accessible IPv4 address for the source database server.
+          The IPv4 address and port for the external server, or the the DNS address for the external server. If the external server is hosted on Cloud SQL, the port is 5432.
         required: true
-        validation: !ruby/object:Provider::Terraform::Validation
-          function: 'verify.ValidateIpAddress'
       - !ruby/object:Api::Type::Integer
         name: 'port'
         default_value: 3306

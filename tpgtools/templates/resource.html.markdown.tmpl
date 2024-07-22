@@ -143,6 +143,29 @@ This resource provides the following
 {{/* TODO excluded imports */}}
 {{$.DCLTitle}} can be imported using any of these accepted formats:
 
+{{- $id := "" }}
+{{- range $format := $.ImportFormats }}
+{{- $id = $format }}
+* `{{$format}}`
+{{- end }}
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import {{$.DCLTitle}} using one of the formats above. For example:
+
+{{- range $format := $.ImportFormats }}
+{{/* Get the first import format for templating */}}
+{{- $id = $format }}
+{{- break }}
+{{- end }}
+
+```tf
+import {
+  id = "{{$id}}"
+  to = {{$.TerraformName}}.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), {{$.DCLTitle}} can be imported using one of the formats above. For example:
+
 ```
 {{- range $format := $.ImportFormats }}
 $ terraform import {{$.TerraformName}}.default {{$format}}

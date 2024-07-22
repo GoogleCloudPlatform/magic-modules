@@ -88,15 +88,15 @@ properties:
     name: 'displayName'
     description: |
       An arbitrary user-provided name for the AppConnection.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Resource labels to represent user provided metadata.
   - !ruby/object:Api::Type::String
     name: 'type'
     description: |
-      The type of network connectivity used by the AppConnection. Refer to
-      https://cloud.google.com/beyondcorp/docs/reference/rest/v1/projects.locations.appConnections#type
+      The type of network connectivity used by the AppConnection. Refer
+      to https://cloud.google.com/beyondcorp/docs/reference/rest/v1/projects.locations.appConnections#type
       for a list of possible values.
     immutable: true
   - !ruby/object:Api::Type::NestedObject

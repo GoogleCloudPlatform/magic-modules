@@ -16,7 +16,7 @@ resource "google_os_config_patch_deployment" "<%= ctx[:primary_resource_id] %>" 
 
   patch_config {
     mig_instances_allowed = true
-    
+
     reboot_config = "ALWAYS"
 
     apt {
@@ -40,6 +40,7 @@ resource "google_os_config_patch_deployment" "<%= ctx[:primary_resource_id] %>" 
 
     windows_update {
       classifications = ["CRITICAL", "SECURITY", "UPDATE"]
+      excludes = ["5012170"]
     }
 
     pre_step {
@@ -93,6 +94,7 @@ resource "google_os_config_patch_deployment" "<%= ctx[:primary_resource_id] %>" 
       week_day_of_month {
         week_ordinal = -1
         day_of_week  = "TUESDAY"
+        day_offset   = 3
       }
     }
   }

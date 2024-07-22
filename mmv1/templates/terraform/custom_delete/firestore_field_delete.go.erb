@@ -4,13 +4,13 @@ log.Printf("[DEBUG] Deleting Field %q", d.Id())
 
 billingProject := ""
 
-project, err := getProject(d, config)
+project, err := tpgresource.GetProject(d, config)
 if err != nil {
 	return fmt.Errorf("Error fetching project for App: %s", err)
 }
 billingProject = project
 
-url, err := ReplaceVars(d, config, "{{FirestoreBasePath}}{{name}}")
+url, err := tpgresource.ReplaceVars(d, config, "{{FirestoreBasePath}}{{name}}")
 if err != nil {
 	return err
 }
@@ -24,7 +24,7 @@ if err != nil {
 
 
 // err == nil indicates that the billing_project value was found
-if bp, err := getBillingProject(d, config); err == nil {
+if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 	billingProject = bp
 }
 

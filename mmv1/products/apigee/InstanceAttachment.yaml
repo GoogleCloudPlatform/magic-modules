@@ -41,7 +41,8 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Creating an environment': 'https://cloud.google.com/apigee/docs/api-platform/get-started/create-environment'
   api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.attachments/create'
-
+# Skipping the sweeper due to the non-standard instance_id
+skip_sweeper: true
 autogen_async: true
 import_format:
   ['{{instance_id}}/attachments/{{name}}', '{{instance_id}}/{{name}}']
@@ -77,7 +78,7 @@ parameters:
     name: 'instanceId'
     description: |
       The Apigee instance associated with the Apigee environment,
-      in the format `organisations/{{org_name}}/instances/{{instance_name}}`.
+      in the format `organizations/{{org_name}}/instances/{{instance_name}}`.
     required: true
     url_param_only: true
 properties:

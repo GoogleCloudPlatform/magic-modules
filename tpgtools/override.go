@@ -54,6 +54,8 @@ const (
 	CustomSerializer                   = "CUSTOM_SERIALIZER"
 	TerraformProductName               = "CUSTOM_TERRAFORM_PRODUCT_NAME"
 	CustomTimeout                      = "CUSTOM_TIMEOUT"
+	StateUpgrade                       = "STATE_UPGRADE"
+	GenerateLongFormTests              = "GENERATE_LONG_FORM_TESTS"
 )
 
 // Field-level Overrides
@@ -78,6 +80,7 @@ const (
 	CustomListSize                    = "CUSTOM_LIST_SIZE_CONSTRAINT"
 	CustomDefault                     = "CUSTOM_DEFAULT"
 	CustomSchemaValues                = "CUSTOM_SCHEMA_VALUES"
+	ComplexMapKey                     = "COMPLEX_MAP_KEY_NAME"
 )
 
 // Overrides represents the type a resource's override file can be marshalled

@@ -20,15 +20,17 @@ update_verb: :PATCH
 update_mask: true
 description: |
   EdgeCacheOrigin represents a HTTP-reachable backend for an EdgeCacheService.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  api: 'https://cloud.google.com/media-cdn/docs/reference/rest/v1/projects.locations.edgeCacheOrigins'
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
     base_url: '{{op_id}}'
     wait_ms: 1000
     timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 60
-      update_minutes: 60
-      delete_minutes: 60
+      insert_minutes: 120
+      update_minutes: 120
+      delete_minutes: 120
   result: !ruby/object:Api::OpAsync::Result
     path: 'response'
   status: !ruby/object:Api::OpAsync::Status
@@ -82,7 +84,7 @@ properties:
     name: 'description'
     description: |
       A human-readable description of the resource.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: 'Set of label tags associated with the EdgeCache resource.'
   - !ruby/object:Api::Type::String

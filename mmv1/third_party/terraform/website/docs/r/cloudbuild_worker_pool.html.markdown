@@ -4,7 +4,7 @@ description: |-
   Configuration for custom WorkerPool to run builds
 ---
 
-# google\_cloudbuild\_worker\_pool
+# google_cloudbuild_worker_pool
 
 Definition of custom Cloud Build WorkerPools for running jobs with custom configuration and custom networking.
 
@@ -150,6 +150,21 @@ This resource provides the following
 ## Import
 
 WorkerPool can be imported using any of these accepted formats:
+
+* `projects/{{project}}/locations/{{location}}/workerPools/{{name}}`
+* `{{project}}/{{location}}/{{name}}`
+* `{{location}}/{{name}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import WorkerPool using one of the formats above. For example:
+
+```tf
+import {
+  id = "projects/{{project}}/locations/{{location}}/workerPools/{{name}}"
+  to = google_cloudbuild_worker_pool.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), WorkerPool can be imported using one of the formats above. For example:
 
 ```
 $ terraform import google_cloudbuild_worker_pool.default projects/{{project}}/locations/{{location}}/workerPools/{{name}}

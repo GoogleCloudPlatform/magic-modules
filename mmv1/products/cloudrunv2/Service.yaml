@@ -27,11 +27,8 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
   parent_resource_attribute: 'name'
   base_url: projects/{{project}}/locations/{{location}}/services/{{name}}
-  import_format:
-    [
-      'projects/{{project}}/locations/{{location}}/services/{{name}}',
-      '{{name}}',
-    ]
+  import_format: ['projects/{{project}}/locations/{{location}}/services/{{name}}', '{{name}}']
+taint_resource_on_failed_create: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
@@ -56,17 +53,18 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_basic'
     primary_resource_id: 'default'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service%s\",
-      context[\"\
-      random_suffix\"])"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service%s\", context[\"random_suffix\"])"
+    vars:
+      cloud_run_service_name: 'cloudrun-service'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudrunv2_service_limits'
+    primary_resource_id: 'default'
     vars:
       cloud_run_service_name: 'cloudrun-service'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_sql'
     primary_resource_id: 'default'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
-      context[\"random_suffix\"\
-      ])"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
       secret_id: 'secret-1'
@@ -79,28 +77,28 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_vpcaccess'
     primary_resource_id: 'default'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
-      context[\"random_suffix\"\
-      ])"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
       vpc_access_connector_name: 'run-vpc'
       vpc_compute_subnetwork_name: 'run-subnetwork'
       compute_network_name: 'run-network'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudrunv2_service_directvpc'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
+    vars:
+      cloud_run_service_name: 'cloudrun-service'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_probes'
     primary_resource_id: 'default'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
-      context[\"random_suffix\"\
-      ])"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_secret'
     primary_resource_id: 'default'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
-      context[\"random_suffix\"\
-      ])"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
       secret_id: 'secret-1'
@@ -112,9 +110,25 @@ examples:
       random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
+
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudrunv2_service_mount_gcs'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service-%s\", context[\"random_suffix\"])"
+    vars:
+      cloud_run_service_name: 'cloudrun-service'
+
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudrunv2_service_mount_nfs'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service-%s\", context[\"random_suffix\"])"
+    vars:
+      cloud_run_service_name: 'cloudrun-service'
+
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
+    required: true
     immutable: true
     url_param_only: true
     description: The location of the cloud run service
@@ -126,7 +140,6 @@ properties:
     url_param_only: true
     description: |
       Name of the Service.
-    pattern: projects/{{project}}/locations/{{location}}/services/{{name}}
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
@@ -144,14 +157,53 @@ properties:
     output: true
     description: |
       A number that monotonically increases every time the user modifies the desired state. Please note that unlike v1, this is an int64 value. As with most Google APIs, its JSON representation will be a string instead of an integer.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |-
-      Map of string keys and values that can be used to organize and categorize objects. User-provided labels are shared with Google's billing system, so they can be used to filter, or break down billing charges by team, component, environment, state, etc. For more information, visit https://cloud.google.com/resource-manager/docs/creating-managing-labels or https://cloud.google.com/run/docs/configuring/labels Cloud Run will populate some labels with 'run.googleapis.com' or 'serving.knative.dev' namespaces. Those labels are read-only, and user changes will not be preserved.
-  - !ruby/object:Api::Type::KeyValuePairs
+      Unstructured key value map that can be used to organize and categorize objects. User-provided labels are shared with Google's billing system, so they can be used to filter, or break down billing charges by team, component,
+      environment, state, etc. For more information, visit https://cloud.google.com/resource-manager/docs/creating-managing-labels or https://cloud.google.com/run/docs/configuring/labels.
+
+      Cloud Run API v2 does not support labels with  `run.googleapis.com`, `cloud.googleapis.com`, `serving.knative.dev`, or `autoscaling.knative.dev` namespaces, and they will be rejected.
+      All system labels in v1 now have a corresponding field in v2 Service.
+  - !ruby/object:Api::Type::KeyValueAnnotations
     name: 'annotations'
     description: |-
-      Unstructured key value map that may be set by external tools to store and arbitrary metadata. They are not queryable and should be preserved when modifying objects. Cloud Run will populate some annotations using 'run.googleapis.com' or 'serving.knative.dev' namespaces. This field follows Kubernetes annotations' namespacing, limits, and rules. More info: https://kubernetes.io/docs/user-guide/annotations
+      Unstructured key value map that may be set by external tools to store and arbitrary metadata. They are not queryable and should be preserved when modifying objects.
+
+      Cloud Run API v2 does not support annotations with `run.googleapis.com`, `cloud.googleapis.com`, `serving.knative.dev`, or `autoscaling.knative.dev` namespaces, and they will be rejected in new resources.
+      All system annotations in v1 now have a corresponding field in v2 Service.
+
+      This field follows Kubernetes annotations' namespacing, limits, and rules.
+  - !ruby/object:Api::Type::Time
+    name: 'createTime'
+    output: true
+    description: |-
+      The creation time.
+  - !ruby/object:Api::Type::Time
+    name: 'updateTime'
+    output: true
+    description: |-
+      The last-modified time.
+  - !ruby/object:Api::Type::Time
+    name: 'deleteTime'
+    output: true
+    description: |-
+      The deletion time.
+  - !ruby/object:Api::Type::Time
+    name: 'expireTime'
+    output: true
+    description: |-
+      For a deleted resource, the time after which it will be permamently deleted.
+  - !ruby/object:Api::Type::String
+    name: 'creator'
+    output: true
+    description: |-
+      Email address of the authenticated creator.
+  - !ruby/object:Api::Type::String
+    name: 'lastModifier'
+    output: true
+    description: |-
+      Email address of the last authenticated modifier.
   - !ruby/object:Api::Type::String
     name: 'client'
     description: |
@@ -198,6 +250,27 @@ properties:
         name: 'useDefault'
         description: |
           If True, indicates to use the default project's binary authorization policy. If False, binary authorization will be disabled.
+  - !ruby/object:Api::Type::Array
+    name: 'customAudiences'
+    description: |
+      One or more custom audiences that you want this service to support. Specify each custom audience as the full URL in a string. The custom audiences are encoded in the token and used to authenticate requests.
+      For more information, see https://cloud.google.com/run/docs/configuring/custom-audiences.
+    item_type: Api::Type::String
+  - !ruby/object:Api::Type::NestedObject
+    name: 'scaling'
+    min_version: beta
+    description: |
+      Scaling settings that apply to the whole service
+    properties:
+      - !ruby/object:Api::Type::Integer
+        name: 'minInstanceCount'
+        description: |
+          Minimum number of instances for the service, to be divided among all revisions receiving traffic.
+  - !ruby/object:Api::Type::Boolean
+    name: 'defaultUriDisabled'
+    min_version: beta
+    description: |-
+      Disables public resolution of the default URI of this service.
   - !ruby/object:Api::Type::NestedObject
     name: 'template'
     required: true
@@ -211,11 +284,20 @@ properties:
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |-
-          KRM-style labels for the resource.
+          Unstructured key value map that can be used to organize and categorize objects. User-provided labels are shared with Google's billing system, so they can be used to filter, or break down billing charges by team, component, environment, state, etc.
+          For more information, visit https://cloud.google.com/resource-manager/docs/creating-managing-labels or https://cloud.google.com/run/docs/configuring/labels.
+
+          Cloud Run API v2 does not support labels with `run.googleapis.com`, `cloud.googleapis.com`, `serving.knative.dev`, or `autoscaling.knative.dev` namespaces, and they will be rejected.
+          All system labels in v1 now have a corresponding field in v2 RevisionTemplate.
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'annotations'
         description: |-
-          KRM-style annotations for the resource.
+          Unstructured key value map that may be set by external tools to store and arbitrary metadata. They are not queryable and should be preserved when modifying objects.
+
+          Cloud Run API v2 does not support annotations with `run.googleapis.com`, `cloud.googleapis.com`, `serving.knative.dev`, or `autoscaling.knative.dev` namespaces, and they will be rejected.
+          All system annotations in v1 now have a corresponding field in v2 RevisionTemplate.
+
+          This field follows Kubernetes annotations' namespacing, limits, and rules.
       - !ruby/object:Api::Type::NestedObject
         name: 'scaling'
         description: |
@@ -246,6 +328,32 @@ properties:
             values:
               - :ALL_TRAFFIC
               - :PRIVATE_RANGES_ONLY
+            default_from_api: true
+          - !ruby/object:Api::Type::Array
+            name: 'networkInterfaces'
+            description: |-
+              Direct VPC egress settings. Currently only single network interface is supported.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'network'
+                  description: |-
+                    The VPC network that the Cloud Run resource will be able to send traffic to. At least one of network or subnetwork must be specified. If both
+                    network and subnetwork are specified, the given VPC subnetwork must belong to the given VPC network. If network is not specified, it will be
+                    looked up from the subnetwork.
+                  default_from_api: true
+                - !ruby/object:Api::Type::String
+                  name: 'subnetwork'
+                  description: |-
+                    The VPC subnetwork that the Cloud Run resource will get IPs from. At least one of network or subnetwork must be specified. If both
+                    network and subnetwork are specified, the given VPC subnetwork must belong to the given VPC network. If subnetwork is not specified, the
+                    subnetwork with the same name with the network will be used.
+                  default_from_api: true
+                - !ruby/object:Api::Type::Array
+                  name: 'tags'
+                  description: |-
+                    Network tags applied to this Cloud Run service.
+                  item_type: Api::Type::String
       - !ruby/object:Api::Type::String
         name: 'timeout'
         description: |-
@@ -253,6 +361,8 @@ properties:
 
           A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
         default_from_api: true
+        validation: !ruby/object:Provider::Terraform::Validation
+          regex: '^[0-9]+(?:\.[0-9]{1,9})?s$'
       - !ruby/object:Api::Type::String
         name: 'serviceAccount'
         description: |-
@@ -332,18 +442,20 @@ properties:
                 - !ruby/object:Api::Type::KeyValuePairs
                   name: 'limits'
                   description: |-
-                    Only memory and CPU are supported. Note: The only supported values for CPU are '1', '2', '4', and '8'. Setting 4 CPU requires at least 2Gi of memory. The values of the map is string form of the 'quantity' k8s type: https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
+                    Only memory and CPU are supported. Use key `cpu` for CPU limit and `memory` for memory limit. Note: The only supported values for CPU are '1', '2', '4', and '8'. Setting 4 CPU requires at least 2Gi of memory. The values of the map is string form of the 'quantity' k8s type: https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
                   default_from_api: true
                 - !ruby/object:Api::Type::Boolean
                   name: 'cpuIdle'
                   description: |-
-                    Determines whether CPU should be throttled or not outside of requests.
+                    Determines whether CPU is only allocated during requests. True by default if the parent `resources` field is not set. However, if
+                    `resources` is set, this field must be explicitly set to true to preserve the default behavior.
                 - !ruby/object:Api::Type::Boolean
                   name: 'startupCpuBoost'
                   description: |-
                     Determines whether CPU should be boosted on startup of a new container instance above the requested CPU threshold, this can help reduce cold-start latency.
             - !ruby/object:Api::Type::Array
               name: 'ports'
+              max_size: 1
               description: |-
                 List of ports to expose from the container. Only a single port can be specified. The specified ports must be listening on all interfaces (0.0.0.0) within the container to be accessible.
 
@@ -442,21 +554,6 @@ properties:
                             default_value: ''
                             send_empty_value: true
                 - !ruby/object:Api::Type::NestedObject
-                  name: 'tcpSocket'
-                  description: |-
-                    TCPSocket specifies an action involving a TCP port. This field is not supported in liveness probe currently.
-                  deprecation_message:
-                    Cloud Run does not support tcp socket in liveness probe and
-                    `liveness_probe.tcp_socket` field will be removed in a
-                    future major release.
-                  send_empty_value: true
-                  allow_empty_object: true
-                  properties:
-                    - !ruby/object:Api::Type::Integer
-                      name: port
-                      description: |-
-                        Port number to access on the container. Must be in the range 1 to 65535. If not specified, defaults to 8080.
-                - !ruby/object:Api::Type::NestedObject
                   name: grpc
                   description: |-
                     GRPC specifies an action involving a GRPC port.
@@ -475,6 +572,17 @@ properties:
                         The name of the service to place in the gRPC HealthCheckRequest
                         (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
                         If this is not specified, the default behavior is defined by gRPC.
+                - !ruby/object:Api::Type::NestedObject
+                  name: tcpSocket
+                  description: TCPSocketAction describes an action based on opening a socket
+                  properties:
+                    - !ruby/object:Api::Type::Integer
+                      name: port
+                      description: |-
+                        Port number to access on the container. Must be in the range 1 to 65535.
+                        If not specified, defaults to the exposed port of the container, which
+                        is the value of container.ports[0].containerPort.
+                      required: true
             - !ruby/object:Api::Type::NestedObject
               name: 'startupProbe'
               description: |-
@@ -506,8 +614,7 @@ properties:
                   description: |-
                     HTTPGet specifies the http request to perform. Exactly one of HTTPGet or TCPSocket must be specified.
                   send_empty_value: true
-                  allow_empty_object:
-                    true
+                  allow_empty_object: true
                     # exactly_one_of:
                     #   - template.0.containers.0.startupProbe.0.httpGet
                     #   - template.0.containers.0.startupProbe.0.tcpSocket
@@ -546,8 +653,7 @@ properties:
                   description: |-
                     TCPSocket specifies an action involving a TCP port. Exactly one of HTTPGet or TCPSocket must be specified.
                   send_empty_value: true
-                  allow_empty_object:
-                    true
+                  allow_empty_object: true
                     # exactly_one_of:
                     #   - template.0.containers.0.startupProbe.0.httpGet
                     #   - template.0.containers.0.startupProbe.0.tcpSocket
@@ -586,7 +692,6 @@ properties:
               name: 'dependsOn'
               description: |-
                 Containers which should be started before this container. If specified the container will wait to start until all containers with the listed names are healthy.
-              min_version: beta
               item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: 'volumes'
@@ -634,7 +739,6 @@ properties:
                           The Cloud Secret Manager secret version. Can be 'latest' for the latest value or an integer for a specific version
                       - !ruby/object:Api::Type::Integer
                         name: 'mode'
-                        required: true
                         description: |-
                           Integer octal mode bits to use on this file, must be a value between 01 and 0777 (octal). If 0 or not set, the Volume's default mode will be used.
             - !ruby/object:Api::Type::NestedObject
@@ -645,12 +749,14 @@ properties:
               #   - template.0.volumes.0.secret
               #   - template.0.volumes.0.cloudSqlInstance
               #   - template.0.volumes.0.emptyDir
+              #   - template.0.volumes.0.gcs
               properties:
                 - !ruby/object:Api::Type::Array
                   name: 'instances'
                   description: |-
                     The Cloud SQL instance connection names, as can be found in https://console.cloud.google.com/sql/instances. Visit https://cloud.google.com/sql/docs/mysql/connect-run for more information on how to connect Cloud SQL and Cloud Run. Format: {project}:{location}:{instance}
                   item_type: Api::Type::String
+                  is_set: true
             - !ruby/object:Api::Type::NestedObject
               name: 'emptyDir'
               description: |-
@@ -660,6 +766,7 @@ properties:
               #   - template.0.volumes.0.secret
               #   - template.0.volumes.0.cloudSqlInstance
               #   - template.0.volumes.0.emptyDir
+              #   - template.0.volumes.0.gcs
               properties:
                 - !ruby/object:Api::Type::Enum
                   name: 'medium'
@@ -671,7 +778,41 @@ properties:
                 - !ruby/object:Api::Type::String
                   name: 'sizeLimit'
                   description: |-
-                      Limit on the storage usable by this EmptyDir volume. The size limit is also applicable for memory medium. The maximum usage on memory medium EmptyDir would be the minimum value between the SizeLimit specified here and the sum of memory limits of all containers in a pod. This field's values are of the 'Quantity' k8s type: https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/. The default is nil which means that the limit is undefined. More info: http://kubernetes.io/docs/user-guide/volumes#emptydir.
+                    Limit on the storage usable by this EmptyDir volume. The size limit is also applicable for memory medium. The maximum usage on memory medium EmptyDir would be the minimum value between the SizeLimit specified here and the sum of memory limits of all containers in a pod. This field's values are of the 'Quantity' k8s type: https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/. The default is nil which means that the limit is undefined. More info: https://kubernetes.io/docs/concepts/storage/volumes/#emptydir.
+            - !ruby/object:Api::Type::NestedObject
+              name: 'gcs'
+              description: |-
+                Cloud Storage bucket mounted as a volume using GCSFuse. This feature is only supported in the gen2 execution environment and requires launch-stage to be set to ALPHA or BETA.
+              # exactly_one_of:
+              #   - template.0.volumes.0.secret
+              #   - template.0.volumes.0.cloudSqlInstance
+              #   - template.0.volumes.0.emptyDir
+              #   - template.0.volumes.0.gcs
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: bucket
+                  description: GCS Bucket name
+                  required: true
+                - !ruby/object:Api::Type::Boolean
+                  name: readOnly
+                  description: If true, mount the GCS bucket as read-only
+                  required: false
+            - !ruby/object:Api::Type::NestedObject
+              name: nfs
+              description: Represents an NFS mount.
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: server
+                  description: Hostname or IP address of the NFS server
+                  required: true
+                - !ruby/object:Api::Type::String
+                  name: path
+                  description: Path that is exported by the NFS server.
+                  required: true
+                - !ruby/object:Api::Type::Boolean
+                  name: readOnly
+                  description: If true, mount the NFS volume as read only
+                  required: false
       - !ruby/object:Api::Type::Enum
         name: 'executionEnvironment'
         description: |-
@@ -687,6 +828,7 @@ properties:
         name: 'maxInstanceRequestConcurrency'
         description: |-
           Sets the maximum number of requests that each serving instance can receive.
+          If not specified or 0, defaults to 80 when requested CPU >= 1 and defaults to 1 when requested CPU < 1.
         default_from_api: true
       - !ruby/object:Api::Type::Boolean
         name: 'sessionAffinity'

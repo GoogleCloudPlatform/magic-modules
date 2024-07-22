@@ -4,7 +4,7 @@ description: |-
   Creates a new notification configuration on a specified bucket.
 ---
 
-# google\_storage\_notification
+# google_storage_notification
 
 Creates a new notification configuration on a specified bucket, establishing a flow of event notifications from GCS to a Cloud Pub/Sub topic.
  For more information see
@@ -92,8 +92,21 @@ exported:
 
 ## Import
 
-Storage notifications can be imported using the notification `id` in the format `<bucket_name>/notificationConfigs/<id>` e.g.
+Storage notifications can be imported using any of these accepted formats:
+
+* `{{bucket_name}}/notificationConfigs/{{id}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import Storage notifications using one of the formats above. For example:
+
+```tf
+import {
+  id = "{{bucket_name}}/notificationConfigs/{{id}}"
+  to = google_storage_notification.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), Storage notifications can be imported using one of the formats above. For example:
 
 ```
-$ terraform import google_storage_notification.notification default_bucket/notificationConfigs/102
+$ terraform import google_storage_notification.default {{bucket_name}}/notificationConfigs/{{id}}
 ```

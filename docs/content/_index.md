@@ -17,7 +17,7 @@ change.
 
 ## Getting started
 
-Check out the [setup guide](/magic-modules/docs/getting-started/setup/) for information on how to set up your environment.
+Check out the [setup guide]({{< ref "/get-started/generate-providers" >}}) for information on how to set up your environment.
 
 ## Other Resources
 

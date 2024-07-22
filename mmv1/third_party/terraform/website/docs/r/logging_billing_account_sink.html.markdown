@@ -4,7 +4,7 @@ description: |-
   Manages a billing account logging sink.
 ---
 
-# google\_logging\_billing\_account\_sink
+# google_logging_billing_account_sink
 
 * [API documentation](https://cloud.google.com/logging/docs/reference/v2/rest/v2/billingAccounts.sinks)
 * How-to Guides
@@ -101,6 +101,19 @@ exported:
 
 Billing account logging sinks can be imported using this format:
 
+* `billingAccounts/{{billing_account_id}}/sinks/{{sink_id}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import billing account logging sinks using one of the formats above. For example:
+
+```tf
+import {
+  id = "billingAccounts/{{billing_account_id}}/sinks/{{sink_id}}"
+  to = google_logging_billing_account_sink.default
+}
 ```
-$ terraform import google_logging_billing_account_sink.my_sink billingAccounts/{{billing_account_id}}/sinks/{{sink_id}}
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), billing account logging sinks can be imported using one of the formats above. For example:
+
+```
+$ terraform import google_logging_billing_account_sink.default billingAccounts/{{billing_account_id}}/sinks/{{sink_id}}
 ```

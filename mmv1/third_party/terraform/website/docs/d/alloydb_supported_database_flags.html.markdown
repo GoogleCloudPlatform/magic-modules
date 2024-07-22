@@ -1,10 +1,10 @@
 ---
-subcategory: "Alloydb"
+subcategory: "AlloyDB"
 description: |-
   Fetches the list of supported alloydb database flags in a location.
 ---
 
-# google\_alloydb\_supported\_database\_flags
+# google_alloydb_supported_database_flags
 
 Use this data source to get information about the supported alloydb database flags in a location.
 

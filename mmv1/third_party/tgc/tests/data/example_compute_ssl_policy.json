@@ -1,0 +1,22 @@
+[
+  {
+    "name": "//compute.googleapis.com/projects/{{.Provider.project}}/global/sslPolicies/custom-ssl-policy",
+    "asset_type": "compute.googleapis.com/SslPolicy",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "beta",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+      "discovery_name": "SslPolicy",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "customFeatures": [
+          "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+          "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+        ],
+        "minTlsVersion": "TLS_1_2",
+        "name": "custom-ssl-policy",
+        "profile": "CUSTOM"
+      }
+    }
+  }
+]

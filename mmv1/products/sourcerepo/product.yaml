@@ -21,7 +21,3 @@ versions:
     base_url: https://sourcerepo.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Cloud Source Repositories API
-    url: https://console.cloud.google.com/apis/library/sourcerepo.googleapis.com/

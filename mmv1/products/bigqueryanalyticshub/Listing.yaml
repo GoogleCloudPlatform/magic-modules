@@ -37,9 +37,24 @@ import_format:
   [
     'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}',
   ]
+# Skipping the sweeper due to the non-standard base_url
+skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_analyticshub_listing_basic'
+    primary_resource_id: 'listing'
+    primary_resource_name: "fmt.Sprintf(\"tf_test_my_data_exchange%s\",
+      context[\"\
+      random_suffix\"]), fmt.Sprintf(\"tf_test_my_listing%s\",
+      context[\"random_suffix\"\
+      ])"
+    region_override: 'US'
+    vars:
+      data_exchange_id: 'my_data_exchange'
+      listing_id: 'my_listing'
+      description: 'example data exchange'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'bigquery_analyticshub_listing_restricted'
     primary_resource_id: 'listing'
     primary_resource_name: "fmt.Sprintf(\"tf_test_my_data_exchange%s\",
       context[\"\
@@ -144,3 +159,15 @@ properties:
           projects/myproject/datasets/123
         required: true
         diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+  - !ruby/object:Api::Type::NestedObject
+    name: restrictedExportConfig
+    description: If set, restricted export configuration will be propagated and enforced on the linked dataset.
+    properties:
+      - !ruby/object:Api::Type::Boolean
+        name: 'enabled'
+        description:
+          If true, enable restricted export.
+      - !ruby/object:Api::Type::Boolean
+        name: 'restrictQueryResult'
+        description:
+          If true, restrict export of query result derived from restricted linked dataset table.

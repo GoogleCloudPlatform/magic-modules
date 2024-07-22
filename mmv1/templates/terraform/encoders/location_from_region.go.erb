@@ -14,7 +14,7 @@
 -%>
 config := meta.(*transport_tpg.Config)
 if _, ok := d.GetOk("location"); !ok {
-	location, err := getRegionFromSchema("region", "zone", d, config)
+	location, err := tpgresource.GetRegionFromSchema("region", "zone", d, config)
 	if err != nil {
 		return nil, fmt.Errorf("Cannot determine location: set in this resource, or set provider-level 'region' or 'zone'.")
 	}

@@ -1,0 +1,24 @@
+[
+  {
+    "name": "//compute.googleapis.com/projects/{{.Provider.project}}/regions/australia-southeast1/forwardingRules/test-forwarding-rule",
+    "asset_type": "compute.googleapis.com/ForwardingRule",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "beta",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+      "discovery_name": "ForwardingRule",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "IPProtocol": "TCP",
+        "allowGlobalAccess": false,
+        "backendService": "https://compute.googleapis.com/compute/beta/projects/{{.Provider.project}}/regions/australia-southeast1/test-backend-service-id",
+        "loadBalancingScheme": "INTERNAL_MANAGED",
+        "name": "test-forwarding-rule",
+        "portRange": "80",
+        "region": "projects/{{.Provider.project}}/global/regions/australia-southeast1",
+        "allowPscGlobalAccess": false,
+        "noAutomateDnsZone":    false
+      }
+    }
+  }
+]

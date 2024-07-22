@@ -47,7 +47,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/bigquery/docs/reference/rest/v2/datasets'
 exclude_import: true
 skip_sweeper: true
-exclude_validator: true
+exclude_tgc: true
 error_retry_predicates: ['transport_tpg.IsBigqueryIAMQuotaError']
 mutex: '{{dataset_id}}'
 examples:
@@ -158,17 +158,9 @@ properties:
     name: 'specialGroup'
     description: |
       A special group to grant access to. Possible values include:
-
-
       * `projectOwners`: Owners of the enclosing project.
-
-
       * `projectReaders`: Readers of the enclosing project.
-
-
       * `projectWriters`: Writers of the enclosing project.
-
-
       * `allAuthenticatedUsers`: All authenticated BigQuery users.
     exactly_one_of:
       - user_by_email

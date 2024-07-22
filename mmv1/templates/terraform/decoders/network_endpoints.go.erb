@@ -1,0 +1,56 @@
+<%# The license inside this block applies to this file.
+# Copyright 2017 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+-%>
+config := meta.(*transport_tpg.Config)
+userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+if err != nil {
+    return nil, err
+}
+
+url, err := tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/zones/{{zone}}/networkEndpointGroups/{{network_endpoint_group}}/listNetworkEndpoints")
+if err != nil {
+    return nil, err
+}
+
+billingProject := ""
+
+project, err := tpgresource.GetProject(d, config)
+if err != nil {
+    return nil, fmt.Errorf("Error fetching project for NetworkEndpoint: %s", err)
+}
+billingProject = project
+
+// err == nil indicates that the billing_project value was found
+if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+    billingProject = bp
+}
+// Read past the first page to get all endpoints.
+pt, _ := res["nextPageToken"].(string)
+allEndpoints, err := networkEndpointsPaginatedRead(d, config, userAgent, url, project, billingProject, pt)
+if err != nil {
+    // networkEndpointsPaginatedRead already adds error description
+    return nil, err
+}
+firstPage := res["items"].([]interface{})
+allEndpoints = append(firstPage, allEndpoints...)
+
+// listNetworkEndpoints returns data in a different structure, so we need to
+// convert to the Terraform schema.
+var transformed []interface{}
+for _, e := range allEndpoints {
+    t := e.(map[string]interface{})["networkEndpoint"]
+    transformed = append(transformed, t)
+}
+
+return map[string]interface{}{"networkEndpoints": transformed}, nil

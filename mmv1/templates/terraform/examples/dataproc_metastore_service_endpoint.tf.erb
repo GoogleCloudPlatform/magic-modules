@@ -1,5 +1,4 @@
 resource "google_dataproc_metastore_service" "<%= ctx[:primary_resource_id] %>" {
-  provider   = google-beta
   service_id = "<%= ctx[:vars]['metastore_service_name'] %>"
   location   = "us-central1"
   tier       = "DEVELOPER"

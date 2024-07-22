@@ -53,6 +53,24 @@ examples:
     vars:
       workload_identity_pool_id: 'example-pool'
       workload_identity_pool_provider_id: 'example-prvdr'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'iam_workload_identity_pool_provider_saml_basic'
+    primary_resource_id: 'example'
+    vars:
+      workload_identity_pool_id: 'example-pool'
+      workload_identity_pool_provider_id: 'example-prvdr'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'iam_workload_identity_pool_provider_saml_full'
+    primary_resource_id: 'example'
+    vars:
+      workload_identity_pool_id: 'example-pool'
+      workload_identity_pool_provider_id: 'example-prvdr'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'iam_workload_identity_pool_provider_oidc_upload_key'
+    primary_resource_id: 'example'
+    vars:
+      workload_identity_pool_id: 'example-pool'
+      workload_identity_pool_provider_id: 'example-prvdr'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/iam_workload_identity_pool_provider.go.erb
   decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.erb
@@ -199,10 +217,11 @@ properties:
     name: aws
     description:
       An Amazon Web Services identity provider. Not compatible with the property
-      oidc.
+      oidc or saml.
     exactly_one_of:
       - aws
       - oidc
+      - saml
     properties:
       - !ruby/object:Api::Type::String
         name: accountId
@@ -212,13 +231,15 @@ properties:
     name: oidc
     description:
       An OpenId Connect 1.0 identity provider. Not compatible with the property
-      aws.
+      aws or saml.
     exactly_one_of:
       - aws
       - oidc
+      - saml
     update_mask_fields:
       - 'oidc.allowed_audiences'
       - 'oidc.issuer_uri'
+      - 'oidc.jwks_json'
     properties:
       - !ruby/object:Api::Type::Array
         name: allowedAudiences
@@ -239,4 +260,45 @@ properties:
       - !ruby/object:Api::Type::String
         name: issuerUri
         description: The OIDC issuer URL.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: jwksJson
+        description: |
+          OIDC JWKs in JSON String format. For details on definition of a
+          JWK, see https:tools.ietf.org/html/rfc7517. If not set, then we
+          use the `jwks_uri` from the discovery document fetched from the
+          .well-known path for the `issuer_uri`. Currently, RSA and EC asymmetric
+          keys are supported. The JWK must use following format and include only
+          the following fields:
+          ```
+          {
+            "keys": [
+              {
+                    "kty": "RSA/EC",
+                    "alg": "<algorithm>",
+                    "use": "sig",
+                    "kid": "<key-id>",
+                    "n": "",
+                    "e": "",
+                    "x": "",
+                    "y": "",
+                    "crv": ""
+              }
+            ]
+          }
+          ```
+        required: false
+  - !ruby/object:Api::Type::NestedObject
+    name: saml
+    description:
+      An SAML 2.0 identity provider. Not compatible with the property
+      oidc or aws.
+    exactly_one_of:
+      - aws
+      - oidc
+      - saml
+    properties:
+      - !ruby/object:Api::Type::String
+        name: idpMetadataXml
+        description: SAML Identity provider configuration metadata xml doc.
         required: true

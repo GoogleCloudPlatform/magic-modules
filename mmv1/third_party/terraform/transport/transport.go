@@ -24,11 +24,16 @@ type SendRequestOptions struct {
 	UserAgent            string
 	Body                 map[string]any
 	Timeout              time.Duration
+	Headers              http.Header
 	ErrorRetryPredicates []RetryErrorPredicateFunc
+	ErrorAbortPredicates []RetryErrorPredicateFunc
 }
 
 func SendRequest(opt SendRequestOptions) (map[string]interface{}, error) {
-	reqHeaders := make(http.Header)
+	reqHeaders := opt.Headers
+	if reqHeaders == nil {
+		reqHeaders = make(http.Header)
+	}
 	reqHeaders.Set("User-Agent", opt.UserAgent)
 	reqHeaders.Set("Content-Type", "application/json")
 
@@ -49,8 +54,8 @@ func SendRequest(opt SendRequestOptions) (map[string]interface{}, error) {
 	}
 
 	var res *http.Response
-	err := RetryTimeDuration(
-		func() error {
+	err := Retry(RetryOptions{
+		RetryFunc: func() error {
 			var buf bytes.Buffer
 			if opt.Body != nil {
 				err := json.NewEncoder(&buf).Encode(opt.Body)
@@ -81,9 +86,10 @@ func SendRequest(opt SendRequestOptions) (map[string]interface{}, error) {
 
 			return nil
 		},
-		opt.Timeout,
-		opt.ErrorRetryPredicates...,
-	)
+		Timeout:              opt.Timeout,
+		ErrorRetryPredicates: opt.ErrorRetryPredicates,
+		ErrorAbortPredicates: opt.ErrorAbortPredicates,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -121,6 +127,19 @@ func AddQueryParams(rawurl string, params map[string]string) (string, error) {
 	return u.String(), nil
 }
 
+func AddArrayQueryParams(rawurl string, param string, values []interface{}) (string, error) {
+	u, err := url.Parse(rawurl)
+	if err != nil {
+		return "", err
+	}
+	q := u.Query()
+	for _, v := range values {
+		q.Add(param, v.(string))
+	}
+	u.RawQuery = q.Encode()
+	return u.String(), nil
+}
+
 func HandleNotFoundError(err error, d *schema.ResourceData, resource string) error {
 	if IsGoogleApiErrorWithCode(err, 404) {
 		log.Printf("[WARN] Removing %s because it's gone", resource)
@@ -128,6 +147,15 @@ func HandleNotFoundError(err error, d *schema.ResourceData, resource string) err
 		d.SetId("")
 
 		return nil
+	}
+
+	return errwrap.Wrapf(
+		fmt.Sprintf("Error when reading or editing %s: {{err}}", resource), err)
+}
+
+func HandleDataSourceNotFoundError(err error, d *schema.ResourceData, resource, url string) error {
+	if IsGoogleApiErrorWithCode(err, 404) {
+		return fmt.Errorf("%s not found", url)
 	}
 
 	return errwrap.Wrapf(

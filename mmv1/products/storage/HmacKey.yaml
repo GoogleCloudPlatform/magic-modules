@@ -30,7 +30,7 @@ description: |
 id_format: 'projects/{{project}}/hmacKeys/{{access_id}}'
 import_format: ['projects/{{project}}/hmacKeys/{{access_id}}']
 async: !ruby/object:Provider::Terraform::PollAsync
-  check_response_func_existence: PollCheckForExistence
+  check_response_func_existence: transport_tpg.PollCheckForExistence
   actions: ['create']
 skip_sweeper: true
 examples:

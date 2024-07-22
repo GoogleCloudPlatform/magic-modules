@@ -2,9 +2,9 @@
 // 1) the index configuration has no overrides and matches the ancestor configuration.
 // 2) the ttl configuration is unset.
 
-config := GoogleProviderConfig(t)
+config := acctest.GoogleProviderConfig(t)
 
-url, err := replaceVarsForTest(config, rs, "{{FirestoreBasePath}}projects/{{project}}/databases/{{database}}/collectionGroups/{{collection}}/fields/{{field}}")
+url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{FirestoreBasePath}}projects/{{project}}/databases/{{database}}/collectionGroups/{{collection}}/fields/{{field}}")
 if err != nil {
   return err
 }
@@ -16,7 +16,16 @@ res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 	UserAgent: config.UserAgent,
 })
 if err != nil {
-  return err
+	e := err.(*googleapi.Error)
+	if e.Code == 403 && strings.Contains(e.Message, "Cloud Firestore API has not been used in project") {
+		// The acceptance test has provisioned the resources under test in a new project, and the destory check is seeing the
+		// effects of the project not existing. This means the service isn't enabled, and that the resource is definitely destroyed.
+		// We do not return the error in this case - destroy was successful
+		return nil
+	}
+
+	// Return err in all other cases
+	return err
 }
 
 if v := res["indexConfig"]; v != nil {

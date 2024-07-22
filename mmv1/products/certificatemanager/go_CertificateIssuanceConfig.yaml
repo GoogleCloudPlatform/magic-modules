@@ -1,0 +1,136 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'CertificateIssuanceConfig'
+description: |
+  Certificate represents a HTTP-reachable backend for a Certificate.
+references:
+  guides:
+    'Manage certificate issuance configs': 'https://cloud.google.com/certificate-manager/docs/issuance-configs'
+  api: 'https://cloud.google.com/certificate-manager/docs/reference/certificate-manager/rest/v1/projects.locations.certificateIssuanceConfigs'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/certificateIssuanceConfigs'
+create_url: 'projects/{{project}}/locations/{{location}}/certificateIssuanceConfigs?certificateIssuanceConfigId={{name}}'
+immutable: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/certificateIssuanceConfigs/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+schema_version: 1
+state_upgraders: true
+examples:
+  - name: 'certificate_manager_certificate_issuance_config'
+    primary_resource_id: 'default'
+    vars:
+      ca_name: 'ca-authority'
+      pool_name: 'ca-pool'
+      issuance_config_name: 'issuance-config'
+parameters:
+  - name: 'name'
+    type: String
+    description: |
+      A user-defined name of the certificate issuance config.
+      CertificateIssuanceConfig names must be unique globally.
+    url_param_only: true
+    required: true
+  - name: 'location'
+    type: String
+    description: |
+      The Certificate Manager location. If not specified, "global" is used.
+    url_param_only: true
+    immutable: true
+    default_value: "global"
+properties:
+  - name: 'description'
+    type: String
+    description: |
+      One or more paragraphs of text description of a CertificateIssuanceConfig.
+  - name: 'rotationWindowPercentage'
+    type: Integer
+    description: |
+      It specifies the percentage of elapsed time of the certificate lifetime to wait before renewing the certificate.
+      Must be a number between 1-99, inclusive.
+      You must set the rotation window percentage in relation to the certificate lifetime so that certificate renewal occurs at least 7 days after
+      the certificate has been issued and at least 7 days before it expires.
+    required: true
+  - name: 'keyAlgorithm'
+    type: Enum
+    description: |
+      Key algorithm to use when generating the private key.
+    required: true
+    enum_values:
+      - 'RSA_2048'
+      - 'ECDSA_P256'
+  - name: 'lifetime'
+    type: String
+    description: |
+      Lifetime of issued certificates. A duration in seconds with up to nine fractional digits, ending with 's'.
+      Example: "1814400s". Valid values are from 21 days (1814400s) to 30 days (2592000s)
+    required: true
+  - name: 'createTime'
+    type: String
+    description: |
+      The creation timestamp of a CertificateIssuanceConfig. Timestamp is in RFC3339 UTC "Zulu" format,
+      accurate to nanoseconds with up to nine fractional digits.
+      Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      The last update timestamp of a CertificateIssuanceConfig. Timestamp is in RFC3339 UTC "Zulu" format,
+      accurate to nanoseconds with up to nine fractional digits.
+      Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      'Set of label tags associated with the CertificateIssuanceConfig resource.
+       An object containing a list of "key": value pairs. Example: { "name": "wrench", "count": "3" }.
+    immutable: false
+  - name: 'certificateAuthorityConfig'
+    type: NestedObject
+    description: |
+      The CA that issues the workload certificate. It includes the CA address, type, authentication to CA service, etc.
+    required: true
+    properties:
+      - name: 'certificateAuthorityServiceConfig'
+        type: NestedObject
+        description: Defines a CertificateAuthorityServiceConfig.
+        properties:
+          - name: 'caPool'
+            type: String
+            description: |
+              A CA pool resource used to issue a certificate.
+              The CA pool string has a relative resource path following the form
+              "projects/{project}/locations/{location}/caPools/{caPool}".
+            required: true
+            diff_suppress_func: 'tpgresource.CompareResourceNames'

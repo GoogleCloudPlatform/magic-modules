@@ -11,6 +11,9 @@
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License. */}}
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 // ----------------------------------------------------------------------------
 //
 //     ***     AUTO GENERATED CODE    ***    Type: DCL     ***
@@ -69,7 +72,7 @@ func DCLToTerraformReference(product DCLPackageName, resource miscellaneousNameS
 }
 
 // ConvertSampleJSONToHCL unmarshals json to an HCL string.
-func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSnakeCase, version string, hasGAEquivalent bool, b []byte) (string, error) {
+func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSnakeCase, version string, hasGAEquivalent, makeLongForm bool, b []byte) (string, error) {
 	{{- range $version, $resList := $.Resources }}
 		{{- if not (eq $version.V "ga") }}
 	if version == "{{$version.V}}" {
@@ -83,7 +86,7 @@ func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSn
 				{{- if $res.CustomSerializer }}
 			return {{$res.CustomSerializer}}(*r, hasGAEquivalent)
 				{{- else }}
-			return {{$res.TitleCaseFullName}}{{$version.SerializationSuffix}}AsHCL(*r, hasGAEquivalent)
+			return {{$res.TitleCaseFullName}}{{$version.SerializationSuffix}}AsHCL(*r, hasGAEquivalent, makeLongForm)
 				{{- end }}
 			{{- end }}
 		}	
@@ -100,7 +103,7 @@ func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSn
 				{{- if $res.CustomSerializer }}
 			return {{$res.CustomSerializer}}(*r, hasGAEquivalent)
 				{{- else }}
-			return {{$res.TitleCaseFullName}}{{$version.SerializationSuffix}}AsHCL(*r, hasGAEquivalent)
+			return {{$res.TitleCaseFullName}}{{$version.SerializationSuffix}}AsHCL(*r, hasGAEquivalent, makeLongForm)
 				{{- end }}
 			{{- end }}
 	default:
@@ -120,10 +123,10 @@ func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSn
 // the crucial point is that `terraform import; terraform apply` will not produce
 // any changes.  We do not validate that the resource specified will pass terraform
 // validation unless is an object returned from the API after an Apply.
-func {{ $res.TitleCaseFullName }}{{$version.SerializationSuffix}}AsHCL(r {{$res.Package}}{{$version.SerializationSuffix}}.{{$res.DCLStructName}}, hasGAEquivalent bool) (string, error) {
+func {{ $res.TitleCaseFullName }}{{$version.SerializationSuffix}}AsHCL(r {{$res.Package}}{{$version.SerializationSuffix}}.{{$res.DCLStructName}}, hasGAEquivalent, makeLongForm bool) (string, error) {
 	outputConfig := "resource \"{{$res.TerraformName}}\" \"output\" {\n"
 		{{- range $field := $res.Properties}}
-			{{- if $field.Settable }}
+			{{- if $field.ShouldShowUpInSamples }}
 				{{- if eq $field.Type.String "TypeString" "TypeInt" "TypeBool" "TypeFloat" }}
 					{{- if $field.Type.IsDateTime }}
 	if !r.{{$field.PackageName}}.IsZero() {
@@ -135,7 +138,15 @@ func {{ $res.TitleCaseFullName }}{{$version.SerializationSuffix}}AsHCL(r {{$res.
 	}
 					{{- else }}
 	if r.{{$field.PackageName}} != nil {
+						{{- if or $field.Parameter $field.HasLongForm }}
+		if makeLongForm {
+			outputConfig += fmt.Sprintf("\t{{$field.Name}} = %#v\n", "long/form/" + *r.{{$field.PackageName}})
+		} else {
+			outputConfig += fmt.Sprintf("\t{{$field.Name}} = %#v\n", *r.{{$field.PackageName}})
+		}
+						{{- else }}
 		outputConfig += fmt.Sprintf("\t{{$field.Name}} = %#v\n", *r.{{$field.PackageName}})
+						{{- end }}
 	}
 					{{- end}}
 				{{- else if $field.Type.IsObject }}

@@ -1,0 +1,64 @@
+[
+    {
+        "name": "//compute.googleapis.com/projects/{{.Provider.project}}/regions/us-central1/clusters/dataproc-policy1",
+        "asset_type": "dataproc.googleapis.com/Cluster",
+        "resource": {
+            "version": "v1",
+            "discovery_document_uri": "https://dataproc.googleapis.com/$discovery/rest?version=v1",
+            "discovery_name": "Cluster",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "clusterName": "dataproc-policy1",
+                "config": {
+                    "autoscalingConfig": [
+                        null
+                    ],
+                    "auxiliaryNodeGroups": null,
+                    "dataprocMetricConfig": null,
+                    "encryptionConfig": [],
+                    "endpointConfig": [],
+                    "gceClusterConfig": null,
+                    "initializationActions": [],
+                    "lifecycleConfig": [],
+                    "masterConfig": null,
+                    "metastoreConfig": [],
+                    "secondaryWorkerConfig": null,
+                    "securityConfig": [],
+                    "softwareConfig": null,
+                    "workerConfig": null
+                },
+                "projectId": "{{.Provider.project}}"
+            }
+        },
+        "ancestors": ["organizations/{{.OrgID}}"],
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
+    },
+    {
+        "name": "//dataproc.googleapis.com/projects/{{.Provider.project}}/locations/us-central1/autoscalingPolicies/dataproc-policy1",
+        "asset_type": "dataproc.googleapis.com/AutoscalingPolicy",
+        "resource": {
+            "version": "v1beta2",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/dataproc/v1beta2/rest",
+            "discovery_name": "AutoscalingPolicy",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "basicAlgorithm": {
+                    "cooldownPeriod": "120s",
+                    "yarnConfig": {
+                        "gracefulDecommissionTimeout": "30s",
+                        "scaleDownFactor": 0.5,
+                        "scaleUpFactor": 0.5
+                    }
+                },
+                "id": "dataproc-policy1",
+                "workerConfig": {
+                    "maxInstances": 3,
+                    "minInstances": 2,
+                    "weight": 1
+                }
+            }
+        },
+        "ancestors": ["organizations/{{.OrgID}}"],
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
+    }
+]

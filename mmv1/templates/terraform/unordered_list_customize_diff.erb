@@ -27,8 +27,8 @@ for i := 0; i < count; i++ {
     }
 }
 
-oldSet := schema.NewSet(schema.HashResource(Resource<%= resource_name -%>().Schema[<%= go_literal(prop.name.underscore) -%>].Elem.(*schema.Resource)), old)
-newSet := schema.NewSet(schema.HashResource(Resource<%= resource_name -%>().Schema[<%= go_literal(prop.name.underscore) -%>].Elem.(*schema.Resource)), new)
+oldSet := schema.NewSet(schema.HashResource(Resource<%= object.resource_name -%>().Schema[<%= go_literal(prop.name.underscore) -%>].Elem.(*schema.Resource)), old)
+newSet := schema.NewSet(schema.HashResource(Resource<%= object.resource_name -%>().Schema[<%= go_literal(prop.name.underscore) -%>].Elem.(*schema.Resource)), new)
 
 if oldSet.Equal(newSet) {
     if err := diff.Clear(<%= go_literal(prop.name.underscore) -%>); err != nil {

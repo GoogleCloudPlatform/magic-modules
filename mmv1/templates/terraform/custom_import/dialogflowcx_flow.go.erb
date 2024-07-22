@@ -15,4 +15,9 @@ if err != nil {
 }
 d.SetId(id)
 
+// Set is_default_start_flow if the resource is actually the Default Start Flow
+if d.Get("name").(string) == "00000000-0000-0000-0000-000000000000" {
+    d.Set("is_default_start_flow", true)
+}
+
 return []*schema.ResourceData{d}, nil

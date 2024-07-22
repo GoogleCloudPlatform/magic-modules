@@ -1,0 +1,134 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the License);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+!ruby/object:Api::Resource
+name: "Network"
+base_url: "projects/{{project}}/locations/{{location}}/vmwareEngineNetworks"
+self_link: "projects/{{project}}/locations/{{location}}/vmwareEngineNetworks/{{name}}"
+create_url: "projects/{{project}}/locations/{{location}}/vmwareEngineNetworks?vmwareEngineNetworkId={{name}}"
+update_mask: true
+update_verb: :PATCH
+references: !ruby/object:Api::Resource::ReferenceLinks
+  api: "https://cloud.google.com/vmware-engine/docs/reference/rest/v1/projects.locations.vmwareEngineNetworks"
+description: |
+  Provides connectivity for VMware Engine private clouds.
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: "name"
+    base_url: "{{op_id}}"
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: "response"
+  status: !ruby/object:Api::OpAsync::Status
+    path: "done"
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: "error"
+    message: "message"
+
+import_format:
+  ["projects/{{project}}/locations/{{location}}/vmwareEngineNetworks/{{name}}"]
+autogen_async: true
+
+# There is a handwritten sweeper that provides a list of locations to sweep
+skip_sweeper: true
+
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "vmware_engine_network_standard"
+    primary_resource_id: "vmw-engine-network"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "vmware_engine_network_legacy"
+    external_providers: ["random", "time"]
+    primary_resource_id: "vmw-engine-network"
+    skip_test: true   # update tests will take care of create and update. Legacy network needs to be created on an isolated project.
+    vars:
+      proj_id: "vmw-proj"
+    test_env_vars:
+      location: :REGION
+      org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
+parameters:
+  - !ruby/object:Api::Type::String
+    name: "location"
+    immutable: true
+    required: true
+    url_param_only: true
+    description: |
+      The location where the VMwareEngineNetwork should reside.
+  - !ruby/object:Api::Type::String
+    name: "name"
+    immutable: true
+    required: true
+    url_param_only: true
+    description: |
+      The ID of the VMwareEngineNetwork.
+properties:
+  - !ruby/object:Api::Type::String
+    name: "description"
+    description: |
+      User-provided description for this VMware Engine network.
+  - !ruby/object:Api::Type::Array
+    name: "vpcNetworks"
+    description: |
+      VMware Engine service VPC networks that provide connectivity from a private cloud to customer projects,
+      the internet, and other Google Cloud services.
+    output: true
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::Enum
+          name: "type"
+          description: |
+            Type of VPC network (INTRANET, INTERNET, or GOOGLE_CLOUD)
+          output: true
+          values:
+            - :INTRANET
+            - :INTERNET
+            - :GOOGLE_CLOUD
+
+        - !ruby/object:Api::Type::String
+          name: "network"
+          output: true
+          description: |
+            The relative resource name of the service VPC network this VMware Engine network is attached to.
+            For example: projects/123123/global/networks/my-network
+  - !ruby/object:Api::Type::Enum
+    name: "state"
+    description: |
+      State of the VMware Engine network.
+    output: true
+    values:
+      - :CREATING
+      - :ACTIVE
+      - :UPDATING
+      - :DELETING
+
+  - !ruby/object:Api::Type::Enum
+    name: "type"
+    required: true
+    immutable: true
+    description: |
+      VMware Engine network type.
+    values:
+      - :LEGACY
+      - :STANDARD
+
+  - !ruby/object:Api::Type::String
+    name: "uid"
+    output: true
+    description: |
+      System-generated unique identifier for the resource.

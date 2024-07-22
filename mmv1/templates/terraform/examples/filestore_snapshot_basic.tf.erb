@@ -1,12 +1,12 @@
 resource "google_filestore_snapshot" "<%= ctx[:primary_resource_id] %>" {
   name     = "<%= ctx[:vars]["snapshot_name"] %>"
   instance = google_filestore_instance.instance.name
-  location = "us-central1"
+  location = "us-east1"
 }
 
 resource "google_filestore_instance" "instance" {
   name     = "<%= ctx[:vars]["instance_name"] %>"
-  location = "us-central1"
+  location = "us-east1"
   tier     = "ENTERPRISE"
 
   file_shares {

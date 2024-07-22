@@ -31,10 +31,6 @@ func resourceComputeFirewallRuleHash(v interface{}) int {
 	return tpgresource.Hashcode(buf.String())
 }
 
-func compareCaseInsensitive(k, old, new string, d *schema.ResourceData) bool {
-	return strings.ToLower(old) == strings.ToLower(new)
-}
-
 func diffSuppressEnableLogging(k, old, new string, d *schema.ResourceData) bool {
 	if k == "log_config.#" {
 		if new == "0" && d.Get("enable_logging").(bool) {

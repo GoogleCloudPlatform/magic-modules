@@ -53,6 +53,7 @@ import_format: ['{{name}}']
 autogen_async: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/self_link_as_name.erb
+error_abort_predicates: ['transport_tpg.Is429QuotaError']
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'active_directory_domain_basic'
@@ -73,8 +74,8 @@ parameters:
     url_param_only: true
     immutable: true
     description: |
-      The fully qualified domain name. e.g. mydomain.myorganization.com, with the restrictions,
-      https://cloud.google.com/managed-microsoft-ad/reference/rest/v1/projects.locations.global.domains.
+      The fully qualified domain name. e.g. mydomain.myorganization.com, with the restrictions
+      of https://cloud.google.com/managed-microsoft-ad/reference/rest/v1/projects.locations.global.domains.
     validation: !ruby/object:Provider::Terraform::Validation
       function: 'verify.ValidateADDomainName()'
 properties:
@@ -84,7 +85,7 @@ properties:
     description:
       'The unique name of the domain using the format:
       `projects/{project}/locations/global/domains/{domainName}`.'
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: 'Resource labels that can contain user-provided metadata'
   - !ruby/object:Api::Type::Array

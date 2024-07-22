@@ -1,4 +1,3 @@
-# [START eventarc_terraform_enableapis]
 # Used to retrieve project_number later
 data "google_project" "project" {
   provider = google-beta
@@ -25,9 +24,7 @@ resource "google_project_service" "workflows" {
   disable_on_destroy = false
 }
 
-# [END eventarc_terraform_enableapis]
 
-# [START eventarc_workflows_create_serviceaccount]
 
 # Create a service account for Eventarc trigger and Workflows
 resource "google_service_account" "eventarc_workflows_service_account" {
@@ -37,30 +34,28 @@ resource "google_service_account" "eventarc_workflows_service_account" {
 }
 
 # Grant the logWriter role to the service account
-resource "google_project_iam_binding" "project_binding_eventarc" {
+resource "google_project_iam_member" "project_binding_eventarc" {
   provider = google-beta
   project = data.google_project.project.id
   role    = "roles/logging.logWriter"
 
-members = ["serviceAccount:${google_service_account.eventarc_workflows_service_account.email}"]
+  member = "serviceAccount:${google_service_account.eventarc_workflows_service_account.email}"
 
   depends_on = [google_service_account.eventarc_workflows_service_account]
 }
 
 # Grant the workflows.invoker role to the service account
-resource "google_project_iam_binding" "project_binding_workflows" {
+resource "google_project_iam_member" "project_binding_workflows" {
   provider = google-beta
   project = data.google_project.project.id
   role    = "roles/workflows.invoker"
 
-members = ["serviceAccount:${google_service_account.eventarc_workflows_service_account.email}"]
+  member = "serviceAccount:${google_service_account.eventarc_workflows_service_account.email}"
 
   depends_on = [google_service_account.eventarc_workflows_service_account]
 }
 
-# [END eventarc_workflows_create_serviceaccount]
 
-# [START eventarc_workflows_deploy]
 # Define and deploy a workflow
 resource "google_workflows_workflow" "workflows_example" {
   name            = "<%= ctx[:vars]['pubsub_workflow_tf'] %>"
@@ -75,9 +70,7 @@ resource "google_workflows_workflow" "workflows_example" {
 google_service_account.eventarc_workflows_service_account]
 }
 
-# [END eventarc_workflows_deploy]
 
-# [START eventarc_create_pubsub_trigger]
 # Create an Eventarc trigger routing Pub/Sub events to Workflows
 resource "google_eventarc_trigger" "<%= ctx[:primary_resource_id] %>" {
   name     = "<%= ctx[:vars]['trigger_pubsub_workflow_tf'] %>"
@@ -98,4 +91,3 @@ resource "google_eventarc_trigger" "<%= ctx[:primary_resource_id] %>" {
 google_service_account.eventarc_workflows_service_account]
 }
 
-# [END eventarc_create_pubsub_trigger]

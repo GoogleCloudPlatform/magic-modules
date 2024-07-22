@@ -4,15 +4,12 @@ description: |-
   Get a VM instance template within GCE.
 ---
 
-# google\_compute\_region\_instance\_template
+# google_compute_region_instance_template
 
 Get information about a VM instance template resource within GCE. For more information see
 [the official documentation](https://cloud.google.com/compute/docs/instance-templates)
 and
 [API](https://cloud.google.com/compute/docs/reference/rest/v1/regionInstanceTemplates).
-
-~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
-See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
 
 ## Example Usage
 
@@ -127,6 +124,11 @@ The following arguments are supported:
 
 * `disk_name` - Name of the disk. When not provided, this defaults
     to the name of the instance.
+
+* `provisioned_iops` - Indicates how many IOPS to provision for the disk. This
+    sets the number of I/O operations per second that the disk can handle.
+    Values must be between 10,000 and 120,000. For more details, see the
+    [Extreme persistent disk documentation](https://cloud.google.com/compute/docs/disks/extreme-persistent-disk).
 
 * `source_image` - The image from which to
     initialize this disk. This can be one of: the image's `self_link`,

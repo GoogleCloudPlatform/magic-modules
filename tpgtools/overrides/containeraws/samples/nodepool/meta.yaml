@@ -1,4 +1,7 @@
 ignore_read:
   - fleet.0.project
+  - management.#
+  - management.0.%
+  - management.0.auto_repair
 doc_hide:
   - beta_basic.tf.tmpl

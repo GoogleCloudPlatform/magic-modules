@@ -14,6 +14,7 @@ resource "google_billing_budget" "<%= ctx[:primary_resource_id] %>" {
     credit_types_treatment = "INCLUDE_SPECIFIED_CREDITS"
     services               = ["services/24E6-581D-38E5"] # Bigquery
     credit_types           = ["PROMOTION", "FREE_TIER"]
+    resource_ancestors     = ["organizations/<%= ctx[:test_env_vars]['org_id'] %>"]
   }
 
   amount {

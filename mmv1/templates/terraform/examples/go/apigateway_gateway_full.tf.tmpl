@@ -1,0 +1,28 @@
+resource "google_api_gateway_api" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  api_id = "{{index $.Vars "api_id"}}"
+}
+
+resource "google_api_gateway_api_config" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  api = google_api_gateway_api.{{$.PrimaryResourceId}}.api_id
+  api_config_id = "{{index $.Vars "config_id"}}"
+
+  openapi_documents {
+    document {
+      path = "spec.yaml"
+      contents = filebase64("test-fixtures/openapi.yaml")
+    }
+  }
+}
+
+resource "google_api_gateway_gateway" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  region     = "us-central1"
+  api_config = google_api_gateway_api_config.{{$.PrimaryResourceId}}.id
+  gateway_id = "{{index $.Vars "gateway_id"}}"
+  display_name = "MM Dev API Gateway"
+  labels = {
+    environment = "dev"
+  }
+}

@@ -1,0 +1,107 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+!ruby/object:Api::Resource
+name: "Database"
+description: |
+  Databases are containers of tables.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    "Manage open source metadata with BigLake Metastore": "https://cloud.google.com/bigquery/docs/manage-open-source-metadata#create_databases"
+  api: "https://cloud.google.com/bigquery/docs/reference/biglake/rest/v1/projects.locations.catalogs.databases"
+base_url: "{{catalog}}/databases"
+self_link: "{{catalog}}/databases/{{name}}"
+create_url: "{{catalog}}/databases?databaseId={{name}}"
+id_format: "{{catalog}}/databases/{{name}}"
+import_format: ["{{%catalog}}/databases/{{name}}"]
+update_mask: true
+update_verb: :PATCH
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "biglake_database"
+    primary_resource_id: "database"
+    vars:
+      name: "my_database"
+      catalog_id: "my_catalog"
+      bucket_id: "my_bucket"
+parameters:
+  - !ruby/object:Api::Type::String
+    name: "catalog"
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The parent catalog.
+  - !ruby/object:Api::Type::String
+    name: "name"
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The name of the database.
+properties:
+  - !ruby/object:Api::Type::String
+    name: "createTime"
+    description: |
+      Output only. The creation time of the database. A timestamp in RFC3339
+      UTC "Zulu" format, with nanosecond resolution and up to nine fractional
+      digits. Examples: "2014-10-02T15:01:23Z" and
+      "2014-10-02T15:01:23.045123456Z".
+    output: true
+  - !ruby/object:Api::Type::String
+    name: "updateTime"
+    description: |
+      Output only. The last modification time of the database. A timestamp in
+      RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine
+      fractional digits. Examples: "2014-10-02T15:01:23Z" and
+      "2014-10-02T15:01:23.045123456Z".
+    output: true
+  - !ruby/object:Api::Type::String
+    name: "deleteTime"
+    description: |
+      Output only. The deletion time of the database. Only set after the
+      database is deleted. A timestamp in RFC3339 UTC "Zulu" format, with
+      nanosecond resolution and up to nine fractional digits. Examples:
+      "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true
+  - !ruby/object:Api::Type::String
+    name: "expireTime"
+    description: |
+      Output only. The time when this database is considered expired. Only set
+      after the database is deleted. A timestamp in RFC3339 UTC "Zulu" format,
+      with nanosecond resolution and up to nine fractional digits. Examples:
+      "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true
+
+  - !ruby/object:Api::Type::String
+    name: "type"
+    required: true
+    description: |
+      The database type.
+  - !ruby/object:Api::Type::NestedObject
+    name: "hiveOptions"
+    required: true
+    description: |
+      Options of a Hive database.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: "locationUri"
+        description: |
+          Cloud Storage folder URI where the database data is stored, starting with "gs://".
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: "parameters"
+        description: |
+          Stores user supplied Hive database parameters. An object containing a
+          list of"key": value pairs.
+          Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.

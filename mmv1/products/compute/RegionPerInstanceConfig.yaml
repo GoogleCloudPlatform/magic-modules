@@ -55,7 +55,7 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 id_format: '{{project}}/{{region}}/{{region_instance_group_manager}}/{{name}}'
 mutex: instanceGroupManager/{{project}}/{{region}}/{{region_instance_group_manager}}
-exclude_validator: true
+exclude_tgc: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'stateful_rigm'
@@ -102,7 +102,17 @@ virtual_fields:
       - :NONE
     default_value: :REPLACE
   - !ruby/object:Api::Type::Boolean
+    name: 'remove_instance_on_destroy'
+    conflicts:
+      - remove_instance_state_on_destroy
+    description: |
+      When true, deleting this config will immediately remove the underlying instance.
+      When false, deleting this config will use the behavior as determined by remove_instance_on_destroy.
+    default_value: false
+  - !ruby/object:Api::Type::Boolean
     name: 'remove_instance_state_on_destroy'
+    conflicts:
+      - remove_instance_on_destroy
     description: |
       When true, deleting this config will immediately remove any specified state from the underlying instance.
       When false, deleting this config will *not* immediately remove any state from the underlying instance.
@@ -111,7 +121,6 @@ virtual_fields:
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/compute_per_instance_config.go.erb
   update_encoder: templates/terraform/update_encoder/compute_per_instance_config.go.erb
-  pre_delete: templates/terraform/pre_delete/compute_per_instance_config.go.erb
   post_update: templates/terraform/post_update/compute_region_per_instance_config.go.erb
   custom_delete: templates/terraform/custom_delete/region_per_instance_config.go.erb
 parameters:
@@ -195,7 +204,6 @@ properties:
       - !ruby/object:Api::Type::Map
         name: 'internalIp'
         api_name: internalIPs
-        min_version: beta
         key_name: 'interface_name'
         description: |
           Preserved internal IPs defined for this instance. This map is keyed with the name of the network interface.
@@ -220,9 +228,9 @@ properties:
                   imports: 'selfLink'
                   description: |
                     The URL of the reservation for this IP address.
+                  custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
       - !ruby/object:Api::Type::Map
         name: 'externalIp'
-        min_version: beta
         api_name: externalIPs
         key_name: 'interface_name'
         description: |
@@ -248,3 +256,4 @@ properties:
                   imports: 'selfLink'
                   description: |
                     The URL of the reservation for this IP address.
+                  custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'

@@ -13,7 +13,6 @@
 
 --- !ruby/object:Api::Resource
 name: 'BareMetalNodePool'
-min_version: beta
 base_url: 'projects/{{project}}/locations/{{location}}/bareMetalClusters/{{bare_metal_cluster}}/bareMetalNodePools'
 create_url: 'projects/{{project}}/locations/{{location}}/bareMetalClusters/{{bare_metal_cluster}}/bareMetalNodePools?bare_metal_node_pool_id={{name}}'
 update_url: 'projects/{{project}}/locations/{{location}}/bareMetalClusters/{{bare_metal_cluster}}/bareMetalNodePools/{{name}}'
@@ -32,17 +31,17 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkeonprem_bare_metal_node_pool_basic'
     primary_resource_id: 'nodepool-basic'
-    min_version: beta
     vars:
-      name: 'nodepool'
+      name: 'my-nodepool'
+      cluster: 'my-cluster'
     test_env_vars:
       project: 'fake-backend-360322'
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkeonprem_bare_metal_node_pool_full'
     primary_resource_id: 'nodepool-full'
-    min_version: beta
     vars:
-      name: 'nodepool'
+      name: 'my-nodepool'
+      cluster: 'my-cluster'
     test_env_vars:
       project: 'fake-backend-360322'
 skip_sweeper: true
@@ -72,7 +71,7 @@ properties:
     name: 'displayName'
     description: |
       The display name for the Bare Metal Node Pool.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueAnnotations
     name: 'annotations'
     description: |
       Annotations on the Bare Metal Node Pool.
@@ -83,7 +82,6 @@ properties:
       Prefix must be a DNS subdomain.
       Name must be 63 characters or less, begin and end with alphanumerics,
       with dashes (-), underscores (_), dots (.), and alphanumerics between.
-    default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: 'nodePoolConfig'
     required: true
@@ -111,9 +109,9 @@ properties:
                 version -- it's best to assume the behavior is undefined and
                 conflicts should be avoided. For more information, including usage
                 and the valid values, see:
-                  http://kubernetes.io/v1.1/docs/user-guide/labels.html
+                  - http://kubernetes.io/v1.1/docs/user-guide/labels.html
                 An object containing a list of "key": value pairs.
-                Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+                For example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
       - !ruby/object:Api::Type::String
         name: 'operatingSystem'
         description: |
@@ -152,9 +150,9 @@ properties:
           version -- it's best to assume the behavior is undefined and
           conflicts should be avoided. For more information, including usage
           and the valid values, see:
-            http://kubernetes.io/v1.1/docs/user-guide/labels.html
+            - http://kubernetes.io/v1.1/docs/user-guide/labels.html
           An object containing a list of "key": value pairs.
-          Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+          For example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
         default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: 'status'

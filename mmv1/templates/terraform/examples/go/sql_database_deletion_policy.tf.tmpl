@@ -1,0 +1,17 @@
+resource "google_sql_database" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.Vars "database_name"}}"
+  instance = google_sql_database_instance.instance.name
+  deletion_policy = "ABANDON"
+}
+
+# See versions at https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/sql_database_instance#database_version
+resource "google_sql_database_instance" "instance" {
+  name             = "{{index $.Vars "database_instance_name"}}"
+  region           = "us-central1"
+  database_version = "POSTGRES_14"
+  settings {
+    tier = "db-g1-small"
+  }
+
+  deletion_protection  = "{{index $.Vars "deletion_protection"}}"
+}

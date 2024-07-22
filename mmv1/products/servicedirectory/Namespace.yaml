@@ -54,6 +54,7 @@ parameters:
     required: true
     url_param_only: true
     ignore_read: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: namespaceId
     description: |
@@ -71,7 +72,7 @@ properties:
       The resource name for the namespace
       in the format `projects/*/locations/*/namespaces/*`.
     output: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Resource labels associated with this Namespace. No more than 64 user

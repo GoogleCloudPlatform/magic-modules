@@ -24,16 +24,11 @@ end
 describe Provider::Terraform do
   context 'static' do
     let(:product) { Api::Compiler.new(File.read('spec/data/good-file.yaml')).run }
-    let(:config) do
-      Provider::Config.parse('spec/data/terraform-config.yaml', product)[1]
-    end
-    let(:provider) { Provider::Terraform.new(config, product, 'ga', Time.now) }
+    let(:provider) { Provider::Terraform.new(product, 'ga', Time.now) }
 
     before do
       allow_open 'spec/data/good-file.yaml'
-      allow_open 'spec/data/terraform-config.yaml'
       product.validate
-      config.validate
     end
 
     describe '#import_id_formats_from_resource' do
@@ -66,10 +61,7 @@ describe Provider::Terraform do
                                  .concat(data)
                                  .join("\n"))
       product.objects.append(res)
-      new_product = Overrides::Runner.build(product, config.overrides,
-                                            config.resource_override,
-                                            config.property_override)
-      new_product.objects.last
+      product.objects.last
     end
   end
 end

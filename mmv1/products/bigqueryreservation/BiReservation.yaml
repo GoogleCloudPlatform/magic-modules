@@ -1,0 +1,89 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'BiReservation'
+base_url: 'projects/{{project}}/locations/{{location}}/biReservation'
+self_link: 'projects/{{project}}/locations/{{location}}/biReservation'
+create_verb: :PATCH
+update_verb: :PATCH
+update_mask: true
+description: |
+  Represents a BI Reservation.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Introduction to Reservations': 'https://cloud.google.com/bigquery/docs/reservations-intro'
+  api: 'https://cloud.google.com/bigquery/docs/reference/reservations/rest/v1/BiReservation'
+import_format:
+  [
+    'projects/{{project}}/locations/{{location}}/biReservation',
+  ]
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_create: templates/terraform/update_mask.erb
+  custom_delete: templates/terraform/custom_delete/clear_bigquery_bi_reservation.go.erb
+  test_check_destroy: templates/terraform/custom_check_destroy/bigquery_bi_reservation.go.erb
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'bigquery_reservation_bi_reservation_basic'
+    external_providers: ["random", "time"]
+    primary_resource_id: 'reservation'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'bigquery_reservation_bi_reservation_full'
+    external_providers: ["random", "time"]
+    skip_docs: true
+    primary_resource_id: 'reservation'
+    test_env_vars:
+      project: :PROJECT_NAME
+parameters:
+  - !ruby/object:Api::Type::String
+    name: 'location'
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      LOCATION_DESCRIPTION
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    output: true
+    description: |
+      The resource name of the singleton BI reservation. Reservation names have the form `projects/{projectId}/locations/{locationId}/biReservation`.
+  - !ruby/object:Api::Type::Time
+    name: 'updateTime'
+    output: true
+    description: |
+      The last update timestamp of a reservation.
+
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+  - !ruby/object:Api::Type::Integer
+    name: 'size'
+    description: |
+      Size of a reservation, in bytes.
+  - !ruby/object:Api::Type::Array
+    name: 'preferredTables'
+    description: |
+      Preferred tables to use BI capacity for.
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'projectId'
+          description: |
+            The assigned project ID of the project.
+        - !ruby/object:Api::Type::String
+          name: 'datasetId'
+          description: |
+            The ID of the dataset in the above project.
+        - !ruby/object:Api::Type::String
+          name: 'tableId'
+          description: |
+            The ID of the table in the above dataset.

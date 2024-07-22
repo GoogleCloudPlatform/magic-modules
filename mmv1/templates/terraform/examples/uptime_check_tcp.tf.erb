@@ -4,6 +4,9 @@ resource "google_monitoring_uptime_check_config" "<%= ctx[:primary_resource_id] 
 
   tcp_check {
     port = 888
+    ping_config {
+      pings_count = 2
+    }
   }
 
   resource_group {

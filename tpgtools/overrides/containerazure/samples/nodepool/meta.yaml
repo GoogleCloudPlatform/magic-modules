@@ -1,2 +1,6 @@
+ignore_read:
+  - management.#
+  - management.0.%
+  - management.0.auto_repair
 doc_hide:
   - beta_basic.tf.tmpl

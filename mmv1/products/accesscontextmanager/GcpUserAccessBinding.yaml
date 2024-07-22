@@ -24,7 +24,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 id_format: '{{name}}'
 import_format: ['{{name}}']
 autogen_async: true
-exclude_validator: true
+exclude_tgc: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'access_context_manager_gcp_user_access_binding_basic'

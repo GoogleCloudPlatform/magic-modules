@@ -1,23 +1,16 @@
-# [START dns_response_policy_rule_basic]
 resource "google_compute_network" "network-1" {
-  provider = google-beta
-
   name                    = "<%= ctx[:vars]['network_1_name'] %>"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_network" "network-2" {
-  provider = google-beta
-  
   name                    = "<%= ctx[:vars]['network_2_name'] %>"
   auto_create_subnetworks = false
 }
 
 resource "google_dns_response_policy" "response-policy" {
-  provider = google-beta
-
   response_policy_name = "<%= ctx[:vars]['response_policy_name'] %>"
-  
+
   networks {
     network_url = google_compute_network.network-1.id
   }
@@ -27,8 +20,6 @@ resource "google_dns_response_policy" "response-policy" {
 }
 
 resource "google_dns_response_policy_rule" "<%= ctx[:primary_resource_id] %>" {
-  provider = google-beta
-
   response_policy = google_dns_response_policy.response-policy.response_policy_name
   rule_name       = "<%= ctx[:vars]['response_policy_rule_name'] %>"
   dns_name        = "dns.example.com."
@@ -40,7 +31,6 @@ resource "google_dns_response_policy_rule" "<%= ctx[:primary_resource_id] %>" {
       ttl     = 300
       rrdatas = ["192.0.2.91"]
     }
-  }  
+  }
 
 }
-# [END dns_response_policy_rule_basic]

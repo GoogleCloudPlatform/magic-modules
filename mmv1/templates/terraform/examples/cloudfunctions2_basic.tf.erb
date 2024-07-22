@@ -1,4 +1,3 @@
-# [START functions_v2_basic]
 locals {
   project = "<%= ctx[:test_env_vars]['project'] %>" # Google Cloud Platform Project ID
 }
@@ -37,8 +36,3 @@ resource "google_cloudfunctions2_function" "<%= ctx[:primary_resource_id] %>" {
     timeout_seconds     = 60
   }
 }
-
-output "function_uri" { 
-  value = google_cloudfunctions2_function.function.service_config[0].uri
-}
-# [END functions_v2_basic]

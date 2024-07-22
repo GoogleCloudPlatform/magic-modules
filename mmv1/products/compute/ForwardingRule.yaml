@@ -26,6 +26,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/compute/docs/load-balancing/network/forwarding-rules'
   api: 'https://cloud.google.com/compute/docs/reference/v1/forwardingRules'
 immutable: true
+legacy_long_form_project: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
@@ -178,6 +179,23 @@ examples:
       - 'target'
       - 'ip_address'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'forwarding_rule_vpc_psc_no_automate_dns'
+    primary_resource_id: 'default'
+    vars:
+      forwarding_rule_name: 'psc-endpoint'
+      consumer_network_name: 'consumer-net'
+      ip_name: 'website-ip'
+      producer_network_name: 'producer-net'
+      producer_psc_network_name: 'producer-psc-net'
+      service_attachment_name: 'producer-service'
+      producer_forwarding_rule_name: 'producer-forwarding-rule'
+      producer_backend_name: 'producer-service-backend'
+      producer_healthcheck_name: 'producer-service-health-check'
+    ignore_read_extra:
+      - 'port_range'
+      - 'target'
+      - 'ip_address'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'forwarding_rule_regional_steering'
     primary_resource_id: 'steering'
     vars:
@@ -185,8 +203,29 @@ examples:
       ip_name: 'website-ip'
       backend_name: 'service-backend'
       external_forwarding_rule_name: 'external-forwarding-rule'
+  - !ruby/object:Provider::Terraform::Examples
+    name: "forwarding_rule_internallb_ipv6"
+    primary_resource_id: "default"
+    vars:
+      forwarding_rule_name: "ilb-ipv6-forwarding-rule"
+      backend_name: "ilb-ipv6-backend"
+      network_name: "net-ipv6"
+      subnet_name: "subnet-internal-ipv6"
+    ignore_read_extra:
+      - "port_range"
+      - "target"
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/labels.erb
+  constants: 'templates/terraform/constants/compute_forwarding_rule.go.erb'
+custom_diff: [
+  'forwardingRuleCustomizeDiff',
+]
+virtual_fields:
+  - !ruby/object:Api::Type::Boolean
+    name: recreate_closed_psc
+    description:
+      This is used in PSC consumer ForwardingRule to make terraform recreate the ForwardingRule when the status is closed
+    default_value: false
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
@@ -199,6 +238,7 @@ parameters:
     required: false
     default_from_api: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -246,7 +286,6 @@ properties:
       * When the `target` is a Private Service Connect Google APIs
       bundle, you must specify an `IPAddress`.
 
-
       Otherwise, you can optionally specify an IP address that references an
       existing static (reserved) IP address resource. When omitted, Google Cloud
       assigns an ephemeral IP address.
@@ -264,7 +303,6 @@ properties:
         * `global/addresses/address-name`
         * `address-name`
 
-
       The forwarding rule's `target` or `backendService`,
       and in most cases, also the `loadBalancingScheme`, determine the
       type of IP address that you can use. For detailed information, see
@@ -274,7 +312,7 @@ properties:
       When reading an `IPAddress`, the API always returns the IP
       address number.
     default_from_api: true
-    diff_suppress_func: 'tpgresource.InternalIpDiffSuppress'
+    diff_suppress_func: InternalIpDiffSuppress
   - !ruby/object:Api::Type::Enum
     name: 'IPProtocol'
     description: |
@@ -288,6 +326,10 @@ properties:
       The valid IP protocols are different for different load balancing products
       as described in [Load balancing
       features](https://cloud.google.com/load-balancing/docs/features#protocols_from_the_load_balancer_to_the_backends).
+
+      A Forwarding Rule with protocol L3_DEFAULT can attach with target instance or
+      backend service with UNSPECIFIED protocol.
+      A forwarding rule with "L3_DEFAULT" IPProtocal cannot be attached to a backend service with TCP or UDP.
     values:
       - :TCP
       - :UDP
@@ -360,59 +402,62 @@ properties:
     # manifest input from a single value to a range of form NN-NN. The API
     # accepts a single value, e.g. '80', but the API stores and returns
     # '80-80'. This causes idempotency false positive.
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::String
     name: 'portRange'
     description: |
-      This field can only be used:
+      The `ports`, `portRange`, and `allPorts` fields are mutually exclusive.
+      Only packets addressed to ports in the specified range will be forwarded
+      to the backends configured with this forwarding rule.
 
-      * If `IPProtocol` is one of TCP, UDP, or SCTP.
-      * By backend service-based network load balancers, target pool-based
-      network load balancers, internal proxy load balancers, external proxy load
-      balancers, Traffic Director, external protocol forwarding, and Classic VPN.
-      Some products have restrictions on what ports can be used. See
+      The `portRange` field has the following limitations:
+      * It requires that the forwarding rule `IPProtocol` be TCP, UDP, or SCTP,
+      and
+      * It's applicable only to the following products: external passthrough
+      Network Load Balancers, internal and external proxy Network Load
+      Balancers, internal and external Application Load Balancers, external
+      protocol forwarding, and Classic VPN.
+      * Some products have restrictions on what ports can be used. See
       [port specifications](https://cloud.google.com/load-balancing/docs/forwarding-rule-concepts#port_specifications)
       for details.
 
-
-      Only packets addressed to ports in the specified range will be forwarded to
-      the backends configured with this forwarding rule.
-
-      The `ports` and `port_range` fields are mutually exclusive.
-
       For external forwarding rules, two or more forwarding rules cannot use the
-      same `[IPAddress, IPProtocol]` pair, and cannot have
-      overlapping `portRange`s.
+      same `[IPAddress, IPProtocol]` pair, and cannot have overlapping
+      `portRange`s.
 
       For internal forwarding rules within the same VPC network, two or more
-      forwarding rules cannot use the same `[IPAddress, IPProtocol]`
-      pair, and cannot have overlapping `portRange`s.
-    diff_suppress_func: 'tpgresource.PortRangeDiffSuppress'
+      forwarding rules cannot use the same `[IPAddress, IPProtocol]` pair, and
+      cannot have overlapping `portRange`s.
+
+      @pattern: \d+(?:-\d+)?
+    diff_suppress_func: PortRangeDiffSuppress
     default_from_api: true
   - !ruby/object:Api::Type::Array
     name: 'ports'
     max_size: 5
     description: |
-      This field can only be used:
+      The `ports`, `portRange`, and `allPorts` fields are mutually exclusive.
+      Only packets addressed to ports in the specified range will be forwarded
+      to the backends configured with this forwarding rule.
 
-      * If `IPProtocol` is one of TCP, UDP, or SCTP.
-      * By internal TCP/UDP load balancers, backend service-based network load
-      balancers, and internal protocol forwarding.
-
-
-      You can specify a list of up to five ports by number, separated by commas.
-      The ports can be contiguous or discontiguous. Only packets addressed to
-      these ports will be forwarded to the backends configured with this
-      forwarding rule.
+      The `ports` field has the following limitations:
+      * It requires that the forwarding rule `IPProtocol` be TCP, UDP, or SCTP,
+      and
+      * It's applicable only to the following products: internal passthrough
+      Network Load Balancers, backend service-based external passthrough Network
+      Load Balancers, and internal protocol forwarding.
+      * You can specify a list of up to five ports by number, separated by
+      commas. The ports can be contiguous or discontiguous.
 
       For external forwarding rules, two or more forwarding rules cannot use the
-      same `[IPAddress, IPProtocol]` pair, and cannot share any values
-      defined in `ports`.
+      same `[IPAddress, IPProtocol]` pair if they share at least one port
+      number.
 
       For internal forwarding rules within the same VPC network, two or more
-      forwarding rules cannot use the same `[IPAddress, IPProtocol]`
-      pair, and cannot share any values defined in `ports`.
+      forwarding rules cannot use the same `[IPAddress, IPProtocol]` pair if
+      they share at least one port number.
 
-      The `ports` and `port_range` fields are mutually exclusive.
+      @pattern: \d+(?:-\d+)?
     is_set: true
     custom_expand: 'templates/terraform/custom_expand/set_to_list.erb'
     item_type: Api::Type::String
@@ -432,6 +477,7 @@ properties:
     # TargetSslProxy, TargetTcpProxy, TargetVpnGateway, TargetPool,
     # TargetInstance)
     default_from_api: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::String
     name: 'target'
     description: |
@@ -446,12 +492,18 @@ properties:
         *  `vpc-sc` - [ APIs that support VPC Service Controls](https://cloud.google.com/vpc-service-controls/docs/supported-products).
         *  `all-apis` - [All supported Google APIs](https://cloud.google.com/vpc/docs/private-service-connect#supported-apis).
 
-
       For Private Service Connect forwarding rules that forward traffic to managed services, the target must be a service attachment.
     update_verb: :POST
     update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setTarget'
     diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
     custom_expand: 'templates/terraform/custom_expand/self_link_from_name.erb'
+  - !ruby/object:Api::Type::Fingerprint
+    name: 'labelFingerprint'
+    description: |
+      The fingerprint used for optimistic locking of this resource.  Used
+      internally during updates.
+    update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setLabels'
+    update_verb: :POST
   - !ruby/object:Api::Type::Boolean
     name: 'allowGlobalAccess'
     description: |
@@ -467,35 +519,30 @@ properties:
     send_empty_value: true
     update_verb: :PATCH
     update_url: projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Labels to apply to this forwarding rule.  A list of key->value pairs.
     update_verb: :POST
     update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setLabels'
-  - !ruby/object:Api::Type::Fingerprint
-    name: 'labelFingerprint'
-    description: |
-      The fingerprint used for optimistic locking of this resource.  Used
-      internally during updates.
-    update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setLabels'
-    update_verb: :POST
   - !ruby/object:Api::Type::Boolean
     name: 'allPorts'
     description: |
-      This field can only be used:
-      * If `IPProtocol` is one of TCP, UDP, or SCTP.
-      * By internal TCP/UDP load balancers, backend service-based network load
-      balancers, and internal and external protocol forwarding.
+      The `ports`, `portRange`, and `allPorts` fields are mutually exclusive.
+      Only packets addressed to ports in the specified range will be forwarded
+      to the backends configured with this forwarding rule.
 
-
-      Set this field to true to allow packets addressed to any port or packets
+      The `allPorts` field has the following limitations:
+      * It requires that the forwarding rule `IPProtocol` be TCP, UDP, SCTP, or
+      L3_DEFAULT.
+      * It's applicable only to the following products: internal passthrough
+      Network Load Balancers, backend service-based external passthrough Network
+      Load Balancers, and internal and external protocol forwarding.
+      * Set this field to true to allow packets addressed to any port or packets
       lacking destination port information (for example, UDP fragments after the
       first fragment) to be forwarded to the backends configured with this
-      forwarding rule.
-
-      The `ports`, `port_range`, and
-      `allPorts` fields are mutually exclusive.
+      forwarding rule. The L3_DEFAULT protocol requires `allPorts` be set to
+      true.
   - !ruby/object:Api::Type::Enum
     name: 'networkTier'
     description: |
@@ -588,3 +635,27 @@ properties:
       This is used in PSC consumer ForwardingRule to control whether the PSC
       endpoint can be accessed from another region.
     send_empty_value: true
+    update_verb: :PATCH
+    update_url: projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}
+    update_id: 'allowPscGlobalAccess'
+    fingerprint_name: 'fingerprint'
+  - !ruby/object:Api::Type::Boolean
+    name: noAutomateDnsZone
+    description:
+      This is used in PSC consumer ForwardingRule to control whether it should try to auto-generate a DNS zone or not.
+      Non-PSC forwarding rules do not use this field.
+    send_empty_value: true
+    immutable: true
+    ignore_read: true
+  - !ruby/object:Api::Type::Enum
+    name: 'ipVersion'
+    description: |
+      The IP address version that will be used by this forwarding rule.
+      Valid options are IPV4 and IPV6.
+
+      If not set, the IPv4 address will be used by default.
+    values:
+      - :IPV4
+      - :IPV6
+    immutable: true
+    default_from_api: true

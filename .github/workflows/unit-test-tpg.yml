@@ -1,0 +1,47 @@
+name: unit-test-tpg
+permissions: read-all
+
+on:
+  workflow_call:
+    inputs:
+      repo:
+        description: 'Repository for the matrix'
+        required: true
+        type: string
+
+jobs:
+  compile-and-unit-tests:
+    name: unit-test-${{ inputs.repo }}
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Download built artifacts
+        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        with:
+          name: artifact-${{ inputs.repo }}
+          path: artifacts
+
+      - name: Unzip the artifacts and delete the zip
+        run: |
+          unzip artifacts/output.zip -d ./
+          rm artifacts/output.zip
+
+      - name: Set up Go
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+        with:
+          go-version: '^1.21'
+
+      - name: Build Provider
+        run: |
+          go build
+
+      - name: Run Unit Tests
+        run: |
+          make testnolint
+
+      - name: Lint Check
+        run: |
+          make lint
+
+      - name: Documentation Check
+        run: |
+          make docscheck

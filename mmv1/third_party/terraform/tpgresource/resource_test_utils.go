@@ -1,6 +1,7 @@
 package tpgresource
 
 import (
+	"fmt"
 	"reflect"
 	"regexp"
 	"strings"
@@ -8,7 +9,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -177,4 +178,17 @@ func SetupTestResourceDataFromConfigMap(t *testing.T, s map[string]*schema.Schem
 	}
 
 	return d
+}
+
+func GetResourceAttributes(n string, s *terraform.State) (map[string]string, error) {
+	rs, ok := s.RootModule().Resources[n]
+	if !ok {
+		return nil, fmt.Errorf("Not found: %s", n)
+	}
+
+	if rs.Primary.ID == "" {
+		return nil, fmt.Errorf("No ID is set")
+	}
+
+	return rs.Primary.Attributes, nil
 }

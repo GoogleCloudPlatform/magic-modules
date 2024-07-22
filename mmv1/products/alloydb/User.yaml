@@ -1,0 +1,125 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'User'
+self_link: '{{cluster}}/users/{{user_id}}'
+base_url: '{{cluster}}/users'
+create_url: '{{cluster}}/users?userId={{user_id}}'
+update_url: '{{cluster}}/users?userId={{user_id}}'
+update_verb: :POST
+description: 'A database user in an AlloyDB cluster.'
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'AlloyDB': 'https://cloud.google.com/alloydb/docs/'
+  api: 'https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.clusters.users/create'
+import_format: ['projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/users/{{user_id}}']
+# Skipping the sweeper because instances will be deleted during cluster sweeps
+skip_sweeper: true
+autogen_async: true
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_import: templates/terraform/custom_import/alloydb_user.go.erb
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'alloydb_user_builtin'
+    primary_resource_id: 'user1'
+    vars:
+      alloydb_cluster_name: 'alloydb-cluster'
+      alloydb_cluster_pass: 'cluster_secret'
+      alloydb_instance_name: 'alloydb-instance'
+      alloydb_user_name: 'user1'
+      alloydb_user_pass: 'user_secret'
+      network_name: 'alloydb-network'
+    ignore_read_extra:
+      - 'password'
+    skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'alloydb_user_builtin_test'
+    primary_resource_id: 'user1'
+    vars:
+      alloydb_cluster_name: 'alloydb-cluster'
+      alloydb_cluster_pass: 'cluster_secret'
+      alloydb_instance_name: 'alloydb-instance'
+      alloydb_user_name: 'user1'
+      alloydb_user_pass: 'user_secret'
+      network_name: 'alloydb-network'
+    test_vars_overrides:
+      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
+    ignore_read_extra:
+      - 'password'
+    skip_docs: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'alloydb_user_iam'
+    primary_resource_id: 'user2'
+    vars:
+      alloydb_cluster_name: 'alloydb-cluster'
+      alloydb_instance_name: 'alloydb-instance'
+      alloydb_cluster_pass: 'cluster_secret'
+      alloydb_user_name: 'user2@foo.com'
+      network_name: 'alloydb-network'
+    skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'alloydb_user_iam_test'
+    primary_resource_id: 'user2'
+    vars:
+      alloydb_cluster_name: 'alloydb-cluster'
+      alloydb_instance_name: 'alloydb-instance'
+      alloydb_cluster_pass: 'cluster_secret'
+      alloydb_user_name: 'user2@foo.com'
+      network_name: 'alloydb-network'
+    test_vars_overrides:
+      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
+    skip_docs: true
+parameters:
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'cluster'
+    description: |
+      Identifies the alloydb cluster. Must be in the format
+      'projects/{project}/locations/{location}/clusters/{cluster_id}'
+    required: true
+    immutable: true
+    resource: 'Cluster'
+    imports: 'name'
+    url_param_only: true
+  - !ruby/object:Api::Type::String
+    name: 'userId'
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The database role name of the user.
+  - !ruby/object:Api::Type::Enum
+    name: 'userType'
+    required: true
+    immutable: true
+    description: |
+      The type of this user.
+    values:
+      - :ALLOYDB_BUILT_IN
+      - :ALLOYDB_IAM_USER
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    output: true
+    description: |
+      Name of the resource in the form of projects/{project}/locations/{location}/clusters/{cluster}/users/{user}.
+  - !ruby/object:Api::Type::String
+    name: 'password'
+    ignore_read: true
+    description: |
+      Password for this database user.
+  - !ruby/object:Api::Type::Array
+    name: 'databaseRoles'
+    item_type: Api::Type::String
+    description: |
+      List of database roles this database user has.

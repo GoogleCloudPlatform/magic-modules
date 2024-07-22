@@ -51,7 +51,6 @@ properties:
     imports: 'name'
     description: 'The name of the bucket.'
     required: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_as_string.go.erb'
   - !ruby/object:Api::Type::String
     name: 'domain'
     description: 'The domain associated with the entity.'

@@ -20,13 +20,14 @@ update_verb: :PATCH
 update_mask: true
 description: |
   A Service is a discrete, autonomous, and network-accessible unit,
-  designed to solve an individual concern (Wikipedia). In Cloud Monitoring,
+  designed to solve an individual concern. In Cloud Monitoring,
   a Service acts as the root resource under which operational aspects of
   the service are accessible
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Service Monitoring': 'https://cloud.google.com/monitoring/service-monitoring'
     'Monitoring API Documentation': 'https://cloud.google.com/monitoring/api/v3/'
+    'Service-orientation on Wikipedia': 'https://en.wikipedia.org/wiki/Service-orientation'
   api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/v3/services'
 legacy_name: 'google_monitoring_custom_service'
 id_format: '{{name}}'
@@ -54,7 +55,7 @@ parameters:
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
     default_from_api: true
     validation: !ruby/object:Provider::Terraform::Validation
-      regex: '^[a-z0-9\-]+$'
+      regex: '^[a-zA-Z0-9\-_:.]+$'
 properties:
   - !ruby/object:Api::Type::String
     name: name

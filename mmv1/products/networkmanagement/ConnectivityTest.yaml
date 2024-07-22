@@ -204,7 +204,7 @@ properties:
       This is applicable to scenarios where a test can cross project
       boundaries.
     item_type: Api::Type::String
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Resource labels to represent user-provided metadata.

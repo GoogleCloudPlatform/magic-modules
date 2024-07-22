@@ -55,6 +55,8 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/compute_network_endpoint_group.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'network_endpoint_group'
@@ -78,6 +80,8 @@ parameters:
       Zone where the network endpoint group is located.
     required: false
     default_from_api: true
+    ignore_read: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -108,11 +112,15 @@ properties:
       INTERNAL_MANAGED, and INTERNAL_SELF_MANAGED and 2) support the RATE or
       CONNECTION balancing modes.
 
-      Possible values include: GCE_VM_IP, GCE_VM_IP_PORT, and NON_GCP_PRIVATE_IP_PORT.
+      Possible values include: GCE_VM_IP, GCE_VM_IP_PORT, NON_GCP_PRIVATE_IP_PORT, INTERNET_IP_PORT, INTERNET_FQDN_PORT, SERVERLESS, and PRIVATE_SERVICE_CONNECT.
     values:
       - :GCE_VM_IP
       - :GCE_VM_IP_PORT
       - :NON_GCP_PRIVATE_IP_PORT
+      - :INTERNET_IP_PORT
+      - :INTERNET_FQDN_PORT
+      - :SERVERLESS
+      - :PRIVATE_SERVICE_CONNECT
     default_value: :GCE_VM_IP_PORT
   - !ruby/object:Api::Type::Integer
     name: 'size'
@@ -126,13 +134,15 @@ properties:
       The network to which all network endpoints in the NEG belong.
       Uses "default" project network if unspecified.
     required: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::ResourceRef
     name: 'subnetwork'
     resource: 'Subnetwork'
     imports: 'selfLink'
     description: |
       Optional subnetwork to which all network endpoints in the NEG belong.
-    diff_suppress_func: 'tpgresource.CompareOptionalSubnet'
+    diff_suppress_func: 'compareOptionalSubnet'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Integer
     name: 'defaultPort'
     description: |

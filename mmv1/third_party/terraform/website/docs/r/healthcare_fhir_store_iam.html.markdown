@@ -19,7 +19,7 @@ Three different resources help you manage your IAM policy for Healthcare FHIR st
 
 ~> **Note:** `google_healthcare_fhir_store_iam_binding` resources **can be** used in conjunction with `google_healthcare_fhir_store_iam_member` resources **only if** they do not grant privilege to the same role.
 
-## google\_healthcare\_fhir\_store\_iam\_policy
+## google_healthcare_fhir_store_iam_policy
 
 ```hcl
 data "google_iam_policy" "admin" {
@@ -38,7 +38,7 @@ resource "google_healthcare_fhir_store_iam_policy" "fhir_store" {
 }
 ```
 
-## google\_healthcare\_fhir\_store\_iam\_binding
+## google_healthcare_fhir_store_iam_binding
 
 ```hcl
 resource "google_healthcare_fhir_store_iam_binding" "fhir_store" {
@@ -51,7 +51,7 @@ resource "google_healthcare_fhir_store_iam_binding" "fhir_store" {
 }
 ```
 
-## google\_healthcare\_fhir\_store\_iam\_member
+## google_healthcare_fhir_store_iam_member
 
 ```hcl
 resource "google_healthcare_fhir_store_iam_member" "fhir_store" {
@@ -95,20 +95,68 @@ exported:
 
 ## Import
 
-IAM member imports use space-delimited identifiers; the resource in question, the role, and the account.  This member resource can be imported using the `fhir_store_id`, role, and account e.g.
+-> **Custom Roles**: If you're importing a IAM resource with a custom role, make sure to use the
+ full name of the custom role, e.g. `[projects/my-project|organizations/my-org]/roles/my-custom-role`.
+
+### Importing IAM members
+
+IAM member imports use space-delimited identifiers that contains the `fhir_store_id`, `role`, and `member`. For example:
+
+* `"{{project_id}}/{{location}}/{{dataset}}/{{fhir_store}} roles/editor jane@example.com"`
+
+An [`import` block](https://developer.hashicorp.com/terraform/language/import) (Terraform v1.5.0 and later) can be used to import IAM members:
+
+```tf
+import {
+  id = "{{project_id}}/{{location}}/{{dataset}}/{{fhir_store}} roles/editor jane@example.com"
+  to = google_healthcare_fhir_store_iam_member.default
+}
+```
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can also be used:
 
 ```
-$ terraform import google_healthcare_fhir_store_iam_member.fhir_store_iam "your-project-id/location-name/dataset-name/fhir-store-name roles/viewer user:foo@example.com"
+$ terraform import google_healthcare_fhir_store_iam_member.default "{{project_id}}/{{location}}/{{dataset}}/{{fhir_store}} roles/editor jane@example.com"
 ```
 
-IAM binding imports use space-delimited identifiers; the resource in question and the role.  This binding resource can be imported using the `fhir_store_id` and role, e.g.
+### Importing IAM bindings
+
+IAM binding imports use space-delimited identifiers that contain the resource's `fhir_store_id` and `role`. For example:
+
+* `"{{project_id}}/{{location}}/{{dataset}}/{{fhir_store}} roles/editor"`
+
+An [`import` block](https://developer.hashicorp.com/terraform/language/import) (Terraform v1.5.0 and later) can be used to import IAM bindings:
+
+```tf
+import {
+  id = "{{project_id}}/{{location}}/{{dataset}}/{{fhir_store}} roles/editor"
+  to = google_healthcare_fhir_store_iam_binding.default
+}
+```
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can also be used:
 
 ```
-$ terraform import google_healthcare_fhir_store_iam_binding.fhir_store_iam "your-project-id/location-name/dataset-name/fhir-store-name roles/viewer"
+$ terraform import google_healthcare_fhir_store_iam_binding.default "{{project_id}}/{{location}}/{{dataset}}/{{fhir_store}} roles/editor"
 ```
 
-IAM policy imports use the identifier of the resource in question.  This policy resource can be imported using the `fhir_store_id`, role, and account e.g.
+### Importing IAM policies
+
+IAM policy imports use the identifier of the Healthcare FHIR store resource. For example:
+
+* `"{{project_id}}/{{location}}/{{dataset}}/{{fhir_store}}"`
+
+An [`import` block](https://developer.hashicorp.com/terraform/language/import) (Terraform v1.5.0 and later) can be used to import IAM policies:
+
+```tf
+import {
+  id = "{{project_id}}/{{location}}/{{dataset}}/{{fhir_store}}"
+  to = google_healthcare_fhir_store_iam_policy.default
+}
+```
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can also be used:
 
 ```
-$ terraform import google_healthcare_fhir_store_iam_policy.fhir_store_iam your-project-id/location-name/dataset-name/fhir-store-name
+$ terraform import google_healthcare_fhir_store_iam_policy.default {{project_id}}/{{location}}/{{dataset}}/{{fhir_store}}
 ```

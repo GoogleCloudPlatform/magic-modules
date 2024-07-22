@@ -14,4 +14,8 @@
 -%>
 	newObj := make(map[string]interface{})
 	newObj["config"] = obj
+	storedInfoTypeIdProp, ok := d.GetOk("stored_info_type_id")
+	if ok && storedInfoTypeIdProp != nil {
+		newObj["storedInfoTypeId"] = storedInfoTypeIdProp
+	}
 	return newObj, nil

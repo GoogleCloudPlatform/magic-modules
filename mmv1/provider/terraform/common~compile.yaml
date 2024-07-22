@@ -26,35 +26,18 @@
 <% end -%>
 <% end -%>
 
-<%  Dir["third_party/terraform/tests/*.go.erb"].each do |file_path|
-    fname = file_path.split('/')[-1]
--%>
-'<%= dir -%>/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/tests/<%= fname -%>'
-<% end -%>
-<%
-  Dir["third_party/terraform/resources/*.go.erb"].each do |file_path|
-    fname = file_path.split('/')[-1]
--%>
-'<%= dir -%>/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/resources/<%= fname -%>'
-<% end -%>
-<%
-  Dir["third_party/terraform/data_sources/*.go.erb"].each do |file_path|
-    fname = file_path.split('/')[-1]
--%>
-'<%= dir -%>/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/data_sources/<%= fname -%>'
-<% end -%>
-<%
-  Dir["third_party/terraform/utils/*.go.erb"].each do |file_path|
-    fname = file_path.split('/')[-1]
--%>
-'<%= dir -%>/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/utils/<%= fname -%>'
-<% end -%>
-
 <%
   Dir["third_party/terraform/acctest/*.go.erb"].each do |file_path|
     fname = file_path.split('/')[-1]
 -%>
 '<%= dir -%>/acctest/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/acctest/<%= fname -%>'
+<% end -%>
+
+<%
+  Dir["third_party/terraform/provider/*.go.erb"].each do |file_path|
+    fname = file_path.split('/')[-1]
+-%>
+'<%= dir -%>/provider/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/provider/<%= fname -%>'
 <% end -%>
 
 <%
@@ -72,6 +55,34 @@
 <% end -%>
 
 <%
+  Dir["third_party/terraform/fwmodels/*.go.erb"].each do |file_path|
+    fname = file_path.split('/')[-1]
+-%>
+'<%= dir -%>/fwmodels/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/fwmodels/<%= fname -%>'
+<% end -%>
+
+<%
+  Dir["third_party/terraform/fwprovider/*.go.erb"].each do |file_path|
+    fname = file_path.split('/')[-1]
+-%>
+'<%= dir -%>/fwprovider/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/fwprovider/<%= fname -%>'
+<% end -%>
+
+<%
+  Dir["third_party/terraform/fwtransport/*.go.erb"].each do |file_path|
+    fname = file_path.split('/')[-1]
+-%>
+'<%= dir -%>/fwtransport/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/fwtransport/<%= fname -%>'
+<% end -%>
+
+<%
+  Dir["third_party/terraform/sweeper/*.go.erb"].each do |file_path|
+    fname = file_path.split('/')[-1]
+-%>
+'<%= dir -%>/sweeper/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/sweeper/<%= fname -%>'
+<% end -%>
+
+<%
   Dir["third_party/terraform/transport/*.go.erb"].each do |file_path|
     fname = file_path.split('/')[-1]
 -%>
@@ -86,16 +97,16 @@
 <% end -%>
 
 <%
-  Dir["third_party/terraform/framework_utils/*.go.erb"].each do |file_path|
-    fname = file_path.split('/')[-1]
--%>
-'<%= dir -%>/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/framework_utils/<%= fname -%>'
-<% end -%>
-<%
   Dir["third_party/terraform/framework_models/*.go.erb"].each do |file_path|
     fname = file_path.split('/')[-1]
 -%>
 '<%= dir -%>/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/framework_models/<%= fname -%>'
+<% end -%>
+<%
+  Dir["third_party/terraform/functions/*.go.erb"].each do |file_path|
+    fname = file_path.split('/')[-1]
+-%>
+'<%= dir -%>/functions/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/functions/<%= fname -%>'
 <% end -%>
 <%
   Dir["third_party/terraform/scripts/**/*.erb"].each do |file_path|

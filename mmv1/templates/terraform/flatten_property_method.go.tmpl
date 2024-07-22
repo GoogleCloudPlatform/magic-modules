@@ -1,0 +1,156 @@
+{{/* The license inside this block applies to this file
+  Copyright 2024 Google LLC. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License. */ -}}
+{{- define "flattenPropertyMethod" }}
+{{- if $.CustomFlatten }}
+    {{- $.CustomTemplate $.CustomFlatten false -}}
+{{- else -}}
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+  {{- if $.IgnoreRead }}
+  return d.Get("{{ $.TerraformLineage }}")
+  {{- else if $.IsA "NestedObject" }}
+  if v == nil {
+    return nil
+  }
+    {{- if not $.AllowEmptyObject }}
+  original := v.(map[string]interface{})
+  if len(original) == 0 {
+    return nil
+  }
+    {{- else if $.Properties }}
+  original := v.(map[string]interface{})
+    {{- end }}
+  transformed := make(map[string]interface{})
+    {{- range $prop := $.Properties }}
+      {{- if $prop.FlattenObject }}
+    if {{ $prop.ApiName }} := flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ $prop.ApiName }}"], d, config); {{ $prop.ApiName }} != nil {
+      obj := {{ $prop.ApiName }}.([]interface{})[0]
+      for k, v := range obj.(map[string]interface{}) {
+        transformed[k] = v
+      }
+    }
+      {{- else }}
+    transformed["{{ underscore $prop.Name }}"] =
+    flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ $prop.ApiName }}"], d, config)
+      {{- end }}
+    {{- end }}
+  return []interface{}{transformed}
+  {{- else if and ($.IsA "Array") ($.ItemType.IsA "NestedObject") }}
+  if v == nil {
+    return v
+  }
+  l := v.([]interface{})
+    {{- if $.IsSet }}
+      {{- if $.SetHashFunc }}
+  transformed := schema.NewSet({{ $.SetHashFunc }}, []interface{}{})
+      {{- else }}
+  transformed := schema.NewSet(schema.HashResource({{ $.NamespaceProperty }}Schema()), []interface{}{})
+      {{- end }}
+    {{- else }}
+  transformed := make([]interface{}, 0, len(l))
+    {{- end }}
+  for _, raw := range l {
+    original := raw.(map[string]interface{})
+    if len(original) < 1 {
+      // Do not include empty json objects coming back from the api
+      continue
+    }
+  {{- if $.IsSet }}
+    transformed.Add(map[string]interface{}{
+  {{- else }}
+    transformed = append(transformed, map[string]interface{}{
+  {{- end }}
+
+  {{- range $prop := $.ItemType.Properties }}
+    {{- if not $prop.IgnoreRead }}
+      "{{ underscore $prop.Name }}": flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ $prop.ApiName }}"], d, config),
+    {{- end }}
+  {{- end }}
+    })
+  }
+  return transformed
+  {{- else if $.IsA "Map" }}
+  if v == nil {
+    return v
+  }
+  l := v.(map[string]interface{})
+  transformed := make([]interface{}, 0, len(l))
+  for k, raw := range l {
+    original := raw.(map[string]interface{})
+    transformed = append(transformed, map[string]interface{}{
+      "{{ $.KeyName }}": k,
+    {{- range $prop := $.ValueType.Properties }}
+      "{{ underscore $prop.Name }}": flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ $prop.ApiName }}"], d, config),
+    {{- end }}
+    })
+  }
+  return transformed
+    {{- else if or ($.IsA "KeyValueLabels") (or ($.IsA "KeyValueAnnotations") ($.IsA "KeyValueTerraformLabels")) }}
+  if v == nil {
+    return v
+  }
+
+  transformed := make(map[string]interface{})
+  if l, ok := d.GetOkExists("{{ $.TerraformLineage }}"); ok {
+    for k := range l.(map[string]interface{}) {
+      transformed[k] = v.(map[string]interface{})[k]
+    }
+  }
+
+  return transformed
+  {{- else if $.IsA "Integer" }}
+	// Handles the string fixed64 format
+	if strVal, ok := v.(string); ok {
+		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
+			return intVal
+		}
+	}
+
+	// number values are represented as float64
+	if floatVal, ok := v.(float64); ok {
+		intVal := int(floatVal)
+		return intVal
+	}
+
+	return v // let terraform core handle it otherwise
+  {{- else if and ($.IsA "Array") ($.ItemType.IsA "ResourceRef")}}
+  if v == nil {
+    return v
+  }
+  return tpgresource.ConvertAndMapStringArr(v.([]interface{}), tpgresource.ConvertSelfLinkToV1)
+  {{- else if $.IsA "ResourceRef" }}
+  if v == nil {
+    return v
+  }
+  return tpgresource.ConvertSelfLinkToV1(v.(string))
+  {{- else if $.IsSet }}
+  if v == nil {
+    return v
+  }
+    {{- if $.SetHashFunc }}
+  return schema.NewSet({{- $.SetHashFunc }}, v.([]interface{}))
+    {{- else if or ($.ItemType.IsA "String") ($.ItemType.IsA "Enum") }}
+  return schema.NewSet(schema.HashString, v.([]interface{}))
+    {{- end }}
+  {{- else }}
+  return v
+{{- end }}
+}
+{{- if $.NestedProperties }}
+    {{- range $prop := $.NestedProperties }}
+      {{ template "flattenPropertyMethod" $prop -}}
+    {{- end }}
+  {{- end }}
+{{- end }}
+{{ end }}

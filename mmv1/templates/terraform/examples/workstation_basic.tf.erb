@@ -54,6 +54,10 @@ resource "google_workstations_workstation" "<%= ctx[:primary_resource_id] %>" {
     "label" = "key"
   }
 
+  env = {
+    name = "foo"
+  }
+
   annotations = {
     label-one = "value-one"
   }

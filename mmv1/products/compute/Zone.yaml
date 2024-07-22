@@ -93,6 +93,7 @@ properties:
     imports: 'selfLink'
     description: 'The region where the zone is located.'
     output: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Enum
     name: 'status'
     description: 'The status of the zone.'

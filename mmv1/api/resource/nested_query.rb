@@ -16,11 +16,11 @@ require 'google/string_utils'
 
 module Api
   # An object available in the product
-  class Resource < Api::Object::Named
+  class Resource < Api::NamedObject
     # Metadata for resources that are nested within a parent resource, as
     # a list of resources or single object within the parent.
     # e.g. Fine-grained resources
-    class NestedQuery < Api::Object
+    class NestedQuery < Google::YamlValidator
       # A list of keys to traverse in order.
       # i.e. backendBucket --> cdnPolicy.signedUrlKeyNames
       # should be ["cdnPolicy", "signedUrlKeyNames"]

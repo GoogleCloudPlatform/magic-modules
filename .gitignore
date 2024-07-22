@@ -52,3 +52,6 @@ mmv1/build/*
 tpgtools/temp.serial
 
 tpgtools/serialization.go
+
+# ignore magician binary
+.ci/magician/magician

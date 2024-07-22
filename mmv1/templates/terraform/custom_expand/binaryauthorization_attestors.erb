@@ -30,7 +30,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d t
 		}
 	}
 
-	return convertAndMapStringArr(v.(*schema.Set).List(), func(s string) string {
+	return tpgresource.ConvertAndMapStringArr(v.(*schema.Set).List(), func(s string) string {
 		if r.MatchString(s) {
 			return s
 		}

@@ -1,0 +1,77 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'EnvironmentKeyvaluemaps'
+description: |
+  Collection of key/value string pairs.
+references:
+  guides:
+    'Using key value maps': 'https://cloud.google.com/apigee/docs/api-platform/cache/key-value-maps'
+  api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.keyvaluemaps/create'
+docs:
+base_url: '{{env_id}}/keyvaluemaps'
+self_link: '{{env_id}}/keyvaluemaps/{{name}}/entries'
+create_url: '{{env_id}}/keyvaluemaps'
+delete_url: '{{env_id}}/keyvaluemaps/{{name}}'
+immutable: true
+import_format:
+  - '{{env_id}}/keyvaluemaps/{{name}}'
+  - '{{env_id}}/{{name}}'
+timeouts:
+  insert_minutes: 1
+  update_minutes: 20
+  delete_minutes: 1
+autogen_async: true
+custom_code:
+  decoder: 'templates/terraform/decoders/go/apigee_environment_keyvaluemaps.go.tmpl'
+  custom_create: 'templates/terraform/custom_create/go/apigee_environment_keyvaluemaps.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/go/apigee_environment_keyvaluemaps.go.tmpl'
+skip_sweeper: true
+examples:
+  - name: 'apigee_environment_keyvaluemaps_basic'
+    primary_resource_id: 'apigee_environment_keyvaluemaps'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    skip_test: true
+  - name: 'apigee_environment_keyvaluemaps_test'
+    primary_resource_id: 'apigee_environment_keyvaluemaps'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    skip_docs: true
+  - name: 'apigee_environment_keyvaluemaps_beta_test'
+    primary_resource_id: 'apigee_environment_keyvaluemaps'
+    min_version: 'beta'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    skip_docs: true
+parameters:
+  - name: 'envId'
+    type: String
+    description: |
+      The Apigee environment group associated with the Apigee environment,
+      in the format `organizations/{{org_name}}/environments/{{env_name}}`.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      Required. ID of the key value map.
+    required: true
+    immutable: true

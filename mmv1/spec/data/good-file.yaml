@@ -115,16 +115,16 @@ objects:
               name: 'nv-prop1'
               description: 'the first property in my namevalues'
   - !ruby/object:Api::Resource
-    name: 'ResourceWithTerraformOverride'
-    kind: 'terraform#resourceWithTerraformOverride'
-    base_url: 'resourceWithTerraformOverride'
+    name: 'ThirdResource'
+    kind: 'myproduct#thirdresource'
+    base_url: 'thirdResource'
     description: 'a description'
     properties:
       - !ruby/object:Api::Type::String
         name: 'stringOne'
         description: 'a string property (depth 0)'
       - !ruby/object:Api::Type::String
-        name: 'stringRename'
+        name: 'stringRenamed'
         description: 'a string property (depth 0)'
       - !ruby/object:Api::Type::NestedObject
         name: 'objectOne'
@@ -136,20 +136,25 @@ objects:
           - !ruby/object:Api::Type::NestedObject
             name: 'objectOneFlattenedObject'
             description: 'a nested NestedObject (depth 1)'
+            flatten_object: true
             properties:
               - !ruby/object:Api::Type::Integer
                 name: 'objectOneNestedNestedInteger'
                 description: 'a nested integer (depth 2)'
           - !ruby/object:Api::Type::String
-            name: 'objectOneRename'
+            name: 'objectOneRenamed'
             description: 'a string property (depth 1)'
       - !ruby/object:Api::Type::NestedObject
         name: 'objectTwoFlattened'
         description: 'a NestedObject property that is flattened (depth 0)'
+        flatten_object: true
         properties:
           - !ruby/object:Api::Type::String
             name: 'objectTwoString'
             description: 'a nested string (depth 1)'
+            update_mask_fields:
+              - 'overrideFoo'
+              - 'nested.overrideBar'
           - !ruby/object:Api::Type::NestedObject
             name: 'objectTwoNestedObject'
             description: 'a nested NestedObject (depth 1)'

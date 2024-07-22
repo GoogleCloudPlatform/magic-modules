@@ -11,10 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'provider/abstract_core'
-
 module Provider
-  class Terraform < Provider::AbstractCore
+  class Terraform
     # Functions to support 'terraform import'.
     module Import
       def import_id_formats_from_resource(resource)

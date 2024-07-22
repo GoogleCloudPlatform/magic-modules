@@ -33,7 +33,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Setting up IAP Brand': 'https://cloud.google.com/iap/docs/tutorial-gce#set_up_iap'
   api: 'https://cloud.google.com/iap/docs/reference/rest/v1/projects.brands'
 async: !ruby/object:Provider::Terraform::PollAsync
-  check_response_func_existence: PollCheckForExistence
+  check_response_func_existence: transport_tpg.PollCheckForExistence
   target_occurrences: 5
   actions: ['create']
 id_format: '{{name}}'

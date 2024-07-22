@@ -1,0 +1,115 @@
+
+<%# The license inside this block applies to this file.
+# Copyright 2017 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#	 http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+-%>
+
+type NetworkEndpointsNetworkEndpoint struct {
+	IPAddress string
+	Port	  int
+	Instance  string
+}
+
+func NetworkEndpointsNetworkEndpointConvertToStruct(endpoint interface{}) NetworkEndpointsNetworkEndpoint {
+	e := endpoint.(map[string]interface{})
+	ipAddress := e["ip_address"].(string)
+	port := e["port"].(int)
+	instance, _ := e["instance"].(string)
+	return NetworkEndpointsNetworkEndpoint{
+		IPAddress: ipAddress,
+		Port: port,
+		Instance: instance,
+	}
+}
+
+func NetworkEndpointsNetworkEndpointConvertToAny(endpoint NetworkEndpointsNetworkEndpoint) interface{} {
+	m := make(map[string]interface{})
+	m["ip_address"] = endpoint.IPAddress
+	m["port"] = endpoint.Port
+	m["instance"] = endpoint.Instance
+	return m
+}
+
+// Continues to read network endpoints as long as there are unread pages remaining
+func networkEndpointsPaginatedRead(d *schema.ResourceData, config *transport_tpg.Config, userAgent, url, project, billingProject, pt string) ([]interface{}, error) {
+	var allEndpoints []interface{}
+	for len(pt) > 0 {
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:	config,
+			Method:	"POST",
+			Project:   billingProject,
+			RawURL:	fmt.Sprintf("%s?pageToken=%s", url, pt),
+			UserAgent: userAgent,
+		})
+		if err != nil {
+			return nil, transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ComputeNetworkEndpoints %q", d.Id()))
+		}
+		resEndpoints := res["items"].([]interface{})
+		allEndpoints = append(allEndpoints, resEndpoints...)
+		pt, _ = res["nextPageToken"].(string)
+	}
+	return allEndpoints, nil
+}
+
+// Mutates the parent NEG by attaching or detaching endpoints in chunks. `url` determines if endpoints are attached or detached.
+// The last page is not processed, but instead returned for the Create/Delete functions to write.
+func networkEndpointsPaginatedMutate(d *schema.ResourceData, endpoints []interface{}, config *transport_tpg.Config, userAgent, url, project, billingProject string, chunkSize int, returnLastPage bool) ([]interface{}, error) {
+	// Pull out what this mutation is doing - either attachNetworkEndpoints or detachNetworkEndpoints
+	verb := url[len(url)-len("attachNetworkEndpoints"):]
+	id, err := tpgresource.ReplaceVars(d, config, "{{project}}/{{zone}}/{{network_endpoint_group}}/endpoints")
+	if err != nil {
+		return nil, fmt.Errorf("Error constructing id: %s", err)
+	}
+	i := 0
+	for ; i < len(endpoints); i += chunkSize {
+		j := i + chunkSize
+		if j > len(endpoints) {
+			if returnLastPage {
+				break
+			}
+			j = len(endpoints)
+		}
+        timeoutType := schema.TimeoutCreate
+        if verb != "attachNetworkEndpoints" {
+            timeoutType = schema.TimeoutDelete
+        }
+		body := map[string]interface{}{"networkEndpoints": endpoints[i:j]}
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:	   config,
+			Method:	   "POST",
+			Project:   billingProject,
+			RawURL:	   url,
+			UserAgent: userAgent,
+			Body:	   body,
+			Timeout:   d.Timeout(timeoutType),
+		})
+		if err != nil {
+			return nil, fmt.Errorf("Error during %s: %s", verb, err)
+		}
+
+		err = ComputeOperationWaitTime(
+			config, res, project, verb, userAgent,
+			d.Timeout(schema.TimeoutDefault))
+
+		if err != nil {
+			// The mutation wasn't applied
+			return nil, fmt.Errorf("Error in %s operation: %s", verb, err)
+		}
+
+		log.Printf("[DEBUG] Finished %s %q: %#v", verb, id, res)
+	}
+	if returnLastPage {
+		return endpoints[i:], nil
+	}
+	return nil, nil
+}

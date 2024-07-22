@@ -1,5 +1,5 @@
 
-This configuration is expected to be run locally by an administrator. It specifies the configuration needed for a test environment where the full set of acceptance tests can be run.
+There is no automation around this configuration, and it is expected to be run locally by an administrator. It specifies the configuration needed for a test environment where the full set of acceptance tests can be run.
 
 Googlers can find record of internal requests at b/268353203.
 
@@ -46,11 +46,28 @@ After applying this configuration:
 - Add Group Admin role to new service account in the Google Workspace Admin Console: https://admin.google.com/ac/roles
 - Add a new test user in the Google Workspace Admin Console: https://admin.google.com/ac/users
 - Create a `support@` group in the Google Workspace Admin Console, add new service account as a member, and make it an owner
+- Enroll in Cloud Armor Managed Protection Plus tier
+- Add Cloud Identity Premium Plan to the Google Workspace domain
+- Perform the Privileged Access Manager set-up https://pantheon.corp.google.com/iam-admin/pam/setup
 
 Quotas that will need to be adjusted to support all tests:
 - Project quota for the new service account
 - Project quota for the billing account
-- Compute Networks quota in `us-central1`
 - CPUS quota in `us-central1`
 - AlloyDB cluster quota in `us-central1`
 - Cloud Workstation cluster quota in `us-central1`
+- VMWare Engine nodes per region in `southamerica-west1`
+- VMWare Engine nodes across regions
+- Looker `EnterpriseSubscriptionInstancesPerProjectPerRegion`. This must be requested manually from their team, and can't be self-served in the Cloud Console.
+- aiplatform.googleapis.com/feature_store_online_serving_nodes (us-central1)
+- compute.googleapis.com/firewalls
+- compute.googleapis.com/global_in_use_addresses
+- compute.googleapis.com/instance_group_managers (us-central1)
+- compute.googleapis.com/networks
+- compute.googleapis.com/read_requests_per_region (us-central1)
+- compute.googleapis.com/regional_in_use_addresses (us-central1)
+- compute.googleapis.com/regional_static_addresses (us-central1)
+- compute.googleapis.com/routers
+- compute.googleapis.com/c2_cpus (us-central1)
+- compute.googleapis.com/n2_cpus (us-central1) to 36+
+- VMware Engine standard 72 vCPUs nodes per region - southamerica-east1 to 21
