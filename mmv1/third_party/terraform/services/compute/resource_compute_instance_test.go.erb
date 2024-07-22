@@ -7767,9 +7767,9 @@ resource "google_compute_instance" "foobar4" {
   }
 
 }
+<% end -%>
 `, instance, confidentialInstanceType, instance, instance, confidentialInstanceType, instance)
 }
-<% end -%>
 
 func testAccComputeInstanceConfidentialInstanceConfigNoEnable(instance string, minCpuPlatform, confidentialInstanceType string) string {
 	return fmt.Sprintf(`
