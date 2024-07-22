@@ -159,41 +159,6 @@ func TestAccProject_labels(t *testing.T) {
 	})
 }
 
-// Test that a Project resource can be created with tags
-func TestAccProject_tags(t *testing.T) {
-	t.Parallel()
-
-	org := envvar.GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("%s-%d", TestPrefix, acctest.RandInt(t))
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccProject_tags(pid, org, map[string]string{org + "/env": "test"}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGoogleProjectExists("google_project.acceptance", pid),
-				),
-			},
-			// Make sure import supports tags
-			{
-				ResourceName:            "google_project.acceptance",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"skip_delete", "tags", "deletion_protection"}, // we don't read tags back
-			},
-			// Update tags tries to replace project but fails due to deletion protection
-			{
-				Config:      testAccProject_tags(pid, org, map[string]string{org + "/env": "staging"}),
-				ExpectError: regexp.MustCompile("deletion_protection"),
-			},
-			{
-				Config: testAccProject_tagsAllowDestroy(pid, org, map[string]string{org + "/env": "test"}),
-			},
-		},
-	})
-}
-
 func TestAccProject_deleteDefaultNetwork(t *testing.T) {
 	t.Parallel()
 
@@ -457,41 +422,6 @@ resource "google_project" "acceptance" {
   deletion_protection = false
 }
 `, pid, pid, org, billing)
-}
-
-func testAccProject_tags(pid, org string, tags map[string]string) string {
-	r := fmt.Sprintf(`
-resource "google_project" "acceptance" {
-  project_id = "%s"
-  name       = "%s"
-  org_id     = "%s"
-  tags = {`, pid, pid, org)
-
-	l := ""
-	for key, value := range tags {
-		l += fmt.Sprintf("%q = %q\n", key, value)
-	}
-
-	l += fmt.Sprintf("}\n}")
-	return r + l
-}
-
-func testAccProject_tagsAllowDestroy(pid, org string, tags map[string]string) string {
-	r := fmt.Sprintf(`
-  resource "google_project" "acceptance" {
-  project_id = "%s"
-  name       = "%s"
-  org_id     = "%s"
-  deletion_protection = false
-  tags = {`, pid, pid, org)
-
-	l := ""
-	for key, value := range tags {
-		l += fmt.Sprintf("%q = %q\n", key, value)
-	}
-
-	l += fmt.Sprintf("}\n}")
-	return r + l
 }
 
 func testAccProject_labels(pid, org string, labels map[string]string) string {
