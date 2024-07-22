@@ -106,6 +106,7 @@ resource "google_datastream_stream" "{{$.PrimaryResourceId}}" {
                     kms_key_name = "{{index $.Vars "bigquery_destination_table_kms_key_name"}}"
                 }
             }
+            merge {}
         }
     }
 

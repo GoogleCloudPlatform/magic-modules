@@ -116,6 +116,7 @@ examples:
       cloud_run_job_name: 'cloudrun-job'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_job_run_job'
+    min_version: beta
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-job%s\", context[\"random_suffix\"\
       ])"

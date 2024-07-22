@@ -1,0 +1,74 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'UserWorkloadsConfigMap'
+description: |
+  User workloads ConfigMap used by Airflow tasks that run with Kubernetes Executor or KubernetesPodOperator.
+  Intended for Composer 3 Environments.
+min_version: 'beta'
+references:
+  guides:
+  api: 'https://cloud.google.com/composer/docs/reference/rest/v1beta1/projects.locations.environments.userWorkloadsConfigMaps'
+docs:
+base_url: 'projects/{{project}}/locations/{{region}}/environments/{{environment}}/userWorkloadsConfigMaps'
+self_link: 'projects/{{project}}/locations/{{region}}/environments/{{environment}}/userWorkloadsConfigMaps/{{name}}'
+timeouts:
+  insert_minutes: 1
+  update_minutes: 1
+  delete_minutes: 1
+examples:
+  - name: 'composer_user_workloads_config_map_basic'
+    primary_resource_id: 'config_map'
+    vars:
+      environment_name: 'test-environment'
+      config_map_name: 'test-config-map'
+parameters:
+  - name: 'region'
+    type: String
+    description: |
+      The location or Compute Engine region for the environment.
+    min_version: 'beta'
+    url_param_only: true
+    immutable: true
+    default_from_api: true
+  - name: 'environment'
+    type: String
+    description: |
+      Environment where the Kubernetes ConfigMap will be stored and used.
+    min_version: 'beta'
+    url_param_only: true
+    required: true
+    immutable: true
+    validation:
+      function: 'verify.ValidateGCEName'
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      Name of the Kubernetes ConfigMap.
+    min_version: 'beta'
+    required: true
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/go/shortname_to_url.go.tmpl'
+    validation:
+      function: 'verify.ValidateGCEName'
+  - name: 'data'
+    type: KeyValuePairs
+    description: |
+      The "data" field of Kubernetes ConfigMap, organized in key-value pairs.
+      For details see: https://kubernetes.io/docs/concepts/configuration/configmap/
+    min_version: 'beta'
+    immutable: false
