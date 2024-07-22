@@ -377,6 +377,7 @@ resource "google_project" "project" {
 	name       = "%s"
 	org_id     = "%s"
   billing_account = "%s"
+  deletion_protection = false
 }
 
 resource "google_project_service" "logging_service" {
@@ -517,6 +518,7 @@ resource "google_project" "destination-project" {
   name            = "%s"
   org_id          = "%s"
   billing_account = "%s"
+  deletion_protection = false
 }	
 
 resource "google_logging_project_bucket_config" "destination-bucket" {
@@ -579,6 +581,7 @@ resource "google_project" "destination-project" {
   name            = "%s"
   org_id          = "%s"
   billing_account = "%s"
+  deletion_protection = false
 }	
 
 resource "google_logging_project_bucket_config" "destination-bucket" {

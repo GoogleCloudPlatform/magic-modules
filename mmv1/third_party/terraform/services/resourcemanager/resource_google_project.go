@@ -64,7 +64,7 @@ func ResourceGoogleProject() *schema.Resource {
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: verify.ValidateProjectID(),
-				Description:  `The project ID. Changing this forces a new project to be created.`,
+				Description:  `The project unique ID. Changing this forces a new project to be created.`,
 			},
 			"skip_delete": {
 				Type:        schema.TypeBool,
@@ -130,6 +130,20 @@ func ResourceGoogleProject() *schema.Resource {
 				Description: `All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.`,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
+			"tags": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				ForceNew:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Description: `A map of resource manager tags. Resource manager tag keys and values have the same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456. The field is ignored when empty.`,
+			},
+
+			"deletion_protection": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     true,
+				Description: `When the field is set to true or unset in Terraform state, a terraform apply or terraform destroy that would delete the instance will fail. When the field is set to false, deleting the instance is allowed.`,
+			},
 		},
 		UseJSONNumber: true,
 	}
@@ -161,6 +175,10 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 
 	if _, ok := d.GetOk("effective_labels"); ok {
 		project.Labels = tpgresource.ExpandEffectiveLabels(d)
+	}
+
+	if _, ok := d.GetOk("tags"); ok {
+		project.Tags = tpgresource.ExpandStringMap(d, "tags")
 	}
 
 	var op *cloudresourcemanager.Operation
@@ -497,6 +515,9 @@ func resourceGoogleProjectDelete(d *schema.ResourceData, meta interface{}) error
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
+	}
+	if d.Get("deletion_protection").(bool) {
+		return fmt.Errorf("cannot destroy project without setting deletion_protection=false and running `terraform apply`")
 	}
 	// Only delete projects if skip_delete isn't set
 	if !d.Get("skip_delete").(bool) {

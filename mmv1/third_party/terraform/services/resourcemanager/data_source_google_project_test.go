@@ -41,6 +41,7 @@ resource "google_project" "project" {
   project_id = "%s"
   name       = "%s"
   org_id     = "%s"
+  deletion_protection = false
   labels = {
     my-label = "my-label-value"
   }
