@@ -30,6 +30,11 @@ func TestAccSCCV2OrganizationSourceIamBinding(t *testing.T) {
 					resource.TestCheckResourceAttr("google_scc_v2_organization_source_iam_binding.custom_binding", "role", "roles/editor"),
 				),
 			},
+			{
+				ResourceName:      "google_scc_v2_organization_source_iam_binding.custom_binding",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -45,7 +50,7 @@ resource "google_scc_v2_organization_source" "custom_source" {
 
 resource "google_scc_v2_organization_source_iam_binding" "custom_binding" {
   depends_on = [google_scc_v2_organization_source.custom_source]
-  organization = google_scc_v2_organization_source.custom_source.organization
+  organization = "%s"
   source       = google_scc_v2_organization_source.custom_source.canonical_name
   role         = "roles/editor"
 
@@ -59,5 +64,5 @@ resource "google_scc_v2_organization_source_iam_binding" "custom_binding" {
     expression  = "request.time < timestamp('2025-01-01T00:00:00Z')"
   }
 }
-`, sourceId, orgId, orgId, sourceId)
+`, sourceId, orgId, orgId, sourceId, orgId)
 }
