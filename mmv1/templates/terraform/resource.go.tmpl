@@ -130,7 +130,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
         ),
 {{- end}}
 
-{{- if $.DeprecationMessage }}
+{{ if $.DeprecationMessage }}
         DeprecationMessage: "{{ $.DeprecationMessage -}}",
 {{- end}}
 
