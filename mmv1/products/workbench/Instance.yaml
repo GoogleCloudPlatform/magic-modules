@@ -91,6 +91,7 @@ examples:
     test_vars_overrides:
       key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     test_env_vars:
+      project_id: :PROJECT_NAME
       service_account: :SERVICE_ACCT
     ignore_read_extra:
       - 'gce_setup.0.vm_image'
