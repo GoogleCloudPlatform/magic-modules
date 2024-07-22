@@ -1251,22 +1251,47 @@ properties:
     properties:
       - !ruby/object:Api::Type::ResourceRef
         name: 'clientTlsPolicy'
-        resource: 'Region'  # TODO: 'Region' is incorrect and should be 'ClientTlsPolicy'
+        resource: 'ClientTlsPolicy'
         imports: 'name'
         description: |
           ClientTlsPolicy is a resource that specifies how a client should authenticate
           connections to backends of a service. This resource itself does not affect
           configuration unless it is attached to a backend service resource.
-        required: true
-        custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
       - !ruby/object:Api::Type::Array
         name: 'subjectAltNames'
         description: |
           A list of alternate names to verify the subject identity in the certificate.
           If specified, the client will verify that the server certificate's subject
           alt name matches one of the specified values.
-        required: true
         item_type: Api::Type::String
+      - !ruby/object:Api::Type::NestedObject
+        name: 'awsV4Authentication'
+        description: |
+          The configuration needed to generate a signature for access to private storage buckets that support AWS's Signature Version 4 for authentication.
+          Allowed only for INTERNET_IP_PORT and INTERNET_FQDN_PORT NEG backends.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'accessKeyId'
+            description: |
+              The identifier of an access key used for s3 bucket authentication.
+          - !ruby/object:Api::Type::String
+            name: 'accessKey'
+            ignore_read: true
+            sensitive: true
+            send_empty_value: true
+            description: |
+              The access key used for s3 bucket authentication.
+              Required for updating or creating a backend that uses AWS v4 signature authentication, but will not be returned as part of the configuration when queried with a REST API GET request.
+          - !ruby/object:Api::Type::String
+            name: 'accessKeyVersion'
+            description: |
+              The optional version identifier for the access key. You can use this to keep track of different iterations of your access key.
+          - !ruby/object:Api::Type::String
+            name: 'originRegion'
+            description: |
+              The name of the cloud region of your origin. This is a free-form field with the name of the region your cloud uses to host your origin.
+              For example, "us-east-1" for AWS or "us-ashburn-1" for OCI.
   - !ruby/object:Api::Type::Enum
     name: 'sessionAffinity'
     description: |
