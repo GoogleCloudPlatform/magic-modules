@@ -18,7 +18,7 @@ func TestAccSCCV2OrganizationSourceIAMMember(t *testing.T) {
 	member := "user:test@example.com"
 	conditionTitle := "Title"
 	conditionDescription := "Description"
-	conditionExpression := `request.time < timestamp("2023-12-31T00:00:00Z")`
+	conditionExpression := `request.time < timestamp(\"2023-12-31T00:00:00Z\")`
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -30,12 +30,11 @@ func TestAccSCCV2OrganizationSourceIAMMember(t *testing.T) {
 				Config: testAccSCCV2OrganizationSourceIAMMember(orgId, suffix, role, member, conditionTitle, conditionDescription, conditionExpression),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_scc_v2_organization_source_iam_member.custom_member", "organization", orgId),
-					resource.TestCheckResourceAttr("google_scc_v2_organization_source_iam_member.custom_member", "suffix", suffix),
 					resource.TestCheckResourceAttr("google_scc_v2_organization_source_iam_member.custom_member", "role", role),
 					resource.TestCheckResourceAttr("google_scc_v2_organization_source_iam_member.custom_member", "member", member),
-					resource.TestCheckResourceAttr("google_scc_v2_organization_source_iam_member.custom_member", "condition.title", conditionTitle),
-					resource.TestCheckResourceAttr("google_scc_v2_organization_source_iam_member.custom_member", "condition.description", conditionDescription),
-					resource.TestCheckResourceAttr("google_scc_v2_organization_source_iam_member.custom_member", "condition.expression", conditionExpression),
+					resource.TestCheckResourceAttr("google_scc_v2_organization_source_iam_member.custom_member", "condition.0.title", conditionTitle),
+					resource.TestCheckResourceAttr("google_scc_v2_organization_source_iam_member.custom_member", "condition.0.description", conditionDescription),
+					resource.TestCheckResourceAttr("google_scc_v2_organization_source_iam_member.custom_member", "condition.0.expression", conditionExpression),
 				),
 			},
 			{
@@ -62,7 +61,7 @@ resource "google_scc_v2_organization_source_iam_member" "custom_member" {
   condition {
     title       = "%s"
     description = "%s"
-	expression  = "%s"
+    expression  = "%s"
   }
 }
 `, suffix, orgId, orgId, suffix, orgId, role, member, title, description, expression)

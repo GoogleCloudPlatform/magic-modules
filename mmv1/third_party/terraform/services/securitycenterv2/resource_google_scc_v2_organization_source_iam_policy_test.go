@@ -56,11 +56,11 @@ resource "google_scc_v2_organization_source" "custom_source" {
 
 resource "google_scc_v2_organization_source_iam_policy" "custom_policy" {
   organization  = "%s"
-  source        = google_scc_v2_organization_source.custom_source.canonical_name
+  source        = google_scc_v2_organization_source.custom_source.id
   policy_data   = <<-EOF
 %s
 EOF
-depends_on = [google_scc_v2_organization_source.custom_source]
+  depends_on = [google_scc_v2_organization_source.custom_source]
 }
 `, suffix, orgId, orgId, suffix, orgId, policyData)
 }
