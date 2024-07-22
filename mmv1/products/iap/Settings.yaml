@@ -93,7 +93,7 @@ properties:
             required: true
             description: |
               Reauth method requested. The possible values are:
-              
+
               * `METHOD_UNSPECIFIED`: Reauthentication disabled.
               * `LOGIN`: Prompts the user to log in again.
               * `SECURE_KEY`: User must use their secure key 2nd factor device.
@@ -121,7 +121,7 @@ properties:
               How IAP determines the effective policy in cases of hierarchical policies.
               Policies are merged from higher in the hierarchy to lower in the hierarchy.
               The possible values are:
-              
+
               * `POLICY_TYPE_UNSPECIFIED`: Default value. This value is unused.
               * `MINIMUM`: This policy acts as a minimum to other policies, lower in the hierarchy.
               		   Effective policy may only be the same or stricter.
@@ -180,7 +180,7 @@ properties:
         description: |
           Identity sources that IAP can use to authenticate the end user. Only one identity source
           can be configured. The possible values are:
-          
+
           * `IDENTITY_SOURCE_UNSPECIFIED`: IdentitySource unspecified. When selected, IAP relies on
             				   which identity settings are fully configured to redirect
             				   the traffic to. The precedence order is
@@ -244,7 +244,7 @@ properties:
               Which output credentials attributes selected by the CEL expression should be propagated in.
               All attributes will be fully duplicated in each selected output credential.
               Possible values are:
-              
+
               * `OUTPUT_CREDENTIALS_UNSPECIFIED`: An output credential is required.
               * `HEADER`: Propagate attributes in the headers with "x-goog-iap-attr-" prefix.
               * `JWT`: Propagate attributes in the JWT of the form:
@@ -271,7 +271,7 @@ properties:
             description: |
               Whether the provided attribute propagation settings should be evaluated on user requests.
               If set to true, attributes returned from the expression will be propagated in the set output credentials.
-  
+
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_delete: templates/terraform/custom_delete/clear_iap_settings.go.erb
   test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
