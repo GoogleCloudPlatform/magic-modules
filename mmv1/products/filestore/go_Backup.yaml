@@ -102,7 +102,6 @@ properties:
     type: KeyValueLabels
     description: |
       Resource labels to represent user-provided metadata.
-    immutable: 
   - name: 'capacityGb'
     type: String
     description: |

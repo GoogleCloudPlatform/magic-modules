@@ -95,7 +95,6 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: "User-defined labels for the edgecloud cluster."
-    immutable: 
   - name: 'fleet'
     type: NestedObject
     description: |

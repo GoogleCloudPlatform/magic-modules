@@ -103,7 +103,6 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: "Labels associated with this resource."
-    immutable: 
   - name: 'nodeLocation'
     type: String
     description: |
