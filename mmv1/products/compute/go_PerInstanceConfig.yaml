@@ -190,6 +190,7 @@ properties:
         api_name: internalIPs
         key_name: 'interface_name'
         value_type:
+          name: internalIp
           type: NestedObject
           properties:
             - name: 'autoDelete'
@@ -219,6 +220,7 @@ properties:
         api_name: externalIPs
         key_name: 'interface_name'
         value_type:
+          name: externalIp
           type: NestedObject
           properties:
             - name: 'autoDelete'
