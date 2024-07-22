@@ -715,13 +715,15 @@ func TestAccComputeRegionInstanceTemplate_ConfidentialInstanceConfigMain(t *test
 					testAccCheckComputeRegionInstanceTemplateHasConfidentialInstanceConfig(&instanceTemplate2, false, "SEV_SNP"),
 				),
 			},
+			<% unless version == "ga" -%>
 			{
-				Config: testAccComputeRegionInstanceTemplateConfidentialInstanceConfigEnableTdx(acctest.RandString(t, 10), "SEV"),
+				Config: testAccComputeRegionInstanceTemplateConfidentialInstanceConfigEnableTdx(acctest.RandString(t, 10), "TDX"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionInstanceTemplateExists(t, "google_compute_region_instance_template.foobar5", &instanceTemplate),
 					testAccCheckComputeRegionInstanceTemplateHasConfidentialInstanceConfig(&instanceTemplate, false, "TDX"),
 				),
 			},
+			<% end -%>
 		},
 	})
 }
@@ -2979,11 +2981,12 @@ resource "google_compute_region_instance_template" "foobar4" {
 `, suffix, minCpuPlatform, confidentialInstanceType, suffix, minCpuPlatform, confidentialInstanceType)
 }
 
+<% unless version == "ga" -%>
 func testAccComputeRegionInstanceTemplateConfidentialInstanceConfigEnableTdx(suffix string, confidentialInstanceType string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image3" {
   family  = "ubuntu-2204-lts"
-  project = "ubuntu-os-cloud"
+  project = "tdx-guest-images"
 }
 
 resource "google_compute_region_instance_template" "foobar5" {
@@ -3012,6 +3015,7 @@ resource "google_compute_region_instance_template" "foobar5" {
 }
 `, suffix, confidentialInstanceType)
 }
+<% end -%>
 
 func testAccComputeRegionInstanceTemplateAdvancedMachineFeatures(suffix string) string {
 	return fmt.Sprintf(`

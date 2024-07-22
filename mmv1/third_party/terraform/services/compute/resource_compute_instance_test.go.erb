@@ -1916,6 +1916,7 @@ func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance2, false, "SEV_SNP"),
 				),
 			},
+			<% unless version == "ga" -%>
 			{
 				Config: testAccComputeInstanceConfidentialInstanceConfigEnableTdx(instanceName, "TDX"),
 				Check: resource.ComposeTestCheckFunc(
@@ -1923,6 +1924,7 @@ func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance, false, "TDX"),
 				),
 			},
+			<% end -%>
 		},
 	})
 }
@@ -7778,11 +7780,12 @@ resource "google_compute_instance" "foobar4" {
 `, instance, minCpuPlatform, confidentialInstanceType, instance, minCpuPlatform, confidentialInstanceType)
 }
 
+<% unless version == "ga" -%>
 func testAccComputeInstanceConfidentialInstanceConfigEnableTdx(instance string, confidentialInstanceType string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image3" {
   family    = "ubuntu-2204-lts"
-  project   = "ubuntu-os-cloud"
+  project   = "tdx-guest-images"
 }
 
 resource "google_compute_instance" "foobar5" {
@@ -7811,6 +7814,7 @@ resource "google_compute_instance" "foobar5" {
 }
 `, instance, confidentialInstanceType)
 }
+<% end -%>
 
 func testAccComputeInstance_attributionLabelCreate(instance, add, strategy string) string {
 	return fmt.Sprintf(`
