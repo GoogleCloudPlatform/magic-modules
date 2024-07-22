@@ -1250,9 +1250,8 @@ properties:
           ClientTlsPolicy is a resource that specifies how a client should authenticate
           connections to backends of a service. This resource itself does not affect
           configuration unless it is attached to a backend service resource.
-        required: true
-        custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
-        resource: 'Region'
+        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+        resource: 'ClientTlsPolicy'
         imports: 'name'
       - name: 'subjectAltNames'
         type: Array
@@ -1260,9 +1259,35 @@ properties:
           A list of alternate names to verify the subject identity in the certificate.
           If specified, the client will verify that the server certificate's subject
           alt name matches one of the specified values.
-        required: true
         item_type:
           type: String
+      - name: 'awsV4Authentication'
+        type: NestedObject
+        description: |
+          The configuration needed to generate a signature for access to private storage buckets that support AWS's Signature Version 4 for authentication.
+          Allowed only for INTERNET_IP_PORT and INTERNET_FQDN_PORT NEG backends.
+        properties:
+          - name: 'accessKeyId'
+            type: String
+            description: |
+              The identifier of an access key used for s3 bucket authentication.
+          - name: 'accessKey'
+            type: String
+            description: |
+              The access key used for s3 bucket authentication.
+              Required for updating or creating a backend that uses AWS v4 signature authentication, but will not be returned as part of the configuration when queried with a REST API GET request.
+            ignore_read: true
+            sensitive: true
+            send_empty_value: true
+          - name: 'accessKeyVersion'
+            type: String
+            description: |
+              The optional version identifier for the access key. You can use this to keep track of different iterations of your access key.
+          - name: 'originRegion'
+            type: String
+            description: |
+              The name of the cloud region of your origin. This is a free-form field with the name of the region your cloud uses to host your origin.
+              For example, "us-east-1" for AWS or "us-ashburn-1" for OCI.
   - name: 'sessionAffinity'
     type: Enum
     description: |

@@ -99,6 +99,15 @@ examples:
     test_vars_overrides:
       # Don't add random suffix
       custom_domain: '"run.custom.domain.com"'
+virtual_fields:
+  - !ruby/object:Api::Type::Boolean
+    name: wait_dns_verification
+    description: |
+      If true, Terraform will wait for DNS records to be fully resolved on the `CustomDomain`.
+      If false, Terraform will not wait for DNS records on the `CustomDomain`. Any issues in
+      the `CustomDomain` will be returned and stored in the Terraform state.
+    immutable: true
+    default_value: false
 parameters:
   - !ruby/object:Api::Type::String
     name: site_id
@@ -114,15 +123,6 @@ parameters:
     immutable: true
     required: true
     url_param_only: true
-virtual_fields:
-  - !ruby/object:Api::Type::Boolean
-    name: wait_dns_verification
-    description: |
-      If true, Terraform will wait for DNS records to be fully resolved on the `CustomDomain`.
-      If false, Terraform will not wait for DNS records on the `CustomDomain`. Any issues in
-      the `CustomDomain` will be returned and stored in the Terraform state.
-    immutable: true
-    default_value: false
 properties:
   - !ruby/object:Api::Type::String
     name: name
