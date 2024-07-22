@@ -257,7 +257,7 @@ properties:
         description: |
           The path to a binary authorization policy. Format: projects/{project}/platforms/cloudRun/{policy-name}
         conflicts:
-        - use_default
+          - use_default
   - !ruby/object:Api::Type::Array
     name: 'customAudiences'
     description: |
