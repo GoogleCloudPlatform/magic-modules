@@ -1,0 +1,118 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'PrivateConnection'
+description: |
+  The PrivateConnection resource is used to establish private connectivity between Database Migration Service and a customer's network.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/database-migration/docs/oracle-to-postgresql/create-private-connectivity-configuration'
+  api: 'https://cloud.google.com/database-migration/docs/reference/rest/v1/projects.locations.privateConnections'
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/privateConnections'
+self_link: 'projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/privateConnections?privateConnectionId={{private_connection_id}}'
+immutable: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}'
+timeouts:
+  insert_minutes: 60
+  update_minutes: 20
+  delete_minutes: 60
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    resource_inside_response: false
+custom_code:
+examples:
+  - name: 'database_migration_service_private_connection'
+    primary_resource_id: 'default'
+    vars:
+      private_connection_id: 'my-connection'
+      network_name: 'my-network'
+    test_vars_overrides:
+      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "dbms-privateconnection")'
+parameters:
+  - name: 'privateConnectionId'
+    type: String
+    description: |
+      The private connectivity identifier.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'location'
+    type: String
+    description: |
+      The name of the location this private connection is located in.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: The resource's name.
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: Labels.
+    immutable: false
+  - name: 'displayName'
+    type: String
+    description: Display name.
+    default_from_api: true
+  - name: 'state'
+    type: String
+    description: |
+      State of the PrivateConnection.
+    output: true
+  - name: 'error'
+    type: NestedObject
+    description: |
+      The PrivateConnection error in case of failure.
+    output: true
+    properties:
+      - name: 'message'
+        type: String
+        description: |
+          A message containing more information about the error that occurred.
+      - name: 'details'
+        type: KeyValuePairs
+        description: |
+          A list of messages that carry the error details.
+  - name: 'vpcPeeringConfig'
+    type: NestedObject
+    description: |
+      The VPC Peering configuration is used to create VPC peering
+      between databasemigrationservice and the consumer's VPC.
+    required: true
+    properties:
+      - name: 'vpcName'
+        type: String
+        description: |
+          Fully qualified name of the VPC that Database Migration Service will peer to.
+          Format: projects/{project}/global/{networks}/{name}
+        required: true
+      - name: 'subnet'
+        type: String
+        description: |
+          A free subnet for peering. (CIDR of /29)
+        required: true

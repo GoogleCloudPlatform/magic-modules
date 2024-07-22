@@ -1,0 +1,121 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Endpoint'
+description: |
+  Cloud IDS is an intrusion detection service that provides threat detection for intrusions, malware, spyware, and command-and-control attacks on your network.
+references:
+  guides:
+  api: 'https://cloud.google.com/intrusion-detection-system/docs/configuring-ids'
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/endpoints/{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/endpoints'
+self_link: 'projects/{{project}}/locations/{{location}}/endpoints/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/endpoints?endpointId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/endpoints/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 2000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+skip_sweeper: true
+examples:
+  - name: 'cloudids_endpoint'
+    primary_resource_id: 'example-endpoint'
+    skip_test: true
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The location for the endpoint.
+    url_param_only: true
+    required: true
+    immutable: true
+    ignore_read: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      Name of the endpoint in the format projects/{project_id}/locations/{locationId}/endpoints/{endpointId}.
+    required: true
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/id_from_name.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/go/shortname_to_url.go.tmpl'
+  - name: 'createTime'
+    type: String
+    description: |
+      Creation timestamp in RFC 3339 text format.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: |
+      Last update timestamp in RFC 3339 text format.
+    output: true
+  - name: 'network'
+    type: String
+    description: |
+      Name of the VPC network that is connected to the IDS endpoint. This can either contain the VPC network name itself (like "src-net") or the full URL to the network (like "projects/{project_id}/global/networks/src-net").
+    required: true
+    immutable: true
+  - name: 'description'
+    type: String
+    description: |
+      An optional description of the endpoint.
+    immutable: true
+  - name: 'endpointForwardingRule'
+    type: String
+    description: |
+      URL of the endpoint's network address to which traffic is to be sent by Packet Mirroring.
+    output: true
+  - name: 'endpointIp'
+    type: String
+    description: |
+      Internal IP address of the endpoint's network entry point.
+    output: true
+  - name: 'severity'
+    type: Enum
+    description: |
+      The minimum alert severity level that is reported by the endpoint.
+    required: true
+    immutable: true
+    enum_values:
+      - 'INFORMATIONAL'
+      - 'LOW'
+      - 'MEDIUM'
+      - 'HIGH'
+      - 'CRITICAL'
+  - name: 'threatExceptions'
+    type: Array
+    description: |
+      Configuration for threat IDs excluded from generating alerts. Limit: 99 IDs.
+    item_type:
+      type: String

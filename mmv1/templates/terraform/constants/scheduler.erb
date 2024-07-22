@@ -69,7 +69,7 @@ func validateHttpHeaders() schema.SchemaValidateFunc {
 			return
 		}
 		r := regexp.MustCompile(`(X-Google-|X-AppEngine-).*`)
-		for key, _ := range headers {
+		for key := range headers {
 			if r.MatchString(key) {
 				es = append(es, fmt.Errorf("Cannot set the %s header on %s", key, k))
 				return
