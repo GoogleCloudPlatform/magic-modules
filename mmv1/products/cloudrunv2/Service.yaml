@@ -496,7 +496,6 @@ properties:
               name: 'livenessProbe'
               description: |-
                 Periodic probe of container liveness. Container will be restarted if the probe fails. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
-              default_from_api: true
               properties:
                 - !ruby/object:Api::Type::Integer
                   name: 'initialDelaySeconds'

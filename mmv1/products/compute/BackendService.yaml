@@ -165,8 +165,6 @@ properties:
 
             See the [Backend Services Overview](https://cloud.google.com/load-balancing/docs/backend-service#balancing-mode)
             for an explanation of load balancing modes.
-
-            From version 6.0.0 default value will be UTILIZATION to match default GCP value.
         - !ruby/object:Api::Type::Double
           name: 'capacityScaler'
           send_empty_value: true
@@ -747,14 +745,16 @@ properties:
     description: Settings for enabling Cloud Identity Aware Proxy
     send_empty_value: true
     properties:
+      - !ruby/object:Api::Type::Boolean
+        name: 'enabled'
+        required: true
+        description: Whether the serving infrastructure will authenticate and authorize all incoming requests.
       - !ruby/object:Api::Type::String
         name: 'oauth2ClientId'
-        required: true
         description: |
           OAuth2 Client ID for IAP
       - !ruby/object:Api::Type::String
         name: 'oauth2ClientSecret'
-        required: true
         description: |
           OAuth2 Client Secret for IAP
         send_empty_value: true
@@ -964,9 +964,6 @@ properties:
       Settings controlling eviction of unhealthy hosts from the load balancing pool.
       Applicable backend service types can be a global backend service with the
       loadBalancingScheme set to INTERNAL_SELF_MANAGED or EXTERNAL_MANAGED.
-
-      From version 6.0.0 outlierDetection default terraform values will be removed to match default GCP value.
-      Default values are enforce by GCP without providing them.
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'baseEjectionTime'
@@ -1013,7 +1010,6 @@ properties:
           - outlier_detection.0.success_rate_minimum_hosts
           - outlier_detection.0.success_rate_request_volume
           - outlier_detection.0.success_rate_stdev_factor
-        default_value: 5
         description: |
           Number of errors before a host is ejected from the connection pool. When the
           backend host is accessed over HTTP, a 5xx return code qualifies as an error.
@@ -1032,7 +1028,6 @@ properties:
           - outlier_detection.0.success_rate_minimum_hosts
           - outlier_detection.0.success_rate_request_volume
           - outlier_detection.0.success_rate_stdev_factor
-        default_value: 5
         description: |
           The number of consecutive gateway failures (502, 503, 504 status or connection
           errors that are mapped to one of those status codes) before a consecutive
@@ -1051,7 +1046,6 @@ properties:
           - outlier_detection.0.success_rate_minimum_hosts
           - outlier_detection.0.success_rate_request_volume
           - outlier_detection.0.success_rate_stdev_factor
-        default_value: 100
         description: |
           The percentage chance that a host will be actually ejected when an outlier
           status is detected through consecutive 5xx. This setting can be used to disable
@@ -1070,7 +1064,6 @@ properties:
           - outlier_detection.0.success_rate_minimum_hosts
           - outlier_detection.0.success_rate_request_volume
           - outlier_detection.0.success_rate_stdev_factor
-        default_value: 0
         description: |
           The percentage chance that a host will be actually ejected when an outlier
           status is detected through consecutive gateway failures. This setting can be
@@ -1089,7 +1082,6 @@ properties:
           - outlier_detection.0.success_rate_minimum_hosts
           - outlier_detection.0.success_rate_request_volume
           - outlier_detection.0.success_rate_stdev_factor
-        default_value: 100
         description: |
           The percentage chance that a host will be actually ejected when an outlier
           status is detected through success rate statistics. This setting can be used to
@@ -1138,7 +1130,6 @@ properties:
           - outlier_detection.0.success_rate_minimum_hosts
           - outlier_detection.0.success_rate_request_volume
           - outlier_detection.0.success_rate_stdev_factor
-        default_value: 10
         description: |
           Maximum percentage of hosts in the load balancing pool for the backend service
           that can be ejected. Defaults to 10%.
@@ -1156,7 +1147,6 @@ properties:
           - outlier_detection.0.success_rate_minimum_hosts
           - outlier_detection.0.success_rate_request_volume
           - outlier_detection.0.success_rate_stdev_factor
-        default_value: 5
         description: |
           The number of hosts in a cluster that must have enough request volume to detect
           success rate outliers. If the number of hosts is less than this setting, outlier
@@ -1176,7 +1166,6 @@ properties:
           - outlier_detection.0.success_rate_minimum_hosts
           - outlier_detection.0.success_rate_request_volume
           - outlier_detection.0.success_rate_stdev_factor
-        default_value: 100
         description: |
           The minimum number of total requests that must be collected in one interval (as
           defined by the interval duration above) to include this host in success rate
@@ -1197,7 +1186,6 @@ properties:
           - outlier_detection.0.success_rate_minimum_hosts
           - outlier_detection.0.success_rate_request_volume
           - outlier_detection.0.success_rate_stdev_factor
-        default_value: 1900
         description: |
           This factor is used to determine the ejection threshold for success rate outlier
           ejection. The ejection threshold is the difference between the mean success

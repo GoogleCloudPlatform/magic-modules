@@ -1592,6 +1592,9 @@ func resourceBigQueryTableCreate(d *schema.ResourceData, meta interface{}) error
 	}
 
 	if table.View != nil && table.Schema != nil {
+		if schemaHasRequiredFields(table.Schema) {
+			return errors.New("Schema cannot contain required fields when creating a view")
+		}
 
 		log.Printf("[INFO] Removing schema from table definition because BigQuery does not support setting schema on view creation")
 		schemaBack := table.Schema
@@ -2548,6 +2551,15 @@ func setEmptyPolicyTagsInSchema(field *bigquery.TableFieldSchema) {
 	if field.PolicyTags == nil {
 		field.PolicyTags = &bigquery.TableFieldSchemaPolicyTags{Names: []string{}}
 	}
+}
+
+func schemaHasRequiredFields(schema *bigquery.TableSchema) bool {
+	for _, field := range schema.Fields {
+		if "REQUIRED" == field.Mode {
+			return true
+		}
+	}
+	return false
 }
 
 func expandTimePartitioning(configured interface{}) *bigquery.TimePartitioning {
