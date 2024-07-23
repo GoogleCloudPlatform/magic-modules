@@ -216,10 +216,13 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			}
 			rnr.PushDir(repo.Path)
 			if _, err := rnr.Run("make", []string{"build"}, nil); err != nil {
+				fmt.Printf("Built repo %s at path %s failed with error: %v\n", repo.Name, repo.Path, err)
 				errors[repo.Title] = append(errors[repo.Title], fmt.Sprintf("Failed to build branch %s", oldBranch))
 				repo.Cloned = false
 			}
 			rnr.PopDir()
+			fmt.Printf("Built repo %s at path %s\n", repo.Name, repo.Path)
+
 			ctlr.Checkout(repo, newBranch)
 		}
 	}
