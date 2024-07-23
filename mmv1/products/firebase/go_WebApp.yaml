@@ -1,0 +1,131 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'WebApp'
+description: |
+  A Google Cloud Firebase web application instance
+min_version: 'beta'
+references:
+  guides:
+    'Official Documentation': 'https://firebase.google.com/'
+  api: 'https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects.webApps'
+docs:
+base_url: 'projects/{{project}}/webApps'
+self_link: 'projects/{{project}}/webApps/{{app_id}}'
+update_verb: 'PATCH'
+update_mask: true
+delete_url: 'projects/{{project}}/webApps/{{app_id}}:remove'
+delete_verb: 'POST'
+import_format:
+  - '{{project}} projects/{{project}}/webApps/{{app_id}}'
+  - 'projects/{{project}}/webApps/{{app_id}}'
+  - 'webApps/{{app_id}}'
+  - '{{app_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+identity:
+  - appId
+  - name
+custom_code:
+  custom_delete: 'templates/terraform/custom_delete/go/firebase_app_deletion_policy.tmpl'
+skip_sweeper: true
+examples:
+  - name: 'firebase_web_app_basic'
+    primary_resource_id: 'basic'
+    min_version: 'beta'
+    vars:
+      display_name: 'Display Name Basic'
+      bucket_name: 'fb-webapp-'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'display_name': '"tf-test Display Name Basic"'
+    ignore_read_extra:
+      - 'project'
+      - 'deletion_policy'
+    skip_vcr: true
+  - name: 'firebase_web_app_custom_api_key'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      display_name: 'Display Name'
+      api_key_name: 'api-key'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    ignore_read_extra:
+      - 'project'
+      - 'deletion_policy'
+virtual_fields:
+  - name: 'deletion_policy'
+    description: |
+      Set to `ABANDON` to allow the WebApp to be untracked from terraform state
+      rather than deleted upon `terraform destroy`. This is useful becaue the WebApp may be
+      serving traffic. Set to `DELETE` to delete the WebApp. Default to `DELETE`
+    type: Enum
+    default_value: "DELETE"
+parameters:
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The fully qualified resource name of the App, for example:
+      projects/projectId/webApps/appId
+    min_version: 'beta'
+    output: true
+  - name: 'displayName'
+    type: String
+    description: |
+      The user-assigned display name of the App.
+    min_version: 'beta'
+    required: true
+  - name: 'appId'
+    type: String
+    description: |
+      The globally unique, Firebase-assigned identifier of the App.
+      This identifier should be treated as an opaque token, as the data format is not specified.
+    min_version: 'beta'
+    output: true
+  - name: 'appUrls'
+    type: Array
+    description: |
+      The URLs where the `WebApp` is hosted.
+    min_version: 'beta'
+    output: true
+    item_type:
+      type: String
+  - name: 'apiKeyId'
+    type: String
+    description: |
+      The globally unique, Google-assigned identifier (UID) for the Firebase API key associated with the WebApp.
+      If apiKeyId is not set during creation, then Firebase automatically associates an apiKeyId with the WebApp.
+      This auto-associated key may be an existing valid key or, if no valid key exists, a new one will be provisioned.
+    min_version: 'beta'
+    default_from_api: true

@@ -43,7 +43,12 @@
 <%  unless property.required.nil? -%>
     required: <%= property.required %>
 <%  end -%>
-<%  unless property.immutable.nil? -%>
+<%  if property.name == "labels" && (property.is_a?(Api::Type::KeyValueLabels) || property.is_a?(Api::Type::KeyValueAnnotations)) && property.parent.nil? -%>
+<%    effective_labels = property.__resource.properties.find{ |p| p.is_a?(Api::Type::KeyValueEffectiveLabels) } -%>
+<%    unless effective_labels.immutable.nil? -%>
+    immutable: <%= effective_labels.immutable %>
+<%    end -%>
+<%  elsif !property.immutable.nil? -%>
     immutable: <%= property.immutable %>
 <%  end -%>
 <%  unless property.ignore_read.nil? -%>
