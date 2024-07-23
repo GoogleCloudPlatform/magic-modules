@@ -293,7 +293,7 @@ func ResourceComputeInstanceGroupManager() *schema.Resource {
 							Optional:      true,
 							Computed:      true,
 							ConflictsWith: []string{"update_policy.0.max_surge_percent"},
-							Description:   `Specifies a fixed number of VM instances. This must be a positive integer. Conflicts with max_surge_percent. If neither is set, defaults to 1`,
+							Description:   `Specifies a fixed number of VM instances. This must be a positive integer. Conflicts with max_surge_percent. Both cannot be 0`,
 						},
 
 						"max_surge_percent": {
