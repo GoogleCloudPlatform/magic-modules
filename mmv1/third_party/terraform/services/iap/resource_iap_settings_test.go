@@ -73,13 +73,18 @@ resource "google_compute_health_check" "default" {
 resource "google_iap_settings" "default" {
   name = "projects/test_project_id/iap_web/compute-us-central1/services/${google_compute_region_backend_service.default.name}"
   access_settings {
+    identity_sources = ["IDENTITY_SOURCE_UNSPECIFIED"]
     cors_settings {
-      allow_http_options = "true"
+      allow_http_options = true
     }
     reauth_settings {
       method = "LOGIN"
       max_age = "405s"
       policy_type = "MINIMUM"
+    }
+    allowed_domains_settings {
+      domains = ["xyz.org","abc.in"]
+      enable = true
     }
   }
   application_settings {
@@ -102,19 +107,27 @@ func testAccIapSettings_update(context map[string]interface{}) string {
 resource "google_iap_settings" "default" {
   name = "projects/test_project_id/iap_web/compute-us-central1/services/${google_compute_region_backend_service.default.name}"
   access_settings {
-    cors_settings {
-      allow_http_options = "false"
+    gcip_settings {
+      login_page_uri = "https://test.com/?apiKey=abcd_efgh"
+      tenant_ids = ["tenant1","tenant2"]
     }
-    reauth_settings {
-      method = "SECURE_KEY"
-      max_age = "600s"
-      policy_type = "DEFAULT"
+    oauth_settings {
+      login_hint = "test"
+      programmatic_clients = ["client_ids"]
+    }
+    workforce_identity_settings {
+      oauth2 {
+        client_id = "test_id"
+        client_Secret = "test"
+      } 
     }
   }
   application_settings {
-    csm_settings {
-      rctoken_aud = "updated-aud"
-    }   
+    attribute_propagation_settings {
+      enable = true
+      output_credentials = ["HEADER"]
+    }
+    cookie_domain = "org"
   }
 }
 `, context)
@@ -123,9 +136,6 @@ resource "google_iap_settings" "default" {
 func testAccIapSettings_delete(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 
-resource "google_iap_settings" "default" {
-  name = "projects/test_project_id/iap_web/compute-us-central1/services/${google_compute_region_backend_service.default.name}"
-}
 `, context)
 }
 

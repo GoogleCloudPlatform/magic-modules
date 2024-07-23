@@ -19,13 +19,18 @@ resource "google_compute_health_check" "default" {
 resource "google_iap_settings" "<%= ctx[:primary_resource_id] %>" {
   name = "projects/test_project_id/iap_web/compute-us-central1/services/${google_compute_region_backend_service.default.name}"
   access_settings {
+    identity_sources = ["IDENTITY_SOURCE_UPSPECIFIED"]
     cors_settings {
-      allow_http_options = "true"
+      allow_http_options = true
     }
     reauth_settings {
       method = "LOGIN"
       max_age = "405s"
       policy_type = "MINIMUM"
+    }
+    allowed_domains_settings {
+      domains = ["xyz.org","abc.in"]
+      enable = true
     }
   }
   application_settings {
@@ -39,5 +44,3 @@ resource "google_iap_settings" "<%= ctx[:primary_resource_id] %>" {
     }   
   }
 }
-
-
