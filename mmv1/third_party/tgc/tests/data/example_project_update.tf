@@ -31,6 +31,7 @@ resource "google_project" "my_project" {
   name = "My New Project"
   project_id = "{{.Provider.project}}"
   org_id  = "12345"
+  deletion_protection = false
 
   billing_account = "{{.Project.BillingAccountName}}"
 

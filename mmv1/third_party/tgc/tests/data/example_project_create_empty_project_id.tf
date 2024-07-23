@@ -31,6 +31,7 @@ resource "google_project" "my_project-in-a-folder" {
   name = "My Project"
   project_id = "${random_string.suffix.result}"
   folder_id  = google_folder.department1.name
+  deletion_protection = false
 
   billing_account = "{{.Project.BillingAccountName}}"
 

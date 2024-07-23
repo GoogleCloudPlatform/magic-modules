@@ -67,6 +67,7 @@ resource "google_project" "default" {
   provider   = google-beta
   project_id = "tf-test-appcheck%{random_suffix}"
   name       = "tf-test-appcheck%{random_suffix}"
+  deletion_protection = false
   org_id     = "%{org_id}"
   labels     = {
     "firebase" = "enabled"
