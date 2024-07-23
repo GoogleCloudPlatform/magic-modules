@@ -102,11 +102,11 @@ Description of the change and how users should adjust their configuration (if ne
 
 ## Resources
 
-## Resource: `google_product_resource`
+## Resource: `google_bigquery_table`
 
-### Resource-level change example header
+### View creation now validates `schema`
 
-Description of the change and how users should adjust their configuration (if needed).
+A `view` can no longer be created when `schema` contains required fields
 
 ## Resource: `google_sql_database_instance`
 
@@ -122,11 +122,19 @@ An empty value means the setting should be cleared.
 
 ## Resource: `google_compute_backend_service`
 
+### `iap.enabled` is now required in the `iap` block
+
+To apply the IAP settings to the backend service, `true` needs to be set for `enabled` field.
+
 ### `outlier_detection` subfields default values removed
 
-Empty values mean the setting should be cleared.
+Empty values mean the setting should be cleared
 
 ## Resource: `google_compute_region_backend_service`
+
+### `iap.enabled` is now required in the `iap` block
+
+To apply the IAP settings to the backend service, `true` needs to be set for `enabled` field.
 
 ### `outlier_detection` subfields default values removed
 
@@ -164,4 +172,3 @@ Users will need to check their configuration for any `google_vpc_access_connecto
 resource blocks that contain both fields in a conflicting pair, and remove one of those fields.
 The fields that are removed from the configuration will still have Computed values,
 that are derived from the API.
-

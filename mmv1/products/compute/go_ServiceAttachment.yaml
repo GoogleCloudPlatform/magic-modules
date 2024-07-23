@@ -157,15 +157,12 @@ properties:
             this service attachment.
           output: true
   - name: 'targetService'
-    type: ResourceRef
+    type: String
     description: |
-      The URL of a forwarding rule that represents the service identified by
-      this service attachment.
+      The URL of a service serving the endpoint identified by this service attachment.
     required: true
     immutable: true
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
-    resource: 'ForwardingRule'
-    imports: 'selfLink'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - name: 'natSubnets'
     type: Array
     description: |
