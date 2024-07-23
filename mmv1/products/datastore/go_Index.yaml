@@ -1,0 +1,112 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Index'
+description: |
+  Describes a composite index for Firestore in Datastore Mode.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/datastore/docs/concepts/indexes'
+  api: 'https://cloud.google.com/datastore/docs/reference/admin/rest/v1/projects.indexes'
+docs:
+  warning: |
+    `datastore_index` is deprecated and will be removed in a future major release.
+    Use `firestore_index` instead; this resource is deprecated because it only supports the (default) database.
+    This resource creates a Datastore Index on a project that has already
+    enabled a Datastore-compatible database.  If you haven't already created it, you may
+    create a `google_firestore_database` resource with `location_id` set
+    to your chosen location, and `type` set to `"DATASTORE_MODE"`.
+    If you wish to use App Engine, you may instead create a `google_app_engine_application` resource with
+    `database_type` set to `"CLOUD_DATASTORE_COMPATIBILITY"`.
+    Your Datastore location will be the same as the App Engine location specified.
+id_format: 'projects/{{project}}/indexes/{{index_id}}'
+base_url: 'projects/{{project}}/indexes'
+self_link: 'projects/{{project}}/indexes/{{index_id}}'
+immutable: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+collection_url_key: 'indexes'
+identity:
+  - indexId
+custom_code:
+error_retry_predicates:
+
+  - 'transport_tpg.DatastoreIndex409Contention'
+deprecation_message: '`datastore_index` is deprecated and will be removed in a future major release. Use `firestore_index` instead; this resource is deprecated because it only supports the (default) database. `firestore_index` supports both Firestore in Datastore Mode and Firestore Native indexes and supports both named and the (default) database.'
+examples:
+  - name: 'datastore_index'
+    primary_resource_id: 'default'
+    vars:
+      property_name_1: 'property_a'
+      property_name_2: 'property_b'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+parameters:
+properties:
+  - name: 'indexId'
+    type: String
+    description: |
+      The index id.
+    output: true
+  - name: 'kind'
+    type: String
+    description: |
+      The entity kind which the index applies to.
+    required: true
+  - name: 'ancestor'
+    type: Enum
+    description: |
+      Policy for including ancestors in the index.
+    default_value: "NONE"
+    enum_values:
+      - 'NONE'
+      - 'ALL_ANCESTORS'
+  - name: 'properties'
+    type: Array
+    description: |
+      An ordered list of properties to index on.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'name'
+          type: String
+          description: |
+            The property name to index.
+          required: true
+        - name: 'direction'
+          type: Enum
+          description: |
+            The direction the index should optimize for sorting.
+          required: true
+          enum_values:
+            - 'ASCENDING'
+            - 'DESCENDING'
+    min_size: 1

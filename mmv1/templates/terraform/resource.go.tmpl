@@ -130,7 +130,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
         ),
 {{- end}}
 
-{{- if $.DeprecationMessage }}
+{{ if $.DeprecationMessage }}
         DeprecationMessage: "{{ $.DeprecationMessage -}}",
 {{- end}}
 
@@ -298,7 +298,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{- end}}
     })
     if err != nil {
-{{- if and ($.CustomCode.PostCreateFailure) ($.GetAsync) -}}
+{{- if and ($.CustomCode.PostCreateFailure) (not $.GetAsync) -}}
         resource{{ $.ResourceName -}}PostCreateFailure(d, meta)
 {{- end}}
         return fmt.Errorf("Error creating {{ $.Name -}}: %s", err)
@@ -389,7 +389,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     if err != nil {
 {{if $.CustomCode.PostCreateFailure -}}
         resource{{ $.ResourceName -}}PostCreateFailure(d, meta)
-{{- end}}
+{{ end}}
 {{-          if not $.TaintResourceOnFailedCreate -}}
         // The resource didn't actually create
         d.SetId("")
@@ -1210,7 +1210,7 @@ func resource{{ $.ResourceName -}}Decoder(d *schema.ResourceData, meta interface
 }
 {{- end }}
 {{- if $.CustomCode.PostCreateFailure }}
-func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta interface{}) {
     {{- $.CustomTemplate $.CustomCode.PostCreateFailure false -}}
 }
 {{- end }}

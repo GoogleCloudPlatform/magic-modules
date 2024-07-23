@@ -1,0 +1,103 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Fulfillment'
+description: |
+  By default, your agent responds to a matched intent with a static response. If you're using one of the integration options, you can provide a more dynamic response by using fulfillment. When you enable fulfillment for an intent, Dialogflow responds to that intent by calling a service that you define. For example, if an end-user wants to schedule a haircut on Friday, your service can check your database and respond to the end-user with availability information for Friday.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/dialogflow/es/docs/fulfillment-overview'
+  api: 'https://cloud.google.com/dialogflow/es/docs/reference/rest/v2/projects.agent/getFulfillment'
+docs:
+id_format: '{{name}}'
+base_url: 'projects/{{project}}/agent/fulfillment/'
+self_link: '{{name}}'
+create_url: 'projects/{{project}}/agent/fulfillment/?updateMask=name,displayName,enabled,genericWebService,features'
+create_verb: 'PATCH'
+update_url: 'projects/{{project}}/agent/fulfillment/'
+update_verb: 'PATCH'
+update_mask: true
+delete_url: 'projects/{{project}}/agent/fulfillment/?updateMask=name,displayName,enabled,genericWebService,features'
+delete_verb: 'PATCH'
+import_format:
+  - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  post_create: 'templates/terraform/post_create/go/set_computed_name.tmpl'
+  custom_import: 'templates/terraform/custom_import/go/self_link_as_name_set_project.go.tmpl'
+skip_sweeper: true
+examples:
+  - name: 'dialogflow_fulfillment_basic'
+    primary_resource_id: 'basic_fulfillment'
+    vars:
+      fulfillment_name: 'basic-fulfillment'
+    skip_test: true
+parameters:
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The unique identifier of the fulfillment.
+      Format: projects/<Project ID>/agent/fulfillment - projects/<Project ID>/locations/<Location ID>/agent/fulfillment
+    output: true
+  - name: 'displayName'
+    type: String
+    description: |
+      The human-readable name of the fulfillment, unique within the agent.
+    required: true
+  - name: 'enabled'
+    type: Boolean
+    description: |
+      Whether fulfillment is enabled.
+  - name: 'features'
+    type: Array
+    description: |
+      The field defines whether the fulfillment is enabled for certain features.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'type'
+          type: Enum
+          description: |
+            The type of the feature that enabled for fulfillment.
+            * SMALLTALK: Fulfillment is enabled for SmallTalk.
+          required: true
+          enum_values:
+            - 'SMALLTALK'
+  - name: 'genericWebService'
+    type: NestedObject
+    description: |
+      Represents configuration for a generic web service. Dialogflow supports two mechanisms for authentications: - Basic authentication with username and password. - Authentication with additional authentication headers.
+    properties:
+      - name: 'uri'
+        type: String
+        description: |
+          The fulfillment URI for receiving POST requests. It must use https protocol.
+        required: true
+      - name: 'username'
+        type: String
+        description: |
+          The user name for HTTP Basic authentication.
+      - name: 'password'
+        type: String
+        description: |
+          The password for HTTP Basic authentication.
+      - name: 'requestHeaders'
+        type: KeyValuePairs
+        description: |
+          The HTTP request headers to send together with fulfillment requests.
