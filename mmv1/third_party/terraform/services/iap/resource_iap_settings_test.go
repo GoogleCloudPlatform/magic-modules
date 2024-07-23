@@ -90,12 +90,12 @@ resource "google_iap_settings" "default" {
   application_settings {
     csm_settings {
       rctoken_aud = "audience"
-    } 
+    }
     access_denied_page_settings {
       access_denied_page_uri = "access-denied-uri"
       generate_troubleshooting_uri = true
       remediation_token_generation_enabled = true
-    }   
+    }
   }
 }
 `, context)
@@ -118,13 +118,15 @@ resource "google_iap_settings" "default" {
     workforce_identity_settings {
       oauth2 {
         client_id = "test_id"
-        client_Secret = "test"
-      } 
+        client_secret = "test"
+      }
+      workforce_pools = ["wifpool"]
     }
   }
   application_settings {
     attribute_propagation_settings {
       enable = true
+      expression = "test"
       output_credentials = ["HEADER"]
     }
     cookie_domain = "org"
