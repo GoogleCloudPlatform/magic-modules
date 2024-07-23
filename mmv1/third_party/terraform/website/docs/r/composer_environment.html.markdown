@@ -252,6 +252,11 @@ resource "google_composer_environment" "test" {
   name   = "example-composer-env"
   region = "us-central1"
   config {
+    
+    software_config {
+      image_version = "composer-1-airflow-2"
+    }
+    
     node_count = 4
 
     node_config {
