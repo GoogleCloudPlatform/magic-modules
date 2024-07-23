@@ -161,6 +161,8 @@ properties:
     default_from_api: true
     description: |
       The standard options used for isolating this app profile's traffic from other use cases.
+    conflicts:
+      - data_boost_isolation_read_only
     properties:
       - !ruby/object:Api::Type::Enum
         name: 'priority'
@@ -171,3 +173,17 @@ properties:
           - :PRIORITY_LOW
           - :PRIORITY_MEDIUM
           - :PRIORITY_HIGH
+  - !ruby/object:Api::Type::NestedObject
+    name: 'dataBoostIsolationReadOnly'
+    description: |
+      Specifies that this app profile is intended for read-only usage via the Data Boost feature.
+    conflicts:
+      - standard_isolation
+    properties:
+      - !ruby/object:Api::Type::Enum
+        name: 'computeBillingOwner'
+        required: true
+        description: |
+          The Compute Billing Owner for this Data Boost App Profile.
+        values:
+          - :HOST_PAYS

@@ -32,6 +32,16 @@ if newRouting != oldRouting {
 		}
 	}
 }
+
+_, hasStandardIsolation := obj["standardIsolation"]
+_, hasDataBoostIsolationReadOnly := obj["dataBoostIsolationReadOnly"]
+if hasStandardIsolation && hasDataBoostIsolationReadOnly {
+    // Due to the "conflicts" both fields should be present only if neither was
+    // previously specified and the user is now manually adding dataBoostIsolationReadOnly.
+    delete(obj, "standardIsolation")
+    updateMask = append(updateMask, "dataBoostIsolationReadOnly")
+}
+
 // updateMask is a URL parameter but not present in the schema, so ReplaceVars
 // won't set it
 url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
