@@ -446,18 +446,22 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
 
     **Note:** The Compute Engine persistent disk CSI Driver is enabled by default on newly created clusters for the following versions: Linux clusters: GKE version 1.18.10-gke.2100 or later, or 1.19.3-gke.2100 or later.
 
-*  `gke_backup_agent_config` -  (Optional).
+* `gke_backup_agent_config` - (Optional).
     The status of the Backup for GKE agent addon. It is disabled by default; Set `enabled = true` to enable.
 
 * `kalm_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
     Configuration for the KALM addon, which manages the lifecycle of k8s. It is disabled by default; Set `enabled = true` to enable.
 
-*  `config_connector_config` -  (Optional).
+* `config_connector_config` - (Optional).
     The status of the ConfigConnector addon. It is disabled by default; Set `enabled = true` to enable.
 
-*  `stateful_ha_config` - (Optional).
+* `stateful_ha_config` - (Optional).
     The status of the Stateful HA addon, which provides automatic configurable failover for stateful applications.
     It is disabled by default for Standard clusters. Set `enabled = true` to enable.
+
+* `parallelstore_csi_driver_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The status of the Parallelstore CSI driver addon,
+    which allows the usage of a Parallelstore instances as volumes.
+    It is disabled by default for Standard clusters; set `enabled = true` to enable.
 
 This example `addons_config` disables two addons:
 
