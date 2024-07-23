@@ -183,3 +183,10 @@ Users will need to check their configuration for any `google_vpc_access_connecto
 resource blocks that contain both fields in a conflicting pair, and remove one of those fields.
 The fields that are removed from the configuration will still have Computed values,
 that are derived from the API.
+
+## Resource: `google_cloud_run_v2_service`
+
+### `liveness_probe` no longer defaults from API
+
+Cloud Run does not provide a default value for liveness probe. Now removing this field
+will remove the liveness probe from the Cloud Run service.
