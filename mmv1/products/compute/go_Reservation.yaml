@@ -146,6 +146,7 @@ properties:
         key_description: |
           The project id/number which is deleting or adding to the project list.
         value_type:
+          name: projectConfig
           type: NestedObject
           properties:
             - name: 'projectId'

@@ -156,16 +156,13 @@ properties:
           description: |
             The status of the connection from the consumer forwarding rule to
             this service attachment.
-  - !ruby/object:Api::Type::ResourceRef
+  - !ruby/object:Api::Type::String
     name: targetService
     required: true
     immutable: true
-    resource: 'ForwardingRule'
-    imports: 'selfLink'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     description: |
-      The URL of a forwarding rule that represents the service identified by
-      this service attachment.
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+      The URL of a service serving the endpoint identified by this service attachment.
   - !ruby/object:Api::Type::Array
     name: 'natSubnets'
     required: true
