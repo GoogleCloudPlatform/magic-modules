@@ -574,6 +574,24 @@ properties:
     description: |
       Disables support for plain TCP connections in the workstation. By default the service supports TCP connections via a websocket relay. Setting this option to true disables that relay, which prevents the usage of services that require plain tcp connections, such as ssh. When enabled, all communication must occur over https or wss.
   - !ruby/object:Api::Type::Array
+    name: 'allowedPorts'
+    description: |
+      A list of ports specifying single ports or ranges of ports that
+      are externally accessible in the workstation.
+      Allowed ports must be one of 22, 80, or within range 1024-65535.
+      If not specified defaults to ports 22, 80, and ports 1024-65535.
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::Integer
+          name: 'first'
+          description: |
+            Starting port number for the current range of ports.
+      properties:
+        - !ruby/object:Api::Type::Integer
+          name: 'last'
+          description: |
+            Ending port number for the current range of ports.  
+  - !ruby/object:Api::Type::Array
     name: 'conditions'
     description: |-
       Status conditions describing the current resource state.
