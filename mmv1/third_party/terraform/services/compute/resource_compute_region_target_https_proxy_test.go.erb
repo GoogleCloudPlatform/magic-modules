@@ -661,6 +661,14 @@ func TestAccComputeRegionTargetHttpsProxy_addServerTlsPolicy_withForwardingRule(
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+      {
+				Config: testAccComputeRegionTargetHttpsProxy_withForwardingRule_withoutServerTlsPolicy(context),
+			},
+			{
+				ResourceName:      "google_compute_region_target_https_proxy.default-https",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
