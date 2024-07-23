@@ -1327,9 +1327,11 @@ func (r Resource) IamImportQualifiersForTest() string {
 		if param == "project" {
 			if i != len(params)-1 {
 				// If the last parameter is project then we want to create a new project to use for the test, so don't default from the environment
-				importQualifiers = append(importQualifiers, "envvar.GetTestProjectFromEnv()")
-			} else {
-				importQualifiers = append(importQualifiers, `context["project_id"]`)
+				if r.IamPolicy.TestProjectName == "" {
+					importQualifiers = append(importQualifiers, "envvar.GetTestProjectFromEnv()")
+				} else {
+					importQualifiers = append(importQualifiers, `context["project_id"]`)
+				}
 			}
 		} else if param == "zone" && r.IamPolicy.SubstituteZoneValue {
 			importQualifiers = append(importQualifiers, "envvar.GetTestZoneFromEnv()")

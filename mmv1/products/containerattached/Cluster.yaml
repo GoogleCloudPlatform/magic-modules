@@ -71,7 +71,7 @@ examples:
     ignore_read_extra:
       - 'deletion_policy'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/containerattached_cluster_diff.go
+  constants: templates/terraform/constants/containerattached_cluster_diff.go.erb
   pre_update: templates/terraform/pre_update/containerattached_update.go.erb
   pre_delete: templates/terraform/pre_delete/container_attached_deletion_policy.go.erb
 virtual_fields:

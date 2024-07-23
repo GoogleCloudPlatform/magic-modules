@@ -15,7 +15,7 @@ func TestAccSecretManagerSecretIam_iamMemberConditionUpdate(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"role":          "roles/secretmanager.secretAccessor",
+		"role": "roles/secretmanager.secretAccessor",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
