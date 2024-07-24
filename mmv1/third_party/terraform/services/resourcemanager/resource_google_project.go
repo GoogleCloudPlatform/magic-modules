@@ -505,11 +505,11 @@ func resourceGoogleProjectDelete(d *schema.ResourceData, meta interface{}) error
 	if err != nil {
 		return err
 	}
-	if d.Get("deletion_protection").(bool) {
-		return fmt.Errorf("cannot destroy project without setting deletion_protection=false and running `terraform apply`")
-	}
 	// Only delete projects if skip_delete isn't set
 	if !d.Get("skip_delete").(bool) {
+		if d.Get("deletion_protection").(bool) {
+			return fmt.Errorf("cannot destroy project without setting deletion_protection=false and running `terraform apply`")
+		}
 		parts := strings.Split(d.Id(), "/")
 		pid := parts[len(parts)-1]
 		if err := transport_tpg.Retry(transport_tpg.RetryOptions{
