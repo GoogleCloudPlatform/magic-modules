@@ -571,23 +571,23 @@ func getType(input interface{}) (bigtable.Type, error) {
 	switch inputType {
 	case "int64Sum":
 		return bigtable.AggregateType{
-			Input:      bigtable.Int64Type,
-			Aggregator: bigtable.SumAggregator,
+			Input:      bigtable.Int64Type{},
+			Aggregator: bigtable.SumAggregator{},
 		}, nil
 	case "int64Min":
 		return bigtable.AggregateType{
-			Input:      bigtable.Int64Type,
-			Aggregator: bigtable.MinAggregator,
+			Input:      bigtable.Int64Type{},
+			Aggregator: bigtable.MinAggregator{},
 		}, nil
 	case "int64Max":
 		return bigtable.AggregateType{
-			Input:      bigtable.Int64Type,
-			Aggregator: bigtable.MaxAggregator,
+			Input:      bigtable.Int64Type{},
+			Aggregator: bigtable.MaxAggregator{},
 		}, nil
 	case "int64Hll":
 		return bigtable.AggregateType{
-			Input:      bigtable.Int64Type,
-			Aggregator: bigtable.HllAggregator,
+			Input:      bigtable.Int64Type{},
+			Aggregator: bigtable.HllAggregator{},
 		}, nil
 	}
 	result := tfType{input: inputType}
