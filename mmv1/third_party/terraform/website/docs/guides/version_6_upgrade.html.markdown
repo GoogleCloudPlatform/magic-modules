@@ -1,7 +1,7 @@
 ---
-page_title: "Terraform Google Provider 6.0.0 Upgrade Guide"
+page_title: "Terraform provider for Google Cloud 6.0.0 Upgrade Guide"
 description: |-
-  Terraform Google Provider 6.0.0 Upgrade Guide
+  Terraform provider for Google Cloud 6.0.0 Upgrade Guide
 ---
 
 # Terraform Google Provider 6.0.0 Upgrade Guide
@@ -113,3 +113,16 @@ Description of the change and how users should adjust their configuration (if ne
 ### `settings.ip_configuration.require_ssl` is now removed
 
 Removed in favor of field `settings.ip_configuration.ssl_mode`.
+
+## Resource: `google_pubsub_topic`
+
+### `schema_settings` no longer has a default value
+
+An empty value means the setting should be cleared.
+
+## Resource: `google_cloud_run_v2_service`
+
+### `liveness_probe` no longer defaults from API
+
+Cloud Run does not provide a default value for liveness probe. Now removing this field
+will remove the liveness probe from the Cloud Run service.

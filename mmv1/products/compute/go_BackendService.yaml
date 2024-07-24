@@ -34,6 +34,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/global/operations/{{op_id}}'
@@ -51,6 +52,7 @@ iam_policy:
   allowed_iam_role: 'roles/compute.admin'
   parent_resource_attribute: 'name'
   iam_conditions_request_type: 'QUERY_PARAM'
+  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
   min_version: 'beta'
 custom_code:
   constants: 'templates/terraform/constants/go/backend_service.go.tmpl'
@@ -150,7 +152,7 @@ properties:
             for an explanation of load balancing modes.
 
             From version 6.0.0 default value will be UTILIZATION to match default GCP value.
-          default_value: UTILIZATION
+          default_value: "UTILIZATION"
           enum_values:
             - 'UTILIZATION'
             - 'RATE'
@@ -771,7 +773,7 @@ properties:
       load balancing cannot be used with the other. For more information, refer to
       [Choosing a load balancer](https://cloud.google.com/load-balancing/docs/backend-service).
     immutable: true
-    default_value: EXTERNAL
+    default_value: "EXTERNAL"
     enum_values:
       - 'EXTERNAL'
       - 'INTERNAL_SELF_MANAGED'
@@ -820,7 +822,6 @@ properties:
                            UNAVAILABLE_WEIGHT. Otherwise, Load Balancing remains
                            equal-weight.
 
-
       This field is applicable to either:
 
       * A regional backend service with the service_protocol set to HTTP, HTTPS, or HTTP2,
@@ -829,7 +830,6 @@ properties:
       * A regional backend service with loadBalancingScheme set to EXTERNAL (External Network
         Load Balancing). Only MAGLEV and WEIGHTED_MAGLEV values are possible for External
         Network Load Balancing. The default is MAGLEV.
-
 
       If session_affinity is not NONE, and this field is not set to MAGLEV, WEIGHTED_MAGLEV,
       or RING_HASH, session affinity settings will not take effect.
@@ -1250,9 +1250,8 @@ properties:
           ClientTlsPolicy is a resource that specifies how a client should authenticate
           connections to backends of a service. This resource itself does not affect
           configuration unless it is attached to a backend service resource.
-        required: true
-        custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
-        resource: 'Region'
+        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+        resource: 'ClientTlsPolicy'
         imports: 'name'
       - name: 'subjectAltNames'
         type: Array
@@ -1260,9 +1259,35 @@ properties:
           A list of alternate names to verify the subject identity in the certificate.
           If specified, the client will verify that the server certificate's subject
           alt name matches one of the specified values.
-        required: true
         item_type:
           type: String
+      - name: 'awsV4Authentication'
+        type: NestedObject
+        description: |
+          The configuration needed to generate a signature for access to private storage buckets that support AWS's Signature Version 4 for authentication.
+          Allowed only for INTERNET_IP_PORT and INTERNET_FQDN_PORT NEG backends.
+        properties:
+          - name: 'accessKeyId'
+            type: String
+            description: |
+              The identifier of an access key used for s3 bucket authentication.
+          - name: 'accessKey'
+            type: String
+            description: |
+              The access key used for s3 bucket authentication.
+              Required for updating or creating a backend that uses AWS v4 signature authentication, but will not be returned as part of the configuration when queried with a REST API GET request.
+            ignore_read: true
+            sensitive: true
+            send_empty_value: true
+          - name: 'accessKeyVersion'
+            type: String
+            description: |
+              The optional version identifier for the access key. You can use this to keep track of different iterations of your access key.
+          - name: 'originRegion'
+            type: String
+            description: |
+              The name of the cloud region of your origin. This is a free-form field with the name of the region your cloud uses to host your origin.
+              For example, "us-east-1" for AWS or "us-ashburn-1" for OCI.
   - name: 'sessionAffinity'
     type: Enum
     description: |

@@ -31,7 +31,7 @@ create_url: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}/setNam
 delete_url: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}/setNamedPorts'
 delete_verb: 'POST'
 immutable: true
-mutex: projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}
+mutex: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}'
 import_format:
   - 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}/{{port}}/{{name}}'
 timeouts:
@@ -39,6 +39,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'

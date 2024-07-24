@@ -1,0 +1,192 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Application'
+description: 'Application is a functional grouping of Services and Workloads that helps achieve a desired end-to-end business functionality.
+  Services and Workloads are owned by the Application.'
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/applications/{{application_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/applications'
+self_link: 'projects/{{project}}/locations/{{location}}/applications/{{application_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/applications?applicationId={{application_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/applications/{{application_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'application_basic'
+    config_path: 'templates/terraform/examples/go/apphub_application_basic.tf.tmpl'
+    primary_resource_id: 'example'
+    vars:
+      application_id: 'example-application'
+  - name: 'application_full'
+    config_path: 'templates/terraform/examples/go/apphub_application_full.tf.tmpl'
+    primary_resource_id: 'example2'
+    vars:
+      application_id: 'example-application'
+      display_name: 'Application Full'
+      description: 'Application for testing'
+      business_name: 'Alice'
+      business_email: 'alice@google.com'
+      developer_name: 'Bob'
+      developer_email: 'bob@google.com'
+      operator_name: 'Charlie'
+      operator_email: 'charlie@google.com'
+parameters:
+  - name: 'location'
+    type: String
+    description: 'Part of `parent`. See documentation of `projectsId`.'
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'applicationId'
+    type: String
+    description: 'Required. The Application identifier.'
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: "Identifier. The resource name of an Application. Format:\n\"projects/{host-project-id}/locations/{location}/applications/{application-id}\""
+    output: true
+  - name: 'displayName'
+    type: String
+    description: 'Optional. User-defined name for the Application.'
+  - name: 'description'
+    type: String
+    description: 'Optional. User-defined description of an Application.'
+  - name: 'attributes'
+    type: NestedObject
+    description: 'Consumer provided attributes.'
+    properties:
+      - name: 'criticality'
+        type: NestedObject
+        description: 'Criticality of the Application, Service, or Workload'
+        properties:
+          - name: 'type'
+            type: Enum
+            description: 'Criticality type.'
+            required: true
+            enum_values:
+              - 'MISSION_CRITICAL'
+              - 'HIGH'
+              - 'MEDIUM'
+              - 'LOW'
+      - name: 'environment'
+        type: NestedObject
+        description: 'Environment of the Application, Service, or Workload'
+        properties:
+          - name: 'type'
+            type: Enum
+            description: 'Environment type.'
+            required: true
+            enum_values:
+              - 'PRODUCTION'
+              - 'STAGING'
+              - 'TEST'
+              - 'DEVELOPMENT'
+      - name: 'developerOwners'
+        type: Array
+        description: 'Optional. Developer team that owns development and coding.'
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'displayName'
+              type: String
+              description: 'Optional. Contact''s name.'
+            - name: 'email'
+              type: String
+              description: 'Required. Email address of the contacts.'
+              required: true
+      - name: 'operatorOwners'
+        type: Array
+        description: 'Optional. Operator team that ensures runtime and operations.'
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'displayName'
+              type: String
+              description: 'Optional. Contact''s name.'
+            - name: 'email'
+              type: String
+              description: 'Required. Email address of the contacts.'
+              required: true
+      - name: 'businessOwners'
+        type: Array
+        description: 'Optional. Business team that ensures user needs are met and value
+          is delivered'
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'displayName'
+              type: String
+              description: 'Optional. Contact''s name.'
+            - name: 'email'
+              type: String
+              description: 'Required. Email address of the contacts.'
+              required: true
+  - name: 'createTime'
+    type: String
+    description: 'Output only. Create time.'
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: 'Output only. Update time.'
+    output: true
+  - name: 'scope'
+    type: NestedObject
+    description: 'Scope of an application.'
+    required: true
+    properties:
+      - name: 'type'
+        type: Enum
+        description: "Required. Scope Type. \n Possible values:\nREGIONAL"
+        required: true
+        enum_values:
+          - 'REGIONAL'
+  - name: 'uid'
+    type: String
+    description: 'Output only. A universally unique identifier (in UUID4 format) for
+      the `Application`.'
+    output: true
+  - name: 'state'
+    type: Enum
+    description: "Output only. Application state. \n Possible values:\n STATE_UNSPECIFIED\nCREATING\nACTIVE\nDELETING"
+    output: true
+    enum_values:
+      - 'STATE_UNSPECIFIED'
+      - 'CREATING'
+      - 'ACTIVE'
+      - 'DELETING'

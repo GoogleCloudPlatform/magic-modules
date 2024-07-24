@@ -15,9 +15,9 @@ import (
 <% end -%>
   "testing"
 
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+  "github.com/hashicorp/terraform-plugin-testing/helper/resource"
 <% unless object.skip_delete -%>
-  "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+  "github.com/hashicorp/terraform-plugin-testing/terraform"
 <% end -%>
 
   "<%= import_path() -%>/acctest"
@@ -67,7 +67,7 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 	context := map[string]interface{} {
 <%= lines(indent(compile(pwd + '/templates/terraform/env_var_context.go.erb'), 4)) -%>
 	<% unless example.test_vars_overrides.nil? -%>
-	<% example.test_vars_overrides.each do |var_name, override| -%>
+	<% example.test_vars_overrides.sort.each do |var_name, override| -%>
 			"<%= var_name %>": <%= override %>,
 	<% end -%>
 	<% end -%>

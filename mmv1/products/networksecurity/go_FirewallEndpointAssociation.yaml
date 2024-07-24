@@ -1,0 +1,133 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'FirewallEndpointAssociation'
+description: |
+  Firewall endpoint association links a firewall endpoint to a VPC network in
+  the same zone. After you define this association, Cloud Firewall forwards the
+  zonal workload traffic in your VPC network that requires layer 7 inspection to
+  the attached firewall endpoint.
+references:
+  guides:
+    'Firewall endpoint overview': 'https://cloud.google.com/firewall/docs/about-firewall-endpoints'
+    'Create and associate firewall endpoints': 'https://cloud.google.com/firewall/docs/configure-firewall-endpoints'
+  api: 'https://cloud.google.com/firewall/docs/reference/network-security/rest/v1/projects.locations.firewallEndpointAssociations#FirewallEndpointAssociation'
+docs:
+base_url: '{{parent}}/locations/{{location}}/firewallEndpointAssociations'
+self_link: '{{parent}}/locations/{{location}}/firewallEndpointAssociations/{{name}}'
+create_url: '{{parent}}/locations/{{location}}/firewallEndpointAssociations?firewallEndpointAssociationId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - '{{%parent}}/locations/{{location}}/firewallEndpointAssociations/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+  include_project: true
+custom_code:
+examples:
+  - name: 'network_security_firewall_endpoint_association_basic'
+    primary_resource_id: 'default'
+    vars:
+      resource_name_prefix: 'my-firewall-endpoint'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      project: 'PROJECT_NAME'
+    skip_test: true
+parameters:
+  - name: 'name'
+    type: String
+    description: |
+      The name of the firewall endpoint association resource.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'location'
+    type: String
+    description: |
+      The location (zone) of the firewall endpoint association.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'parent'
+    type: String
+    description: |
+      The name of the parent this firewall endpoint association belongs to.
+      Format: projects/{project_id}.
+    url_param_only: true
+    immutable: true
+properties:
+  - name: 'firewallEndpoint'
+    type: String
+    description: |
+      The URL of the firewall endpoint that is being associated.
+    required: true
+  - name: 'network'
+    type: String
+    description: |
+      The URL of the network that is being associated.
+    required: true
+  - name: 'tlsInspectionPolicy'
+    type: String
+    description: |
+      The URL of the TlsInspectionPolicy that is being associated.
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      A map of key/value label pairs to assign to the resource.
+    immutable: false
+  - name: 'disabled'
+    type: Boolean
+    description: |
+      Whether the association is disabled. True indicates that traffic will not be intercepted.
+
+      ~> **Note:** The API will reject the request if this value is set to true when creating the resource,
+      otherwise on an update the association can be disabled.
+    default_value: false
+  - name: 'selfLink'
+    type: String
+    description: |
+      Server-defined URL of this resource.
+    output: true
+  - name: 'createTime'
+    type: Time
+    description: Time the firewall endpoint was created in UTC.
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: Time the firewall endpoint was updated in UTC.
+    output: true
+  - name: 'reconciling'
+    type: Boolean
+    description: |
+      Whether reconciling is in progress, recommended per https://google.aip.dev/128.
+    output: true
+  - name: 'state'
+    type: Enum
+    description: The current state of the endpoint.
+    output: true
+    enum_values:
+      - 'ACTIVE'
+      - 'CREATING'
+      - 'DELETING'
+      - 'INACTIVE'

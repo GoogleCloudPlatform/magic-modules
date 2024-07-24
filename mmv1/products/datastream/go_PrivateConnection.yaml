@@ -1,0 +1,139 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'PrivateConnection'
+description: |
+  The PrivateConnection resource is used to establish private connectivity between Datastream and a customer's network.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/datastream/docs/create-a-private-connectivity-configuration'
+  api: 'https://cloud.google.com/datastream/docs/reference/rest/v1/projects.locations.privateConnections'
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/privateConnections'
+self_link: 'projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/privateConnections?privateConnectionId={{private_connection_id}}&force={{create_without_validation}}'
+immutable: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+  constants: 'templates/terraform/constants/go/private_connection.go.tmpl'
+  post_create: 'templates/terraform/post_create/go/private_connection.go.tmpl'
+  post_import: 'templates/terraform/post_import/go/private_connection.go.tmpl'
+skip_sweeper: true
+schema_version: 1
+state_upgraders: true
+examples:
+  - name: 'datastream_private_connection_full'
+    primary_resource_id: 'default'
+    vars:
+      private_connection_id: 'my-connection'
+      network_name: 'my-network'
+parameters:
+  - name: 'privateConnectionId'
+    type: String
+    description: |-
+      The private connectivity identifier.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'create_without_validation'
+    type: Boolean
+    description: |-
+      If set to true, will skip validations.
+    url_param_only: true
+    required: false
+    immutable: true
+    default_value: false
+  - name: 'location'
+    type: String
+    description: |
+      The name of the location this private connection is located in.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: The resource's name.
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: Labels.
+    immutable: false
+  - name: 'displayName'
+    type: String
+    description: Display name.
+    required: true
+  - name: 'state'
+    type: Enum
+    description: |
+      State of the PrivateConnection.
+    output: true
+    enum_values:
+      - 'CREATING'
+      - 'CREATED'
+      - 'FAILED'
+      - 'DELETING'
+      - 'FAILED_TO_DELETE'
+  - name: 'error'
+    type: NestedObject
+    description: |
+      The PrivateConnection error in case of failure.
+    output: true
+    properties:
+      - name: 'message'
+        type: String
+        description: |
+          A message containing more information about the error that occurred.
+      - name: 'details'
+        type: KeyValuePairs
+        description: |
+          A list of messages that carry the error details.
+  - name: 'vpcPeeringConfig'
+    type: NestedObject
+    description: |
+      The VPC Peering configuration is used to create VPC peering
+      between Datastream and the consumer's VPC.
+    required: true
+    properties:
+      - name: 'vpc'
+        type: String
+        description: |
+          Fully qualified name of the VPC that Datastream will peer to.
+          Format: projects/{project}/global/{networks}/{name}
+        required: true
+      - name: 'subnet'
+        type: String
+        description: |
+          A free subnet for peering. (CIDR of /29)
+        required: true

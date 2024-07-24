@@ -8,8 +8,8 @@ import (
 
   "github.com/hashicorp/terraform-provider-google/google/tpgresource"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 <% if version == "ga" -%>
 	"google.golang.org/api/compute/v1"
 <% else -%>
@@ -226,6 +226,7 @@ resource "google_compute_target_https_proxy" "foobar" {
     google_compute_ssl_certificate.foobar2.self_link,
   ]
   quic_override = "ENABLE"
+  tls_early_data = "STRICT"
 }
 
 resource "google_compute_backend_service" "foobar" {

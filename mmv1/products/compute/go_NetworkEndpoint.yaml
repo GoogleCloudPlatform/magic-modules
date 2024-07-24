@@ -38,12 +38,13 @@ read_verb: 'POST'
 delete_url: 'projects/{{project}}/zones/{{zone}}/networkEndpointGroups/{{network_endpoint_group}}/detachNetworkEndpoints'
 delete_verb: 'POST'
 immutable: true
-mutex: networkEndpoint/{{project}}/{{zone}}/{{network_endpoint_group}}
+mutex: 'networkEndpoint/{{project}}/{{zone}}/{{network_endpoint_group}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'

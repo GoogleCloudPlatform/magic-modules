@@ -1,0 +1,47 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Lake'
+description: |
+  Only used to generate IAM resources
+exclude_resource: true
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/lakes/{{name}}'
+self_link: 'projects/{{project}}/locations/{{location}}/lakes/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_attribute: 'lake'
+  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/lakes/{{name}}'
+    - '{{name}}'
+custom_code:
+examples:
+  - name: 'dataplex_lake_primary'
+    primary_resource_id: 'example'
+    primary_resource_name: 'fmt.Sprintf("tf-test-lake%s", context["random_suffix"])'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+parameters:
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      Dummy property.
+    output: true

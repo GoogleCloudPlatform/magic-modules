@@ -1,0 +1,655 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'DiscoveryConfig'
+description: |
+  Configuration for discovery to scan resources for profile generation. Only one discovery configuration may exist per organization, folder, or project.
+references:
+  guides:
+    'Schedule inspection scan': 'https://cloud.google.com/dlp/docs/schedule-inspection-scan'
+  api: 'https://cloud.google.com/dlp/docs/reference/rest/v2/projects.locations.discoveryConfigs'
+docs:
+id_format: '{{parent}}/discoveryConfigs/{{name}}'
+base_url: '{{parent}}/discoveryConfigs'
+self_link: '{{parent}}/discoveryConfigs/{{name}}'
+create_url: '{{parent}}/discoveryConfigs'
+update_verb: 'PATCH'
+update_mask: true
+delete_url: '{{parent}}/discoveryConfigs/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  encoder: 'templates/terraform/encoders/go/wrap_object.go.tmpl'
+  update_encoder: 'templates/terraform/encoders/go/wrap_object.go.tmpl'
+  decoder: 'templates/terraform/decoders/go/unwrap_resource.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/go/dlp_import.go.tmpl'
+examples:
+  - name: 'dlp_discovery_config_basic'
+    primary_resource_id: 'basic'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+      location: 'REGION'
+    skip_test: true
+  - name: 'dlp_discovery_config_actions'
+    primary_resource_id: 'actions'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+    skip_test: true
+  - name: 'dlp_discovery_config_org_running'
+    primary_resource_id: 'org_running'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+      organization: 'ORG_ID'
+    skip_test: true
+  - name: 'dlp_discovery_config_org_folder_paused'
+    primary_resource_id: 'org_folder_paused'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+      organization: 'ORG_ID'
+  - name: 'dlp_discovery_config_conditions_cadence'
+    primary_resource_id: 'conditions_cadence'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+    skip_test: true
+  - name: 'dlp_discovery_config_filter_regexes_and_conditions'
+    primary_resource_id: 'filter_regexes_and_conditions'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+    skip_test: true
+  - name: 'dlp_discovery_config_cloud_sql'
+    primary_resource_id: 'cloud_sql'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+    skip_test: true
+  - name: 'dlp_discovery_config_cloud_storage'
+    primary_resource_id: 'cloud_storage'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+    skip_test: true
+parameters:
+  - name: 'parent'
+    type: String
+    description: |
+      The parent of the discovery config in any of the following formats:
+
+      * `projects/{{project}}/locations/{{location}}`
+      * `organizations/{{organization_id}}/locations/{{location}}`
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'location'
+    type: String
+    description: |
+      Location to create the discovery config in.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: Unique resource name for the DiscoveryConfig, assigned by the service when the DiscoveryConfig is created.
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+  - name: 'displayName'
+    type: String
+    description: Display Name (max 1000 Chars)
+  - name: 'orgConfig'
+    type: NestedObject
+    properties:
+      - name: 'projectId'
+        type: String
+        description: The project that will run the scan. The DLP service account that exists within this project must have access to all resources that are profiled, and the cloud DLP API must be enabled.
+      - name: 'location'
+        type: NestedObject
+        description: The data to scan folder org or project
+        properties:
+          - name: 'organizationId'
+            type: String
+            description: The ID of an organization to scan
+          - name: 'folderId'
+            type: String
+            description: The ID for the folder within an organization to scan
+  - name: 'inspectTemplates'
+    type: Array
+    description: Detection logic for profile generation
+    item_type:
+      type: String
+  - name: 'actions'
+    type: Array
+    description: Actions to execute at the completion of scanning
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'exportData'
+          type: NestedObject
+          description: Export data profiles into a provided location
+          properties:
+            - name: 'profileTable'
+              type: NestedObject
+              description: Store all table and column profiles in an existing table or a new table in an existing dataset. Each re-generation will result in a new row in BigQuery
+              properties:
+                - name: 'projectId'
+                  type: String
+                  description: The Google Cloud Platform project ID of the project containing the table. If omitted, the project ID is inferred from the API call.
+                - name: 'datasetId'
+                  type: String
+                  description: Dataset Id of the table
+                - name: 'tableId'
+                  type: String
+                  description: Name of the table
+        - name: 'pubSubNotification'
+          type: NestedObject
+          description: Publish a message into the Pub/Sub topic.
+          properties:
+            - name: 'topic'
+              type: String
+              description: Cloud Pub/Sub topic to send notifications to. Format is projects/{project}/topics/{topic}.
+            - name: 'event'
+              type: Enum
+              description: The type of event that triggers a Pub/Sub. At most one PubSubNotification per EventType is permitted.
+              enum_values:
+                - 'NEW_PROFILE'
+                - 'CHANGED_PROFILE'
+                - 'SCORE_INCREASED'
+                - 'ERROR_CHANGED'
+            - name: 'pubsubCondition'
+              type: NestedObject
+              description: Conditions for triggering pubsub
+              properties:
+                - name: 'expressions'
+                  type: NestedObject
+                  description: An expression
+                  properties:
+                    - name: 'logicalOperator'
+                      type: Enum
+                      description: The operator to apply to the collection of conditions
+                      enum_values:
+                        - 'OR'
+                        - 'AND'
+                    - name: 'conditions'
+                      type: Array
+                      description: Conditions to apply to the expression
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: 'minimumRiskScore'
+                            type: Enum
+                            description: The minimum data risk score that triggers the condition.
+                            enum_values:
+                              - 'HIGH'
+                              - 'MEDIUM_OR_HIGH'
+                          - name: 'minimumSensitivityScore'
+                            type: Enum
+                            description: The minimum sensitivity level that triggers the condition.
+                            enum_values:
+                              - 'HIGH'
+                              - 'MEDIUM_OR_HIGH'
+            - name: 'detailOfMessage'
+              type: Enum
+              description: How much data to include in the pub/sub message.
+              enum_values:
+                - 'TABLE_PROFILE'
+                - 'RESOURCE_NAME'
+  - name: 'targets'
+    type: Array
+    description: Target to match against for determining what to scan and how frequently
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'bigQueryTarget'
+          type: NestedObject
+          description: BigQuery target for Discovery. The first target to match a table will be the one applied.
+          properties:
+            - name: 'filter'
+              type: NestedObject
+              description: Required. The tables the discovery cadence applies to. The first target with a matching filter will be the one to apply to a table
+              properties:
+                - name: 'tables'
+                  type: NestedObject
+                  description: A specific set of tables for this filter to apply to. A table collection must be specified in only one filter per config.
+                  properties:
+                    - name: 'includeRegexes'
+                      type: NestedObject
+                      description: A collection of regular expressions to match a BQ table against.
+                      properties:
+                        - name: 'patterns'
+                          type: Array
+                          description: A single BigQuery regular expression pattern to match against one or more tables, datasets, or projects that contain BigQuery tables.
+                          item_type:
+                            type: NestedObject
+                            properties:
+                              - name: 'projectIdRegex'
+                                type: String
+                                description: For organizations, if unset, will match all projects. Has no effect for data profile configurations created within a project.
+                              - name: 'datasetIdRegex'
+                                type: String
+                                description: if unset, this property matches all datasets
+                              - name: 'tableIdRegex'
+                                type: String
+                                description: if unset, this property matches all tables
+                - name: 'otherTables'
+                  type: NestedObject
+                  description: Catch-all. This should always be the last filter in the list because anything above it will apply first.
+                  send_empty_value: true
+                  allow_empty_object: true
+                  properties:
+                    []
+                - name: 'tableReference'
+                  type: NestedObject
+                  description: The table to scan. Discovery configurations including this can only include one DiscoveryTarget (the DiscoveryTarget with this TableReference).
+                  properties:
+                    - name: 'datasetId'
+                      type: String
+                      description: Dataset ID of the table.
+                      required: true
+                    - name: 'tableId'
+                      type: String
+                      description: Name of the table.
+                      required: true
+            - name: 'conditions'
+              type: NestedObject
+              description: In addition to matching the filter, these conditions must be true before a profile is generated
+              properties:
+                - name: 'createdAfter'
+                  type: String
+                  description: A timestamp in RFC3339 UTC "Zulu" format with nanosecond resolution and upto nine fractional digits.
+                - name: 'orConditions'
+                  type: NestedObject
+                  description: At least one of the conditions must be true for a table to be scanned.
+                  properties:
+                    - name: 'minAge'
+                      type: String
+                      description: Duration format. The minimum age a table must have before Cloud DLP can profile it. Value greater than 1.
+                    - name: 'minRowCount'
+                      type: Integer
+                      description: Minimum number of rows that should be present before Cloud DLP profiles as a table.
+                - name: 'types'
+                  type: NestedObject
+                  description: Restrict discovery to specific table type
+                  properties:
+                    - name: 'types'
+                      type: Array
+                      description: A set of BiqQuery table types
+                      item_type:
+                        type: Enum
+                        description: |
+                          This field only has a name and description because of MM
+                          limitations. It should not appear in downstreams.
+                        enum_values:
+                          - 'BIG_QUERY_TABLE_TYPE_TABLE'
+                          - 'BIG_QUERY_TABLE_TYPE_EXTERNAL_BIG_LAKE'
+                - name: 'typeCollection'
+                  type: Enum
+                  description: Restrict discovery to categories of table types. Currently view, materialized view, snapshot and non-biglake external tables are supported.
+                  enum_values:
+                    - 'BIG_QUERY_COLLECTION_ALL_TYPES'
+                    - 'BIG_QUERY_COLLECTION_ONLY_SUPPORTED_TYPES'
+            - name: 'cadence'
+              type: NestedObject
+              description: How often and when to update profiles. New tables that match both the fiter and conditions are scanned as quickly as possible depending on system capacity.
+              properties:
+                - name: 'schemaModifiedCadence'
+                  type: NestedObject
+                  description: Governs when to update data profiles when a schema is modified
+                  properties:
+                    - name: 'types'
+                      type: Array
+                      description: The type of events to consider when deciding if the table's schema has been modified and should have the profile updated. Defaults to NEW_COLUMN.
+                      item_type:
+                        type: Enum
+                        description: |
+                          This field only has a name and description because of MM
+                          limitations. It should not appear in downstreams.
+                        enum_values:
+                          - 'SCHEMA_NEW_COLUMNS'
+                          - 'SCHEMA_REMOVED_COLUMNS'
+                    - name: 'frequency'
+                      type: Enum
+                      description: How frequently profiles may be updated when schemas are modified. Default to monthly
+                      enum_values:
+                        - 'UPDATE_FREQUENCY_NEVER'
+                        - 'UPDATE_FREQUENCY_DAILY'
+                        - 'UPDATE_FREQUENCY_MONTHLY'
+                - name: 'tableModifiedCadence'
+                  type: NestedObject
+                  description: Governs when to update profile when a table is modified.
+                  properties:
+                    - name: 'types'
+                      type: Array
+                      description: 'The type of events to consider when deciding if the table has been modified and should have the profile updated. Defaults to MODIFIED_TIMESTAMP'
+                      item_type:
+                        type: Enum
+                        description: |
+                          This field only has a name and description because of MM
+                          limitations. It should not appear in downstreams.
+                        enum_values:
+                          - 'TABLE_MODIFIED_TIMESTAMP'
+                    - name: 'frequency'
+                      type: Enum
+                      description: 'How frequently data profiles can be updated when tables are modified. Defaults to never.'
+                      enum_values:
+                        - 'UPDATE_FREQUENCY_NEVER'
+                        - 'UPDATE_FREQUENCY_DAILY'
+                        - 'UPDATE_FREQUENCY_MONTHLY'
+            - name: 'disabled'
+              type: NestedObject
+              description: 'Tables that match this filter will not have profiles created.'
+              send_empty_value: true
+              allow_empty_object: true
+              properties:
+                []
+        - name: 'cloudSqlTarget'
+          type: NestedObject
+          description: 'Cloud SQL target for Discovery. The first target to match a table will be the one applied.'
+          properties:
+            - name: 'filter'
+              type: NestedObject
+              description: 'Required. The tables the discovery cadence applies to. The first target with a matching filter will be the one to apply to a table.'
+              required: true
+              properties:
+                - name: 'collection'
+                  type: NestedObject
+                  description: 'A specific set of database resources for this filter to apply to.'
+                  properties:
+                    - name: 'includeRegexes'
+                      type: NestedObject
+                      description: 'A collection of regular expressions to match a database resource against.'
+                      properties:
+                        - name: 'patterns'
+                          type: Array
+                          description: A group of regular expression patterns to match against one or more database resources. Maximum of 100 entries. The sum of all regular expressions' length can't exceed 10 KiB.
+                          item_type:
+                            type: NestedObject
+                            properties:
+                              - name: 'projectIdRegex'
+                                type: String
+                                description: For organizations, if unset, will match all projects. Has no effect for data profile configurations created within a project.
+                              - name: 'instanceRegex'
+                                type: String
+                                description: Regex to test the instance name against. If empty, all instances match.
+                              - name: 'databaseRegex'
+                                type: String
+                                description: Regex to test the database name against. If empty, all databases match.
+                              - name: 'databaseResourceNameRegex'
+                                type: String
+                                description: Regex to test the database resource's name against. An example of a database resource name is a table's name. Other database resource names like view names could be included in the future. If empty, all database resources match.'
+                - name: 'others'
+                  type: NestedObject
+                  description: 'Catch-all. This should always be the last target in the list because anything above it will apply first. Should only appear once in a configuration. If none is specified, a default one will be added automatically.'
+                  send_empty_value: true
+                  allow_empty_object: true
+                  properties:
+                    []
+                - name: 'databaseResourceReference'
+                  type: NestedObject
+                  description: The database resource to scan. Targets including this can only include one target (the target with this database resource reference).
+                  properties:
+                    - name: 'projectId'
+                      type: String
+                      description: Required. If within a project-level config, then this must match the config's project ID.
+                      required: true
+                    - name: 'instance'
+                      type: String
+                      description: 'Required. The instance where this resource is located. For example: Cloud SQL instance ID.'
+                      required: true
+                    - name: 'database'
+                      type: String
+                      description: Required. Name of a database within the instance.
+                      required: true
+                    - name: 'databaseResource'
+                      type: String
+                      description: Required. Name of a database resource, for example, a table within the database.
+                      required: true
+            - name: 'conditions'
+              type: NestedObject
+              description: 'In addition to matching the filter, these conditions must be true before a profile is generated.'
+              properties:
+                - name: 'databaseEngines'
+                  type: Array
+                  description: Database engines that should be profiled. Optional. Defaults to ALL_SUPPORTED_DATABASE_ENGINES if unspecified.
+                  item_type:
+                    type: Enum
+                    description: |
+                      This field only has a name and description because of MM
+                      limitations. It should not appear in downstreams.
+                    enum_values:
+                      - 'ALL_SUPPORTED_DATABASE_ENGINES'
+                      - 'MYSQL'
+                      - 'POSTGRES'
+                - name: 'types'
+                  type: Array
+                  description: 'Data profiles will only be generated for the database resource types specified in this field. If not specified, defaults to [DATABASE_RESOURCE_TYPE_ALL_SUPPORTED_TYPES].'
+                  item_type:
+                    type: Enum
+                    description: |
+                      This field only has a name and description because of MM
+                      limitations. It should not appear in downstreams.
+                    enum_values:
+                      - 'DATABASE_RESOURCE_TYPE_ALL_SUPPORTED_TYPES'
+                      - 'DATABASE_RESOURCE_TYPE_TABLE'
+            - name: 'generationCadence'
+              type: NestedObject
+              description: How often and when to update profiles. New tables that match both the filter and conditions are scanned as quickly as possible depending on system capacity.
+              properties:
+                - name: 'schemaModifiedCadence'
+                  type: NestedObject
+                  description: Governs when to update data profiles when a schema is modified
+                  properties:
+                    - name: 'types'
+                      type: Array
+                      description: The types of schema modifications to consider. Defaults to NEW_COLUMNS.
+                      item_type:
+                        type: Enum
+                        description: |
+                          This field only has a name and description because of MM
+                          limitations. It should not appear in downstreams.
+                        enum_values:
+                          - 'NEW_COLUMNS'
+                          - 'REMOVED_COLUMNS'
+                    - name: 'frequency'
+                      type: Enum
+                      description: Frequency to regenerate data profiles when the schema is modified. Defaults to monthly.
+                      enum_values:
+                        - 'UPDATE_FREQUENCY_NEVER'
+                        - 'UPDATE_FREQUENCY_DAILY'
+                        - 'UPDATE_FREQUENCY_MONTHLY'
+                - name: 'refreshFrequency'
+                  type: Enum
+                  description: Data changes (non-schema changes) in Cloud SQL tables can't trigger reprofiling. If you set this field, profiles are refreshed at this frequency regardless of whether the underlying tables have changes. Defaults to never.
+                  enum_values:
+                    - 'UPDATE_FREQUENCY_NEVER'
+                    - 'UPDATE_FREQUENCY_DAILY'
+                    - 'UPDATE_FREQUENCY_MONTHLY'
+            - name: 'disabled'
+              type: NestedObject
+              description: 'Disable profiling for database resources that match this filter.'
+              send_empty_value: true
+              allow_empty_object: true
+              properties:
+                []
+        - name: 'secretsTarget'
+          type: NestedObject
+          description: Discovery target that looks for credentials and secrets stored in cloud resource metadata and reports them as vulnerabilities to Security Command Center. Only one target of this type is allowed.
+          send_empty_value: true
+          allow_empty_object: true
+          properties:
+            []
+        - name: 'cloudStorageTarget'
+          type: NestedObject
+          description: Cloud Storage target for Discovery. The first target to match a bucket will be the one applied.
+          properties:
+            - name: 'filter'
+              type: NestedObject
+              description: The buckets the generation_cadence applies to. The first target with a matching filter will be the one to apply to a bucket.
+              required: true
+              properties:
+                - name: 'collection'
+                  type: NestedObject
+                  description: A specific set of buckets for this filter to apply to.
+                  properties:
+                    - name: 'includeRegexes'
+                      type: NestedObject
+                      description: A collection of regular expressions to match a file store against.
+                      properties:
+                        - name: 'patterns'
+                          type: Array
+                          description: The group of regular expression patterns to match against one or more file stores. Maximum of 100 entries. The sum of all lengths of regular expressions can't exceed 10 KiB.
+                          item_type:
+                            type: NestedObject
+                            properties:
+                              - name: 'cloudStorageRegex'
+                                type: NestedObject
+                                description: Regex for Cloud Storage.
+                                properties:
+                                  - name: 'projectIdRegex'
+                                    type: String
+                                    description: For organizations, if unset, will match all projects.
+                                  - name: 'bucketNameRegex'
+                                    type: String
+                                    description: 'Regex to test the bucket name against. If empty, all buckets match. Example: "marketing2021" or "(marketing)\d{4}" will both match the bucket gs://marketing2021'
+                - name: 'cloudStorageResourceReference'
+                  type: NestedObject
+                  description: The bucket to scan. Targets including this can only include one target (the target with this bucket). This enables profiling the contents of a single bucket, while the other options allow for easy profiling of many buckets within a project or an organization.
+                  properties:
+                    - name: 'bucketName'
+                      type: String
+                      description: The bucket to scan.
+                    - name: 'projectId'
+                      type: String
+                      description: If within a project-level config, then this must match the config's project id.
+                - name: 'others'
+                  type: NestedObject
+                  description: Match discovery resources not covered by any other filter.
+                  send_empty_value: true
+                  allow_empty_object: true
+                  properties:
+                    []
+            - name: 'conditions'
+              type: NestedObject
+              description: In addition to matching the filter, these conditions must be true before a profile is generated.
+              properties:
+                - name: 'createdAfter'
+                  type: String
+                  description: File store must have been created after this date. Used to avoid backfilling. A timestamp in RFC3339 UTC "Zulu" format with nanosecond resolution and upto nine fractional digits.
+                - name: 'minAge'
+                  type: String
+                  description: Duration format. Minimum age a file store must have. If set, the value must be 1 hour or greater.
+                - name: 'cloudStorageConditions'
+                  type: NestedObject
+                  description: Cloud Storage conditions.
+                  properties:
+                    - name: 'includedObjectAttributes'
+                      type: Array
+                      description: Only objects with the specified attributes will be scanned. If an object has one of the specified attributes but is inside an excluded bucket, it will not be scanned. Defaults to [ALL_SUPPORTED_OBJECTS]. A profile will be created even if no objects match the included_object_attributes.
+                      item_type:
+                        type: Enum
+                        description: |
+                          This field only has a name and description because of MM
+                          limitations. It should not appear in downstreams.
+                        enum_values:
+                          - 'ALL_SUPPORTED_OBJECTS'
+                          - 'STANDARD'
+                          - 'NEARLINE'
+                          - 'COLDLINE'
+                          - 'ARCHIVE'
+                          - 'REGIONAL'
+                          - 'MULTI_REGIONAL'
+                          - 'DURABLE_REDUCED_AVAILABILITY'
+                    - name: 'includedBucketAttributes'
+                      type: Array
+                      description: Only objects with the specified attributes will be scanned. Defaults to [ALL_SUPPORTED_BUCKETS] if unset.
+                      item_type:
+                        type: Enum
+                        description: |
+                          This field only has a name and description because of MM
+                          limitations. It should not appear in downstreams.
+                        enum_values:
+                          - 'ALL_SUPPORTED_BUCKETS'
+                          - 'AUTOCLASS_DISABLED'
+                          - 'AUTOCLASS_ENABLED'
+            - name: 'generationCadence'
+              type: NestedObject
+              description: How often and when to update profiles. New buckets that match both the filter and conditions are scanned as quickly as possible depending on system capacity.
+              properties:
+                - name: 'refreshFrequency'
+                  type: Enum
+                  description: Data changes in Cloud Storage can't trigger reprofiling. If you set this field, profiles are refreshed at this frequency regardless of whether the underlying buckets have changes. Defaults to never.
+                  enum_values:
+                    - 'UPDATE_FREQUENCY_NEVER'
+                    - 'UPDATE_FREQUENCY_DAILY'
+                    - 'UPDATE_FREQUENCY_MONTHLY'
+                - name: 'inspectTemplateModifiedCadence'
+                  type: NestedObject
+                  description: Governs when to update data profiles when the inspection rules defined by the `InspectTemplate` change. If not set, changing the template will not cause a data profile to update.
+                  properties:
+                    - name: 'frequency'
+                      type: Enum
+                      description: How frequently data profiles can be updated when the template is modified. Defaults to never.
+                      enum_values:
+                        - 'UPDATE_FREQUENCY_NEVER'
+                        - 'UPDATE_FREQUENCY_DAILY'
+                        - 'UPDATE_FREQUENCY_MONTHLY'
+            - name: 'disabled'
+              type: NestedObject
+              description: Disable profiling for buckets that match this filter.
+              send_empty_value: true
+              allow_empty_object: true
+              properties:
+                []
+  - name: 'errors'
+    type: Array
+    description: Output only. A stream of errors encountered when the config was activated. Repeated errors may result in the config automatically being paused. Output only field. Will return the last 100 errors. Whenever the config is modified this list will be cleared.
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'details'
+          type: NestedObject
+          description: Detailed error codes and messages.
+          properties:
+            - name: 'code'
+              type: Integer
+              description: The status code, which should be an enum value of google.rpc.Code.
+            - name: 'message'
+              type: String
+              description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the google.rpc.Status.details field, or localized by the client.
+            - name: 'details'
+              type: Array
+              description: A list of messages that carry the error details.
+              item_type:
+                type: KeyValuePairs
+        - name: 'timestamp'
+          type: String
+          description: The times the error occurred. List includes the oldest timestamp and the last 9 timestamps.
+  - name: 'createTime'
+    type: String
+    description: Output only. The creation timestamp of a DiscoveryConfig.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: Output only. The last update timestamp of a DiscoveryConfig.
+    output: true
+  - name: 'lastRunTime'
+    type: String
+    description: Output only. The timestamp of the last time this config was executed
+    output: true
+  - name: 'status'
+    type: Enum
+    description: Required. A status for this configuration
+    enum_values:
+      - 'RUNNING'
+      - 'PAUSED'

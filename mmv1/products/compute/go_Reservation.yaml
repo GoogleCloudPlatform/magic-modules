@@ -38,6 +38,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
@@ -132,6 +133,7 @@ properties:
         type: Enum
         description: |
           Type of sharing for this shared-reservation
+        immutable: true
         default_from_api: true
         enum_values:
           - 'LOCAL'
@@ -144,6 +146,7 @@ properties:
         key_description: |
           The project id/number which is deleting or adding to the project list.
         value_type:
+          name: projectConfig
           type: NestedObject
           properties:
             - name: 'projectId'
@@ -231,7 +234,7 @@ properties:
                   description: |
                     The disk interface to use for attaching this disk.
                   immutable: true
-                  default_value: SCSI
+                  default_value: "SCSI"
                   enum_values:
                     - 'SCSI'
                     - 'NVME'
