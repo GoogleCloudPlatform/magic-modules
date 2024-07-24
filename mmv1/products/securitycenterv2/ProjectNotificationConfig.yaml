@@ -18,6 +18,8 @@ self_link: '{{name}}'
 create_url: projects/{{projectId}}/locations/{location}/notificationConfigs?configId={{config_id}}
 update_verb: :PATCH
 update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/notificationConfigs/{{config_id}}'
 description: |
   A Cloud Security Command Center (Cloud SCC) notification configs. A
   notification config is a Cloud SCC resource that contains the

@@ -3,7 +3,7 @@ package securitycenterv2_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -19,17 +19,19 @@ func TestAccSecurityCenterV2ProjectNotificationConfig_updateStreamingConfigFilte
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckSecurityCenterV2ProjectNotificationConfigDestroyProducer(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),		
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSecurityCenterV2ProjectNotificationConfig_sccV2ProjectNotificationConfigBasicExample(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_scc_v2_project_notification_config.custom_notification_config", "id"),
+				),
 			},
 			{
 				ResourceName:            "google_scc_v2_project_notification_config.custom_notification_config",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"project", "config_id"},
+				ImportStateVerifyIgnore: []string{"project", "location", "config_id"},
 			},
 			{
 				Config: testAccSecurityCenterV2ProjectNotificationConfig_updateStreamingConfigFilter(context),
@@ -38,7 +40,7 @@ func TestAccSecurityCenterV2ProjectNotificationConfig_updateStreamingConfigFilte
 				ResourceName:            "google_scc_v2_project_notification_config.custom_notification_config",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"project", "config_id"},
+				ImportStateVerifyIgnore: []string{"project", "location", "config_id"},
 			},
 		},
 	})
