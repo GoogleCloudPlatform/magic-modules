@@ -73,5 +73,5 @@ resource "google_compute_network" "network1" {
 data "google_compute_ha_vpn_gateway" "ha_gateway" {
   name = google_compute_ha_vpn_gateway.ha_gateway.name
 }
-`, gwName, gateway_ip_version, stack_type, gwName)
+`, gwName, gatewayIpVersion, stackType, gwName)
 }
