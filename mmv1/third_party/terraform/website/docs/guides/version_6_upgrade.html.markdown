@@ -119,3 +119,16 @@ Removed in favor of field `settings.ip_configuration.ssl_mode`.
 ### `schema_settings` no longer has a default value
 
 An empty value means the setting should be cleared.
+
+## Resource: `google_project`
+
+### Project deletion now prevented by default with `deletion_protection`
+
+The field `deletion_protection` has been added with a default value of `true`. This field prevents
+Terraform from destroying or recreating the project. In 6.0.0, existing projects will have 
+`deletion_protection` set to `true` during the next refresh unless otherwise set in configuration.
+
+**`deletion_protection` does NOT prevent deletion outside of Terraform.**
+
+To disable deletion protection, explicitly set this field to `false` in configuration
+and then run `terraform apply` to apply the change.
