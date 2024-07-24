@@ -1002,6 +1002,26 @@ properties:
             default_from_api: true
             validation: !ruby/object:Provider::Terraform::Validation
               function: 'validation.IntAtLeast(0)'
+          - !ruby/object:Api::Type::NestedObject
+            name: 'transactionLogs'
+            allow_empty_object: true
+            send_empty_value: true
+            exactly_one_of:
+              - source_config.0.sql_server_source_config.transaction_logs
+              - source_config.0.sql_server_source_config.change_tables
+            description: |
+              CDC reader reads from change tables.
+            properties: []
+          - !ruby/object:Api::Type::NestedObject
+            name: 'changeTables'
+            allow_empty_object: true
+            send_empty_value: true
+            exactly_one_of:
+              - source_config.0.sql_server_source_config.transaction_logs
+              - source_config.0.sql_server_source_config.change_tables
+            description: |
+              CDC reader reads from change tables.
+            properties: []
   - !ruby/object:Api::Type::NestedObject
     name: 'destinationConfig'
     required: true
