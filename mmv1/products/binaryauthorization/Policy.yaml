@@ -87,6 +87,31 @@ properties:
       A location is either a compute zone (e.g. `us-central1-a`) or a region
       (e.g. `us-central1`).
     key_name: cluster
+    is_set: true
+    set_hash_func: |-
+      func(v interface{}) int {
+        // require_attestations_by is a set of strings that can have the format
+        // projects/{project}/attestors/{attestor} or {attestor}. We diffsuppress
+        // and hash that set on the name, but now we need to make sure that the
+        // overall hash here respects that so changing the attestor format doesn't
+        // change the hash code of cluster_admission_rules.
+        raw := v.(map[string]interface{})
+
+        // modifying raw actually modifies the values passed to the provider.
+        // Use a copy to avoid that.
+        copy := make((map[string]interface{}))
+        for key, value := range raw {
+          copy[key] = value
+        }
+        at := copy["require_attestations_by"].(*schema.Set)
+        if at != nil {
+          t := tpgresource.ConvertAndMapStringArr(at.List(), tpgresource.GetResourceNameFromSelfLink)
+          copy["require_attestations_by"] = schema.NewSet(tpgresource.SelfLinkNameHash, tpgresource.ConvertStringArrToInterface(t))
+        }
+        var buf bytes.Buffer
+        schema.SerializeResourceForHash(&buf, copy, ResourceBinaryAuthorizationPolicy().Schema["cluster_admission_rules"].Elem.(*schema.Resource))
+        return tpgresource.Hashcode(buf.String())
+      }
     value_type: !ruby/object:Api::Type::NestedObject
       name: clusterAdmissionRule
       properties:
@@ -123,31 +148,6 @@ properties:
           values:
             - :ENFORCED_BLOCK_AND_AUDIT_LOG
             - :DRYRUN_AUDIT_LOG_ONLY
-    is_set: true
-    set_hash_func: |-
-      func(v interface{}) int {
-        // require_attestations_by is a set of strings that can have the format
-        // projects/{project}/attestors/{attestor} or {attestor}. We diffsuppress
-        // and hash that set on the name, but now we need to make sure that the
-        // overall hash here respects that so changing the attestor format doesn't
-        // change the hash code of cluster_admission_rules.
-        raw := v.(map[string]interface{})
-
-        // modifying raw actually modifies the values passed to the provider.
-        // Use a copy to avoid that.
-        copy := make((map[string]interface{}))
-        for key, value := range raw {
-          copy[key] = value
-        }
-        at := copy["require_attestations_by"].(*schema.Set)
-        if at != nil {
-          t := tpgresource.ConvertAndMapStringArr(at.List(), tpgresource.GetResourceNameFromSelfLink)
-          copy["require_attestations_by"] = schema.NewSet(tpgresource.SelfLinkNameHash, tpgresource.ConvertStringArrToInterface(t))
-        }
-        var buf bytes.Buffer
-        schema.SerializeResourceForHash(&buf, copy, ResourceBinaryAuthorizationPolicy().Schema["cluster_admission_rules"].Elem.(*schema.Resource))
-        return tpgresource.Hashcode(buf.String())
-      }
   - !ruby/object:Api::Type::NestedObject
     name: defaultAdmissionRule
     description: |

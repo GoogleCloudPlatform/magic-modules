@@ -52,6 +52,7 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'env_id'
   base_url: '{{org_id}}/environments/{{name}}'
+  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
   self_link: '{{org_id}}/environments/{{name}}'
   import_format:
     - '{{%org_id}}/environments/{{name}}'

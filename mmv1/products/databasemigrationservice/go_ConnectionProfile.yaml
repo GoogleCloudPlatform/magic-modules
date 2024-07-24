@@ -1,0 +1,758 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'ConnectionProfile'
+description: 'A connection profile definition.'
+references:
+  guides:
+    'Database Migration': 'https://cloud.google.com/database-migration/docs/'
+  api: 'https://cloud.google.com/database-migration/docs/reference/rest/v1/projects.locations.connectionProfiles/create'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/connectionProfiles'
+self_link: 'projects/{{project}}/locations/{{location}}/connectionProfiles/{{connection_profile_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/connectionProfiles?connectionProfileId={{connection_profile_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/connectionProfiles/{{connection_profile_id}}'
+timeouts:
+  insert_minutes: 60
+  update_minutes: 60
+  delete_minutes: 60
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+    timeouts:
+      insert_minutes: 60
+      update_minutes: 60
+      delete_minutes: 60
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'database_migration_service_connection_profile_cloudsql'
+    primary_resource_id: 'cloudsqlprofile'
+    vars:
+      sqldb: 'my-database'
+      sqldb_cert: 'my-cert'
+      sqldb_user: 'my-username'
+      sqldb_pass: 'my-password'
+      from_profile: 'my-fromprofileid'
+      to_profile: 'my-toprofileid'
+    ignore_read_extra:
+      - 'mysql.0.password'
+      - 'mysql.0.ssl.0.ca_certificate'
+      - 'mysql.0.ssl.0.client_certificate'
+      - 'mysql.0.ssl.0.client_key'
+  - name: 'database_migration_service_connection_profile_postgres'
+    primary_resource_id: 'postgresprofile'
+    vars:
+      sqldb: 'my-database'
+      sqldb_cert: 'my-cert'
+      sqldb_user: 'my-username'
+      sqldb_pass: 'my-password'
+      profile: 'my-profileid'
+    ignore_read_extra:
+      - 'postgresql.0.password'
+      - 'postgresql.0.ssl.0.ca_certificate'
+      - 'postgresql.0.ssl.0.client_certificate'
+      - 'postgresql.0.ssl.0.client_key'
+  - name: 'database_migration_service_connection_profile_oracle'
+    primary_resource_id: 'oracleprofile'
+    vars:
+      profile: 'my-profileid'
+    ignore_read_extra:
+      - 'oracle.0.password'
+    skip_test: true
+  - name: 'database_migration_service_connection_profile_alloydb'
+    primary_resource_id: 'alloydbprofile'
+    vars:
+      profile: 'my-profileid'
+      global_address_name: 'private-ip-alloc'
+      network_name: 'vpc-network'
+    ignore_read_extra:
+      - 'alloydb.0.settings.0.initial_user.0.password'
+    skip_test: true
+parameters:
+  - name: 'connectionProfileId'
+    type: String
+    description: |
+      The ID of the connection profile.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'location'
+    type: String
+    description: |
+      The location where the connection profile should reside.
+    url_param_only: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The name of this connection profile resource in the form of projects/{project}/locations/{location}/connectionProfiles/{connectionProfile}.
+    output: true
+  - name: 'displayName'
+    type: String
+    description: |
+      The connection profile display name.
+  - name: 'createTime'
+    type: Time
+    description: |
+      Output only. The timestamp when the resource was created. A timestamp in RFC3339 UTC 'Zulu' format, accurate to nanoseconds. Example: '2014-10-02T15:01:23.045123456Z'.
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      The resource labels for connection profile to use to annotate any related underlying resources such as Compute Engine VMs.
+    immutable: false
+  - name: 'state'
+    type: Enum
+    description: |
+      The current connection profile state.
+    output: true
+    enum_values:
+      - 'DRAFT'
+      - 'READY'
+      - 'FAILED'
+  - name: 'error'
+    type: NestedObject
+    description: |
+      Output only. The error details in case of state FAILED.
+    output: true
+    properties:
+      - name: 'code'
+        type: Integer
+        description: |
+          The status code, which should be an enum value of google.rpc.Code.
+        output: true
+      - name: 'message'
+        type: String
+        description: |
+          Human readable message indicating details about the current status.
+        output: true
+      - name: 'details'
+        type: Array
+        description: |
+          A list of messages that carry the error details.
+        output: true
+        item_type:
+          type: KeyValuePairs
+  - name: 'dbprovider'
+    type: Enum
+    description: |
+      The database provider.
+    api_name: provider
+    output: true
+    enum_values:
+      - 'CLOUDSQL'
+      - 'RDS'
+      - 'AURORA'
+      - 'ALLOYDB'
+  - name: 'mysql'
+    type: NestedObject
+    description: |
+      Specifies connection parameters required specifically for MySQL databases.
+    exactly_one_of:
+      - 'mysql'
+      - 'postgresql'
+      - 'oracle'
+      - 'cloudsql'
+      - 'alloydb'
+    properties:
+      - name: 'host'
+        type: String
+        description: |
+          Required. The IP or hostname of the source MySQL database.
+        required: true
+      - name: 'port'
+        type: Integer
+        description: |
+          Required. The network port of the source MySQL database.
+        required: true
+      - name: 'username'
+        type: String
+        description: |
+          Required. The username that Database Migration Service will use to connect to the database. The value is encrypted when stored in Database Migration Service.
+        required: true
+      - name: 'password'
+        type: String
+        description: |
+          Required. Input only. The password for the user that Database Migration Service will be using to connect to the database.
+          This field is not returned on request, and the value is encrypted when stored in Database Migration Service.
+        required: true
+        immutable: true
+        sensitive: true
+        custom_flatten: 'templates/terraform/custom_flatten/go/database_migration_service_connection_profile_mysql_password.go.tmpl'
+      - name: 'passwordSet'
+        type: Boolean
+        description: |
+          Output only. Indicates If this connection profile password is stored.
+        output: true
+      - name: 'ssl'
+        type: NestedObject
+        description: |
+          SSL configuration for the destination to connect to the source database.
+        properties:
+          - name: 'type'
+            type: Enum
+            description: |
+              The current connection profile state.
+            output: true
+            enum_values:
+              - 'SERVER_ONLY'
+              - 'SERVER_CLIENT'
+          - name: 'clientKey'
+            type: String
+            description: |
+              Input only. The unencrypted PKCS#1 or PKCS#8 PEM-encoded private key associated with the Client Certificate.
+              If this field is used then the 'clientCertificate' field is mandatory.
+            immutable: true
+            sensitive: true
+            custom_flatten: 'templates/terraform/custom_flatten/go/database_migration_service_connection_profile_mysql_ssl_client_key.go.tmpl'
+          - name: 'clientCertificate'
+            type: String
+            description: |
+              Input only. The x509 PEM-encoded certificate that will be used by the replica to authenticate against the source database server.
+              If this field is used then the 'clientKey' field is mandatory
+            immutable: true
+            sensitive: true
+            custom_flatten: 'templates/terraform/custom_flatten/go/database_migration_service_connection_profile_mysql_ssl_client_certificate.go.tmpl'
+          - name: 'caCertificate'
+            type: String
+            description: |
+              Required. Input only. The x509 PEM-encoded certificate of the CA that signed the source database server's certificate.
+              The replica will use this certificate to verify it's connecting to the right host.
+            required: true
+            immutable: true
+            sensitive: true
+            custom_flatten: 'templates/terraform/custom_flatten/go/database_migration_service_connection_profile_mysql_ssl_ca_certificate.go.tmpl'
+      - name: 'cloudSqlId'
+        type: String
+        description: |
+          If the source is a Cloud SQL database, use this field to provide the Cloud SQL instance ID of the source.
+  - name: 'postgresql'
+    type: NestedObject
+    description: |
+      Specifies connection parameters required specifically for PostgreSQL databases.
+    exactly_one_of:
+      - 'mysql'
+      - 'postgresql'
+      - 'oracle'
+      - 'cloudsql'
+      - 'alloydb'
+    properties:
+      - name: 'host'
+        type: String
+        description: |
+          Required. The IP or hostname of the source MySQL database.
+        required: true
+      - name: 'port'
+        type: Integer
+        description: |
+          Required. The network port of the source MySQL database.
+        required: true
+      - name: 'username'
+        type: String
+        description: |
+          Required. The username that Database Migration Service will use to connect to the database. The value is encrypted when stored in Database Migration Service.
+        required: true
+      - name: 'password'
+        type: String
+        description: |
+          Required. Input only. The password for the user that Database Migration Service will be using to connect to the database.
+          This field is not returned on request, and the value is encrypted when stored in Database Migration Service.
+        required: true
+        immutable: true
+        sensitive: true
+        custom_flatten: 'templates/terraform/custom_flatten/go/database_migration_service_connection_profile_postgresql_password.go.tmpl'
+      - name: 'passwordSet'
+        type: Boolean
+        description: |
+          Output only. Indicates If this connection profile password is stored.
+        output: true
+      - name: 'ssl'
+        type: NestedObject
+        description: |
+          SSL configuration for the destination to connect to the source database.
+        properties:
+          - name: 'type'
+            type: Enum
+            description: |
+              The current connection profile state.
+            output: true
+            enum_values:
+              - 'SERVER_ONLY'
+              - 'SERVER_CLIENT'
+          - name: 'clientKey'
+            type: String
+            description: |
+              Input only. The unencrypted PKCS#1 or PKCS#8 PEM-encoded private key associated with the Client Certificate.
+              If this field is used then the 'clientCertificate' field is mandatory.
+            immutable: true
+            sensitive: true
+            required_with:
+              - 'client_certificate'
+            custom_flatten: 'templates/terraform/custom_flatten/go/database_migration_service_connection_profile_postgresql_ssl_client_key.go.tmpl'
+          - name: 'clientCertificate'
+            type: String
+            description: |
+              Input only. The x509 PEM-encoded certificate that will be used by the replica to authenticate against the source database server.
+              If this field is used then the 'clientKey' field is mandatory
+            immutable: true
+            sensitive: true
+            required_with:
+              - 'client_key'
+            custom_flatten: 'templates/terraform/custom_flatten/go/database_migration_service_connection_profile_postgresql_ssl_client_certificate.go.tmpl'
+          - name: 'caCertificate'
+            type: String
+            description: |
+              Required. Input only. The x509 PEM-encoded certificate of the CA that signed the source database server's certificate.
+              The replica will use this certificate to verify it's connecting to the right host.
+            required: true
+            immutable: true
+            sensitive: true
+            custom_flatten: 'templates/terraform/custom_flatten/go/database_migration_service_connection_profile_postgresql_ssl_ca_certificate.go.tmpl'
+      - name: 'cloudSqlId'
+        type: String
+        description: |
+          If the source is a Cloud SQL database, use this field to provide the Cloud SQL instance ID of the source.
+      - name: 'networkArchitecture'
+        type: Enum
+        description: |
+          Output only. If the source is a Cloud SQL database, this field indicates the network architecture it's associated with.
+        output: true
+        enum_values:
+          - 'NETWORK_ARCHITECTURE_OLD_CSQL_PRODUCER'
+          - 'NETWORK_ARCHITECTURE_NEW_CSQL_PRODUCER'
+  - name: 'oracle'
+    type: NestedObject
+    description: |
+      Specifies connection parameters required specifically for Oracle databases.
+    exactly_one_of:
+      - 'mysql'
+      - 'postgresql'
+      - 'oracle'
+      - 'cloudsql'
+      - 'alloydb'
+    properties:
+      - name: 'host'
+        type: String
+        description: |
+          Required. The IP or hostname of the source Oracle database.
+        required: true
+      - name: 'port'
+        type: Integer
+        description: |
+          Required. The network port of the source Oracle database.
+        required: true
+      - name: 'username'
+        type: String
+        description: |
+          Required. The username that Database Migration Service will use to connect to the database. The value is encrypted when stored in Database Migration Service.
+        required: true
+      - name: 'password'
+        type: String
+        description: |
+          Required. Input only. The password for the user that Database Migration Service will be using to connect to the database.
+          This field is not returned on request, and the value is encrypted when stored in Database Migration Service.
+        required: true
+        immutable: true
+        sensitive: true
+        custom_flatten: 'templates/terraform/custom_flatten/go/database_migration_service_connection_profile_oracle_password.go.tmpl'
+      - name: 'passwordSet'
+        type: Boolean
+        description: |
+          Output only. Indicates If this connection profile password is stored.
+        output: true
+      - name: 'databaseService'
+        type: String
+        description: |
+          Required. Database service for the Oracle connection.
+        required: true
+      - name: 'ssl'
+        type: NestedObject
+        description: |
+          SSL configuration for the destination to connect to the source database.
+        properties:
+          - name: 'type'
+            type: Enum
+            description: |
+              The current connection profile state.
+            output: true
+            enum_values:
+              - 'SERVER_ONLY'
+              - 'SERVER_CLIENT'
+          - name: 'clientKey'
+            type: String
+            description: |
+              Input only. The unencrypted PKCS#1 or PKCS#8 PEM-encoded private key associated with the Client Certificate.
+              If this field is used then the 'clientCertificate' field is mandatory.
+            immutable: true
+            sensitive: true
+            required_with:
+              - 'client_certificate'
+            custom_flatten: 'templates/terraform/custom_flatten/go/database_migration_service_connection_profile_oracle_ssl_client_key.go.tmpl'
+          - name: 'clientCertificate'
+            type: String
+            description: |
+              Input only. The x509 PEM-encoded certificate that will be used by the replica to authenticate against the source database server.
+              If this field is used then the 'clientKey' field is mandatory
+            immutable: true
+            sensitive: true
+            required_with:
+              - 'client_key'
+            custom_flatten: 'templates/terraform/custom_flatten/go/database_migration_service_connection_profile_oracle_ssl_client_certificate.go.tmpl'
+          - name: 'caCertificate'
+            type: String
+            description: |
+              Required. Input only. The x509 PEM-encoded certificate of the CA that signed the source database server's certificate.
+              The replica will use this certificate to verify it's connecting to the right host.
+            required: true
+            immutable: true
+            sensitive: true
+            custom_flatten: 'templates/terraform/custom_flatten/go/database_migration_service_connection_profile_oracle_ssl_ca_certificate.go.tmpl'
+      - name: 'staticServiceIpConnectivity'
+        type: NestedObject
+        description: |
+          This object has no nested fields.
+
+          Static IP address connectivity configured on service project.
+        send_empty_value: true
+        allow_empty_object: true
+        exactly_one_of:
+          - 'static_service_ip_connectivity'
+          - 'forward_ssh_connectivity'
+          - 'private_connectivity'
+        properties:
+          []
+      - name: 'forwardSshConnectivity'
+        type: NestedObject
+        description: |
+          SSL configuration for the destination to connect to the source database.
+        exactly_one_of:
+          - 'static_service_ip_connectivity'
+          - 'forward_ssh_connectivity'
+          - 'private_connectivity'
+        properties:
+          - name: 'hostname'
+            type: String
+            description: |
+              Required. Hostname for the SSH tunnel.
+            required: true
+          - name: 'username'
+            type: String
+            description: |
+              Required. Username for the SSH tunnel.
+            required: true
+          - name: 'port'
+            type: Integer
+            description: |
+              Port for the SSH tunnel, default value is 22.
+            required: true
+          - name: 'password'
+            type: String
+            description: |
+              Input only. SSH password. Only one of `password` and `private_key` can be configured.
+            immutable: true
+            sensitive: true
+            exactly_one_of:
+              - 'forward_ssh_connectivity.0.password'
+              - 'forward_ssh_connectivity.0.private_key'
+            custom_flatten: 'templates/terraform/custom_flatten/go/database_migration_service_connection_profile_oracle_forward_ssh_password.go.tmpl'
+          - name: 'privateKey'
+            type: String
+            description: |
+              Input only. SSH private key. Only one of `password` and `private_key` can be configured.
+            immutable: true
+            sensitive: true
+            exactly_one_of:
+              - 'oracle.0.forward_ssh_connectivity.0.password'
+              - 'oracle.0.forward_ssh_connectivity.0.private_key'
+            custom_flatten: 'templates/terraform/custom_flatten/go/database_migration_service_connection_profile_oracle_forward_ssh_private_key.go.tmpl'
+      - name: 'privateConnectivity'
+        type: NestedObject
+        description: |
+          Configuration for using a private network to communicate with the source database
+        exactly_one_of:
+          - 'oracle.0.static_service_ip_connectivity'
+          - 'oracle.0.forward_ssh_connectivity'
+          - 'oracle.0.private_connectivity'
+        properties:
+          - name: 'privateConnection'
+            type: String
+            description: |
+              Required. The resource name (URI) of the private connection.
+            required: true
+  - name: 'cloudsql'
+    type: NestedObject
+    description: |
+      Specifies required connection parameters, and, optionally, the parameters required to create a Cloud SQL destination database instance.
+    exactly_one_of:
+      - 'mysql'
+      - 'postgresql'
+      - 'oracle'
+      - 'cloudsql'
+      - 'alloydb'
+    properties:
+      - name: 'cloudSqlId'
+        type: String
+        description: |
+          Output only. The Cloud SQL instance ID that this connection profile is associated with.
+        output: true
+      - name: 'settings'
+        type: NestedObject
+        description: |
+          Immutable. Metadata used to create the destination Cloud SQL database.
+        immutable: true
+        properties:
+          - name: 'databaseVersion'
+            type: String
+            description: |
+              The database engine type and version.
+              Currently supported values located at https://cloud.google.com/database-migration/docs/reference/rest/v1/projects.locations.connectionProfiles#sqldatabaseversion
+          - name: 'userLabels'
+            type: KeyValuePairs
+            description: |
+              The resource labels for a Cloud SQL instance to use to annotate any related underlying resources such as Compute Engine VMs.
+          - name: 'tier'
+            type: String
+            description: |
+              The tier (or machine type) for this instance, for example: db-n1-standard-1 (MySQL instances) or db-custom-1-3840 (PostgreSQL instances).
+              For more information, see https://cloud.google.com/sql/docs/mysql/instance-settings
+          - name: 'storageAutoResizeLimit'
+            type: String
+            description: |
+              The maximum size to which storage capacity can be automatically increased. The default value is 0, which specifies that there is no limit.
+          - name: 'activationPolicy'
+            type: Enum
+            description: |
+              The activation policy specifies when the instance is activated; it is applicable only when the instance state is 'RUNNABLE'.
+            enum_values:
+              - 'ALWAYS'
+              - 'NEVER'
+          - name: 'ipConfig'
+            type: NestedObject
+            description: |
+              The settings for IP Management. This allows to enable or disable the instance IP and manage which external networks can connect to the instance. The IPv4 address cannot be disabled.
+            properties:
+              - name: 'enableIpv4'
+                type: Boolean
+                description: |
+                  Whether the instance should be assigned an IPv4 address or not.
+              - name: 'privateNetwork'
+                type: String
+                description: |
+                  The resource link for the VPC network from which the Cloud SQL instance is accessible for private IP. For example, projects/myProject/global/networks/default.
+                  This setting can be updated, but it cannot be removed after it is set.
+              - name: 'requireSsl'
+                type: Boolean
+                description: |
+                  Whether SSL connections over IP should be enforced or not.
+              - name: 'authorizedNetworks'
+                type: Array
+                description: |
+                  The list of external networks that are allowed to connect to the instance using the IP.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: 'value'
+                      type: String
+                      description: |
+                        The allowlisted value for the access control list.
+                      required: true
+                    - name: 'label'
+                      type: String
+                      description: |
+                        A label to identify this entry.
+                    - name: 'expireTime'
+                      type: Time
+                      description: |
+                        The time when this access control entry expires in RFC 3339 format.
+                      exactly_one_of:
+                        - 'expire_time'
+                        - 'ttl'
+                    - name: 'ttl'
+                      type: Time
+                      description: |
+                        Input only. The time-to-leave of this access control entry.
+                      immutable: true
+          - name: 'autoStorageIncrease'
+            type: Boolean
+            description: |
+              If you enable this setting, Cloud SQL checks your available storage every 30 seconds. If the available storage falls below a threshold size, Cloud SQL automatically adds additional storage capacity.
+              If the available storage repeatedly falls below the threshold size, Cloud SQL continues to add storage until it reaches the maximum of 30 TB.
+          - name: 'databaseFlags'
+            type: KeyValuePairs
+            description: |
+              The database flags passed to the Cloud SQL instance at startup.
+          - name: 'dataDiskType'
+            type: Enum
+            description: |
+              The type of storage.
+            enum_values:
+              - 'PD_SSD'
+              - 'PD_HDD'
+          - name: 'dataDiskSizeGb'
+            type: String
+            description: |
+              The storage capacity available to the database, in GB. The minimum (and default) size is 10GB.
+          - name: 'zone'
+            type: String
+            description: |
+              The Google Cloud Platform zone where your Cloud SQL datdabse instance is located.
+          - name: 'sourceId'
+            type: String
+            description: |
+              The Database Migration Service source connection profile ID, in the format: projects/my_project_name/locations/us-central1/connectionProfiles/connection_profile_ID
+            required: true
+          - name: 'rootPassword'
+            type: String
+            description: |
+              Input only. Initial root password.
+            immutable: true
+            sensitive: true
+            custom_flatten: 'templates/terraform/custom_flatten/go/database_migration_service_connection_profile_cloudsql_settings_root_password.go.tmpl'
+          - name: 'rootPasswordSet'
+            type: Boolean
+            description: |
+              Output only. Indicates If this connection profile root password is stored.
+            output: true
+          - name: 'collation'
+            type: String
+            description: |
+              The Cloud SQL default instance level collation.
+          - name: 'cmekKeyName'
+            type: String
+            description: |
+              The KMS key name used for the csql instance.
+          - name: 'edition'
+            type: Enum
+            description: |
+              The edition of the given Cloud SQL instance.
+            enum_values:
+              - 'ENTERPRISE'
+              - 'ENTERPRISE_PLUS'
+      - name: 'privateIp'
+        type: String
+        description: |
+          Output only. The Cloud SQL database instance's private IP.
+        output: true
+      - name: 'publicIp'
+        type: String
+        description: |
+          Output only. The Cloud SQL database instance's public IP.
+        output: true
+  - name: 'alloydb'
+    type: NestedObject
+    description: |
+      Specifies required connection parameters, and the parameters required to create an AlloyDB destination cluster.
+    exactly_one_of:
+      - 'mysql'
+      - 'postgresql'
+      - 'oracle'
+      - 'cloudsql'
+      - 'alloydb'
+    properties:
+      - name: 'clusterId'
+        type: String
+        description: |
+          Required. The AlloyDB cluster ID that this connection profile is associated with.
+        required: true
+      - name: 'settings'
+        type: NestedObject
+        description: |
+          Immutable. Metadata used to create the destination AlloyDB cluster.
+        immutable: true
+        properties:
+          - name: 'initialUser'
+            type: NestedObject
+            description: |
+              Required. Input only. Initial user to setup during cluster creation.
+            required: true
+            immutable: true
+            properties:
+              - name: 'user'
+                type: String
+                description: |
+                  The database username.
+                required: true
+              - name: 'password'
+                type: String
+                description: |
+                  The initial password for the user.
+                required: true
+                sensitive: true
+                custom_flatten: 'templates/terraform/custom_flatten/go/database_migration_service_connection_profile_alloydb_settings_initial_user_password.go.tmpl'
+              - name: 'passwordSet'
+                type: Boolean
+                description: |
+                  Output only. Indicates if the initialUser.password field has been set.
+                output: true
+          - name: 'vpcNetwork'
+            type: String
+            description: |
+              Required. The resource link for the VPC network in which cluster resources are created and from which they are accessible via Private IP. The network must belong to the same project as the cluster.
+              It is specified in the form: 'projects/{project_number}/global/networks/{network_id}'. This is required to create a cluster.
+            required: true
+          - name: 'labels'
+            type: KeyValuePairs
+            description: |
+              Labels for the AlloyDB cluster created by DMS.
+          - name: 'primaryInstanceSettings'
+            type: NestedObject
+            description: |
+              Settings for the cluster's primary instance
+            properties:
+              - name: 'id'
+                type: String
+                description: |
+                  The database username.
+                required: true
+              - name: 'machineConfig'
+                type: NestedObject
+                description: |
+                  Configuration for the machines that host the underlying database engine.
+                required: true
+                immutable: true
+                properties:
+                  - name: 'cpuCount'
+                    type: Integer
+                    description: |
+                      The number of CPU's in the VM instance.
+                    required: true
+              - name: 'databaseFlags'
+                type: KeyValuePairs
+                description: |
+                  Database flags to pass to AlloyDB when DMS is creating the AlloyDB cluster and instances. See the AlloyDB documentation for how these can be used.
+              - name: 'labels'
+                type: KeyValuePairs
+                description: |
+                  Labels for the AlloyDB primary instance created by DMS.
+              - name: 'privateIp'
+                type: String
+                description: |
+                  Output only. The private IP address for the Instance. This is the connection endpoint for an end-user application.
+                output: true

@@ -1,0 +1,134 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'CertificateMapEntry'
+description: |
+  CertificateMapEntry is a list of certificate configurations,
+  that have been issued for a particular hostname
+docs:
+base_url: 'projects/{{project}}/locations/global/certificateMaps/{{map}}/certificateMapEntries'
+self_link: 'projects/{{project}}/locations/global/certificateMaps/{{map}}/certificateMapEntries/{{name}}'
+create_url: 'projects/{{project}}/locations/global/certificateMaps/{{map}}/certificateMapEntries?certificateMapEntryId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'certificate_manager_certificate_map_entry_full'
+    primary_resource_id: 'default'
+    vars:
+      dns_auth_name: 'dns-auth'
+      dns_auth_subdomain: 'subdomain'
+      dns_auth_name2: 'dns-auth2'
+      dns_auth_subdomain2: 'subdomain2'
+      cert_map_entry_name: 'cert-map-entry'
+parameters:
+  - name: 'name'
+    type: String
+    description: |
+      A user-defined name of the Certificate Map Entry. Certificate Map Entry
+      names must be unique globally and match pattern
+      'projects/*/locations/*/certificateMaps/*/certificateMapEntries/*'
+    required: true
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/go/resource_from_self_link.go.tmpl'
+  - name: 'map'
+    type: ResourceRef
+    description: |
+      A map entry that is inputted into the cetrificate map
+    url_param_only: true
+    required: true
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/go/resource_from_self_link.go.tmpl'
+    resource: 'CertificateMap'
+    imports: 'name'
+properties:
+  - name: 'description'
+    type: String
+    description: |
+      A human-readable description of the resource.
+  - name: 'createTime'
+    type: String
+    description: |
+      Creation timestamp of a Certificate Map Entry. Timestamp in RFC3339 UTC "Zulu" format,
+      with nanosecond resolution and up to nine fractional digits.
+      Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      Update timestamp of a Certificate Map Entry. Timestamp in RFC3339 UTC "Zulu" format,
+      with nanosecond resolution and up to nine fractional digits.
+      Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      Set of labels associated with a Certificate Map Entry.
+      An object containing a list of "key": value pairs.
+      Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+    immutable: false
+  - name: 'certificates'
+    type: Array
+    description: |
+      A set of Certificates defines for the given hostname.
+      There can be defined up to fifteen certificates in each Certificate Map Entry.
+      Each certificate must match pattern projects/*/locations/*/certificates/*.
+    required: true
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+    item_type:
+      type: String
+  - name: 'state'
+    type: String
+    description: |
+      A serving state of this Certificate Map Entry.
+    output: true
+  - name: 'hostname'
+    type: String
+    description: |
+      A Hostname (FQDN, e.g. example.com) or a wildcard hostname expression (*.example.com)
+      for a set of hostnames with common suffix. Used as Server Name Indication (SNI) for
+      selecting a proper certificate.
+    immutable: true
+    exactly_one_of:
+      - 'hostname'
+      - 'matcher'
+  - name: 'matcher'
+    type: String
+    description: |
+      A predefined matcher for particular cases, other than SNI selection
+    immutable: true
+    exactly_one_of:
+      - 'hostname'
+      - 'matcher'
