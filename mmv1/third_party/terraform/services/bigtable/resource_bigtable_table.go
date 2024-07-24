@@ -556,7 +556,7 @@ func (t tfType) toProto() (*btapb.Type, error) {
 	}
 	unm := protojson.UnmarshalOptions{}
 	output := &btapb.Type{}
-	if err := unm.Unmarshal(t.input, output); err != nil {
+	if err := unm.Unmarshal([]byte(t.input), output); err != nil {
 		return nil, err
 	}
 	return output, nil
@@ -572,7 +572,7 @@ func getType(input interface{}) (bigtable.Type, error) {
 		return bigtable.AggregateType{
 			Input:      bigtable.Int64Type,
 			Aggregator: bigtable.SumAggregator,
-		}.nil
+		}, nil
 	case "int64Min":
 		return bigtable.AggregateType{
 			Input:      bigtable.Int64Type,
