@@ -513,7 +513,7 @@ func FlattenColumnFamily(families []bigtable.FamilyInfo) []map[string]interface{
 	for _, f := range families {
 		data := make(map[string]interface{})
 		data["family"] = f.Name
-		data["type"] = f.ValueType.proto()
+		data["type"] = f.ValueType
 		result = append(result, data)
 	}
 
@@ -547,12 +547,13 @@ type tfType struct {
 
 func (t tfType) proto() *btapb.Type {
 	output, _ := t.toProto()
+	// If we got here, there is no error.
 	return output
 }
 
 func (t tfType) toProto() (*btapb.Type, error) {
 	if t.input == "" {
-		return nil
+		return nil, nil
 	}
 	unm := protojson.UnmarshalOptions{}
 	output := &btapb.Type{}
