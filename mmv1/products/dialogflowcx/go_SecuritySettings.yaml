@@ -33,6 +33,7 @@ timeouts:
   update_minutes: 40
   delete_minutes: 20
 custom_code:
+  post_create: 'templates/terraform/post_create/go/sleep.go.tmpl'
 examples:
   - name: 'dialogflowcx_security_settings_basic'
     primary_resource_id: 'basic_security_settings'

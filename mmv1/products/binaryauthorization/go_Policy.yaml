@@ -1,0 +1,199 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Policy'
+description: |
+  A policy for container image binary authorization.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/binary-authorization/'
+  api: 'https://cloud.google.com/binary-authorization/docs/reference/rest/'
+docs:
+id_format: 'projects/{{project}}'
+base_url: 'projects/{{project}}/policy'
+self_link: 'projects/{{project}}/policy'
+create_verb: 'PUT'
+delete_verb: 'PUT'
+import_format:
+  - 'projects/{{project}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  constants: 'templates/terraform/constants/go/binaryauthorization_policy.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/go/restore_default_binaryauthorization_policy.tmpl'
+examples:
+  - name: 'binary_authorization_policy_basic'
+    primary_resource_id: 'policy'
+    vars:
+      attestor_name: 'test-attestor'
+      note_name: 'test-attestor-note'
+    skip_test: true
+  - name: 'binary_authorization_policy_global_evaluation'
+    primary_resource_id: 'policy'
+    vars:
+      attestor_name: 'test-attestor'
+      note_name: 'test-attestor-note'
+    skip_test: true
+parameters:
+properties:
+  - name: 'description'
+    type: String
+    description: A descriptive comment.
+  - name: 'globalPolicyEvaluationMode'
+    type: Enum
+    description: |
+      Controls the evaluation of a Google-maintained global admission policy
+      for common system-level images. Images not covered by the global
+      policy will be subject to the project admission policy.
+    default_from_api: true
+    enum_values:
+      - 'ENABLE'
+      - 'DISABLE'
+  - name: 'admissionWhitelistPatterns'
+    type: Array
+    description: |
+      A whitelist of image patterns to exclude from admission rules. If an
+      image's name matches a whitelist pattern, the image's admission
+      requests will always be permitted regardless of your admission rules.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'namePattern'
+          type: String
+          description: |
+            An image name pattern to whitelist, in the form
+            `registry/path/to/image`. This supports a trailing * as a
+            wildcard, but this is allowed only in text after the registry/
+            part.
+          required: true
+  - name: 'clusterAdmissionRules'
+    type: Map
+    description: |
+      Per-cluster admission rules. An admission rule specifies either that
+      all container images used in a pod creation request must be attested
+      to by one or more attestors, that all pod creations will be allowed,
+      or that all pod creations will be denied. There can be at most one
+      admission rule per cluster spec.
+
+
+      Identifier format: `{{location}}.{{clusterId}}`.
+      A location is either a compute zone (e.g. `us-central1-a`) or a region
+      (e.g. `us-central1`).
+    is_set: true
+    set_hash_func: |-
+      func(v interface{}) int {
+        // require_attestations_by is a set of strings that can have the format
+        // projects/{project}/attestors/{attestor} or {attestor}. We diffsuppress
+        // and hash that set on the name, but now we need to make sure that the
+        // overall hash here respects that so changing the attestor format doesn't
+        // change the hash code of cluster_admission_rules.
+        raw := v.(map[string]interface{})
+
+        // modifying raw actually modifies the values passed to the provider.
+        // Use a copy to avoid that.
+        copy := make((map[string]interface{}))
+        for key, value := range raw {
+          copy[key] = value
+        }
+        at := copy["require_attestations_by"].(*schema.Set)
+        if at != nil {
+          t := tpgresource.ConvertAndMapStringArr(at.List(), tpgresource.GetResourceNameFromSelfLink)
+          copy["require_attestations_by"] = schema.NewSet(tpgresource.SelfLinkNameHash, tpgresource.ConvertStringArrToInterface(t))
+        }
+        var buf bytes.Buffer
+        schema.SerializeResourceForHash(&buf, copy, ResourceBinaryAuthorizationPolicy().Schema["cluster_admission_rules"].Elem.(*schema.Resource))
+        return tpgresource.Hashcode(buf.String())
+      }
+    key_name: 'cluster'
+    value_type:
+      type: NestedObject
+      properties:
+        - name: 'evaluationMode'
+          type: Enum
+          description: How this admission rule will be evaluated.
+          required: true
+          enum_values:
+            - 'ALWAYS_ALLOW'
+            - 'REQUIRE_ATTESTATION'
+            - 'ALWAYS_DENY'
+        - name: 'requireAttestationsBy'
+          type: Array
+          description: |
+            The resource names of the attestors that must attest to a
+            container image. If the attestor is in a different project from the
+            policy, it should be specified in the format `projects/*/attestors/*`.
+            Each attestor must exist before a policy can reference it. To add an
+            attestor to a policy the principal issuing the policy change
+            request must be able to read the attestor resource.
+
+            Note: this field must be non-empty when the evaluation_mode field
+            specifies REQUIRE_ATTESTATION, otherwise it must be empty.
+          is_set: true
+          diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+          set_hash_func: tpgresource.SelfLinkNameHash
+          custom_expand: 'templates/terraform/custom_expand/go/binaryauthorization_attestors.tmpl'
+          item_type:
+            type: String
+        - name: 'enforcementMode'
+          type: Enum
+          description: |
+            The action when a pod creation is denied by the admission rule.
+          required: true
+          enum_values:
+            - 'ENFORCED_BLOCK_AND_AUDIT_LOG'
+            - 'DRYRUN_AUDIT_LOG_ONLY'
+  - name: 'defaultAdmissionRule'
+    type: NestedObject
+    description: |
+      Default admission rule for a cluster without a per-cluster admission
+      rule.
+    required: true
+    properties:
+      - name: 'evaluationMode'
+        type: Enum
+        description: How this admission rule will be evaluated.
+        required: true
+        enum_values:
+          - 'ALWAYS_ALLOW'
+          - 'REQUIRE_ATTESTATION'
+          - 'ALWAYS_DENY'
+      - name: 'requireAttestationsBy'
+        type: Array
+        description: |
+          The resource names of the attestors that must attest to a
+          container image. If the attestor is in a different project from the
+          policy, it should be specified in the format `projects/*/attestors/*`.
+          Each attestor must exist before a policy can reference it. To add an
+          attestor to a policy the principal issuing the policy change
+          request must be able to read the attestor resource.
+
+          Note: this field must be non-empty when the evaluation_mode field
+          specifies REQUIRE_ATTESTATION, otherwise it must be empty.
+        is_set: true
+        diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+        set_hash_func: tpgresource.SelfLinkNameHash
+        custom_expand: 'templates/terraform/custom_expand/go/binaryauthorization_attestors.tmpl'
+        item_type:
+          type: String
+      - name: 'enforcementMode'
+        type: Enum
+        description: |
+          The action when a pod creation is denied by the admission rule.
+        required: true
+        enum_values:
+          - 'ENFORCED_BLOCK_AND_AUDIT_LOG'
+          - 'DRYRUN_AUDIT_LOG_ONLY'

@@ -89,7 +89,7 @@ examples:
     test_vars_overrides:
       delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/index_self_link_as_name_set_project.go.erb
+  custom_import: templates/terraform/custom_import/firestore_field.go.erb
   encoder: templates/terraform/encoders/firestore_field.go.erb
   custom_delete: templates/terraform/custom_delete/firestore_field_delete.go.erb
   test_check_destroy: templates/terraform/custom_check_destroy/firestore_field.go.erb
