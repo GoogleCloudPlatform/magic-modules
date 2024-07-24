@@ -1010,7 +1010,7 @@ properties:
               - source_config.0.sql_server_source_config.transaction_logs
               - source_config.0.sql_server_source_config.change_tables
             description: |
-              CDC reader reads from change tables.
+              CDC reader reads from transaction logs.
             properties: []
           - !ruby/object:Api::Type::NestedObject
             name: 'changeTables'
