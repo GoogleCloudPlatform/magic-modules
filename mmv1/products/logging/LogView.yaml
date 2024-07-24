@@ -52,6 +52,7 @@ examples:
     skip_docs: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/logging_log_view.go.erb
+  pre_read: templates/terraform/pre_read/logging_log_view.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: parent

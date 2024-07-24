@@ -1,0 +1,163 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'AppProfile'
+kind: 'bigtable#appProfile'
+description: |
+  App profile is a configuration object describing how Cloud Bigtable should treat traffic from a particular end user application.
+references:
+  guides:
+  api: 'https://cloud.google.com/bigtable/docs/reference/admin/rest/v2/projects.instances.appProfiles'
+docs:
+id_format: 'projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}'
+base_url: 'projects/{{project}}/instances/{{instance}}/appProfiles?appProfileId={{app_profile_id}}'
+self_link: 'projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}'
+create_url: 'projects/{{project}}/instances/{{instance}}/appProfiles?appProfileId={{app_profile_id}}&ignoreWarnings={{ignore_warnings}}'
+update_url: 'projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}?ignoreWarnings={{ignore_warnings}}'
+update_verb: 'PATCH'
+update_mask: true
+delete_url: 'projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}?ignoreWarnings={{ignore_warnings}}'
+import_format:
+  - 'projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  extra_schema_entry: 'templates/terraform/extra_schema_entry/go/bigtable_app_profile.go.tmpl'
+  encoder: 'templates/terraform/encoders/go/bigtable_app_profile.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/go/bigtable_app_profile.go.tmpl'
+skip_sweeper: true
+examples:
+  - name: 'bigtable_app_profile_anycluster'
+    primary_resource_id: 'ap'
+    vars:
+      instance_name: 'bt-instance'
+      app_profile_name: 'bt-profile'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+    ignore_read_extra:
+      - 'ignore_warnings'
+    skip_vcr: true
+  - name: 'bigtable_app_profile_singlecluster'
+    primary_resource_id: 'ap'
+    vars:
+      instance_name: 'bt-instance'
+      app_profile_name: 'bt-profile'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+    ignore_read_extra:
+      - 'ignore_warnings'
+    skip_vcr: true
+  - name: 'bigtable_app_profile_multicluster'
+    primary_resource_id: 'ap'
+    vars:
+      instance_name: 'bt-instance'
+      app_profile_name: 'bt-profile'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+    ignore_read_extra:
+      - 'ignore_warnings'
+    skip_vcr: true
+  - name: 'bigtable_app_profile_priority'
+    primary_resource_id: 'ap'
+    vars:
+      instance_name: 'bt-instance'
+      app_profile_name: 'bt-profile'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+    ignore_read_extra:
+      - 'ignore_warnings'
+    skip_vcr: true
+parameters:
+  - name: 'appProfileId'
+    type: String
+    description:
+      'The unique name of the app profile in the form
+      `[_a-zA-Z0-9][-_.a-zA-Z0-9]*`.'
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'instance'
+    type: String
+    description: 'The name of the instance to create the app profile within.'
+    url_param_only: true
+    immutable: true
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
+  - name: 'ignoreWarnings'
+    type: Boolean
+    description:
+      'If true, ignore safety checks when deleting/updating the app profile.'
+    url_param_only: true
+    default_value: false
+properties:
+  - name: 'name'
+    type: String
+    description:
+      'The unique name of the requested app profile. Values are of the form
+      `projects/<project>/instances/<instance>/appProfiles/<appProfileId>`.'
+    output: true
+  - name: 'description'
+    type: String
+    description: |
+      Long form description of the use case for this app profile.
+  - name: 'multiClusterRoutingUseAny'
+    type: Boolean
+    description: |
+      If true, read/write requests are routed to the nearest cluster in the instance, and will fail over to the nearest cluster that is available
+      in the event of transient errors or delays. Clusters in a region are considered equidistant. Choosing this option sacrifices read-your-writes
+      consistency to improve availability.
+    exactly_one_of:
+      - 'single_cluster_routing'
+      - 'multi_cluster_routing_use_any'
+    custom_flatten: 'templates/terraform/custom_flatten/go/bigtable_app_profile_routing.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/go/bigtable_app_profile_routing.tmpl'
+  - name: 'singleClusterRouting'
+    type: NestedObject
+    description: |
+      Use a single-cluster routing policy.
+    exactly_one_of:
+      - 'single_cluster_routing'
+      - 'multi_cluster_routing_use_any'
+    properties:
+      - name: 'clusterId'
+        type: String
+        description: |
+          The cluster to which read/write requests should be routed.
+        required: true
+      - name: 'allowTransactionalWrites'
+        type: Boolean
+        description: |
+          If true, CheckAndMutateRow and ReadModifyWriteRow requests are allowed by this app profile.
+          It is unsafe to send these requests to the same table/row/column in multiple clusters.
+  - name: 'standardIsolation'
+    type: NestedObject
+    description: |
+      The standard options used for isolating this app profile's traffic from other use cases.
+    default_from_api: true
+    properties:
+      - name: 'priority'
+        type: Enum
+        description: |
+          The priority of requests sent using this app profile.
+        required: true
+        enum_values:
+          - 'PRIORITY_LOW'
+          - 'PRIORITY_MEDIUM'
+          - 'PRIORITY_HIGH'

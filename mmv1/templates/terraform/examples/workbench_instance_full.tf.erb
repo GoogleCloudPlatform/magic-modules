@@ -14,6 +14,14 @@ resource "google_compute_address" "static" {
   name = "<%= ctx[:vars]['network_name'] %>"
 }
 
+resource "google_service_account_iam_binding" "act_as_permission" {
+  service_account_id = "projects/<%= ctx[:test_env_vars]['project_id'] %>/serviceAccounts/<%= ctx[:test_env_vars]['service_account'] %>"
+  role               = "roles/iam.serviceAccountUser"
+  members = [
+    "user:example@example.com",
+  ]
+}
+
 resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
   name = "<%= ctx[:vars]['instance_name'] %>"
   location = "us-central1-a"
@@ -34,7 +42,7 @@ resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
     disable_public_ip = false
 
     service_accounts {
-      email = "<%= ctx[:test_env_vars]["service_account"] %>"
+      email = "<%= ctx[:test_env_vars]['service_account'] %>"
     }
 
     boot_disk {
@@ -72,7 +80,7 @@ resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
 
   disable_proxy_access = "true"
 
-  instance_owners  = [ "<%= ctx[:test_env_vars]["service_account"] %>"]
+  instance_owners  = ["example@example.com"]
 
   labels = {
     k = "val"
