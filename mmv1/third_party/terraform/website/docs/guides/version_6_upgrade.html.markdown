@@ -102,11 +102,11 @@ Description of the change and how users should adjust their configuration (if ne
 
 ## Resources
 
-## Resource: `google_product_resource`
+## Resource: `google_bigquery_table`
 
-### Resource-level change example header
+### View creation now validates `schema`
 
-Description of the change and how users should adjust their configuration (if needed).
+A `view` can no longer be created when `schema` contains required fields
 
 ## Resource: `google_sql_database_instance`
 
@@ -132,3 +132,56 @@ Terraform from destroying or recreating the project. In 6.0.0, existing projects
 
 To disable deletion protection, explicitly set this field to `false` in configuration
 and then run `terraform apply` to apply the change.
+
+## Resource: `google_compute_backend_service`
+
+### `iap.enabled` is now required in the `iap` block
+
+To apply the IAP settings to the backend service, `true` needs to be set for `enabled` field.
+
+### `outlier_detection` subfields default values removed
+
+Empty values mean the setting should be cleared
+
+## Resource: `google_compute_region_backend_service`
+
+### `iap.enabled` is now required in the `iap` block
+
+To apply the IAP settings to the backend service, `true` needs to be set for `enabled` field.
+
+### `outlier_detection` subfields default values removed
+
+Empty values mean the setting should be cleared.
+
+### `connection_draining_timeout_sec` default value changed
+
+An empty value now means 300.
+
+### `balancing_mode` default value changed
+
+An empty value now means UTILIZATION.
+ 
+## Resource: `google_vpc_access_connector`
+
+### Fields `min_throughput` and `max_throughput` no longer have default values
+
+The fields `min_throughput` and `max_throughput` no longer have default values 
+set by the provider. This was necessary to add conflicting field validation, also
+described in this guide.
+
+No configuration changes are needed for existing resources as these fields' values
+will default to values present in data returned from the API.
+
+### Conflicting field validation added for `min_throughput` and `min_instances`, and `max_throughput` and `max_instances`
+
+The provider will now enforce that `google_vpc_access_connector` resources can only
+include one of `min_throughput` and `min_instances` and one of `max_throughput`and 
+`max_instances`. Previously if a user included all four fields in a resource block
+they would experience a permadiff. This is a result of how `min_instances` and
+`max_instances` fields' values take precedence in the API, and how the API calculates
+values for `min_throughput` and `max_throughput` that match the number of instances.
+
+Users will need to check their configuration for any `google_vpc_access_connector`
+resource blocks that contain both fields in a conflicting pair, and remove one of those fields.
+The fields that are removed from the configuration will still have Computed values,
+that are derived from the API.
