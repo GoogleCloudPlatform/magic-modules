@@ -916,7 +916,7 @@ resource "google_project" "acceptance" {
 	project_id      = "%s"
 	org_id          = "%s"
 	billing_account = "%s"
-    deletion_protection = false 
+	deletion_protection = false 
 }
 
 resource "google_project_service" "acceptance" {
@@ -951,7 +951,7 @@ resource "google_project" "acceptance" {
 	project_id      = "%s"
 	org_id          = "%s"
 	billing_account = "%s"
-    deletion_protection = false 
+	deletion_protection = false 
 }
 
 resource "google_project_service" "acceptance" {
@@ -990,7 +990,7 @@ resource "google_project" "acceptance" {
 	project_id      = "%s"
 	org_id          = "%s"
 	billing_account = "%s"
-    deletion_protection = false 
+	deletion_protection = false 
 }
 
 resource "google_project_service" "acceptance" {
