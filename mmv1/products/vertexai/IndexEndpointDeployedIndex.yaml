@@ -193,7 +193,7 @@ properties:
         name: 'maxReplicaCount'
         description: The maximum number of replicas this DeployedModel may be deployed on when the traffic against it increases. If maxReplicaCount is not set, the default value is minReplicaCount
         immutable: true
-        custom_expand: templates/terraform/custom_expand/vertex_ai_endpoint_deployed_index_automatic_resources_max_replica_count.go.erb
+        default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: dedicatedResources
     description: A description of resources that are dedicated to the DeployedIndex, and that need a higher degree of manual configuration.
@@ -215,7 +215,7 @@ properties:
       - !ruby/object:Api::Type::Integer
         name: 'maxReplicaCount'
         description: The maximum number of replicas this DeployedModel may be deployed on when the traffic against it increases. If maxReplicaCount is not set, the default value is minReplicaCount
-        custom_expand: templates/terraform/custom_expand/vertex_ai_endpoint_deployed_index_dedicated_resources_max_replica_count.go.erb
+        default_from_api: true
   - !ruby/object:Api::Type::Boolean
     name: enableAccessLogging
     description: If true, private endpoint's access logs are sent to Cloud Logging.
