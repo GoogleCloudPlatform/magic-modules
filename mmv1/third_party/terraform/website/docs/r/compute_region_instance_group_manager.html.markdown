@@ -236,9 +236,9 @@ update_policy {
 
 * `instance_redistribution_type` - (Optional) - The instance redistribution policy for regional managed instance groups. Valid values are: `"PROACTIVE"`, `"NONE"`. If `PROACTIVE` (default), the group attempts to maintain an even distribution of VM instances across zones in the region. If `NONE`, proactive redistribution is disabled.
 
-* `max_surge_fixed` - (Optional), Specifies a fixed number of VM instances. This must be a positive integer. Conflicts with max_surge_percent. Both cannot be 0.
+* `max_surge_fixed` - (Optional), Specifies a fixed number of VM instances. This must be a positive integer. Conflicts with `max_surge_percent`. Both cannot be 0.
 
-* `max_surge_percent` - (Optional), Specifies a percentage of instances between 0 to 100%, inclusive. For example, specify 80 for 80%. Conflicts with max_surge_fixed.
+* `max_surge_percent` - (Optional), Specifies a percentage of instances between 0 to 100%, inclusive. For example, specify 80 for 80%. Conflicts with `max_surge_fixed`.
 
 * `max_unavailable_fixed` - (Optional), Specifies a fixed number of VM instances. This must be a positive integer.
 
