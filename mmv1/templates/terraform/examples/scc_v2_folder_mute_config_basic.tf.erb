@@ -1,0 +1,8 @@
+resource "google_scc_v2_folder_mute_config" "<%= ctx[:primary_resource_id] %>" {
+  mute_config_id    = "<%= ctx[:vars]['mute_config_id'] %>"
+  folder = "<%= ctx[:test_env_vars]['folder'] %>"
+  location     = "global"
+  description  = "My custom Cloud Security Command Center Finding Folder mute Configuration"
+  filter = "severity = \"HIGH\""
+  type = "STATIC"
+}
