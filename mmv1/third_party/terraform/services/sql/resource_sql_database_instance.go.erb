@@ -141,6 +141,7 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 			customdiff.IfValueChange("instance_type", isReplicaPromoteRequested, checkPromoteConfigurationsAndUpdateDiff),
 			privateNetworkCustomizeDiff,
 			pitrSupportDbCustomizeDiff,
+			tpgresource.SetNestedLabelsDiff("settings", "user_labels"),
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -565,9 +566,23 @@ is set to true. Defaults to ZONAL.`,
 						"user_labels": {
 							Type:        schema.TypeMap,
 							Optional:    true,
-							Computed:    true,
 							Elem:        &schema.Schema{Type: schema.TypeString},
-							Description: `A set of key/value user label pairs to assign to the instance.`,
+							Description: `A set of key/value user label pairs to assign to the instance.
+
+							**Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
+							Please refer to the field 'effective_labels' for all of the labels present on the resource.`,
+						},
+						"terraform_labels": {
+							Type:        schema.TypeMap,
+							Computed:    true,
+							Description: `The combination of labels configured directly on the resource and default labels configured on the provider.`,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+						},
+						"effective_labels": {
+							Type:        schema.TypeMap,
+							Computed:    true,
+							Description: `All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.`,
+							Elem:        &schema.Schema{Type: schema.TypeString},
 						},
 						"insights_config": {
 							Type:     schema.TypeList,
@@ -1288,7 +1303,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion
 		PricingPlan:                _settings["pricing_plan"].(string),
 		DeletionProtectionEnabled:  _settings["deletion_protection_enabled"].(bool),
 		EnableGoogleMlIntegration:  _settings["enable_google_ml_integration"].(bool),
-		UserLabels:                 tpgresource.ConvertStringMap(_settings["user_labels"].(map[string]interface{})),
+		UserLabels:                 tpgresource.ConvertStringMap(_settings["effective_labels"].(map[string]interface{})),
 		BackupConfiguration:        expandBackupConfiguration(_settings["backup_configuration"].([]interface{})),
 		DatabaseFlags:              expandDatabaseFlags(_settings["database_flags"].(*schema.Set).List()),
 		IpConfiguration:            expandIpConfiguration(_settings["ip_configuration"].([]interface{}), databaseVersion),
@@ -2067,7 +2082,6 @@ func flattenSettings(settings *sqladmin.Settings, d *schema.ResourceData) []map[
 		"disk_type":                    settings.DataDiskType,
 		"disk_size":                    settings.DataDiskSizeGb,
 		"pricing_plan":                 settings.PricingPlan,
-		"user_labels":                  settings.UserLabels,
 		"password_validation_policy":   settings.PasswordValidationPolicy,
 		"time_zone":                    settings.TimeZone,
 		"deletion_protection_enabled":  settings.DeletionProtectionEnabled,
@@ -2115,8 +2129,10 @@ func flattenSettings(settings *sqladmin.Settings, d *schema.ResourceData) []map[
 	data["enable_google_ml_integration"] = settings.EnableGoogleMlIntegration
 
 	if settings.UserLabels != nil {
-		data["user_labels"] = settings.UserLabels
+		data["user_labels"] = flattenSettingsLabels("settings.0.user_labels", settings.UserLabels, d)
 	}
+	data["terraform_labels"] = flattenSettingsLabels("settings.0.terraform_labels", settings.UserLabels, d)
+	data["effective_labels"] = settings.UserLabels
 
 	if settings.PasswordValidationPolicy != nil {
 		data["password_validation_policy"] = flattenPasswordValidationPolicy(settings.PasswordValidationPolicy)
@@ -2131,6 +2147,21 @@ func flattenSettings(settings *sqladmin.Settings, d *schema.ResourceData) []map[
 	}
 
 	return []map[string]interface{}{data}
+}
+
+func flattenSettingsLabels(lineage string, v interface{}, d *schema.ResourceData) interface{} {
+	if v == nil {
+		return v
+	}
+
+	transformed := make(map[string]string)
+	if l, ok := d.GetOkExists(lineage); ok {
+		for k := range l.(map[string]interface{}) {
+			transformed[k] = v.(map[string]string)[k]
+		}
+	}
+
+	return transformed
 }
 
 func flattenDataCacheConfig(d *sqladmin.DataCacheConfig) []map[string]interface{} {

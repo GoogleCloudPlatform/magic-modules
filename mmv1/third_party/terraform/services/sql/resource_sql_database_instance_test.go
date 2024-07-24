@@ -741,7 +741,7 @@ func TestAccSqlDatabaseInstance_basic_with_user_labels(t *testing.T) {
 				ResourceName:            "google_sql_database_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "settings.0.user_labels", "settings.0.terraform_labels"},
 			},
 			{
 				Config: fmt.Sprintf(
@@ -751,7 +751,99 @@ func TestAccSqlDatabaseInstance_basic_with_user_labels(t *testing.T) {
 				ResourceName:            "google_sql_database_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "settings.0.user_labels", "settings.0.terraform_labels"},
+			},
+		},
+	})
+}
+
+func TestAccSqlDatabaseInstance_basic_with_provider_default_labels(t *testing.T) {
+	// The test failed if VCR testing is enabled, because the cached provider config is used.
+	// With the cached provider config, any changes in the provider default labels will not be applied.
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(
+					testGoogleSqlDatabaseInstance_withProviderDefaultLabels, databaseName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.user_labels.%", "1"),
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.user_labels.track", "production"),
+
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.terraform_labels.%", "2"),
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.terraform_labels.default_key1", "default_value1"),
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.terraform_labels.track", "production"),
+
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.effective_labels.%", "2"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "settings.0.user_labels", "settings.0.terraform_labels"},
+			},
+			{
+				Config: fmt.Sprintf(
+					testGoogleSqlDatabaseInstance_resourceLabelsOverridesProviderDefaultLabels, databaseName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.user_labels.%", "2"),
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.user_labels.default_key1", "value1"),
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.terraform_labels.track", "production"),
+
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.terraform_labels.%", "2"),
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.terraform_labels.default_key1", "value1"),
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.terraform_labels.track", "production"),
+
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.effective_labels.%", "2"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "settings.0.user_labels", "settings.0.terraform_labels"},
+			},
+			{
+				Config: fmt.Sprintf(
+					testGoogleSqlDatabaseInstance_moveResourceLabelToProviderDefaultLabels, databaseName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.user_labels.%", "0"),
+
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.terraform_labels.%", "2"),
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.terraform_labels.default_key1", "default_value1"),
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.terraform_labels.track", "production"),
+
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.effective_labels.%", "2"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "settings.0.user_labels", "settings.0.terraform_labels"},
+			},
+			{
+				Config: fmt.Sprintf(
+					testGoogleSqlDatabaseInstance_basic3, databaseName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.user_labels.%", "0"),
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.terraform_labels.%", "0"),
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.effective_labels.%", "0"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "settings.0.user_labels", "settings.0.terraform_labels"},
 			},
 		},
 	})
@@ -3764,7 +3856,66 @@ resource "google_sql_database_instance" "instance" {
   }
 }
 `
+var testGoogleSqlDatabaseInstance_withProviderDefaultLabels = `
+provider "google" {
+  default_labels = {
+    default_key1 = "default_value1"
+  }
+}
 
+
+resource "google_sql_database_instance" "instance" {
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
+  deletion_protection = false
+  settings {
+    tier = "db-g1-small"
+    user_labels = {
+      track    = "production"
+    }
+  }
+}
+`
+var testGoogleSqlDatabaseInstance_resourceLabelsOverridesProviderDefaultLabels = `
+provider "google" {
+  default_labels = {
+    default_key1 = "default_value1"
+  }
+}
+
+resource "google_sql_database_instance" "instance" {
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
+  deletion_protection = false
+  settings {
+    tier = "db-g1-small"
+    user_labels = {
+      track        = "production"
+	  default_key1 = "value1"
+    }
+  }
+}
+`
+var testGoogleSqlDatabaseInstance_moveResourceLabelToProviderDefaultLabels = `
+provider "google" {
+  default_labels = {
+    default_key1 = "default_value1"
+    track        = "production"
+  }
+}
+
+resource "google_sql_database_instance" "instance" {
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
+  deletion_protection = false
+  settings {
+    tier = "db-g1-small"
+  }
+}
+`
 var testGoogleSqlDatabaseInstance_insights = `
 resource "google_sql_database_instance" "instance" {
   name                = "tf-test-%d"

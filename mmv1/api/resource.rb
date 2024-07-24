@@ -477,7 +477,7 @@ module Api
       if parent.nil? || parent.flatten_object
         @custom_diff.append('tpgresource.SetLabelsDiff')
       elsif parent.name == 'metadata'
-        @custom_diff.append('tpgresource.SetMetadataLabelsDiff')
+        @custom_diff.append('tpgresource.SetNestedLabelsDiff("metadata", "labels")')
       end
 
       props << build_terraform_labels_field('labels', parent, labels)

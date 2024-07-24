@@ -55,8 +55,8 @@ func SetDataSourceLabels(d *schema.ResourceData) error {
 	return nil
 }
 
-func SetLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
-	raw := d.Get("labels")
+func setLabelsFields(labelsField string, d *schema.ResourceDiff, meta interface{}) error {
+	raw := d.Get(labelsField)
 	if raw == nil {
 		return nil
 	}
@@ -131,8 +131,27 @@ func SetLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) 
 	return nil
 }
 
-func SetMetadataLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
-	l := d.Get("metadata").([]interface{})
+func SetLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	return setLabelsFields("labels", d, meta)
+}
+
+func SetDiffForLabelsFields(labelsField string) func(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	return func(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+		return setLabelsFields(labelsField, d, meta)
+	}
+}
+
+// It sets the value of terraform_labels and effective_labels inside the same object
+// when labels field is nested inside an object.
+// terraform_labels combines labels configured on resource and provider defaul labels.
+// effective_labels has all of labels in GCP, including labels configured on resource,
+// provider default labels and system labels outside Terraform
+//
+// Currently there are only two cases:
+//   - metadata.labels in google_cloudrun_service and google_cloud_run_domain_mapping
+//   - settings.user_labels in google_sql_database_instance
+func setNestedLabelsFields(parentName, labelsField string, d *schema.ResourceDiff, meta interface{}) error {
+	l := d.Get(parentName).([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil
 	}
@@ -143,22 +162,26 @@ func SetMetadataLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta inter
 	// "terraform_labels" and "effective_labels" cannot be set directly due to a bug that SetNew doesn't work on nested fields
 	// in terraform sdk.
 	// https://github.com/hashicorp/terraform-plugin-sdk/issues/459
-	values := d.GetRawPlan().GetAttr("metadata").AsValueSlice()
-	if len(values) > 0 && !values[0].GetAttr("labels").IsWhollyKnown() {
+	values := d.GetRawPlan().GetAttr(parentName).AsValueSlice()
+	if len(values) > 0 && !values[0].GetAttr(labelsField).IsWhollyKnown() {
 		return nil
 	}
 
-	raw := d.Get("metadata.0.labels")
+	labelsLineage := fmt.Sprintf("%s.0.%s", parentName, labelsField)
+	terraformLabelsLineage := fmt.Sprintf("%s.0.terraform_labels", parentName)
+	effectiveLabelsLineage := fmt.Sprintf("%s.0.effective_labels", parentName)
+
+	raw := d.Get(labelsLineage)
 	if raw == nil {
 		return nil
 	}
 
-	if d.Get("metadata.0.terraform_labels") == nil {
-		return fmt.Errorf("`metadata.0.terraform_labels` field is not present in the resource schema.")
+	if d.Get(terraformLabelsLineage) == nil {
+		return fmt.Errorf("`%s` field is not present in the resource schema.", terraformLabelsLineage)
 	}
 
-	if d.Get("metadata.0.effective_labels") == nil {
-		return fmt.Errorf("`metadata.0.effective_labels` field is not present in the resource schema.")
+	if d.Get(effectiveLabelsLineage) == nil {
+		return fmt.Errorf("`%s` field is not present in the resource schema.", effectiveLabelsLineage)
 	}
 
 	config := meta.(*transport_tpg.Config)
@@ -171,7 +194,7 @@ func SetMetadataLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta inter
 
 	// Append optional label indicating the resource was provisioned using Terraform
 	if config.AddTerraformAttributionLabel {
-		if el, ok := d.Get("metadata.0.effective_labels").(map[string]any); ok {
+		if el, ok := d.Get(effectiveLabelsLineage).(map[string]any); ok {
 			_, hasExistingLabel := el[transport_tpg.AttributionKey]
 			if hasExistingLabel ||
 				config.TerraformAttributionLabelAdditionStrategy == transport_tpg.ProactiveAttributionStrategy ||
@@ -189,12 +212,12 @@ func SetMetadataLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta inter
 	original := l[0].(map[string]interface{})
 
 	original["terraform_labels"] = terraformLabels
-	if err := d.SetNew("metadata", []interface{}{original}); err != nil {
-		return fmt.Errorf("error setting new metadata diff: %w", err)
+	if err := d.SetNew(parentName, []interface{}{original}); err != nil {
+		return fmt.Errorf("error setting new %s diff: %w", parentName, err)
 	}
 
-	o, n := d.GetChange("metadata.0.terraform_labels")
-	effectiveLabels := d.Get("metadata.0.effective_labels").(map[string]interface{})
+	o, n := d.GetChange(terraformLabelsLineage)
+	effectiveLabels := d.Get(effectiveLabelsLineage).(map[string]interface{})
 
 	for k, v := range n.(map[string]interface{}) {
 		effectiveLabels[k] = v.(string)
@@ -207,11 +230,17 @@ func SetMetadataLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta inter
 	}
 
 	original["effective_labels"] = effectiveLabels
-	if err := d.SetNew("metadata", []interface{}{original}); err != nil {
-		return fmt.Errorf("error setting new metadata diff: %w", err)
+	if err := d.SetNew(parentName, []interface{}{original}); err != nil {
+		return fmt.Errorf("error setting new %s diff: %w", parentName, err)
 	}
 
 	return nil
+}
+
+func SetNestedLabelsDiff(parentName, labelsField string) func(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	return func(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+		return setNestedLabelsFields(parentName, labelsField, d, meta)
+	}
 }
 
 // Upgrade the field "labels" in the state to exclude the labels with the labels prefix

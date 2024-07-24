@@ -409,7 +409,7 @@ custom_code:
 <%  end -%>
 <% 
 custom_diff = object.custom_diff.reject {
-  |cdiff| cdiff == "tpgresource.SetLabelsDiff" || cdiff == "tpgresource.SetMetadataLabelsDiff" || cdiff == "tpgresource.SetAnnotationsDiff" || cdiff == "tpgresource.SetMetadataAnnotationsDiff"
+  |cdiff| cdiff == "tpgresource.SetLabelsDiff" || cdiff.include?("tpgresource.SetNestedLabelsDiff") || cdiff == "tpgresource.SetAnnotationsDiff" || cdiff == "tpgresource.SetMetadataAnnotationsDiff"
 }
 -%>
 <%  unless custom_diff.empty? -%>

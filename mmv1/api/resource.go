@@ -541,7 +541,7 @@ func (r *Resource) addLabelsFields(props []*Type, parent *Type, labels *Type) []
 	if parent == nil || parent.FlattenObject {
 		r.CustomDiff = append(r.CustomDiff, "tpgresource.SetLabelsDiff")
 	} else if parent.Name == "metadata" {
-		r.CustomDiff = append(r.CustomDiff, "tpgresource.SetMetadataLabelsDiff")
+		r.CustomDiff = append(r.CustomDiff, `tpgresource.SetNestedLabelsDiff("metadata", "labels")`)
 	}
 
 	terraformLabelsField := buildTerraformLabelsField("labels", parent, labels)
