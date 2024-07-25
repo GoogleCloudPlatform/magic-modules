@@ -9,8 +9,6 @@ cloud.google.com/go/auth/oauth2adapt v0.2.2 h1:+TTV8aXpjeChS9M+aTtN/TjdQnzJvmzKF
 cloud.google.com/go/auth/oauth2adapt v0.2.2/go.mod h1:wcYjgpZI9+Yu7LyYBg4pqSiaRkfEK3GQcpb7C/uyF1Q=
 cloud.google.com/go/bigtable v1.24.0 h1:RtBERIoZZsQm3LUExDGFWgOwMEHCO04O9/pDA0KoAZI=
 cloud.google.com/go/bigtable v1.24.0/go.mod h1:NlsITD7sKXo97kKIfF83ROd6P1bw8J4zsAUUYqk167Q=
-cloud.google.com/go/bigtable v1.26.0 h1:Gxk6UA21+3uz6QUm8d9wpxHznf6hr29HkwqWekfZ8Rs=
-cloud.google.com/go/bigtable v1.26.0/go.mod h1:nqDsH+YoPA1oTmCEfWfsUGYV7NDIaufhwJgs+eh5bGo=
 cloud.google.com/go/compute/metadata v0.4.0 h1:vHzJCWaM4g8XIcm8kopr3XmDA4Gy/lblD3EhhSux05c=
 cloud.google.com/go/compute/metadata v0.4.0/go.mod h1:SIQh1Kkb4ZJ8zJ874fqVkslA29PRXuleyj6vOzlbK7M=
 cloud.google.com/go/iam v1.1.10 h1:ZSAr64oEhQSClwBL670MsJAW5/RLiC6kfw3Bqmd5ZDI=
