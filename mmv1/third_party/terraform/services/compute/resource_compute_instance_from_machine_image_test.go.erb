@@ -229,7 +229,6 @@ func TestAccComputeInstanceFromMachineImage_confidentialInstanceConfigMain(t *te
 	t.Parallel()
 
 	var instance compute.Instance
-	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -237,7 +236,7 @@ func TestAccComputeInstanceFromMachineImage_confidentialInstanceConfigMain(t *te
 		CheckDestroy:             testAccCheckComputeInstanceFromMachineImageDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceFromMachineImage_ConfidentialInstanceConfigEnable(fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)), generatedInstanceName),
+				Config: testAccComputeInstanceFromMachineImage_ConfidentialInstanceConfigEnable(fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)), fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(t, "google_compute_instance_from_machine_image.foobar1", &instance),
 					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar1", "machine_type", "n2d-standard-2"),
@@ -246,7 +245,7 @@ func TestAccComputeInstanceFromMachineImage_confidentialInstanceConfigMain(t *te
 				),
 			},
 			{
-				Config: testAccComputeInstanceFromMachineImage_ConfidentialInstanceConfigEnableSev(fmt.Sprintf("tf-test-sev0-%s", acctest.RandString(t, 10)), generatedInstanceName, "SEV"),
+				Config: testAccComputeInstanceFromMachineImage_ConfidentialInstanceConfigEnableSev(fmt.Sprintf("tf-test-sev0-%s", acctest.RandString(t, 10)), fmt.Sprintf("tf-test-sev0-generated-%s", acctest.RandString(t, 10)), "SEV"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(t, "google_compute_instance_from_machine_image.foobar2", &instance),
 					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar2", "machine_type", "n2d-standard-2"),
@@ -255,26 +254,26 @@ func TestAccComputeInstanceFromMachineImage_confidentialInstanceConfigMain(t *te
 				),
 			},
 			{
-				Config: testAccComputeInstanceFromMachineImage_ConfidentialInstanceConfigNoEnableSev(fmt.Sprintf("tf-test-sev1-%s", acctest.RandString(t, 10)), generatedInstanceName, "SEV"),
+				Config: testAccComputeInstanceFromMachineImage_ConfidentialInstanceConfigNoEnableSev(fmt.Sprintf("tf-test-sev1-%s", acctest.RandString(t, 10)), fmt.Sprintf("tf-test-sev1-generated-%s", acctest.RandString(t, 10)), "SEV"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(t, "google_compute_instance_from_machine_image.foobar3", &instance),
-					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar3", "machine_type", "n2d-standard-2"),
+					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar3", "min_cpu_platform", "AMD Milan"),
 					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar3", "scheduling.0.on_host_maintenance", "TERMINATE"),
 					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance, false, "SEV"),
 				),
 			},
 			{
-				Config: testAccComputeInstanceFromMachineImage_ConfidentialInstanceConfigSevSnp(fmt.Sprintf("tf-test-sev-snp-%s", acctest.RandString(t, 10)), generatedInstanceName, "SEV_SNP"),
+				Config: testAccComputeInstanceFromMachineImage_ConfidentialInstanceConfigSevSnp(fmt.Sprintf("tf-test-sev-snp-%s", acctest.RandString(t, 10)), fmt.Sprintf("tf-test-sev-snp-generated-%s", acctest.RandString(t, 10)), "SEV_SNP"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(t, "google_compute_instance_from_machine_image.foobar4", &instance),
-					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar4", "machine_type", "n2d-standard-2"),
+					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar4", "min_cpu_platform", "AMD Milan"),
 					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar4", "scheduling.0.on_host_maintenance", "TERMINATE"),
 					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance, false, "SEV_SNP"),
 				),
 			},
 			<% unless version == "ga" -%>
 			{
-				Config: testAccComputeInstanceFromMachineImage_ConfidentialInstanceConfigTdx(fmt.Sprintf("tf-test-tdx-%s", acctest.RandString(t, 10)), generatedInstanceName, "TDX"),
+				Config: testAccComputeInstanceFromMachineImage_ConfidentialInstanceConfigTdx(fmt.Sprintf("tf-test-tdx-%s", acctest.RandString(t, 10)), fmt.Sprintf("tf-test-tdx-generated-%s", acctest.RandString(t, 10)), "TDX"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(t, "google_compute_instance_from_machine_image.foobar5", &instance),
 					// Check that fields were set based on the template
@@ -497,6 +496,8 @@ resource "google_compute_instance" "vm3" {
   metadata = {
     foo = "bar"
   }
+
+  min_cpu_platform = "AMD Milan"
 
   confidential_instance_config {
     enable_confidential_compute     = false
