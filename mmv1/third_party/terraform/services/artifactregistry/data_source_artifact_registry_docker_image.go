@@ -41,7 +41,7 @@ func DataSourceArtifactRegistryDockerImage() *schema.Resource {
 			"repository_id": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: `The last part of the repository name to fetch from.`,
+				Description: `The last part of the repository name to fetch from. another test lol`,
 			},
 			"image_name": {
 				Type:        schema.TypeString,
