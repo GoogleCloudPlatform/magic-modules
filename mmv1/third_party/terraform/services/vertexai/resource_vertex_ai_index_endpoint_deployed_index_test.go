@@ -30,7 +30,7 @@ func TestAccVertexAIIndexEndpointDeployedIndex_updated(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"etag", "region", "labels", "terraform_labels"},
 			},
 			{
-				Config: testAccVertexAIIndexEndpoint_updated(context),
+				Config: TestAccVertexAIIndexEndpointDeployedIndex_updated(context),
 			},
 			{
 				ResourceName:            "google_vertex_ai_index_endpoint_deployed_index.index_endpoint_deployed_index",
@@ -42,7 +42,7 @@ func TestAccVertexAIIndexEndpointDeployedIndex_updated(t *testing.T) {
 	})
 }
 
-func testAccVertexAIIndexEndpoint_basic(context map[string]interface{}) string {
+func testAccVertexAIIndexEndpointDeployedIndex_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 	resource "google_vertex_ai_index_endpoint_deployed_index" "index_endpoint_deployed_index" {
 		depends_on = [ google_vertex_ai_index_endpoint.vertex_endpoint ]
@@ -116,7 +116,7 @@ func testAccVertexAIIndexEndpoint_basic(context map[string]interface{}) string {
 `, context)
 }
 
-func testAccVertexAIIndexEndpoint_updated(context map[string]interface{}) string {
+func TestAccVertexAIIndexEndpointDeployedIndex_updated(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 	resource "google_vertex_ai_index_endpoint_deployed_index" "index_endpoint_deployed_index" {
 		depends_on = [ google_vertex_ai_index_endpoint.vertex_endpoint ]
