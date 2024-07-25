@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-func TestAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedIndexDedicatedResourcesExample_mutated(t *testing.T) {
+func TestAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedIndexDedicatedResourcesExample_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -20,7 +20,7 @@ func TestAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedInde
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedIndexDedicatedResourcesBasicExample(context),
+				Config: testAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedIndexDedicatedResourcesBasicExample_full(context),
 			},
 			{
 				ResourceName:            "google_vertex_ai_index_endpoint_deployed_index.dedicated_resources",
@@ -29,7 +29,7 @@ func TestAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedInde
 				ImportStateVerifyIgnore: []string{"index_endpoint"},
 			},
 			{
-				Config: testAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedIndexDedicatedResourcesBasicExample_mutated(context),
+				Config: testAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedIndexDedicatedResourcesBasicExample_update(context),
 			},
 			{
 				ResourceName:            "google_vertex_ai_index_endpoint_deployed_index.dedicated_resources",
@@ -41,7 +41,7 @@ func TestAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedInde
 	})
 }
 
-func testAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedIndexDedicatedResourcesBasicExample(context map[string]interface{}) string {
+func testAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedIndexDedicatedResourcesBasicExample_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_vertex_ai_index_endpoint_deployed_index" "dedicated_resources" {
   depends_on = [ google_vertex_ai_index_endpoint.vertex_endpoint ]
@@ -115,7 +115,7 @@ data "google_project" "project" {}
 `, context)
 }
 
-func testAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedIndexDedicatedResourcesBasicExample_mutated(context map[string]interface{}) string {
+func testAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedIndexDedicatedResourcesBasicExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_vertex_ai_index_endpoint_deployed_index" "dedicated_resources" {
   depends_on = [ google_vertex_ai_index_endpoint.vertex_endpoint ]
