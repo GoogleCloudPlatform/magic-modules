@@ -43,7 +43,7 @@ func ResourceAppEngineApplication() *schema.Resource {
 				Computed:     true,
 				ForceNew:     true,
 				ValidateFunc: verify.ValidateProjectID(),
-				Description:  `The project ID to create the application under.`,
+				Description:  `The project ID to create the application under. and also, test. lol.`,
 			},
 			"auth_domain": {
 				Type:        schema.TypeString,
