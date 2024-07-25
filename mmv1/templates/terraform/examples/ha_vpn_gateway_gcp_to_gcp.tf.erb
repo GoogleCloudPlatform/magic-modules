@@ -1,4 +1,3 @@
-# [START cloudvpn_ha_gcp_to_gcp]
 resource "google_compute_ha_vpn_gateway" "<%= ctx[:primary_resource_id] %>" {
   region   = "us-central1"
   name     = "<%= ctx[:vars]['ha_vpn_gateway1_name'] %>"
@@ -178,4 +177,3 @@ resource "google_compute_router_peer" "router2_peer2" {
   advertised_route_priority = 100
   interface                 = google_compute_router_interface.router2_interface2.name
 }
-# [END cloudvpn_ha_gcp_to_gcp]

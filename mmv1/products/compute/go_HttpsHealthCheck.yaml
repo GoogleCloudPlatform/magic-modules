@@ -36,6 +36,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/global/operations/{{op_id}}'
@@ -107,7 +108,7 @@ properties:
     description: |
       The request path of the HTTPS health check request.
       The default value is /.
-    default_value: /
+    default_value: "/"
   - name: 'timeoutSec'
     type: Integer
     description: |

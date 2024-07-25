@@ -1,0 +1,67 @@
+// Get project id
+project, err := tpgresource.GetProject(d, config)
+if err != nil {
+	return fmt.Errorf("Error fetching project for resize request: %s", err)
+}
+
+// Get cancel url
+var cancelUrl string
+cancelUrl, err = tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instanceGroupManagers/{{"{{"}}instance_group_manager{{"}}"}}/resizeRequests/{{"{{"}}name{{"}}"}}/cancel")
+
+if err != nil {
+	return err
+}
+
+// Get delete url
+var deleteUrl string
+deleteUrl, err = tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instanceGroupManagers/{{"{{"}}instance_group_manager{{"}}"}}/resizeRequests/{{"{{"}}name{{"}}"}}")
+if err != nil {
+	return err
+}
+
+// Get current state (accepted or not) and delete
+if d.Get("state") == "ACCEPTED" {
+	// cancel resize request
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config: config,
+		Method: "POST",
+		Project: project,
+		RawURL: cancelUrl,
+		UserAgent: userAgent,
+		Timeout: d.Timeout(schema.TimeoutDelete),
+	})
+
+	if err != nil {
+		return transport_tpg.HandleNotFoundError(err, d, "ResizeRequest")
+	}
+
+	err = ComputeOperationWaitTime(
+		config, res, project, "Cancelling the resize request", userAgent,
+		d.Timeout(schema.TimeoutDelete))
+	
+	if err != nil {
+		return err
+	}
+}
+
+// delete resize request
+res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config: config,
+	Method: "DELETE",
+	Project: project,
+	RawURL: deleteUrl,
+	UserAgent: userAgent,
+	Timeout: d.Timeout(schema.TimeoutDelete),
+})
+
+err = ComputeOperationWaitTime(
+config, res, project, "Cancelling the resize request", userAgent,
+d.Timeout(schema.TimeoutDelete))
+
+
+if err != nil {
+	return err
+}
+return nil
+
+

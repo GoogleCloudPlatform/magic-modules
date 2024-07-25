@@ -1,0 +1,119 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'ServiceConfig'
+description: The enforcement configuration for a service supported by App Check.
+references:
+  guides:
+    'Official Documentation': 'https://firebase.google.com/docs/app-check'
+  api: 'https://firebase.google.com/docs/reference/appcheck/rest/v1/projects.services'
+docs:
+base_url: 'projects/{{project}}/services/'
+self_link: 'projects/{{project}}/services/{{service_id}}'
+create_url: 'projects/{{project}}/services/{{service_id}}?updateMask=enforcementMode'
+create_verb: 'PATCH'
+update_verb: 'PATCH'
+update_mask: true
+delete_url: 'projects/{{project}}/services/{{service_id}}?updateMask=enforcementMode'
+delete_verb: 'PATCH'
+import_format:
+  - 'projects/{{project}}/services/{{service_id}}'
+  - '{{project}}/{{service_id}}'
+  - '{{service_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  test_check_destroy: 'templates/terraform/custom_check_destroy/go/firebase_app_check_service_config.go.tmpl'
+examples:
+  - name: 'firebase_app_check_service_config_off'
+    primary_resource_id: 'default'
+    vars:
+      service_id: 'firestore.googleapis.com'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'service_id': '"firestore.googleapis.com"'
+  - name: 'firebase_app_check_service_config_enforced'
+    primary_resource_id: 'default'
+    vars:
+      service_id: 'firebasestorage.googleapis.com'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'service_id': '"firebasestorage.googleapis.com"'
+  - name: 'firebase_app_check_service_config_unenforced'
+    primary_resource_id: 'default'
+    vars:
+      service_id: 'identitytoolkit.googleapis.com'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'service_id': '"identitytoolkit.googleapis.com"'
+parameters:
+  - name: 'service_id'
+    type: String
+    description: |
+      The identifier of the service to configure enforcement. Currently, the following service IDs are supported:
+        firebasestorage.googleapis.com (Cloud Storage for Firebase)
+        firebasedatabase.googleapis.com (Firebase Realtime Database)
+        firestore.googleapis.com (Cloud Firestore)
+        identitytoolkit.googleapis.com (Authentication)
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The fully-qualified resource name of the service enforcement configuration.
+    output: true
+  - name: 'enforcementMode'
+    type: Enum
+    description: |
+      The App Check enforcement mode for a service supported by App Check. Valid values are
+
+      (Unset)
+      Firebase App Check is not enforced for the service, nor are App Check metrics collected.
+      Though the service is not protected by App Check in this mode, other applicable protections,
+      such as user authorization, are still enforced. An unconfigured service is in this mode by default.
+      This is equivalent to OFF in the REST API. Deleting the Terraform resource will also switch the
+      enforcement to OFF for this service.
+
+      UNENFORCED
+      Firebase App Check is not enforced for the service. App Check metrics are collected to help you
+      decide when to turn on enforcement for the service. Though the service is not protected by App Check
+      in this mode, other applicable protections, such as user authorization, are still enforced.
+
+      ENFORCED
+      Firebase App Check is enforced for the service. The service will reject any request that attempts to
+      access your project's resources if it does not have valid App Check token attached, with some exceptions
+      depending on the service; for example, some services will still allow requests bearing the developer's
+      privileged service account credentials without an App Check token. App Check metrics continue to be
+      collected to help you detect issues with your App Check integration and monitor the composition of your
+      callers. While the service is protected by App Check, other applicable protections, such as user
+      authorization, continue to be enforced at the same time.
+
+      Use caution when choosing to enforce App Check on a Firebase service. If your users have not updated
+      to an App Check capable version of your app, their apps will no longer be able to use your Firebase
+      services that are enforcing App Check. App Check metrics can help you decide whether to enforce App
+      Check on your Firebase services.
+
+      If your app has not launched yet, you should enable enforcement immediately, since there are no outdated
+      clients in use.
+    enum_values:
+      - 'UNENFORCED'
+      - 'ENFORCED'

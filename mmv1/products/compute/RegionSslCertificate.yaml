@@ -78,6 +78,7 @@ examples:
     ignore_read_extra:
       - 'name_prefix'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/compute_certificate.go.erb
   extra_schema_entry: templates/terraform/extra_schema_entry/ssl_certificate.erb
 parameters:
   - !ruby/object:Api::Type::ResourceRef
@@ -141,4 +142,4 @@ properties:
     sensitive: true
     ignore_read: true
     custom_flatten: 'templates/terraform/custom_flatten/sha256.erb'
-    diff_suppress_func: 'tpgresource.Sha256DiffSuppress'
+    diff_suppress_func: 'sha256DiffSuppress'

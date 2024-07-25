@@ -23,12 +23,10 @@ description: |
   An Entitlement defines the eligibility of a set of users to obtain a predefined access for some time possibly after going through an approval workflow.
 update_verb: :PATCH
 update_mask: true
-min_version: beta
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "privileged_access_manager_entitlement_basic"
-    min_version: beta
     primary_resource_id: "tfentitlement"
     vars:
       entitlement_id: "example-entitlement"

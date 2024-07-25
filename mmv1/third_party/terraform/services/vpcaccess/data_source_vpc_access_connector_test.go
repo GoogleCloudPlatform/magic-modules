@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -36,7 +36,7 @@ func TestAccVPCAccessConnectorDatasource_basic(t *testing.T) {
 func testAccVPCAccessConnectorDatasourceConfig(suffix string) string {
 	return fmt.Sprintf(`
 resource "google_vpc_access_connector" "connector" {
-  name          = "vpc-con-test-%s"
+  name          = "tf-test-%s"
   ip_cidr_range = "10.8.0.32/28"
   network       = "default"
   region        = "us-central1"
