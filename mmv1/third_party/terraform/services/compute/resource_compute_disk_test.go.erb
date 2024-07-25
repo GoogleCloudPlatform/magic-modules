@@ -1725,16 +1725,29 @@ func TestAccComputeDisk_accessModeSpecified(t *testing.T) {
 	t.Parallel()
 
 	diskName := fmt.Sprintf("tf-test-disk-accessmode-%s", acctest.RandString(t, 10))
-	accessMode := "READ_ONLY_MANY"
-
+	accessModeForCreate := "READ_WRITE_SINGLE"
+        accessModeForUpdate := "READ_ONLY_MANY"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
+			// Create disk with Access Mode
 			{
-				Config:    testAccComputeDisk_accessModeSpecified(diskName, accessMode),
+				Config:    testAccComputeDisk_accessModeSpecified(diskName, accessModeForCreate),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_compute_disk.foobar", "access_mode", accessMode),
+					resource.TestCheckResourceAttr("google_compute_disk.foobar", "access_mode", accessModeForCreate),
+				),
+			},
+			{
+				ResourceName:      "google_compute_disk.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+                        // Update Access Mode
+			{       
+				Config: testAccComputeDisk_accessModeSpecified(diskName, accessModeForUpdate),
+                               	Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_disk.foobar", "access_mode", accessModeForUpdate),
 				),
 			},
 			{
@@ -1744,7 +1757,6 @@ func TestAccComputeDisk_accessModeSpecified(t *testing.T) {
 			},
 		},
 	})
-
 }
 
 func testAccComputeDisk_accessModeSpecified(diskName, accessMode string) string {
