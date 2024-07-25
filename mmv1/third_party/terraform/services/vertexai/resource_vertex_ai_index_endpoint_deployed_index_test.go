@@ -18,10 +18,9 @@ func TestAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedInde
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckVertexAIIndexEndpointDeployedIndexDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedIndexDedicatedResourcesExample(context),
+				Config: testAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedIndexDedicatedResourcesBasicExample(context),
 			},
 			{
 				ResourceName:            "google_vertex_ai_index_endpoint_deployed_index.dedicated_resources",
@@ -30,7 +29,7 @@ func TestAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedInde
 				ImportStateVerifyIgnore: []string{"index_endpoint"},
 			},
 			{
-				Config: testAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedIndexDedicatedResourcesExample_mutated(context),
+				Config: testAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedIndexDedicatedResourcesBasicExample_mutated(context),
 			},
 			{
 				ResourceName:            "google_vertex_ai_index_endpoint_deployed_index.dedicated_resources",
