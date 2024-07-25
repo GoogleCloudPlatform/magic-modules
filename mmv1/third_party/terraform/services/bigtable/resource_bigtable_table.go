@@ -477,7 +477,7 @@ func resourceBigtableTableDestroy(d *schema.ResourceData, meta interface{}) erro
 	name := d.Get("name").(string)
 	err = c.DeleteTable(ctx, name)
 	if err != nil {
-		return fmt.Errorf("Error deleting table. TEST %s", err)
+		return fmt.Errorf("Error deleting table. %s", err)
 	}
 
 	d.SetId("")
