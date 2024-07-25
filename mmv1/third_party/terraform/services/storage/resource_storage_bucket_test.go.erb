@@ -641,37 +641,37 @@ func TestAccStorageBucket_lifecycleRulesVirtualFields(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy","lifecycle_rule.0.condition.0.send_age_if_zero"},
+				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 			{
 				Config: testAccStorageBucket_customAttributes_withLifecycleVirtualFieldsUpdate1(bucketName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckStorageBucketExists(
 						t, "google_storage_bucket.bucket", bucketName, &bucket),
-					testAccCheckStorageBucketLifecycleConditionNoAge(nil, &bucket,1),
-					testAccCheckStorageBucketLifecycleConditionNoAge(&zero_age, &bucket,2),
+					testAccCheckStorageBucketLifecycleConditionNoAge(nil, &bucket, 1),
+					testAccCheckStorageBucketLifecycleConditionNoAge(&zero_age, &bucket, 2),
 				),
 			},
 			{
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy","lifecycle_rule.1.condition.0.no_age","lifecycle_rule.1.condition.0.send_days_since_noncurrent_time_if_zero","lifecycle_rule.2.condition.0.send_days_since_noncurrent_time_if_zero","lifecycle_rule.1.condition.0.send_days_since_custom_time_if_zero","lifecycle_rule.2.condition.0.send_days_since_custom_time_if_zero","lifecycle_rule.1.condition.0.send_num_newer_versions_if_zero","lifecycle_rule.2.condition.0.send_num_newer_versions_if_zero","lifecycle_rule.0.condition.0.send_age_if_zero","lifecycle_rule.1.condition.0.send_age_if_zero","lifecycle_rule.2.condition.0.send_age_if_zero"},
+				ImportStateVerifyIgnore: []string{"force_destroy", "lifecycle_rule.1.condition.0.no_age", "lifecycle_rule.1.condition.0.send_days_since_noncurrent_time_if_zero", "lifecycle_rule.2.condition.0.send_days_since_noncurrent_time_if_zero", "lifecycle_rule.1.condition.0.send_days_since_custom_time_if_zero", "lifecycle_rule.2.condition.0.send_days_since_custom_time_if_zero", "lifecycle_rule.1.condition.0.send_num_newer_versions_if_zero", "lifecycle_rule.2.condition.0.send_num_newer_versions_if_zero", "lifecycle_rule.1.condition.0.send_age_if_zero"},
 			},
 			{
 				Config: testAccStorageBucket_customAttributes_withLifecycleVirtualFieldsUpdate2(bucketName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckStorageBucketExists(
 						t, "google_storage_bucket.bucket", bucketName, &bucket),
-					testAccCheckStorageBucketLifecycleConditionNoAge(nil, &bucket,1),
-					testAccCheckStorageBucketLifecycleConditionNoAge(nil, &bucket,2),
+					testAccCheckStorageBucketLifecycleConditionNoAge(nil, &bucket, 1),
+					testAccCheckStorageBucketLifecycleConditionNoAge(nil, &bucket, 2),
 				),
 			},
 			{
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy","lifecycle_rule.1.condition.0.no_age","lifecycle_rule.0.condition.0.send_days_since_noncurrent_time_if_zero","lifecycle_rule.0.condition.0.send_days_since_custom_time_if_zero","lifecycle_rule.0.condition.0.send_num_newer_versions_if_zero","lifecycle_rule.0.condition.0.send_age_if_zero","lifecycle_rule.1.condition.0.send_age_if_zero","lifecycle_rule.2.condition.0.send_age_if_zero"},
+				ImportStateVerifyIgnore: []string{"force_destroy", "lifecycle_rule.1.condition.0.no_age", "lifecycle_rule.0.condition.0.send_days_since_noncurrent_time_if_zero", "lifecycle_rule.0.condition.0.send_days_since_custom_time_if_zero", "lifecycle_rule.0.condition.0.send_num_newer_versions_if_zero", "lifecycle_rule.0.condition.0.send_age_if_zero", "lifecycle_rule.1.condition.0.send_age_if_zero", "lifecycle_rule.2.condition.0.send_age_if_zero"},
 			},
 			{
 				Config: testAccStorageBucket_customAttributes_withLifecycle1(bucketName),
@@ -684,7 +684,7 @@ func TestAccStorageBucket_lifecycleRulesVirtualFields(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy","lifecycle_rule.0.condition.0.send_age_if_zero"},
+				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 		},
 	})

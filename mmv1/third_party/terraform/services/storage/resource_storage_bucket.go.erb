@@ -1403,7 +1403,8 @@ func flattenBucketLifecycleRuleCondition(index int, d *schema.ResourceData, cond
 			ruleCondition["with_state"] = "ARCHIVED"
 		}
 	}
-  // setting no_age value from state config since it is terraform only variable and not getting value from backend.
+	// Setting the lifecycle condition virtual fields from the state file if they
+	// are already present otherwise setting them to individual default values.
 	if v, ok := d.GetOk(fmt.Sprintf("lifecycle_rule.%d.condition",index)); ok{
 		state_condition := v.(*schema.Set).List()[0].(map[string]interface{})
 		ruleCondition["no_age"] = state_condition["no_age"].(bool)
@@ -1411,6 +1412,12 @@ func flattenBucketLifecycleRuleCondition(index int, d *schema.ResourceData, cond
 		ruleCondition["send_days_since_custom_time_if_zero"] = state_condition["send_days_since_custom_time_if_zero"].(bool)
 		ruleCondition["send_num_newer_versions_if_zero"] = state_condition["send_num_newer_versions_if_zero"].(bool)
 		ruleCondition["send_age_if_zero"] = state_condition["send_age_if_zero"].(bool)
+	}  else {
+		ruleCondition["no_age"] = false
+		ruleCondition["send_age_if_zero"] = true
+		ruleCondition["send_days_since_noncurrent_time_if_zero"] = false
+		ruleCondition["send_days_since_custom_time_if_zero"] = false
+		ruleCondition["send_num_newer_versions_if_zero"] = false
 	}
 
 	return ruleCondition
