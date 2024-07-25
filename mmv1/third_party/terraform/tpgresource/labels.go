@@ -55,6 +55,7 @@ func SetDataSourceLabels(d *schema.ResourceData) error {
 	return nil
 }
 
+// Sets the values of terraform_labels and effective_labels fields when labels field is in root level
 func setLabelsFields(labelsField string, d *schema.ResourceDiff, meta interface{}) error {
 	raw := d.Get(labelsField)
 	if raw == nil {
@@ -71,7 +72,7 @@ func setLabelsFields(labelsField string, d *schema.ResourceDiff, meta interface{
 
 	// If "labels" field is computed, set "terraform_labels" and "effective_labels" to computed.
 	// https://github.com/hashicorp/terraform-provider-google/issues/16217
-	if !d.GetRawPlan().GetAttr("labels").IsWhollyKnown() {
+	if !d.GetRawPlan().GetAttr(labelsField).IsWhollyKnown() {
 		if err := d.SetNewComputed("terraform_labels"); err != nil {
 			return fmt.Errorf("error setting terraform_labels to computed: %w", err)
 		}
@@ -131,17 +132,21 @@ func setLabelsFields(labelsField string, d *schema.ResourceDiff, meta interface{
 	return nil
 }
 
+// The CustomizeDiff func to set the values of terraform_labels and effective_labels fields
+// when labels field is at the root level and named "labels".
 func SetLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	return setLabelsFields("labels", d, meta)
 }
 
-func SetDiffForLabelsFields(labelsField string) func(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+// The CustomizeDiff func to set the values of terraform_labels and effective_labels fields
+// when labels field is at the root level and has a diffent name (e.g. resource_labels) than "labels"
+func SetDiffForLabelsWithCustomizedName(labelsField string) func(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	return func(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 		return setLabelsFields(labelsField, d, meta)
 	}
 }
 
-// It sets the value of terraform_labels and effective_labels inside the same object
+// It sets the values of terraform_labels and effective_labels inside the same object
 // when labels field is nested inside an object.
 // terraform_labels combines labels configured on resource and provider defaul labels.
 // effective_labels has all of labels in GCP, including labels configured on resource,
@@ -237,6 +242,8 @@ func setNestedLabelsFields(parentName, labelsField string, d *schema.ResourceDif
 	return nil
 }
 
+// Returns a CustomizeDiff to set the values of terraform_labels and effective_labels inside the same object
+// when labels field is nested inside an object. The labels field could have name "labels", "user_labels".
 func SetNestedLabelsDiff(parentName, labelsField string) func(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	return func(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 		return setNestedLabelsFields(parentName, labelsField, d, meta)
