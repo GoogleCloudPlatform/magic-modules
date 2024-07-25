@@ -50,7 +50,7 @@ func ResourceIamPolicy(parentSpecificSchema map[string]*schema.Schema, newUpdate
 		Delete: ResourceIamPolicyDelete(newUpdaterFunc),
 
 		// if non-empty, this will be used to send a deprecation message when the
-		// resource is used.
+		// resource is used. Another test LOL!
 		DeprecationMessage: settings.DeprecationMessage,
 
 		Schema: tpgresource.MergeSchemas(IamPolicyBaseSchema, parentSpecificSchema),
