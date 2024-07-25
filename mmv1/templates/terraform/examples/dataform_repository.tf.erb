@@ -14,11 +14,30 @@ resource "google_secret_manager_secret_version" "secret_version" {
   secret_data = "<%= ctx[:vars]['data'] %>"
 }
 
+resource "google_kms_key_ring" "keyring" {
+  provider = google-beta
+  
+  name     = "keyring-example"
+  location = "<%= ctx[:vars]['region'] %>"
+}
+
+resource "google_kms_crypto_key" "example_key" {
+  provider = google-beta
+  
+  name            = "crypto-key-example"
+  key_ring        = google_kms_key_ring.keyring.id
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
 resource "google_dataform_repository" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
   name = "<%= ctx[:vars]['dataform_repository_name'] %>"
   display_name = "<%= ctx[:vars]['dataform_repository_name'] %>"
   npmrc_environment_variables_secret_version = google_secret_manager_secret_version.secret_version.id
+  kmsKeyName = google_kms_crypto_key.example_key.id
 
   labels = {
     label_foo1 = "label-bar1"

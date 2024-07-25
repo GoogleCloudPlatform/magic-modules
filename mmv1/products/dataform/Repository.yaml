@@ -45,6 +45,7 @@ examples:
       dataform_repository_name: 'dataform_repository'
       data: secret-data
       secret_name: my-secret
+      region: 'us-central1'
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataform_repository_with_cloudsource_repo'
     # Although the Terraform config can be applied without error, the connection between Dataform and the SourceRepo aren't yet functional
