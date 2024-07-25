@@ -15,7 +15,7 @@
 name: 'PrivateCloud'
 base_url: 'projects/{{project}}/locations/{{location}}/privateClouds'
 self_link: 'projects/{{project}}/locations/{{location}}/privateClouds/{{name}}'
-delete_url: 'projects/{{project}}/locations/{{location}}/privateClouds/{{name}}?delay_hours=0'
+delete_url: 'projects/{{project}}/locations/{{location}}/privateClouds/{{name}}'
 create_url: 'projects/{{project}}/locations/{{location}}/privateClouds?privateCloudId={{name}}'
 update_verb: :PATCH
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -45,11 +45,12 @@ async: !ruby/object:Api::OpAsync
 import_format: ["projects/{{project}}/locations/{{location}}/privateClouds/{{name}}"]
 autogen_async: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  post_delete: "templates/terraform/post_delete/private_cloud.go.erb"
+  constants: templates/terraform/constants/vmwareengine_private_cloud.go.erb
   decoder: "templates/terraform/decoders/private_cloud.go.erb"
+  pre_delete: templates/terraform/pre_delete/vmwareengine_private_cloud.go.erb
+  post_delete: "templates/terraform/post_delete/private_cloud.go.erb"
   post_update: "templates/terraform/post_update/private_cloud.go.erb"
   update_encoder: "templates/terraform/update_encoder/private_cloud.go.erb"
-  constants: templates/terraform/constants/vmwareengine_private_cloud_type.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "vmware_engine_private_cloud_basic"
@@ -89,6 +90,16 @@ parameters:
     url_param_only: true
     description: |
       The ID of the PrivateCloud.
+
+virtual_fields:
+  - !ruby/object:Api::Type::Integer
+    name: "deletion_delay_hours"
+    description: |
+      The number of hours to delay this request. You can set this value to an hour between 0 to 8, where setting it to 0 starts the deletion request immediately. If no value is set, a default value is set at the API Level.
+  - !ruby/object:Api::Type::Boolean
+    name: "send_deletion_delay_hours_if_zero"
+    description: |
+      While set true, deletion_delay_hours value will be sent in the request even for zero value of the field. This field is only useful for setting 0 value to the deletion_delay_hours field. It can be used both alone and together with deletion_delay_hours.
 
 properties:
   - !ruby/object:Api::Type::String

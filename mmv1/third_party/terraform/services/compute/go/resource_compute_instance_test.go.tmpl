@@ -16,8 +16,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -1889,9 +1889,7 @@ func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 	t.Parallel()
 
 	var instance compute.Instance
-	{{- if ne $.TargetVersionName "ga" }}
 	var instance2 compute.Instance
-	{{- end }}
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1904,13 +1902,10 @@ func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
 					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance, true, "SEV"),
-					{{- if ne $.TargetVersionName "ga" }}
 					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar2", &instance2),
 					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance2, true, ""),
-					{{- end }}
 				),
 			},
-			{{- if ne $.TargetVersionName "ga" }}
 			{
 				Config: testAccComputeInstanceConfidentialInstanceConfigNoEnable(instanceName, "AMD Milan", "SEV_SNP"),
 				Check: resource.ComposeTestCheckFunc(
@@ -1920,7 +1915,6 @@ func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance2, false, "SEV_SNP"),
 				),
 			},
-			{{- end }}
 		},
 	})
 }
@@ -2641,7 +2635,6 @@ func TestAccComputeInstance_spotVM_update(t *testing.T) {
 	})
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeInstance_maxRunDuration_update(t *testing.T) {
 	t.Parallel()
 
@@ -2829,7 +2822,6 @@ func TestAccComputeInstance_spotVM_maxRunDuration_update(t *testing.T) {
 		},
 	})
 }
-{{- end }}
 
 func TestAccComputeInstance_localSsdRecoveryTimeout(t *testing.T) {
 	t.Parallel()
@@ -3158,6 +3150,8 @@ func TestAccComputeInstance_proactiveAttributionLabel(t *testing.T) {
 // The tests related to security_policy use network_edge_security_service resource
 // which can only exist one per region. Because of that, all the following tests must run serially.
 func TestAccComputeInstanceNetworkIntefaceWithSecurityPolicy(t *testing.T) {
+	// Consistently failing - https://github.com/hashicorp/terraform-provider-google/issues/17838
+	acctest.SkipIfVcr(t)
 	testCases := map[string]func(t *testing.T){
 		"two_access_config": testAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigs,
 		"two_nics_access_config_with_empty_nil_security_policy":   testAccComputeInstance_nic_securityPolicyCreateWithEmptyAndNullSecurityPolicies,
@@ -3785,7 +3779,6 @@ func testAccCheckComputeResourcePolicy(instance *compute.Instance, scheduleName 
 	}
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccCheckComputeInstanceMaxRunDuration(instance *compute.Instance, instanceMaxRunDurationWant compute.Duration) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if instance == nil {
@@ -3802,7 +3795,6 @@ func testAccCheckComputeInstanceMaxRunDuration(instance *compute.Instance, insta
 		return nil
 	}
 }
-{{- end }}
 
 func testAccCheckComputeInstanceLocalSsdRecoveryTimeout(instance *compute.Instance, instanceLocalSsdRecoveryTiemoutWant compute.Duration) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -4310,7 +4302,7 @@ func testAccCheckComputeInstanceHasAliasIpRange(instance *compute.Instance, subn
 	return func(s *terraform.State) error {
 		for _, networkInterface := range instance.NetworkInterfaces {
 			for _, aliasIpRange := range networkInterface.AliasIpRanges {
-				if aliasIpRange.SubnetworkRangeName == subnetworkRangeName && (aliasIpRange.IpCidrRange == iPCidrRange || tpgresource.IpCidrRangeDiffSuppress("ip_cidr_range", aliasIpRange.IpCidrRange, iPCidrRange, nil)) {
+				if aliasIpRange.SubnetworkRangeName == subnetworkRangeName && (aliasIpRange.IpCidrRange == iPCidrRange || tpgcompute.IpCidrRangeDiffSuppress("ip_cidr_range", aliasIpRange.IpCidrRange, iPCidrRange, nil)) {
 					return nil
 				}
 			}
@@ -4395,11 +4387,9 @@ func testAccCheckComputeInstanceHasConfidentialInstanceConfig(instance *compute.
 		if instance.ConfidentialInstanceConfig.EnableConfidentialCompute != EnableConfidentialCompute {
 			return fmt.Errorf("Wrong ConfidentialInstanceConfig EnableConfidentialCompute: expected %t, got, %t", EnableConfidentialCompute, instance.ConfidentialInstanceConfig.EnableConfidentialCompute)
 		}
-		{{- if ne $.TargetVersionName "ga" }}
 		if instance.ConfidentialInstanceConfig.ConfidentialInstanceType != ConfidentialInstanceType {
 			return fmt.Errorf("Wrong ConfidentialInstanceConfig ConfidentialInstanceType: expected %s, got, %s", ConfidentialInstanceType, instance.ConfidentialInstanceConfig.ConfidentialInstanceType)
 		}
-		{{- end }}
 
 		return nil
 	}
@@ -6476,7 +6466,7 @@ resource "google_compute_instance" "foobar" {
 func testAccComputeInstance_advancedMachineFeatures(instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-10"
+  family  = "debian-12"
   project = "debian-cloud"
 }
 
@@ -6504,7 +6494,7 @@ resource "google_compute_instance" "foobar" {
 func testAccComputeInstance_advancedMachineFeaturesUpdated(instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-10"
+  family  = "debian-12"
   project = "debian-cloud"
 }
 
@@ -7627,8 +7617,8 @@ resource "google_compute_instance" "foobar" {
 func testAccComputeInstance_shieldedVmConfig(instance string, enableSecureBoot bool, enableVtpm bool, enableIntegrityMonitoring bool) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "centos-7"
-  project = "centos-cloud"
+  family  = "debian-12"
+  project = "debian-cloud"
 }
 
 resource "google_compute_instance" "foobar" {
@@ -7681,9 +7671,7 @@ resource "google_compute_instance" "foobar" {
 
   confidential_instance_config {
     enable_confidential_compute       = true
-{{- if ne $.TargetVersionName "ga" }}
     confidential_instance_type        = %q
-{{- end }}
   }
 
   scheduling {
@@ -7692,7 +7680,6 @@ resource "google_compute_instance" "foobar" {
 
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 resource "google_compute_instance" "foobar2" {
   name         = "%s2"
   machine_type = "n2d-standard-2"
@@ -7717,15 +7704,9 @@ resource "google_compute_instance" "foobar2" {
   }
 
 }
-{{- end }}
-{{- if eq $.TargetVersionName "ga" }}
-`, instance)
-{{- else }}
 `, instance, confidentialInstanceType, instance)
-{{- end }}
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeInstanceConfidentialInstanceConfigNoEnable(instance string, minCpuPlatform, confidentialInstanceType string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image2" {
@@ -7788,7 +7769,6 @@ resource "google_compute_instance" "foobar4" {
 }
 `, instance, minCpuPlatform, confidentialInstanceType, instance, minCpuPlatform, confidentialInstanceType)
 }
-{{- end }}
 
 func testAccComputeInstance_attributionLabelCreate(instance, add, strategy string) string {
 	return fmt.Sprintf(`
@@ -7938,8 +7918,8 @@ resource "google_compute_instance" "foobar" {
 func testAccComputeInstance_enableDisplay(instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "centos-7"
-  project = "centos-cloud"
+  family  = "debian-12"
+  project = "debian-cloud"
 }
 
 resource "google_compute_instance" "foobar" {
@@ -7967,8 +7947,8 @@ resource "google_compute_instance" "foobar" {
 func testAccComputeInstance_enableDisplayUpdated(instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "centos-7"
-  project = "centos-cloud"
+  family  = "debian-12"
+  project = "debian-cloud"
 }
 
 resource "google_compute_instance" "foobar" {
@@ -8362,7 +8342,6 @@ resource "google_compute_instance" "foobar" {
 `, instance)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeInstance_standardVM_maxRunDuration(instance string, instanceTerminationAction string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -8473,7 +8452,6 @@ resource "google_compute_instance" "foobar" {
 }
 `, instance, instanceTerminationAction)
 }
-{{- end }}
 
 
 func testAccComputeInstance_spotVM_maxRunDuration(instance string, instanceTerminationAction string) string {
@@ -8503,12 +8481,10 @@ resource "google_compute_instance" "foobar" {
     automatic_restart = false
     preemptible = true
     instance_termination_action = "%s"
-{{- if ne $.TargetVersionName "ga" }}
     max_run_duration {
         nanos = 123
         seconds = 60
     }
-{{- end }}
   }
 }
 `, instance, instanceTerminationAction)

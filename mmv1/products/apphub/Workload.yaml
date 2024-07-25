@@ -45,7 +45,7 @@ examples:
       application_id: "example-application-1"
       service_project_attachment_id: "project-1"
       display_name: "Example Service Full"
-      description: "Register service for testing"
+      description: 'Register service for testing'
       business_name: "Alice"
       business_email: "alice@google.com"
       developer_name: "Bob"
@@ -82,7 +82,7 @@ update_mask: true
 parameters:
   - !ruby/object:Api::Type::String
     name: location
-    description: 'Part of `parent`.  Full resource name of a parent Application. Example: projects/{HOST_PROJECT_ID}/locations/{LOCATION}/applications/{APPLICATION_ID} '
+    description: 'Part of `parent`.  Full resource name of a parent Application. Example: projects/{HOST_PROJECT_ID}/locations/{LOCATION}/applications/{APPLICATION_ID}'
     url_param_only: true
     required: true
     immutable: true
@@ -94,7 +94,7 @@ parameters:
     immutable: true
   - !ruby/object:Api::Type::String
     name: workloadId
-    description: 'The Workload identifier. '
+    description: 'The Workload identifier.'
     url_param_only: true
     required: true
     immutable: true
@@ -102,59 +102,59 @@ properties:
   - !ruby/object:Api::Type::String
     name: name
     output: true
-    description: "Identifier. The resource name of the Workload. Format:\"projects/{host-project-id}/locations/{location}/applications/{application-id}/workloads/{workload-id}\" "
+    description: "Identifier. The resource name of the Workload. Format:\"projects/{host-project-id}/locations/{location}/applications/{application-id}/workloads/{workload-id}\""
   - !ruby/object:Api::Type::String
     name: displayName
-    description: 'User-defined name for the Workload. '
+    description: 'User-defined name for the Workload.'
   - !ruby/object:Api::Type::String
     name: description
-    description: 'User-defined description of a Workload. '
+    description: 'User-defined description of a Workload.'
   - !ruby/object:Api::Type::NestedObject
+    output: true
+    name: workloadReference
+    description: 'Reference of an underlying compute resource represented by the Workload.'
     properties:
       - !ruby/object:Api::Type::String
         name: uri
-        description: 'Output only. The underlying compute resource uri. '
+        description: 'Output only. The underlying compute resource uri.'
         output: true
-    output: true
-    name: workloadReference
-    description: 'Reference of an underlying compute resource represented by the Workload. '
   - !ruby/object:Api::Type::NestedObject
+    output: true
+    name: workloadProperties
+    description: 'Properties of an underlying compute resource represented by the Workload.'
     properties:
       - !ruby/object:Api::Type::String
         name: gcpProject
         description: "Output only. The service project identifier that the underlying
-          cloud resource resides in. Empty for non cloud resources. "
+          cloud resource resides in. Empty for non cloud resources."
         output: true
       - !ruby/object:Api::Type::String
         name: location
         description: "Output only. The location that the underlying compute resource resides
-          in (e.g us-west1). "
+          in (e.g us-west1)."
         output: true
       - !ruby/object:Api::Type::String
         name: zone
         description: "Output only. The location that the underlying compute resource resides
-          in if it is zonal (e.g us-west1-a). "
+          in if it is zonal (e.g us-west1-a)."
         output: true
-    output: true
-    name: workloadProperties
-    description: 'Properties of an underlying compute resource represented by the Workload. '
   - !ruby/object:Api::Type::String
     name: discoveredWorkload
     diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
-    description: 'Immutable. The resource name of the original discovered workload. '
+    description: 'Immutable. The resource name of the original discovered workload.'
     required: true
     immutable: true
   - !ruby/object:Api::Type::NestedObject
     name: attributes
-    description: 'Consumer provided attributes. '
+    description: 'Consumer provided attributes.'
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: criticality
-        description: 'Criticality of the Application, Service, or Workload '
+        description: 'Criticality of the Application, Service, or Workload'
         properties:
           - !ruby/object:Api::Type::Enum
             name: type
-            description: 'Criticality type. '
+            description: 'Criticality type.'
             required: true
             values:
               - :MISSION_CRITICAL
@@ -163,11 +163,11 @@ properties:
               - :LOW
       - !ruby/object:Api::Type::NestedObject
         name: environment
-        description: 'Environment of the Application, Service, or Workload '
+        description: 'Environment of the Application, Service, or Workload'
         properties:
           - !ruby/object:Api::Type::Enum
             name: type
-            description: 'Environment type. '
+            description: 'Environment type.'
             required: true
             values:
               - :PRODUCTION
@@ -176,51 +176,51 @@ properties:
               - :DEVELOPMENT
       - !ruby/object:Api::Type::Array
         name: developerOwners
-        description: 'Developer team that owns development and coding. '
+        description: 'Developer team that owns development and coding.'
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String
               name: displayName
-              description: 'Contact''s name. '
+              description: 'Contact''s name.'
             - !ruby/object:Api::Type::String
               name: email
-              description: 'Email address of the contacts. '
+              description: 'Email address of the contacts.'
               required: true
       - !ruby/object:Api::Type::Array
         name: operatorOwners
-        description: 'Operator team that ensures runtime and operations. '
+        description: 'Operator team that ensures runtime and operations.'
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String
               name: displayName
-              description: 'Contact''s name. '
+              description: 'Contact''s name.'
             - !ruby/object:Api::Type::String
               name: email
-              description: 'Email address of the contacts. '
+              description: 'Email address of the contacts.'
               required: true
       - !ruby/object:Api::Type::Array
         name: businessOwners
-        description: 'Business team that ensures user needs are met and value is delivered '
+        description: 'Business team that ensures user needs are met and value is delivered'
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String
               name: displayName
-              description: 'Contact''s name. '
+              description: 'Contact''s name.'
             - !ruby/object:Api::Type::String
               name: email
-              description: 'Email address of the contacts. '
+              description: 'Email address of the contacts.'
               required: true
   - !ruby/object:Api::Type::String
     name: createTime
-    description: 'Output only. Create time. '
+    description: 'Output only. Create time.'
     output: true
   - !ruby/object:Api::Type::String
     name: updateTime
-    description: 'Output only. Update time. '
+    description: 'Output only. Update time.'
     output: true
   - !ruby/object:Api::Type::String
     name: uid
-    description: "Output only. A universally unique identifier (UUID) for the `Workload` in the UUID4 format. "
+    description: "Output only. A universally unique identifier (UUID) for the `Workload` in the UUID4 format."
     output: true
   - !ruby/object:Api::Type::String
     name: state

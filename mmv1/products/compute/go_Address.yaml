@@ -43,6 +43,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
@@ -114,7 +115,7 @@ properties:
       The type of address to reserve.
       Note: if you set this argument's value as `INTERNAL` you need to leave the `network_tier` argument unset in that resource block.
     custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
-    default_value: EXTERNAL
+    default_value: "EXTERNAL"
     enum_values:
       - 'INTERNAL'
       - 'EXTERNAL'

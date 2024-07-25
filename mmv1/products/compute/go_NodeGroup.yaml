@@ -32,6 +32,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
@@ -122,7 +123,7 @@ properties:
     type: String
     description: |
       Specifies how to handle instances when a node in the group undergoes maintenance. Set to one of: DEFAULT, RESTART_IN_PLACE, or MIGRATE_WITHIN_NODE_GROUP. The default value is DEFAULT.
-    default_value: DEFAULT
+    default_value: "DEFAULT"
   - name: 'maintenanceWindow'
     type: NestedObject
     description: |
@@ -193,6 +194,7 @@ properties:
         key_description: |
           The project ID.
         value_type:
+          name: projectConfig
           type: NestedObject
           properties:
             - name: 'projectId'

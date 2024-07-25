@@ -31,6 +31,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/global/operations/{{op_id}}'
@@ -120,7 +121,7 @@ properties:
     update_url: 'projects/{{project}}/global/targetHttpsProxies/{{name}}/setQuicOverride'
     update_verb: 'POST'
     custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
-    default_value: NONE
+    default_value: "NONE"
     enum_values:
       - 'NONE'
       - 'ENABLE'

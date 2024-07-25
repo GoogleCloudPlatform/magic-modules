@@ -27,6 +27,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
@@ -44,6 +45,7 @@ iam_policy:
   allowed_iam_role: 'roles/compute.osLogin'
   parent_resource_attribute: 'instance_name'
   iam_conditions_request_type: 'QUERY_PARAM'
+  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
 custom_code:
 examples:
   - name: 'instance_basic'
@@ -593,13 +595,13 @@ properties:
         at_least_one_of:
           - 'confidential_instance_config.0.enable_confidential_compute'
           - 'confidential_instance_config.0.confidential_instance_type'
+        deprecation_message: '`enableConfidentialCompute` is deprecated and will be removed in a future major release. Use `confidentialInstanceType: SEV` instead.'
       - name: 'confidentialInstanceType'
         type: Enum
         description: |
           The confidential computing technology the instance uses.
           SEV is an AMD feature. One of the following values: SEV, SEV_SNP.
           If SEV_SNP, min_cpu_platform = "AMD Milan" is currently required.
-        min_version: 'beta'
         at_least_one_of:
           - 'confidential_instance_config.0.enable_confidential_compute'
           - 'confidential_instance_config.0.confidential_instance_type'

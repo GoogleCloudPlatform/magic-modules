@@ -44,6 +44,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
@@ -60,6 +61,7 @@ collection_url_key: 'items'
 iam_policy:
   parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}'
+  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/zones/{{zone}}/disks/{{name}}'
     - '{{name}}'
@@ -347,8 +349,8 @@ properties:
       Specifies the disk interface to use for attaching this disk, which is either SCSI or NVME. The default is SCSI.
     min_version: 'beta'
     url_param_only: true
-    diff_suppress_func: 'tpgresource.AlwaysDiffSuppress'
-    default_value: SCSI
+    diff_suppress_func: 'AlwaysDiffSuppress'
+    default_value: "SCSI"
     deprecation_message: '`interface` is deprecated and will be removed in a future major release. This field is no longer used and can be safely removed from your configurations; disk interfaces are automatically determined on attachment.'
   - name: 'sourceDisk'
     type: String
@@ -384,7 +386,7 @@ properties:
     diff_suppress_func: 'tpgresource.CompareResourceNames'
     custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
     custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
-    default_value: pd-standard
+    default_value: "pd-standard"
     resource: 'DiskType'
     imports: 'selfLink'
   - name: 'image'
