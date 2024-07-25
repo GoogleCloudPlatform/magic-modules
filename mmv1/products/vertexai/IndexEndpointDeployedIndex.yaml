@@ -27,6 +27,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 async: !ruby/object:Api::OpAsync
   actions:
     - create
+    - update
     - delete
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
