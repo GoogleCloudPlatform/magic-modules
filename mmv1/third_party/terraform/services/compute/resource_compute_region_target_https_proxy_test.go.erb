@@ -928,6 +928,10 @@ resource "google_network_security_server_tls_policy" "default" {
     client_validation_mode = "REJECT_INVALID"
     client_validation_trust_config = "projects/${data.google_project.project.number}/locations/us-central1/trustConfigs/${google_certificate_manager_trust_config.default.name}"
   }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "google_compute_region_url_map" "default-https" {
