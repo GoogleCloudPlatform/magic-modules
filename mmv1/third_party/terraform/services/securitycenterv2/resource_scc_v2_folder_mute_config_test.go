@@ -50,7 +50,7 @@ func testAccSecurityCenterV2FolderMuteConfig_basic(context map[string]interface{
 	return acctest.Nprintf(`
 resource "google_scc_v2_folder_mute_config" "default" {
   mute_config_id = "tf-test-config-%{random_suffix}"
-  folder   = "%{folder}"
+  folder         = google_folder.folder.folder_id
   location       = "global"
   description    = "A test folder mute config"
   filter         = "severity = \"HIGH\""
@@ -63,7 +63,7 @@ func testAccSecurityCenterV2FolderMuteConfig_update(context map[string]interface
 	return acctest.Nprintf(`
 resource "google_scc_v2_folder_mute_config" "default" {
   mute_config_id = "tf-test-config-%{random_suffix}"
-  folder   = "%{folder}"
+  folder         = google_folder.folder.folder_id
   location       = "global"
   description    = "An updated test folder mute config"
   filter         = "severity = \"HIGH\""
