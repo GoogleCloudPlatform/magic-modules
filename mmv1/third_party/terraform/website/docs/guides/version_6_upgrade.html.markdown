@@ -120,17 +120,20 @@ Removed in favor of field `settings.ip_configuration.ssl_mode`.
 
 An empty value means the setting should be cleared.
 
+## Resource: `google_cloud_run_v2_job`
+
+### retyped `containers.env` to SET from ARRAY
+
+Previously, `containers.env` was a list, making it order-dependent. It is now a set.
+
+If you were relying on accessing an individual environment variable by index (for example, `google_cloud_run_v2_job.template.containers.0.env.0.name`), then that will now need to by hash (for example, `google_cloud_run_v2_job.template.containers.0.env.<some-hash>.name`).
+
 ## Resource: `google_project`
 
-### Project deletion now prevented by default with `deletion_policy`
+### `liveness_probe` no longer defaults from API
 
-The field `deletion_policy` has been added with a default value of `PREVENT`. This field prevents
-Terraform from destroying or recreating the project. In 6.0.0, existing projects will have 
-`deletion_policy` set to `PREVENT` during the next refresh unless otherwise set in configuration.
-
-**`deletion_policy` does NOT prevent deletion outside of Terraform.**
-
-Setting `deletion_policy` to `ABANDON` allows the resource to be abandoned rather than deleted. To disable any kind of deletion protection, explicitly set this field to `NONE` in configuration and then run `terraform apply` to apply the change.
+Cloud Run does not provide a default value for liveness probe. Now removing this field
+will remove the liveness probe from the Cloud Run service.
 ## Resource: `google_compute_backend_service`
 
 ### `iap.enabled` is now required in the `iap` block
