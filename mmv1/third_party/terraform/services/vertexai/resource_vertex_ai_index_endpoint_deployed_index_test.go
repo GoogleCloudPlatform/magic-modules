@@ -41,7 +41,7 @@ func TestAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedInde
 	})
 }
 
-func testAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedIndexDedicatedResourcesExample(context map[string]interface{}) string {
+func testAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedIndexDedicatedResourcesBasicExample(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_vertex_ai_index_endpoint_deployed_index" "dedicated_resources" {
   depends_on = [ google_vertex_ai_index_endpoint.vertex_endpoint ]
@@ -115,7 +115,7 @@ data "google_project" "project" {}
 `, context)
 }
 
-func testAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedIndexDedicatedResourcesExample_mutated(context map[string]interface{}) string {
+func testAccVertexAIIndexEndpointDeployedIndex_vertexAiIndexEndpointDeployedIndexDedicatedResourcesBasicExample_mutated(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_vertex_ai_index_endpoint_deployed_index" "dedicated_resources" {
   depends_on = [ google_vertex_ai_index_endpoint.vertex_endpoint ]
