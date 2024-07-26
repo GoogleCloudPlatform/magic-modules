@@ -184,6 +184,7 @@ resource "google_project" "basic" {
   project_id = "tf-test-id%{random_suffix}"
   name       = "tf-test-id%{random_suffix}"
   org_id     = "%{org_id}"
+  deletion_policy = "NONE"
 }
 
 
@@ -336,6 +337,7 @@ resource "google_project" "basic" {
   project_id = "tf-test-id%{random_suffix}"
   name       = "tf-test-id%{random_suffix}"
   org_id     = "%{org_id}"
+  deletion_policy = "NONE"
 }
 
 
@@ -373,6 +375,7 @@ resource "google_project" "basic" {
   project_id = "tf-test-id%{random_suffix}"
   name       = "tf-test-id%{random_suffix}"
   org_id     = "%{org_id}"
+  deletion_policy = "NONE"
 }
 
 

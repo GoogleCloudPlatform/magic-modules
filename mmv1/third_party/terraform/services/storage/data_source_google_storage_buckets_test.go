@@ -70,6 +70,7 @@ resource "google_project" "acceptance" {
   project_id      = local.project_id
   org_id          = local.organization
   billing_account = local.billing_account
+  deletion_policy = "NONE"
 }
 
 resource "google_storage_bucket" "one" {

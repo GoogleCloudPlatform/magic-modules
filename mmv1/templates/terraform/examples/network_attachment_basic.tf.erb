@@ -35,6 +35,7 @@ resource "google_project" "rejected_producer_project" {
     name            = "<%= ctx[:vars]['rejected_producer_project_name'] %>"
     org_id          = "<%= ctx[:test_env_vars]['org_id'] %>"
     billing_account = "<%= ctx[:test_env_vars]['billing_account'] %>"
+    deletion_policy = "NONE"
 }
 
 resource "google_project" "accepted_producer_project" {
@@ -42,4 +43,5 @@ resource "google_project" "accepted_producer_project" {
     name            = "<%= ctx[:vars]['accepted_producer_project_name'] %>"
     org_id          = "<%= ctx[:test_env_vars]['org_id'] %>"
     billing_account = "<%= ctx[:test_env_vars]['billing_account'] %>"
+    deletion_policy = "NONE"
 }

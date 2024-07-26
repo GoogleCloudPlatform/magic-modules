@@ -128,6 +128,7 @@ resource "google_project" "project" {
   project_id      = "%{project_id}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
+  deletion_policy = "NONE"
 }
 resource "google_project_service" "mcsd" {
   project = google_project.project.project_id
@@ -164,6 +165,7 @@ resource "google_project" "project" {
   project_id      = "%{project_id}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
+  deletion_policy = "NONE"
 }
 resource "google_project_service" "mcsd" {
   project = google_project.project.project_id
@@ -213,6 +215,7 @@ resource "google_project" "project" {
   project_id      = "%{project_id}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
+  deletion_policy = "NONE"
 }
 resource "google_project_service" "mcsd" {
   project = google_project.project.project_id
@@ -250,6 +253,7 @@ resource "google_project" "project" {
   project_id      = "%{project_id}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
+  deletion_policy = "NONE"
 }
 resource "google_project_service" "mcsd" {
   project = google_project.project.project_id
@@ -286,6 +290,7 @@ resource "google_project" "project" {
   project_id      = "%{project_id}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
+  deletion_policy = "NONE"
 }
 resource "google_project_service" "mcsd" {
   project = google_project.project.project_id

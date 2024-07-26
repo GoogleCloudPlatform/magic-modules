@@ -43,6 +43,7 @@ resource "google_project" "project" {
   project_id = "tf-test%{random_suffix}"
   name       = "tf-test%{random_suffix}"
   org_id     = "%{org_id}"
+  deletion_policy = "NONE"
 }
 
 resource "google_project_service" "project_service" {

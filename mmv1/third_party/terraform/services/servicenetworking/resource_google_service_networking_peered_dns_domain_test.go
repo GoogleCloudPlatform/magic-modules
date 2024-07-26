@@ -36,6 +36,7 @@ resource "google_project" "host" {
   name            = "%s"
   org_id          = "%s"
   billing_account = "%s"
+  deletion_policy = "NONE"
 }
 
 resource "google_project_service" "host-compute" {

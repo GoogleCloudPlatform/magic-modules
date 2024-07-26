@@ -4,6 +4,7 @@ resource "google_project" "default" {
   project_id = "{{index $.Vars "project_name"}}"
   name       = "{{index $.Vars "project_name"}}"
   org_id     = "{{index $.TestEnvVars "org_id"}}"
+  deletion_policy = "NONE"
 
   labels = {
     "firebase" = "enabled"

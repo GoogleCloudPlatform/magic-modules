@@ -3,6 +3,7 @@ resource "google_project" "my_project" {
   name       = "tf-test-project"
   project_id = "{{index $.Vars "project_id"}}"
   org_id     = "{{index $.TestEnvVars "org_id"}}"
+  deletion_policy = "NONE"
 }
 
 resource "google_service_usage_consumer_quota_override" "override" {
