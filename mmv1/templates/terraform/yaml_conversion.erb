@@ -491,6 +491,9 @@ examples:
 <%      unless example.min_version.nil? -%>
     min_version: '<%= example.min_version %>'
 <%      end -%>
+<%      unless example.region_override.nil? -%>
+    region_override: '<%= example.region_override %>'
+<%      end -%>
 <%      unless example.vars.nil? -%>
 <%      unless example.vars.empty? -%>
     vars:
