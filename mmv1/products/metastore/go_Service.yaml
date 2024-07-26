@@ -177,7 +177,6 @@ properties:
     type: KeyValueLabels
     description: 'User-defined labels for the metastore service.'
   # This is an x-product resource reference.
-    immutable: false
   - name: 'network'
     type: String
     description: |

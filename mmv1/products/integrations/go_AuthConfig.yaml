@@ -1,0 +1,476 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'AuthConfig'
+description: |
+  The AuthConfig resource use to hold channels and connection config data.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/application-integration/docs/overview'
+    'Manage authentication profiles': 'https://cloud.google.com/application-integration/docs/configure-authentication-profiles'
+  api: 'https://cloud.google.com/application-integration/docs/reference/rest/v1/projects.locations.authConfigs'
+docs:
+id_format: '{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/authConfigs'
+self_link: '{{name}}'
+update_verb: 'PATCH'
+mutex: '{{name}}'
+import_format:
+  - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  pre_create: 'templates/terraform/pre_create/go/integrations_auth_config.go.tmpl'
+  post_create: 'templates/terraform/post_create/go/set_computed_name.tmpl'
+  pre_update: 'templates/terraform/pre_update/go/integrations_auth_config.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/go/self_link_as_name.tmpl'
+examples:
+  - name: 'integrations_auth_config_basic'
+    primary_resource_id: 'basic_example'
+    vars:
+      auth_config_name: 'test-authconfig'
+    skip_test: true
+  - name: 'integrations_auth_config_advance'
+    primary_resource_id: 'advance_example'
+    vars:
+      auth_config_name: 'test-authconfig'
+    skip_docs: true
+  - name: 'integrations_auth_config_username_and_password'
+    primary_resource_id: 'username_and_password_example'
+    vars:
+      auth_config_name: 'test-authconfig-username-and-password'
+    skip_docs: true
+  - name: 'integrations_auth_config_oauth2_authorization_code'
+    primary_resource_id: 'oauth2_authotization_code_example'
+    vars:
+      auth_config_name: 'test-authconfig-oauth2-authorization-code'
+    skip_docs: true
+  - name: 'integrations_auth_config_oauth2_client_credentials'
+    primary_resource_id: 'oauth2_client_credentials_example'
+    vars:
+      auth_config_name: 'test-authconfig-oauth2-client-credentials'
+    skip_docs: true
+  - name: 'integrations_auth_config_jwt'
+    primary_resource_id: 'jwt_example'
+    vars:
+      auth_config_name: 'test-authconfig-jwt'
+    skip_docs: true
+  - name: 'integrations_auth_config_auth_token'
+    primary_resource_id: 'auth_token_example'
+    vars:
+      auth_config_name: 'test-authconfig-auth-token'
+    skip_docs: true
+  - name: 'integrations_auth_config_service_account'
+    primary_resource_id: 'service_account_example'
+    vars:
+      auth_config_name: 'test-authconfig-service-account'
+      service_account_id: 'sa'
+    skip_docs: true
+  - name: 'integrations_auth_config_oidc_token'
+    primary_resource_id: 'oidc_token_example'
+    vars:
+      auth_config_name: 'test-authconfig-oidc-token'
+      service_account_id: 'sa'
+    skip_docs: true
+  - name: 'integrations_auth_config_client_certificate_only'
+    primary_resource_id: 'client_certificate_example'
+    vars:
+      auth_config_name: 'test-authconfig-client-certificate'
+    skip_docs: true
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      Location in which client needs to be provisioned.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      Resource name of the auth config.
+    output: true
+  - name: 'displayName'
+    type: String
+    description: |
+      The name of the auth config.
+    required: true
+  - name: 'description'
+    type: String
+    description: |
+      A description of the auth config.
+  - name: 'certificateId'
+    type: String
+    description: |
+      Certificate id for client certificate.
+    output: true
+  - name: 'credentialType'
+    type: Enum
+    description: |
+      Credential type of the encrypted credential.
+    output: true
+    enum_values:
+      - 'USERNAME_AND_PASSWORD'
+      - 'OAUTH2_AUTHORIZATION_CODE'
+      - 'OAUTH2_IMPLICIT'
+      - 'OAUTH2_CLIENT_CREDENTIALS'
+      - 'OAUTH2_RESORUCE_OWNER_CREDENTIALS'
+      - 'JWT'
+      - 'AUTH_TOKEN'
+      - 'SERVICE_ACCOUNT'
+      - 'CLIENT_CERTIFICATE_ONLY'
+      - 'OIDC_TOKEN'
+  - name: 'creatorEmail'
+    type: String
+    description: |
+      The creator's email address. Generated based on the End User Credentials/LOAS role of the user making the call.
+    output: true
+  - name: 'createTime'
+    type: Time
+    description: |
+      The timestamp when the auth config is created.
+
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true
+  - name: 'lastModifierEmail'
+    type: String
+    description: |
+      The last modifier's email address. Generated based on the End User Credentials/LOAS role of the user making the call.
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      The timestamp when the auth config is modified.
+
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true
+  - name: 'visibility'
+    type: Enum
+    description: |
+      The visibility of the auth config.
+    enum_values:
+      - 'PRIVATE'
+      - 'CLIENT_VISIBLE'
+  - name: 'state'
+    type: Enum
+    description: |
+      The status of the auth config.
+    output: true
+    enum_values:
+      - 'VALID'
+      - 'INVALID'
+      - 'SOFT_DELETED'
+      - 'EXPIRED'
+      - 'UNAUTHORIZED'
+      - 'UNSUPPORTED'
+  - name: 'reason'
+    type: String
+    description: |
+      The reason / details of the current status.
+    output: true
+  - name: 'expiryNotificationDuration'
+    type: Array
+    description: |
+      User can define the time to receive notification after which the auth config becomes invalid. Support up to 30 days. Support granularity in hours.
+
+      A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
+    item_type:
+      type: String
+  - name: 'validTime'
+    type: String
+    description: |
+      The time until the auth config is valid. Empty or max value is considered the auth config won't expire.
+
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true
+  - name: 'overrideValidTime'
+    type: String
+    description: |
+      User provided expiry time to override. For the example of Salesforce, username/password credentials can be valid for 6 months depending on the instance settings.
+
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+  - name: 'encryptedCredential'
+    type: String
+    description: |
+      Auth credential encrypted by Cloud KMS. Can be decrypted as Credential with proper KMS key.
+
+      A base64-encoded string.
+    output: true
+  - name: 'decryptedCredential'
+    type: NestedObject
+    description: |
+      Raw auth credentials.
+    properties:
+      - name: 'credentialType'
+        type: ResourceRef
+        description: |
+          Credential type associated with auth configs.
+        required: true
+        resource: 'AuthConfig'
+        imports: 'credentialType'
+      - name: 'usernameAndPassword'
+        type: NestedObject
+        description: |
+          Username and password credential.
+        conflicts:
+          - decryptedCredential.0.oauth2_authorization_code
+          - decryptedCredential.0.oauth2_client_credentials
+          - decryptedCredential.0.jwt
+          - decryptedCredential.0.auth_token
+          - decryptedCredential.0.service_account_credentials
+          - decryptedCredential.0.oidc_token
+        properties:
+          - name: 'username'
+            type: String
+            description: |
+              Username to be used.
+          - name: 'password'
+            type: String
+            description: |
+              Password to be used.
+      - name: 'oauth2AuthorizationCode'
+        type: NestedObject
+        description: |
+          OAuth2 authorization code credential.
+        conflicts:
+          - decryptedCredential.0.username_and_password
+          - decryptedCredential.0.oauth2_client_credentials
+          - decryptedCredential.0.jwt
+          - decryptedCredential.0.auth_token
+          - decryptedCredential.0.service_account_credentials
+          - decryptedCredential.0.oidc_token
+        properties:
+          - name: 'clientId'
+            type: String
+            description: |
+              The client's id.
+          - name: 'clientSecret'
+            type: String
+            description: |
+              The client's secret.
+          - name: 'scope'
+            type: String
+            description: |
+              A space-delimited list of requested scope permissions.
+          - name: 'authEndpoint'
+            type: String
+            description: |
+              The auth url endpoint to send the auth code request to.
+          - name: 'tokenEndpoint'
+            type: String
+            description: |
+              The token url endpoint to send the token request to.
+      - name: 'oauth2ClientCredentials'
+        type: NestedObject
+        description: |
+          OAuth2 client credentials.
+        conflicts:
+          - decryptedCredential.0.username_and_password
+          - decryptedCredential.0.oauth2_authorization_code
+          - decryptedCredential.0.jwt
+          - decryptedCredential.0.auth_token
+          - decryptedCredential.0.service_account_credentials
+          - decryptedCredential.0.oidc_token
+        properties:
+          - name: 'clientId'
+            type: String
+            description: |
+              The client's ID.
+          - name: 'clientSecret'
+            type: String
+            description: |
+              The client's secret.
+          - name: 'tokenEndpoint'
+            type: String
+            description: |
+              The token endpoint is used by the client to obtain an access token by presenting its authorization grant or refresh token.
+          - name: 'scope'
+            type: String
+            description: |
+              A space-delimited list of requested scope permissions.
+          - name: 'tokenParams'
+            type: NestedObject
+            description: |
+              Token parameters for the auth request.
+            properties:
+              - name: 'entries'
+                type: Array
+                description: |
+                  A list of parameter map entries.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: 'key'
+                      type: NestedObject
+                      description: |
+                        Key of the map entry.
+                      properties:
+                        - name: 'literalValue'
+                          type: NestedObject
+                          description: |
+                            Passing a literal value
+                          properties:
+                            - name: 'stringValue'
+                              type: String
+                              description: |
+                                String.
+                    - name: 'value'
+                      type: NestedObject
+                      description: |
+                        Value of the map entry.
+                      properties:
+                        - name: 'literalValue'
+                          type: NestedObject
+                          description: |
+                            Passing a literal value
+                          properties:
+                            - name: 'stringValue'
+                              type: String
+                              description: |
+                                String.
+          - name: 'requestType'
+            type: Enum
+            description: |
+              Represent how to pass parameters to fetch access token
+            enum_values:
+              - 'REQUEST_TYPE_UNSPECIFIED'
+              - 'REQUEST_BODY'
+              - 'QUERY_PARAMETERS'
+              - 'ENCODED_HEADER'
+      - name: 'jwt'
+        type: NestedObject
+        description: |
+          JWT credential.
+        conflicts:
+          - decryptedCredential.0.username_and_password
+          - decryptedCredential.0.oauth2_authorization_code
+          - decryptedCredential.0.oauth2_client_credentials
+          - decryptedCredential.0.auth_token
+          - decryptedCredential.0.service_account_credentials
+          - decryptedCredential.0.oidc_token
+        properties:
+          - name: 'jwtHeader'
+            type: String
+            description: |
+              Identifies which algorithm is used to generate the signature.
+          - name: 'jwtPayload'
+            type: String
+            description: |
+              Contains a set of claims. The JWT specification defines seven Registered Claim Names which are the standard fields commonly included in tokens. Custom claims are usually also included, depending on the purpose of the token.
+          - name: 'secret'
+            type: String
+            description: |
+              User's pre-shared secret to sign the token.
+          - name: 'jwt'
+            type: String
+            description: |
+              The token calculated by the header, payload and signature.
+            output: true
+      - name: 'authToken'
+        type: NestedObject
+        description: |
+          Auth token credential.
+        conflicts:
+          - decryptedCredential.0.username_and_password
+          - decryptedCredential.0.oauth2_authorization_code
+          - decryptedCredential.0.oauth2_client_credentials
+          - decryptedCredential.0.jwt
+          - decryptedCredential.0.service_account_credentials
+          - decryptedCredential.0.oidc_token
+        properties:
+          - name: 'type'
+            type: String
+            description: |
+              Authentication type, e.g. "Basic", "Bearer", etc.
+          - name: 'token'
+            type: String
+            description: |
+              The token for the auth type.
+      - name: 'serviceAccountCredentials'
+        type: NestedObject
+        description: |
+          Service account credential.
+        conflicts:
+          - decryptedCredential.0.username_and_password
+          - decryptedCredential.0.oauth2_authorization_code
+          - decryptedCredential.0.oauth2_client_credentials
+          - decryptedCredential.0.jwt
+          - decryptedCredential.0.auth_token
+          - decryptedCredential.0.oidc_token
+        properties:
+          - name: 'serviceAccount'
+            type: String
+            description: |
+              Name of the service account that has the permission to make the request.
+          - name: 'scope'
+            type: String
+            description: |
+              A space-delimited list of requested scope permissions.
+      - name: 'oidcToken'
+        type: NestedObject
+        description: |
+          Google OIDC ID Token.
+        conflicts:
+          - decryptedCredential.0.username_and_password
+          - decryptedCredential.0.oauth2_authorization_code
+          - decryptedCredential.0.oauth2_client_credentials
+          - decryptedCredential.0.jwt
+          - decryptedCredential.0.auth_token
+          - decryptedCredential.0.service_account_credentials
+        properties:
+          - name: 'serviceAccountEmail'
+            type: String
+            description: |
+              The service account email to be used as the identity for the token.
+          - name: 'audience'
+            type: String
+            description: |
+              Audience to be used when generating OIDC token. The audience claim identifies the recipients that the JWT is intended for.
+          - name: 'token'
+            type: String
+            description: |
+              ID token obtained for the service account.
+            output: true
+          - name: 'tokenExpireTime'
+            type: String
+            description: |
+              The approximate time until the token retrieved is valid.
+
+              A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+            output: true
+  - name: 'client_certificate'
+    type: NestedObject
+    description: |
+      Raw client certificate
+    ignore_read: true
+    properties:
+      - name: 'ssl_certificate'
+        type: String
+        description: |
+          The ssl certificate encoded in PEM format. This string must include the begin header and end footer lines.
+        required: true
+      - name: 'encrypted_private_key'
+        type: String
+        description: |
+          The ssl certificate encoded in PEM format. This string must include the begin header and end footer lines.
+        required: true
+      - name: 'passphrase'
+        type: String
+        description: |
+          'passphrase' should be left unset if private key is not encrypted.
+          Note that 'passphrase' is not the password for web server, but an extra layer of security to protected private key.
