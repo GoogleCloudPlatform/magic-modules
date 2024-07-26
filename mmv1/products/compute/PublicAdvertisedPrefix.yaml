@@ -75,3 +75,8 @@ properties:
       The IPv4 address range, in CIDR format, represented by this public
       advertised prefix.
     required: true
+  - !ruby/object:Api::Type::String
+    name: 'sharedSecret'
+    output: true
+    description: |
+      Output Only. The shared secret to be used for reverse DNS verification.
