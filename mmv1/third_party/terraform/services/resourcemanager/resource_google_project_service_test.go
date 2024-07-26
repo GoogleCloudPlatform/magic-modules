@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package resourcemanager_test
 
 import (
@@ -105,11 +104,7 @@ func TestAccProjectService_disableDependentServices(t *testing.T) {
 				ResourceName:            "google_project_service.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-			  <% unless version == "ga" -%>
-			  ImportStateVerifyIgnore: []string{"disable_on_destroy", "check_if_service_has_usage_on_destroy"},
-			  <% else -%>
-			  ImportStateVerifyIgnore: []string{"disable_on_destroy"},
-			  <% end -%>
+				ImportStateVerifyIgnore: []string{"disable_on_destroy"},
 			},
 			{
 				Config:             testAccProjectService_dependencyRemoved(services, pid, org, billingId),
@@ -169,11 +164,7 @@ func TestAccProjectService_renamedService(t *testing.T) {
 				ResourceName:            "google_project_service.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				<% unless version == "ga" -%>
-				ImportStateVerifyIgnore: []string{"disable_on_destroy", "check_if_service_has_usage_on_destroy", "disable_dependent_services"},
-        <% else -%>
-        ImportStateVerifyIgnore: []string{"disable_on_destroy", "disable_dependent_services"},
-        <% end -%>
+				ImportStateVerifyIgnore: []string{"disable_on_destroy", "disable_dependent_services"},
 			},
 		},
 	})
@@ -205,37 +196,6 @@ func testAccCheckProjectService(t *testing.T, services []string, pid string, exp
 		return nil
 	}
 }
-
-<% unless version == 'ga' -%>
-func TestAccProjectService_checkUsageOfServices(t *testing.T) {
-	// Multiple fine-grained resources
-	acctest.SkipIfVcr(t)
-	t.Parallel()
-
-	org := envvar.GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
-	services := "bigquerystorage.googleapis.com"
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccProjectService_checkUsage(services, pid, org, "false"),
-			},
-			{
-				ResourceName:            "google_project_service.test",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"disable_on_destroy", "disable_dependent_services"},
-			},
-			{
-				Config: testAccProjectService_checkUsage(services, pid, org, "true"),
-			},
-		},
-	})
-}
-<% end -%>
 
 func testAccProjectService_basic(services []string, pid, org string) string {
 	return fmt.Sprintf(`
@@ -369,22 +329,3 @@ resource "google_project_service" "test" {
 }
 `, pid, pid, org, service)
 }
-
-<% unless version == 'ga' -%>
-func testAccProjectService_checkUsage(service string, pid, org string, checkIfServiceHasUsage string) string {
-	return fmt.Sprintf(`
-resource "google_project" "acceptance" {
-  project_id = "%s"
-  name       = "%s"
-  org_id     = "%s"
-}
-
-resource "google_project_service" "test" {
-  project = google_project.acceptance.project_id
-  service = "%s"
-
-  check_if_service_has_usage_on_destroy = %s
-}
-`, pid, pid, org, service, checkIfServiceHasUsage)
-}
-<% end -%>

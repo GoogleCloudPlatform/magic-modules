@@ -778,7 +778,7 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
     }
 {{-                 end}}
 {{-             end}}
-{{-              if $.SupportsIndirectUserProjectOverride -}}
+{{              if $.SupportsIndirectUserProjectOverride -}}
     if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
         billingProject = parts[1]
     }
@@ -1173,7 +1173,7 @@ func resource{{ $.ResourceName }}Import(d *schema.ResourceData, meta interface{}
             {{- end }}
         {{- end }}
         {{- if $.CustomCode.PostImport }}
-            {{ $.CustomTemplate $.CustomCode.PostImport false -}}
+            {{- $.CustomTemplate $.CustomCode.PostImport false -}}
         {{- end }}
 
     return []*schema.ResourceData{d}, nil
