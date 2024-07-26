@@ -1080,7 +1080,7 @@ properties:
         properties:
           - !ruby/object:Api::Type::String
             name: 'dataFreshness'
-            default_value: 600
+            default_value: '900s'
             description: |
               The guaranteed data freshness (in seconds) when querying tables created by the stream.
               Editing this field will only affect new tables created in the future, but existing tables
