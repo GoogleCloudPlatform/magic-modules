@@ -43,6 +43,7 @@ examples:
     primary_resource_id: 'custom_source'
     vars:
       source_display_name: 'My Source'
+      source_canonical_name: 'source-1234'
     test_env_vars:
       org_id: :ORG_ID
 custom_code: !ruby/object:Provider::Terraform::CustomCode
