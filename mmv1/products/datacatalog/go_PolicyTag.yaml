@@ -1,0 +1,97 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'PolicyTag'
+description: |
+  Denotes one policy tag in a taxonomy.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/data-catalog/docs'
+  api: 'https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.taxonomies.policyTags'
+docs:
+base_url: '{{taxonomy}}/policyTags'
+self_link: '{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+iam_policy:
+  skip_import_test: true
+  method_name_separator: ':'
+  fetch_iam_policy_verb: 'POST'
+  parent_resource_attribute: 'policy_tag'
+  base_url: '{{%policy_tag}}'
+  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  import_format:
+    - '{{%policy_tag}}'
+custom_code:
+  custom_import: 'templates/terraform/custom_import/go/extract_taxonomy.go.tmpl'
+examples:
+  - name: 'data_catalog_taxonomies_policy_tag_basic'
+    primary_resource_id: 'basic_policy_tag'
+    primary_resource_name: 'fmt.Sprintf("tf_test_my_policy_tag%s", context["random_suffix"])'
+    vars:
+      taxonomy_display_name: 'taxonomy_display_name'
+  - name: 'data_catalog_taxonomies_policy_tag_child_policies'
+    primary_resource_id: 'child_policy'
+    primary_resource_name: 'fmt.Sprintf("tf_test_my_child_tag%s", context["random_suffix"])'
+    vars:
+      taxonomy_display_name: 'taxonomy_display_name'
+parameters:
+  - name: 'taxonomy'
+    type: String
+    description: |
+      Taxonomy the policy tag is associated with
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      Resource name of this policy tag, whose format is:
+      "projects/{project}/locations/{region}/taxonomies/{taxonomy}/policyTags/{policytag}"
+    output: true
+  - name: 'displayName'
+    type: String
+    description: |
+      User defined name of this policy tag. It must: be unique within the parent
+      taxonomy; contain only unicode letters, numbers, underscores, dashes and spaces;
+      not start or end with spaces; and be at most 200 bytes long when encoded in UTF-8.
+    required: true
+  - name: 'description'
+    type: String
+    description: |
+      Description of this policy tag. It must: contain only unicode characters, tabs,
+      newlines, carriage returns and page breaks; and be at most 2000 bytes long when
+      encoded in UTF-8. If not set, defaults to an empty description.
+      If not set, defaults to an empty description.
+  - name: 'parentPolicyTag'
+    type: String
+    description: |
+      Resource name of this policy tag's parent policy tag.
+      If empty, it means this policy tag is a top level policy tag.
+      If not set, defaults to an empty string.
+  - name: 'childPolicyTags'
+    type: Array
+    description: |
+      Resource names of child policy tags of this policy tag.
+    output: true
+    item_type:
+      type: String

@@ -1,0 +1,127 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Instance'
+description: A Firebase Realtime Database instance.
+min_version: 'beta'
+references:
+  guides:
+    'Official Documentation': 'https://firebase.google.com/products/realtime-database'
+  api: 'https://firebase.google.com/docs/reference/rest/database/database-management/rest'
+docs:
+base_url: 'projects/{{project}}/locations/{{region}}/instances/'
+self_link: 'projects/{{project}}/locations/{{region}}/instances/{{instance_id}}'
+create_url: 'projects/{{project}}/locations/{{region}}/instances?databaseId={{instance_id}}'
+import_format:
+  - 'projects/{{project}}/locations/{{region}}/instances/{{instance_id}}'
+  - '{{region}}/{{instance_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  constants: 'templates/terraform/constants/go/firebase_database_instance.go.tmpl'
+  decoder: 'templates/terraform/decoders/go/firebase_database_instance.go.tmpl'
+  post_create: 'templates/terraform/post_create/go/firebase_database_instance.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/go/firebase_database_instance.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/go/firebase_database_instance.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/go/firebase_database_instance.go.tmpl'
+examples:
+  - name: 'firebase_database_instance_basic'
+    primary_resource_id: 'basic'
+    min_version: 'beta'
+    vars:
+      instance_id: 'active-db'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+  - name: 'firebase_database_instance_full'
+    primary_resource_id: 'full'
+    min_version: 'beta'
+    vars:
+      instance_id: 'disabled-db'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    ignore_read_extra:
+      - 'desired_state'
+  - name: 'firebase_database_instance_default_database'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      project_id: 'rtdb-project'
+    test_env_vars:
+      org_id: 'ORG_ID'
+virtual_fields:
+  - name: 'desired_state'
+    description: The intended database state.
+    type: Enum
+    default_value: "ACTIVE"
+parameters:
+  - name: 'region'
+    type: String
+    description: |
+      A reference to the region where the Firebase Realtime database resides.
+      Check all [available regions](https://firebase.google.com/docs/projects/locations#rtdb-locations)
+    min_version: 'beta'
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'instance_id'
+    type: String
+    description: |
+      The globally unique identifier of the Firebase Realtime Database instance.
+      Instance IDs cannot be reused after deletion.
+    min_version: 'beta'
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The fully-qualified resource name of the Firebase Realtime Database, in
+      the format: projects/PROJECT_NUMBER/locations/REGION_IDENTIFIER/instances/INSTANCE_ID
+      PROJECT_NUMBER: The Firebase project's [`ProjectNumber`](https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects#FirebaseProject.FIELDS.project_number)
+      Learn more about using project identifiers in Google's [AIP 2510 standard](https://google.aip.dev/cloud/2510).
+    min_version: 'beta'
+    output: true
+  - name: 'databaseUrl'
+    type: String
+    description: |
+      The database URL in the form of https://{instance-id}.firebaseio.com for us-central1 instances
+      or https://{instance-id}.{region}.firebasedatabase.app in other regions.
+    min_version: 'beta'
+    output: true
+  - name: 'type'
+    type: Enum
+    description: |
+      The database type.
+      Each project can create one default Firebase Realtime Database, which cannot be deleted once created.
+      Creating user Databases is only available for projects on the Blaze plan.
+      Projects can be upgraded using the Cloud Billing API https://cloud.google.com/billing/reference/rest/v1/projects/updateBillingInfo.
+    min_version: 'beta'
+    immutable: true
+    default_value: "USER_DATABASE"
+    enum_values:
+      - 'DEFAULT_DATABASE'
+      - 'USER_DATABASE'
+  - name: 'state'
+    type: Enum
+    description: |
+      The current database state. Set desired_state to :DISABLED to disable the database and :ACTIVE to reenable the database
+    min_version: 'beta'
+    output: true
+    enum_values:
+      - 'ACTIVE'
+      - 'DISABLED'

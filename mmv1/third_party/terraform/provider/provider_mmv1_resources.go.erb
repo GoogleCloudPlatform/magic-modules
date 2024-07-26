@@ -10,6 +10,7 @@ import (
 
 	<% if version == 'ga' -%>
 	"github.com/hashicorp/terraform-provider-google/google/services/composer"
+	"github.com/hashicorp/terraform-provider-google/google/services/siteverification"
 	<% end -%>
 	"github.com/hashicorp/terraform-provider-google/google/services/container"
 	"github.com/hashicorp/terraform-provider-google/google/services/containeraws"
@@ -123,6 +124,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_dns_managed_zone":                          dns.DataSourceDnsManagedZone(),
 	"google_dns_managed_zones":                         dns.DataSourceDnsManagedZones(),
 	"google_dns_record_set":                            dns.DataSourceDnsRecordSet(),
+	"google_gke_hub_membership_binding":                gkehub2.DataSourceGoogleGkeHubMembershipBinding(),
 	"google_filestore_instance":                        filestore.DataSourceGoogleFilestoreInstance(),
 	"google_iam_policy":                                resourcemanager.DataSourceGoogleIamPolicy(),
 	"google_iam_role":                                  resourcemanager.DataSourceGoogleIamRole(),
@@ -133,8 +135,10 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	<% end -%>
 	"google_iap_client":                                iap.DataSourceGoogleIapClient(),
 	"google_kms_crypto_key":                            kms.DataSourceGoogleKmsCryptoKey(),
+	"google_kms_crypto_keys":                           kms.DataSourceGoogleKmsCryptoKeys(),
 	"google_kms_crypto_key_version":                    kms.DataSourceGoogleKmsCryptoKeyVersion(),
 	"google_kms_key_ring":                              kms.DataSourceGoogleKmsKeyRing(),
+	"google_kms_key_rings":                              kms.DataSourceGoogleKmsKeyRings(),
 	"google_kms_secret":                                kms.DataSourceGoogleKmsSecret(),
 	"google_kms_secret_ciphertext":                     kms.DataSourceGoogleKmsSecretCiphertext(),
 	<% unless version == 'ga' -%>
@@ -180,6 +184,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_service_account_id_token":                  resourcemanager.DataSourceGoogleServiceAccountIdToken(),
 	"google_service_account_jwt":                       resourcemanager.DataSourceGoogleServiceAccountJwt(),
 	"google_service_account_key":                       resourcemanager.DataSourceGoogleServiceAccountKey(),
+	"google_site_verification_token":                   siteverification.DataSourceSiteVerificationToken(),
 	"google_sourcerepo_repository":                     sourcerepo.DataSourceGoogleSourceRepoRepository(),
 	"google_spanner_instance":                          spanner.DataSourceSpannerInstance(),
 	"google_sql_ca_certs":                              sql.DataSourceGoogleSQLCaCerts(),
@@ -252,6 +257,7 @@ var handwrittenIAMDatasources = map[string]*schema.Resource{
 	"google_kms_crypto_key_iam_policy":             tpgiamresource.DataSourceIamPolicy(kms.IamKmsCryptoKeySchema, kms.NewKmsCryptoKeyIamUpdater),
 	"google_spanner_instance_iam_policy":           tpgiamresource.DataSourceIamPolicy(spanner.IamSpannerInstanceSchema, spanner.NewSpannerInstanceIamUpdater),
 	"google_spanner_database_iam_policy":           tpgiamresource.DataSourceIamPolicy(spanner.IamSpannerDatabaseSchema, spanner.NewSpannerDatabaseIamUpdater),
+	"google_storage_managed_folder_iam_policy":     tpgiamresource.DataSourceIamPolicy(storage.StorageManagedFolderIamSchema, storage.StorageManagedFolderIamUpdaterProducer),
 	"google_organization_iam_policy":               tpgiamresource.DataSourceIamPolicy(resourcemanager.IamOrganizationSchema, resourcemanager.NewOrganizationIamUpdater),
 	"google_project_iam_policy":                    tpgiamresource.DataSourceIamPolicy(resourcemanager.IamProjectSchema, resourcemanager.NewProjectIamUpdater),
 	"google_pubsub_subscription_iam_policy":        tpgiamresource.DataSourceIamPolicy(pubsub.IamPubsubSubscriptionSchema, pubsub.NewPubsubSubscriptionIamUpdater),
@@ -426,6 +432,9 @@ var handwrittenIAMResources = map[string]*schema.Resource{
 	"google_spanner_database_iam_binding":          tpgiamresource.ResourceIamBinding(spanner.IamSpannerDatabaseSchema, spanner.NewSpannerDatabaseIamUpdater, spanner.SpannerDatabaseIdParseFunc),
 	"google_spanner_database_iam_member":           tpgiamresource.ResourceIamMember(spanner.IamSpannerDatabaseSchema, spanner.NewSpannerDatabaseIamUpdater, spanner.SpannerDatabaseIdParseFunc),
 	"google_spanner_database_iam_policy":           tpgiamresource.ResourceIamPolicy(spanner.IamSpannerDatabaseSchema, spanner.NewSpannerDatabaseIamUpdater, spanner.SpannerDatabaseIdParseFunc),
+	"google_storage_managed_folder_iam_binding":    tpgiamresource.ResourceIamBinding(storage.StorageManagedFolderIamSchema, storage.StorageManagedFolderIamUpdaterProducer, storage.StorageManagedFolderIdParseFunc),
+	"google_storage_managed_folder_iam_member":     tpgiamresource.ResourceIamMember(storage.StorageManagedFolderIamSchema, storage.StorageManagedFolderIamUpdaterProducer, storage.StorageManagedFolderIdParseFunc),
+	"google_storage_managed_folder_iam_policy":     tpgiamresource.ResourceIamPolicy(storage.StorageManagedFolderIamSchema, storage.StorageManagedFolderIamUpdaterProducer, storage.StorageManagedFolderIdParseFunc),
 	"google_organization_iam_binding":              tpgiamresource.ResourceIamBinding(resourcemanager.IamOrganizationSchema, resourcemanager.NewOrganizationIamUpdater, resourcemanager.OrgIdParseFunc),
 	"google_organization_iam_member":               tpgiamresource.ResourceIamMember(resourcemanager.IamOrganizationSchema, resourcemanager.NewOrganizationIamUpdater, resourcemanager.OrgIdParseFunc),
 	"google_organization_iam_policy":               tpgiamresource.ResourceIamPolicy(resourcemanager.IamOrganizationSchema, resourcemanager.NewOrganizationIamUpdater, resourcemanager.OrgIdParseFunc),

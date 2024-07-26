@@ -1,0 +1,197 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'CustomTargetType'
+description: |
+  A Cloud Deploy `CustomTargetType` defines a type of custom target that can be referenced in a
+  Cloud Deploy `Target` in order to facilitate deploying to other systems besides the supported runtimes.
+references:
+  guides:
+    'Define and use a custom target type': 'https://cloud.google.com/deploy/docs/deploy-app-custom-target'
+  api: 'https://cloud.google.com/deploy/docs/api/reference/rest/v1/projects.locations.customTargetTypes'
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/customTargetTypes/{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/customTargetTypes'
+self_link: 'projects/{{project}}/locations/{{location}}/customTargetTypes/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/customTargetTypes?customTargetTypeId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/customTargetTypes/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_attribute: 'name'
+  base_url: 'projects/{{project}}/locations/{{location}}/customTargetTypes/{{name}}'
+  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/customTargetTypes/{{name}}'
+    - '{{name}}'
+custom_code:
+examples:
+  - name: 'clouddeploy_custom_target_type_basic'
+    primary_resource_id: 'custom-target-type'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-custom-target-type%s", context["random_suffix"])'
+    vars:
+      custom_target_type_name: 'my-custom-target-type'
+  - name: 'clouddeploy_custom_target_type_git_skaffold_modules'
+    primary_resource_id: 'custom-target-type'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-custom-target-type%s", context["random_suffix"])'
+    vars:
+      custom_target_type_name: 'my-custom-target-type'
+  - name: 'clouddeploy_custom_target_type_gcs_skaffold_modules'
+    primary_resource_id: 'custom-target-type'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-custom-target-type%s", context["random_suffix"])'
+    vars:
+      custom_target_type_name: 'my-custom-target-type'
+  - name: 'clouddeploy_custom_target_type_gcb_repo_skaffold_modules'
+    primary_resource_id: 'custom-target-type'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-custom-target-type%s", context["random_suffix"])'
+    vars:
+      custom_target_type_name: 'my-custom-target-type'
+parameters:
+  - name: 'location'
+    type: String
+    description: "The location of the source."
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: "Name of the `CustomTargetType`."
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'customTargetTypeId'
+    type: String
+    description: "Resource id of the `CustomTargetType`."
+    output: true
+  - name: 'uid'
+    type: String
+    description: "Unique identifier of the `CustomTargetType`."
+    output: true
+  - name: 'description'
+    type: String
+    description: "Description of the `CustomTargetType`. Max length is 255 characters."
+  - name: 'annotations'
+    type: KeyValueAnnotations
+    description: "User annotations. These attributes can only be set and used by the user, and not by Cloud Deploy. See https://google.aip.dev/128#annotations for more details such as format and size limitations."
+  - name: 'labels'
+    type: KeyValueLabels
+    description: "Labels are attributes that can be set and used by both the user and by Cloud Deploy. Labels must meet the following constraints: * Keys and values can contain only lowercase letters, numeric characters, underscores, and dashes. * All characters must use UTF-8 encoding, and international characters are allowed. * Keys must start with a lowercase letter or international character. * Each resource is limited to a maximum of 64 labels. Both keys and values are additionally constrained to be <= 128 bytes."
+    immutable: false
+  - name: 'createTime'
+    type: String
+    description: "Time at which the `CustomTargetType` was created."
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: "Time at which the `CustomTargetType` was updated."
+    output: true
+  - name: 'etag'
+    type: String
+    description: "The weak etag of the `CustomTargetType` resource. This checksum is computed by the server based on the value of other fields, and may be sent on update and delete requests to ensure the client has an up-to-date value before proceeding."
+    output: true
+  - name: 'customActions'
+    type: NestedObject
+    description: "Configures render and deploy for the `CustomTargetType` using Skaffold custom actions."
+    properties:
+      - name: 'renderAction'
+        type: String
+        description: "The Skaffold custom action responsible for render operations. If not provided then Cloud Deploy will perform the render operations via `skaffold render`."
+      - name: 'deployAction'
+        type: String
+        description: "The Skaffold custom action responsible for deploy operations."
+        required: true
+      - name: 'includeSkaffoldModules'
+        type: Array
+        description: "List of Skaffold modules Cloud Deploy will include in the Skaffold Config as required before performing diagnose."
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'configs'
+              type: Array
+              description: "The Skaffold Config modules to use from the specified source."
+              item_type:
+                type: String
+            - name: 'git'
+              type: NestedObject
+              description: "Remote git repository containing the Skaffold Config modules."
+              exactly_one_of:
+                - 'git'
+                - 'googleCloudStorage'
+                - 'googleCloudBuildRepo'
+              properties:
+                - name: 'repo'
+                  type: String
+                  description: "Git repository the package should be cloned from."
+                  required: true
+                - name: 'path'
+                  type: String
+                  description: "Relative path from the repository root to the Skaffold file."
+                - name: 'ref'
+                  type: String
+                  description: "Git ref the package should be cloned from."
+            - name: 'googleCloudStorage'
+              type: NestedObject
+              description: "Cloud Storage bucket containing Skaffold Config modules."
+              exactly_one_of:
+                - 'git'
+                - 'googleCloudStorage'
+                - 'googleCloudBuildRepo'
+              properties:
+                - name: 'source'
+                  type: String
+                  description: "Cloud Storage source paths to copy recursively. For example, providing `gs://my-bucket/dir/configs/*` will result in Skaffold copying all files within the `dir/configs` directory in the bucket `my-bucket`."
+                  required: true
+                - name: 'path'
+                  type: String
+                  description: "Relative path from the source to the Skaffold file."
+            - name: 'googleCloudBuildRepo'
+              type: NestedObject
+              description: "Cloud Build 2nd gen repository containing the Skaffold Config modules."
+              exactly_one_of:
+                - 'git'
+                - 'googleCloudStorage'
+                - 'googleCloudBuildRepo'
+              properties:
+                - name: 'repository'
+                  type: String
+                  description: "Cloud Build 2nd gen repository in the format of 'projects/<project>/locations/<location>/connections/<connection>/repositories/<repository>'."
+                  required: true
+                - name: 'path'
+                  type: String
+                  description: "Relative path from the repository root to the Skaffold file."
+                - name: 'ref'
+                  type: String
+                  description: "Branch or tag to use when cloning the repository."

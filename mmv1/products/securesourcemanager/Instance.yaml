@@ -76,12 +76,47 @@ examples:
       key_name: 'my-key'
   - !ruby/object:Provider::Terraform::Examples
     name: 'secure_source_manager_instance_private'
-    external_providers: ["random", "time"]
+    external_providers: ["time"]
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\",
       context[\"random_suffix\"\
       ])"
     vars:
+      instance_id: 'my-instance'
+      ca_pool_id: 'ca-pool'
+      root_ca_id: 'root-ca'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'secure_source_manager_instance_private_psc_backend'
+    external_providers: ["time"]
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\",
+      context[\"random_suffix\"\
+      ])"
+    vars:
+      network_id: 'my-network'
+      subnet_id: 'my-subnet'
+      neg_id: 'my-neg'
+      backend_id: 'my-backend-service'
+      proxy_subnet_id: 'my-proxy-subnet'
+      target_proxy_id: 'my-target-proxy'
+      fw_rule_to_target_proxy_id: 'fw-rule-target-proxy'
+      dns_zone_id: 'my-dns-zone'
+      instance_id: 'my-instance'
+      ca_pool_id: 'ca-pool'
+      root_ca_id: 'root-ca'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'secure_source_manager_instance_private_psc_endpoint'
+    external_providers: ["time"]
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\",
+      context[\"random_suffix\"\
+      ])"
+    vars:
+      network_id: 'my-network'
+      subnet_id: 'my-subnet'
+      address_id: 'my-address'
+      fw_rule_to_service_attachment_id: 'fw-rule-service-attachment'
+      dns_zone_id: 'my-dns-zone'
       instance_id: 'my-instance'
       ca_pool_id: 'ca-pool'
       root_ca_id: 'root-ca'

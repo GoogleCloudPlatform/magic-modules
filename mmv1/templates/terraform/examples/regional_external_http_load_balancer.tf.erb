@@ -1,14 +1,10 @@
-# [START cloudloadbalancing_rllxlb_example]
 
-# [START cloudloadbalancing_vpc_network_rllxlb_example]
 resource "google_compute_network" "default" {
   name                    = "<%= ctx[:vars]['lb_network'] %>"
   auto_create_subnetworks = false
   routing_mode            = "REGIONAL"
 }
-# [END cloudloadbalancing_vpc_network_rllxlb_example]
 
-# [START cloudloadbalancing_vpc_subnetwork_rllxlb_example]
 resource "google_compute_subnetwork" "default" {
   name                       = "<%= ctx[:vars]['backend_subnet'] %>"
   ip_cidr_range              = "10.1.2.0/24"
@@ -18,9 +14,7 @@ resource "google_compute_subnetwork" "default" {
   region                     = "us-west1"
   stack_type                 = "IPV4_ONLY"
 }
-# [END cloudloadbalancing_vpc_subnetwork_rllxlb_example]
 
-# [START cloudloadbalancing_vpc_proxy_subnetwork_rllxlb_example]
 resource "google_compute_subnetwork" "proxy_only" {
   name          = "<%= ctx[:vars]['proxy_only_subnet'] %>"
   ip_cidr_range = "10.129.0.0/23"
@@ -29,9 +23,7 @@ resource "google_compute_subnetwork" "proxy_only" {
   region        = "us-west1"
   role          = "ACTIVE"
 }
-# [END cloudloadbalancing_vpc_proxy_subnetwork_rllxlb_example]
 
-# [START cloudloadbalancing_health_firewall_rllxlb_example]
 resource "google_compute_firewall" "default" {
   name = "<%= ctx[:vars]['fw_allow_health_check'] %>"
   allow {
@@ -43,9 +35,7 @@ resource "google_compute_firewall" "default" {
   source_ranges = ["130.211.0.0/22", "35.191.0.0/16"]
   target_tags   = ["load-balanced-backend"]
 }
-# [END cloudloadbalancing_health_firewall_rllxlb_example]
 
-# [START cloudloadbalancing_proxy_firewall_rllxlb_example]
 resource "google_compute_firewall" "allow_proxy" {
   name = "<%= ctx[:vars]['fw_allow_proxies'] %>"
   allow {
@@ -66,9 +56,7 @@ resource "google_compute_firewall" "allow_proxy" {
   source_ranges = ["10.129.0.0/23"]
   target_tags   = ["load-balanced-backend"]
 }
-# [END cloudloadbalancing_proxy_firewall_rllxlb_example]
 
-# [START cloudloadbalancing_instance_template_rllxlb_example]
 resource "google_compute_instance_template" "default" {
   name = "<%= ctx[:vars]['l7_xlb_backend_template'] %>"
   disk {
@@ -76,7 +64,7 @@ resource "google_compute_instance_template" "default" {
     boot         = true
     device_name  = "persistent-disk-0"
     mode         = "READ_WRITE"
-    source_image = "projects/debian-cloud/global/images/family/debian-10"
+    source_image = "projects/debian-cloud/global/images/family/debian-12"
     type         = "PERSISTENT"
   }
   labels = {
@@ -106,9 +94,7 @@ resource "google_compute_instance_template" "default" {
   }
   tags = ["load-balanced-backend"]
 }
-# [END cloudloadbalancing_instance_template_rllxlb_example]
 
-# [START cloudloadbalancing_instance_group_rllxlb_example]
 resource "google_compute_instance_group_manager" "default" {
   name = "<%= ctx[:vars]['l7_xlb_backend_example'] %>"
   zone = "us-west1-a"
@@ -123,19 +109,15 @@ resource "google_compute_instance_group_manager" "default" {
   base_instance_name = "vm"
   target_size        = 2
 }
-# [END cloudloadbalancing_instance_group_rllxlb_example]
 
-# [START cloudloadbalancing_ip_address_rllxlb_example]
 resource "google_compute_address" "default" {
   name         = "<%= ctx[:vars]['address_name'] %>"
   address_type = "EXTERNAL"
   network_tier = "STANDARD"
   region       = "us-west1"
 }
-# [END cloudloadbalancing_ip_address_rllxlb_example]
 
 
-# [START cloudloadbalancing_health_check_rllxlb_example]
 resource "google_compute_region_health_check" "default" {
   name               = "<%= ctx[:vars]['l7_xlb_basic_check'] %>"
   check_interval_sec = 5
@@ -149,9 +131,7 @@ resource "google_compute_region_health_check" "default" {
   timeout_sec         = 5
   unhealthy_threshold = 2
 }
-# [END cloudloadbalancing_health_check_rllxlb_example]
 
-# [START cloudloadbalancing_backend_service_rllxlb_example]
 resource "google_compute_region_backend_service" "default" {
   name                            = "<%= ctx[:vars]['l7_xlb_backend_service'] %>"
   region                          = "us-west1"
@@ -166,25 +146,19 @@ resource "google_compute_region_backend_service" "default" {
     capacity_scaler = 1.0
   }
 }
-# [END cloudloadbalancing_backend_service_rllxlb_example]
 
-# [START cloudloadbalancing_url_map_rllxlb_example]
 resource "google_compute_region_url_map" "<%= ctx[:primary_resource_id] %>" {
   name            = "<%= ctx[:vars]['regional_l7_xlb_map'] %>"
   region          = "us-west1"
   default_service = google_compute_region_backend_service.default.id
 }
-# [END cloudloadbalancing_url_map_rllxlb_example]
 
-# [START cloudloadbalancing_target_http_proxy_rllxlb_example]
 resource "google_compute_region_target_http_proxy" "default" {
   name    = "<%= ctx[:vars]['l7_xlb_proxy'] %>"
   region  = "us-west1"
   url_map = google_compute_region_url_map.default.id
 }
-# [END cloudloadbalancing_target_http_proxy_rllxlb_example]
 
-# [START cloudloadbalancing_forwarding_rule_rllxlb_example]
 resource "google_compute_forwarding_rule" "default" {
   name                  = "l7-xlb-forwarding-rule"
   provider              = google-beta
@@ -199,6 +173,4 @@ resource "google_compute_forwarding_rule" "default" {
   ip_address            = google_compute_address.default.address
   network_tier          = "STANDARD"
 }
-# [END cloudloadbalancing_forwarding_rule_rllxlb_example]
 
-# [END cloudloadbalancing_rllxlb_example]

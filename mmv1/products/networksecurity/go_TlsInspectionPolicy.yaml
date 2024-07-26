@@ -1,0 +1,136 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'TlsInspectionPolicy'
+description:
+  'The TlsInspectionPolicy resource contains references to CA pools in
+  Certificate Authority Service and associated metadata.'
+references:
+  guides:
+    'Use TlsInspectionPolicy': 'https://cloud.google.com/secure-web-proxy/docs/tls-inspection-overview'
+  api: 'https://cloud.google.com/secure-web-proxy/docs/reference/network-security/rest/v1/projects.locations.tlsInspectionPolicies'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/tlsInspectionPolicies'
+self_link: 'projects/{{project}}/locations/{{location}}/tlsInspectionPolicies/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/tlsInspectionPolicies?tlsInspectionPolicyId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/tlsInspectionPolicies/{{name}}'
+timeouts:
+  insert_minutes: 30
+  update_minutes: 30
+  delete_minutes: 30
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+    timeouts:
+      insert_minutes: 30
+      update_minutes: 30
+      delete_minutes: 30
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'network_security_tls_inspection_policy_basic'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-tls-inspection-policy'
+      privateca_ca_pool_name: 'my-basic-ca-pool'
+      privateca_certificate_authority_id: 'my-basic-certificate-authority'
+  - name: 'network_security_tls_inspection_policy_custom'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      resource_name: 'my-tls-inspection-policy'
+      privateca_ca_pool_name: 'my-basic-ca-pool'
+      privateca_certificate_authority_id: 'my-basic-certificate-authority'
+      trust_config_name: 'my-trust-config'
+parameters:
+  - name: 'name'
+    type: String
+    description: |
+      Short name of the TlsInspectionPolicy resource to be created.
+    url_param_only: true
+    required: true
+  - name: 'location'
+    type: String
+    description: |
+      The location of the tls inspection policy.
+    url_param_only: true
+properties:
+  - name: 'createTime'
+    type: Time
+    description: |
+      The timestamp when the resource was created.
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      The timestamp when the resource was updated.
+    output: true
+  - name: 'description'
+    type: String
+    description: |
+      Free-text description of the resource.
+  - name: 'caPool'
+    type: String
+    description: |
+      A CA pool resource used to issue interception certificates.
+    required: true
+  - name: 'trustConfig'
+    type: String
+    description: |
+      A TrustConfig resource used when making a connection to the TLS server. This is a relative resource path following the form \"projects/{project}/locations/{location}/trustConfigs/{trust_config}\". This is necessary to intercept TLS connections to servers with certificates signed by a private CA or self-signed certificates. Trust config and the TLS inspection policy must be in the same region. Note that Secure Web Proxy does not yet honor this field.
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+  - name: 'minTlsVersion'
+    type: Enum
+    description: |
+      Minimum TLS version that the firewall should use when negotiating connections with both clients and servers. If this is not set, then the default value is to allow the broadest set of clients and servers (TLS 1.0 or higher). Setting this to more restrictive values may improve security, but may also prevent the firewall from connecting to some clients or servers. Note that Secure Web Proxy does not yet honor this field.
+    enum_values:
+      - 'TLS_VERSION_UNSPECIFIED'
+      - 'TLS_1_0'
+      - 'TLS_1_1'
+      - 'TLS_1_2'
+      - 'TLS_1_3'
+  - name: 'tlsFeatureProfile'
+    type: Enum
+    description: |
+      The selected Profile. If this is not set, then the default value is to allow the broadest set of clients and servers (\"PROFILE_COMPATIBLE\"). Setting this to more restrictive values may improve security, but may also prevent the TLS inspection proxy from connecting to some clients or servers. Note that Secure Web Proxy does not yet honor this field.
+    enum_values:
+      - 'PROFILE_UNSPECIFIED'
+      - 'PROFILE_COMPATIBLE'
+      - 'PROFILE_MODERN'
+      - 'PROFILE_RESTRICTED'
+      - 'PROFILE_CUSTOM'
+  - name: 'customTlsFeatures'
+    type: Array
+    description: |
+      List of custom TLS cipher suites selected. This field is valid only if the selected tls_feature_profile is CUSTOM. The compute.SslPoliciesService.ListAvailableFeatures method returns the set of features that can be specified in this list. Note that Secure Web Proxy does not yet honor this field.
+    item_type:
+      type: String
+  - name: 'excludePublicCaSet'
+    type: Boolean
+    description: |
+      If FALSE (the default), use our default set of public CAs in addition to any CAs specified in trustConfig. These public CAs are currently based on the Mozilla Root Program and are subject to change over time. If TRUE, do not accept our default set of public CAs. Only CAs specified in trustConfig will be accepted.

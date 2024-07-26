@@ -1,0 +1,231 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'ConnectivityTest'
+description: |
+  A connectivity test are a static analysis of your resource configurations
+  that enables you to evaluate connectivity to and from Google Cloud
+  resources in your Virtual Private Cloud (VPC) network.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/network-intelligence-center/docs'
+  api: 'https://cloud.google.com/network-intelligence-center/docs/connectivity-tests/reference/networkmanagement/rest/v1/projects.locations.global.connectivityTests'
+docs:
+id_format: 'projects/{{project}}/locations/global/connectivityTests/{{name}}'
+base_url: 'projects/{{project}}/locations/global/connectivityTests'
+create_url: 'projects/{{project}}/locations/global/connectivityTests?testId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+filename_override: 'connectivity_test_resource'
+examples:
+  - name: 'network_management_connectivity_test_instances'
+    primary_resource_id: 'instance-test'
+    vars:
+      primary_resource_name: 'conn-test-instances'
+      network_name: 'conn-test-net'
+      source_instance: 'source-vm'
+      dest_instance: 'dest-vm'
+  - name: 'network_management_connectivity_test_addresses'
+    primary_resource_id: 'address-test'
+    vars:
+      primary_resource_name: 'conn-test-addr'
+      network: 'connectivity-vpc'
+      source_addr: 'src-addr'
+      dest_addr: 'dest-addr'
+parameters:
+properties:
+  - name: 'name'
+    type: String
+    description: |-
+      Unique name for the connectivity test.
+    required: true
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/go/network_management_connectivity_test_name.go.tmpl'
+  - name: 'description'
+    type: String
+    description: |-
+      The user-supplied description of the Connectivity Test.
+      Maximum of 512 characters.
+  - name: 'source'
+    type: NestedObject
+    description: |
+      Required. Source specification of the Connectivity Test.
+
+      You can use a combination of source IP address, virtual machine
+      (VM) instance, or Compute Engine network to uniquely identify the
+      source location.
+
+      Examples: If the source IP address is an internal IP address within
+      a Google Cloud Virtual Private Cloud (VPC) network, then you must
+      also specify the VPC network. Otherwise, specify the VM instance,
+      which already contains its internal IP address and VPC network
+      information.
+
+      If the source of the test is within an on-premises network, then
+      you must provide the destination VPC network.
+
+      If the source endpoint is a Compute Engine VM instance with multiple
+      network interfaces, the instance itself is not sufficient to
+      identify the endpoint. So, you must also specify the source IP
+      address or VPC network.
+
+      A reachability analysis proceeds even if the source location is
+      ambiguous. However, the test result may include endpoints that
+      you don't intend to test.
+    required: true
+    update_mask_fields:
+      - 'source.ipAddress'
+      - 'source.port'
+      - 'source.instance'
+      - 'source.network'
+      - 'source.networkType'
+      - 'source.projectId'
+    properties:
+      - name: 'ipAddress'
+        type: String
+        description: |-
+          The IP address of the endpoint, which can be an external or
+          internal IP. An IPv6 address is only allowed when the test's
+          destination is a global load balancer VIP.
+      - name: 'port'
+        type: Integer
+        description: |-
+          The IP protocol port of the endpoint. Only applicable when
+          protocol is TCP or UDP.
+      - name: 'instance'
+        type: String
+        description: |-
+          A Compute Engine instance URI.
+      - name: 'network'
+        type: String
+        description: |-
+          A Compute Engine network URI.
+      - name: 'networkType'
+        type: Enum
+        description: |-
+          Type of the network where the endpoint is located.
+        enum_values:
+          - 'GCP_NETWORK'
+          - 'NON_GCP_NETWORK'
+      - name: 'projectId'
+        type: String
+        description: |-
+          Project ID where the endpoint is located. The Project ID can be
+          derived from the URI if you provide a VM instance or network URI.
+          The following are two cases where you must provide the project ID:
+
+          1. Only the IP address is specified, and the IP address is
+             within a GCP project.
+          2. When you are using Shared VPC and the IP address
+             that you provide is from the service project. In this case,
+             the network that the IP address resides in is defined in the
+             host project.
+  - name: 'destination'
+    type: NestedObject
+    description: |
+      Required. Destination specification of the Connectivity Test.
+
+      You can use a combination of destination IP address, Compute
+      Engine VM instance, or VPC network to uniquely identify the
+      destination location.
+
+      Even if the destination IP address is not unique, the source IP
+      location is unique. Usually, the analysis can infer the destination
+      endpoint from route information.
+
+      If the destination you specify is a VM instance and the instance has
+      multiple network interfaces, then you must also specify either a
+      destination IP address or VPC network to identify the destination
+      interface.
+
+      A reachability analysis proceeds even if the destination location
+      is ambiguous. However, the result can include endpoints that you
+      don't intend to test.
+    required: true
+    update_mask_fields:
+      - 'destination.ipAddress'
+      - 'destination.port'
+      - 'destination.instance'
+      - 'destination.network'
+      - 'destination.projectId'
+    properties:
+      - name: 'ipAddress'
+        type: String
+        description: |-
+          The IP address of the endpoint, which can be an external or
+          internal IP. An IPv6 address is only allowed when the test's
+          destination is a global load balancer VIP.
+      - name: 'port'
+        type: Integer
+        description: |-
+          The IP protocol port of the endpoint. Only applicable when
+          protocol is TCP or UDP.
+      - name: 'instance'
+        type: String
+        description: |-
+          A Compute Engine instance URI.
+      - name: 'network'
+        type: String
+        description: |-
+          A Compute Engine network URI.
+      - name: 'projectId'
+        type: String
+        description: |-
+          Project ID where the endpoint is located. The Project ID can be
+          derived from the URI if you provide a VM instance or network URI.
+          The following are two cases where you must provide the project ID:
+          1. Only the IP address is specified, and the IP address is within
+          a GCP project. 2. When you are using Shared VPC and the IP address
+          that you provide is from the service project. In this case, the
+          network that the IP address resides in is defined in the host
+          project.
+  - name: 'protocol'
+    type: String
+    description: |-
+      IP Protocol of the test. When not provided, "TCP" is assumed.
+    default_value: "TCP"
+  - name: 'relatedProjects'
+    type: Array
+    description: |-
+      Other projects that may be relevant for reachability analysis.
+      This is applicable to scenarios where a test can cross project
+      boundaries.
+    item_type:
+      type: String
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      Resource labels to represent user-provided metadata.
+    immutable: false
