@@ -88,7 +88,7 @@ resource "google_kms_crypto_key" "example_key" {
 resource "google_dataform_repository" "dataform_repository" {
   provider = google-beta
   name = "tf_test_dataform_repository%{random_suffix}"
-  kmsKeyName = google_kms_crypto_key.example_key.id
+  kms_key_name = google_kms_crypto_key.example_key.id
 
   git_remote_settings {
       url = google_sourcerepo_repository.git_repository.url
