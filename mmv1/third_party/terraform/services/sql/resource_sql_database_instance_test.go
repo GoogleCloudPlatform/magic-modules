@@ -3004,6 +3004,7 @@ resource "google_project" "testproject" {
   project_id          = "%s"
   org_id              = "%s"
   billing_account     = "%s"
+  deletion_policy = "NONE"
 }
 
 resource "google_sql_database_instance" "instance" {
@@ -3031,6 +3032,7 @@ resource "google_project" "testproject" {
   project_id          = "%s"
   org_id              = "%s"
   billing_account     = "%s"
+  deletion_policy = "NONE"
 }
 
 resource "google_sql_database_instance" "instance" {
@@ -3064,6 +3066,7 @@ resource "google_project" "testproject" {
   project_id          = "%s"
   org_id              = "%s"
   billing_account     = "%s"
+  deletion_policy = "NONE"
 }
 
 resource "google_sql_database_instance" "instance" {
@@ -3097,6 +3100,7 @@ resource "google_project" "testproject" {
   project_id          = "%s"
   org_id              = "%s"
   billing_account     = "%s"
+  deletion_policy = "NONE"
 }
 
 resource "google_sql_database_instance" "instance" {
@@ -3131,6 +3135,7 @@ resource "google_project" "testproject" {
   project_id          = "%s"
   org_id              = "%s"
   billing_account     = "%s"
+  deletion_policy = "NONE"
 }
 
 resource "google_sql_database_instance" "instance" {

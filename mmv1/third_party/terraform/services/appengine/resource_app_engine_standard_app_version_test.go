@@ -63,6 +63,7 @@ resource "google_project" "my_project" {
   project_id = "tf-test-appeng-std%{random_suffix}"
   org_id = "%{org_id}"
   billing_account = "%{billing_account}"
+  deletion_policy = "NONE"
 }
 
 resource "google_app_engine_application" "app" {
@@ -150,6 +151,7 @@ resource "google_project" "my_project" {
   project_id = "tf-test-appeng-std%{random_suffix}"
   org_id = "%{org_id}"
   billing_account = "%{billing_account}"
+  deletion_policy = "NONE"
 }
 
 resource "google_app_engine_application" "app" {
@@ -271,6 +273,7 @@ resource "google_project" "my_project" {
   project_id = "tf-test-appeng-std%{random_suffix}"
   org_id = "%{org_id}"
   billing_account = "%{billing_account}"
+  deletion_policy = "NONE"
 }
 
 resource "google_app_engine_application" "app" {

@@ -21,7 +21,7 @@ func TestAccBinaryAuthorizationPolicy_basic(t *testing.T) {
 	pid := "tf-test-" + acctest.RandString(t, 10)
 	billingId := envvar.GetTestBillingAccountFromEnv(t)
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:  func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
@@ -165,9 +165,9 @@ func testAccCheckBinaryAuthorizationPolicyDefault(t *testing.T, pid string) reso
 		config := acctest.GoogleProviderConfig(t)
 		url := fmt.Sprintf("https://binaryauthorization.googleapis.com/v1/projects/%s/policy", pid)
 		pol, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config: config,
-			Method: "GET",
-			RawURL: url,
+			Config:    config,
+			Method:    "GET",
+			RawURL:    url,
 			UserAgent: config.UserAgent,
 		})
 		if err != nil {
@@ -194,6 +194,7 @@ resource "google_project" "project" {
   name            = "%s"
   org_id          = "%s"
   billing_account = "%s"
+  deletion_policy = "NONE"
 }
 
 resource "google_project_service" "binauthz" {
@@ -211,6 +212,7 @@ resource "google_project" "project" {
   name            = "%s"
   org_id          = "%s"
   billing_account = "%s"
+  deletion_policy = "NONE"
 }
 
 resource "google_project_service" "binauthz" {
@@ -243,6 +245,7 @@ resource "google_project" "project" {
   name            = "%s"
   org_id          = "%s"
   billing_account = "%s"
+  deletion_policy = "NONE"
 }
 
 resource "google_project_service" "binauthz" {
@@ -307,6 +310,7 @@ resource "google_project" "project" {
   name            = "%s"
   org_id          = "%s"
   billing_account = "%s"
+  deletion_policy = "NONE"
 }
 
 data "google_client_config" "current" {

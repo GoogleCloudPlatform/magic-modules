@@ -31,4 +31,5 @@ resource "google_project" "my_project" {
   name = "My Project"
   project_id = "foobat"
   org_id     = "{{.OrgID}}"
+  deletion_policy = "NONE"
 }

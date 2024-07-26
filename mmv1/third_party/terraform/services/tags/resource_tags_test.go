@@ -378,6 +378,7 @@ resource "google_project" "project" {
 	project_id = "%{project_id}"
 	name       = "%{project_id}"
 	org_id     = "%{org_id}"
+	deletion_policy = "NONE"
 }
 
 resource "google_tags_tag_key" "key" {

@@ -673,6 +673,7 @@ resource "google_project" "acceptance" {
   project_id      = "%s"
   org_id          = "%s"
   billing_account = "%s"
+  deletion_policy = "NONE"
 }
 
 resource "google_project_service" "acceptance" {
@@ -703,6 +704,7 @@ resource "google_project" "acceptance" {
   project_id      = "%s"
   org_id          = "%s"
   billing_account = "%s"
+  deletion_policy = "NONE"
 }
 
 resource "google_project_service" "acceptance" {
@@ -731,6 +733,7 @@ resource "google_project" "acceptance" {
   project_id      = "%s"
   org_id          = "%s"
   billing_account = "%s"
+  deletion_policy = "NONE"
 }
 
 resource "google_project_service" "acceptance" {
@@ -758,6 +761,7 @@ resource "google_project" "acceptance" {
   project_id      = "%s"
   org_id          = "%s"
   billing_account = "%s"
+  deletion_policy = "NONE"
 }
 
 resource "google_project_service" "acceptance" {
@@ -790,6 +794,7 @@ resource "google_project" "acceptance" {
   project_id      = "%s"
   org_id          = "%s"
   billing_account = "%s"
+  deletion_policy = "NONE"
 }
 
 resource "google_project_service" "acceptance" {
@@ -812,6 +817,7 @@ resource "google_project" "acceptance" {
   project_id      = "%s"
   org_id          = "%s"
   billing_account = "%s"
+  deletion_policy = "NONE"
 }
 
 resource "google_project_service" "acceptance" {
@@ -843,6 +849,7 @@ resource "google_project" "acceptance" {
   project_id      = "%s"
   org_id          = "%s"
   billing_account = "%s"
+  deletion_policy = "NONE"
 }
 
 resource "google_project_service" "acceptance" {
@@ -876,6 +883,7 @@ resource "google_project" "acceptance" {
   project_id      = "%s"
   org_id          = "%s"
   billing_account = "%s"
+  deletion_policy = "NONE"
 }
 
 resource "google_project_service" "acceptance" {
@@ -908,6 +916,7 @@ resource "google_project" "acceptance" {
 	project_id      = "%s"
 	org_id          = "%s"
 	billing_account = "%s"
+	deletion_policy = "NONE"
 }
 
 resource "google_project_service" "acceptance" {
@@ -942,6 +951,7 @@ resource "google_project" "acceptance" {
 	project_id      = "%s"
 	org_id          = "%s"
 	billing_account = "%s"
+	deletion_policy = "NONE"
 }
 
 resource "google_project_service" "acceptance" {
@@ -980,6 +990,7 @@ resource "google_project" "acceptance" {
 	project_id      = "%s"
 	org_id          = "%s"
 	billing_account = "%s"
+	deletion_policy = "NONE"
 }
 
 resource "google_project_service" "acceptance" {
@@ -1010,6 +1021,7 @@ resource "google_project" "acceptance" {
 	project_id      = "%s"
 	org_id          = "%s"
 	billing_account = "%s"
+	deletion_policy = "NONE"
 }
 
 resource "google_project_service" "acceptance" {
@@ -1044,6 +1056,7 @@ resource "google_project" "acceptance" {
 	project_id      = "%s"
 	org_id          = "%s"
 	billing_account = "%s"
+	deletion_policy = "NONE"
 }
 
 resource "google_project_service" "acceptance" {
@@ -1082,6 +1095,7 @@ resource "google_project" "acceptance" {
 	project_id      = "%s"
 	org_id          = "%s"
 	billing_account = "%s"
+	deletion_policy = "NONE"
 }
 
 resource "google_project_service" "acceptance" {
@@ -1120,6 +1134,7 @@ resource "google_project" "acceptance" {
 	project_id      = "%s"
 	org_id          = "%s"
 	billing_account = "%s"
+	deletion_policy = "NONE"
 }
 
 resource "google_project_service" "acceptance" {

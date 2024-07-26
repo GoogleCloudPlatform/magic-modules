@@ -36,6 +36,7 @@ resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
   org_id     = "%s"
+  deletion_policy = "NONE"
 }
 
 resource "google_project_service" "foo" {

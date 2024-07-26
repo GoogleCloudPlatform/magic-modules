@@ -7,6 +7,7 @@ resource "google_project" "service_project" {
   project_id ="{{index $.Vars "service_project_attachment_id"}}"
   name = "Service Project"
   org_id = "{{index $.TestEnvVars "org_id"}}"
+  deletion_policy = "NONE"
 }
 
 resource "time_sleep" "wait_120s" {

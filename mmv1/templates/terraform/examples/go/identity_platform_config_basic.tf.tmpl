@@ -3,6 +3,7 @@ resource "google_project" "default" {
   name       = "{{index $.Vars "project_id"}}"
   org_id     = "{{index $.TestEnvVars "org_id"}}"
   billing_account =  "{{index $.TestEnvVars "billing_acct"}}"
+  deletion_policy = "NONE"
   labels = {
     firebase = "enabled"
   }

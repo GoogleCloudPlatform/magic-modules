@@ -138,6 +138,7 @@ func createScopedPolicy(t *testing.T, org string) string {
 		project_id      = "acm-tf-test-%s"
 		name            = "acm-tf-test-%s"
 		org_id          = "%s"
+		deletion_policy = "NONE"
 		}
 
 		resource "google_access_context_manager_access_policy" "access-policy" {
