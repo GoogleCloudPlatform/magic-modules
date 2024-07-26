@@ -19,6 +19,10 @@ func TestAccSecurityCenterV2FolderMuteConfig_update(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {},
+			"time":   {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSecurityCenterV2FolderMuteConfig_basic(context),
@@ -48,6 +52,16 @@ func TestAccSecurityCenterV2FolderMuteConfig_update(t *testing.T) {
 
 func testAccSecurityCenterV2FolderMuteConfig_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_folder" "folder" {
+  parent       = "organizations/%{org_id}"
+  display_name = "tf-test-folder-name%{random_suffix}"
+}	
+
+resource "time_sleep" "wait_1_minute" {
+	depends_on = [google_folder.folder]
+	create_duration = "2m"
+}
+
 resource "google_scc_v2_folder_mute_config" "default" {
   mute_config_id = "tf-test-config-%{random_suffix}"
   folder         = google_folder.folder.folder_id
@@ -55,12 +69,20 @@ resource "google_scc_v2_folder_mute_config" "default" {
   description    = "A test folder mute config"
   filter         = "severity = \"HIGH\""
   type           = "STATIC"
+
+  depends_on = [time_sleep.wait_1_minute]
 }
+  
 `, context)
 }
 
 func testAccSecurityCenterV2FolderMuteConfig_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_folder" "folder" {
+  parent       = "organizations/%{org_id}"
+  display_name = "tf-test-folder-name%{random_suffix}"
+}
+
 resource "google_scc_v2_folder_mute_config" "default" {
   mute_config_id = "tf-test-config-%{random_suffix}"
   folder         = google_folder.folder.folder_id
