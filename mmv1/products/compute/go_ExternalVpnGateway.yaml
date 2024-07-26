@@ -67,7 +67,6 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: 'Labels for the external VPN gateway resource.'
-    immutable: false
     update_url: 'projects/{{project}}/global/externalVpnGateways/{{name}}/setLabels'
     update_verb: 'POST'
   - name: 'labelFingerprint'
