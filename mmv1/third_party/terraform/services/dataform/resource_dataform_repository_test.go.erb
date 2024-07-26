@@ -67,28 +67,9 @@ resource "google_secret_manager_secret_version" "secret_version" {
   secret_data = "tf-test-secret-data%{random_suffix}"
 }
 
-resource "google_kms_key_ring" "keyring" {
-  provider = google-beta
-  
-  name     = "keyring-example"
-  location = "us-central1"
-}
-
-resource "google_kms_crypto_key" "example_key" {
-  provider = google-beta
-  
-  name            = "crypto-key-example"
-  key_ring        = google_kms_key_ring.keyring.id
-
-  lifecycle {
-    prevent_destroy = true
-  }
-}
-
 resource "google_dataform_repository" "dataform_repository" {
   provider = google-beta
   name = "tf_test_dataform_repository%{random_suffix}"
-  kms_key_name = google_kms_crypto_key.example_key.id
 
   git_remote_settings {
       url = google_sourcerepo_repository.git_repository.url
