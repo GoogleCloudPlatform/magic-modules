@@ -87,4 +87,3 @@ properties:
   - !ruby/object:Api::Type::String
     name: description
     description: 'Optional. The description of the group.'
-

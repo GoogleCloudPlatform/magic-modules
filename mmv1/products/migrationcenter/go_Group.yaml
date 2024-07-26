@@ -88,4 +88,3 @@ properties:
   - name: 'description'
     type: String
     description: 'Optional. The description of the group.'
-

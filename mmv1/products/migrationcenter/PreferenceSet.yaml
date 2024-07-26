@@ -102,7 +102,7 @@ properties:
       - !ruby/object:Api::Type::String
         name: targetProduct
         description: "Target product for assets using this preference set. Specify either
-          target product or business goal, but not both. 
+          target product or business goal, but not both.
           Possible values:
             COMPUTE_MIGRATION_TARGET_PRODUCT_UNSPECIFIED
             COMPUTE_MIGRATION_TARGET_PRODUCT_COMPUTE_ENGINE
@@ -122,7 +122,7 @@ properties:
         name: commitmentPlan
         description: "Commitment plan to consider when calculating costs for virtual machine
           insights and recommendations. If you are unsure which value to set, a 3 year
-          commitment plan is often a good value to start with. 
+          commitment plan is often a good value to start with.
           Possible values:
             COMMITMENT_PLAN_UNSPECIFIED
             COMMITMENT_PLAN_NONE
@@ -133,7 +133,7 @@ properties:
         description: "Sizing optimization strategy specifies the preferred strategy used
           when extrapolating usage data to calculate insights and recommendations for
           a virtual machine. If you are unsure which value to set, a moderate sizing optimization
-          strategy is often a good value to start with. 
+          strategy is often a good value to start with.
           Possible values:
             SIZING_OPTIMIZATION_STRATEGY_UNSPECIFIED
             SIZING_OPTIMIZATION_STRATEGY_SAME_AS_SOURCE
@@ -164,7 +164,7 @@ properties:
             name: licenseType
             description: "License type to consider when calculating costs for virtual machine
               insights and recommendations. If unspecified, costs are calculated based on
-              the default licensing plan. 
+              the default licensing plan.
               Possible values:
                 LICENSE_TYPE_UNSPECIFIED
                 LICENSE_TYPE_DEFAULT
@@ -196,7 +196,7 @@ properties:
             description: "Commitment plan to consider when calculating costs for virtual
               machine insights and recommendations. If you are unsure which value to set,
               a 3 year commitment plan is often a good value to start with.
-              Possible values: 
+              Possible values:
                 COMMITMENT_PLAN_UNSPECIFIED
                 ON_DEMAND
                 COMMITMENT_1_YEAR_MONTHLY_PAYMENTS
@@ -213,7 +213,7 @@ properties:
               inclusive.'
           - !ruby/object:Api::Type::String
             name: hostMaintenancePolicy
-            description: "Sole Tenancy nodes maintenance policy. 
+            description: "Sole Tenancy nodes maintenance policy.
               Possible values:
                 HOST_MAINTENANCE_POLICY_UNSPECIFIED
                 HOST_MAINTENANCE_POLICY_DEFAULT
@@ -223,7 +223,7 @@ properties:
             name: commitmentPlan
             description: "Commitment plan to consider when calculating costs for virtual
               machine insights and recommendations. If you are unsure which value to set,
-              a 3 year commitment plan is often a good value to start with. 
+              a 3 year commitment plan is often a good value to start with.
               Possible values:
                 COMMITMENT_PLAN_UNSPECIFIED
                 ON_DEMAND
