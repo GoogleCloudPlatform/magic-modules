@@ -2678,7 +2678,7 @@ resource "google_storage_bucket" "test" {
 
 // Upload Metadata File.
 resource "google_storage_bucket_object" "metadata" {
-	name    = "_delta_log/00000000000000000000.json.crc"
+	name    = "_delta_log/00000000000000000000.json"
 	source = "./test-fixtures/simple/metadata/00000000000000000000.json"
 	bucket = google_storage_bucket.test.name
 }
