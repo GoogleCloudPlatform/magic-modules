@@ -30,7 +30,7 @@ description: |
   Once Firebase has been added to a Google Project it cannot be removed.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation': 'https://firebase.google.com/'
+    'Official Documentation': 'https://firebase.google.com/docs/projects/terraform/get-started'
   api: 'https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects'
 import_format: ['projects/{{project}}', '{{project}}']
 autogen_async: true
