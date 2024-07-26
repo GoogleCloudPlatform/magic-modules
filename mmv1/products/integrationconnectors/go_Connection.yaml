@@ -1,0 +1,954 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Connection'
+description: |
+  An Integration connectors Connection.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/integration-connectors/docs/createconnection'
+  api: 'https://cloud.google.com/integration-connectors/docs/reference/rest/v1/projects.locations.connections'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/connections'
+self_link: 'projects/{{project}}/locations/{{location}}/connections/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/connections?connectionId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 30
+  update_minutes: 30
+  delete_minutes: 30
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+    timeouts:
+      insert_minutes: 50
+      update_minutes: 30
+      delete_minutes: 30
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+  constants: 'templates/terraform/constants/go/integration_connectors_connection.go.tmpl'
+  post_create: 'templates/terraform/post_create/go/integration_connectors_connection.go.tmpl'
+  post_update: 'templates/terraform/post_update/go/integration_connectors_connection.go.tmpl'
+  post_import: 'templates/terraform/post_import/go/integration_connectors_connection.go.tmpl'
+examples:
+  - name: 'integration_connectors_connection_basic'
+    primary_resource_id: 'pubsubconnection'
+    vars:
+      connection_name: 'test-pubsub'
+    ignore_read_extra:
+      - 'status.0.description'
+    skip_test: true
+  - name: 'integration_connectors_connection_advanced'
+    primary_resource_id: 'zendeskconnection'
+    vars:
+      connection_name: 'test-zendesk'
+      secret_id: 'test-secret'
+    ignore_read_extra:
+      - 'status.0.description'
+    skip_test: true
+  - name: 'integration_connectors_connection_sa'
+    primary_resource_id: 'zendeskconnection'
+    vars:
+      connection_name: 'test-zendesk'
+      secret_id: 'test-secret'
+    ignore_read_extra:
+      - 'status.0.description'
+    skip_test: true
+    skip_docs: true
+  - name: 'integration_connectors_connection_oauth'
+    primary_resource_id: 'boxconnection'
+    vars:
+      connection_name: 'test-box'
+      secret_id: 'test-secret'
+    ignore_read_extra:
+      - 'status.0.description'
+    skip_test: true
+    skip_docs: true
+  - name: 'integration_connectors_connection_oauth_ssh'
+    primary_resource_id: 'boxconnection'
+    vars:
+      connection_name: 'test-box'
+      secret_id: 'test-secret'
+    ignore_read_extra:
+      - 'status.0.description'
+    skip_test: true
+    skip_docs: true
+  - name: 'integration_connectors_connection_oauth_cc'
+    primary_resource_id: 'boxconnection'
+    vars:
+      connection_name: 'test-box'
+      secret_id: 'test-secret'
+    ignore_read_extra:
+      - 'status.0.description'
+    skip_test: true
+    skip_docs: true
+  - name: 'integration_connectors_connection_oauth_jwt'
+    primary_resource_id: 'boxconnection'
+    vars:
+      connection_name: 'test-box'
+      secret_id: 'test-secret'
+    ignore_read_extra:
+      - 'status.0.description'
+    skip_test: true
+    skip_docs: true
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      Location in which Connection needs to be created.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'name'
+    type: String
+    description: |
+      Name of Connection needs to be created.
+
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'createTime'
+    type: Time
+    description: |
+      Time the Namespace was created in UTC.
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      Time the Namespace was updated in UTC.
+    output: true
+  - name: 'description'
+    type: String
+    description: |
+      An arbitrary description for the Conection.
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      Resource labels to represent user provided metadata.
+  - name: 'connectorVersion'
+    type: String
+    description: |
+      connectorVersion of the Connector.
+    required: true
+  - name: 'status'
+    type: NestedObject
+    description: |
+      Status of the Integration Connector.
+    output: true
+    properties:
+      - name: 'state'
+        type: String
+        description: |
+          State of the Integration Connector
+        output: true
+      - name: 'description'
+        type: String
+        description: |
+          Description of Status of Connection.
+        output: true
+      - name: 'status'
+        type: String
+        description: |
+          Status of the Connection.
+
+        output: true
+  - name: 'configVariable'
+    type: Array
+    description: |
+      Config Variables for the connection.
+    api_name: configVariables
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'key'
+          type: String
+          description: |
+            Key for the configVariable
+          required: true
+        - name: 'integerValue'
+          type: Integer
+          description: |
+            Integer Value of configVariable
+          api_name: intValue
+        - name: 'stringValue'
+          type: String
+          description: |
+            String Value of configVariabley
+        - name: 'booleanValue'
+          type: Boolean
+          description: |
+            Boolean Value of configVariable
+          api_name: boolValue
+        - name: 'secretValue'
+          type: NestedObject
+          description: |
+            Secret value of configVariable.
+          properties:
+            - name: 'secretVersion'
+              type: String
+              description: |
+                Secret version of Secret Value for Config variable.
+              required: true
+        - name: 'encryptionKeyValue'
+          type: NestedObject
+          description: |
+            Encription key value of configVariable.
+          properties:
+            - name: 'type'
+              type: Enum
+              description: |
+                Type of Encription Key
+              required: true
+              enum_values:
+                - 'GOOGLE_MANAGED'
+                - 'CUSTOMER_MANAGED'
+            - name: 'kmsKeyName'
+              type: String
+              description: |
+                The [KMS key name] with which the content of the Operation is encrypted. The
+                expected format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
+                Will be empty string if google managed.
+  - name: 'authConfig'
+    type: NestedObject
+    description: |
+      authConfig for the connection.
+    properties:
+      - name: 'authType'
+        type: Enum
+        description: |
+          authType of the Connection
+        required: true
+        enum_values:
+          - 'USER_PASSWORD'
+          - 'OAUTH2_JWT_BEARER'
+          - 'OAUTH2_CLIENT_CREDENTIALS'
+          - 'SSH_PUBLIC_KEY'
+          - 'OAUTH2_AUTH_CODE_FLOW'
+      - name: 'additionalVariable'
+        type: Array
+        description: |
+          List containing additional auth configs.
+        api_name: additionalVariables
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'key'
+              type: String
+              description: |
+                Key for the configVariable
+              required: true
+            - name: 'integerValue'
+              type: Integer
+              description: |
+                Integer Value of configVariable.
+              api_name: intValue
+            - name: 'stringValue'
+              type: String
+              description: |
+                String Value of configVariabley.
+            - name: 'booleanValue'
+              type: Boolean
+              description: |
+                Boolean Value of configVariable.
+              api_name: boolValue
+            - name: 'secretValue'
+              type: NestedObject
+              description: |
+                Secret value of configVariable.
+              properties:
+                - name: 'secretVersion'
+                  type: String
+                  description: |
+                    Secret version of Secret Value for Config variable.
+                  required: true
+            - name: 'encryptionKeyValue'
+              type: NestedObject
+              description: |
+                Encription key value of configVariable.
+              properties:
+                - name: 'type'
+                  type: Enum
+                  description: |
+                    Type of Encription Key
+                  required: true
+                  enum_values:
+                    - 'GOOGLE_MANAGED'
+                    - 'CUSTOMER_MANAGED'
+                - name: 'kmsKeyName'
+                  type: String
+                  description: |
+                    The [KMS key name] with which the content of the Operation is encrypted. The
+                    expected format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
+                    Will be empty string if google managed.
+      - name: 'authKey'
+        type: String
+        description: |
+          The type of authentication configured.
+      - name: 'userPassword'
+        type: NestedObject
+        description: |
+          User password for Authentication.
+        exactly_one_of:
+          - 'auth_config.0.user_password'
+          - 'auth_config.0.oauth2_jwt_bearer'
+          - 'auth_config.0.oauth2_client_credentials'
+          - 'auth_config.0.ssh_public_key'
+          - 'auth_config.0.oauth2_auth_code_flow'
+        properties:
+          - name: 'username'
+            type: String
+            description: |
+              Username for Authentication.
+            required: true
+          - name: 'password'
+            type: NestedObject
+            description: |
+              Password for Authentication.
+            properties:
+              - name: 'secretVersion'
+                type: String
+                description: |
+                  The resource name of the secret version in the format,
+                  format as: projects/*/secrets/*/versions/*.
+                required: true
+      - name: 'oauth2JwtBearer'
+        type: NestedObject
+        description: |
+          OAuth2 JWT Bearer for Authentication.
+        exactly_one_of:
+          - 'auth_config.0.user_password'
+          - 'auth_config.0.oauth2_jwt_bearer'
+          - 'auth_config.0.oauth2_client_credentials'
+          - 'auth_config.0.ssh_public_key'
+          - 'auth_config.0.oauth2_auth_code_flow'
+        properties:
+          - name: 'clientKey'
+            type: NestedObject
+            description: |
+              Secret version reference containing a PKCS#8 PEM-encoded private key associated with the Client Certificate.
+              This private key will be used to sign JWTs used for the jwt-bearer authorization grant.
+              Specified in the form as: projects/*/secrets/*/versions/*.
+            properties:
+              - name: 'secretVersion'
+                type: String
+                description: |
+                  The resource name of the secret version in the format,
+                  format as: projects/*/secrets/*/versions/*.
+                required: true
+          - name: 'jwtClaims'
+            type: NestedObject
+            description: |
+              JwtClaims providers fields to generate the token.
+            properties:
+              - name: 'issuer'
+                type: String
+                description: |
+                  Value for the "iss" claim.
+              - name: 'subject'
+                type: String
+                description: |
+                  Value for the "sub" claim.
+              - name: 'audience'
+                type: String
+                description: |
+                  Value for the "aud" claim.
+      - name: 'oauth2ClientCredentials'
+        type: NestedObject
+        description: |
+          OAuth3 Client Credentials for Authentication.
+        exactly_one_of:
+          - 'auth_config.0.user_password'
+          - 'auth_config.0.oauth2_jwt_bearer'
+          - 'auth_config.0.oauth2_client_credentials'
+          - 'auth_config.0.ssh_public_key'
+          - 'auth_config.0.oauth2_auth_code_flow'
+        properties:
+          - name: 'clientId'
+            type: String
+            description: |
+              Secret version of Password for Authentication.
+            required: true
+          - name: 'clientSecret'
+            type: NestedObject
+            description: |
+              Secret version reference containing the client secret.
+            properties:
+              - name: 'secretVersion'
+                type: String
+                description: |
+                  The resource name of the secret version in the format,
+                  format as: projects/*/secrets/*/versions/*.
+                required: true
+      - name: 'sshPublicKey'
+        type: NestedObject
+        description: |
+          SSH Public Key for Authentication.
+        exactly_one_of:
+          - 'auth_config.0.user_password'
+          - 'auth_config.0.oauth2_jwt_bearer'
+          - 'auth_config.0.oauth2_client_credentials'
+          - 'auth_config.0.ssh_public_key'
+          - 'auth_config.0.oauth2_auth_code_flow'
+        properties:
+          - name: 'username'
+            type: String
+            description: |
+              The user account used to authenticate.
+            required: true
+          - name: 'sshClientCert'
+            type: NestedObject
+            description: |
+              SSH Client Cert. It should contain both public and private key.
+            properties:
+              - name: 'secretVersion'
+                type: String
+                description: |
+                  The resource name of the secret version in the format,
+                  format as: projects/*/secrets/*/versions/*.
+                required: true
+          - name: 'certType'
+            type: String
+            description: |
+              Format of SSH Client cert.
+          - name: 'sshClientCertPass'
+            type: NestedObject
+            description: |
+              Password (passphrase) for ssh client certificate if it has one.
+            properties:
+              - name: 'secretVersion'
+                type: String
+                description: |
+                  The resource name of the secret version in the format,
+                  format as: projects/*/secrets/*/versions/*.
+                required: true
+      - name: 'oauth2AuthCodeFlow'
+        type: NestedObject
+        description: |
+          Parameters to support Oauth 2.0 Auth Code Grant Authentication.
+        exactly_one_of:
+          - 'auth_config.0.user_password'
+          - 'auth_config.0.oauth2_jwt_bearer'
+          - 'auth_config.0.oauth2_client_credentials'
+          - 'auth_config.0.ssh_public_key'
+          - 'auth_config.0.oauth2_auth_code_flow'
+        properties:
+          - name: 'clientId'
+            type: String
+            description: |
+              Client ID for user-provided OAuth app.
+          - name: 'clientSecret'
+            type: NestedObject
+            description: |
+              Client secret for user-provided OAuth app.
+            properties:
+              - name: 'secretVersion'
+                type: String
+                description: |
+                  The resource name of the secret version in the format,
+                  format as: projects/*/secrets/*/versions/*.
+                required: true
+          - name: 'scopes'
+            type: Array
+            description: |
+              Scopes the connection will request when the user performs the auth code flow.
+            item_type:
+              type: String
+          - name: 'enablePkce'
+            type: Boolean
+            description: |
+              Whether to enable PKCE when the user performs the auth code flow.
+          - name: 'authUri'
+            type: String
+            description: |
+              Auth URL for Authorization Code Flow.
+  - name: 'lockConfig'
+    type: NestedObject
+    description: |
+      Determines whether or no a connection is locked. If locked, a reason must be specified.
+    properties:
+      - name: 'locked'
+        type: Boolean
+        description: |
+          Indicates whether or not the connection is locked.
+        required: true
+      - name: 'reason'
+        type: String
+        description: |
+          Describes why a connection is locked.
+  - name: 'destinationConfig'
+    type: Array
+    description: |
+      Define the Connectors target endpoint.
+    api_name: destinationConfigs
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'key'
+          type: String
+          description: |
+            The key is the destination identifier that is supported by the Connector.
+          required: true
+        - name: 'destination'
+          type: Array
+          description: |
+            The destinations for the key.
+          api_name: destinations
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'port'
+                type: Integer
+                description: |
+                  The port is the target port number that is accepted by the destination.
+              - name: 'serviceAttachment'
+                type: String
+                description: |
+                  PSC service attachments. Format: projects/*/regions/*/serviceAttachments/*
+              - name: 'host'
+                type: String
+                description: |
+                  For publicly routable host.
+  - name: 'serviceAccount'
+    type: String
+    description: |
+      Service account needed for runtime plane to access Google Cloud resources.
+    default_from_api: true
+  - name: 'serviceDirectory'
+    type: String
+    description: |
+      The name of the Service Directory service name. Used for Private Harpoon to resolve the ILB address.
+      e.g. "projects/cloud-connectors-e2e-testing/locations/us-central1/namespaces/istio-system/services/istio-ingressgateway-connectors"
+    output: true
+  - name: 'suspended'
+    type: Boolean
+    description: |
+      Suspended indicates if a user has suspended a connection or not.
+  - name: 'nodeConfig'
+    type: NestedObject
+    description: |
+      Node configuration for the connection.
+    default_from_api: true
+    properties:
+      - name: 'minNodeCount'
+        type: Integer
+        description: |
+          Minimum number of nodes in the runtime nodes.
+        required: true
+        default_from_api: true
+      - name: 'maxNodeCount'
+        type: Integer
+        description: |
+          Minimum number of nodes in the runtime nodes.
+        required: true
+        default_from_api: true
+  - name: 'logConfig'
+    type: NestedObject
+    description: |
+      Log configuration for the connection.
+    properties:
+      - name: 'enabled'
+        type: Boolean
+        description: |
+          Enabled represents whether logging is enabled or not for a connection.
+        required: true
+  - name: 'sslConfig'
+    type: NestedObject
+    description: |
+      SSL Configuration of a connection
+    properties:
+      - name: 'type'
+        type: Enum
+        description: |
+          Enum for controlling the SSL Type (TLS/MTLS)
+        required: true
+        enum_values:
+          - 'TLS'
+          - 'MTLS'
+      - name: 'trustModel'
+        type: Enum
+        description: |
+          Enum for Trust Model
+        enum_values:
+          - 'PUBLIC'
+          - 'PRIVATE'
+          - 'INSECURE'
+      - name: 'privateServerCertificate'
+        type: NestedObject
+        description: |
+          Private Server Certificate. Needs to be specified if trust model is PRIVATE.
+        properties:
+          - name: 'secretVersion'
+            type: String
+            description: |
+              Secret version of Secret Value for Config variable.
+            required: true
+      - name: 'clientCertificate'
+        type: NestedObject
+        description: |
+          Client Certificate
+        properties:
+          - name: 'secretVersion'
+            type: String
+            description: |
+              Secret version of Secret Value for Config variable.
+            required: true
+      - name: 'clientPrivateKey'
+        type: NestedObject
+        description: |
+          Client Private Key
+        properties:
+          - name: 'secretVersion'
+            type: String
+            description: |
+              Secret version of Secret Value for Config variable.
+            required: true
+      - name: 'clientPrivateKeyPass'
+        type: NestedObject
+        description: |
+          Secret containing the passphrase protecting the Client Private Key
+        properties:
+          - name: 'secretVersion'
+            type: String
+            description: |
+              Secret version of Secret Value for Config variable.
+            required: true
+      - name: 'serverCertType'
+        type: Enum
+        description: |
+          Type of Server Cert (PEM/JKS/.. etc.)
+        enum_values:
+          - 'PEM'
+      - name: 'clientCertType'
+        type: Enum
+        description: |
+          Type of Client Cert (PEM/JKS/.. etc.)
+        enum_values:
+          - 'PEM'
+      - name: 'useSsl'
+        type: Boolean
+        description: |
+          Bool for enabling SSL
+      - name: 'additionalVariable'
+        type: Array
+        description: |
+          Additional SSL related field values.
+        api_name: additionalVariables
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'key'
+              type: String
+              description: |
+                Key for the configVariable
+              required: true
+            - name: 'integerValue'
+              type: Integer
+              description: |
+                Integer Value of configVariable.
+              api_name: intValue
+            - name: 'stringValue'
+              type: String
+              description: |
+                String Value of configVariabley.
+            - name: 'booleanValue'
+              type: Boolean
+              description: |
+                Boolean Value of configVariable.
+              api_name: boolValue
+            - name: 'secretValue'
+              type: NestedObject
+              description: |
+                Secret value of configVariable
+              properties:
+                - name: 'secretVersion'
+                  type: String
+                  description: |
+                    Secret version of Secret Value for Config variable.
+                  required: true
+            - name: 'encryptionKeyValue'
+              type: NestedObject
+              description: |
+                Encription key value of configVariable
+              properties:
+                - name: 'type'
+                  type: Enum
+                  description: |
+                    Type of Encription Key
+                  enum_values:
+                    - 'GOOGLE_MANAGED'
+                    - 'CUSTOMER_MANAGED'
+                - name: 'kmsKeyName'
+                  type: String
+                  description: |
+                    The [KMS key name] with which the content of the Operation is encrypted. The
+                    expected format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
+                    Will be empty string if google managed.
+  - name: 'subscriptionType'
+    type: String
+    description: |
+      This subscription type enum states the subscription type of the project.
+    output: true
+  - name: 'connectionRevision'
+    type: String
+    description: |
+      Connection revision. This field is only updated when the connection is created or updated by User.
+    output: true
+  - name: 'eventingEnablementType'
+    type: Enum
+    description: |
+      Eventing enablement type. Will be nil if eventing is not enabled.
+    enum_values:
+      - 'EVENTING_AND_CONNECTION'
+      - 'ONLY_EVENTING'
+  - name: 'eventingConfig'
+    type: NestedObject
+    description: |
+      Eventing Configuration of a connection
+    properties:
+      - name: 'registrationDestinationConfig'
+        type: NestedObject
+        description: |
+          registrationDestinationConfig
+        required: true
+        properties:
+          - name: 'key'
+            type: String
+            description: |
+              Key for the connection
+          - name: 'destination'
+            type: Array
+            description: |
+              destinations for the connection
+            api_name: destinations
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'port'
+                  type: Integer
+                  description: |
+                    port number
+                - name: 'serviceAttachment'
+                  type: String
+                  description: |
+                    Service Attachment
+                - name: 'host'
+                  type: String
+                  description: |
+                    Host
+      - name: 'authConfig'
+        type: NestedObject
+        description: |
+          authConfig for Eventing Configuration.
+        properties:
+          - name: 'authType'
+            type: Enum
+            description: |
+              authType of the Connection
+            required: true
+            enum_values:
+              - 'USER_PASSWORD'
+          - name: 'additionalVariable'
+            type: Array
+            description: |
+              List containing additional auth configs.
+            api_name: additionalVariables
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'key'
+                  type: String
+                  description: |
+                    Key for the configVariable
+                  required: true
+                - name: 'integerValue'
+                  type: Integer
+                  description: |
+                    Integer Value of configVariable.
+                  api_name: intValue
+                - name: 'stringValue'
+                  type: String
+                  description: |
+                    String Value of configVariabley.
+                - name: 'booleanValue'
+                  type: Boolean
+                  description: |
+                    Boolean Value of configVariable.
+                  api_name: boolValue
+                - name: 'secretValue'
+                  type: NestedObject
+                  description: |
+                    Secret value of configVariable
+                  properties:
+                    - name: 'secretVersion'
+                      type: String
+                      description: |
+                        Secret version of Secret Value for Config variable.
+                      required: true
+                - name: 'encryptionKeyValue'
+                  type: NestedObject
+                  description: |
+                    Encription key value of configVariable
+                  properties:
+                    - name: 'type'
+                      type: Enum
+                      description: |
+                        Type of Encription Key
+                      enum_values:
+                        - 'GOOGLE_MANAGED'
+                        - 'CUSTOMER_MANAGED'
+                    - name: 'kmsKeyName'
+                      type: String
+                      description: |
+                        The [KMS key name] with which the content of the Operation is encrypted. The
+                        expected format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
+                        Will be empty string if google managed.
+          - name: 'authKey'
+            type: String
+            description: |
+              The type of authentication configured.
+          - name: 'userPassword'
+            type: NestedObject
+            description: |
+              User password for Authentication.
+            required: true
+            properties:
+              - name: 'username'
+                type: String
+                description: |
+                  Username for Authentication.
+              - name: 'password'
+                type: NestedObject
+                description: |
+                  Password for Authentication.
+                properties:
+                  - name: 'secretVersion'
+                    type: String
+                    description: |
+                      The resource name of the secret version in the format,
+                      format as: projects/*/secrets/*/versions/*.
+                    required: true
+      - name: 'additionalVariable'
+        type: Array
+        description: |
+          List containing additional auth configs.
+        api_name: additionalVariables
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'key'
+              type: String
+              description: |
+                Key for the configVariable
+              required: true
+            - name: 'integerValue'
+              type: Integer
+              description: |
+                Integer Value of configVariable.
+              api_name: intValue
+            - name: 'stringValue'
+              type: String
+              description: |
+                String Value of configVariabley.
+            - name: 'booleanValue'
+              type: Boolean
+              description: |
+                Boolean Value of configVariable.
+              api_name: boolValue
+            - name: 'secretValue'
+              type: NestedObject
+              description: |
+                Secret value of configVariable
+              properties:
+                - name: 'secretVersion'
+                  type: String
+                  description: |
+                    Secret version of Secret Value for Config variable.
+                  required: true
+            - name: 'encryptionKeyValue'
+              type: NestedObject
+              description: |
+                Encription key value of configVariable.
+              properties:
+                - name: 'type'
+                  type: Enum
+                  description: |
+                    Type of Encryption Key
+                  enum_values:
+                    - 'GOOGLE_MANAGED'
+                    - 'CUSTOMER_MANAGED'
+                - name: 'kmsKeyName'
+                  type: String
+                  description: |
+                    The [KMS key name] with which the content of the Operation is encrypted. The
+                    expected format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
+                    Will be empty string if google managed.
+      - name: 'enrichmentEnabled'
+        type: Boolean
+        description: |
+          Enrichment Enabled.
+  - name: 'connectorVersionLaunchStage'
+    type: String
+    description: |
+      Flag to mark the version indicating the launch stage.
+    output: true
+  - name: 'eventingRuntimeData'
+    type: NestedObject
+    description: |
+      Eventing Runtime Data.
+    output: true
+    properties:
+      - name: 'status'
+        type: NestedObject
+        description: |
+          Current status of eventing.
+        output: true
+        properties:
+          - name: 'state'
+            type: String
+            description: |
+              State of the Eventing
+            output: true
+          - name: 'description'
+            type: String
+            description: |
+              Description of error if State is set to "ERROR".
+            output: true
+      - name: 'eventsListenerEndpoint'
+        type: String
+        description: |
+          Events listener endpoint. The value will populated after provisioning the events listener.
+  - name: 'connectorVersionInfraConfig'
+    type: NestedObject
+    description: |
+      This configuration provides infra configs like rate limit threshold which need to be configurable for every connector version.
+    output: true
+    properties:
+      - name: 'ratelimitThreshold'
+        type: String
+        description: |
+          Max QPS supported by the connector version before throttling of requests.
+        output: true

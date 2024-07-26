@@ -1,0 +1,444 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Instance'
+description: |
+  A Google Cloud Looker instance.
+references:
+  guides:
+    'Create a Looker (Google Cloud core) instance': 'https://cloud.google.com/looker/docs/looker-core-instance-create'
+    'Configure a Looker (Google Cloud core) instance': 'https://cloud.google.com/looker/docs/looker-core-instance-setup'
+  api: 'https://cloud.google.com/looker/docs/reference/rest/v1/projects.locations.instances'
+docs:
+base_url: 'projects/{{project}}/locations/{{region}}/instances'
+create_url: 'projects/{{project}}/locations/{{region}}/instances?instanceId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 90
+  update_minutes: 90
+  delete_minutes: 90
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+skip_sweeper: true
+error_abort_predicates:
+
+  - 'transport_tpg.Is429QuotaError'
+examples:
+  - name: 'looker_instance_basic'
+    primary_resource_id: 'looker-instance'
+    vars:
+      instance_name: 'my-instance'
+      client_id: 'my-client-id'
+      client_secret: 'my-client-secret'
+  - name: 'looker_instance_full'
+    primary_resource_id: 'looker-instance'
+    vars:
+      instance_name: 'my-instance'
+      client_id: 'my-client-id'
+      client_secret: 'my-client-secret'
+  - name: 'looker_instance_enterprise_full'
+    primary_resource_id: 'looker-instance'
+    vars:
+      network_name: 'looker-network'
+      kms_key_ring_name: 'looker-kms-ring'
+      kms_key_name: 'looker-kms-key'
+      address_name: 'looker-range'
+      instance_name: 'my-instance'
+      client_id: 'my-client-id'
+      client_secret: 'my-client-secret'
+    skip_test: true
+  - name: 'looker_instance_enterprise_full_test'
+    primary_resource_id: 'looker-instance'
+    vars:
+      network_name: 'looker-network'
+      kms_key_ring_name: 'looker-kms-ring'
+      kms_key_name: 'looker-kms-key'
+      address_name: 'looker-range'
+      instance_name: 'my-instance'
+      client_id: 'my-client-id'
+      client_secret: 'my-client-secret'
+    test_vars_overrides:
+      'address_name': 'acctest.BootstrapSharedTestGlobalAddress(t, "looker-vpc-network-3", acctest.AddressWithPrefixLength(8))'
+      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "looker-vpc-network-3", acctest.ServiceNetworkWithPrefixLength(8))'
+    skip_docs: true
+  - name: 'looker_instance_custom_domain'
+    primary_resource_id: 'looker-instance'
+    vars:
+      instance_name: 'my-instance'
+      client_id: 'my-client-id'
+      client_secret: 'my-client-secret'
+      custom_domain: 'my-custom-domain'
+parameters:
+  - name: 'region'
+    type: String
+    description: |
+      The name of the Looker region of the instance.
+    url_param_only: true
+    immutable: true
+    default_from_api: true
+properties:
+  - name: 'adminSettings'
+    type: NestedObject
+    description: |
+      Looker instance Admin settings.
+    update_mask_fields:
+      - 'admin_settings.allowed_email_domains'
+    properties:
+      - name: 'allowedEmailDomains'
+        type: Array
+        description: |
+          Email domain allowlist for the instance.
+
+          Define the email domains to which your users can deliver Looker (Google Cloud core) content.
+          Updating this list will restart the instance. Updating the allowed email domains from terraform
+          means the value provided will be considered as the entire list and not an amendment to the
+          existing list of allowed email domains.
+  # Admin Settings Object - End
+        item_type:
+          type: String
+  - name: 'consumerNetwork'
+    type: String
+    description: |
+      Network name in the consumer project in the format of: projects/{project}/global/networks/{network}
+      Note that the consumer network may be in a different GCP project than the consumer
+      project that is hosting the Looker Instance.
+  - name: 'createTime'
+    type: Time
+    description: |
+      The time the instance was created in RFC3339 UTC "Zulu" format,
+      accurate to nanoseconds.
+    output: true
+  - name: 'denyMaintenancePeriod'
+    type: NestedObject
+    description: |
+      Maintenance denial period for this instance.
+
+      You must allow at least 14 days of maintenance availability
+      between any two deny maintenance periods.
+    properties:
+      - name: 'startDate'
+        type: NestedObject
+        description: |
+          Required. Start date of the deny maintenance period
+        required: true
+        properties:
+          - name: 'year'
+            type: Integer
+            description: |
+              Year of the date. Must be from 1 to 9999, or 0 to specify a date without
+              a year.
+            validation:
+              function: 'validation.IntBetween(0,10000)'
+          - name: 'month'
+            type: Integer
+            description: |
+              Month of a year. Must be from 1 to 12, or 0 to specify a year without a
+              month and day.
+            validation:
+              function: 'validation.IntBetween(0,13)'
+          - name: 'day'
+            type: Integer
+            description: |
+              Day of a month. Must be from 1 to 31 and valid for the year and month, or 0
+              to specify a year by itself or a year and month where the day isn't significant.
+            validation:
+              function: 'validation.IntBetween(0,32)'
+      - name: 'endDate'
+        type: NestedObject
+        description: |
+          Required. Start date of the deny maintenance period
+        required: true
+        properties:
+          - name: 'year'
+            type: Integer
+            description: |
+              Year of the date. Must be from 1 to 9999, or 0 to specify a date without
+              a year.
+            validation:
+              function: 'validation.IntBetween(0,10000)'
+          - name: 'month'
+            type: Integer
+            description: |
+              Month of a year. Must be from 1 to 12, or 0 to specify a year without a
+              month and day.
+            validation:
+              function: 'validation.IntBetween(0,13)'
+          - name: 'day'
+            type: Integer
+            description: |
+              Day of a month. Must be from 1 to 31 and valid for the year and month, or 0
+              to specify a year by itself or a year and month where the day isn't significant.
+            validation:
+              function: 'validation.IntBetween(0,32)'
+      - name: 'time'
+        type: NestedObject
+        description: |
+          Required. Start time of the window in UTC time.
+        required: true
+        properties:
+          - name: 'hours'
+            type: Integer
+            description: |
+              Hours of day in 24 hour format. Should be from 0 to 23.
+            validation:
+              function: 'validation.IntBetween(0,23)'
+          - name: 'minutes'
+            type: Integer
+            description: |
+              Minutes of hour of day. Must be from 0 to 59.
+            validation:
+              function: 'validation.IntBetween(0,60)'
+          - name: 'seconds'
+            type: Integer
+            description: |
+              Seconds of minutes of the time. Must normally be from 0 to 59.
+            validation:
+              function: 'validation.IntBetween(0,60)'
+          - name: 'nanos'
+            type: Integer
+            description: |
+              Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+            validation:
+              function: 'validation.IntBetween(0,999999999)'
+  - name: 'egressPublicIp'
+    type: String
+    description: |
+      Public Egress IP (IPv4).
+    output: true
+  - name: 'encryptionConfig'
+    type: NestedObject
+    description: |
+      Looker instance encryption settings.
+    default_from_api: true
+    properties:
+      - name: 'kmsKeyName'
+        type: String
+        description: |
+          Name of the customer managed encryption key (CMEK) in KMS.
+      - name: 'kmsKeyState'
+        type: Enum
+        description: |
+          Status of the customer managed encryption key (CMEK) in KMS.
+        output: true
+        enum_values:
+          - 'VALID'
+          - 'REVOKED'
+      - name: 'kmsKeyNameVersion'
+        type: String
+        description: |
+          Full name and version of the CMEK key currently in use to encrypt Looker data.
+  # Encryption Config  Object - End
+        output: true
+  - name: 'ingressPrivateIp'
+    type: String
+    description: |
+      Private Ingress IP (IPv4).
+    output: true
+  - name: 'ingressPublicIp'
+    type: String
+    description: |
+      Public Ingress IP (IPv4).
+    output: true
+  - name: 'lookerVersion'
+    type: String
+    description: |
+      The Looker version that the instance is using.
+    output: true
+  - name: 'lookerUri'
+    type: String
+    description: |
+      Looker instance URI which can be used to access the Looker Instance UI.
+    output: true
+  - name: 'maintenanceWindow'
+    type: NestedObject
+    description: |
+      Maintenance window for an instance.
+
+      Maintenance of your instance takes place once a month, and will require
+      your instance to be restarted during updates, which will temporarily
+      disrupt service.
+    properties:
+      - name: 'dayOfWeek'
+        type: Enum
+        description: |
+          Required. Day of the week for this MaintenanceWindow (in UTC).
+
+          - MONDAY: Monday
+          - TUESDAY: Tuesday
+          - WEDNESDAY: Wednesday
+          - THURSDAY: Thursday
+          - FRIDAY: Friday
+          - SATURDAY: Saturday
+          - SUNDAY: Sunday
+        required: true
+        enum_values:
+          - 'MONDAY'
+          - 'TUESDAY'
+          - 'WEDNESDAY'
+          - 'THURSDAY'
+          - 'FRIDAY'
+          - 'SATURDAY'
+          - 'SUNDAY'
+      - name: 'startTime'
+        type: NestedObject
+        description: |
+          Required. Start time of the window in UTC time.
+        required: true
+        properties:
+          - name: 'hours'
+            type: Integer
+            description: |
+              Hours of day in 24 hour format. Should be from 0 to 23.
+            validation:
+              function: 'validation.IntBetween(0,23)'
+          - name: 'minutes'
+            type: Integer
+            description: |
+              Minutes of hour of day. Must be from 0 to 59.
+            validation:
+              function: 'validation.IntBetween(0,60)'
+          - name: 'seconds'
+            type: Integer
+            description: |
+              Seconds of minutes of the time. Must normally be from 0 to 59.
+            validation:
+              function: 'validation.IntBetween(0,60)'
+          - name: 'nanos'
+            type: Integer
+            description: |
+              Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+            validation:
+              function: 'validation.IntBetween(0,999999999)'
+  - name: 'name'
+    type: String
+    description: |
+      The ID of the instance or a fully qualified identifier for the instance.
+    url_param_only: true
+    required: true
+    immutable: true
+    validation:
+      regex: '^[a-z][a-z0-9-]{0,61}[a-z0-9]$'
+  - name: 'oauthConfig'
+    type: NestedObject
+    description: |
+      Looker Instance OAuth login settings.
+    ignore_read: true
+    properties:
+      - name: 'clientId'
+        type: String
+        description: |
+          The client ID for the Oauth config.
+        required: true
+      - name: 'clientSecret'
+        type: String
+        description: |
+          The client secret for the Oauth config.
+  # Oauth Object - End
+        required: true
+  - name: 'platformEdition'
+    type: Enum
+    description: |
+      Platform editions for a Looker instance. Each edition maps to a set of instance features, like its size. Must be one of these values:
+      - LOOKER_CORE_TRIAL: trial instance (Currently Unavailable)
+      - LOOKER_CORE_STANDARD: pay as you go standard instance (Currently Unavailable)
+      - LOOKER_CORE_STANDARD_ANNUAL: subscription standard instance
+      - LOOKER_CORE_ENTERPRISE_ANNUAL: subscription enterprise instance
+      - LOOKER_CORE_EMBED_ANNUAL: subscription embed instance
+    immutable: true
+    default_value: "LOOKER_CORE_TRIAL"
+    enum_values:
+      - 'LOOKER_CORE_TRIAL'
+      - 'LOOKER_CORE_STANDARD'
+      - 'LOOKER_CORE_STANDARD_ANNUAL'
+      - 'LOOKER_CORE_ENTERPRISE_ANNUAL'
+      - 'LOOKER_CORE_EMBED_ANNUAL'
+  - name: 'privateIpEnabled'
+    type: Boolean
+    description: |
+      Whether private IP is enabled on the Looker instance.
+    default_value: false
+  - name: 'publicIpEnabled'
+    type: Boolean
+    description: |
+      Whether public IP is enabled on the Looker instance.
+    default_value: true
+  - name: 'reservedRange'
+    type: String
+    description: |
+      Name of a reserved IP address range within the consumer network, to be used for
+      private service access connection. User may or may not specify this in a request.
+  - name: 'updateTime'
+    type: Time
+    description: |
+      The time the instance was updated in RFC3339 UTC "Zulu" format,
+      accurate to nanoseconds.
+    output: true
+  - name: 'userMetadata'
+    type: NestedObject
+    description: |
+      Metadata about users for a Looker instance.
+
+      These settings are only available when platform edition LOOKER_CORE_STANDARD is set.
+
+      There are ten Standard and two Developer users included in the cost of the product.
+      You can allocate additional Standard, Viewer, and Developer users for this instance.
+      It is an optional step and can be modified later.
+
+      With the Standard edition of Looker (Google Cloud core), you can provision up to 50
+      total users, distributed across Viewer, Standard, and Developer.
+    properties:
+      - name: 'additionalViewerUserCount'
+        type: Integer
+        description: |
+          Number of additional Viewer Users to allocate to the Looker Instance.
+      - name: 'additionalStandardUserCount'
+        type: Integer
+        description: |
+          Number of additional Standard Users to allocate to the Looker Instance.
+      - name: 'additionalDeveloperUserCount'
+        type: Integer
+        description: |
+          Number of additional Developer Users to allocate to the Looker Instance.
+  # UserMetadata Object - End
+  # CustomDomain Object
+  - name: 'customDomain'
+    type: NestedObject
+    description: |
+      Custom domain settings for a Looker instance.
+    properties:
+      - name: 'domain'
+        type: String
+        description: |
+          Domain name
+      - name: 'state'
+        type: String
+        description: |
+          Status of the custom domain.
+        output: true
