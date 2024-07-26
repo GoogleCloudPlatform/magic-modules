@@ -1,0 +1,189 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Featurestore'
+description: |-
+  A collection of DataItems and Annotations on them.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featurestores'
+docs:
+base_url: 'projects/{{project}}/locations/{{region}}/featurestores'
+self_link: 'projects/{{project}}/locations/{{region}}/featurestores/{{name}}'
+create_url: 'projects/{{project}}/locations/{{region}}/featurestores?featurestoreId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+iam_policy:
+  method_name_separator: ':'
+  fetch_iam_policy_verb: 'POST'
+  parent_resource_attribute: 'featurestore'
+  example_config_body: 'templates/terraform/iam/example_config_body/go/vertex_ai_featurestore.tf.tmpl'
+  import_format:
+    - 'projects/{{project}}/locations/{{region}}/featurestores/{{name}}'
+  min_version: 'beta'
+custom_code:
+  pre_delete: 'templates/terraform/pre_delete/go/vertex_ai_force_delete.go.tmpl'
+skip_sweeper: true
+examples:
+  - name: 'vertex_ai_featurestore'
+    primary_resource_id: 'featurestore'
+    primary_resource_name: 'fmt.Sprintf("terraform%s", context["random_suffix"])'
+    vars:
+      name: 'terraform'
+      project: 'appeng-flex'
+      kms_key_name: 'kms-name'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    test_vars_overrides:
+      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+    ignore_read_extra:
+      - 'force_destroy'
+  - name: 'vertex_ai_featurestore_with_beta_fields'
+    primary_resource_id: 'featurestore'
+    primary_resource_name: 'fmt.Sprintf("terraform%s", context["random_suffix"])'
+    min_version: 'beta'
+    vars:
+      name: 'terraform2'
+      project: 'appeng-flex'
+      kms_key_name: 'kms-name'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    test_vars_overrides:
+      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+    ignore_read_extra:
+      - 'force_destroy'
+  - name: 'vertex_ai_featurestore_scaling'
+    primary_resource_id: 'featurestore'
+    primary_resource_name: 'fmt.Sprintf("terraform%s", context["random_suffix"])'
+    vars:
+      name: 'terraform3'
+      project: 'appeng-flex'
+      kms_key_name: 'kms-name'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    test_vars_overrides:
+      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+    ignore_read_extra:
+      - 'force_destroy'
+virtual_fields:
+  - name: 'force_destroy'
+    description:
+      'If set to true, any EntityTypes and Features for this Featurestore will
+      also be deleted'
+    type: Boolean
+    default_value: false
+parameters:
+  - name: 'region'
+    type: String
+    description: The region of the dataset. eg us-central1
+    url_param_only: true
+    immutable: true
+    default_from_api: true
+properties:
+  - name: 'name'
+    type: String
+    description:
+      The name of the Featurestore. This value may be up to 60 characters, and
+      valid characters are [a-z0-9_]. The first character cannot be a number.
+    url_param_only: true
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+  - name: 'etag'
+    type: String
+    description: Used to perform consistent read-modify-write updates.
+    ignore_read: true
+    output: true
+  - name: 'createTime'
+    type: String
+    description: |
+      The timestamp of when the featurestore was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: |
+      The timestamp of when the featurestore was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      A set of key/value label pairs to assign to this Featurestore.
+    immutable: false
+  - name: 'onlineServingConfig'
+    type: NestedObject
+    description: |
+      Config for online serving resources.
+    properties:
+      - name: 'fixedNodeCount'
+        type: Integer
+        description: |
+          The number of nodes for each cluster. The number of nodes will not scale automatically but can be scaled manually by providing different values when updating.
+        exactly_one_of:
+          - 'online_serving_config.0.fixed_node_count'
+          - 'online_serving_config.0.scaling'
+      - name: 'scaling'
+        type: NestedObject
+        description: |
+          Online serving scaling configuration. Only one of fixedNodeCount and scaling can be set. Setting one will reset the other.
+        exactly_one_of:
+          - 'online_serving_config.0.fixed_node_count'
+          - 'online_serving_config.0.scaling'
+        properties:
+          - name: 'minNodeCount'
+            type: Integer
+            description: |
+              The minimum number of nodes to scale down to. Must be greater than or equal to 1.
+            required: true
+          - name: 'maxNodeCount'
+            type: Integer
+            description: |
+              The maximum number of nodes to scale up to. Must be greater than minNodeCount, and less than or equal to 10 times of 'minNodeCount'.
+            required: true
+  - name: 'onlineStorageTtlDays'
+    type: Integer
+    description: |
+      TTL in days for feature values that will be stored in online serving storage. The Feature Store online storage periodically removes obsolete feature values older than onlineStorageTtlDays since the feature generation time. Note that onlineStorageTtlDays should be less than or equal to offlineStorageTtlDays for each EntityType under a featurestore. If not set, default to 4000 days
+    min_version: 'beta'
+    default_value: 4000
+  - name: 'encryptionSpec'
+    type: NestedObject
+    description: |
+      If set, both of the online and offline data storage will be secured by this key.
+    properties:
+      - name: 'kmsKeyName'
+        type: String
+        description: |
+          The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource. Has the form: projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key. The key needs to be in the same region as where the compute resource is created.
+        required: true

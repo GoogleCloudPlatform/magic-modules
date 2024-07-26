@@ -449,7 +449,11 @@ func (t *Type) GetPrefix() string {
 			if t.ParentMetadata != nil && (t.ParentMetadata.IsA("Array") || t.ParentMetadata.IsA("Map")) {
 				t.Prefix = t.ParentMetadata.GetPrefix()
 			} else {
-				t.Prefix = fmt.Sprintf("%s%s", t.ParentMetadata.GetPrefix(), t.ParentMetadata.TitlelizeProperty())
+				if t.ParentMetadata != nil && t.ParentMetadata.ParentMetadata != nil && t.ParentMetadata.ParentMetadata.IsA("Map") {
+					t.Prefix = fmt.Sprintf("%s%s", t.ParentMetadata.GetPrefix(), t.ParentMetadata.ParentMetadata.TitlelizeProperty())
+				} else {
+					t.Prefix = fmt.Sprintf("%s%s", t.ParentMetadata.GetPrefix(), t.ParentMetadata.TitlelizeProperty())
+				}
 			}
 		}
 	}

@@ -1,0 +1,81 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Client'
+description: |
+  Contains the data that describes an Identity Aware Proxy owned client.
+
+  ~> **Note:** Only internal org clients can be created via declarative tools. External clients must be
+  manually created via the GCP console. This restriction is due to the existing APIs and not lack of support
+  in this tool.
+references:
+  guides:
+    'Setting up IAP Client': 'https://cloud.google.com/iap/docs/authentication-howto'
+  api: 'https://cloud.google.com/iap/docs/reference/rest/v1/projects.brands.identityAwareProxyClients'
+docs:
+id_format: '{{brand}}/identityAwareProxyClients/{{client_id}}'
+base_url: '{{brand}}/identityAwareProxyClients'
+self_link: '{{brand}}/identityAwareProxyClients/{{client_id}}'
+immutable: true
+import_format:
+  - '{{brand}}/identityAwareProxyClients/{{client_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  post_create: 'templates/terraform/post_create/go/iap_client.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/go/iap_client.go.tmpl'
+skip_sweeper: true
+error_retry_predicates:
+
+  - 'transport_tpg.IapClient409Operation'
+examples:
+  - name: 'iap_client'
+    primary_resource_id: 'project_client'
+    vars:
+      project_id: 'my-project'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      org_domain: 'ORG_DOMAIN'
+parameters:
+  - name: 'clientId'
+    type: String
+    description: |
+      Output only. Unique identifier of the OAuth client.
+    api_name: name
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+  - name: 'brand'
+    type: String
+    description: |
+      Identifier of the brand to which this client
+      is attached to. The format is
+      `projects/{project_number}/brands/{brand_id}`.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'secret'
+    type: String
+    description: |
+      Output only. Client secret of the OAuth client.
+    sensitive: true
+    output: true
+  - name: 'displayName'
+    type: String
+    description: |
+      Human-friendly name given to the OAuth client.
+    required: true

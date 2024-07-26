@@ -331,6 +331,9 @@ iam_policy:
 <%    unless object.iam_policy.self_link.nil? -%>
   self_link: '<%= object.iam_policy.self_link %>'
 <%    end -%>
+<%    unless object.iam_policy.custom_diff_suppress.nil? -%>
+  custom_diff_suppress: '<%= object.convert_go_file(object.iam_policy.custom_diff_suppress ) %>'
+<%    end -%>
 <%    unless object.iam_policy.import_format.nil? -%>
   import_format:
 <%      object.iam_policy.import_format.each do |iformat| -%>
@@ -432,6 +435,10 @@ exclude_tgc: <%= object.exclude_tgc %>
 <%  end -%>
 <%  unless !object.skip_sweeper -%>
 skip_sweeper: <%= object.skip_sweeper %>
+<%  end -%>
+<%    if !object.sweeper.nil? && !object.sweeper.sweepable_identifier_field.nil? -%>
+sweeper:
+  sweepable_identifier_field: <%= object.sweeper.sweepable_identifier_field %>
 <%  end -%>
 <%  unless object.error_retry_predicates.nil? -%>
 error_retry_predicates:

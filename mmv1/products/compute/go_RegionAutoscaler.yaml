@@ -365,6 +365,7 @@ properties:
         key_description: |
           A name for the schedule.
         value_type:
+          name: scalingSchedule
           type: NestedObject
           properties:
             - name: 'minRequiredReplicas'
