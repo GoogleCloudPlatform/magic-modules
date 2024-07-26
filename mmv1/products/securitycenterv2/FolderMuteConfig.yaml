@@ -33,8 +33,9 @@ examples:
     primary_resource_id: 'default'
     vars:
       mute_config_id: 'my-config'
+      folder_display_name: "folder-name"
     test_env_vars:
-      folder: :FOLDER
+      org_id: :ORG_ID
 parameters:
   - !ruby/object:Api::Type::String
     name: folder
