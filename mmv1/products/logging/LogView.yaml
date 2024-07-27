@@ -101,7 +101,7 @@ properties:
     name: filter
     description:
       'Filter that restricts which log entries in a bucket are visible in this
-      view. Filters are restricted to be a logical AND of ==/!= of any of the
-      following: - originating project/folder/organization/billing account. -
+      view. Filters are restricted to be a logical AND of ==/!= of any of
+      the following: - originating project/folder/organization/billing account. -
       resource type - log id For example: SOURCE("projects/myproject") AND
       resource.type = "gce_instance" AND LOG_ID("stdout")'
