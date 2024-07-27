@@ -87,4 +87,3 @@ func flattenArtifactRegistryLocations(resp map[string]interface{}) []interface{}
 	}
 	return regions
 }
-

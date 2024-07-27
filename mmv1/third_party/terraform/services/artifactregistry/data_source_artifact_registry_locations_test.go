@@ -67,4 +67,3 @@ func testAccCheckGoogleArtifactRegistryLocations(n string) resource.TestCheckFun
 const testAccDataSourceGoogleArtifactRegistryLocationsBasic = `
 data "google_artifact_registry_locations" "default" {}
 `
-
