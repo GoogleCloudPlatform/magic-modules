@@ -162,6 +162,7 @@ func clusterSchemaNodePoolDefaults() *schema.Schema {
 <% unless version == 'ga' -%>
 							"gcfs_config": schemaGcfsConfig(false),
 <% end -%>
+							"insecure_kubelet_readonly_port_enabled": schemaInsecureKubeletReadonlyPortEnabled(),
 							"logging_variant": schemaLoggingVariant(),
 						},
 					},
@@ -4256,6 +4257,28 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 			}
 
 			log.Printf("[INFO] GKE cluster %s enabled Kubernetes Beta APIs has been updated", d.Id())
+		}
+	}
+
+	if d.HasChange("node_pool_defaults") && d.HasChange("node_pool_defaults.0.node_config_defaults.0.insecure_kubelet_readonly_port_enabled") {
+		if v, ok := d.GetOk("node_pool_defaults.0.node_config_defaults.0.insecure_kubelet_readonly_port_enabled"); ok {
+			insecureKubeletReadonlyPortEnabled := v.(string)
+			req := &container.UpdateClusterRequest{
+				Update: &container.ClusterUpdate{
+					DesiredNodeKubeletConfig: &container.NodeKubeletConfig{
+						InsecureKubeletReadonlyPortEnabled: expandInsecureKubeletReadonlyPortEnabled(insecureKubeletReadonlyPortEnabled),
+						ForceSendFields:                    []string{"InsecureKubeletReadonlyPortEnabled"},
+					},
+				},
+			}
+
+			updateF := updateFunc(req, "updating GKE cluster desired node pool insecure kubelet readonly port configuration defaults.")
+			// Call update serially.
+			if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+				return err
+			}
+
+			log.Printf("[INFO] GKE cluster %s node pool insecure_kubelet_readonly_port_enabled default has been updated", d.Id())
 		}
 	}
 
