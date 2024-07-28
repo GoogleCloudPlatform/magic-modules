@@ -612,13 +612,6 @@ func ResourceComputeInstance() *schema.Resource {
 							Description: `Name with which the attached disk is accessible under /dev/disk/by-id/`,
 						},
 
-						"interface": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							ValidateFunc: validation.StringInSlice([]string{"SCSI", "NVME"}, false),
-							Description:  `The disk interface used for attaching this disk. One of SCSI or NVME.`,
-						},
-
 						"mode": {
 							Type:         schema.TypeString,
 							Optional:     true,
