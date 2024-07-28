@@ -10300,3 +10300,128 @@ resource "google_compute_instance" "foobar" {
 }
 `, instanceName, zone, storagePoolUrl)
 }
+
+func TestAccComputeInstance_bootAndAttachedDiskinterface(t *testing.T) {
+	t.Parallel()
+
+	instanceName1 := fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10))
+	diskName1 := fmt.Sprintf("tf-test-disk-%s", acctest.RandString(t, 10))
+	instanceName2 := fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10))
+	diskName2 := fmt.Sprintf("tf-test-disk-%s", acctest.RandString(t, 10))
+	interface := "NVME"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			// Test interface specified
+			{
+				Config:    testAccComputeInstance_bootAndAttachedDisk_interfaceSpecified(instanceName1, diskName1, envvar.GetTestZoneFromEnv(), interface),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "boot_disk.0.interface", interface),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "attached_disk.0.interface", interface),
+				),
+			},
+			{
+				ResourceName:      "google_compute_instance.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Test interface not specified
+			{
+				Config:    testAccComputeInstance_bootAndAttachedDisk_interfaceUnspecified(instanceName2, diskName2, envvar.GetTestZoneFromEnv(), interface),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "boot_disk.0.interface", ""),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "attached_disk.0.interface", ""),
+				),
+			},
+			{
+				ResourceName:      "google_compute_instance.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccComputeInstance_bootAndAttachedDisk_interfaceSpecified(instanceName, diskName, zone, interface string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family    = "ubuntu-2204-lts"
+  project   = "ubuntu-os-cloud"
+}
+
+data "google_project" "project" {}
+
+resource "google_compute_disk" "foorbarattach" {
+  name = "%s"
+  size = 100
+  type = "hyperdisk-balanced"
+  zone = "us-central1-a"
+}
+
+resource "google_compute_instance" "foobar" {
+	name = "%s"
+	machine_type= "h3-standard-88"
+	zone = "%s"
+
+	boot_disk {
+		initialize_params {
+			image = data.google_compute_image.my_image.self_link
+			type = "hyperdisk-balanced"
+			size = 500
+		}
+                interface = "%s"
+	}
+
+  	attached_disk {
+    		source = google_compute_disk.foorbarattach.self_link
+		interface = "%s"
+  	}
+	
+	network_interface {
+		network = "default"
+	}
+}
+`, diskName, instanceName, zone, interface, interface)
+}
+
+func testAccComputeInstance_bootAndAttachedDisk_interfaceUnspecified(instanceName, diskName, zone string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family    = "ubuntu-2204-lts"
+  project   = "ubuntu-os-cloud"
+}
+
+data "google_project" "project" {}
+
+resource "google_compute_disk" "foorbarattach" {
+  name = "%s"
+  size = 100
+  type = "hyperdisk-balanced"
+  zone = "us-central1-a"
+}
+
+resource "google_compute_instance" "foobar" {
+	name = "%s"
+	machine_type= "h3-standard-88"
+	zone = "%s"
+
+	boot_disk {
+		initialize_params {
+			image = data.google_compute_image.my_image.self_link
+			type = "hyperdisk-balanced"
+			size = 500
+		}
+	}
+
+  	attached_disk {
+    		source = google_compute_disk.foorbarattach.self_link
+  	}
+	
+	network_interface {
+		network = "default"
+	}
+}
+`, diskName, instanceName, zone)
+}
