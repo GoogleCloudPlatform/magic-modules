@@ -206,6 +206,21 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			fmt.Println("Failed to fetch old branch: ", err)
 			errors[repo.Title] = append(errors[repo.Title], "Failed to clone repo at old branch")
 			repo.Cloned = false
+			continue
+		}
+		if repo.Name == "terraform-provider-google-beta" || repo.Name == "terraform-provider-google" {
+			if err := ctlr.Checkout(repo, oldBranch); err != nil {
+				errors[repo.Title] = append(errors[repo.Title], fmt.Sprintf("Failed to checkout branch %s", oldBranch))
+				repo.Cloned = false
+				continue
+			}
+			rnr.PushDir(repo.Path)
+			if _, err := rnr.Run("make", []string{"build"}, nil); err != nil {
+				errors[repo.Title] = append(errors[repo.Title], fmt.Sprintf("Failed to build branch %s", oldBranch))
+				repo.Cloned = false
+			}
+			rnr.PopDir()
+			ctlr.Checkout(repo, newBranch)
 		}
 	}
 

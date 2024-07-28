@@ -1,0 +1,90 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Group'
+description: 'A resource that represents an asset group. The purpose of an asset
+  group is to bundle a set of assets that have something in common, while
+  allowing users to add annotations to the group.'
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/groups/{{group_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/groups'
+self_link: 'projects/{{project}}/locations/{{location}}/groups/{{group_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/groups?groupId={{group_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/groups/{{group_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'migration_group_basic'
+    primary_resource_id: 'default'
+    vars:
+      group_name: 'group-test'
+parameters:
+  - name: 'location'
+    type: String
+    description: 'The location of the group.'
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'groupId'
+    type: String
+    description: 'Required. User specified ID for the group. It will become the last
+      component of the group name. The ID must be unique within the project, must conform
+      with RFC-1034, is restricted to lower-cased letters, and has a maximum length
+      of 63 characters. The ID must match the regular expression: `[a-z]([a-z0-9-]{0,61}[a-z0-9])?`.'
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: 'Output only. The name of the group.'
+    output: true
+  - name: 'createTime'
+    type: String
+    description: 'Output only. The timestamp when the group was created.'
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: 'Output only. The timestamp when the group was last updated.'
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: 'Labels as key value pairs.'
+  - name: 'displayName'
+    type: String
+    description: 'Optional. User-friendly display name.'
+  - name: 'description'
+    type: String
+    description: 'Optional. The description of the group.'

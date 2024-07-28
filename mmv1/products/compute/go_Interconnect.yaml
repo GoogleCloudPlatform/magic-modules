@@ -294,7 +294,6 @@ properties:
     description: |
       Labels for this resource. These can only be added or modified by the setLabels
       method. Each label key/value pair must comply with RFC1035. Label values may be empty.
-    immutable: false
   - name: 'labelFingerprint'
     type: Fingerprint
     description: |

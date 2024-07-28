@@ -175,7 +175,6 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: Labels to apply to this Image.
-    immutable: false
     update_url: 'projects/{{project}}/global/images/{{name}}/setLabels'
     update_verb: 'POST'
   - name: 'labelFingerprint'

@@ -1,0 +1,387 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Config'
+description: |
+  Identity Platform configuration for a Cloud project. Identity Platform is an
+  end-to-end authentication system for third-party users to access apps
+  and services.
+
+  This entity is created only once during intialization and cannot be deleted,
+  individual Identity Providers may be disabled instead.  This resource may only
+  be created in billing-enabled projects.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/identity-platform/docs'
+  api: 'https://cloud.google.com/identity-platform/docs/reference/rest/v2/Config'
+docs:
+base_url: 'projects/{{project}}/config'
+self_link: 'projects/{{project}}/config'
+create_url: 'projects/{{project}}/identityPlatform:initializeAuth'
+update_verb: 'PATCH'
+update_mask: true
+skip_delete: true
+import_format:
+  - 'projects/{{project}}/config'
+  - 'projects/{{project}}'
+  - '{{project}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  custom_create: 'templates/terraform/custom_create/go/identity_platform_config.go.tmpl'
+skip_sweeper: true
+examples:
+  - name: 'identity_platform_config_basic'
+    primary_resource_id: 'default'
+    vars:
+      instance_name: 'memory-cache'
+      project_id: 'my-project'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_acct: 'BILLING_ACCT'
+    test_vars_overrides:
+      'quota_start_time': 'time.Now().AddDate(0, 0, 1).Format(time.RFC3339)'
+    ignore_read_extra:
+      - 'client.0.api_key'
+      - 'client.0.firebase_subdomain'
+    skip_vcr: true
+  - name: 'identity_platform_config_minimal'
+    primary_resource_id: 'default'
+    vars:
+      project_id: 'my-project-1'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_acct: 'BILLING_ACCT'
+    ignore_read_extra:
+      - 'client.0.api_key'
+      - 'client.0.firebase_subdomain'
+    skip_docs: true
+parameters:
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The name of the Config resource
+    output: true
+  - name: 'autodeleteAnonymousUsers'
+    type: Boolean
+    description: |
+      Whether anonymous users will be auto-deleted after a period of 30 days
+  - name: 'signIn'
+    type: NestedObject
+    description: |
+      Configuration related to local sign in methods.
+    default_from_api: true
+    properties:
+      - name: 'email'
+        type: NestedObject
+        description: |
+          Configuration options related to authenticating a user by their email address.
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            description: |
+              Whether email auth is enabled for the project or not.
+            required: true
+          - name: 'passwordRequired'
+            type: Boolean
+            description: |
+              Whether a password is required for email auth or not. If true, both an email and
+              password must be provided to sign in. If false, a user may sign in via either
+              email/password or email link.
+      - name: 'phoneNumber'
+        type: NestedObject
+        description: |
+          Configuration options related to authenticated a user by their phone number.
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            description: |
+              Whether phone number auth is enabled for the project or not.
+            required: true
+          - name: 'testPhoneNumbers'
+            type: KeyValuePairs
+            description: |
+              A map of <test phone number, fake code> that can be used for phone auth testing.
+      - name: 'anonymous'
+        type: NestedObject
+        description: |
+          Configuration options related to authenticating an anonymous user.
+        custom_flatten: 'templates/terraform/custom_flatten/go/identity_platform_config_anonymous.go.tmpl'
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            description: |
+              Whether anonymous user auth is enabled for the project or not.
+            required: true
+            send_empty_value: true
+      - name: 'allowDuplicateEmails'
+        type: Boolean
+        description: |
+          Whether to allow more than one account to have the same email.
+      - name: 'hashConfig'
+        type: NestedObject
+        description: |
+          Output only. Hash config information.
+        output: true
+        properties:
+          - name: 'algorithm'
+            type: String
+            description: |
+              Different password hash algorithms used in Identity Toolkit.
+            output: true
+          - name: 'signerKey'
+            type: String
+            description: |
+              Signer key in base64.
+            output: true
+          - name: 'saltSeparator'
+            type: String
+            description: |
+              Non-printable character to be inserted between the salt and plain text password in base64.
+            output: true
+          - name: 'rounds'
+            type: Integer
+            description: |
+              How many rounds for hash calculation. Used by scrypt and other similar password derivation algorithms.
+            output: true
+          - name: 'memoryCost'
+            type: Integer
+            description: |
+              Memory cost for hash calculation. Used by scrypt and other similar password derivation algorithms. See https://tools.ietf.org/html/rfc7914 for explanation of field.
+            output: true
+  - name: 'blockingFunctions'
+    type: NestedObject
+    description: |
+      Configuration related to blocking functions.
+    properties:
+      - name: 'triggers'
+        type: Map
+        description: |
+          Map of Trigger to event type. Key should be one of the supported event types: "beforeCreate", "beforeSignIn".
+        required: true
+        key_name: 'event_type'
+        value_type:
+          name: triggers
+          type: NestedObject
+          properties:
+            - name: 'functionUri'
+              type: String
+              description: |
+                HTTP URI trigger for the Cloud Function.
+              required: true
+            - name: 'updateTime'
+              type: Time
+              description: |
+                When the trigger was changed.
+              output: true
+      - name: 'forwardInboundCredentials'
+        type: NestedObject
+        description: |
+          The user credentials to include in the JWT payload that is sent to the registered Blocking Functions.
+        properties:
+          - name: 'idToken'
+            type: Boolean
+            description: |
+              Whether to pass the user's OIDC identity provider's ID token.
+          - name: 'accessToken'
+            type: Boolean
+            description: |
+              Whether to pass the user's OAuth identity provider's access token.
+          - name: 'refreshToken'
+            type: Boolean
+            description: |
+              Whether to pass the user's OAuth identity provider's refresh token.
+  - name: 'quota'
+    type: NestedObject
+    description: |
+      Configuration related to quotas.
+    properties:
+      - name: 'signUpQuotaConfig'
+        type: NestedObject
+        description: |
+          Quota for the Signup endpoint, if overwritten. Signup quota is measured in sign ups per project per hour per IP.
+        properties:
+          - name: 'quota'
+            type: Integer
+            description: |
+              A sign up APIs quota that customers can override temporarily.
+          - name: 'startTime'
+            type: Time
+            description: |
+              When this quota will take affect.
+          - name: 'quotaDuration'
+            type: String
+            description: |
+              How long this quota will be active for. It is measurred in seconds, e.g., Example: "9.615s".
+  - name: 'authorizedDomains'
+    type: Array
+    description: |
+      List of domains authorized for OAuth redirects.
+    default_from_api: true
+    item_type:
+      type: String
+  - name: 'smsRegionConfig'
+    type: NestedObject
+    description: |
+      Configures the regions where users are allowed to send verification SMS for the project or tenant. This is based on the calling code of the destination phone number.
+    default_from_api: true
+    properties:
+      - name: 'allowByDefault'
+        type: NestedObject
+        description: |
+          A policy of allowing SMS to every region by default and adding disallowed regions to a disallow list.
+        exactly_one_of:
+          - 'sms_region_config.0.allow_by_default'
+          - 'sms_region_config.0.allowlist_only'
+        properties:
+          - name: 'disallowedRegions'
+            type: Array
+            description: |
+              Two letter unicode region codes to disallow as defined by https://cldr.unicode.org/ The full list of these region codes is here: https://github.com/unicode-cldr/cldr-localenames-full/blob/master/main/en/territories.json
+            item_type:
+              type: String
+      - name: 'allowlistOnly'
+        type: NestedObject
+        description: |
+          A policy of only allowing regions by explicitly adding them to an allowlist.
+        exactly_one_of:
+          - 'sms_region_config.0.allow_by_default'
+          - 'sms_region_config.0.allowlist_only'
+        properties:
+          - name: 'allowedRegions'
+            type: Array
+            description: |
+              Two letter unicode region codes to allow as defined by https://cldr.unicode.org/ The full list of these region codes is here: https://github.com/unicode-cldr/cldr-localenames-full/blob/master/main/en/territories.json
+            item_type:
+              type: String
+  - name: 'client'
+    type: NestedObject
+    description: |
+      Options related to how clients making requests on behalf of a project should be configured.
+    default_from_api: true
+    properties:
+      - name: 'permissions'
+        type: NestedObject
+        description: |
+          Configuration related to restricting a user's ability to affect their account.
+        custom_flatten: 'templates/terraform/custom_flatten/go/identity_platform_config_client_permissions.go.tmpl'
+        properties:
+          - name: 'disabledUserSignup'
+            type: Boolean
+            description: |
+              When true, end users cannot sign up for a new account on the associated project through any of our API methods
+          - name: 'disabledUserDeletion'
+            type: Boolean
+            description: |
+              When true, end users cannot delete their account on the associated project through any of our API methods
+      - name: 'apiKey'
+        type: String
+        description: |
+          API key that can be used when making requests for this project.
+        sensitive: true
+        output: true
+      - name: 'firebaseSubdomain'
+        type: String
+        description: |
+          Firebase subdomain.
+        output: true
+  - name: 'mfa'
+    type: NestedObject
+    description: |
+      Options related to how clients making requests on behalf of a project should be configured.
+    default_from_api: true
+    properties:
+      - name: 'state'
+        type: Enum
+        description: |
+          Whether MultiFactor Authentication has been enabled for this project.
+        default_from_api: true
+        enum_values:
+          - 'DISABLED'
+          - 'ENABLED'
+          - 'MANDATORY'
+      - name: 'enabledProviders'
+        type: Array
+        description: |
+          A list of usable second factors for this project.
+        item_type:
+          type: Enum
+          description: |
+            This field only has a name and description because of MM
+            limitations. It should not appear in downstreams.
+          enum_values:
+            - 'PHONE_SMS'
+      - name: 'providerConfigs'
+        type: Array
+        description: |
+          A list of usable second factors for this project along with their configurations.
+          This field does not support phone based MFA, for that use the 'enabledProviders' field.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'state'
+              type: Enum
+              description: |
+                Whether MultiFactor Authentication has been enabled for this project.
+              default_from_api: true
+              enum_values:
+                - 'DISABLED'
+                - 'ENABLED'
+                - 'MANDATORY'
+            - name: 'totpProviderConfig'
+              type: NestedObject
+              description: |
+                TOTP MFA provider config for this project.
+              properties:
+                - name: 'adjacentIntervals'
+                  type: Integer
+                  description: |
+                    The allowed number of adjacent intervals that will be used for verification to avoid clock skew.
+  - name: 'multiTenant'
+    type: NestedObject
+    description: |
+      Configuration related to multi-tenant functionality.
+    properties:
+      - name: 'allowTenants'
+        type: Boolean
+        description: |
+          Whether this project can have tenants or not.
+      - name: 'defaultTenantLocation'
+        type: String
+        description: |
+          The default cloud parent org or folder that the tenant project should be created under.
+          The parent resource name should be in the format of "/", such as "folders/123" or "organizations/456".
+          If the value is not set, the tenant will be created under the same organization or folder as the agent project.
+  - name: 'monitoring'
+    type: NestedObject
+    description: |
+      Configuration related to monitoring project activity.
+    default_from_api: true
+    properties:
+      - name: 'requestLogging'
+        type: NestedObject
+        description: |
+          Configuration for logging requests made to this project to Stackdriver Logging
+        send_empty_value: true
+        custom_flatten: 'templates/terraform/custom_flatten/go/identity_platform_config_logging.go.tmpl'
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            description: |
+              Whether logging is enabled for this project or not.
+            send_empty_value: true

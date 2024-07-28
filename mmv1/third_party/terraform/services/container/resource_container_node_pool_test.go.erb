@@ -701,7 +701,6 @@ func TestAccContainerNodePool_withNetworkConfig(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccContainerNodePool_withMultiNicNetworkConfig(t *testing.T) {
 	t.Parallel()
 
@@ -727,7 +726,6 @@ func TestAccContainerNodePool_withMultiNicNetworkConfig(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccContainerNodePool_withEnablePrivateNodesToggle(t *testing.T) {
 	t.Parallel()
@@ -3402,7 +3400,6 @@ resource "google_container_node_pool" "with_tier1_net" {
 `, network, cluster, np, np, np, np, netTier)
 }
 
-<% unless version.nil? || version == 'ga' -%>
 func testAccContainerNodePool_withMultiNicNetworkConfig(cluster, np, network string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "container_network" {
@@ -3521,7 +3518,6 @@ resource "google_container_node_pool" "with_multi_nic" {
 
 `, network, network, network, network, network, network, cluster, np)
 }
-<% end -%>
 
 <% unless version.nil? || version == 'ga' -%>
 func testAccContainerNodePool_withBootDiskKmsKey(cluster, np, networkName, subnetworkName string) string {

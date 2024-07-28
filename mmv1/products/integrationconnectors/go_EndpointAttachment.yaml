@@ -1,0 +1,106 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'EndpointAttachment'
+description: |
+  An Integration connectors Endpoint Attachment.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/integration-connectors/docs/create-endpoint-attachment'
+  api: 'https://cloud.google.com/integration-connectors/docs/reference/rest/v1/projects.locations.endpointAttachments'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/endpointAttachments'
+self_link: 'projects/{{project}}/locations/{{location}}/endpointAttachments/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/endpointAttachments?endpointAttachmentId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 5
+  update_minutes: 5
+  delete_minutes: 5
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+    timeouts:
+      insert_minutes: 5
+      update_minutes: 5
+      delete_minutes: 5
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'integration_connectors_endpoint_attachment'
+    primary_resource_id: 'sampleendpointattachment'
+    vars:
+      endpoint_attachment_name: 'test-endpoint-attachment'
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      Location in which Endpoint Attachment needs to be created.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'name'
+    type: String
+    description: |
+      Name of Endpoint Attachment needs to be created.
+
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'createTime'
+    type: Time
+    description: |
+      Time the Namespace was created in UTC.
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      Time the Namespace was updated in UTC.
+    output: true
+  - name: 'description'
+    type: String
+    description: |
+      Description of the resource.
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      Resource labels to represent user provided metadata.
+  - name: 'serviceAttachment'
+    type: String
+    description: |
+      The path of the service attachment.
+    required: true
+    immutable: true
+  - name: 'endpointIp'
+    type: String
+    description: |
+      The Private Service Connect connection endpoint ip.
+    output: true
+  - name: 'endpointGlobalAccess'
+    type: Boolean
+    description: |
+      Enable global access for endpoint attachment.

@@ -192,7 +192,6 @@ properties:
     type: KeyValueLabels
     description: |
       Labels to apply to this address.  A list of key->value pairs.
-    immutable: false
     update_url: 'projects/{{project}}/regions/{{region}}/addresses/{{name}}/setLabels'
     update_verb: 'POST'
   - name: 'labelFingerprint'

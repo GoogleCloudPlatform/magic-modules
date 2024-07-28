@@ -1,0 +1,104 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Model'
+description: |
+  Represents a machine learning solution.
+
+  A model can have multiple versions, each of which is a deployed, trained model
+  ready to receive prediction requests. The model itself is just a container.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/ai-platform/prediction/docs/deploying-models'
+  api: 'https://cloud.google.com/ai-platform/prediction/docs/reference/rest/v1/projects.models'
+docs:
+base_url: 'projects/{{project}}/models'
+self_link: 'projects/{{project}}/models/{{name}}'
+immutable: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['delete']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+schema_version: 1
+state_upgraders: true
+examples:
+  - name: 'ml_model_basic'
+    primary_resource_id: 'default'
+    vars:
+      model_name: 'default'
+  - name: 'ml_model_full'
+    primary_resource_id: 'default'
+    vars:
+      model_name: 'default'
+parameters:
+properties:
+  - name: 'name'
+    type: String
+    description: The name specified for the model.
+    required: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+  - name: 'description'
+    type: String
+    description: The description specified for the model when it was created.
+  # Ignoring most of defaultVersion.
+  # Only name should be exposed. Use the Version resource to learn more
+  # about versions.
+  - name: 'defaultVersion'
+    type: NestedObject
+    description: |
+      The default version of the model. This version will be used to handle
+      prediction requests that do not specify a version.
+    properties:
+      - name: 'name'
+        type: String
+        description: The name specified for the version when it was created.
+  # Even though only one region is supported, keeping this as an array
+  # to future-proof it.
+        required: true
+  - name: 'regions'
+    type: Array
+    description: |
+      The list of regions where the model is going to be deployed.
+      Currently only one region per model is supported
+    item_type:
+      type: String
+    max_size: 1
+  - name: 'onlinePredictionLogging'
+    type: Boolean
+    description:
+      If true, online prediction access logs are sent to StackDriver Logging.
+  - name: 'onlinePredictionConsoleLogging'
+    type: Boolean
+    description:
+      If true, online prediction nodes send stderr and stdout streams to
+      Stackdriver Logging
+  - name: 'labels'
+    type: KeyValueLabels
+    description: One or more labels that you can add, to organize your models.

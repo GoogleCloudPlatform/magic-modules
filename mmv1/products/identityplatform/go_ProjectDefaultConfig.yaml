@@ -1,0 +1,128 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'ProjectDefaultConfig'
+description: |
+  There is no persistent data associated with this resource.
+docs:
+  warning: |
+    If you are using User ADCs (Application Default Credentials) with this resource,
+    you must specify a `billing_project` and set `user_project_override` to true
+    in the provider configuration. Otherwise the ACM API will return a 403 error.
+    Your account must have the `serviceusage.services.use` permission on the
+    `billing_project` you defined.
+id_format: '{{project}}'
+base_url: 'projects/{{project}}/config'
+self_link: 'projects/{{project}}/config'
+create_verb: 'PATCH'
+update_verb: 'PATCH'
+update_mask: true
+delete_verb: 'PATCH'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  test_check_destroy: 'templates/terraform/custom_check_destroy/go/identity_platform_project_default_config.go.tmpl'
+deprecation_message: '`google_identity_platform_config` is deprecated and will be removed in the next major release of the provider. Use the `google_identity_platform_config` resource instead. It contains a more comprehensive list of fields, and was created before `google_identity_platform_project_default_config` was added.'
+examples:
+  - name: 'identity_platform_project_default_config'
+    primary_resource_id: 'default'
+    skip_test: true
+parameters:
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The name of the Config resource. Example: "projects/my-awesome-project/config"
+    output: true
+  - name: 'signIn'
+    type: NestedObject
+    description: |
+      Configuration related to local sign in methods.
+    properties:
+      - name: 'email'
+        type: NestedObject
+        description: |
+          Configuration options related to authenticating a user by their email address.
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            description: |
+              Whether email auth is enabled for the project or not.
+          - name: 'passwordRequired'
+            type: Boolean
+            description: |
+              Whether a password is required for email auth or not. If true, both an email and
+              password must be provided to sign in. If false, a user may sign in via either
+              email/password or email link.
+      - name: 'phoneNumber'
+        type: NestedObject
+        description: |
+          Configuration options related to authenticated a user by their phone number.
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            description: |
+              Whether phone number auth is enabled for the project or not.
+          - name: 'testPhoneNumbers'
+            type: KeyValuePairs
+            description: |
+              A map of <test phone number, fake code> that can be used for phone auth testing.
+      - name: 'anonymous'
+        type: NestedObject
+        description: |
+          Configuration options related to authenticating an anonymous user.
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            description: |
+              Whether anonymous user auth is enabled for the project or not.
+            required: true
+      - name: 'allowDuplicateEmails'
+        type: Boolean
+        description: |
+          Whether to allow more than one account to have the same email.
+      - name: 'hashConfig'
+        type: NestedObject
+        description: |
+          Output only. Hash config information.
+        output: true
+        properties:
+          - name: 'algorithm'
+            type: String
+            description: |
+              Different password hash algorithms used in Identity Toolkit.
+            output: true
+          - name: 'signerKey'
+            type: String
+            description: |
+              Signer key in base64.
+            output: true
+          - name: 'saltSeparator'
+            type: String
+            description: |
+              Non-printable character to be inserted between the salt and plain text password in base64.
+            output: true
+          - name: 'rounds'
+            type: Integer
+            description: |
+              How many rounds for hash calculation. Used by scrypt and other similar password derivation algorithms.
+            output: true
+          - name: 'memoryCost'
+            type: Integer
+            description: |
+              Memory cost for hash calculation. Used by scrypt and other similar password derivation algorithms. See https://tools.ietf.org/html/rfc7914 for explanation of field.
+            output: true

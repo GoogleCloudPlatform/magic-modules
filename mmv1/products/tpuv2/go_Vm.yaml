@@ -1,0 +1,403 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Vm'
+description: |
+  A Cloud TPU VM instance.
+min_version: 'beta'
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/tpu/docs/'
+  api: 'https://cloud.google.com/tpu/docs/reference/rest/v2/projects.locations.nodes'
+docs:
+base_url: 'projects/{{project}}/locations/{{zone}}/nodes'
+self_link: 'projects/{{project}}/locations/{{zone}}/nodes/{{name}}'
+create_url: 'projects/{{project}}/locations/{{zone}}/nodes?nodeId={{name}}'
+update_url: 'projects/{{project}}/locations/{{zone}}/nodes/{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+  constants: 'templates/terraform/constants/go/tpu_vm.go.tmpl'
+custom_diff:
+  - 'acceleratorTypeCustomizeDiff'
+examples:
+  - name: 'tpu_v2_vm_basic'
+    primary_resource_id: 'tpu'
+    min_version: 'beta'
+    vars:
+      vm_name: 'test-tpu'
+    skip_vcr: true
+  - name: 'tpu_v2_vm_full'
+    primary_resource_id: 'tpu'
+    min_version: 'beta'
+    vars:
+      vm_name: 'test-tpu'
+      network_name: 'tpu-net'
+      subnet_name: 'tpu-subnet'
+      sa_id: 'tpu-sa'
+      disk_name: 'tpu-disk'
+    external_providers: ["random", "time"]
+    skip_vcr: true
+parameters:
+  - name: 'zone'
+    type: String
+    description: |
+      The GCP location for the TPU. If it is not provided, the provider zone is used.
+    min_version: 'beta'
+    url_param_only: true
+    immutable: true
+    default_from_api: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The immutable name of the TPU.
+    min_version: 'beta'
+    required: true
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+  - name: 'runtimeVersion'
+    type: String
+    description: |
+      Runtime version for the TPU.
+    min_version: 'beta'
+    required: true
+    immutable: true
+  - name: 'acceleratorType'
+    type: String
+    description: |
+      TPU accelerator type for the TPU. `accelerator_type` cannot be used at the same time as
+      `accelerator_config`. If neither is specified, `accelerator_type` defaults to 'v2-8'.
+    min_version: 'beta'
+    immutable: true
+    default_from_api: true
+    conflicts:
+      - accelerator_config
+  - name: 'description'
+    type: String
+    description: |
+      Text description of the TPU.
+    min_version: 'beta'
+  - name: 'cidrBlock'
+    type: String
+    description: |
+      The CIDR block that the TPU node will use when selecting an IP address. This CIDR block must
+      be a /29 block; the Compute Engine networks API forbids a smaller block, and using a larger
+      block would be wasteful (a node can only consume one IP address). Errors will occur if the
+      CIDR block has already been used for a currently existing TPU node, the CIDR block conflicts
+      with any subnetworks in the user's provided network, or the provided network is peered with
+      another network that is using that CIDR block.
+    min_version: 'beta'
+    immutable: true
+    default_from_api: true
+  - name: 'networkConfig'
+    type: NestedObject
+    description: |
+      Network configurations for the TPU node.
+    min_version: 'beta'
+    immutable: true
+    default_from_api: true
+    properties:
+      - name: 'network'
+        type: String
+        description: |
+          The name of the network for the TPU node. It must be a preexisting Google Compute Engine
+          network. If both network and subnetwork are specified, the given subnetwork must belong
+          to the given network. If network is not specified, it will be looked up from the
+          subnetwork if one is provided, or otherwise use "default".
+        min_version: 'beta'
+        immutable: true
+        default_from_api: true
+      - name: 'subnetwork'
+        type: String
+        description: |
+          The name of the subnetwork for the TPU node. It must be a preexisting Google Compute
+          Engine subnetwork. If both network and subnetwork are specified, the given subnetwork
+          must belong to the given network. If subnetwork is not specified, the subnetwork with the
+          same name as the network will be used.
+        min_version: 'beta'
+        immutable: true
+        default_from_api: true
+      - name: 'enableExternalIps'
+        type: Boolean
+        description: |
+          Indicates that external IP addresses would be associated with the TPU workers. If set to
+          false, the specified subnetwork or network should have Private Google Access enabled.
+        min_version: 'beta'
+        immutable: true
+        send_empty_value: true
+      - name: 'canIpForward'
+        type: Boolean
+        description: |
+          Allows the TPU node to send and receive packets with non-matching destination or source
+          IPs. This is required if you plan to use the TPU workers to forward routes.
+        min_version: 'beta'
+        immutable: true
+        send_empty_value: true
+  - name: 'serviceAccount'
+    type: NestedObject
+    description: |
+      The Google Cloud Platform Service Account to be used by the TPU node VMs. If None is
+      specified, the default compute service account will be used.
+    min_version: 'beta'
+    immutable: true
+    default_from_api: true
+    properties:
+      - name: 'email'
+        type: String
+        description: |
+          Email address of the service account. If empty, default Compute service account will be used.
+        min_version: 'beta'
+        immutable: true
+        default_from_api: true
+      - name: 'scope'
+        type: Array
+        description: |
+          The list of scopes to be made available for this service account. If empty, access to all
+          Cloud APIs will be allowed.
+        min_version: 'beta'
+        immutable: true
+        default_from_api: true
+        diff_suppress_func: 'tpuServiceAccountAddedScopesSuppress'
+        item_type:
+          type: String
+  - name: 'schedulingConfig'
+    type: NestedObject
+    description: |
+      The scheduling options for this node.
+    min_version: 'beta'
+    immutable: true
+    properties:
+      - name: 'preemptible'
+        type: Boolean
+        description: |
+          Defines whether the node is preemptible.
+        min_version: 'beta'
+        immutable: true
+        send_empty_value: true
+      - name: 'reserved'
+        type: Boolean
+        description: |
+          Whether the node is created under a reservation.
+        min_version: 'beta'
+        immutable: true
+        send_empty_value: true
+  - name: 'dataDisks'
+    type: Array
+    description: |
+      The additional data disks for the Node.
+    min_version: 'beta'
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'sourceDisk'
+          type: String
+          description: |
+            Specifies the full path to an existing disk. For example:
+            "projects/my-project/zones/us-central1-c/disks/my-disk".
+          min_version: 'beta'
+          required: true
+        - name: 'mode'
+          type: Enum
+          description: |
+            The mode in which to attach this disk. If not specified, the default is READ_WRITE
+            mode. Only applicable to dataDisks.
+          min_version: 'beta'
+          default_value: "READ_WRITE"
+          enum_values:
+            - 'READ_WRITE'
+            - 'READ_ONLY'
+  - name: 'shieldedInstanceConfig'
+    type: NestedObject
+    description: |
+      Shielded Instance options.
+    min_version: 'beta'
+    immutable: true
+    properties:
+      - name: 'enableSecureBoot'
+        type: Boolean
+        description: |
+          Defines whether the instance has Secure Boot enabled.
+        min_version: 'beta'
+        required: true
+        immutable: true
+        send_empty_value: true
+  - name: 'acceleratorConfig'
+    type: NestedObject
+    description: |
+      The AccleratorConfig for the TPU Node. `accelerator_config` cannot be used at the same time
+      as `accelerator_type`. If neither is specified, `accelerator_type` defaults to 'v2-8'.
+    min_version: 'beta'
+    immutable: true
+    default_from_api: true
+    conflicts:
+      - accelerator_type
+    properties:
+      - name: 'type'
+        type: Enum
+        description: |
+          Type of TPU.
+        min_version: 'beta'
+        required: true
+        immutable: true
+        enum_values:
+          - 'V2'
+          - 'V3'
+          - 'V4'
+          - 'V5P'
+      - name: 'topology'
+        type: String
+        description: |
+          Topology of TPU in chips.
+        min_version: 'beta'
+        required: true
+        immutable: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: Resource labels to represent user-provided metadata.
+    min_version: 'beta'
+  - name: 'metadata'
+    type: KeyValuePairs
+    description: Custom metadata to apply to the TPU Node. Can set startup-script and shutdown-script.
+    min_version: 'beta'
+  - name: 'tags'
+    type: Array
+    description: |
+      Tags to apply to the TPU Node. Tags are used to identify valid sources or targets for network firewalls.
+    min_version: 'beta'
+    item_type:
+      type: String
+  - name: 'state'
+    type: String
+    description: |
+      The current state for the TPU Node.
+    min_version: 'beta'
+    output: true
+  - name: 'health'
+    type: String
+    description: |
+      The health status of the TPU node.
+    min_version: 'beta'
+    output: true
+  - name: 'healthDescription'
+    type: String
+    description: |
+      If this field is populated, it contains a description of why the TPU Node is unhealthy.
+    min_version: 'beta'
+    output: true
+  - name: 'apiVersion'
+    type: String
+    description: |
+      The API version that created this Node.
+    min_version: 'beta'
+    output: true
+  - name: 'queuedResource'
+    type: String
+    description: |
+      The qualified name of the QueuedResource that requested this Node.
+    min_version: 'beta'
+    output: true
+  - name: 'multisliceNode'
+    type: Boolean
+    description: |
+      Whether the Node belongs to a Multislice group.
+    min_version: 'beta'
+    output: true
+  - name: 'networkEndpoints'
+    type: Array
+    description: |
+      The network endpoints where TPU workers can be accessed and sent work. It is recommended that
+      runtime clients of the node reach out to the 0th entry in this map first.
+    min_version: 'beta'
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'ipAddress'
+          type: String
+          description: |
+            The internal IP address of this network endpoint.
+          min_version: 'beta'
+          output: true
+        - name: 'port'
+          type: Integer
+          description: |
+            The port of this network endpoint.
+          min_version: 'beta'
+          output: true
+        - name: 'accessConfig'
+          type: NestedObject
+          description: |
+            The access config for the TPU worker.
+          min_version: 'beta'
+          output: true
+          properties:
+            - name: 'externalIp'
+              type: String
+              description: |
+                An external IP address associated with the TPU worker.
+              min_version: 'beta'
+              output: true
+  - name: 'symptoms'
+    type: Array
+    description: |
+      The Symptoms that have occurred to the TPU Node.
+    min_version: 'beta'
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'createTime'
+          type: String
+          description: |
+            Timestamp when the Symptom is created.
+          min_version: 'beta'
+          output: true
+        - name: 'symptomType'
+          type: String
+          description: |
+            Type of the Symptom.
+          min_version: 'beta'
+          output: true
+        - name: 'details'
+          type: String
+          description: |
+            Detailed information of the current Symptom.
+          min_version: 'beta'
+          output: true
+        - name: 'workerId'
+          type: String
+          description: |
+            A string used to uniquely distinguish a worker within a TPU node.
+          min_version: 'beta'
+          output: true

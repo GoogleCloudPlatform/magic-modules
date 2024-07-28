@@ -1,0 +1,118 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'TagValue'
+description:
+  A TagValue is a child of a particular TagKey. TagValues are used to group
+  cloud resources for the purpose of controlling them using policies.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/resource-manager/docs/tags/tags-creating-and-managing'
+  api: 'https://cloud.google.com/resource-manager/reference/rest/v3/tagValues'
+docs:
+id_format: 'tagValues/{{name}}'
+base_url: 'tagValues'
+self_link: 'tagValues/{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+mutex: 'tagValues/{{parent}}'
+import_format:
+  - 'tagValues/{{name}}'
+  - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+iam_policy:
+  method_name_separator: ':'
+  fetch_iam_policy_verb: 'POST'
+  parent_resource_attribute: 'tag_value'
+  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+custom_code:
+exclude_tgc: true
+examples:
+  - name: 'tag_value_basic'
+    primary_resource_id: 'value'
+    vars:
+      key_short_name: 'keyname'
+      value_short_name: 'valuename'
+    test_env_vars:
+      org_id: 'ORG_ID'
+    test_vars_overrides:
+      'key_short_name': '"tf-test-key-" + acctest.RandString(t, 10)'
+      'value_short_name': '"tf-test-value-" + acctest.RandString(t, 10)'
+    skip_test: true
+parameters:
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The generated numeric id for the TagValue.
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+  - name: 'parent'
+    type: String
+    description: |
+      Input only. The resource name of the new TagValue's parent. Must be of the form tagKeys/{tag_key_id}.
+    required: true
+    immutable: true
+  - name: 'shortName'
+    type: String
+    description: |
+      Input only. User-assigned short name for TagValue. The short name should be unique for TagValues within the same parent TagKey.
+
+      The short name must be 63 characters or less, beginning and ending with an alphanumeric character ([a-z0-9A-Z]) with dashes (-), underscores (_), dots (.), and alphanumerics between.
+    required: true
+    immutable: true
+    validation:
+      function: 'validation.StringLenBetween(1, 63)'
+  - name: 'namespacedName'
+    type: String
+    description: |
+      Output only. Namespaced name of the TagValue. Will be in the format {parentNamespace}/{tagKeyShortName}/{shortName}.
+    output: true
+  - name: 'description'
+    type: String
+    description: |
+      User-assigned description of the TagValue. Must not exceed 256 characters.
+    validation:
+      function: 'validation.StringLenBetween(0, 256)'
+  - name: 'createTime'
+    type: String
+    description: |
+      Output only. Creation time.
+
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: |
+      Output only. Update time.
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true

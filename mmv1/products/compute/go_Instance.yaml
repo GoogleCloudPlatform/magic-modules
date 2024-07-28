@@ -234,6 +234,15 @@ properties:
                     customer-supplied encryption key that protects this
                     resource.
                   output: true
+            - name: 'storagePool'
+              type: String
+              description: |
+                The URL of the storage pool in which the new disk is created.
+                For example:
+                * https://www.googleapis.com/compute/v1/projects/{project}/zones/{zone}/storagePools/{storagePool}
+                * /projects/{project}/zones/{zone}/storagePools/{storagePool}
+              required: false
+              immutable: true
         - name: 'interface'
           type: Enum
           description: |
@@ -327,7 +336,6 @@ properties:
     type: KeyValueLabels
     description: |
       Labels to apply to this instance.  A list of key->value pairs.
-    immutable: false
     update_url: 'projects/{{project}}/zones/{{zone}}/instances/{{name}}/setLabels'
     update_verb: 'POST'
   - name: 'metadata'

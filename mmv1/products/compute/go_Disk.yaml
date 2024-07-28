@@ -286,7 +286,6 @@ properties:
     type: KeyValueLabels
     description: |
       Labels to apply to this disk.  A list of key->value pairs.
-    immutable: false
     update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}/setLabels'
     update_verb: 'POST'
   - name: 'name'
@@ -503,3 +502,16 @@ properties:
     immutable: true
     diff_suppress_func: 'tpgresource.CompareResourceNames'
     custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+  - name: 'accessMode'
+    type: String
+    description: |
+      The accessMode of the disk.
+      For example:
+      * READ_WRITE_SINGLE
+      * READ_WRITE_MANY
+      * READ_ONLY_SINGLE
+    required: false
+    immutable: false
+    default_from_api: true
+    update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}?paths=accessMode'
+    update_verb: 'PATCH'

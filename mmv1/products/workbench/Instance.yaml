@@ -100,6 +100,11 @@ examples:
 timeouts: !ruby/object:Api::Timeouts
   insert_minutes: 10
   update_minutes: 20
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/workbench_instance.go
+  post_create: templates/terraform/post_create/workbench_instance.go.erb
+  pre_update: templates/terraform/pre_update/workbench_instance.go.erb
+  post_update: templates/terraform/post_update/workbench_instance.go.erb
 virtual_fields:
   - !ruby/object:Api::Type::Enum
     name: desired_state
@@ -109,15 +114,23 @@ virtual_fields:
       - :ACTIVE
       - :STOPPED
     default_value: :ACTIVE
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/workbench_instance.go
-  post_create: templates/terraform/post_create/workbench_instance.go.erb
-  pre_update: templates/terraform/pre_update/workbench_instance.go.erb
-  post_update: templates/terraform/post_update/workbench_instance.go.erb
+parameters:
+  - !ruby/object:Api::Type::String
+    name: location
+    description: Part of `parent`. See documentation of `projectsId`.
+    url_param_only: true
+    required: true
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: instanceId
+    description: Required. User-defined unique ID of this instance.
+    url_param_only: true
+    immutable: true
 properties:
   - !ruby/object:Api::Type::String
     name: name
-    description: 'The name of this workbench instance. Format: `projects/{project_id}/locations/{location}/instances/{instance_id}`'
+    description: |
+      The name of this workbench instance. Format: `projects/{project_id}/locations/{location}/instances/{instance_id}`
     required: true
     immutable: true
     url_param_only: true
@@ -125,7 +138,8 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: gceSetup
     default_from_api: true
-    description: The definition of how to configure a VM instance outside of Resources and Identity.
+    description: |
+      The definition of how to configure a VM instance outside of Resources and Identity.
     properties:
       - !ruby/object:Api::Type::String
         name: machineType
@@ -156,15 +170,12 @@ properties:
                 - NVIDIA_TESLA_T4_VWS
                 - NVIDIA_TESLA_P100_VWS
                 - NVIDIA_TESLA_P4_VWS
-              description: Optional. Type of this accelerator.
+              description: |
+                Optional. Type of this accelerator.
             - !ruby/object:Api::Type::String
               name: coreCount
-              description: Optional. Count of cores of this accelerator.
-          description: |
-            Optional. The hardware accelerators used on this instance. If you
-            use accelerators, make sure that your configuration has [enough vCPUs and memory
-            to support the `machine_type` you have selected](https://cloud.google.com/compute/docs/gpus/#gpus-list).
-            Currently supports only one accelerator configuration.
+              description: |
+                Optional. Count of cores of this accelerator.
       - !ruby/object:Api::Type::NestedObject
         name: shieldedInstanceConfig
         default_from_api: true
@@ -215,9 +226,6 @@ properties:
                 Output only. The list of scopes to be made available for this
                 service account. Set by the CLH to https://www.googleapis.com/auth/cloud-platform
               output: true
-          description: |
-            Optional. The service account that serves as an identity for the
-            VM instance. Currently supports only one service account.
       - !ruby/object:Api::Type::NestedObject
         name: vmImage
         custom_flatten: templates/terraform/custom_flatten/workbench_instance_vm_image_flatten.go.erb
@@ -238,19 +246,14 @@ properties:
           - !ruby/object:Api::Type::String
             name: name
             immutable: true
-            description: Optional. Use VM image name to find the image.
-            exactly_one_of:
-              - vm_image.0.name
-              - vm_image.0.family
+            description: |
+              Optional. Use VM image name to find the image.
           - !ruby/object:Api::Type::String
             name: family
             immutable: true
             description: |
               Optional. Use this VM image family to find the image; the newest
               image in this family will be used.
-            exactly_one_of:
-              - vm_image.0.name
-              - vm_image.0.family
       - !ruby/object:Api::Type::NestedObject
         name: containerImage
         conflicts:
@@ -271,7 +274,8 @@ properties:
       - !ruby/object:Api::Type::NestedObject
         name: bootDisk
         default_from_api: true
-        description: The definition of a boot disk.
+        description: |
+          The definition of a boot disk.
         properties:
           - !ruby/object:Api::Type::String
             name: diskSizeGb
@@ -290,7 +294,8 @@ properties:
               - PD_SSD
               - PD_BALANCED
               - PD_EXTREME
-            description: Optional. Indicates the type of the disk.
+            description: |
+              Optional. Indicates the type of the disk.
           - !ruby/object:Api::Type::Enum
             name: diskEncryption
             default_from_api: true
@@ -311,7 +316,8 @@ properties:
             diff_suppress_func: WorkbenchInstanceKmsDiffSuppress
       - !ruby/object:Api::Type::Array
         name: dataDisks
-        description: Data disks attached to the VM instance. Currently supports only one data disk.
+        description: |
+          Data disks attached to the VM instance. Currently supports only one data disk.
         max_size: 1
         default_from_api: true
         item_type: !ruby/object:Api::Type::NestedObject
@@ -331,7 +337,8 @@ properties:
                 - PD_SSD
                 - PD_BALANCED
                 - PD_EXTREME
-              description: Optional. Input only. Indicates the type of the disk.
+              description: |
+                Optional. Input only. Indicates the type of the disk.
               immutable: true
             - !ruby/object:Api::Type::Enum
               name: diskEncryption
@@ -351,26 +358,26 @@ properties:
                 Learn more about using your own encryption keys.'
               immutable: true
               diff_suppress_func: WorkbenchInstanceKmsDiffSuppress
-          description: |
-            Optional. Data disks attached to the VM instance. Currently supports
-            only one data disk.
       - !ruby/object:Api::Type::Array
         name: networkInterfaces
-        description: The network interfaces for the VM. Supports only one interface.
+        description: |
+          The network interfaces for the VM. Supports only one interface.
         default_from_api: true
         immutable: true
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String
               name: network
-              description: 'Optional. The name of the VPC that this VM instance is in.'
+              description: |
+                Optional. The name of the VPC that this VM instance is in.
               immutable: true
               diff_suppress_func: tpgresource.CompareSelfLinkRelativePaths
               default_from_api: true
             - !ruby/object:Api::Type::String
               name: subnet
               immutable: true
-              description: 'Optional. The name of the subnet that this VM instance is in.'
+              description: |
+                Optional. The name of the subnet that this VM instance is in.
               diff_suppress_func: tpgresource.CompareSelfLinkRelativePaths
               default_from_api: true
             - !ruby/object:Api::Type::Enum
@@ -403,12 +410,12 @@ properties:
                       undefined to use an IP from a shared ephemeral IP address pool. If you
                       specify a static external IP address, it must live in the same region as
                       the zone of the instance.
-          description: Optional. The network interfaces for the VM. Supports only one interface.
       - !ruby/object:Api::Type::Boolean
         name: disablePublicIp
         default_from_api: true
         immutable: true
-        description: Optional. If true, no external IP will be assigned to this VM instance.
+        description: |
+          Optional. If true, no external IP will be assigned to this VM instance.
       - !ruby/object:Api::Type::Array
         name: tags
         item_type: Api::Type::String
@@ -422,7 +429,8 @@ properties:
         name: metadata
         default_from_api: true
         diff_suppress_func: WorkbenchInstanceMetadataDiffSuppress
-        description: Optional. Custom metadata to apply to this instance.
+        description: |
+          Optional. Custom metadata to apply to this instance.
       - !ruby/object:Api::Type::Boolean
         name: enableIpForwarding
         immutable: true
@@ -431,7 +439,8 @@ properties:
           https://cloud.google.com/vpc/docs/using-routes#canipforward
   - !ruby/object:Api::Type::String
     name: proxyUri
-    description: Output only. The proxy endpoint that is used to access the Jupyter notebook.
+    description: |
+      Output only. The proxy endpoint that is used to access the Jupyter notebook.
     output: true
   - !ruby/object:Api::Type::Array
     name: instanceOwners
@@ -444,36 +453,45 @@ properties:
     immutable: true
   - !ruby/object:Api::Type::String
     name: creator
-    description: Output only. Email address of entity that sent original CreateInstance request.
+    description: |
+      Output only. Email address of entity that sent original CreateInstance request.
     output: true
   - !ruby/object:Api::Type::String
     name: state
-    description: Output only. The state of this instance.
+    description: |
+      Output only. The state of this instance.
     output: true
   - !ruby/object:Api::Type::Array
     name: upgradeHistory
-    description: Output only. The upgrade history of this instance.
+    description: |
+      Output only. The upgrade history of this instance.
     output: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::String
           name: snapshot
-          description: Optional. The snapshot of the boot disk of this workbench instance before upgrade.
+          description: |
+            Optional. The snapshot of the boot disk of this workbench instance before upgrade.
         - !ruby/object:Api::Type::String
           name: vmImage
-          description: Optional. The VM image before this instance upgrade.
+          description: |
+            Optional. The VM image before this instance upgrade.
         - !ruby/object:Api::Type::String
           name: containerImage
-          description: Optional. The container image before this instance upgrade.
+          description: |
+            Optional. The container image before this instance upgrade.
         - !ruby/object:Api::Type::String
           name: framework
-          description: Optional. The framework of this workbench instance.
+          description: |
+            Optional. The framework of this workbench instance.
         - !ruby/object:Api::Type::String
           name: version
-          description: Optional. The version of the workbench instance before this upgrade.
+          description: |
+            Optional. The version of the workbench instance before this upgrade.
         - !ruby/object:Api::Type::String
           name: state
-          description: Output only. The state of this instance upgrade history entry.
+          description: |
+            Output only. The state of this instance upgrade history entry.
           output: true
         - !ruby/object:Api::Type::String
           name: createTime
@@ -482,13 +500,16 @@ properties:
             The milliseconds portion (".SSS") is optional.
         - !ruby/object:Api::Type::String
           name: action
-          description: Optional. Action. Rolloback or Upgrade.
+          description: |
+            Optional. Action. Rolloback or Upgrade.
         - !ruby/object:Api::Type::String
           name: targetVersion
-          description: Optional. Target VM Version, like m63.
+          description: |
+            Optional. Target VM Version, like m63.
   - !ruby/object:Api::Type::String
     name: healthState
-    description: Output only. Instance health_state.
+    description: |
+      Output only. Instance health_state.
     output: true
   - !ruby/object:Api::Type::NestedObject
     properties: []
@@ -513,25 +534,14 @@ properties:
   - !ruby/object:Api::Type::Boolean
     name: disableProxyAccess
     immutable: true
-    description: Optional. If true, the workbench instance will not register with the proxy.
+    description: |
+      Optional. If true, the workbench instance will not register with the proxy.
   - !ruby/object:Api::Type::KeyValueLabels
     name: labels
     description: |
       Optional. Labels to apply to this instance. These can be later modified
       by the UpdateInstance method.
     diff_suppress_func: WorkbenchInstanceLabelsDiffSuppress
-parameters:
-  - !ruby/object:Api::Type::String
-    name: location
-    description: Part of `parent`. See documentation of `projectsId`.
-    url_param_only: true
-    required: true
-    immutable: true
-  - !ruby/object:Api::Type::String
-    name: instanceId
-    description: Required. User-defined unique ID of this instance.
-    url_param_only: true
-    immutable: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: name

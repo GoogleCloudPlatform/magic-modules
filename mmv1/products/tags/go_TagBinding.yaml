@@ -1,0 +1,91 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'TagBinding'
+description:
+  A TagBinding represents a connection between a TagValue and a cloud resource
+  (currently project, folder, or organization). Once a TagBinding is created,
+  the TagValue is applied to all the descendants of the cloud resource.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/resource-manager/docs/tags/tags-creating-and-managing'
+  api: 'https://cloud.google.com/resource-manager/reference/rest/v3/tagBindings'
+docs:
+id_format: 'tagBindings/{{name}}'
+base_url: 'tagBindings'
+self_link: 'tagBindings/?parent={{parent}}&pageSize=300'
+delete_url: 'tagBindings/{{name}}'
+immutable: true
+mutex: 'tagBindings/{{parent}}'
+import_format:
+  - 'tagBindings/{{name}}'
+  - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+nested_query:
+  keys:
+    - tagBindings
+  is_list_of_ids: false
+  modify_by_patch: false
+custom_code:
+  custom_import: 'templates/terraform/custom_import/go/tags_tag_binding.go.tmpl'
+examples:
+  - name: 'tag_binding_basic'
+    primary_resource_id: 'binding'
+    vars:
+      key_short_name: 'keyname'
+      value_short_name: 'valuename'
+      project_id: 'project_id'
+    test_env_vars:
+      org_id: 'ORG_ID'
+    test_vars_overrides:
+      'key_short_name': '"tf-test-key-" + acctest.RandString(t, 10)'
+      'value_short_name': '"tf-test-value-" + acctest.RandString(t, 10)'
+      'project_id': '"tf-test-" + acctest.RandString(t, 10)'
+    skip_test: true
+parameters:
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The generated id for the TagBinding. This is a string of the form: `tagBindings/{full-resource-name}/{tag-value-name}`
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/tags_tag_binding_name.tmpl'
+  - name: 'parent'
+    type: String
+    description: |
+      The full resource name of the resource the TagValue is bound to. E.g. //cloudresourcemanager.googleapis.com/projects/123
+    required: true
+  - name: 'tagValue'
+    type: String
+    description: |
+      The TagValue of the TagBinding. Must be of the form tagValues/456.
+    required: true

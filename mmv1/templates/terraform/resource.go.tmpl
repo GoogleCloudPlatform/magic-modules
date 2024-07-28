@@ -619,7 +619,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 
   // Explicitly set virtual fields to default values if unset
 {{- range $prop := $.VirtualFields }}
-{{      if not (eq $prop.DefaultValue nil) -}}
+{{-      if not (eq $prop.DefaultValue nil) }}
     if _, ok := d.GetOkExists("{{ $prop.Name -}}"); !ok {
         if err := d.Set("{{ $prop.Name -}}", {{ $prop.GoLiteral $prop.DefaultValue -}}); err != nil {
             return fmt.Errorf("Error setting {{ $prop.Name -}}: %s", err)

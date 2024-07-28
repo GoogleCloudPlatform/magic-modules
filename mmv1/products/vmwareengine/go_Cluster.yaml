@@ -1,0 +1,149 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Cluster'
+description: |
+  A cluster in a private cloud.
+references:
+  guides:
+  api: 'https://cloud.google.com/vmware-engine/docs/reference/rest/v1/projects.locations.privateClouds.clusters'
+docs:
+id_format: '{{parent}}/clusters/{{name}}'
+base_url: '{{parent}}/clusters'
+self_link: '{{parent}}/clusters/{{name}}'
+create_url: '{{parent}}/clusters?clusterId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - '{{%parent}}/clusters/{{name}}'
+timeouts:
+  insert_minutes: 210
+  update_minutes: 190
+  delete_minutes: 150
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 5000
+    timeouts:
+      insert_minutes: 210
+      update_minutes: 190
+      delete_minutes: 150
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+  include_project: true
+custom_code:
+skip_sweeper: true
+error_abort_predicates:
+
+  - 'transport_tpg.Is429QuotaError'
+examples:
+  - name: 'vmware_engine_cluster_basic'
+    primary_resource_id: 'vmw-engine-ext-cluster'
+    vars:
+      name: 'ext-cluster'
+      private_cloud_id: 'sample-pc'
+      network_id: 'pc-nw'
+      management_cluster_id: 'sample-mgmt-cluster'
+    test_env_vars:
+      region: 'REGION'
+    skip_test: true
+  - name: 'vmware_engine_cluster_full'
+    primary_resource_id: 'vmw-ext-cluster'
+    vars:
+      name: 'ext-cluster'
+      private_cloud_id: 'sample-pc'
+      network_id: 'pc-nw'
+      management_cluster_id: 'sample-mgmt-cluster'
+    test_env_vars:
+      region: 'REGION'
+    skip_test: true
+parameters:
+  - name: 'parent'
+    type: String
+    description: |
+      The resource name of the private cloud to create a new cluster in.
+      Resource names are schemeless URIs that follow the conventions in https://cloud.google.com/apis/design/resource_names.
+      For example: projects/my-project/locations/us-west1-a/privateClouds/my-cloud
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'name'
+    type: String
+    description: |
+      The ID of the Cluster.
+
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'management'
+    type: Boolean
+    description: |
+      True if the cluster is a management cluster; false otherwise.
+      There can only be one management cluster in a private cloud and it has to be the first one.
+
+    output: true
+  - name: 'uid'
+    type: String
+    description: |
+      System-generated unique identifier for the resource.
+
+    output: true
+  - name: 'state'
+    type: Enum
+    description: |
+      State of the Cluster.
+    output: true
+    enum_values:
+      - 'ACTIVE'
+      - 'CREATING'
+      - 'UPDATING'
+      - 'DELETING'
+      - 'REPAIRING'
+  - name: 'nodeTypeConfigs'
+    type: Map
+    description: |
+      The map of cluster node types in this cluster,
+      where the key is canonical identifier of the node type (corresponds to the NodeType).
+    update_mask_fields:
+      - 'nodeTypeConfigs.*.nodeCount'
+    key_name: 'node_type_id'
+    key_description: |
+      Canonical identifier of the NodeType.
+    value_type:
+      name: nodeTypeConfig
+      type: NestedObject
+      properties:
+        - name: 'nodeCount'
+          type: Integer
+          description: |
+            The number of nodes of this type in the cluster.
+          required: true
+        - name: 'customCoreCount'
+          type: Integer
+          description: |
+            Customized number of cores available to each node of the type.
+            This number must always be one of `nodeType.availableCustomCoreCounts`.
+            If zero is provided max value from `nodeType.availableCustomCoreCounts` will be used.
+            Once the customer is created then corecount cannot be changed.
+          default_value: 0

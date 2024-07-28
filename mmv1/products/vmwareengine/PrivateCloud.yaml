@@ -74,7 +74,15 @@ examples:
       management_cluster_id: "sample-mgmt-cluster"
     test_env_vars:
       region: :REGION
-
+virtual_fields:
+  - !ruby/object:Api::Type::Integer
+    name: "deletion_delay_hours"
+    description: |
+      The number of hours to delay this request. You can set this value to an hour between 0 to 8, where setting it to 0 starts the deletion request immediately. If no value is set, a default value is set at the API Level.
+  - !ruby/object:Api::Type::Boolean
+    name: "send_deletion_delay_hours_if_zero"
+    description: |
+      While set true, deletion_delay_hours value will be sent in the request even for zero value of the field. This field is only useful for setting 0 value to the deletion_delay_hours field. It can be used both alone and together with deletion_delay_hours.
 parameters:
   - !ruby/object:Api::Type::String
     name: "location"
@@ -90,29 +98,16 @@ parameters:
     url_param_only: true
     description: |
       The ID of the PrivateCloud.
-
-virtual_fields:
-  - !ruby/object:Api::Type::Integer
-    name: "deletion_delay_hours"
-    description: |
-      The number of hours to delay this request. You can set this value to an hour between 0 to 8, where setting it to 0 starts the deletion request immediately. If no value is set, a default value is set at the API Level.
-  - !ruby/object:Api::Type::Boolean
-    name: "send_deletion_delay_hours_if_zero"
-    description: |
-      While set true, deletion_delay_hours value will be sent in the request even for zero value of the field. This field is only useful for setting 0 value to the deletion_delay_hours field. It can be used both alone and together with deletion_delay_hours.
-
 properties:
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
       User-provided description for this private cloud.
-
   - !ruby/object:Api::Type::String
     name: 'uid'
     output: true
     description: |
       System-generated unique identifier for the resource.
-
   - !ruby/object:Api::Type::Enum
     name: 'state'
     description: |
@@ -125,7 +120,6 @@ properties:
       - :FAILED
       - :DELETED
       - :PURGING
-
   - !ruby/object:Api::Type::NestedObject
     name: 'networkConfig'
     required: true
@@ -138,21 +132,18 @@ properties:
         description: |
           Management CIDR used by VMware management appliances.
         required: true
-
       - !ruby/object:Api::Type::String
         name: 'vmwareEngineNetwork'
         description: |
           The relative resource name of the VMware Engine network attached to the private cloud.
           Specify the name in the following form: projects/{project}/locations/{location}/vmwareEngineNetworks/{vmwareEngineNetworkId}
           where {project} can either be a project number or a project ID.
-
       - !ruby/object:Api::Type::String
         name: 'vmwareEngineNetworkCanonical'
         output: true
         description: |
           The canonical name of the VMware Engine network in
           the form: projects/{project_number}/locations/{location}/vmwareEngineNetworks/{vmwareEngineNetworkId}
-
       - !ruby/object:Api::Type::Integer
         name: 'managementIpAddressLayoutVersion'
         output: true
@@ -163,13 +154,11 @@ properties:
           as it does not support all features.
           * managementIpAddressLayoutVersion=2: Indicates the latest IP address layout
           used by all newly created private clouds. This version supports all current features.
-
       - !ruby/object:Api::Type::String
         name: 'dnsServerIp'
         output: true
         description: |
           DNS Server IP of the Private Cloud.
-
   - !ruby/object:Api::Type::NestedObject
     name: 'managementCluster'
     required: true
@@ -223,8 +212,6 @@ properties:
             name: 'secondaryLocation'
             description: |
               Additional zone for a higher level of availability and load balancing.
-
-
   - !ruby/object:Api::Type::NestedObject
     name: 'hcx'
     output: true
@@ -235,12 +222,10 @@ properties:
         name: 'internalIp'
         description: |
           Internal IP address of the appliance.
-
       - !ruby/object:Api::Type::String
         name: 'version'
         description: |
           Version of the appliance.
-
       - !ruby/object:Api::Type::Enum
         name: 'state'
         description: |
@@ -248,12 +233,10 @@ properties:
         values:
           - :ACTIVE
           - :CREATING
-
       - !ruby/object:Api::Type::String
         name: 'fqdn'
         description: |
           Fully qualified domain name of the appliance.
-
   - !ruby/object:Api::Type::NestedObject
     name: 'nsx'
     output: true
@@ -264,12 +247,10 @@ properties:
         name: 'internalIp'
         description: |
           Internal IP address of the appliance.
-
       - !ruby/object:Api::Type::String
         name: 'version'
         description: |
           Version of the appliance.
-
       - !ruby/object:Api::Type::Enum
         name: 'state'
         description: |
@@ -277,12 +258,10 @@ properties:
         values:
           - :ACTIVE
           - :CREATING
-
       - !ruby/object:Api::Type::String
         name: 'fqdn'
         description: |
           Fully qualified domain name of the appliance.
-
   - !ruby/object:Api::Type::NestedObject
     name: 'vcenter'
     output: true
@@ -293,12 +272,10 @@ properties:
         name: 'internalIp'
         description: |
           Internal IP address of the appliance.
-
       - !ruby/object:Api::Type::String
         name: 'version'
         description: |
           Version of the appliance.
-
       - !ruby/object:Api::Type::Enum
         name: 'state'
         description: |
@@ -306,12 +283,10 @@ properties:
         values:
           - :ACTIVE
           - :CREATING
-
       - !ruby/object:Api::Type::String
         name: 'fqdn'
         description: |-
           Fully qualified domain name of the appliance.
-
   - !ruby/object:Api::Type::Enum
     name: 'type'
     description: |

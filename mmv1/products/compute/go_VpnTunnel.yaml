@@ -212,7 +212,6 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: Labels to apply to this VpnTunnel.
-    immutable: false
     update_url: 'projects/{{project}}/regions/{{region}}/vpnTunnels/{{name}}/setLabels'
     update_verb: 'POST'
   - name: 'labelFingerprint'

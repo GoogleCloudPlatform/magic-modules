@@ -34,6 +34,12 @@ async: !ruby/object:Api::OpAsync
     base_url: '{{op_id}}'
 id_format: 'projects/{{project}}/locations/{{location}}/activeDirectories/{{name}}'
 import_format: ['projects/{{project}}/locations/{{location}}/activeDirectories/{{name}}']
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'netapp_active_directory_full'
+    primary_resource_id: 'test_active_directory_full'
+    vars:
+      active_directory_full_name: 'test-active-directory-full'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -49,12 +55,6 @@ parameters:
     required: true
     immutable: true
     url_param_only: true
-examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'netapp_active_directory_full'
-    primary_resource_id: 'test_active_directory_full'
-    vars:
-      active_directory_full_name: 'test-active-directory-full'
 properties:
   # Fields go here
   - !ruby/object:Api::Type::String

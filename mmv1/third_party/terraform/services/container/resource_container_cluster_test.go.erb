@@ -432,7 +432,6 @@ func TestAccContainerCluster_withILBSubsetting(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccContainerCluster_withMultiNetworking(t *testing.T) {
 	t.Parallel()
 
@@ -455,7 +454,6 @@ func TestAccContainerCluster_withMultiNetworking(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 <% unless version == 'ga' -%>
 func TestAccContainerCluster_withFQDNNetworkPolicy(t *testing.T) {
@@ -598,6 +596,8 @@ func TestAccContainerCluster_withAuthenticatorGroupsConfig(t *testing.T) {
 	})
 }
 
+
+
 func TestUnitContainerCluster_Rfc3339TimeDiffSuppress(t *testing.T) {
 	cases := map[string]struct {
 		Old, New           string
@@ -641,7 +641,7 @@ func TestUnitContainerCluster_Rfc3339TimeDiffSuppress(t *testing.T) {
 	}
 }
 
-<% unless version == 'ga' -%>
+
 func testAccContainerCluster_enableMultiNetworking(clusterName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "container_network" {
@@ -699,7 +699,6 @@ resource "google_container_cluster" "cluster" {
 }
 `, clusterName, clusterName)
 }
-<% end -%>
 
 <% unless version == 'ga' -%>
 func testAccContainerCluster_withAdditiveVPC(clusterName string) string {
