@@ -640,6 +640,12 @@ func ResourceComputeInstance() *schema.Resource {
 							Computed:    true,
 							Description: `The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied encryption key that protects this resource.`,
 						},
+						"interface": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validation.StringInSlice([]string{"SCSI", "NVME"}, false),
+							Description:  `The disk interface used for attaching this disk. One of SCSI or NVME.`,
+						},
 					},
 				},
 			},
@@ -1691,6 +1697,11 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 					di["disk_encryption_key_sha256"] = key.Sha256
 				}
 			}
+			
+                        if o_interface := d.Get(fmt.Sprintf("attached_disk.%d.interface", adIndex)); o_interface != nil && o_interface != "" {
+				// attached disk interface is a limited feature. Don't show it unless it is explicitly specified by users.
+				di["interface"] = o_interface
+			}
 			// We want the disks to remain in the order we set in the config, so if a disk
 			// is present in the config, make sure it's at the correct index. Otherwise, append it.
 			if inConfig {
@@ -2729,6 +2740,11 @@ func expandAttachedDisk(diskConfig map[string]interface{}, d *schema.ResourceDat
 	if v, ok := diskConfig["device_name"]; ok {
 		disk.DeviceName = v.(string)
 	}
+
+	if v, ok := diskConfig["interface"; ok {
+		disk.Interface = v.(string)
+	}
+
 
 	keyValue, keyOk := diskConfig["disk_encryption_key_raw"]
 	if keyOk {
