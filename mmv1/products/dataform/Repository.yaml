@@ -74,6 +74,7 @@ examples:
       dataform_repository_name: 'dataform_repository'
       data: secret-data
       secret_name: my-secret
+      region: 'us-central1'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'region'
