@@ -20,6 +20,8 @@ update_verb: :PATCH
 update_mask: true
 description: |
   ClientTlsPolicy is a resource that specifies how a client should authenticate connections to backends of a service. This resource itself does not affect configuration unless it is attached to a backend service resource.
+
+  Recreating a server TLS policy that's in use by another resource will give a `resourceInUseByAnotherResource` error. Use `lifecycle.create_before_destroy` to avoid this type of error.
 references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/traffic-director/docs/reference/network-security/rest/v1beta1/projects.locations.serverTlsPolicies'
 async: !ruby/object:Api::OpAsync

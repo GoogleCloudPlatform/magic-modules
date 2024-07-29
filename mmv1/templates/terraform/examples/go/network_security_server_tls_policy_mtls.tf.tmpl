@@ -1,3 +1,15 @@
+// Using with Target HTTPS Proxies
+//
+// If you need to rename or delete the "google_network_security_server_tls_policy" resource,
+// Terraform will try to destroy it first then perform the update to the
+// "google_compute_region_target_https_proxy" resource that references the server TLS policy.
+// This might happen in a situation where you want to disable mTLS on a target HTTPS proxy.
+// This will NOT work and will yield a "resourceInUseByAnotherResource" error as the target
+// HTTPS proxy is still referencing the server TLS policy that Terraform is trying to destroy.
+// It is recommended to specify "create_before_destroy = true" in a lifecycle block for the
+// "google_network_security_server_tls_policy" resource so that any create/update operations take
+// place _before_ the destroy.
+
 data "google_project" "project" {
   provider = google-beta
 }
