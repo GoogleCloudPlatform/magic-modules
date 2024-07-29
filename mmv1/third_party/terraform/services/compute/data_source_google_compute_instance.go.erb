@@ -123,6 +123,7 @@ func dataSourceGoogleComputeInstanceRead(d *schema.ResourceData, meta interface{
 				"source":      tpgresource.ConvertSelfLinkToV1(disk.Source),
 				"device_name": disk.DeviceName,
 				"mode":        disk.Mode,
+                                "interface":   disk.Interface,
 			}
 			if key := disk.DiskEncryptionKey; key != nil {
 				di["disk_encryption_key_sha256"] = key.Sha256

@@ -210,6 +210,8 @@ func ResourceComputeInstance() *schema.Resource {
 							Type:         schema.TypeString,
 							Optional:     true,
 							ValidateFunc: validation.StringInSlice([]string{"SCSI", "NVME"}, false),
+                                                        Computed:     true,
+							ForceNew:     true,
 							Description:  `The disk interface used for attaching this disk. One of SCSI or NVME.`,
 						},
 
@@ -645,6 +647,8 @@ func ResourceComputeInstance() *schema.Resource {
 							Optional:     true,
 							ValidateFunc: validation.StringInSlice([]string{"SCSI", "NVME"}, false),
 							Description:  `The disk interface used for attaching this disk. One of SCSI or NVME.`,
+                                                        Computed:     true,
+                                                        ForceNew:     true,
 						},
 					},
 				},
@@ -1680,6 +1684,7 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 				"source":      tpgresource.ConvertSelfLinkToV1(disk.Source),
 				"device_name": disk.DeviceName,
 				"mode":        disk.Mode,
+                                "interface":   disk.Interface,
 			}
 			if key := disk.DiskEncryptionKey; key != nil {
 				if inConfig {
@@ -1698,10 +1703,6 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 				}
 			}
 			
-                        if o_interface := d.Get(fmt.Sprintf("attached_disk.%d.interface", adIndex)); o_interface != nil && o_interface != "" {
-				// attached disk interface is a limited feature. Don't show it unless it is explicitly specified by users.
-				di["interface"] = o_interface
-			}
 			// We want the disks to remain in the order we set in the config, so if a disk
 			// is present in the config, make sure it's at the correct index. Otherwise, append it.
 			if inConfig {
@@ -2741,7 +2742,7 @@ func expandAttachedDisk(diskConfig map[string]interface{}, d *schema.ResourceDat
 		disk.DeviceName = v.(string)
 	}
 
-	if v, ok := diskConfig["interface"; ok {
+	if v, ok := diskConfig["interface"]; ok {
 		disk.Interface = v.(string)
 	}
 
@@ -3050,11 +3051,7 @@ func flattenBootDisk(d *schema.ResourceData, disk *compute.AttachedDisk, config 
 		// disk_encryption_key_raw is not returned from the API, so copy it from what the user
 		// originally specified to avoid diffs.
 		"disk_encryption_key_raw": d.Get("boot_disk.0.disk_encryption_key_raw"),
-	}
-
-	if d.Get("boot_disk.0.interface") != nil && d.Get("boot_disk.0.interface") != "" {
-		// boot disk interface is a limited feature. Don't show it unless it is explicitly specified by users.
-		result["interface"] := disk.Interface
+                "interface":  disk.Interface,
 	}
 
 	diskDetails, err := getDisk(disk.Source, d, config)
