@@ -12,12 +12,12 @@ import (
 )
 
 func init() {
-	sweeper.AddTestSweepers("VmwareengineCluster", testSweepVmwareengineCluster)
+	sweeper.AddTestSweepers("VmwareengineExternalAccessRule", testSweepVmwareengineExternalAccessRule)
 }
 
 // At the time of writing, the CI only passes us-central1 as the region
-func testSweepVmwareengineCluster(region string) error {
-	resourceName := "VmwareengineCluster"
+func testSweepVmwareengineExternalAccessRule(region string) error {
+	resourceName := "VmwareengineExternalAccessRule"
 	log.Printf("[INFO][SWEEPER_LOG] Starting sweeper for %s", resourceName)
 
 	config, err := sweeper.SharedConfigForRegion(region)
@@ -38,10 +38,9 @@ func testSweepVmwareengineCluster(region string) error {
 	// List of location values includes:
 	//   * zones used for this resource type's acc tests in the past
 	//   * the 'region' passed to the sweeper
-	locations := []string{region, "us-central1-a", "us-central1-b", "southamerica-west1-a", "southamerica-west1-b", "me-west1-a", "me-west1-b"}
+	locations := []string{region, "us-central1", "southamerica-west1", "me-west1"}
 	log.Printf("[INFO][SWEEPER_LOG] Sweeping will include these locations: %v.", locations)
 	for _, location := range locations {
-		log.Printf("[INFO][SWEEPER_LOG] Beginning the process of sweeping location '%s'.", location)
 
 		// Setup variables to replace in list template
 		d := &tpgresource.ResourceDataMock{
@@ -56,24 +55,25 @@ func testSweepVmwareengineCluster(region string) error {
 
 		log.Printf("[INFO][SWEEPER_LOG] looking for parent resources in location '%s'.", location)
 
-		parentResponseField := "privateClouds"
-		parentListUrlTemplate := "https://vmwareengine.googleapis.com/v1/projects/{{project}}/locations/{{location}}/privateClouds"
+		parentResponseField := "networkPolicies"
+		parentListUrlTemplate := "https://vmwareengine.googleapis.com/v1/projects/{{project}}/locations/{{location}}/networkPolicies"
 		parentNames, err := sweeper.ListParentResourcesInLocation(d, config, parentListUrlTemplate, parentResponseField)
 		if err != nil {
 			log.Printf("[INFO][SWEEPER_LOG] error finding parental resources in location %s: %s", location, err)
 			continue
 		}
+
 		for _, parent := range parentNames {
 
 			// `parent` will be string of form projects/my-project/locations/us-central1-a/privateClouds/my-cloud
 			// Change on each loop, so new value used in tpgresource.ReplaceVars
 			d.Set("parent", parent)
 
-			listTemplate := "https://vmwareengine.googleapis.com/v1/{{parent}}/clusters"
+			listTemplate := "https://vmwareengine.googleapis.com/v1/{{parent}}/externalAccessRules"
 			listUrl, err := tpgresource.ReplaceVars(d, config, listTemplate)
 			if err != nil {
 				log.Printf("[INFO][SWEEPER_LOG] error preparing sweeper list url: %s", err)
-				continue
+				return nil
 			}
 
 			res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
@@ -85,13 +85,13 @@ func testSweepVmwareengineCluster(region string) error {
 			})
 			if err != nil {
 				log.Printf("[INFO][SWEEPER_LOG] Error in response from request %s: %s", listUrl, err)
-				continue
+				return nil
 			}
 
-			resourceList, ok := res["clusters"]
+			resourceList, ok := res["externalAccessRules"]
 			if !ok {
 				log.Printf("[INFO][SWEEPER_LOG] Nothing found in response.")
-				continue
+				return nil
 			}
 
 			rl := resourceList.([]interface{})
@@ -103,7 +103,7 @@ func testSweepVmwareengineCluster(region string) error {
 				obj := ri.(map[string]interface{})
 				if obj["name"] == nil {
 					log.Printf("[INFO][SWEEPER_LOG] %s resource name was nil", resourceName)
-					continue
+					return nil
 				}
 
 				name := tpgresource.GetResourceNameFromSelfLink(obj["name"].(string))
@@ -113,11 +113,11 @@ func testSweepVmwareengineCluster(region string) error {
 					continue
 				}
 
-				deleteTemplate := "https://vmwareengine.googleapis.com/v1/{{parent}}/clusters/{{name}}"
+				deleteTemplate := "https://vmwareengine.googleapis.com/v1/{{parent}}/externalAccessRules/{{name}}"
 				deleteUrl, err := tpgresource.ReplaceVars(d, config, deleteTemplate)
 				if err != nil {
 					log.Printf("[INFO][SWEEPER_LOG] error preparing delete url: %s", err)
-					continue
+					return nil
 				}
 				deleteUrl = deleteUrl + name
 
