@@ -59,7 +59,7 @@ resource "google_folder" "folder" {
 
 resource "time_sleep" "wait_1_minute" {
 	depends_on = [google_folder.folder]
-	create_duration = "2m"
+	create_duration = "5m"
 }
 
 resource "google_scc_v2_folder_mute_config" "default" {
