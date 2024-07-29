@@ -1,0 +1,7 @@
+if (d.HasChange("status")){
+	fingerPrint := d.Get("fingerprint")
+	if v, ok := d.GetOkExists("fingerprint"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, fingerPrint)) {
+		obj["fingerprint"] = fingerPrint
+ }
+}
+return obj, nil
