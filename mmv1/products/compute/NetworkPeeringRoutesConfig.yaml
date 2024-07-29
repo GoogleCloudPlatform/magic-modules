@@ -37,7 +37,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
