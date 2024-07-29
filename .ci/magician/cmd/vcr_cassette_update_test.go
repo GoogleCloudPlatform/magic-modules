@@ -4,6 +4,8 @@ import (
 	"container/list"
 	"fmt"
 	"magician/source"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -290,6 +292,12 @@ func TestFormatVCRCassettesUpdateRecording(t *testing.T) {
 }
 
 func TestExecVCRCassetteUpdate(t *testing.T) {
+	isEmptyFunc = func(filePath string) (bool, error) {
+		return false, nil
+	}
+	defer func() {
+		isEmptyFunc = isEmpty
+	}()
 	tests := []struct {
 		name          string
 		cmdResults    map[string]string
@@ -367,9 +375,10 @@ func TestExecVCRCassetteUpdate(t *testing.T) {
 						"VCR_MODE":                       "RECORDING",
 						"VCR_PATH":                       "/mock/dir/magic-modules/.ci/magician/cassettes/beta",
 					}},
-					{"/mock/dir/magic-modules/.ci/magician", "gsutil", []string{"-m", "-q", "cp", "/mock/dir/magic-modules/.ci/magician/cassettes/beta", "gs://vcr-nightly/beta/2024-07-08/buildID/pr_recording_cassettes_backup/fixtures/"}, map[string]string(nil)},
+
 					{"/mock/dir/magic-modules/.ci/magician", "gsutil", []string{"-h", "Content-Type:text/plain", "-q", "cp", "-r", "/mock/dir/magic-modules/.ci/magician/testlogs/recording_test.log", "gs://vcr-nightly/beta/2024-07-08/buildID/logs/recording/"}, map[string]string(nil)},
 					{"/mock/dir/magic-modules/.ci/magician", "gsutil", []string{"-h", "Content-Type:text/plain", "-q", "cp", "-r", "/mock/dir/magic-modules/.ci/magician/testlogs/recording/beta/*", "gs://vcr-nightly/beta/2024-07-08/buildID/logs/build-log/"}, map[string]string(nil)},
+					{"/mock/dir/magic-modules/.ci/magician", "gsutil", []string{"-m", "-q", "cp", "/mock/dir/magic-modules/.ci/magician/cassettes/beta", "gs://vcr-nightly/beta/2024-07-08/buildID/pr_recording_cassettes_backup/fixtures/"}, map[string]string(nil)},
 				},
 			},
 		},
@@ -412,5 +421,59 @@ func TestExecVCRCassetteUpdate(t *testing.T) {
 			}
 		})
 	}
+}
 
+func TestIsEmpty(t *testing.T) {
+	tmpDir := t.TempDir()
+	dirPath1, err := os.MkdirTemp(tmpDir, "test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dirPath2, err := os.MkdirTemp(tmpDir, "test")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = os.Create(filepath.Join(dirPath1, "test.log"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tests := []struct {
+		name     string
+		filePath string
+		want     bool
+	}{
+		{
+			name:     "exist file",
+			filePath: filepath.Join(dirPath1, "test.log"),
+			want:     false,
+		},
+		{
+			name:     "non-empty folder",
+			filePath: dirPath1,
+			want:     false,
+		},
+		{
+			name:     "non-exist file",
+			filePath: filepath.Join(dirPath2, "test.log"),
+			want:     true,
+		},
+		{
+			name:     "empty folder",
+			filePath: dirPath2,
+			want:     true,
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := isEmpty(test.filePath)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got != test.want {
+				t.Errorf("isEmpty(%s) = %v, want %v", test.filePath, got, test.want)
+			}
+		})
+	}
 }

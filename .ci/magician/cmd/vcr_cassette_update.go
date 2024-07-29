@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"magician/exec"
 	"magician/provider"
 	"magician/source"
@@ -31,13 +32,11 @@ var vcuEnvironmentVariables = [...]string{
 	"GOOGLE_SERVICE_ACCOUNT",
 	"GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION",
 	"GOOGLE_ZONE",
-	"GOOGLE_REGION",
 	"HOME",
 	"PATH",
 	"SA_KEY",
 	"USER",
 	"GITHUB_TOKEN_CLASSIC",
-	"BASE_BRANCH",
 }
 
 var (
@@ -160,11 +159,6 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 
 		recordingResult, recordingErr := vt.RunParallel(Recording, provider.Beta, nil, replayingResult.FailedTests)
 
-		cassettesPath := vt.CassettePath(provider.Beta)
-		if _, err := uploadCassettesToGCS(cassettesPath, bucketPrefix + "/pr_recording_cassettes_backup/fixtures/", rnr); err != nil {
-			return fmt.Errorf("error uploading cassettes: %w", err)
-		}
-
 		// upload build and test logs, slightly different log structure than original
 		buildLogPath := filepath.Join(rnr.GetCWD(), "testlogs", fmt.Sprintf("%s_test.log", Recording.Lower()))
 		if _, err := uploadLogsToGCS(buildLogPath, bucketPrefix+"/logs/recording/", rnr); err != nil {
@@ -174,6 +168,11 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 		testLogPath := vt.LogPath(Recording, provider.Beta)
 		if _, err := uploadLogsToGCS(filepath.Join(testLogPath, "*"), bucketPrefix+"/logs/build-log/", rnr); err != nil {
 			return fmt.Errorf("error uploading recording build log: %w", err)
+		}
+
+		cassettesPath := vt.CassettePath(provider.Beta)
+		if _, err := uploadCassettesToGCS(cassettesPath, bucketPrefix+"/pr_recording_cassettes_backup/fixtures/", rnr); err != nil {
+			return fmt.Errorf("error uploading cassettes: %w", err)
 		}
 
 		hasTerminatedTests := (len(recordingResult.PassedTests) + len(recordingResult.FailedTests)) < len(replayingResult.FailedTests)
@@ -198,17 +197,27 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 }
 
 func uploadLogsToGCS(src, dest string, rnr ExecRunner) (string, error) {
-	args := []string{"-h", "Content-Type:text/plain", "-q", "cp", "-r", src, dest}
-	return rnr.Run("gsutil", args, nil)
+	return uploadToGCS(src, dest, []string{"-h", "Content-Type:text/plain", "-q", "cp", "-r"}, rnr)
 }
 
 func uploadCassettesToGCS(src, dest string, rnr ExecRunner) (string, error) {
-	args := []string{"-m", "-q", "cp", src, dest}
-	return rnr.Run("gsutil", args, nil)
+	return uploadToGCS(src, dest, []string{"-m", "-q", "cp"}, rnr)
 }
 
-func init() {
-	rootCmd.AddCommand(vcrCassetteUpdateCmd)
+var isEmptyFunc func(filePath string) (bool, error) = isEmpty
+
+func uploadToGCS(src, dest string, opts []string, rnr ExecRunner) (string, error) {
+	fmt.Printf("uploading from %s to %s\n", src, dest)
+	empty, err := isEmptyFunc(src)
+	if err != nil {
+		return "", err
+	}
+	if empty {
+		return "", fmt.Errorf("source path %s does not exist or is empty", src)
+	}
+	args := append(opts, src, dest)
+	fmt.Println("gsutil", args)
+	return rnr.Run("gsutil", args, nil)
 }
 
 func formatVCRCassettesUpdateReplaying(data vcrCassetteUpdateReplayingResult) (string, error) {
@@ -217,4 +226,32 @@ func formatVCRCassettesUpdateReplaying(data vcrCassetteUpdateReplayingResult) (s
 
 func formatVCRCassettesUpdateRecording(data vcrCassetteUpdateRecordingResult) (string, error) {
 	return formatComment("vcr_cassette_update_recording.tmpl", recordingTmplText, data)
+}
+
+func isEmpty(filePath string) (bool, error) {
+	f, err := os.Open(filePath)
+	if os.IsNotExist(err) {
+		return true, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	defer f.Close()
+
+	statInfo, err := f.Stat()
+	if err != nil {
+		return false, err
+	}
+	if !statInfo.IsDir() {
+		return false, nil
+	}
+	_, err = f.Readdirnames(1)
+	if err == io.EOF {
+		return true, nil
+	}
+	return false, err
+}
+
+func init() {
+	rootCmd.AddCommand(vcrCassetteUpdateCmd)
 }
