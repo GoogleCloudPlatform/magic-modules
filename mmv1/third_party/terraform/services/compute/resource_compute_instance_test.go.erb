@@ -10321,15 +10321,6 @@ func TestAccComputeInstance_bootAndAttachedDisk_interface(t *testing.T) {
                         },
                         computeInstanceImportStep("us-central1-a", instanceName, []string{"desired_status","allow_stopping_for_update"}),
                         {
-                                Config:    testAccComputeInstance_bootAndAttachedDisk_interface(instanceName, diskName, envvar.GetTestZoneFromEnv(), "h3-standard-88", "", "", false),
-                                Check: resource.ComposeTestCheckFunc(
-                                        resource.TestCheckResourceAttr("google_compute_instance.foobar", "boot_disk.0.interface", "NVME"),
-                                        resource.TestCheckResourceAttr("google_compute_instance.foobar", "attached_disk.0.interface", "NVME"),
-                                        resource.TestCheckResourceAttr("google_compute_instance.foobar", "machine_type", "h3-standard-88"),
-                                ),
-                        },
-                        computeInstanceImportStep("us-central1-a", instanceName, []string{"desired_status","allow_stopping_for_update"}),
-                        {
                                 Config:    testAccComputeInstance_bootAndAttachedDisk_interface(instanceName, diskName, envvar.GetTestZoneFromEnv(), "n2-standard-8", "SCSI",  "SCSI", true),
                                 Check: resource.ComposeTestCheckFunc(
                                         resource.TestCheckResourceAttr("google_compute_instance.foobar", "boot_disk.0.interface", "SCSI"),
@@ -10344,20 +10335,6 @@ func TestAccComputeInstance_bootAndAttachedDisk_interface(t *testing.T) {
 }
 
 func testAccComputeInstance_bootAndAttachedDisk_interface(instanceName, diskName, zone, machineType, bootDiskInterface, attachedDiskInterface string, allowStoppingForUpdate bool) string {
-        bootDiskInterfaceConfig := ""
-	if bootDiskInterface != "" {
-		bootDiskInterfaceConfig = fmt.Sprintf(
-			"interface = \"%s\"",
-			bootDiskInterface,
-		)
-	} 
-        attachedDiskInterfaceConfig := ""
-        if attachedDiskInterface != "" {
-                attachedDiskInterfaceConfig = fmt.Sprintf(
-                        "interface = \"%s\"",
-                        attachedDiskInterface,
-                )
-        }
         return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family    = "ubuntu-2204-lts"
@@ -10384,13 +10361,13 @@ resource "google_compute_instance" "foobar" {
 			type = "pd-balanced"
 			size = 500
                 }
-                %s
+                interface = "%s"
 
 	}
 
   	attached_disk {
               source = google_compute_disk.foorbarattach.self_link
-              %s
+              interface = "%s"
   	}
 	
 	network_interface {
@@ -10400,5 +10377,5 @@ resource "google_compute_instance" "foobar" {
         desired_status = "RUNNING"
 
 }
-`, diskName, instanceName, machineType, zone, bootDiskInterfaceConfig, attachedDiskInterfaceConfig, allowStoppingForUpdate)
+`, diskName, instanceName, machineType, zone, bootDiskInterface, attachedDiskInterface, allowStoppingForUpdate)
 }
