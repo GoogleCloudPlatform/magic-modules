@@ -3669,7 +3669,7 @@ func testAccCheckComputeInstanceUpdateMachineType(t *testing.T, n string) resour
 		}
 
 		machineType := compute.InstancesSetMachineTypeRequest{
-			MachineType: "zones/us-central1-a/machineTypes/c3-standard-8",
+			MachineType: "zones/us-central1-a/machineTypes/f1-micro",
 		}
 
 		op, err = config.NewComputeClient(config.UserAgent).Instances.SetMachineType(
