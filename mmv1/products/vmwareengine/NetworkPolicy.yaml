@@ -50,7 +50,7 @@ examples:
     name: "vmware_engine_network_policy_basic"
     primary_resource_id: "vmw-engine-network-policy"
     vars:
-      network_name: 'sample-network-policy'
+      network_name: 'sample-network'
       network_policy_name: 'sample-network-policy'
     test_env_vars:
       region: :REGION
@@ -58,7 +58,7 @@ examples:
     name: "vmware_engine_network_policy_full"
     primary_resource_id: "vmw-engine-network-policy"
     vars:
-      network_name: 'sample-network-policy'
+      network_name: 'sample-network'
       network_policy_name: 'sample-network-policy'
     test_env_vars:
       region: :REGION
