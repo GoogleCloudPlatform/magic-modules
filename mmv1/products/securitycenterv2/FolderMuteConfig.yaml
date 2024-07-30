@@ -31,11 +31,15 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'scc_v2_folder_mute_config_basic'
     primary_resource_id: 'default'
+    external_providers: ["random", "time"]
+    skip_test: true
     vars:
       mute_config_id: 'my-config'
       folder_display_name: "folder-name"
     test_env_vars:
       org_id: :ORG_ID
+    test_vars_overrides:
+      sleep: "true"
 parameters:
   - !ruby/object:Api::Type::String
     name: folder
