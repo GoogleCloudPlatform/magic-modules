@@ -126,3 +126,11 @@ An empty value means the setting should be cleared.
 
 Cloud Run does not provide a default value for liveness probe. Now removing this field
 will remove the liveness probe from the Cloud Run service.
+
+## Resource: `google_storage_bucket`
+
+### `lifecycle_rule.condition.no_age` is now removed
+
+Previously `lifecycle_rule.condition.age` attirbute was being set zero value by default and `lifecycle_rule.condition.no_age` was introduced to prevent that.
+Now `lifecycle_rule.condition.no_age` is no longer supported and `lifecycle_rule.condition.age` won't set zero value.
+Removed in favor of the field `lifecycle_rule.condition.send_age_if_zero` which can be used to set zero value for `lifecycle_rule.condition.age` attribute.
