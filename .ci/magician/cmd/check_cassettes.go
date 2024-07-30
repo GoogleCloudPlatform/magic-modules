@@ -5,7 +5,6 @@ import (
 	"magician/exec"
 	"magician/provider"
 	"magician/source"
-	"magician/vcr"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -65,7 +64,7 @@ var checkCassettesCmd = &cobra.Command{
 
 		ctlr := source.NewController(env["GOPATH"], "modular-magician", githubToken, rnr)
 
-		vt, err := vcr.NewTester(env, rnr)
+		vt, err := NewTester(env, rnr)
 		if err != nil {
 			return fmt.Errorf("error creating VCR tester: %w", err)
 		}
@@ -89,7 +88,7 @@ func listCCEnvironmentVariables() string {
 	return result
 }
 
-func execCheckCassettes(commit string, vt *vcr.Tester, ctlr *source.Controller) error {
+func execCheckCassettes(commit string, vt *Tester, ctlr *source.Controller) error {
 	if err := vt.FetchCassettes(provider.Beta, "main", ""); err != nil {
 		return fmt.Errorf("error fetching cassettes: %w", err)
 	}
@@ -104,11 +103,11 @@ func execCheckCassettes(commit string, vt *vcr.Tester, ctlr *source.Controller) 
 	}
 	vt.SetRepoPath(provider.Beta, providerRepo.Path)
 
-	result, err := vt.Run(vcr.Replaying, provider.Beta, nil)
+	result, err := vt.Run(Replaying, provider.Beta, nil)
 	if err != nil {
 		fmt.Println("Error running VCR: ", err)
 	}
-	if err := vt.UploadLogs("vcr-check-cassettes", "", "", false, false, vcr.Replaying, provider.Beta); err != nil {
+	if err := vt.UploadLogs("vcr-check-cassettes", "", "", false, false, Replaying, provider.Beta); err != nil {
 		return fmt.Errorf("error uploading logs: %w", err)
 	}
 	fmt.Println(len(result.FailedTests), " failed tests: ", result.FailedTests)

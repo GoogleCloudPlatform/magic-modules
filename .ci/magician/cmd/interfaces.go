@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"magician/github"
+	"path/filepath"
 )
 
 type GithubClient interface {
@@ -50,4 +51,6 @@ type ExecRunner interface {
 	WriteFile(name, data string) error
 	Run(name string, args []string, env map[string]string) (string, error)
 	MustRun(name string, args []string, env map[string]string) string
+	Walk(root string, fn filepath.WalkFunc) error
+	ReadFile(name string) (string, error)
 }

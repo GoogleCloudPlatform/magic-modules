@@ -15,7 +15,6 @@ import (
 	"magician/github"
 	"magician/provider"
 	"magician/source"
-	"magician/vcr"
 
 	_ "embed"
 )
@@ -57,7 +56,7 @@ var ttvEnvironmentVariables = [...]string{
 }
 
 type analytics struct {
-	ReplayingResult  *vcr.Result
+	ReplayingResult  *Result
 	RunFullVCR       bool
 	AffectedServices []string
 }
@@ -68,7 +67,7 @@ type nonExercisedTests struct {
 }
 
 type withReplayFailedTests struct {
-	ReplayingResult *vcr.Result
+	ReplayingResult *Result
 }
 
 type withoutReplayFailedTests struct {
@@ -78,8 +77,8 @@ type withoutReplayFailedTests struct {
 }
 
 type recordReplay struct {
-	RecordingResult               *vcr.Result
-	ReplayingAfterRecordingResult *vcr.Result
+	RecordingResult               *Result
+	ReplayingAfterRecordingResult *Result
 	HasTerminatedTests            bool
 	RecordingErr                  error
 	AllRecordingPassed            bool
@@ -121,7 +120,7 @@ var testTerraformVCRCmd = &cobra.Command{
 		}
 		ctlr := source.NewController(env["GOPATH"], "modular-magician", env["GITHUB_TOKEN_DOWNSTREAMS"], rnr)
 
-		vt, err := vcr.NewTester(env, rnr)
+		vt, err := NewTester(env, rnr)
 		if err != nil {
 			return fmt.Errorf("error creating VCR tester: %w", err)
 		}
@@ -134,7 +133,7 @@ var testTerraformVCRCmd = &cobra.Command{
 	},
 }
 
-func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, baseBranch string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller, vt *vcr.Tester) error {
+func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, baseBranch string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller, vt *Tester) error {
 	newBranch := "auto-pr-" + prNumber
 	oldBranch := newBranch + "-old"
 
@@ -196,11 +195,11 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		testState = "failure"
 	}
 
-	if err := vt.UploadLogs("ci-vcr-logs", prNumber, buildID, false, false, vcr.Replaying, provider.Beta); err != nil {
+	if err := vt.UploadLogs("ci-vcr-logs", prNumber, buildID, false, false, Replaying, provider.Beta); err != nil {
 		return fmt.Errorf("error uploading replaying logs: %w", err)
 	}
 
-	if hasPanics, err := handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha, replayingResult, vcr.Replaying, gh); err != nil {
+	if hasPanics, err := handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha, replayingResult, Replaying, gh); err != nil {
 		return fmt.Errorf("error handling panics: %w", err)
 	} else if hasPanics {
 		return nil
@@ -245,7 +244,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 			return fmt.Errorf("error posting comment: %w", err)
 		}
 
-		recordingResult, recordingErr := vt.RunParallel(vcr.Recording, provider.Beta, testDirs, replayingResult.FailedTests)
+		recordingResult, recordingErr := vt.RunParallel(Recording, provider.Beta, testDirs, replayingResult.FailedTests)
 		if recordingErr != nil {
 			testState = "failure"
 		} else {
@@ -256,25 +255,25 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 			return fmt.Errorf("error uploading cassettes: %w", err)
 		}
 
-		if err := vt.UploadLogs("ci-vcr-logs", prNumber, buildID, true, false, vcr.Recording, provider.Beta); err != nil {
+		if err := vt.UploadLogs("ci-vcr-logs", prNumber, buildID, true, false, Recording, provider.Beta); err != nil {
 			return fmt.Errorf("error uploading recording logs: %w", err)
 		}
 
-		if hasPanics, err := handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha, recordingResult, vcr.Recording, gh); err != nil {
+		if hasPanics, err := handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha, recordingResult, Recording, gh); err != nil {
 			return fmt.Errorf("error handling panics: %w", err)
 		} else if hasPanics {
 			return nil
 		}
 
-		var replayingAfterRecordingResult *vcr.Result
+		var replayingAfterRecordingResult *Result
 		var replayingAfterRecordingErr error
 		if len(recordingResult.PassedTests) > 0 {
-			replayingAfterRecordingResult, replayingAfterRecordingErr = vt.RunParallel(vcr.Replaying, provider.Beta, testDirs, recordingResult.PassedTests)
+			replayingAfterRecordingResult, replayingAfterRecordingErr = vt.RunParallel(Replaying, provider.Beta, testDirs, recordingResult.PassedTests)
 			if replayingAfterRecordingErr != nil {
 				testState = "failure"
 			}
 
-			if err := vt.UploadLogs("ci-vcr-logs", prNumber, buildID, true, true, vcr.Replaying, provider.Beta); err != nil {
+			if err := vt.UploadLogs("ci-vcr-logs", prNumber, buildID, true, true, Replaying, provider.Beta); err != nil {
 				return fmt.Errorf("error uploading recording logs: %w", err)
 			}
 		}
@@ -324,7 +323,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 
 var addedTestsRegexp = regexp.MustCompile(`(?m)^\+func (Test\w+)\(t \*testing.T\) {`)
 
-func notRunTests(gaDiff, betaDiff string, result *vcr.Result) ([]string, []string) {
+func notRunTests(gaDiff, betaDiff string, result *Result) ([]string, []string) {
 	fmt.Println("Checking for new acceptance tests that were not run")
 	addedGaTests := addedTestsRegexp.FindAllStringSubmatch(gaDiff, -1)
 	addedBetaTests := addedTestsRegexp.FindAllStringSubmatch(betaDiff, -1)
@@ -389,20 +388,20 @@ func modifiedPackages(changedFiles []string) (map[string]struct{}, bool) {
 	return services, runFullVCR
 }
 
-func runReplaying(runFullVCR bool, services map[string]struct{}, vt *vcr.Tester) (*vcr.Result, []string, error) {
-	var result *vcr.Result
+func runReplaying(runFullVCR bool, services map[string]struct{}, vt *Tester) (*Result, []string, error) {
+	var result *Result
 	var testDirs []string
 	var replayingErr error
 	if runFullVCR {
 		fmt.Println("run full VCR tests")
-		result, replayingErr = vt.Run(vcr.Replaying, provider.Beta, nil)
+		result, replayingErr = vt.Run(Replaying, provider.Beta, nil)
 	} else if len(services) > 0 {
-		result = &vcr.Result{}
+		result = &Result{}
 		for service := range services {
 			servicePath := "./" + filepath.Join("google-beta", "services", service)
 			testDirs = append(testDirs, servicePath)
 			fmt.Println("run VCR tests in ", service)
-			serviceResult, serviceReplayingErr := vt.Run(vcr.Replaying, provider.Beta, []string{servicePath})
+			serviceResult, serviceReplayingErr := vt.Run(Replaying, provider.Beta, []string{servicePath})
 			if serviceReplayingErr != nil {
 				replayingErr = serviceReplayingErr
 			}
@@ -416,7 +415,7 @@ func runReplaying(runFullVCR bool, services map[string]struct{}, vt *vcr.Tester)
 	return result, testDirs, replayingErr
 }
 
-func handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha string, result *vcr.Result, mode vcr.Mode, gh GithubClient) (bool, error) {
+func handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha string, result *Result, mode Mode, gh GithubClient) (bool, error) {
 	if len(result.Panics) > 0 {
 		comment := fmt.Sprintf(`$\textcolor{red}{\textsf{The provider crashed while running the VCR tests in %s mode}}$
 $\textcolor{red}{\textsf{Please fix it to complete your PR}}$
