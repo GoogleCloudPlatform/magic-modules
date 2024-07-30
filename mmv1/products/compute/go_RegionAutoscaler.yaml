@@ -34,6 +34,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
@@ -119,6 +120,7 @@ properties:
           of replicas.
         api_name: maxNumReplicas
         required: true
+        send_empty_value: true
       - name: 'cooldownPeriod'
         type: Integer
         description: |
@@ -363,6 +365,7 @@ properties:
         key_description: |
           A name for the schedule.
         value_type:
+          name: scalingSchedule
           type: NestedObject
           properties:
             - name: 'minRequiredReplicas'

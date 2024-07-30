@@ -141,6 +141,9 @@ type Type struct {
 	ItemType *Type  `yaml:"item_type"`
 	MinSize  string `yaml:"min_size"`
 	MaxSize  string `yaml:"max_size"`
+	// Adds a ValidateFunc to the item schema
+	ItemValidation resource.Validation `yaml:"item_validation"`
+
 	// __name
 	ParentName string
 
@@ -446,7 +449,11 @@ func (t *Type) GetPrefix() string {
 			if t.ParentMetadata != nil && (t.ParentMetadata.IsA("Array") || t.ParentMetadata.IsA("Map")) {
 				t.Prefix = t.ParentMetadata.GetPrefix()
 			} else {
-				t.Prefix = fmt.Sprintf("%s%s", t.ParentMetadata.GetPrefix(), t.ParentMetadata.TitlelizeProperty())
+				if t.ParentMetadata != nil && t.ParentMetadata.ParentMetadata != nil && t.ParentMetadata.ParentMetadata.IsA("Map") {
+					t.Prefix = fmt.Sprintf("%s%s", t.ParentMetadata.GetPrefix(), t.ParentMetadata.ParentMetadata.TitlelizeProperty())
+				} else {
+					t.Prefix = fmt.Sprintf("%s%s", t.ParentMetadata.GetPrefix(), t.ParentMetadata.TitlelizeProperty())
+				}
 			}
 		}
 	}
@@ -585,7 +592,7 @@ func (t Type) ExactlyOneOfList() []string {
 // Returns list of properties that needs required with their fields set.
 // func (t *Type) required_with_list() {
 func (t Type) RequiredWithList() []string {
-	if t.ResourceMetadata == nil || t.Parent() != nil {
+	if t.ResourceMetadata == nil {
 		return []string{}
 	}
 

@@ -32,12 +32,13 @@ update_verb: 'POST'
 read_verb: 'POST'
 delete_url: 'projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{region_instance_group_manager}}/deletePerInstanceConfigs'
 delete_verb: 'POST'
-mutex: instanceGroupManager/{{project}}/{{region}}/{{region_instance_group_manager}}
+mutex: 'instanceGroupManager/{{project}}/{{region}}/{{region_instance_group_manager}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
@@ -190,6 +191,7 @@ properties:
         api_name: internalIPs
         key_name: 'interface_name'
         value_type:
+          name: internalIp
           type: NestedObject
           properties:
             - name: 'autoDelete'
@@ -219,6 +221,7 @@ properties:
         api_name: externalIPs
         key_name: 'interface_name'
         value_type:
+          name: externalIp
           type: NestedObject
           properties:
             - name: 'autoDelete'

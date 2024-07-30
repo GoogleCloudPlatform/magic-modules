@@ -1,0 +1,85 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'TunnelDestGroup'
+description: |
+  Tunnel destination groups represent resources that have the same tunnel access restrictions.
+references:
+  guides:
+    'Set up IAP TCP forwarding with an IP address or hostname in a Google Cloud or non-Google Cloud environment': 'https://cloud.google.com/iap/docs/tcp-by-host'
+  api: 'https://cloud.google.com/iap/docs/reference/rest/v1/projects.iap_tunnel.locations.destGroups'
+docs:
+base_url: 'projects/{{project}}/iap_tunnel/locations/{{region}}/destGroups'
+self_link: 'projects/{{project}}/iap_tunnel/locations/{{region}}/destGroups/{{group_name}}'
+create_url: 'projects/{{project}}/iap_tunnel/locations/{{region}}/destGroups?tunnelDestGroupId={{group_name}}'
+update_verb: 'PATCH'
+import_format:
+  - 'projects/{{project}}/iap_tunnel/locations/{{region}}/destGroups/{{group_name}}'
+  - '{{project}}/iap_tunnel/locations/{{region}}/destGroups/{{group_name}}'
+  - '{{region}}/destGroups/{{group_name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+iam_policy:
+  skip_import_test: true
+  method_name_separator: ':'
+  fetch_iam_policy_verb: 'POST'
+  allowed_iam_role: 'roles/iap.tunnelResourceAccessor'
+  parent_resource_attribute: 'dest_group'
+  iam_conditions_request_type: 'REQUEST_BODY'
+  base_url: 'projects/{{project}}/iap_tunnel/locations/{{region}}/destGroups/{{dest_group}}'
+  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  import_format:
+    - 'projects/{{project}}/iap_tunnel/locations/{{region}}/destGroups/{{dest_group}}'
+    - '{{project}}/iap_tunnel/locations/{{region}}/destGroups/{{dest_group}}'
+custom_code:
+examples:
+  - name: 'iap_destgroup'
+    primary_resource_id: 'dest_group'
+    primary_resource_name: 'fmt.Sprintf("tf-test%s", context["random_suffix"])'
+    external_providers: ["random", "time"]
+parameters:
+  - name: 'region'
+    type: String
+    description: |
+      The region of the tunnel group. Must be the same as the network resources in the group.
+    url_param_only: true
+    immutable: true
+    default_from_api: true
+  - name: 'group_name'
+    type: String
+    description: Unique tunnel destination group name.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: Full resource name.
+    immutable: true
+    output: true
+  - name: 'cidrs'
+    type: Array
+    description: |
+      List of CIDRs that this group applies to.
+    item_type:
+      type: String
+  - name: 'fqdns'
+    type: Array
+    description: |
+      List of FQDNs that this group applies to.
+    item_type:
+      type: String

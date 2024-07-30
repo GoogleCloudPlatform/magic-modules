@@ -1,0 +1,8 @@
+resource "google_scc_v2_organization_mute_config" "<%= ctx[:primary_resource_id] %>" {
+  mute_config_id    = "<%= ctx[:vars]['mute_config_id'] %>"
+  organization = "<%= ctx[:test_env_vars]['org_id'] %>"
+  location     = "global"
+  description  = "My custom Cloud Security Command Center Finding Organization mute Configuration"
+  filter = "severity = \"HIGH\""
+  type = "STATIC"
+}

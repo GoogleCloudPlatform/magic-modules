@@ -30,12 +30,13 @@ update_url: 'projects/{{project}}/regions/{{region}}/routers/{{router}}'
 update_verb: 'PATCH'
 delete_url: 'projects/{{project}}/regions/{{region}}/routers/{{router}}'
 delete_verb: 'PATCH'
-mutex: router/{{region}}/{{router}}
+mutex: 'router/{{region}}/{{router}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/regions/{{regions}}/operations/{{op_id}}'
