@@ -28,7 +28,7 @@ func TestAccCloudFunctions2Function_update(t *testing.T) {
 				ResourceName:            "google_cloudfunctions2_function.terraform-test2",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "build_config.0.source.0.storage_source.0.object", "build_config.0.source.0.storage_source.0.bucket", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"location", "build_config.0.source.0.storage_source.0.object", "build_config.0.source.0.storage_source.0.generation", "build_config.0.source.0.storage_source.0.bucket", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccCloudFunctions2Function_test_update(context),
@@ -37,7 +37,7 @@ func TestAccCloudFunctions2Function_update(t *testing.T) {
 				ResourceName:            "google_cloudfunctions2_function.terraform-test2",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "build_config.0.source.0.storage_source.0.object", "build_config.0.source.0.storage_source.0.bucket", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"location", "build_config.0.source.0.storage_source.0.object", "build_config.0.source.0.storage_source.0.generation", "build_config.0.source.0.storage_source.0.bucket", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccCloudFunctions2Function_test_redeploy(context),
@@ -46,7 +46,7 @@ func TestAccCloudFunctions2Function_update(t *testing.T) {
 				ResourceName:            "google_cloudfunctions2_function.terraform-test2",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "build_config.0.source.0.storage_source.0.object", "build_config.0.source.0.storage_source.0.bucket", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"location", "build_config.0.source.0.storage_source.0.object", "build_config.0.source.0.storage_source.0.generation", "build_config.0.source.0.storage_source.0.bucket", "labels", "terraform_labels"},
 			},
 		},
 	})
@@ -115,7 +115,7 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
   labels = {
     env = "test-update"
   }
-  
+
   build_config {
     runtime = "nodejs12"
     entry_point = "helloHttp"
@@ -341,7 +341,7 @@ func TestAccCloudFunctions2Function_updateAbiuFull(t *testing.T) {
 				ResourceName:            "google_cloudfunctions2_function.terraform-test2",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "build_config.0.source.0.storage_source.0.object", "build_config.0.source.0.storage_source.0.bucket", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"location", "build_config.0.source.0.storage_source.0.object", "build_config.0.source.0.storage_source.0.generation", "build_config.0.source.0.storage_source.0.bucket", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccCloudFunctions2Function_test_abiuUpdate(context),
@@ -350,7 +350,7 @@ func TestAccCloudFunctions2Function_updateAbiuFull(t *testing.T) {
 				ResourceName:            "google_cloudfunctions2_function.terraform-test2",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "build_config.0.source.0.storage_source.0.object", "build_config.0.source.0.storage_source.0.bucket", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"location", "build_config.0.source.0.storage_source.0.object", "build_config.0.source.0.storage_source.0.generation", "build_config.0.source.0.storage_source.0.bucket", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccCloudFunctions2Function_test_abiuUpdate2(context),
@@ -359,7 +359,7 @@ func TestAccCloudFunctions2Function_updateAbiuFull(t *testing.T) {
 				ResourceName:            "google_cloudfunctions2_function.terraform-test2",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "build_config.0.source.0.storage_source.0.object", "build_config.0.source.0.storage_source.0.bucket", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"location", "build_config.0.source.0.storage_source.0.object", "build_config.0.source.0.storage_source.0.generation", "build_config.0.source.0.storage_source.0.bucket", "labels", "terraform_labels"},
 			},
 		},
 	})
@@ -470,7 +470,7 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
   labels = {
     env = "test-update"
   }
-  
+
   build_config {
     runtime = "nodejs12"
     entry_point = "helloHttp"
