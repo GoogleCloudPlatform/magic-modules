@@ -64,7 +64,7 @@ virtual_fields:
       When the field is set to false, deleting the domain is allowed.
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/self_link_as_name.erb
-  custom_delete: 'templates/terraform/custom_delete/active_directory_domain.erb'
+  pre_delete: 'templates/terraform/pre_delete/active_directory_domain.go.erb'
 error_abort_predicates: ['transport_tpg.Is429QuotaError']
 examples:
   - !ruby/object:Provider::Terraform::Examples
