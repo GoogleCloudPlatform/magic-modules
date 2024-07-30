@@ -66,7 +66,6 @@ parameters:
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
-    output: true
     description: |
       Name of the mute config. Its format is
       organizations/{organization}/locations/global/muteConfigs/{configId},
