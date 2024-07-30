@@ -65,6 +65,12 @@ func ResourceGoogleFolder() *schema.Resource {
 				Computed:    true,
 				Description: `Timestamp when the Folder was created. Assigned by the server. A timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds. Example: "2014-10-02T15:01:23.045123456Z".`,
 			},
+			"deletion_protection": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     true,
+				Description: `When the field is set to true or unset in Terraform state, a terraform apply or terraform destroy that would delete the instance will fail. When the field is set to false, deleting the instance is allowed.`,
+			},
 		},
 		UseJSONNumber: true,
 	}
@@ -222,6 +228,11 @@ func resourceGoogleFolderDelete(d *schema.ResourceData, meta interface{}) error 
 	if err != nil {
 		return err
 	}
+
+	if d.Get("deletion_protection").(bool) {
+		return fmt.Errorf("cannot destroy folder without setting deletion_protection=false and running `terraform apply`")
+	}
+
 	displayName := d.Get("display_name").(string)
 
 	var op *resourceManagerV3.Operation

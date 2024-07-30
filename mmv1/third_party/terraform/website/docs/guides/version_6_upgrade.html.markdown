@@ -205,3 +205,16 @@ Terraform from destroying or recreating the project. In 6.0.0, existing projects
 **`deletion_policy` does NOT prevent deletion outside of Terraform.**
 
 Setting `deletion_policy` to `ABANDON` allows the resource to be abandoned rather than deleted. To disable any kind of deletion protection, explicitly set this field to `NONE` in configuration and then run `terraform apply` to apply the change.
+
+## Resource: `google_folder`
+
+### Folder deletion now prevented by default with `deletion_protection`
+
+The field `deletion_protection` has been added with a default value of `true`. This field prevents
+Terraform from destroying or recreating the Folder. In 6.0.0, existing folders will have 
+`deletion_protection` set to `true` during the next refresh unless otherwise set in configuration.
+
+**`deletion_protection` does NOT prevent deletion outside of Terraform.**
+
+To disable deletion protection, explicitly set this field to `false` in configuration
+and then run `terraform apply` to apply the change.

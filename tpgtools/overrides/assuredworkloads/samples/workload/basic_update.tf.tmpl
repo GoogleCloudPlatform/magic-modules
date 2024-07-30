@@ -18,4 +18,5 @@ resource "google_assured_workloads_workload" "primary" {
 resource "google_folder" "folder1" {
   display_name = "{{name}}"
   parent       = "organizations/{{org_id}}"
+  deletion_protection = false
 }
