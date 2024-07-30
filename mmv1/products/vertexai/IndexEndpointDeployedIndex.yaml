@@ -127,15 +127,18 @@ properties:
       The name of the DeployedIndex resource.
   - !ruby/object:Api::Type::String
     name: 'deployedIndexId'
+    immutable: true
     description: The user specified ID of the DeployedIndex. The ID can be up to 128 characters long and must start with a letter and only contain letters, numbers, and underscores. The ID must be unique within the project it is created in.
     required: true
   - !ruby/object:Api::Type::String
     name: 'index'
     description: The name of the Index this is the deployment of.
+    immutable: true
     required: true
     diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
   - !ruby/object:Api::Type::String
     name: 'displayName'
+    immutable: true
     description: The display name of the Index. The name can be up to 128 characters long and can consist of any UTF-8 characters.
   - !ruby/object:Api::Type::String
     name: 'createTime'
@@ -184,20 +187,22 @@ properties:
     name: automaticResources
     description: A description of resources that the DeployedIndex uses, which to large degree are decided by Vertex AI, and optionally allows only a modest additional configuration.
     default_from_api: true
+    exactly_one_of:
+      - dedicatedResources
     properties:
       - !ruby/object:Api::Type::Integer
         name: 'minReplicaCount'
         description: The minimum number of replicas this DeployedModel will be always deployed on.
-        immutable: true
-        default_value: 2
+        default_from_api: true
       - !ruby/object:Api::Type::Integer
         name: 'maxReplicaCount'
         description: The maximum number of replicas this DeployedModel may be deployed on when the traffic against it increases. If maxReplicaCount is not set, the default value is minReplicaCount
-        immutable: true
         default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: dedicatedResources
     description: A description of resources that are dedicated to the DeployedIndex, and that need a higher degree of manual configuration.
+    exactly_one_of:
+      - automaticResources
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'machineSpec'
@@ -220,10 +225,12 @@ properties:
   - !ruby/object:Api::Type::Boolean
     name: enableAccessLogging
     description: If true, private endpoint's access logs are sent to Cloud Logging.
+    immutable: true
     default_value: false
   - !ruby/object:Api::Type::NestedObject
     name: deployedIndexAuthConfig
     description: If set, the authentication is enabled for the private endpoint.
+    immutable: true
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: authProvider
@@ -232,18 +239,22 @@ properties:
           - !ruby/object:Api::Type::Array
             name: audiences
             description: The list of JWT audiences. that are allowed to access. A JWT containing any of these audiences will be accepted.
+            immutable: true
             item_type: Api::Type::String
           - !ruby/object:Api::Type::Array
             name: allowedIssuers
+            immutable: true
             description: |
               A list of allowed JWT issuers. Each entry must be a valid Google service account, in the following format: service-account-name@project-id.iam.gserviceaccount.com
             item_type: Api::Type::String
   - !ruby/object:Api::Type::Array
     name: reservedIpRanges
+    immutable: true
     description: A list of reserved ip ranges under the VPC network that can be used for this DeployedIndex.
     item_type: Api::Type::String
   - !ruby/object:Api::Type::String
     name: deploymentGroup
+    immutable: true
     default_value: 'default'
     description: |
       The deployment group can be no longer than 64 characters (eg: 'test', 'prod'). If not set, we will use the 'default' deployment group. Note: we only support up to 5 deployment groups (not including 'default').
