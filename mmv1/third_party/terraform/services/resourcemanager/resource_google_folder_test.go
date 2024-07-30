@@ -42,9 +42,10 @@ func TestAccFolder_rename(t *testing.T) {
 					testAccCheckGoogleFolderDisplayName(&folder, newFolderDisplayName),
 				)},
 			{
-				ResourceName:      "google_folder.folder1",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_folder.folder1",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -153,6 +154,7 @@ func testAccFolder_basic(folder, parent string) string {
 resource "google_folder" "folder1" {
   display_name = "%s"
   parent       = "%s"
+  deletion_protection = false
 }
 `, folder, parent)
 }
@@ -162,11 +164,13 @@ func testAccFolder_move(folder1, folder2, parent string) string {
 resource "google_folder" "folder1" {
   display_name = "%s"
   parent       = google_folder.folder2.name
+  deletion_protection = false
 }
 
 resource "google_folder" "folder2" {
   display_name = "%s"
   parent       = "%s"
+  deletion_protection = false
 }
 `, folder1, folder2, parent)
 }

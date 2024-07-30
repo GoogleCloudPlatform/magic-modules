@@ -185,3 +185,38 @@ Users will need to check their configuration for any `google_vpc_access_connecto
 resource blocks that contain both fields in a conflicting pair, and remove one of those fields.
 The fields that are removed from the configuration will still have Computed values,
 that are derived from the API.
+
+=======
+
+## Resource: `google_cloud_run_v2_service`
+
+### `liveness_probe` no longer defaults from API
+
+Cloud Run does not provide a default value for liveness probe. Now removing this field
+will remove the liveness probe from the Cloud Run service.
+
+## Resource: `google_project`
+
+### Project deletion now prevented by default with `deletion_policy`
+
+The field `deletion_policy` has been added with a default value of `PREVENT`. This field prevents
+Terraform from destroying or recreating the project. In 6.0.0, existing projects will have 
+`deletion_policy` set to `PREVENT` during the next refresh unless otherwise set in configuration.
+
+**`deletion_policy` does NOT prevent deletion outside of Terraform.**
+
+Setting `deletion_policy` to `ABANDON` allows the resource to be abandoned rather than deleted. To disable any kind of deletion protection, explicitly set this field to `NONE` in configuration and then run `terraform apply` to apply the change.
+
+## Resource: `google_folder`
+
+### Folder deletion now prevented by default with `deletion_protection`
+
+The field `deletion_protection` has been added with a default value of `true`. This field prevents
+Terraform from destroying or recreating the Folder. In 6.0.0, existing folders will have 
+`deletion_protection` set to `true` during the next refresh unless otherwise set in configuration.
+
+**`deletion_protection` does NOT prevent deletion outside of Terraform.**
+
+To disable deletion protection, explicitly set this field to `false` in configuration
+and then run `terraform apply` to apply the change.
+

@@ -9,6 +9,7 @@ resource "google_logging_folder_settings" "{{$.PrimaryResourceId}}" {
 resource "google_folder" "my_folder" {
   display_name = "{{index $.Vars "folder_name"}}"
   parent       = "organizations/{{index $.TestEnvVars "org_id"}}"
+  deletion_protection = false
 }
 
 data "google_logging_folder_settings" "settings" {

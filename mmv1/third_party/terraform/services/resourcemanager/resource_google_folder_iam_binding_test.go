@@ -293,6 +293,7 @@ func testAccFolderIamBasic(org, fname string) string {
 resource "google_folder" "acceptance" {
   parent       = "organizations/%s"
   display_name = "%s"
+  deletion_protection = false
 }
 `, org, fname)
 }
@@ -302,6 +303,7 @@ func testAccFolderAssociateBindingBasic(org, fname string) string {
 resource "google_folder" "acceptance" {
   parent       = "organizations/%s"
   display_name = "%s"
+  deletion_protection = false
 }
 
 resource "google_folder_iam_binding" "acceptance" {
@@ -317,6 +319,7 @@ func testAccFolderAssociateBindingMultiple(org, fname string) string {
 resource "google_folder" "acceptance" {
   parent       = "organizations/%s"
   display_name = "%s"
+  deletion_protection = false
 }
 
 resource "google_folder_iam_binding" "acceptance" {
@@ -338,6 +341,7 @@ func testAccFolderAssociateBindingUpdated(org, fname string) string {
 resource "google_folder" "acceptance" {
   parent       = "organizations/%s"
   display_name = "%s"
+  deletion_protection = false
 }
 
 resource "google_folder_iam_binding" "acceptance" {
@@ -353,6 +357,7 @@ func testAccFolderAssociateBindingDropMemberFromBasic(org, fname string) string 
 resource "google_folder" "acceptance" {
   parent       = "organizations/%s"
   display_name = "%s"
+  deletion_protection = false
 }
 
 resource "google_folder_iam_binding" "acceptance" {
