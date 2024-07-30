@@ -187,8 +187,6 @@ properties:
     name: automaticResources
     description: A description of resources that the DeployedIndex uses, which to large degree are decided by Vertex AI, and optionally allows only a modest additional configuration.
     default_from_api: true
-    exactly_one_of:
-      - dedicatedResources
     properties:
       - !ruby/object:Api::Type::Integer
         name: 'minReplicaCount'
@@ -201,8 +199,6 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: dedicatedResources
     description: A description of resources that are dedicated to the DeployedIndex, and that need a higher degree of manual configuration.
-    exactly_one_of:
-      - automaticResources
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'machineSpec'
