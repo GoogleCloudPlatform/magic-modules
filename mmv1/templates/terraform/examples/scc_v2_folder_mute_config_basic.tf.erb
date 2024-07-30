@@ -1,6 +1,20 @@
+terraform {
+  required_providers {
+    time = {
+      source = "hashicorp/time"
+      version = "0.12.0"
+    }
+  }
+}
+
 resource "google_folder" "folder" {
   parent       = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"
   display_name = "<%= ctx[:vars]['folder_display_name'] %>"
+}
+
+resource "time_sleep" "wait_1_minute" {
+	depends_on = [google_folder.folder]
+	create_duration = "5m"
 }
 
 resource "google_scc_v2_folder_mute_config" "<%= ctx[:primary_resource_id] %>" {
@@ -10,4 +24,5 @@ resource "google_scc_v2_folder_mute_config" "<%= ctx[:primary_resource_id] %>" {
   description  = "My custom Cloud Security Command Center Finding Folder mute Configuration"
   filter = "severity = \"HIGH\""
   type = "STATIC"
+  depends_on = [time_sleep.wait_1_minute]
 }
