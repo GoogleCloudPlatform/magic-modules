@@ -608,4 +608,3 @@ properties:
         description: |
           Grace end time of the trial cluster.
         default_from_api: true
-
