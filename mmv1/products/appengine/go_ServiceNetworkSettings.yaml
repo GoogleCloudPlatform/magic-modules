@@ -57,6 +57,7 @@ examples:
     primary_resource_id: 'internalapp'
     vars:
       bucket_name: 'appengine-static-content'
+    external_providers: ["archive"]
 parameters:
 properties:
   - name: 'service'

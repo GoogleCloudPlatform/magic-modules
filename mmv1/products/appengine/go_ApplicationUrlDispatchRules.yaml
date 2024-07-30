@@ -59,6 +59,7 @@ examples:
     primary_resource_id: 'web_service'
     vars:
       bucket_name: 'appengine-test-bucket'
+    external_providers: ["archive"]
 parameters:
 properties:
   - name: 'dispatchRules'

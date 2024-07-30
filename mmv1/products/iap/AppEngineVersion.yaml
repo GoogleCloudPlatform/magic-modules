@@ -42,6 +42,7 @@ examples:
     primary_resource_name: "envvar.GetTestProjectFromEnv(), \"default\",
       context[\"random_suffix\"\
       ]"
+    external_providers: ["archive"]
 properties:
   - !ruby/object:Api::Type::String
     name: 'appId'

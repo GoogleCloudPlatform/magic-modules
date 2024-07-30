@@ -98,8 +98,20 @@ resource "google_storage_bucket" "bucket" {
   location = "US"
 }
 
-resource "google_storage_bucket_object" "object" {
-  name   = "hello-world.zip"
+resource "google_storage_bucket_object" "yaml" {
+  name   = "app.yaml"
   bucket = google_storage_bucket.bucket.name
-  source = "./test-fixtures/hello-world.zip"
+  source = "./test-fixtures/hello-world-node-flexible/app.yaml"
+}
+
+resource "google_storage_bucket_object" "package_json" {
+  name   = "package.json"
+  bucket = google_storage_bucket.bucket.name
+  source = "./test-fixtures/hello-world-node-flexible/package.json"
+}
+
+resource "google_storage_bucket_object" "app" {
+  name   = "app.js"
+  bucket = google_storage_bucket.bucket.name
+  source = "./test-fixtures/hello-world-node-flexible/app.js"
 }

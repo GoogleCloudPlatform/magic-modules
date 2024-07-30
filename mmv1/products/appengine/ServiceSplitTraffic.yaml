@@ -58,6 +58,7 @@ examples:
       bucket_name: 'appengine-static-content'
     test_env_vars:
       org_id: :ORG_ID
+    external_providers: ["archive"]
 parameters:
   - !ruby/object:Api::Type::Boolean
     name: 'migrate_traffic'

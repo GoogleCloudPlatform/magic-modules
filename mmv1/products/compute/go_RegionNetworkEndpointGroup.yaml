@@ -69,6 +69,7 @@ examples:
     primary_resource_id: 'appengine_neg'
     vars:
       neg_name: 'appengine-neg'
+    external_providers: ["archive"]
   - name: 'region_network_endpoint_group_appengine_empty'
     primary_resource_id: 'appengine_neg'
     vars:

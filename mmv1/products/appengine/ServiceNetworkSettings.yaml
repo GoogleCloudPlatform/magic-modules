@@ -54,6 +54,7 @@ examples:
     primary_resource_id: 'internalapp'
     vars:
       bucket_name: 'appengine-static-content'
+    external_providers: ["archive"]
 properties:
   - !ruby/object:Api::Type::String
     name: 'service'

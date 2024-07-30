@@ -76,6 +76,7 @@ examples:
     ignore_read_extra:
       - 'noop_on_destroy'
       - 'deployment.0.zip'
+    external_providers: ["archive"]
 virtual_fields:
   - name: 'noop_on_destroy'
     description: |
