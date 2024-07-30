@@ -1,12 +1,3 @@
-terraform {
-  required_providers {
-    time = {
-      source = "hashicorp/time"
-      version = "0.12.0"
-    }
-  }
-}
-
 resource "google_folder" "folder" {
   parent       = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"
   display_name = "<%= ctx[:vars]['folder_display_name'] %>"
