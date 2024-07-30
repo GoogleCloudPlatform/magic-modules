@@ -317,27 +317,27 @@ resource "google_compute_attached_disk" "test" {
 }
 
 func TestAccComputeAttachedDisk_diskInterface(t *testing.T) {
-  t.Parallel()
+        t.Parallel()
 
-  diskName := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
-  instanceName := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
-  importID := fmt.Sprintf("%s/us-central1-a/%s/%s", envvar.GetTestProjectFromEnv(), instanceName, diskName)
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    CheckDestroy:             nil,
-    Steps: []resource.TestStep{
-      {
-        Config: testAttachedDiskResource(diskName, instanceName) + testAccComputeAttachedDisk_interface("SCSI"),
-      },
-      {
-        ResourceName:      "google_compute_attached_disk.test",
-        ImportStateId:     importID,
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
-    },
-  })
+        diskName := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+        instanceName := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+        importID := fmt.Sprintf("%s/us-central1-a/%s/%s", envvar.GetTestProjectFromEnv(), instanceName, diskName)
+        acctest.VcrTest(t, resource.TestCase{
+                PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+                ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+                CheckDestroy:             nil,
+                Steps: []resource.TestStep{
+                        {
+                                Config: testAttachedDiskResource(diskName, instanceName) + testAccComputeAttachedDisk_interface("SCSI"),
+                        },
+                        {
+                                ResourceName:      "google_compute_attached_disk.test",
+                                ImportStateId:     importID,
+                                ImportState:       true,
+                                ImportStateVerify: true,
+                        },
+                },
+        })
 
 }
 
