@@ -22,14 +22,14 @@ resource "google_secret_manager_secret_version" "secret_version" {
 resource "google_kms_key_ring" "keyring" {
   provider = google-beta
   
-  name     = "keyring-example"
+  name     = "keyring-example-with-cloudsource"
   location = "us-central1"
 }
 
 resource "google_kms_crypto_key" "example_key" {
   provider = google-beta
   
-  name            = "crypto-key-example"
+  name            = "crypto-key-example-with-cloudsource"
   key_ring        = google_kms_key_ring.keyring.id
 
   lifecycle {
