@@ -8,105 +8,105 @@ import (
 )
 
 func TestAccGkeonpremBareMetalCluster_bareMetalClusterUpdateBasic(t *testing.T) {
-	t.Parallel()
+  t.Parallel()
 
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-	}
+  context := map[string]interface{}{
+    "random_suffix":   acctest.RandString(t, 10),
+  }
 
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckGkeonpremBareMetalClusterDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccGkeonpremBareMetalCluster_bareMetalClusterUpdateMetalLbStart(context),
-			},
-			{
-				ResourceName:            "google_gkeonprem_bare_metal_cluster.cluster-metallb",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"annotations"},
-			},
-			{
-				Config: testAccGkeonpremBareMetalCluster_bareMetalClusterUpdateMetalLb(context),
-			},
-			{
-				ResourceName:            "google_gkeonprem_bare_metal_cluster.cluster-metallb",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"annotations"},
-			},
-		},
-	})
+  acctest.VcrTest(t, resource.TestCase{
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+    CheckDestroy:             testAccCheckGkeonpremBareMetalClusterDestroyProducer(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccGkeonpremBareMetalCluster_bareMetalClusterUpdateMetalLbStart(context),
+      },
+      {
+        ResourceName:      "google_gkeonprem_bare_metal_cluster.cluster-metallb",
+        ImportState:       true,
+        ImportStateVerify: true,
+        ImportStateVerifyIgnore: []string{"annotations"},
+      },
+      {
+        Config: testAccGkeonpremBareMetalCluster_bareMetalClusterUpdateMetalLb(context),
+      },
+      {
+        ResourceName:      "google_gkeonprem_bare_metal_cluster.cluster-metallb",
+        ImportState:       true,
+        ImportStateVerify: true,
+        ImportStateVerifyIgnore: []string{"annotations"},
+      },
+    },
+  })
 }
 
 func TestAccGkeonpremBareMetalCluster_bareMetalClusterUpdateManualLb(t *testing.T) {
-	t.Parallel()
+  t.Parallel()
 
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-	}
+  context := map[string]interface{}{
+    "random_suffix":   acctest.RandString(t, 10),
+  }
 
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckGkeonpremBareMetalClusterDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccGkeonpremBareMetalCluster_bareMetalClusterUpdateManualLbStart(context),
-			},
-			{
-				ResourceName:      "google_gkeonprem_bare_metal_cluster.cluster-manuallb",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccGkeonpremBareMetalCluster_bareMetalClusterUpdateManualLb(context),
-			},
-			{
-				ResourceName:      "google_gkeonprem_bare_metal_cluster.cluster-manuallb",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
+  acctest.VcrTest(t, resource.TestCase{
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+    CheckDestroy:             testAccCheckGkeonpremBareMetalClusterDestroyProducer(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccGkeonpremBareMetalCluster_bareMetalClusterUpdateManualLbStart(context),
+      },
+      {
+        ResourceName:      "google_gkeonprem_bare_metal_cluster.cluster-manuallb",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      {
+        Config: testAccGkeonpremBareMetalCluster_bareMetalClusterUpdateManualLb(context),
+      },
+      {
+        ResourceName:      "google_gkeonprem_bare_metal_cluster.cluster-manuallb",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+    },
+  })
 }
 
 func TestAccGkeonpremBareMetalCluster_bareMetalClusterUpdateBgpLb(t *testing.T) {
-	t.Parallel()
+  t.Parallel()
 
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-	}
+  context := map[string]interface{}{
+    "random_suffix":   acctest.RandString(t, 10),
+  }
 
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckGkeonpremBareMetalClusterDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccGkeonpremBareMetalCluster_bareMetalClusterUpdateBgpLbStart(context),
-			},
-			{
-				ResourceName:      "google_gkeonprem_bare_metal_cluster.cluster-bgplb",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccGkeonpremBareMetalCluster_bareMetalClusterUpdateBgpLb(context),
-			},
-			{
-				ResourceName:      "google_gkeonprem_bare_metal_cluster.cluster-bgplb",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
+  acctest.VcrTest(t, resource.TestCase{
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+    CheckDestroy:             testAccCheckGkeonpremBareMetalClusterDestroyProducer(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccGkeonpremBareMetalCluster_bareMetalClusterUpdateBgpLbStart(context),
+      },
+      {
+        ResourceName:      "google_gkeonprem_bare_metal_cluster.cluster-bgplb",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      {
+        Config: testAccGkeonpremBareMetalCluster_bareMetalClusterUpdateBgpLb(context),
+      },
+      {
+        ResourceName:      "google_gkeonprem_bare_metal_cluster.cluster-bgplb",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+    },
+  })
 }
 
 func testAccGkeonpremBareMetalCluster_bareMetalClusterUpdateMetalLbStart(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+  return acctest.Nprintf(`
 
   resource "google_gkeonprem_bare_metal_cluster" "cluster-metallb" {
     name = "cluster-metallb%{random_suffix}"
@@ -184,7 +184,7 @@ func testAccGkeonpremBareMetalCluster_bareMetalClusterUpdateMetalLbStart(context
 }
 
 func testAccGkeonpremBareMetalCluster_bareMetalClusterUpdateMetalLb(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+  return acctest.Nprintf(`
 
   resource "google_gkeonprem_bare_metal_cluster" "cluster-metallb" {
     name = "cluster-metallb%{random_suffix}"
@@ -260,7 +260,7 @@ func testAccGkeonpremBareMetalCluster_bareMetalClusterUpdateMetalLb(context map[
 }
 
 func testAccGkeonpremBareMetalCluster_bareMetalClusterUpdateManualLbStart(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+  return acctest.Nprintf(`
 
   resource "google_gkeonprem_bare_metal_cluster" "cluster-manuallb" {
     name = "cluster-manuallb%{random_suffix}"
@@ -339,7 +339,7 @@ func testAccGkeonpremBareMetalCluster_bareMetalClusterUpdateManualLbStart(contex
 }
 
 func testAccGkeonpremBareMetalCluster_bareMetalClusterUpdateManualLb(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+  return acctest.Nprintf(`
 
   resource "google_gkeonprem_bare_metal_cluster" "cluster-manuallb" {
     name = "cluster-manuallb%{random_suffix}"
@@ -407,7 +407,7 @@ func testAccGkeonpremBareMetalCluster_bareMetalClusterUpdateManualLb(context map
 }
 
 func testAccGkeonpremBareMetalCluster_bareMetalClusterUpdateBgpLbStart(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+  return acctest.Nprintf(`
 
   resource "google_gkeonprem_bare_metal_cluster" "cluster-bgplb" {
     name = "cluster-bgplb%{random_suffix}"
@@ -491,7 +491,7 @@ func testAccGkeonpremBareMetalCluster_bareMetalClusterUpdateBgpLbStart(context m
 }
 
 func testAccGkeonpremBareMetalCluster_bareMetalClusterUpdateBgpLb(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+  return acctest.Nprintf(`
 
   resource "google_gkeonprem_bare_metal_cluster" "cluster-bgplb" {
     name = "cluster-bgplb%{random_suffix}"

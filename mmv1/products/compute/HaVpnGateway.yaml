@@ -31,7 +31,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -135,6 +135,17 @@ properties:
     values:
       - :IPV4_ONLY
       - :IPV4_IPV6
+      - :IPV6_ONLY
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
+  - !ruby/object:Api::Type::Enum
+    name: 'gatewayIpVersion'
+    description: |
+      The IP family of the gateway IPs for the HA-VPN gateway interfaces. If not specified, IPV4 will be used.
+    default_value: :IPV4
+    values:
+      - :IPV4
+      - :IPV6
     immutable: true
     custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
   - !ruby/object:Api::Type::Array

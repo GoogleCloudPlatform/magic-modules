@@ -2,10 +2,10 @@ package compute_test
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	"testing"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccDataSourceRegionInstanceGroup(t *testing.T) {
@@ -14,7 +14,7 @@ func TestAccDataSourceRegionInstanceGroup(t *testing.T) {
 	t.Parallel()
 	name := "tf-test-" + acctest.RandString(t, 6)
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		PreCheck:  func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{

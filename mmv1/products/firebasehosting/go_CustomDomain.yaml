@@ -1,0 +1,560 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'CustomDomain'
+description: |
+  Manages Custom Domains for Firebase Hosting. Custom Domains link your
+  domain names with Firebase Hosting sites, allowing Hosting to serve content
+  on those domain names.
+min_version: 'beta'
+references:
+  guides:
+    'Official Documentation': 'https://firebase.google.com/docs/hosting'
+  api: 'https://firebase.google.com/docs/reference/hosting/rest/v1beta1/projects.sites.customDomains'
+docs:
+base_url: 'projects/{{project}}/sites/{{site_id}}/customDomains'
+self_link: 'projects/{{project}}/sites/{{site_id}}/customDomains/{{custom_domain}}'
+create_url: 'projects/{{project}}/sites/{{site_id}}/customDomains?customDomainId={{custom_domain}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/sites/{{site_id}}/customDomains/{{custom_domain}}'
+  - '{{project}}/{{site_id}}/{{custom_domain}}'
+  - 'sites/{{site_id}}/customDomains/{{custom_domain}}'
+  - '{{site_id}}/{{custom_domain}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['update', 'delete']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+  post_create: 'templates/terraform/post_create/go/firebasehosting_custom_domain_wait_dns_verification.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/go/firebasehosting_custom_domain_soft_delete.go.tmpl'
+examples:
+  - name: 'firebasehosting_customdomain_basic'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      site_id: 'site-id'
+      custom_domain: 'custom.domain.com'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'site_id': 'envvar.GetTestProjectFromEnv()'
+      'custom_domain': '"basic.custom.domain.com"'
+  - name: 'firebasehosting_customdomain_full'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      site_id: 'site-id-full'
+      custom_domain: 'source.domain.com'
+      redirect_target: 'destination.domain.com'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'custom_domain': '"full.source.domain.com"'
+      'redirect_target': '"destination.domain.com"'
+  - name: 'firebasehosting_customdomain_cloud_run'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      site_id: 'site-id'
+      custom_domain: 'run.custom.domain.com'
+      cloud_run_service_id: 'cloud-run-service-via-hosting'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'custom_domain': '"run.custom.domain.com"'
+virtual_fields:
+  - name: 'wait_dns_verification'
+    description: |
+      If true, Terraform will wait for DNS records to be fully resolved on the `CustomDomain`.
+      If false, Terraform will not wait for DNS records on the `CustomDomain`. Any issues in
+      the `CustomDomain` will be returned and stored in the Terraform state.
+    type: Boolean
+    default_value: false
+    immutable: true
+parameters:
+  - name: 'site_id'
+    type: String
+    description: |
+      The ID of the site in which to create this custom domain association.
+    min_version: 'beta'
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'custom_domain'
+    type: String
+    description: |
+      The ID of the `CustomDomain`, which is the domain name you'd like to use with Firebase Hosting.
+    min_version: 'beta'
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The fully-qualified name of the `CustomDomain`.
+    min_version: 'beta'
+    output: true
+  - name: 'createTime'
+    type: Time
+    description: The `CustomDomain`'s create time.
+    min_version: 'beta'
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: The last time the `CustomDomain` was updated.
+    min_version: 'beta'
+    output: true
+  - name: 'deleteTime'
+    type: Time
+    description: |
+      The time the `CustomDomain` was deleted; null for `CustomDomains` that
+      haven't been deleted. Deleted `CustomDomains` persist for approximately 30
+      days, after which time Hosting removes them completely.
+    min_version: 'beta'
+    output: true
+  - name: 'expireTime'
+    type: Time
+    description: |
+      The minimum time before a soft-deleted `CustomDomain` is completely removed
+      from Hosting; null for `CustomDomains` that haven't been deleted.
+    min_version: 'beta'
+    output: true
+  - name: 'etag'
+    type: Fingerprint
+    description: |
+      A string that represents the current state of the `CustomDomain` and
+      allows you to confirm its initial state in requests that would modify it.
+    min_version: 'beta'
+    output: true
+  - name: 'hostState'
+    type: String
+    description: |
+      The host state of your domain name. Host state is determined by checking each
+      IP address associated with your domain name to see if it's serving
+      Hosting content.
+        HOST_UNHOSTED:
+          Your `CustomDomain`'s domain name isn't associated with any IP addresses.
+
+        HOST_UNREACHABLE:
+          Your `CustomDomain`'s domain name can't be reached. Hosting services' DNS
+          queries to find your domain name's IP addresses resulted in errors. See
+          your `CustomDomain`'s `issues` field for more details.
+
+        HOST_MISMATCH:
+          Your `CustomDomain`'s domain name has IP addresses that don't ultimately
+          resolve to Hosting.
+
+        HOST_CONFLICT:
+          Your `CustomDomain`'s domain name has IP addresses that resolve to both
+          Hosting and other services. To ensure consistent results, remove `A` and
+          `AAAA` records related to non-Hosting services.
+
+        HOST_ACTIVE:
+          All requests against your `CustomDomain`'s domain name are served by
+          Hosting. If the `CustomDomain`'s `OwnershipState` is also `ACTIVE`, Hosting
+          serves your Hosting Site's content on the domain name.
+    min_version: 'beta'
+    output: true
+  - name: 'ownershipState'
+    type: Enum
+    description: |
+      The ownership state of your domain name. Ownership is determined at a
+      Firebase project level, and established by adding `TXT` records to your
+      domain name's DNS records.
+
+      Ownership cascades to subdomains. Granting a project ownership of `foo.com`
+      also grants that project ownership over `bar.foo.com`, unless you add
+      specific `TXT` records to `bar.foo.com` that grant a different project
+      ownership.
+
+      If your `CustomDomain` is in an `OwnershipState` other than
+      `OWNERSHIP_ACTIVE` for more than 30 days and it hasn't been updated in at
+      least 30 days, Hosting's ownership systems delete the `CustomDomain`.
+
+      OWNERSHIP_MISSING:
+        Your `CustomDomain`'s domain name has no Hosting-related ownership records;
+        no Firebase project has permission to act on the domain name's behalf.
+
+      OWNERSHIP_UNREACHABLE:
+        Your `CustomDomain`'s domain name can't be reached. Hosting services' DNS
+        queries to find your domain name's ownership records resulted in errors.
+        See your `CustomDomain`'s `issues` field for more details.
+
+      OWNERSHIP_MISMATCH:
+        Your `CustomDomain`'s domain name is owned by another Firebase project.
+        Remove the conflicting `TXT` records and replace them with project-specific
+        records for your current Firebase project.
+
+      OWNERSHIP_CONFLICT:
+        Your `CustomDomain`'s domain name has conflicting `TXT` records that
+        indicate ownership by both your current Firebase project and another
+        project. Remove the other project's ownership records to grant the current
+        project ownership.
+
+      OWNERSHIP_PENDING:
+        Your `CustomDomain`'s DNS records are configured correctly. Hosting will
+        transfer ownership of your domain to this `CustomDomain` within 24 hours.
+
+      OWNERSHIP_ACTIVE:
+        Your `CustomDomain`'s domain name has `TXT` records that grant its project
+        permission to act on its behalf.
+    min_version: 'beta'
+    output: true
+    enum_values:
+      - 'OWNERSHIP_MISSING'
+      - 'OWNERSHIP_UNREACHABLE'
+      - 'OWNERSHIP_MISMATCH'
+      - 'OWNERSHIP_CONFLICT'
+      - 'OWNERSHIP_PENDING'
+      - 'ACTIVE'
+  - name: 'certPreference'
+    type: Enum
+    description: |
+      A field that lets you specify which SSL certificate type Hosting creates
+      for your domain name. Spark plan `CustomDomain`s only have access to the
+      `GROUPED` cert type, while Blaze plan can select any option.
+    min_version: 'beta'
+    default_from_api: true
+    enum_values:
+      - 'GROUPED'
+      - 'PROJECT_GROUPED'
+      - 'DEDICATED'
+  - name: 'redirectTarget'
+    type: String
+    description: |
+      A domain name that this CustomDomain should direct traffic towards. If
+      specified, Hosting will respond to requests against this CustomDomain
+      with an HTTP 301 code, and route traffic to the specified `redirect_target`
+      instead.
+    min_version: 'beta'
+  - name: 'requiredDnsUpdates'
+    type: NestedObject
+    description: |
+      A set of updates you should make to the domain name's DNS records to
+      let Hosting serve secure content on its behalf.
+    min_version: 'beta'
+    output: true
+    properties:
+      - name: 'checkTime'
+        type: Time
+        description: |
+          The last time Hosting checked your CustomDomain's DNS records.
+        min_version: 'beta'
+        output: true
+      - name: 'discovered'
+        type: Array
+        description: |
+          The set of DNS records Hosting discovered when inspecting a domain
+        min_version: 'beta'
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'domainName'
+              type: String
+              description: The domain name the record set pertains to.
+              min_version: 'beta'
+            - name: 'records'
+              type: Array
+              description: Records on the domain
+              min_version: 'beta'
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'domainName'
+                    type: String
+                    description: The domain name the record pertains to, e.g. `foo.bar.com.`.
+                    min_version: 'beta'
+                  - name: 'type'
+                    type: String
+                    description: |
+                      The record's type, which determines what data the record contains.
+                    min_version: 'beta'
+                  - name: 'rdata'
+                    type: String
+                    description: |
+                      The data of the record. The meaning of the value depends on record type:
+                         - A and AAAA: IP addresses for the domain name.
+                         - CNAME: Another domain to check for records.
+                         - TXT: Arbitrary text strings associated with the domain name. Hosting
+                           uses TXT records to determine a which Firebase Projects have
+                           permission to act on the domain name's behalf.
+                         - CAA: The record's flags, tag, and value, e.g. `0 issue "pki.goog"`.
+                    min_version: 'beta'
+                  - name: 'requiredAction'
+                    type: String
+                    description: |
+                      Indicates the a required action for this record.
+                    min_version: 'beta'
+      - name: 'desired'
+        type: Array
+        description: |
+          The set of DNS records Hosting needs to serve secure content on the domain.
+        min_version: 'beta'
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'domainName'
+              type: String
+              description: The domain name the record set pertains to.
+              min_version: 'beta'
+            - name: 'records'
+              type: Array
+              description: Records on the domain
+              min_version: 'beta'
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'domainName'
+                    type: String
+                    description: The domain name the record pertains to, e.g. `foo.bar.com.`.
+                    min_version: 'beta'
+                  - name: 'type'
+                    type: String
+                    description: |
+                      The record's type, which determines what data the record contains.
+                    min_version: 'beta'
+                  - name: 'rdata'
+                    type: String
+                    description: |
+                      The data of the record. The meaning of the value depends on record type:
+                         - A and AAAA: IP addresses for the domain name.
+                         - CNAME: Another domain to check for records.
+                         - TXT: Arbitrary text strings associated with the domain name. Hosting
+                           uses TXT records to determine a which Firebase Projects have
+                           permission to act on the domain name's behalf.
+                         - CAA: The record's flags, tag, and value, e.g. `0 issue "pki.goog"`.
+                    min_version: 'beta'
+                  - name: 'requiredAction'
+                    type: String
+                    description: |
+                      Indicates the a required action for this record.
+                    min_version: 'beta'
+  - name: 'issues'
+    type: Array
+    description: |
+      A set of errors Hosting systems encountered when trying to establish
+      Hosting's ability to serve secure content for your domain name. Resolve
+      these issues to ensure your `CustomDomain` behaves properly.
+    min_version: 'beta'
+    output: true
+    item_type:
+      description: A `google.rpc.Status`
+      type: NestedObject
+      properties:
+        - name: 'code'
+          type: Integer
+          description: The status code, which should be an enum value of `google.rpc.Code`
+          min_version: 'beta'
+        - name: 'message'
+          type: String
+          description: Error message
+          min_version: 'beta'
+        - name: 'details'
+          type: String
+          description: |
+            A list of messages that carry the error details.
+          min_version: 'beta'
+          state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+          custom_flatten: 'templates/terraform/custom_flatten/go/json_schema.tmpl'
+          custom_expand: 'templates/terraform/custom_expand/go/json_schema.tmpl'
+          validation:
+            function: 'validation.StringIsJSON'
+  - name: 'cert'
+    type: NestedObject
+    description: |
+      The SSL certificate Hosting has for this `CustomDomain`'s domain name.
+      For new `CustomDomain`s, this often represents Hosting's intent to create
+      a certificate, rather than an actual cert. Check the `state` field for
+      more.
+    min_version: 'beta'
+    output: true
+    properties:
+      - name: 'type'
+        type: String
+        description: The certificate's type.
+        min_version: 'beta'
+      - name: 'state'
+        type: String
+        description: |
+          The state of the certificate. Only the `CERT_ACTIVE` and
+          `CERT_EXPIRING_SOON` states provide SSL coverage for a domain name. If the
+          state is `PROPAGATING` and Hosting had an active cert for the domain name
+          before, that formerly-active cert provides SSL coverage for the domain name
+          until the current cert propagates.
+        min_version: 'beta'
+      - name: 'verification'
+        type: NestedObject
+        description: |
+          A set of ACME challenges you can add to your DNS records or existing,
+          non-Hosting hosting provider to allow Hosting to create an SSL certificate
+          for your domain name before you point traffic toward hosting. You can use
+          thse challenges as part of a zero downtime transition from your old
+          provider to Hosting.
+        min_version: 'beta'
+        properties:
+          - name: 'dns'
+            type: NestedObject
+            description: |
+              A `TXT` record to add to your DNS records that confirms your intent to
+              let Hosting create an SSL cert for your domain name.
+            min_version: 'beta'
+            properties:
+              - name: 'checkTime'
+                type: Time
+                description: |
+                  The last time Hosting checked your CustomDomain's DNS records.
+                min_version: 'beta'
+                output: true
+              - name: 'discovered'
+                type: Array
+                description: |
+                  The set of DNS records Hosting discovered when inspecting a domain
+                min_version: 'beta'
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: 'domainName'
+                      type: String
+                      description: The domain name the record set pertains to.
+                      min_version: 'beta'
+                    - name: 'records'
+                      type: Array
+                      description: Records on the domain
+                      min_version: 'beta'
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: 'domainName'
+                            type: String
+                            description: The domain name the record pertains to, e.g. `foo.bar.com.`.
+                            min_version: 'beta'
+                          - name: 'type'
+                            type: String
+                            description: |
+                              The record's type, which determines what data the record contains.
+                            min_version: 'beta'
+                          - name: 'rdata'
+                            type: String
+                            description: |
+                              The data of the record. The meaning of the value depends on record type:
+                                - A and AAAA: IP addresses for the domain name.
+                                - CNAME: Another domain to check for records.
+                                - TXT: Arbitrary text strings associated with the domain name. Hosting
+                                  uses TXT records to determine a which Firebase Projects have
+                                  permission to act on the domain name's behalf.
+                                - CAA: The record's flags, tag, and value, e.g. `0 issue "pki.goog"`.
+                            min_version: 'beta'
+                          - name: 'requiredAction'
+                            type: String
+                            description: |
+                              Indicates the a required action for this record.
+                            min_version: 'beta'
+              - name: 'desired'
+                type: Array
+                description: |
+                  The set of DNS records Hosting needs to serve secure content on the domain.
+                min_version: 'beta'
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: 'domainName'
+                      type: String
+                      description: The domain name the record set pertains to.
+                      min_version: 'beta'
+                    - name: 'records'
+                      type: Array
+                      description: Records on the domain
+                      min_version: 'beta'
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: 'domainName'
+                            type: String
+                            description: The domain name the record pertains to, e.g. `foo.bar.com.`.
+                            min_version: 'beta'
+                          - name: 'type'
+                            type: String
+                            description: |
+                              The record's type, which determines what data the record contains.
+                            min_version: 'beta'
+                          - name: 'rdata'
+                            type: String
+                            description: |
+                              The data of the record. The meaning of the value depends on record type:
+                                - A and AAAA: IP addresses for the domain name.
+                                - CNAME: Another domain to check for records.
+                                - TXT: Arbitrary text strings associated with the domain name. Hosting
+                                  uses TXT records to determine a which Firebase Projects have
+                                  permission to act on the domain name's behalf.
+                                - CAA: The record's flags, tag, and value, e.g. `0 issue "pki.goog"`.
+                            min_version: 'beta'
+                          - name: 'requiredAction'
+                            type: String
+                            description: |
+                              Indicates the a required action for this record.
+                            min_version: 'beta'
+          - name: 'http'
+            type: NestedObject
+            description: |
+              A file to add to your existing, non-Hosting hosting service that confirms
+              your intent to let Hosting create an SSL cert for your domain name.
+            min_version: 'beta'
+            properties:
+              - name: 'path'
+                type: String
+                description: The path to the file.
+                min_version: 'beta'
+              - name: 'desired'
+                type: String
+                description: A text string to serve at the path.
+                min_version: 'beta'
+              - name: 'discovered'
+                type: String
+                description: |
+                  Whether Hosting was able to find the required file contents on the
+                  specified path during its last check.
+                min_version: 'beta'
+              - name: 'lastCheckTime'
+                type: Time
+                description: |
+                  The last time Hosting systems checked for the file contents.
+                min_version: 'beta'
+                output: true
+  - name: 'reconciling'
+    type: Boolean
+    description: |
+      if true, indicates that Hosting's systems are attmepting to
+      make the `CustomDomain`'s state match your preferred state. This is most
+      frequently `true` when initially provisioning a `CustomDomain` or when creating
+      a new SSL certificate to match an updated `cert_preference`
+    min_version: 'beta'
+    output: true
