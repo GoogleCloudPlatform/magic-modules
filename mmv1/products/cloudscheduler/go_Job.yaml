@@ -1,0 +1,406 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Job'
+description: |
+  A scheduled job that can publish a PubSub message or an HTTP request
+  every X interval of time, using a crontab format string.
+
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/scheduler/'
+  api: 'https://cloud.google.com/scheduler/docs/reference/rest/'
+docs:
+id_format: 'projects/{{project}}/locations/{{region}}/jobs/{{name}}'
+base_url: 'projects/{{project}}/locations/{{region}}/jobs'
+self_link: 'projects/{{project}}/locations/{{region}}/jobs/{{name}}'
+update_verb: 'PATCH'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  constants: 'templates/terraform/constants/go/scheduler.tmpl'
+  encoder: 'templates/terraform/encoders/go/cloud_scheduler.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/go/cloud_scheduler.go.tmpl'
+  post_create: 'templates/terraform/post_create/go/cloud_scheduler.go.tmpl'
+  post_update: 'templates/terraform/post_update/go/cloud_scheduler.go.tmpl'
+custom_diff:
+  - 'validateAuthHeaders'
+examples:
+  - name: 'scheduler_job_pubsub'
+    primary_resource_id: 'job'
+    vars:
+      job_name: 'test-job'
+      topic_name: 'job-topic'
+  - name: 'scheduler_job_http'
+    primary_resource_id: 'job'
+    vars:
+      job_name: 'test-job'
+  - name: 'scheduler_job_paused'
+    primary_resource_id: 'job'
+    vars:
+      job_name: 'test-job'
+  - name: 'scheduler_job_app_engine'
+    primary_resource_id: 'job'
+    vars:
+      job_name: 'test-job'
+  - name: 'scheduler_job_oauth'
+    primary_resource_id: 'job'
+    vars:
+      job_name: 'test-job'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+      region: 'REGION'
+  - name: 'scheduler_job_oidc'
+    primary_resource_id: 'job'
+    vars:
+      job_name: 'test-job'
+parameters:
+  - name: 'region'
+    type: String
+    description: |
+      Region where the scheduler job resides. If it is not provided, Terraform will use the provider default.
+    url_param_only: true
+    required: false
+    immutable: true
+    ignore_read: true
+    default_from_api: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The name of the job.
+    required: true
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/go/shortname_to_url.go.tmpl'
+  - name: 'description'
+    type: String
+    description: |
+      A human-readable description for the job.
+      This string must not contain more than 500 characters.
+    required: false
+  - name: 'schedule'
+    type: String
+    description: |
+      Describes the schedule on which the job will be executed.
+    required: false
+  - name: 'timeZone'
+    type: String
+    description: |
+      Specifies the time zone to be used in interpreting schedule.
+      The value of this field must be a time zone name from the tz database.
+    required: false
+    default_value: "Etc/UTC"
+  - name: 'state'
+    type: String
+    description: |
+      State of the job.
+    output: true
+  - name: 'paused'
+    type: Boolean
+    description: |
+      Sets the job to a paused state. Jobs default to being enabled when this property is not set.
+    required: false
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/cloud_scheduler_paused.go.tmpl'
+  - name: 'attemptDeadline'
+    type: String
+    description: |
+      The deadline for job attempts. If the request handler does not respond by this deadline then the request is
+      cancelled and the attempt is marked as a DEADLINE_EXCEEDED failure. The failed attempt can be viewed in
+      execution logs. Cloud Scheduler will retry the job according to the RetryConfig.
+      The allowed duration for this deadline is:
+      * For HTTP targets, between 15 seconds and 30 minutes.
+      * For App Engine HTTP targets, between 15 seconds and 24 hours.
+      * **Note**: For PubSub targets, this field is ignored - setting it will introduce an unresolvable diff.
+      A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s"
+    required: false
+    diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("180s")'
+    default_value: "180s"
+  - name: 'retryConfig'
+    type: NestedObject
+    description: |
+      By default, if a job does not complete successfully,
+      meaning that an acknowledgement is not received from the handler,
+      then it will be retried with exponential backoff according to the settings
+    required: false
+    properties:
+      - name: 'retryCount'
+        type: Integer
+        description: |
+          The number of attempts that the system will make to run a
+          job using the exponential backoff procedure described by maxDoublings.
+          Values greater than 5 and negative values are not allowed.
+        required: false
+        default_from_api: true
+        at_least_one_of:
+          - 'retry_config.0.retry_count'
+          - 'retry_config.0.max_retry_duration'
+          - 'retry_config.0.min_backoff_duration'
+          - 'retry_config.0.max_backoff_duration'
+          - 'retry_config.0.max_doublings'
+      - name: 'maxRetryDuration'
+        type: String
+        description: |
+          The time limit for retrying a failed job, measured from time when an execution was first attempted.
+          If specified with retryCount, the job will be retried until both limits are reached.
+          A duration in seconds with up to nine fractional digits, terminated by 's'.
+        required: false
+        default_from_api: true
+        at_least_one_of:
+          - 'retry_config.0.retry_count'
+          - 'retry_config.0.max_retry_duration'
+          - 'retry_config.0.min_backoff_duration'
+          - 'retry_config.0.max_backoff_duration'
+          - 'retry_config.0.max_doublings'
+      - name: 'minBackoffDuration'
+        type: String
+        description: |
+          The minimum amount of time to wait before retrying a job after it fails.
+          A duration in seconds with up to nine fractional digits, terminated by 's'.
+        required: false
+        default_from_api: true
+        at_least_one_of:
+          - 'retry_config.0.retry_count'
+          - 'retry_config.0.max_retry_duration'
+          - 'retry_config.0.min_backoff_duration'
+          - 'retry_config.0.max_backoff_duration'
+          - 'retry_config.0.max_doublings'
+      - name: 'maxBackoffDuration'
+        type: String
+        description: |
+          The maximum amount of time to wait before retrying a job after it fails.
+          A duration in seconds with up to nine fractional digits, terminated by 's'.
+        required: false
+        default_from_api: true
+        at_least_one_of:
+          - 'retry_config.0.retry_count'
+          - 'retry_config.0.max_retry_duration'
+          - 'retry_config.0.min_backoff_duration'
+          - 'retry_config.0.max_backoff_duration'
+          - 'retry_config.0.max_doublings'
+      - name: 'maxDoublings'
+        type: Integer
+        description: |
+          The time between retries will double maxDoublings times.
+          A job's retry interval starts at minBackoffDuration,
+          then doubles maxDoublings times, then increases linearly,
+          and finally retries retries at intervals of maxBackoffDuration up to retryCount times.
+        required: false
+        default_from_api: true
+        at_least_one_of:
+          - 'retry_config.0.retry_count'
+          - 'retry_config.0.max_retry_duration'
+          - 'retry_config.0.min_backoff_duration'
+          - 'retry_config.0.max_backoff_duration'
+          - 'retry_config.0.max_doublings'
+  - name: 'pubsubTarget'
+    type: NestedObject
+    description: |
+      Pub/Sub target
+      If the job providers a Pub/Sub target the cron will publish
+      a message to the provided topic
+    exactly_one_of:
+      - 'pubsub_target'
+      - 'http_target'
+      - 'app_engine_http_target'
+    properties:
+      - name: 'topicName'
+        type: String
+        description: |
+          The full resource name for the Cloud Pub/Sub topic to which
+          messages will be published when a job is delivered. ~>**NOTE:**
+          The topic name must be in the same format as required by PubSub's
+          PublishRequest.name, e.g. `projects/my-project/topics/my-topic`.
+        required: true
+      - name: 'data'
+        type: String
+        description: |
+          The message payload for PubsubMessage.
+          Pubsub message must contain either non-empty data, or at least one attribute.
+
+           A base64-encoded string.
+        required: false
+        validation:
+          function: 'verify.ValidateBase64String'
+      - name: 'attributes'
+        type: KeyValuePairs
+        description: |
+          Attributes for PubsubMessage.
+          Pubsub message must contain either non-empty data, or at least one attribute.
+        required: false
+  - name: 'appEngineHttpTarget'
+    type: NestedObject
+    description: |
+      App Engine HTTP target.
+      If the job providers a App Engine HTTP target the cron will
+      send a request to the service instance
+    exactly_one_of:
+      - 'pubsub_target'
+      - 'http_target'
+      - 'app_engine_http_target'
+    properties:
+      - name: 'httpMethod'
+        type: String
+        description: |
+          Which HTTP method to use for the request.
+        required: false
+      - name: 'appEngineRouting'
+        type: NestedObject
+        description: |
+          App Engine Routing setting for the job.
+        required: false
+        custom_flatten: 'templates/terraform/custom_flatten/go/cloudscheduler_job_appenginerouting.go.tmpl'
+        properties:
+          - name: 'service'
+            type: String
+            description: |
+              App service.
+              By default, the job is sent to the service which is the default service when the job is attempted.
+            required: false
+            at_least_one_of:
+              - 'app_engine_http_target.0.app_engine_routing.0.service'
+              - 'app_engine_http_target.0.app_engine_routing.0.version'
+              - 'app_engine_http_target.0.app_engine_routing.0.instance'
+          - name: 'version'
+            type: String
+            description: |
+              App version.
+              By default, the job is sent to the version which is the default version when the job is attempted.
+            required: false
+            at_least_one_of:
+              - 'app_engine_http_target.0.app_engine_routing.0.service'
+              - 'app_engine_http_target.0.app_engine_routing.0.version'
+              - 'app_engine_http_target.0.app_engine_routing.0.instance'
+          - name: 'instance'
+            type: String
+            description: |
+              App instance.
+              By default, the job is sent to an instance which is available when the job is attempted.
+            required: false
+            at_least_one_of:
+              - 'app_engine_http_target.0.app_engine_routing.0.service'
+              - 'app_engine_http_target.0.app_engine_routing.0.version'
+              - 'app_engine_http_target.0.app_engine_routing.0.instance'
+      - name: 'relativeUri'
+        type: String
+        description: |
+          The relative URI.
+          The relative URL must begin with "/" and must be a valid HTTP relative URL.
+          It can contain a path, query string arguments, and \# fragments.
+          If the relative URL is empty, then the root path "/" will be used.
+          No spaces are allowed, and the maximum length allowed is 2083 characters
+        required: true
+      - name: 'body'
+        type: String
+        description: |
+          HTTP request body.
+          A request body is allowed only if the HTTP method is POST or PUT.
+          It will result in invalid argument error to set a body on a job with an incompatible HttpMethod.
+
+          A base64-encoded string.
+        required: false
+        validation:
+          function: 'verify.ValidateBase64String'
+      - name: 'headers'
+        type: KeyValuePairs
+        description: |
+          HTTP request headers.
+          This map contains the header field names and values.
+          Headers can be set when the job is created.
+        required: false
+        custom_flatten: 'templates/terraform/custom_flatten/go/http_headers.tmpl'
+        validation:
+          function: 'validateHttpHeaders()'
+  - name: 'httpTarget'
+    type: NestedObject
+    description: |
+      HTTP target.
+      If the job providers a http_target the cron will
+      send a request to the targeted url
+    exactly_one_of:
+      - 'pubsub_target'
+      - 'http_target'
+      - 'app_engine_http_target'
+    properties:
+      - name: 'uri'
+        type: String
+        description: |
+          The full URI path that the request will be sent to.
+        required: true
+        diff_suppress_func: 'LastSlashDiffSuppress'
+      - name: 'httpMethod'
+        type: String
+        description: |
+          Which HTTP method to use for the request.
+        required: false
+      - name: 'body'
+        type: String
+        description: |
+          HTTP request body.
+          A request body is allowed only if the HTTP method is POST, PUT, or PATCH.
+          It is an error to set body on a job with an incompatible HttpMethod.
+
+          A base64-encoded string.
+        required: false
+        validation:
+          function: 'verify.ValidateBase64String'
+      - name: 'headers'
+        type: KeyValuePairs
+        description: |
+          This map contains the header field names and values.
+          Repeated headers are not supported, but a header value can contain commas.
+        required: false
+        custom_flatten: 'templates/terraform/custom_flatten/go/http_headers.tmpl'
+        validation:
+          function: 'validateHttpHeaders()'
+      - name: 'oauthToken'
+        type: NestedObject
+        description: |
+          Contains information needed for generating an OAuth token.
+          This type of authorization should be used when sending requests to a GCP endpoint.
+        diff_suppress_func: 'authHeaderDiffSuppress'
+        properties:
+          - name: 'serviceAccountEmail'
+            type: String
+            description: |
+              Service account email to be used for generating OAuth token.
+              The service account must be within the same project as the job.
+            required: true
+          - name: 'scope'
+            type: String
+            description: |
+              OAuth scope to be used for generating OAuth access token. If not specified,
+              "https://www.googleapis.com/auth/cloud-platform" will be used.
+      - name: 'oidcToken'
+        type: NestedObject
+        description: |
+          Contains information needed for generating an OpenID Connect token.
+          This type of authorization should be used when sending requests to third party endpoints or Cloud Run.
+        diff_suppress_func: 'authHeaderDiffSuppress'
+        properties:
+          - name: 'serviceAccountEmail'
+            type: String
+            description: |
+              Service account email to be used for generating OAuth token.
+              The service account must be within the same project as the job.
+            required: true
+          - name: 'audience'
+            type: String
+            description: |
+              Audience to be used when generating OIDC token. If not specified,
+              the URI specified in target will be used.

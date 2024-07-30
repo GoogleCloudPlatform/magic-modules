@@ -10,11 +10,11 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */ -}}
-{{- if eq $.TargetVersionName "ga" }}
+{{- if eq $.TargetVersionName "ga" -}}
 // Field was renamed in GA API
 res["attestationAuthority"] = res["attestation"]
 delete(res, "attestation")
-{{- else }}
+{{- else -}}
 // decoder logic only in GA provider
 {{- end }}
 

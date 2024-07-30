@@ -3,8 +3,8 @@ package notebooks_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccNotebooksRuntime_update(t *testing.T) {
@@ -47,6 +47,7 @@ func TestAccNotebooksRuntime_update(t *testing.T) {
 		},
 	})
 }
+
 
 func testAccNotebooksRuntime_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`

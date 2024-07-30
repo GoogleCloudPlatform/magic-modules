@@ -43,7 +43,12 @@
 <%  unless property.required.nil? -%>
     required: <%= property.required %>
 <%  end -%>
-<%  unless property.immutable.nil? -%>
+<%  if property.name == "labels" && (property.is_a?(Api::Type::KeyValueLabels) || property.is_a?(Api::Type::KeyValueAnnotations)) && property.parent.nil? -%>
+<%    effective_labels = property.__resource.properties.find{ |p| p.is_a?(Api::Type::KeyValueEffectiveLabels) } -%>
+<%    unless effective_labels.immutable.nil? -%>
+    immutable: <%= effective_labels.immutable %>
+<%    end -%>
+<%  elsif !property.immutable.nil? -%>
     immutable: <%= property.immutable %>
 <%  end -%>
 <%  unless property.ignore_read.nil? -%>
@@ -252,6 +257,9 @@
     value_type:
 <%        unless property.value_type.description.nil? || property.value_type.description == "A nested object resource"  -%>
       description:
+<%        end -%>
+<%        unless property.value_type.name.nil? -%>
+      name: <%= property.value_type.name %>
 <%        end -%>
       type: <%= property.value_type.type.to_s.gsub("Api::Type::", "") %>
 <%        unless property.value_type.properties.nil? -%>

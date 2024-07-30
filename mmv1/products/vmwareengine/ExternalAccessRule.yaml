@@ -42,6 +42,8 @@ async: !ruby/object:Api::OpAsync
 import_format: ["{{%parent}}/externalAccessRules/{{name}}"]
 id_format: "{{parent}}/externalAccessRules/{{name}}"
 autogen_async: true
+# There is a handwritten sweeper that provides a list of locations to sweep
+skip_sweeper: true
 
 examples:
   - !ruby/object:Provider::Terraform::Examples

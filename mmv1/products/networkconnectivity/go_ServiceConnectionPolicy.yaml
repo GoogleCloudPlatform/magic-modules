@@ -1,0 +1,217 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'ServiceConnectionPolicy'
+description:
+  'Manage Service Connection Policies.'
+references:
+  guides:
+    'About Service Connection Policies': 'https://cloud.google.com/vpc/docs/about-service-connection-policies#service-policies'
+  api: 'https://cloud.google.com/secure-web-proxy/docs/reference/networkconnectivity/rest/v1/projects.locations.networkConnectionPolicies'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/serviceConnectionPolicies'
+self_link: 'projects/{{project}}/locations/{{location}}/serviceConnectionPolicies/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/serviceConnectionPolicies?serviceConnectionPolicyId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/serviceConnectionPolicies/{{name}}'
+timeouts:
+  insert_minutes: 30
+  update_minutes: 30
+  delete_minutes: 30
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+    timeouts:
+      insert_minutes: 30
+      update_minutes: 30
+      delete_minutes: 30
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+  update_encoder: 'templates/terraform/encoders/go/service_connection_policy.go.tmpl'
+examples:
+  - name: 'network_connectivity_policy_basic'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-network-connectivity-policy'
+      producer_network_name: 'producer-net'
+      producer_subnetwork_name: 'producer-subnet'
+      service_class_name: 'my-basic-service-class'
+    test_vars_overrides:
+      'service_class_name': '"gcp-memorystore-redis"'
+parameters:
+  - name: 'name'
+    type: String
+    description: |
+      The name of a ServiceConnectionPolicy. Format: projects/{project}/locations/{location}/serviceConnectionPolicies/{service_connection_policy} See: https://google.aip.dev/122#fields-representing-resource-names
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'location'
+    type: String
+    description: |
+      The location of the ServiceConnectionPolicy.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'createTime'
+    type: Time
+    description: |
+      The timestamp when the resource was created.
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      The timestamp when the resource was updated.
+    output: true
+  - name: 'serviceClass'
+    type: String
+    description: |
+      The service class identifier for which this ServiceConnectionPolicy is for. The service class identifier is a unique, symbolic representation of a ServiceClass.
+      It is provided by the Service Producer. Google services have a prefix of gcp. For example, gcp-cloud-sql. 3rd party services do not. For example, test-service-a3dfcx.
+    required: true
+    immutable: true
+  - name: 'description'
+    type: String
+    description: |
+      Free-text description of the resource.
+  - name: 'network'
+    type: String
+    description: |
+      The resource path of the consumer network. Example: - projects/{projectNumOrId}/global/networks/{resourceId}.
+    required: true
+    immutable: true
+  - name: 'pscConfig'
+    type: NestedObject
+    description: |
+      Configuration used for Private Service Connect connections. Used when Infrastructure is PSC.
+    properties:
+      - name: 'subnetworks'
+        type: Array
+        description: |
+          IDs of the subnetworks or fully qualified identifiers for the subnetworks
+        required: true
+        item_type:
+          type: String
+      - name: 'limit'
+        type: String
+        description: |
+          Max number of PSC connections for this policy.
+  - name: 'etag'
+    type: Fingerprint
+    description: |
+      The etag is computed by the server, and may be sent on update and delete requests to ensure the client has an up-to-date value before proceeding.
+    output: true
+  - name: 'pscConnections'
+    type: Array
+    description: |
+      Information about each Private Service Connect connection.
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'state'
+          type: Enum
+          description: The state of the PSC connection.
+          enum_values:
+            - 'STATE_UNSPECIFIED'
+            - 'ACTIVE'
+            - 'CREATING'
+            - 'DELETING'
+            - 'FAILED'
+        - name: 'consumerForwardingRule'
+          type: String
+          description: |
+            The resource reference of the PSC Forwarding Rule within the consumer VPC.
+        - name: 'consumerAddress'
+          type: String
+          description: |
+            The resource reference of the consumer address.
+        - name: 'errorType'
+          type: Enum
+          description: |
+            The error type indicates whether the error is consumer facing, producer
+            facing or system internal.
+          enum_values:
+            - 'CONNECTION_ERROR_TYPE_UNSPECIFIED'
+            - 'ERROR_INTERNAL'
+            - 'ERROR_CONSUMER_SIDE'
+            - 'ERROR_PRODUCER_SIDE'
+        - name: 'error'
+          type: NestedObject
+          description: |
+            The most recent error during operating this connection.
+          properties:
+            - name: 'message'
+              type: String
+              description: A developer-facing error message.
+            - name: 'code'
+              type: Integer
+              description: The status code, which should be an enum value of [google.rpc.Code][].
+            - name: 'details'
+              type: Array
+              description: |
+                A list of messages that carry the error details.
+              output: true
+              item_type:
+                type: KeyValuePairs
+        - name: 'gceOperation'
+          type: String
+          description: |
+            The last Compute Engine operation to setup PSC connection.
+        - name: 'consumerTargetProject'
+          type: String
+          description: |
+            The project where the PSC connection is created.
+        - name: 'pscConnectionId'
+          type: String
+          description: |
+            The PSC connection id of the PSC forwarding rule.
+        - name: 'errorInfo'
+          type: NestedObject
+          description: |
+            The error info for the latest error during operating this connection.
+          properties:
+            - name: 'reason'
+              type: String
+              description: The reason of the error.
+            - name: 'domain'
+              type: String
+              description: The logical grouping to which the "reason" belongs.
+            - name: 'metadata'
+              type: KeyValuePairs
+              description: |
+               Additional structured details about this error.
+  - name: 'infrastructure'
+    type: String
+    description: |
+      The type of underlying resources used to create the connection.
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      User-defined labels.

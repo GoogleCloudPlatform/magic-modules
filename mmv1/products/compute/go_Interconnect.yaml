@@ -45,6 +45,7 @@ async:
     path: 'error/errors'
     message: 'message'
 custom_code:
+  constants: 'templates/terraform/constants/go/interconnect.go.tmpl'
 examples:
   - name: 'compute_interconnect_basic'
     primary_resource_id: 'example-interconnect'
@@ -118,6 +119,7 @@ properties:
         - DEDICATED: A dedicated physical interconnection with the customer.
     required: true
     immutable: true
+    diff_suppress_func: 'InterconnectTypeDiffSuppress'
     enum_values:
       - 'DEDICATED'
       - 'PARTNER'
@@ -292,7 +294,6 @@ properties:
     description: |
       Labels for this resource. These can only be added or modified by the setLabels
       method. Each label key/value pair must comply with RFC1035. Label values may be empty.
-    immutable: false
   - name: 'labelFingerprint'
     type: Fingerprint
     description: |

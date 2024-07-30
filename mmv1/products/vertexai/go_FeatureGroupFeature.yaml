@@ -1,0 +1,100 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'FeatureGroupFeature'
+description: Vertex AI Feature Group Feature is feature metadata information.
+references:
+  guides:
+    'Creating a Feature': 'https://cloud.google.com/vertex-ai/docs/featurestore/latest/create-feature'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.featureGroups.features'
+docs:
+base_url: 'projects/{{project}}/locations/{{region}}/featureGroups/{{feature_group}}/features'
+self_link: 'projects/{{project}}/locations/{{region}}/featureGroups/{{feature_group}}/features/{{name}}'
+create_url: 'projects/{{project}}/locations/{{region}}/featureGroups/{{feature_group}}/features?featureId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{region}}/featureGroups/{{feature_group}}/features/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'vertex_ai_feature_group_feature'
+    primary_resource_id: 'feature_group_feature'
+    vars:
+      job_id: 'job_load'
+      name: 'example_feature'
+      feature_group_name: 'example_feature_group'
+  - name: 'vertex_ai_feature_group_feature_with_version_column_name'
+    primary_resource_id: 'feature_group_feature'
+    vars:
+      job_id: 'job_load'
+      name: 'example_feature'
+      feature_group_name: 'example_feature_group'
+    skip_docs: true
+parameters:
+  - name: 'featureGroup'
+    type: String
+    description: The name of the Feature Group.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'region'
+    type: String
+    description: The region for the resource. It should be the same as the feature group's region.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: The resource name of the Feature Group Feature.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'createTime'
+    type: String
+    description: The timestamp of when the FeatureGroup was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: The timestamp of when the FeatureGroup was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: The labels with user-defined metadata to organize your FeatureGroup.
+    immutable: false
+  - name: 'description'
+    type: String
+    description: The description of the FeatureGroup.
+  - name: 'versionColumnName'
+    type: String
+    description: The name of the BigQuery Table/View column hosting data for this version. If no value is provided, will use featureId.
+    default_from_api: true
