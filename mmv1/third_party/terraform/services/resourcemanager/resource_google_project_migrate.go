@@ -24,9 +24,29 @@ func resourceGoogleProjectMigrateState(v int, s *terraform.InstanceState, meta i
 			return s, err
 		}
 		return s, nil
+	case 1:
+		log.Println("[INFO] Found Google Project State v1; migrating to v2")
+		s, err := migrateGoogleProjectStateV1toV2(s, meta.(*transport_tpg.Config))
+		if err != nil {
+			return s, err
+		}
+		return s, nil
 	default:
 		return s, fmt.Errorf("Unexpected schema version: %d", v)
 	}
+}
+
+// This migration adjusts google_project resources to replace skip_delete with deletion_policy.
+func migrateGoogleProjectStateV1toV2(s *terraform.InstanceState, config *transport_tpg.Config) (*terraform.InstanceState, error) {
+	log.Printf("[DEBUG] Attributes before migration: %#v", s.Attributes)
+
+	if s.Attributes["skip_delete"] == "true" {
+		s.Attributes["deletion_policy"] = "ABANDON"
+		s.Attributes["skip_delete"] = "false"
+	}
+
+	log.Printf("[DEBUG] Attributes after migration: %#v", s.Attributes)
+	return s, nil
 }
 
 // This migration adjusts google_project resources to include several additional attributes
