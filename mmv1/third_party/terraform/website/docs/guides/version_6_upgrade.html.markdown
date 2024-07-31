@@ -198,3 +198,9 @@ Users will need to check their configuration for any `google_vpc_access_connecto
 resource blocks that contain both fields in a conflicting pair, and remove one of those fields.
 The fields that are removed from the configuration will still have Computed values,
 that are derived from the API.
+
+## Resource: `google_service_networking_connection`
+
+### Field `update_on_creation_fail` enforces an update in case of creation failure
+
+When `update_on_creation_fail` is set to true, enforce an update of the reserved peering ranges on the existing service networking connection in case of a new connection creation failure.
