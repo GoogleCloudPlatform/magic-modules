@@ -2128,9 +2128,7 @@ func flattenSettings(settings *sqladmin.Settings, d *schema.ResourceData) []map[
 
 	data["enable_google_ml_integration"] = settings.EnableGoogleMlIntegration
 
-	if settings.UserLabels != nil {
-		data["user_labels"] = flattenSettingsLabels("settings.0.user_labels", settings.UserLabels, d)
-	}
+	data["user_labels"] = flattenSettingsLabels("settings.0.user_labels", settings.UserLabels, d)
 	data["terraform_labels"] = flattenSettingsLabels("settings.0.terraform_labels", settings.UserLabels, d)
 	data["effective_labels"] = settings.UserLabels
 
