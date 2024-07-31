@@ -161,7 +161,7 @@ properties:
         immutable: true
         description: |
           Fully qualified names of the KMS keys to use to encrypt this database. The keys
-          referenced by kms_key_names must fully cover all regions of the database
+          referenced by kmsKeyNames must fully cover all regions of the database
           instance configuration.
   - !ruby/object:Api::Type::Enum
     name: 'databaseDialect'
