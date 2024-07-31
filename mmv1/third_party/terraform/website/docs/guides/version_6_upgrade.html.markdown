@@ -120,6 +120,15 @@ This field is no longer supported by the BigQuery Reservation API.
 
 Removed in favor of field `settings.ip_configuration.ssl_mode`.
 
+### Three label-related fields are now present
+
+* `settings.user_labels` field is non-authoritative and only manages the labels defined by
+the users on the resource through Terraform.
+* The new output-only `settings.terraform_labels` field merges the labels defined by the users
+on the resource through Terraform and the default labels configured on the provider.
+* The new output-only `settings.effective_labels` field lists all of labels present on the resource
+in GCP, including the labels configured through Terraform, the system, and other clients.
+
 ## Resource: `google_pubsub_topic`
 
 ### `schema_settings` no longer has a default value
@@ -204,3 +213,36 @@ Users will need to check their configuration for any `google_vpc_access_connecto
 resource blocks that contain both fields in a conflicting pair, and remove one of those fields.
 The fields that are removed from the configuration will still have Computed values,
 that are derived from the API.
+
+## Resource: `google_container_cluster`
+
+### Three label-related fields are now present
+
+* `resource_labels` field is non-authoritative and only manages the labels defined by
+the users on the resource through Terraform.
+* The new output-only `terraform_labels` field merges the labels defined by the users
+on the resource through Terraform and the default labels configured on the provider.
+* The new output-only `effective_labels` field lists all of labels present on the resource
+in GCP, including the labels configured through Terraform, the system, and other clients.
+
+## Resource: `google_edgenetwork_network`
+
+### Three label-related fields are now present
+
+* `labels` field is non-authoritative and only manages the labels defined by
+the users on the resource through Terraform.
+* The new output-only `terraform_labels` field merges the labels defined by the users
+on the resource through Terraform and the default labels configured on the provider.
+* The new output-only `effective_labels` field lists all of labels present on the resource
+in GCP, including the labels configured through Terraform, the system, and other clients.
+
+## Resource: `google_edgenetwork_subnet`
+
+### Three label-related fields are now present
+
+* `labels` field is non-authoritative and only manages the labels defined by
+the users on the resource through Terraform.
+* The new output-only `terraform_labels` field merges the labels defined by the users
+on the resource through Terraform and the default labels configured on the provider.
+* The new output-only `effective_labels` field lists all of labels present on the resource
+in GCP, including the labels configured through Terraform, the system, and other clients.

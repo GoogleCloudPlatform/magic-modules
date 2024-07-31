@@ -762,12 +762,6 @@ module Api
              # The "labels" field has type Array, so skip this resource
              !(product_name == 'DeploymentManager' && resource_name == 'Deployment') &&
 
-             # https://github.com/hashicorp/terraform-provider-google/issues/16219
-             !(product_name == 'Edgenetwork' && resource_name == 'Network') &&
-
-             # https://github.com/hashicorp/terraform-provider-google/issues/16219
-             !(product_name == 'Edgenetwork' && resource_name == 'Subnet') &&
-
              # "userLabels" is the resource labels field
              !(product_name == 'Monitoring' && resource_name == 'NotificationChannel') &&
 
