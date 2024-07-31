@@ -444,34 +444,6 @@ resource "google_organization_iam_member" "sa_org2_resource_settings_admin" {
   member = google_service_account.sa.member
 }
 
-resource "google_project" "firestore_proj" {
-  name            = var.firestore_project_id
-  project_id      = var.firestore_project_id
-  org_id          = data.google_organization.org.org_id
-  billing_account = var.billing_account_id
-}
-
-module "firestore-project-services" {
-  source  = "terraform-google-modules/project-factory/google//modules/project_services"
-  version = "~> 14.1"
-
-  project_id = google_project.firestore_proj.project_id
-
-  activate_apis = [
-    "firestore.googleapis.com",
-  ]
-}
-
-resource "google_firestore_database" "firestore_db" {
-  provider = google-beta
-  depends_on = [module.firestore-project-services]
-
-  project     = google_project.firestore_proj.project_id
-  name        = "(default)"
-  location_id = "nam5"
-  type        = "FIRESTORE_NATIVE"
-}
-
 output "service_account" {
   value = google_service_account.sa.email
 }
