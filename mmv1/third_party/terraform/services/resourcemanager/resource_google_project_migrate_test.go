@@ -23,16 +23,6 @@ func TestGoogleProjectMigrateState(t *testing.T) {
 			},
 			Meta: &transport_tpg.Config{},
 		},
-		"replace skip_delete with deletion_policy": {
-			StateVersion: 1,
-			Attributes: map[string]string{
-				"skip_delete": "true",
-			},
-			Expected: map[string]string{
-				"deletion_policy": "ABANDON",
-			},
-			Meta: &transport_tpg.Config{},
-		},
 	}
 
 	for tn, tc := range cases {

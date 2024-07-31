@@ -35,7 +35,7 @@ type ServicesCall interface {
 // to declare a Google Cloud Project resource.
 func ResourceGoogleProject() *schema.Resource {
 	return &schema.Resource{
-		SchemaVersion: 2,
+		SchemaVersion: 1,
 
 		Create: resourceGoogleProjectCreate,
 		Read:   resourceGoogleProjectRead,
