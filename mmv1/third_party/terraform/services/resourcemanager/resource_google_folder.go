@@ -268,6 +268,10 @@ func resourceGoogleFolderImportState(d *schema.ResourceData, m interface{}) ([]*
 		id = fmt.Sprintf("folders/%s", id)
 	}
 
+	if err := d.Set("deletion_protection", true); err != nil {
+		return nil, fmt.Errorf("Error setting deletion_protection: %s", err)
+	}
+
 	d.SetId(id)
 
 	return []*schema.ResourceData{d}, nil
