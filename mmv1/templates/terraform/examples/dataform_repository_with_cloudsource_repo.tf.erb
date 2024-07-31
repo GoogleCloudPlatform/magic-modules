@@ -1,3 +1,7 @@
+data "google_project" "project" {
+  provider = google-beta
+}
+
 resource "google_sourcerepo_repository" "git_repository" {
   provider = google-beta
   name = "<%= ctx[:vars]['git_repository_name'] %>"
@@ -33,6 +37,19 @@ resource "google_kms_crypto_key" "example_key" {
   key_ring        = google_kms_key_ring.keyring.id
 }
 
+
+resource "google_kms_crypto_key_iam_binding" "crypto_key_binding" {
+  provider = google-beta
+
+  crypto_key_id = google_kms_crypto_key.example_key.id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+
+  members = [
+    "serviceAccount:service-${data.google_project.project.number}@gcp-sa-healthcare.iam.gserviceaccount.com",
+  ]
+}
+
+
 resource "google_dataform_repository" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
   name = "<%= ctx[:vars]['dataform_repository_name'] %>"
@@ -55,4 +72,8 @@ resource "google_dataform_repository" "<%= ctx[:primary_resource_id] %>" {
     schema_suffix = "_suffix"
     table_prefix = "prefix_"
   }
+
+  depends_on = [
+    google_kms_crypto_key_iam_binding.crypto_key_binding
+  ]
 }
