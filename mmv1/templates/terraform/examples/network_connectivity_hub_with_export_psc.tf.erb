@@ -1,0 +1,5 @@
+resource "google_network_connectivity_hub" "<%= ctx[:primary_resource_id] %>"  {
+ name        = "<%= ctx[:vars]['resource_name'] %>"
+ description = "A sample hub with Private Service Connect transitivity is enabled"
+ export_psc = true
+}

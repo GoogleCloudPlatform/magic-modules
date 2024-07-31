@@ -1,0 +1,95 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'TenantDefaultSupportedIdpConfig'
+description: |
+  Configurations options for the tenant for authenticating with a the standard set of Identity Toolkit-trusted IDPs.
+
+  You must enable the
+  [Google Identity Platform](https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity) in
+  the marketplace prior to using this resource.
+docs:
+base_url: 'projects/{{project}}/tenants/{{tenant}}/defaultSupportedIdpConfigs'
+self_link: 'projects/{{project}}/tenants/{{tenant}}/defaultSupportedIdpConfigs/{{idp_id}}'
+create_url: 'projects/{{project}}/tenants/{{tenant}}/defaultSupportedIdpConfigs?idpId={{idp_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/tenants/{{tenant}}/defaultSupportedIdpConfigs/{{idp_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+skip_sweeper: true
+examples:
+  - name: 'identity_platform_tenant_default_supported_idp_config_basic'
+    primary_resource_id: 'idp_config'
+parameters:
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The name of the default supported IDP config resource
+    output: true
+  - name: 'idpId'
+    type: String
+    description: |
+      ID of the IDP. Possible values include:
+
+      * `apple.com`
+
+      * `facebook.com`
+
+      * `gc.apple.com`
+
+      * `github.com`
+
+      * `google.com`
+
+      * `linkedin.com`
+
+      * `microsoft.com`
+
+      * `playgames.google.com`
+
+      * `twitter.com`
+
+      * `yahoo.com`
+
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'tenant'
+    type: String
+    description: |
+      The name of the tenant where this DefaultSupportedIdpConfig resource exists
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'clientId'
+    type: String
+    description: |
+      OAuth client ID
+    required: true
+  - name: 'clientSecret'
+    type: String
+    description: |
+      OAuth client secret
+    required: true
+  - name: 'enabled'
+    type: Boolean
+    description: |
+      If this IDP allows the user to sign in

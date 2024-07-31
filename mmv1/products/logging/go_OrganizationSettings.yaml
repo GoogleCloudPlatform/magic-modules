@@ -1,0 +1,84 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'OrganizationSettings'
+description: |
+  Default resource settings control whether CMEK is required for new log buckets. These settings also determine the storage location for the _Default and _Required log buckets, and whether the _Default sink is enabled or disabled.
+references:
+  guides:
+    'Configure default settings for organizations and folders': 'https://cloud.google.com/logging/docs/default-settings'
+  api: 'https://cloud.google.com/logging/docs/reference/v2/rest/v2/TopLevel/getSettings'
+docs:
+base_url: 'organizations/{{organization}}/settings'
+self_link: 'organizations/{{organization}}/settings'
+create_url: 'organizations/{{organization}}/settings?updateMask=disableDefaultSink,storageLocation,kmsKeyName'
+create_verb: 'PATCH'
+update_url: 'organizations/{{organization}}/settings?updateMask=disableDefaultSink,storageLocation,kmsKeyName'
+update_verb: 'PATCH'
+skip_delete: true
+import_format:
+  - 'organizations/{{organization}}/settings'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+examples:
+  - name: 'logging_organization_settings_all'
+    primary_resource_id: 'example'
+    vars:
+      key_name: 'kms-key'
+    test_env_vars:
+      org_id: 'ORG_TARGET'
+    skip_test: true
+parameters:
+  - name: 'organization'
+    type: String
+    description: |
+      The organization for which to retrieve or configure settings.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The resource name of the settings.
+    output: true
+  - name: 'kmsKeyName'
+    type: String
+    description: |
+      The resource name for the configured Cloud KMS key.
+    default_from_api: true
+  - name: 'kmsServiceAccountId'
+    type: String
+    description: |
+      The service account that will be used by the Log Router to access your Cloud KMS key.
+    output: true
+  - name: 'storageLocation'
+    type: String
+    description: |
+      The storage location that Cloud Logging will use to create new resources when a location is needed but not explicitly provided.
+    default_from_api: true
+  - name: 'disableDefaultSink'
+    type: Boolean
+    description: |
+      If set to true, the _Default sink in newly created projects and folders will created in a disabled state. This can be used to automatically disable log storage if there is already an aggregated sink configured in the hierarchy. The _Default sink can be re-enabled manually if needed.
+    default_from_api: true
+  - name: 'loggingServiceAccountId'
+    type: String
+    description: |
+      The service account for the given container. Sinks use this service account as their writerIdentity if no custom service account is provided.
+    output: true
