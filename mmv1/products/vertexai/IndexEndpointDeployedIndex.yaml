@@ -246,7 +246,13 @@ properties:
   - !ruby/object:Api::Type::Array
     name: reservedIpRanges
     immutable: true
-    description: A list of reserved ip ranges under the VPC network that can be used for this DeployedIndex.
+    description: |
+      A list of reserved ip ranges under the VPC network that can be used for this DeployedIndex.
+      If set, we will deploy the index within the provided ip ranges. Otherwise, the index might be deployed to any ip ranges under the provided VPC network.
+
+      The value should be the name of the address (https://cloud.google.com/compute/docs/reference/rest/v1/addresses) Example: ['vertex-ai-ip-range'].
+
+      For more information about subnets and network IP ranges, please see https://cloud.google.com/vpc/docs/subnets#manually_created_subnet_ip_ranges.
     item_type: Api::Type::String
   - !ruby/object:Api::Type::String
     name: deploymentGroup
