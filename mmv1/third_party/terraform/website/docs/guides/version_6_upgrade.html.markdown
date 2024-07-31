@@ -260,11 +260,8 @@ For a seamless update, if your state today uses `no_age=true`, update it to remo
 
 ### Project deletion now prevented by default with `deletion_policy`
 
-The field `deletion_policy` has been added with a default value of `PREVENT`. This field prevents
-Terraform from destroying or recreating the project. In 6.0.0, existing projects will have 
-`deletion_policy` set to `PREVENT` during the next refresh unless otherwise set in configuration.
-
-**`deletion_policy` does NOT prevent deletion outside of Terraform.**
-
-Setting `deletion_policy` to `ABANDON` allows the resource to be abandoned rather than deleted. To disable any kind of deletion protection, explicitly set this field to `NONE` in configuration and then run `terraform apply` to apply the change.
-
+The field `skip_delete` is replaced with `deletion_policy`. The default value for `deletion_policy` is `PREVENT`, which stops Terraform from deleting or recreating your project. Setting this field to `ABANDON` allows the resource to be abandoned instead of deleted. To remove deletion protection entirely, explicitly set this field to `DELETE` in your configuration and run `terraform apply`.
+After upgrading to version `6.0.0`, the following changes apply:
+* For `google_project` resources without a `skip_delete` field, `terraform apply` will automatically set `deletion_policy` to `PREVENT`.
+* For `google_project` resources with `skip_delete` set to `false`, remove the `skip_delete` setting from your configuration. Then, running `terraform apply` will set `deletion_policy` to `PREVENT`.
+* For `google_project` resources with `skip_delete` set to `true`,  replace `skip_delete = true` with `deletion_policy = “ABANDON”` in  the configuration. Then, running `terraform apply` will set `deletion_policy` to `ABANDON`.

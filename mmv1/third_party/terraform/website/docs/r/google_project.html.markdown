@@ -101,7 +101,7 @@ The following arguments are supported:
 * `deletion_policy` -  (Optional) The deletion policy for the Project. Setting PREVENT will protect the project
    against any destroy actions caused by a terraform apply or terraform destroy. Setting ABANDON allows the resource 
    to be abandoned rather than deleted, i.e., the Terraform resource can be deleted without deleting the Project via 
-   the Google API. Possible values are: "PREVENT", "ABANDON", "NONE".
+   the Google API. Possible values are: "PREVENT", "ABANDON", "NONE". Default value is `PREVENT`.
 
 ## Attributes Reference
 
