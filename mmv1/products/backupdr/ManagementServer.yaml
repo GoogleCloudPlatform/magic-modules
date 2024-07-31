@@ -125,19 +125,19 @@ properties:
     description: 'Output only. Reserved for future use. '
     output: true
   parameters:
-  - !ruby/object:Api::Type::String
-    name: location
-    description: " "
-    url_param_only: true
-    required: true
-    immutable: true
-  - !ruby/object:Api::Type::String
-    name: managementServerId
-    description: "Required. The name of the management server to create. The name must
-      be unique for\nthe specified project and location. "
-    url_param_only: true
-    required: true
-    immutable: true
+    - !ruby/object:Api::Type::String
+      name: location
+      description: " "
+      url_param_only: true
+      required: true
+      immutable: true
+    - !ruby/object:Api::Type::String
+      name: managementServerId
+      description: "Required. The name of the management server to create. The name must
+        be unique for\nthe specified project and location. "
+      url_param_only: true
+      required: true
+      immutable: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: name
@@ -151,8 +151,8 @@ async: !ruby/object:Api::OpAsync
     path: done
     complete: true
     allowed:
-    - true
-    - false
+      - true
+      - false
   error: !ruby/object:Api::OpAsync::Error
     path: error
     message: message
