@@ -19,7 +19,7 @@ self_link: 'b/{{bucket}}/managedFolders/{{%name}}'
 id_format: '{{bucket}}/{{name}}'
 delete_url: 'b/{{bucket}}/managedFolders/{{%name}}?allowNonEmpty={{force_destroy}}'
 has_self_link: true
-skip_sweeper: true # Skipping sweeper since this is a child resource.
+skip_sweeper: true  # Skipping sweeper since this is a child resource.
 description: |
   A Google Cloud Storage Managed Folder.
 
@@ -41,7 +41,7 @@ import_format:
   - '{{bucket}}/managedFolders/{{%name}}'
   - '{{bucket}}/{{%name}}'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-   custom_update: templates/terraform/custom_update/storage_managed_folder.go.erb
+  custom_update: templates/terraform/custom_update/storage_managed_folder.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'storage_managed_folder_basic'
