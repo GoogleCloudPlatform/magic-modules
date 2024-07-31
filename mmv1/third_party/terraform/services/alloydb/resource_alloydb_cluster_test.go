@@ -102,7 +102,7 @@ func testAccAlloydbCluster_withSubscriptionTypeTrial(context map[string]interfac
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
-  location   = "asia-east1"
+  location   = "us-central1"
   subscription_type = "TRIAL"
   network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
 }
