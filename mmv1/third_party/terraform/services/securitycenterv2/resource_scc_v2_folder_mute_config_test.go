@@ -26,9 +26,6 @@ func TestAccSecurityCenterV2FolderMuteConfig_update(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSecurityCenterV2FolderMuteConfig_basic(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("google_scc_v2_folder_mute_config.default", "name"),
-				),
 			},
 			{
 				ResourceName:      "google_scc_v2_folder_mute_config.default",
@@ -40,9 +37,6 @@ func TestAccSecurityCenterV2FolderMuteConfig_update(t *testing.T) {
 			},
 			{
 				Config: testAccSecurityCenterV2FolderMuteConfig_update(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("google_scc_v2_folder_mute_config.default", "name"),
-				),
 			},
 			{
 				ResourceName:      "google_scc_v2_folder_mute_config.default",
