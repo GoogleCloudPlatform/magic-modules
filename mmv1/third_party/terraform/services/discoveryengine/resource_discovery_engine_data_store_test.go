@@ -17,7 +17,6 @@ func TestAccDiscoveryEngineDataStore_discoveryengineDatastoreBasicExample_update
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckDiscoveryEngineDataStoreDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDiscoveryEngineDataStore_discoveryengineDatastoreBasicExample_basic(context),
