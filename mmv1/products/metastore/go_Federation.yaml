@@ -91,7 +91,6 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: 'User-defined labels for the metastore federation.'
-    immutable: false
   - name: 'endpointUri'
     type: String
     description: |

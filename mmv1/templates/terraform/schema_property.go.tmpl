@@ -43,7 +43,7 @@
 {{ if .IsForceNew -}}
   ForceNew: true,
 {{ end -}}
-{{ if .Validation -}}
+{{ if and (not .Output) .Validation -}}
 	{{ if .Validation.Regex -}}
   ValidateFunc: verify.ValidateRegexp(`{{ .Validation.Regex -}}`),
 	{{ else if .Validation.Function -}}

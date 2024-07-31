@@ -108,8 +108,8 @@ virtual_fields:
       - :STOPPED
     default_value: :ACTIVE
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/notebooks_instance.go
-  update_encoder: templates/terraform/update_encoder/notebooks_instance.go
+  constants: templates/terraform/constants/notebooks_instance.go.erb
+  update_encoder: templates/terraform/update_encoder/notebooks_instance.go.erb
   post_create: templates/terraform/post_create/notebooks_instance.go.erb
   post_update: templates/terraform/post_update/notebooks_instance.go.erb
 state_upgraders: true

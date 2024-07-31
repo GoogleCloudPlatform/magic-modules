@@ -1,0 +1,196 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'PolicyBasedRoute'
+description:
+  'Policy-based Routes are more powerful routes that route L4 network traffic based on not just destination IP, but also source IP, protocol and more. A Policy-based Route always take precedence when it conflicts with other types of routes.'
+references:
+  guides:
+    'Use policy-based routes': 'https://cloud.google.com/vpc/docs/use-policy-based-routes#api'
+  api: 'https://cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1/projects.locations.global.policyBasedRoutes'
+docs:
+base_url: 'projects/{{project}}/locations/global/policyBasedRoutes'
+self_link: 'projects/{{project}}/locations/global/policyBasedRoutes/{{name}}'
+create_url: 'projects/{{project}}/locations/global/policyBasedRoutes?policyBasedRouteId={{name}}'
+immutable: true
+timeouts:
+  insert_minutes: 30
+  update_minutes: 30
+  delete_minutes: 30
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+    timeouts:
+      insert_minutes: 30
+      update_minutes: 30
+      delete_minutes: 30
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'network_connectivity_policy_based_route_basic'
+    primary_resource_id: 'default'
+    vars:
+      pbr_name: 'my-pbr'
+      network_name: 'my-network'
+  - name: 'network_connectivity_policy_based_route_full'
+    primary_resource_id: 'default'
+    vars:
+      pbr_name: 'my-pbr'
+      network_name: 'my-network'
+      ilb_name: 'my-ilb'
+parameters:
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The name of the policy based route.
+    url_param_only: true
+    required: true
+  - name: 'description'
+    type: String
+    description: |
+      An optional description of this resource.
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      User-defined labels.
+  - name: 'network'
+    type: String
+    description: |
+      Fully-qualified URL of the network that this route applies to, for example: projects/my-project/global/networks/my-network.
+    required: true
+  - name: 'filter'
+    type: NestedObject
+    description: |
+      The filter to match L4 traffic.
+    required: true
+    properties:
+      - name: 'protocolVersion'
+        type: Enum
+        description: |
+          Internet protocol versions this policy-based route applies to.
+        required: true
+        enum_values:
+          - 'IPV4'
+      - name: 'ipProtocol'
+        type: String
+        description: |
+          The IP protocol that this policy-based route applies to. Valid values are 'TCP', 'UDP', and 'ALL'. Default is 'ALL'.
+        default_value: "ALL"
+      - name: 'srcRange'
+        type: String
+        description: |
+          The source IP range of outgoing packets that this policy-based route applies to. Default is "0.0.0.0/0" if protocol version is IPv4.
+        default_value: "0.0.0.0/0"
+      - name: 'destRange'
+        type: String
+        description: |
+          The destination IP range of outgoing packets that this policy-based route applies to. Default is "0.0.0.0/0" if protocol version is IPv4.
+        default_value: "0.0.0.0/0"
+  - name: 'nextHopOtherRoutes'
+    type: Enum
+    description: |
+      Other routes that will be referenced to determine the next hop of the packet.
+    exactly_one_of:
+      - 'next_hop_ilb_ip'
+      - 'next_hop_other_routes'
+    enum_values:
+      - 'DEFAULT_ROUTING'
+  - name: 'nextHopIlbIp'
+    type: String
+    description: |
+      The IP address of a global-access-enabled L4 ILB that is the next hop for matching packets.
+    exactly_one_of:
+      - 'next_hop_ilb_ip'
+      - 'next_hop_other_routes'
+  - name: 'priority'
+    type: Integer
+    description: |
+      The priority of this policy-based route. Priority is used to break ties in cases where there are more than one matching policy-based routes found. In cases where multiple policy-based routes are matched, the one with the lowest-numbered priority value wins. The default value is 1000. The priority value must be from 1 to 65535, inclusive.
+    default_value: 1000
+  - name: 'virtualMachine'
+    type: NestedObject
+    description: |
+      VM instances to which this policy-based route applies to.
+    conflicts:
+      - interconnect_attachment
+    properties:
+      - name: 'tags'
+        type: Array
+        description: |
+          A list of VM instance tags that this policy-based route applies to. VM instances that have ANY of tags specified here will install this PBR.
+        required: true
+        item_type:
+          type: String
+  - name: 'interconnectAttachment'
+    type: NestedObject
+    description: |
+      The interconnect attachments that this policy-based route applies to.
+    conflicts:
+      - virtual_machine
+    properties:
+      - name: 'region'
+        type: String
+        description: |
+          Cloud region to install this policy-based route on for Interconnect attachments. Use `all` to install it on all Interconnect attachments.
+        required: true
+  - name: 'createTime'
+    type: Time
+    description: |
+      Time when the policy-based route was created.
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      Time when the policy-based route was created.
+    output: true
+  - name: 'kind'
+    type: Time
+    description: |
+      Type of this resource.
+    output: true
+  - name: 'warnings'
+    type: Array
+    description: |
+       If potential misconfigurations are detected for this route, this field will be populated with warning messages.
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'code'
+          type: String
+          description: |
+            A warning code, if applicable.
+          output: true
+        - name: 'data'
+          type: KeyValuePairs
+          description: |
+            Metadata about this warning in key: value format. The key should provides more detail on the warning being returned. For example, for warnings where there are no results in a list request for a particular zone, this key might be scope and the key value might be the zone name. Other examples might be a key indicating a deprecated resource and a suggested replacement.
+          output: true
+        - name: 'warningMessage'
+          type: String
+          description: |
+            A human-readable description of the warning code.
+          output: true
