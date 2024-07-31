@@ -19,8 +19,8 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
 	// As TF Input and GET response values have different format,
 	// we will return TF Input value to prevent state drift.
 
-	if ObjVal, ok := d.GetOk("build_config.0.source.0.storage_source.0.generation"); ok {
-		v = ObjVal
+	if genVal, ok := d.GetOk("build_config.0.source.0.storage_source.0.generation"); ok {
+		v = genVal
 	}
 
 	// Handles the string fixed64 format
