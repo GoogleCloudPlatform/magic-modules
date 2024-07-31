@@ -4,140 +4,140 @@ create_url: projects/{{project}}/locations/{{location}}/managementServers?manage
 self_link: projects/{{project}}/locations/{{location}}/managementServers/{{management_server_id}}
 id_format: projects/{{project}}/locations/{{location}}/managementServers/{{management_server_id}}
 import_format:
-- projects/{{project}}/locations/{{location}}/managementServers/{{management_server_id}}
+  - projects/{{project}}/locations/{{location}}/managementServers/{{management_server_id}}
 name: ManagementServer
 description: Description
 immutable: true
 autogen_async: true
 properties:
-- !ruby/object:Api::Type::String
-  name: name
-  description: 'Output only. Identifier. The resource name. '
-  output: true
-- !ruby/object:Api::Type::String
-  name: description
-  description: 'Optional. The description of the ManagementServer instance (2048 characters
-    or less). '
-- !ruby/object:Api::Type::KeyValueLabels
-  name: labels
-  output:
-  api_name:
-  description: "Optional. Resource labels to represent user provided metadata.\nLabels
-    currently defined:\n1. migrate_from_go=\n   If set to true, the MS is created
-    in migration ready mode. "
-  min_version:
-  ignore_write:
-  update_verb:
-  update_url:
-  immutable:
-- !ruby/object:Api::Type::String
-  name: createTime
-  description: 'Output only. The time when the instance was created. '
-  output: true
-- !ruby/object:Api::Type::String
-  name: updateTime
-  description: 'Output only. The time when the instance was updated. '
-  output: true
-- !ruby/object:Api::Type::String
-  name: type
-  description: "Optional. The type of the ManagementServer resource. \n Possible values:\n
-    INSTANCE_TYPE_UNSPECIFIED\nBACKUP_RESTORE"
-- !ruby/object:Api::Type::NestedObject
-  properties:
   - !ruby/object:Api::Type::String
-    name: webUi
-    description: 'Output only. The ManagementServer AGM/RD WebUI URL. '
+    name: name
+    description: 'Output only. Identifier. The resource name. '
     output: true
   - !ruby/object:Api::Type::String
-    name: api
-    description: 'Output only. The ManagementServer AGM/RD API URL. '
-    output: true
-  name: managementUri
-  description: 'ManagementURI for the Management Server resource. '
-- !ruby/object:Api::Type::NestedObject
-  properties:
+    name: description
+    description: 'Optional. The description of the ManagementServer instance (2048 characters
+      or less). '
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: labels
+    output:
+    api_name:
+    description: "Optional. Resource labels to represent user provided metadata.\nLabels
+      currently defined:\n1. migrate_from_go=\n   If set to true, the MS is created
+      in migration ready mode. "
+    min_version:
+    ignore_write:
+    update_verb:
+    update_url:
+    immutable:
   - !ruby/object:Api::Type::String
-    name: firstPartyManagementUri
-    description: 'Output only. First party Management URI for Google Identities. '
+    name: createTime
+    description: 'Output only. The time when the instance was created. '
     output: true
   - !ruby/object:Api::Type::String
-    name: thirdPartyManagementUri
-    description: 'Output only. Third party Management URI for External Identity Providers. '
+    name: updateTime
+    description: 'Output only. The time when the instance was updated. '
     output: true
-  name: workforceIdentityBasedManagementUri
-  description: 'ManagementURI depending on the Workforce Identity i.e. either 1p or
-    3p. '
-- !ruby/object:Api::Type::String
-  name: state
-  description: "Output only. The ManagementServer state. \n Possible values:\n INSTANCE_STATE_UNSPECIFIED\nCREATING\nREADY\nUPDATING\nDELETING\nREPAIRING\nMAINTENANCE\nERROR"
-  output: true
-- !ruby/object:Api::Type::Array
-  name: networks
-  item_type: !ruby/object:Api::Type::NestedObject
+  - !ruby/object:Api::Type::String
+    name: type
+    description: "Optional. The type of the ManagementServer resource. \n Possible values:\n
+      INSTANCE_TYPE_UNSPECIFIED\nBACKUP_RESTORE"
+  - !ruby/object:Api::Type::NestedObject
     properties:
-    - !ruby/object:Api::Type::String
-      name: network
-      description: "Optional. The resource name of the Google Compute Engine VPC network
-        to which the\nManagementServer instance is connected. "
-    - !ruby/object:Api::Type::String
-      name: peeringMode
-      description: "Optional. The network connect mode of the ManagementServer instance.
-        For this\nversion, only PRIVATE_SERVICE_ACCESS is supported. \n Possible values:\n
-        PEERING_MODE_UNSPECIFIED\nPRIVATE_SERVICE_ACCESS"
-  description: "Required. VPC networks to which the ManagementServer instance is connected.
-    For this\nversion, only a single network is supported. "
-  required: true
-- !ruby/object:Api::Type::String
-  name: etag
-  description: "Optional. Server specified ETag for the ManagementServer resource
-    to prevent\nsimultaneous updates from overwiting each other. "
-- !ruby/object:Api::Type::String
-  name: oauth2ClientId
-  description: "Output only. The OAuth 2.0 client id is required to make API calls
-    to the BackupDR\ninstance API of this ManagementServer. This is the value that
-    should\nbe provided in the 'aud' field of the OIDC ID Token (see openid\nspecification\nhttps://openid.net/specs/openid-connect-core-1_0.html#IDToken). "
-  output: true
-- !ruby/object:Api::Type::NestedObject
-  properties:
+      - !ruby/object:Api::Type::String
+        name: webUi
+        description: 'Output only. The ManagementServer AGM/RD WebUI URL. '
+        output: true
+      - !ruby/object:Api::Type::String
+        name: api
+        description: 'Output only. The ManagementServer AGM/RD API URL. '
+        output: true
+    name: managementUri
+    description: 'ManagementURI for the Management Server resource. '
+  - !ruby/object:Api::Type::NestedObject
+    properties:
+      - !ruby/object:Api::Type::String
+        name: firstPartyManagementUri
+        description: 'Output only. First party Management URI for Google Identities. '
+        output: true
+      - !ruby/object:Api::Type::String
+        name: thirdPartyManagementUri
+        description: 'Output only. Third party Management URI for External Identity Providers. '
+        output: true
+    name: workforceIdentityBasedManagementUri
+    description: 'ManagementURI depending on the Workforce Identity i.e. either 1p or
+      3p. '
   - !ruby/object:Api::Type::String
-    name: firstPartyOauth2ClientId
-    description: 'Output only. First party OAuth Client ID for Google Identities. '
+    name: state
+    description: "Output only. The ManagementServer state. \n Possible values:\n INSTANCE_STATE_UNSPECIFIED\nCREATING\nREADY\nUPDATING\nDELETING\nREPAIRING\nMAINTENANCE\nERROR"
     output: true
+  - !ruby/object:Api::Type::Array
+    name: networks
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: network
+          description: "Optional. The resource name of the Google Compute Engine VPC network
+            to which the\nManagementServer instance is connected. "
+        - !ruby/object:Api::Type::String
+          name: peeringMode
+          description: "Optional. The network connect mode of the ManagementServer instance.
+            For this\nversion, only PRIVATE_SERVICE_ACCESS is supported. \n Possible values:\n
+            PEERING_MODE_UNSPECIFIED\nPRIVATE_SERVICE_ACCESS"
+    description: "Required. VPC networks to which the ManagementServer instance is connected.
+      For this\nversion, only a single network is supported. "
+    required: true
   - !ruby/object:Api::Type::String
-    name: thirdPartyOauth2ClientId
-    description: 'Output only. Third party OAuth Client ID for External Identity Providers. '
+    name: etag
+    description: "Optional. Server specified ETag for the ManagementServer resource
+      to prevent\nsimultaneous updates from overwiting each other. "
+  - !ruby/object:Api::Type::String
+    name: oauth2ClientId
+    description: "Output only. The OAuth 2.0 client id is required to make API calls
+      to the BackupDR\ninstance API of this ManagementServer. This is the value that
+      should\nbe provided in the 'aud' field of the OIDC ID Token (see openid\nspecification\nhttps://openid.net/specs/openid-connect-core-1_0.html#IDToken). "
     output: true
-  name: workforceIdentityBasedOauth2ClientId
-  description: 'OAuth Client ID depending on the Workforce Identity i.e. either 1p
-    or 3p, '
-- !ruby/object:Api::Type::Array
-  name: baProxyUri
-  item_type: Api::Type::String
-  description: "Output only. The hostname or ip address of the exposed AGM endpoints,
-    used by BAs to\nconnect to BA proxy. "
-  output: true
-- !ruby/object:Api::Type::Boolean
-  name: satisfiesPzs
-  description: 'Output only. Reserved for future use. '
-  output: true
-- !ruby/object:Api::Type::Boolean
-  name: satisfiesPzi
-  description: 'Output only. Reserved for future use. '
-  output: true
-parameters:
-- !ruby/object:Api::Type::String
-  name: location
-  description: " "
-  url_param_only: true
-  required: true
-  immutable: true
-- !ruby/object:Api::Type::String
-  name: managementServerId
-  description: "Required. The name of the management server to create. The name must
-    be unique for\nthe specified project and location. "
-  url_param_only: true
-  required: true
-  immutable: true
+  - !ruby/object:Api::Type::NestedObject
+    properties:
+      - !ruby/object:Api::Type::String
+        name: firstPartyOauth2ClientId
+        description: 'Output only. First party OAuth Client ID for Google Identities. '
+        output: true
+      - !ruby/object:Api::Type::String
+        name: thirdPartyOauth2ClientId
+        description: 'Output only. Third party OAuth Client ID for External Identity Providers. '
+        output: true
+    name: workforceIdentityBasedOauth2ClientId
+    description: 'OAuth Client ID depending on the Workforce Identity i.e. either 1p
+      or 3p, '
+  - !ruby/object:Api::Type::Array
+    name: baProxyUri
+    item_type: Api::Type::String
+    description: "Output only. The hostname or ip address of the exposed AGM endpoints,
+      used by BAs to\nconnect to BA proxy. "
+    output: true
+  - !ruby/object:Api::Type::Boolean
+    name: satisfiesPzs
+    description: 'Output only. Reserved for future use. '
+    output: true
+  - !ruby/object:Api::Type::Boolean
+    name: satisfiesPzi
+    description: 'Output only. Reserved for future use. '
+    output: true
+  parameters:
+  - !ruby/object:Api::Type::String
+    name: location
+    description: " "
+    url_param_only: true
+    required: true
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: managementServerId
+    description: "Required. The name of the management server to create. The name must
+      be unique for\nthe specified project and location. "
+    url_param_only: true
+    required: true
+    immutable: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: name
