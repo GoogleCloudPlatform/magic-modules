@@ -313,7 +313,7 @@ custom VPC networks to your environment.
   other tools like Google Cloud CLI.
 </Note>
 
-Switch to Private IP networking:
+Use Private IP networking:
 
 ```hcl
 resource "google_composer_environment" "example" {
