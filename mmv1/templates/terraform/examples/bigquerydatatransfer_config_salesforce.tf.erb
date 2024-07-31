@@ -18,6 +18,6 @@ resource "google_bigquery_data_transfer_config" "<%= ctx[:primary_resource_id] %
     "connector.authentication.username"           = "username"
     "connector.authentication.password"           = "password"
     "connector.authentication.securityToken"      = "security-token"
-    "assets"                                      = "[asset-a, asset-b]"
+    "assets"                                      = "[\"asset-a\",\"asset-b\"]"
   }
 }

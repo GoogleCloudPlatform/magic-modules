@@ -68,7 +68,7 @@ parameters:
     required: true
     description: |
       The parent of this AccessPolicy in the Cloud Resource Hierarchy.
-      Format: organizations/{organization_id}
+      Format: 'organizations/{{organization_id}}'
   - !ruby/object:Api::Type::String
     name: title
     required: true
@@ -78,14 +78,14 @@ parameters:
     name: scopes
     description: |
       Folder or project on which this policy is applicable.
-      Format: folders/{{folder_id}} or projects/{{project_id}}
+      Format: 'folders/{{folder_id}}' or 'projects/{{project_number}}'
     item_type: Api::Type::String
     max_size: 1
 properties:
   - !ruby/object:Api::Type::String
     name: name
     description: |
-      Resource name of the AccessPolicy. Format: {policy_id}
+      Resource name of the AccessPolicy. Format: '{{policy_id}}'
     output: true
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::Time

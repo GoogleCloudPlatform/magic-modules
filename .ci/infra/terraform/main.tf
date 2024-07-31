@@ -321,6 +321,7 @@ module "project-services" {
     "servicenetworking.googleapis.com",
     "serviceusage.googleapis.com",
     "sourcerepo.googleapis.com",
+    "speech.googleapis.com",
     "spanner.googleapis.com",
     "sql-component.googleapis.com",
     "sqladmin.googleapis.com",
