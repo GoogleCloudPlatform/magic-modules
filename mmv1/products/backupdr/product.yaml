@@ -13,13 +13,13 @@
 
 --- !ruby/object:Api::Product
 name: BackupDR
-display_name: Backup and DR
+display_name: Backup and DR Service
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 versions:
   - !ruby/object:Api::Product::Version
     name: beta
-    base_url: https://backupdr.googleapis.com/v1/
+    base_url: https://autopush-backupdr.sandbox.googleapis.com/v1/
 async: !ruby/object:Api::OpAsync
   actions: ['create', 'delete']
   operation: !ruby/object:Api::OpAsync::Operation
