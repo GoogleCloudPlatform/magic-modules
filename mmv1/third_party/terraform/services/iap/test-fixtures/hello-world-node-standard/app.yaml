@@ -12,5 +12,5 @@
 # limitations under the License.
 
 # [START gae_quickstart_yaml]
-runtime: nodejs20
+runtime: nodejs22
 # [END gae_quickstart_yaml]
