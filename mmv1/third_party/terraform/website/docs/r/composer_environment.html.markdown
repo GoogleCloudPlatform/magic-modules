@@ -305,7 +305,7 @@ resource "google_project_iam_member" "composer-worker" {
 
 In Cloud Composer 3, networking configuration is simplified compared to
 previous versions. You don't need to specify network ranges, and can attach
-custom VPC networks to your envrionment.
+custom VPC networks to your environment.
 
 <Note>
   It's not possible to detach a VPC network using Terraform. Instead, you can
