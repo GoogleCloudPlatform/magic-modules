@@ -84,10 +84,7 @@ For more information, see
   * For handwritten resources, removing `DiffSuppressFunc` from a field.
 * <a name="field-adding-subfield-to-config-mode-attr"></a> Adding a subfield to
   a SchemaConfigModeAttr field.
-  * For MMv1 resources, adding a subfield to a field that has
-    SchemaConfigModeAttr.
-  * For handwritten resources, adding a subfield to a field that has
-    SchemaConfigModeAttr.
+  * Subfields of SchemaConfigModeAttr fields are treated as required even if the schema says they are optional.
 * Removing update support from a field.
 
 ### Making validation more strict
