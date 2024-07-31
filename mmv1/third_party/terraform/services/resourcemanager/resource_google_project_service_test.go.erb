@@ -368,12 +368,14 @@ resource "google_project_service" "test" {
 func testAccProjectService_checkUsage(service string, pid, org string, checkIfServiceHasUsage string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
+  provider = google-beta
   project_id = "%s"
   name       = "%s"
   org_id     = "%s"
 }
 
 resource "google_project_service" "test" {
+  provider = google-beta
   project = google_project.acceptance.project_id
   service = "%s"
 
