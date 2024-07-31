@@ -28,7 +28,7 @@ func TestAccCloudRunV2Job_cloudrunv2JobFullUpdate(t *testing.T) {
 				ResourceName:            "google_cloud_run_v2_job.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "launch_stage", "labels", "terraform_labels", "annotations"},
+				ImportStateVerifyIgnore: []string{"location", "launch_stage", "labels", "terraform_labels", "annotations", "deletion_protection"},
 			},
 			{
 				Config: testAccCloudRunV2Job_cloudrunv2JobFullUpdate(context),
@@ -37,7 +37,7 @@ func TestAccCloudRunV2Job_cloudrunv2JobFullUpdate(t *testing.T) {
 				ResourceName:            "google_cloud_run_v2_job.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "launch_stage", "labels", "terraform_labels", "annotations"},
+				ImportStateVerifyIgnore: []string{"location", "launch_stage", "labels", "terraform_labels", "annotations", "deletion_protection"},
 			},
 		},
 	})
@@ -229,7 +229,7 @@ func TestAccCloudRunV2Job_cloudrunv2JobWithDirectVPCUpdate(t *testing.T) {
 				ResourceName:            "google_cloud_run_v2_job.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "launch_stage"},
+				ImportStateVerifyIgnore: []string{"location", "launch_stage", "deletion_protection"},
 			},
 			{
 				Config: testAccCloudRunV2Job_cloudrunv2JobWithDirectVPCUpdate(context),
@@ -238,7 +238,7 @@ func TestAccCloudRunV2Job_cloudrunv2JobWithDirectVPCUpdate(t *testing.T) {
 				ResourceName:            "google_cloud_run_v2_job.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "launch_stage"},
+				ImportStateVerifyIgnore: []string{"location", "launch_stage", "deletion_protection"},
 			},
 		},
 	})
@@ -325,7 +325,7 @@ func TestAccCloudRunV2Job_cloudrunv2JobWithGcsUpdate(t *testing.T) {
 				ResourceName:            "google_cloud_run_v2_job.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "launch_stage"},
+				ImportStateVerifyIgnore: []string{"location", "launch_stage", "deletion_protection"},
 			},
 			{
 				Config: testAccCloudRunV2Job_cloudrunv2JobWithGcsVolume(context),
@@ -334,7 +334,7 @@ func TestAccCloudRunV2Job_cloudrunv2JobWithGcsUpdate(t *testing.T) {
 				ResourceName:            "google_cloud_run_v2_job.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "launch_stage"},
+				ImportStateVerifyIgnore: []string{"location", "launch_stage", "deletion_protection"},
 			},
 		},
 	})
@@ -413,7 +413,7 @@ func TestAccCloudRunV2Job_cloudrunv2JobWithNfsUpdate(t *testing.T) {
 				ResourceName:            "google_cloud_run_v2_job.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "launch_stage"},
+				ImportStateVerifyIgnore: []string{"location", "launch_stage", "deletion_protection"},
 			},
 			{
 				Config: testAccCloudRunV2Job_cloudrunv2JobWithNfsVolume(context),
@@ -422,7 +422,7 @@ func TestAccCloudRunV2Job_cloudrunv2JobWithNfsUpdate(t *testing.T) {
 				ResourceName:            "google_cloud_run_v2_job.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "launch_stage"},
+				ImportStateVerifyIgnore: []string{"location", "launch_stage", "deletion_protection"},
 			},
 		},
 	})
@@ -483,7 +483,7 @@ func TestAccCloudRunV2Job_cloudrunv2JobWithStartExecutionTokenUpdate(t *testing.
 				ResourceName:            "google_cloud_run_v2_job.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "launch_stage"},
+				ImportStateVerifyIgnore: []string{"location", "launch_stage", "deletion_protection"},
 			},
 			{
 				Config: testAccCloudRunV2Job_cloudrunv2JobWithStartExecutionToken(context2),
@@ -492,7 +492,7 @@ func TestAccCloudRunV2Job_cloudrunv2JobWithStartExecutionTokenUpdate(t *testing.
 				ResourceName:            "google_cloud_run_v2_job.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "launch_stage"},
+				ImportStateVerifyIgnore: []string{"location", "launch_stage", "deletion_protection"},
 			},
 		},
 	})
@@ -541,7 +541,7 @@ func TestAccCloudRunV2Job_cloudrunv2JobWithRunExecutionTokenUpdate(t *testing.T)
 				ResourceName:            "google_cloud_run_v2_job.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "launch_stage"},
+				ImportStateVerifyIgnore: []string{"location", "launch_stage", "deletion_protection"},
 			},
 			{
 				Config: testAccCloudRunV2Job_cloudrunv2JobWithRunExecutionToken(context2),
@@ -550,7 +550,7 @@ func TestAccCloudRunV2Job_cloudrunv2JobWithRunExecutionTokenUpdate(t *testing.T)
 				ResourceName:            "google_cloud_run_v2_job.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "launch_stage"},
+				ImportStateVerifyIgnore: []string{"location", "launch_stage", "deletion_protection"},
 			},
 		},
 	})
