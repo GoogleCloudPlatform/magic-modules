@@ -50,7 +50,7 @@ type logKey struct {
 
 type Tester struct {
 	env           map[string]string           // shared environment variables for running tests
-	rnr           *exec.Runner                // for running commands and manipulating files
+	rnr           exec.ExecRunner             // for running commands and manipulating files
 	baseDir       string                      // the directory in which this tester was created
 	saKeyPath     string                      // where sa_key.json is relative to baseDir
 	cassettePaths map[provider.Version]string // where cassettes are relative to baseDir by version
@@ -68,7 +68,7 @@ var testResultsExpression = regexp.MustCompile(`(?m:^--- (PASS|FAIL|SKIP): (Test
 var testPanicExpression = regexp.MustCompile(`^panic: .*`)
 
 // Create a new tester in the current working directory and write the service account key file.
-func NewTester(env map[string]string, rnr *exec.Runner) (*Tester, error) {
+func NewTester(env map[string]string, rnr exec.ExecRunner) (*Tester, error) {
 	saKeyPath := "sa_key.json"
 	if err := rnr.WriteFile(saKeyPath, env["SA_KEY"]); err != nil {
 		return nil, err
@@ -91,11 +91,11 @@ func (vt *Tester) SetRepoPath(version provider.Version, repoPath string) {
 // Fetch the cassettes for the current version if not already fetched.
 // Should be run from the base dir.
 func (vt *Tester) FetchCassettes(version provider.Version, baseBranch, prNumber string) error {
-	cassettePath, ok := vt.cassettePaths[version]
+	_, ok := vt.cassettePaths[version]
 	if ok {
 		return nil
 	}
-	cassettePath = filepath.Join(vt.baseDir, "cassettes", version.String())
+	cassettePath := filepath.Join(vt.baseDir, "cassettes", version.String())
 	vt.rnr.Mkdir(cassettePath)
 	if baseBranch != "FEATURE-BRANCH-major-release-6.0.0" {
 		// pull main cassettes (major release uses branch specific casssettes as primary ones)
@@ -240,7 +240,7 @@ func (vt *Tester) RunParallel(mode Mode, version provider.Version, testDirs, tes
 	if err != nil {
 		return nil, err
 	}
-	if vt.rnr.Mkdir(filepath.Join(vt.baseDir, "testlogs", mode.Lower()+"_build")); err != nil {
+	if err := vt.rnr.Mkdir(filepath.Join(vt.baseDir, "testlogs", mode.Lower()+"_build")); err != nil {
 		return nil, err
 	}
 	repoPath, ok := vt.repoPaths[version]
