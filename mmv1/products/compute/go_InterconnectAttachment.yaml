@@ -27,6 +27,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
@@ -300,7 +301,7 @@ properties:
       attachment must be created with this option.
     immutable: true
     custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
-    default_value: NONE
+    default_value: "NONE"
     enum_values:
       - 'NONE'
       - 'IPSEC'

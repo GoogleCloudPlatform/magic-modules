@@ -44,6 +44,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
@@ -60,6 +61,7 @@ collection_url_key: 'items'
 iam_policy:
   parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}'
+  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/regions/{{region}}/disks/{{name}}'
     - '{{name}}'
@@ -70,7 +72,6 @@ custom_code:
 custom_diff:
   - 'customdiff.ForceNewIfChange("size", IsDiskShrinkage)'
   - 'hyperDiskIopsUpdateDiffSupress'
-  - 'tpgresource.SetLabelsDiff'
 examples:
   - name: 'region_disk_basic'
     primary_resource_id: 'regiondisk'
@@ -214,7 +215,6 @@ properties:
     type: KeyValueLabels
     description: |
       Labels to apply to this disk.  A list of key->value pairs.
-    immutable: false
     update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}/setLabels'
     update_verb: 'POST'
   - name: 'name'
@@ -287,7 +287,7 @@ properties:
       create the disk. Provide this when creating the disk.
     custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
     custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
-    default_value: pd-standard
+    default_value: "pd-standard"
     resource: 'RegionDiskType'
     imports: 'selfLink'
   - name: 'interface'
@@ -296,8 +296,8 @@ properties:
       Specifies the disk interface to use for attaching this disk, which is either SCSI or NVME. The default is SCSI.
     min_version: 'beta'
     url_param_only: true
-    diff_suppress_func: 'tpgresource.AlwaysDiffSuppress'
-    default_value: SCSI
+    diff_suppress_func: 'AlwaysDiffSuppress'
+    default_value: "SCSI"
     deprecation_message: '`interface` is deprecated and will be removed in a future major release. This field is no longer used and can be safely removed from your configurations; disk interfaces are automatically determined on attachment.'
   - name: 'sourceDisk'
     type: String

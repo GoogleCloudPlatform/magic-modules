@@ -1,4 +1,4 @@
-{{- define "propertyDocumentation" }}
+{{ "" }}
 * `{{ underscore $.Name }}` -
   {{- if and (eq $.MinVersion "beta") (not (eq $.ResourceMetadata.MinVersion "beta")) }}
     {{- if $.Required }}
@@ -21,20 +21,20 @@
   (Deprecated)
     {{- end}}
   {{- end }}
-  {{ $.ResourceMetadata.FormatDocDescription $.Description -}}
+  {{- $.ResourceMetadata.FormatDocDescription $.Description true -}}
   {{- if and (and ($.IsA "Array") ($.ItemType.IsA "Enum")) (and (not $.Output) (not $.ItemType.SkipDocsValues))}}
     {{- if $.ItemType.DefaultValue }}
   Default value is `{{ $.ItemType.DefaultValue }}`.
     {{- end }}
-    Each value may be one of: {{ $.ItemType.EnumValuesToString "`" false }}.
-  {{- else if and ($.IsA "Enum") (and (not $.Output) (not (and $.ItemType $.ItemType.SkipDocsValues)))}}
+  Each value may be one of: {{ $.ItemType.EnumValuesToString "`" false }}.
+  {{- else if and ($.IsA "Enum") (and (not $.Output) (not $.SkipDocsValues))}}
     {{- if $.DefaultValue }}
   Default value is `{{ $.DefaultValue }}`.
     {{- end }}
   Possible values are: {{ $.EnumValuesToString "`" false }}.
   {{- end }}
   {{- if $.Sensitive }}
-    **Note**: This property is sensitive and will not be displayed in the plan.
+  **Note**: This property is sensitive and will not be displayed in the plan.
   {{- end }}
   {{- if and (not $.FlattenObject) $.NestedProperties }}
   Structure is [documented below](#nested_{{ underscore $.Name }}).
@@ -42,5 +42,5 @@
   {{- if $.DeprecationMessage }}
 
   ~> **Warning:** {{ $.DeprecationMessage }}
-  {{- end }}
-{{ end }}
+  {{- end -}}
+{{ "" }}

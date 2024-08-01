@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Product
 name: SecurityCenterV2
-display_name: Security Command Center (SCC)
+display_name: Security Command Center (SCC)v2 API
 legacy_name: scc_v2
 versions:
   - !ruby/object:Api::Product::Version

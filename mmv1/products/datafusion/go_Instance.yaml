@@ -68,6 +68,16 @@ examples:
       prober_test_run: ''
     test_vars_overrides:
       'prober_test_run': '`options = { prober_test_run = "true" }`'
+  - name: 'data_fusion_instance_psc'
+    primary_resource_id: 'psc_instance'
+    vars:
+      instance_name: 'psc-instance'
+      network_name: 'datafusion-psc-network'
+      subnet_name: 'datafusion-psc-subnet'
+      attachment_name: 'datafusion-psc-attachment'
+      prober_test_run: ''
+    test_vars_overrides:
+      'prober_test_run': '`options = { prober_test_run = "true" }`'
   - name: 'data_fusion_instance_cmek'
     primary_resource_id: 'cmek'
     vars:
@@ -238,7 +248,6 @@ properties:
         description: |
           The IP range in CIDR notation to use for the managed Data Fusion instance
           nodes. This range must not overlap with any other ranges used in the Data Fusion instance network.
-        required: true
         immutable: true
       - name: 'network'
         type: String
@@ -246,8 +255,46 @@ properties:
           Name of the network in the project with which the tenant project
           will be peered for executing pipelines. In case of shared VPC where the network resides in another host
           project the network should specified in the form of projects/{host-project-id}/global/networks/{network}
-        required: true
         immutable: true
+      - name: 'connectionType'
+        type: Enum
+        description: |
+          Optional. Type of connection for establishing private IP connectivity between the Data Fusion customer project VPC and
+          the corresponding tenant project from a predefined list of available connection modes.
+          If this field is unspecified for a private instance, VPC peering is used.
+        immutable: true
+        enum_values:
+          - 'VPC_PEERING'
+          - 'PRIVATE_SERVICE_CONNECT_INTERFACES'
+      - name: 'privateServiceConnectConfig'
+        type: NestedObject
+        description: |
+          Optional. Configuration for Private Service Connect.
+          This is required only when using connection type PRIVATE_SERVICE_CONNECT_INTERFACES.
+        immutable: true
+        properties:
+          - name: 'networkAttachment'
+            type: String
+            description: |
+              Optional. The reference to the network attachment used to establish private connectivity.
+              It will be of the form projects/{project-id}/regions/{region}/networkAttachments/{network-attachment-id}.
+              This is required only when using connection type PRIVATE_SERVICE_CONNECT_INTERFACES.
+            immutable: true
+          - name: 'unreachableCidrBlock'
+            type: String
+            description: |
+              Optional. Input only. The CIDR block to which the CDF instance can't route traffic to in the consumer project VPC.
+              The size of this block should be at least /25. This range should not overlap with the primary address range of any subnetwork used by the network attachment.
+              This range can be used for other purposes in the consumer VPC as long as there is no requirement for CDF to reach destinations using these addresses.
+              If this value is not provided, the server chooses a non RFC 1918 address range. The format of this field is governed by RFC 4632.
+            immutable: true
+            ignore_read: true
+          - name: 'effectiveUnreachableCidrBlock'
+            type: String
+            description: |
+              Output only. The CIDR block to which the CDF instance can't route traffic to in the consumer project VPC.
+              The size of this block is /25. The format of this field is governed by RFC 4632.
+            output: true
   - name: 'zone'
     type: String
     description: |
@@ -305,6 +352,7 @@ properties:
       If accelerators are enabled it is possible a permadiff will be created with the Options field.
       Users will need to either manually update their state file to include these diffed options, or include the field in a [lifecycle ignore changes block](https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle#ignore_changes).
     item_type:
+      type: NestedObject
       properties:
         - name: 'acceleratorType'
           type: Enum
@@ -323,4 +371,3 @@ properties:
           enum_values:
             - 'ENABLED'
             - 'DISABLED'
-      type: NestedObject

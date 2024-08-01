@@ -35,6 +35,7 @@ timeouts:
   delete_minutes: 20
 custom_code:
   post_create: 'templates/terraform/post_create/go/org_security_policy.go.tmpl'
+  post_delete: 'templates/terraform/post_delete/go/org_security_policy.go.tmpl'
   post_update: 'templates/terraform/post_update/go/org_security_policy.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/go/skip_delete_during_test.go.tmpl'
 examples:
@@ -87,6 +88,6 @@ properties:
       is "FIREWALL".
     min_version: 'beta'
     immutable: true
-    default_value: FIREWALL
+    default_value: "FIREWALL"
     enum_values:
       - 'FIREWALL'

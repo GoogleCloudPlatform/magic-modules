@@ -10,7 +10,7 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */ -}}
-{{- /* Not all self links behave like ResourceRef expects, eg they may expect a fully qualified url. In those
+{{/* Not all self links behave like ResourceRef expects, eg they may expect a fully qualified url. In those
  cases, we need to manually define this flattener. */}}
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {

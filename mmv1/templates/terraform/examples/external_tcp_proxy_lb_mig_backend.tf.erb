@@ -1,6 +1,5 @@
 # External TCP proxy load balancer with managed instance group backend
 
-# [START cloudloadbalancing_ext_tcp_proxy_lb]
 # VPC
 resource "google_compute_network" "default" {
   name                    = "<%= ctx[:vars]['tcp_proxy_xlb_network'] %>"
@@ -83,7 +82,7 @@ resource "google_compute_instance_template" "default" {
     }
   }
   disk {
-    source_image = "debian-cloud/debian-10"
+    source_image = "debian-cloud/debian-12"
     auto_delete  = true
     boot         = true
   }
@@ -142,4 +141,3 @@ resource "google_compute_firewall" "default" {
   }
   target_tags = ["allow-health-check"]
 }
-# [END cloudloadbalancing_ext_tcp_proxy_lb]

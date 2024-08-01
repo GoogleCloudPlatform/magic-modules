@@ -60,19 +60,19 @@ references:
 <%  unless object.docs.nil? -%>
 docs:
 <%    unless object.docs.warning.nil? -%>
-  warning: '<%= object.docs.warning %>'
+  warning:
 <%    end -%>
 <%    unless object.docs.note.nil? -%>
   note:
 <%    end -%>
 <%    unless object.docs.required_properties.nil? -%>
-  required_properties: '<%= object.docs.required_properties %>'
+  required_properties:
 <%    end -%>
 <%    unless object.docs.optional_properties.nil? -%>
-  optional_properties: '<%= object.docs.optional_properties %>'
+  optional_properties:
 <%    end -%>
 <%    unless object.docs.attributes.nil? -%>
-  attributes: '<%= object.docs.attributes %>'
+  attributes:
 <%    end -%>
 <%  end -%>
 <%
@@ -130,7 +130,7 @@ skip_delete: <%= object.skip_delete %>
 immutable: <%= object.immutable %>
 <%  end -%>
 <%  unless object.mutex.nil? -%>
-mutex: <%= object.mutex %>
+mutex: '<%= object.mutex %>'
 <%  end -%>
 <%
 #import
@@ -184,8 +184,8 @@ async:
 <%      unless object.async.target_occurrences.nil? -%>
   target_occurrences: <%= object.async.target_occurrences %>
 <%      end -%>
-  actions: ['<%= object.async.actions.join('\',\'') %>']
 <%    end -%>
+  actions: ['<%= object.async.actions.join('\', \'') %>']
 <%    if object.async.is_a? Api::OpAsync -%>
   type: 'OpAsync'
 <% #async.operation %>
@@ -239,6 +239,9 @@ async:
 <%      unless object.async.error.message.nil? -%>
     message: '<%= object.async.error.message %>'
 <%      end -%>
+<%    end -%>
+<%    unless !object.async.include_project -%>
+  include_project: <%= object.async.include_project %>
 <%    end -%>
 <%    end -%>
 <%  end -%>
@@ -322,8 +325,14 @@ iam_policy:
 <%    unless object.iam_policy.base_url.nil? -%>
   base_url: '<%= object.iam_policy.base_url %>'
 <%    end -%>
+<%    unless object.iam_policy.example_config_body.nil? -%>
+  example_config_body: '<%= object.convert_go_file( object.iam_policy.example_config_body ) %>'
+<%    end -%>
 <%    unless object.iam_policy.self_link.nil? -%>
   self_link: '<%= object.iam_policy.self_link %>'
+<%    end -%>
+<%    unless object.iam_policy.custom_diff_suppress.nil? -%>
+  custom_diff_suppress: '<%= object.convert_go_file(object.iam_policy.custom_diff_suppress ) %>'
 <%    end -%>
 <%    unless object.iam_policy.import_format.nil? -%>
   import_format:
@@ -367,6 +376,9 @@ custom_code:
 <%    unless object.custom_code.post_create.nil? -%>
   post_create: '<%= object.convert_go_file( object.custom_code.post_create )%>'
 <%    end -%>
+<%    unless object.custom_code.post_delete.nil? -%>
+  post_delete: '<%= object.convert_go_file( object.custom_code.post_delete )%>'
+<%    end -%>
 <%    unless object.custom_code.custom_create.nil? -%>
   custom_create: '<%= object.convert_go_file( object.custom_code.custom_create )%>'
 <%    end -%>
@@ -397,10 +409,18 @@ custom_code:
 <%    unless object.custom_code.test_check_destroy.nil? -%>
   test_check_destroy: '<%= object.convert_go_file( object.custom_code.test_check_destroy )%>'
 <%    end -%>
+<%    unless object.custom_code.post_create_failure.nil? -%>
+  post_create_failure: '<%= object.convert_go_file( object.custom_code.post_create_failure )%>'
+<%    end -%>
 <%  end -%>
-<%  unless object.custom_diff.empty? || (object.custom_diff.size == 1 && object.custom_diff.include?("tpgresource.SetLabelsDiff")) -%>
+<% 
+custom_diff = object.custom_diff.reject {
+  |cdiff| cdiff == "tpgresource.SetLabelsDiff" || cdiff == "tpgresource.SetMetadataLabelsDiff" || cdiff == "tpgresource.SetAnnotationsDiff" || cdiff == "tpgresource.SetMetadataAnnotationsDiff"
+}
+-%>
+<%  unless custom_diff.empty? -%>
 custom_diff:
-<%    object.custom_diff.each do |cdiff| -%>
+<%    custom_diff.each do |cdiff| -%>
   - '<%= cdiff %>'
 <%    end -%>
 <%  end -%>
@@ -418,6 +438,10 @@ exclude_tgc: <%= object.exclude_tgc %>
 <%  end -%>
 <%  unless !object.skip_sweeper -%>
 skip_sweeper: <%= object.skip_sweeper %>
+<%  end -%>
+<%    if !object.sweeper.nil? && !object.sweeper.sweepable_identifier_field.nil? -%>
+sweeper:
+  sweepable_identifier_field: <%= object.sweeper.sweepable_identifier_field %>
 <%  end -%>
 <%  unless object.error_retry_predicates.nil? -%>
 error_retry_predicates:
@@ -466,7 +490,7 @@ examples:
 <%    object.examples.each do |example| -%>
   - name: '<%= example.name %>'
 <%      unless example.config_path == "templates/terraform/examples/#{example.name}.tf.erb" -%>
-    config_path: '<%= example.config_path %>'
+    config_path: '<%= object.convert_go_file(example.config_path) %>'
 <%      end -%>
 <%      unless example.primary_resource_id.nil? -%>
     primary_resource_id: '<%= example.primary_resource_id %>'
@@ -476,6 +500,9 @@ examples:
 <%      end -%>
 <%      unless example.min_version.nil? -%>
     min_version: '<%= example.min_version %>'
+<%      end -%>
+<%      unless example.region_override.nil? -%>
+    region_override: '<%= example.region_override %>'
 <%      end -%>
 <%      unless example.vars.nil? -%>
 <%      unless example.vars.empty? -%>

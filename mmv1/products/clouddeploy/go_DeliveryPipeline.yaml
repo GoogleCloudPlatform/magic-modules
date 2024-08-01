@@ -1,0 +1,56 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'DeliveryPipeline'
+description: |
+  A DeliveryPipeline defines a pipeline through which a Skaffold configuration can progress.
+exclude_resource: true
+references:
+  guides:
+    'Deploy an app to GKE using Cloud Deploy': 'https://cloud.google.com/deploy/docs/deploy-app-gke'
+    'Deploy an app to Cloud Run using Cloud Deploy': 'https://cloud.google.com/deploy/docs/deploy-app-run'
+    'Create a pipeline and release in the Google Cloud console': 'https://cloud.google.com/deploy/docs/deploy-app-in-console'
+  api: 'https://cloud.google.com/deploy/docs/api/reference/rest/v1/projects.locations.deliveryPipelines'
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/deliveryPipelines/{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/deliveryPipelines'
+self_link: 'projects/{{project}}/locations/{{location}}/deliveryPipelines/{{name}}'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/deliveryPipelines/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_attribute: 'name'
+  base_url: 'projects/{{project}}/locations/{{location}}/deliveryPipelines/{{name}}'
+  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/deliveryPipelines/{{name}}'
+    - '{{name}}'
+custom_code:
+examples:
+  - name: 'clouddeploy_delivery_pipeline_basic'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cd-delivery-pipeline%s", context["random_suffix"])'
+    vars:
+      delivery_pipeline: 'cd-delivery-pipeline'
+parameters:
+properties:
+  - name: 'name'
+    type: String
+    description: "Dummy property."
+    required: true

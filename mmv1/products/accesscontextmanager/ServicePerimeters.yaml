@@ -57,6 +57,7 @@ properties:
     name: 'servicePerimeters'
     description: |
       The desired Service Perimeters that should replace all existing Service Perimeters in the Access Policy.
+    custom_flatten: 'templates/terraform/custom_flatten/accesscontextmanager_serviceperimeters_custom_flatten.go.erb'
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::String

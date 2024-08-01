@@ -38,8 +38,8 @@ res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 })
 
 
-{{- /*     The generated DELETE method returns a generic error for 400. 
-    Need to include a help message about deleting associated Alert Policies. */}}
+{{/*     The generated DELETE method returns a generic error for 400. 
+    Need to include a help message about deleting associated Alert Policies. */ -}}
 
 if err != nil {
     if transport_tpg.IsGoogleApiErrorWithCode(err, 400) {

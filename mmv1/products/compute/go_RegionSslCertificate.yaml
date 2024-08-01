@@ -24,9 +24,9 @@ references:
     'Official Documentation': 'https://cloud.google.com/load-balancing/docs/ssl-certificates'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionSslCertificates'
 docs:
-  optional_properties: '* `name_prefix` - (Optional) Creates a unique name beginning with the
- specified prefix. Conflicts with `name`.
-'
+  optional_properties: |
+    * `name_prefix` - (Optional) Creates a unique name beginning with the
+     specified prefix. Conflicts with `name`.
 base_url: 'projects/{{project}}/regions/{{region}}/sslCertificates'
 has_self_link: true
 immutable: true
@@ -35,6 +35,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
@@ -50,6 +51,7 @@ async:
 collection_url_key: 'items'
 custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/go/ssl_certificate.tmpl'
+  constants: 'templates/terraform/constants/go/compute_certificate.go.tmpl'
 examples:
   - name: 'region_ssl_certificate_basic'
     primary_resource_id: 'default'
@@ -119,7 +121,6 @@ properties:
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
 
-
       These are in the same namespace as the managed SSL certificates.
     default_from_api: true
     custom_expand: 'templates/terraform/custom_expand/go/name_or_name_prefix.go.tmpl'
@@ -132,5 +133,5 @@ properties:
     immutable: true
     ignore_read: true
     sensitive: true
-    diff_suppress_func: 'tpgresource.Sha256DiffSuppress'
+    diff_suppress_func: 'sha256DiffSuppress'
     custom_flatten: 'templates/terraform/custom_flatten/go/sha256.tmpl'

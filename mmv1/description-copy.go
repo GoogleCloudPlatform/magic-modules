@@ -10,8 +10,24 @@ import (
 	"strings"
 )
 
+func CopyAllDescriptions() {
+	identifiers := []string{
+		"description:",
+		"note:",
+		"set_hash_func:",
+		"warning:",
+		"required_properties:",
+		"optional_properties:",
+		"attributes:",
+	}
+
+	for i, id := range identifiers {
+		CopyText(id, len(identifiers)-1 == i)
+	}
+}
+
 // Used to copy/paste text from Ruby -> Go YAML files
-func CopyText(identifier string) {
+func CopyText(identifier string, last bool) {
 	var allProductFiles []string = make([]string, 0)
 	files, err := filepath.Glob("products/**/go_product.yaml")
 	if err != nil {
@@ -92,12 +108,14 @@ func CopyText(identifier string) {
 			for scanner.Scan() {
 				line := scanner.Text()
 				if firstLine {
-					if line != "NOT CONVERTED - RUN YAML MODE" {
-						// log.Printf("skipping %s", goPath)
-						break
-					} else {
+					if strings.Contains(line, "NOT CONVERTED - RUN YAML MODE") {
 						firstLine = false
+						if !last {
+							w.WriteString(fmt.Sprintf("NOT CONVERTED - RUN YAML MODE\n"))
+						}
 						continue
+					} else {
+						break
 					}
 				}
 				if strings.Contains(line, identifier) {
@@ -141,6 +159,10 @@ func terminateText(line string) bool {
 		if strings.Contains(line, t) {
 			return true
 		}
+	}
+
+	if regexp.MustCompile(`^\s*https:[\s$]*`).MatchString(line) {
+		return false
 	}
 
 	return regexp.MustCompile(`^\s*[a-z_]+:[\s$]*`).MatchString(line)

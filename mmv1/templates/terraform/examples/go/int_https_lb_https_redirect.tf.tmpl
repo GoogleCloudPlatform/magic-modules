@@ -1,6 +1,5 @@
 # Internal HTTPS load balancer with HTTP-to-HTTPS redirect
 
-# [START cloudloadbalancing_int_https_with_redirect]
 
 # VPC network
 resource "google_compute_network" "default" {
@@ -138,7 +137,7 @@ resource "google_compute_instance_template" "default" {
     }
   }
   disk {
-    source_image = "debian-cloud/debian-10"
+    source_image = "debian-cloud/debian-12"
     auto_delete  = true
     boot         = true
   }
@@ -231,7 +230,7 @@ resource "google_compute_instance" "default" {
   }
   boot_disk {
     initialize_params {
-      image = "debian-cloud/debian-10"
+      image = "debian-cloud/debian-12"
     }
   }
 }
@@ -283,4 +282,3 @@ resource "google_compute_region_url_map" "{{$.PrimaryResourceId}}" {
     }
   }
 }
-# [END cloudloadbalancing_int_https_with_redirect]

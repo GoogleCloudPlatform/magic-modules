@@ -27,7 +27,7 @@
 # ----------------------------------------------------------------------------
 subcategory: "{{$.ProductMetadata.DisplayName}}"
 description: |-
-  {{ $.FormatDocDescription $.Description }}
+  {{- $.FormatDocDescription (firstSentence $.Description) true }}
 ---
 
 # {{$.TerraformName}}
@@ -35,13 +35,12 @@ description: |-
 ~> **Warning:** {{$.DeprecationMessage}}
 {{- end }}
 
-{{$.Description}}
-
-{{- if eq $.MinVersion "beta"}}
+{{ $.FormatDocDescription $.Description false }}
+{{ if eq $.MinVersion "beta"}}
 ~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
 See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
 {{- end }}
-{{ if $.References}}
+{{ if or $.References.Api $.References.Guides }}
 To get more information about {{$.Name}}, see:
 
 	{{- if $.References.Api}}
@@ -54,9 +53,13 @@ To get more information about {{$.Name}}, see:
     * [{{$title}}]({{$link}})
 		{{- end }}
 	{{- end }}
-{{ end }}
+	{{- if gt (len $.Examples) 0}}
+{{ "" }}
+	{{- end }}
+{{- else }}
+{{ "" }}
+{{- end }}
 {{- if $.Docs.Warning}}
-
 ~> **Warning:** {{$.Docs.Warning}}
 {{- end }}
 {{- if $.Docs.Note}}
@@ -66,7 +69,7 @@ To get more information about {{$.Name}}, see:
 ~> **Warning:** All arguments including the following potentially sensitive
 values will be stored in the raw state as plain text: {{ $.SensitivePropsToString }}.
 [Read more about sensitive data in state](https://www.terraform.io/language/state/sensitive-data).
-{{- end }}
+{{ end }}
 {{- if $.Examples }}
 	{{- range $e := $.Examples }}
 		{{- if not $e.SkipDocs }}
@@ -77,54 +80,60 @@ values will be stored in the raw state as plain text: {{ $.SensitivePropsToStrin
   </a>
 </div>
 			{{- end }}
-		{{- end }}
 ## Example Usage - {{ title (camelize $e.Name "upper" )}}
 
 
 ```hcl
 {{ $e.DocumentationHCLText -}}
 ```
+		{{- end }}
 	{{- end }}
 {{- end }}
 
 ## Argument Reference
 
 The following arguments are supported:
-
-{{ range $p := $.RootProperties }}
+{{ "" }}
+{{ "" }}
+{{- range $p := $.RootProperties }}
 	{{- if $p.Required }}
-{{- template "propertyDocumentation" $p }}
+{{- trimTemplate "property_documentation.html.markdown.tmpl" $p -}}
 	{{- end }}
 {{- end }}
-
+{{ "" }}
 {{- range $p := $.AllUserProperties }}
 	{{- if $p.Required }}
-{{- template "nestedPropertyDocumentation" $p}}
+{{- trimTemplate "nested_property_documentation.html.markdown.tmpl" $p -}}
 	{{- end}}
 {{- end }}
-
 - - -
-
-{{ range $p := $.RootProperties }}
+{{ "" }}
+{{ "" }}
+{{- range $p := $.RootProperties }}
 	{{- if and (not $p.Required) (not $p.Output) }}
-{{- template "propertyDocumentation" $p -}}
+{{- trimTemplate "property_documentation.html.markdown.tmpl" $p -}}
 	{{- end }}
 {{- end }}
 {{- if or (contains $.BaseUrl "{{project}}") (contains $.CreateUrl "{{project}}")}}
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.
+{{ "" }}
 {{- end }}
-{{ range $f := $.VirtualFields }}
+{{- range $f := $.VirtualFields }}
 * `{{$f.Name}}` - (Optional) {{$f.Description}}
 {{- end }}
-{{ if $.Docs.OptionalProperties }}
+{{- if not $.Docs.OptionalProperties }}
+{{ "" }}
+{{- end }}
+{{- if $.Docs.OptionalProperties }}
 {{ $.Docs.OptionalProperties }}
 {{- end }}
 {{- range $p := $.AllUserProperties }}
 	{{- if and (not $p.Required) (not $p.Output) }}
-{{- template "nestedPropertyDocumentation" $p -}}
-{{ end}}
+{{- trimTemplate "nested_property_documentation.html.markdown.tmpl" $p -}}
+	{{- end}}
 {{- end }}
+{{- "" }}
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:
@@ -132,15 +141,16 @@ In addition to the arguments listed above, the following computed attributes are
 * `id` - an identifier for the resource with format `{{$.IdFormat}}`
 {{ range $p := $.RootProperties }}
 	{{- if $p.Output }}
-{{- template "propertyDocumentation" $p -}}
+{{- trimTemplate "property_documentation.html.markdown.tmpl" $p }}
 	{{- end}}
 {{- end }}
-{{- if $.HasSelfLink }}
+{{- if $.HasSelfLink -}}
 * `self_link` - The URI of the created resource.
+{{ "" }}
 {{- end }}
 {{ range $p := $.AllUserProperties }}
 	{{- if $p.Output }}
-{{- template "nestedPropertyDocumentation" $p -}}
+{{- trimTemplate "nested_property_documentation.html.markdown.tmpl" $p }}
 	{{- end }}
 {{- end }}
 ## Timeouts
@@ -149,7 +159,9 @@ This resource provides the following
 [Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options:
 
 - `create` - Default is {{$.Timeouts.InsertMinutes}} minutes.
-- `update` - Default is {{$.Timeouts.UpdateMinutes}} minutes.{{/*TODO Q2: <% if updatable?(object, properties) || object.root_labels? -%> */}}
+{{- if or $.Updatable $.RootLabels }}
+- `update` - Default is {{$.Timeouts.UpdateMinutes}} minutes.
+{{- end }}
 - `delete` - Default is {{$.Timeouts.DeleteMinutes}} minutes.
 
 ## Import
@@ -161,7 +173,7 @@ This resource does not support import.
 
 {{$.Name}} can be imported using any of these accepted formats:
 {{ range $idFormat := $.ImportIdFormatsFromResource }}
-* `{{$idFormat}}`
+* `{{replaceAll $idFormat "%" "" }}`
 {{- end }}
 
 
@@ -169,7 +181,7 @@ In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashico
 
 ```tf
 import {
-  id = "{{ index $.ImportIdFormatsFromResource 0 }}"
+  id = "{{replaceAll (index $.ImportIdFormatsFromResource 0) "%" ""  }}"
   to = {{$.TerraformName}}.default
 }
 ```
@@ -178,7 +190,7 @@ When using the [`terraform import` command](https://developer.hashicorp.com/terr
 
 ```
 	{{- range $idFormat := $.ImportIdFormatsFromResource }}
-$ terraform import {{$.TerraformName}}.default {{$idFormat}}
+$ terraform import {{$.TerraformName}}.default {{replaceAll $idFormat "%" "" }}
 	{{- end }}
 ```
 {{ end }}

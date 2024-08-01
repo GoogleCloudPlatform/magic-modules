@@ -31,6 +31,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/global/operations/{{op_id}}'
@@ -91,8 +92,6 @@ properties:
     type: KeyValueLabels
     description: |
       Labels to apply to this address.  A list of key->value pairs.
-    min_version: 'beta'
-    immutable: false
     update_url: 'projects/{{project}}/global/addresses/{{name}}/setLabels'
     update_verb: 'POST'
   - name: 'labelFingerprint'
@@ -130,7 +129,7 @@ properties:
       * EXTERNAL indicates public/external single IP address.
       * INTERNAL indicates internal IP ranges belonging to some network.
     diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("EXTERNAL")'
-    default_value: EXTERNAL
+    default_value: "EXTERNAL"
     enum_values:
       - 'EXTERNAL'
       - 'INTERNAL'

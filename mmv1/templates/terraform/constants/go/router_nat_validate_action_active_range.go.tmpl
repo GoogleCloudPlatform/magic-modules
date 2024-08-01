@@ -1,5 +1,4 @@
-{{- if ne $.TargetVersionName "ga" }}
-// validates if the field action.source_nat_active_ranges is filled when the type is PRIVATE.
+{{- if ne $.TargetVersionName "ga" -}}
 natType := d.Get("type").(string)
 if natType == "PRIVATE" {
 	rules := d.Get("rules").(*schema.Set)

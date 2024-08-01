@@ -1,0 +1,158 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'AddressGroup'
+description: |
+  AddressGroup is a resource that specifies how a collection of IP/DNS used in Firewall Policy.
+references:
+  guides:
+    'Use AddressGroups': 'https://cloud.google.com/vpc/docs/use-address-groups-firewall-policies'
+  api: 'https://cloud.google.com/traffic-director/docs/reference/network-security/rest/v1beta1/organizations.locations.addressGroups'
+docs:
+base_url: '{{parent}}/locations/{{location}}/addressGroups'
+self_link: '{{parent}}/locations/{{location}}/addressGroups/{{name}}'
+create_url: '{{parent}}/locations/{{location}}/addressGroups?addressGroupId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - '{{%parent}}/locations/{{location}}/addressGroups/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+    timeouts:
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+  include_project: true
+custom_code:
+examples:
+  - name: 'network_security_address_groups_basic'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-address-groups'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+  - name: 'network_security_address_groups_organization_basic'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-address-groups'
+    test_env_vars:
+      org_id: 'ORG_ID'
+  - name: 'network_security_address_groups_advanced'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-address-groups'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+  - name: 'network_security_address_groups_cloud_armor'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      resource_name: 'my-address-groups'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+parameters:
+  - name: 'parent'
+    type: String
+    description: |
+      The name of the parent this address group belongs to. Format: organizations/{organization_id} or projects/{project_id}.
+    url_param_only: true
+    immutable: true
+  - name: 'name'
+    type: String
+    description: |
+      Name of the AddressGroup resource.
+    url_param_only: true
+    required: true
+  - name: 'location'
+    type: String
+    description: |
+      The location of the gateway security policy.
+      The default value is `global`.
+    url_param_only: true
+    required: true
+properties:
+  - name: 'description'
+    type: String
+    description: |
+      Free-text description of the resource.
+  - name: 'createTime'
+    type: Time
+    description: |
+      The timestamp when the resource was created.
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z"
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      The timestamp when the resource was updated.
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      Set of label tags associated with the AddressGroup resource.
+      An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+    immutable: false
+  - name: 'type'
+    type: Enum
+    description: |
+      The type of the Address Group. Possible values are "IPV4" or "IPV6".
+    required: true
+    enum_values:
+      - 'IPV4'
+      - 'IPV6'
+  - name: 'items'
+    type: Array
+    description: |
+      List of items.
+    item_type:
+      type: String
+  - name: 'capacity'
+    type: Integer
+    description: |
+      Capacity of the Address Group.
+    required: true
+  - name: 'purpose'
+    type: Array
+    description: |
+      List of supported purposes of the Address Group.
+    min_version: 'beta'
+    default_from_api: true
+    item_type:
+      type: Enum
+      description: |
+        This field only has a name and description because of MM
+        limitations. It should not appear in downstreams.
+      enum_values:
+        - 'DEFAULT'
+        - 'CLOUD_ARMOR'

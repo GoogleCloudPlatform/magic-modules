@@ -240,8 +240,8 @@ properties:
             - !ruby/object:Api::Type::String
               name: "kmsKeyName"
               description: |
-                The [KMS key name] with which the content of the Operation is encrypted. The expected
-                format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
+                The [KMS key name] with which the content of the Operation is encrypted. The
+                expected format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
                 Will be empty string if google managed.
   - !ruby/object:Api::Type::NestedObject
     name: "authConfig"
@@ -311,8 +311,8 @@ properties:
                 - !ruby/object:Api::Type::String
                   name: "kmsKeyName"
                   description: |
-                    The [KMS key name] with which the content of the Operation is encrypted. The expected
-                    format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
+                    The [KMS key name] with which the content of the Operation is encrypted. The
+                    expected format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
                     Will be empty string if google managed.
       - !ruby/object:Api::Type::String
         name: "authKey"
@@ -711,8 +711,8 @@ properties:
                 - !ruby/object:Api::Type::String
                   name: "kmsKeyName"
                   description: |
-                    The [KMS key name] with which the content of the Operation is encrypted. The expected
-                    format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
+                    The [KMS key name] with which the content of the Operation is encrypted. The
+                    expected format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
                     Will be empty string if google managed.
   - !ruby/object:Api::Type::String
     name: "subscriptionType"
@@ -828,8 +828,8 @@ properties:
                     - !ruby/object:Api::Type::String
                       name: "kmsKeyName"
                       description: |
-                        The [KMS key name] with which the content of the Operation is encrypted. The expected
-                        format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
+                        The [KMS key name] with which the content of the Operation is encrypted. The
+                        expected format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
                         Will be empty string if google managed.
           - !ruby/object:Api::Type::String
             name: "authKey"
@@ -907,8 +907,8 @@ properties:
                 - !ruby/object:Api::Type::String
                   name: "kmsKeyName"
                   description: |
-                    The [KMS key name] with which the content of the Operation is encrypted. The expected
-                    format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
+                    The [KMS key name] with which the content of the Operation is encrypted. The
+                    expected format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
                     Will be empty string if google managed.
       - !ruby/object:Api::Type::Boolean
         name: "enrichmentEnabled"

@@ -96,7 +96,7 @@ func computeRouterNatIPsHash(v interface{}) int {
 	return schema.HashString(tpgresource.GetResourceNameFromSelfLink(val))
 }
 
-{{- if ne $.TargetVersionName "ga" }}
+{{ if ne $.TargetVersionName `ga` -}}
 func computeRouterNatRulesSubnetHash(v interface{}) int {
 	return computeRouterNatIPsHash(v)
 }
@@ -145,7 +145,7 @@ func computeRouterNatRulesHash(v interface{}) int {
 				}
 			}
 
-			{{- if ne $.TargetVersionName "ga" }}
+			{{ if ne $.TargetVersionName `ga` -}}
 			sourceNatActiveRanges := action["source_nat_active_ranges"]
 			if sourceNatActiveRanges != nil {
 				sourceNatActiveRangesSet := sourceNatActiveRanges.(*schema.Set)

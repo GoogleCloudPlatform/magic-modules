@@ -97,6 +97,25 @@ func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh G
 	if baseBranch == "" {
 		baseBranch = "main"
 	}
+	if command == "downstream" {
+		var syncBranchPrefix string
+		if repo == "terraform" {
+			if version == "beta" {
+				syncBranchPrefix = "tpgb-sync"
+			} else if version == "ga" {
+				syncBranchPrefix = "tpg-sync"
+			}
+		} else if repo == "terraform-google-conversion" {
+			syncBranchPrefix = "tgc-sync"
+		} else if repo == "tf-oics" {
+			syncBranchPrefix = "tf-oics-sync"
+		}
+		syncBranch := getSyncBranch(syncBranchPrefix, baseBranch)
+		if syncBranchHasCommit(ref, syncBranch, rnr) {
+			fmt.Printf("Sync branch %s already has commit %s, skipping generation\n", syncBranch, ref)
+			os.Exit(0)
+		}
+	}
 
 	mmLocalPath := filepath.Join(rnr.GetCWD(), "..", "..")
 	mmCopyPath := filepath.Join(mmLocalPath, "..", fmt.Sprintf("mm-%s-%s-%s", repo, version, command))

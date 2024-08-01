@@ -44,20 +44,21 @@ references:
     'Using Routes': 'https://cloud.google.com/vpc/docs/using-routes'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/routes'
 docs:
-  optional_properties: '* `next_hop_instance_zone` - (Optional when `next_hop_instance` is
-  specified)  The zone of the instance specified in
-  `next_hop_instance`.  Omit if `next_hop_instance` is specified as
-  a URL.
-'
+  optional_properties: |
+    * `next_hop_instance_zone` - (Optional when `next_hop_instance` is
+      specified)  The zone of the instance specified in
+      `next_hop_instance`.  Omit if `next_hop_instance` is specified as
+      a URL.
 base_url: 'projects/{{project}}/global/routes'
 has_self_link: true
 immutable: true
-mutex: projects/{{project}}/global/networks/{{network}}/peerings
+mutex: 'projects/{{project}}/global/networks/{{network}}/peerings'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/global/operations/{{op_id}}'
@@ -73,6 +74,7 @@ async:
 collection_url_key: 'items'
 custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/go/route.tmpl'
+  constants: 'templates/terraform/constants/go/compute_route.go.tmpl'
   decoder: 'templates/terraform/decoders/go/route.tmpl'
 error_retry_predicates:
 
@@ -253,4 +255,4 @@ properties:
       - 'next_hop_ip'
       - 'next_hop_vpn_tunnel'
       - 'next_hop_ilb'
-    diff_suppress_func: 'tpgresource.CompareIpAddressOrSelfLinkOrResourceName'
+    diff_suppress_func: 'CompareIpAddressOrSelfLinkOrResourceName'

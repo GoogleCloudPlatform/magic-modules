@@ -51,6 +51,10 @@ func getChangedFieldsFromSchemaDiff(schemaDiff diff.SchemaDiff) map[string]Resou
 				// Skip the project field.
 				continue
 			}
+			if strings.Contains(resource, "iam") && field == "condition" {
+				// Skip the condition field of iam resources because some iam resources do not support it.
+				continue
+			}
 			if fieldDiff.New == nil {
 				// Skip deleted fields.
 				continue
@@ -69,7 +73,9 @@ func getChangedFieldsFromSchemaDiff(schemaDiff diff.SchemaDiff) map[string]Resou
 				resourceChanges[field] = &Field{Changed: true}
 			}
 		}
-		changedFields[resource] = resourceChanges
+		if len(resourceChanges) > 0 {
+			changedFields[resource] = resourceChanges
+		}
 	}
 	return changedFields
 }

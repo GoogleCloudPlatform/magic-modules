@@ -29,7 +29,7 @@ provider "google" {
 
 resource "google_pubsub_lite_topic" "example" {
   name = "example-topic"
-  zone = "us-central1a"
+  zone = "us-central1-a"
 
   partition_config {
     count = 1

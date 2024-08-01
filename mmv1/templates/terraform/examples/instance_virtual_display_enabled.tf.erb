@@ -1,13 +1,10 @@
-# [START compute_instance_virtual_display_enabled]
 
 resource "google_compute_instance" "<%= ctx[:primary_resource_id] %>" {
   name         = "<%= ctx[:vars]['instance_virtual_display'] %>"
   machine_type = "f1-micro"
   zone = "us-central1-c"
-  
   # Set the below to true to enable virtual display
   enable_display = true
-  
   boot_disk {
     initialize_params {
       image = "debian-cloud/debian-11"
@@ -21,4 +18,3 @@ resource "google_compute_instance" "<%= ctx[:primary_resource_id] %>" {
   }
 }
 
-# [END compute_instance_virtual_display_enabled]

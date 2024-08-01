@@ -27,19 +27,19 @@ references:
     'Official Documentation': 'https://cloud.google.com/load-balancing/docs/ssl-certificates'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/sslCertificates'
 docs:
-  warning: 'This resource should be used with extreme caution!  Provisioning an SSL
-certificate is complex.  Ensure that you understand the lifecycle of a
-certificate before attempting complex tasks like cert rotation automatically.
-This resource will "return" as soon as the certificate object is created,
-but post-creation the certificate object will go through a "provisioning"
-process.  The provisioning process can complete only when the domain name
-for which the certificate is created points to a target pool which, itself,
-points at the certificate.  Depending on your DNS provider, this may take
-some time, and migrating from self-managed certificates to Google-managed
-certificates may entail some downtime while the certificate provisions.
+  warning: |
+    This resource should be used with extreme caution!  Provisioning an SSL
+    certificate is complex.  Ensure that you understand the lifecycle of a
+    certificate before attempting complex tasks like cert rotation automatically.
+    This resource will "return" as soon as the certificate object is created,
+    but post-creation the certificate object will go through a "provisioning"
+    process.  The provisioning process can complete only when the domain name
+    for which the certificate is created points to a target pool which, itself,
+    points at the certificate.  Depending on your DNS provider, this may take
+    some time, and migrating from self-managed certificates to Google-managed
+    certificates may entail some downtime while the certificate provisions.
 
-In conclusion: Be extremely cautious.
-'
+    In conclusion: Be extremely cautious.
 base_url: 'projects/{{project}}/global/sslCertificates'
 has_self_link: true
 immutable: true
@@ -48,6 +48,7 @@ timeouts:
   update_minutes: 30
   delete_minutes: 30
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/global/operations/{{op_id}}'
@@ -66,6 +67,7 @@ async:
     message: 'message'
 collection_url_key: 'items'
 custom_code:
+  constants: 'templates/terraform/constants/go/compute_managed_ssl_certificate.go.tmpl'
 examples:
   - name: 'managed_ssl_certificate_basic'
     primary_resource_id: 'default'
@@ -107,7 +109,6 @@ properties:
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
 
-
       These are in the same namespace as the managed SSL certificates.
   - name: 'managed'
     type: NestedObject
@@ -121,7 +122,7 @@ properties:
           Domains for which a managed SSL certificate will be valid.  Currently,
           there can be up to 100 domains in this list.
         required: true
-        diff_suppress_func: 'tpgresource.AbsoluteDomainSuppress'
+        diff_suppress_func: 'AbsoluteDomainSuppress'
         item_type:
           type: String
         max_size: 100
@@ -130,7 +131,7 @@ properties:
     description: |
       Enum field whose value is always `MANAGED` - used to signal to the API
       which type this is.
-    default_value: MANAGED
+    default_value: "MANAGED"
     enum_values:
       - 'MANAGED'
   - name: 'subjectAlternativeNames'

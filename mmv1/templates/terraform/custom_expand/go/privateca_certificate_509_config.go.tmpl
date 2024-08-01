@@ -1,4 +1,4 @@
-{{- /* See mmv1/third_party/terraform/utils/privateca_utils.go for the sub-expanders and explanation */}}
+{{/* See mmv1/third_party/terraform/utils/privateca_utils.go for the sub-expanders and explanation */}}
 func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
         if v == nil {
                return v, nil

@@ -30,6 +30,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
@@ -156,15 +157,12 @@ properties:
             this service attachment.
           output: true
   - name: 'targetService'
-    type: ResourceRef
+    type: String
     description: |
-      The URL of a forwarding rule that represents the service identified by
-      this service attachment.
+      The URL of a service serving the endpoint identified by this service attachment.
     required: true
     immutable: true
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
-    resource: 'ForwardingRule'
-    imports: 'selfLink'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - name: 'natSubnets'
     type: Array
     description: |
@@ -211,7 +209,7 @@ properties:
       attachment.
     is_set: true
     send_empty_value: true
-    set_hash_func: 'computeServiceAttachmentConsumerAcceptListsHash'
+    set_hash_func: computeServiceAttachmentConsumerAcceptListsHash
     item_type:
       type: NestedObject
       properties:

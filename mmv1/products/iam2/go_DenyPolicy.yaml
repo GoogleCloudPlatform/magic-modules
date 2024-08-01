@@ -1,0 +1,155 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'DenyPolicy'
+description: |
+  Represents a collection of denial policies to apply to a given resource.
+references:
+  guides:
+    'Permissions supported in deny policies': 'https://cloud.google.com/iam/docs/deny-permissions-support'
+  api: 'https://cloud.google.com/iam/docs/reference/rest/v2/policies'
+docs:
+id_format: '{{parent}}/{{name}}'
+base_url: 'policies/{{parent}}/denypolicies'
+create_url: 'policies/{{parent}}/denypolicies?policyId={{name}}'
+import_format:
+  - '{{parent}}/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'targetLink'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'iam_deny_policy_basic'
+    primary_resource_id: 'example'
+    vars:
+      policy_name: 'my-deny-policy'
+      account_id: 'svc-acc'
+      project_name: 'my-project'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+parameters:
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The name of the policy.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'parent'
+    type: String
+    description: |
+      The attachment point is identified by its URL-encoded full resource name.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'displayName'
+    type: String
+    description: |
+      The display name of the rule.
+  - name: 'etag'
+    type: Fingerprint
+    description: |
+      The hash of the resource. Used internally during updates.
+    output: true
+  - name: 'rules'
+    type: Array
+    description: |
+      Rules to be applied.
+    required: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'description'
+          type: String
+          description: |
+            The description of the rule.
+        - name: 'denyRule'
+          type: NestedObject
+          description: |
+            A deny rule in an IAM deny policy.
+          properties:
+            - name: 'deniedPrincipals'
+              type: Array
+              description:
+                The identities that are prevented from using one or more
+                permissions on Google Cloud resources.
+              item_type:
+                type: String
+            - name: 'exceptionPrincipals'
+              type: Array
+              description: |
+                The identities that are excluded from the deny rule, even if they are listed in the deniedPrincipals.
+                For example, you could add a Google group to the deniedPrincipals, then exclude specific users who belong to that group.
+              item_type:
+                type: String
+            - name: 'deniedPermissions'
+              type: Array
+              description: |
+                The permissions that are explicitly denied by this rule. Each permission uses the format `{service-fqdn}/{resource}.{verb}`,
+                where `{service-fqdn}` is the fully qualified domain name for the service. For example, `iam.googleapis.com/roles.list`.
+              item_type:
+                type: String
+            - name: 'exceptionPermissions'
+              type: Array
+              description: |
+                Specifies the permissions that this rule excludes from the set of denied permissions given by deniedPermissions.
+                If a permission appears in deniedPermissions and in exceptionPermissions then it will not be denied.
+                The excluded permissions can be specified using the same syntax as deniedPermissions.
+              item_type:
+                type: String
+            - name: 'denialCondition'
+              type: NestedObject
+              description:
+                User defined CEVAL expression. A CEVAL expression is used to
+                specify match criteria such as origin.ip, source.region_code and
+                contents in the request header.
+              properties:
+                - name: 'expression'
+                  type: String
+                  description: |
+                    Textual representation of an expression in Common Expression Language syntax.
+                  required: true
+                - name: 'title'
+                  type: String
+                  description: |
+                    Title for the expression, i.e. a short string describing its purpose.
+                    This can be used e.g. in UIs which allow to enter the expression.
+                - name: 'description'
+                  type: String
+                  description: |
+                    Description of the expression. This is a longer text which describes the expression,
+                    e.g. when hovered over it in a UI.
+                - name: 'location'
+                  type: String
+                  description: |
+                    String indicating the location of the expression for error reporting,
+                    e.g. a file name and a position in the file.

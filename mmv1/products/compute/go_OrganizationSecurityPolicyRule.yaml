@@ -38,6 +38,7 @@ timeouts:
   delete_minutes: 20
 custom_code:
   post_create: 'templates/terraform/post_create/go/org_security_policy_rule.go.tmpl'
+  post_delete: 'templates/terraform/post_create/go/org_security_policy_rule.go.tmpl'
   post_update: 'templates/terraform/post_create/go/org_security_policy_rule.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/go/skip_delete_during_test.go.tmpl'
 examples:
@@ -89,7 +90,7 @@ properties:
           Preconfigured versioned expression. For organization security policy rules,
           the only supported type is "FIREWALL".
         min_version: 'beta'
-        default_value: FIREWALL
+        default_value: "FIREWALL"
         enum_values:
           - 'FIREWALL'
       - name: 'config'

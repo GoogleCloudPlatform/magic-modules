@@ -494,7 +494,7 @@ Google Cloud KMS.`,
 										Type:             schema.TypeString,
 										Required:         true,
 										ForceNew:         true,
-										DiffSuppressFunc: tpgresource.IpCidrRangeDiffSuppress,
+										DiffSuppressFunc: IpCidrRangeDiffSuppress,
 										Description:      `The IP CIDR range represented by this alias IP range. This IP CIDR range must belong to the specified subnetwork and cannot contain IP addresses reserved by system or used by other network interfaces. At the time of writing only a netmask (e.g. /24) may be supplied, with a CIDR format resulting in an API error.`,
 									},
 									"subnetwork_range_name": {
@@ -675,7 +675,6 @@ Google Cloud KMS.`,
 							AtLeastOneOf: schedulingInstTemplateKeys,
 							Description:  `Specifies the action GCE should take when SPOT VM is preempted.`,
 						},
-<% unless version == 'ga' -%>
 						"max_run_duration" : {
 							Type:        schema.TypeList,
 							Optional:    true,
@@ -721,6 +720,7 @@ be from 0 to 999,999,999 inclusive.`,
 								},
 							},
 						},
+<% unless version == 'ga' -%>
 						"maintenance_interval" : {
 							Type:        schema.TypeString,
 							Optional:    true,
@@ -852,14 +852,6 @@ be from 0 to 999,999,999 inclusive.`,
 				Description: `The Confidential VM config being used by the instance. on_host_maintenance has to be set to TERMINATE or this will fail to create.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						<% if version == "ga" -%>
-						"enable_confidential_compute": {
-							Type:        schema.TypeBool,
-							Required:    true,
-							ForceNew:    true,
-							Description: `Defines whether the instance should have confidential compute enabled.`,
-						},
-						<% else -%>
 						"enable_confidential_compute": {
 							Type:        schema.TypeBool,
 							Optional:    true,
@@ -877,7 +869,6 @@ be from 0 to 999,999,999 inclusive.`,
 								If SEV_SNP, min_cpu_platform = "AMD Milan" is currently required.`,
 							AtLeastOneOf: []string{"confidential_instance_config.0.enable_confidential_compute", "confidential_instance_config.0.confidential_instance_type"},
 						},
-						<% end -%>
 					},
 				},
 			},

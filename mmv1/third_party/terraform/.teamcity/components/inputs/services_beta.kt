@@ -631,6 +631,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Securitycentermanagement",
         "path" to "./google-beta/services/securitycentermanagement"
     ),
+    "securitycenterv2" to mapOf(
+        "name" to "securitycenterv2",
+        "displayName" to "securitycenterv2",
+        "path" to "./google-beta/services/securitycenterv2"
+    ),
     "securityposture" to mapOf(
         "name" to "securityposture",
         "displayName" to "Securityposture",
@@ -660,6 +665,11 @@ var ServicesListBeta = mapOf(
         "name" to "serviceusage",
         "displayName" to "Serviceusage",
         "path" to "./google-beta/services/serviceusage"
+    ),
+    "siteverification" to mapOf(
+        "name" to "siteverification",
+        "displayName" to "Siteverification",
+        "path" to "./google-beta/services/siteverification"
     ),
     "sourcerepo" to mapOf(
         "name" to "sourcerepo",

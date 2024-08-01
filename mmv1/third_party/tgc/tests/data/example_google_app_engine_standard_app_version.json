@@ -1,0 +1,28 @@
+[
+    {
+        "name": "//appengine.googleapis.com/apps/{{.Provider.project}}/services/default/versions/v1",
+        "asset_type": "appengine.googleapis.com/Version",
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+        "resource": {
+            "version": "v1",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/appengine/v1/rest",
+            "discovery_name": "Version",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "deployment": {
+                    "zip": {
+                        "sourceUrl": "https://storage.googleapis.com/bucket-app-engine/world.zip"
+                    }
+                },
+                "entrypoint": {
+                    "shell": "python3 world.py"
+                },
+                "id": "v1",
+                "project": "{{.Provider.project}}",
+                "runtime": "python39",
+                "service": "default"
+            }
+        },
+        "ancestors": ["organizations/{{.OrgID}}"]
+    }
+]

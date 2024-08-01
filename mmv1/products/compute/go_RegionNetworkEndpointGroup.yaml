@@ -36,6 +36,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
@@ -136,7 +137,7 @@ properties:
     type: Enum
     description: |
       Type of network endpoints in this network endpoint group. Defaults to SERVERLESS.
-    default_value: SERVERLESS
+    default_value: "SERVERLESS"
     enum_values:
       - 'SERVERLESS'
       - 'PRIVATE_SERVICE_CONNECT'

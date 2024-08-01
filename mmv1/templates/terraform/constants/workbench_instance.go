@@ -126,6 +126,16 @@ func WorkbenchInstanceTagsDiffSuppress(_, _, _ string, d *schema.ResourceData) b
 	return false
 }
 
+func WorkbenchInstanceAcceleratorDiffSuppress(_, _, _ string, d *schema.ResourceData) bool {
+	old, new := d.GetChange("gce_setup.0.accelerator_configs")
+	oldInterface := old.([]interface{})
+	newInterface := new.([]interface{})
+	if len(oldInterface) == 0 && len(newInterface) == 1 && newInterface[0] == nil{
+		return true
+	}
+	return false
+  }
+
 <% unless compiler == "terraformgoogleconversion-codegen" -%>
 // waitForWorkbenchInstanceActive waits for an workbench instance to become "ACTIVE"
 func waitForWorkbenchInstanceActive(d *schema.ResourceData, config *transport_tpg.Config, timeout time.Duration) error {
@@ -182,6 +192,51 @@ func waitForWorkbenchOperation(config *transport_tpg.Config, d *schema.ResourceD
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func resizeWorkbenchInstanceDisk(config *transport_tpg.Config, d *schema.ResourceData, project string, userAgent string, isBoot bool) (error) {
+	diskObj := make(map[string]interface{})
+	var sizeString string
+	var diskKey string
+	if isBoot{
+		sizeString = "gce_setup.0.boot_disk.0.disk_size_gb"
+		diskKey = "bootDisk"
+	} else{
+		sizeString = "gce_setup.0.data_disks.0.disk_size_gb"
+		diskKey = "dataDisk"
+	}
+	disk := make(map[string]interface{})
+	disk["diskSizeGb"] = d.Get(sizeString)
+	diskObj[diskKey] = disk
+	
+  
+	resizeUrl, err := tpgresource.ReplaceVars(d, config, "{{WorkbenchBasePath}}projects/{{project}}/locations/{{location}}/instances/{{name}}:resizeDisk")
+	if err != nil {
+		return err
+	}
+  
+	dRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	  Config: config,
+	  Method: "POST",
+	  RawURL: resizeUrl,
+	  UserAgent: userAgent,
+	  Body: diskObj,
+	  Timeout: d.Timeout(schema.TimeoutUpdate),
+	})
+  
+	if err != nil {
+	  return fmt.Errorf("Error resizing disk: %s", err)
+	}
+
+	var opRes map[string]interface{}
+	err = WorkbenchOperationWaitTimeWithResponse(
+	  config, dRes, &opRes, project, "Resizing disk", userAgent,
+	  d.Timeout(schema.TimeoutUpdate))
+	if err != nil {
+	  return fmt.Errorf("Error resizing disk: %s", err)
+	}
+
 	return nil
 }
 <% end -%>

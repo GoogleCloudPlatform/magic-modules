@@ -90,6 +90,8 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: bigQuery
     description: Indicates that features for this group come from BigQuery Table/View. By default treats the source as a sparse time series source, which is required to have an entityId and a feature_timestamp column in the source.
+    update_mask_fields:
+      - 'bigQuery.entityIdColumns'
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: bigQuerySource
@@ -103,5 +105,5 @@ properties:
             description: 'BigQuery URI to a table, up to 2000 characters long. For example: `bq://projectId.bqDatasetId.bqTableId.`'
       - !ruby/object:Api::Type::Array
         name: entityIdColumns
-        description: Columns to construct entityId / row keys. Currently only supports 1 entity_id_column. If not provided defaults to entityId.
+        description: Columns to construct entityId / row keys. If not provided defaults to entityId.
         item_type: Api::Type::String

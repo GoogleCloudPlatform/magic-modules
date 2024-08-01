@@ -32,7 +32,7 @@ if d.Get("load_balancing_scheme").(string) == "EXTERNAL_MANAGED" || d.Get("load_
 	return obj, nil
 }
 
-{{- if ne $.TargetVersionName "ga" }}
+{{ if ne $.TargetVersionName `ga` -}}
 // To remove subsetting on an ILB, "NONE" must be specified. If subsetting
 // isn't specified, we set the value to NONE to make this use case work.
 _, ok := obj["subsetting"]
