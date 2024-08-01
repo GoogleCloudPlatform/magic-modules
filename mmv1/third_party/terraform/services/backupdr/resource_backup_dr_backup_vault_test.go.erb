@@ -6,14 +6,15 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-func TestAccBackupDRBackupVault_update(t *testing.T) {
+func TestAccBackupDRBackupVault_basicUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -22,7 +23,7 @@ func TestAccBackupDRBackupVault_update(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBackupDRBackupVault_basic(context),
+				Config: testAccBackupDRBackupVault_basicCreate(context),
 			},
 			{
 				ResourceName:            "google_backup_dr_backup_vault.backup-vault-test",
@@ -31,7 +32,7 @@ func TestAccBackupDRBackupVault_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"annotations", "backup_vault_id", "labels", "location", "terraform_labels"},
 			},
 			{
-				Config: testAccBackupDRBackupVault_update(context),
+				Config: testAccBackupDRBackupVault_basicUpdate(context),
 			},
 			{
 				ResourceName:            "google_backup_dr_backup_vault.backup-vault-test",
@@ -39,11 +40,12 @@ func TestAccBackupDRBackupVault_update(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"annotations", "backup_vault_id", "labels", "location", "terraform_labels"},
 			},
+			
 		},
 	})
 }
 
-func testAccBackupDRBackupVault_basic(context map[string]interface{}) string {
+func testAccBackupDRBackupVault_basicCreate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 	resource "google_backup_dr_backup_vault" "backup-vault-test" {
 	provider = google-beta
@@ -55,7 +57,7 @@ func testAccBackupDRBackupVault_basic(context map[string]interface{}) string {
 	`, context)
 }
 
-func testAccBackupDRBackupVault_update(context map[string]interface{}) string {
+func testAccBackupDRBackupVault_basicUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 	resource "google_backup_dr_backup_vault" "backup-vault-test" {
 	provider = google-beta
@@ -65,5 +67,81 @@ func testAccBackupDRBackupVault_update(context map[string]interface{}) string {
 	backup_minimum_enforced_retention_duration = "200000s"
 	}
 	`, context)
+}
+
+func TestAccBackupDRBackupVault_fullUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBackupDRBackupVault_fullCreate(context),
+			},
+			{
+				ResourceName:            "google_backup_dr_backup_vault.backup-vault-test2",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"annotations", "backup_vault_id", "labels", "location", "terraform_labels"},
+			},
+			{
+				Config: testAccBackupDRBackupVault_fullUpdate(context),
+			},
+			{
+				ResourceName:            "google_backup_dr_backup_vault.backup-vault-test2",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"annotations", "backup_vault_id", "labels", "location", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccBackupDRBackupVault_fullCreate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+	resource "google_backup_dr_backup_vault" "backup-vault-test2" {
+	provider = google-beta
+	location = "us-central1"
+	backup_vault_id    = "tf-test-tf-test2-backup-vault-test%{random_suffix}%{random_suffix}"
+	description = "This is a second backup vault built by Terraform."
+	backup_minimum_enforced_retention_duration = "100000s"
+	effective-time = "9999-12-30T00:00:00Z" 
+	labels = {
+		foo = "bar"
+		bar = "baz"
+	}
+	annotations = {
+		annotations1 = "bar"
+		annotations2 = "baz"
+	}
+	}
+`, context)
+}
+
+func testAccBackupDRBackupVault_fullUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+	resource "google_backup_dr_backup_vault" "backup-vault-test2" {
+	provider = google-beta
+	location = "us-central1"
+	backup_vault_id    = "tf-test-tf-test2-backup-vault-test%{random_suffix}%{random_suffix}"
+	description = "This is a second backup vault built by Terraform."
+	backup_minimum_enforced_retention_duration = "100000s"
+	effective-time = "9999-12-31T00:00:00Z" 
+	labels = {
+		foo = "bar1"
+		bar = "baz1"
+	}
+	annotations = {
+		annotations1 = "bar1"
+		annotations2 = "baz1"
+	}
+	}
+`, context)
 }
 <% end -%>
