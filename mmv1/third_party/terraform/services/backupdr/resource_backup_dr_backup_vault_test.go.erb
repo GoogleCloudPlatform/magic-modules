@@ -80,8 +80,6 @@ func TestAccBackupDRBackupVault_fullUpdate(t *testing.T) {
 		"calculated_effective_time": referenceTime.Add(24 * time.Hour).Format(time.RFC3339),
 	}
 
-	fmt.Printf(referenceTime.Format(time.RFC3339))
-
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
