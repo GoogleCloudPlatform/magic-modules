@@ -207,7 +207,16 @@ properties:
         default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: dedicatedResources
-    description: A description of resources that are dedicated to the DeployedIndex, and that need a higher degree of manual configuration.
+    description: |
+        A description of resources that are dedicated to the DeployedIndex, and that need a higher degree of manual configuration. The field minReplicaCount must be set to a value strictly greater than 0, or else validation will fail. We don't provide SLA when minReplicaCount=1. If maxReplicaCount is not set, the default value is minReplicaCount. The max allowed replica count is 1000.
+
+        Available machine types for SMALL shard: e2-standard-2 and all machine types available for MEDIUM and LARGE shard.
+
+        Available machine types for MEDIUM shard: e2-standard-16 and all machine types available for LARGE shard.
+
+        Available machine types for LARGE shard: e2-highmem-16, n2d-standard-32.
+
+        n1-standard-16 and n1-standard-32 are still available, but we recommend e2-standard-16 and e2-highmem-16 for cost efficiency.
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'machineSpec'
