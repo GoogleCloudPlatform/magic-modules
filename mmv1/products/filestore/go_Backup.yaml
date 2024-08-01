@@ -1,0 +1,149 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Backup'
+description: |
+  A Google Cloud Filestore backup.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/filestore/docs/backups'
+    'Creating Backups': 'https://cloud.google.com/filestore/docs/create-backups'
+  api: 'https://cloud.google.com/filestore/docs/reference/rest/v1/projects.locations.instances.backups'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/backups'
+self_link: 'projects/{{project}}/locations/{{location}}/backups/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/backups?backupId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+mutex: 'filestore/{{project}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+error_abort_predicates:
+
+  - 'transport_tpg.Is429QuotaError'
+examples:
+  - name: 'filestore_backup_basic'
+    primary_resource_id: 'backup'
+    vars:
+      backup_name: 'tf-fs-bkup'
+      instance_name: 'tf-fs-inst'
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The name of the location of the instance. This can be a region for ENTERPRISE tier instances.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The resource name of the backup. The name must be unique within the specified instance.
+
+      The name must be 1-63 characters long, and comply with
+      RFC1035. Specifically, the name must be 1-63 characters long and match
+      the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the
+      first character must be a lowercase letter, and all following
+      characters must be a dash, lowercase letter, or digit, except the last
+      character, which cannot be a dash.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'description'
+    type: String
+    description: |
+      A description of the backup with 2048 characters or less. Requests with longer descriptions will be rejected.
+  - name: 'state'
+    type: Enum
+    description: |
+      The backup state.
+    output: true
+    enum_values:
+      - 'STATE_UNSPECIFIED'
+      - 'FINALIZING'
+      - 'CREATING'
+      - 'READY'
+      - 'DELETING'
+  - name: 'createTime'
+    type: Time
+    description: |
+      The time when the snapshot was created in RFC3339 text format.
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      Resource labels to represent user-provided metadata.
+  - name: 'capacityGb'
+    type: String
+    description: |
+      The amount of bytes needed to allocate a full copy of the snapshot content.
+    output: true
+  - name: 'storageBytes'
+    type: String
+    description: |
+      The size of the storage used by the backup. As backups share storage, this number is expected to change with backup creation/deletion.
+    output: true
+  - name: 'sourceInstance'
+    type: String
+    description: |
+      The resource name of the source Cloud Filestore instance, in the format projects/{projectId}/locations/{locationId}/instances/{instanceId}, used to create this backup.
+    required: true
+  - name: 'sourceFileShare'
+    type: String
+    description: |
+      Name of the file share in the source Cloud Filestore instance that the backup is created from.
+    required: true
+    immutable: true
+  - name: 'sourceInstanceTier'
+    type: Enum
+    description: |
+      The service tier of the source Cloud Filestore instance that this backup is created from.
+    output: true
+    enum_values:
+      - 'STANDARD'
+      - 'PREMIUM'
+      - 'BASIC_HDD'
+      - 'BASIC_SSD'
+      - 'HIGH_SCALE_SSD'
+      - 'ZONAL'
+      - 'REGIONAL'
+      - 'ENTERPRISE'
+  - name: 'downloadBytes'
+    type: String
+    description: |
+      Amount of bytes that will be downloaded if the backup is restored.
+    output: true
+  - name: 'kmsKeyName'
+    type: String
+    description: |
+      KMS key name used for data encryption.
+    output: true

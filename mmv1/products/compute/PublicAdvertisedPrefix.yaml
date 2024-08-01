@@ -26,7 +26,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -75,3 +75,8 @@ properties:
       The IPv4 address range, in CIDR format, represented by this public
       advertised prefix.
     required: true
+  - !ruby/object:Api::Type::String
+    name: 'sharedSecret'
+    output: true
+    description: |
+      Output Only. The shared secret to be used for reverse DNS verification.

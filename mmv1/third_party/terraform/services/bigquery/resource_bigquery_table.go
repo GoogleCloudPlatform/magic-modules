@@ -515,7 +515,7 @@ func ResourceBigQueryTable() *schema.Resource {
 							Optional:    true,
 							Description: `Please see sourceFormat under ExternalDataConfiguration in Bigquery's public API documentation (https://cloud.google.com/bigquery/docs/reference/rest/v2/tables#externaldataconfiguration) for supported formats. To use "GOOGLE_SHEETS" the scopes must include "googleapis.com/auth/drive.readonly".`,
 							ValidateFunc: validation.StringInSlice([]string{
-								"CSV", "GOOGLE_SHEETS", "NEWLINE_DELIMITED_JSON", "AVRO", "ICEBERG", "DATASTORE_BACKUP", "PARQUET", "ORC", "BIGTABLE",
+								"CSV", "GOOGLE_SHEETS", "NEWLINE_DELIMITED_JSON", "AVRO", "ICEBERG", "DATASTORE_BACKUP", "PARQUET", "ORC", "BIGTABLE", "DELTA_LAKE",
 							}, false),
 						},
 						// SourceURIs [Required] The fully-qualified URIs that point to your data in Google Cloud.
@@ -1254,7 +1254,8 @@ func ResourceBigQueryTable() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     false,
-				Description: `Whether or not to allow table deletion when there are still resource tags attached.`,
+				Description: `**Deprecated** Whether or not to allow table deletion when there are still resource tags attached.`,
+				Deprecated:  `This field is deprecated and will be removed in a future major release. The default behavior will be allowing the presence of resource tags on deletion after the next major release.`,
 			},
 
 			// TableConstraints: [Optional] Defines the primary key and foreign keys.

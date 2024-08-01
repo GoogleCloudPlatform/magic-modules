@@ -1,0 +1,95 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'KeyHandle'
+description: |
+  A `KeyHandle` is a resource used to auto-provision CryptoKeys for CMEK.
+
+
+  ~> **Note:** KeyHandles cannot be deleted from Google Cloud Platform.
+  Destroying a Terraform-managed KeyHandle will remove it from state but
+  *will not delete the resource from the project.*
+min_version: 'beta'
+references:
+  guides:
+    'Cloud KMS with Autokey': 'https://cloud.google.com/kms/docs/kms-with-autokey'
+  api: 'https://cloud.google.com/kms/docs/reference/rest/v1/projects.locations.keyHandles'
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/keyHandles/{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/keyHandles'
+self_link: 'projects/{{project}}/locations/{{location}}/keyHandles/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/keyHandles?keyHandleId={{name}}'
+skip_delete: true
+immutable: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/keyHandles/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+custom_code:
+  decoder: 'templates/terraform/decoders/go/kms.go.tmpl'
+examples:
+  - name: 'kms_key_handle_basic'
+    primary_resource_id: 'example-keyhandle'
+    min_version: 'beta'
+    vars:
+      key_project_name: 'key-proj'
+      resource_project_name: 'resources'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    external_providers: ["random", "time"]
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The location for the KeyHandle.
+      A full list of valid locations can be found by running `gcloud kms locations list`.
+    min_version: 'beta'
+    url_param_only: true
+    required: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The resource name for the KeyHandle.
+    min_version: 'beta'
+    required: true
+    immutable: true
+  - name: 'kmsKey'
+    type: String
+    description: |
+      A reference to a Cloud KMS CryptoKey that can be used for CMEK in the requested
+      product/project/location, for example
+      `projects/1/locations/us-east1/keyRings/foo/cryptoKeys/bar-ffffff`
+    min_version: 'beta'
+    output: true
+  - name: 'resourceTypeSelector'
+    type: String
+    description: |
+      Selector of the resource type where we want to protect resources.
+      For example, `storage.googleapis.com/Bucket OR compute.googleapis.com/*`
+    min_version: 'beta'
+    required: true
+    immutable: true
