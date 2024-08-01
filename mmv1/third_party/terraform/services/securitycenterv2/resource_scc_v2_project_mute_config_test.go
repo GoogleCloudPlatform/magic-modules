@@ -12,7 +12,7 @@ func TestAccSecurityCenterV2ProjectMuteConfig_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"project":        envvar.GetTestProjectFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -50,7 +50,7 @@ func testAccSecurityCenterV2ProjectMuteConfig_basic(context map[string]interface
 	return acctest.Nprintf(`
 resource "google_scc_v2_project_mute_config" "default" {
   mute_config_id = "tf-test-config-%{random_suffix}"
-  project   = "%{org_id}"
+  project   = "%{project}"
   location       = "global"
   description    = "A test project mute config"
   filter         = "severity = \"HIGH\""
@@ -63,7 +63,7 @@ func testAccSecurityCenterV2ProjectMuteConfig_update(context map[string]interfac
 	return acctest.Nprintf(`
 resource "google_scc_v2_project_mute_config" "default" {
   mute_config_id = "tf-test-config-%{random_suffix}"
-  project   = "%{org_id}"
+  project   = "%{project}"
   location       = "global"
   description    = "An updated test project mute config"
   filter         = "severity = \"HIGH\""
