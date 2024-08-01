@@ -99,18 +99,21 @@ properties:
     default_value: '(default)'
     description: |
       The Firestore database id. Defaults to `"(default)"`.
+    immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::String
     name: 'collection'
     description: |
       The id of the collection group to configure.
     required: true
+    immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::String
     name: 'field'
     description: |
       The id of the field to configure.
     required: true
+    immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::String
     name: name

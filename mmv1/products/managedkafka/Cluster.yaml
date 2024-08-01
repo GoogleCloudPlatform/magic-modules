@@ -46,13 +46,59 @@ examples:
       cluster_id: 'my-cluster'
       key_name: 'example-key'
       key_ring_name: 'example-key-ring'
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: name
+    base_url: "{{op_id}}"
+    wait_ms: 1000
+    timeouts:
+  result: !ruby/object:Api::OpAsync::Result
+    path: response
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: done
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: error
+    message: message
+parameters:
+  - !ruby/object:Api::Type::String
+    name: location
+    description: "ID of the location of the Apache Kafka for BigQuery resource. See
+      https://cloud.google.com/managed-kafka/docs/locations for a list of
+      supported locations."
+    url_param_only: true
+    required: true
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: clusterId
+    description: "The ID to use for the cluster, which will become the final
+      component of the cluster's name. The ID must be 1-63 characters long, and match
+      the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` to comply with RFC 1035. This
+      value is structured like: `my-cluster-id`."
+    url_param_only: true
+    required: true
+    immutable: true
 properties:
   - !ruby/object:Api::Type::NestedObject
+    name: gcpConfig
+    description: "Configuration properties for a Kafka cluster deployed to Google Cloud Platform."
+    required: true
     properties:
       - !ruby/object:Api::Type::NestedObject
+        name: accessConfig
+        description: "The configuration of access to the Kafka cluster."
+        required: true
         properties:
           - !ruby/object:Api::Type::Array
             name: networkConfigs
+            description: "Virtual Private Cloud (VPC) networks that must be granted
+              direct access to the Kafka cluster. Minimum of 1 network is required. Maximum
+              of 10 networks can be specified."
+            required: true
             item_type: !ruby/object:Api::Type::NestedObject
               properties:
                 - !ruby/object:Api::Type::String
@@ -65,13 +111,6 @@ properties:
                     in the format `projects/PROJECT_ID/regions/REGION/subnetworks/SUBNET`."
                   required: true
                   diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
-            description: "Virtual Private Cloud (VPC) networks that must be granted
-              direct access to the Kafka cluster. Minimum of 1 network is required. Maximum
-              of 10 networks can be specified."
-            required: true
-        name: accessConfig
-        description: "The configuration of access to the Kafka cluster."
-        required: true
       - !ruby/object:Api::Type::String
         name: kmsKey
         description: "The Cloud KMS Key name to use for encryption.
@@ -79,9 +118,6 @@ properties:
           Must be in the format `projects/PROJECT_ID/locations/LOCATION/keyRings/KEY_RING/cryptoKeys/KEY`."
         immutable: true
         diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
-    name: gcpConfig
-    description: "Configuration properties for a Kafka cluster deployed to Google Cloud Platform."
-    required: true
   - !ruby/object:Api::Type::String
     name: name
     description: "The name of the cluster. Structured like: `projects/PROJECT_ID/locations/LOCATION/clusters/CLUSTER_ID`."
@@ -101,6 +137,9 @@ properties:
         characters, and numbers. Values must contain only hyphens (-),
         underscores (\_), lowercase characters, and numbers."
   - !ruby/object:Api::Type::NestedObject
+    name: capacityConfig
+    description: "A capacity configuration of a Kafka cluster."
+    required: true
     properties:
       - !ruby/object:Api::Type::String
         name: vcpuCount
@@ -111,54 +150,15 @@ properties:
         description: "The memory to provision for the cluster in bytes. The value must be
           between 1 GiB and 8 GiB per vCPU. Ex. 1024Mi, 4Gi."
         required: true
-    name: capacityConfig
-    description: "A capacity configuration of a Kafka cluster."
-    required: true
   - !ruby/object:Api::Type::NestedObject
+    name: rebalanceConfig
+    description: "Defines rebalancing behavior of a Kafka cluster."
     properties:
       - !ruby/object:Api::Type::String
         name: mode
         description: "The rebalance behavior for the cluster. When not specified,
           defaults to `NO_REBALANCE`. Possible values: `MODE_UNSPECIFIED`, `NO_REBALANCE`, `AUTO_REBALANCE_ON_SCALE_UP`."
-    name: rebalanceConfig
-    description: "Defines rebalancing behavior of a Kafka cluster."
   - !ruby/object:Api::Type::String
     name: state
     description: "The current state of the cluster. Possible values: `STATE_UNSPECIFIED`, `CREATING`, `ACTIVE`, `DELETING`."
     output: true
-parameters:
-  - !ruby/object:Api::Type::String
-    name: location
-    description: "ID of the location of the Apache Kafka for BigQuery resource. See
-      https://cloud.google.com/managed-kafka/docs/locations for a list of
-      supported locations."
-    url_param_only: true
-    required: true
-    immutable: true
-  - !ruby/object:Api::Type::String
-    name: clusterId
-    description: "The ID to use for the cluster, which will become the final
-      component of the cluster's name. The ID must be 1-63 characters long, and match
-      the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` to comply with RFC 1035. This
-      value is structured like: `my-cluster-id`."
-    url_param_only: true
-    required: true
-    immutable: true
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: name
-    base_url: "{{op_id}}"
-    wait_ms: 1000
-    timeouts:
-  result: !ruby/object:Api::OpAsync::Result
-    path: response
-    resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: done
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
-    path: error
-    message: message
