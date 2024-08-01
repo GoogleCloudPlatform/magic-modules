@@ -25,12 +25,11 @@ To get more information about Environments, see:
   * [Connect an environment to a VPC network](https://cloud.google.com/composer/docs/composer-3/connect-vpc-network)
 * [Apache Airflow Documentation](http://airflow.apache.org/)
 
-<Note>
+-> **Note**
   Cloud Composer 1 is in the post-maintenance mode. Google does 
   not release any further updates to Cloud Composer 1, including new versions 
   of Airflow, bugfixes, and security updates. We recommend using
   Cloud Composer 2 or Cloud Composer 3 instead.
-</Note>
 
 Several special considerations apply to managing Cloud Composer environments 
 with Terraform:
@@ -94,7 +93,7 @@ resource "google_composer_environment" "test" {
 
 ### With GKE and Compute Resource Dependencies
 
-<Note>
+-> **Note**
   To use custom service accounts, you must give at least the
   `role/composer.worker` role to the service account of the Cloud Composer 
   environment. For more information, see the
@@ -102,7 +101,6 @@ resource "google_composer_environment" "test" {
   page in the Cloud Composer documentation.
   You might need to assign additional roles depending on specific workflows 
   that the Airflow DAGs will be running.
-</Note>
 
 #### GKE and Compute Resource Dependencies (Cloud Composer 3)
 
@@ -307,11 +305,10 @@ In Cloud Composer 3, networking configuration is simplified compared to
 previous versions. You don't need to specify network ranges, and can attach
 custom VPC networks to your environment.
 
-<Note>
+-> **Note**
   It's not possible to detach a VPC network using Terraform. Instead, you can
   attach a different VPC network in its place, or detach the network using
   other tools like Google Cloud CLI.
-</Note>
 
 Use Private IP networking:
 
