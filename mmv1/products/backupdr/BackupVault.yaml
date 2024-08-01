@@ -22,8 +22,8 @@ examples:
     name: 'backup_dr_backup_vault_full'
     primary_resource_id: 'backup-vault-test2'
     vars:
-      backup_vault_id: 'tf-test2-backup-vault-test%{random_suffix}'
-      effective_time: "9999-12-30T00:00:00Z" 
+      backup_vault_id: 'tf-test2-backup-vault-test%{random_suffix}%{random_suffix}'
+      effective_time: "%{calculated_effective_time}" 
     test_env_vars:
       project: :PROJECT_NAME
 properties:

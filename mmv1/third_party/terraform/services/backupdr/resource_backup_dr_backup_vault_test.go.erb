@@ -3,11 +3,11 @@ package backupdr_test
 <% unless version == 'ga' -%>
 
 import (
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
 	"github.com/hashicorp/terraform-provider-google-beta/google-beta/envvar"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"testing"
+	"time"
 )
 
 func TestAccBackupDRBackupVault_basicUpdate(t *testing.T) {
@@ -40,7 +40,6 @@ func TestAccBackupDRBackupVault_basicUpdate(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"annotations", "backup_vault_id", "labels", "location", "terraform_labels"},
 			},
-			
 		},
 	})
 }
@@ -72,10 +71,16 @@ func testAccBackupDRBackupVault_basicUpdate(context map[string]interface{}) stri
 func TestAccBackupDRBackupVault_fullUpdate(t *testing.T) {
 	t.Parallel()
 
+	timeNow := time.Now().UTC()
+	referenceTime := time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), 0, 0, 0, 0, time.UTC)
+
 	context := map[string]interface{}{
-		"project":       envvar.GetTestProjectFromEnv(),
-		"random_suffix": acctest.RandString(t, 10),
+		"project":                   envvar.GetTestProjectFromEnv(),
+		"random_suffix":             acctest.RandString(t, 10),
+		"calculated_effective_time": referenceTime.Add(24 * time.Hour).Format(time.RFC3339),
 	}
+
+	fmt.Printf(referenceTime.Format(time.RFC3339))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -111,7 +116,7 @@ func testAccBackupDRBackupVault_fullCreate(context map[string]interface{}) strin
 	backup_vault_id    = "tf-test-tf-test2-backup-vault-test%{random_suffix}%{random_suffix}"
 	description = "This is a second backup vault built by Terraform."
 	backup_minimum_enforced_retention_duration = "100000s"
-	effective-time = "9999-12-30T00:00:00Z" 
+	effective_time = "%{calculated_effective_time}" 
 	labels = {
 		foo = "bar"
 		bar = "baz"
@@ -132,7 +137,7 @@ func testAccBackupDRBackupVault_fullUpdate(context map[string]interface{}) strin
 	backup_vault_id    = "tf-test-tf-test2-backup-vault-test%{random_suffix}%{random_suffix}"
 	description = "This is a second backup vault built by Terraform."
 	backup_minimum_enforced_retention_duration = "100000s"
-	effective-time = "9999-12-31T00:00:00Z" 
+	effective_time = "%{calculated_effective_time}" 
 	labels = {
 		foo = "bar1"
 		bar = "baz1"
