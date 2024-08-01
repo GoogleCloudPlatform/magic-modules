@@ -66,6 +66,9 @@ func TestAccActiveDirectoryDomain_update(t *testing.T) {
 }
 
 func TestAccActiveDirectoryDomain_tags(t *testing.T) {
+	// skip the test until Active Directory setup issue got resolved
+	t.Skip()
+
 	t.Parallel()
 
 	domain := fmt.Sprintf("tf-test%s.org1.com", acctest.RandString(t, 5))
