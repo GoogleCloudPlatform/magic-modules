@@ -93,7 +93,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'ipCidrRange'
     description:
-      The IP address range, in CIDR format, represented by this public 
+      The IP address range, in CIDR format, represented by this public
       delegated prefix.
     required: true
   - !ruby/object:Api::Type::Enum
@@ -106,6 +106,6 @@ properties:
   - !ruby/object:Api::Type::Integer
     name: 'allocatablePrefixLength'
     description:
-      The allocatable prefix length supported by this public delegated prefix. 
+      The allocatable prefix length supported by this public delegated prefix.
       This field is optional and cannot be set for prefixes in DELEGATION mode.
       It cannot be set for IPv4 prefixes either, and it always defaults to 32.
