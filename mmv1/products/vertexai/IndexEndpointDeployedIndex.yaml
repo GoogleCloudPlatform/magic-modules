@@ -188,7 +188,10 @@ properties:
         A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
   - !ruby/object:Api::Type::NestedObject
     name: automaticResources
-    description: A description of resources that the DeployedIndex uses, which to large degree are decided by Vertex AI, and optionally allows only a modest additional configuration.
+    description: | 
+      A description of resources that the DeployedIndex uses, which to large degree are decided by Vertex AI, and optionally allows only a modest additional configuration.
+
+      Having the fields within automaticResouces not being marked as immutable was done in order to support the ability to update such fields. This is discussed extensively [here](https://github.com/GoogleCloudPlatform/magic-modules/pull/11039#issuecomment-2209316648).
     default_from_api: true
     properties:
       - !ruby/object:Api::Type::Integer
@@ -217,6 +220,9 @@ properties:
         Available machine types for LARGE shard: e2-highmem-16, n2d-standard-32.
 
         n1-standard-16 and n1-standard-32 are still available, but we recommend e2-standard-16 and e2-highmem-16 for cost efficiency.
+
+        Having fields within dedicatedResources not being marked as immutable as well as removing
+        fields such as acceleratorType, acceleratorCount, tpuTopology was done in order to support the ability to update such fields. This is discussed extensively [here](https://github.com/GoogleCloudPlatform/magic-modules/pull/11039#issuecomment-2209316648).
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'machineSpec'
