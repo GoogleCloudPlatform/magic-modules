@@ -62,7 +62,6 @@ virtual_fields:
       or `terraform destroy` that would delete the job will fail.
       When the field is set to false, deleting the job is allowed.
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/self_link_as_name.erb
   pre_delete: 'templates/terraform/pre_delete/cloudrunv2_job_deletion_policy.go.erb'
 examples:
   - !ruby/object:Provider::Terraform::Examples
