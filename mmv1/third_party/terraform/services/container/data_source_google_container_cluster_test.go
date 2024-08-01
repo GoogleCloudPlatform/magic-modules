@@ -96,7 +96,9 @@ resource "google_container_cluster" "kubes" {
   deletion_protection = false
   network    = "%s"
   subnetwork    = "%s"
-
+  resource_labels = {
+    created-by = "terraform"
+  }
 }
 
 data "google_container_cluster" "kubes" {
