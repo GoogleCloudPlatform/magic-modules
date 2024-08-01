@@ -65,16 +65,34 @@ resource "google_project" "my_project" {
   billing_account = "%{billing_account}"
 }
 
-resource "google_app_engine_application" "app" {
-  project     = google_project.my_project.project_id
-  location_id = "us-central"
-}
-
 resource "google_project_service" "project" {
   project = google_project.my_project.project_id
   service = "appengine.googleapis.com"
 
   disable_dependent_services = false
+}
+
+resource "google_app_engine_application" "app" {
+  project     = google_project.my_project.project_id
+  location_id = "us-central"
+}
+
+data "google_app_engine_default_service_account" "default" {
+  depends_on = [
+    google_app_engine_application.app
+  ]
+}
+
+resource "google_project_iam_member" "app_eng_sa_bucket_permissions" {
+  project = google_project.my_project.project_id
+  role    = "roles/editor"
+  member  = "serviceAccount:${data.google_app_engine_default_service_account.default.email}"
+}
+
+resource "time_sleep" "wait_for_appengine_permissions_propagate" {
+  depends_on = [google_project_iam_member.app_eng_sa_bucket_permissions]
+
+  create_duration = "60s"
 }
 
 resource "google_app_engine_standard_app_version" "foo" {
@@ -121,6 +139,7 @@ resource "google_app_engine_standard_app_version" "foo" {
     }
   }
 
+  depends_on = [ time_sleep.wait_for_appengine_permissions_propagate ]
   noop_on_destroy = true
 }
 
@@ -152,16 +171,34 @@ resource "google_project" "my_project" {
   billing_account = "%{billing_account}"
 }
 
-resource "google_app_engine_application" "app" {
-  project     = google_project.my_project.project_id
-  location_id = "us-central"
-}
-
 resource "google_project_service" "project" {
   project = google_project.my_project.project_id
   service = "appengine.googleapis.com"
 
   disable_dependent_services = false
+}
+
+resource "google_app_engine_application" "app" {
+  project     = google_project.my_project.project_id
+  location_id = "us-central"
+}
+
+data "google_app_engine_default_service_account" "default" {
+  depends_on = [
+    google_app_engine_application.app
+  ]
+}
+
+resource "google_project_iam_member" "app_eng_sa_bucket_permissions" {
+  project = google_project.my_project.project_id
+  role    = "roles/editor"
+  member  = "serviceAccount:${data.google_app_engine_default_service_account.default.email}"
+}
+
+resource "time_sleep" "wait_for_appengine_permissions_propagate" {
+  depends_on = [google_project_iam_member.app_eng_sa_bucket_permissions]
+
+  create_duration = "60s"
 }
 
 resource "time_sleep" "wait_60_seconds" {
@@ -240,6 +277,7 @@ resource "google_app_engine_standard_app_version" "foo" {
     }
   }
 
+  depends_on = [ time_sleep.wait_for_appengine_permissions_propagate ]
   noop_on_destroy = true
 }
 
@@ -271,16 +309,34 @@ resource "google_project" "my_project" {
   billing_account = "%{billing_account}"
 }
 
-resource "google_app_engine_application" "app" {
-  project     = google_project.my_project.project_id
-  location_id = "us-central"
-}
-
 resource "google_project_service" "project" {
   project = google_project.my_project.project_id
   service = "appengine.googleapis.com"
 
   disable_dependent_services = false
+}
+
+resource "google_app_engine_application" "app" {
+  project     = google_project.my_project.project_id
+  location_id = "us-central"
+}
+
+data "google_app_engine_default_service_account" "default" {
+  depends_on = [
+    google_app_engine_application.app
+  ]
+}
+
+resource "google_project_iam_member" "app_eng_sa_bucket_permissions" {
+  project = google_project.my_project.project_id
+  role    = "roles/editor"
+  member  = "serviceAccount:${data.google_app_engine_default_service_account.default.email}"
+}
+
+resource "time_sleep" "wait_for_appengine_permissions_propagate" {
+  depends_on = [google_project_iam_member.app_eng_sa_bucket_permissions]
+
+  create_duration = "60s"
 }
 
 resource "google_app_engine_standard_app_version" "foo" {
@@ -317,6 +373,7 @@ resource "google_app_engine_standard_app_version" "foo" {
     max_instances = 5
   }
 
+  depends_on = [ time_sleep.wait_for_appengine_permissions_propagate ]
   noop_on_destroy = true
 }
 
