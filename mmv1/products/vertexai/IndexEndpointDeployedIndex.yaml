@@ -193,7 +193,10 @@ properties:
     properties:
       - !ruby/object:Api::Type::Integer
         name: 'minReplicaCount'
-        description: The minimum number of replicas this DeployedModel will be always deployed on.
+        description: |
+                The minimum number of replicas this DeployedModel will be always deployed on. If minReplicaCount is not set, the default value is 2 (we don't provide SLA when minReplicaCount=1).
+        
+                If traffic against it increases, it may dynamically be deployed onto more replicas up to [maxReplicaCount](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/AutomaticResources#FIELDS.max_replica_count), and as traffic decreases, some of these extra replicas may be freed. If the requested value is too large, the deployment will error.
         default_from_api: true
       - !ruby/object:Api::Type::Integer
         name: 'maxReplicaCount'
