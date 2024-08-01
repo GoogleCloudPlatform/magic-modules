@@ -1,0 +1,195 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'activeDirectory'
+description: |
+  ActiveDirectory is the public representation of the active directory config.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/netapp/volumes/docs/configure-and-use/active-directory/about-ad'
+  api: 'https://cloud.google.com/netapp/volumes/docs/reference/rest/v1/projects.locations.activeDirectories'
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/activeDirectories/{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/activeDirectories'
+self_link: 'projects/{{project}}/locations/{{location}}/activeDirectories/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/activeDirectories?activeDirectoryId={{name}}'
+update_url: 'projects/{{project}}/locations/{{location}}/activeDirectories/{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+delete_url: 'projects/{{project}}/locations/{{location}}/activeDirectories/{{name}}'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/activeDirectories/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+custom_code:
+examples:
+  - name: 'netapp_active_directory_full'
+    primary_resource_id: 'test_active_directory_full'
+    vars:
+      active_directory_full_name: 'test-active-directory-full'
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      Name of the region for the policy to apply to.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'name'
+    type: String
+    description: |
+      The resource name of the Active Directory pool. Needs to be unique per location.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'createTime'
+    type: String
+    description: |
+      Create time of the active directory. A timestamp in RFC3339 UTC "Zulu" format. Examples: "2023-06-22T09:13:01.617Z".
+    output: true
+  - name: 'state'
+    type: Enum
+    description: |
+      The state of the Active Directory policy (not the Active Directory itself).
+    output: true
+    enum_values:
+      - 'STATE_UNSPECIFIED'
+      - 'CREATING'
+      - 'READY'
+      - 'UPDATING'
+      - 'DELETING'
+      - 'IN_USE'
+      - 'ERROR'
+  - name: 'domain'
+    type: String
+    description: |
+      Fully qualified domain name for the Active Directory domain.
+    required: true
+  - name: 'site'
+    type: String
+    description: |
+      Specifies an Active Directory site to manage domain controller selection.
+      Use when Active Directory domain controllers in multiple regions are configured. Defaults to `Default-First-Site-Name` if left empty.
+    required: false
+  - name: 'dns'
+    type: String
+    description: |
+      Comma separated list of DNS server IP addresses for the Active Directory domain.
+    required: true
+  - name: 'netBiosPrefix'
+    type: String
+    description: |
+      NetBIOS name prefix of the server to be created.
+      A five-character random ID is generated automatically, for example, -6f9a, and appended to the prefix. The full UNC share path will have the following format:
+      `\\NetBIOS_PREFIX-ABCD.DOMAIN_NAME\SHARE_NAME`
+    required: true
+  - name: 'organizationalUnit'
+    type: String
+    description: |
+      Name of the Organizational Unit where you intend to create the computer account for NetApp Volumes.
+      Defaults to `CN=Computers` if left empty.
+    required: false
+    default_from_api: true
+  - name: 'aesEncryption'
+    type: Boolean
+    description: |
+      Enables AES-128 and AES-256 encryption for Kerberos-based communication with Active Directory.
+    required: false
+    default_value: true
+  - name: 'username'
+    type: String
+    description: |
+      Username for the Active Directory account with permissions to create the compute account within the specified organizational unit.
+    required: true
+  - name: 'password'
+    type: String
+    description: |
+      Password for specified username. Note - Manual changes done to the password will not be detected. Terraform will not re-apply the password, unless you use a new password in Terraform.
+    required: true
+    ignore_read: true
+    sensitive: true
+  - name: 'backupOperators'
+    type: Array
+    description: |
+      Domain user/group accounts to be added to the Backup Operators group of the SMB service. The Backup Operators group allows members to backup and restore files regardless of whether they have read or write access to the files. Comma-separated list.
+    required: false
+    item_type:
+      type: String
+  - name: 'administrators'
+    type: Array
+    description: |
+      Domain user accounts to be added to the local Administrators group of the SMB service. Comma-separated list of domain users or groups. The Domain Admin group is automatically added when the service joins your domain as a hidden group.
+    required: false
+    item_type:
+      type: String
+  - name: 'securityOperators'
+    type: Array
+    description: |
+      Domain accounts that require elevated privileges such as `SeSecurityPrivilege` to manage security logs. Comma-separated list.
+    required: false
+    item_type:
+      type: String
+  - name: 'kdcHostname'
+    type: String
+    description: |
+      Hostname of the Active Directory server used as Kerberos Key Distribution Center. Only requried for volumes using kerberized NFSv4.1
+    required: false
+  - name: 'kdcIp'
+    type: String
+    description: |
+      IP address of the Active Directory server used as Kerberos Key Distribution Center.
+    required: false
+  - name: 'nfsUsersWithLdap'
+    type: Boolean
+    description: |
+      Local UNIX users on clients without valid user information in Active Directory are blocked from access to LDAP enabled volumes.
+      This option can be used to temporarily switch such volumes to AUTH_SYS authentication (user ID + 1-16 groups).
+    required: false
+  - name: 'description'
+    type: String
+    description: |
+      An optional description of this resource.
+    required: false
+  - name: 'ldapSigning'
+    type: Boolean
+    description: |
+      Specifies whether or not the LDAP traffic needs to be signed.
+    required: false
+  - name: 'encryptDcConnections'
+    type: Boolean
+    description: |
+      If enabled, traffic between the SMB server to Domain Controller (DC) will be encrypted.
+    required: false
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      Labels as key value pairs. Example: `{ "owner": "Bob", "department": "finance", "purpose": "testing" }`.
+    required: false
+  - name: 'stateDetails'
+    type: String
+    description: |
+      The state details of the Active Directory.
+    output: true

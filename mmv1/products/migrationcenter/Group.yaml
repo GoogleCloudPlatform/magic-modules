@@ -31,44 +31,6 @@ examples:
     primary_resource_id: 'default'
     vars:
       group_name: 'group-test'
-properties:
-  - !ruby/object:Api::Type::String
-    name: name
-    description: 'Output only. The name of the group. '
-    output: true
-  - !ruby/object:Api::Type::String
-    name: createTime
-    description: 'Output only. The timestamp when the group was created. '
-    output: true
-  - !ruby/object:Api::Type::String
-    name: updateTime
-    description: 'Output only. The timestamp when the group was last updated. '
-    output: true
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: labels
-    description: 'Labels as key value pairs. '
-  - !ruby/object:Api::Type::String
-    name: displayName
-    description: 'Optional. User-friendly display name. '
-  - !ruby/object:Api::Type::String
-    name: description
-    description: 'Optional. The description of the group. '
-parameters:
-  - !ruby/object:Api::Type::String
-    name: location
-    description: 'The location of the group. '
-    url_param_only: true
-    required: true
-    immutable: true
-  - !ruby/object:Api::Type::String
-    name: groupId
-    description: 'Required. User specified ID for the group. It will become the last
-      component of the group name. The ID must be unique within the project, must conform
-      with RFC-1034, is restricted to lower-cased letters, and has a maximum length
-      of 63 characters. The ID must match the regular expression: `[a-z]([a-z0-9-]{0,61}[a-z0-9])?`. '
-    url_param_only: true
-    required: true
-    immutable: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: name
@@ -87,3 +49,41 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: error
     message: message
+parameters:
+  - !ruby/object:Api::Type::String
+    name: location
+    description: 'The location of the group.'
+    url_param_only: true
+    required: true
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: groupId
+    description: 'Required. User specified ID for the group. It will become the last
+      component of the group name. The ID must be unique within the project, must conform
+      with RFC-1034, is restricted to lower-cased letters, and has a maximum length
+      of 63 characters. The ID must match the regular expression: `[a-z]([a-z0-9-]{0,61}[a-z0-9])?`.'
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: name
+    description: 'Output only. The name of the group.'
+    output: true
+  - !ruby/object:Api::Type::String
+    name: createTime
+    description: 'Output only. The timestamp when the group was created.'
+    output: true
+  - !ruby/object:Api::Type::String
+    name: updateTime
+    description: 'Output only. The timestamp when the group was last updated.'
+    output: true
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: labels
+    description: 'Labels as key value pairs.'
+  - !ruby/object:Api::Type::String
+    name: displayName
+    description: 'Optional. User-friendly display name.'
+  - !ruby/object:Api::Type::String
+    name: description
+    description: 'Optional. The description of the group.'
