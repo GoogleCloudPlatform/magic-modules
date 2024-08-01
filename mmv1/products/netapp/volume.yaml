@@ -36,6 +36,31 @@ async: !ruby/object:Api::OpAsync
     base_url: '{{op_id}}'
 id_format: 'projects/{{project}}/locations/{{location}}/volumes/{{name}}'
 import_format: ['projects/{{project}}/locations/{{location}}/volumes/{{name}}']
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'netapp_volume_basic'
+    primary_resource_id: 'test_volume'
+    vars:
+      volume_name: 'test-volume'
+      pool_name: 'test-pool'
+      network_name: 'test-network'
+    ignore_read_extra:
+      - "deletion_policy"
+    test_vars_overrides:
+      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_delete: templates/terraform/pre_delete/netapp_volume_force_delete.go.erb
+virtual_fields:
+  - !ruby/object:Api::Type::Enum
+    name: 'deletion_policy'
+    description: |
+      Policy to determine if the volume should be deleted forcefully.
+      Volumes may have nested snapshot resources. Deleting such a volume will fail.
+      Setting this parameter to FORCE will delete volumes including nested snapshots.
+    values:
+      - :DEFAULT
+      - :FORCE
+    default_value: :DEFAULT
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -51,18 +76,6 @@ parameters:
     required: true
     immutable: true
     url_param_only: true
-examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'netapp_volume_basic'
-    primary_resource_id: 'test_volume'
-    vars:
-      volume_name: 'test-volume'
-      pool_name: 'test-pool'
-      network_name: 'test-network'
-    ignore_read_extra:
-      - "deletion_policy"
-    test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
 properties:
   - !ruby/object:Api::Type::Enum
     name: 'state'
@@ -225,11 +238,6 @@ properties:
     name: 'description'
     description: |
       An optional description of this resource.
-  # Use of snapReserve is deprecated. Here as a comment to express intention.
-  # - !ruby/object:Api::Type::Integer
-  #   name: 'snapReserve'
-  #   description: |
-  #     `snap_reserve` specifies percentage of volume storage reserved for snapshot storage. Default is 0 percent. Use is deprecated.
   - !ruby/object:Api::Type::Boolean
     name: 'snapshotDirectory'
     description: |
@@ -488,16 +496,3 @@ properties:
       Specifies the replica zone for regional volume.
     output: true
     min_version: beta
-virtual_fields:
-  - !ruby/object:Api::Type::Enum
-    name: 'deletion_policy'
-    description: |
-      Policy to determine if the volume should be deleted forcefully.
-      Volumes may have nested snapshot resources. Deleting such a volume will fail.
-      Setting this parameter to FORCE will delete volumes including nested snapshots.
-    values:
-      - :DEFAULT
-      - :FORCE
-    default_value: :DEFAULT
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  pre_delete: templates/terraform/pre_delete/netapp_volume_force_delete.go.erb

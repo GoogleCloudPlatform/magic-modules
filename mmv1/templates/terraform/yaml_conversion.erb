@@ -331,6 +331,9 @@ iam_policy:
 <%    unless object.iam_policy.self_link.nil? -%>
   self_link: '<%= object.iam_policy.self_link %>'
 <%    end -%>
+<%    unless object.iam_policy.custom_diff_suppress.nil? -%>
+  custom_diff_suppress: '<%= object.convert_go_file(object.iam_policy.custom_diff_suppress ) %>'
+<%    end -%>
 <%    unless object.iam_policy.import_format.nil? -%>
   import_format:
 <%      object.iam_policy.import_format.each do |iformat| -%>
@@ -405,6 +408,9 @@ custom_code:
 <%    end -%>
 <%    unless object.custom_code.test_check_destroy.nil? -%>
   test_check_destroy: '<%= object.convert_go_file( object.custom_code.test_check_destroy )%>'
+<%    end -%>
+<%    unless object.custom_code.post_create_failure.nil? -%>
+  post_create_failure: '<%= object.convert_go_file( object.custom_code.post_create_failure )%>'
 <%    end -%>
 <%  end -%>
 <% 

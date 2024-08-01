@@ -38,154 +38,6 @@ examples:
     primary_resource_id: 'default'
     vars:
       set_name: 'preference-set-test'
-properties:
-  - !ruby/object:Api::Type::String
-    name: name
-    description: 'Output only. Name of the preference set. '
-    output: true
-  - !ruby/object:Api::Type::String
-    name: createTime
-    description: 'Output only. The timestamp when the preference set was created. '
-    output: true
-  - !ruby/object:Api::Type::String
-    name: updateTime
-    description: 'Output only. The timestamp when the preference set was last updated. '
-    output: true
-  - !ruby/object:Api::Type::String
-    name: displayName
-    description: 'User-friendly display name. Maximum length is 63 characters. '
-  - !ruby/object:Api::Type::String
-    name: description
-    description: 'A description of the preference set. '
-  - !ruby/object:Api::Type::NestedObject
-    name: virtualMachinePreferences
-    description: 'VirtualMachinePreferences enables you to create sets of assumptions,
-      for example, a geographical location and pricing track, for your migrated virtual
-      machines. The set of preferences influence recommendations for migrating virtual
-      machine assets. '
-    properties:
-      - !ruby/object:Api::Type::String
-        name: targetProduct
-        description: "Target product for assets using this preference set. Specify either
-          target product or business goal, but not both. \n Possible values:\n COMPUTE_MIGRATION_TARGET_PRODUCT_UNSPECIFIED\nCOMPUTE_MIGRATION_TARGET_PRODUCT_COMPUTE_ENGINE\nCOMPUTE_MIGRATION_TARGET_PRODUCT_VMWARE_ENGINE\nCOMPUTE_MIGRATION_TARGET_PRODUCT_SOLE_TENANCY"
-      - !ruby/object:Api::Type::NestedObject
-        name: regionPreferences
-        description: 'The user preferences relating to target regions. '
-        properties:
-          - !ruby/object:Api::Type::Array
-            name: preferredRegions
-            item_type: Api::Type::String
-            description: 'A list of preferred regions, ordered by the most preferred region
-              first. Set only valid Google Cloud region names. See https://cloud.google.com/compute/docs/regions-zones
-              for available regions. '
-      - !ruby/object:Api::Type::String
-        name: commitmentPlan
-        description: "Commitment plan to consider when calculating costs for virtual machine
-          insights and recommendations. If you are unsure which value to set, a 3 year
-          commitment plan is often a good value to start with. \n Possible values:\n COMMITMENT_PLAN_UNSPECIFIED\nCOMMITMENT_PLAN_NONE\nCOMMITMENT_PLAN_ONE_YEAR\nCOMMITMENT_PLAN_THREE_YEARS"
-      - !ruby/object:Api::Type::String
-        name: sizingOptimizationStrategy
-        description: "Sizing optimization strategy specifies the preferred strategy used
-          when extrapolating usage data to calculate insights and recommendations for
-          a virtual machine. If you are unsure which value to set, a moderate sizing optimization
-          strategy is often a good value to start with. \n Possible values:\n SIZING_OPTIMIZATION_STRATEGY_UNSPECIFIED\nSIZING_OPTIMIZATION_STRATEGY_SAME_AS_SOURCE\nSIZING_OPTIMIZATION_STRATEGY_MODERATE\nSIZING_OPTIMIZATION_STRATEGY_AGGRESSIVE"
-      - !ruby/object:Api::Type::NestedObject
-        name: computeEnginePreferences
-        description: 'The user preferences relating to Compute Engine target platform. '
-        properties:
-          - !ruby/object:Api::Type::NestedObject
-            name: machinePreferences
-            description: 'The type of machines to consider when calculating virtual machine
-              migration insights and recommendations. Not all machine types are available
-              in all zones and regions. '
-            properties:
-              - !ruby/object:Api::Type::Array
-                name: allowedMachineSeries
-                item_type: !ruby/object:Api::Type::NestedObject
-                  properties:
-                    - !ruby/object:Api::Type::String
-                      name: code
-                      description: 'Code to identify a Compute Engine machine series. Consult
-                        https://cloud.google.com/compute/docs/machine-resource#machine_type_comparison
-                        for more details on the available series. '
-                description: 'Compute Engine machine series to consider for insights and recommendations.
-                  If empty, no restriction is applied on the machine series. '
-          - !ruby/object:Api::Type::String
-            name: licenseType
-            description: "License type to consider when calculating costs for virtual machine
-              insights and recommendations. If unspecified, costs are calculated based on
-              the default licensing plan. \n Possible values:\n LICENSE_TYPE_UNSPECIFIED\nLICENSE_TYPE_DEFAULT\nLICENSE_TYPE_BRING_YOUR_OWN_LICENSE"
-      - !ruby/object:Api::Type::NestedObject
-        name: vmwareEnginePreferences
-        description: 'The user preferences relating to Google Cloud VMware Engine target
-          platform. '
-        properties:
-          - !ruby/object:Api::Type::Double
-            name: cpuOvercommitRatio
-            description: 'CPU overcommit ratio. Acceptable values are between 1.0 and 8.0,
-              with 0.1 increment. '
-          - !ruby/object:Api::Type::Double
-            name: memoryOvercommitRatio
-            description: 'Memory overcommit ratio. Acceptable values are 1.0, 1.25, 1.5,
-              1.75 and 2.0. '
-          - !ruby/object:Api::Type::Double
-            name: storageDeduplicationCompressionRatio
-            description: 'The Deduplication and Compression ratio is based on the logical
-              (Used Before) space required to store data before applying deduplication and
-              compression, in relation to the physical (Used After) space required after
-              applying deduplication and compression. Specifically, the ratio is the Used
-              Before space divided by the Used After space. For example, if the Used Before
-              space is 3 GB, but the physical Used After space is 1 GB, the deduplication
-              and compression ratio is 3x. Acceptable values are between 1.0 and 4.0. '
-          - !ruby/object:Api::Type::String
-            name: commitmentPlan
-            description: "Commitment plan to consider when calculating costs for virtual
-              machine insights and recommendations. If you are unsure which value to set,
-              a 3 year commitment plan is often a good value to start with. \n Possible
-              values:\n COMMITMENT_PLAN_UNSPECIFIED\nON_DEMAND\nCOMMITMENT_1_YEAR_MONTHLY_PAYMENTS\nCOMMITMENT_3_YEAR_MONTHLY_PAYMENTS\nCOMMITMENT_1_YEAR_UPFRONT_PAYMENT\nCOMMITMENT_3_YEAR_UPFRONT_PAYMENT"
-      - !ruby/object:Api::Type::NestedObject
-        name: soleTenancyPreferences
-        description: 'Preferences concerning Sole Tenancy nodes and VMs. '
-        properties:
-          - !ruby/object:Api::Type::Double
-            name: cpuOvercommitRatio
-            description: 'CPU overcommit ratio. Acceptable values are between 1.0 and 2.0
-              inclusive. '
-          - !ruby/object:Api::Type::String
-            name: hostMaintenancePolicy
-            description: "Sole Tenancy nodes maintenance policy. \n Possible values:\n HOST_MAINTENANCE_POLICY_UNSPECIFIED\nHOST_MAINTENANCE_POLICY_DEFAULT\nHOST_MAINTENANCE_POLICY_RESTART_IN_PLACE\nHOST_MAINTENANCE_POLICY_MIGRATE_WITHIN_NODE_GROUP"
-          - !ruby/object:Api::Type::String
-            name: commitmentPlan
-            description: "Commitment plan to consider when calculating costs for virtual
-              machine insights and recommendations. If you are unsure which value to set,
-              a 3 year commitment plan is often a good value to start with. \n Possible
-              values:\n COMMITMENT_PLAN_UNSPECIFIED\nON_DEMAND\nCOMMITMENT_1_YEAR\nCOMMITMENT_3_YEAR"
-          - !ruby/object:Api::Type::Array
-            name: nodeTypes
-            item_type: !ruby/object:Api::Type::NestedObject
-              properties:
-                - !ruby/object:Api::Type::String
-                  name: nodeName
-                  description: 'Name of the Sole Tenant node. Consult https://cloud.google.com/compute/docs/nodes/sole-tenant-nodes '
-            description: 'A list of sole tenant node types. An empty list means that all
-              possible node types will be considered. '
-parameters:
-  - !ruby/object:Api::Type::String
-    name: location
-    description: 'Part of `parent`. See documentation of `projectsId`. '
-    url_param_only: true
-    required: true
-    immutable: true
-  - !ruby/object:Api::Type::String
-    name: preferenceSetId
-    description: 'Required. User specified ID for the preference set. It will become
-      the last component of the preference set name. The ID must be unique within the
-      project, must conform with RFC-1034, is restricted to lower-cased letters, and
-      has a maximum length of 63 characters. The ID must match the regular expression
-      `[a-z]([a-z0-9-]{0,61}[a-z0-9])?`. '
-    url_param_only: true
-    required: true
-    immutable: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: name
@@ -204,3 +56,185 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: error
     message: message
+parameters:
+  - !ruby/object:Api::Type::String
+    name: location
+    description: 'Part of `parent`. See documentation of `projectsId`.'
+    url_param_only: true
+    required: true
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: preferenceSetId
+    description: 'Required. User specified ID for the preference set. It will become
+      the last component of the preference set name. The ID must be unique within the
+      project, must conform with RFC-1034, is restricted to lower-cased letters, and
+      has a maximum length of 63 characters. The ID must match the regular expression
+      `[a-z]([a-z0-9-]{0,61}[a-z0-9])?`.'
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: name
+    description: 'Output only. Name of the preference set.'
+    output: true
+  - !ruby/object:Api::Type::String
+    name: createTime
+    description: 'Output only. The timestamp when the preference set was created.'
+    output: true
+  - !ruby/object:Api::Type::String
+    name: updateTime
+    description: 'Output only. The timestamp when the preference set was last updated.'
+    output: true
+  - !ruby/object:Api::Type::String
+    name: displayName
+    description: 'User-friendly display name. Maximum length is 63 characters.'
+  - !ruby/object:Api::Type::String
+    name: description
+    description: 'A description of the preference set.'
+  - !ruby/object:Api::Type::NestedObject
+    name: virtualMachinePreferences
+    description: 'VirtualMachinePreferences enables you to create sets of assumptions,
+      for example, a geographical location and pricing track, for your migrated virtual
+      machines. The set of preferences influence recommendations for migrating virtual
+      machine assets.'
+    properties:
+      - !ruby/object:Api::Type::String
+        name: targetProduct
+        description: "Target product for assets using this preference set. Specify either
+          target product or business goal, but not both.
+          Possible values:
+            `COMPUTE_MIGRATION_TARGET_PRODUCT_UNSPECIFIED`,
+            `COMPUTE_MIGRATION_TARGET_PRODUCT_COMPUTE_ENGINE`,
+            `COMPUTE_MIGRATION_TARGET_PRODUCT_VMWARE_ENGINE`,
+            `COMPUTE_MIGRATION_TARGET_PRODUCT_SOLE_TENANCY`"
+      - !ruby/object:Api::Type::NestedObject
+        name: regionPreferences
+        description: 'The user preferences relating to target regions.'
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: preferredRegions
+            item_type: Api::Type::String
+            description: 'A list of preferred regions, ordered by the most preferred region
+              first. Set only valid Google Cloud region names. See https://cloud.google.com/compute/docs/regions-zones
+              for available regions.'
+      - !ruby/object:Api::Type::String
+        name: commitmentPlan
+        description: "Commitment plan to consider when calculating costs for virtual machine
+          insights and recommendations. If you are unsure which value to set, a 3 year
+          commitment plan is often a good value to start with.
+          Possible values:
+            `COMMITMENT_PLAN_UNSPECIFIED`,
+            `COMMITMENT_PLAN_NONE`,
+            `COMMITMENT_PLAN_ONE_YEAR`,
+            `COMMITMENT_PLAN_THREE_YEARS`"
+      - !ruby/object:Api::Type::String
+        name: sizingOptimizationStrategy
+        description: "Sizing optimization strategy specifies the preferred strategy used
+          when extrapolating usage data to calculate insights and recommendations for
+          a virtual machine. If you are unsure which value to set, a moderate sizing optimization
+          strategy is often a good value to start with.
+          Possible values:
+            `SIZING_OPTIMIZATION_STRATEGY_UNSPECIFIED`,
+            `SIZING_OPTIMIZATION_STRATEGY_SAME_AS_SOURCE`,
+            `SIZING_OPTIMIZATION_STRATEGY_MODERATE`,
+            `SIZING_OPTIMIZATION_STRATEGY_AGGRESSIVE`"
+      - !ruby/object:Api::Type::NestedObject
+        name: computeEnginePreferences
+        description: 'The user preferences relating to Compute Engine target platform.'
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: machinePreferences
+            description: 'The type of machines to consider when calculating virtual machine
+              migration insights and recommendations. Not all machine types are available
+              in all zones and regions.'
+            properties:
+              - !ruby/object:Api::Type::Array
+                name: allowedMachineSeries
+                description: 'Compute Engine machine series to consider for insights and recommendations.
+                  If empty, no restriction is applied on the machine series.'
+                item_type: !ruby/object:Api::Type::NestedObject
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: code
+                      description: 'Code to identify a Compute Engine machine series. Consult
+                        https://cloud.google.com/compute/docs/machine-resource#machine_type_comparison
+                        for more details on the available series.'
+          - !ruby/object:Api::Type::String
+            name: licenseType
+            description: "License type to consider when calculating costs for virtual machine
+              insights and recommendations. If unspecified, costs are calculated based on
+              the default licensing plan.
+              Possible values:
+                `LICENSE_TYPE_UNSPECIFIED`,
+                `LICENSE_TYPE_DEFAULT`,
+                `LICENSE_TYPE_BRING_YOUR_OWN_LICENSE`"
+      - !ruby/object:Api::Type::NestedObject
+        name: vmwareEnginePreferences
+        description: 'The user preferences relating to Google Cloud VMware Engine target
+          platform.'
+        properties:
+          - !ruby/object:Api::Type::Double
+            name: cpuOvercommitRatio
+            description: 'CPU overcommit ratio. Acceptable values are between 1.0 and 8.0,
+              with 0.1 increment.'
+          - !ruby/object:Api::Type::Double
+            name: memoryOvercommitRatio
+            description: 'Memory overcommit ratio. Acceptable values are 1.0, 1.25, 1.5,
+              1.75 and 2.0.'
+          - !ruby/object:Api::Type::Double
+            name: storageDeduplicationCompressionRatio
+            description: 'The Deduplication and Compression ratio is based on the logical
+              (Used Before) space required to store data before applying deduplication and
+              compression, in relation to the physical (Used After) space required after
+              applying deduplication and compression. Specifically, the ratio is the Used
+              Before space divided by the Used After space. For example, if the Used Before
+              space is 3 GB, but the physical Used After space is 1 GB, the deduplication
+              and compression ratio is 3x. Acceptable values are between 1.0 and 4.0.'
+          - !ruby/object:Api::Type::String
+            name: commitmentPlan
+            description: "Commitment plan to consider when calculating costs for virtual
+              machine insights and recommendations. If you are unsure which value to set,
+              a 3 year commitment plan is often a good value to start with.
+              Possible values:
+                `COMMITMENT_PLAN_UNSPECIFIED`,
+                `ON_DEMAND`,
+                `COMMITMENT_1_YEAR_MONTHLY_PAYMENTS`,
+                `COMMITMENT_3_YEAR_MONTHLY_PAYMENTS`,
+                `COMMITMENT_1_YEAR_UPFRONT_PAYMENT`,
+                `COMMITMENT_3_YEAR_UPFRONT_PAYMENT`,"
+      - !ruby/object:Api::Type::NestedObject
+        name: soleTenancyPreferences
+        description: 'Preferences concerning Sole Tenancy nodes and VMs.'
+        properties:
+          - !ruby/object:Api::Type::Double
+            name: cpuOvercommitRatio
+            description: 'CPU overcommit ratio. Acceptable values are between 1.0 and 2.0
+              inclusive.'
+          - !ruby/object:Api::Type::String
+            name: hostMaintenancePolicy
+            description: "Sole Tenancy nodes maintenance policy.
+              Possible values:
+                `HOST_MAINTENANCE_POLICY_UNSPECIFIED`,
+                `HOST_MAINTENANCE_POLICY_DEFAULT`,
+                `HOST_MAINTENANCE_POLICY_RESTART_IN_PLACE`,
+                `HOST_MAINTENANCE_POLICY_MIGRATE_WITHIN_NODE_GROUP`"
+          - !ruby/object:Api::Type::String
+            name: commitmentPlan
+            description: "Commitment plan to consider when calculating costs for virtual
+              machine insights and recommendations. If you are unsure which value to set,
+              a 3 year commitment plan is often a good value to start with.
+              Possible values:
+                `COMMITMENT_PLAN_UNSPECIFIED`,
+                `ON_DEMAND`,
+                `COMMITMENT_1_YEAR`,
+                `COMMITMENT_3_YEAR`"
+          - !ruby/object:Api::Type::Array
+            name: nodeTypes
+            description: 'A list of sole tenant node types. An empty list means that all
+              possible node types will be considered.'
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: nodeName
+                  description: 'Name of the Sole Tenant node. Consult https://cloud.google.com/compute/docs/nodes/sole-tenant-nodes'

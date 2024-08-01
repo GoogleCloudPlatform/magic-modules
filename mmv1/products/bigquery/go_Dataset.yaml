@@ -329,7 +329,6 @@ properties:
     description: |
       The labels associated with this dataset. You can use these to
       organize and group your datasets.
-    immutable: false
   - name: 'lastModifiedTime'
     type: Integer
     description: |

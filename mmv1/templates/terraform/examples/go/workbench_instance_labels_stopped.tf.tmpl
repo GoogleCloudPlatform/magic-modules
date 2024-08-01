@@ -21,8 +21,6 @@ resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
 
   }
 
-  instance_owners  = [ "{{index $.TestEnvVars "service_account"}}"]
-
   labels = {
     k = "val"
   }

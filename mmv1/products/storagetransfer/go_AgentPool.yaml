@@ -1,0 +1,84 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'AgentPool'
+description: 'Represents an On-Premises Agent pool.'
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/storage-transfer/docs/on-prem-agent-pools'
+  api: 'https://cloud.google.com/storage-transfer/docs/reference/rest/v1/projects.agentPools'
+docs:
+base_url: 'projects/{{project}}/agentPools'
+self_link: 'projects/{{project}}/agentPools/{{name}}'
+create_url: 'projects/{{project}}/agentPools?agentPoolId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 30
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  constants: 'templates/terraform/constants/go/agent_pool.go.tmpl'
+  post_create: 'templates/terraform/post_create/go/agent_pool.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/go/agent_pool.go.tmpl'
+  post_import: 'templates/terraform/post_import/go/agent_pool.go.tmpl'
+examples:
+  - name: 'agent_pool_basic'
+    primary_resource_id: 'example'
+    vars:
+      agent-pool-name: 'agent-pool-example'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    skip_test: true
+parameters:
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The ID of the agent pool to create.
+
+      The agentPoolId must meet the following requirements:
+      * Length of 128 characters or less.
+      * Not start with the string goog.
+      * Start with a lowercase ASCII character, followed by:
+        * Zero or more: lowercase Latin alphabet characters, numerals, hyphens (-), periods (.), underscores (_), or tildes (~).
+        * One or more numerals or lowercase ASCII characters.
+
+      As expressed by the regular expression: ^(?!goog)[a-z]([a-z0-9-._~]*[a-z0-9])?$.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'displayName'
+    type: String
+    description: 'Specifies the client-specified AgentPool description.'
+  - name: 'state'
+    type: Enum
+    description: 'Specifies the state of the AgentPool.'
+    output: true
+    enum_values:
+      - 'CREATING'
+      - 'CREATED'
+      - 'DELETING'
+  - name: 'bandwidthLimit'
+    type: NestedObject
+    description: |
+      Specifies the bandwidth limit details. If this field is unspecified, the default value is set as 'No Limit'.
+    properties:
+      - name: 'limitMbps'
+        type: String
+        description:
+          'Bandwidth rate in megabytes per second, distributed across all the
+          agents in the pool.'
+        required: true

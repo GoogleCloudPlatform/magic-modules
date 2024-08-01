@@ -42,7 +42,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -511,3 +511,16 @@ properties:
       * /projects/{project}/zones/{zone}/storagePools/{storagePool}
     diff_suppress_func: 'tpgresource.CompareResourceNames'
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+  - !ruby/object:Api::Type::String
+    name: 'accessMode'
+    required: false
+    immutable: false
+    description: |
+      The accessMode of the disk.
+      For example:
+      * READ_WRITE_SINGLE
+      * READ_WRITE_MANY
+      * READ_ONLY_SINGLE
+    default_from_api: true
+    update_verb: :PATCH
+    update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}?paths=accessMode'
