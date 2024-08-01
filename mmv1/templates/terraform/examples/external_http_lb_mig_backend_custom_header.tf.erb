@@ -1,7 +1,6 @@
 # External HTTP load balancer with a CDN-enabled managed instance group backend
 # and custom request and response headers
 
-# [START cloudloadbalancing_ext_http_gce_custom_header]
 # VPC
 resource "google_compute_network" "default" {
   name                    = "<%= ctx[:vars]['xlb_network_name'] %>"
@@ -83,7 +82,7 @@ resource "google_compute_instance_template" "default" {
     }
   }
   disk {
-    source_image = "debian-cloud/debian-10"
+    source_image = "debian-cloud/debian-12"
     auto_delete  = true
     boot         = true
   }
@@ -154,4 +153,3 @@ resource "google_compute_firewall" "default" {
   }
   target_tags = ["allow-health-check"]
 }
-# [END cloudloadbalancing_ext_http_gce_custom_header]

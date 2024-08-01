@@ -64,17 +64,20 @@ parameters:
     default_value: '(default)'
     description: |
       The Firestore database id. Defaults to `"(default)"`.
+    immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::String
     name: 'collection'
     description: |
       The collection ID, relative to database. For example: chatrooms or chatrooms/my-document/private-messages.
     required: true
+    immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::String
     name: 'documentId'
     description: |
       The client-assigned document ID to use for this document during creation.
+    immutable: true
     required: true
     url_param_only: true
 properties:

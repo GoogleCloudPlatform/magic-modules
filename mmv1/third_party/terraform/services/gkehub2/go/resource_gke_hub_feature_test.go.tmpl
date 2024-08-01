@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -530,8 +530,9 @@ resource "google_gke_hub_feature" "feature" {
   fleet_default_member_config {
     configmanagement {
       version = "1.16.1"
-     config_sync {
-       prevent_drift = true
+      config_sync {
+        enabled = true
+        prevent_drift = true
         source_format = "unstructured"
         oci {
           sync_repo = "us-central1-docker.pkg.dev/corp-gke-build-artifacts/acm/configs:latest"

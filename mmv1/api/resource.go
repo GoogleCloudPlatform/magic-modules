@@ -593,9 +593,6 @@ func buildEffectiveLabelsField(name string, labels *Type) *Type {
 		"including the %s configured through Terraform, other clients and services.", name, name)
 
 	t := "KeyValueEffectiveLabels"
-	if name == "annotations" {
-		t = "KeyValueEffectiveAnnotations"
-	}
 
 	n := fmt.Sprintf("effective%s", strings.Title(name))
 
@@ -669,6 +666,10 @@ func getLabelsFieldNote(title string) string {
 			"in your configuration.\n"+
 			"Please refer to the field `effective_%s` for all of the %s present on the resource.",
 		title, title, title)
+}
+
+func (r Resource) StateMigrationFile() string {
+	return fmt.Sprintf("templates/terraform/state_migrations/go/%s_%s.go.tmpl", google.Underscore(r.ProductMetadata.Name), google.Underscore(r.Name))
 }
 
 // ====================
@@ -1026,7 +1027,7 @@ func (r Resource) IgnoreReadPropertiesToString(e resource.Examples) string {
 		props = append(props, fmt.Sprintf("\"%s\"", tp))
 	}
 	for _, tp := range r.IgnoreReadLabelsFields(r.PropertiesWithExcluded()) {
-		props = append(props, fmt.Sprintf("\"%s\"", google.Underscore(tp)))
+		props = append(props, fmt.Sprintf("\"%s\"", tp))
 	}
 	for _, tp := range ignoreReadFields(r.AllUserProperties()) {
 		props = append(props, fmt.Sprintf("\"%s\"", tp))
@@ -1294,6 +1295,21 @@ func (r Resource) IamParentSourceType() string {
 	return t
 }
 
+func (r Resource) IamImportFormat() string {
+	var importFormat string
+	if len(r.IamPolicy.ImportFormat) > 0 {
+		importFormat = r.IamPolicy.ImportFormat[0]
+	} else {
+		importFormat = r.IamPolicy.SelfLink
+		if importFormat == "" {
+			importFormat = r.SelfLinkUrl()
+		}
+	}
+
+	importFormat = regexp.MustCompile(`\{\{%?(\w+)\}\}`).ReplaceAllString(importFormat, "%s")
+	return strings.ReplaceAll(importFormat, r.ProductMetadata.BaseUrl, "")
+}
+
 func (r Resource) IamImportQualifiersForTest() string {
 	var importFormat string
 	if len(r.IamPolicy.ImportFormat) > 0 {
@@ -1311,9 +1327,11 @@ func (r Resource) IamImportQualifiersForTest() string {
 		if param == "project" {
 			if i != len(params)-1 {
 				// If the last parameter is project then we want to create a new project to use for the test, so don't default from the environment
-				importQualifiers = append(importQualifiers, "envvar.GetTestProjectFromEnv()")
-			} else {
-				importQualifiers = append(importQualifiers, `context["project_id"]`)
+				if r.IamPolicy.TestProjectName == "" {
+					importQualifiers = append(importQualifiers, "envvar.GetTestProjectFromEnv()")
+				} else {
+					importQualifiers = append(importQualifiers, `context["project_id"]`)
+				}
 			}
 		} else if param == "zone" && r.IamPolicy.SubstituteZoneValue {
 			importQualifiers = append(importQualifiers, "envvar.GetTestZoneFromEnv()")
@@ -1322,7 +1340,7 @@ func (r Resource) IamImportQualifiersForTest() string {
 			if example.RegionOverride == "" {
 				importQualifiers = append(importQualifiers, "envvar.GetTestRegionFromEnv()")
 			} else {
-				importQualifiers = append(importQualifiers, example.RegionOverride)
+				importQualifiers = append(importQualifiers, fmt.Sprintf("\"%s\"", example.RegionOverride))
 			}
 		} else if param == "universe_domain" {
 			importQualifiers = append(importQualifiers, "envvar.GetTestUniverseDomainFromEnv()")
@@ -1376,7 +1394,7 @@ func (r Resource) GetPropertyUpdateMasksGroups(properties []*Type, maskPrefix st
 	maskGroups := map[string][]string{}
 	for _, prop := range properties {
 		if prop.FlattenObject {
-			maps.Copy(maskGroups, r.GetPropertyUpdateMasksGroups(prop.Properties, prop.ApiName))
+			maps.Copy(maskGroups, r.GetPropertyUpdateMasksGroups(prop.Properties, prop.ApiName+"."))
 		} else if len(prop.UpdateMaskFields) > 0 {
 			maskGroups[google.Underscore(prop.Name)] = prop.UpdateMaskFields
 		} else {
@@ -1467,8 +1485,8 @@ func (r Resource) propertiesWithCustomUpdate(properties []*Type) []*Type {
 	})
 }
 
-func (r Resource) PropertiesByCustomUpdate() map[UpdateGroup][]*Type {
-	customUpdateProps := r.propertiesWithCustomUpdate(r.RootProperties())
+func (r Resource) PropertiesByCustomUpdate(properties []*Type) map[UpdateGroup][]*Type {
+	customUpdateProps := r.propertiesWithCustomUpdate(properties)
 	groupedCustomUpdateProps := map[UpdateGroup][]*Type{}
 	for _, prop := range customUpdateProps {
 		groupedProperty := UpdateGroup{UpdateUrl: prop.UpdateUrl,
@@ -1494,21 +1512,30 @@ func (r Resource) PropertiesByCustomUpdateGroups() []UpdateGroup {
 		}
 		updateGroups = append(updateGroups, groupedProperty)
 	}
-	sort.Slice(updateGroups, func(i, j int) bool { return updateGroups[i].UpdateId < updateGroups[i].UpdateId })
+	sort.Slice(updateGroups, func(i, j int) bool {
+		a := updateGroups[i]
+		b := updateGroups[j]
+		if a.UpdateVerb != b.UpdateVerb {
+			return a.UpdateVerb > b.UpdateVerb
+		}
+		return a.UpdateId < b.UpdateId
+	})
 	return updateGroups
 }
 
 func (r Resource) FieldSpecificUpdateMethods() bool {
-	return (len(r.PropertiesByCustomUpdate()) > 0)
+	return (len(r.PropertiesByCustomUpdate(r.RootProperties())) > 0)
 }
 
-func (r Resource) CustomUpdatePropertiesByKey(updateUrl string, updateId string, fingerprintName string, updateVerb string) []*Type {
-	groupedProperties := r.PropertiesByCustomUpdate()
+func (r Resource) CustomUpdatePropertiesByKey(properties []*Type, updateUrl string, updateId string, fingerprintName string, updateVerb string) []*Type {
+	groupedProperties := r.PropertiesByCustomUpdate(properties)
 	groupedProperty := UpdateGroup{UpdateUrl: updateUrl,
 		UpdateVerb:      updateVerb,
 		UpdateId:        updateId,
 		FingerprintName: fingerprintName}
-	return groupedProperties[groupedProperty]
+	return google.Reject(groupedProperties[groupedProperty], func(p *Type) bool {
+		return p.UrlParamOnly
+	})
 }
 
 func (r Resource) PropertyNamesToStrings(properties []*Type) []string {
@@ -1537,4 +1564,12 @@ func (r Resource) VersionedProvider(exampleVersion string) bool {
 		vp = exampleVersion
 	}
 	return vp != "" && vp != "ga"
+}
+
+func (r Resource) StateUpgradersCount() []int {
+	var nums []int
+	for i := r.StateUpgradeBaseSchemaVersion; i < r.SchemaVersion; i++ {
+		nums = append(nums, i)
+	}
+	return nums
 }

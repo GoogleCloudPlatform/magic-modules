@@ -84,6 +84,6 @@ properties:
     name: 'resourceTypeSelector'
     description: |
       Selector of the resource type where we want to protect resources.
-      For example, `storage.googleapis.com/Bucket OR compute.googleapis.com/*`
+      For example, `storage.googleapis.com/Bucket`.
     required: true
     immutable: true

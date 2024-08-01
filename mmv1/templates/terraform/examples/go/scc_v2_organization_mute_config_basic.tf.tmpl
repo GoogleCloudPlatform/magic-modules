@@ -1,0 +1,8 @@
+resource "google_scc_v2_organization_mute_config" "{{$.PrimaryResourceId}}" {
+  mute_config_id    = "{{index $.Vars "mute_config_id"}}"
+  organization = "{{index $.TestEnvVars "org_id"}}"
+  location     = "global"
+  description  = "My custom Cloud Security Command Center Finding Organization mute Configuration"
+  filter = "severity = \"HIGH\""
+  type = "STATIC"
+}

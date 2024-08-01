@@ -34,6 +34,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
@@ -119,6 +120,7 @@ properties:
           of replicas.
         api_name: maxNumReplicas
         required: true
+        send_empty_value: true
       - name: 'cooldownPeriod'
         type: Integer
         description: |
@@ -138,7 +140,7 @@ properties:
         type: String
         description: |
           Defines operating mode for this policy.
-        default_value: ON
+        default_value: "ON"
       - name: 'scaleDownControl'
         type: NestedObject
         description: |
@@ -247,7 +249,7 @@ properties:
 
               - OPTIMIZE_AVAILABILITY. Predictive autoscaling improves availability by monitoring daily and weekly load patterns and scaling out ahead of anticipated demand.
             custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
-            default_value: NONE
+            default_value: "NONE"
       - name: 'metric'
         type: Array
         description: |
@@ -363,6 +365,7 @@ properties:
         key_description: |
           A name for the schedule.
         value_type:
+          name: scalingSchedule
           type: NestedObject
           properties:
             - name: 'minRequiredReplicas'
@@ -380,7 +383,7 @@ properties:
               type: String
               description: |
                 The time zone to be used when interpreting the schedule. The value of this field must be a time zone name from the tz database: http://en.wikipedia.org/wiki/Tz_database.
-              default_value: UTC
+              default_value: "UTC"
             - name: 'durationSec'
               type: Integer
               description: |

@@ -31,7 +31,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -497,6 +497,13 @@ properties:
     update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setTarget'
     diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
     custom_expand: 'templates/terraform/custom_expand/self_link_from_name.erb'
+  - !ruby/object:Api::Type::Fingerprint
+    name: 'labelFingerprint'
+    description: |
+      The fingerprint used for optimistic locking of this resource.  Used
+      internally during updates.
+    update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setLabels'
+    update_verb: :POST
   - !ruby/object:Api::Type::Boolean
     name: 'allowGlobalAccess'
     description: |
@@ -518,13 +525,6 @@ properties:
       Labels to apply to this forwarding rule.  A list of key->value pairs.
     update_verb: :POST
     update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setLabels'
-  - !ruby/object:Api::Type::Fingerprint
-    name: 'labelFingerprint'
-    description: |
-      The fingerprint used for optimistic locking of this resource.  Used
-      internally during updates.
-    update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setLabels'
-    update_verb: :POST
   - !ruby/object:Api::Type::Boolean
     name: 'allPorts'
     description: |

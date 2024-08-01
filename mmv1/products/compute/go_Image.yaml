@@ -45,6 +45,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/global/operations/{{op_id}}'
@@ -62,6 +63,7 @@ iam_policy:
   allowed_iam_role: 'roles/compute.imageUser'
   parent_resource_attribute: 'image'
   iam_conditions_request_type: 'QUERY_PARAM'
+  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
 custom_code:
 examples:
   - name: 'image_basic'
@@ -173,7 +175,6 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: Labels to apply to this Image.
-    immutable: false
     update_url: 'projects/{{project}}/global/images/{{name}}/setLabels'
     update_verb: 'POST'
   - name: 'labelFingerprint'
@@ -219,7 +220,7 @@ properties:
           should be TAR. This is just a container and transmission format
           and not a runtime format. Provided by the client when the disk
           image is created.
-        default_value: TAR
+        default_value: "TAR"
         enum_values:
           - 'TAR'
       - name: 'sha1'

@@ -1,0 +1,201 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Queue'
+description: |
+  A named resource to which messages are sent by publishers.
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/queues/{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/queues'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+iam_policy:
+  method_name_separator: ':'
+  fetch_iam_policy_verb: 'POST'
+  parent_resource_attribute: 'name'
+  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/queues/{{name}}'
+    - '{{name}}'
+custom_code:
+  constants: 'templates/terraform/constants/go/cloud_tasks_retry_config_custom_diff.go.tmpl'
+examples:
+  - name: 'queue_basic'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloud-tasks-queue-test%s", context["random_suffix"])'
+    vars:
+      name: 'cloud-tasks-queue-test'
+  - name: 'cloud_tasks_queue_advanced'
+    primary_resource_id: 'advanced_configuration'
+    vars:
+      name: 'instance-name'
+    ignore_read_extra:
+      - 'app_engine_routing_override.0.service'
+      - 'app_engine_routing_override.0.version'
+      - 'app_engine_routing_override.0.instance'
+parameters:
+  - name: 'location'
+    type: String
+    description: The location of the queue
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: The queue name.
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/go/qualify_queue_name.go.tmpl'
+  - name: 'appEngineRoutingOverride'
+    type: NestedObject
+    description: |
+      Overrides for task-level appEngineRouting. These settings apply only
+      to App Engine tasks in this queue
+    custom_flatten: 'templates/terraform/custom_flatten/go/cloudtasks_queue_appenginerouting.go.tmpl'
+    properties:
+      - name: 'service'
+        type: String
+        description: |
+          App service.
+
+          By default, the task is sent to the service which is the default service when the task is attempted.
+      - name: 'version'
+        type: String
+        description: |
+          App version.
+
+          By default, the task is sent to the version which is the default version when the task is attempted.
+      - name: 'instance'
+        type: String
+        description: |
+          App instance.
+
+          By default, the task is sent to an instance which is available when the task is attempted.
+      - name: 'host'
+        type: String
+        description: The host that the task is sent to.
+        output: true
+  - name: 'rateLimits'
+    type: NestedObject
+    description: |
+      Rate limits for task dispatches.
+
+      The queue's actual dispatch rate is the result of:
+
+      * Number of tasks in the queue
+      * User-specified throttling: rateLimits, retryConfig, and the queue's state.
+      * System throttling due to 429 (Too Many Requests) or 503 (Service
+        Unavailable) responses from the worker, high error rates, or to
+        smooth sudden large traffic spikes.
+    default_from_api: true
+    properties:
+      - name: 'maxDispatchesPerSecond'
+        type: Double
+        description: |
+          The maximum rate at which tasks are dispatched from this queue.
+
+          If unspecified when the queue is created, Cloud Tasks will pick the default.
+        default_from_api: true
+      - name: 'maxConcurrentDispatches'
+        type: Integer
+        description: |
+          The maximum number of concurrent tasks that Cloud Tasks allows to
+          be dispatched for this queue. After this threshold has been
+          reached, Cloud Tasks stops dispatching tasks until the number of
+          concurrent requests decreases.
+        default_from_api: true
+      - name: 'maxBurstSize'
+        type: Integer
+        description: |
+          The max burst size.
+
+          Max burst size limits how fast tasks in queue are processed when many tasks are
+          in the queue and the rate is high. This field allows the queue to have a high
+          rate so processing starts shortly after a task is enqueued, but still limits
+          resource usage when many tasks are enqueued in a short period of time.
+        output: true
+  - name: 'retryConfig'
+    type: NestedObject
+    description: Settings that determine the retry behavior.
+    default_from_api: true
+    properties:
+      - name: 'maxAttempts'
+        type: Integer
+        description: |
+          Number of attempts per task.
+
+          Cloud Tasks will attempt the task maxAttempts times (that is, if
+          the first attempt fails, then there will be maxAttempts - 1
+          retries). Must be >= -1.
+
+          If unspecified when the queue is created, Cloud Tasks will pick
+          the default.
+
+          -1 indicates unlimited attempts.
+        default_from_api: true
+      - name: 'maxRetryDuration'
+        type: String
+        description: |
+          If positive, maxRetryDuration specifies the time limit for
+          retrying a failed task, measured from when the task was first
+          attempted. Once maxRetryDuration time has passed and the task has
+          been attempted maxAttempts times, no further attempts will be
+          made and the task will be deleted.
+
+          If zero, then the task age is unlimited.
+        default_from_api: true
+        diff_suppress_func: 'suppressOmittedMaxDuration'
+      - name: 'minBackoff'
+        type: String
+        description: |
+          A task will be scheduled for retry between minBackoff and
+          maxBackoff duration after it fails, if the queue's RetryConfig
+          specifies that the task should be retried.
+        default_from_api: true
+        diff_suppress_func: 'tpgresource.DurationDiffSuppress'
+      - name: 'maxBackoff'
+        type: String
+        description: |
+          A task will be scheduled for retry between minBackoff and
+          maxBackoff duration after it fails, if the queue's RetryConfig
+          specifies that the task should be retried.
+        default_from_api: true
+        diff_suppress_func: 'tpgresource.DurationDiffSuppress'
+      - name: 'maxDoublings'
+        type: Integer
+        description: |
+          The time between retries will double maxDoublings times.
+
+          A task's retry interval starts at minBackoff, then doubles maxDoublings times,
+          then increases linearly, and finally retries retries at intervals of maxBackoff
+          up to maxAttempts times.
+        default_from_api: true
+  - name: 'stackdriverLoggingConfig'
+    type: NestedObject
+    description: |
+      Configuration options for writing logs to Stackdriver Logging.
+    properties:
+      - name: 'samplingRatio'
+        type: Double
+        description: |
+          Specifies the fraction of operations to write to Stackdriver Logging.
+          This field may contain any value between 0.0 and 1.0, inclusive. 0.0 is the
+          default and means that no operations are logged.
+        required: true

@@ -1,0 +1,160 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'FolderFeed'
+description: |
+  Describes a Cloud Asset Inventory feed used to to listen to asset updates.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/asset-inventory/docs'
+  api: 'https://cloud.google.com/asset-inventory/docs/reference/rest/'
+docs:
+base_url: 'folders/{{folder_id}}/feeds'
+self_link: '{{name}}'
+create_url: 'folders/{{folder_id}}/feeds?feedId={{feed_id}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+collection_url_key: 'feeds'
+custom_code:
+  encoder: 'templates/terraform/encoders/go/cloud_asset_feed.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/go/cloud_asset_feed.go.tmpl'
+  post_create: 'templates/terraform/post_create/go/cloud_asset_feed.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/go/cloud_asset_feed.go.tmpl'
+supports_indirect_user_project_override: true
+examples:
+  - name: 'cloud_asset_folder_feed'
+    primary_resource_id: 'folder_feed'
+    vars:
+      feed_id: 'network-updates'
+      folder_name: 'Networking'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+      org_id: 'ORG_ID'
+parameters:
+  - name: 'folder'
+    type: String
+    description: |
+      The folder this feed should be created in.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'billing_project'
+    type: String
+    description: |
+      The project whose identity will be used when sending messages to the
+      destination pubsub topic. It also specifies the project for API
+      enablement check, quota, and billing.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'folder_id'
+    type: String
+    description: |
+      The ID of the folder where this feed has been created. Both [FOLDER_NUMBER]
+      and folders/[FOLDER_NUMBER] are accepted.
+    output: true
+  - name: 'name'
+    type: String
+    description: |
+      The format will be folders/{folder_number}/feeds/{client-assigned_feed_identifier}.
+    output: true
+  - name: 'feedId'
+    type: String
+    description: |
+      This is the client-assigned asset feed identifier and it needs to be unique under a specific parent.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'assetNames'
+    type: Array
+    description: |
+      A list of the full names of the assets to receive updates. You must specify either or both of
+      assetNames and assetTypes. Only asset updates matching specified assetNames and assetTypes are
+      exported to the feed. For example: //compute.googleapis.com/projects/my_project_123/zones/zone1/instances/instance1.
+      See https://cloud.google.com/apis/design/resourceNames#fullResourceName for more info.
+    item_type:
+      type: String
+  - name: 'assetTypes'
+    type: Array
+    description: |
+      A list of types of the assets to receive updates. You must specify either or both of assetNames
+      and assetTypes. Only asset updates matching specified assetNames and assetTypes are exported to
+      the feed. For example: "compute.googleapis.com/Disk"
+      See https://cloud.google.com/asset-inventory/docs/supported-asset-types for a list of all
+      supported asset types.
+    item_type:
+      type: String
+  - name: 'contentType'
+    type: Enum
+    description: |
+      Asset content type. If not specified, no content but the asset name and type will be returned.
+    enum_values:
+      - 'CONTENT_TYPE_UNSPECIFIED'
+      - 'RESOURCE'
+      - 'IAM_POLICY'
+      - 'ORG_POLICY'
+      - 'OS_INVENTORY'
+      - 'ACCESS_POLICY'
+  - name: 'feedOutputConfig'
+    type: NestedObject
+    description: |
+      Output configuration for asset feed destination.
+    required: true
+    properties:
+      - name: 'pubsubDestination'
+        type: NestedObject
+        description: |
+          Destination on Cloud Pubsub.
+        required: true
+        properties:
+          - name: 'topic'
+            type: String
+            description: |
+              Destination on Cloud Pubsub topic.
+            required: true
+  - name: 'condition'
+    type: NestedObject
+    description: |
+      A condition which determines whether an asset update should be published. If specified, an asset
+      will be returned only when the expression evaluates to true. When set, expression field
+      must be a valid CEL expression on a TemporalAsset with name temporal_asset. Example: a Feed with
+      expression "temporal_asset.deleted == true" will only publish Asset deletions. Other fields of
+      condition are optional.
+    properties:
+      - name: 'expression'
+        type: String
+        description: |
+          Textual representation of an expression in Common Expression Language syntax.
+        required: true
+      - name: 'title'
+        type: String
+        description: |
+          Title for the expression, i.e. a short string describing its purpose.
+          This can be used e.g. in UIs which allow to enter the expression.
+      - name: 'description'
+        type: String
+        description: |
+          Description of the expression. This is a longer text which describes the expression,
+          e.g. when hovered over it in a UI.
+      - name: 'location'
+        type: String
+        description: |
+          String indicating the location of the expression for error reporting, e.g. a file
+          name and a position in the file.
