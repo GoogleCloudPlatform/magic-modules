@@ -191,7 +191,7 @@ properties:
     description: |
       A description of resources that the DeployedIndex uses, which to large degree are decided by Vertex AI, and optionally allows only a modest additional configuration.
 
-// Note: Having the fields within automaticResouces not being marked as immutable was done in order to support the ability to update such fields. See : https://github.com/GoogleCloudPlatform/magic-modules/pull/11039#issuecomment-2209316648
+    # Note: Having the fields within automaticResouces not being marked as immutable was done in order to support the ability to update such fields. See : https://github.com/GoogleCloudPlatform/magic-modules/pull/11039#issuecomment-2209316648
     default_from_api: true
     properties:
       - !ruby/object:Api::Type::Integer
@@ -221,8 +221,8 @@ properties:
 
         n1-standard-16 and n1-standard-32 are still available, but we recommend e2-standard-16 and e2-highmem-16 for cost efficiency.
 
-        Having fields within dedicatedResources not being marked as immutable as well as removing
-        fields such as acceleratorType, acceleratorCount, tpuTopology was done in order to support the ability to update such fields. This is discussed extensively [here](https://github.com/GoogleCloudPlatform/magic-modules/pull/11039#issuecomment-2209316648).
+    # Having fields within dedicatedResources not being marked as immutable as well as removing
+    # fields such as acceleratorType, acceleratorCount, tpuTopology was done in order to support the ability to update such fields. This is discussed extensively [here](https://github.com/GoogleCloudPlatform/magic-modules/pull/11039#issuecomment-2209316648).
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'machineSpec'
