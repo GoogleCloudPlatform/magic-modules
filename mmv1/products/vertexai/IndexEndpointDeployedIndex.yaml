@@ -147,7 +147,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: privateEndpoints
     output: true
-    description: Provides paths for users to send requests directly to the deployed index services running on Cloud via private services access
+    description: Provides paths for users to send requests directly to the deployed index services running on Cloud via private services access. This field is populated if [network](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.indexEndpoints#IndexEndpoint.FIELDS.network) is configured.
     properties:
       - !ruby/object:Api::Type::String
         name: 'matchGrpcAddress'
