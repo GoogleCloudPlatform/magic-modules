@@ -1363,34 +1363,41 @@ resource "google_service_account" "cloud_function_build_account_%[3]s" {
 }
 
 resource "google_project_iam_member" "storage_object_admin_%[3]s" {
-	project = data.google_project.project.project_id
+  project = data.google_project.project.project_id
   role      = "roles/storage.objectAdmin"
   member    = "serviceAccount:${google_service_account.cloud_function_build_account_%[3]s.email}"
 }
 
 resource "google_project_iam_member" "artifact_registry_writer_%[3]s" {
-	project = data.google_project.project.project_id
+  project = data.google_project.project.project_id
   role      = "roles/artifactregistry.writer"
   member    = "serviceAccount:${google_service_account.cloud_function_build_account_%[3]s.email}"
 }
 
 resource "google_project_iam_member" "log_writer_%[3]s" {
-	project = data.google_project.project.project_id
+  project = data.google_project.project.project_id
   role      = "roles/logging.logWriter"
+  member    = "serviceAccount:${google_service_account.cloud_function_build_account_%[3]s.email}"
+}
+
+resource "google_project_iam_member" "object_viewer_%[3]s" {
+  project = data.google_project.project.project_id
+  role      = "roles/storage.objectViewer"
   member    = "serviceAccount:${google_service_account.cloud_function_build_account_%[3]s.email}"
 }
 
 resource "time_sleep" "wait_iam_roles_%[3]s" {
   depends_on       = [
-		google_project_iam_member.storage_object_admin_%[3]s,
-		google_project_iam_member.artifact_registry_writer_%[3]s,
-		google_project_iam_member.log_writer_%[3]s,
-	]
-	create_duration  = "60s"
+    google_project_iam_member.storage_object_admin_%[3]s,
+    google_project_iam_member.artifact_registry_writer_%[3]s,
+    google_project_iam_member.log_writer_%[3]s,
+    google_project_iam_member.object_viewer_%[3]s,
+  ]
+  create_duration  = "60s"
 }
 
 resource "google_cloudfunctions_function" "function" {
-	depends_on = [time_sleep.wait_iam_roles_%[3]s]
+  depends_on = [time_sleep.wait_iam_roles_%[3]s]
   name    = "%[5]s"
   runtime = "nodejs10"
 
