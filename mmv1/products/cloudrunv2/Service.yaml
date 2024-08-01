@@ -70,11 +70,15 @@ examples:
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_limits'
     primary_resource_id: 'default'
     vars:
       cloud_run_service_name: 'cloudrun-service'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_sql'
     primary_resource_id: 'default'
@@ -97,18 +101,24 @@ examples:
       vpc_access_connector_name: 'run-vpc'
       vpc_compute_subnetwork_name: 'run-subnetwork'
       compute_network_name: 'run-network'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_directvpc'
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_probes'
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_secret'
     primary_resource_id: 'default'
@@ -116,6 +126,8 @@ examples:
     vars:
       cloud_run_service_name: 'cloudrun-service'
       secret_id: 'secret-1'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_multicontainer'
     min_version: 'beta'
@@ -124,20 +136,24 @@ examples:
       random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
-
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_mount_gcs'
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service-%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
-
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_mount_nfs'
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service-%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
+    ignore_read_extra:
+      - 'deletion_protection'
 
 parameters:
   - !ruby/object:Api::Type::String

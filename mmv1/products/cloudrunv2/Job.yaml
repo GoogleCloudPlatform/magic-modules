@@ -73,11 +73,15 @@ examples:
       ])"
     vars:
       cloud_run_job_name: 'cloudrun-job'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_job_limits'
     primary_resource_id: 'default'
     vars:
       cloud_run_job_name: 'cloudrun-job'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_job_sql'
     primary_resource_id: 'default'
@@ -104,6 +108,8 @@ examples:
       vpc_access_connector_name: 'run-vpc'
       vpc_compute_subnetwork_name: 'run-subnetwork'
       compute_network_name: 'run-network'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_job_directvpc'
     primary_resource_id: 'default'
@@ -111,6 +117,8 @@ examples:
       ])"
     vars:
       cloud_run_job_name: 'cloudrun-job'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_job_secret'
     primary_resource_id: 'default'
@@ -128,6 +136,8 @@ examples:
       ])"
     vars:
       cloud_run_job_name: 'cloudrun-job'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_job_run_job'
     min_version: beta
@@ -136,6 +146,8 @@ examples:
       ])"
     vars:
       cloud_run_job_name: 'cloudrun-job'
+    ignore_read_extra:
+      - 'deletion_protection'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
