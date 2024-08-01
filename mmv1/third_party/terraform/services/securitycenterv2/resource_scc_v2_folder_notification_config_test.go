@@ -38,6 +38,7 @@ func TestAccSecurityCenterV2FolderNotificationConfig_basic(t *testing.T) {
 				),
 			},
 			{
+				Config:            testAccSecurityCenterV2FolderNotificationConfig_basic(context),
 				ResourceName:      "google_scc_v2_folder_notification_config.default",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -52,6 +53,7 @@ func TestAccSecurityCenterV2FolderNotificationConfig_basic(t *testing.T) {
 				),
 			},
 			{
+				Config:            testAccSecurityCenterV2FolderNotificationConfig_update(context),
 				ResourceName:      "google_scc_v2_folder_notification_config.default",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -111,7 +113,6 @@ resource "google_pubsub_topic" "scc_v2_folder_notification_config" {
 
 resource "google_scc_v2_folder_notification_config" "default" {
   config_id    = "tf-test-config-%{random_suffix}"
-  organization = "%{org_id}"
   folder 	   = google_folder.folder.folder_id
   location     = "global"
   description  = "An updated test folder notification config"
