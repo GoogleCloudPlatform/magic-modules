@@ -130,6 +130,17 @@ func (vt *Tester) fetchBucketPath(bucketPath, cassettePath string) error {
 	return nil
 }
 
+// CassettePath returns the local cassette path.
+func (vt *Tester) CassettePath(version provider.Version) string {
+	return vt.cassettePaths[version]
+}
+
+// LogPath returns the local log path.
+func (vt *Tester) LogPath(mode Mode, version provider.Version) string {
+	lgky := logKey{mode, version}
+	return vt.logPaths[lgky]
+}
+
 // Run the vcr tests in the given mode and provider version and return the result.
 // This will overwrite any existing logs for the given mode and version.
 func (vt *Tester) Run(mode Mode, version provider.Version, testDirs []string) (*Result, error) {
