@@ -1,21 +1,36 @@
+resource "google_compute_public_advertised_prefix" "advertised" {
+  name                = "<%= ctx[:vars]['pap_name'] %>"
+  description         = "my description"
+  dns_verification_ip = "127.127.0.0"
+  ip_cidr_range       = "2001:db8::/40"
+}
+
+resource "google_compute_public_delegated_prefix" "pdp" {
+  name          = "<%= ctx[:vars]['pdp_name'] %>"
+  region        = "us-central1"
+  description   = "my description"
+  ip_cidr_range = "2001:db8::/48"
+  mode          = "EXTERNAL_IPV6_FORWARDING_RULE_CREATION"
+  parent_prefix = google_compute_public_advertised_prefix.advertised.id
+}
 resource "google_compute_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
   provider              = google-beta
   name                  = "<%= ctx[:vars]['forwarding_rule_name'] %>"
-  region                = "us-west1"
+  region                = "us-central1"
   port_range            = 80
   ip_protocol           = "TCP"
   ip_version            = "IPV6"
   load_balancing_scheme = "EXTERNAL"
-  ip_address            = "2600:1901:4456::1/96"
+  ip_address            = "2001:db8::1/96"
   network_tier          = "PREMIUM"
   backend_service       = google_compute_region_backend_service.backend.id
-  ip_collection         = "projects/zberger-sandbox-276421/regions/us-west1/publicDelegatedPrefixes/tf-test-prefix"
+  ip_collection         = google_compute_public_delegated_prefix.pdp.id
 }
 
 resource "google_compute_region_backend_service" "backend" {
   provider              = google-beta
   name                  = "<%= ctx[:vars]['backend_name'] %>"
-  region                = "us-west1"
+  region                = "us-central1"
   load_balancing_scheme = "EXTERNAL"
   health_checks         = [google_compute_region_health_check.hc.id]
 }
@@ -25,7 +40,7 @@ resource "google_compute_region_health_check" "hc" {
   name               = "check-<%= ctx[:vars]['backend_name'] %>"
   check_interval_sec = 1
   timeout_sec        = 1
-  region             = "us-west1"
+  region             = "us-central1"
 
   tcp_health_check {
     port = "80"

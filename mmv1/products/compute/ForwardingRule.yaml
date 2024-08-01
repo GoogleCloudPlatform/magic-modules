@@ -97,6 +97,8 @@ examples:
     name: 'forwarding_rule_externallb_ipv6'
     primary_resource_id: 'default'
     vars:
+      pap_name: 'my-pap'
+      pdp_name: 'my-pdp'
       forwarding_rule_name: 'website-forwarding-rule'
       backend_name: 'website-backend'
       network_name: 'website-net'

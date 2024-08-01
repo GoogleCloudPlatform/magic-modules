@@ -51,6 +51,16 @@ examples:
       prefixes_name: 'my-prefix'
     test_env_vars:
       desc: :PAP_DESCRIPTION
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'public_delegated_prefixes_ipv6'
+    primary_resource_id: 'prefixes'
+    # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
+    # resource_compute_public_advertised_prefix_test.go
+    skip_test: true
+    vars:
+      prefixes_name: 'my-prefix'
+    test_env_vars:
+      desc: :PAP_DESCRIPTION
 properties:
   - !ruby/object:Api::Type::String
     name: 'region'
@@ -83,6 +93,19 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'ipCidrRange'
     description:
-      The IPv4 address range, in CIDR format, represented by this public
-      advertised prefix.
+      The IP address range, in CIDR format, represented by this public 
+      delegated prefix.
     required: true
+  - !ruby/object:Api::Type::Enum
+    name: 'mode'
+    description:
+      The public delegated prefix mode for IPv6 only.
+    values:
+      - :DELEGATION
+      - :EXTERNAL_IPV6_FORWARDING_RULE_CREATION
+  - !ruby/object:Api::Type::Integer
+    name: 'allocatablePrefixLength'
+    description:
+      The allocatable prefix length supported by this public delegated prefix. 
+      This field is optional and cannot be set for prefixes in DELEGATION mode.
+      It cannot be set for IPv4 prefixes either, and it always defaults to 32.
