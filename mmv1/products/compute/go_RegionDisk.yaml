@@ -215,7 +215,6 @@ properties:
     type: KeyValueLabels
     description: |
       Labels to apply to this disk.  A list of key->value pairs.
-    immutable: false
     update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}/setLabels'
     update_verb: 'POST'
   - name: 'name'
