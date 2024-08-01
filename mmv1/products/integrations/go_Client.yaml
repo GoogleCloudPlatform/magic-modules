@@ -45,6 +45,7 @@ examples:
     primary_resource_id: 'example'
     vars:
       key_ring_name: 'my-keyring'
+      service_account_id: my-service-acc
     skip_vcr: true
   - name: 'integrations_client_deprecated_fields'
     primary_resource_id: 'example'
