@@ -1,4 +1,4 @@
-package rules
+package breaking_changes
 
 import (
 	"sort"
@@ -15,7 +15,7 @@ func TestComputeBreakingChanges(t *testing.T) {
 		name           string
 		oldResourceMap map[string]*schema.Resource
 		newResourceMap map[string]*schema.Resource
-		wantViolations []*BreakingChange
+		wantViolations []BreakingChange
 	}{
 		{
 			name: "control",
@@ -91,14 +91,10 @@ func TestComputeBreakingChanges(t *testing.T) {
 				},
 			},
 			newResourceMap: map[string]*schema.Resource{},
-			wantViolations: []*BreakingChange{
+			wantViolations: []BreakingChange{
 				{
-					Resource:               "google-x",
 					Message:                "Resource `google-x` was either removed or renamed",
-					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes#resource-map-resource-removal-or-rename",
-					RuleTemplate:           "Resource {{resource}} was either removed or renamed",
-					RuleDefinition:         "In terraform resources should be retained whenever possible. A removable of an resource will result in a configuration breakage wherever a dependency on that resource exists. Renaming or Removing a resources are functionally equivalent in terms of configuration breakages.",
-					RuleName:               "Removing or Renaming an Resource",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#resource-map-resource-removal-or-rename",
 				},
 			},
 		},
@@ -119,15 +115,10 @@ func TestComputeBreakingChanges(t *testing.T) {
 					},
 				},
 			},
-			wantViolations: []*BreakingChange{
+			wantViolations: []BreakingChange{
 				{
-					Resource:               "google-x",
-					Field:                  "field-b",
 					Message:                "Field `field-b` within resource `google-x` was either removed or renamed",
-					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes#resource-schema-field-removal-or-rename",
-					RuleTemplate:           "Field {{field}} within resource {{resource}} was either removed or renamed",
-					RuleDefinition:         "In terraform fields should be retained whenever possible. A removable of an field will result in a configuration breakage wherever a dependency on that field exists. Renaming or Removing a field are functionally equivalent in terms of configuration breakages.",
-					RuleName:               "Removing or Renaming an field",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#resource-schema-field-removal-or-rename",
 				},
 			},
 		},
@@ -149,15 +140,10 @@ func TestComputeBreakingChanges(t *testing.T) {
 					},
 				},
 			},
-			wantViolations: []*BreakingChange{
+			wantViolations: []BreakingChange{
 				{
-					Resource:               "google-x",
-					Field:                  "field-a",
 					Message:                "Field `field-a` changed from optional to required on `google-x`",
-					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes#field-optional-to-required",
-					RuleTemplate:           "Field {{field}} changed from optional to required on {{resource}}",
-					RuleName:               "Field becoming Required Field",
-					RuleDefinition:         "A field cannot become required as existing configs may not have this field defined. Thus, breaking configs in sequential plan or applies. If you are adding Required to a field so a block won't remain empty, this can cause two issues. First if it's a singular nested field the block may gain more fields later and it's not clear whether the field is actually required so it may be misinterpreted by future contributors. Second if users are defining empty blocks in existing configurations this change will break them. Consider these points in admittance of this type of change.",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#field-optional-to-required",
 				},
 			},
 		},
@@ -178,24 +164,14 @@ func TestComputeBreakingChanges(t *testing.T) {
 					},
 				},
 			},
-			wantViolations: []*BreakingChange{
+			wantViolations: []BreakingChange{
 				{
-					Resource:               "google-x",
-					Field:                  "field-a",
 					Message:                "Field `field-a` changed from optional to required on `google-x`",
-					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes#field-optional-to-required",
-					RuleTemplate:           "Field {{field}} changed from optional to required on {{resource}}",
-					RuleName:               "Field becoming Required Field",
-					RuleDefinition:         "A field cannot become required as existing configs may not have this field defined. Thus, breaking configs in sequential plan or applies. If you are adding Required to a field so a block won't remain empty, this can cause two issues. First if it's a singular nested field the block may gain more fields later and it's not clear whether the field is actually required so it may be misinterpreted by future contributors. Second if users are defining empty blocks in existing configurations this change will break them. Consider these points in admittance of this type of change.",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#field-optional-to-required",
 				},
 				{
-					Resource:               "google-x",
-					Field:                  "field-b",
 					Message:                "Field `field-b` within resource `google-x` was either removed or renamed",
-					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes#resource-schema-field-removal-or-rename",
-					RuleTemplate:           "Field {{field}} within resource {{resource}} was either removed or renamed",
-					RuleDefinition:         "In terraform fields should be retained whenever possible. A removable of an field will result in a configuration breakage wherever a dependency on that field exists. Renaming or Removing a field are functionally equivalent in terms of configuration breakages.",
-					RuleName:               "Removing or Renaming an field",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#resource-schema-field-removal-or-rename",
 				},
 			},
 		},
@@ -221,32 +197,18 @@ func TestComputeBreakingChanges(t *testing.T) {
 					},
 				},
 			},
-			wantViolations: []*BreakingChange{
+			wantViolations: []BreakingChange{
 				{
-					Resource:               "google-x",
-					Field:                  "field-a",
 					Message:                "Field `field-a` changed from optional to required on `google-x`",
-					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes#field-optional-to-required",
-					RuleTemplate:           "Field {{field}} changed from optional to required on {{resource}}",
-					RuleName:               "Field becoming Required Field",
-					RuleDefinition:         "A field cannot become required as existing configs may not have this field defined. Thus, breaking configs in sequential plan or applies. If you are adding Required to a field so a block won't remain empty, this can cause two issues. First if it's a singular nested field the block may gain more fields later and it's not clear whether the field is actually required so it may be misinterpreted by future contributors. Second if users are defining empty blocks in existing configurations this change will break them. Consider these points in admittance of this type of change.",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#field-optional-to-required",
 				},
 				{
-					Resource:               "google-x",
-					Field:                  "field-b",
 					Message:                "Field `field-b` within resource `google-x` was either removed or renamed",
-					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes#resource-schema-field-removal-or-rename",
-					RuleTemplate:           "Field {{field}} within resource {{resource}} was either removed or renamed",
-					RuleDefinition:         "In terraform fields should be retained whenever possible. A removable of an field will result in a configuration breakage wherever a dependency on that field exists. Renaming or Removing a field are functionally equivalent in terms of configuration breakages.",
-					RuleName:               "Removing or Renaming an field",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#resource-schema-field-removal-or-rename",
 				},
 				{
-					Resource:               "google-y",
 					Message:                "Resource `google-y` was either removed or renamed",
-					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes#resource-map-resource-removal-or-rename",
-					RuleTemplate:           "Resource {{resource}} was either removed or renamed",
-					RuleDefinition:         "In terraform resources should be retained whenever possible. A removable of an resource will result in a configuration breakage wherever a dependency on that resource exists. Renaming or Removing a resources are functionally equivalent in terms of configuration breakages.",
-					RuleName:               "Removing or Renaming an Resource",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#resource-map-resource-removal-or-rename",
 				},
 			},
 		},
@@ -289,15 +251,10 @@ func TestComputeBreakingChanges(t *testing.T) {
 					},
 				},
 			},
-			wantViolations: []*BreakingChange{
+			wantViolations: []BreakingChange{
 				{
-					Resource:               "google-x",
-					Field:                  "field-a.sub-field-2",
 					Message:                "Field `field-a.sub-field-2` within resource `google-x` was either removed or renamed",
-					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes#resource-schema-field-removal-or-rename",
-					RuleTemplate:           "Field {{field}} within resource {{resource}} was either removed or renamed",
-					RuleDefinition:         "In terraform fields should be retained whenever possible. A removable of an field will result in a configuration breakage wherever a dependency on that field exists. Renaming or Removing a field are functionally equivalent in terms of configuration breakages.",
-					RuleName:               "Removing or Renaming an field",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#resource-schema-field-removal-or-rename",
 				},
 			},
 		},
@@ -339,15 +296,10 @@ func TestComputeBreakingChanges(t *testing.T) {
 					},
 				},
 			},
-			wantViolations: []*BreakingChange{
+			wantViolations: []BreakingChange{
 				{
-					Resource:               "google-x",
-					Field:                  "field-a.sub-field-1",
 					Message:                "Field `field-a.sub-field-1` MinItems went from 100 to 25 on `google-x`",
-					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes#field-shrinking-max",
-					RuleTemplate:           "Field {{field}} MinItems went from 100 to 25 on {{resource}}",
-					RuleName:               "Shrinking Maximum Items",
-					RuleDefinition:         "MaxItems cannot shrink. Otherwise existing terraform configurations that don't satisfy this rule will break.",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#field-shrinking-max",
 				},
 			},
 		},
@@ -389,15 +341,10 @@ func TestComputeBreakingChanges(t *testing.T) {
 					},
 				},
 			},
-			wantViolations: []*BreakingChange{
+			wantViolations: []BreakingChange{
 				{
-					Resource:               "google-x",
-					Field:                  "field-a.sub-field-1",
 					Message:                "Field `field-a.sub-field-1` MinItems went from 100 to 25 on `google-x`",
-					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes#field-shrinking-max",
-					RuleTemplate:           "Field {{field}} MinItems went from 100 to 25 on {{resource}}",
-					RuleName:               "Shrinking Maximum Items",
-					RuleDefinition:         "MaxItems cannot shrink. Otherwise existing terraform configurations that don't satisfy this rule will break.",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#field-shrinking-max",
 				},
 			},
 		},
@@ -425,15 +372,10 @@ func TestComputeBreakingChanges(t *testing.T) {
 					},
 				},
 			},
-			wantViolations: []*BreakingChange{
+			wantViolations: []BreakingChange{
 				{
-					Resource:               "google-x",
-					Field:                  "field-a",
 					Message:                "Field `field-a` MinItems went from 1 to 4 on `google-x`",
-					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes#field-growing-min",
-					RuleTemplate:           "Field {{field}} MinItems went from 1 to 4 on {{resource}}",
-					RuleName:               "Growing Minimum Items",
-					RuleDefinition:         "MinItems cannot grow. Otherwise existing terraform configurations that don't satisfy this rule will break.",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#field-growing-min",
 				},
 			},
 		},

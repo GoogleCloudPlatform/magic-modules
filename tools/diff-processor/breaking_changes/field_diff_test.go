@@ -1,7 +1,6 @@
-package rules
+package breaking_changes
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -14,13 +13,13 @@ type fieldTestCase struct {
 	expectedViolation bool
 }
 
-func TestFieldRule_BecomingRequired(t *testing.T) {
-	for _, tc := range fieldRule_BecomingRequiredTestCases {
-		tc.check(fieldRule_BecomingRequired, t)
+func TestFieldBecomingRequired(t *testing.T) {
+	for _, tc := range FieldBecomingRequiredTestCases {
+		tc.check(FieldBecomingRequired, t)
 	}
 }
 
-var fieldRule_BecomingRequiredTestCases = []fieldTestCase{
+var FieldBecomingRequiredTestCases = []fieldTestCase{
 	{
 		name: "control",
 		oldField: &schema.Schema{
@@ -93,15 +92,15 @@ var fieldRule_BecomingRequiredTestCases = []fieldTestCase{
 }
 
 // !! min max ?
-// isRuleBreak: fieldRule_OptionalComputedToOptional_func,
+// isRuleBreak: FieldOptionalComputedToOptional_func,
 
-func TestFieldRule_ChangingType(t *testing.T) {
-	for _, tc := range fieldRule_ChangingTypeTestCases {
-		tc.check(fieldRule_ChangingType, t)
+func TestFieldChangingType(t *testing.T) {
+	for _, tc := range FieldChangingTypeTestCases {
+		tc.check(FieldChangingType, t)
 	}
 }
 
-var fieldRule_ChangingTypeTestCases = []fieldTestCase{
+var FieldChangingTypeTestCases = []fieldTestCase{
 	{
 		name: "control",
 		oldField: &schema.Schema{
@@ -174,13 +173,13 @@ var fieldRule_ChangingTypeTestCases = []fieldTestCase{
 	},
 }
 
-func TestFieldRule_DefaultModification(t *testing.T) {
-	for _, tc := range fieldRule_DefaultModificationTestCases {
-		tc.check(fieldRule_DefaultModification, t)
+func TestFieldDefaultModification(t *testing.T) {
+	for _, tc := range FieldDefaultModificationTestCases {
+		tc.check(FieldDefaultModification, t)
 	}
 }
 
-var fieldRule_DefaultModificationTestCases = []fieldTestCase{
+var FieldDefaultModificationTestCases = []fieldTestCase{
 	{
 		name: "control",
 		oldField: &schema.Schema{
@@ -275,13 +274,13 @@ var fieldRule_DefaultModificationTestCases = []fieldTestCase{
 	},
 }
 
-func TestFieldRule_BecomingComputedOnly(t *testing.T) {
-	for _, tc := range fieldRule_BecomingComputedOnlyTestCases {
-		tc.check(fieldRule_BecomingComputedOnly, t)
+func TestFieldBecomingComputedOnly(t *testing.T) {
+	for _, tc := range FieldBecomingComputedOnlyTestCases {
+		tc.check(FieldBecomingComputedOnly, t)
 	}
 }
 
-var fieldRule_BecomingComputedOnlyTestCases = []fieldTestCase{
+var FieldBecomingComputedOnlyTestCases = []fieldTestCase{
 	{
 		name: "control - already computed",
 		oldField: &schema.Schema{
@@ -363,13 +362,13 @@ var fieldRule_BecomingComputedOnlyTestCases = []fieldTestCase{
 	},
 }
 
-func TestFieldRule_OptionalComputedToOptional(t *testing.T) {
-	for _, tc := range fieldRule_OptionalComputedToOptionalTestCases {
-		tc.check(fieldRule_OptionalComputedToOptional, t)
+func TestFieldOptionalComputedToOptional(t *testing.T) {
+	for _, tc := range FieldOptionalComputedToOptionalTestCases {
+		tc.check(FieldOptionalComputedToOptional, t)
 	}
 }
 
-var fieldRule_OptionalComputedToOptionalTestCases = []fieldTestCase{
+var FieldOptionalComputedToOptionalTestCases = []fieldTestCase{
 	{
 		name: "control - static",
 		oldField: &schema.Schema{
@@ -422,13 +421,13 @@ var fieldRule_OptionalComputedToOptionalTestCases = []fieldTestCase{
 	},
 }
 
-func TestFieldRule_GrowingMin(t *testing.T) {
-	for _, tc := range fieldRule_GrowingMinTestCases {
-		tc.check(fieldRule_GrowingMin, t)
+func TestFieldGrowingMin(t *testing.T) {
+	for _, tc := range FieldGrowingMinTestCases {
+		tc.check(FieldGrowingMin, t)
 	}
 }
 
-var fieldRule_GrowingMinTestCases = []fieldTestCase{
+var FieldGrowingMinTestCases = []fieldTestCase{
 	{
 		name: "control:min - static",
 		oldField: &schema.Schema{
@@ -491,13 +490,13 @@ var fieldRule_GrowingMinTestCases = []fieldTestCase{
 	},
 }
 
-func TestFieldRule_ShrinkingMax(t *testing.T) {
-	for _, tc := range fieldRule_ShrinkingMaxTestCases {
-		tc.check(fieldRule_ShrinkingMax, t)
+func TestFieldShrinkingMax(t *testing.T) {
+	for _, tc := range FieldShrinkingMaxTestCases {
+		tc.check(FieldShrinkingMax, t)
 	}
 }
 
-var fieldRule_ShrinkingMaxTestCases = []fieldTestCase{
+var FieldShrinkingMaxTestCases = []fieldTestCase{
 	{
 		name: "control:max - static",
 		oldField: &schema.Schema{
@@ -560,13 +559,13 @@ var fieldRule_ShrinkingMaxTestCases = []fieldTestCase{
 	},
 }
 
-func TestFieldRule_AddingSubfieldToConfigModeAttr(t *testing.T) {
-	for _, tc := range fieldRule_AddingSubfieldToConfigModeAttrTestCases {
-		tc.check(fieldRule_AddingSubfieldToConfigModeAttr, t)
+func TestFieldAddingSubfieldToConfigModeAttr(t *testing.T) {
+	for _, tc := range FieldAddingSubfieldToConfigModeAttrTestCases {
+		tc.check(FieldAddingSubfieldToConfigModeAttr, t)
 	}
 }
 
-var fieldRule_AddingSubfieldToConfigModeAttrTestCases = []fieldTestCase{
+var FieldAddingSubfieldToConfigModeAttrTestCases = []fieldTestCase{
 	{
 		name: "no new subfields",
 		oldField: &schema.Schema{
@@ -635,35 +634,11 @@ var fieldRule_AddingSubfieldToConfigModeAttrTestCases = []fieldTestCase{
 	},
 }
 
-func (tc *fieldTestCase) check(rule FieldRule, t *testing.T) {
-	breakage := rule.isRuleBreak(tc.oldField, tc.newField, MessageContext{})
+func (tc *fieldTestCase) check(rule FieldDiffRule, t *testing.T) {
+	messages := rule.Messages("resource", "field", tc.oldField, tc.newField)
 
-	violation := breakage != nil
-	if breakage != nil && strings.Contains(breakage.Message, "{{") {
-		t.Errorf("Test `%s` failed: replacements for `{{<val>}}` not successful ", tc.name)
-	}
+	violation := len(messages) > 0
 	if tc.expectedViolation != violation {
 		t.Errorf("Test `%s` failed: expected %v violations, got %v", tc.name, tc.expectedViolation, violation)
 	}
-}
-
-func TestBreakingMessage(t *testing.T) {
-	breakageMessage := fieldRule_OptionalComputedToOptional.IsRuleBreak(
-		&schema.Schema{
-			Optional: true,
-			Computed: true,
-		},
-		&schema.Schema{
-			Optional: true,
-		},
-		MessageContext{
-			Resource: "a",
-			Field:    "b",
-		},
-	)
-
-	if !strings.Contains(breakageMessage.Message, "Field `b` transitioned from optional+computed to optional `a`") {
-		t.Errorf("Test `%s` failed: replacements for `{{<val>}}` not successful ", "TestBreakingMessage")
-	}
-
 }

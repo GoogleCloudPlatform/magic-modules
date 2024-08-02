@@ -52,7 +52,7 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 				ResourceName:            "google_vmwareengine_private_cloud.vmw-engine-pc",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "update_time", "type", "deletion_parameters"},
+				ImportStateVerifyIgnore: []string{"location", "name", "update_time", "type", "deletion_parameters", "deletion_delay_hours"},
 			},
 			{
 				Config: testPrivateCloudUpdateConfig(context),
@@ -72,7 +72,7 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 				ResourceName:            "google_vmwareengine_private_cloud.vmw-engine-pc",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "update_time", "type", "deletion_parameters"},
+				ImportStateVerifyIgnore: []string{"location", "name", "update_time", "type", "deletion_parameters", "deletion_delay_hours"},
 			},
 		},
 	})

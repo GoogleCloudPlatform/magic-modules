@@ -1,15 +1,8 @@
-package rules
+package breaking_changes
 
 import (
-	"fmt"
-
-	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/constants"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
-
-func documentationReference(identifier string) string {
-	return fmt.Sprintf(" - [reference](%s)", constants.GetFileUrl(identifier))
-}
 
 func getValueType(valueType schema.ValueType) string {
 	switch valueType {

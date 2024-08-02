@@ -1,17 +1,30 @@
-package rules
+package breaking_changes
 
 import (
+	"sort"
+	"strings"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
-	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func TestResourceSchemaRule_RemovingAField(t *testing.T) {
+func TestRemovingAFieldMessages(t *testing.T) {
 	for _, tc := range resourceSchemaRule_RemovingAField_TestCases {
-		tc.check(resourceSchemaRule_RemovingAField, t)
+		gotMessages := RemovingAFieldMessages("resource", tc.resourceDiff)
+
+		if len(gotMessages) != len(tc.expectedFields) {
+			t.Errorf("RemovingAFieldMessages(%v) got %d messages; want %d", tc.name, len(gotMessages), len(tc.expectedFields))
+			continue
+		}
+		wantFields := tc.expectedFields
+		sort.Strings(wantFields)
+		sort.Strings(gotMessages)
+		for i, field := range wantFields {
+			if !strings.Contains(gotMessages[i], field) {
+				t.Errorf("RemovingAFieldMessages(%v) got message %q; want field %q", tc.name, gotMessages[i], field)
+			}
+		}
 	}
 }
 
@@ -74,12 +87,4 @@ var resourceSchemaRule_RemovingAField_TestCases = []resourceSchemaTestCase{
 		},
 		expectedFields: []string{"field-a", "field-b"},
 	},
-}
-
-func (tc *resourceSchemaTestCase) check(rule ResourceSchemaRule, t *testing.T) {
-	fields := rule.IsRuleBreak(tc.resourceDiff)
-	less := func(a, b string) bool { return a < b }
-	if !cmp.Equal(fields, tc.expectedFields, cmpopts.SortSlices(less)) {
-		t.Errorf("Test `%s` failed: wanted %v , got %v", tc.name, tc.expectedFields, fields)
-	}
 }
