@@ -34,9 +34,6 @@ In addition to the arguments listed above, the following attributes are exported
 
 <a name="nested_memberships"></a>The `memberships` block contains:
 
-* `name` -
-  The resource name of the Membership, of the form groups/{group_id}/memberships/{membership_id}.
-
 * `roles` - The TransitiveMembershipRoles that apply to the Membership. Structure is [documented below](#nested_roles).
 
 * `member` - EntityKey of the member.  This value will be either a userKey in the format `users/000000000000000000000` with a numerical id or a groupKey in the format `groups/000ab0000ab0000` with a hexadecimal id.
