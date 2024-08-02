@@ -3470,7 +3470,7 @@ func testAccComputeInstance_nic_securityPolicyCreateWithAccessConfigUpdateAccess
 			},
 			{
 				Config:      testAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsRemoveAccessConfig(suffix, policyName, instanceName),
-				ExpectError: regexp.MustCompile("Error setting security policy to the instance since at least one access config must exist"),
+				ExpectError: regexp.MustCompile("Error deleting old access_config:"),
 			},
 		},
 	})
@@ -3488,7 +3488,7 @@ func testAccComputeInstance_nic_securityPolicyCreateWithoutAccessConfig(t *testi
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsRemoveAccessConfig(suffix, policyName, instanceName),
-				ExpectError: regexp.MustCompile("Error setting security policy to the instance since at least one access config must exist"),
+				ExpectError: regexp.MustCompile("Error deleting old access_config:"),
 			},
 		},
 	})
