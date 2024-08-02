@@ -10,7 +10,7 @@ import (
 // structure for rules regarding resource config changes
 type ResourceConfigDiffRule struct {
 	Identifier string
-	Messages func(resource string, diff diff.ResourceConfigDiff) []string
+	Messages func(resource string, resourceConfigDiff diff.ResourceConfigDiff) []string
 }
 
 // ResourceConfigDiffRules is a list of ResourceConfigDiffRule
@@ -22,8 +22,8 @@ var ResourceConfigRemovingAResource = ResourceConfigDiffRule{
 	Messages:   ResourceConfigRemovingAResourceMessages,
 }
 
-func ResourceConfigRemovingAResourceMessages(resource string, diff diff.ResourceConfigDiff) []string {
-	if diff.New == nil && diff.Old != nil {
+func ResourceConfigRemovingAResourceMessages(resource string, resourceConfigDiff diff.ResourceConfigDiff) []string {
+	if resourceConfigDiff.New == nil && resourceConfigDiff.Old != nil {
 		tmpl := "Resource `%s` was either removed or renamed"
 		return []string{fmt.Sprintf(tmpl, resource)}
 	}
