@@ -48,6 +48,8 @@ examples:
     primary_resource_id: 'folder'
     vars:
       bucket_name: 'my-bucket'
+    ignore_read_extra:
+      - 'force_destroy'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'bucket'
