@@ -12,7 +12,7 @@ func TestAccSecurityCenterV2ProjectMuteConfig_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":        envvar.GetTestProjectFromEnv(t),
+		"project":       envvar.GetTestProjectFromEnv(),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -21,7 +21,7 @@ func TestAccSecurityCenterV2ProjectMuteConfig_update(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSecurityCenterV2projectMuteConfig_basic(context),
+				Config: testAccSecurityCenterV2ProjectMuteConfig_basic(context),
 			},
 			{
 				ResourceName:      "google_scc_v2_project_mute_config.default",
@@ -32,7 +32,7 @@ func TestAccSecurityCenterV2ProjectMuteConfig_update(t *testing.T) {
 				},
 			},
 			{
-				Config: testAccSecurityCenterV2projectMuteConfig_update(context),
+				Config: testAccSecurityCenterV2ProjectMuteConfig_update(context),
 			},
 			{
 				ResourceName:      "google_scc_v2_project_mute_config.default",
