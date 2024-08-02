@@ -222,31 +222,32 @@ func TestFieldChanged(t *testing.T) {
 	cases := map[string]struct {
 		oldField      *schema.Schema
 		newField      *schema.Schema
-		expectChanged bool
+		wantHasChanges bool
+		wantChanged    map[string]bool
 	}{
 		"both nil": {
 			oldField:      nil,
 			newField:      nil,
-			expectChanged: false,
+			wantHasChanges: false,
 		},
 		"old nil": {
 			oldField: nil,
 			newField: &schema.Schema{
 				Type: schema.TypeString,
 			},
-			expectChanged: true,
+			wantHasChanges: true,
 		},
 		"new nil": {
 			oldField: &schema.Schema{
 				Type: schema.TypeString,
 			},
 			newField:      nil,
-			expectChanged: true,
+			wantHasChanges: true,
 		},
 		"not changed": {
 			oldField:      &schema.Schema{},
 			newField:      &schema.Schema{},
-			expectChanged: false,
+			wantHasChanges: false,
 		},
 		"Type changed": {
 			oldField: &schema.Schema{
@@ -255,7 +256,8 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				Type: schema.TypeInt,
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"Type": true},
 		},
 		"ConfigMode changed": {
 			oldField: &schema.Schema{
@@ -264,7 +266,8 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				ConfigMode: schema.SchemaConfigModeBlock,
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"ConfigMode": true},
 		},
 		"Required changed": {
 			oldField: &schema.Schema{
@@ -273,7 +276,8 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				Required: true,
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"Required": true},
 		},
 		"Optional changed": {
 			oldField: &schema.Schema{
@@ -282,7 +286,8 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				Optional: true,
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"Optional": true},
 		},
 		"Computed changed": {
 			oldField: &schema.Schema{
@@ -291,7 +296,8 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				Computed: true,
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"Computed": true},
 		},
 		"ForceNew changed": {
 			oldField: &schema.Schema{
@@ -300,7 +306,8 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				ForceNew: true,
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"ForceNew": true},
 		},
 		"DiffSuppressOnRefresh changed": {
 			oldField: &schema.Schema{
@@ -309,7 +316,8 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				DiffSuppressOnRefresh: true,
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"DiffSuppressOnRefresh": true},
 		},
 		"Default changed": {
 			oldField: &schema.Schema{
@@ -318,7 +326,8 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				Default: 20,
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"Default": true},
 		},
 		"Description changed": {
 			oldField: &schema.Schema{
@@ -327,7 +336,8 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				Description: "Goodbye",
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"Description": true},
 		},
 		"InputDefault changed": {
 			oldField: &schema.Schema{
@@ -336,7 +346,8 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				InputDefault: "Goodbye",
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"InputDefault": true},
 		},
 		"MaxItems changed": {
 			oldField: &schema.Schema{
@@ -345,7 +356,8 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				MaxItems: 20,
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"MaxItems": true},
 		},
 		"MinItems changed": {
 			oldField: &schema.Schema{
@@ -354,7 +366,8 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				MinItems: 20,
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"MinItems": true},
 		},
 		"Deprecated changed": {
 			oldField: &schema.Schema{
@@ -363,7 +376,8 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				Deprecated: "Goodbye",
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"Deprecated": true},
 		},
 		"Sensitive changed": {
 			oldField: &schema.Schema{
@@ -372,7 +386,8 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				Sensitive: true,
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"Sensitive": true},
 		},
 		"ConflictsWith reordered": {
 			oldField: &schema.Schema{
@@ -381,7 +396,7 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				ConflictsWith: []string{"field_two", "field_one"},
 			},
-			expectChanged: false,
+			wantHasChanges: false,
 		},
 		"ConflictsWith changed": {
 			oldField: &schema.Schema{
@@ -390,7 +405,8 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				ConflictsWith: []string{"field_two", "field_three"},
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"ConflictsWith": true},
 		},
 		"ExactlyOneOf reordered": {
 			oldField: &schema.Schema{
@@ -399,7 +415,7 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				ExactlyOneOf: []string{"field_two", "field_one"},
 			},
-			expectChanged: false,
+			wantHasChanges: false,
 		},
 		"ExactlyOneOf changed": {
 			oldField: &schema.Schema{
@@ -408,7 +424,8 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				ExactlyOneOf: []string{"field_two", "field_three"},
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"ExactlyOneOf": true},
 		},
 		"AtLeastOneOf reordered": {
 			oldField: &schema.Schema{
@@ -417,7 +434,7 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				AtLeastOneOf: []string{"field_two", "field_one"},
 			},
-			expectChanged: false,
+			wantHasChanges: false,
 		},
 		"AtLeastOneOf changed": {
 			oldField: &schema.Schema{
@@ -426,7 +443,8 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				AtLeastOneOf: []string{"field_two", "field_three"},
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"AtLeastOneOf": true},
 		},
 		"RequiredWith reordered": {
 			oldField: &schema.Schema{
@@ -435,7 +453,7 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				RequiredWith: []string{"field_two", "field_one"},
 			},
-			expectChanged: false,
+			wantHasChanges: false,
 		},
 		"RequiredWith changed": {
 			oldField: &schema.Schema{
@@ -444,21 +462,24 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				RequiredWith: []string{"field_two", "field_three"},
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"RequiredWith": true},
 		},
 		"simple Elem unset -> set": {
 			oldField: &schema.Schema{},
 			newField: &schema.Schema{
 				Elem: &schema.Schema{Type: schema.TypeInt},
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"Elem": true},
 		},
 		"simple Elem set -> unset": {
 			oldField: &schema.Schema{
 				Elem: &schema.Schema{Type: schema.TypeInt},
 			},
 			newField:      &schema.Schema{},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"Elem": true},
 		},
 		"simple Elem unchanged": {
 			oldField: &schema.Schema{
@@ -467,7 +488,7 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				Elem: &schema.Schema{Type: schema.TypeString},
 			},
-			expectChanged: false,
+			wantHasChanges: false,
 		},
 		"simple Elem changed": {
 			oldField: &schema.Schema{
@@ -476,7 +497,8 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				Elem: &schema.Schema{Type: schema.TypeInt},
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"Elem.Type": true},
 		},
 		"nested Elem unset -> set": {
 			oldField: &schema.Schema{},
@@ -489,7 +511,8 @@ func TestFieldChanged(t *testing.T) {
 					},
 				},
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"Elem": true},
 		},
 		"nested Elem set -> unset": {
 			oldField: &schema.Schema{
@@ -502,7 +525,8 @@ func TestFieldChanged(t *testing.T) {
 				},
 			},
 			newField:      &schema.Schema{},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"Elem": true},
 		},
 		"nested Elem unchanged": {
 			oldField: &schema.Schema{
@@ -523,7 +547,7 @@ func TestFieldChanged(t *testing.T) {
 					},
 				},
 			},
-			expectChanged: false,
+			wantHasChanges: false,
 		},
 		"nested Elem changing is ignored": {
 			oldField: &schema.Schema{
@@ -544,7 +568,7 @@ func TestFieldChanged(t *testing.T) {
 					},
 				},
 			},
-			expectChanged: false,
+			wantHasChanges: false,
 		},
 		"Elem simple -> nested": {
 			oldField: &schema.Schema{
@@ -559,7 +583,8 @@ func TestFieldChanged(t *testing.T) {
 					},
 				},
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"Elem": true},
 		},
 		"Elem nested -> simple": {
 			oldField: &schema.Schema{
@@ -574,7 +599,8 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				Elem: &schema.Schema{Type: schema.TypeString},
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"Elem": true},
 		},
 
 		"DiffSuppressFunc added": {
@@ -582,14 +608,16 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				DiffSuppressFunc: newTpgresource.CaseDiffSuppress,
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"DiffSuppressFunc": true},
 		},
 		"DiffSuppressFunc removed": {
 			oldField: &schema.Schema{
 				DiffSuppressFunc: oldTpgresource.CaseDiffSuppress,
 			},
 			newField:      &schema.Schema{},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"DiffSuppressFunc": true},
 		},
 		"DiffSuppressFunc remains set": {
 			oldField: &schema.Schema{
@@ -598,7 +626,7 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				DiffSuppressFunc: newTpgresource.CaseDiffSuppress,
 			},
-			expectChanged: false,
+			wantHasChanges: false,
 		},
 		"Elem DiffSuppressFunc added": {
 			oldField: &schema.Schema{
@@ -612,7 +640,8 @@ func TestFieldChanged(t *testing.T) {
 					DiffSuppressFunc: oldTpgresource.CaseDiffSuppress,
 				},
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"Elem.DiffSuppressFunc": true},
 		},
 		"Elem DiffSuppressFunc removed": {
 			oldField: &schema.Schema{
@@ -626,7 +655,8 @@ func TestFieldChanged(t *testing.T) {
 					Type: schema.TypeString,
 				},
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"Elem.DiffSuppressFunc": true},
 		},
 		"Elem DiffSuppressFunc remains set": {
 			oldField: &schema.Schema{
@@ -641,7 +671,7 @@ func TestFieldChanged(t *testing.T) {
 					DiffSuppressFunc: oldTpgresource.CaseDiffSuppress,
 				},
 			},
-			expectChanged: false,
+			wantHasChanges: false,
 		},
 
 		"DefaultFunc added": {
@@ -649,14 +679,16 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				DefaultFunc: testDefaultFunc1,
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"DefaultFunc": true},
 		},
 		"DefaultFunc removed": {
 			oldField: &schema.Schema{
 				DefaultFunc: testDefaultFunc1,
 			},
 			newField:      &schema.Schema{},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"DefaultFunc": true},
 		},
 		"DefaultFunc remains set": {
 			oldField: &schema.Schema{
@@ -665,7 +697,7 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				DefaultFunc: testDefaultFunc2,
 			},
-			expectChanged: false,
+			wantHasChanges: false,
 		},
 		"Elem DefaultFunc added": {
 			oldField: &schema.Schema{
@@ -679,7 +711,8 @@ func TestFieldChanged(t *testing.T) {
 					DefaultFunc: testDefaultFunc2,
 				},
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"Elem.DefaultFunc": true},
 		},
 		"Elem DefaultFunc removed": {
 			oldField: &schema.Schema{
@@ -693,7 +726,8 @@ func TestFieldChanged(t *testing.T) {
 					Type: schema.TypeString,
 				},
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"Elem.DefaultFunc": true},
 		},
 		"Elem DefaultFunc remains set": {
 			oldField: &schema.Schema{
@@ -708,7 +742,7 @@ func TestFieldChanged(t *testing.T) {
 					DefaultFunc: testDefaultFunc2,
 				},
 			},
-			expectChanged: false,
+			wantHasChanges: false,
 		},
 
 		"StateFunc added": {
@@ -716,14 +750,16 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				StateFunc: testStateFunc1,
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"StateFunc": true},
 		},
 		"StateFunc removed": {
 			oldField: &schema.Schema{
 				StateFunc: testStateFunc1,
 			},
 			newField:      &schema.Schema{},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"StateFunc": true},
 		},
 		"StateFunc remains set": {
 			oldField: &schema.Schema{
@@ -732,7 +768,7 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				StateFunc: testStateFunc2,
 			},
-			expectChanged: false,
+			wantHasChanges: false,
 		},
 		"Elem StateFunc added": {
 			oldField: &schema.Schema{
@@ -746,7 +782,8 @@ func TestFieldChanged(t *testing.T) {
 					StateFunc: testStateFunc2,
 				},
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"Elem.StateFunc": true},
 		},
 		"Elem StateFunc removed": {
 			oldField: &schema.Schema{
@@ -760,7 +797,8 @@ func TestFieldChanged(t *testing.T) {
 					Type: schema.TypeString,
 				},
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"Elem.StateFunc": true},
 		},
 		"Elem StateFunc remains set": {
 			oldField: &schema.Schema{
@@ -775,7 +813,7 @@ func TestFieldChanged(t *testing.T) {
 					StateFunc: testStateFunc2,
 				},
 			},
-			expectChanged: false,
+			wantHasChanges: false,
 		},
 
 		"Set added": {
@@ -783,14 +821,16 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				Set: newTpgresource.SelfLinkRelativePathHash,
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"Set": true},
 		},
 		"Set removed": {
 			oldField: &schema.Schema{
 				Set: oldTpgresource.SelfLinkRelativePathHash,
 			},
 			newField:      &schema.Schema{},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"Set": true},
 		},
 		"Set remains set": {
 			oldField: &schema.Schema{
@@ -799,7 +839,7 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				Set: newTpgresource.SelfLinkRelativePathHash,
 			},
-			expectChanged: false,
+			wantHasChanges: false,
 		},
 		"Elem Set added": {
 			oldField: &schema.Schema{
@@ -813,7 +853,8 @@ func TestFieldChanged(t *testing.T) {
 					Set:  newTpgresource.SelfLinkRelativePathHash,
 				},
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"Elem.Set": true},
 		},
 		"Elem Set removed": {
 			oldField: &schema.Schema{
@@ -827,7 +868,8 @@ func TestFieldChanged(t *testing.T) {
 					Type: schema.TypeString,
 				},
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"Elem.Set": true},
 		},
 		"Elem Set remains set": {
 			oldField: &schema.Schema{
@@ -842,7 +884,7 @@ func TestFieldChanged(t *testing.T) {
 					Set:  newTpgresource.SelfLinkRelativePathHash,
 				},
 			},
-			expectChanged: false,
+			wantHasChanges: false,
 		},
 
 		"ValidateFunc added": {
@@ -850,14 +892,16 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				ValidateFunc: newVerify.ValidateBase64String,
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"ValidateFunc": true},
 		},
 		"ValidateFunc removed": {
 			oldField: &schema.Schema{
 				ValidateFunc: oldVerify.ValidateBase64String,
 			},
 			newField:      &schema.Schema{},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"ValidateFunc": true},
 		},
 		"ValidateFunc remains set": {
 			oldField: &schema.Schema{
@@ -866,7 +910,7 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				ValidateFunc: newVerify.ValidateBase64String,
 			},
-			expectChanged: false,
+			wantHasChanges: false,
 		},
 		"Elem ValidateFunc added": {
 			oldField: &schema.Schema{
@@ -880,7 +924,8 @@ func TestFieldChanged(t *testing.T) {
 					ValidateFunc: newVerify.ValidateBase64String,
 				},
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"Elem.ValidateFunc": true},
 		},
 		"Elem ValidateFunc removed": {
 			oldField: &schema.Schema{
@@ -894,7 +939,8 @@ func TestFieldChanged(t *testing.T) {
 					Type: schema.TypeString,
 				},
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"Elem.ValidateFunc": true},
 		},
 		"Elem ValidateFunc remains set": {
 			oldField: &schema.Schema{
@@ -909,7 +955,7 @@ func TestFieldChanged(t *testing.T) {
 					ValidateFunc: newVerify.ValidateBase64String,
 				},
 			},
-			expectChanged: false,
+			wantHasChanges: false,
 		},
 
 		"ValidateDiagFunc added": {
@@ -917,14 +963,16 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				ValidateDiagFunc: testValidateDiagFunc1,
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"ValidateDiagFunc": true},
 		},
 		"ValidateDiagFunc removed": {
 			oldField: &schema.Schema{
 				ValidateDiagFunc: testValidateDiagFunc1,
 			},
 			newField:      &schema.Schema{},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"ValidateDiagFunc": true},
 		},
 		"ValidateDiagFunc remains set": {
 			oldField: &schema.Schema{
@@ -933,7 +981,7 @@ func TestFieldChanged(t *testing.T) {
 			newField: &schema.Schema{
 				ValidateDiagFunc: testValidateDiagFunc2,
 			},
-			expectChanged: false,
+			wantHasChanges: false,
 		},
 		"Elem ValidateDiagFunc added": {
 			oldField: &schema.Schema{
@@ -947,7 +995,8 @@ func TestFieldChanged(t *testing.T) {
 					ValidateDiagFunc: testValidateDiagFunc2,
 				},
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"Elem.ValidateDiagFunc": true},
 		},
 		"Elem ValidateDiagFunc removed": {
 			oldField: &schema.Schema{
@@ -961,7 +1010,8 @@ func TestFieldChanged(t *testing.T) {
 					Type: schema.TypeString,
 				},
 			},
-			expectChanged: true,
+			wantHasChanges: true,
+			wantChanged: map[string]bool{"Elem.ValidateDiagFunc": true},
 		},
 		"Elem ValidateDiagFunc remains set": {
 			oldField: &schema.Schema{
@@ -976,7 +1026,7 @@ func TestFieldChanged(t *testing.T) {
 					ValidateDiagFunc: testValidateDiagFunc2,
 				},
 			},
-			expectChanged: false,
+			wantHasChanges: false,
 		},
 	}
 
@@ -984,22 +1034,25 @@ func TestFieldChanged(t *testing.T) {
 		tc := tc
 		t.Run(tn, func(t *testing.T) {
 			t.Parallel()
-			changed := fieldChanged(tc.oldField, tc.newField)
-			if changed != tc.expectChanged {
+			hasChanges, changed := fieldChanged(tc.oldField, tc.newField)
+			if hasChanges != tc.wantHasChanges {
 				if diff := cmp.Diff(tc.oldField, tc.newField); diff != "" {
-					t.Errorf("want %t; got %t.\nField diff (-old, +new):\n%s",
-						tc.expectChanged,
-						changed,
+					t.Errorf("fieldChanged hasChanges = %t; want %t.\nField diff (-old, +new):\n%s",
+						tc.wantHasChanges,
+						hasChanges,
 						diff,
 					)
 				} else {
-					t.Errorf("want %t; got %t. No field diff.\nOld field: %s\nNew field: %s\n",
-						tc.expectChanged,
-						changed,
+					t.Errorf("fieldChanged hasChanges = %t; want %t. No field diff.\nOld field: %s\nNew field: %s\n",
+						tc.wantHasChanges,
+						hasChanges,
 						spew.Sdump(tc.oldField),
 						spew.Sdump(tc.newField),
 					)
 				}
+			}
+			if diff := cmp.Diff(tc.wantChanged, changed); diff != "" {
+				t.Errorf("fieldChanged changes not equal.  (-want, +got):\n%s", diff)
 			}
 		})
 	}

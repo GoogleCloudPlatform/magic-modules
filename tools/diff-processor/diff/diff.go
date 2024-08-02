@@ -1,6 +1,7 @@
 package diff
 
 import (
+	"fmt"
 	"reflect"
 
 	"github.com/google/go-cmp/cmp"
@@ -23,6 +24,7 @@ type ResourceConfigDiff struct {
 }
 
 type FieldDiff struct {
+	Changed map[string]bool
 	Old *schema.Schema
 	New *schema.Schema
 }
@@ -50,8 +52,9 @@ func ComputeSchemaDiff(oldResourceMap, newResourceMap map[string]*schema.Resourc
 		for key, _ := range union(maps.Keys(flattenedOldSchema), maps.Keys(flattenedNewSchema)) {
 			oldField := flattenedOldSchema[key]
 			newField := flattenedNewSchema[key]
-			if fieldChanged(oldField, newField) {
+			if hasChanges, changed := fieldChanged(oldField, newField); hasChanges {
 				resourceDiff.Fields[key] = FieldDiff{
+					Changed: changed,
 					Old: oldField,
 					New: newField,
 				}
@@ -96,81 +99,82 @@ func flattenSchema(parentKey string, schemaObj map[string]*schema.Schema) map[st
 	return flattened
 }
 
-func fieldChanged(oldField, newField *schema.Schema) bool {
+func fieldChanged(oldField, newField *schema.Schema) (bool, map[string]bool) {
 	// If either field is nil, it is changed; if both are nil (which should never happen) it's not
 	if oldField == nil && newField == nil {
-		return false
+		return false, nil
 	}
 	if oldField == nil || newField == nil {
-		return true
+		return true, nil
 	}
+	changed := map[string]bool{}
 	// Check if any basic Schema struct fields have changed.
 	// https://github.com/hashicorp/terraform-plugin-sdk/blob/v2.24.0/helper/schema/schema.go#L44
 	if oldField.Type != newField.Type {
-		return true
+		changed["Type"] = true
 	}
 	if oldField.ConfigMode != newField.ConfigMode {
-		return true
+		changed["ConfigMode"] = true
 	}
 	if oldField.Required != newField.Required {
-		return true
+		changed["Required"] = true
 	}
 	if oldField.Optional != newField.Optional {
-		return true
+		changed["Optional"] = true
 	}
 	if oldField.Computed != newField.Computed {
-		return true
+		changed["Computed"] = true
 	}
 	if oldField.ForceNew != newField.ForceNew {
-		return true
+		changed["ForceNew"] = true
 	}
 	if oldField.DiffSuppressOnRefresh != newField.DiffSuppressOnRefresh {
-		return true
+		changed["DiffSuppressOnRefresh"] = true
 	}
 	if oldField.Default != newField.Default {
-		return true
+		changed["Default"] = true
 	}
 	if oldField.Description != newField.Description {
-		return true
+		changed["Description"] = true
 	}
 	if oldField.InputDefault != newField.InputDefault {
-		return true
+		changed["InputDefault"] = true
 	}
 	if oldField.MaxItems != newField.MaxItems {
-		return true
+		changed["MaxItems"] = true
 	}
 	if oldField.MinItems != newField.MinItems {
-		return true
+		changed["MinItems"] = true
 	}
 	if oldField.Deprecated != newField.Deprecated {
-		return true
+		changed["Deprecated"] = true
 	}
 	if oldField.Sensitive != newField.Sensitive {
-		return true
+		changed["Sensitive"] = true
 	}
 
 	// Compare slices
 	less := func(a, b string) bool { return a < b }
 
 	if (len(oldField.ConflictsWith) > 0 || len(newField.ConflictsWith) > 0) && !cmp.Equal(oldField.ConflictsWith, newField.ConflictsWith, cmpopts.SortSlices(less)) {
-		return true
+		changed["ConflictsWith"] = true
 	}
 
 	if (len(oldField.ExactlyOneOf) > 0 || len(newField.ExactlyOneOf) > 0) && !cmp.Equal(oldField.ExactlyOneOf, newField.ExactlyOneOf, cmpopts.SortSlices(less)) {
-		return true
+		changed["ExactlyOneOf"] = true
 	}
 
 	if (len(oldField.AtLeastOneOf) > 0 || len(newField.AtLeastOneOf) > 0) && !cmp.Equal(oldField.AtLeastOneOf, newField.AtLeastOneOf, cmpopts.SortSlices(less)) {
-		return true
+		changed["AtLeastOneOf"] = true
 	}
 
 	if (len(oldField.RequiredWith) > 0 || len(newField.RequiredWith) > 0) && !cmp.Equal(oldField.RequiredWith, newField.RequiredWith, cmpopts.SortSlices(less)) {
-		return true
+		changed["RequiredWith"] = true
 	}
 
 	// Check if Elem changed (unless old and new both represent nested fields)
 	if (oldField.Elem == nil && newField.Elem != nil) || (oldField.Elem != nil && newField.Elem == nil) {
-		return true
+		changed["Elem"] = true
 	}
 	if oldField.Elem != nil && newField.Elem != nil {
 		// At this point new/old Elems are either schema.Schema or schema.Resource.
@@ -180,36 +184,41 @@ func fieldChanged(oldField, newField *schema.Schema) bool {
 		_, newIsResource := newField.Elem.(*schema.Resource)
 
 		if (oldIsResource && !newIsResource) || (!oldIsResource && newIsResource) {
-			return true
+			changed["Elem"] = true
 		}
 		if !oldIsResource && !newIsResource {
-			if fieldChanged(oldField.Elem.(*schema.Schema), newField.Elem.(*schema.Schema)) {
-				return true
+			if hasChanges, elemChanged := fieldChanged(oldField.Elem.(*schema.Schema), newField.Elem.(*schema.Schema)); hasChanges {
+				for k := range elemChanged {
+					changed[fmt.Sprintf("Elem.%s", k)] = true
+				}
 			}
 		}
 	}
 
 	// Check if any Schema struct fields that are functions have changed
 	if funcChanged(oldField.DiffSuppressFunc, newField.DiffSuppressFunc) {
-		return true
+		changed["DiffSuppressFunc"] = true
 	}
 	if funcChanged(oldField.DefaultFunc, newField.DefaultFunc) {
-		return true
+		changed["DefaultFunc"] = true
 	}
 	if funcChanged(oldField.StateFunc, newField.StateFunc) {
-		return true
+		changed["StateFunc"] = true
 	}
 	if funcChanged(oldField.Set, newField.Set) {
-		return true
+		changed["Set"] = true
 	}
 	if funcChanged(oldField.ValidateFunc, newField.ValidateFunc) {
-		return true
+		changed["ValidateFunc"] = true
 	}
 	if funcChanged(oldField.ValidateDiagFunc, newField.ValidateDiagFunc) {
-		return true
+		changed["ValidateDiagFunc"] = true
 	}
 
-	return false
+	if len(changed) > 0 {
+		return true, changed
+	}
+	return false, nil
 }
 
 func funcChanged(oldFunc, newFunc interface{}) bool {
