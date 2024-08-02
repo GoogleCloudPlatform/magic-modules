@@ -54,7 +54,7 @@ resource "google_pubsub_topic" "scc_v2_project_notification" {
 
 resource "google_scc_v2_project_notification_config" "custom_notification_config" {
   config_id    = "tf-test-my-config%{random_suffix}"
-  project      = "%{project_id}"
+  project      = "%{project}"
   description  = "My custom Cloud Security Command Center Finding Notification Configuration"
   pubsub_topic =  google_pubsub_topic.scc_v2_project_notification.id
   location     = "global"
