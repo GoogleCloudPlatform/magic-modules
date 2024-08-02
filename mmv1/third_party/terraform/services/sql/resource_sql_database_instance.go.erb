@@ -504,6 +504,7 @@ is set to true. Defaults to ZONAL.`,
                                                                         "server_ca_mode": {
                                                                                 Type:         schema.TypeString,
                                                                                 Optional:     true,
+                                                                                Computed:     true,
                                                                                 ValidateFunc: validation.StringInSlice([]string{"CA_MODE_UNSPECIFIED", "GOOGLE_MANAGED_INTERNAL_CA", "GOOGLE_MANAGED_CAS_CA"}, false),
                                                                                 Description:  `Specify how the server certificate's Certificate Authority is hosted.`,
 										AtLeastOneOf: ipConfigurationKeys,
