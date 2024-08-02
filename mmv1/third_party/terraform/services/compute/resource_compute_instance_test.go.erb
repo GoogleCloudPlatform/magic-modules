@@ -7260,7 +7260,7 @@ resource "google_compute_instance" "foobar" {
   network_interface {
     subnetwork = google_compute_subnetwork.inst-test-subnetwork.self_link
     alias_ip_range {
-	  subnetwork_range_name = "inst-test-tertiary"
+      subnetwork_range_name = "inst-test-tertiary"
       ip_cidr_range = "10.1.1.0/24"
     }
     alias_ip_range {
