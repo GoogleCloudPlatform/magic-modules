@@ -25,8 +25,8 @@ type ResourceConfigDiff struct {
 
 type FieldDiff struct {
 	Changed map[string]bool
-	Old *schema.Schema
-	New *schema.Schema
+	Old     *schema.Schema
+	New     *schema.Schema
 }
 
 func ComputeSchemaDiff(oldResourceMap, newResourceMap map[string]*schema.Resource) SchemaDiff {
@@ -55,8 +55,8 @@ func ComputeSchemaDiff(oldResourceMap, newResourceMap map[string]*schema.Resourc
 			if hasChanges, changed := fieldChanged(oldField, newField); hasChanges {
 				resourceDiff.Fields[key] = FieldDiff{
 					Changed: changed,
-					Old: oldField,
-					New: newField,
+					Old:     oldField,
+					New:     newField,
 				}
 			}
 		}
