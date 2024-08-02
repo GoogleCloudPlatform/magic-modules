@@ -3,19 +3,17 @@ package breaking_changes
 import (
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
 )
 
-// ResourceInventoryRule provides
-// structure for rules regarding resource
-// inventory changes
+// ResourceConfigDiffRule provides
+// structure for rules regarding resource config changes
 type ResourceConfigDiffRule struct {
 	Identifier string
-	// TODO: Make this take a ResourceConfigDiff instead of old, new.
-	Messages func(resource string, old, new *schema.Resource) []string
+	Messages func(resource string, diff diff.ResourceConfigDiff) []string
 }
 
-// ResourceInventoryRules is a list of ResourceInventoryRule
+// ResourceConfigDiffRules is a list of ResourceConfigDiffRule
 // guarding against provider breaking changes
 var ResourceConfigDiffRules = []ResourceConfigDiffRule{ResourceConfigRemovingAResource}
 
@@ -24,8 +22,8 @@ var ResourceConfigRemovingAResource = ResourceConfigDiffRule{
 	Messages:   ResourceConfigRemovingAResourceMessages,
 }
 
-func ResourceConfigRemovingAResourceMessages(resource string, old, new *schema.Resource) []string {
-	if new == nil && old != nil {
+func ResourceConfigRemovingAResourceMessages(resource string, diff diff.ResourceConfigDiff) []string {
+	if diff.New == nil && diff.Old != nil {
 		tmpl := "Resource `%s` was either removed or renamed"
 		return []string{fmt.Sprintf(tmpl, resource)}
 	}
