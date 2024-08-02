@@ -21,7 +21,6 @@ func TestAccSecurityCenterV2FolderNotificationConfig_basic(t *testing.T) {
 	}
 
 	configID := fmt.Sprintf("tf-test-config-%s", randomSuffix)
-	t.Logf("Generated config ID: %s", configID)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -76,7 +75,7 @@ resource "google_folder" "folder" {
 resource "time_sleep" "wait_1_minute" {
 	depends_on = [google_folder.folder]
 
-	create_duration = "2m"
+	create_duration = "3m"
 }
 
 resource "google_pubsub_topic" "scc_v2_folder_notification_config" {
