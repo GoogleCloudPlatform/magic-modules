@@ -96,7 +96,7 @@ func ResourceStorageBucketObject() *schema.Resource {
 			},
 
 			"generation": {
-				Type:        schema.TypeString,
+				Type:        schema.TypeInt,
 				Computed:    true,
 				Description: `The content generation of this object. Used for object versioning and soft delete.`,
 			},
