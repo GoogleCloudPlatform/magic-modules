@@ -1,0 +1,5 @@
+resource "google_compute_organization_security_policy" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  display_name = "tf-test%{random_suffix}"
+  parent       = "organizations/{{index $.TestEnvVars "org_id"}}"
+}

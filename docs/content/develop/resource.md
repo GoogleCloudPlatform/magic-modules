@@ -80,14 +80,6 @@ For more information about types of resources and the generation process overall
    # provider.yaml.
    # min_version: beta
 
-   # Inserts styled markdown into the header of the resource's page in the
-   # provider documentation.
-   # docs: !ruby/object:Provider::Terraform::Docs
-   #   warning: |
-   #     MULTILINE_WARNING_MARKDOWN
-   #   note: |
-   #     MULTILINE_NOTE_MARKDOWN
-
    # URL for the resource's standard List method. https://google.aip.dev/132
    # Terraform field names enclosed in double curly braces are replaced with
    # the field values from the resource at runtime.
@@ -102,20 +94,11 @@ For more information about types of resources and the generation process overall
    # have a custom update method in the API.
    # immutable: true
 
-   # Overrides one or more timeouts, in minutes. All timeouts default to 20.
-   # timeouts: !ruby/object:Api::Timeouts
-   #   insert_minutes: 20 
-   #   update_minutes: 20 
-   #   delete_minutes: 20 
-
    # URL for the resource's standard Create method, including query parameters.
    # https://google.aip.dev/133
    # Terraform field names enclosed in double curly braces are replaced with
    # the field values from the resource at runtime.
    create_url: 'projects/{{project}}/locations/{{location}}/resourcenames?resourceId={{name}}'
-   # Overrides the HTTP verb used to create a new resource.
-   # Allowed values: :POST, :PUT, :PATCH. Default: :POST
-   # create_verb: :POST
 
    # Overrides the URL for the resource's standard Update method. (If unset, the
    # self_link URL is used by default.) https://google.aip.dev/134
@@ -128,15 +111,6 @@ For more information about types of resources and the generation process overall
    # fields when updating the resource. If false, it does not.
    update_mask: true
 
-   # Overrides the URL for the resource's standard Delete method. (If unset, the
-   # self_link URL is used by default.) https://google.aip.dev/135
-   # Terraform field names enclosed in double curly braces are replaced with
-   # the field values from the resource at runtime.
-   # delete_url: 'projects/{{project}}/locations/{{location}}/resourcenames/{{name}}'
-   # Overrides the HTTP verb used to delete a resource.
-   # Allowed values: :POST, :PUT, :PATCH, :DELETE. Default: :DELETE
-   # delete_verb: :DELETE
-
    # If true, code for handling long-running operations is generated along with
    # the resource. If false, that code is not generated.
    autogen_async: true
@@ -147,20 +121,6 @@ For more information about types of resources and the generation process overall
      # actions: ['create', 'update', 'delete']
      operation: !ruby/object:Api::OpAsync::Operation
        base_url: '{{op_id}}'
-
-     # If true, the provider sets the resource's Terraform ID after the resource is created,
-     # taking into account values that are set by the API at create time. This is only possible
-     # when the completed operation's JSON includes the created resource in the "response" field.
-     # If false (or unset), the provider sets the resource's Terraform ID before the resource is
-     # created, based only on the resource configuration.
-     # result: !ruby/object:Api::OpAsync::Result
-     #   resource_inside_response: true
-
-   # All resources (of all kinds) that share a mutex value block rather than
-   # executing concurrent API requests.
-   # Terraform field names enclosed in double curly braces are replaced with
-   # the field values from the resource at runtime.
-   # mutex: RESOURCE_NAME/{{name}}
 
    parameters:
      - !ruby/object:Api::Type::String
@@ -185,7 +145,7 @@ For more information about types of resources and the generation process overall
 3. Modify the template as needed to match the API resource's documented behavior.
 4. Delete all remaining comments in the resource configuration (including attribute descriptions) that were copied from the above template.
 
-> **Note:** The template includes the most commonly-used fields. For a comprehensive reference, see [ResourceName.yaml reference ↗]({{<ref "/reference/resource-reference.md" >}}).
+> **Note:** The template includes the most commonly-used fields. For a comprehensive reference, see [MMv1 resource reference ↗]({{<ref "/develop/resource-reference.md" >}}).
 {{< /tab >}}
 {{< tab "Handwritten" >}}
 > **Warning:** Handwritten resources are more difficult to develop and maintain. New handwritten resources will only be accepted if implementing the resource in MMv1 would require entirely overriding two or more CRUD methods.
@@ -402,6 +362,8 @@ This section covers how to add IAM resources in Terraform if they are supported 
 
 {{< tabs "IAM" >}}
 {{< tab "MMv1" >}}
+IAM support for MMv1-generated resources is configured within the `ResourceName.yaml` file, and will create the `google_product_resource_iam_policy`, `google_product_resource_iam_binding`, `google_product_resource_iam_member` resource, website, and test files for that resource target when an `iam_policy` block is present.
+
 1. Add the following top-level block to `ResourceName.yaml` directly above `parameters`.
 
 ```yaml
@@ -413,10 +375,8 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   # Usually `:`
   method_name_separator: ':'
   # HTTP method for getIamPolicy. Usually :POST.
-  # Allowed values: :GET, :POST. Default: :GET
   fetch_iam_policy_verb: :POST
-  # Overrides the HTTP method for setIamPolicy.
-  # Allowed values: :POST, :PUT. Default: :POST
+  # Overrides the HTTP method for setIamPolicy. Default: :POST
   # set_iam_policy_verb: :POST
 
   # Must match the parent resource's `import_format` (or `self_link` if
@@ -425,8 +385,6 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   import_format: [
     'projects/{{project}}/locations/{{location}}/resourcenames/{{resource_name}}'
   ]
-  # Valid IAM role that can be set by generated tests. Default: 'roles/viewer'
-  # allowed_iam_role: 'roles/viewer'
 
   # If IAM conditions are supported, set this attribute to indicate how the
   # conditions should be passed to the API. Allowed values: :QUERY_PARAM,
@@ -438,7 +396,7 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   # min_version: beta
 ```
 
-2. Modify the template as needed to match the API resource's documented behavior. These are the most commonly-used fields. For a comprehensive reference, see [IAM policy YAML reference ↗]({{<ref "/reference/iam-policy-reference.md" >}}).
+2. Modify the template as needed to match the API resource's documented behavior. These are the most commonly-used fields. For a comprehensive reference, see [MMv1 resource reference: `iam_policy` ↗]({{<ref "/develop/resource-reference#iam_policy" >}}).
 3. Delete all remaining comments in the IAM configuration (including attribute descriptions) that were copied from the above template.
 {{< /tab >}}
 {{< tab "Handwritten" >}}

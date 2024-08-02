@@ -21,17 +21,17 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
         with:
           fetch-depth: 0
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@ec02537da5712d66d4d50a0f33b7eb52773b5ed1
+        uses: ruby/setup-ruby@036ef458ddccddb148a2b9fb67e95a22fdbf728b # v1.160.0
         with:
           ruby-version: '3.1'
 
       - name: Cache Bundler gems
-        uses: actions/cache@v2
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
         with:
           path: mmv1/vendor/bundle
           key: ${{ runner.os }}-gems-${{ hashFiles('mmv1/**/Gemfile.lock') }}
@@ -45,20 +45,20 @@ jobs:
         working-directory: mmv1
 
       - name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
         with:
-          go-version: '^1.20'
+          go-version: '^1.21'
 
       # Cache Go modules
       - name: Cache Go modules
-        uses: actions/cache@v2
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
 
-      - run: go install golang.org/x/tools/cmd/goimports@latest
+      - run: go install golang.org/x/tools/cmd/goimports@7656c4c657688cae30795365d2a5f30d6f18be7f # v0.19.0
 
       - name: Build ${{ inputs.repo  }}
         run: |
@@ -108,7 +108,7 @@ jobs:
           (current_dir=$(pwd) && cd $OUTPUT_PATH && zip -r "$current_dir/output.zip" .)
 
       - name: Upload built artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
         with:
           name: artifact-${{ inputs.repo  }}
           path: output.zip

@@ -2,70 +2,46 @@ name: TeamCity Services Weekly Diff Check
 permissions: read-all
 
 on:
+  # Enable ad hoc checks
+  workflow_dispatch:
+  
+  # Scheduled checks to catch edge cases
   schedule:
-    # Runs every tuesday morning
-    - cron:  '0 4 * * 2'
+    # Every Monday and Tuesday morning
+    - cron:  '0 4 * * 1-2'
 
 jobs:
-  terraform-provider-google:
-    uses: ./.github/workflows/build-downstream.yml
-    with:
-      repo: 'terraform-provider-google'
-      
-  terraform-provider-google-beta:
-    uses: ./.github/workflows/build-downstream.yml
-    with:
-      repo: 'terraform-provider-google-beta'
-      
   teamcity-services-diff-check:
-    needs: [terraform-provider-google, terraform-provider-google-beta]
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Download built artifacts - GA provider
-        uses: actions/download-artifact@v2
-        with:
-          name: artifact-terraform-provider-google
-          path: artifacts
-      
-      - name: Unzip the artifacts and delete the zip
-        run: |
-          unzip -o artifacts/output.zip -d ./provider
-          rm artifacts/output.zip
-
-      - name: Download built artifacts - Beta provider
-        uses: actions/download-artifact@v2
-        with:
-          name: artifact-terraform-provider-google-beta
-          path: artifacts
-  
-      - name: Unzip the artifacts and delete the zip
-        run: |
-          unzip -o artifacts/output.zip -d ./provider
-          rm artifacts/output.zip
-
-      - name: Setup Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: '^1.20'
-
-      - name: Cache Go modules and build cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/go-build
-          key: ${{ runner.os }}-test-terraform-provider-google-${{hashFiles('go.sum','google-*/transport/**','google-*/tpgresource/**','google-*/acctest/**','google-*/envvar/**','google-*/sweeper/**','google-*/verify/**') }}
-          restore-keys: |
-              ${{ runner.os }}-test-terraform-provider-google-${{ hashFiles('go.sum') }}
-              ${{ runner.os }}-test-terraform-provider-google-
-
-      - name: Diff Check
-        run: |
-          ls provider/google/services > tools/teamcity-diff-check/services_ga.txt
-          ls provider/google-beta/services > tools/teamcity-diff-check/services_beta.txt
-          cd tools/teamcity-diff-check
-          go run main.go -service_file=services_ga
-          go run main.go -service_file=services_beta
-          
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      runs-on: ubuntu-22.04
+      steps:
+        - name: Checkout Repository
+          uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+        - name: TeamCity Google Provider Generate
+          uses: ./.github/actions/build-downstream
+          with:
+            repo: 'terraform-provider-google'
+            token: '$GITHUB_TOKEN'
+        # The path where GA/Beta providers are generated is grabbed from the OUTPUT_PATH that's set in build_downstream.yaml
+        # export OUTPUT_PATH=$GOPATH/src/github.com/$UPSTREAM_OWNER/$GH_REPO
+        # OUTPUT_PATH changes after each generate (GA/beta)
+        - name: Set GOOGLE_REPO_PATH to path where GA provider was generated
+          run: echo "GOOGLE_REPO_PATH=${{ env.OUTPUT_PATH}}" >> $GITHUB_ENV
+        - name: TeamCity Google Beta Provider Generate
+          uses: ./.github/actions/build-downstream
+          with:
+            repo: 'terraform-provider-google-beta'
+            token: '$GITHUB_TOKEN'
+        - name: Set GOOGLE_BETA_REPO_PATH to path where beta provider was generated
+          run: echo "GOOGLE_BETA_REPO_PATH=${{ env.OUTPUT_PATH}}" >> $GITHUB_ENV
+        - name: Check that new services have been added to the TeamCity configuration code
+          run: |
+              # Create lists of service packages in providers
+              ls ${{env.GOOGLE_REPO_PATH}}/google/services > tools/teamcity-diff-check/services_ga.txt
+              ls ${{env.GOOGLE_BETA_REPO_PATH}}/google-beta/services > tools/teamcity-diff-check/services_beta.txt
+    
+              # Run tool to compare service packages in the providers vs those listed in TeamCity config files
+              cd tools/teamcity-diff-check
+              go run main.go -service_file=services_ga
+              go run main.go -service_file=services_beta

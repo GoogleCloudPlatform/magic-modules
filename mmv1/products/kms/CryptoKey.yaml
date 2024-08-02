@@ -69,7 +69,8 @@ parameters:
     name: 'skipInitialVersionCreation'
     description: |
       If set to true, the request will create a CryptoKey without any CryptoKeyVersions.
-      You must use the `google_kms_key_ring_import_job` resource to import the CryptoKeyVersion.
+      You must use the `google_kms_crypto_key_version` resource to create a new CryptoKeyVersion
+      or `google_kms_key_ring_import_job` resource to import the CryptoKeyVersion.
     immutable: true
     url_param_only: true
 properties:
@@ -148,7 +149,7 @@ properties:
     immutable: true
     description: |
       The period of time that versions of this key spend in the DESTROY_SCHEDULED state before transitioning to DESTROYED.
-      If not specified at creation time, the default duration is 24 hours.
+      If not specified at creation time, the default duration is 30 days.
     default_from_api: true
   - !ruby/object:Api::Type::Boolean
     name: 'importOnly'
@@ -156,3 +157,33 @@ properties:
     description: |
       Whether this key may contain imported versions only.
     default_from_api: true
+  - !ruby/object:Api::Type::String
+    name: 'cryptoKeyBackend'
+    immutable: true
+    description: |
+      The resource name of the backend environment associated with all CryptoKeyVersions within this CryptoKey.
+      The resource name is in the format "projects/*/locations/*/ekmConnections/*" and only applies to "EXTERNAL_VPC" keys.
+    default_from_api: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'keyAccessJustificationsPolicy'
+    min_version: beta
+    description: |
+      The policy used for Key Access Justifications Policy Enforcement. If this
+      field is present and this key is enrolled in Key Access Justifications
+      Policy Enforcement, the policy will be evaluated in encrypt, decrypt, and
+      sign operations, and the operation will fail if rejected by the policy. The
+      policy is defined by specifying zero or more allowed justification codes.
+      https://cloud.google.com/assured-workloads/key-access-justifications/docs/justification-codes
+      By default, this field is absent, and all justification codes are allowed.
+      This field is currently in beta and is subject to change.
+    default_from_api: true
+    update_mask_fields:
+      - 'keyAccessJustificationsPolicy'
+    properties:
+      - !ruby/object:Api::Type::Array
+        item_type: Api::Type::String
+        name: 'allowedAccessReasons'
+        description: |
+          The list of allowed reasons for access to this CryptoKey. Zero allowed
+          access reasons means all encrypt, decrypt, and sign operations for
+          this CryptoKey will fail.

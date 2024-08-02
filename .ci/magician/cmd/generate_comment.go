@@ -16,18 +16,62 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
+	"regexp"
+	"sort"
+	"strconv"
+	"strings"
+	"text/template"
+
 	"magician/exec"
 	"magician/github"
 	"magician/provider"
 	"magician/source"
-	"os"
-	"path/filepath"
-	"regexp"
-	"strings"
+
+	"github.com/GoogleCloudPlatform/magic-modules/tools/issue-labeler/labeler"
 
 	"github.com/spf13/cobra"
+	"golang.org/x/exp/maps"
+
+	_ "embed"
 )
+
+var (
+	//go:embed DIFF_COMMENT.md
+	diffComment string
+)
+
+type Diff struct {
+	Title     string
+	Repo      string
+	ShortStat string
+}
+
+type BreakingChange struct {
+	Message                string
+	DocumentationReference string
+}
+
+type MissingTestInfo struct {
+	SuggestedTest string
+	Tests         []string
+}
+
+type Errors struct {
+	Title  string
+	Errors []string
+}
+
+type diffCommentData struct {
+	PrNumber        int
+	Diffs           []Diff
+	BreakingChanges []BreakingChange
+	MissingTests    map[string]*MissingTestInfo
+	Errors          []Errors
+}
 
 const allowBreakingChangesLabel = "override-breaking-change"
 
@@ -35,7 +79,6 @@ var gcEnvironmentVariables = [...]string{
 	"BUILD_ID",
 	"BUILD_STEP",
 	"COMMIT_SHA",
-	"GITHUB_TOKEN",
 	"GOPATH",
 	"HOME",
 	"PATH",
@@ -59,25 +102,44 @@ var generateCommentCmd = &cobra.Command{
 	5. Report the results in a PR comment.
 	6. Run unit tests for the missing test detector.
 	`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		env := make(map[string]string, len(gcEnvironmentVariables))
 		for _, ev := range gcEnvironmentVariables {
 			val, ok := os.LookupEnv(ev)
 			if !ok {
-				fmt.Printf("Did not provide %s environment variable\n", ev)
-				os.Exit(1)
+				return fmt.Errorf("did not provide %s environment variable", ev)
 			}
 			env[ev] = val
 		}
 
-		gh := github.NewClient()
+		for _, tokenName := range []string{"GITHUB_TOKEN_DOWNSTREAMS", "GITHUB_TOKEN_MAGIC_MODULES"} {
+			val, ok := lookupGithubTokenOrFallback(tokenName)
+			if !ok {
+				return fmt.Errorf("did not provide %s or GITHUB_TOKEN environment variable", tokenName)
+			}
+			env[tokenName] = val
+		}
+		gh := github.NewClient(env["GITHUB_TOKEN_MAGIC_MODULES"])
 		rnr, err := exec.NewRunner()
 		if err != nil {
-			fmt.Println("Error creating a runner: ", err)
-			os.Exit(1)
+			return fmt.Errorf("error creating a runner: %w", err)
 		}
-		ctlr := source.NewController(filepath.Join("workspace", "go"), "modular-magician", env["GITHUB_TOKEN"], rnr)
-		execGenerateComment(env, gh, rnr, ctlr)
+		ctlr := source.NewController(filepath.Join("workspace", "go"), "modular-magician", env["GITHUB_TOKEN_DOWNSTREAMS"], rnr)
+		prNumber, err := strconv.Atoi(env["PR_NUMBER"])
+		if err != nil {
+			return fmt.Errorf("error parsing PR_NUMBER: %w", err)
+		}
+		return execGenerateComment(
+			prNumber,
+			env["GITHUB_TOKEN_MAGIC_MODULES"],
+			env["BUILD_ID"],
+			env["BUILD_STEP"],
+			env["PROJECT_ID"],
+			env["COMMIT_SHA"],
+			gh,
+			rnr,
+			ctlr,
+		)
 	},
 }
 
@@ -89,200 +151,275 @@ func listGCEnvironmentVariables() string {
 	return result
 }
 
-func execGenerateComment(env map[string]string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller) {
-	newBranch := "auto-pr-" + env["PR_NUMBER"]
-	oldBranch := "auto-pr-" + env["PR_NUMBER"] + "-old"
+func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, projectId, commitSha string, gh GithubClient, rnr exec.ExecRunner, ctlr *source.Controller) error {
+	errors := map[string][]string{"Other": []string{}}
+
+	pullRequest, err := gh.GetPullRequest(strconv.Itoa(prNumber))
+	if err != nil {
+		fmt.Printf("Error getting pull request: %v\n", err)
+		errors["Other"] = append(errors["Other"], "Failed to fetch PR data")
+	}
+
+	newBranch := fmt.Sprintf("auto-pr-%d", prNumber)
+	oldBranch := fmt.Sprintf("auto-pr-%d-old", prNumber)
 	wd := rnr.GetCWD()
 	mmLocalPath := filepath.Join(wd, "..", "..")
-	tpgRepoName := "terraform-provider-google"
-	tpgLocalPath := filepath.Join(mmLocalPath, "..", "tpg")
-	tpgbRepoName := "terraform-provider-google-beta"
-	tpgbLocalPath := filepath.Join(mmLocalPath, "..", "tpgb")
-	tfoicsRepoName := "docs-examples"
-	tfoicsLocalPath := filepath.Join(mmLocalPath, "..", "tfoics")
-	// For backwards compatibility until at least Nov 15 2021
-	tfcRepoName := "terraform-google-conversion"
-	tfcLocalPath := filepath.Join(mmLocalPath, "..", "tfc")
 
-	var diffs string
-	for _, repo := range []*source.Repo{
-		{
-			Name:  tpgRepoName,
-			Title: "Terraform GA",
-			Path:  tpgLocalPath,
-		},
-		{
-			Name:  tpgbRepoName,
-			Title: "Terraform Beta",
-			Path:  tpgbLocalPath,
-		},
-		{
-			Name:        tfcRepoName,
-			Title:       "TF Conversion",
-			Path:        tfcLocalPath,
-			DiffCanFail: true,
-		},
-		{
-			Name:  tfoicsRepoName,
-			Title: "TF OiCS",
-			Path:  tfoicsLocalPath,
-		},
-	} {
-		// TPG/TPGB difference
-		repoDiffs, err := cloneAndDiff(repo, oldBranch, newBranch, ctlr)
+	tpgRepo := source.Repo{
+		Name:    "terraform-provider-google",
+		Title:   "`google` provider",
+		Path:    filepath.Join(mmLocalPath, "..", "tpg"),
+		Version: provider.GA,
+	}
+	tpgbRepo := source.Repo{
+		Name:    "terraform-provider-google-beta",
+		Title:   "`google-beta` provider",
+		Path:    filepath.Join(mmLocalPath, "..", "tpgb"),
+		Version: provider.Beta,
+	}
+	tgcRepo := source.Repo{
+		Name:    "terraform-google-conversion",
+		Title:   "`terraform-google-conversion`",
+		Path:    filepath.Join(mmLocalPath, "..", "tgc"),
+		Version: provider.Beta,
+	}
+	tfoicsRepo := source.Repo{
+		Name:  "docs-examples",
+		Title: "Open in Cloud Shell",
+		Path:  filepath.Join(mmLocalPath, "..", "tfoics"),
+	}
+
+	// Initialize repos
+	data := diffCommentData{
+		PrNumber: prNumber,
+	}
+	for _, repo := range []*source.Repo{&tpgRepo, &tpgbRepo, &tgcRepo, &tfoicsRepo} {
+		errors[repo.Title] = []string{}
+		repo.Branch = newBranch
+		repo.Cloned = true
+		if err := ctlr.Clone(repo); err != nil {
+			fmt.Println("Failed to clone repo at new branch: ", err)
+			errors[repo.Title] = append(errors[repo.Title], "Failed to clone repo at new branch")
+			repo.Cloned = false
+		}
+		if err := ctlr.Fetch(repo, oldBranch); err != nil {
+			fmt.Println("Failed to fetch old branch: ", err)
+			errors[repo.Title] = append(errors[repo.Title], "Failed to clone repo at old branch")
+			repo.Cloned = false
+			continue
+		}
+		if repo.Name == "terraform-provider-google-beta" || repo.Name == "terraform-provider-google" {
+			if err := ctlr.Checkout(repo, oldBranch); err != nil {
+				errors[repo.Title] = append(errors[repo.Title], fmt.Sprintf("Failed to checkout branch %s", oldBranch))
+				repo.Cloned = false
+				continue
+			}
+			rnr.PushDir(repo.Path)
+			if _, err := rnr.Run("make", []string{"build"}, nil); err != nil {
+				errors[repo.Title] = append(errors[repo.Title], fmt.Sprintf("Failed to build branch %s", oldBranch))
+				repo.Cloned = false
+			}
+			rnr.PopDir()
+			ctlr.Checkout(repo, newBranch)
+		}
+	}
+
+	diffs := []Diff{}
+	for _, repo := range []*source.Repo{&tpgRepo, &tpgbRepo, &tgcRepo, &tfoicsRepo} {
+		if !repo.Cloned {
+			fmt.Println("Skipping diff; repo failed to clone: ", repo.Name)
+			continue
+		}
+		shortStat, err := ctlr.DiffShortStat(repo, oldBranch, newBranch)
 		if err != nil {
-			fmt.Printf("Error cloning and diffing tpg repo: %v\n", err)
-			if !repo.DiffCanFail {
-				os.Exit(1)
+			fmt.Println("Failed to compute repo diff --shortstat: ", err)
+			errors[repo.Title] = append(errors[repo.Title], "Failed to compute repo diff shortstats")
+		}
+		if shortStat != "" {
+			diffs = append(diffs, Diff{
+				Title:     repo.Title,
+				Repo:      repo.Name,
+				ShortStat: shortStat,
+			})
+			repo.ChangedFiles, err = ctlr.DiffNameOnly(repo, oldBranch, newBranch)
+			if err != nil {
+				fmt.Println("Failed to compute repo diff --name-only: ", err)
+				errors[repo.Title] = append(errors[repo.Title], "Failed to compute repo changed filenames")
 			}
 		}
-		if repoDiffs != "" {
-			diffs += "\n" + repoDiffs
-		}
 	}
+	data.Diffs = diffs
 
-	var showBreakingChangesFailed bool
-	var err error
+	// The breaking changes are unique across both provider versions
+	uniqueAffectedResources := map[string]struct{}{}
+	uniqueBreakingChanges := map[string]BreakingChange{}
 	diffProcessorPath := filepath.Join(mmLocalPath, "tools", "diff-processor")
-	// versionedBreakingChanges is a map of breaking change output by provider version.
-	versionedBreakingChanges := make(map[provider.Version]string, 2)
+	diffProcessorEnv := map[string]string{
+		"OLD_REF": oldBranch,
+		"NEW_REF": newBranch,
+		// Passthrough vars required for a valid build environment.
+		"PATH":   os.Getenv("PATH"),
+		"GOPATH": os.Getenv("GOPATH"),
+		"HOME":   os.Getenv("HOME"),
+	}
+	for _, repo := range []source.Repo{tpgRepo, tpgbRepo} {
+		if !repo.Cloned {
+			fmt.Println("Skipping diff processor; repo failed to clone: ", repo.Name)
+			continue
+		}
+		if len(repo.ChangedFiles) == 0 {
+			fmt.Println("Skipping diff processor; no diff: ", repo.Name)
+			continue
+		}
+		err = buildDiffProcessor(diffProcessorPath, repo.Path, diffProcessorEnv, rnr)
+		if err != nil {
+			fmt.Println("building diff processor: ", err)
+			errors[repo.Title] = append(errors[repo.Title], "The diff processor failed to build. This is usually due to the downstream provider failing to compile.")
+			continue
+		}
 
-	env["OLD_REF"] = oldBranch
-	env["NEW_REF"] = newBranch
-	for _, repo := range []*source.Repo{
-		{
-			Title:   "TPG",
-			Path:    tpgLocalPath,
-			Version: provider.GA,
-		},
-		{
-			Title:   "TPGB",
-			Path:    tpgbLocalPath,
-			Version: provider.Beta,
-		},
-	} {
-		// TPG(B) diff processor
-		err = buildDiffProcessor(diffProcessorPath, repo.Path, env, rnr)
+		breakingChanges, err := computeBreakingChanges(diffProcessorPath, rnr)
 		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+			fmt.Println("computing breaking changes: ", err)
+			errors[repo.Title] = append(errors[repo.Title], "The diff processor crashed while computing breaking changes. This is usually due to the downstream provider failing to compile.")
 		}
-		output, err := computeBreakingChanges(diffProcessorPath, rnr)
-		if err != nil {
-			fmt.Println("Error computing TPG breaking changes: ", err)
-			showBreakingChangesFailed = true
+		for _, breakingChange := range breakingChanges {
+			uniqueBreakingChanges[breakingChange.Message] = breakingChange
 		}
-		versionedBreakingChanges[repo.Version] = strings.TrimSuffix(output, "\n")
-		err = addLabels(diffProcessorPath, env, rnr)
-		if err != nil {
-			fmt.Println("Error adding TPG labels to PR: ", err)
+
+		if repo.Name == "terraform-provider-google-beta" {
+			// Run missing test detector (currently only for beta)
+			missingTests, err := detectMissingTests(diffProcessorPath, repo.Path, rnr)
+			if err != nil {
+				fmt.Println("Error running missing test detector: ", err)
+				errors[repo.Title] = append(errors[repo.Title], "The missing test detector failed to run.")
+			}
+			data.MissingTests = missingTests
 		}
-		err = cleanDiffProcessor(diffProcessorPath, rnr)
+
+		affectedResources, err := changedSchemaResources(diffProcessorPath, rnr)
 		if err != nil {
-			fmt.Println("Error cleaning up diff processor: ", err)
-			os.Exit(1)
+			fmt.Println("computing changed resource schemas: ", err)
+			errors[repo.Title] = append(errors[repo.Title], "The diff processor crashed while computing changed resource schemas.")
+		}
+		for _, resource := range affectedResources {
+			uniqueAffectedResources[resource] = struct{}{}
 		}
 	}
+	breakingChangesSlice := maps.Values(uniqueBreakingChanges)
+	sort.Slice(breakingChangesSlice, func(i, j int) bool {
+		return breakingChangesSlice[i].Message < breakingChangesSlice[j].Message
+	})
+	data.BreakingChanges = breakingChangesSlice
 
-	var breakingChanges string
-	if showBreakingChangesFailed {
-		breakingChanges = `## Breaking Change Detection Failed
-The breaking change detector crashed during execution. This is usually due to the downstream provider(s) failing to compile. Please investigate or follow up with your reviewer.`
-	} else {
-		breakingChanges = combineBreakingChanges(versionedBreakingChanges[provider.GA], versionedBreakingChanges[provider.Beta])
+	// Compute affected resources based on changed files
+	changedFilesAffectedResources := map[string]struct{}{}
+	for _, repo := range []source.Repo{tpgRepo, tpgbRepo} {
+		if !repo.Cloned {
+			fmt.Println("Skipping changed file service labels; repo failed to clone: ", repo.Name)
+			continue
+		}
+		for _, path := range repo.ChangedFiles {
+			if r := fileToResource(path); r != "" {
+				uniqueAffectedResources[r] = struct{}{}
+				changedFilesAffectedResources[r] = struct{}{}
+			}
+		}
 	}
+	fmt.Printf("affected resources based on changed files: %v\n", maps.Keys(changedFilesAffectedResources))
 
-	// Missing test detector
-	missingTests, err := detectMissingTests(mmLocalPath, tpgbLocalPath, oldBranch, rnr)
+	// Compute service labels based on affected resources
+	uniqueServiceLabels := map[string]struct{}{}
+	regexpLabels, err := labeler.BuildRegexLabels(labeler.EnrolledTeamsYaml)
 	if err != nil {
-		fmt.Println("Error setting up missing test detector: ", err)
-		os.Exit(1)
+		fmt.Println("error building regexp labels: ", err)
+		errors["Other"] = append(errors["Other"], "Failed to parse service label mapping")
+	}
+	if len(regexpLabels) > 0 {
+		for _, label := range labeler.ComputeLabels(maps.Keys(uniqueAffectedResources), regexpLabels) {
+			uniqueServiceLabels[label] = struct{}{}
+		}
 	}
 
-	message := "Hi there, I'm the Modular magician. I've detected the following information about your changes:\n\n"
-	breakingState := "success"
-	if breakingChanges != "" {
-		message += breakingChanges + "\n\n"
-
-		pullRequest, err := gh.GetPullRequest(env["PR_NUMBER"])
-		if err != nil {
-			fmt.Printf("Error getting pull request: %v\n", err)
-			os.Exit(1)
+	// Add service labels to PR if it doesn't already have service labels
+	if len(uniqueServiceLabels) > 0 {
+		// short-circuit if service labels have already been added to the PR
+		hasServiceLabels := false
+		for _, label := range pullRequest.Labels {
+			if strings.HasPrefix(label.Name, "service/") {
+				hasServiceLabels = true
+			}
 		}
+		if !hasServiceLabels {
+			serviceLabelsSlice := maps.Keys(uniqueServiceLabels)
+			sort.Strings(serviceLabelsSlice)
+			if len(serviceLabelsSlice) > 3 {
+				// Treat this as a cross-provider change
+				serviceLabelsSlice = []string{"service/terraform"}
+			}
+			if err = gh.AddLabels(strconv.Itoa(prNumber), serviceLabelsSlice); err != nil {
+				fmt.Printf("Error posting new service labels %q: %s", serviceLabelsSlice, err)
+				errors["Other"] = append(errors["Other"], "Failed to update service labels")
+			}
+		}
+	}
 
-		breakingChangesAllowed := false
+	// Update breaking changes status on PR
+	breakingState := "success"
+	if len(uniqueBreakingChanges) > 0 {
+		breakingState = "failure"
+		// If fetching the PR failed, Labels will be empty
 		for _, label := range pullRequest.Labels {
 			if label.Name == allowBreakingChangesLabel {
-				breakingChangesAllowed = true
+				breakingState = "success"
 				break
 			}
 		}
-		if !breakingChangesAllowed {
-			breakingState = "failure"
+	}
+	targetURL := fmt.Sprintf("https://console.cloud.google.com/cloud-build/builds;region=global/%s;step=%s?project=%s", buildId, buildStep, projectId)
+	if err = gh.PostBuildStatus(strconv.Itoa(prNumber), "terraform-provider-breaking-change-test", breakingState, targetURL, commitSha); err != nil {
+		fmt.Printf("Error posting build status for pr %d commit %s: %v\n", prNumber, commitSha, err)
+		errors["Other"] = append(errors["Other"], "Failed to update breaking-change status check with state: "+breakingState)
+	}
+
+	// Add errors to data as an ordered list
+	errorsList := []Errors{}
+	for _, repo := range []source.Repo{tpgRepo, tpgbRepo, tgcRepo, tfoicsRepo} {
+		if len(errors[repo.Title]) > 0 {
+			errorsList = append(errorsList, Errors{
+				Title:  repo.Title,
+				Errors: errors[repo.Title],
+			})
 		}
 	}
+	if len(errors["Other"]) > 0 {
+		errorsList = append(errorsList, Errors{
+			Title:  "Other",
+			Errors: errors["Other"],
+		})
+	}
+	data.Errors = errorsList
 
-	if diffs == "" {
-		message += "## Diff report\nYour PR hasn't generated any diffs, but I'll let you know if a future commit does."
-	} else {
-		message += "## Diff report\nYour PR generated some diffs in downstreams - here they are.\n" + diffs + "\n"
-		if missingTests != "" {
-			message += "\n" + missingTests + "\n"
-		}
-	}
-
-	if err := gh.PostComment(env["PR_NUMBER"], message); err != nil {
-		fmt.Printf("Error posting comment to PR %s: %v\n", env["PR_NUMBER"], err)
-	}
-
-	targetURL := fmt.Sprintf("https://console.cloud.google.com/cloud-build/builds;region=global/%s;step=%s?project=%s", env["BUILD_ID"], env["BUILD_STEP"], env["PROJECT_ID"])
-	if err := gh.PostBuildStatus(env["PR_NUMBER"], "terraform-provider-breaking-change-test", breakingState, targetURL, env["COMMIT_SHA"]); err != nil {
-		fmt.Printf("Error posting build status for pr %s commit %s: %v\n", env["PR_NUMBER"], env["COMMIT_SHA"], err)
-		os.Exit(1)
-	}
-
-	if err := rnr.PushDir(mmLocalPath); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	if diffs := rnr.MustRun("git", []string{"diff", "HEAD", "origin/main", "tools/missing-test-detector"}, nil); diffs != "" {
-		fmt.Printf("Found diffs in missing test detector:\n%s\nRunning tests.\n", diffs)
-		if err := testTools(mmLocalPath, tpgbLocalPath, env, gh, rnr); err != nil {
-			fmt.Printf("Error testing tools in %s: %v\n", mmLocalPath, err)
-			os.Exit(1)
-		}
-	}
-	if err := rnr.PopDir(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-}
-
-func cloneAndDiff(repo *source.Repo, oldBranch, newBranch string, ctlr *source.Controller) (string, error) {
-	// Clone the repo to the desired repo.Path.
-	repo.Branch = newBranch
-	if err := ctlr.Clone(repo); err != nil {
-		return "", fmt.Errorf("error cloning %s: %v\n", repo.Name, err)
-	}
-
-	if err := ctlr.Fetch(repo, oldBranch); err != nil {
-		return "", err
-	}
-
-	// Return summary, if any.
-	diffs, err := ctlr.Diff(repo, oldBranch, newBranch)
+	// Post diff comment
+	message, err := formatDiffComment(data)
 	if err != nil {
-		return "", err
+		fmt.Printf("Data: %v\n", data)
+		return fmt.Errorf("error formatting message: %w", err)
 	}
-	if diffs == "" {
-		return "", nil
+	if err := gh.PostComment(strconv.Itoa(prNumber), message); err != nil {
+		fmt.Println("Comment: ", message)
+		return fmt.Errorf("error posting comment to PR %d: %w", prNumber, err)
 	}
-	diffs = strings.TrimSuffix(diffs, "\n")
-	return fmt.Sprintf("%s: [Diff](https://github.com/modular-magician/%s/compare/%s..%s) (%s)", repo.Title, repo.Name, oldBranch, newBranch, diffs), nil
+	return nil
 }
 
 // Build the diff processor for tpg or tpgb
-func buildDiffProcessor(diffProcessorPath, providerLocalPath string, env map[string]string, rnr ExecRunner) error {
+func buildDiffProcessor(diffProcessorPath, providerLocalPath string, env map[string]string, rnr exec.ExecRunner) error {
+	for _, path := range []string{"old", "new", "bin"} {
+		if err := rnr.RemoveAll(filepath.Join(diffProcessorPath, path)); err != nil {
+			return err
+		}
+	}
 	if err := rnr.PushDir(diffProcessorPath); err != nil {
 		return err
 	}
@@ -297,174 +434,114 @@ func buildDiffProcessor(diffProcessorPath, providerLocalPath string, env map[str
 	return rnr.PopDir()
 }
 
-func computeBreakingChanges(diffProcessorPath string, rnr ExecRunner) (string, error) {
+func computeBreakingChanges(diffProcessorPath string, rnr exec.ExecRunner) ([]BreakingChange, error) {
 	if err := rnr.PushDir(diffProcessorPath); err != nil {
-		return "", err
+		return nil, err
 	}
-	breakingChanges, err := rnr.Run("bin/diff-processor", []string{"breaking-changes"}, nil)
+	output, err := rnr.Run("bin/diff-processor", []string{"breaking-changes"}, nil)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return breakingChanges, rnr.PopDir()
+
+	if output == "" {
+		return nil, nil
+	}
+
+	var changes []BreakingChange
+	if err = json.Unmarshal([]byte(output), &changes); err != nil {
+		return nil, err
+	}
+	return changes, rnr.PopDir()
 }
 
-func addLabels(diffProcessorPath string, env map[string]string, rnr ExecRunner) error {
+func changedSchemaResources(diffProcessorPath string, rnr exec.ExecRunner) ([]string, error) {
 	if err := rnr.PushDir(diffProcessorPath); err != nil {
-		return err
+		return nil, err
 	}
-	output, err := rnr.Run("bin/diff-processor", []string{"add-labels", env["PR_NUMBER"]}, env)
-	fmt.Println(output)
+
+	output, err := rnr.Run("bin/diff-processor", []string{"changed-schema-resources"}, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return rnr.PopDir()
-}
 
-func cleanDiffProcessor(diffProcessorPath string, rnr ExecRunner) error {
-	for _, path := range []string{"old", "new", "bin"} {
-		if err := rnr.RemoveAll(filepath.Join(diffProcessorPath, path)); err != nil {
-			return err
-		}
+	fmt.Println("Resources with changed schemas: " + output)
+
+	var labels []string
+	if err = json.Unmarshal([]byte(output), &labels); err != nil {
+		return nil, err
 	}
-	return nil
-}
 
-// Get the breaking change message including the unique tpg messages and all tpgb messages.
-func combineBreakingChanges(tpgBreaking, tpgbBreaking string) string {
-	var allMessages []string
-	if tpgBreaking == "" {
-		if tpgbBreaking == "" {
-			return ""
-		}
-		allMessages = strings.Split(tpgbBreaking, "\n")
-	} else if tpgbBreaking == "" {
-		allMessages = strings.Split(tpgBreaking, "\n")
-	} else {
-		dashExp := regexp.MustCompile("-.*")
-		tpgMessages := strings.Split(tpgBreaking, "\n")
-		tpgbMessages := strings.Split(tpgbBreaking, "\n")
-		tpgbSet := make(map[string]struct{}, len(tpgbMessages))
-		var tpgUnique []string
-		for _, message := range tpgbMessages {
-			simple := dashExp.ReplaceAllString(message, "")
-			tpgbSet[simple] = struct{}{}
-		}
-		for _, message := range tpgMessages {
-			simple := dashExp.ReplaceAllString(message, "")
-			if _, ok := tpgbSet[simple]; !ok {
-				tpgUnique = append(tpgUnique, message)
-			}
-		}
-		allMessages = append(tpgUnique, tpgbMessages...)
+	if err = rnr.PopDir(); err != nil {
+		return nil, err
 	}
-	if len(allMessages) > 0 {
-		return `## Breaking Change(s) Detected
-The following breaking change(s) were detected within your pull request.
-
-* ` + strings.Join(allMessages, "\n* ") + `
-
-If you believe this detection to be incorrect please raise the concern with your reviewer.
-If you intend to make this change you will need to wait for a [major release](https://www.terraform.io/plugin/sdkv2/best-practices/versioning#example-major-number-increments) window.
-An ` + "`override-breaking-change`" + ` label can be added to allow merging.
-`
-	}
-	return ""
+	return labels, nil
 }
 
 // Run the missing test detector and return the results.
 // Returns an empty string unless there are missing tests.
 // Error will be nil unless an error occurs during setup.
-func detectMissingTests(mmLocalPath, tpgbLocalPath, oldBranch string, rnr ExecRunner) (string, error) {
-	tpgbLocalPathOld := tpgbLocalPath + "old"
-
-	if err := rnr.Copy(tpgbLocalPath, tpgbLocalPathOld); err != nil {
-		return "", err
+func detectMissingTests(diffProcessorPath, tpgbLocalPath string, rnr exec.ExecRunner) (map[string]*MissingTestInfo, error) {
+	if err := rnr.PushDir(diffProcessorPath); err != nil {
+		return nil, err
 	}
 
-	if err := rnr.PushDir(tpgbLocalPathOld); err != nil {
-		return "", err
-	}
-	if _, err := rnr.Run("git", []string{"checkout", "origin/" + oldBranch}, nil); err != nil {
-		return "", err
-	}
-
-	if err := updatePackageName("old", tpgbLocalPathOld, rnr); err != nil {
-		return "", err
-	}
-	if err := updatePackageName("new", tpgbLocalPath, rnr); err != nil {
-		return "", err
-	}
-	if err := rnr.PopDir(); err != nil {
-		return "", err
-	}
-
-	missingTestDetectorPath := filepath.Join(mmLocalPath, "tools", "missing-test-detector")
-	if err := rnr.PushDir(missingTestDetectorPath); err != nil {
-		return "", err
-	}
-	if _, err := rnr.Run("go", []string{"mod", "edit", "-replace", fmt.Sprintf("google/provider/%s=%s", "new", tpgbLocalPath)}, nil); err != nil {
-		fmt.Printf("Error running go mod edit: %v\n", err)
-	}
-	if _, err := rnr.Run("go", []string{"mod", "edit", "-replace", fmt.Sprintf("google/provider/%s=%s", "old", tpgbLocalPathOld)}, nil); err != nil {
-		fmt.Printf("Error running go mod edit: %v\n", err)
-	}
-	if _, err := rnr.Run("go", []string{"mod", "tidy"}, nil); err != nil {
-		fmt.Printf("Error running go mod tidy: %v\n", err)
-	}
-	missingTests, err := rnr.Run("go", []string{"run", ".", fmt.Sprintf("-services-dir=%s/google-beta/services", tpgbLocalPath)}, nil)
+	output, err := rnr.Run("bin/diff-processor", []string{"detect-missing-tests", fmt.Sprintf("%s/google-beta/services", tpgbLocalPath)}, nil)
 	if err != nil {
-		fmt.Printf("Error running missing test detector: %v\n", err)
-		missingTests = ""
-	} else {
-		fmt.Printf("Successfully ran missing test detector:\n%s\n", missingTests)
+		return nil, err
+	}
+
+	var missingTests map[string]*MissingTestInfo
+	if err = json.Unmarshal([]byte(output), &missingTests); err != nil {
+		return nil, err
 	}
 	return missingTests, rnr.PopDir()
 }
 
-// Update the provider package name to the given name in the given path.
-// name should be either "old" or "new".
-func updatePackageName(name, path string, rnr ExecRunner) error {
-	oldPackageName := "github.com/hashicorp/terraform-provider-google-beta"
-	newPackageName := "google/provider/" + name
-	fmt.Printf("Updating package name in %s from %s to %s\n", path, oldPackageName, newPackageName)
-	if err := rnr.PushDir(path); err != nil {
-		return err
+func formatDiffComment(data diffCommentData) (string, error) {
+	tmpl, err := template.New("DIFF_COMMENT.md").Parse(diffComment)
+	if err != nil {
+		panic(fmt.Sprintf("Unable to parse DIFF_COMMENT.md: %s", err))
 	}
-	if _, err := rnr.Run("find", []string{".", "-type", "f", "-name", "*.go", "-exec", "sed", "-i.bak", fmt.Sprintf("s~%s~%s~g", oldPackageName, newPackageName), "{}", "+"}, nil); err != nil {
-		return fmt.Errorf("error running find: %v\n", err)
+	sb := new(strings.Builder)
+	err = tmpl.Execute(sb, data)
+	if err != nil {
+		return "", err
 	}
-	if _, err := rnr.Run("sed", []string{"-i.bak", fmt.Sprintf("s|%s|%s|g", oldPackageName, newPackageName), "go.mod"}, nil); err != nil {
-		return fmt.Errorf("error running sed: %v\n", err)
-	}
-	if _, err := rnr.Run("sed", []string{"-i.bak", fmt.Sprintf("s|%s|%s|g", oldPackageName, newPackageName), "go.sum"}, nil); err != nil {
-		return fmt.Errorf("error running sed: %v\n", err)
-	}
-	return rnr.PopDir()
+	return sb.String(), nil
 }
 
-// Run unit tests for the missing test detector and diff processor.
-// Report results using Github API.
-func testTools(mmLocalPath, tpgbLocalPath string, env map[string]string, gh GithubClient, rnr ExecRunner) error {
-	missingTestDetectorPath := filepath.Join(mmLocalPath, "tools", "missing-test-detector")
-	rnr.PushDir(missingTestDetectorPath)
-	if _, err := rnr.Run("go", []string{"mod", "tidy"}, nil); err != nil {
-		fmt.Printf("error running go mod tidy in %s: %v\n", missingTestDetectorPath, err)
+var resourceFileRegexp = regexp.MustCompile(`^.*/services/[^/]+/(?:data_source_|resource_|iam_)(.*?)(?:_test|_sweeper|_iam_test|_generated_test|_internal_test)?.go`)
+var resourceDocsRegexp = regexp.MustCompile(`^.*website/docs/(?:r|d)/(.*).html.markdown`)
+
+func fileToResource(path string) string {
+	var submatches []string
+	if strings.HasSuffix(path, ".go") {
+		submatches = resourceFileRegexp.FindStringSubmatch(path)
+	} else if strings.HasSuffix(path, ".html.markdown") {
+		submatches = resourceDocsRegexp.FindStringSubmatch(path)
 	}
-	servicesDir := filepath.Join(tpgbLocalPath, "google-beta", "services")
-	state := "success"
-	if _, err := rnr.Run("go", []string{"test"}, map[string]string{
-		"GOPATH":       env["GOPATH"],
-		"HOME":         env["HOME"],
-		"SERVICES_DIR": servicesDir,
-	}); err != nil {
-		fmt.Printf("error from running go test in %s: %v\n", missingTestDetectorPath, err)
-		state = "failure"
+
+	if len(submatches) == 0 {
+		return ""
 	}
-	targetURL := fmt.Sprintf("https://console.cloud.google.com/cloud-build/builds;region=global/%s;step=%s?project=%s", env["BUILD_ID"], env["BUILD_STEP"], env["PROJECT_ID"])
-	if err := gh.PostBuildStatus(env["PR_NUMBER"], "unit-tests-missing-test-detector", state, targetURL, env["COMMIT_SHA"]); err != nil {
-		return err
+
+	// The regexes will each return the resource name as the first
+	// submatch, stripping any prefixes or suffixes.
+	resource := submatches[1]
+
+	if !strings.HasPrefix(resource, "google_") {
+		resource = "google_" + resource
 	}
-	return rnr.PopDir()
+	return resource
+}
+
+func pathChanged(path string, changedFiles []string) bool {
+	for _, f := range changedFiles {
+		if strings.HasPrefix(f, path) {
+			return true
+		}
+	}
+	return false
 }
 
 func init() {

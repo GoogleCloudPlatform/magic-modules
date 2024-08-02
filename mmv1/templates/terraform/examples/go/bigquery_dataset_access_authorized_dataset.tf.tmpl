@@ -1,0 +1,18 @@
+resource "google_bigquery_dataset_access" "{{$.PrimaryResourceId}}" {
+  dataset_id    = google_bigquery_dataset.private.dataset_id
+  dataset {
+    dataset{
+      project_id = google_bigquery_dataset.public.project
+      dataset_id = google_bigquery_dataset.public.dataset_id
+    }
+    target_types = ["VIEWS"]
+  }
+}
+
+resource "google_bigquery_dataset" "private" {
+  dataset_id = "{{index $.Vars "private"}}"
+}
+
+resource "google_bigquery_dataset" "public" {
+  dataset_id = "{{index $.Vars "public"}}"
+}

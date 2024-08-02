@@ -28,6 +28,7 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   parent_resource_attribute: 'name'
   base_url: projects/{{project}}/locations/{{location}}/services/{{name}}
   import_format: ['projects/{{project}}/locations/{{location}}/services/{{name}}', '{{name}}']
+taint_resource_on_failed_create: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
@@ -139,7 +140,6 @@ properties:
     url_param_only: true
     description: |
       Name of the Service.
-    pattern: projects/{{project}}/locations/{{location}}/services/{{name}}
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
@@ -257,6 +257,21 @@ properties:
       For more information, see https://cloud.google.com/run/docs/configuring/custom-audiences.
     item_type: Api::Type::String
   - !ruby/object:Api::Type::NestedObject
+    name: 'scaling'
+    min_version: beta
+    description: |
+      Scaling settings that apply to the whole service
+    properties:
+      - !ruby/object:Api::Type::Integer
+        name: 'minInstanceCount'
+        description: |
+          Minimum number of instances for the service, to be divided among all revisions receiving traffic.
+  - !ruby/object:Api::Type::Boolean
+    name: 'defaultUriDisabled'
+    min_version: beta
+    description: |-
+      Disables public resolution of the default URI of this service.
+  - !ruby/object:Api::Type::NestedObject
     name: 'template'
     required: true
     description: |
@@ -346,6 +361,8 @@ properties:
 
           A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
         default_from_api: true
+        validation: !ruby/object:Provider::Terraform::Validation
+          regex: '^[0-9]+(?:\.[0-9]{1,9})?s$'
       - !ruby/object:Api::Type::String
         name: 'serviceAccount'
         description: |-
@@ -438,6 +455,7 @@ properties:
                     Determines whether CPU should be boosted on startup of a new container instance above the requested CPU threshold, this can help reduce cold-start latency.
             - !ruby/object:Api::Type::Array
               name: 'ports'
+              max_size: 1
               description: |-
                 List of ports to expose from the container. Only a single port can be specified. The specified ports must be listening on all interfaces (0.0.0.0) within the container to be accessible.
 
@@ -731,6 +749,7 @@ properties:
               #   - template.0.volumes.0.secret
               #   - template.0.volumes.0.cloudSqlInstance
               #   - template.0.volumes.0.emptyDir
+              #   - template.0.volumes.0.gcs
               properties:
                 - !ruby/object:Api::Type::Array
                   name: 'instances'
@@ -747,6 +766,7 @@ properties:
               #   - template.0.volumes.0.secret
               #   - template.0.volumes.0.cloudSqlInstance
               #   - template.0.volumes.0.emptyDir
+              #   - template.0.volumes.0.gcs
               properties:
                 - !ruby/object:Api::Type::Enum
                   name: 'medium'
@@ -760,8 +780,14 @@ properties:
                   description: |-
                     Limit on the storage usable by this EmptyDir volume. The size limit is also applicable for memory medium. The maximum usage on memory medium EmptyDir would be the minimum value between the SizeLimit specified here and the sum of memory limits of all containers in a pod. This field's values are of the 'Quantity' k8s type: https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/. The default is nil which means that the limit is undefined. More info: https://kubernetes.io/docs/concepts/storage/volumes/#emptydir.
             - !ruby/object:Api::Type::NestedObject
-              name: gcs
-              description: Represents a GCS Bucket mounted as a volume.
+              name: 'gcs'
+              description: |-
+                Cloud Storage bucket mounted as a volume using GCSFuse. This feature is only supported in the gen2 execution environment and requires launch-stage to be set to ALPHA or BETA.
+              # exactly_one_of:
+              #   - template.0.volumes.0.secret
+              #   - template.0.volumes.0.cloudSqlInstance
+              #   - template.0.volumes.0.emptyDir
+              #   - template.0.volumes.0.gcs
               properties:
                 - !ruby/object:Api::Type::String
                   name: bucket
@@ -802,6 +828,7 @@ properties:
         name: 'maxInstanceRequestConcurrency'
         description: |-
           Sets the maximum number of requests that each serving instance can receive.
+          If not specified or 0, defaults to 80 when requested CPU >= 1 and defaults to 1 when requested CPU < 1.
         default_from_api: true
       - !ruby/object:Api::Type::Boolean
         name: 'sessionAffinity'

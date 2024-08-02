@@ -47,8 +47,10 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'app_engine_domain_mapping_basic'
     primary_resource_id: 'domain_mapping'
+    ignore_read_extra:
+      - 'ssl_settings.0.ssl_management_type'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/domain_mapping.erb
+  decoder: templates/terraform/decoders/app_engine_domain_mapping.go.erb
 parameters:
   - !ruby/object:Api::Type::Enum
     name: 'overrideStrategy'
@@ -78,7 +80,7 @@ properties:
     name: 'sslSettings'
     description: |
       SSL configuration for this domain. If unconfigured, this domain will not serve with SSL.
-    diff_suppress_func: 'sslSettingsDiffSuppress'
+    default_from_api: true
     update_mask_fields:
       - 'ssl_settings.certificate_id'
       - 'ssl_settings.ssl_management_type'

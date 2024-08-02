@@ -41,7 +41,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -164,7 +164,6 @@ properties:
       * PRIVATE_SERVICE_CONNECT for a private network address that is used to
       configure Private Service Connect. Only global internal addresses can use
       this purpose.
-
 
       This should only be set when using an Internal address.
     default_from_api: true

@@ -1,6 +1,6 @@
 ---
-majorVersion: "5.0.0"
-upgradeGuide: "version_5_upgrade.html.markdown"
+majorVersion: "6.0.0"
+upgradeGuide: "version_6_upgrade.html.markdown"
 title: "Make a breaking change"
 summary: "Guidance on making a breaking changes"
 weight: 20
@@ -18,11 +18,11 @@ The `google` and `google-beta` providers are both considered "stable surfaces"
 for the purpose of releases, which means that neither provider allows breaking
 changes except during major releases, which are typically yearly.
 
-Terraform users rely on the stability of Terraform providers (including the GCP
-provider and other major providers.) Even as part of a major release, breaking
-changes that are overly broad and/or have little benefit to users can cause
-deeply negative reactions and significantly delay customers upgrading to the
-new major version.
+Terraform users rely on the stability of Terraform providers (including the
+Google Cloud provider and other major providers.) Even as part of a major
+release, breaking changes that are overly broad and/or have little benefit to
+users can cause deeply negative reactions and significantly delay customers
+upgrading to the new major version.
 
 Breaking changes may cause significant churn for users by forcing them to
 update their configurations. It also causes churn in tooling built on top of
@@ -62,7 +62,7 @@ The general process for contributing a breaking change to the
 
 1. Make the `main` branch forwards-compatible with the major release
 2. Add deprecations and warnings to the `main` branch of `magic-modules`
-3. Add upgrade guide entries to the `main` branch of `magic-modules`
+3. Add upgrade guide entries to the `FEATURE-BRANCH-major-release-6.0.0` branch of `magic-modules`
 4. Make the breaking change on `FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}`
 
 These are covered in more detail in the following sections. The upgrade guide
@@ -169,20 +169,7 @@ The deprecation message will automatically show up in the resource documentation
 Other breaking changes should be called out in the docs for the impacted field
 or resource. It is also great to log warnings at runtime if possible.
 
-### Add upgrade guide entries to the `main` branch of `magic-modules`
-
-Upgrade guide entries should be added to
-[{{< param upgradeGuide >}}](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/website/docs/guides/{{< param upgradeGuide >}}).
-Entries should focus on the changes that users need to make when upgrading
-to `{{% param "majorVersion" %}}`, rather than how to write configurations
-after upgrading.
-
-See [Terraform Google Provider 4.0.0 Upgrade Guide](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/version_4_upgrade)
-and other upgrade guides for examples.
-
-The upgrade guide and the actual breaking change will be merged only after both are completed.
-
-### Make the breaking change on `FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}`
+### Make the change on `FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}`
 
 When working on your breaking change, make sure that your base branch
 is `FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}`. This
@@ -207,13 +194,16 @@ with the following changes:
    are present on the major release branch. Changes to the `main` branch will be
    merged into the major release branch every Monday.
 1. Make the breaking change.
+1. Add the upgrade guide entries to
+[{{< param upgradeGuide >}}](https://github.com/GoogleCloudPlatform/magic-modules/blob/FEATURE-BRANCH-major-release-6.0.0/mmv1/third_party/terraform/website/docs/guides/{{< param upgradeGuide >}}). Entries should focus on the changes that users need to make when upgrading
+to `{{% param "majorVersion" %}}`, rather than how to write configurations
+after upgrading. See [Terraform provider for Google Cloud 5.0.0 Upgrade Guide](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/version_5_upgrade)
+and other upgrade guides for examples.
 1. Remove any deprecation notices and warnings (including in documentation) not already removed by the breaking change.
 1. When you create your pull request,
    [change the base branch](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/changing-the-base-branch-of-a-pull-request)
    to `FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}`
 1. To resolve merge conflicts with `git rebase` or `git merge`, use `FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}` instead of `main`.
-
-The upgrade guide and the actual breaking change will be merged only after both are completed.
 
 ## What's next?
 

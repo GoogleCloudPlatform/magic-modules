@@ -58,7 +58,6 @@ properties:
     description: |
       Resource name of the repository, of the form `{{repo}}`.
       The repo name may contain slashes. eg, `name/with/slash`
-    pattern: 'projects/{{project}}/repos/{{name}}'
     custom_expand: templates/terraform/custom_expand/shortname_to_url.go.erb
     custom_flatten: templates/terraform/custom_flatten/repository_short_name_from_name.go.erb
   - !ruby/object:Api::Type::String
@@ -103,6 +102,5 @@ properties:
             If unspecified, it defaults to the compute engine default service account.
 
           default_from_api: true
-    key_diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     key_expander: 'expandSourceRepoRepositoryPubsubConfigsTopic'
     set_hash_func: 'resourceSourceRepoRepositoryPubSubConfigsHash'

@@ -6,7 +6,7 @@ import (
 	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccComputeRegionAutoscaler_update(t *testing.T) {
@@ -20,7 +20,7 @@ func TestAccComputeRegionAutoscaler_update(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRegionAutoscalerDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeRegionAutoscaler_basic(itName, tpName, igmName, autoscalerName),
 			},
 			{
@@ -28,7 +28,7 @@ func TestAccComputeRegionAutoscaler_update(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeRegionAutoscaler_update(itName, tpName, igmName, autoscalerName),
 			},
 			{
@@ -53,10 +53,10 @@ func TestAccComputeRegionAutoscaler_scaleDownControl(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRegionAutoscalerDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeRegionAutoscaler_scaleDownControl(itName, tpName, igmName, autoscalerName),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_region_autoscaler.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -78,10 +78,10 @@ func TestAccComputeRegionAutoscaler_scalingSchedule(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRegionAutoscalerDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeRegionAutoscaler_scalingSchedule(itName, tpName, igmName, autoscalerName),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_region_autoscaler.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -103,10 +103,10 @@ func TestAccComputeRegionAutoscaler_scaleInControl(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRegionAutoscalerDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeRegionAutoscaler_scaleInControl(itName, tpName, igmName, autoscalerName),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_region_autoscaler.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -217,12 +217,14 @@ resource "google_compute_region_autoscaler" "foobar" {
       target = 0.5
       predictive_method = "OPTIMIZE_AVAILABILITY"
     }
+<% unless version == 'ga' -%>
     scale_down_control {
       max_scaled_down_replicas {
         percent = 80
       }
       time_window_sec = 300
     }
+<% end -%>
   }
 }
 `, autoscalerName)
@@ -267,12 +269,14 @@ resource "google_compute_region_autoscaler" "foobar" {
     cpu_utilization {
       target = 0.5
     }
+<% unless version == 'ga' -%>
     scale_down_control {
       max_scaled_down_replicas {
         percent = 80
       }
       time_window_sec = 300
     }
+<% end -%>
     scaling_schedules {
       name = "every-weekday-morning"
       description = "Increase to 2 every weekday at 7AM for 6 hours."

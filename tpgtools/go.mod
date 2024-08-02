@@ -1,10 +1,10 @@
 module github.com/GoogleCloudPlatform/magic-modules/tpgtools
 
-go 1.20
+go 1.21
 
 require (
 	bitbucket.org/creachadair/stringset v0.0.11
-	github.com/GoogleCloudPlatform/declarative-resource-client-library v1.62.0
+	github.com/GoogleCloudPlatform/declarative-resource-client-library v1.68.0
 	github.com/golang/glog v1.1.2
 	github.com/hashicorp/hcl v1.0.0
 	github.com/kylelemons/godebug v1.1.0

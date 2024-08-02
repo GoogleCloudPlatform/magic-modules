@@ -3,10 +3,12 @@ package workstations_test
 <% unless version == "ga" -%>
 
 import (
+	"fmt"
 	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccWorkstationsWorkstationConfig_basic(t *testing.T) {
@@ -223,6 +225,183 @@ resource "google_workstations_workstation_config" "default" {
 `, context)
 }
 
+func TestAccWorkstationsWorkstationConfig_ephemeralDirectories(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckWorkstationsWorkstationConfigDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccWorkstationsWorkstationConfig_ephemeralDirectories(context),
+			},
+			{
+				ResourceName:            "google_workstations_workstation_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag", "labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccWorkstationsWorkstationConfig_ephemeralDirectories(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_network" "default" {
+  provider                = google-beta
+  name                    = "tf-test-workstation-cluster%{random_suffix}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "default" {
+  provider      = google-beta
+  name          = "tf-test-workstation-cluster%{random_suffix}"
+  ip_cidr_range = "10.0.0.0/24"
+  region        = "us-central1"
+  network       = google_compute_network.default.name
+}
+
+resource "google_compute_disk" "test_source_disk" {
+  provider = google-beta
+  name     = "tf-test-workstation-source-disk%{random_suffix}"
+  size     = 10
+  type     = "pd-ssd"
+  zone     = "us-central1-a"
+}
+
+resource "google_compute_snapshot" "test_source_snapshot" {
+  provider    = google-beta
+  name        = "tf-test-workstation-source-snapshot%{random_suffix}"
+  source_disk = google_compute_disk.test_source_disk.name
+  zone        = "us-central1-a"
+}
+
+resource "google_workstations_workstation_cluster" "default" {
+  provider   		      	 = google-beta
+  workstation_cluster_id     = "tf-test-workstation-cluster%{random_suffix}"
+  network                    = google_compute_network.default.id
+  subnetwork                 = google_compute_subnetwork.default.id
+  location   		         = "us-central1"
+
+  labels = {
+	foo = "bar"
+  }
+}
+
+resource "google_workstations_workstation_config" "default" {
+  provider               = google-beta
+  workstation_config_id  = "tf-test-workstation-config%{random_suffix}"
+  workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
+  location   		     = "us-central1"
+
+  ephemeral_directories {
+        mount_path = "/cache"
+	gce_pd {
+	      source_snapshot = google_compute_snapshot.test_source_snapshot.id
+	      read_only  = true
+    	}
+  }
+
+  labels = {
+	foo = "bar"
+  }
+}
+`, context)
+}
+
+func TestAccWorkstationsWorkstationConfig_ephemeralDirectories_withSourceImage(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckWorkstationsWorkstationConfigDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccWorkstationsWorkstationConfig_ephemeralDirectories_withSourceImage(context),
+			},
+			{
+				ResourceName:            "google_workstations_workstation_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag", "labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccWorkstationsWorkstationConfig_ephemeralDirectories_withSourceImage(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_network" "default" {
+  provider                = google-beta
+  name                    = "tf-test-workstation-cluster%{random_suffix}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "default" {
+  provider      = google-beta
+  name          = "tf-test-workstation-cluster%{random_suffix}"
+  ip_cidr_range = "10.0.0.0/24"
+  region        = "us-central1"
+  network       = google_compute_network.default.name
+}
+
+resource "google_compute_disk" "test_source_disk" {
+  provider = google-beta
+  name     = "tf-test-workstation-source-disk%{random_suffix}"
+  size     = 10
+  type     = "pd-ssd"
+  zone     = "us-central1-a"
+}
+
+resource "google_compute_image" "test_source_image" {
+  provider    = google-beta
+  name        = "tf-test-workstation-source-image%{random_suffix}"
+  source_disk = google_compute_disk.test_source_disk.name
+  storage_locations = ["us-central1"]
+}
+
+resource "google_workstations_workstation_cluster" "default" {
+  provider   		      	 = google-beta
+  workstation_cluster_id     = "tf-test-workstation-cluster%{random_suffix}"
+  network                    = google_compute_network.default.id
+  subnetwork                 = google_compute_subnetwork.default.id
+  location   		         = "us-central1"
+
+  labels = {
+	foo = "bar"
+  }
+}
+
+resource "google_workstations_workstation_config" "default" {
+  provider               = google-beta
+  workstation_config_id  = "tf-test-workstation-config%{random_suffix}"
+  workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
+  location   		     = "us-central1"
+
+  ephemeral_directories {
+        mount_path = "/cache"
+	gce_pd {
+ 	      disk_type = "pd-standard"
+	      source_image = google_compute_image.test_source_image.id
+    	}
+  }
+
+  labels = {
+	foo = "bar"
+  }
+}
+`, context)
+}
 
 func TestAccWorkstationsWorkstationConfig_serviceAccount(t *testing.T) {
 	t.Parallel()
@@ -292,6 +471,83 @@ func testAccWorkstationsWorkstationConfig_serviceAccount(context map[string]inte
       gce_instance {  
         service_account             = google_service_account.default.email
         service_account_scopes      = ["https://www.googleapis.com/auth/cloud-platform"]
+      }
+    }
+  }
+`, context)
+}
+
+func TestAccWorkstationsWorkstationConfig_boost(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckWorkstationsWorkstationConfigDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccWorkstationsWorkstationConfig_boost(context),
+			},
+			{
+				ResourceName:            "google_workstations_workstation_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag"},
+			},
+		},
+	})
+}
+
+func testAccWorkstationsWorkstationConfig_boost(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+  resource "google_compute_network" "default" {
+    provider                = google-beta
+    name                    = "tf-test-workstation-cluster%{random_suffix}"
+    auto_create_subnetworks = false
+  }
+  
+  resource "google_compute_subnetwork" "default" {
+    provider      = google-beta
+    name          = "tf-test-workstation-cluster%{random_suffix}"
+    ip_cidr_range = "10.0.0.0/24"
+    region        = "us-central1"
+    network       = google_compute_network.default.name
+  }
+  
+  resource "google_workstations_workstation_cluster" "default" {
+    provider                   = google-beta
+    workstation_cluster_id     = "tf-test-workstation-cluster%{random_suffix}"
+    network                    = google_compute_network.default.id
+    subnetwork                 = google_compute_subnetwork.default.id
+    location                   = "us-central1"
+  }
+
+  resource "google_workstations_workstation_config" "default" {
+    provider               = google-beta
+    workstation_config_id  = "tf-test-workstation-config%{random_suffix}"
+    workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
+    location               = "us-central1"
+    host {
+      gce_instance {
+        boost_configs {
+          id           = "boost-1"
+          machine_type = "n1-standard-2"
+          accelerators {
+            type  = "nvidia-tesla-t4"
+            count = 1
+          }
+        }
+        boost_configs {
+          id                           = "boost-2"
+          machine_type                 = "n1-standard-2"
+          pool_size                    = 2
+          boot_disk_size_gb            = 30
+          enable_nested_virtualization = true
+        }
       }
     }
   }
@@ -453,8 +709,13 @@ func testAccWorkstationsWorkstationConfig_readinessChecks(context map[string]int
 func TestAccWorkstationsWorkstationConfig_update(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix":    randString,
+		"project_id":       fmt.Sprintf("tf-test-proj-%s", randString),
+		"key_short_name":   fmt.Sprintf("tf-test-key-%s", randString),
+		"value_short_name": fmt.Sprintf("tf-test-value-%s", randString),
+		"org_id":           envvar.GetTestOrgFromEnv(t),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -495,6 +756,18 @@ func TestAccWorkstationsWorkstationConfig_update(t *testing.T) {
 
 func testAccWorkstationsWorkstationConfig_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_tags_tag_key" "tag_key1" {
+  provider = google-beta
+  parent = "organizations/%{org_id}"
+  short_name = "%{key_short_name}"
+}
+
+resource "google_tags_tag_value" "tag_value1" {
+  provider = google-beta
+  parent = "tagKeys/${google_tags_tag_key.tag_key1.name}"
+  short_name = "%{value_short_name}"
+}
+
 resource "google_compute_network" "default" {
   provider                = google-beta
   name                    = "tf-test-workstation-cluster%{random_suffix}"
@@ -707,6 +980,11 @@ resource "google_workstations_workstation_config" "default" {
 
       confidential_instance_config {
         enable_confidential_compute = true
+      }
+ 
+      boost_configs {
+        id           = "boost-1"
+        machine_type = "n2d-standard-2"
       }
     }
   }
@@ -1033,4 +1311,91 @@ resource "google_workstations_workstation_config" "default" {
 }
 `, context)
 }
+
+func TestAccWorkstationsWorkstationConfig_vmTags(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckWorkstationsWorkstationConfigDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccWorkstationsWorkstationConfig_vmTags(context),
+			},
+			{
+				ResourceName:            "google_workstations_workstation_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag"},
+			},
+		},
+	})
+}
+
+func testAccWorkstationsWorkstationConfig_vmTags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
+  provider = google-beta
+}
+
+resource "google_tags_tag_key" "tag_key1" {
+  provider = google-beta
+  parent = "projects/${data.google_project.project.number}"
+  short_name = "tf_test_tag_key1%{random_suffix}"
+}
+
+resource "google_tags_tag_value" "tag_value1" {
+  provider = google-beta
+  parent = "tagKeys/${google_tags_tag_key.tag_key1.name}"
+  short_name = "tf_test_tag_value1%{random_suffix}"
+}
+
+resource "google_compute_network" "default" {
+  provider                = google-beta
+  name                    = "tf-test-workstation-cluster%{random_suffix}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "default" {
+  provider      = google-beta
+  name          = "tf-test-workstation-cluster%{random_suffix}"
+  ip_cidr_range = "10.0.0.0/24"
+  region        = "us-central1"
+  network       = google_compute_network.default.name
+}
+
+resource "google_workstations_workstation_cluster" "default" {
+  provider                   = google-beta
+  workstation_cluster_id     = "tf-test-workstation-cluster%{random_suffix}"
+  network                    = google_compute_network.default.id
+  subnetwork                 = google_compute_subnetwork.default.id
+  location                   = "us-central1"
+}
+
+resource "google_workstations_workstation_config" "default" {
+  provider               = google-beta
+  workstation_config_id  = "tf-test-workstation-config%{random_suffix}"
+  workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
+  location               = "us-central1"
+
+  host {
+    gce_instance {
+      machine_type                = "e2-standard-4"
+      boot_disk_size_gb           = 35
+      disable_public_ip_addresses = true
+      vm_tags = {
+        "tagKeys/${google_tags_tag_key.tag_key1.name}" = "tagValues/${google_tags_tag_value.tag_value1.name}"
+      }
+    }
+  }
+  
+}
+`, context)
+}
+
 <% end -%>

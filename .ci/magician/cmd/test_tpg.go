@@ -37,26 +37,29 @@ var testTPGCmd = &cobra.Command{
         2. COMMIT_SHA
         3. PR_NUMBER
 	`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		version := os.Getenv("VERSION")
 		commit := os.Getenv("COMMIT_SHA")
 		pr := os.Getenv("PR_NUMBER")
 
-		gh := github.NewClient()
+		githubToken, ok := lookupGithubTokenOrFallback("GITHUB_TOKEN_MAGIC_MODULES")
+		if !ok {
+			return fmt.Errorf("did not provide GITHUB_TOKEN_MAGIC_MODULES or GITHUB_TOKEN environment variables")
+		}
+		gh := github.NewClient(githubToken)
 
-		execTestTPG(version, commit, pr, gh)
+		return execTestTPG(version, commit, pr, gh)
 	},
 }
 
-func execTestTPG(version, commit, pr string, gh ttGithub) {
+func execTestTPG(version, commit, pr string, gh ttGithub) error {
 	var repo string
 	if version == "ga" {
 		repo = "terraform-provider-google"
 	} else if version == "beta" {
 		repo = "terraform-provider-google-beta"
 	} else {
-		fmt.Println("invalid version specified")
-		os.Exit(1)
+		return fmt.Errorf("invalid version specified")
 	}
 
 	if err := gh.CreateWorkflowDispatchEvent("test-tpg.yml", map[string]any{
@@ -65,9 +68,9 @@ func execTestTPG(version, commit, pr string, gh ttGithub) {
 		"branch": "auto-pr-" + pr,
 		"sha":    commit,
 	}); err != nil {
-		fmt.Printf("Error creating workflow dispatch event: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("error creating workflow dispatch event: %w", err)
 	}
+	return nil
 }
 
 func init() {

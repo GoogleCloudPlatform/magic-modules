@@ -31,7 +31,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -53,12 +53,16 @@ examples:
     vars:
       router_name: 'my-router'
       network_name: 'my-network'
+    ignore_read_extra:
+      - advertisedIpRanges
   - !ruby/object:Provider::Terraform::Examples
     name: 'compute_router_encrypted_interconnect'
     primary_resource_id: 'encrypted-interconnect-router'
     vars:
       router_name: 'test-router'
       network_name: 'test-network'
+    ignore_read_extra:
+      - advertisedIpRanges
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/router.go.erb
 custom_diff: [
@@ -159,6 +163,7 @@ properties:
           ranges will be advertised in addition to any specified groups.
           Leave this field blank to advertise no custom IP ranges.
         send_empty_value: true
+        custom_flatten: 'templates/terraform/custom_flatten/compute_router_range.go.erb'
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String
@@ -187,6 +192,15 @@ properties:
           between the two peers. If set, this value must be between 20 and 60.
           The default is 20.
         default_value: 20
+      - !ruby/object:Api::Type::String
+        name: identifierRange
+        default_from_api: true
+        description: |
+          Explicitly specifies a range of valid BGP Identifiers for this Router.
+          It is provided as a link-local IPv4 range (from 169.254.0.0/16), of
+          size at least /30, even if the BGP sessions are over IPv6. It must
+          not overlap with any IPv4 BGP session ranges. Other vendors commonly
+          call this router ID.
   - !ruby/object:Api::Type::Boolean
     name: encryptedInterconnectRouter
     immutable: true

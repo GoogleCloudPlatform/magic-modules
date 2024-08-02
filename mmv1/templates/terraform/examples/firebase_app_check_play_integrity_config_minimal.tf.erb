@@ -1,4 +1,17 @@
+# Enables the Play Integrity API
+resource "google_project_service" "play_integrity" {
+  provider = google-beta
+
+  project = "<%= ctx[:test_env_vars]['project_id'] %>"
+  service = "playintegrity.googleapis.com"
+
+  # Don't disable the service if the resource block is removed by accident.
+  disable_on_destroy = false
+}
+
 resource "google_firebase_android_app" "default" {
+  provider = google-beta
+
   project       = "<%= ctx[:test_env_vars]['project_id'] %>"
   display_name  = "Play Integrity app"
   package_name  = "<%= ctx[:vars]['package_name'] %>"
@@ -14,6 +27,8 @@ resource "time_sleep" "wait_30s" {
 }
 
 resource "google_firebase_app_check_play_integrity_config" "default" {
+  provider = google-beta
+
   project = "<%= ctx[:test_env_vars]['project_id'] %>"
   app_id  = google_firebase_android_app.default.app_id
 

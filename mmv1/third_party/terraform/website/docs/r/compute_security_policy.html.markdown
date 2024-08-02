@@ -4,7 +4,7 @@ description: |-
   Creates a Security Policy resource for Google Compute Engine.
 ---
 
-# google\_compute\_security\_policy
+# google_compute_security_policy
 
 A Security Policy defines an IP blacklist or whitelist that protects load balanced Google Cloud services by denying or permitting traffic from specified IP ranges. For more information
 see the [official documentation](https://cloud.google.com/armor/docs/configure-security-policies)
@@ -196,6 +196,7 @@ The following arguments are supported:
 * `json_parsing` - Whether or not to JSON parse the payload body. Defaults to `DISABLED`.
   * `DISABLED` - Don't parse JSON payloads in POST bodies.
   * `STANDARD` - Parse JSON payloads in POST bodies.
+  * `STANDARD_WITH_GRAPHQL` - Parse JSON and GraphQL payloads in POST bodies.
 
 * `json_custom_config` - Custom configuration to apply the JSON parsing. Only applicable when
     `json_parsing` is set to `STANDARD`. Structure is [documented below](#nested_json_custom_config).
@@ -259,6 +260,11 @@ The following arguments are supported:
     such as `origin.ip`, `source.region_code` and `contents` in the request header.
     Structure is [documented below](#nested_expr).
 
+* `expr_options` -
+  (Optional)
+  The configuration options available when specifying a user defined CEVAL expression (i.e., 'expr').
+  Structure is [documented below](#nested_expr_options).
+
 <a name="nested_config"></a>The `config` block supports:
 
 * `src_ip_ranges` - (Required) Set of IP addresses or ranges (IPV4 or IPV6) in CIDR notation
@@ -270,6 +276,23 @@ The following arguments are supported:
 * `expression` - (Required) Textual representation of an expression in Common Expression Language syntax.
     The application context of the containing message determines which well-known feature set of CEL is supported.
 
+<a name="nested_expr_options"></a>The `expr_options` block supports:
+
+* `recaptcha_options` -
+  (Required)
+  reCAPTCHA configuration options to be applied for the rule. If the rule does not evaluate reCAPTCHA tokens, this field has no effect.
+  Structure is [documented below](#nested_recaptcha_options).
+
+<a name="nested_recaptcha_options"></a>The `recaptcha_options` block supports:
+
+* `action_token_site_keys` -
+  (Optional)
+  A list of site keys to be used during the validation of reCAPTCHA action-tokens. The provided site keys need to be created from reCAPTCHA API under the same project where the security policy is created.
+
+* `session_token_site_keys` -
+  (Optional)
+  A list of site keys to be used during the validation of reCAPTCHA session-tokens. The provided site keys need to be created from reCAPTCHA API under the same project where the security policy is created.
+
 <a name="nested_preconfigured_waf_config"></a>The `preconfigured_waf_config` block supports:
 
 * `exclusion` - (Optional) An exclusion to apply during preconfigured WAF evaluation. Structure is [documented below](#nested_exclusion).
@@ -280,9 +303,9 @@ The following arguments are supported:
 
 * `request_cookie` - (Optional) Request cookie whose value will be excluded from inspection during preconfigured WAF evaluation. Structure is [documented below](#nested_field_params).
 
-* `request_uri` - (Optional) Request query parameter whose value will be excluded from inspection during preconfigured WAF evaluation. Note that the parameter can be in the query string or in the POST body. Structure is [documented below](#nested_field_params).
+* `request_uri` - (Optional) Request URI from the request line to be excluded from inspection during preconfigured WAF evaluation. When specifying this field, the query or fragment part should be excluded. Structure is [documented below](#nested_field_params).
 
-* `request_query_param` - (Optional) Request URI from the request line to be excluded from inspection during preconfigured WAF evaluation. When specifying this field, the query or fragment part should be excluded. Structure is [documented below](#nested_field_params).
+* `request_query_param` - (Optional) Request query parameter whose value will be excluded from inspection during preconfigured WAF evaluation. Note that the parameter can be in the query string or in the POST body. Structure is [documented below](#nested_field_params).
 
 * `target_rule_set` - (Required) Target WAF rule set to apply the preconfigured WAF exclusion.
 
@@ -327,6 +350,8 @@ The following arguments are supported:
   * `HTTP_PATH`: The URL path of the HTTP request. The key value is truncated to the first 128 bytes
   * `SNI`: Server name indication in the TLS session of the HTTPS request. The key value is truncated to the first 128 bytes. The key type defaults to `ALL` on a HTTP session.
   * `REGION_CODE`: The country/region from which the request originates.
+  * `TLS_JA3_FINGERPRINT`: JA3 TLS/SSL fingerprint if the client connects using HTTPS, HTTP/2 or HTTP/3. If not available, the key type defaults to ALL.
+  * `USER_IP`: The IP address of the originating client, which is resolved based on "user_ip_request_headers" configured with the securitypolicy. If there is no "user_ip_request_headers" configuration or an IP address cannot be resolved from it, the key type defaults to IP.
 
 * `enforce_on_key_name` - (Optional) Rate limit key name applicable only for the following key types:
 
@@ -354,6 +379,8 @@ The following arguments are supported:
     * `HTTP_PATH`: The URL path of the HTTP request. The key value is truncated to the first 128 bytes
     * `SNI`: Server name indication in the TLS session of the HTTPS request. The key value is truncated to the first 128 bytes. The key type defaults to `ALL` on a HTTP session.
     * `REGION_CODE`: The country/region from which the request originates.
+    * `TLS_JA3_FINGERPRINT`: JA3 TLS/SSL fingerprint if the client connects using HTTPS, HTTP/2 or HTTP/3. If not available, the key type defaults to ALL.
+    * `USER_IP`: The IP address of the originating client, which is resolved based on "user_ip_request_headers" configured with the securitypolicy. If there is no "user_ip_request_headers" configuration or an IP address cannot be resolved from it, the key type defaults to IP.
 
 * `exceed_redirect_options` - (Optional) Parameters defining the redirect action that is used as the exceed action. Cannot be specified if the exceed action is not redirect. Structure is [documented below](#nested_exceed_redirect_options).
 

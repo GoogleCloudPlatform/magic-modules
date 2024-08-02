@@ -1,0 +1,23 @@
+[
+    {
+        "name": "//compute.googleapis.com/projects/{{.Provider.project}}/global/routes/my-route",
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+        "asset_type": "compute.googleapis.com/Route",
+        "resource": {
+            "version": "beta",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+            "discovery_name": "Route",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "destRange": "10.1.0.0/16",
+                "name": "my-route",
+                "network": "projects/{{.Provider.project}}/global/networks/my-network",
+                "nextHopIp": "10.0.0.1",
+                "priority": 1000
+            }
+        },
+        "ancestors": [
+            "organizations/{{.OrgID}}"
+        ]
+    }
+]

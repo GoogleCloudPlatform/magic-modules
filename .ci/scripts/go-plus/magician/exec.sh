@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # Get the directory of the current script
 DIR="$(dirname $(realpath $0))"
 

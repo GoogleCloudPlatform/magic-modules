@@ -1,0 +1,12 @@
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+  if v == nil || v.(string) == "" {
+    return "", nil
+  } else if strings.HasPrefix(v.(string), "https://") {
+    return v, nil
+  }
+  url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ServiceDirectoryBasePath{{"}}"}}" + v.(string))
+  if err != nil {
+    return "", err
+  }
+  return url, nil
+}

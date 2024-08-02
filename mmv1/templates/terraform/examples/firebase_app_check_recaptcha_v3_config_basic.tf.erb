@@ -1,4 +1,6 @@
 resource "google_firebase_web_app" "default" {
+  provider = google-beta
+
   project      = "<%= ctx[:test_env_vars]['project_id'] %>"
   display_name = "Web App for reCAPTCHA V3"
 }
@@ -11,6 +13,8 @@ resource "time_sleep" "wait_30s" {
 }
 
 resource "google_firebase_app_check_recaptcha_v3_config" "default" {
+  provider = google-beta
+
   project     = "<%= ctx[:test_env_vars]['project_id'] %>"
   app_id      = google_firebase_web_app.default.app_id
   site_secret = "<%= ctx[:vars]['site_secret'] %>"

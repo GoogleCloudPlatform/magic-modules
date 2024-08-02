@@ -1,0 +1,54 @@
+resource "google_managed_kafka_cluster" "{{$.PrimaryResourceId}}" {
+  cluster_id = "{{index $.Vars "cluster_id"}}"
+  location = "us-central1"
+  capacity_config {
+    vcpu_count = 3
+    memory_bytes = 3221225472
+  }
+  gcp_config {
+    access_config {
+      network_configs {
+        subnet = "projects/${data.google_project.project.number}/regions/us-central1/subnetworks/default"
+      }
+    }
+    kms_key = google_kms_crypto_key.key.id
+  }
+
+  provider = google-beta
+}
+
+resource "google_project_service_identity" "kafka_service_identity" {
+  project  = data.google_project.project.project_id
+  service  = "managedkafka.googleapis.com"
+
+  provider = google-beta
+}
+
+resource "google_kms_crypto_key" "key" {
+  name     = "{{index $.Vars "key_name"}}"
+  key_ring = google_kms_key_ring.key_ring.id
+
+  provider = google-beta
+}
+
+resource "google_kms_key_ring" "key_ring" {
+  name     = "{{index $.Vars "key_ring_name"}}"
+  location = "us-central1"
+
+  provider = google-beta
+}
+
+resource "google_kms_crypto_key_iam_binding" "crypto_key_binding" {
+  crypto_key_id = google_kms_crypto_key.key.id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+
+  members = [
+    "serviceAccount:service-${data.google_project.project.number}@gcp-sa-managedkafka.iam.gserviceaccount.com",
+  ]
+
+  provider = google-beta
+}
+
+data "google_project" "project" {
+  provider = google-beta
+}

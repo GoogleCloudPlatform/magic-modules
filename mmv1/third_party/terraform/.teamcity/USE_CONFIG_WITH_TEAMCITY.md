@@ -8,6 +8,10 @@ Contents:
 * [Editing configuration files](#editing-configuration-files)
 * [Pushing configuration changes to TeamCity](#pushing-configuration-changes-to-teamcity)
 
+## Permissions
+
+Actions in this file require Project Administrator permissions - ask for these if you are unsure if you have them.
+
 
 ## Using configuration files for the first time in a project
 
@@ -85,9 +89,6 @@ The next step is provide some input values that the configuration needs to fully
 | identityUserGa | Used to set the [GOOGLE_IDENTITY_USER](https://github.com/GoogleCloudPlatform/magic-modules/blob/94a3f91d75ee823c521a0d8d3984a1493fa0926a/mmv1/third_party/terraform/envvar/envvar_utils.go#L58-L63) environment variable in acceptance tests - GA specific |
 | identityUserBeta | Used to set the [GOOGLE_IDENTITY_USER](https://github.com/GoogleCloudPlatform/magic-modules/blob/94a3f91d75ee823c521a0d8d3984a1493fa0926a/mmv1/third_party/terraform/envvar/envvar_utils.go#L58-L63) environment variable in acceptance tests - Beta specific |
 | identityUserVcr | Used to set the [GOOGLE_IDENTITY_USER](https://github.com/GoogleCloudPlatform/magic-modules/blob/94a3f91d75ee823c521a0d8d3984a1493fa0926a/mmv1/third_party/terraform/envvar/envvar_utils.go#L58-L63) environment variable in acceptance tests - VCR specific |
-| firestoreProjectGa | Used to set the [GOOGLE_FIRESTORE_PROJECT](https://github.com/GoogleCloudPlatform/magic-modules/blob/94a3f91d75ee823c521a0d8d3984a1493fa0926a/mmv1/third_party/terraform/envvar/envvar_utils.go#L32-L34) environment variable in acceptance tests - GA specific |
-| firestoreProjectBeta | Used to set the [GOOGLE_FIRESTORE_PROJECT](https://github.com/GoogleCloudPlatform/magic-modules/blob/94a3f91d75ee823c521a0d8d3984a1493fa0926a/mmv1/third_party/terraform/envvar/envvar_utils.go#L32-L34) environment variable in acceptance tests - Beta specific |
-| firestoreProjectVcr | Used to set the [GOOGLE_FIRESTORE_PROJECT](https://github.com/GoogleCloudPlatform/magic-modules/blob/94a3f91d75ee823c521a0d8d3984a1493fa0926a/mmv1/third_party/terraform/envvar/envvar_utils.go#L32-L34) environment variable in acceptance tests - VCR specific |
 | masterBillingAccountGa | Used to set the [GOOGLE_MASTER_BILLING_ACCOUNT](https://github.com/GoogleCloudPlatform/magic-modules/blob/94a3f91d75ee823c521a0d8d3984a1493fa0926a/mmv1/third_party/terraform/envvar/envvar_utils.go#L87-L91) environment variable in acceptance tests - GA specific |
 | masterBillingAccountBeta | Used to set the [GOOGLE_MASTER_BILLING_ACCOUNT](https://github.com/GoogleCloudPlatform/magic-modules/blob/94a3f91d75ee823c521a0d8d3984a1493fa0926a/mmv1/third_party/terraform/envvar/envvar_utils.go#L87-L91) environment variable in acceptance tests - Beta specific |
 | masterBillingAccountVcr | Used to set the [GOOGLE_MASTER_BILLING_ACCOUNT](https://github.com/GoogleCloudPlatform/magic-modules/blob/94a3f91d75ee823c521a0d8d3984a1493fa0926a/mmv1/third_party/terraform/envvar/envvar_utils.go#L87-L91) environment variable in acceptance tests - VCR specific |

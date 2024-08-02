@@ -34,11 +34,9 @@ if v, ok := d.GetOk("type"); ok {
 
 	obj["type"] = diskType.RelativeLink()
 }
-<%
-else
-  raise 'disk.erb included in non-disk type #{object.name}'
-end
--%>
+<% else -%>
+  raise 'disk.erb included in non-disk type <%= object.name -%>'
+<% end -%>
 
 if v, ok := d.GetOk("image"); ok {
 	log.Printf("[DEBUG] Resolving image name: %s", v.(string))

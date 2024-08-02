@@ -33,6 +33,12 @@ resource "google_organization_iam_member" "sa_access_boundary_admin" {
   member = google_service_account.sa.member
 }
 
+resource "google_organization_iam_member" "sa_apphub_admin" {
+  org_id = data.google_organization.org.org_id
+  role   = "roles/apphub.admin"
+  member = google_service_account.sa.member
+}
+
 resource "google_organization_iam_member" "sa_assuredworkloads_admin" {
   org_id = data.google_organization.org.org_id
   role   = "roles/assuredworkloads.admin"
@@ -60,6 +66,18 @@ resource "google_organization_iam_member" "sa_cloudkms_admin" {
 resource "google_organization_iam_member" "sa_compute_xpn_admin" {
   org_id = data.google_organization.org.org_id
   role   = "roles/compute.xpnAdmin"
+  member = google_service_account.sa.member
+}
+
+resource "google_organization_iam_member" "sa_contentwarehouse_admin" {
+  org_id = data.google_organization.org.org_id
+  role   = "roles/contentwarehouse.admin"
+  member = google_service_account.sa.member
+}
+
+resource "google_organization_iam_member" "sa_contentwarehouse_document_admin" {
+  org_id = data.google_organization.org.org_id
+  role   = "roles/contentwarehouse.documentAdmin"
   member = google_service_account.sa.member
 }
 
@@ -168,6 +186,7 @@ module "project-services" {
     "apikeys.googleapis.com",
     "appengine.googleapis.com",
     "appengineflex.googleapis.com",
+    "apphub.googleapis.com",
     "artifactregistry.googleapis.com",
     "assuredworkloads.googleapis.com",
     "autoscaling.googleapis.com",
@@ -190,11 +209,9 @@ module "project-services" {
     "cloudasset.googleapis.com",
     "cloudbilling.googleapis.com",
     "cloudbuild.googleapis.com",
-    "clouddebugger.googleapis.com",
     "clouddeploy.googleapis.com",
     "cloudfunctions.googleapis.com",
     "cloudidentity.googleapis.com",
-    "cloudiot.googleapis.com",
     "cloudkms.googleapis.com",
     "cloudquotas.googleapis.com",
     "cloudresourcemanager.googleapis.com",
@@ -279,6 +296,7 @@ module "project-services" {
     "oslogin.googleapis.com",
     "parallelstore.googleapis.com",
     "privateca.googleapis.com",
+    "privilegedaccessmanager.googleapis.com",
     "pubsub.googleapis.com",
     "pubsublite.googleapis.com",
     "publicca.googleapis.com",
@@ -294,6 +312,7 @@ module "project-services" {
     "securesourcemanager.googleapis.com",
     "securetoken.googleapis.com",
     "securitycenter.googleapis.com",
+    "securitycentermanagement.googleapis.com",
     "securityposture.googleapis.com",
     "serviceconsumermanagement.googleapis.com",
     "servicecontrol.googleapis.com",
@@ -302,6 +321,7 @@ module "project-services" {
     "servicenetworking.googleapis.com",
     "serviceusage.googleapis.com",
     "sourcerepo.googleapis.com",
+    "speech.googleapis.com",
     "spanner.googleapis.com",
     "sql-component.googleapis.com",
     "sqladmin.googleapis.com",
@@ -315,6 +335,7 @@ module "project-services" {
     "testing.googleapis.com",
     "tpu.googleapis.com",
     "trafficdirector.googleapis.com",
+    "transcoder.googleapis.com",
     "vmwareengine.googleapis.com",
     "vpcaccess.googleapis.com",
     "websecurityscanner.googleapis.com",
@@ -421,34 +442,6 @@ resource "google_organization_iam_member" "sa_org2_resource_settings_admin" {
   org_id = data.google_organization.org2.org_id
   role   = "roles/resourcesettings.admin"
   member = google_service_account.sa.member
-}
-
-resource "google_project" "firestore_proj" {
-  name            = var.firestore_project_id
-  project_id      = var.firestore_project_id
-  org_id          = data.google_organization.org.org_id
-  billing_account = var.billing_account_id
-}
-
-module "firestore-project-services" {
-  source  = "terraform-google-modules/project-factory/google//modules/project_services"
-  version = "~> 14.1"
-
-  project_id = google_project.firestore_proj.project_id
-
-  activate_apis = [
-    "firestore.googleapis.com",
-  ]
-}
-
-resource "google_firestore_database" "firestore_db" {
-  provider = google-beta
-  depends_on = [module.firestore-project-services]
-
-  project     = google_project.firestore_proj.project_id
-  name        = "(default)"
-  location_id = "nam5"
-  type        = "FIRESTORE_NATIVE"
 }
 
 output "service_account" {

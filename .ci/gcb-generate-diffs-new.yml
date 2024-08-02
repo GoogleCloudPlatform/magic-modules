@@ -72,7 +72,7 @@ steps:
     - name: 'gcr.io/graphite-docker-images/build-environment'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: tpg-head
-      secretEnv: ["GITHUB_TOKEN"]
+      secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS"]
       waitFor: ["build-magician-binary"]
       env:
         - BASE_BRANCH=$_BASE_BRANCH
@@ -86,7 +86,7 @@ steps:
     - name: 'gcr.io/graphite-docker-images/build-environment'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: tpg-base
-      secretEnv: ["GITHUB_TOKEN"]
+      secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS"]
       waitFor: ["build-magician-binary"]
       env:
         - BASE_BRANCH=$_BASE_BRANCH
@@ -99,7 +99,7 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/build-environment'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
-      secretEnv: ["GITHUB_TOKEN"]
+      secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS"]
       id: tpgb-head
       waitFor: ["build-magician-binary"]
       env:
@@ -114,7 +114,7 @@ steps:
     - name: 'gcr.io/graphite-docker-images/build-environment'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: tpgb-base
-      secretEnv: ["GITHUB_TOKEN"]
+      secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS"]
       waitFor: ["build-magician-binary"]
       env:
         - BASE_BRANCH=$_BASE_BRANCH
@@ -128,7 +128,7 @@ steps:
     - name: 'gcr.io/graphite-docker-images/build-environment'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: tgc-head
-      secretEnv: ["GITHUB_TOKEN"]
+      secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS"]
       waitFor: ["build-magician-binary"]
       env:
         - BASE_BRANCH=$_BASE_BRANCH
@@ -142,7 +142,7 @@ steps:
     - name: 'gcr.io/graphite-docker-images/build-environment'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: tgc-base
-      secretEnv: ["GITHUB_TOKEN"]
+      secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS"]
       waitFor: ["build-magician-binary"]
       env:
         - BASE_BRANCH=$_BASE_BRANCH
@@ -156,7 +156,7 @@ steps:
     - name: 'gcr.io/graphite-docker-images/build-environment'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: tf-oics-head
-      secretEnv: ["GITHUB_TOKEN"]
+      secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS"]
       waitFor: ["build-magician-binary"]
       env:
         - BASE_BRANCH=$_BASE_BRANCH
@@ -170,7 +170,7 @@ steps:
     - name: 'gcr.io/graphite-docker-images/build-environment'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: tf-oics-base
-      secretEnv: ["GITHUB_TOKEN"]
+      secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS"]
       waitFor: ["build-magician-binary"]
       env:
         - BASE_BRANCH=$_BASE_BRANCH
@@ -184,7 +184,7 @@ steps:
     - name: 'gcr.io/graphite-docker-images/go-plus'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: diff
-      secretEnv: ["GITHUB_TOKEN"]
+      secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS", "GITHUB_TOKEN_MAGIC_MODULES"]
       args:
           - 'generate-comment'
       env:
@@ -198,7 +198,7 @@ steps:
       id: tgc-test
       allowFailure: true
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
-      secretEnv: ["GITHUB_TOKEN"]
+      secretEnv: ["GITHUB_TOKEN_MAGIC_MODULES"]
       waitFor: ["tpgb-head", "tpgb-base", "tgc-head", "tgc-base"]
       args:
         - 'test-tgc'
@@ -208,9 +208,9 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
       id: tgc-test-integration
-      entrypoint: '/workspace/.ci/scripts/go-plus/tgc-tester-integration/test_tgc_integration.sh'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       allowFailure: true
-      secretEnv: ["GITHUB_TOKEN"]
+      secretEnv: ["GITHUB_TOKEN_MAGIC_MODULES"]
       waitFor: ["tpgb-head", "tpgb-base", "tgc-head", "tgc-base"]
       env:
         - TEST_PROJECT=$_VALIDATOR_TEST_PROJECT
@@ -218,18 +218,19 @@ steps:
         - TEST_ANCESTRY=$_VALIDATOR_TEST_ANCESTRY
         - TEST_ORG_ID=$_VALIDATOR_TEST_ORG
       args:
-          - $_PR_NUMBER
-          - $COMMIT_SHA
-          - $BUILD_ID
-          - $PROJECT_ID
-          - "18"  # Build step
-          - terraform-google-conversion
+        - 'test-tgc-integration'
+        - $_PR_NUMBER
+        - $COMMIT_SHA
+        - $BUILD_ID
+        - $PROJECT_ID
+        - "18"  # Build step
+        - terraform-google-conversion
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
       id: tpgb-test
       allowFailure: true
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
-      secretEnv: ["GITHUB_TOKEN"]
+      secretEnv: ["GITHUB_TOKEN_MAGIC_MODULES"]
       waitFor: ["tpgb-head", "tpgb-base"]
       args:
         - 'test-tpg'
@@ -242,7 +243,7 @@ steps:
       id: tpg-test
       allowFailure: true
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
-      secretEnv: ["GITHUB_TOKEN"]
+      secretEnv: ["GITHUB_TOKEN_MAGIC_MODULES"]
       waitFor: ["tpg-head", "tpg-base"]
       args:
         - 'test-tpg'
@@ -254,7 +255,7 @@ steps:
     - name: 'gcr.io/graphite-docker-images/go-plus'
       id: gcb-tpg-vcr-test
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
-      secretEnv: ["GITHUB_TOKEN", "GOOGLE_BILLING_ACCOUNT", "GOOGLE_CUST_ID", "GOOGLE_FIRESTORE_PROJECT", "GOOGLE_IDENTITY_USER", "GOOGLE_MASTER_BILLING_ACCOUNT", "GOOGLE_ORG", "GOOGLE_ORG_2", "GOOGLE_ORG_DOMAIN", "GOOGLE_PROJECT", "GOOGLE_PROJECT_NUMBER", "GOOGLE_SERVICE_ACCOUNT", "SA_KEY", "GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION", "GOOGLE_TPU_V2_VM_RUNTIME_VERSION"]
+      secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS", "GITHUB_TOKEN_MAGIC_MODULES", "GOOGLE_BILLING_ACCOUNT", "GOOGLE_CUST_ID", "GOOGLE_IDENTITY_USER", "GOOGLE_MASTER_BILLING_ACCOUNT", "GOOGLE_ORG", "GOOGLE_ORG_2", "GOOGLE_ORG_DOMAIN", "GOOGLE_PROJECT", "GOOGLE_PROJECT_NUMBER", "GOOGLE_SERVICE_ACCOUNT", "SA_KEY", "GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION"]
       waitFor: ["diff"]
       env:
         - BASE_BRANCH=$_BASE_BRANCH
@@ -271,27 +272,30 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
-      secretEnv: ["GITHUB_TOKEN"]
+      secretEnv: ["GITHUB_TOKEN_MAGIC_MODULES"]
       waitFor: ["diff"]
       args:
           - 'request-service-reviewers'
           - $_PR_NUMBER
+      env:
+        - COMMIT_SHA=$COMMIT_SHA
 
 # Long timeout to enable waiting on VCR test
 timeout: 20000s
 options:
     machineType: 'N1_HIGHCPU_32'
 
+logsBucket: 'gs://cloudbuild-generate-diffs-logs'
 availableSecrets:
   secretManager:
-    - versionName: projects/673497134629/secrets/github-magician-token/versions/latest
-      env: GITHUB_TOKEN
+    - versionName: projects/673497134629/secrets/github-magician-token-generate-diffs-downstreams/versions/latest
+      env: GITHUB_TOKEN_DOWNSTREAMS
+    - versionName: projects/673497134629/secrets/github-magician-token-generate-diffs-magic-modules/versions/latest
+      env: GITHUB_TOKEN_MAGIC_MODULES
     - versionName: projects/673497134629/secrets/ci-test-billing-account/versions/latest
       env: GOOGLE_BILLING_ACCOUNT
     - versionName: projects/673497134629/secrets/ci-test-cust-id/versions/latest
       env: GOOGLE_CUST_ID
-    - versionName: projects/673497134629/secrets/ci-test-firestore-project/versions/latest
-      env: GOOGLE_FIRESTORE_PROJECT
     - versionName: projects/673497134629/secrets/ci-test-identity-user/versions/latest
       env: GOOGLE_IDENTITY_USER
     - versionName: projects/673497134629/secrets/ci-test-master-billing-account/versions/latest
@@ -312,5 +316,3 @@ availableSecrets:
       env: SA_KEY
     - versionName: projects/673497134629/secrets/ci-test-public-advertised-prefix-description/versions/latest
       env: GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION
-    - versionName: projects/673497134629/secrets/ci-test-tpu-v2-vm-runtime-version/versions/latest
-      env: GOOGLE_TPU_V2_VM_RUNTIME_VERSION

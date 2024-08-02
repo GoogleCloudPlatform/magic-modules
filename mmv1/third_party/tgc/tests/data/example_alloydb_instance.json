@@ -1,0 +1,41 @@
+[
+   {
+      "name":"//alloydb.googleapis.com/alloydb-cluster/instances/alloydb-instance",
+      "asset_type":"alloydb.googleapis.com/Instance",
+      "resource":{
+         "version":"v1beta",
+         "discovery_document_uri":"https://www.googleapis.com/discovery/v1/apis/alloydb/v1beta/rest",
+         "discovery_name":"Instance",
+         "parent":"//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+         "data":{
+            "instanceType":"PRIMARY",
+            "machineConfig":{
+               "cpuCount":2
+            }
+         }
+      },
+     "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+     "ancestors": ["organizations/{{.OrgID}}"]
+
+
+   },
+   {
+      "name":"//alloydb.googleapis.com/projects/{{.Provider.project}}/locations/us-central1/clusters/alloydb-cluster",
+      "asset_type":"alloydb.googleapis.com/Cluster",
+      "resource":{
+         "version":"v1beta",
+         "discovery_document_uri":"https://www.googleapis.com/discovery/v1/apis/alloydb/v1beta/rest",
+         "discovery_name":"Cluster",
+         "parent":"//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+         "data":{
+            "clusterType":"PRIMARY",
+            "initialUser":{
+               "password":"alloydb-cluster"
+            },
+            "network":"default"
+         }
+      },
+     "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+     "ancestors": ["organizations/{{.OrgID}}"]
+   }
+]

@@ -1,0 +1,302 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Database'
+description: |
+  A Cloud Firestore Database.
+
+  If you wish to use Firestore with App Engine, use the
+  [`google_app_engine_application`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/app_engine_application)
+  resource instead. If you were previously using the `google_app_engine_application` resource exclusively for managing a Firestore database
+  and would like to use the `google_firestore_database` resource instead, please follow the instructions
+  [here](https://cloud.google.com/firestore/docs/app-engine-requirement).
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/firestore/docs/'
+  api: 'https://cloud.google.com/firestore/docs/reference/rest/v1/projects.databases'
+docs:
+id_format: 'projects/{{project}}/databases/{{name}}'
+base_url: 'projects/{{project}}/databases'
+create_url: 'projects/{{project}}/databases?databaseId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/databases/{{name}}'
+  - '{{project}}/{{name}}'
+  - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+  pre_delete: 'templates/terraform/pre_delete/go/firestore_database.go.tmpl'
+examples:
+  - name: 'firestore_default_database'
+    primary_resource_id: 'database'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    ignore_read_extra:
+      - 'project'
+      - 'etag'
+      - 'deletion_policy'
+    skip_test: true
+  - name: 'firestore_database'
+    primary_resource_id: 'database'
+    vars:
+      database_id: 'database-id'
+      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
+    ignore_read_extra:
+      - 'project'
+      - 'etag'
+      - 'deletion_policy'
+  - name: 'firestore_cmek_database'
+    primary_resource_id: 'database'
+    min_version: 'beta'
+    vars:
+      database_id: 'cmek-database-id'
+      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
+      kms_key_ring_name: 'kms-key-ring'
+      kms_key_name: 'kms-key'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
+    ignore_read_extra:
+      - 'project'
+      - 'etag'
+      - 'deletion_policy'
+  - name: 'firestore_default_database_in_datastore_mode'
+    primary_resource_id: 'datastore_mode_database'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    ignore_read_extra:
+      - 'project'
+      - 'etag'
+      - 'deletion_policy'
+    skip_test: true
+  - name: 'firestore_database_in_datastore_mode'
+    primary_resource_id: 'datastore_mode_database'
+    vars:
+      database_id: 'database-id'
+      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
+    ignore_read_extra:
+      - 'project'
+      - 'etag'
+      - 'deletion_policy'
+  - name: 'firestore_cmek_database_in_datastore_mode'
+    primary_resource_id: 'database'
+    min_version: 'beta'
+    vars:
+      database_id: 'cmek-database-id'
+      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
+      kms_key_ring_name: 'kms-key-ring'
+      kms_key_name: 'kms-key'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
+    ignore_read_extra:
+      - 'project'
+      - 'etag'
+      - 'deletion_policy'
+virtual_fields:
+  - name: 'deletion_policy'
+    description: |
+      Deletion behavior for this database.
+      If the deletion policy is `ABANDON`, the database will be removed from Terraform state but not deleted from Google Cloud upon destruction.
+      If the deletion policy is `DELETE`, the database will both be removed from Terraform state and deleted from Google Cloud upon destruction.
+      The default value is `ABANDON`.
+      See also `delete_protection`.
+    type: Enum
+    default_value: "ABANDON"
+parameters:
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The ID to use for the database, which will become the final
+      component of the database's resource name. This value should be 4-63
+      characters. Valid characters are /[a-z][0-9]-/ with first character
+      a letter and the last a letter or a number. Must not be
+      UUID-like /[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}/.
+      "(default)" database id is also valid.
+    required: true
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/go/shortname_to_url.go.tmpl'
+  - name: 'locationId'
+    type: String
+    description: |
+      The location of the database. Available locations are listed at
+      https://cloud.google.com/firestore/docs/locations.
+    required: true
+    immutable: true
+  - name: 'type'
+    type: Enum
+    description: |
+      The type of the database.
+      See https://cloud.google.com/datastore/docs/firestore-or-datastore
+      for information about how to choose.
+    required: true
+    enum_values:
+      - 'FIRESTORE_NATIVE'
+      - 'DATASTORE_MODE'
+  - name: 'concurrencyMode'
+    type: Enum
+    description: |
+      The concurrency control mode to use for this database.
+    default_from_api: true
+    enum_values:
+      - 'OPTIMISTIC'
+      - 'PESSIMISTIC'
+      - 'OPTIMISTIC_WITH_ENTITY_GROUPS'
+  - name: 'appEngineIntegrationMode'
+    type: Enum
+    description: |
+      The App Engine integration mode to use for this database.
+    default_from_api: true
+    enum_values:
+      - 'ENABLED'
+      - 'DISABLED'
+  - name: 'pointInTimeRecoveryEnablement'
+    type: Enum
+    description: |
+      Whether to enable the PITR feature on this database.
+      If `POINT_IN_TIME_RECOVERY_ENABLED` is selected, reads are supported on selected versions of the data from within the past 7 days.
+      versionRetentionPeriod and earliestVersionTime can be used to determine the supported versions. These include reads against any timestamp within the past hour
+      and reads against 1-minute snapshots beyond 1 hour and within 7 days.
+      If `POINT_IN_TIME_RECOVERY_DISABLED` is selected, reads are supported on any version of the data from within the past 1 hour.
+    default_value: "POINT_IN_TIME_RECOVERY_DISABLED"
+    enum_values:
+      - 'POINT_IN_TIME_RECOVERY_ENABLED'
+      - 'POINT_IN_TIME_RECOVERY_DISABLED'
+  - name: 'key_prefix'
+    type: String
+    description: |
+      Output only. The keyPrefix for this database.
+      This keyPrefix is used, in combination with the project id ("~") to construct the application id
+      that is returned from the Cloud Datastore APIs in Google App Engine first generation runtimes.
+      This value may be empty in which case the appid to use for URL-encoded keys is the project_id (eg: foo instead of v~foo).
+    output: true
+  - name: 'deleteProtectionState'
+    type: Enum
+    description: |
+      State of delete protection for the database.
+      When delete protection is enabled, this database cannot be deleted.
+      The default value is `DELETE_PROTECTION_STATE_UNSPECIFIED`, which is currently equivalent to `DELETE_PROTECTION_DISABLED`.
+      **Note:** Additionally, to delete this database using `terraform destroy`, `deletion_policy` must be set to `DELETE`.
+    default_from_api: true
+    enum_values:
+      - 'DELETE_PROTECTION_STATE_UNSPECIFIED'
+      - 'DELETE_PROTECTION_ENABLED'
+      - 'DELETE_PROTECTION_DISABLED'
+  - name: 'etag'
+    type: Fingerprint
+    description: |
+      Output only. This checksum is computed by the server based on the value of other fields,
+      and may be sent on update and delete requests to ensure the client has an
+      up-to-date value before proceeding.
+    output: true
+  - name: 'create_time'
+    type: String
+    description: |
+      Output only. The timestamp at which this database was created.
+    output: true
+  - name: 'update_time'
+    type: String
+    description: |
+      Output only. The timestamp at which this database was most recently updated.
+    output: true
+  - name: 'uid'
+    type: String
+    description: |
+      Output only. The system-generated UUID4 for this Database.
+    output: true
+  - name: 'versionRetentionPeriod'
+    type: String
+    description: |
+      Output only. The period during which past versions of data are retained in the database.
+      Any read or query can specify a readTime within this window, and will read the state of the database at that time.
+      If the PITR feature is enabled, the retention period is 7 days. Otherwise, the retention period is 1 hour.
+      A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
+    output: true
+  - name: 'earliestVersionTime'
+    type: String
+    description: |
+      Output only. The earliest timestamp at which older versions of the data can be read from the database. See versionRetentionPeriod above; this field is populated with now - versionRetentionPeriod.
+      This value is continuously updated, and becomes stale the moment it is queried. If you are using this value to recover data, make sure to account for the time from the moment when the value is queried to the moment when you initiate the recovery.
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true
+  - name: 'cmekConfig'
+    type: NestedObject
+    description: |
+       The CMEK (Customer Managed Encryption Key) configuration for a Firestore
+       database. If not present, the database is secured by the default Google
+       encryption key.
+    min_version: 'beta'
+    immutable: true
+    properties:
+      - name: 'kmsKeyName'
+        type: String
+        description: |
+          The resource ID of a Cloud KMS key. If set, the database created will
+          be a Customer-managed Encryption Key (CMEK) database encrypted with
+          this key. This feature is allowlist only in initial launch.
+
+          Only keys in the same location as this database are allowed to be used
+          for encryption. For Firestore's nam5 multi-region, this corresponds to Cloud KMS
+          multi-region us. For Firestore's eur3 multi-region, this corresponds to
+          Cloud KMS multi-region europe. See https://cloud.google.com/kms/docs/locations.
+
+          This value should be the KMS key resource ID in the format of
+          `projects/{project_id}/locations/{kms_location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}`.
+          How to retrive this resource ID is listed at
+          https://cloud.google.com/kms/docs/getting-resource-ids#getting_the_id_for_a_key_and_version.
+        required: true
+        immutable: true
+      - name: 'activeKeyVersion'
+        type: Array
+        description: |
+           Currently in-use KMS key versions (https://cloud.google.com/kms/docs/resource-hierarchy#key_versions).
+           During key rotation (https://cloud.google.com/kms/docs/key-rotation), there can be
+           multiple in-use key versions.
+
+           The expected format is
+           `projects/{project_id}/locations/{kms_location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}/cryptoKeyVersions/{key_version}`.
+        output: true
+        item_type:
+          type: String

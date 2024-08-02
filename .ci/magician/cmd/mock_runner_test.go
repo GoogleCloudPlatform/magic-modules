@@ -20,13 +20,19 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"magician/exec"
+	"os"
 	"path/filepath"
+	"sort"
+	"strings"
+
+	"golang.org/x/exp/maps"
 )
 
 type ParameterList []any
 
 type MockRunner interface {
-	ExecRunner
+	exec.ExecRunner
 	Calls(method string) ([]ParameterList, bool)
 }
 
@@ -35,38 +41,53 @@ type mockRunner struct {
 	cmdResults    map[string]string
 	cwd           string
 	dirStack      *list.List
+	notifyError   bool
+}
+
+func sortedEnvString(env map[string]string) string {
+	keys := maps.Keys(env)
+	sort.Strings(keys)
+	kvs := make([]string, len(keys))
+	for i, k := range keys {
+		kvs[i] = fmt.Sprintf("%s:%s", k, env[k])
+	}
+	return fmt.Sprintf("map[%s]", strings.Join(kvs, " "))
 }
 
 func NewMockRunner() MockRunner {
+	diffProcessorEnv := map[string]string{
+		"NEW_REF": "auto-pr-123456",
+		"OLD_REF": "auto-pr-123456-old",
+		"PATH":    os.Getenv("PATH"),
+		"GOPATH":  os.Getenv("GOPATH"),
+		"HOME":    os.Getenv("HOME"),
+	}
 	return &mockRunner{
 		calledMethods: make(map[string][]ParameterList),
 		cmdResults: map[string]string{
-			"/mock/dir/tfc git [clone -b auto-pr-pr1 https://modular-magician:*******@github.com/modular-magician/docs-examples /mock/dir/tfoics] map[]":                "",
-			"/mock/dir/tpgb git [clone -b auto-pr-pr1 https://modular-magician:*******@github.com/modular-magician/terraform-google-conversion /mock/dir/tfc] map[]":    "",
-			" git [clone -b auto-pr-pr1 https://modular-magician:*******@github.com/modular-magician/terraform-provider-google /mock/dir/tpg] map[]":                    "",
-			"/mock/dir/tpg git [clone -b auto-pr-pr1 https://modular-magician:*******@github.com/modular-magician/terraform-provider-google-beta /mock/dir/tpgb] map[]": "",
-			"/mock/dir/magic-modules git [diff HEAD origin/main tools/missing-test-detector] map[]":                                                                     "",
-			"/mock/dir/magic-modules/tools/diff-processor bin/diff-processor [breaking-changes] map[]":                                                                  "",
-			"/mock/dir/magic-modules/tools/diff-processor make [build] map[OLD_REF:auto-pr-pr1-old NEW_REF:auto-pr-pr1]":                                                "",
-			"/mock/dir/magic-modules/tools/missing-test-detector go [mod edit -replace google/provider/new=/mock/dir/tpgb] map[]":                                       "",
-			"/mock/dir/magic-modules/tools/missing-test-detector go [mod edit -replace google/provider/old=/mock/dir/tpgbold] map[]":                                    "",
-			"/mock/dir/magic-modules/tools/missing-test-detector go [mod tidy] map[]":                                                                                   "",
-			"/mock/dir/magic-modules/tools/missing-test-detector go [run . -services-dir=/mock/dir/tpgb/google-beta/services] map[]":                                    "## Missing test report\nYour PR includes resource fields which are not covered by any test.\n\nResource: `google_folder_access_approval_settings` (3 total tests)\nPlease add an acceptance test which includes these fields. The test should include the following:\n\n```hcl\nresource \"google_folder_access_approval_settings\" \"primary\" {\n  uncovered_field = # value needed\n}\n\n```\n",
-			"/mock/dir/tfc git [diff origin/auto-pr-pr1-old origin/auto-pr-pr1 --shortstat] map[]":                                                                      " 1 file changed, 10 insertions(+)\n",
-			"/mock/dir/tfc git [fetch origin auto-pr-pr1-old] map[]":                                                                                                    "",
-			"/mock/dir/tfoics git [diff origin/auto-pr-pr1-old origin/auto-pr-pr1 --shortstat] map[]":                                                                   "",
-			"/mock/dir/tfoics git [fetch origin auto-pr-pr1-old] map[]":                                                                                                 "",
-			"/mock/dir/tpg git [diff origin/auto-pr-pr1-old origin/auto-pr-pr1 --shortstat] map[]":                                                                      " 2 files changed, 40 insertions(+)\n",
-			"/mock/dir/tpg git [fetch origin auto-pr-pr1-old] map[]":                                                                                                    "",
-			"/mock/dir/tpgb find [. -type f -name *.go -exec sed -i.bak s~github.com/hashicorp/terraform-provider-google-beta~google/provider/new~g {} +] map[]":        "",
-			"/mock/dir/tpgb git [diff origin/auto-pr-pr1-old origin/auto-pr-pr1 --shortstat] map[]":                                                                     " 2 files changed, 40 insertions(+)\n",
-			"/mock/dir/tpgb git [fetch origin auto-pr-pr1-old] map[]":                                                                                                   "",
-			"/mock/dir/tpgb sed [-i.bak s|github.com/hashicorp/terraform-provider-google-beta|google/provider/new|g go.mod] map[]":                                      "",
-			"/mock/dir/tpgb sed [-i.bak s|github.com/hashicorp/terraform-provider-google-beta|google/provider/new|g go.sum] map[]":                                      "",
-			"/mock/dir/tpgbold find [. -type f -name *.go -exec sed -i.bak s~github.com/hashicorp/terraform-provider-google-beta~google/provider/old~g {} +] map[]":     "",
-			"/mock/dir/tpgbold git [checkout origin/auto-pr-pr1-old] map[]":                                                                                             "",
-			"/mock/dir/tpgbold sed [-i.bak s|github.com/hashicorp/terraform-provider-google-beta|google/provider/old|g go.mod] map[]":                                   "",
-			"/mock/dir/tpgbold sed [-i.bak s|github.com/hashicorp/terraform-provider-google-beta|google/provider/old|g go.sum] map[]":                                   "",
+			"/mock/dir/magic-modules/.ci/magician git [clone -b auto-pr-123456 https://modular-magician:*******@github.com/modular-magician/docs-examples /mock/dir/tfoics] map[]":                "",
+			"/mock/dir/magic-modules/.ci/magician git [clone -b auto-pr-123456 https://modular-magician:*******@github.com/modular-magician/terraform-google-conversion /mock/dir/tgc] map[]":     "",
+			"/mock/dir/magic-modules/.ci/magician git [clone -b auto-pr-123456 https://modular-magician:*******@github.com/modular-magician/terraform-provider-google /mock/dir/tpg] map[]":       "",
+			"/mock/dir/magic-modules/.ci/magician git [clone -b auto-pr-123456 https://modular-magician:*******@github.com/modular-magician/terraform-provider-google-beta /mock/dir/tpgb] map[]": "",
+			"/mock/dir/magic-modules/tools/diff-processor bin/diff-processor [breaking-changes] map[]":                                                                                            "",
+			"/mock/dir/magic-modules/tools/diff-processor make [build] " + sortedEnvString(diffProcessorEnv):                                                                                      "",
+			"/mock/dir/magic-modules/tools/diff-processor bin/diff-processor [changed-schema-resources] map[]":                                                                                    "[\"google_alloydb_instance\"]",
+			"/mock/dir/magic-modules/tools/diff-processor bin/diff-processor [detect-missing-tests /mock/dir/tpgb/google-beta/services] map[]":                                                    `{"google_folder_access_approval_settings":{"SuggestedTest":"resource \"google_folder_access_approval_settings\" \"primary\" {\n  uncovered_field = # value needed\n}","Tests":["a","b","c"]}}`,
+			"/mock/dir/tgc git [diff origin/auto-pr-123456-old origin/auto-pr-123456 --shortstat] map[]":                                                                                          " 1 file changed, 10 insertions(+)\n",
+			"/mock/dir/tgc git [fetch origin auto-pr-123456-old] map[]":                                                                                                                           "",
+			"/mock/dir/tfoics git [diff origin/auto-pr-123456-old origin/auto-pr-123456 --shortstat] map[]":                                                                                       "",
+			"/mock/dir/tfoics git [fetch origin auto-pr-123456-old] map[]":                                                                                                                        "",
+			"/mock/dir/tpg git [diff origin/auto-pr-123456-old origin/auto-pr-123456 --shortstat] map[]":                                                                                          " 2 files changed, 40 insertions(+)\n",
+			"/mock/dir/tpg git [fetch origin auto-pr-123456-old] map[]":                                                                                                                           "",
+			"/mock/dir/tpgb find [. -type f -name *.go -exec sed -i.bak s~github.com/hashicorp/terraform-provider-google-beta~google/provider/new~g {} +] map[]":                                  "",
+			"/mock/dir/tpgb git [diff origin/auto-pr-123456-old origin/auto-pr-123456 --shortstat] map[]":                                                                                         " 2 files changed, 40 insertions(+)\n",
+			"/mock/dir/tpgb git [fetch origin auto-pr-123456-old] map[]":                                                                                                                          "",
+			"/mock/dir/tpgb sed [-i.bak s|github.com/hashicorp/terraform-provider-google-beta|google/provider/new|g go.mod] map[]":                                                                "",
+			"/mock/dir/tpgb sed [-i.bak s|github.com/hashicorp/terraform-provider-google-beta|google/provider/new|g go.sum] map[]":                                                                "",
+			"/mock/dir/tpgbold find [. -type f -name *.go -exec sed -i.bak s~github.com/hashicorp/terraform-provider-google-beta~google/provider/old~g {} +] map[]":                               "",
+			"/mock/dir/tpgbold git [checkout origin/auto-pr-123456-old] map[]":                                                                                                                    "",
+			"/mock/dir/tpgbold sed [-i.bak s|github.com/hashicorp/terraform-provider-google-beta|google/provider/old|g go.mod] map[]":                                                             "",
+			"/mock/dir/tpgbold sed [-i.bak s|github.com/hashicorp/terraform-provider-google-beta|google/provider/old|g go.sum] map[]":                                                             "",
 		},
 		cwd:      "/mock/dir/magic-modules/.ci/magician",
 		dirStack: list.New(),
@@ -127,9 +148,12 @@ func (mr *mockRunner) PopDir() error {
 
 func (mr *mockRunner) Run(name string, args []string, env map[string]string) (string, error) {
 	mr.calledMethods["Run"] = append(mr.calledMethods["Run"], ParameterList{mr.cwd, name, args, env})
-	cmd := fmt.Sprintf("%s %s %v %v", mr.cwd, name, args, env)
+	cmd := fmt.Sprintf("%s %s %v %s", mr.cwd, name, args, sortedEnvString(env))
 	if result, ok := mr.cmdResults[cmd]; ok {
 		return result, nil
+	}
+	if mr.notifyError {
+		return "", fmt.Errorf("unknown command %s", cmd)
 	}
 	fmt.Printf("unknown command %s\n", cmd)
 	return "", nil

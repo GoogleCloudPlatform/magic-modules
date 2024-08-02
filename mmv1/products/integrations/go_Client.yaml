@@ -1,0 +1,134 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Client'
+description: |
+  Application Integration Client.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/application-integration/docs/overview'
+    'Set up Application Integration': 'https://cloud.google.com/application-integration/docs/setup-application-integration'
+  api: 'https://cloud.google.com/application-integration/docs/reference/rest/v1/projects.locations.clients'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/clients'
+self_link: 'projects/{{project}}/locations/{{location}}/clients'
+create_url: 'projects/{{project}}/locations/{{location}}/clients:provision'
+delete_url: 'projects/{{project}}/locations/{{location}}/clients:deprovision'
+delete_verb: 'POST'
+immutable: true
+mutex: 'Client/{{location}}'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/clients'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  decoder: 'templates/terraform/decoders/go/integrations_client.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/go/integrations_client.go.tmpl'
+examples:
+  - name: 'integrations_client_basic'
+    primary_resource_id: 'example'
+  - name: 'integrations_client_full'
+    primary_resource_id: 'example'
+    vars:
+      key_ring_name: 'my-keyring'
+    skip_vcr: true
+  - name: 'integrations_client_deprecated_fields'
+    primary_resource_id: 'example'
+    skip_docs: true
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      Location in which client needs to be provisioned.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'cloudKmsConfig'
+    type: NestedObject
+    description: |
+      Cloud KMS config for AuthModule to encrypt/decrypt credentials.
+    immutable: true
+    ignore_read: true
+    conflicts:
+      - provision_gmek
+    properties:
+      - name: 'kmsLocation'
+        type: String
+        description: |
+          Location name of the key ring, e.g. "us-west1".
+        required: true
+      - name: 'kmsRing'
+        type: String
+        description: |
+          A key ring organizes keys in a specific Google Cloud location and allows you to
+          manage access control on groups of keys. A key ring's name does not need to be
+          unique across a Google Cloud project, but must be unique within a given location.
+        required: true
+      - name: 'key'
+        type: String
+        description: |
+          A Cloud KMS key is a named object containing one or more key versions, along
+          with metadata for the key. A key exists on exactly one key ring tied to a
+          specific location.
+        required: true
+      - name: 'keyVersion'
+        type: String
+        description: |
+          Each version of a key contains key material used for encryption or signing.
+          A key's version is represented by an integer, starting at 1. To decrypt data
+          or verify a signature, you must use the same key version that was used to
+          encrypt or sign the data.
+      - name: 'kmsProjectId'
+        type: String
+        description: |
+          The Google Cloud project id of the project where the kms key stored. If empty,
+          the kms key is stored at the same project as customer's project and ecrypted
+          with CMEK, otherwise, the kms key is stored in the tenant project and
+          encrypted with GMEK.
+  - name: 'createSampleWorkflows'
+    type: Boolean
+    description: |
+      Indicates if sample workflow should be created along with provisioning.
+    immutable: true
+    ignore_read: true
+    conflicts:
+      - create_sample_integrations
+    deprecation_message: '`create_sample_workflows` is deprecated and will be removed in a future major release. Use `create_sample_integrations` instead.'
+  - name: 'createSampleIntegrations'
+    type: Boolean
+    description: |
+      Indicates if sample integrations should be created along with provisioning.
+    immutable: true
+    ignore_read: true
+    conflicts:
+      - create_sample_workflows
+  - name: 'provisionGmek'
+    type: Boolean
+    description: |
+      Indicates provision with GMEK or CMEK.
+    immutable: true
+    ignore_read: true
+    conflicts:
+      - cloud_kms_config
+    deprecation_message: '`provision_gmek` is deprecated and will be removed in a future major release. Client would be provisioned as gmek if `cloud_kms_config` is not given.'
+  - name: 'runAsServiceAccount'
+    type: String
+    description: |
+      User input run-as service account, if empty, will bring up a new default service account.
+    immutable: true
+    ignore_read: true

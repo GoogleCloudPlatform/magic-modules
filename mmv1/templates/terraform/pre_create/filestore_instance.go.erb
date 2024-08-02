@@ -10,7 +10,7 @@
     }
     if strings.Contains(url, "locations//") {
         // re-compute url now that location must be set
-        url, err = tpgresource.ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.create_uri}" -%>")
+        url, err = tpgresource.ReplaceVars(d, config, "{{<%=object.__product.name-%>BasePath}}<%=object.create_uri-%>")
         if err != nil {
             return err
         }

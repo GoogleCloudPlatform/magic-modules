@@ -57,7 +57,6 @@ properties:
     required: true
     immutable: true
     url_param_only: true
-    pattern: projects/{{project}}/locations/{{location}}/backups/{{backupId}}
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |

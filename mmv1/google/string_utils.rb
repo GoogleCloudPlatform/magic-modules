@@ -38,12 +38,6 @@ module Google
       ss.gsub(/\b(?<!\w['’`()])[a-z]/, &:capitalize)
     end
 
-    # rubocop:disable Style/SafeNavigation # support Ruby < 2.3.0
-    def self.symbolize(key)
-      key.to_sym unless key.nil?
-    end
-    # rubocop:enable Style/SafeNavigation
-
     # Returns all the characters up until the period (.) or returns text
     # unchanged if there is no period.
     def self.first_sentence(text)

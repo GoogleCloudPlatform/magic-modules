@@ -24,7 +24,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -130,6 +130,15 @@ examples:
     skip_docs: true
     skip_test: true  # Similar to other samples
     min_version: beta
+  - !ruby/object:Provider::Terraform::Examples
+    name: "region_url_map_path_template_match"
+    primary_resource_id: "urlmap"
+    vars:
+      url_map_name: "urlmap"
+      home_backend_service_name: "home-service"
+      cart_backend_service_name: "cart-service"
+      user_backend_service_name: "user-service"
+      health_check_name: "health-check"
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
@@ -558,6 +567,18 @@ properties:
                         and anchor supplied with the original URL. For regular expression grammar please
                         see en.cppreference.com/w/cpp/regex/ecmascript  Only one of prefixMatch,
                         fullPathMatch or regexMatch must be specified.
+                    - !ruby/object:Api::Type::String
+                      name: 'pathTemplateMatch'
+                      description: |
+                        For satisfying the matchRule condition, the path of the request
+                        must match the wildcard pattern specified in pathTemplateMatch
+                        after removing any query parameters and anchor that may be part
+                        of the original URL.
+
+                        pathTemplateMatch must be between 1 and 255 characters
+                        (inclusive).  The pattern specified by pathTemplateMatch may
+                        have at most 5 wildcard operators and at most 5 variable
+                        captures in total.
               - !ruby/object:Api::Type::NestedObject
                 name: 'routeAction'
                 description: |
@@ -728,7 +749,7 @@ properties:
 
                           * 5xx: Loadbalancer will attempt a retry if the backend service responds with
                             any 5xx response code, or if the backend service does not respond at all,
-                            example: disconnects, reset, read timeout, connection failure, and refused
+                            for example: disconnects, reset, read timeout, connection failure, and refused
                             streams.
                           * gateway-error: Similar to 5xx, but only applies to response codes
                             502, 503 or 504.
@@ -784,6 +805,23 @@ properties:
                           Prior to forwarding the request to the selected backend service, the matching
                           portion of the request's path is replaced by pathPrefixRewrite. The value must
                           be between 1 and 1024 characters.
+                      - !ruby/object:Api::Type::String
+                        name: 'pathTemplateRewrite'
+                        description: |
+                          Prior to forwarding the request to the selected origin, if the
+                          request matched a pathTemplateMatch, the matching portion of the
+                          request's path is replaced re-written using the pattern specified
+                          by pathTemplateRewrite.
+
+                          pathTemplateRewrite must be between 1 and 255 characters
+                          (inclusive), must start with a '/', and must only use variables
+                          captured by the route's pathTemplate matchers.
+
+                          pathTemplateRewrite may only be used when all of a route's
+                          MatchRules specify pathTemplate.
+
+                          Only one of pathPrefixRewrite and pathTemplateRewrite may be
+                          specified.
                   - !ruby/object:Api::Type::Array
                     name: 'weightedBackendServices'
                     description: |
@@ -1159,7 +1197,7 @@ properties:
 
                           - 5xx: Loadbalancer will attempt a retry if the backend service responds with
                           any 5xx response code, or if the backend service does not respond at all,
-                          example: disconnects, reset, read timeout, connection failure, and refused
+                          for example: disconnects, reset, read timeout, connection failure, and refused
                           streams.
                           - gateway-error: Similar to 5xx, but only applies to response codes
                           502, 503 or 504.

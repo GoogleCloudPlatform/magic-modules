@@ -1,4 +1,3 @@
-# [START trafficdirector_url_map_parameter_based_routing]
 resource "google_compute_url_map" "<%= ctx[:primary_resource_id] %>" {
   name        = "<%= ctx[:vars]['url_map_name'] %>"
   description = "parameter-based routing example"
@@ -73,4 +72,3 @@ resource "google_compute_http_health_check" "default" {
   check_interval_sec = 1
   timeout_sec        = 1
 }
-# [END trafficdirector_url_map_parameter_based_routing]

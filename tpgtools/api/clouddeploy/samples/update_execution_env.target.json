@@ -21,7 +21,8 @@
     {
       "usages": ["RENDER"],
       "serviceAccount": "other-owner@{{project}}.iam.gserviceaccount.com",
-      "artifactStorage": "gs://other-bucket/other-dir"
+      "artifactStorage": "gs://other-bucket/other-dir",
+      "verbose": true
     },
     {
       "usages": ["DEPLOY"],

@@ -3,7 +3,15 @@
  * SPDX-License-Identifier: MPL-2.0
  */
 
-// This file is controlled by MMv1, any changes made here will be overwritten
+// This file is maintained in the GoogleCloudPlatform/magic-modules repository and copied into the downstream provider repositories. Any changes to this file in the downstream will be overwritten.
+
+/*
+  NOTE: This file is manually curated - any new service packages added to the provider codebase will need to be accompanied with a change in this file.
+        When adding new entires make sure to ensure the path value is correct for TPG or TPGB
+
+        For this file, services_ga.kt, please ensure paths are like:
+            "./google/services/accessapproval"
+*/
 
 package generated
 
@@ -47,6 +55,11 @@ var ServicesListGa = mapOf(
         "name" to "appengine",
         "displayName" to "Appengine",
         "path" to "./google/services/appengine"
+    ),
+    "apphub" to mapOf(
+        "name" to "apphub",
+        "displayName" to "Apphub",
+        "path" to "./google/services/apphub"
     ),
     "artifactregistry" to mapOf(
         "name" to "artifactregistry",
@@ -172,6 +185,11 @@ var ServicesListGa = mapOf(
         "name" to "cloudids",
         "displayName" to "Cloudids",
         "path" to "./google/services/cloudids"
+    ),
+    "cloudquotas" to mapOf(
+        "name" to "cloudquotas",
+        "displayName" to "Cloudquotas",
+        "path" to "./google/services/cloudquotas"
     ),
     "cloudrun" to mapOf(
         "name" to "cloudrun",
@@ -443,6 +461,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Integrationconnectors",
         "path" to "./google/services/integrationconnectors"
     ),
+    "integrations" to mapOf(
+        "name" to "integrations",
+        "displayName" to "Applicationintegration",
+        "path" to "./google/services/integrations"
+    ),
     "kms" to mapOf(
         "name" to "kms",
         "displayName" to "Kms",
@@ -457,6 +480,11 @@ var ServicesListGa = mapOf(
         "name" to "looker",
         "displayName" to "Looker",
         "path" to "./google/services/looker"
+    ),
+    "managedkafka" to mapOf(
+        "name" to "managedkafka",
+        "displayName" to "Managedkafka",
+        "path" to "./google/services/managedkafka"
     ),
     "memcache" to mapOf(
         "name" to "memcache",
@@ -523,10 +551,20 @@ var ServicesListGa = mapOf(
         "displayName" to "Oslogin",
         "path" to "./google/services/oslogin"
     ),
+    "parallelstore" to mapOf(
+        "name" to "parallelstore",
+        "displayName" to "Parallelstore",
+        "path" to "./google/services/parallelstore"
+    ),
     "privateca" to mapOf(
         "name" to "privateca",
         "displayName" to "Privateca",
         "path" to "./google/services/privateca"
+    ),
+    "privilegedaccessmanager" to mapOf(
+        "name" to "privilegedaccessmanager",
+        "displayName" to "Privilegedaccessmanager",
+        "path" to "./google/services/privilegedaccessmanager"
     ),
     "publicca" to mapOf(
         "name" to "publicca",
@@ -578,6 +616,16 @@ var ServicesListGa = mapOf(
         "displayName" to "Securitycenter",
         "path" to "./google/services/securitycenter"
     ),
+    "securitycentermanagement" to mapOf(
+        "name" to "securitycentermanagement",
+        "displayName" to "Securitycentermanagement",
+        "path" to "./google/services/securitycentermanagement"
+    ),
+    "securitycenterv2" to mapOf(
+        "name" to "securitycenterv2",
+        "displayName" to "securitycenterv2",
+        "path" to "./google/services/securitycenterv2"
+    ),
     "securityposture" to mapOf(
         "name" to "securityposture",
         "displayName" to "Securityposture",
@@ -607,6 +655,11 @@ var ServicesListGa = mapOf(
         "name" to "serviceusage",
         "displayName" to "Serviceusage",
         "path" to "./google/services/serviceusage"
+    ),
+    "siteverification" to mapOf(
+        "name" to "siteverification",
+        "displayName" to "Siteverification",
+        "path" to "./google/services/siteverification"
     ),
     "sourcerepo" to mapOf(
         "name" to "sourcerepo",

@@ -37,8 +37,9 @@ import_format:
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "firebase_app_check_play_integrity_config_minimal"
+    min_version: 'beta'
     # Need the time_sleep resource
-    pull_external: true
+    external_providers: ["random", "time"]
     primary_resource_id: "default"
     vars:
       package_name: "package.name.playintegrity"
@@ -46,8 +47,9 @@ examples:
       project_id: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
     name: "firebase_app_check_play_integrity_config_full"
+    min_version: 'beta'
     # Need the time_sleep resource
-    pull_external: true
+    external_providers: ["random", "time"]
     primary_resource_id: "default"
     vars:
       package_name: "package.name.playintegrity"
@@ -72,7 +74,6 @@ properties:
     description: |
       The relative resource name of the Play Integrity configuration object
     output: true
-    pattern: projects/{{project}}/apps/{{app_id}}/playIntegrityConfig
   - !ruby/object:Api::Type::String
     name: tokenTtl
     description: |

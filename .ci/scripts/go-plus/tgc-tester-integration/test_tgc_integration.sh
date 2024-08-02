@@ -12,7 +12,7 @@ github_username=modular-magician
 
 
 new_branch="auto-pr-$pr_number"
-git_remote=https://$github_username:$GITHUB_TOKEN@github.com/$github_username/$gh_repo
+git_remote=https://github.com/$github_username/$gh_repo
 local_path=$GOPATH/src/github.com/GoogleCloudPlatform/$gh_repo
 mkdir -p "$(dirname $local_path)"
 git clone $git_remote $local_path --branch $new_branch --depth 2
@@ -36,9 +36,14 @@ post_body=$( jq -n \
 	--arg state "pending" \
 	'{context: $context, target_url: $target_url, state: $state}')
 
+# Fall back to old github token if new token is unavailable.
+if [[ -z $GITHUB_TOKEN_MAGIC_MODULES ]]; then
+  GITHUB_TOKEN_MAGIC_MODULES=$GITHUB_TOKEN
+fi
+
 curl \
   -X POST \
-  -u "$github_username:$GITHUB_TOKEN" \
+  -u "$github_username:$GITHUB_TOKEN_MAGIC_MODULES" \
   -H "Accept: application/vnd.github.v3+json" \
   "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/$mm_commit_sha" \
   -d "$post_body"
@@ -68,7 +73,7 @@ post_body=$( jq -n \
 
 curl \
   -X POST \
-  -u "$github_username:$GITHUB_TOKEN" \
+  -u "$github_username:$GITHUB_TOKEN_MAGIC_MODULES" \
   -H "Accept: application/vnd.github.v3+json" \
   "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/$mm_commit_sha" \
   -d "$post_body"

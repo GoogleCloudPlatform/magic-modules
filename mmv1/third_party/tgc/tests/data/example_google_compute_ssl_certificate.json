@@ -1,0 +1,21 @@
+[
+    {
+        "name": "//compute.googleapis.com/projects/{{.Provider.project}}/global/sslCertificates/prod-webserver-cert",
+        "asset_type": "compute.googleapis.com/SslCertificate",
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+        "resource": {
+            "version": "beta",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+            "discovery_name": "SslCertificate",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "certificate": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS4uLg==",
+                "name": "prod-webserver-cert",
+                "privateKey": "LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVkuLi4="
+            }
+        },
+        "ancestors": [
+            "organizations/{{.OrgID}}"
+        ]
+    }
+]

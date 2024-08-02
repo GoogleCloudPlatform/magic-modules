@@ -6,14 +6,17 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 <% if version == "ga" -%>
 	"google.golang.org/api/compute/v1"
 <% else -%>
 	compute "google.golang.org/api/compute/v0.beta"
+<% end -%>
+<% unless version == 'ga' -%>
+	"google.golang.org/api/googleapi"
 <% end -%>
 )
 
@@ -72,6 +75,39 @@ func TestAccComputeInstanceFromTemplate_self_link_unique(t *testing.T) {
 		},
 	})
 }
+
+<% unless version == 'ga' -%>
+func TestAccComputeInstanceFromTemplate_maxRunDuration_onInstanceStopAction(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	templateName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	resourceName := "google_compute_instance_from_template.foobar"
+
+	var expectedMaxRunDuration = compute.Duration{}
+	// Define in testAccComputeInstanceFromTemplate_maxRunDuration_onInstanceStopAction
+	expectedMaxRunDuration.Nanos = 456
+	expectedMaxRunDuration.Seconds = 60
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckComputeInstanceFromTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceFromTemplate_maxRunDuration_onInstanceStopAction(instanceName, templateName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, resourceName, &instance),
+
+					// Check that fields were set based on the template
+					testAccCheckComputeInstanceMaxRunDuration(&instance, expectedMaxRunDuration),
+				),
+			},
+		},
+	})
+}
+<% end -%>
 
 func TestAccComputeInstanceFromTemplate_localSsdRecoveryTimeout(t *testing.T) {
 	t.Parallel()
@@ -132,6 +168,70 @@ func TestAccComputeInstanceFromTemplateWithOverride_localSsdRecoveryTimeout(t *t
 		},
 	})
 }
+
+<% unless version == 'ga' -%>
+func TestAccComputeInstanceFromTemplate_partnerMetadata(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	templateName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	resourceName := "google_compute_instance_from_template.foobar"
+	var namespace = "test.compute.googleapis.com"
+	expectedPartnerMetadata := make(map[string]compute.StructuredEntries)
+	expectedPartnerMetadata[namespace] = compute.StructuredEntries{
+		Entries: googleapi.RawMessage(`{"key1": "value1", "key2": 2,"key3": {"key31":"value31"}}`),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckComputeInstanceFromTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceFromTemplate_partnerMetadata(instanceName, templateName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, resourceName, &instance),
+
+					// Check that fields were set based on the template
+					testAccCheckComputeInstancePartnerMetadata(&instance, expectedPartnerMetadata),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeInstanceFromTemplateWithOverride_partnerMetadata(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	templateName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	resourceName := "google_compute_instance_from_template.foobar"
+	var namespace = "test.compute.googleapis.com"
+	expectedPartnerMetadata := make(map[string]compute.StructuredEntries)
+	expectedPartnerMetadata[namespace] = compute.StructuredEntries{
+		Entries: googleapi.RawMessage(`{"key1": "value1", "key2": 2,"key3": {"key31":"value31"}}`),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckComputeInstanceFromTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceFromTemplateWithOverride_partnerMetadata(instanceName, templateName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, resourceName, &instance),
+
+					// Check that fields were set based on the template
+					testAccCheckComputeInstancePartnerMetadata(&instance, expectedPartnerMetadata),
+				),
+			},
+		},
+	})
+}
+<% end -%>
 
 <% unless version == 'ga' -%>
 
@@ -446,6 +546,108 @@ resource "google_compute_instance_from_template" "foobar" {
 `, template, template, instance)
 }
 
+<% unless version == 'ga' -%>
+func testAccComputeInstanceFromTemplate_maxRunDuration_onInstanceStopAction(instance, template string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_disk" "foobar" {
+  name  = "%s"
+  image = data.google_compute_image.my_image.self_link
+  size  = 10
+  type  = "pd-ssd"
+  zone  = "us-central1-a"
+}
+
+resource "google_compute_instance_template" "foobar" {
+  name         = "%s"
+  machine_type = "n1-standard-1"  // can't be e2 because of local-ssd
+
+  disk {
+    source      = google_compute_disk.foobar.name
+    auto_delete = false
+    boot        = true
+  }
+
+  disk {
+    disk_type    = "local-ssd"
+    type         = "SCRATCH"
+    interface    = "NVME"
+    disk_size_gb = 375
+  }
+
+  disk {
+    device_name  = "test-local-ssd"
+    disk_type    = "local-ssd"
+    type         = "SCRATCH"
+    interface    = "NVME"
+    disk_size_gb = 375
+  }
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    disk_size_gb = 100
+    boot         = false
+    disk_type    = "pd-ssd"
+    type         = "PERSISTENT"
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  metadata = {
+    foo = "bar"
+  }
+
+  scheduling {
+    automatic_restart = false
+    provisioning_model = "STANDARD"
+    instance_termination_action = "STOP"
+    max_run_duration {
+	  nanos = 123
+	  seconds = 60
+    }
+    on_instance_stop_action {
+    discard_local_ssd = true
+    }
+  }
+
+  can_ip_forward = true
+}
+
+resource "google_compute_instance_from_template" "foobar" {
+  name = "%s"
+  zone = "us-central1-a"
+
+  source_instance_template = google_compute_instance_template.foobar.self_link
+
+  // Overrides
+  can_ip_forward = false
+  labels = {
+    my_key = "my_value"
+  }
+  scheduling {
+    automatic_restart = false
+    provisioning_model = "STANDARD"
+    instance_termination_action = "STOP"
+    max_run_duration {
+	  nanos = 456
+	  seconds = 60
+    }
+    on_instance_stop_action {
+    discard_local_ssd = true
+    }
+  }
+}
+`, template, template, instance)
+}
+<% end -%>
+
 func testAccComputeInstanceFromTemplate_localSsdRecoveryTimeout(instance, template string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -621,6 +823,187 @@ resource "google_compute_instance_from_template" "foobar" {
 }
 `, template, template, instance)
 }
+
+<% unless version == 'ga' -%>
+func testAccComputeInstanceFromTemplate_partnerMetadata(instance, template string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_disk" "foobar" {
+  name  = "%s"
+  image = data.google_compute_image.my_image.self_link
+  size  = 10
+  type  = "pd-ssd"
+  zone  = "us-central1-a"
+}
+
+resource "google_compute_instance_template" "foobar" {
+  name         = "%s"
+  machine_type = "n1-standard-1"  // can't be e2 because of local-ssd
+
+  disk {
+    source      = google_compute_disk.foobar.name
+    auto_delete = false
+    boot        = true
+  }
+
+  disk {
+    disk_type    = "local-ssd"
+    type         = "SCRATCH"
+    interface    = "NVME"
+    disk_size_gb = 375
+  }
+
+  disk {
+    device_name  = "test-local-ssd"
+    disk_type    = "local-ssd"
+    type         = "SCRATCH"
+    interface    = "NVME"
+    disk_size_gb = 375
+  }
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    disk_size_gb = 100
+    boot         = false
+    disk_type    = "pd-ssd"
+    type         = "PERSISTENT"
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  partner_metadata = {
+  	"test.compute.googleapis.com" = jsonencode({ 
+  		entries = {
+  			key1 = "value1"
+  			key2 = 2
+  			key3 = {
+  				key31 = "value31"
+  			}
+  		}
+  	})
+  }
+
+  can_ip_forward = true
+}
+
+resource "google_compute_instance_from_template" "foobar" {
+  name = "%s"
+  zone = "us-central1-a"
+
+  source_instance_template = google_compute_instance_template.foobar.self_link
+
+  // Overrides
+  can_ip_forward = false
+  labels = {
+    my_key = "my_value"
+  }
+  scheduling {
+    automatic_restart = false
+  }
+}
+`, template, template, instance)
+}
+
+func testAccComputeInstanceFromTemplateWithOverride_partnerMetadata(instance, template string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_disk" "foobar" {
+  name  = "%s"
+  image = data.google_compute_image.my_image.self_link
+  size  = 10
+  type  = "pd-ssd"
+  zone  = "us-central1-a"
+}
+
+resource "google_compute_instance_template" "foobar" {
+  name         = "%s"
+  machine_type = "n1-standard-1"  // can't be e2 because of local-ssd
+
+  disk {
+    source      = google_compute_disk.foobar.name
+    auto_delete = false
+    boot        = true
+  }
+
+  disk {
+    disk_type    = "local-ssd"
+    type         = "SCRATCH"
+    interface    = "NVME"
+    disk_size_gb = 375
+  }
+
+  disk {
+    device_name  = "test-local-ssd"
+    disk_type    = "local-ssd"
+    type         = "SCRATCH"
+    interface    = "NVME"
+    disk_size_gb = 375
+  }
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    disk_size_gb = 100
+    boot         = false
+    disk_type    = "pd-ssd"
+    type         = "PERSISTENT"
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  partner_metadata = {
+  	"test.compute.googleapis.com" = jsonencode({ 
+  		entries = {
+  			key1 = "value1"
+  		}
+  	})
+  }
+
+  can_ip_forward = true
+}
+
+resource "google_compute_instance_from_template" "foobar" {
+  name = "%s"
+  zone = "us-central1-a"
+
+  source_instance_template = google_compute_instance_template.foobar.self_link
+
+  // Overrides
+  can_ip_forward = false
+  labels = {
+    my_key = "my_value"
+  }
+  scheduling {
+    automatic_restart = false
+  }
+  partner_metadata = {
+  	"test.compute.googleapis.com" = jsonencode({ 
+  		entries = {
+  			key1 = "value1"
+  			key2 = 2
+  			key3 = {
+  				key31 = "value31"
+  			}
+  		}
+  	})
+  }
+}
+`, template, template, instance)
+}
+<% end -%>
 
 <% unless version == 'ga' -%>
 

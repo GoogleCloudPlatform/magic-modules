@@ -11,8 +11,8 @@ import (
 
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
@@ -100,7 +100,7 @@ func TestAccDataSourceGoogleServiceAccountJwt(t *testing.T) {
 
 	resourceName := "data.google_service_account_jwt.default"
 	serviceAccount := envvar.GetTestServiceAccountFromEnv(t)
-	targetServiceAccountEmail := acctest.BootstrapServiceAccount(t, envvar.GetTestProjectFromEnv(), serviceAccount)
+	targetServiceAccountEmail := acctest.BootstrapServiceAccount(t, "jwt", serviceAccount)
 
 	staticTime := time.Now()
 

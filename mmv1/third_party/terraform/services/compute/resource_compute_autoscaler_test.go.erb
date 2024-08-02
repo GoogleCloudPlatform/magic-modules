@@ -6,7 +6,7 @@ import (
 	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccComputeAutoscaler_update(t *testing.T) {
@@ -22,18 +22,18 @@ func TestAccComputeAutoscaler_update(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeAutoscalerDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeAutoscaler_basic(itName, tpName, igmName, autoscalerName),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_autoscaler.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeAutoscaler_update(itName, tpName, igmName, autoscalerName),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_autoscaler.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -56,10 +56,10 @@ func TestAccComputeAutoscaler_multicondition(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeAutoscalerDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeAutoscaler_multicondition(itName, tpName, igmName, autoscalerName),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_autoscaler.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -81,10 +81,10 @@ func TestAccComputeAutoscaler_scaleDownControl(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeAutoscalerDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeAutoscaler_scaleDownControl(itName, tpName, igmName, autoscalerName),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_autoscaler.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -106,10 +106,10 @@ func TestAccComputeAutoscaler_scalingSchedule(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeAutoscalerDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeAutoscaler_scalingSchedule(itName, tpName, igmName, autoscalerName),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_autoscaler.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -131,10 +131,10 @@ func TestAccComputeAutoscaler_scaleInControl(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeAutoscalerDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeAutoscaler_scaleInControl(itName, tpName, igmName, autoscalerName),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_autoscaler.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -156,10 +156,10 @@ func TestAccComputeAutoscaler_scaleInControlFixed(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeAutoscalerDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeAutoscaler_scaleInControlFixed(itName, tpName, igmName, autoscalerName),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_autoscaler.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,

@@ -37,12 +37,16 @@ func TestExecCommunityChecker_CoreContributorFlow(t *testing.T) {
 
 	execCommunityChecker("pr1", "sha1", "branch1", "url1", "head1", "base1", gh, cb)
 
-	if _, ok := cb.calledMethods["TriggerMMPresubmitRuns"]; ok {
-		t.Fatal("Presubmit runs redundantly triggered for core contributor")
+	method := "TriggerMMPresubmitRuns"
+	expected := [][]any{{"sha1", map[string]string{"BRANCH_NAME": "branch1", "_BASE_BRANCH": "base1", "_HEAD_BRANCH": "head1", "_HEAD_REPO_URL": "url1", "_PR_NUMBER": "pr1"}}}
+	if calls, ok := cb.calledMethods[method]; !ok {
+		t.Fatal("Presubmit runs not triggered for core contributor")
+	} else if !reflect.DeepEqual(calls, expected) {
+		t.Fatalf("Wrong calls for %s, got %v, expected %v", method, calls, expected)
 	}
 
-	method := "RemoveLabel"
-	expected := [][]any{{"pr1", "awaiting-approval"}}
+	method = "RemoveLabel"
+	expected = [][]any{{"pr1", "awaiting-approval"}}
 	if calls, ok := gh.calledMethods[method]; !ok {
 		t.Fatal("awaiting-approval label not removed for PR ")
 	} else if !reflect.DeepEqual(calls, expected) {
@@ -69,12 +73,16 @@ func TestExecCommunityChecker_GooglerFlow(t *testing.T) {
 
 	execCommunityChecker("pr1", "sha1", "branch1", "url1", "head1", "base1", gh, cb)
 
-	if _, ok := cb.calledMethods["TriggerMMPresubmitRuns"]; ok {
-		t.Fatal("Presubmit runs redundantly triggered for googler")
+	method := "TriggerMMPresubmitRuns"
+	expected := [][]any{{"sha1", map[string]string{"BRANCH_NAME": "branch1", "_BASE_BRANCH": "base1", "_HEAD_BRANCH": "head1", "_HEAD_REPO_URL": "url1", "_PR_NUMBER": "pr1"}}}
+	if calls, ok := cb.calledMethods[method]; !ok {
+		t.Fatal("Presubmit runs not triggered for googler")
+	} else if !reflect.DeepEqual(calls, expected) {
+		t.Fatalf("Wrong calls for %s, got %v, expected %v", method, calls, expected)
 	}
 
-	method := "RemoveLabel"
-	expected := [][]any{{"pr1", "awaiting-approval"}}
+	method = "RemoveLabel"
+	expected = [][]any{{"pr1", "awaiting-approval"}}
 	if calls, ok := gh.calledMethods[method]; !ok {
 		t.Fatal("awaiting-approval label not removed for PR ")
 	} else if !reflect.DeepEqual(calls, expected) {

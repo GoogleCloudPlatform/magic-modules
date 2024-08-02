@@ -1,19 +1,21 @@
 package rules
 
 import (
+	"sort"
 	"strings"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
+	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func TestComputeBreakingChanges(t *testing.T) {
 	cases := []struct {
-		name               string
-		oldResourceMap     map[string]*schema.Resource
-		newResourceMap     map[string]*schema.Resource
-		expectedViolations int
+		name           string
+		oldResourceMap map[string]*schema.Resource
+		newResourceMap map[string]*schema.Resource
+		wantViolations []BreakingChange
 	}{
 		{
 			name: "control",
@@ -33,7 +35,6 @@ func TestComputeBreakingChanges(t *testing.T) {
 					},
 				},
 			},
-			expectedViolations: 0,
 		},
 		{
 			name: "adding resources",
@@ -58,7 +59,6 @@ func TestComputeBreakingChanges(t *testing.T) {
 					},
 				},
 			},
-			expectedViolations: 0,
 		},
 		{
 			name: "adding fields",
@@ -79,7 +79,6 @@ func TestComputeBreakingChanges(t *testing.T) {
 					},
 				},
 			},
-			expectedViolations: 0,
 		},
 		{
 			name: "resource missing",
@@ -91,8 +90,13 @@ func TestComputeBreakingChanges(t *testing.T) {
 					},
 				},
 			},
-			newResourceMap:     map[string]*schema.Resource{},
-			expectedViolations: 1,
+			newResourceMap: map[string]*schema.Resource{},
+			wantViolations: []BreakingChange{
+				{
+					Message:                "Resource `google-x` was either removed or renamed",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#resource-map-resource-removal-or-rename",
+				},
+			},
 		},
 		{
 			name: "field missing",
@@ -111,7 +115,12 @@ func TestComputeBreakingChanges(t *testing.T) {
 					},
 				},
 			},
-			expectedViolations: 1,
+			wantViolations: []BreakingChange{
+				{
+					Message:                "Field `field-b` within resource `google-x` was either removed or renamed",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#resource-schema-field-removal-or-rename",
+				},
+			},
 		},
 		{
 			name: "optional field to required",
@@ -131,7 +140,12 @@ func TestComputeBreakingChanges(t *testing.T) {
 					},
 				},
 			},
-			expectedViolations: 1,
+			wantViolations: []BreakingChange{
+				{
+					Message:                "Field `field-a` changed from optional to required on `google-x`",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#field-optional-to-required",
+				},
+			},
 		},
 		{
 			name: "field missing and optional to required",
@@ -150,7 +164,16 @@ func TestComputeBreakingChanges(t *testing.T) {
 					},
 				},
 			},
-			expectedViolations: 2,
+			wantViolations: []BreakingChange{
+				{
+					Message:                "Field `field-a` changed from optional to required on `google-x`",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#field-optional-to-required",
+				},
+				{
+					Message:                "Field `field-b` within resource `google-x` was either removed or renamed",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#resource-schema-field-removal-or-rename",
+				},
+			},
 		},
 		{
 			name: "field missing, resource missing, and optional to required",
@@ -174,7 +197,20 @@ func TestComputeBreakingChanges(t *testing.T) {
 					},
 				},
 			},
-			expectedViolations: 3,
+			wantViolations: []BreakingChange{
+				{
+					Message:                "Field `field-a` changed from optional to required on `google-x`",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#field-optional-to-required",
+				},
+				{
+					Message:                "Field `field-b` within resource `google-x` was either removed or renamed",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#resource-schema-field-removal-or-rename",
+				},
+				{
+					Message:                "Resource `google-y` was either removed or renamed",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#resource-map-resource-removal-or-rename",
+				},
+			},
 		},
 		{
 			name: "removing a subfield",
@@ -215,7 +251,12 @@ func TestComputeBreakingChanges(t *testing.T) {
 					},
 				},
 			},
-			expectedViolations: 1,
+			wantViolations: []BreakingChange{
+				{
+					Message:                "Field `field-a.sub-field-2` within resource `google-x` was either removed or renamed",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#resource-schema-field-removal-or-rename",
+				},
+			},
 		},
 		{
 			name: "subfield max shrinking",
@@ -255,7 +296,12 @@ func TestComputeBreakingChanges(t *testing.T) {
 					},
 				},
 			},
-			expectedViolations: 1,
+			wantViolations: []BreakingChange{
+				{
+					Message:                "Field `field-a.sub-field-1` MinItems went from 100 to 25 on `google-x`",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#field-shrinking-max",
+				},
+			},
 		},
 		{
 			name: "subfield max shrinking",
@@ -295,7 +341,12 @@ func TestComputeBreakingChanges(t *testing.T) {
 					},
 				},
 			},
-			expectedViolations: 1,
+			wantViolations: []BreakingChange{
+				{
+					Message:                "Field `field-a.sub-field-1` MinItems went from 100 to 25 on `google-x`",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#field-shrinking-max",
+				},
+			},
 		},
 		{
 			name: "min growing",
@@ -321,7 +372,12 @@ func TestComputeBreakingChanges(t *testing.T) {
 					},
 				},
 			},
-			expectedViolations: 1,
+			wantViolations: []BreakingChange{
+				{
+					Message:                "Field `field-a` MinItems went from 1 to 4 on `google-x`",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#field-growing-min",
+				},
+			},
 		},
 	}
 
@@ -332,12 +388,15 @@ func TestComputeBreakingChanges(t *testing.T) {
 			schemaDiff := diff.ComputeSchemaDiff(tc.oldResourceMap, tc.newResourceMap)
 			violations := ComputeBreakingChanges(schemaDiff)
 			for _, v := range violations {
-				if strings.Contains(v, "{{") || strings.Contains(v, "}}") {
+				if strings.Contains(v.Message, "{{") || strings.Contains(v.Message, "}}") {
 					t.Errorf("Test `%s` failed: found unreplaced characters in string - %s", tc.name, v)
 				}
 			}
-			if tc.expectedViolations != len(violations) {
-				t.Errorf("Test `%s` failed: expected %d violations, got %d", tc.name, tc.expectedViolations, len(violations))
+			sort.Slice(violations, func(i, j int) bool {
+				return violations[i].Message < violations[j].Message
+			})
+			if diff := cmp.Diff(tc.wantViolations, violations); diff != "" {
+				t.Errorf("Test `%s` failed: violation diff(-want, +got) = %s", tc.name, diff)
 			}
 		})
 	}

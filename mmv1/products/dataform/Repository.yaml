@@ -34,7 +34,26 @@ import_format:
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataform_repository'
-    primary_resource_id: dataform_respository
+    # This example is used in the docs to address this issue
+    # See : https://github.com/hashicorp/terraform-provider-google/issues/17335
+    skip_test: true
+    primary_resource_id: dataform_repository
+    primary_resource_name:
+      'fmt.Sprintf("tf_test_dataform_repository%s", context["random_suffix"])'
+    min_version: beta
+    vars:
+      dataform_repository_name: 'dataform_repository'
+      data: secret-data
+      secret_name: my-secret
+      key_ring_name: example-key-ring
+      crypto_key_name: example-crypto-key-name
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dataform_repository_with_cloudsource_repo'
+    # Although the Terraform config can be applied without error, the connection between Dataform and the SourceRepo aren't yet functional
+    # See : https://github.com/hashicorp/terraform-provider-google/issues/17335
+    # See : https://issuetracker.google.com/issues/287850319
+    skip_docs: true
+    primary_resource_id: dataform_repository
     primary_resource_name:
       'fmt.Sprintf("tf_test_dataform_repository%s", context["random_suffix"])'
     min_version: beta
@@ -43,9 +62,15 @@ examples:
       dataform_repository_name: 'dataform_repository'
       data: secret-data
       secret_name: my-secret
+      key_ring_name: example-key-ring
+      crypto_key_name: example-crypto-key-name
   - !ruby/object:Provider::Terraform::Examples
-    name: 'dataform_repository_ssh'
-    primary_resource_id: dataform_respository
+    name: 'dataform_repository_with_cloudsource_repo_and_ssh'
+    # Although the Terraform config can be applied without error, the connection between Dataform and the SourceRepo aren't yet functional
+    # See : https://github.com/hashicorp/terraform-provider-google/issues/17335
+    # See : https://issuetracker.google.com/issues/287850319
+    skip_docs: true
+    primary_resource_id: dataform_repository
     min_version: beta
     vars:
       git_repository_name: 'my/repository'
@@ -129,6 +154,11 @@ properties:
   - !ruby/object:Api::Type::String
     name: displayName
     description: Optional. The repository's user-friendly name.
+  - !ruby/object:Api::Type::String
+    name: kmsKeyName
+    description: |
+      Optional. The reference to a KMS encryption key. If provided, it will be used to encrypt user data in the repository and all child resources.
+      It is not possible to add or update the encryption key after the repository is created. Example projects/[kms_project_id]/locations/[region]/keyRings/[key_region]/cryptoKeys/[key]
   - !ruby/object:Api::Type::KeyValueLabels
     name: labels
     description: |

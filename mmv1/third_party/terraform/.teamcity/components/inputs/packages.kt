@@ -3,7 +3,15 @@
  * SPDX-License-Identifier: MPL-2.0
  */
 
-// This file is controlled by MMv1, any changes made here will be overwritten
+// This file is maintained in the GoogleCloudPlatform/magic-modules repository and copied into the downstream provider repositories. Any changes to this file in the downstream will be overwritten.
+
+/*
+  NOTE: This file is manually curated - any new packages added to the provider codebase will need to be accompanied with a change in this file.
+        When adding new entires make sure to ensure the path value is correct for TPG or TPGB
+        e.g. "path" to "./google/envvar"
+             versus
+             "path" to "./google-beta/envvar"
+*/
 
 package generated
 
@@ -12,6 +20,11 @@ var PackagesListGa = mapOf(
         "name" to "envvar",
         "displayName" to "Environment Variables",
         "path" to "./google/envvar"
+    ),
+    "functions" to mapOf(
+        "name" to "functions",
+        "displayName" to "Provider-Defined Functions",
+        "path" to "./google/functions"
     ),
     "fwmodels" to mapOf(
         "name" to "fwmodels",
@@ -63,6 +76,11 @@ var PackagesListBeta = mapOf(
         "name" to "envvar",
         "displayName" to "Environment Variables",
         "path" to "./google-beta/envvar"
+    ),
+    "functions" to mapOf(
+        "name" to "functions",
+        "displayName" to "Provider-Defined Functions",
+        "path" to "./google-beta/functions"
     ),
     "fwmodels" to mapOf(
         "name" to "fwmodels",

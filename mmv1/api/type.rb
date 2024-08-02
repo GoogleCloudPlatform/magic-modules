@@ -545,6 +545,7 @@ module Api
     # Represents an array, and stores its items' type
     class Array < Composite
       attr_reader :item_type
+      attr_reader :item_validation # Adds a ValidateFunc to the item schema
       attr_reader :min_size
       attr_reader :max_size
 
@@ -564,20 +565,7 @@ module Api
 
         check :min_size, type: ::Integer
         check :max_size, type: ::Integer
-      end
-
-      def property_class
-        case @item_type
-        when NestedObject, ResourceRef
-          type = @item_type.property_class
-        when Enum
-          raise 'aaaa'
-        else
-          type = property_ns_prefix
-          type << get_type(@item_type).new(@name).type
-        end
-        type[-1] = "#{type[-1].camelize(:upper)}Array"
-        type
+        check :item_validation, type: Provider::Terraform::Validation
       end
 
       def exclude_if_not_in_version!(version)
@@ -595,7 +583,9 @@ module Api
 
       def item_type_class
         return @item_type \
-          if @item_type.instance_of?(Class)
+          if @item_type.instance_of?(Class) \
+            || @item_type.is_a?(Api::Type::ResourceRef) \
+            || @item_type.is_a?(Api::Type::Enum)
 
         Object.const_get(@item_type)
       end
@@ -657,24 +647,11 @@ module Api
         check_resource_ref_property_exists
       end
 
-      def property
-        props = resource_ref.all_user_properties
-                            .select { |prop| prop.name == @imports }
-        return props.first unless props.empty?
-      end
-
       def resource_ref
         product = @__resource.__product
         resources = product.objects.select { |obj| obj.name == @resource }
 
         resources[0]
-      end
-
-      def property_class
-        type = property_ns_prefix
-        type << [@resource, @imports, 'Ref']
-        type[-1] = type[-1].join('_').camelize(:upper)
-        type
       end
 
       private
@@ -706,13 +683,6 @@ module Api
           p.set_variable(self, :__parent)
         end
         check :properties, type: ::Array, item_type: Api::Type, required: true
-      end
-
-      def property_class
-        type = property_ns_prefix
-        type << [@__resource.name, @name]
-        type[-1] = type[-1].join('_').camelize(:upper)
-        type
       end
 
       # Returns all properties including the ones that are excluded
@@ -895,20 +865,6 @@ module Api
 
       def nested_properties
         @value_type.nested_properties.reject(&:exclude)
-      end
-    end
-
-    # Support for schema ValidateFunc functionality.
-    class Validation < Object
-      # Ensures the value matches this regex
-      attr_reader :regex
-      attr_reader :function
-
-      def validate
-        super
-
-        check :regex, type: String
-        check :function, type: String
       end
     end
 

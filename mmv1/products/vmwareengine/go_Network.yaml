@@ -1,0 +1,130 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Network'
+description: |
+  Provides connectivity for VMware Engine private clouds.
+references:
+  guides:
+  api: 'https://cloud.google.com/vmware-engine/docs/reference/rest/v1/projects.locations.vmwareEngineNetworks'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/vmwareEngineNetworks'
+self_link: 'projects/{{project}}/locations/{{location}}/vmwareEngineNetworks/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/vmwareEngineNetworks?vmwareEngineNetworkId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/vmwareEngineNetworks/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+skip_sweeper: true
+examples:
+  - name: 'vmware_engine_network_standard'
+    primary_resource_id: 'vmw-engine-network'
+  - name: 'vmware_engine_network_legacy'
+    primary_resource_id: 'vmw-engine-network'
+    vars:
+      proj_id: 'vmw-proj'
+    test_env_vars:
+      location: 'REGION'
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    external_providers: ["random", "time"]
+    skip_test: true
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The location where the VMwareEngineNetwork should reside.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'name'
+    type: String
+    description: |
+      The ID of the VMwareEngineNetwork.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'description'
+    type: String
+    description: |
+      User-provided description for this VMware Engine network.
+  - name: 'vpcNetworks'
+    type: Array
+    description: |
+      VMware Engine service VPC networks that provide connectivity from a private cloud to customer projects,
+      the internet, and other Google Cloud services.
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'type'
+          type: Enum
+          description: |
+            Type of VPC network (INTRANET, INTERNET, or GOOGLE_CLOUD)
+          output: true
+          enum_values:
+            - 'INTRANET'
+            - 'INTERNET'
+            - 'GOOGLE_CLOUD'
+        - name: 'network'
+          type: String
+          description: |
+            The relative resource name of the service VPC network this VMware Engine network is attached to.
+            For example: projects/123123/global/networks/my-network
+          output: true
+  - name: 'state'
+    type: Enum
+    description: |
+      State of the VMware Engine network.
+    output: true
+    enum_values:
+      - 'CREATING'
+      - 'ACTIVE'
+      - 'UPDATING'
+      - 'DELETING'
+  - name: 'type'
+    type: Enum
+    description: |
+      VMware Engine network type.
+    required: true
+    immutable: true
+    enum_values:
+      - 'LEGACY'
+      - 'STANDARD'
+  - name: 'uid'
+    type: String
+    description: |
+      System-generated unique identifier for the resource.
+    output: true

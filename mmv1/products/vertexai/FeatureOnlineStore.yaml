@@ -50,13 +50,12 @@ examples:
     ignore_read_extra:
       - force_destroy
   - !ruby/object:Provider::Terraform::Examples
-    name: vertex_ai_featureonlinestore_with_beta_fields_optimized
+    name: vertex_ai_featureonlinestore_with_optimized
     primary_resource_id: featureonlinestore
     vars:
       name: example_feature_online_store_optimized
     ignore_read_extra:
       - force_destroy
-    min_version: beta
   - !ruby/object:Provider::Terraform::Examples
     name: vertex_ai_featureonlinestore_with_beta_fields_bigtable
     primary_resource_id: featureonlinestore
@@ -88,7 +87,6 @@ properties:
     immutable: true
     required: true
     url_param_only: true
-    pattern: projects/{{project}}/locations/{{region}}/featureOnlineStores/{{name}}
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String
     name: createTime
@@ -146,7 +144,6 @@ properties:
     exactly_one_of:
       - bigtable
       - optimized
-    min_version: beta
     properties:
       []  # Meant to be an empty object with no properties - see here : https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.featureOnlineStores#Optimized
       # The fields below are necessary to include the "Optimized" transformation in the payload
@@ -156,9 +153,8 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: dedicatedServingEndpoint
     description: |
-       The dedicated serving endpoint for this FeatureOnlineStore, which is different from common vertex service endpoint. Only need to set when you choose Optimized storage type or enable EmbeddingManagement. Will use public endpoint by default.
+       The dedicated serving endpoint for this FeatureOnlineStore, which is different from common vertex service endpoint. Only need to be set when you choose Optimized storage type or enable EmbeddingManagement. Will use public endpoint by default.
     default_from_api: true
-    min_version: beta
     properties:
       - !ruby/object:Api::Type::String
         name: publicEndpointDomainName
@@ -188,10 +184,13 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: embeddingManagement
     description: |
-      The settings for embedding management in FeatureOnlineStore. Embedding management can only be used with BigTable.
+      The settings for embedding management in FeatureOnlineStore. Embedding management can only be set for BigTable. It is enabled by default for optimized storagetype.
     conflicts:
       - optimized
     min_version: beta
+    default_from_api: true
+    deprecation_message: >-
+              `embedding_management` is deprecated. This field is no longer needed anymore and embedding management is automatically enabled when specifying Optimized storage type
     properties:
       - !ruby/object:Api::Type::Boolean
         name: enabled

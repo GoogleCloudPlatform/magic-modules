@@ -32,7 +32,7 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'iap_project'
-    pull_external: true
+    external_providers: ["random", "time"]
     primary_resource_id: 'project_service'
     primary_resource_name: 'fmt.Sprintf("tf-test%s", context["random_suffix"])'
     test_env_vars:

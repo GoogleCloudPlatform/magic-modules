@@ -50,7 +50,7 @@ type logKey struct {
 
 type Tester struct {
 	env           map[string]string           // shared environment variables for running tests
-	rnr           *exec.Runner                // for running commands and manipulating files
+	rnr           exec.ExecRunner             // for running commands and manipulating files
 	baseDir       string                      // the directory in which this tester was created
 	saKeyPath     string                      // where sa_key.json is relative to baseDir
 	cassettePaths map[provider.Version]string // where cassettes are relative to baseDir by version
@@ -68,7 +68,7 @@ var testResultsExpression = regexp.MustCompile(`(?m:^--- (PASS|FAIL|SKIP): (Test
 var testPanicExpression = regexp.MustCompile(`^panic: .*`)
 
 // Create a new tester in the current working directory and write the service account key file.
-func NewTester(env map[string]string, rnr *exec.Runner) (*Tester, error) {
+func NewTester(env map[string]string, rnr exec.ExecRunner) (*Tester, error) {
 	saKeyPath := "sa_key.json"
 	if err := rnr.WriteFile(saKeyPath, env["SA_KEY"]); err != nil {
 		return nil, err
@@ -91,13 +91,14 @@ func (vt *Tester) SetRepoPath(version provider.Version, repoPath string) {
 // Fetch the cassettes for the current version if not already fetched.
 // Should be run from the base dir.
 func (vt *Tester) FetchCassettes(version provider.Version, baseBranch, prNumber string) error {
-	cassettePath, ok := vt.cassettePaths[version]
+	_, ok := vt.cassettePaths[version]
 	if ok {
 		return nil
 	}
-	cassettePath = filepath.Join(vt.baseDir, "cassettes", version.String())
+	cassettePath := filepath.Join(vt.baseDir, "cassettes", version.String())
 	vt.rnr.Mkdir(cassettePath)
-	if baseBranch != "FEATURE-BRANCH-major-release-5.0.0" {
+	if baseBranch != "FEATURE-BRANCH-major-release-6.0.0" {
+		// pull main cassettes (major release uses branch specific casssettes as primary ones)
 		bucketPath := fmt.Sprintf("gs://ci-vcr-cassettes/%sfixtures/*", version.BucketPath())
 		if err := vt.fetchBucketPath(bucketPath, cassettePath); err != nil {
 			fmt.Println("Error fetching cassettes: ", err)
@@ -199,7 +200,7 @@ func (vt *Tester) Run(mode Mode, version provider.Version, testDirs []string) (*
 	}
 	var printedEnv string
 	for ev, val := range env {
-		if ev == "SA_KEY" || ev == "GITHUB_TOKEN" {
+		if ev == "SA_KEY" || strings.HasPrefix(ev, "GITHUB_TOKEN") {
 			val = "{hidden}"
 		}
 		printedEnv += fmt.Sprintf("%s=%s\n", ev, val)
@@ -223,12 +224,13 @@ func (vt *Tester) Run(mode Mode, version provider.Version, testDirs []string) (*
 	logFileName := filepath.Join(vt.baseDir, "testlogs", fmt.Sprintf("%s_test.log", mode.Lower()))
 	// Write output (or error) to test log.
 	// Append to existing log file.
-	previousLog, _ := vt.rnr.ReadFile(logFileName)
-	if previousLog != "" {
-		output = previousLog + "\n" + output
+	allOutput, _ := vt.rnr.ReadFile(logFileName)
+	if allOutput != "" {
+		allOutput += "\n"
 	}
-	if err := vt.rnr.WriteFile(logFileName, output); err != nil {
-		return nil, fmt.Errorf("error writing log: %v, test output: %v", err, output)
+	allOutput += output
+	if err := vt.rnr.WriteFile(logFileName, allOutput); err != nil {
+		return nil, fmt.Errorf("error writing log: %v, test output: %v", err, allOutput)
 	}
 	return collectResult(output), testErr
 }
@@ -238,7 +240,7 @@ func (vt *Tester) RunParallel(mode Mode, version provider.Version, testDirs, tes
 	if err != nil {
 		return nil, err
 	}
-	if vt.rnr.Mkdir(filepath.Join(vt.baseDir, "testlogs", mode.Lower()+"_build")); err != nil {
+	if err := vt.rnr.Mkdir(filepath.Join(vt.baseDir, "testlogs", mode.Lower()+"_build")); err != nil {
 		return nil, err
 	}
 	repoPath, ok := vt.repoPaths[version]
@@ -319,7 +321,7 @@ func (vt *Tester) runInParallel(mode Mode, version provider.Version, testDir, te
 		"-parallel",
 		"1",
 		"-v",
-		"-run=" + test,
+		"-run=" + test + "$",
 		"-timeout",
 		replayingTimeout,
 		"-ldflags=-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc",
@@ -473,19 +475,26 @@ func (vt *Tester) printLogs(logPath string) {
 
 func collectResult(output string) *Result {
 	matches := testResultsExpression.FindAllStringSubmatch(output, -1)
-	results := make(map[string][]string, 4)
+	resultSets := make(map[string]map[string]struct{}, 4)
 	for _, submatches := range matches {
 		if len(submatches) != 3 {
 			fmt.Printf("Warning: unexpected regex match found in test output: %v", submatches)
 			continue
 		}
-		results[submatches[1]] = append(results[submatches[1]], submatches[2])
+		if _, ok := resultSets[submatches[1]]; !ok {
+			resultSets[submatches[1]] = make(map[string]struct{})
+		}
+		resultSets[submatches[1]][submatches[2]] = struct{}{}
 	}
+	results := make(map[string][]string, 4)
 	results["PANIC"] = testPanicExpression.FindAllString(output, -1)
-	sort.Strings(results["FAIL"])
-	sort.Strings(results["PASS"])
-	sort.Strings(results["SKIP"])
 	sort.Strings(results["PANIC"])
+	for _, kind := range []string{"FAIL", "PASS", "SKIP"} {
+		for test := range resultSets[kind] {
+			results[kind] = append(results[kind], test)
+		}
+		sort.Strings(results[kind])
+	}
 	return &Result{
 		FailedTests:  results["FAIL"],
 		PassedTests:  results["PASS"],

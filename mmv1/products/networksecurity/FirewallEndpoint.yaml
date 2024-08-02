@@ -16,16 +16,22 @@ name: 'FirewallEndpoint'
 base_url: '{{parent}}/locations/{{location}}/firewallEndpoints'
 create_url: '{{parent}}/locations/{{location}}/firewallEndpoints?firewallEndpointId={{name}}'
 self_link: '{{parent}}/locations/{{location}}/firewallEndpoints/{{name}}'
-min_version: beta
 update_verb: :PATCH
 update_mask: true
 description: |
   A Firewall endpoint is a Cloud Firewall resource that enables
   layer 7 advanced protection capabilities, such as intrusion prevention,
   in your network.
+docs: !ruby/object:Provider::Terraform::Docs
+  warning: |
+    If you are using User ADCs (Application Default Credentials) with this resource,
+    you must specify a `billing_project_id` and set `user_project_override` to true
+    in the provider configuration. Otherwise the ACM API will return a 403 error.
+    Your account must have the `serviceusage.services.use` permission on the
+    `billing_project_id` you defined.
 references:
   !ruby/object:Api::Resource::ReferenceLinks
-  api: 'https://cloud.google.com/firewall/docs/reference/network-security/rest/v1beta1/organizations.locations.firewallEndpoints'
+  api: 'https://cloud.google.com/firewall/docs/reference/network-security/rest/v1/organizations.locations.firewallEndpoints'
   guides:
     'Firewall endpoint overview': 'https://cloud.google.com/firewall/docs/about-firewall-endpoints'
     'Create and associate firewall endpoints': 'https://cloud.google.com/firewall/docs/configure-firewall-endpoints'
@@ -46,11 +52,11 @@ examples:
     name: 'network_security_firewall_endpoint_basic'
     primary_resource_id: 'default'
     skip_test: true   # update tests will take care of create and update. Firewall endpoint creation is too long.
-    min_version: beta
     vars:
       resource_name: 'my-firewall-endpoint'
     test_env_vars:
       org_id: :ORG_ID
+      project: :PROJECT_NAME
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -110,3 +116,8 @@ properties:
     name: 'state'
     description: The current state of the endpoint.
     output: true
+  - !ruby/object:Api::Type::String
+    name: 'billingProjectId'
+    description: |
+      Project to bill on endpoint uptime usage.
+    required: true

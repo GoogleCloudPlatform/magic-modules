@@ -1,0 +1,168 @@
+{{/* The license inside this block applies to this file
+  Copyright 2024 Google LLC. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License. */ -}}
+{{- define "expandPropertyMethod" }}
+  {{- if $.CustomExpand }}
+    {{ $.CustomTemplate $.CustomExpand true -}}
+  {{- else }}{{/* if $.CustomExpand */}}
+    {{- if $.IsA "Map" }}
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
+  if v == nil {
+    return map[string]interface{}{}, nil
+  }
+  m := make(map[string]interface{})
+  for _, raw := range v.(*schema.Set).List() {
+    original := raw.(map[string]interface{})
+    transformed := make(map[string]interface{})
+      {{- range $prop := $.NestedProperties }}
+        {{- if not (eq $prop.Name $prop.KeyName) }}
+
+    transformed{{$prop.TitlelizeProperty}}, err := expand{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ underscore $prop.Name }}"], d, config)
+    if err != nil {
+      return nil, err
+          {{- if $prop.SendEmptyValue }}
+    } else {
+      transformed["{{$prop.ApiName}}"] = transformed{{$prop.TitlelizeProperty}}
+          {{- else }}
+    } else if val := reflect.ValueOf(transformed{{$prop.TitlelizeProperty}}); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+      transformed["{{$prop.ApiName}}"] = transformed{{$prop.TitlelizeProperty}}
+          {{- end }}
+    }
+        {{- end }}
+      {{ end }}
+
+    transformed{{ camelize $.KeyName "upper" }}, err := {{ $.KeyExpander }}(original["{{ underscore $.KeyName }}"], d, config)
+    if err != nil {
+      return nil, err
+    }
+    m[transformed{{ camelize $.KeyName "upper" }}] = transformed
+  }
+  return m, nil
+}
+    {{ else if hasPrefix $.Type "KeyValue" }}{{/* KeyValueLabels, KeyValueTerraformLabels, KeyValueEffectiveLabels, KeyValueAnnotations are types similar to KeyValuePairs*/}}
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]string, error) {
+  if v == nil {
+    return map[string]string{}, nil
+  }
+  m := make(map[string]string)
+  for k, val := range v.(map[string]interface{}) {
+    m[k] = val.(string)
+  }
+  return m, nil
+}
+    {{ else if $.FlattenObject }}{{/* if $.IsA "Map" */}}
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+  transformed := make(map[string]interface{})
+      {{- range $prop := $.NestedProperties }}
+        {{- if not (and (hasPrefix $prop.Type "KeyValue") $prop.IgnoreWrite) }}
+  transformed{{$prop.TitlelizeProperty}}, err := expand{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}({{ if $prop.FlattenObject }}nil{{ else }}d.Get("{{ underscore $prop.Name }}"), d, config)
+  if err != nil {
+    return nil, err
+          {{- if $prop.SendEmptyValue }}
+  } else {
+    transformed["{{$prop.ApiName}}"] = transformed{{$prop.TitlelizeProperty}}
+          {{- else }}
+  } else if val := reflect.ValueOf(transformed{{$prop.TitlelizeProperty}}); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+    transformed["{{$prop.ApiName}}"] = transformed{{$prop.TitlelizeProperty}}
+          {{- end }}
+  }
+        {{- end }}
+        {{- end }}
+      {{ end }}
+  return transformed, nil
+}
+    {{ else }}{{/* if $.IsA "Map" */}}
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+      {{- if $.IsSet }}
+  v = v.(*schema.Set).List()
+      {{- end }}
+      {{- if or $.NestedProperties $.AllowEmptyObject }}
+  l := v.([]interface{})
+        {{- if $.IsA "Array" }}
+  req := make([]interface{}, 0, len(l))
+  for _, raw := range l {
+    if raw == nil {
+      continue
+    }
+    original := raw.(map[string]interface{})
+        {{- else }}{{/* if $.IsA "Array */}}
+          {{- if $.AllowEmptyObject }}
+  if len(l) == 0 {
+    return nil, nil
+  }
+
+  if l[0] == nil {
+    transformed := make(map[string]interface{})
+    return transformed, nil
+  }
+          {{- else }}
+  if len(l) == 0 || l[0] == nil {
+    return nil, nil
+  }
+          {{- end }}
+          {{- if $.NestedProperties }}
+  raw := l[0]
+  original := raw.(map[string]interface{})
+          {{- end }}
+        {{- end }}{{/* if $.IsA "Array */}}
+    transformed := make(map[string]interface{})
+        {{ range $prop := $.NestedProperties }}
+          {{- if not (and (hasPrefix $prop.Type "KeyValue") $prop.IgnoreWrite) }}
+      transformed{{$prop.TitlelizeProperty}}, err := expand{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ underscore $prop.Name }}"], d, config)
+      if err != nil {
+        return nil, err
+            {{- if $prop.SendEmptyValue }}
+      } else {
+        transformed["{{$prop.ApiName}}"] = transformed{{$prop.TitlelizeProperty}}
+            {{- else }}
+      } else if val := reflect.ValueOf(transformed{{$prop.TitlelizeProperty}}); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+        transformed["{{$prop.ApiName}}"] = transformed{{$prop.TitlelizeProperty}}
+            {{- end }}
+      }
+          {{ end }}
+        {{- end }}
+        {{- if $.IsA "Array" }}
+    req = append(req, transformed)
+  }
+  return req, nil
+        {{- else }}
+  return transformed, nil
+        {{- end }}
+}
+
+      {{ else if and ($.IsA "Array") ($.ItemType.IsA "ResourceRef")}}{{/* if $.NestedProperties */}}
+  l := v.([]interface{})
+  req := make([]interface{}, 0, len(l))
+  for _, raw := range l {
+    if raw == nil {
+      return nil, fmt.Errorf("Invalid value for {{ underscore $.Name }}: nil")
+    }
+    req = append(req, raw.(string))
+  }
+  return req, nil
+}
+      {{- else }}
+  return v, nil
+}
+      {{- end }}{{/* if $.NestedProperties */}}
+    {{- end }}{{/* if $.IsA "Map" */}}
+    {{ if $.NestedProperties }}
+      {{- range $prop := $.NestedProperties }}
+        {{- if not (and (hasPrefix $prop.Type "KeyValue") $prop.IgnoreWrite) }}
+          {{- template "expandPropertyMethod" $prop -}}
+        {{- end }}
+      {{- end }}
+    {{- end }}{{/* if $.NestedProperties */}}
+  {{- end }}{{/* if $.CustomExpand */}}
+{{- end }}{{/* define */}}

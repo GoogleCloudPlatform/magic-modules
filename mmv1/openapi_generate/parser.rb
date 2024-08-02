@@ -33,7 +33,9 @@ module OpenAPIGenerate
     def write_object(name, obj, type, url_param)
       field = nil
       case name
-      when 'projectsId'
+      when 'projectsId', 'project'
+        # projectsId and project are omitted in MMv1 as they are inferred from
+        # the presence of {{project}} in the URL
         return field
       when 'locationsId'
         name = 'location'
@@ -126,6 +128,12 @@ module OpenAPIGenerate
         field.instance_variable_set(:@output, obj.read_only)
       end
 
+      # x-google-identifier fields are described by AIP 203 and are represented
+      # as output only in Terraform.
+      if obj.instance_variable_get(:@raw_schema)['x-google-identifier']
+        field.instance_variable_set(:@output, true)
+      end
+
       if (obj.respond_to?(:write_only) && obj.write_only) \
         || obj.instance_variable_get(:@raw_schema)['x-google-immutable']
         field.instance_variable_set(:@immutable, true)
@@ -155,8 +163,8 @@ module OpenAPIGenerate
       parameters = []
       path.post.parameters.each do |param|
         parameter_object = write_object(param.name, param, param.schema.type, true)
-        # Ignore standard requestId field
-        next if param.name == 'requestId'
+        # Ignore standard requestId and validateOnly params
+        next if param.name == 'requestId' || param.name == 'validateOnly'
         next if parameter_object.nil?
 
         # All parameters are immutable

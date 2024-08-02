@@ -92,7 +92,7 @@ examples:
     name: 'artifact_registry_repository_remote_yum'
     primary_resource_id: 'my-repo'
     vars:
-      repository_id: 'centos-8'
+      repository_id: 'rocky-9'
       description: 'example remote yum repository'
   - !ruby/object:Provider::Terraform::Examples
     name: 'artifact_registry_repository_cleanup'
@@ -101,18 +101,79 @@ examples:
       repository_id: 'my-repository'
       description: 'example docker repository with cleanup policies'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'artifact_registry_repository_remote_custom'
+    name: 'artifact_registry_repository_remote_dockerhub_auth'
     primary_resource_id: 'my-repo'
+    # Ignore this field as it is INPUT_ONLY. AR will not return this in the
+    # response.
+    ignore_read_extra:
+      - 'remote_repository_config.0.disable_upstream_validation'
     vars:
-      repository_id: 'example-custom-remote'
-      description: 'example remote docker repository with credentials'
+      repository_id: 'example-dockerhub-remote'
+      description: 'example remote dockerhub repository with credentials'
       secret_id: 'example-secret'
-      secret_resource_id: 'example-custom-remote-secret'
+      secret_resource_id: 'example-remote-secret'
+      username: 'remote-username'
+      secret_data: 'remote-password'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'artifact_registry_repository_remote_docker_custom_with_auth'
+    primary_resource_id: 'my-repo'
+    ignore_read_extra:
+      # Ignore this field as it is INPUT_ONLY. AR will not return this in the
+      # response.
+      - 'remote_repository_config.0.disable_upstream_validation'
+    vars:
+      repository_id: 'example-docker-custom-remote'
+      description: 'example remote custom docker repository with credentials'
+      secret_id: 'example-secret'
+      secret_resource_id: 'example-remote-secret'
+      username: 'remote-username'
+      secret_data: 'remote-password'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'artifact_registry_repository_remote_maven_custom_with_auth'
+    primary_resource_id: 'my-repo'
+    ignore_read_extra:
+      # Ignore this field as it is INPUT_ONLY. AR will not return this in the
+      # response.
+      - 'remote_repository_config.0.disable_upstream_validation'
+    vars:
+      repository_id: 'example-maven-custom-remote'
+      description: 'example remote custom maven repository with credentials'
+      secret_id: 'example-secret'
+      secret_resource_id: 'example-remote-secret'
+      username: 'remote-username'
+      secret_data: 'remote-password'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'artifact_registry_repository_remote_npm_custom_with_auth'
+    primary_resource_id: 'my-repo'
+    ignore_read_extra:
+      # Ignore this field as it is INPUT_ONLY. AR will not return this in the
+      # response.
+      - 'remote_repository_config.0.disable_upstream_validation'
+    vars:
+      repository_id: 'example-npm-custom-remote'
+      description: 'example remote custom npm repository with credentials'
+      secret_id: 'example-secret'
+      secret_resource_id: 'example-remote-secret'
+      username: 'remote-username'
+      secret_data: 'remote-password'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'artifact_registry_repository_remote_python_custom_with_auth'
+    primary_resource_id: 'my-repo'
+    ignore_read_extra:
+      # Ignore this field as it is INPUT_ONLY. AR will not return this in the
+      # response.
+      - 'remote_repository_config.0.disable_upstream_validation'
+    vars:
+      repository_id: 'example-python-custom-remote'
+      description: 'example remote custom python repository with credentials'
+      secret_id: 'example-secret'
+      secret_resource_id: 'example-remote-secret'
       username: 'remote-username'
       secret_data: 'remote-password'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/artifact_registry_repository.go.erb
   encoder: templates/terraform/encoders/location_from_region.go.erb
+  pre_create: templates/terraform/pre_create/artifact_registry_remote_repository.go.erb
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -181,6 +242,7 @@ properties:
     name: 'dockerConfig'
     description: |-
       Docker repository config contains repository level configuration for the repositories of docker type.
+    allow_empty_object: true
     properties:
       - !ruby/object:Api::Type::Boolean
         name: 'immutableTags'
@@ -387,14 +449,29 @@ properties:
         properties:
           - !ruby/object:Api::Type::Enum
             name: 'publicRepository'
-            exactly_one_of:
-              - remoteRepositoryConfig.0.docker_repository.0.public_repository
             description: |-
               Address of the remote repository.
             immutable: true
+            conflicts:
+              - remoteRepositoryConfig.0.docker_repository.0.custom_repository
             values:
               - :DOCKER_HUB
+            # Eventually lets delete default_value and custom_flatten in a major release
             default_value: :DOCKER_HUB
+            custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
+          - !ruby/object:Api::Type::NestedObject
+            name: 'customRepository'
+            description: |-
+              Settings for a remote repository with a custom uri.
+            immutable: true
+            conflicts:
+              - remoteRepositoryConfig.0.docker_repository.0.public_repository
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'uri'
+                description: |-
+                  Specific uri to the registry, e.g. `"https://registry-1.docker.io"`
+                immutable: true
       - !ruby/object:Api::Type::NestedObject
         name: 'mavenRepository'
         exactly_one_of:
@@ -410,14 +487,29 @@ properties:
         properties:
           - !ruby/object:Api::Type::Enum
             name: 'publicRepository'
-            exactly_one_of:
-              - remoteRepositoryConfig.0.maven_repository.0.public_repository
             description: |-
               Address of the remote repository.
             immutable: true
+            conflicts:
+              - remoteRepositoryConfig.0.maven_repository.0.custom_repository
             values:
               - :MAVEN_CENTRAL
+            # Eventually lets delete default_value and custom_flatten in a major release
             default_value: :MAVEN_CENTRAL
+            custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
+          - !ruby/object:Api::Type::NestedObject
+            name: 'customRepository'
+            description: |-
+              Settings for a remote repository with a custom uri.
+            immutable: true
+            conflicts:
+              - remoteRepositoryConfig.0.maven_repository.0.public_repository
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'uri'
+                description: |-
+                  Specific uri to the registry, e.g. `"https://repo.maven.apache.org/maven2"`
+                immutable: true
       - !ruby/object:Api::Type::NestedObject
         name: 'npmRepository'
         exactly_one_of:
@@ -433,14 +525,29 @@ properties:
         properties:
           - !ruby/object:Api::Type::Enum
             name: 'publicRepository'
-            exactly_one_of:
-              - remoteRepositoryConfig.0.npm_repository.0.public_repository
             description: |-
               Address of the remote repository.
             immutable: true
+            conflicts:
+              - remoteRepositoryConfig.0.npm_repository.0.custom_repository
             values:
               - :NPMJS
+            # Eventually lets delete default_value and custom_flatten in a major release
             default_value: :NPMJS
+            custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
+          - !ruby/object:Api::Type::NestedObject
+            name: 'customRepository'
+            description: |-
+              Settings for a remote repository with a custom uri.
+            immutable: true
+            conflicts:
+              - remoteRepositoryConfig.0.npm_repository.0.public_repository
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'uri'
+                description: |-
+                  Specific uri to the registry, e.g. `"https://registry.npmjs.org"`
+                immutable: true
       - !ruby/object:Api::Type::NestedObject
         name: 'pythonRepository'
         exactly_one_of:
@@ -456,14 +563,29 @@ properties:
         properties:
           - !ruby/object:Api::Type::Enum
             name: 'publicRepository'
-            exactly_one_of:
-              - remoteRepositoryConfig.0.python_repository.0.public_repository
             description: |-
               Address of the remote repository.
             immutable: true
+            conflicts:
+              - remoteRepositoryConfig.0.python_repository.0.custom_repository
             values:
               - :PYPI
+            # Eventually lets delete default_value and custom_flatten in a major release
             default_value: :PYPI
+            custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
+          - !ruby/object:Api::Type::NestedObject
+            name: 'customRepository'
+            description: |-
+              Settings for a remote repository with a custom uri.
+            immutable: true
+            conflicts:
+              - remoteRepositoryConfig.0.python_repository.0.public_repository
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'uri'
+                description: |-
+                  Specific uri to the registry, e.g. `"https://pypi.io"`
+                immutable: true
       - !ruby/object:Api::Type::NestedObject
         name: 'yumRepository'
         exactly_one_of:
@@ -500,7 +622,7 @@ properties:
                 name: 'repositoryPath'
                 required: true
                 description: |-
-                  Specific repository from the base, e.g. `"centos/8-stream/BaseOS/x86_64/os"`
+                  Specific repository from the base, e.g. `"pub/rocky/9/BaseOS/x86_64/os"`
                 immutable: true
       - !ruby/object:Api::Type::NestedObject
         name: 'upstreamCredentials'
@@ -526,6 +648,14 @@ properties:
                   remote repository. Must be in the format of
                   `projects/{project}/secrets/{secret}/versions/{version}`.
                 immutable: true
+      - !ruby/object:Api::Type::Boolean
+        name: 'disableUpstreamValidation'
+        # Ignore read on this field because it is INPUT_ONLY.
+        # Need to use custom flatten because ignore_read doesn't work with nested fields.
+        custom_flatten: 'templates/terraform/custom_flatten/artifactregistry_rr_disable_upstream_validation.go.erb'
+        description: |-
+          If true, the remote repository upstream and upstream credentials will
+          not be validated.
   - !ruby/object:Api::Type::Boolean
     name: 'cleanupPolicyDryRun'
     description: |-

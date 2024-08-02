@@ -1,0 +1,96 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'kmsconfig'
+description: |
+  NetApp Volumes always encrypts your data at rest using volume-specific keys.
+
+  A CMEK policy (customer-managed encryption key) warps such volume-specific keys in a key stored in Cloud Key Management Service (KMS).
+references:
+  guides:
+    'Documentation': 'https://cloud.google.com/netapp/volumes/docs/configure-and-use/cmek/cmek-overview'
+  api: 'https://cloud.google.com/netapp/volumes/docs/reference/rest/v1/projects.locations.kmsConfigs'
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/kmsConfigs/{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/kmsConfigs'
+self_link: 'projects/{{project}}/locations/{{location}}/kmsConfigs/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/kmsConfigs?kmsConfigId={{name}}'
+update_url: 'projects/{{project}}/locations/{{location}}/kmsConfigs/{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/kmsConfigs/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+custom_code:
+  post_create: 'templates/terraform/post_create/go/KMS_Verify.go.tmpl'
+examples:
+  - name: 'kmsConfig_create'
+    primary_resource_id: 'kmsConfig'
+    vars:
+      kms_name: 'kms-test'
+      key_ring_value: 'key-ring'
+      crypto_name: 'crypto-name'
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      Name of the policy location. CMEK policies apply to the whole region.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'name'
+    type: String
+    description: |
+      Name of the CMEK policy.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'description'
+    type: String
+    description: |
+      Description for the CMEK policy.
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      Labels as key value pairs. Example: `{ "owner": "Bob", "department": "finance", "purpose": "testing" }`.
+  - name: 'cryptoKeyName'
+    type: String
+    description: |
+      Resource name of the KMS key to use. Only regional keys are supported. Format: `projects/{{project}}/locations/{{location}}/keyRings/{{key_ring}}/cryptoKeys/{{key}}`.
+    required: true
+  - name: 'instructions'
+    type: String
+    description: |
+      Access to the key needs to be granted. The instructions contain gcloud commands to run to grant access.
+
+      To make the policy work, a CMEK policy check is required, which verifies key access.
+    output: true
+  - name: 'serviceAccount'
+    type: String
+    description: |
+      The Service account which needs to have access to the  provided KMS key.
+    output: true

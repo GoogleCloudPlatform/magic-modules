@@ -1,6 +1,5 @@
 # External SSL proxy load balancer with managed instance group backend
 
-# [START cloudloadbalancing_ext_ssl_proxy_lb]
 # VPC
 resource "google_compute_network" "default" {
   name                    = "<%= ctx[:vars]['ssl_proxy_xlb_network'] %>"
@@ -121,7 +120,7 @@ resource "google_compute_instance_template" "default" {
     }
   }
   disk {
-    source_image = "debian-cloud/debian-10"
+    source_image = "debian-cloud/debian-12"
     auto_delete  = true
     boot         = true
   }
@@ -184,5 +183,4 @@ resource "google_compute_firewall" "default" {
   }
   target_tags = ["allow-health-check"]
 }
-# [END cloudloadbalancing_ext_ssl_proxy_lb]
 

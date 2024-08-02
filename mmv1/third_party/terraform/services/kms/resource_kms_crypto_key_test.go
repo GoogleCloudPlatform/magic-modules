@@ -10,8 +10,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/services/kms"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestCryptoKeyIdParsing(t *testing.T) {
@@ -317,6 +317,53 @@ func TestAccKmsCryptoKey_destroyDuration(t *testing.T) {
 	})
 }
 
+func TestAccKmsCryptoKey_keyAccessJustificationsPolicy(t *testing.T) {
+	t.Parallel()
+
+	projectId := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	projectOrg := envvar.GetTestOrgFromEnv(t)
+	location := envvar.GetTestRegionFromEnv()
+	projectBillingAccount := envvar.GetTestBillingAccountFromEnv(t)
+	keyRingName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	allowedAccessReason := "CUSTOMER_INITIATED_SUPPORT"
+	updatedAllowedAccessReason := "GOOGLE_INITIATED_SERVICE"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleKmsCryptoKey_keyAccessJustificationsPolicy(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, allowedAccessReason),
+			},
+			{
+				ResourceName:            "google_kms_crypto_key.crypto_key",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testGoogleKmsCryptoKey_keyAccessJustificationsPolicy(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, updatedAllowedAccessReason),
+			},
+			{
+				ResourceName:            "google_kms_crypto_key.crypto_key",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			// Use a separate TestStep rather than a CheckDestroy because we need the project to still exist.
+			{
+				Config: testGoogleKmsCryptoKey_removed(projectId, projectOrg, projectBillingAccount, keyRingName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleKmsCryptoKeyWasRemovedFromState("google_kms_crypto_key.crypto_key"),
+					testAccCheckGoogleKmsCryptoKeyVersionsDestroyed(t, projectId, location, keyRingName, cryptoKeyName),
+					testAccCheckGoogleKmsCryptoKeyRotationDisabled(t, projectId, location, keyRingName, cryptoKeyName),
+				),
+			},
+		},
+	})
+}
+
 func TestAccKmsCryptoKey_importOnly(t *testing.T) {
 	t.Parallel()
 
@@ -444,6 +491,35 @@ func TestAccKmsCryptoKeyVersion_basic(t *testing.T) {
 	})
 }
 
+func TestAccKmsCryptoKeyVersionWithSymmetricHSM(t *testing.T) {
+	t.Parallel()
+
+	projectId := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	projectOrg := envvar.GetTestOrgFromEnv(t)
+	projectBillingAccount := envvar.GetTestBillingAccountFromEnv(t)
+	keyRingName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleKmsCryptoKeyVersionWithSymmetricHSM(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
+			},
+			{
+				ResourceName:            "google_kms_crypto_key_version.crypto_key_version",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testGoogleKmsCryptoKeyVersion_removed(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
+			},
+		},
+	})
+}
+
 func TestAccKmsCryptoKeyVersion_skipInitialVersion(t *testing.T) {
 	t.Parallel()
 
@@ -504,6 +580,85 @@ func TestAccKmsCryptoKeyVersion_patch(t *testing.T) {
 			},
 			{
 				Config: testGoogleKmsCryptoKeyVersion_patch("false", projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, state),
+			},
+		},
+	})
+}
+
+func TestAccKmsCryptoKeyVersion_externalProtectionLevelOptions(t *testing.T) {
+	t.Parallel()
+
+	projectId := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	projectOrg := envvar.GetTestOrgFromEnv(t)
+	projectBillingAccount := envvar.GetTestBillingAccountFromEnv(t)
+	keyRingName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	keyUri := "data.google_secret_manager_secret_version.key_uri.secret_data"
+	updatedKeyUri := "data.google_secret_manager_secret_version.key_uri_updated.secret_data"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleKmsCryptoKeyVersion_externalProtectionLevelOptions(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, keyUri),
+			},
+			{
+				ResourceName:            "google_kms_crypto_key_version.crypto_key_version",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testGoogleKmsCryptoKeyVersion_externalProtectionLevelOptions(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, updatedKeyUri),
+			},
+			{
+				ResourceName:            "google_kms_crypto_key_version.crypto_key_version",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func TestAccKmsCryptoKeyVersion_externalProtectionLevelOptionsVpc(t *testing.T) {
+	// This test relies on manual steps to set up the EkmConnection used for the
+	// CryptoKeyVersion creation, which means we can't spin up a temporary project.
+	// We also can't use bootstrapped keys because that would defeat the purpose of
+	// this key creation test, so we skip this test for VCR to avoid KMS resource
+	// accumulation in the TF test project (since KMS resources can't be deleted).
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	projectId := envvar.GetTestProjectFromEnv()
+	keyRingName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	ekmConnectionName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	keyPath := "data.google_secret_manager_secret_version.key_path.secret_data"
+	updatedKeyPath := "data.google_secret_manager_secret_version.key_path_updated.secret_data"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleKmsCryptoKeyVersion_externalProtectionLevelOptionsVpc(projectId, keyRingName, cryptoKeyName, ekmConnectionName, keyPath),
+			},
+			{
+				ResourceName:            "google_kms_crypto_key_version.crypto_key_version",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testGoogleKmsCryptoKeyVersion_externalProtectionLevelOptionsVpc(projectId, keyRingName, cryptoKeyName, ekmConnectionName, updatedKeyPath),
+			},
+			{
+				ResourceName:            "google_kms_crypto_key_version.crypto_key_version",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 		},
 	})
@@ -681,6 +836,39 @@ resource "google_kms_crypto_key" "crypto_key" {
 `, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName)
 }
 
+func testGoogleKmsCryptoKey_keyAccessJustificationsPolicy(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, allowed_access_reason string) string {
+	return fmt.Sprintf(`
+resource "google_project" "acceptance" {
+  name            = "%s"
+  project_id      = "%s"
+  org_id          = "%s"
+  billing_account = "%s"
+}
+
+resource "google_project_service" "acceptance" {
+  project = google_project.acceptance.project_id
+  service = "cloudkms.googleapis.com"
+}
+
+resource "google_kms_key_ring" "key_ring" {
+  project  = google_project_service.acceptance.project
+  name     = "%s"
+  location = "us-central1"
+}
+
+resource "google_kms_crypto_key" "crypto_key" {
+  name     = "%s"
+  key_ring = google_kms_key_ring.key_ring.id
+  labels = {
+    key = "value"
+  }
+  key_access_justifications_policy {
+    allowed_access_reasons = ["%s"]
+  }
+}
+`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, allowed_access_reason)
+}
+
 func testGoogleKmsCryptoKey_importOnly(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
@@ -738,6 +926,44 @@ resource "google_kms_crypto_key" "crypto_key" {
 	key_ring = google_kms_key_ring.key_ring.id
 	labels = {
 		key = "value"
+	}
+}
+
+resource "google_kms_crypto_key_version" "crypto_key_version" {
+	crypto_key = google_kms_crypto_key.crypto_key.id
+}
+`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName)
+}
+
+func testGoogleKmsCryptoKeyVersionWithSymmetricHSM(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName string) string {
+	return fmt.Sprintf(`
+resource "google_project" "acceptance" {
+	name            = "%s"
+	project_id      = "%s"
+	org_id          = "%s"
+	billing_account = "%s"
+}
+
+resource "google_project_service" "acceptance" {
+	project = google_project.acceptance.project_id
+	service = "cloudkms.googleapis.com"
+}
+
+resource "google_kms_key_ring" "key_ring" {
+	project  = google_project_service.acceptance.project
+	name     = "%s"
+	location = "us-central1"
+}
+
+resource "google_kms_crypto_key" "crypto_key" {
+	name     = "%s"
+	key_ring = google_kms_key_ring.key_ring.id
+	labels = {
+		key = "value"
+	}
+	version_template {
+		algorithm        = "GOOGLE_SYMMETRIC_ENCRYPTION"
+		protection_level = "HSM"
 	}
 }
 
@@ -885,4 +1111,148 @@ resource "google_kms_crypto_key_version" "crypto_key_version" {
 	state = "%s"
 }
 `, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, preventDestroy, state)
+}
+
+func testGoogleKmsCryptoKeyVersion_externalProtectionLevelOptions(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, keyUri string) string {
+	return fmt.Sprintf(`
+resource "google_project" "acceptance" {
+	name            = "%s"
+	project_id      = "%s"
+	org_id          = "%s"
+	billing_account = "%s"
+}
+
+resource "google_project_service" "acceptance" {
+	project = google_project.acceptance.project_id
+	service = "cloudkms.googleapis.com"
+}
+
+resource "google_kms_key_ring" "key_ring" {
+	project  = google_project_service.acceptance.project
+	name     = "%s"
+	location = "us-central1"
+}
+
+resource "google_kms_crypto_key" "crypto_key" {
+	name     = "%s"
+	key_ring = google_kms_key_ring.key_ring.id
+
+	version_template {
+		algorithm = "EXTERNAL_SYMMETRIC_ENCRYPTION"
+		protection_level = "EXTERNAL"
+	}
+
+	labels = {
+		key = "value"
+	}
+	skip_initial_version_creation = true
+}
+
+data "google_secret_manager_secret_version" "key_uri" {
+  secret = "external-full-key-uri"
+  project = "315636579862"
+}
+data "google_secret_manager_secret_version" "key_uri_updated" {
+  secret = "external-full-key-uri-update-test"
+  project = "315636579862"
+}
+
+resource "google_kms_crypto_key_version" "crypto_key_version" {
+	crypto_key = google_kms_crypto_key.crypto_key.id
+	external_protection_level_options {
+		external_key_uri = %s
+	}
+}
+`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, keyUri)
+}
+
+// EkmConnection setup and creation is based off of resource_kms_ekm_connection_test.go
+func testGoogleKmsCryptoKeyVersion_externalProtectionLevelOptionsVpc(projectId, keyRingName, cryptoKeyName, ekmConnectionName, keyPath string) string {
+	return fmt.Sprintf(`
+data "google_project" "vpc-project" {
+  project_id = "cloud-ekm-refekm-playground"
+}
+data "google_project" "project" {
+  project_id = "%s"
+}
+
+data "google_secret_manager_secret_version" "raw_der" {
+  secret = "playground-cert"
+  project = "315636579862"
+}
+data "google_secret_manager_secret_version" "hostname" {
+  secret = "external-uri"
+  project = "315636579862"
+}
+data "google_secret_manager_secret_version" "servicedirectoryservice" {
+  secret = "external-servicedirectoryservice"
+  project = "315636579862"
+}
+
+resource "google_project_iam_member" "add_sdviewer" {
+  project = data.google_project.vpc-project.number
+  role    = "roles/servicedirectory.viewer"
+  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-ekms.iam.gserviceaccount.com"
+}
+resource "google_project_iam_member" "add_pscAuthorizedService" {
+  project = data.google_project.vpc-project.number
+  role    = "roles/servicedirectory.pscAuthorizedService"
+  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-ekms.iam.gserviceaccount.com"
+}
+
+resource "google_kms_ekm_connection" "example-ekmconnection" {
+  name            	= "%s"
+  location		= "us-central1"
+  key_management_mode 	= "MANUAL"
+  service_resolvers  	{
+      service_directory_service  = data.google_secret_manager_secret_version.servicedirectoryservice.secret_data
+      hostname 			 = data.google_secret_manager_secret_version.hostname.secret_data
+      server_certificates        {
+      		raw_der	= data.google_secret_manager_secret_version.raw_der.secret_data
+      }
+  }
+  depends_on = [
+        google_project_iam_member.add_pscAuthorizedService,
+        google_project_iam_member.add_sdviewer
+  ]
+}
+
+resource "google_kms_key_ring" "key_ring" {
+	project  = data.google_project.project.project_id
+	name     = "%s"
+	location = "us-central1"
+}
+
+resource "google_kms_crypto_key" "crypto_key" {
+	name     = "%s"
+	key_ring = google_kms_key_ring.key_ring.id
+
+	version_template {
+		algorithm = "EXTERNAL_SYMMETRIC_ENCRYPTION"
+		protection_level = "EXTERNAL_VPC"
+	}
+
+	labels = {
+		key = "value"
+	}
+	crypto_key_backend = google_kms_ekm_connection.example-ekmconnection.id
+	skip_initial_version_creation = true
+}
+
+data "google_secret_manager_secret_version" "key_path" {
+  secret = "external-keypath"
+  project = "315636579862"
+}
+data "google_secret_manager_secret_version" "key_path_updated" {
+  secret = "external-keypath-update-test"
+  project = "315636579862"
+}
+
+resource "google_kms_crypto_key_version" "crypto_key_version" {
+	crypto_key = google_kms_crypto_key.crypto_key.id
+	external_protection_level_options {
+		ekm_connection_key_path = %s
+	}
+}
+`, projectId, ekmConnectionName, keyRingName, cryptoKeyName, keyPath)
 }

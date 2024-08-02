@@ -188,6 +188,9 @@ module Api
       # If true, skip sweeper generation for this resource
       attr_reader :skip_sweeper
 
+      # Override sweeper settings
+      attr_reader :sweeper
+
       attr_reader :timeouts
 
       # An array of function names that determine whether an error is retryable.
@@ -317,6 +320,7 @@ module Api
 
       check :custom_code, type: Provider::Terraform::CustomCode,
                           default: Provider::Terraform::CustomCode.new
+      check :sweeper, type: Provider::Terraform::Sweeper, default: Provider::Terraform::Sweeper.new
       check :docs, type: Provider::Terraform::Docs, default: Provider::Terraform::Docs.new
       check :import_format, type: Array, item_type: String, default: []
       check :autogen_async, type: :boolean, default: false
@@ -389,9 +393,14 @@ module Api
       nested
     end
 
-    # Returns all resourcerefs at any depth
-    def all_resourcerefs
-      resourcerefs_for_properties(all_user_properties, self)
+    def convert_go_file(file)
+      dir, base = File.split(file)
+      base.slice! '.erb'
+      if dir.end_with?('terraform')
+        "#{dir}/#{base}.go.tmpl"
+      else
+        "#{dir}/go/#{base}.tmpl"
+      end
     end
 
     # All settable properties in the resource.
@@ -425,6 +434,10 @@ module Api
       end
     end
 
+    def sensitive_props
+      all_nested_properties(root_properties).select(&:sensitive)
+    end
+
     # Return the product-level async object, or the resource-specific one
     # if one exists.
     def async
@@ -444,18 +457,6 @@ module Api
       else
         props.select { |p| @identity.include?(p.name) }.sort_by { |p| @identity.index p.name }
       end
-    end
-
-    def kind?
-      !@kind.nil?
-    end
-
-    def encoder?
-      !@transport&.encoder.nil?
-    end
-
-    def decoder?
-      !@transport&.decoder.nil?
     end
 
     def add_labels_related_fields(props, parent)
@@ -569,6 +570,19 @@ module Api
       fields
     end
 
+    # Return ignore_read fields that should be added to ImportStateVerifyIgnore
+    def ignore_read_fields(props)
+      fields = []
+      props.each do |p|
+        if p.ignore_read && !p.url_param_only && !p.is_a?(Api::Type::ResourceRef)
+          fields << p.terraform_lineage
+        elsif (p.is_a? Api::Type::NestedObject) && !p.all_properties.nil?
+          fields.concat(ignore_read_fields(p.all_properties))
+        end
+      end
+      fields
+    end
+
     def get_labels_field_note(title)
       "**Note**: This field is non-authoritative, and will only manage the #{title} present " \
 "in your configuration.
@@ -636,10 +650,6 @@ Please refer to the field `effective_#{title}` for all of the #{title} present o
       @base_url
     end
 
-    def full_create_url
-      [@__product.base_url, create_uri].flatten.join
-    end
-
     def create_uri
       if @create_url.nil?
         if @create_verb.nil? || @create_verb == :POST
@@ -650,10 +660,6 @@ Please refer to the field `effective_#{title}` for all of the #{title} present o
       else
         @create_url
       end
-    end
-
-    def full_delete_url
-      [@__product.base_url, delete_uri].flatten.join
     end
 
     def delete_uri
@@ -769,42 +775,6 @@ Please refer to the field `effective_#{title}` for all of the #{title} present o
         raise "Missing property/parameter for identity #{i}" \
           if all_user_properties.select { |p| p.name == i }.empty?
       end
-    end
-
-    # Given an array of properties, return all ResourceRefs contained within
-    # Requires:
-    #   props- a list of props
-    #   original_object - the original object containing props. This is to
-    #                     avoid self-referencing objects.
-    def resourcerefs_for_properties(props, original_obj)
-      rrefs = []
-      props.each do |p|
-        # We need to recurse on ResourceRefs to get all levels
-        # We do not want to recurse on resourcerefs of type self to avoid
-        # infinite loop.
-        if p.is_a? Api::Type::ResourceRef
-          # We want to avoid a circular reference
-          # This reference may be the next reference or have some number of refs
-          # in between it.
-          next if p.resource_ref == original_obj
-          next if p.resource_ref == p.__resource
-
-          rrefs << p
-          rrefs.concat(resourcerefs_for_properties(p.resource_ref
-                                                    .required_properties,
-                                                   original_obj))
-        elsif !p.nested_properties.nil?
-          rrefs.concat(resourcerefs_for_properties(p.nested_properties, original_obj))
-        elsif p.is_a? Api::Type::Array
-          if p.item_type.is_a? Api::Type::ResourceRef
-            rrefs << p.item_type
-            rrefs.concat(resourcerefs_for_properties(p.item_type.resource_ref
-                                                      .required_properties,
-                                                     original_obj))
-          end
-        end
-      end
-      rrefs.uniq
     end
   end
 end

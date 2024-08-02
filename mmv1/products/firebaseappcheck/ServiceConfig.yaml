@@ -58,9 +58,9 @@ examples:
     name: "firebase_app_check_service_config_unenforced"
     primary_resource_id: "default"
     vars:
-      service_id: "firebasedatabase.googleapis.com"
+      service_id: "identitytoolkit.googleapis.com"
     test_vars_overrides:
-      service_id: '"firebasedatabase.googleapis.com"'
+      service_id: '"identitytoolkit.googleapis.com"'
     test_env_vars:
       project_id: :PROJECT_NAME
 parameters:
@@ -81,7 +81,6 @@ properties:
     description: |
       The fully-qualified resource name of the service enforcement configuration.
     output: true
-    pattern: projects/{{project}}/services/{{service_id}}
   - !ruby/object:Api::Type::Enum
     name: enforcementMode
     description: |

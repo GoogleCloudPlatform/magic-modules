@@ -1,0 +1,6 @@
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	if d.Get("autogenerate_revision_name") == true {
+		return nil, nil
+	}
+	return v, nil
+}

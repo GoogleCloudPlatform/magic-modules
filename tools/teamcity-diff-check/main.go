@@ -45,7 +45,8 @@ func main() {
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	f, err := os.Open(fmt.Sprintf("../../mmv1/third_party/terraform/.teamcity/components/inputs/%s", *serviceFile+".kt"))
+	filePath := fmt.Sprintf("mmv1/third_party/terraform/.teamcity/components/inputs/%s.kt", *serviceFile)
+	f, err := os.Open(fmt.Sprintf("../../%s", filePath)) // Need to make path relative to where the script is called
 	if err != nil {
 		panic(err)
 	}
@@ -79,13 +80,13 @@ func main() {
 		teamcityServices = append(teamcityServices, string(service))
 	}
 	if len(teamcityServices) == 0 {
-		fmt.Fprintf(os.Stderr, "teamcityServices error: regex produced no matches.\n")
+		fmt.Fprintf(os.Stderr, "error: script could not find any services listed in the file %s.kt .\n", filePath)
 		os.Exit(1)
 	}
 
 	if diff := serviceDifference(googleServices, teamcityServices); len(diff) != 0 {
-		fmt.Fprintf(os.Stderr, "error: diff in %s\n", *serviceFile)
-		fmt.Fprintf(os.Stderr, "Missing Services: %s\n", diff)
+		fmt.Fprintf(os.Stderr, "error: missing services detected in %s\n", filePath)
+		fmt.Fprintf(os.Stderr, "Please update file to include these new services: %s\n", diff)
 		os.Exit(1)
 	}
 

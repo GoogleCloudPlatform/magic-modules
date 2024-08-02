@@ -27,7 +27,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -69,6 +69,20 @@ examples:
       consumer_address_name: 'psc-ilb-consumer-address'
       consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'service_attachment_explicit_networks'
+    primary_resource_id: 'psc_ilb_service_attachment'
+    vars:
+      service_attachment_name: 'my-psc-ilb'
+      network_name: 'psc-ilb-network'
+      nat_subnetwork_name: 'psc-ilb-nat'
+      producer_subnetwork_name: 'psc-ilb-producer-subnetwork'
+      producer_health_check_name: 'producer-service-health-check'
+      producer_service_name: 'producer-service'
+      producer_forwarding_rule_name: 'producer-forwarding-rule'
+      consumer_network_name: 'psc-ilb-consumer-network'
+      consumer_address_name: 'psc-ilb-consumer-address'
+      consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'service_attachment_reconcile_connections'
     primary_resource_id: 'psc_ilb_service_attachment'
     vars:
@@ -82,6 +96,7 @@ examples:
       consumer_address_name: 'psc-ilb-consumer-address'
       consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/compute_service_attachment.go.erb
   update_encoder: 'templates/terraform/update_encoder/compute_service_attachment.go.erb'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
@@ -141,16 +156,13 @@ properties:
           description: |
             The status of the connection from the consumer forwarding rule to
             this service attachment.
-  - !ruby/object:Api::Type::ResourceRef
+  - !ruby/object:Api::Type::String
     name: targetService
     required: true
     immutable: true
-    resource: 'ForwardingRule'
-    imports: 'selfLink'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     description: |
-      The URL of a forwarding rule that represents the service identified by
-      this service attachment.
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+      The URL of a service serving the endpoint identified by this service attachment.
   - !ruby/object:Api::Type::Array
     name: 'natSubnets'
     required: true
@@ -194,13 +206,22 @@ properties:
       attachment.
     send_empty_value: true
     is_set: true
+    set_hash_func: computeServiceAttachmentConsumerAcceptListsHash
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::String
           name: 'projectIdOrNum'
-          required: true
+          # TODO (laurensknoll): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
           description: |
             A project that is allowed to connect to this service attachment.
+            Only one of project_id_or_num and network_url may be set.
+        - !ruby/object:Api::Type::String
+          name: 'networkUrl'
+          # TODO (laurensknoll): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
+          description: |
+            The network that is allowed to connect to this service attachment.
+            Only one of project_id_or_num and network_url may be set.
+          diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
         - !ruby/object:Api::Type::Integer
           name: 'connectionLimit'
           required: true

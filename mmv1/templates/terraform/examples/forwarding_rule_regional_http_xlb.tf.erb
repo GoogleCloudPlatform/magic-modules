@@ -10,7 +10,7 @@ resource "google_compute_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
   port_range            = "80"
   target                = google_compute_region_target_http_proxy.default.id
   network               = google_compute_network.default.id
-  ip_address            = google_compute_address.default.id
+  ip_address            = google_compute_address.default.address
   network_tier          = "STANDARD"
 }
 

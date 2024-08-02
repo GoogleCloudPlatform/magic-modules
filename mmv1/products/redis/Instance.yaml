@@ -33,7 +33,7 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/redis_location_id_for_fallback_zone.go.erb
   decoder: templates/terraform/decoders/redis_instance.go.erb
   extra_schema_entry: templates/terraform/extra_schema_entry/redis_instance.erb
-  constants: templates/terraform/constants/redis_instance.go
+  constants: templates/terraform/constants/redis_instance.go.erb
 custom_diff: [
   'customdiff.ForceNewIfChange("redis_version", isRedisVersionDecreasing)',
   'tpgresource.DefaultProviderProject',
@@ -399,6 +399,11 @@ properties:
           can not go beyond, including reschedule.
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
+  - !ruby/object:Api::Type::String
+    name: maintenanceVersion
+    description: The self service update maintenance version.
+    required: false
+    default_from_api: true
   - !ruby/object:Api::Type::Integer
     name: memorySizeGb
     description: Redis memory size in GiB.
