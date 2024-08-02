@@ -7365,12 +7365,12 @@ resource "google_compute_instance" "foobar" {
     subnetwork = google_compute_subnetwork.inst-test-subnetwork.self_link
     alias_ip_range {
       subnetwork_range_name = "inst-test-secondary"  
-	  ip_cidr_range = "172.16.1.0/24"
+      ip_cidr_range = "172.16.1.0/24"
     }
-	alias_ip_range {
-	  subnetwork_range_name = "inst-test-tertiary"
-	  ip_cidr_range = "10.1.3.0/24"
-	}
+    alias_ip_range {
+      subnetwork_range_name = "inst-test-tertiary"
+      ip_cidr_range = "10.1.3.0/24"
+    }
   }
 }
 `, network, subnet, instance)
