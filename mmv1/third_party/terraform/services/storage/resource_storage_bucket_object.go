@@ -95,6 +95,12 @@ func ResourceStorageBucketObject() *schema.Resource {
 				Description:  `Data as string to be uploaded. Must be defined if source is not. Note: The content field is marked as sensitive. To view the raw contents of the object, please define an output.`,
 			},
 
+			"generation": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: `The content generation of this object. Used for object versioning and soft delete.`,
+			},
+
 			"crc32c": {
 				Type:        schema.TypeString,
 				Computed:    true,
