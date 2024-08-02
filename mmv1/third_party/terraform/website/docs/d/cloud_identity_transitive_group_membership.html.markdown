@@ -4,9 +4,9 @@ description: |-
   Get a list of direct and indirect Cloud Identity Group Memberships within a Group.
 ---
 
-# google_cloud_identity_transitive_group_memberships
+# google_cloud_identity_group_transitive_memberships
 
-Use this data source to get list of the Cloud Identity Group Memberships within a given Group. Whereas `google_cloud_identity_group_memberships` returns details of only direct members of the group, `google_cloud_identity_transitive_group_memberships` will return details about both direct and indirect members. For example, a user is an indirect member of Group A if the user is a direct member of Group B and Group B is a direct member of Group A.
+Use this data source to get list of the Cloud Identity Group Memberships within a given Group. Whereas `google_cloud_identity_group_memberships` returns details of only direct members of the group, `google_cloud_identity_group_transitive_memberships` will return details about both direct and indirect members. For example, a user is an indirect member of Group A if the user is a direct member of Group B and Group B is a direct member of Group A.
 
 To get more information about TransitiveGroupMembership, see:
 
@@ -17,7 +17,7 @@ To get more information about TransitiveGroupMembership, see:
 ## Example Usage
 
 ```tf
-data "google_cloud_identity_transitive_group_memberships" "members" {
+data "google_cloud_identity_group_transitive_memberships" "members" {
   group = "groups/123eab45c6defghi"
 }
 ```

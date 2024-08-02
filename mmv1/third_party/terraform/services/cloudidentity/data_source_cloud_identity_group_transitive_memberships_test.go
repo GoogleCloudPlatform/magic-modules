@@ -36,12 +36,12 @@ func testAccDataSourceCloudIdentityGroupTransitiveMemberships_basicTest(t *testi
 				Config: testAccCloudIdentityGroupTransitiveMembershipConfig(context),
 				Check: resource.ComposeTestCheckFunc(
 					// Finds two members of Group A (1 direct, 1 indirect)
-					resource.TestCheckResourceAttr("data.google_cloud_identity_transitive_group_memberships.members",
+					resource.TestCheckResourceAttr("data.google_cloud_identity_group_transitive_memberships.members",
 						"memberships.#", "2"),
 					// Group B is a member of Group A; DIRECT membership to A
-					checkMembershipRelationship("data.google_cloud_identity_transitive_group_memberships.members", groupBId, "DIRECT"),
+					checkGroupTransitiveMembershipRelationship("data.google_cloud_identity_group_transitive_memberships.members", groupBId, "DIRECT"),
 					// User is a member of Group B; INDIRECT membership to A
-					checkMembershipRelationship("data.google_cloud_identity_transitive_group_memberships.members", memberId, "INDIRECT"),
+					checkGroupTransitiveMembershipRelationship("data.google_cloud_identity_group_transitive_memberships.members", memberId, "INDIRECT"),
 				),
 			},
 		},
@@ -120,7 +120,7 @@ resource "time_sleep" "wait_15_seconds" {
 }
 
 // Look for all members of Group A. This should return Group B and the user.
-data "google_cloud_identity_transitive_group_memberships" "members" {
+data "google_cloud_identity_group_transitive_memberships" "members" {
   group = google_cloud_identity_group.group_a.id
 
   depends_on = [
@@ -131,7 +131,7 @@ data "google_cloud_identity_transitive_group_memberships" "members" {
 `, context)
 }
 
-func checkMembershipRelationship(datasourceName, memberId, expectedRelationType string) resource.TestCheckFunc {
+func checkGroupTransitiveMembershipRelationship(datasourceName, memberId, expectedRelationType string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		ds, ok := s.RootModule().Resources[datasourceName]
 		if !ok {
