@@ -2457,24 +2457,6 @@ func TestAccSqlDatabaseInstance_useInternalCaByDefault(t *testing.T) {
 	})
 }
 
-func testGoogleSqlDatabaseInstance_setCasServerCa(databaseName, serverCaMode string) string {
-	return fmt.Sprintf(`
-resource "google_sql_database_instance" "instance" {
-  name                = "%s"
-  region              = "us-central1"
-  database_version    = "POSTGRES_15"
-  deletion_protection = false
-  settings {
-    tier = "db-f1-micro"
-    ip_configuration {
-      ipv4_enabled    = "true"
-      server_ca_mode  = "%s"
-    }
-  }
-}
-`, databaseName, serverCaMode)
-}
-
 func testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName string, databaseVersion string, requireSsl bool, sslMode string) string {
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "instance" {
