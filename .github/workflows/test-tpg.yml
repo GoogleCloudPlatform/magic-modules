@@ -19,12 +19,15 @@ on:
       branch:
         description: 'The branch or sha of the provider execute against'
         required: true
+      pr-number:
+        description: 'The pull request number in magic-modules repository'
+        required: true
       sha:
         description: "The commit SHA in magic-modules repository where the status result will be posted"
         required: true
 
 concurrency:
-  group: test-tpg-${{ github.event.inputs.owner }}-${{ github.event.inputs.repo }}-${{ github.event.inputs.branch }}
+  group: test-tpg-${{ github.event.inputs.owner }}-${{ github.event.inputs.repo }}-${{ github.event.inputs.pr-number }}
   cancel-in-progress: true
 
 jobs:
