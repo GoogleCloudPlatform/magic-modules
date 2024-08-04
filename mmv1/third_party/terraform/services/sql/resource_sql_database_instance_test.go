@@ -58,6 +58,40 @@ func TestAccSqlDatabaseInstance_basicInferredName(t *testing.T) {
 	})
 }
 
+func TestAccSqlDatabaseInstance_networkArchitecture(t *testing.T) {
+	t.Parallel()
+
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(
+					testGoogleSqlDatabaseInstance_old_netowrk_architecture, databaseName),
+				Check: resource.ComposeTestCheckFunc(
+					checkInstanceTypeIsPresent("google_sql_database_instance.instance"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: fmt.Sprintf(
+					testGoogleSqlDatabaseInstance_new_netowrk_architecture, databaseName),
+				Check: resource.ComposeTestCheckFunc(
+					checkInstanceTypeIsPresent("google_sql_database_instance.instance"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccSqlDatabaseInstance_basicSecondGen(t *testing.T) {
 	t.Parallel()
 
@@ -2533,6 +2567,32 @@ resource "google_sql_database_instance" "instance" {
       require_ssl = true
     }
   }
+}
+`
+
+var testGoogleSqlDatabaseInstance_old_netowrk_architecture = `
+resource "google_sql_database_instance" "instance" {
+	name                = "%s"
+	region              = "us-central1"
+	database_version    = "MYSQL_8_0"
+	deletion_protection = false
+	settings {
+		tier = "db-g1-small"
+	}
+	sql_network_architecture = "OLD_NETWORK_ARCHITECTURE"
+}
+`
+
+var testGoogleSqlDatabaseInstance_new_netowrk_architecture = `
+resource "google_sql_database_instance" "instance" {
+	name                = "%s"
+	region              = "us-central1"
+	database_version    = "MYSQL_8_0"
+	deletion_protection = false
+	settings {
+		tier = "db-g1-small"
+	}
+	sql_network_architecture = "NEW_NETWORK_ARCHITECTURE"
 }
 `
 

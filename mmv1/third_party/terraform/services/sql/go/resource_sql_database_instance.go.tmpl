@@ -923,6 +923,12 @@ is set to true. Defaults to ZONAL.`,
 				Computed:    true,
 				Description: `The link to service attachment of PSC instance.`,
 			},
+			"sql_network_architecture": {
+				Type:        schema.TypeString,
+				Optional: 	true,
+				ValidateFunc: validation.StringInSlice([]string{"NEW_NETWORK_ARCHITECTURE", "OLD_NETWORK_ARCHITECTURE"}, false),
+				Description: `The SQL network architecture for the instance. The valid values are:- 'NEW_NETWORK_ARCHITECTURE'and 'OLD_NETWORK_ARCHITECTURE'.`,
+			},
 			"dns_name": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -1077,11 +1083,12 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	databaseVersion := d.Get("database_version").(string)
 
 	instance := &sqladmin.DatabaseInstance{
-		Name:                 name,
-		Region:               region,
-		DatabaseVersion:      databaseVersion,
-		MasterInstanceName:   d.Get("master_instance_name").(string),
-		ReplicaConfiguration: expandReplicaConfiguration(d.Get("replica_configuration").([]interface{})),
+		Name:                 	name,
+		Region:               	region,
+		DatabaseVersion:      	databaseVersion,
+		MasterInstanceName: 	d.Get("master_instance_name").(string),
+		ReplicaConfiguration:	expandReplicaConfiguration(d.Get("replica_configuration").([]interface{})),
+		SqlNetworkArchitecture: d.Get("sql_network_architecture").(string),
 	}
 
 	cloneContext, cloneSource := expandCloneContext(d.Get("clone").([]interface{}))
@@ -1193,6 +1200,8 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 			}
 		}
 	}
+
+
 
 	// patch any fields that need to be sent postcreation
 	if patchData != nil {
@@ -1688,6 +1697,9 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 	if err := d.Set("psc_service_attachment_link", instance.PscServiceAttachmentLink); err != nil {
 		return fmt.Errorf("Error setting psc_service_attachment_link: %s", err)
 	}
+	if err := d.Set("sql_network_architecture", instance.SqlNetworkArchitecture); err != nil {
+		return fmt.Errorf("Error setting sql_network_architecture: %s", err)
+	}
 	if err := d.Set("dns_name", instance.DnsName); err != nil {
 		return fmt.Errorf("Error setting dns_name: %s", err)
 	}
@@ -1973,6 +1985,10 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 				return err
 			}
 		}
+	}
+
+	if _, ok := d.GetOk("sql_network_architecture"); ok {
+		instance.SqlNetworkArchitecture = d.Get("sql_network_architecture").(string)
 	}
 
 	return resourceSqlDatabaseInstanceRead(d, meta)
