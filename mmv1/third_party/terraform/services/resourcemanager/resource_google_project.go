@@ -509,7 +509,7 @@ func resourceGoogleProjectDelete(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 	deletionPolicy := d.Get("deletion_policy").(string)
-
+	// Only delete projects if skip_delete isn't set
 	if deletionPolicy == "PREVENT" {
 		return fmt.Errorf("Cannot destroy project as deletion_policy is set to PREVENT.")
 	} else if deletionPolicy == "ABANDON" {
@@ -518,16 +518,19 @@ func resourceGoogleProjectDelete(d *schema.ResourceData, meta interface{}) error
 		return nil
 	} else {
 		// Only delete projects if deletion_policy isn't PREVENT or ABANDON
-		parts := strings.Split(d.Id(), "/")
-		pid := parts[len(parts)-1]
-		if err := transport_tpg.Retry(transport_tpg.RetryOptions{
-			RetryFunc: func() error {
-				_, delErr := config.NewResourceManagerClient(userAgent).Projects.Delete(pid).Do()
-				return delErr
-			},
-			Timeout: d.Timeout(schema.TimeoutDelete),
-		}); err != nil {
-			return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Project %s", pid))
+		// Only delete projects if skip_delete isn't set
+		if !d.Get("skip_delete").(bool) {
+			parts := strings.Split(d.Id(), "/")
+			pid := parts[len(parts)-1]
+			if err := transport_tpg.Retry(transport_tpg.RetryOptions{
+				RetryFunc: func() error {
+					_, delErr := config.NewResourceManagerClient(userAgent).Projects.Delete(pid).Do()
+					return delErr
+				},
+				Timeout: d.Timeout(schema.TimeoutDelete),
+			}); err != nil {
+				return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Project %s", pid))
+			}
 		}
 	}
 	d.SetId("")
