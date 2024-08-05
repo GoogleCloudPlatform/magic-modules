@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -28,8 +27,7 @@ func TestAccSecurityCenterV2OrganizationSourceIamBinding(t *testing.T) {
 			},
 			{
 				ResourceName: "google_scc_v2_organization_source_iam_binding.foo",
-				ImportStateIdFunc: func(state *terraform.State) (string, error) {
-					// This has to be a function because sources only use numeric IDs
+				ImportStateIdFunc: func(state *resource.State) (string, error) {
 					id := state.RootModule().Resources["google_scc_v2_organization_source.custom_source"].Primary.Attributes["id"]
 					return fmt.Sprintf("%s %s",
 						id,
@@ -45,8 +43,7 @@ func TestAccSecurityCenterV2OrganizationSourceIamBinding(t *testing.T) {
 			},
 			{
 				ResourceName: "google_scc_v2_organization_source_iam_binding.foo",
-				ImportStateIdFunc: func(state *terraform.State) (string, error) {
-					// This has to be a function because sources only use numeric IDs
+				ImportStateIdFunc: func(state *resource.State) (string, error) {
 					id := state.RootModule().Resources["google_scc_v2_organization_source.custom_source"].Primary.Attributes["id"]
 					return fmt.Sprintf("%s %s",
 						id,
@@ -74,13 +71,11 @@ func TestAccSecurityCenterV2OrganizationSourceIamMember(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				// Test Iam Member creation (no update for member, no need to test)
 				Config: testAccSecurityCenterSourceIamMember_basic(context),
 			},
 			{
 				ResourceName: "google_scc_v2_organization_source_iam_member.foo",
-				ImportStateIdFunc: func(state *terraform.State) (string, error) {
-					// This has to be a function because sources only use numeric IDs
+				ImportStateIdFunc: func(state *resource.State) (string, error) {
 					id := state.RootModule().Resources["google_scc_v2_organization_source.custom_source"].Primary.Attributes["id"]
 					return fmt.Sprintf("%s %s user:admin@hashicorptest.com",
 						id,
