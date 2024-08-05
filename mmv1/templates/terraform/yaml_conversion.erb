@@ -409,6 +409,9 @@ custom_code:
 <%    unless object.custom_code.test_check_destroy.nil? -%>
   test_check_destroy: '<%= object.convert_go_file( object.custom_code.test_check_destroy )%>'
 <%    end -%>
+<%    unless object.custom_code.post_create_failure.nil? -%>
+  post_create_failure: '<%= object.convert_go_file( object.custom_code.post_create_failure )%>'
+<%    end -%>
 <%  end -%>
 <% 
 custom_diff = object.custom_diff.reject {
