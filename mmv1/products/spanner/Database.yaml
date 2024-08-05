@@ -156,6 +156,9 @@ properties:
         description: |
           Fully qualified name of the KMS key to use to encrypt this database. This key must exist
           in the same location as the Spanner Database.
+        exactly_one_of:
+          - kmsKeyName
+          - kmsKeyNames
       - !ruby/object:Api::Type::Array
         name: 'kmsKeyNames'
         immutable: true
@@ -163,6 +166,9 @@ properties:
           Fully qualified names of the KMS keys to use to encrypt this database. The keys
           referenced by kmsKeyNames must fully cover all regions of the database
           instance configuration.
+        exactly_one_of:
+          - kmsKeyName
+          - kmsKeyNames
   - !ruby/object:Api::Type::Enum
     name: 'databaseDialect'
     immutable: true
