@@ -2141,7 +2141,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 					Fingerprint:     instNetworkInterface.Fingerprint,
 					ForceSendFields: []string{"AliasIpRanges"},
 				}
-				if commonAliasIpRanges := checkForCommonAliasIp(instNetworkInterface, networkInterface); len(commonAliasIpRanges) > 0 {
+				if commonAliasIpRanges := CheckForCommonAliasIp(instNetworkInterface, networkInterface); len(commonAliasIpRanges) > 0 {
 					ni.AliasIpRanges = commonAliasIpRanges
 				}
 				op, err := config.NewComputeClient(userAgent).Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, ni).Do()
@@ -3181,7 +3181,7 @@ func isEmptyServiceAccountBlock(d *schema.ResourceData) bool {
 
 // Alias ip ranges cannot be removed and created at the same time. This checks if there are any unchanged alias ip ranges
 // to be kept in between the PATCH operations on Network Interface
-func checkForCommonAliasIp(old, new *compute.NetworkInterface) []*compute.AliasIpRange {
+func CheckForCommonAliasIp(old, new *compute.NetworkInterface) []*compute.AliasIpRange {
 	newAliasIpMap := make(map[string]bool)
 	for _, ipRange := range new.AliasIpRanges {
 		newAliasIpMap[ipRange.IpCidrRange] = true

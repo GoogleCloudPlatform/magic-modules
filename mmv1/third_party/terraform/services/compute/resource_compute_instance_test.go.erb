@@ -21,6 +21,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
@@ -99,6 +100,60 @@ func TestMinCpuPlatformDiffSuppress(t *testing.T) {
 		if tpgcompute.ComputeInstanceMinCpuPlatformEmptyOrAutomaticDiffSuppress("min_cpu_platform", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
 			t.Errorf("bad: %s, %q => %q expect DiffSuppress to return %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
 		}
+	}
+}
+
+func TestCheckForCommonAliasIp(t *testing.T) {
+	type testCase struct {
+		old, new []*compute.AliasIpRange
+		expected []*compute.AliasIpRange
+	}
+
+	testCases := []testCase{
+		{
+			old: []*compute.AliasIpRange{
+				{IpCidrRange: "10.0.0.0/24"},
+				{IpCidrRange: "10.0.1.0/24"},
+			},
+			new: []*compute.AliasIpRange{
+				{IpCidrRange: "10.0.0.0/24"},
+				{IpCidrRange: "10.0.2.0/24"},
+			},
+			expected: []*compute.AliasIpRange{
+				{IpCidrRange: "10.0.0.0/24"},
+			},
+		},
+		{
+			old: []*compute.AliasIpRange{
+				{IpCidrRange: "172.16.0.0/24"},
+				{IpCidrRange: "10.0.1.0/24"},
+			},
+			new: []*compute.AliasIpRange{
+				{IpCidrRange: "172.16.0.0/24"},
+				{IpCidrRange: "10.0.2.0/24"},
+			},
+			expected: []*compute.AliasIpRange{
+				{IpCidrRange: "172.16.0.0/24"},
+			},
+		},
+		{
+			old: []*compute.AliasIpRange{
+				{IpCidrRange: "10.0.0.0/24"},
+				{IpCidrRange: "10.0.1.0/24"},
+			},
+			new: []*compute.AliasIpRange{
+				{IpCidrRange: "192.168.0.0/24"},
+				{IpCidrRange: "172.17.0.0/24"},
+			},
+			expected: []*compute.AliasIpRange{},
+		},
+	}
+
+	for _, tc := range testCases {
+		oldInterface := &compute.NetworkInterface{AliasIpRanges: tc.old}
+		newInterface := &compute.NetworkInterface{AliasIpRanges: tc.new}
+		result := tpgcompute.CheckForCommonAliasIp(oldInterface, newInterface)
+		assert.Equal(t, tc.expected, result)
 	}
 }
 
