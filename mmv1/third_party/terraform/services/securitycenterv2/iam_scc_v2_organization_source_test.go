@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -27,7 +28,7 @@ func TestAccSecurityCenterV2OrganizationSourceIamBinding(t *testing.T) {
 			},
 			{
 				ResourceName: "google_scc_v2_organization_source_iam_binding.foo",
-				ImportStateIdFunc: func(state *resource.State) (string, error) {
+				ImportStateIdFunc: func(state *terraform.State) (string, error) {
 					id := state.RootModule().Resources["google_scc_v2_organization_source.custom_source"].Primary.Attributes["id"]
 					return fmt.Sprintf("%s %s",
 						id,
@@ -43,7 +44,7 @@ func TestAccSecurityCenterV2OrganizationSourceIamBinding(t *testing.T) {
 			},
 			{
 				ResourceName: "google_scc_v2_organization_source_iam_binding.foo",
-				ImportStateIdFunc: func(state *resource.State) (string, error) {
+				ImportStateIdFunc: func(state *terraform.State) (string, error) {
 					id := state.RootModule().Resources["google_scc_v2_organization_source.custom_source"].Primary.Attributes["id"]
 					return fmt.Sprintf("%s %s",
 						id,
@@ -75,7 +76,7 @@ func TestAccSecurityCenterV2OrganizationSourceIamMember(t *testing.T) {
 			},
 			{
 				ResourceName: "google_scc_v2_organization_source_iam_member.foo",
-				ImportStateIdFunc: func(state *resource.State) (string, error) {
+				ImportStateIdFunc: func(state *terraform.State) (string, error) {
 					id := state.RootModule().Resources["google_scc_v2_organization_source.custom_source"].Primary.Attributes["id"]
 					return fmt.Sprintf("%s %s user:admin@hashicorptest.com",
 						id,
