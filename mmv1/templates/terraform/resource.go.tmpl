@@ -164,7 +164,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
                 ForceNew: true,
             },
 {{- end}}
-{{if $.HasSelfLink -}}
+{{- if $.HasSelfLink -}}
             "self_link": {
                 Type:     schema.TypeString,
                 Computed: true,
