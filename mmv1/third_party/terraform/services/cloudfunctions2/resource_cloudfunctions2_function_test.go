@@ -489,7 +489,6 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
 `, context)
 }
 
-
 func TestAccCloudFunctions2Function_generation(t *testing.T) {
 	t.Parallel()
 
@@ -505,9 +504,9 @@ func TestAccCloudFunctions2Function_generation(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudfunctions2function_generation(context),
-        Check: resource.ComposeTestCheckFunc(
-          resource.TestCheckOutput("object_gen_eq_storage_source_gen", "true"),
-        ),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckOutput("object_gen_eq_storage_source_gen", "true"),
+				),
 			},
 		},
 	})
