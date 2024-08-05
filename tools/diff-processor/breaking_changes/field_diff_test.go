@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
 )
 
 type fieldTestCase struct {
@@ -635,7 +636,7 @@ var FieldAddingSubfieldToConfigModeAttrTestCases = []fieldTestCase{
 }
 
 func (tc *fieldTestCase) check(rule FieldDiffRule, t *testing.T) {
-	messages := rule.Messages("resource", "field", tc.oldField, tc.newField)
+	messages := rule.Messages("resource", "field", diff.FieldDiff{Old: tc.oldField, New: tc.newField})
 
 	violation := len(messages) > 0
 	if tc.expectedViolation != violation {
