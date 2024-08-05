@@ -33,7 +33,7 @@ resource "google_cloudfunctions2_function" "<%= ctx[:primary_resource_id] %>" {
     entry_point = "helloPubSub"  # Set the entry point 
     environment_variables = {
         BUILD_CONFIG_TEST = "build_test"
-        SERVICE_CONFIG_DIFF_TEST = google_storage_bucket.bucket.name
+        SERVICE_CONFIG_DIFF_TEST = google_service_account.account.email
     }
     source {
       storage_source {
