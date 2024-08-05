@@ -277,7 +277,7 @@ func testAccCloudRunV2Job_cloudrunv2JobWithDirectVPCAndNamedBinAuthPolicyUpdate(
     name     = "%{job_name}"
     location = "us-central1"
     binary_authorization {
-      policy = "projects/%{project}/platforms/cloudRun/policies/test-policy"
+      policy = "projects/%{project}/platforms/cloudRun/policies/my-policy"
       breakglass_justification = "Some justification"
     }
     template {
