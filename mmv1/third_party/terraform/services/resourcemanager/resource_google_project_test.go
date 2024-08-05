@@ -375,7 +375,7 @@ func TestAccProject_noAllowDestroy(t *testing.T) {
 				ExpectError: regexp.MustCompile("deletion_policy"),
 			},
 			{
-				Config: testAccProject(pid, org),
+				Config: testAccProject_create(pid, org),
 			},
 		},
 	})
