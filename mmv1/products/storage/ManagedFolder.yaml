@@ -17,10 +17,9 @@ kind: 'storage#managedFolder'
 base_url: 'b/{{bucket}}/managedFolders'
 self_link: 'b/{{bucket}}/managedFolders/{{%name}}'
 id_format: '{{bucket}}/{{name}}'
-delete_url: 'b/{{bucket}}/managedFolders/{{%name}}'
+delete_url: 'b/{{bucket}}/managedFolders/{{%name}}?allowNonEmpty={{force_destroy}}'
 has_self_link: true
-immutable: true
-skip_sweeper: true # Skipping sweeper since this is a child resource.
+skip_sweeper: true  # Skipping sweeper since this is a child resource.
 description: |
   A Google Cloud Storage Managed Folder.
 
@@ -41,12 +40,16 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 import_format:
   - '{{bucket}}/managedFolders/{{%name}}'
   - '{{bucket}}/{{%name}}'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_update: templates/terraform/custom_update/storage_managed_folder.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'storage_managed_folder_basic'
     primary_resource_id: 'folder'
     vars:
       bucket_name: 'my-bucket'
+    ignore_read_extra:
+      - 'force_destroy'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'bucket'
@@ -54,17 +57,28 @@ parameters:
     imports: 'name'
     description: 'The name of the bucket that contains the managed folder.'
     required: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
       The name of the managed folder expressed as a path. Must include
       trailing '/'. For example, `example_dir/example_dir2/`.
     required: true
+    immutable: true
     # The API returns values with trailing slashes, even if not
     # provided. Enforcing trailing slashes prevents diffs and ensures
     # consistent output.
     validation: !ruby/object:Provider::Terraform::Validation
       regex: '/$'
+virtual_fields:
+  - !ruby/object:Api::Type::Boolean
+    name: 'force_destroy'
+    default_value: false
+    description: |
+      Allows the deletion of a managed folder even if contains
+      objects. If a non-empty managed folder is deleted, any objects
+      within the folder will remain in a simulated folder with the
+      same name.
 properties:
   - !ruby/object:Api::Type::String
     name: createTime

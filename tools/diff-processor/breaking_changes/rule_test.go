@@ -1,4 +1,4 @@
-package rules
+package breaking_changes
 
 import (
 	"fmt"
@@ -23,7 +23,7 @@ func TestUniqueRuleIdentifiers(t *testing.T) {
 
 func TestMarkdownIdentifiers(t *testing.T) {
 	// Define the Markdown file path relative to the importer
-	mdFilePath := "../../../docs/content/develop/breaking-changes/breaking-changes.md"
+	mdFilePath := fmt.Sprintf("../../../docs/content/%s.md", breakingChangesPath)
 
 	// Read the Markdown file
 	mdContent, err := ioutil.ReadFile(mdFilePath)
@@ -50,17 +50,19 @@ func TestMarkdownIdentifiers(t *testing.T) {
 }
 
 func getArrayOfIdentifiers() []string {
-	var output []string
-	ruleCats := GetRules()
-	var rules []Rule
-	for _, rc := range ruleCats.Categories {
-		rules = append(rules, rc.Rules...)
+	var identifiers []string
+
+	for _, r := range ResourceDiffRules {
+		identifiers = append(identifiers, r.Identifier)
 	}
 
-	for _, r := range rules {
-		identifier := r.Identifier()
-		output = append(output, identifier)
+	for _, r := range ResourceConfigDiffRules {
+		identifiers = append(identifiers, r.Identifier)
 	}
 
-	return output
+	for _, r := range FieldDiffRules {
+		identifiers = append(identifiers, r.Identifier)
+	}
+
+	return identifiers
 }
