@@ -50,6 +50,10 @@ examples:
     name: "gkehub_fleet_basic"
     skip_test: true
     primary_resource_id: "default"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "gkehub_fleet_compliance_enabled_by_default"
+    skip_test: true
+    primary_resource_id: "default"
 id_format: "projects/{{project}}/locations/global/fleets/default"
 import_format: ["projects/{{project}}/locations/global/fleets/default"]
 properties:
@@ -138,3 +142,25 @@ properties:
               - VULNERABILITY_DISABLED
               - VULNERABILITY_BASIC
               - VULNERABILITY_ENTERPRISE
+      - !ruby/object:Api::Type::NestedObject
+        name: "complianceConfig"
+        api_name: "compliancePostureConfig"
+        description: Defines the config needed to enable/disable features for Compliance Posture.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: "mode"
+            description: Sets which mode to use for Security Posture features.
+            required: true
+            values:
+              - DISABLED
+              - ENABLED
+          - !ruby/object:Api::Type::Array
+            name: "complianceStandards"
+            description: List of enabled compliance standards.
+            default_from_api: true
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'standard'
+                  description: Name of the compliance standard.
+                  required: true
