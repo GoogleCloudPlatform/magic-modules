@@ -19,7 +19,7 @@ scopes:
 versions:
   - !ruby/object:Api::Product::Version
     name: beta
-    base_url: https://analyticshub.googleapis.com/v1beta1/
+    base_url: https://analyticshub.googleapis.com/v1/
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://analyticshub.googleapis.com/v1/

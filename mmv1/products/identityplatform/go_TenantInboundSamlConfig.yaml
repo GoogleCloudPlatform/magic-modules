@@ -1,0 +1,131 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'TenantInboundSamlConfig'
+description: |
+  Inbound SAML configuration for a Identity Toolkit tenant.
+
+  You must enable the
+  [Google Identity Platform](https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity) in
+  the marketplace prior to using this resource.
+docs:
+base_url: 'projects/{{project}}/tenants/{{tenant}}/inboundSamlConfigs'
+self_link: 'projects/{{project}}/tenants/{{tenant}}/inboundSamlConfigs/{{name}}'
+create_url: 'projects/{{project}}/tenants/{{tenant}}/inboundSamlConfigs?inboundSamlConfigId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+examples:
+  - name: 'identity_platform_tenant_inbound_saml_config_basic'
+    primary_resource_id: 'tenant_saml_config'
+    vars:
+      name: 'saml.tf-config'
+      idp_entity_id: 'tf-idp'
+      sp_entity_id: 'tf-sp'
+    test_vars_overrides:
+      'name': '"saml.tf-config-" + acctest.RandString(t, 10)'
+parameters:
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The name of the InboundSamlConfig resource. Must start with 'saml.' and can only have alphanumeric characters,
+      hyphens, underscores or periods. The part after 'saml.' must also start with a lowercase letter, end with an
+      alphanumeric character, and have at least 2 characters.
+    required: true
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+  - name: 'tenant'
+    type: String
+    description: |
+      The name of the tenant where this inbound SAML config resource exists
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'displayName'
+    type: String
+    description: |
+      Human friendly display name.
+    required: true
+  - name: 'enabled'
+    type: Boolean
+    description: |
+      If this config allows users to sign in with the provider.
+  - name: 'idpConfig'
+    type: NestedObject
+    description: |
+      SAML IdP configuration when the project acts as the relying party
+    required: true
+    properties:
+      - name: 'idpEntityId'
+        type: String
+        description: |
+          Unique identifier for all SAML entities
+        required: true
+      - name: 'ssoUrl'
+        type: String
+        description: |
+          URL to send Authentication request to.
+        required: true
+      - name: 'signRequest'
+        type: Boolean
+        description: |
+          Indicates if outbounding SAMLRequest should be signed.
+      - name: 'idpCertificates'
+        type: Array
+        description: |
+          The IDP's certificate data to verify the signature in the SAMLResponse issued by the IDP.
+        required: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'x509Certificate'
+              type: String
+              description: |
+                The x509 certificate
+  - name: 'spConfig'
+    type: NestedObject
+    description: |
+      SAML SP (Service Provider) configuration when the project acts as the relying party to receive
+      and accept an authentication assertion issued by a SAML identity provider.
+    required: true
+    properties:
+      - name: 'spEntityId'
+        type: String
+        description: |
+          Unique identifier for all SAML entities.
+        required: true
+      - name: 'callbackUri'
+        type: String
+        description: |
+          Callback URI where responses from IDP are handled. Must start with `https://`.
+        required: true
+      - name: 'spCertificates'
+        type: Array
+        description: |
+          The IDP's certificate data to verify the signature in the SAMLResponse issued by the IDP.
+        output: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'x509Certificate'
+              type: String
+              description: |
+                The x509 certificate
+              output: true

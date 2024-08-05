@@ -18,6 +18,11 @@ base_url: projects/{{project}}
 self_link: projects/{{project}}
 create_url: projects/{{project}}:addFirebase
 immutable: true
+docs: !ruby/object:Provider::Terraform::Docs
+  note: |
+    This resource should usually be used with a provider configuration
+    with `user_project_override = true` unless you wish for your quota
+    project to be different from the Firebase project.
 description: |
   A Google Cloud Firebase instance. This enables Firebase resources on a given google project.
   Since a FirebaseProject is actually also a GCP Project, a FirebaseProject uses underlying GCP
@@ -25,7 +30,7 @@ description: |
   Once Firebase has been added to a Google Project it cannot be removed.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation': 'https://firebase.google.com/'
+    'Official Documentation': 'https://firebase.google.com/docs/projects/terraform/get-started'
   api: 'https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects'
 import_format: ['projects/{{project}}', '{{project}}']
 autogen_async: true

@@ -65,6 +65,47 @@ examples:
       - "wait_for_mirror"
     test_vars_overrides:
       network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/netapp_volume_replication.go.erb
+  post_create: templates/terraform/post_create/netapp_volume_replication_post_create.go.erb
+  pre_delete: templates/terraform/pre_delete/netapp_volume_replication_stop_before_delete.go.erb
+  post_delete: templates/terraform/post_delete/netapp_volume_replication_delete_destination_volume.go.erb
+  post_update: templates/terraform/post_update/netapp_volume_replication_mirror_state.go.erb
+virtual_fields:
+  - !ruby/object:Api::Type::Boolean
+    name: "delete_destination_volume"
+    description: |
+      A destination volume is created as part of replication creation. The destination volume will not became
+      under Terraform management unless you import it manually. If you delete the replication, this volume
+      will remain.
+      Setting this parameter to true will delete the *current* destination volume when destroying the
+      replication. If you reversed the replication direction, this will be your former source volume!
+      For production use, it is recommended to keep this parameter false to avoid accidental volume
+      deletion. Handle with care. Default is false.
+    default_value: false
+  - !ruby/object:Api::Type::Boolean
+    name: "replication_enabled"
+    description: |
+      Set to false to stop/break the mirror. Stopping the mirror makes the destination volume read-write
+      and act independently from the source volume.
+      Set to true to enable/resume the mirror. WARNING: Resuming a mirror overwrites any changes
+      done to the destination volume with the content of the source volume.
+    default_value: true
+  - !ruby/object:Api::Type::Boolean
+    name: "force_stopping"
+    description: |
+      Only replications with mirror_state=MIRRORED can be stopped. A replication in mirror_state=TRANSFERRING
+      currently receives an update and stopping the update might be undesirable. Set this parameter to true
+      to stop anyway. All data transferred to the destination will be discarded and content of destination
+      volume will remain at the state of the last successful update. Default is false.
+    default_value: false
+  - !ruby/object:Api::Type::Boolean
+    name: "wait_for_mirror"
+    description: |
+      Replication resource state is independent of mirror_state. With enough data, it can take many hours
+      for mirror_state to reach MIRRORED. If you want Terraform to wait for the mirror to finish on
+      create/stop/resume operations, set this parameter to true. Default is false.
+    default_value: false
 parameters:
   - !ruby/object:Api::Type::String
     name: "location"
@@ -246,44 +287,3 @@ properties:
     name: "description"
     description: |
       An description of this resource.
-virtual_fields:
-  - !ruby/object:Api::Type::Boolean
-    name: "delete_destination_volume"
-    description: |
-      A destination volume is created as part of replication creation. The destination volume will not became
-      under Terraform management unless you import it manually. If you delete the replication, this volume
-      will remain.
-      Setting this parameter to true will delete the *current* destination volume when destroying the
-      replication. If you reversed the replication direction, this will be your former source volume!
-      For production use, it is recommended to keep this parameter false to avoid accidental volume
-      deletion. Handle with care. Default is false.
-    default_value: false
-  - !ruby/object:Api::Type::Boolean
-    name: "replication_enabled"
-    description: |
-      Set to false to stop/break the mirror. Stopping the mirror makes the destination volume read-write
-      and act independently from the source volume.
-      Set to true to enable/resume the mirror. WARNING: Resuming a mirror overwrites any changes
-      done to the destination volume with the content of the source volume.
-    default_value: true
-  - !ruby/object:Api::Type::Boolean
-    name: "force_stopping"
-    description: |
-      Only replications with mirror_state=MIRRORED can be stopped. A replication in mirror_state=TRANSFERRING
-      currently receives an update and stopping the update might be undesirable. Set this parameter to true
-      to stop anyway. All data transferred to the destination will be discarded and content of destination
-      volume will remain at the state of the last successful update. Default is false.
-    default_value: false
-  - !ruby/object:Api::Type::Boolean
-    name: "wait_for_mirror"
-    description: |
-      Replication resource state is independent of mirror_state. With enough data, it can take many hours
-      for mirror_state to reach MIRRORED. If you want Terraform to wait for the mirror to finish on
-      create/stop/resume operations, set this parameter to true. Default is false.
-    default_value: false
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/netapp_volume_replication.go.erb
-  post_create: templates/terraform/post_create/netapp_volume_replication_post_create.go.erb
-  pre_delete: templates/terraform/pre_delete/netapp_volume_replication_stop_before_delete.go.erb
-  post_delete: templates/terraform/post_delete/netapp_volume_replication_delete_destination_volume.go.erb
-  post_update: templates/terraform/post_update/netapp_volume_replication_mirror_state.go.erb
