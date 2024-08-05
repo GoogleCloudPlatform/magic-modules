@@ -219,4 +219,4 @@ For a seamless update, if your state today uses `no_age=true`, update it to remo
 
 ### Resource: `google_identity_platform_project_default_config` is now removed
 
-`google_identity_platform_project_default_config` is deprecated in favor of `google_identity_platform_project_config`
+`google_identity_platform_project_default_config` is removed in favor of `google_identity_platform_project_config`
