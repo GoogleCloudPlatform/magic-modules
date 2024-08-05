@@ -1,0 +1,31 @@
+resource "google_monitoring_alert_policy" "<%= ctx[:vars]["alert_policy_resource_id"] %>" {
+  display_name = "<%= ctx[:vars]["alert_policy_display_name"] %>"
+  combiner     = "OR"
+  conditions {
+    display_name = "test condition"
+    condition_threshold {
+      filter     = "metric.type=\"compute.googleapis.com/instance/disk/write_bytes_count\" AND resource.type=\"gce_instance\""
+      duration   = "60s"
+      comparison = "COMPARISON_GT"
+      aggregations {
+        alignment_period   = "60s"
+        per_series_aligner = "ALIGN_RATE"
+      }
+    }
+  }
+}
+
+resource "google_monitoring_snooze"  "<%= ctx[:primary_resource_id] %>" {
+  display_name = "<%= ctx[:vars]["snooze_display_name"] %>"
+  
+  interval {
+      start_time = timeadd(plantimestamp(), "1h")
+      end_time   = timeadd(plantimestamp(), "2h")
+  }
+
+  criteria {
+    policies = [
+        google_monitoring_alert_policy.<%= ctx[:vars]["alert_policy_resource_id"] %>.id
+    ]
+  }
+}
