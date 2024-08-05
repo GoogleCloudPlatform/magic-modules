@@ -18,9 +18,9 @@ func TestAccDataSourceGoogleStorageBucketObject_basic(t *testing.T) {
 	bucket := "tf-bucket-object-test-" + acctest.RandString(t, 10)
 
 	context := map[string]interface{}{
-		"bucket":        bucket,
-		"project":       project,
-		"object_name": 	 "bee",
+		"bucket":      bucket,
+		"project":     project,
+		"object_name": "bee",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
