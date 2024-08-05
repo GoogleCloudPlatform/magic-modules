@@ -575,6 +575,7 @@ is set to true. Defaults to ZONAL.`,
 						"insights_config": {
 							Type:     schema.TypeList,
 							Optional: true,
+							Computed: true,
 							MaxItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -663,7 +664,7 @@ is set to true. Defaults to ZONAL.`,
 							Optional:     true,
 							Computed:     true,
 							ValidateFunc: validation.StringInSlice([]string{"NOT_REQUIRED", "REQUIRED"}, false),
-							Description:  `Specifies if connections must use Cloud SQL connectors.`,
+							Description:  `Enables the enforcement of Cloud SQL Auth Proxy or Cloud SQL connectors for all the connections. If enabled, all the direct connections are rejected.`,
 						},
 						"deletion_protection_enabled": {
 							Type:        schema.TypeBool,
@@ -1146,7 +1147,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("Error, failed to create instance %s: %s", instance.Name, err)
 	}
 
-	id, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}"}}/instances/{{"{{"}}name{{"}}"}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/instances/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -2049,7 +2050,7 @@ func resourceSqlDatabaseInstanceImport(d *schema.ResourceData, meta interface{})
 	}
 
 	// Replace import id for the resource id
-	id, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}"}}/instances/{{"{{"}}name{{"}}"}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/instances/{{name}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
