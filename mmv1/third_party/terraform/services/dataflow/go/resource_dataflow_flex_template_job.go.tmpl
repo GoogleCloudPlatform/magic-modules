@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"unicode"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
@@ -311,23 +310,38 @@ func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interfac
 func resourceDataflowFlexJobSetupEnv(d *schema.ResourceData, config *transport_tpg.Config) (dataflow.FlexTemplateRuntimeEnvironment, map[string]string, error) {
 
 	updatedParameters := tpgresource.ExpandStringMap(d, "parameters")
-    if err := hasIllegalParametersErr(d); err != nil {
-        return dataflow.FlexTemplateRuntimeEnvironment{}, updatedParameters, err
-    }
 
 	additionalExperiments := tpgresource.ConvertStringSet(d.Get("additional_experiments").(*schema.Set))
 
 	var autoscalingAlgorithm string
 	autoscalingAlgorithm, updatedParameters = dataflowFlexJobTypeTransferVar("autoscaling_algorithm", "autoscalingAlgorithm", updatedParameters, d)
 
-    numWorkers, err := parseInt64("num_workers", d)
-	if err != nil {
-		return dataflow.FlexTemplateRuntimeEnvironment{}, updatedParameters, err
+	var numWorkers int
+	if p, ok := d.GetOk("parameters.numWorkers"); ok {
+		number, err := strconv.Atoi(p.(string))
+		if err != nil {
+			return dataflow.FlexTemplateRuntimeEnvironment{}, updatedParameters, fmt.Errorf("parameters.numWorkers must have a valid integer assigned to it, current value is %s", p.(string))
+		}
+		delete(updatedParameters, "numWorkers")
+		numWorkers = number
+	} else {
+		if v, ok := d.GetOk("num_workers"); ok {
+			numWorkers = v.(int)
+		}
 	}
 
-    maxNumWorkers, err := parseInt64("max_workers", d)
-	if err != nil {
-		return dataflow.FlexTemplateRuntimeEnvironment{}, updatedParameters, err
+	var maxNumWorkers int
+	if p, ok := d.GetOk("parameters.maxNumWorkers"); ok {
+		number, err := strconv.Atoi(p.(string))
+		if err != nil {
+			return dataflow.FlexTemplateRuntimeEnvironment{}, updatedParameters, fmt.Errorf("parameters.maxNumWorkers must have a valid integer assigned to it, current value is %s", p.(string))
+		}
+		delete(updatedParameters, "maxNumWorkers")
+		maxNumWorkers = number
+	} else {
+		if v, ok := d.GetOk("max_workers"); ok {
+			maxNumWorkers = v.(int)
+		}
 	}
 
 	network, updatedParameters := dataflowFlexJobTypeTransferVar("network", "network", updatedParameters, d)
@@ -346,10 +360,23 @@ func resourceDataflowFlexJobSetupEnv(d *schema.ResourceData, config *transport_t
 
 	ipConfiguration, updatedParameters := dataflowFlexJobTypeTransferVar("ip_configuration", "ipConfiguration", updatedParameters, d)
 
-    enableStreamingEngine, err := parseBool("enable_streaming_engine", d)
-    if err != nil {
-        return dataflow.FlexTemplateRuntimeEnvironment{}, updatedParameters, err
-    }
+	var enableStreamingEngine bool
+	if p, ok := d.GetOk("parameters.enableStreamingEngine"); ok {
+		delete(updatedParameters, "enableStreamingEngine")
+		e := strings.ToLower(p.(string))
+		switch e {
+		case "true":
+			enableStreamingEngine = true
+		case "false":
+			enableStreamingEngine = false
+		default:
+			return dataflow.FlexTemplateRuntimeEnvironment{}, nil, fmt.Errorf("error when handling parameters.enableStreamingEngine value: expected value to be true or false but got value `%s`", e)
+		}
+	} else {
+		if v, ok := d.GetOk("enable_streaming_engine"); ok {
+			enableStreamingEngine = v.(bool)
+		}
+	}
 
 	sdkContainerImage, updatedParameters := dataflowFlexJobTypeTransferVar("sdk_container_image", "sdkContainerImage", updatedParameters, d)
 
@@ -358,8 +385,8 @@ func resourceDataflowFlexJobSetupEnv(d *schema.ResourceData, config *transport_t
 	env := dataflow.FlexTemplateRuntimeEnvironment{
 		AdditionalUserLabels:  tpgresource.ExpandStringMap(d, "effective_labels"),
 		AutoscalingAlgorithm:  autoscalingAlgorithm,
-		NumWorkers:            numWorkers,
-		MaxWorkers:            maxNumWorkers,
+		NumWorkers:            int64(numWorkers),
+		MaxWorkers:            int64(maxNumWorkers),
 		Network:               network,
 		ServiceAccountEmail:   serviceAccountEmail,
 		Subnetwork:            subnetwork,
@@ -811,66 +838,6 @@ func dataflowFlexJobTypeParameterOverride(ename, pname string, d *schema.Resourc
 		}
 	}
 	return nil
-}
-
-func hasIllegalParametersErr(d *schema.ResourceData) error {
-	pKey := "parameters"
-	errFmt := "%s must not include Dataflow options, found: %s"
-	for k := range ResourceDataflowFlexTemplateJob().Schema {
-		if _, notOk := d.GetOk(fmt.Sprintf("%s.%s", pKey, k)); notOk {
-			return fmt.Errorf(errFmt, pKey, k)
-		}
-		kk := toCamelCase(k)
-		if _, notOk := d.GetOk(fmt.Sprintf("%s.%s", pKey, kk)); notOk {
-			return fmt.Errorf(errFmt, pKey, kk)
-		}
-	}
-	return nil
-}
-
-func toCamelCase(s string) string {
-	var result []rune
-	runes := []rune(s)
-	for i := 0; i < len(runes); i++ {
-		r := runes[i]
-		if i == 0 {
-			result = append(result, r)
-			continue
-		}
-		if r != '_' {
-			result = append(result, r)
-			continue
-		}
-		i++
-		r = runes[i]
-		result = append(result, unicode.ToUpper(r))
-	}
-
-	return string(result)
-}
-
-func parseInt64(name string, d *schema.ResourceData) (int64, error) {
-	v, ok := d.GetOk(name)
-	if !ok {
-		return 0, nil
-	}
-	vv, err := strconv.ParseInt(fmt.Sprint(v), 10, 64)
-	if err != nil {
-		return 0, fmt.Errorf("illegal value assigned to %s, got: %s", name, v)
-	}
-	return vv, nil
-}
-
-func parseBool(name string, d *schema.ResourceData) (bool, error) {
-	v, ok := d.GetOk(name)
-	if !ok {
-		return false, nil
-	}
-	vv, err := strconv.ParseBool(fmt.Sprint(v))
-	if err != nil {
-		return false, fmt.Errorf("illegal value assigned to %s, got: %s", name, v)
-	}
-	return vv, nil
 }
 
 {{ end }}
