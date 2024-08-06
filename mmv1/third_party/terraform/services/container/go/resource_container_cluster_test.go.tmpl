@@ -10120,7 +10120,7 @@ resource "google_container_cluster" "with_confidential_boot_disk" {
       ]
       image_type = "COS_CONTAINERD"
       boot_disk_kms_key = "%s"
-      machine_type = "n2-standard-2"
+      machine_type = "n2d-standard-2"
       enable_confidential_storage = true
       disk_type = "hyperdisk-balanced"
     }
