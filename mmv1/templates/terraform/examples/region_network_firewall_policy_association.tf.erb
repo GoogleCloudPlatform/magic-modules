@@ -1,0 +1,18 @@
+resource "google_compute_region_network_firewall_policy" "policy" {
+  name = "<%= ctx[:vars]['policy_name'] %>"
+  project = "<%= ctx[:test_env_vars]["project"] %>"
+  description = "Sample global network firewall policy"
+  region = "<%= ctx[:test_env_vars]["region"] %>"
+}
+
+resource "google_compute_network" "network" {
+  name = "<%= ctx[:vars]['network_name'] %>"
+}
+
+resource "google_compute_region_network_firewall_policy_association" "<%= ctx[:primary_resource_id] %>" {
+  name = "<%= ctx[:vars]['association_name'] %>"
+  attachment_target = google_compute_network.network.id
+  firewall_policy =  google_compute_region_network_firewall_policy.policy.name
+  project =  "<%= ctx[:test_env_vars]["project"] %>"
+  region = "<%= ctx[:test_env_vars]["region"] %>"
+}
