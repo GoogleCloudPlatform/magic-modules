@@ -314,7 +314,12 @@ func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 		d.SetId("")
 		return nil
 	}
-
+	// Explicitly set client-side fields to default values if unset
+	if _, ok := d.GetOkExists("deletion_policy"); !ok {
+		if err := d.Set("deletion_policy", "NONE"); err != nil {
+			return fmt.Errorf("Error setting deletion_policy: %s", err)
+		}
+	}
 	if err := d.Set("project_id", pid); err != nil {
 		return fmt.Errorf("Error setting project_id: %s", err)
 	}
