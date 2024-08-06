@@ -1,0 +1,249 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'FirewallPolicyRule'
+kind: 'compute#firewallPolicyRule'
+base_url: 'locations/global/firewallPolicies/{{firewall_policy}}'
+id_format: 'locations/global/firewallPolicies/{{firewall_policy}}/rules/{{priority}}'
+self_link: 'locations/global/firewallPolicies/{{firewall_policy}}/getRule?priority={{priority}}'
+create_url: 'locations/global/firewallPolicies/{{firewall_policy}}/addRule'
+update_verb: :POST
+update_url: 'locations/global/firewallPolicies/{{firewall_policy}}/patchRule?priority={{priority}}'
+delete_verb: :POST
+delete_url: 'locations/global/firewallPolicies/{{firewall_policy}}/removeRule?priority={{priority}}'
+import_format: [
+  'locations/global/firewallPolicies/{{firewall_policy}}/rules/{{priority}}',
+  '{{firewall_policy}}/{{priority}}'
+]
+immutable: true
+description: |
+  Represents a rule that describes one or more match conditions along with the action to be taken when traffic matches this condition (allow or deny).
+references: !ruby/object:Api::Resource::ReferenceLinks
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/firewallPolicies/addRule'
+timeouts: !ruby/object:Api::Timeouts
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  post_create: 'templates/terraform/constants/compute_firewall_policy_rule_operation.go.erb'
+  post_delete: 'templates/terraform/constants/compute_firewall_policy_rule_operation.go.erb'
+  post_update: 'templates/terraform/constants/compute_firewall_policy_rule_operation.go.erb'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'firewall_policy_rule'
+    primary_resource_id: 'policy_rule'
+    vars:
+      fw_policy: 'policy'
+      address: 'address'
+      folder: 'folder'
+    test_env_vars:
+      org_id: :ORG_ID
+      service_account: :SERVICE_ACCT
+parameters:
+  - !ruby/object:Api::Type::String
+    name: 'firewallPolicy'
+    description: |
+      The firewall policy of the resource.
+    required: true
+    url_param_only: true
+    immutable: true
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'creationTimestamp'
+    description: |
+      Creation timestamp in RFC3339 text format.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'ruleName'
+    description: |
+      An optional name for the rule. This field is not a unique identifier and can be updated.
+  - !ruby/object:Api::Type::String
+    name: 'description'
+    description: 'An optional description for this resource.'
+  - !ruby/object:Api::Type::Integer
+    name: 'priority'
+    required: true
+    description: |
+      An integer indicating the priority of a rule in the list.
+      The priority must be a positive value between 0 and 2147483647.
+      Rules are evaluated from highest to lowest priority where 0 is the highest priority and 2147483647 is the lowest prority.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'match'
+    required: true
+    description: |
+      A match condition that incoming traffic is evaluated against. If it evaluates to true, the corresponding 'action' is enforced.
+    properties:
+      - !ruby/object:Api::Type::Array
+        name: 'srcIpRanges'
+        description: |
+          CIDR IP address range. Maximum number of source CIDR IP ranges allowed is 5000.
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::Array
+        name: 'destIpRanges'
+        description: |
+          CIDR IP address range. Maximum number of destination CIDR IP ranges allowed is 5000.
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::Array
+        name: 'layer4Configs'
+        required: true
+        description: |
+          Pairs of IP protocols and ports that the rule should match.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'ipProtocol'
+              required: true
+              description: |
+                The IP protocol to which this rule applies. The protocol type is required when creating a firewall rule.
+                This value can either be one of the following well known protocol strings (tcp, udp, icmp, esp, ah, ipip, sctp), or the IP protocol number.
+            - !ruby/object:Api::Type::Array
+              name: 'ports'
+              description: |
+                An optional list of ports to which this rule applies. This field is only applicable for UDP or TCP protocol. Each entry must be either an integer or a range. If not specified, this rule applies to connections through any port.
+                Example inputs include: ["22"], ["80","443"], and ["12345-12349"].
+              item_type: Api::Type::String
+      - !ruby/object:Api::Type::Array
+        name: 'srcSecureTags'
+        description: |
+          regionNetworkFirewallPolicies.list of secure tag values, which should be matched at the source of the traffic. For INGRESS rule, if all the srcSecureTag are INEFFECTIVE, and there is no srcIpRange, this rule will be ignored. Maximum number of source tag values allowed is 256.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'name'
+              description: |
+                Name of the secure tag, created with TagManager's TagValue API.
+            - !ruby/object:Api::Type::Enum
+              name: 'state'
+              output: true
+              description: |
+                State of the secure tag, either EFFECTIVE or INEFFECTIVE. A secure tag is INEFFECTIVE when it is deleted or its network is deleted.
+              values:
+                - :EFFECTIVE
+                - :INEFFECTIVE
+      - !ruby/object:Api::Type::Array
+        name: 'destAddressGroups'
+        description: |
+          Address groups which should be matched against the traffic destination. Maximum number of destination address groups is 10.
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::Array
+        name: 'srcAddressGroups'
+        description: |
+          Address groups which should be matched against the traffic source. Maximum number of source address groups is 10.
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::Array
+        name: 'srcFqdns'
+        description: |
+          Fully Qualified Domain Name (FQDN) which should be matched against traffic source. Maximum number of source fqdn allowed is 100.
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::Array
+        name: 'destFqdns'
+        description: |
+          Fully Qualified Domain Name (FQDN) which should be matched against traffic destination. Maximum number of destination fqdn allowed is 100.
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::Array
+        name: 'srcRegionCodes'
+        description: |
+          Region codes whose IP addresses will be used to match for source of traffic. Should be specified as 2 letter country code defined as per ISO 3166 alpha-2 country codes. ex."US" Maximum number of source region codes allowed is 5000.
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::Array
+        name: 'destRegionCodes'
+        description: |
+          Region codes whose IP addresses will be used to match for destination of traffic. Should be specified as 2 letter country code defined as per ISO 3166 alpha-2 country codes. ex."US" Maximum number of dest region codes allowed is 5000.
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::Array
+        name: 'destThreatIntelligences'
+        description: |
+          Names of Network Threat Intelligence lists. The IPs in these lists will be matched against traffic destination.
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::Array
+        name: 'srcThreatIntelligences'
+        description: |
+          Names of Network Threat Intelligence lists. The IPs in these lists will be matched against traffic source.
+        item_type: Api::Type::String
+  - !ruby/object:Api::Type::String
+    name: 'action'
+    required: true
+    description: 'The Action to perform when the client connection triggers the rule. Valid actions are "allow", "deny", "goto_next" and "apply_security_profile_group".'
+  - !ruby/object:Api::Type::String
+    name: 'securityProfileGroup'
+    description: |
+      A fully-qualified URL of a SecurityProfile resource instance.
+      Example: https://networksecurity.googleapis.com/v1/projects/{project}/locations/{location}/securityProfileGroups/my-security-profile-group
+      Must be specified if action = 'apply_security_profile_group' and cannot be specified for other actions.
+  - !ruby/object:Api::Type::Boolean
+    name: 'tlsInspect'
+    description: |
+      Boolean flag indicating if the traffic should be TLS decrypted.
+      Can be set only if action = 'apply_security_profile_group' and cannot be set for other actions.
+  - !ruby/object:Api::Type::Enum
+    name: 'direction'
+    required: true
+    description: |
+      The direction in which this rule applies.
+    values:
+      - :INGRESS
+      - :EGRESS
+  - !ruby/object:Api::Type::Array
+    name: 'targetResources'
+    item_type: Api::Type::String
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    description: |
+      A list of network resource URLs to which this rule applies.
+      This field allows you to control which network's VMs get this rule.
+      If this field is left blank, all VMs within the organization will receive the rule.
+  - !ruby/object:Api::Type::Boolean
+    name: 'enableLogging'
+    description: |
+      Denotes whether to enable logging for a particular rule.
+      If logging is enabled, logs will be exported to the configured export destination in Stackdriver.
+      Logs may be exported to BigQuery or Pub/Sub.
+      Note: you cannot enable logging on "goto_next" rules.
+  - !ruby/object:Api::Type::Integer
+    name: 'ruleTupleCount'
+    output: true
+    description: |
+      Calculation of the complexity of a single firewall policy rule.
+  - !ruby/object:Api::Type::Array
+    name: 'targetServiceAccounts'
+    item_type: Api::Type::String
+    description: |
+      A list of service accounts indicating the sets of instances that are applied with this rule.
+  - !ruby/object:Api::Type::Array
+    name: 'targetSecureTags'
+    description: |
+      A list of secure tags that controls which instances the firewall rule applies to.
+      If targetSecureTag are specified, then the firewall rule applies only to instances in the VPC network that have one of those EFFECTIVE secure tags, if all the targetSecureTag are in INEFFECTIVE state, then this rule will be ignored.
+      targetSecureTag may not be set at the same time as targetServiceAccounts. If neither targetServiceAccounts nor targetSecureTag are specified, the firewall rule applies to all instances on the specified network. Maximum number of target label tags allowed is 256.
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'name'
+          description: |
+            Name of the secure tag, created with TagManager's TagValue API.
+        - !ruby/object:Api::Type::Enum
+          name: 'state'
+          output: true
+          description: |
+            State of the secure tag, either EFFECTIVE or INEFFECTIVE. A secure tag is INEFFECTIVE when it is deleted or its network is deleted.
+          values:
+            - :EFFECTIVE
+            - :INEFFECTIVE
+  - !ruby/object:Api::Type::Boolean
+    name: 'disabled'
+    description: |
+      Denotes whether the firewall policy rule is disabled.
+      When set to true, the firewall policy rule is not enforced and traffic behaves as if it did not exist.
+      If this is unspecified, the firewall policy rule will be enabled.

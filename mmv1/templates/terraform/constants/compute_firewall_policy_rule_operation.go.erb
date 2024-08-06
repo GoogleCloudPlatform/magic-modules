@@ -1,0 +1,15 @@
+parent, err := tpgresource.ReplaceVars(d, config, "locations/global/firewallPolicies/{{firewall_policy}}")
+if err != nil {
+	return fmt.Errorf("Error constructing parent: %s", err)
+}
+
+var opRes map[string]interface{}
+err = ComputeOrgOperationWaitTimeWithResponse(
+	config, res, &opRes, parent, "FirewallPolicyRule operation", userAgent,
+	d.Timeout(schema.TimeoutCreate))
+
+if err != nil {
+	// The resource didn't actually create
+	d.SetId("")
+	return fmt.Errorf("Error waiting for FirewallPolicyRule operation: %s", err)
+}
