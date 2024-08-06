@@ -103,9 +103,3 @@ properties:
     values:
       - :DELEGATION
       - :EXTERNAL_IPV6_FORWARDING_RULE_CREATION
-  - !ruby/object:Api::Type::Integer
-    name: 'allocatablePrefixLength'
-    description:
-      The allocatable prefix length supported by this public delegated prefix.
-      This field is optional and cannot be set for prefixes in DELEGATION mode.
-      It cannot be set for IPv4 prefixes either, and it always defaults to 32.
