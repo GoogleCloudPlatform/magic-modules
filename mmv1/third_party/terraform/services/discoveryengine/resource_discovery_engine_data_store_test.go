@@ -48,7 +48,6 @@ resource "google_discovery_engine_data_store" "basic" {
   display_name                = "tf-test-structured-datastore"
   industry_vertical           = "GENERIC"
   content_config              = "NO_CONTENT"
-  skip_default_schema_creation = false
 }
 `, context)
 }
@@ -56,14 +55,11 @@ resource "google_discovery_engine_data_store" "basic" {
 func testAccDiscoveryEngineDataStore_discoveryengineDatastoreBasicExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_discovery_engine_data_store" "basic" {
-  location                     = "global"
-  data_store_id                = "tf-test-data-store-id%{random_suffix}"
-  display_name                 = "updated-tf-test-structured-datastore"
-  industry_vertical            = "GENERIC"
-  content_config               = "NO_CONTENT"
-  solution_types               = ["SOLUTION_TYPE_SEARCH"]
-  create_advanced_site_search  = false
-  skip_default_schema_creation = false
+  location                    = "global"
+  data_store_id               = "tf-test-data-store-id%{random_suffix}"
+  display_name                = "updated-tf-test-structured-datastore"
+  industry_vertical           = "GENERIC"
+  content_config              = "NO_CONTENT"
 }
 `, context)
 }
