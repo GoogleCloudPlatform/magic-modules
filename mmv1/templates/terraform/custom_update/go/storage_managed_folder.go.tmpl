@@ -1,0 +1,11 @@
+_ = config
+
+// we can only get here if force_destroy was updated
+if d.Get("force_destroy") != nil {
+	if err := d.Set("force_destroy", d.Get("force_destroy")); err != nil {
+		return fmt.Errorf("Error updating force_destroy: %s", err)
+	}
+}
+
+// all other fields are immutable, don't do anything else
+return nil

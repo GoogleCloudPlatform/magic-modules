@@ -1,5 +1,5 @@
 resource "google_vmwareengine_network" "network-policy-nw" {
-    name              = "standard-full-nw"
+    name              = "{{index $.Vars "network_name"}}"
     location          = "global" 
     type              = "STANDARD"
     description       = "VMwareEngine standard network sample"
@@ -7,7 +7,7 @@ resource "google_vmwareengine_network" "network-policy-nw" {
 
 resource "google_vmwareengine_network_policy" "{{$.PrimaryResourceId}}" {
     location = "{{index $.TestEnvVars "region"}}"
-    name = "{{index $.Vars "name"}}"
+    name = "{{index $.Vars "network_policy_name"}}"
     edge_services_cidr = "192.168.30.0/26"
     vmware_engine_network = google_vmwareengine_network.network-policy-nw.id
     description = "Sample Network Policy"
