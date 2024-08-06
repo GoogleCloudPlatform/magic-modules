@@ -49,6 +49,19 @@ async: !ruby/object:Api::OpAsync
 id_format: 'projects/{{project}}/locations/{{location}}/services/{{name}}'
 import_format: ['projects/{{project}}/locations/{{location}}/services/{{name}}']
 autogen_async: true
+virtual_fields:
+  - !ruby/object:Api::Type::Boolean
+    name: 'deletion_protection'
+    default_value: true
+    description: |
+      Whether Terraform will be prevented from destroying the service. Defaults to true.
+      When a`terraform destroy` or `terraform apply` would delete the service,
+      the command will fail if this field is not set to false in Terraform state.
+      When the field is set to true or unset in Terraform state, a `terraform apply`
+      or `terraform destroy` that would delete the service will fail.
+      When the field is set to false, deleting the service is allowed.
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_delete: 'templates/terraform/pre_delete/cloudrunv2_service_deletion_policy.go.erb'
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_basic'
@@ -56,11 +69,15 @@ examples:
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_limits'
     primary_resource_id: 'default'
     vars:
       cloud_run_service_name: 'cloudrun-service'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_sql'
     primary_resource_id: 'default'
@@ -74,6 +91,8 @@ examples:
       deletion_protection: 'false'
     oics_vars_overrides:
       deletion_protection: 'false'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_vpcaccess'
     primary_resource_id: 'default'
@@ -83,18 +102,24 @@ examples:
       vpc_access_connector_name: 'run-vpc'
       vpc_compute_subnetwork_name: 'run-subnetwork'
       compute_network_name: 'run-network'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_directvpc'
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_probes'
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_secret'
     primary_resource_id: 'default'
@@ -102,6 +127,8 @@ examples:
     vars:
       cloud_run_service_name: 'cloudrun-service'
       secret_id: 'secret-1'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_multicontainer'
     min_version: 'beta'
@@ -110,20 +137,24 @@ examples:
       random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
-
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_mount_gcs'
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service-%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
-
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_mount_nfs'
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service-%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
+    ignore_read_extra:
+      - 'deletion_protection'
 
 parameters:
   - !ruby/object:Api::Type::String
