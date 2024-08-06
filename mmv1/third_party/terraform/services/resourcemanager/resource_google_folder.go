@@ -142,7 +142,12 @@ func resourceGoogleFolderRead(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Folder Not Found : %s", d.Id()))
 	}
-
+	// Explicitly set client-side fields to default values if unset
+	if _, ok := d.GetOkExists("deletion_protection"); !ok {
+		if err := d.Set("deletion_protection", true); err != nil {
+			return fmt.Errorf("Error setting deletion_protection: %s", err)
+		}
+	}
 	if err := d.Set("name", folder.Name); err != nil {
 		return fmt.Errorf("Error setting name: %s", err)
 	}
@@ -266,10 +271,6 @@ func resourceGoogleFolderImportState(d *schema.ResourceData, m interface{}) ([]*
 
 	if !strings.HasPrefix(d.Id(), "folders/") {
 		id = fmt.Sprintf("folders/%s", id)
-	}
-
-	if err := d.Set("deletion_protection", true); err != nil {
-		return nil, fmt.Errorf("Error setting deletion_protection: %s", err)
 	}
 
 	d.SetId(id)
