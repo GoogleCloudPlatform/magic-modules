@@ -19,7 +19,7 @@ func TestAccDataSourceGoogleKmsCryptoKeyVersionLatest_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleKmsCryptoKeyVersionLatest_basic(asymSignKey.CryptoKey.Name),
-				Check:  resource.TestCheckResourceAttr("data.google_kms_crypto_key_version_latest.version_latest", "version", "2"),
+				Check:  resource.TestCheckResourceAttr("data.google_kms_crypto_key_version_latest.version_latest", "version", "3"),
 			},
 			// Asymmetric keys should have a public key
 			{
@@ -41,10 +41,6 @@ func TestAccDataSourceGoogleKmsCryptoKeyVersionLatest_basic(t *testing.T) {
 
 func testAccDataSourceGoogleKmsCryptoKeyVersionLatest_basic(kmsKey string) string {
 	return fmt.Sprintf(`
-resource "google_kms_crypto_key_version" "version" {
-	crypto_key = "%s"
-  }
-
 data "google_kms_crypto_key_version_latest" "version_latest" {
   crypto_key = "%s"
 }
