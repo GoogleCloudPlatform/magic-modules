@@ -3,7 +3,7 @@ steps:
     - name: 'gcr.io/graphite-docker-images/go-plus'
       id: gcb-vcr-nightly
       entrypoint: '/workspace/.ci/scripts/go-plus/vcr-cassette-update/vcr_cassette_update.sh'
-      secretEnv: ["GOOGLE_BILLING_ACCOUNT", "GOOGLE_CUST_ID", "GOOGLE_FIRESTORE_PROJECT", "GOOGLE_IDENTITY_USER", "GOOGLE_MASTER_BILLING_ACCOUNT", "GOOGLE_ORG", "GOOGLE_ORG_2", "GOOGLE_ORG_DOMAIN", "GOOGLE_PROJECT", "GOOGLE_PROJECT_NUMBER", "GOOGLE_SERVICE_ACCOUNT", "SA_KEY", "GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION"]
+      secretEnv: ["GOOGLE_BILLING_ACCOUNT", "GOOGLE_CUST_ID", "GOOGLE_IDENTITY_USER", "GOOGLE_MASTER_BILLING_ACCOUNT", "GOOGLE_ORG", "GOOGLE_ORG_2", "GOOGLE_ORG_DOMAIN", "GOOGLE_PROJECT", "GOOGLE_PROJECT_NUMBER", "GOOGLE_SERVICE_ACCOUNT", "SA_KEY", "GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION"]
       args:
           - $BUILD_ID
 
@@ -19,8 +19,6 @@ availableSecrets:
       env: GOOGLE_BILLING_ACCOUNT
     - versionName: projects/673497134629/secrets/ci-test-cust-id/versions/latest
       env: GOOGLE_CUST_ID
-    - versionName: projects/673497134629/secrets/ci-test-firestore-project/versions/latest
-      env: GOOGLE_FIRESTORE_PROJECT
     - versionName: projects/673497134629/secrets/ci-test-identity-user/versions/latest
       env: GOOGLE_IDENTITY_USER
     - versionName: projects/673497134629/secrets/ci-test-master-billing-account/versions/latest
