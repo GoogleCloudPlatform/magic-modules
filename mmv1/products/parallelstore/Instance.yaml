@@ -22,7 +22,6 @@ name: Instance
 description: A Parallelstore Instance.
 update_verb: :PATCH
 update_mask: true
-- min_version: beta
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
