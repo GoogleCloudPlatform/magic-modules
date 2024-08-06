@@ -177,6 +177,19 @@ func resourceGoogleFolderUpdate(d *schema.ResourceData, meta interface{}) error 
 	if err != nil {
 		return err
 	}
+
+	clientSideFields := map[string]bool{"deletion_protection": true}
+	clientSideOnly := true
+	for field := range ResourceGoogleFolder().Schema {
+		if d.HasChange(field) && !clientSideFields[field] {
+			clientSideOnly = false
+			break
+		}
+	}
+	if clientSideOnly {
+		return nil
+	}
+
 	displayName := d.Get("display_name").(string)
 
 	d.Partial(true)
