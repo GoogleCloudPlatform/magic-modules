@@ -189,4 +189,3 @@ properties:
           output: true
           description: |
             A human-readable description of the warning code.
-# note: the API includes a "selfLink" output field that is not populated

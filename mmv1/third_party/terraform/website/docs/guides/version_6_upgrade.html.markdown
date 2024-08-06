@@ -108,6 +108,12 @@ Description of the change and how users should adjust their configuration (if ne
 
 A `view` can no longer be created when `schema` contains required fields
 
+## Resource: `google_bigquery_reservation`
+
+### `multi_region_auxiliary` is now removed
+
+This field is no longer supported by the BigQuery Reservation API.
+
 ## Resource: `google_sql_database_instance`
 
 ### `settings.ip_configuration.require_ssl` is now removed
@@ -119,6 +125,19 @@ Removed in favor of field `settings.ip_configuration.ssl_mode`.
 ### `schema_settings` no longer has a default value
 
 An empty value means the setting should be cleared.
+
+## Resource: `google_domain`
+
+### Domain deletion now prevented by default with `deletion_protection`
+
+The field `deletion_protection` has been added with a default value of `true`. This field prevents
+Terraform from destroying or recreating the Domain. In 6.0.0, existing domains will have 
+`deletion_protection` set to `true` during the next refresh unless otherwise set in configuration.
+
+**`deletion_protection` does NOT prevent deletion outside of Terraform.**
+
+To disable deletion protection, explicitly set this field to `false` in configuration
+and then run `terraform apply` to apply the change.
 
 ## Resource: `google_cloud_run_v2_job`
 
@@ -199,3 +218,18 @@ Terraform from destroying or recreating the Folder. In 6.0.0, existing folders w
 To disable deletion protection, explicitly set this field to `false` in configuration
 and then run `terraform apply` to apply the change.
 
+## Resource: `google_storage_bucket`
+
+### `lifecycle_rule.condition.no_age` is now removed
+
+Previously `lifecycle_rule.condition.age` attirbute was being set zero value by default and `lifecycle_rule.condition.no_age` was introduced to prevent that.
+Now `lifecycle_rule.condition.no_age` is no longer supported and `lifecycle_rule.condition.age` won't set a zero value by default.
+Removed in favor of the field `lifecycle_rule.condition.send_age_if_zero` which can be used to set zero value for `lifecycle_rule.condition.age` attribute. 
+
+For a seamless update, if your state today uses `no_age=true`, update it to remove `no_age` and set `send_age_if_zero=false`. If you do not use `no_age=true`, you will need to add `send_age_if_zero=true` to your state to avoid any changes after updating to 6.0.0. 
+
+## Removals
+
+### Resource: `google_identity_platform_project_default_config` is now removed
+
+`google_identity_platform_project_default_config` is removed in favor of `google_identity_platform_project_config`
