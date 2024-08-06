@@ -16,6 +16,16 @@ import (
 	"google.golang.org/api/dns/v1"
 )
 
+func lbTypeNoneDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+    // Check if the key matches the relevant attribute
+    if k != "routing_policy.0.primary_backup.0.primary.0.internal_load_balancers.0.load_balancer_type" {
+        return false
+    }
+
+    // Suppress diff if the change is from "none" to null or vice versa
+    return (old == "none" && new == "") || (old == "" && new == "none")
+}
+
 func rrdatasDnsDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	if k == "rrdatas.#" && (new == "0" || new == "") && old != new {
 		return false
@@ -263,6 +273,7 @@ var healthCheckedTargetSchema *schema.Resource = &schema.Resource{
 					"load_balancer_type": {
 						Type:         schema.TypeString,
 						Optional:     true,
+						DiffSuppressFunc: lbTypeNoneDiffSuppress,
 						Description:  `The type of load balancer. This value is case-sensitive. Possible values: ["regionalL4ilb", "regionalL7ilb", "globalL7ilb"]`,
 						ValidateFunc: validation.StringInSlice([]string{"regionalL4ilb", "regionalL7ilb", "globalL7ilb"}, false),
 					},
