@@ -1,0 +1,136 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'RouterNatAddress'
+base_url: projects/{{project}}/regions/{{region}}/routers/{{router}}
+self_link: projects/{{project}}/regions/{{region}}/routers/{{router}}
+create_url: projects/{{project}}/regions/{{region}}/routers/{{router}}
+update_url: projects/{{project}}/regions/{{region}}/routers/{{router}}
+delete_url: projects/{{project}}/regions/{{region}}/routers/{{router}}
+create_verb: :PATCH
+update_verb: :PATCH
+delete_verb: :PATCH
+identity:
+  - routerNat
+collection_url_key: nats
+nested_query: !ruby/object:Api::Resource::NestedQuery
+  modify_by_patch: true
+  keys:
+    - nats
+description: |
+  A list of IP addresses to be used in a NAT service.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Google Cloud Router': 'https://cloud.google.com/router/docs/'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/routers'
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    kind: 'compute#operation'
+    path: 'routerNat'
+    base_url: 'projects/{{project}}/regions/{{regions}}/operations/{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'targetLink'
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'status'
+    complete: 'DONE'
+    allowed:
+      - 'PENDING'
+      - 'RUNNING'
+      - 'DONE'
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error/errors'
+    message: 'message'
+exclude_tgc: true
+id_format: '{{project}}/{{region}}/{{router}}/{{router.name}}'
+mutex: router/{{region}}/{{router}}
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'security_policy_rule_basic'
+    primary_resource_id: 'policy_rule'
+    vars:
+      sec_policy_name: 'policyruletest'
+# We use a custom code for CREATE since the generated code does not replace the encoder when using nested_query parameter
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_create: templates/terraform/custom_create/router_nat_address_test_create.go.erb
+  encoder: 'templates/terraform/encoders/router_nat_address_patch_on_create.go.erb'
+  update_encoder: 'templates/terraform/encoders/router_nat_address_update_skip_encoder.go.erb'
+parameters:
+  # - !ruby/object:Api::Type::String
+  #   name: 'router'
+  #   api_name: 'Router'
+  #   description: |
+  #     The name of the Cloud Router in which the referenced NAT service is configured.
+  #   required: true
+  #   immutable: true
+  #   url_param_only: true
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'router'
+    resource: 'Router'
+    imports: 'name'
+    description: |
+      The name of the Cloud Router in which the referenced NAT service is configured.
+    required: true
+    immutable: true
+    url_param_only: true
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'routerNat'
+    resource: 'RouterNat'
+    imports: 'name'
+    api_name: 'name'
+    description: |
+      The name of the Nat service in which this address will be configured.
+    required: true
+    immutable: true
+  # - !ruby/object:Api::Type::String
+  #   name: 'routerNat'
+  #   api_name: 'name'
+  #   description: |
+  #     The name of the Nat service in which this address will be configured.
+  #   required: true
+  #   immutable: true
+  - !ruby/object:Api::Type::ResourceRef
+    name: region
+    resource: Region
+    imports: name
+    description: Region where the NAT service reside.
+    immutable: true
+    required: false
+    url_param_only: true
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+properties:
+  # - !ruby/object:Api::Type::ResourceRef
+  #   name: 'natIps'
+  #   resource: 'Address'
+  #   imports: 'selfLink'
+  #   description: |
+  #     Self-links of NAT IP to be used in a Nat service. Only valid if the referenced RouterNat 
+  #     natIpAllocateOption is set to MANUAL_ONLY.
+  #   required: true
+  - !ruby/object:Api::Type::Array
+    name: 'natIps'
+    description: |
+      Self-links of NAT IPs to be used in a Nat service. Only valid if the referenced RouterNat 
+      natIpAllocateOption is set to MANUAL_ONLY.
+    send_empty_value: true
+    required: true
+    is_set: true
+    set_hash_func: computeRouterNatIPsHash
+    item_type: !ruby/object:Api::Type::ResourceRef
+      name: 'address'
+      resource: 'Address'
+      imports: 'selfLink'
+      description: 'A reference to an address to be associated with this NAT'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'

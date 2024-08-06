@@ -1,0 +1,135 @@
+<% autogen_exception -%>
+package compute_test
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+)
+
+func TestAccComputeRouterNatAddress_withAddressCountDecrease(t *testing.T) {
+	t.Parallel()
+
+	testId := acctest.RandString(t, 10)
+	routerName := fmt.Sprintf("tf-test-router-nat-%s", testId)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRouterNatAddressDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRouterNatAddress_withAddressCountDecrease(routerName, "3"),
+			},
+			{
+				ResourceName:      "google_compute_router_nat_address.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// {
+			// 	Config: testAccComputeRouterNatAddress_withAddressCountDecrease(routerName, "2"),
+			// },
+			// {
+			// 	ResourceName:      "google_compute_router_nat_address.foobar",
+			// 	ImportState:       true,
+			// 	ImportStateVerify: true,
+			// },
+		},
+	})
+}
+
+func testAccComputeRouterNatAddressBasic(routerName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "foobar" {
+  name = "%s-net"
+}
+
+resource "google_compute_subnetwork" "foobar" {
+  name          = "%s-subnet"
+  network       = google_compute_network.foobar.self_link
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+}
+
+resource "google_compute_router" "foobar" {
+  name    = "%s"
+  region  = google_compute_subnetwork.foobar.region
+  network = google_compute_network.foobar.self_link
+}
+
+resource "google_compute_router_nat" "foobar" {
+  name                               = "%s"
+  router                             = google_compute_router.foobar.name
+  region                             = google_compute_router.foobar.region
+  nat_ip_allocate_option             = "AUTO_ONLY"
+  source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
+  log_config {
+    enable = true
+    filter = "ERRORS_ONLY"
+  }
+}
+`, routerName, routerName, routerName, routerName)
+}
+
+func testAccComputeRouterNatAddress_withAddressCountDecrease(routerName, routerCount string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "foobar" {
+  name = "%s-net"
+}
+
+resource "google_compute_subnetwork" "foobar" {
+  name          = "%s-subnet"
+  network       = google_compute_network.foobar.self_link
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-east1"
+}
+
+resource "google_compute_router" "foobar" {
+  name    = "%s"
+  region  = google_compute_subnetwork.foobar.region
+  network = google_compute_network.foobar.self_link
+}
+
+resource "google_compute_address" "foobar" {
+  count = %s
+  name = "%s-address-${count.index}"
+  region = google_compute_subnetwork.foobar.region
+}
+
+resource "google_compute_router_nat_address" "foobar" {
+  # for_each = {
+  #   for address_resource in google_compute_address.foobar : address_resource.name => address_resource
+  # }
+  # nat_ips = each.value.self_link
+  nat_ips = google_compute_address.foobar.*.self_link
+  router = google_compute_router.foobar.name
+  router_nat = google_compute_router_nat.foobar.name
+  region = google_compute_router_nat.foobar.region
+}
+
+resource "google_compute_router_nat" "foobar" {
+  name                               = "%s-nat"
+  router                             = google_compute_router.foobar.name
+  region                             = google_compute_router.foobar.region
+
+  nat_ip_allocate_option             = "MANUAL_ONLY"
+  source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
+
+  nat_ips = [google_compute_address.foobar[0].self_link, google_compute_address.foobar[1].self_link]
+
+  subnetwork {
+    name  = google_compute_subnetwork.foobar.name
+    source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
+  }
+
+  min_ports_per_vm = 1024
+
+  log_config {
+    enable = true
+    filter = "ERRORS_ONLY"
+  }
+}
+`, routerName, routerName, routerName, routerCount, routerName, routerName)
+}

@@ -1,0 +1,8 @@
+// Since we only change the handling of the CREATE function, this encoder just returns the same obj value it receives
+
+_, err := resourceComputeRouterNatAddressListForPatch(d, meta)
+if err != nil {
+  return nil, err
+}
+
+return obj, nil
