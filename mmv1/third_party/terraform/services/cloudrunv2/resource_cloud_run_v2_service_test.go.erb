@@ -53,7 +53,6 @@ resource "google_cloud_run_v2_service" "default" {
   name     = "tf-test-cloudrun-service%{random_suffix}"
   description = "description creating"
   location = "us-central1"
-  deletion_protection = false
   annotations = {
     generated-by = "magic-modules"
   }
