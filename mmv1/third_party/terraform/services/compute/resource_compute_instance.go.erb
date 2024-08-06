@@ -2461,37 +2461,21 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			}
 		}
 
-		if d.HasChange("min_cpu_platform") {
-			minCpuPlatform := d.Get("min_cpu_platform")
-			req := &compute.InstancesSetMinCpuPlatformRequest{
-				MinCpuPlatform: minCpuPlatform.(string),
-			}
-			op, err := config.NewComputeClient(userAgent).Instances.SetMinCpuPlatform(project, zone, instance.Name, req).Do()
-			if err != nil && instance.MinCpuPlatform != "AUTOMATIC" && strings.Contains(err.Error(), "The minimum CPU platform must match this") {
-				return errwrap.Wrapf("{{err}}. If you are trying to change a previously set value set it to AUTOMATIC first to change the min_cpu_platform", err)
-			}
-			if err != nil {
-				return err
-			}
-			opErr := ComputeOperationWaitTime(config, op, project, "updating min cpu platform", userAgent, d.Timeout(schema.TimeoutUpdate))
-			if opErr != nil {
-				return opErr
-			}
-		}
-
-		if d.HasChange("machine_type") {
+		if d.HasChange("min_cpu_platform") || d.HasChange("machine_type") {
+			mcp := d.Get("min_cpu_platform")
 			mt, err := tpgresource.ParseMachineTypesFieldValue(d.Get("machine_type").(string), d, config)
 			if err != nil {
 				return err
 			}
-			req := &compute.InstancesSetMachineTypeRequest{
-				MachineType: mt.RelativeLink(),
-			}
-			op, err := config.NewComputeClient(userAgent).Instances.SetMachineType(project, zone, instance.Name, req).Do()
+
+			instance.MinCpuPlatform = mcp.(string)
+			instance.MachineType = mt.RelativeLink()
+
+			op, err := config.NewComputeClient(userAgent).Instances.Update(project, zone, instance.Name, instance).Do()
 			if err != nil {
 				return err
 			}
-			opErr := ComputeOperationWaitTime(config, op, project, "updating machinetype", userAgent, d.Timeout(schema.TimeoutUpdate))
+			opErr := ComputeOperationWaitTime(config, op, project, "updating min cpu platform and machine_type", userAgent, d.Timeout(schema.TimeoutUpdate))
 			if opErr != nil {
 				return opErr
 			}
