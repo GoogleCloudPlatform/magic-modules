@@ -3345,11 +3345,7 @@ func testAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfi
 			},
 			{
 				Config: testAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfigsUpdateTwoPoliciesRemoveAccessConfig(suffix, policyName, policyName2, instanceName, "google_compute_region_security_policy.policyforinstance.self_link", "google_compute_region_security_policy.policyforinstance.self_link"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(
-						t, "google_compute_instance.foobar", &instance),
-					testAccCheckComputeInstanceNicAccessConfigHasSecurityPolicy(&instance, policyName),
-				),
+				ExpectError: regexp.MustCompile(`.* Cannot delete an access config with a security policy set. Please remove the security policy first. .*`),
 			},
 			{
 				ResourceName:      "google_compute_instance.foobar",
@@ -3455,11 +3451,7 @@ func testAccComputeInstance_nic_securityPolicyCreateWithAccessConfigUpdateAccess
 			},
 			{
 				Config: testAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsUpdateAccessConfig(suffix, policyName, instanceName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(
-						t, "google_compute_instance.foobar", &instance),
-					testAccCheckComputeInstanceNicAccessConfigHasSecurityPolicy(&instance, policyName),
-				),
+				ExpectError: regexp.MustCompile(`.* Cannot delete an access config with a security policy set. Please remove the security policy first. .*`),
 			},
 			{
 				ResourceName:      "google_compute_instance.foobar",
@@ -3468,7 +3460,7 @@ func testAccComputeInstance_nic_securityPolicyCreateWithAccessConfigUpdateAccess
 			},
 			{
 				Config:      testAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsRemoveAccessConfig(suffix, policyName, instanceName),
-				ExpectError: regexp.MustCompile(`.* Cannot delete an access config with a security policy set. Please remove the security policy first. .*`),
+				ExpectError: regexp.MustCompile("Error setting security policy to the instance since at least one access config must exist"),
 			},
 		},
 	})
@@ -3486,7 +3478,7 @@ func testAccComputeInstance_nic_securityPolicyCreateWithoutAccessConfig(t *testi
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsRemoveAccessConfig(suffix, policyName, instanceName),
-				ExpectError: regexp.MustCompile(`.* Cannot delete an access config with a security policy set. Please remove the security policy first. .*`),
+				ExpectError: regexp.MustCompile("Error setting security policy to the instance since at least one access config must exist"),
 			},
 		},
 	})
