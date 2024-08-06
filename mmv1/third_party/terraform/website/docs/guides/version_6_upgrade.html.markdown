@@ -141,6 +141,17 @@ and then run `terraform apply` to apply the change.
 
 ## Resource: `google_cloud_run_v2_job`
 
+### Job deletion now prevented by default with `deletion_protection`
+
+The field `deletion_protection` has been added with a default value of `true`. This field prevents
+Terraform from destroying or recreating the Job. In 6.0.0, existing jobs will have
+`deletion_protection` set to `true` during the next refresh unless otherwise set in configuration.
+
+**`deletion_protection` does NOT prevent deletion outside of Terraform.**
+
+To disable deletion protection, explicitly set this field to `false` in configuration
+and then run `terraform apply` to apply the change.
+
 ### retyped `containers.env` to SET from ARRAY
 
 Previously, `containers.env` was a list, making it order-dependent. It is now a set.
