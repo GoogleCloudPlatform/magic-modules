@@ -4320,11 +4320,11 @@ resource "google_container_node_pool" "with_confidential_boot_disk" {
   name               = "%s"
   location           = "us-central1-a"
   cluster            = google_container_cluster.cluster.name
-  confidential_nodes {
-  	enabled = true
-  }
 
   node_config {
+    confidential_nodes {
+      enabled = true
+    }
     image_type = "COS_CONTAINERD"
     boot_disk_kms_key = "%s"
     oauth_scopes = [
