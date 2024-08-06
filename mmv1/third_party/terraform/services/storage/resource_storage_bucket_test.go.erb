@@ -1868,6 +1868,7 @@ resource "google_storage_bucket" "bucket" {
       type = "Delete"
     }
     condition {
+      send_age_if_zero = true
       age = 0
     }
   }
