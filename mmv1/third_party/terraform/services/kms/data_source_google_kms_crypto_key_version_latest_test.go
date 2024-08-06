@@ -43,7 +43,6 @@ func testAccDataSourceGoogleKmsCryptoKeyVersionLatest_basic(kmsKey string) strin
 	return fmt.Sprintf(`
 resource "google_kms_crypto_key_version" "version" {
 	crypto_key = "%s"
-	state = "ENABLED"
   }
 
 data "google_kms_crypto_key_version_latest" "version_latest" {
