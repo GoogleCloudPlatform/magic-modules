@@ -299,7 +299,9 @@ func (t *Type) SetDefault(r *Resource) {
 		t.ItemType.ParentMetadata = t
 		t.ItemType.SetDefault(r)
 	case t.IsA("Map"):
-		t.KeyExpander = "tpgresource.ExpandString"
+		if t.KeyExpander == "" {
+			t.KeyExpander = "tpgresource.ExpandString"
+		}
 		t.ValueType.ParentName = t.Name
 		t.ValueType.ParentMetadata = t
 		t.ValueType.SetDefault(r)
