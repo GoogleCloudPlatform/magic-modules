@@ -508,7 +508,6 @@ properties:
     type: KeyValueLabels
     description: |
       Labels to apply to this forwarding rule.  A list of key->value pairs.
-    immutable: false
     update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setLabels'
     update_verb: 'POST'
   - name: 'allPorts'

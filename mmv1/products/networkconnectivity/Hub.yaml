@@ -46,6 +46,11 @@ examples:
     primary_resource_id: 'primary'
     vars:
       resource_name: "basic"
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'network_connectivity_hub_with_export_psc'
+    primary_resource_id: 'primary'
+    vars:
+      resource_name: "basic"
 description: The NetworkConnectivity Hub resource
 parameters: []
 properties:
@@ -94,3 +99,7 @@ properties:
         - !ruby/object:Api::Type::String
           name: uri
           description: The URI of the VPC network.
+  - !ruby/object:Api::Type::Boolean
+    name: exportPsc
+    description: Whether Private Service Connect transitivity is enabled for the hub. If true, Private Service Connect endpoints in VPC spokes attached to the hub are made accessible to other VPC spokes attached to the hub. The default value is false.
+    default_from_api: true

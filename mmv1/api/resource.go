@@ -1533,7 +1533,9 @@ func (r Resource) CustomUpdatePropertiesByKey(properties []*Type, updateUrl stri
 		UpdateVerb:      updateVerb,
 		UpdateId:        updateId,
 		FingerprintName: fingerprintName}
-	return groupedProperties[groupedProperty]
+	return google.Reject(groupedProperties[groupedProperty], func(p *Type) bool {
+		return p.UrlParamOnly
+	})
 }
 
 func (r Resource) PropertyNamesToStrings(properties []*Type) []string {

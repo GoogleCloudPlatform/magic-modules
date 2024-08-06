@@ -1,0 +1,121 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'backupPolicy'
+description: |
+  A backup policy is used to schedule backups at regular daily, weekly, or monthly intervals.
+  Backup policies allow you to attach a backup schedule to a volume.
+  The policy defines how many backups to retain at daily, weekly, or monthly intervals.
+references:
+  guides:
+    'Documentation': 'https://cloud.google.com/netapp/volumes/docs/protect-data/about-volume-backups#about_backup_policies'
+  api: 'https://cloud.google.com/netapp/volumes/docs/reference/rest/v1/projects.locations.backupPolicies'
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/backupPolicies/{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/backupPolicies'
+self_link: 'projects/{{project}}/locations/{{location}}/backupPolicies/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/backupPolicies?backupPolicyId={{name}}'
+update_url: 'projects/{{project}}/locations/{{location}}/backupPolicies/{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+delete_url: 'projects/{{project}}/locations/{{location}}/backupPolicies/{{name}}'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/backupPolicies/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+custom_code:
+examples:
+  - name: 'netapp_backup_policy_full'
+    primary_resource_id: 'test_backup_policy_full'
+    vars:
+      backup_policy_full_name: 'test-backup-policy-full'
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      Name of the region for the policy to apply to.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'name'
+    type: String
+    description: |
+      The name of the backup policy. Needs to be unique per location.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'createTime'
+    type: String
+    description: |
+      Create time of the backup policy. A timestamp in RFC3339 UTC "Zulu" format. Examples: "2023-06-22T09:13:01.617Z".
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      Labels as key value pairs. Example: `{ "owner": "Bob", "department": "finance", "purpose": "testing" }`.
+  - name: 'state'
+    type: Enum
+    description: |
+      The state of the backup policy.
+    output: true
+    enum_values:
+      - 'STATE_UNSPECIFIED'
+      - 'CREATING'
+      - 'READY'
+      - 'UPDATING'
+      - 'DELETING'
+      - 'ERROR'
+  - name: 'dailyBackupLimit'
+    type: Integer
+    description: |
+      Number of daily backups to keep. Note that the minimum daily backup limit is 2.
+    required: true
+  - name: 'weeklyBackupLimit'
+    type: Integer
+    description: |
+      Number of weekly backups to keep. Note that the sum of daily, weekly and monthly backups should be greater than 1.
+    required: true
+  - name: 'monthlyBackupLimit'
+    type: Integer
+    description: |
+      Number of monthly backups to keep. Note that the sum of daily, weekly and monthly backups should be greater than 1.
+    required: true
+  - name: 'description'
+    type: String
+    description: |
+      An optional description of this resource.
+  - name: 'enabled'
+    type: Boolean
+    description: |
+      If enabled, make backups automatically according to the schedules.
+      This will be applied to all volumes that have this policy attached and enforced on volume level.
+    send_empty_value: true
+    default_value: true
+  - name: 'assignedVolumeCount'
+    type: Integer
+    description: |
+      The total number of volumes assigned by this backup policy.
+    output: true
