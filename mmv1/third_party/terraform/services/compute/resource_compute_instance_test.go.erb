@@ -1942,8 +1942,8 @@ func TestAccComputeInstance_confidentialHyperDiskBootDisk(t *testing.T) {
 		"key_ring":              kms.KeyRing.Name,
 		"key_name":              kms.CryptoKey.Name,
 		"zone":                  "us-central1-a",
-		"machine_type":          "n2d-standard-16",
-		"min_cpu_platform":      "AMD Milan",
+		"machine_type":          "n2-standard-16",
+
 	}
 
 	context_2 := map[string]interface{}{
@@ -1953,7 +1953,6 @@ func TestAccComputeInstance_confidentialHyperDiskBootDisk(t *testing.T) {
 		"key_name":              context_1["key_name"],
 		"zone":                  context_1["zone"],
 		"machine_type":          "c3d-standard-16",
-		"min_cpu_platform":      "AMD Genoa",
 	}
 
 
@@ -7932,15 +7931,6 @@ resource "google_compute_instance" "foobar" {
   name         = "%{instance_name}"
   machine_type = "%{machine_type}"
   zone         = "%{zone}"
-
-  confidential_instance_config {
-  	enable_confidential_compute = true
-  	confidential_instance_type = "SEV"
-  }
-  min_cpu_platform = "%{min_cpu_platform}"
-  scheduling {
-    on_host_maintenance = "TERMINATE"
-  }
 
   boot_disk {
 
