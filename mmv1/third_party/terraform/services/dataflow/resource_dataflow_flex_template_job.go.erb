@@ -821,33 +821,13 @@ func hasIllegalParametersErr(d *schema.ResourceData) error {
 		if _, notOk := d.GetOk(fmt.Sprintf("%s.%s", pKey, k)); notOk {
 			return fmt.Errorf(errFmt, pKey, k)
 		}
-		kk := toCamelCase(k)
+		kk :=tpgresource.SnakeToPascalCase(k)
+                kk = strings.ToLower(kk)
 		if _, notOk := d.GetOk(fmt.Sprintf("%s.%s", pKey, kk)); notOk {
 			return fmt.Errorf(errFmt, pKey, kk)
 		}
 	}
 	return nil
-}
-
-func toCamelCase(s string) string {
-	var result []rune
-	runes := []rune(s)
-	for i := 0; i < len(runes); i++ {
-		r := runes[i]
-		if i == 0 {
-			result = append(result, r)
-			continue
-		}
-		if r != '_' {
-			result = append(result, r)
-			continue
-		}
-		i++
-		r = runes[i]
-		result = append(result, unicode.ToUpper(r))
-	}
-
-	return string(result)
 }
 
 func parseInt64(name string, d *schema.ResourceData) (int64, error) {
