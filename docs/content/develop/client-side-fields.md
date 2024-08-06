@@ -87,6 +87,47 @@ Replace `ResourceSpannerInstance` with the appropriate resource function.
 {{< /tab >}}
 {{< /tabs >}}
 
+## Update data source
+
+If the resource has a corresponding data source that calls the resource's Read function, you will need to make the following changes to the data source:
+
+1. Add the client-side field to the data source's Schema as an output-only field. (This will happen automatically for data sources that use `tpgresource.DatasourceSchemaFromResourceSchema`.)
+
+   ```go
+   "deletion_protection": {
+     Type:        schema.TypeBool,
+     Computed:    true,
+   },
+   ```
+2. Unset the field in the data source's Read function.
+
+   ```go
+   if err := d.Set("deletion_protection", nil); err != nil {
+     return fmt.Errorf("Error setting deletion_protection: %s", err)
+   }
+   ```
+
 ## Implement logic
 
-At this point, you should be ready to implement your logic!
+At this point, you should be ready to implement your logic! For example, a `deletion_protection` field short-ciruits the deletion process if it is not explicitly set to `false`.
+
+{{< tabs "implementation" >}}
+{{< tab "MMv1" >}}
+Add the following as [pre_delete custom code]({{< ref "/develop/custom-code#pre_post_injection" >}}).
+
+```go
+if d.Get("deletion_protection").(bool) {
+	return fmt.Errorf("cannot destroy folder without setting deletion_protection=false and running `terraform apply`")
+}
+```
+{{< /tab >}}
+{{< tab "Handwritten" >}}
+Add the following at the beginning of the resource's Delete function.
+
+```go
+if d.Get("deletion_protection").(bool) {
+	return fmt.Errorf("cannot destroy folder without setting deletion_protection=false and running `terraform apply`")
+}
+```
+{{< /tab >}}
+{{< /tabs >}}
