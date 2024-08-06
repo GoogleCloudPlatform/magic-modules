@@ -7931,6 +7931,14 @@ resource "google_compute_instance" "foobar" {
   machine_type = "%{machine_type}"
   zone         = "%{zone}"
 
+  confidential_instance_config {
+  	enable_confidential_compute = true
+  	confidential_instance_type = "SEV"
+  }
+  scheduling {
+	  on_host_maintenance = "TERMINATE"
+	}
+
   boot_disk {
 
     initialize_params {
