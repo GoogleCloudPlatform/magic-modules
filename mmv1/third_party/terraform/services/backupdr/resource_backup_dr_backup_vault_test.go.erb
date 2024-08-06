@@ -15,7 +15,6 @@ func TestAccBackupDRBackupVault_basicUpdate(t *testing.T) {
 
 	context := map[string]interface{}{
 		"project":       envvar.GetTestProjectFromEnv(),
-		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -49,7 +48,7 @@ func testAccBackupDRBackupVault_basicCreate(context map[string]interface{}) stri
 	resource "google_backup_dr_backup_vault" "backup-vault-test" {
 	provider = google-beta
 	location = "us-central1"
-	backup_vault_id    = "tf-test-backup-vault-test%{random_suffix}"
+	backup_vault_id    = "backup-vault-test"
 	description = "This is a backup vault built by Terraform."
 	backup_minimum_enforced_retention_duration = "100000s"
 	}
@@ -61,7 +60,7 @@ func testAccBackupDRBackupVault_basicUpdate(context map[string]interface{}) stri
 	resource "google_backup_dr_backup_vault" "backup-vault-test" {
 	provider = google-beta
 	location = "us-central1"
-	backup_vault_id    = "tf-test-backup-vault-test%{random_suffix}"
+	backup_vault_id    = "backup-vault-test"
 	description = "Terraform BV updated."
 	backup_minimum_enforced_retention_duration = "200000s"
 	}
@@ -76,8 +75,7 @@ func TestAccBackupDRBackupVault_fullUpdate(t *testing.T) {
 
 	context := map[string]interface{}{
 		"project":                   envvar.GetTestProjectFromEnv(),
-		"random_suffix":             acctest.RandString(t, 10),
-		"calculated_effective_time": referenceTime.Add(24 * time.Hour).Format(time.RFC3339),
+		"effective_time": referenceTime.Add(24 * time.Hour).Format(time.RFC3339),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -111,10 +109,10 @@ func testAccBackupDRBackupVault_fullCreate(context map[string]interface{}) strin
 	resource "google_backup_dr_backup_vault" "backup-vault-test2" {
 	provider = google-beta
 	location = "us-central1"
-	backup_vault_id    = "tf-test-tf-test2-backup-vault-test%{random_suffix}%{random_suffix}"
+	backup_vault_id    = "backup-vault-test"
 	description = "This is a second backup vault built by Terraform."
 	backup_minimum_enforced_retention_duration = "100000s"
-	effective_time = "%{calculated_effective_time}" 
+	effective_time = "%{effective_time}" 
 	labels = {
 		foo = "bar"
 		bar = "baz"
@@ -132,10 +130,10 @@ func testAccBackupDRBackupVault_fullUpdate(context map[string]interface{}) strin
 	resource "google_backup_dr_backup_vault" "backup-vault-test2" {
 	provider = google-beta
 	location = "us-central1"
-	backup_vault_id    = "tf-test-tf-test2-backup-vault-test%{random_suffix}%{random_suffix}"
+	backup_vault_id    = "backup-vault-test"
 	description = "This is a second backup vault built by Terraform."
 	backup_minimum_enforced_retention_duration = "100000s"
-	effective_time = "%{calculated_effective_time}" 
+	effective_time = "%{effective_time}" 
 	labels = {
 		foo = "bar1"
 		bar = "baz1"

@@ -14,7 +14,7 @@ examples:
     name: 'backup_dr_backup_vault_basic'
     primary_resource_id: 'backup-vault-test'
     vars:
-      backup_vault_id: 'tf-test-backup-vault-test%{random_suffix}'
+      backup_vault_id: 'backup-vault-test'
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
@@ -22,8 +22,8 @@ examples:
     name: 'backup_dr_backup_vault_full'
     primary_resource_id: 'backup-vault-test2'
     vars:
-      backup_vault_id: 'tf-test2-backup-vault-test%{random_suffix}%{random_suffix}'
-      effective_time: "%{calculated_effective_time}"
+      backup_vault_id: 'backup-vault-test'  
+      effective_time: "%{effective_time}"
     test_env_vars:
       project: :PROJECT_NAME
 properties:

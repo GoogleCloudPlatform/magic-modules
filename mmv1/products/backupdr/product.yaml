@@ -19,7 +19,7 @@ scopes:
 versions:
   - !ruby/object:Api::Product::Version
     name: beta
-    base_url: https://backupdr.googleapis.com/v1/
+    base_url: https://staging-backupdr.sandbox.googleapis.com/v1/
 async: !ruby/object:Api::OpAsync
   actions: ['create', 'delete']
   operation: !ruby/object:Api::OpAsync::Operation
