@@ -1,0 +1,507 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Volume'
+description: |
+  A volume is a file system container in a storage pool that stores application, database, and user data.
+
+  You can create a volume's capacity using the available capacity in the storage pool and you can define and resize the capacity without disruption to any processes.
+
+  Storage pool settings apply to the volumes contained within them automatically.
+references:
+  guides:
+    'Quickstart': 'https://cloud.google.com/netapp/volumes/docs/get-started/quickstarts/create-volume'
+    'Documentation': 'https://cloud.google.com/netapp/volumes/docs/configure-and-use/volumes/overview'
+  api: 'https://cloud.google.com/netapp/volumes/docs/reference/rest/v1/projects.locations.volumes'
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/volumes/{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/volumes'
+self_link: 'projects/{{project}}/locations/{{location}}/volumes/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/volumes?volumeId={{name}}'
+update_url: 'projects/{{project}}/locations/{{location}}/volumes/{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/volumes/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+custom_code:
+  pre_delete: 'templates/terraform/pre_delete/go/netapp_volume_force_delete.go.tmpl'
+examples:
+  - name: 'netapp_volume_basic'
+    primary_resource_id: 'test_volume'
+    vars:
+      volume_name: 'test-volume'
+      pool_name: 'test-pool'
+      network_name: 'test-network'
+    test_vars_overrides:
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
+    ignore_read_extra:
+      - 'deletion_policy'
+virtual_fields:
+  - name: 'deletion_policy'
+    description: |
+      Policy to determine if the volume should be deleted forcefully.
+      Volumes may have nested snapshot resources. Deleting such a volume will fail.
+      Setting this parameter to FORCE will delete volumes including nested snapshots.
+    type: Enum
+    default_value: "DEFAULT"
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      Name of the pool location. Usually a region name, expect for some STANDARD service level pools which require a zone name.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'name'
+    type: String
+    description:
+      The name of the volume. Needs to be unique per location.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'state'
+    type: Enum
+    description: |
+      State of the volume.
+    output: true
+    enum_values:
+      - 'STATE_UNSPECIFIED'
+      - 'READY'
+      - 'CREATING'
+      - 'DELETING'
+      - 'UPDATING'
+      - 'RESTORING'
+      - 'DISABLED'
+      - 'ERROR'
+  - name: 'stateDetails'
+    type: String
+    description: |
+      State details of the volume.
+    output: true
+  - name: 'createTime'
+    type: String
+    description: |
+      Create time of the volume. A timestamp in RFC3339 UTC "Zulu" format. Examples: "2023-06-22T09:13:01.617Z".
+    output: true
+  - name: 'shareName'
+    type: String
+    description: |
+      Share name (SMB) or export path (NFS) of the volume. Needs to be unique per location.
+    required: true
+    immutable: true
+  - name: 'psaRange'
+    type: String
+    description: |
+      Name of the Private Service Access allocated range. Inherited from storage pool.
+    output: true
+  - name: 'storagePool'
+    type: String
+    description: |
+      Name of the storage pool to create the volume in. Pool needs enough spare capacity to accomodate the volume.
+    required: true
+  - name: 'network'
+    type: String
+    description: |
+      VPC network name with format: `projects/{{project}}/global/networks/{{network}}`. Inherited from storage pool.
+    output: true
+  - name: 'serviceLevel'
+    type: String
+    description: |
+      Service level of the volume. Inherited from storage pool. Supported values are : PREMIUM, EXTERME, STANDARD, FLEX.
+    output: true
+  - name: 'capacityGib'
+    type: String
+    description: |
+      Capacity of the volume (in GiB).
+    required: true
+  - name: 'exportPolicy'
+    type: NestedObject
+    description: |-
+      Export policy of the volume for NFSV3 and/or NFSV4.1 access.
+    properties:
+      - name: 'rules'
+        type: Array
+        description: |-
+          Export rules (up to 5) control NFS volume access.
+        required: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'allowedClients'
+              type: String
+              description: |-
+                Defines the client ingress specification (allowed clients) as a comma seperated list with IPv4 CIDRs or IPv4 host addresses.
+            - name: 'hasRootAccess'
+              type: String
+              description: |-
+                 If enabled, the root user (UID = 0) of the specified clients doesn't get mapped to nobody (UID = 65534). This is also known as no_root_squash.
+            - name: 'accessType'
+              type: Enum
+              description: |
+                Defines the access type for clients matching the `allowedClients` specification.
+              enum_values:
+                - 'READ_ONLY'
+                - 'READ_WRITE'
+                - 'READ_NONE'
+            - name: 'nfsv3'
+              type: Boolean
+              description: |
+                Enable to apply the export rule to NFSV3 clients.
+            - name: 'nfsv4'
+              type: Boolean
+              description: |
+                Enable to apply the export rule to NFSV4.1 clients.
+            - name: 'kerberos5ReadOnly'
+              type: Boolean
+              description: |
+                If enabled (true) the rule defines a read only access for clients matching the 'allowedClients' specification. It enables nfs clients to mount using 'authentication' kerberos security mode.
+            - name: 'kerberos5ReadWrite'
+              type: Boolean
+              description: |
+                If enabled (true) the rule defines read and write access for clients matching the 'allowedClients' specification. It enables nfs clients to mount using 'authentication' kerberos security mode. The 'kerberos5ReadOnly' value is ignored if this is enabled.
+            - name: 'kerberos5iReadOnly'
+              type: Boolean
+              description: |
+                If enabled (true) the rule defines a read only access for clients matching the 'allowedClients' specification. It enables nfs clients to mount using 'integrity' kerberos security mode.
+            - name: 'kerberos5iReadWrite'
+              type: Boolean
+              description: |
+                If enabled (true) the rule defines read and write access for clients matching the 'allowedClients' specification. It enables nfs clients to mount using 'integrity' kerberos security mode. The 'kerberos5iReadOnly' value is ignored if this is enabled.
+            - name: 'kerberos5pReadOnly'
+              type: Boolean
+              description: |
+                If enabled (true) the rule defines a read only access for clients matching the 'allowedClients' specification. It enables nfs clients to mount using 'privacy' kerberos security mode.
+            - name: 'kerberos5pReadWrite'
+              type: Boolean
+              description: |
+                If enabled (true) the rule defines read and write access for clients matching the 'allowedClients' specification. It enables nfs clients to mount using 'privacy' kerberos security mode. The 'kerberos5pReadOnly' value is ignored if this is enabled.
+  - name: 'protocols'
+    type: Array
+    description: |
+      The protocol of the volume. Allowed combinations are `['NFSV3']`, `['NFSV4']`, `['SMB']`, `['NFSV3', 'NFSV4']`, `['SMB', 'NFSV3']` and `['SMB', 'NFSV4']`.
+    required: true
+    immutable: true
+    item_type:
+      type: Enum
+      description: |
+        Access protocol types.
+      enum_values:
+        - 'NFSV3'
+        - 'NFSV4'
+        - 'SMB'
+  - name: 'smbSettings'
+    type: Array
+    description: |
+      Settings for volumes with SMB access.
+    default_from_api: true
+    item_type:
+      type: Enum
+      description: |
+        Settings for volumes with SMB access.
+      enum_values:
+        - 'ENCRYPT_DATA'
+        - 'BROWSABLE'
+        - 'CHANGE_NOTIFY'
+        - 'NON_BROWSABLE'
+        - 'OPLOCKS'
+        - 'SHOW_SNAPSHOT'
+        - 'SHOW_PREVIOUS_VERSIONS'
+        - 'ACCESS_BASED_ENUMERATION'
+        - 'CONTINUOUSLY_AVAILABLE'
+  - name: 'unixPermissions'
+    type: String
+    description: |
+      Unix permission the mount point will be created with. Default is 0770. Applicable for UNIX security style volumes only.
+    default_from_api: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      Labels as key value pairs. Example: `{ "owner": "Bob", "department": "finance", "purpose": "testing" }`.
+  - name: 'description'
+    type: String
+    description: |
+      An optional description of this resource.
+  - name: 'snapshotDirectory'
+    type: Boolean
+    description: |
+      If enabled, a NFS volume will contain a read-only .snapshot directory which provides access to each of the volume's snapshots. Will enable "Previous Versions" support for SMB.
+  - name: 'usedGib'
+    type: String
+    description: |
+      Used capacity of the volume (in GiB). This is computed periodically and it does not represent the realtime usage.
+    output: true
+  - name: 'securityStyle'
+    type: Enum
+    description: |
+      Security Style of the Volume. Use UNIX to use UNIX or NFSV4 ACLs for file permissions.
+      Use NTFS to use NTFS ACLs for file permissions. Can only be set for volumes which use SMB together with NFS as protocol.
+    immutable: true
+    default_from_api: true
+    enum_values:
+      - 'NTFS'
+      - 'UNIX'
+  - name: 'kerberosEnabled'
+    type: Boolean
+    description: |
+      Flag indicating if the volume is a kerberos volume or not, export policy rules control kerberos security modes (krb5, krb5i, krb5p).
+    immutable: true
+    default_value: false
+  - name: 'ldapEnabled'
+    type: Boolean
+    description: |
+      Flag indicating if the volume is NFS LDAP enabled or not. Inherited from storage pool.
+    output: true
+  - name: 'activeDirectory'
+    type: String
+    description: |
+      Reports the resource name of the Active Directory policy being used. Inherited from storage pool.
+    output: true
+  - name: 'restoreParameters'
+    type: NestedObject
+    description: |-
+      Used to create this volume from a snapshot (= cloning) or an backup.
+    immutable: true
+    ignore_read: true
+    properties:
+      - name: 'sourceSnapshot'
+        type: String
+        description: |-
+          Full name of the snapshot to use for creating this volume.
+          `source_snapshot` and `source_backup` cannot be used simultaneously.
+          Format: `projects/{{project}}/locations/{{location}}/volumes/{{volume}}/snapshots/{{snapshot}}`.
+        immutable: true
+        exactly_one_of:
+          - 'restore_parameters.0.source_backup'
+          - 'restore_parameters.0.source_snapshot'
+      - name: 'sourceBackup'
+        type: String
+        description: |-
+          Full name of the snapshot to use for creating this volume.
+          `source_snapshot` and `source_backup` cannot be used simultaneously.
+          Format: `projects/{{project}}/locations/{{location}}/backupVaults/{{backupVaultId}}/backups/{{backup}}`.
+        immutable: true
+        exactly_one_of:
+          - 'restore_parameters.0.source_backup'
+          - 'restore_parameters.0.source_snapshot'
+  - name: 'kmsConfig'
+    type: String
+    description: |
+      Reports the CMEK policy resurce name being used for volume encryption. Inherited from storage pool.
+    output: true
+  - name: 'encryptionType'
+    type: Enum
+    description: |
+      Reports the data-at-rest encryption type of the volume. Inherited from storage pool.
+    output: true
+    enum_values:
+      - 'ENCRYPTION_TYPE_UNSPECIFIED'
+      - 'SERVICE_MANAGED'
+      - 'CLOUD_KMS'
+  - name: 'hasReplication'
+    type: Boolean
+    description: |
+      Indicates whether the volume is part of a volume replication relationship.
+    output: true
+  - name: 'restrictedActions'
+    type: Array
+    description: |
+      List of actions that are restricted on this volume.
+    item_type:
+      type: Enum
+      description: |
+        Settings for volumes with SMB access.
+      enum_values:
+        - 'DELETE'
+  - name: 'mountOptions'
+    type: Array
+    description: Reports mount instructions for this volume.
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'export'
+          type: String
+          description: Export path of the volume.
+          output: true
+        - name: 'exportFull'
+          type: String
+          description: |
+            Full export path of the volume.
+
+            Format for NFS volumes: `<export_ip>:/<shareName>`
+
+            Format for SMB volumes: `\\\\netbios_prefix-four_random_hex_letters.domain_name\\shareName`
+          output: true
+        - name: 'instructions'
+          type: String
+          description: Human-readable mount instructions.
+          output: true
+        - name: 'protocol'
+          type: Enum
+          description: |
+              Protocol to mount with.
+          output: true
+          enum_values:
+            - 'PROTOCOLS_UNSPECIFIED'
+            - 'NFSV3'
+            - 'NFSV4'
+            - 'SMB'
+  - name: 'snapshotPolicy'
+    type: NestedObject
+    description: |-
+      Snapshot policy defines the schedule for automatic snapshot creation.
+      To disable automatic snapshot creation you have to remove the whole snapshot_policy block.
+    properties:
+      - name: 'enabled'
+        type: Boolean
+        description: |-
+          Enables automated snapshot creation according to defined schedule. Default is false.
+          To disable automatic snapshot creation you have to remove the whole snapshot_policy block.
+        send_empty_value: true
+        default_value: false
+      - name: 'hourlySchedule'
+        type: NestedObject
+        description: |-
+          Hourly schedule policy.
+        properties:
+          - name: 'snapshotsToKeep'
+            type: Integer
+            description: |-
+              The maximum number of snapshots to keep for the hourly schedule.
+            required: true
+          - name: 'minute'
+            type: Integer
+            description: |-
+              Set the minute of the hour to create the snapshot (0-59), defaults to the top of the hour (0).
+            default_value: 0
+      - name: 'dailySchedule'
+        type: NestedObject
+        description: |-
+          Daily schedule policy.
+        properties:
+          - name: 'snapshotsToKeep'
+            type: Integer
+            description: |-
+              The maximum number of snapshots to keep for the daily schedule.
+            required: true
+          - name: 'minute'
+            type: Integer
+            description: |-
+              Set the minute of the hour to create the snapshot (0-59), defaults to the top of the hour (0).
+            default_value: 0
+          - name: 'hour'
+            type: Integer
+            description: |-
+              Set the hour to create the snapshot (0-23), defaults to midnight (0).
+            default_value: 0
+      - name: 'weeklySchedule'
+        type: NestedObject
+        description: |-
+          Weekly schedule policy.
+        properties:
+          - name: 'snapshotsToKeep'
+            type: Integer
+            description: |-
+              The maximum number of snapshots to keep for the weekly schedule.
+            required: true
+          - name: 'minute'
+            type: Integer
+            description: |-
+              Set the minute of the hour to create the snapshot (0-59), defaults to the top of the hour (0).
+            default_value: 0
+          - name: 'hour'
+            type: Integer
+            description: |-
+              Set the hour to create the snapshot (0-23), defaults to midnight (0).
+            default_value: 0
+          - name: 'day'
+            type: String
+            description: |-
+              Set the day or days of the week to make a snapshot. Accepts a comma separated days of the week. Defaults to 'Sunday'.
+            default_value: "Sunday"
+      - name: 'monthlySchedule'
+        type: NestedObject
+        description: |-
+          Monthly schedule policy.
+        properties:
+          - name: 'snapshotsToKeep'
+            type: Integer
+            description: |-
+              The maximum number of snapshots to keep for the monthly schedule
+            required: true
+          - name: 'minute'
+            type: Integer
+            description: |-
+              Set the minute of the hour to create the snapshot (0-59), defaults to the top of the hour (0).
+            default_value: 0
+          - name: 'hour'
+            type: Integer
+            description: |-
+              Set the hour to create the snapshot (0-23), defaults to midnight (0).
+            default_value: 0
+          - name: 'daysOfMonth'
+            type: String
+            description: |-
+              Set the day or days of the month to make a snapshot (1-31). Accepts a comma separated number of days. Defaults to '1'.
+            default_value: "1"
+  - name: 'backupConfig'
+    type: NestedObject
+    description: |-
+      Backup configuration for the volume.
+    update_mask_fields:
+      - 'backup_config.backup_policies'
+      - 'backup_config.backup_vault'
+      - 'backup_config.scheduled_backup_enabled'
+    properties:
+      - name: 'backupPolicies'
+        type: Array
+        description: |-
+          Specify a single backup policy ID for scheduled backups. Format: `projects/{{projectId}}/locations/{{location}}/backupPolicies/{{backupPolicyName}}`
+        item_type:
+          type: String
+      - name: 'backupVault'
+        type: String
+        description: |-
+          ID of the backup vault to use. A backup vault is reqired to create manual or scheduled backups.
+          Format: `projects/{{projectId}}/locations/{{location}}/backupVaults/{{backupVaultName}}`
+      - name: 'scheduledBackupEnabled'
+        type: Boolean
+        description: |-
+          When set to true, scheduled backup is enabled on the volume. Omit if no backup_policy is specified.
+  - name: 'zone'
+    type: String
+    description: |
+      Specifies the active zone for regional volume.
+    min_version: 'beta'
+    output: true
+  - name: 'replicaZone'
+    type: String
+    description: |
+      Specifies the replica zone for regional volume.
+    min_version: 'beta'
+    output: true

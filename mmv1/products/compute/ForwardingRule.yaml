@@ -31,7 +31,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -215,6 +215,7 @@ examples:
       - "port_range"
       - "target"
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_create: templates/terraform/pre_create/compute_forwarding_rule.go.erb
   post_create: templates/terraform/post_create/labels.erb
   constants: 'templates/terraform/constants/compute_forwarding_rule.go.erb'
 custom_diff: [
