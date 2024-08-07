@@ -54,7 +54,6 @@ resource "google_compute_forwarding_rule" "default" {
   network_tier           = "PREMIUM"
 }
 
-# [START compute_vm_packet_mirror]
 resource "google_compute_packet_mirroring" "{{$.PrimaryResourceId}}" {
   name = "{{index $.Vars "mirroring_name"}}"
   description = "bar"
@@ -76,4 +75,3 @@ resource "google_compute_packet_mirroring" "{{$.PrimaryResourceId}}" {
     direction = "BOTH"
   }
 }
-# [END compute_vm_packet_mirror]

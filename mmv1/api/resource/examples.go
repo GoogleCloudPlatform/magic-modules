@@ -172,7 +172,9 @@ func (e *Examples) UnmarshalYAML(n *yaml.Node) error {
 		return err
 	}
 
-	e.ConfigPath = fmt.Sprintf("templates/terraform/examples/go/%s.tf.tmpl", e.Name)
+	if e.ConfigPath == "" {
+		e.ConfigPath = fmt.Sprintf("templates/terraform/examples/go/%s.tf.tmpl", e.Name)
+	}
 	e.SetHCLText()
 
 	return nil
@@ -204,6 +206,7 @@ func (e *Examples) SetHCLText() {
 	}
 	e.TestEnvVars = docTestEnvVars
 	e.DocumentationHCLText = ExecuteTemplate(e, e.ConfigPath, true)
+	e.DocumentationHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(e.DocumentationHCLText, "\n")
 
 	// Remove region tags
 	re1 := regexp.MustCompile(`# \[[a-zA-Z_ ]+\]\n`)
@@ -259,6 +262,12 @@ func ExecuteTemplate(e any, templatePath string, appendNewline bool) string {
 	templates := []string{
 		templatePath,
 		"templates/terraform/expand_resource_ref.tmpl",
+		"templates/terraform/custom_flatten/go/bigquery_table_ref.go.tmpl",
+		"templates/terraform/flatten_property_method.go.tmpl",
+		"templates/terraform/expand_property_method.go.tmpl",
+		"templates/terraform/update_mask.go.tmpl",
+		"templates/terraform/nested_query.go.tmpl",
+		"templates/terraform/unordered_list_customize_diff.go.tmpl",
 	}
 	templateFileName := filepath.Base(templatePath)
 

@@ -13,6 +13,7 @@
   # limitations under the License.
 */}}
 {{define "SchemaSubResource"}}
+{{if and (eq .Type "Array") (.IsSet) (eq .ItemType.Type "NestedObject")}}
   {{ if and (.IsSet) (eq .Type "Array") (eq .ItemType.Type "NestedObject")  -}}
 func {{ .NamespaceProperty }}Schema() *schema.Resource {
 	return &schema.Resource{
@@ -24,7 +25,7 @@ func {{ .NamespaceProperty }}Schema() *schema.Resource {
 	}
 }
   {{ end -}}
-
+{{end}}
   {{ if .NestedProperties }}
     {{- range $prop := $.NestedProperties }}
 {{template "SchemaSubResource" $prop}}

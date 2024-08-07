@@ -90,7 +90,7 @@ properties:
           Preconfigured versioned expression. For organization security policy rules,
           the only supported type is "FIREWALL".
         min_version: 'beta'
-        default_value: FIREWALL
+        default_value: "FIREWALL"
         enum_values:
           - 'FIREWALL'
       - name: 'config'

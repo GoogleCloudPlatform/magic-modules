@@ -32,12 +32,13 @@ update_verb: 'POST'
 read_verb: 'POST'
 delete_url: 'projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{region_instance_group_manager}}/deletePerInstanceConfigs'
 delete_verb: 'POST'
-mutex: instanceGroupManager/{{project}}/{{region}}/{{region_instance_group_manager}}
+mutex: 'instanceGroupManager/{{project}}/{{region}}/{{region_instance_group_manager}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
@@ -167,7 +168,7 @@ properties:
               type: Enum
               description: |
                 The mode of the disk.
-              default_value: READ_WRITE
+              default_value: "READ_WRITE"
               enum_values:
                 - 'READ_ONLY'
                 - 'READ_WRITE'
@@ -179,7 +180,7 @@ properties:
                 `NEVER` - detach the disk when the VM is deleted, but do not delete the disk.
                 `ON_PERMANENT_INSTANCE_DELETION` will delete the stateful disk when the VM is permanently
                 deleted from the instance group.
-              default_value: NEVER
+              default_value: "NEVER"
               enum_values:
                 - 'NEVER'
                 - 'ON_PERMANENT_INSTANCE_DELETION'
@@ -190,13 +191,14 @@ properties:
         api_name: internalIPs
         key_name: 'interface_name'
         value_type:
+          name: internalIp
           type: NestedObject
           properties:
             - name: 'autoDelete'
               type: Enum
               description: |
                 These stateful IPs will never be released during autohealing, update or VM instance recreate operations. This flag is used to configure if the IP reservation should be deleted after it is no longer used by the group, e.g. when the given instance or the whole group is deleted.
-              default_value: NEVER
+              default_value: "NEVER"
               enum_values:
                 - 'NEVER'
                 - 'ON_PERMANENT_INSTANCE_DELETION'
@@ -219,13 +221,14 @@ properties:
         api_name: externalIPs
         key_name: 'interface_name'
         value_type:
+          name: externalIp
           type: NestedObject
           properties:
             - name: 'autoDelete'
               type: Enum
               description: |
                 These stateful IPs will never be released during autohealing, update or VM instance recreate operations. This flag is used to configure if the IP reservation should be deleted after it is no longer used by the group, e.g. when the given instance or the whole group is deleted.
-              default_value: NEVER
+              default_value: "NEVER"
               enum_values:
                 - 'NEVER'
                 - 'ON_PERMANENT_INSTANCE_DELETION'

@@ -35,6 +35,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
@@ -130,7 +131,7 @@ properties:
       NAT option controlling how IPs are NAT'ed to the instance.
       Currently only NO_NAT (default value) is supported.
     immutable: true
-    default_value: NO_NAT
+    default_value: "NO_NAT"
     enum_values:
       - 'NO_NAT'
   - name: 'securityPolicy'

@@ -10,7 +10,7 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */ -}}
-{{- if ne $.TargetVersionName "ga" }}
+{{- if ne $.TargetVersionName "ga" -}}
 // Resource object was flattened in GA API
 if nestedResource, ok := res["resource"]; ok {
 	if resObj, ok := nestedResource.(map[string]interface{}); ok {
@@ -34,8 +34,8 @@ if attV, ok := res["attestation"]; ok && attV != nil {
 		}
 	}
 }
-
-{{- else }}
+{{""}}
+{{- else -}}
 // encoder logic only in non-GA version
 {{- end }}
 return res, nil

@@ -43,7 +43,7 @@
 {{ if .IsForceNew -}}
   ForceNew: true,
 {{ end -}}
-{{ if .Validation -}}
+{{ if and (not .Output) .Validation -}}
 	{{ if .Validation.Regex -}}
   ValidateFunc: verify.ValidateRegexp(`{{ .Validation.Regex -}}`),
 	{{ else if .Validation.Function -}}
@@ -106,6 +106,7 @@ Default value: {{ .ItemType.DefaultValue -}}
   {{ else if eq .ItemType.Type "String" -}}
       Elem: &schema.Schema{
         Type: schema.Type{{ .ItemTypeClass -}},
+        {{ template "ItemValidation" . -}}
       },
   {{ else if eq .ItemType.Type "Enum" -}}
       Elem: &schema.Schema{
@@ -122,8 +123,9 @@ Default value: {{ .ItemType.DefaultValue -}}
         DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
         {{- end }}
     {{ else -}}
-        Type: schema.Type{{ .ItemTypeClass -}},
+        Type: {{ .TFType .ItemType.Type }},
     {{ end -}}
+    {{ template "ItemValidation" . -}}
       },
   {{ end -}}
   {{ if .IsSet -}}
@@ -166,17 +168,28 @@ Default value: {{ .ItemType.DefaultValue -}}
     Default: {{ .GoLiteral .DefaultValue -}},
 {{ end -}}
 {{ if or .Conflicting .Conflicts -}}
-    ConflictsWith: {{ .GoLiteral .Conflicting  -}},
+    ConflictsWith: {{ .GoLiteral (.GetPropertySchemaPathList .Conflicting)  -}},
 {{ end -}}
 {{ if or .AtLeastOneOfList .AtLeastOneOf -}}
-    AtLeastOneOf: {{ .GoLiteral .AtLeastOneOfList  -}},
+    AtLeastOneOf: {{ .GoLiteral (.GetPropertySchemaPathList .AtLeastOneOfList) -}},
 {{ end -}}
 {{ if or .ExactlyOneOfList .ExactlyOneOf -}}
-    ExactlyOneOf: {{ .GoLiteral .ExactlyOneOfList  -}},
+    ExactlyOneOf: {{ .GoLiteral (.GetPropertySchemaPathList .ExactlyOneOfList) -}},
 {{ end -}}
 {{ if or .RequiredWithList .RequiredWith -}}
-    RequiredWith: {{ .GoLiteral .RequiredWithList  -}},
+    RequiredWith: {{ .GoLiteral (.GetPropertySchemaPathList .RequiredWithList) -}},
 {{ end -}}
 },
 {{- end -}}
+{{- end -}}
+{{- define "ItemValidation" -}}
+  {{ if not .Output -}}
+    {{ if .ItemValidation -}}
+      {{ if .ItemValidation.Regex -}}
+      ValidateFunc: verify.ValidateRegexp(`{{ .ItemValidation.Regex -}}`),
+      {{ else if .ItemValidation.Function -}}
+      ValidateFunc: {{ .ItemValidation.Function -}},
+      {{ end  -}}
+    {{ end -}}
+  {{- end }}
 {{- end -}}

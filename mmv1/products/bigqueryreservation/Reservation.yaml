@@ -70,6 +70,7 @@ properties:
     description: |
       Applicable only for reservations located within one of the BigQuery multi-regions (US or EU).
       If set to true, this reservation is placed in the organization's secondary region which is designated for disaster recovery purposes. If false, this reservation is placed in the organization's default region.
+    deprecation_message: "`multi_region_auxiliary` is deprecated and will be removed in a future major release. This field is no longer supported by the BigQuery Reservation API."
   - !ruby/object:Api::Type::String
     name: 'edition'
     immutable: true

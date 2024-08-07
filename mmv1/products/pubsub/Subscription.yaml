@@ -140,7 +140,7 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'table'
         description: |
-          The name of the table to which to write data, of the form {projectId}:{datasetId}.{tableId}
+          The name of the table to which to write data, of the form {projectId}.{datasetId}.{tableId}
         required: true
       - !ruby/object:Api::Type::Boolean
         name: 'useTopicSchema'
@@ -302,7 +302,7 @@ properties:
 
           - v1beta1: uses the push format defined in the v1beta1 Pub/Sub API.
           - v1 or v1beta2: uses the push format defined in the v1 Pub/Sub API.
-        diff_suppress_func: 'tpgresource.IgnoreMissingKeyInMap("x-goog-version")'
+        diff_suppress_func: 'IgnoreMissingKeyInMap("x-goog-version")'
       - !ruby/object:Api::Type::NestedObject
         name: 'noWrapper'
         custom_flatten: 'templates/terraform/custom_flatten/pubsub_no_wrapper_write_metadata_flatten.go.erb'

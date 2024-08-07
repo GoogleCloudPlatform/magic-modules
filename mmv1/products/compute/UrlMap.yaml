@@ -26,7 +26,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -703,7 +703,7 @@ properties:
 
                           * 5xx: Loadbalancer will attempt a retry if the backend service responds with
                           any 5xx response code, or if the backend service does not respond at all,
-                          example: disconnects, reset, read timeout, connection failure, and refused
+                          for example: disconnects, reset, read timeout, connection failure, and refused
                           streams.
                           * gateway-error: Similar to 5xx, but only applies to response codes
                           502, 503 or 504.
@@ -1415,7 +1415,7 @@ properties:
 
                           * 5xx: Loadbalancer will attempt a retry if the backend service responds with
                             any 5xx response code, or if the backend service does not respond at all,
-                            example: disconnects, reset, read timeout, connection failure, and refused
+                            for example: disconnects, reset, read timeout, connection failure, and refused
                             streams.
                           * gateway-error: Similar to 5xx, but only applies to response codes
                             502, 503 or 504.

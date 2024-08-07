@@ -1,0 +1,183 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'ClientTlsPolicy'
+description: |
+  ClientTlsPolicy is a resource that specifies how a client should authenticate connections to backends of a service. This resource itself does not affect configuration unless it is attached to a backend service resource.
+min_version: 'beta'
+references:
+  guides:
+    'Service Security': 'https://cloud.google.com/traffic-director/docs/security-use-cases'
+  api: 'https://cloud.google.com/traffic-director/docs/reference/network-security/rest/v1beta1/projects.locations.clientTlsPolicies'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/clientTlsPolicies'
+create_url: 'projects/{{project}}/locations/{{location}}/clientTlsPolicies?clientTlsPolicyId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/clientTlsPolicies/{{name}}'
+timeouts:
+  insert_minutes: 30
+  update_minutes: 30
+  delete_minutes: 30
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+    timeouts:
+      insert_minutes: 30
+      update_minutes: 30
+      delete_minutes: 30
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'network_security_client_tls_policy_basic'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      resource_name: 'my-client-tls-policy'
+  - name: 'network_security_client_tls_policy_advanced'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      resource_name: 'my-client-tls-policy'
+parameters:
+  - name: 'name'
+    type: String
+    description: |
+      Name of the ClientTlsPolicy resource.
+    min_version: 'beta'
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'location'
+    type: String
+    description: |
+      The location of the client tls policy.
+      The default value is `global`.
+    min_version: 'beta'
+    url_param_only: true
+    default_value: "global"
+properties:
+  - name: 'createTime'
+    type: Time
+    description: |
+      Time the ClientTlsPolicy was created in UTC.
+    min_version: 'beta'
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      Time the ClientTlsPolicy was updated in UTC.
+    min_version: 'beta'
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: Set of label tags associated with the ClientTlsPolicy resource.
+    min_version: 'beta'
+    immutable: false
+  - name: 'description'
+    type: String
+    description: |
+      A free-text description of the resource. Max length 1024 characters.
+    min_version: 'beta'
+  - name: 'sni'
+    type: String
+    description: |
+      Server Name Indication string to present to the server during TLS handshake. E.g: "secure.example.com".
+    min_version: 'beta'
+  - name: 'clientCertificate'
+    type: NestedObject
+    description: |
+      Defines a mechanism to provision client identity (public and private keys) for peer to peer authentication. The presence of this dictates mTLS.
+    min_version: 'beta'
+    properties:
+      - name: 'grpcEndpoint'
+        type: NestedObject
+        description: |
+          gRPC specific configuration to access the gRPC server to obtain the cert and private key.
+        min_version: 'beta'
+        exactly_one_of:
+          - 'grpc_endpoint'
+          - 'certificate_provider_instance'
+        properties:
+          - name: 'targetUri'
+            type: String
+            description: |
+              The target URI of the gRPC endpoint. Only UDS path is supported, and should start with "unix:".
+            min_version: 'beta'
+            required: true
+      - name: 'certificateProviderInstance'
+        type: NestedObject
+        description: |
+          The certificate provider instance specification that will be passed to the data plane, which will be used to load necessary credential information.
+        min_version: 'beta'
+        exactly_one_of:
+          - 'grpc_endpoint'
+          - 'certificate_provider_instance'
+        properties:
+          - name: 'pluginInstance'
+            type: String
+            description: |
+              Plugin instance name, used to locate and load CertificateProvider instance configuration. Set to "google_cloud_private_spiffe" to use Certificate Authority Service certificate provider instance.
+            min_version: 'beta'
+            required: true
+  - name: 'serverValidationCa'
+    type: Array
+    description: |
+      Defines the mechanism to obtain the Certificate Authority certificate to validate the server certificate. If empty, client does not validate the server certificate.
+    min_version: 'beta'
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'grpcEndpoint'
+          type: NestedObject
+          description: |
+            gRPC specific configuration to access the gRPC server to obtain the cert and private key.
+          min_version: 'beta'
+          exactly_one_of:
+            - 'grpc_endpoint'
+            - 'certificate_provider_instance'
+          properties:
+            - name: 'targetUri'
+              type: String
+              description: |
+                The target URI of the gRPC endpoint. Only UDS path is supported, and should start with "unix:".
+              min_version: 'beta'
+              required: true
+        - name: 'certificateProviderInstance'
+          type: NestedObject
+          description: |
+            The certificate provider instance specification that will be passed to the data plane, which will be used to load necessary credential information.
+          min_version: 'beta'
+          exactly_one_of:
+            - 'grpc_endpoint'
+            - 'certificate_provider_instance'
+          properties:
+            - name: 'pluginInstance'
+              type: String
+              description: |
+                Plugin instance name, used to locate and load CertificateProvider instance configuration. Set to "google_cloud_private_spiffe" to use Certificate Authority Service certificate provider instance.
+              min_version: 'beta'
+              required: true

@@ -109,9 +109,9 @@ properties:
                 version -- it's best to assume the behavior is undefined and
                 conflicts should be avoided. For more information, including usage
                 and the valid values, see:
-                  http://kubernetes.io/v1.1/docs/user-guide/labels.html
+                  - http://kubernetes.io/v1.1/docs/user-guide/labels.html
                 An object containing a list of "key": value pairs.
-                Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+                For example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
       - !ruby/object:Api::Type::String
         name: 'operatingSystem'
         description: |
@@ -150,9 +150,9 @@ properties:
           version -- it's best to assume the behavior is undefined and
           conflicts should be avoided. For more information, including usage
           and the valid values, see:
-            http://kubernetes.io/v1.1/docs/user-guide/labels.html
+            - http://kubernetes.io/v1.1/docs/user-guide/labels.html
           An object containing a list of "key": value pairs.
-          Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+          For example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
         default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: 'status'

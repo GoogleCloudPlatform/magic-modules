@@ -43,6 +43,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/global/operations/{{op_id}}'
@@ -158,6 +159,31 @@ properties:
       The default value is 5 seconds.  It is invalid for timeoutSec to have
       greater value than checkIntervalSec.
     default_value: 5
+  - name: 'sourceRegions'
+    type: Array
+    description: |
+      The list of cloud regions from which health checks are performed. If
+      any regions are specified, then exactly 3 regions should be specified.
+      The region names must be valid names of Google Cloud regions. This can
+      only be set for global health check. If this list is non-empty, then
+      there are restrictions on what other health check fields are supported
+      and what other resources can use this health check:
+
+      * SSL, HTTP2, and GRPC protocols are not supported.
+
+      * The TCP request field is not supported.
+
+      * The proxyHeader field for HTTP, HTTPS, and TCP is not supported.
+
+      * The checkIntervalSec field must be at least 30.
+
+      * The health check cannot be used with BackendService nor with managed
+      instance group auto-healing.
+    min_version: 'beta'
+    item_type:
+      type: String
+    min_size: 3
+    max_size: 3
   - name: 'unhealthyThreshold'
     type: Integer
     description: |
@@ -213,7 +239,7 @@ properties:
           - 'http_health_check.0.port_name'
           - 'http_health_check.0.proxy_header'
           - 'http_health_check.0.port_specification'
-        default_value: /
+        default_value: "/"
       - name: 'response'
         type: String
         description: |
@@ -267,7 +293,7 @@ properties:
           - 'http_health_check.0.port_name'
           - 'http_health_check.0.proxy_header'
           - 'http_health_check.0.port_specification'
-        default_value: NONE
+        default_value: "NONE"
         enum_values:
           - 'NONE'
           - 'PROXY_V1'
@@ -338,7 +364,7 @@ properties:
           - 'https_health_check.0.port_name'
           - 'https_health_check.0.proxy_header'
           - 'https_health_check.0.port_specification'
-        default_value: /
+        default_value: "/"
       - name: 'response'
         type: String
         description: |
@@ -392,7 +418,7 @@ properties:
           - 'https_health_check.0.port_name'
           - 'https_health_check.0.proxy_header'
           - 'https_health_check.0.port_specification'
-        default_value: NONE
+        default_value: "NONE"
         enum_values:
           - 'NONE'
           - 'PROXY_V1'
@@ -499,7 +525,7 @@ properties:
           - 'tcp_health_check.0.port_name'
           - 'tcp_health_check.0.proxy_header'
           - 'tcp_health_check.0.port_specification'
-        default_value: NONE
+        default_value: "NONE"
         enum_values:
           - 'NONE'
           - 'PROXY_V1'
@@ -605,7 +631,7 @@ properties:
           - 'ssl_health_check.0.port_name'
           - 'ssl_health_check.0.proxy_header'
           - 'ssl_health_check.0.port_specification'
-        default_value: NONE
+        default_value: "NONE"
         enum_values:
           - 'NONE'
           - 'PROXY_V1'
@@ -675,7 +701,7 @@ properties:
           - 'http2_health_check.0.port_name'
           - 'http2_health_check.0.proxy_header'
           - 'http2_health_check.0.port_specification'
-        default_value: /
+        default_value: "/"
       - name: 'response'
         type: String
         description: |
@@ -729,7 +755,7 @@ properties:
           - 'http2_health_check.0.port_name'
           - 'http2_health_check.0.proxy_header'
           - 'http2_health_check.0.port_specification'
-        default_value: NONE
+        default_value: "NONE"
         enum_values:
           - 'NONE'
           - 'PROXY_V1'

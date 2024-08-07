@@ -133,7 +133,6 @@ func expandScheduling(v interface{}) (*compute.Scheduling, error) {
 		scheduling.InstanceTerminationAction = v.(string)
 		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "InstanceTerminationAction")
 	}
-{{- if ne $.TargetVersionName "ga" }}
 	if v, ok := original["max_run_duration"]; ok {
 		transformedMaxRunDuration, err := expandComputeMaxRunDuration(v)
 		if err != nil {
@@ -141,9 +140,6 @@ func expandScheduling(v interface{}) (*compute.Scheduling, error) {
 		}
 		scheduling.MaxRunDuration = transformedMaxRunDuration
 		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "MaxRunDuration")
-	}
-	if v, ok := original["maintenance_interval"]; ok {
-		scheduling.MaintenanceInterval = v.(string)
 	}
 
 	if v, ok := original["on_instance_stop_action"]; ok {
@@ -153,6 +149,10 @@ func expandScheduling(v interface{}) (*compute.Scheduling, error) {
 		}
 		scheduling.OnInstanceStopAction = transformedOnInstanceStopAction
 		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "OnInstanceStopAction")
+	}
+{{- if ne $.TargetVersionName "ga" }}
+	if v, ok := original["maintenance_interval"]; ok {
+		scheduling.MaintenanceInterval = v.(string)
 	}
 {{- end }}
 	if v, ok := original["local_ssd_recovery_timeout"]; ok {
@@ -166,7 +166,6 @@ func expandScheduling(v interface{}) (*compute.Scheduling, error) {
 	return scheduling, nil
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func expandComputeMaxRunDuration(v interface{}) (*compute.Duration, error) {
 	l := v.([]interface{})
 	duration := compute.Duration{}
@@ -218,7 +217,6 @@ func expandComputeOnInstanceStopAction(v interface{}) (*compute.SchedulingOnInst
 
 	return &onInstanceStopAction, nil	
 }
-{{- end }}
 
 func expandComputeLocalSsdRecoveryTimeout(v interface{}) (*compute.Duration, error) {
 	l := v.([]interface{})
@@ -266,15 +264,17 @@ func flattenScheduling(resp *compute.Scheduling) []map[string]interface{} {
 		schedulingMap["automatic_restart"] = *resp.AutomaticRestart
 	}
 
-{{ if ne $.TargetVersionName `ga` -}}
 	if resp.MaxRunDuration != nil {
 		schedulingMap["max_run_duration"] = flattenComputeMaxRunDuration(resp.MaxRunDuration)
 	}
-	if resp.MaintenanceInterval != "" {
-		schedulingMap["maintenance_interval"] = resp.MaintenanceInterval
-	}
+
 	if resp.OnInstanceStopAction != nil {
 		schedulingMap["on_instance_stop_action"] = flattenOnInstanceStopAction(resp.OnInstanceStopAction)
+	}
+
+{{ if ne $.TargetVersionName `ga` -}}
+	if resp.MaintenanceInterval != "" {
+		schedulingMap["maintenance_interval"] = resp.MaintenanceInterval
 	}
 {{- end }}
 
@@ -295,7 +295,6 @@ func flattenScheduling(resp *compute.Scheduling) []map[string]interface{} {
 	return []map[string]interface{}{schedulingMap}
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func flattenComputeMaxRunDuration(v *compute.Duration) []interface{} {
 	if v == nil {
 		return nil
@@ -314,7 +313,6 @@ func flattenOnInstanceStopAction(v *compute.SchedulingOnInstanceStopAction) []in
 	transformed["discard_local_ssd"] = v.DiscardLocalSsd
 	return []interface{}{transformed}
 }
-{{- end }}
 
 func flattenComputeLocalSsdRecoveryTimeout(v *compute.Duration) []interface{} {
 	if v == nil {
@@ -612,9 +610,7 @@ func expandConfidentialInstanceConfig(d tpgresource.TerraformResourceData) *comp
 	prefix := "confidential_instance_config.0"
 	return &compute.ConfidentialInstanceConfig{
 		EnableConfidentialCompute: d.Get(prefix + ".enable_confidential_compute").(bool),
-		{{- if ne $.TargetVersionName "ga" }}
 		ConfidentialInstanceType: d.Get(prefix + ".confidential_instance_type").(string),
-		{{- end }}
 	}
 }
 
@@ -625,9 +621,7 @@ func flattenConfidentialInstanceConfig(ConfidentialInstanceConfig *compute.Confi
 
 	return []map[string]interface{}{{"{{"}}
 		"enable_confidential_compute": ConfidentialInstanceConfig.EnableConfidentialCompute,
-		{{- if ne $.TargetVersionName "ga" }}
 		"confidential_instance_type": ConfidentialInstanceConfig.ConfidentialInstanceType,
-		{{- end }}
 	{{"}}"}}
 }
 
@@ -691,11 +685,7 @@ func schedulingHasChangeRequiringReboot(d *schema.ResourceData) bool {
 	oScheduling := o.([]interface{})[0].(map[string]interface{})
 	newScheduling := n.([]interface{})[0].(map[string]interface{})
 
-{{ if ne $.TargetVersionName `ga` -}}
 	return hasNodeAffinitiesChanged(oScheduling, newScheduling) || hasMaxRunDurationChanged(oScheduling, newScheduling)
-{{- else }}
-	return hasNodeAffinitiesChanged(oScheduling, newScheduling)
-{{- end }}
 }
 
 // Terraform doesn't correctly calculate changes on schema.Set, so we do it manually
@@ -737,7 +727,6 @@ func schedulingHasChangeWithoutReboot(d *schema.ResourceData) bool {
 	return false
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func hasMaxRunDurationChanged(oScheduling, nScheduling map[string]interface{}) bool {
 	oMrd := oScheduling["max_run_duration"].([]interface{})
 	nMrd := nScheduling["max_run_duration"].([]interface{})
@@ -761,7 +750,6 @@ func hasMaxRunDurationChanged(oScheduling, nScheduling map[string]interface{}) b
 
 	return false
 }
-{{- end }}
 
 func hasNodeAffinitiesChanged(oScheduling, newScheduling map[string]interface{}) bool {
 	oldNAs := oScheduling["node_affinities"].(*schema.Set).List()

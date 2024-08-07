@@ -1,0 +1,306 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'VmwareNodePool'
+description: "A Google Vmware Node Pool."
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/vmwareClusters/{{vmware_cluster}}/vmwareNodePools/{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/vmwareClusters/{{vmware_cluster}}/vmwareNodePools'
+self_link: 'projects/{{project}}/locations/{{location}}/vmwareClusters/{{vmware_cluster}}/vmwareNodePools/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/vmwareClusters/{{vmware_cluster}}/vmwareNodePools?vmware_node_pool_id={{name}}'
+update_url: 'projects/{{project}}/locations/{{location}}/vmwareClusters/{{vmware_cluster}}/vmwareNodePools/{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/vmwareClusters/{{vmware_cluster}}/vmwareNodePools/{{name}}'
+timeouts:
+  insert_minutes: 60
+  update_minutes: 60
+  delete_minutes: 60
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    kind: 'gkeonprem#operation'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+taint_resource_on_failed_create: true
+examples:
+  - name: 'gkeonprem_vmware_node_pool_basic'
+    primary_resource_id: 'nodepool-basic'
+    vars:
+      name: 'my-nodepool'
+      cluster: 'my-cluster'
+    test_env_vars:
+      project: 'fake-backend-360322'
+  - name: 'gkeonprem_vmware_node_pool_full'
+    primary_resource_id: 'nodepool-full'
+    vars:
+      name: 'my-nodepool'
+      cluster: 'my-cluster'
+    test_env_vars:
+      project: 'fake-backend-360322'
+parameters:
+  - name: 'name'
+    type: String
+    description: The vmware node pool name.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'vmwareCluster'
+    type: ResourceRef
+    description: "The cluster this node pool belongs to."
+    url_param_only: true
+    required: true
+    resource: 'VmwareCluster'
+    imports: 'name'
+  - name: 'location'
+    type: String
+    description: The location of the resource.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'displayName'
+    type: String
+    description: The display name for the node pool.
+  - name: 'annotations'
+    type: KeyValueAnnotations
+    description: |
+      Annotations on the node Pool.
+      This field has the same restrictions as Kubernetes annotations.
+      The total size of all keys and values combined is limited to 256k.
+      Key can have 2 segments: prefix (optional) and name (required),
+      separated by a slash (/).
+      Prefix must be a DNS subdomain.
+      Name must be 63 characters or less, begin and end with alphanumerics,
+      with dashes (-), underscores (_), dots (.), and alphanumerics between.
+  - name: 'nodePoolAutoscaling'
+    type: NestedObject
+    description: Node Pool autoscaling config for the node pool.
+    properties:
+      - name: 'minReplicas'
+        type: Integer
+        description: Minimum number of replicas in the NodePool.
+        required: true
+      - name: 'maxReplicas'
+        type: Integer
+        description: Maximum number of replicas in the NodePool.
+        required: true
+  - name: 'config'
+    type: NestedObject
+    description: The node configuration of the node pool.
+    required: true
+    properties:
+      - name: 'cpus'
+        type: Integer
+        description: The number of CPUs for each node in the node pool.
+        default_value: 4
+      - name: 'memoryMb'
+        type: Integer
+        description: The megabytes of memory for each node in the node pool.
+        default_value: 8192
+      - name: 'replicas'
+        type: Integer
+        description: The number of nodes in the node pool.
+        default_value: 1
+      - name: 'imageType'
+        type: String
+        description: |
+          The OS image to be used for each node in a node pool.
+          Currently `cos`, `ubuntu`, `ubuntu_containerd` and `windows` are supported.
+        required: true
+      - name: 'image'
+        type: String
+        description: The OS image name in vCenter, only valid when using Windows.
+      - name: 'bootDiskSizeGb'
+        type: Integer
+        description: VMware disk size to be used during creation.
+      - name: 'taints'
+        type: Array
+        description: The initial taints assigned to nodes of this node pool.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'key'
+              type: String
+              description: |
+                Key associated with the effect.
+              required: true
+            - name: 'value'
+              type: String
+              description: |
+                Value associated with the effect.
+              required: true
+            - name: 'effect'
+              type: Enum
+              description: |
+                Available taint effects.
+              enum_values:
+                - 'EFFECT_UNSPECIFIED'
+                - 'NO_SCHEDULE'
+                - 'PREFER_NO_SCHEDULE'
+                - 'NO_EXECUTE'
+      - name: 'labels'
+        type: KeyValuePairs
+        description: |
+          The map of Kubernetes labels (key/value pairs) to be applied to each node.
+          These will added in addition to any default label(s) that
+          Kubernetes may apply to the node.
+          In case of conflict in label keys, the applied set may differ depending on
+          the Kubernetes version -- it's best to assume the behavior is undefined
+          and conflicts should be avoided.
+        default_from_api: true
+      - name: 'vsphereConfig'
+        type: NestedObject
+        description: Specifies the vSphere config for node pool.
+        properties:
+          - name: 'datastore'
+            type: String
+            description: The name of the vCenter datastore. Inherited from the user
+              cluster.
+          - name: 'tags'
+            type: Array
+            description: Tags to apply to VMs.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'category'
+                  type: String
+                  description: The Vsphere tag category.
+                - name: 'tag'
+                  type: String
+                  description: The Vsphere tag name.
+          - name: 'hostGroups'
+            type: Array
+            description: |
+              Vsphere host groups to apply to all VMs in the node pool
+            item_type:
+              type: String
+      - name: 'enableLoadBalancer'
+        type: Boolean
+        description: |
+          Allow node pool traffic to be load balanced. Only works for clusters with
+          MetalLB load balancers.
+  - name: 'status'
+    type: NestedObject
+    description: ResourceStatus representing detailed cluster state.
+    output: true
+    properties:
+      - name: 'errorMessage'
+        type: String
+        description: |
+          Human-friendly representation of the error message from the user cluster
+          controller. The error message can be temporary as the user cluster
+          controller creates a cluster or node pool. If the error message persists
+          for a longer period of time, it can be used to surface error message to
+          indicate real problems requiring user intervention.
+        output: true
+      - name: 'conditions'
+        type: Array
+        description: |
+          ResourceConditions provide a standard mechanism for higher-level status reporting from user cluster controller.
+        output: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'type'
+              type: String
+              description: |
+                Type of the condition.
+                (e.g., ClusterRunning, NodePoolRunning or ServerSidePreflightReady)
+              output: true
+            - name: 'reason'
+              type: String
+              description: |
+                Machine-readable message indicating details about last transition.
+              output: true
+            - name: 'message'
+              type: String
+              description: |
+                Human-readable message indicating details about last transition.
+              output: true
+            - name: 'lastTransitionTime'
+              type: Time
+              description: |
+                Last time the condition transit from one status to another.
+              output: true
+            - name: 'state'
+              type: Enum
+              description: The lifecycle state of the condition.
+              output: true
+              enum_values:
+                - 'STATE_UNSPECIFIED'
+                - 'STATE_TRUE'
+                - 'STATE_FALSE'
+                - 'STATE_UNKNOWN'
+  - name: 'uid'
+    type: String
+    description: The unique identifier of the node pool.
+    output: true
+  - name: 'state'
+    type: Enum
+    description: The current state of this cluster.
+    output: true
+    enum_values:
+      - 'STATE_UNSPECIFIED'
+      - 'PROVISIONING'
+      - 'RUNNING'
+      - 'RECONCILING'
+      - 'STOPPING'
+      - 'ERROR'
+      - 'DEGRADED'
+  - name: 'reconciling'
+    type: Boolean
+    description: |
+      If set, there are currently changes in flight to the node pool.
+    output: true
+  - name: 'createTime'
+    type: Time
+    description: |
+      The time the cluster was created, in RFC3339 text format.
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      The time the cluster was last updated, in RFC3339 text format.
+    output: true
+  - name: 'deleteTime'
+    type: Time
+    description: |
+      The time the cluster was deleted, in RFC3339 text format.
+    output: true
+  - name: 'etag'
+    type: String
+    description: |
+      This checksum is computed by the server based on the value of other
+      fields, and may be sent on update and delete requests to ensure the
+      client has an up-to-date value before proceeding.
+      Allows clients to perform consistent read-modify-writes
+      through optimistic concurrency control.
+    output: true
+  - name: 'onPremVersion'
+    type: String
+    description: |
+      Anthos version for the node pool. Defaults to the user cluster version.
+    output: true

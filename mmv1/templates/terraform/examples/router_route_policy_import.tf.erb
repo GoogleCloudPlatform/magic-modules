@@ -1,0 +1,37 @@
+resource "google_compute_network" "net" {
+  provider = google-beta
+  name                    = "<%= ctx[:vars]['network_name'] %>"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "subnet" {
+  provider = google-beta
+  name          = "<%= ctx[:vars]['subnet_name'] %>"
+  network       = google_compute_network.net.id
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+}
+
+resource "google_compute_router" "router" {
+  provider = google-beta
+  name    = "<%= ctx[:vars]['router_name'] %>"
+  region  = google_compute_subnetwork.subnet.region
+  network = google_compute_network.net.id
+}
+
+resource "google_compute_router_route_policy" "<%= ctx[:primary_resource_id] %>" {
+  provider = google-beta
+	name = "<%= ctx[:vars]['route_policy_name'] %>"
+  router = google_compute_router.router.name
+  region = google_compute_router.router.region
+	type = "ROUTE_POLICY_TYPE_IMPORT"
+	terms {
+    priority = 2
+    match {
+      expression = "destination == '10.0.0.0/12'"
+	  }
+    actions {
+      expression = "accept()"
+    }
+  }
+}

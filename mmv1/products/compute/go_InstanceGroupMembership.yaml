@@ -41,12 +41,13 @@ read_verb: 'POST'
 delete_url: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{instance_group}}/removeInstances'
 delete_verb: 'POST'
 immutable: true
-mutex: instanceGroups/{{project}}/zones/{{zone}}/{{instance_group}}
+mutex: 'instanceGroups/{{project}}/zones/{{zone}}/{{instance_group}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'

@@ -87,7 +87,7 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
       {{- if $.IsSet }}
   v = v.(*schema.Set).List()
       {{- end }}
-      {{- if $.NestedProperties }}
+      {{- if or $.NestedProperties $.AllowEmptyObject }}
   l := v.([]interface{})
         {{- if $.IsA "Array" }}
   req := make([]interface{}, 0, len(l))
@@ -111,8 +111,10 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
     return nil, nil
   }
           {{- end }}
+          {{- if $.NestedProperties }}
   raw := l[0]
   original := raw.(map[string]interface{})
+          {{- end }}
         {{- end }}{{/* if $.IsA "Array */}}
     transformed := make(map[string]interface{})
         {{ range $prop := $.NestedProperties }}

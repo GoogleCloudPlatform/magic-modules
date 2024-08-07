@@ -43,7 +43,12 @@
 <%  unless property.required.nil? -%>
     required: <%= property.required %>
 <%  end -%>
-<%  unless property.immutable.nil? -%>
+<%  if property.name == "labels" && (property.is_a?(Api::Type::KeyValueLabels) || property.is_a?(Api::Type::KeyValueAnnotations)) && property.parent.nil? -%>
+<%    effective_labels = property.__resource.properties.find{ |p| p.is_a?(Api::Type::KeyValueEffectiveLabels) } -%>
+<%    unless effective_labels.immutable.nil? -%>
+    immutable: <%= effective_labels.immutable %>
+<%    end -%>
+<%  elsif !property.immutable.nil? -%>
     immutable: <%= property.immutable %>
 <%  end -%>
 <%  unless property.ignore_read.nil? -%>
@@ -151,7 +156,7 @@
 <%  end -%>
 <%  end -%>
 <%  unless property.default_value.nil? -%>
-    default_value: <%= property.default_value %>
+    default_value: <%= go_literal(property.default_value) %>
 <%  end -%>
 <%  unless property.deprecation_message.nil? -%>
     deprecation_message: '<%= property.deprecation_message %>'
@@ -168,6 +173,9 @@
       type: <%= property.item_type.type.to_s.gsub("Api::Type::", "") %>
 <%        unless property.item_type.properties.nil? -%>
       properties:
+<%          if property.item_type.properties.length == 0 -%>
+        []
+<%          end -%>
 <%          property.item_type.properties.each do |prop| -%>
 <%=   lines(indent(build_newyaml_field(prop, object, pwd), 6)) -%>
 <%          end -%>
@@ -208,6 +216,15 @@
 <%    unless property.max_size.nil? -%>
     max_size: <%= property.max_size %>
 <%    end -%>
+<%    unless property.item_validation.nil? -%>
+    item_validation:
+<%  unless property.item_validation.regex.nil? -%>
+      regex: '<%= property.item_validation.regex %>'
+<%  end -%>
+<%  unless property.item_validation.function.nil? -%>
+      function: '<%= property.item_validation.function %>'
+<%  end -%>
+<%    end -%>
 <%  end -%>
 <%  if property.is_a?(Api::Type::ResourceRef) -%>
 <%    unless property.resource.nil? -%>
@@ -241,9 +258,15 @@
 <%        unless property.value_type.description.nil? || property.value_type.description == "A nested object resource"  -%>
       description:
 <%        end -%>
+<%        unless property.value_type.name.nil? -%>
+      name: <%= property.value_type.name %>
+<%        end -%>
       type: <%= property.value_type.type.to_s.gsub("Api::Type::", "") %>
 <%        unless property.value_type.properties.nil? -%>
       properties:
+<%          if property.value_type.properties.length == 0 -%>
+        []
+<%          end -%>
 <%          property.value_type.properties.each do |prop| -%>
 <%=   lines(indent(build_newyaml_field(prop, object, pwd), 6)) -%>
 <%          end -%>
@@ -256,6 +279,9 @@
 <%  if property.is_a?(Api::Type::NestedObject) -%>
 <%    unless property.properties.nil? -%>
     properties:
+<%          if property.properties.length == 0 -%>
+      []
+<%          end -%>
 <%      property.properties.each do |prop| -%>
 <%= lines(indent(build_newyaml_field(prop, object, pwd), 4)) -%>
 <%      end -%>

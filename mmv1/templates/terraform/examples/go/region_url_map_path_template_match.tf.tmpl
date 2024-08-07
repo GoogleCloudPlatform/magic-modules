@@ -1,4 +1,3 @@
-# [START cloudloadbalancing_url_map_path_template_match]
 resource "google_compute_region_url_map" "{{$.PrimaryResourceId}}" {
   region = "us-central1"
 
@@ -87,4 +86,3 @@ resource "google_compute_region_health_check" "default" {
   }
 }
 
-# [END cloudloadbalancing_url_map_path_template_match]

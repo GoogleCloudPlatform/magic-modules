@@ -237,7 +237,7 @@ func TestAnalyticsComment(t *testing.T) {
 			want: strings.Join(
 				[]string{
 					"#### Tests analytics",
-					"Total tests: 7",
+					"Total tests: 6",
 					"Passed tests: 3",
 					"Skipped tests: 2",
 					"Affected tests: 1",
@@ -268,7 +268,7 @@ func TestAnalyticsComment(t *testing.T) {
 			want: strings.Join(
 				[]string{
 					"#### Tests analytics",
-					"Total tests: 7",
+					"Total tests: 6",
 					"Passed tests: 3",
 					"Skipped tests: 2",
 					"Affected tests: 1",
@@ -302,7 +302,7 @@ func TestAnalyticsComment(t *testing.T) {
 			},
 			want: strings.Join([]string{
 				"#### Tests analytics",
-				"Total tests: 7",
+				"Total tests: 6",
 				"Passed tests: 3",
 				"Skipped tests: 2",
 				"Affected tests: 1",

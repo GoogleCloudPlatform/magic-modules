@@ -1,0 +1,175 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'EkmConnection'
+description: |
+  `Ekm Connections` are used to control the connection settings for an `EXTERNAL_VPC` CryptoKey.
+  It is used to connect customer's external key manager to Google Cloud EKM.
+
+
+  ~> **Note:** Ekm Connections cannot be deleted from Google Cloud Platform.
+references:
+  guides:
+    'Creating a Ekm Connection': 'https://cloud.google.com/kms/docs/create-ekm-connection'
+  api: 'https://cloud.google.com/kms/docs/reference/rest/v1/projects.locations.ekmConnections'
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/ekmConnections/{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/ekmConnections'
+self_link: 'projects/{{project}}/locations/{{location}}/ekmConnections/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/ekmConnections?ekmConnectionId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+skip_delete: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/ekmConnections/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+examples:
+  - name: 'kms_ekm_connection_basic'
+    primary_resource_id: 'example-ekmconnection'
+    vars:
+      ekmconnection_name: 'ekmconnection_example'
+    skip_test: true
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The location for the EkmConnection.
+      A full list of valid locations can be found by running `gcloud kms locations list`.
+    url_param_only: true
+    required: true
+    immutable: true
+    ignore_read: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The resource name for the EkmConnection.
+    required: true
+    immutable: true
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+  - name: 'serviceResolvers'
+    type: Array
+    description: |
+      A list of ServiceResolvers where the EKM can be reached. There should be one ServiceResolver per EKM replica. Currently, only a single ServiceResolver is supported
+    required: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'serviceDirectoryService'
+          type: String
+          description: |
+            Required. The resource name of the Service Directory service pointing to an EKM replica, in the format projects/*/locations/*/namespaces/*/services/*
+          required: true
+        - name: 'hostname'
+          type: String
+          description: |
+            Required. The hostname of the EKM replica used at TLS and HTTP layers.
+          required: true
+        - name: 'serverCertificates'
+          type: Array
+          description: |
+            Required. A list of leaf server certificates used to authenticate HTTPS connections to the EKM replica. Currently, a maximum of 10 Certificate is supported.
+          required: true
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'rawDer'
+                type: String
+                description: |
+                  Required. The raw certificate bytes in DER format. A base64-encoded string.
+                required: true
+              - name: 'parsed'
+                type: Boolean
+                description: |
+                  Output only. True if the certificate was parsed successfully.
+                output: true
+              - name: 'issuer'
+                type: String
+                description: |
+                  Output only. The issuer distinguished name in RFC 2253 format. Only present if parsed is true.
+                output: true
+              - name: 'subject'
+                type: String
+                description: |
+                  Output only. The subject distinguished name in RFC 2253 format. Only present if parsed is true.
+                output: true
+              - name: 'notBeforeTime'
+                type: String
+                description: |
+                  Output only. The certificate is not valid before this time. Only present if parsed is true.
+                  A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+                output: true
+              - name: 'notAfterTime'
+                type: String
+                description: |
+                  Output only. The certificate is not valid after this time. Only present if parsed is true.
+                  A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+                output: true
+              - name: 'sha256Fingerprint'
+                type: String
+                description: |
+                  Output only. The SHA-256 certificate fingerprint as a hex string. Only present if parsed is true.
+                output: true
+              - name: 'serialNumber'
+                type: String
+                description: |
+                  Output only. The certificate serial number as a hex string. Only present if parsed is true.
+                output: true
+              - name: 'subjectAlternativeDnsNames'
+                type: Array
+                description: |
+                  Output only. The subject Alternative DNS names. Only present if parsed is true.
+                default_from_api: true
+                output: true
+                item_type:
+                  type: String
+        - name: 'endpointFilter'
+          type: String
+          description: |
+            Optional. The filter applied to the endpoints of the resolved service. If no filter is specified, all endpoints will be considered. An endpoint will be chosen arbitrarily from the filtered list for each request. For endpoint filter syntax and examples, see https://cloud.google.com/service-directory/docs/reference/rpc/google.cloud.servicedirectory.v1#resolveservicerequest.
+          required: false
+          default_from_api: true
+  - name: 'keyManagementMode'
+    type: Enum
+    description: |
+      Optional. Describes who can perform control plane operations on the EKM. If unset, this defaults to MANUAL
+    required: false
+    default_value: "MANUAL"
+    enum_values:
+      - 'MANUAL'
+      - 'CLOUD_KMS'
+  - name: 'etag'
+    type: String
+    description: |
+      Optional. Etag of the currently stored EkmConnection.
+    required: false
+    default_from_api: true
+  - name: 'cryptoSpacePath'
+    type: String
+    description: |
+      Optional. Identifies the EKM Crypto Space that this EkmConnection maps to. Note: This field is required if KeyManagementMode is CLOUD_KMS.
+    required: false
+    default_from_api: true
+  - name: 'createTime'
+    type: String
+    description: |
+      Output only. The time at which the EkmConnection was created.
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true

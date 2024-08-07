@@ -30,7 +30,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -115,7 +115,6 @@ properties:
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
 
-
       These are in the same namespace as the managed SSL certificates.
     default_from_api: true
     custom_expand: 'templates/terraform/custom_expand/name_or_name_prefix.go.erb'
@@ -129,4 +128,4 @@ properties:
     sensitive: true
     ignore_read: true
     custom_flatten: 'templates/terraform/custom_flatten/sha256.erb'
-    diff_suppress_func: 'tpgresource.Sha256DiffSuppress'
+    diff_suppress_func: 'sha256DiffSuppress'

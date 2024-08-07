@@ -1,6 +1,5 @@
 # CDN load balancer with Cloud bucket as backend
 
-# [START cloudloadbalancing_cdn_with_backend_bucket_cloud_storage_bucket]
 # Cloud Storage bucket
 resource "google_storage_bucket" "default" {
   name                        = "{{index $.Vars "my_bucket"}}"
@@ -16,18 +15,14 @@ resource "google_storage_bucket" "default" {
   }
 }
 
-# [END cloudloadbalancing_cdn_with_backend_bucket_cloud_storage_bucket]
 
-# [START cloudloadbalancing_cdn_with_backend_bucket_make_public]
 # make bucket public
 resource "google_storage_bucket_iam_member" "default" {
   bucket = google_storage_bucket.default.name
   role   = "roles/storage.objectViewer"
   member = "allUsers"
 }
-# [END cloudloadbalancing_cdn_with_backend_bucket_make_public]
 
-# [START cloudloadbalancing_cdn_with_backend_bucket_index_page]
 resource "google_storage_bucket_object" "index_page" {
   name    = "{{index $.Vars "index_page"}}"
   bucket  = google_storage_bucket.default.name
@@ -37,9 +32,7 @@ resource "google_storage_bucket_object" "index_page" {
     </body></html>
   EOT
 }
-# [END cloudloadbalancing_cdn_with_backend_bucket_index_page]
 
-# [START cloudloadbalancing_cdn_with_backend_bucket_error_page]
 resource "google_storage_bucket_object" "error_page" {
   name    = "{{index $.Vars "404_page"}}"
   bucket  = google_storage_bucket.default.name
@@ -49,9 +42,7 @@ resource "google_storage_bucket_object" "error_page" {
     </body></html>
   EOT
 }
-# [END cloudloadbalancing_cdn_with_backend_bucket_error_page]
 
-# [START cloudloadbalancing_cdn_with_backend_bucket_image]
 # image object for testing, try to access http://<your_lb_ip_address>/test.jpg
 resource "google_storage_bucket_object" "test_image" {
   name = "{{index $.Vars "test_object"}}"
@@ -65,16 +56,12 @@ resource "google_storage_bucket_object" "test_image" {
 
   bucket = google_storage_bucket.default.name
 }
-# [END cloudloadbalancing_cdn_with_backend_bucket_image]
 
-# [START cloudloadbalancing_cdn_with_backend_bucket_ip_address]
 # reserve IP address
 resource "google_compute_global_address" "default" {
   name = "{{index $.Vars "example_ip"}}"
 }
-# [END cloudloadbalancing_cdn_with_backend_bucket_ip_address]
 
-# [START cloudloadbalancing_cdn_with_backend_bucket_forwarding_rule]
 # forwarding rule
 resource "google_compute_global_forwarding_rule" "default" {
   name                  = "{{index $.Vars "http_lb_forwarding_rule"}}"
@@ -84,25 +71,19 @@ resource "google_compute_global_forwarding_rule" "default" {
   target                = google_compute_target_http_proxy.default.id
   ip_address            = google_compute_global_address.default.id
 }
-# [END cloudloadbalancing_cdn_with_backend_bucket_forwarding_rule]
 
-# [START cloudloadbalancing_cdn_with_backend_bucket_http_proxy]
 # http proxy
 resource "google_compute_target_http_proxy" "default" {
   name    = "{{index $.Vars "http_lb_proxy"}}"
   url_map = google_compute_url_map.default.id
 }
-# [END cloudloadbalancing_cdn_with_backend_bucket_http_proxy]
 
-# [START cloudloadbalancing_cdn_with_backend_bucket_url_map]
 # url map
 resource "google_compute_url_map" "default" {
   name            = "{{index $.Vars "http_lb"}}"
   default_service = google_compute_backend_bucket.default.id
 }
-# [END cloudloadbalancing_cdn_with_backend_bucket_url_map]
 
-# [START cloudloadbalancing_cdn_with_backend_bucket_backend_bucket]
 # backend bucket with CDN policy with default ttl settings
 resource "google_compute_backend_bucket" "{{$.PrimaryResourceId}}" {
   name        = "{{index $.Vars "cat_backend_bucket"}}"
@@ -118,4 +99,3 @@ resource "google_compute_backend_bucket" "{{$.PrimaryResourceId}}" {
     serve_while_stale = 86400
   }
 }
-# [END cloudloadbalancing_cdn_with_backend_bucket_backend_bucket]

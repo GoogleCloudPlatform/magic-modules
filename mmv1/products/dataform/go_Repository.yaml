@@ -1,0 +1,170 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Repository'
+description: |-
+  A resource represents a Dataform Git repository
+min_version: 'beta'
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/dataform/docs/'
+  api: 'https://cloud.google.com/dataform/reference/rest/v1beta1/projects.locations.repositories'
+docs:
+id_format: 'projects/{{project}}/locations/{{region}}/repositories/{{name}}'
+base_url: 'projects/{{project}}/locations/{{region}}/repositories'
+create_url: 'projects/{{project}}/locations/{{region}}/repositories?repositoryId={{name}}'
+update_verb: 'PATCH'
+import_format:
+  - 'projects/{{project}}/locations/{{region}}/repositories/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_attribute: 'repository'
+  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  min_version: 'beta'
+custom_code:
+examples:
+  - name: 'dataform_repository'
+    primary_resource_id: 'dataform_repository'
+    primary_resource_name: 'fmt.Sprintf("tf_test_dataform_repository%s", context["random_suffix"])'
+    min_version: 'beta'
+    vars:
+      dataform_repository_name: 'dataform_repository'
+      data: 'secret-data'
+      secret_name: 'my-secret'
+    skip_test: true
+  - name: 'dataform_repository_with_cloudsource_repo'
+    primary_resource_id: 'dataform_repository'
+    primary_resource_name: 'fmt.Sprintf("tf_test_dataform_repository%s", context["random_suffix"])'
+    min_version: 'beta'
+    vars:
+      git_repository_name: 'my/repository'
+      dataform_repository_name: 'dataform_repository'
+      data: 'secret-data'
+      secret_name: 'my-secret'
+    skip_docs: true
+  - name: 'dataform_repository_with_cloudsource_repo_and_ssh'
+    primary_resource_id: 'dataform_repository'
+    min_version: 'beta'
+    vars:
+      git_repository_name: 'my/repository'
+      dataform_repository_name: 'dataform_repository'
+      data: 'secret-data'
+      secret_name: 'my-secret'
+    skip_docs: true
+parameters:
+  - name: 'region'
+    type: String
+    description: 'A reference to the region'
+    min_version: 'beta'
+    url_param_only: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: The repository's name.
+    min_version: 'beta'
+    required: true
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+  - name: 'gitRemoteSettings'
+    type: NestedObject
+    description:
+      Optional. If set, configures this repository to be linked to a Git remote.
+    min_version: 'beta'
+    properties:
+      - name: 'url'
+        type: String
+        description: The Git remote's URL.
+        min_version: 'beta'
+        required: true
+      - name: 'defaultBranch'
+        type: String
+        description: The Git remote's default branch name.
+        min_version: 'beta'
+        required: true
+      - name: 'authenticationTokenSecretVersion'
+        type: String
+        description:
+          The name of the Secret Manager secret version to use as an
+          authentication token for Git operations. This secret is for assigning with HTTPS only(for SSH use `ssh_authentication_config`). Must be in the format
+          projects/*/secrets/*/versions/*.
+        min_version: 'beta'
+        exactly_one_of:
+          - 'gitRemoteSettings.0.authenticationTokenSecretVersion'
+          - 'gitRemoteSettings.0.sshAuthenticationConfig'
+      - name: 'sshAuthenticationConfig'
+        type: NestedObject
+        description: Authentication fields for remote uris using SSH protocol.
+        min_version: 'beta'
+        exactly_one_of:
+          - 'gitRemoteSettings.0.authenticationTokenSecretVersion'
+          - 'gitRemoteSettings.0.sshAuthenticationConfig'
+        properties:
+          - name: 'userPrivateKeySecretVersion'
+            type: String
+            description: The name of the Secret Manager secret version to use as a ssh private key for Git operations. Must be in the format projects/*/secrets/*/versions/*.
+            min_version: 'beta'
+            required: true
+          - name: 'hostPublicKey'
+            type: String
+            description: Content of a public SSH key to verify an identity of a remote Git host.
+            min_version: 'beta'
+            required: true
+      - name: 'tokenStatus'
+        type: String
+        description: |
+          Indicates the status of the Git access token. https://cloud.google.com/dataform/reference/rest/v1beta1/projects.locations.repositories#TokenStatus
+        min_version: 'beta'
+        output: true
+  - name: 'workspaceCompilationOverrides'
+    type: NestedObject
+    description: If set, fields of workspaceCompilationOverrides override the default compilation settings that are specified in dataform.json when creating workspace-scoped compilation results.
+    min_version: 'beta'
+    properties:
+      - name: 'defaultDatabase'
+        type: String
+        description: The default database (Google Cloud project ID).
+        min_version: 'beta'
+      - name: 'schemaSuffix'
+        type: String
+        description: The suffix that should be appended to all schema (BigQuery dataset ID) names.
+        min_version: 'beta'
+      - name: 'tablePrefix'
+        type: String
+        description: The prefix that should be prepended to all table names.
+        min_version: 'beta'
+  - name: 'serviceAccount'
+    type: String
+    description: The service account to run workflow invocations under.
+    min_version: 'beta'
+  - name: 'npmrcEnvironmentVariablesSecretVersion'
+    type: String
+    description: Optional. The name of the Secret Manager secret version to be used to interpolate variables into the .npmrc file for package installation operations. Must be in the format projects/*/secrets/*/versions/*. The file itself must be in a JSON format.
+    min_version: 'beta'
+  - name: 'displayName'
+    type: String
+    description: Optional. The repository's user-friendly name.
+    min_version: 'beta'
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      Optional. Repository user labels.
+      An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+    min_version: 'beta'
+    immutable: false

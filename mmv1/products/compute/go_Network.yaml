@@ -30,6 +30,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/global/operations/{{op_id}}'
@@ -175,7 +176,7 @@ properties:
       Set the order that Firewall Rules and Firewall Policies are evaluated.
     update_url: 'projects/{{project}}/global/networks/{{name}}'
     update_verb: 'PATCH'
-    default_value: AFTER_CLASSIC_FIREWALL
+    default_value: "AFTER_CLASSIC_FIREWALL"
     enum_values:
       - 'BEFORE_CLASSIC_FIREWALL'
       - 'AFTER_CLASSIC_FIREWALL'

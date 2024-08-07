@@ -1,0 +1,93 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'VolumeSnapshot'
+description: |
+  NetApp Volumes helps you manage your data usage with snapshots that can quickly restore lost data.
+  Snapshots are point-in-time versions of your volume's content. They are resources of volumes and are
+  instant captures of your data that consume space only for modified data. Because data changes over
+  time, snapshots usually consume more space as they get older.
+  NetApp Volumes volumes use just-in-time copy-on-write so that unmodified files in snapshots don't
+  consume any of the volume's capacity.
+references:
+  guides:
+    'Documentation': 'https://cloud.google.com/netapp/volumes/docs/configure-and-use/volume-snapshots/overview'
+  api: 'https://cloud.google.com/netapp/volumes/docs/reference/rest/v1/projects.locations.volumes.snapshots'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/snapshots'
+self_link: 'projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/snapshots/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/snapshots?snapshotId={{name}}'
+update_url: 'projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/snapshots/{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+custom_code:
+examples:
+  - name: 'volume_snapshot_create'
+    primary_resource_id: 'test_snapshot'
+    vars:
+      volume_name: 'test-volume'
+      pool_name: 'test-pool'
+      network_name: 'test-network'
+      snap_name: 'testvolumesnap'
+    test_vars_overrides:
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      Name of the snapshot location. Snapshots are child resources of volumes and live in the same location.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'volume_name'
+    type: String
+    description: |
+      The name of the volume to create the snapshot in.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'name'
+    type: String
+    description:
+      The name of the snapshot.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'description'
+    type: String
+    description: |
+      Description for the snapshot.
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      Labels as key value pairs. Example: `{ "owner": "Bob", "department": "finance", "purpose": "testing" }`.
+  - name: 'usedBytes'
+    type: Integer
+    description: |
+      Storage used to store blocks unique to this snapshot.
+    output: true
