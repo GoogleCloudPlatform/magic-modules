@@ -108,11 +108,6 @@ properties:
     immutable: true
     output: true
   - !ruby/object:Api::Type::String
-    name: snProject
-    description: "Output only. SN project that hosts the shared VPC network.\nInternal
-      only. "
-    output: true
-  - !ruby/object:Api::Type::String
     name: fileStripeLevel
     description: "Optional. Stripe level for files.\nMIN better suited for small size
       files.\nMAX higher throughput performance for larger files. \n Possible values:\n
