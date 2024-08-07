@@ -10,62 +10,6 @@ import (
 )
 
 func TestAccComputeProjectCloudArmorTier_basic(t *testing.T) {
-	acctest.SkipIfVcr(t)
-	t.Parallel()
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeProject_cloudArmorTier_standard(),
-			},
-			{
-				ResourceName:      "google_compute_project_cloud_armor_tier.cloud_armor_tier_config",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
-func TestAccComputeProjectCloudArmorTier_modify(t *testing.T) {
-	acctest.SkipIfVcr(t)
-	t.Parallel()
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeProject_cloudArmorTier_standard(),
-			},
-			{
-				ResourceName:      "google_compute_project_cloud_armor_tier.cloud_armor_tier_config",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccComputeProject_cloudArmorTier_enterprise_paygo(),
-			},
-			{
-				ResourceName:      "google_compute_project_cloud_armor_tier.cloud_armor_tier_config",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccComputeProject_cloudArmorTier_standard(),
-			},
-			{
-				ResourceName:      "google_compute_project_cloud_armor_tier.cloud_armor_tier_config",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
-func TestAccComputeProjectCloudArmorTier_withProjectSet(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -79,23 +23,7 @@ func TestAccComputeProjectCloudArmorTier_withProjectSet(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeProject_cloudArmorTier_withProjectSet_standard(context),
-			},
-			{
-				ResourceName:      "google_compute_project_cloud_armor_tier.cloud_armor_tier_config",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccComputeProject_cloudArmorTier_withProjectSet_enterprise_paygo(context),
-			},
-			{
-				ResourceName:      "google_compute_project_cloud_armor_tier.cloud_armor_tier_config",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccComputeProject_cloudArmorTier_withProjectSet_standard(context),
+				Config: testAccComputeProject_cloudArmorTier_standard(context),
 			},
 			{
 				ResourceName:      "google_compute_project_cloud_armor_tier.cloud_armor_tier_config",
@@ -106,21 +34,48 @@ func TestAccComputeProjectCloudArmorTier_withProjectSet(t *testing.T) {
 	})
 }
 
-func testAccComputeProject_cloudArmorTier_enterprise_paygo() string {
-	return fmt.Sprintln(`
-resource "google_compute_project_cloud_armor_tier" "cloud_armor_tier_config" {
-  cloud_armor_tier = "CA_ENTERPRISE_PAYGO"
-}`)
+func TestAccComputeProjectCloudArmorTier_modify(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"org":       envvar.GetTestOrgFromEnv(t),
+		"billingId": envvar.GetTestBillingAccountFromEnv(t),
+		"projectID": fmt.Sprintf("tf-test-%d", acctest.RandInt(t)),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeProject_cloudArmorTier_standard(context),
+			},
+			{
+				ResourceName:      "google_compute_project_cloud_armor_tier.cloud_armor_tier_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeProject_cloudArmorTier_enterprise_paygo(context),
+			},
+			{
+				ResourceName:      "google_compute_project_cloud_armor_tier.cloud_armor_tier_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeProject_cloudArmorTier_standard(context),
+			},
+			{
+				ResourceName:      "google_compute_project_cloud_armor_tier.cloud_armor_tier_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
 }
 
-func testAccComputeProject_cloudArmorTier_standard() string {
-	return fmt.Sprintln(`
-resource "google_compute_project_cloud_armor_tier" "cloud_armor_tier_config" {
-	cloud_armor_tier = "CA_STANDARD"
-}`)
-}
-
-func testAccComputeProject_cloudArmorTier_withProjectSet_enterprise_paygo(context map[string]interface{}) string {
+func testAccComputeProject_cloudArmorTier_enterprise_paygo(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_project" "project" {
   project_id      = "%{projectID}"
@@ -142,7 +97,7 @@ resource "google_compute_project_cloud_armor_tier" "cloud_armor_tier_config" {
 `, context)
 }
 
-func testAccComputeProject_cloudArmorTier_withProjectSet_standard(context map[string]interface{}) string {
+func testAccComputeProject_cloudArmorTier_standard(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_project" "project" {
   project_id      = "%{projectID}"
