@@ -207,7 +207,6 @@ properties:
     api_name: secondaryIpRanges
     unordered_list: true
     default_from_api: true
-    schema_config_mode_attr: true
     send_empty_value: true
     description: |
       An array of configurations for secondary IP ranges for VM instances

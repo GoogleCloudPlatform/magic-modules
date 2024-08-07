@@ -443,7 +443,7 @@ func testAccCheckComputeSubnetworkHasNotSecondaryIpRange(subnetwork *compute.Sub
 		for _, secondaryRange := range subnetwork.SecondaryIpRanges {
 			if secondaryRange.RangeName == rangeName {
 				if secondaryRange.IpCidrRange == ipCidrRange {
-					return fmt.Errorf("Secondary range %s has the wrong ip_cidr_range. Expected %s, got %s", rangeName, ipCidrRange, secondaryRange.IpCidrRange)
+					return fmt.Errorf("Secondary range %s has the wrong ip_cidr_range. Did not expect %s, got %s", rangeName, ipCidrRange, secondaryRange.IpCidrRange)
 				}
 			}
 		}
@@ -617,7 +617,6 @@ resource "google_compute_subnetwork" "network-with-private-secondary-ip-ranges" 
   ip_cidr_range      = "10.2.0.0/16"
   region             = "us-central1"
   network            = google_compute_network.custom-test.self_link
-  secondary_ip_range = []
 }
 `, cnName, subnetworkName)
 }
