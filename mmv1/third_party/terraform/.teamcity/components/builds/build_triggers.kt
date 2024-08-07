@@ -27,7 +27,7 @@ fun Triggers.runNightly(config: NightlyTriggerConfiguration) {
 
     schedule{
         enabled = config.nightlyTestsEnabled
-        branchFilter = "+:refs/heads/UTC-*\n-:refs/heads/UTC-nightly-*"
+        branchFilter = "+:refs/heads/nightly-test"
         triggerBuild = always() // Run build even if no new commits/pending changes
         withPendingChangesOnly = false
         enforceCleanCheckout = true
@@ -35,6 +35,7 @@ fun Triggers.runNightly(config: NightlyTriggerConfiguration) {
         schedulingPolicy = cron {
             hours = config.startHour.toString()
             timezone = "SERVER"
+
             dayOfWeek = config.daysOfWeek
             dayOfMonth = config.daysOfMonth
         }

@@ -252,15 +252,6 @@ fun ParametrizedWithType.readOnlySettings() {
     hiddenVariable("teamcity.ui.settings.readOnly", "true", "Requires build configurations be edited via Kotlin")
 }
 
-
-// ParametrizedWithType.activeBranchSettings sets the max length of age for keeping an active branch
-// after a recent build is made. (By default, the activeBuildBranch age is 24 hours while activeVcsBranch age is 7 days.)
-// https://www.jetbrains.com/help/teamcity/2024.03/working-with-feature-branches.html#Active+Branches
-fun ParametrizedWithType.activeBranchSettings() {
-    hiddenVariable("teamcity.activeVcsBranch.age.days", "10", "allows branches to be present in teamcity UI before 10 days have passed since last commit on branch")
-    hiddenVariable("teamcity.activeBuildBranch.age.hours", "240", "allows builds to be present in teamcity UI before 10 days have passed since last build")
-}
-
 // ParametrizedWithType.terraformCoreBinaryTesting sets environment variables that control what Terraform version is downloaded
 // and ensures the testing framework uses that downloaded version. The default Terraform core version is used if no argument is supplied.
 fun ParametrizedWithType.terraformCoreBinaryTesting(tfVersion: String = DefaultTerraformCoreVersion) {

@@ -39,9 +39,9 @@ class NightlyTestProjectsTests {
 
             assertTrue("Build configuration `${bt.name}` should contain a CRON/'schedulingTrigger' trigger", found)
 
-            // Check that nightly test is being ran on a nightly-test-* branch
+            // Check that nightly test is being ran on the nightly-test branch
             var isNightlyTestBranch: Boolean = false
-            if (schedulingTrigger.branchFilter == "+:refs/heads/UTC-*\n-:refs/heads/UTC-nightly-*"){
+            if (schedulingTrigger.branchFilter == "+:refs/heads/nightly-tests"){
                 isNightlyTestBranch = true
             }
             assertTrue("Build configuration `${bt.name}` is using the nightly-test branch filter;", isNightlyTestBranch)
