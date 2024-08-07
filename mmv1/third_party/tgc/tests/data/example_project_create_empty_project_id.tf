@@ -48,4 +48,5 @@ resource "random_string" "suffix" {
 resource "google_folder" "department1" {
   display_name = "Department 1"
   parent     = "organizations/{{.OrgID}}"
+  deletion_protection = false
 }
