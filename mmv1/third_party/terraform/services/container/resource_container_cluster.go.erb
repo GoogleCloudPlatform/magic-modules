@@ -847,6 +847,13 @@ func ResourceContainerCluster() *schema.Resource {
 								},
 							},
 						},
+						"auto_provisioning_locations": {
+							Type:             schema.TypeList,
+							Optional:         true,
+							Computed:         true,
+							Elem:             &schema.Schema{Type: schema.TypeString},
+							Description:      `The list of Google Compute Engine zones in which the NodePool's nodes can be created by NAP.`,
+						},
 						"autoscaling_profile": {
 							Type:             schema.TypeString,
 							Default:          "BALANCED",
@@ -2036,7 +2043,6 @@ func ResourceContainerCluster() *schema.Resource {
 			   Description: `Whether L4ILB Subsetting is enabled for this cluster.`,
 			   Default: false,
 			},
-<% unless version == 'ga' -%>
 			"enable_multi_networking": {
 			   Type: schema.TypeBool,
 			   Optional: true,
@@ -2044,6 +2050,7 @@ func ResourceContainerCluster() *schema.Resource {
 			   Description: `Whether multi-networking is enabled for this cluster.`,
 			   Default: false,
 			},
+<% unless version == 'ga' -%>
 			"enable_fqdn_network_policy": {
 			   Type: schema.TypeBool,
 			   Optional: true,
@@ -2372,8 +2379,8 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			EnableL4ilbSubsetting:                d.Get("enable_l4_ilb_subsetting").(bool),
 			DnsConfig:                            expandDnsConfig(d.Get("dns_config")),
 			GatewayApiConfig:                     expandGatewayApiConfig(d.Get("gateway_api_config")),
-<% unless version == "ga" -%>
 			EnableMultiNetworking:                d.Get("enable_multi_networking").(bool),
+<% unless version == "ga" -%>
 			EnableFqdnNetworkPolicy:              d.Get("enable_fqdn_network_policy").(bool),
 <% end -%>
 	    },
@@ -2912,10 +2919,10 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("enable_intranode_visibility", cluster.NetworkConfig.EnableIntraNodeVisibility); err != nil {
 		return fmt.Errorf("Error setting enable_intranode_visibility: %s", err)
 	}
-<% unless version == 'ga' -%>
 	if err := d.Set("enable_multi_networking", cluster.NetworkConfig.EnableMultiNetworking); err != nil {
 		return fmt.Errorf("Error setting enable_multi_networking: %s", err)
 	}
+<% unless version == 'ga' -%>
 	if err := d.Set("enable_fqdn_network_policy", cluster.NetworkConfig.EnableFqdnNetworkPolicy); err != nil {
 		return fmt.Errorf("Error setting enable_fqdn_network_policy: %s", err)
 	}
@@ -4872,6 +4879,7 @@ func expandClusterAutoscaling(configured interface{}, d *schema.ResourceData) *c
 		ResourceLimits:             resourceLimits,
 		AutoscalingProfile: config["autoscaling_profile"].(string),
 		AutoprovisioningNodePoolDefaults: expandAutoProvisioningDefaults(config["auto_provisioning_defaults"], d),
+		AutoprovisioningLocations: 	tpgresource.ConvertStringArr(config["auto_provisioning_locations"].([]interface{})),
 	}
 }
 
@@ -6184,6 +6192,7 @@ func flattenClusterAutoscaling(a *container.ClusterAutoscaling) []map[string]int
 		r["resource_limits"] = resourceLimits
 		r["enabled"] = true
 		r["auto_provisioning_defaults"] = flattenAutoProvisioningDefaults(a.AutoprovisioningNodePoolDefaults)
+		r["auto_provisioning_locations"] = a.AutoprovisioningLocations
 	} else {
 		r["enabled"] = false
 	}

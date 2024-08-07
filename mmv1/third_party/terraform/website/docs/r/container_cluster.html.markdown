@@ -356,7 +356,7 @@ subnetwork in which the cluster's instances are launched.
 * `enable_l4_ilb_subsetting` - (Optional)
     Whether L4ILB Subsetting is enabled for this cluster.
 
-* `enable_multi_networking` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+* `enable_multi_networking` - (Optional)
     Whether multi-networking is enabled for this cluster.
 
 * `enable_fqdn_network_policy` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
@@ -543,6 +543,10 @@ in addition to node auto-provisioning. Structure is [documented below](#nested_r
 GKE Autopilot clusters.
 Structure is [documented below](#nested_auto_provisioning_defaults).
 
+* `auto_provisioning_locations` - (Optional) The list of Google Compute Engine 
+[zones](https://cloud.google.com/compute/docs/zones#available) in which the 
+NodePool's nodes can be created by NAP.
+
 * `autoscaling_profile` - (Optional) Configuration
 options for the [Autoscaling profile](https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-autoscaler#autoscaling_profiles)
 feature, which lets you choose whether the cluster autoscaler should optimize for resource utilization or resource availability
@@ -642,7 +646,7 @@ This block also contains several computed attributes, documented below.
 
 * `enable_metrics` - (Required) Whether or not to enable advanced datapath metrics.
 * `enable_relay` - (Optional) Whether or not Relay is enabled.
-* `relay_mode` - (Optional) Mode used to make Relay available.
+* `relay_mode` - (Optional, Deprecated) Mode used to make Relay available. Deprecated in favor of `enable_relay` field. Remove this attribute's configuration as this field will be removed in the next major release and `enable_relay` will become a required field.
 
 <a name="nested_maintenance_policy"></a>The `maintenance_policy` block supports:
 * `daily_maintenance_window` - (Optional) structure documented below.

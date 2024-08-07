@@ -44,7 +44,7 @@ var testTGCIntegrationCmd = &cobra.Command{
 	},
 }
 
-func execTestTGCIntegration(prNumber, mmCommit, buildID, projectID, buildStep, ghRepo, githubUsername string, rnr ExecRunner, ctlr *source.Controller, gh GithubClient) error {
+func execTestTGCIntegration(prNumber, mmCommit, buildID, projectID, buildStep, ghRepo, githubUsername string, rnr exec.ExecRunner, ctlr *source.Controller, gh GithubClient) error {
 	newBranch := "auto-pr-" + prNumber
 	repo := &source.Repo{
 		Name:   ghRepo,

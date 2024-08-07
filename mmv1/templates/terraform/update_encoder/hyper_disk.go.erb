@@ -1,5 +1,5 @@
 
-if (d.HasChange("provisioned_iops") && strings.Contains(d.Get("type").(string), "hyperdisk")) || (d.HasChange("provisioned_throughput") && strings.Contains(d.Get("type").(string), "hyperdisk")) {
+if (d.HasChange("provisioned_iops") && strings.Contains(d.Get("type").(string), "hyperdisk")) || (d.HasChange("provisioned_throughput") && strings.Contains(d.Get("type").(string), "hyperdisk")) || (d.HasChange("access_mode") && strings.Contains(d.Get("type").(string), "hyperdisk")) {
     nameProp := d.Get("name")
     if v, ok := d.GetOkExists("name"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, nameProp)) {
         obj["name"] = nameProp
