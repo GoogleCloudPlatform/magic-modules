@@ -63,18 +63,10 @@ examples:
       sec_policy_name: 'policyruletest'
 # We use a custom code for CREATE since the generated code does not replace the encoder when using nested_query parameter
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_create: templates/terraform/custom_create/router_nat_address_test_create.go.erb
+  custom_create: templates/terraform/custom_create/router_nat_address_nested_query_create_encoder.go.erb
   encoder: 'templates/terraform/encoders/router_nat_address_patch_on_create.go.erb'
   update_encoder: 'templates/terraform/encoders/router_nat_address_update_skip_encoder.go.erb'
 parameters:
-  # - !ruby/object:Api::Type::String
-  #   name: 'router'
-  #   api_name: 'Router'
-  #   description: |
-  #     The name of the Cloud Router in which the referenced NAT service is configured.
-  #   required: true
-  #   immutable: true
-  #   url_param_only: true
   - !ruby/object:Api::Type::ResourceRef
     name: 'router'
     resource: 'Router'
@@ -93,13 +85,6 @@ parameters:
       The name of the Nat service in which this address will be configured.
     required: true
     immutable: true
-  # - !ruby/object:Api::Type::String
-  #   name: 'routerNat'
-  #   api_name: 'name'
-  #   description: |
-  #     The name of the Nat service in which this address will be configured.
-  #   required: true
-  #   immutable: true
   - !ruby/object:Api::Type::ResourceRef
     name: region
     resource: Region
@@ -111,14 +96,6 @@ parameters:
     default_from_api: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
 properties:
-  # - !ruby/object:Api::Type::ResourceRef
-  #   name: 'natIps'
-  #   resource: 'Address'
-  #   imports: 'selfLink'
-  #   description: |
-  #     Self-links of NAT IP to be used in a Nat service. Only valid if the referenced RouterNat 
-  #     natIpAllocateOption is set to MANUAL_ONLY.
-  #   required: true
   - !ruby/object:Api::Type::Array
     name: 'natIps'
     description: |

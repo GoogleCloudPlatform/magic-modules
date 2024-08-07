@@ -28,14 +28,14 @@ func TestAccComputeRouterNatAddress_withAddressCountDecrease(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			// {
-			// 	Config: testAccComputeRouterNatAddress_withAddressCountDecrease(routerName, "2"),
-			// },
-			// {
-			// 	ResourceName:      "google_compute_router_nat_address.foobar",
-			// 	ImportState:       true,
-			// 	ImportStateVerify: true,
-			// },
+			{
+				Config: testAccComputeRouterNatAddress_withAddressCountDecrease(routerName, "2"),
+			},
+			{
+				ResourceName:      "google_compute_router_nat_address.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
