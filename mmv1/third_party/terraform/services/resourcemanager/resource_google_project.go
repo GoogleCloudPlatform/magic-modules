@@ -77,10 +77,10 @@ func ResourceGoogleProject() *schema.Resource {
 			"deletion_policy": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "NONE",
+				Default:  "DELETE",
 				Description: `The deletion policy for the Project. Setting PREVENT will protect the project against any destroy actions caused by a terraform apply or terraform destroy. Setting ABANDON allows the resource
-				to be abandoned rather than deleted. Possible values are: "PREVENT", "ABANDON", "NONE"`,
-				ValidateFunc: validation.StringInSlice([]string{"PREVENT", "ABANDON", "NONE"}, false),
+				to be abandoned rather than deleted. Possible values are: "PREVENT", "ABANDON", "DELETE"`,
+				ValidateFunc: validation.StringInSlice([]string{"PREVENT", "ABANDON", "DELETE"}, false),
 			},
 			"auto_create_network": {
 				Type:        schema.TypeBool,
@@ -316,7 +316,7 @@ func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	// Explicitly set client-side fields to default values if unset
 	if _, ok := d.GetOkExists("deletion_policy"); !ok {
-		if err := d.Set("deletion_policy", "NONE"); err != nil {
+		if err := d.Set("deletion_policy", "DELETE"); err != nil {
 			return fmt.Errorf("Error setting deletion_policy: %s", err)
 		}
 	}
