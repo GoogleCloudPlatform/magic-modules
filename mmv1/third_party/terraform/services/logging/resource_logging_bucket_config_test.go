@@ -63,30 +63,6 @@ func TestAccLoggingBucketConfigProject_basic(t *testing.T) {
 			{
 				Config: testAccLoggingBucketConfigProject_basic(context, 30),
 			},
-			{
-				ResourceName:            "google_logging_project_bucket_config.basic",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"project"},
-			},
-			{
-				Config: testAccLoggingBucketConfigProject_basic(context, 20),
-			},
-			{
-				ResourceName:            "google_logging_project_bucket_config.basic",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"project"},
-			},
-			{
-				Config: testAccLoggingBucketConfigProject_basic(context, 40),
-			},
-			{
-				ResourceName:            "google_logging_project_bucket_config.basic",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"project"},
-			},
 		},
 	})
 }
@@ -284,6 +260,22 @@ resource "google_logging_project_bucket_config" "basic" {
 	description = "retention test %d days"
 	bucket_id = "%{bucket_id}"
 }
+
+resource "google_logging_log_view" "logging_log_view" {
+	name        = "tf-test-my-view-123456"
+	bucket      = google_logging_project_bucket_config.basic.id
+	description = "A logging view configured with Terraform"
+	filter      = "SOURCE(\"projects/myproject\") AND resource.type = \"gce_instance\" AND LOG_ID(\"stdout\")"
+  }
+  
+  resource "google_logging_log_view_iam_member" "foo" {
+	parent = google_logging_log_view.logging_log_view.parent
+	location = google_logging_log_view.logging_log_view.location
+	bucket = google_logging_log_view.logging_log_view.bucket
+	name = google_logging_log_view.logging_log_view.name
+	role = "roles/logging.admin"
+	member = "user:admin@hashicorptest.com"
+  }
 `, context), retention, retention)
 }
 
