@@ -166,6 +166,7 @@ properties:
           Fully qualified names of the KMS keys to use to encrypt this database. The keys
           referenced by kmsKeyNames must fully cover all regions of the database
           instance configuration.
+        item_type: Api::Type::String
         exactly_one_of:
           - kmsKeyName
           - kmsKeyNames
