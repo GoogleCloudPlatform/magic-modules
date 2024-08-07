@@ -44,5 +44,5 @@ func testAccDataSourceGoogleKmsCryptoKeyVersionLatest_basic(kmsKey string) strin
 data "google_kms_crypto_key_version_latest" "version_latest" {
   crypto_key = "%s"
 }
-`, kmsKey, kmsKey)
+`, kmsKey)
 }
