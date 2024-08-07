@@ -27,7 +27,7 @@ func ComputeBreakingChanges(schemaDiff diff.SchemaDiff) []BreakingChange {
 	var breakingChanges []BreakingChange
 	for resource, resourceDiff := range schemaDiff {
 		for _, rule := range ResourceConfigDiffRules {
-			for _, message := range rule.Messages(resource, resourceDiff.ResourceConfig.Old, resourceDiff.ResourceConfig.New) {
+			for _, message := range rule.Messages(resource, resourceDiff.ResourceConfig) {
 				breakingChanges = append(breakingChanges, NewBreakingChange(message, rule.Identifier))
 			}
 		}
@@ -45,7 +45,7 @@ func ComputeBreakingChanges(schemaDiff diff.SchemaDiff) []BreakingChange {
 
 		for field, fieldDiff := range resourceDiff.Fields {
 			for _, rule := range FieldDiffRules {
-				for _, message := range rule.Messages(resource, field, fieldDiff.Old, fieldDiff.New) {
+				for _, message := range rule.Messages(resource, field, fieldDiff) {
 					breakingChanges = append(breakingChanges, NewBreakingChange(message, rule.Identifier))
 				}
 			}

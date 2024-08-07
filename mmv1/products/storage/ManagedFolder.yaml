@@ -50,6 +50,15 @@ examples:
       bucket_name: 'my-bucket'
     ignore_read_extra:
       - 'force_destroy'
+virtual_fields:
+  - !ruby/object:Api::Type::Boolean
+    name: 'force_destroy'
+    default_value: false
+    description: |
+      Allows the deletion of a managed folder even if contains
+      objects. If a non-empty managed folder is deleted, any objects
+      within the folder will remain in a simulated folder with the
+      same name.
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'bucket'
@@ -70,15 +79,6 @@ parameters:
     # consistent output.
     validation: !ruby/object:Provider::Terraform::Validation
       regex: '/$'
-virtual_fields:
-  - !ruby/object:Api::Type::Boolean
-    name: 'force_destroy'
-    default_value: false
-    description: |
-      Allows the deletion of a managed folder even if contains
-      objects. If a non-empty managed folder is deleted, any objects
-      within the folder will remain in a simulated folder with the
-      same name.
 properties:
   - !ruby/object:Api::Type::String
     name: createTime
