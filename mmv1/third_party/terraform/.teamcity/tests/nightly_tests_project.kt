@@ -41,7 +41,7 @@ class NightlyTestProjectsTests {
 
             // Check that nightly test is being ran on the nightly-test branch
             var isNightlyTestBranch: Boolean = false
-            if (schedulingTrigger.branchFilter == "+:refs/heads/nightly-tests"){
+            if (schedulingTrigger.branchFilter == "+:refs/heads/nightly-test"){
                 isNightlyTestBranch = true
             }
             assertTrue("Build configuration `${bt.name}` is using the nightly-test branch filter;", isNightlyTestBranch)
