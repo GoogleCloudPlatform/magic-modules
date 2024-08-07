@@ -14,7 +14,6 @@ resource "google_compute_public_delegated_prefix" "pdp" {
   parent_prefix = google_compute_public_advertised_prefix.advertised.id
 }
 resource "google_compute_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
-  provider              = google-beta
   name                  = "<%= ctx[:vars]['forwarding_rule_name'] %>"
   region                = "us-central1"
   port_range            = 80
@@ -28,7 +27,6 @@ resource "google_compute_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
 }
 
 resource "google_compute_region_backend_service" "backend" {
-  provider              = google-beta
   name                  = "<%= ctx[:vars]['backend_name'] %>"
   region                = "us-central1"
   load_balancing_scheme = "EXTERNAL"
@@ -36,7 +34,6 @@ resource "google_compute_region_backend_service" "backend" {
 }
 
 resource "google_compute_region_health_check" "hc" {
-  provider           = google-beta
   name               = "check-<%= ctx[:vars]['backend_name'] %>"
   check_interval_sec = 1
   timeout_sec        = 1

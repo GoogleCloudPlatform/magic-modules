@@ -16,7 +16,6 @@ resource "google_compute_public_delegated_prefix" "pdp" {
 }
 
 resource "google_compute_forwarding_rule" "{{$.PrimaryResourceId}}" {
-  provider              = google-beta
   name                  = "{{index $.Vars "forwarding_rule_name"}}"
   region                = "us-central1"
   port_range            = 80
@@ -29,14 +28,12 @@ resource "google_compute_forwarding_rule" "{{$.PrimaryResourceId}}" {
   ip_collection         = google_compute_public_delegated_prefix.pdp.id
 }
 resource "google_compute_region_backend_service" "backend" {
-  provider              = google-beta
   name                  = "{{index $.Vars "backend_name"}}"
   region                = "us-central1"
   load_balancing_scheme = "EXTERNAL"
   health_checks         = [google_compute_region_health_check.hc.id]
 }
 resource "google_compute_region_health_check" "hc" {
-  provider           = google-beta
   name               = "check-{{index $.Vars "backend_name"}}"
   check_interval_sec = 1
   timeout_sec        = 1

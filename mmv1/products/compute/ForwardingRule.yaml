@@ -102,7 +102,6 @@ examples:
       forwarding_rule_name: 'website-forwarding-rule'
       backend_name: 'website-backend'
       network_name: 'website-net'
-    min_version: beta
     ignore_read_extra:
       - 'port_range'
   - !ruby/object:Provider::Terraform::Examples
