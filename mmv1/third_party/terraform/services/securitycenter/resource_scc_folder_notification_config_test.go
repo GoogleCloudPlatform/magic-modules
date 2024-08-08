@@ -1,8 +1,8 @@
 package securitycenter_test
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
