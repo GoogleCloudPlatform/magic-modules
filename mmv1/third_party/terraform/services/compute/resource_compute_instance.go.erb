@@ -121,7 +121,7 @@ func forceNewIfNetworkIPNotUpdatableFunc(d tpgresource.TerraformResourceDiff) er
 		subnetworkProjectKey := prefix + ".subnetwork_project"
 		networkIPKey := prefix + ".network_ip"
 		if d.HasChange(networkIPKey) {
-			if  !d.HasChange(subnetworkKey) && !d.HasChange(subnetworkProjectKey) && tpgresource.CompareSelfLinkOrResourceName("", oldN.(string), newN.(string), nil) || !d.HasChange(networkKey) {
+			if !d.HasChange(subnetworkKey) && !d.HasChange(subnetworkProjectKey) && tpgresource.CompareSelfLinkOrResourceName("", oldN.(string), newN.(string), nil) || !d.HasChange(networkKey) {
 				if err := d.ForceNew(networkIPKey); err != nil {
 					return err
 				}
