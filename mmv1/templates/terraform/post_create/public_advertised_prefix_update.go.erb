@@ -1,0 +1,5 @@
+if v, ok := d.GetOkExists("status"); !tpgresource.IsEmptyValue(reflect.ValueOf(statusProp)) && (ok || !reflect.DeepEqual(v, statusProp)) {
+	log.Printf("[DEBUG] Calling update after create to patch in google_compute_public_advertised_prefix")
+	// staus on google_compute_public_advertised_prefix cannot be added on create
+	return resourceComputePublicAdvertisedPrefixUpdate(d, meta)
+}
