@@ -17,12 +17,14 @@ import (
 )
 
 func lbTypeNoneDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-	// Check if the key matches the relevant attribute
-	if k != "routing_policy.0.primary_backup.0.primary.0.internal_load_balancers.0.load_balancer_type" {
-		return false
+	// Extract the index from the key
+	var index int
+	_, err := fmt.Sscanf(k, "routing_policy.0.primary_backup.0.primary.0.internal_load_balancers.%d.load_balancer_type", &index)
+	if err != nil {
+		return false // Key doesn't match the expected format
 	}
 
-	// Suppress diff if the change is from "none" to null or vice versa
+	// Check if the value is changing between "none" and "" (null)
 	return (old == "none" && new == "") || (old == "" && new == "none")
 }
 
