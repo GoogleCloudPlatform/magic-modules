@@ -1,6 +1,7 @@
 config := acctest.GoogleProviderConfig(t)
 
 url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{KMSBasePath}}folders/{{folder}}/autokeyConfig")
+url = strings.Replace(url, "folders/folders/", "folders/", 1)
 if err != nil {
   return err
 }
