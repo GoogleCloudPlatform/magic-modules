@@ -541,58 +541,37 @@ func resourceBigtableTableImport(d *schema.ResourceData, meta interface{}) ([]*s
 	return []*schema.ResourceData{d}, nil
 }
 
-type tfType struct {
-	input string
-}
-
-func (t tfType) proto() *btapb.Type {
-	output, _ := t.toProto()
-	// If we got here, there is no error.
-	return output
-}
-
-func (t tfType) toProto() (*btapb.Type, error) {
-	if t.input == "" {
-		return nil, nil
-	}
-	unm := protojson.UnmarshalOptions{}
-	output := &btapb.Type{}
-	if err := unm.Unmarshal([]byte(t.input), output); err != nil {
-		return nil, err
-	}
-	return output, nil
-}
-
 func getType(input interface{}) (bigtable.Type, error) {
 	if input == nil {
-		return tfType{}, nil
+		return nil, nil
 	}
 	inputType := input.(string)
 	switch inputType {
-	case "int64Sum":
+	case "intsum":
 		return bigtable.AggregateType{
 			Input:      bigtable.Int64Type{},
 			Aggregator: bigtable.SumAggregator{},
 		}, nil
-	case "int64Min":
+	case "intmin":
 		return bigtable.AggregateType{
 			Input:      bigtable.Int64Type{},
 			Aggregator: bigtable.MinAggregator{},
 		}, nil
-	case "int64Max":
+	case "intmax":
 		return bigtable.AggregateType{
 			Input:      bigtable.Int64Type{},
 			Aggregator: bigtable.MaxAggregator{},
 		}, nil
-	case "int64Hll":
+	case "inthll":
 		return bigtable.AggregateType{
 			Input:      bigtable.Int64Type{},
-			Aggregator: bigtable.HllAggregator{},
+			Aggregator: bigtable.HllppUniqueCountAggregator{},
 		}, nil
 	}
-	result := tfType{input: inputType}
-	if _, err := result.toProto(); err != nil {
+	unm := protojson.UnmarshalOptions{}
+	output := &btapb.Type{}
+	if err := unm.Unmarshal([]byte(inputType), output); err != nil {
 		return nil, err
 	}
-	return result, nil
+	return bigtable.ProtoToType(output), nil
 }
