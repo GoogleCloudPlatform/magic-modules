@@ -7,5 +7,5 @@ resource "google_project" "basic" {
   project_id = "<%= ctx[:vars]['monitored_project'] %>"
   name       = "<%= ctx[:vars]['monitored_project'] %>-display"
   org_id     = "<%= ctx[:test_env_vars]['org_id'] %>"
-  deletion_policy = "NONE"
+  deletion_policy = "DELETE"
 }

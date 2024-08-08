@@ -39,5 +39,5 @@ resource "google_project" "peered-project" {
     project_id      = "{{index $.Vars "project_id"}}"
     org_id          = "{{index $.TestEnvVars "org_id"}}"
     billing_account = "{{index $.TestEnvVars "billing_account"}}"
-    deletion_policy = "NONE"
+    deletion_policy = "DELETE"
 }

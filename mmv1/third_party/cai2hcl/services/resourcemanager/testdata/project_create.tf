@@ -8,5 +8,5 @@ resource "google_project" "example-project" {
 
   name       = "My Project"
   project_id = "example-project"
-  deletion_policy = "NONE"
+  deletion_policy = "DELETE"
 }

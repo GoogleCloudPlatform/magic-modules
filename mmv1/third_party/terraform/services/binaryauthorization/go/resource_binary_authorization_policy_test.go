@@ -194,7 +194,7 @@ resource "google_project" "project" {
   name            = "%s"
   org_id          = "%s"
   billing_account = "%s"
-  deletion_policy = "NONE"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_service" "binauthz" {
@@ -212,7 +212,7 @@ resource "google_project" "project" {
   name            = "%s"
   org_id          = "%s"
   billing_account = "%s"
-  deletion_policy = "NONE"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_service" "binauthz" {
@@ -245,7 +245,7 @@ resource "google_project" "project" {
   name            = "%s"
   org_id          = "%s"
   billing_account = "%s"
-  deletion_policy = "NONE"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_service" "binauthz" {
@@ -310,7 +310,7 @@ resource "google_project" "project" {
   name            = "%s"
   org_id          = "%s"
   billing_account = "%s"
-  deletion_policy = "NONE"
+  deletion_policy = "DELETE"
 }
 
 data "google_client_config" "current" {

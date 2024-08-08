@@ -21,7 +21,7 @@ resource "google_project" "acceptance" {
   project_id      = "{{index $.Vars "proj_id"}}"
   org_id          = "{{index $.TestEnvVars "org_id"}}"
   billing_account = "{{index $.TestEnvVars "billing_account"}}"
-  deletion_policy = "NONE"
+  deletion_policy = "DELETE"
 }
 
 resource "time_sleep" "wait_60_seconds" {

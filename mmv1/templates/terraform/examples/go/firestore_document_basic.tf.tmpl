@@ -2,7 +2,7 @@ resource "google_project" "project" {
   project_id = "{{index $.Vars "project_id"}}"
   name       = "{{index $.Vars "project_id"}}"
   org_id     = "{{index $.TestEnvVars "org_id"}}"
-  deletion_policy = "NONE"
+  deletion_policy = "DELETE"
 }
 
 resource "time_sleep" "wait_60_seconds" {

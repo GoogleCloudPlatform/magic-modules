@@ -65,7 +65,7 @@ resource "google_project" "acceptance" {
   project_id      = "tf-test-%{random_suffix}"
   org_id          = "%{organization}"
   billing_account = "%{billing_account}"
-  deletion_policy = "NONE"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_service" "acceptance" {

@@ -63,7 +63,7 @@ func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_ba
 			name            = "tf-test%{random_suffix}"
 			org_id          = "%{org_id}"
 			billing_account = "%{billing_account}"
-			deletion_policy = "NONE"
+			deletion_policy = "DELETE"
 		}
 
 		resource "google_project_service" "cloudquotas" {
@@ -113,7 +113,7 @@ func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_in
 			name            = "tf-test%{random_suffix}"
 			org_id          = "%{org_id}"
 			billing_account = "%{billing_account}"
-			deletion_policy = "NONE"
+			deletion_policy = "DELETE"
 		}
 
 		resource "google_project_service" "cloudquotas" {
@@ -152,7 +152,7 @@ func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_de
 			name            = "tf-test%{random_suffix}"
 			org_id          = "%{org_id}"
 			billing_account = "%{billing_account}"
-			deletion_policy = "NONE"
+			deletion_policy = "DELETE"
 		}
 
 		resource "google_project_service" "cloudquotas" {

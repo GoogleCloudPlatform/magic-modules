@@ -49,7 +49,7 @@ func testAccDialogflowFulfillment_basic(context map[string]interface{}) string {
 		project_id = "tf-test-dialogflow-%{random_suffix}"
 		org_id     = "%{org_id}"
 		billing_account = "%{billing_account}"
-		deletion_policy = "NONE"
+		deletion_policy = "DELETE"
 	}
 
 	resource "google_project_service" "agent_project" {
@@ -92,7 +92,7 @@ func testAccDialogflowEntityType_full(context map[string]interface{}) string {
 		project_id = "tf-test-dialogflow-%{random_suffix}"
 		org_id     = "%{org_id}"
 		billing_account = "%{billing_account}"
-		deletion_policy = "NONE"
+		deletion_policy = "DELETE"
 	}
 
 	resource "google_project_service" "agent_project" {

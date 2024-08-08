@@ -40,7 +40,7 @@ func testAccLoggingProjectSettings_datasource(context map[string]interface{}) st
 		name            = "%{project_name}"
 		org_id          = "%{org_id}"
 		billing_account = "%{billing_account}"
-		deletion_policy = "NONE"
+		deletion_policy = "DELETE"
 	}
 	
 	resource "google_project_service" "logging_service" {

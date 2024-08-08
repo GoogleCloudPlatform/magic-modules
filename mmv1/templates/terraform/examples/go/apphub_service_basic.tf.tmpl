@@ -11,7 +11,7 @@ resource "google_project" "service_project" {
   name = "Service Project"
   org_id = "{{index $.TestEnvVars "org_id"}}"
   billing_account = "{{index $.TestEnvVars "billing_account"}}"
-  deletion_policy = "NONE"
+  deletion_policy = "DELETE"
 }
 
 # Enable Compute API

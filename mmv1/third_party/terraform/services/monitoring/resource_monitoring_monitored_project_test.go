@@ -76,7 +76,7 @@ resource "google_project" "basic" {
   project_id = "tf-test-m-id%{random_suffix}"
   name       = "tf-test-m-id%{random_suffix}-display"
   org_id     = "%{org_id}"
-  deletion_policy = "NONE"
+  deletion_policy = "DELETE"
 }
 `, context)
 }
@@ -92,7 +92,7 @@ resource "google_project" "basic" {
   project_id = "tf-test-m-id%{random_suffix}"
   name       = "tf-test-m-id%{random_suffix}-display"
   org_id     = "%{org_id}"
-  deletion_policy = "NONE"
+  deletion_policy = "DELETE"
 }
 `, context)
 }

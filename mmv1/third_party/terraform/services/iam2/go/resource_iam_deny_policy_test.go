@@ -96,7 +96,7 @@ resource "google_project" "project" {
   name            = "tf-test%{random_suffix}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
-  deletion_policy = "NONE"
+  deletion_policy = "DELETE"
 }
 
 resource "google_iam_deny_policy" "example" {
@@ -143,7 +143,7 @@ resource "google_project" "project" {
   name            = "tf-test%{random_suffix}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
-  deletion_policy = "NONE"
+  deletion_policy = "DELETE"
 }
 
 resource "google_iam_deny_policy" "example" {

@@ -415,7 +415,7 @@ func testAccProject_createWithoutOrg(pid string) string {
 resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
-  deletion_policy = "NONE"
+  deletion_policy = "DELETE"
 }
 `, pid, pid)
 }
@@ -426,7 +426,7 @@ resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
   org_id = "%s"
-  deletion_policy = "NONE"
+  deletion_policy = "DELETE"
 }
 `, pid, pid, org)
 }
@@ -459,7 +459,7 @@ resource "google_project" "acceptance" {
   name            = "%s"
   org_id          = "%s"
   billing_account = "%s"
-  deletion_policy = "NONE"
+  deletion_policy = "DELETE"
 }
 `, pid, pid, org, billing)
 }
@@ -470,7 +470,7 @@ resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
   org_id     = "%s"
-  deletion_policy = "NONE"
+  deletion_policy = "DELETE"
   labels = {`, pid, pid, org)
 
 	l := ""
@@ -489,7 +489,7 @@ resource "google_project" "acceptance" {
   name                = "%s"
   org_id              = "%s"
   billing_account     = "%s" # requires billing to enable compute API
-  deletion_policy = "NONE"
+  deletion_policy = "DELETE"
   auto_create_network = false
 }
 `, pid, pid, org, billing)
@@ -500,7 +500,7 @@ func testAccProject_parentFolder(pid, folderName, org string) string {
 resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
-  deletion_policy = "NONE"
+  deletion_policy = "DELETE"
 
   folder_id = google_folder.folder1.id
 }
@@ -518,7 +518,7 @@ func testAccProject_migrateParentFolder(pid, folderName, org string) string {
 resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
-  deletion_policy = "NONE"
+  deletion_policy = "DELETE"
 
   folder_id = google_folder.folder1.id
 }
@@ -536,7 +536,7 @@ func testAccProject_migrateParentOrg(pid, folderName, org string) string {
 resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
-  deletion_policy = "NONE"
+  deletion_policy = "DELETE"
 
   org_id = "%s"
 }

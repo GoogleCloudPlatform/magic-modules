@@ -80,8 +80,8 @@ func ResourceGoogleProject() *schema.Resource {
 				Optional: true,
 				Default:  "PREVENT",
 				Description: `The deletion policy for the Project. Setting PREVENT will protect the project against any destroy actions caused by a terraform apply or terraform destroy. Setting ABANDON allows the resource
-				to be abandoned rather than deleted. Possible values are: "PREVENT", "ABANDON", "NONE"`,
-				ValidateFunc: validation.StringInSlice([]string{"PREVENT", "ABANDON", "NONE"}, false),
+				to be abandoned rather than deleted. Possible values are: "PREVENT", "ABANDON", "DELETE"`,
+				ValidateFunc: validation.StringInSlice([]string{"PREVENT", "ABANDON", "DELETE"}, false),
 			},
 			"auto_create_network": {
 				Type:        schema.TypeBool,

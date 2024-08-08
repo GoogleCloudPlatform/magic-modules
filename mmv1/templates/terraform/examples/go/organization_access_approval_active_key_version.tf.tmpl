@@ -2,7 +2,7 @@ resource "google_project" "my_project" {
   name       = "My Project"
   project_id = "your-project-id"
   org_id     = "{{index $.TestEnvVars "org_id"}}"
-  deletion_policy = "NONE"
+  deletion_policy = "DELETE"
 }
 
 resource "google_kms_key_ring" "key_ring" {

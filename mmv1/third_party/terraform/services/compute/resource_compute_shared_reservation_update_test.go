@@ -61,7 +61,7 @@ resource "google_project" "owner_project" {
   name            = "tf-test%{random_suffix}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
-  deletion_policy = "NONE"
+  deletion_policy = "DELETE"
 }
 
 
@@ -76,7 +76,7 @@ resource "google_project" "guest_project" {
   name            = "tf-test-2%{random_suffix}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
-  deletion_policy = "NONE"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project" "guest_project_second" {
@@ -84,7 +84,7 @@ resource "google_project" "guest_project_second" {
   name            = "tf-test-3%{random_suffix}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
-  deletion_policy = "NONE"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project" "guest_project_third" {
@@ -92,7 +92,7 @@ resource "google_project" "guest_project_third" {
   name            = "tf-test-4%{random_suffix}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
-  deletion_policy = "NONE"
+  deletion_policy = "DELETE"
 }
 
 resource "google_organization_policy" "shared_reservation_org_policy" {
@@ -154,7 +154,7 @@ resource "google_project" "owner_project" {
   name            = "tf-test%{random_suffix}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
-  deletion_policy = "NONE"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_service" "compute" {
@@ -168,7 +168,7 @@ resource "google_project" "guest_project" {
   name            = "tf-test-2%{random_suffix}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
-  deletion_policy = "NONE"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project" "guest_project_second" {
@@ -176,7 +176,7 @@ resource "google_project" "guest_project_second" {
   name            = "tf-test-3%{random_suffix}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
-  deletion_policy = "NONE"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project" "guest_project_third" {
@@ -184,7 +184,7 @@ resource "google_project" "guest_project_third" {
   name            = "tf-test-4%{random_suffix}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
-  deletion_policy = "NONE"
+  deletion_policy = "DELETE"
 }
 
 resource "google_organization_policy" "shared_reservation_org_policy" {

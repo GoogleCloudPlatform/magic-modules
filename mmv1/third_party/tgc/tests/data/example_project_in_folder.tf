@@ -31,5 +31,5 @@ resource "google_project" "my_project" {
   name        = "My Project"
   project_id  = "foobat"
   folder_id   = "folders/{{.FolderID}}"
-  deletion_policy = "NONE"
+  deletion_policy = "DELETE"
 }

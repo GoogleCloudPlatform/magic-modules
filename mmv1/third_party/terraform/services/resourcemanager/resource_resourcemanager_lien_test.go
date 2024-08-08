@@ -100,7 +100,7 @@ resource "google_project" "project" {
   project_id = "%s"
   name       = "some test project"
   org_id     = "%s"
-  deletion_policy = "NONE"
+  deletion_policy = "DELETE"
 }
 
 resource "google_resource_manager_lien" "lien" {
