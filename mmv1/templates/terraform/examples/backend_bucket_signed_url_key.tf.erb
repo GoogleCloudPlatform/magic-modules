@@ -4,7 +4,7 @@ resource "random_id" "url_signature" {
 
 resource "google_compute_backend_bucket_signed_url_key" "backend_key" {
   name           = "<%= ctx[:vars]['key_name'] %>"
-  key_value      = random_id.url_signature.b64_url
+  key_value      = replace(replace(random_id.url_signature.b64_std,"+", "-") ,"/", "_")
   backend_bucket = google_compute_backend_bucket.test_backend.name
 }
 
