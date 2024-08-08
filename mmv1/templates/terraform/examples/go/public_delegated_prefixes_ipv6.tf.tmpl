@@ -1,0 +1,15 @@
+resource "google_compute_public_advertised_prefix" "advertised" {
+  name                = "{{index $.Vars "prefixes_name"}}"
+  description         = "{{index $.TestEnvVars "desc"}}"
+  dns_verification_ip = "2001:db8::55"
+  ip_cidr_range       = "2001:db8::/40"
+}
+
+resource "google_compute_public_delegated_prefix" "{{$.PrimaryResourceId}}" {
+  name          = "{{index $.Vars "prefixes_name"}}"
+  region        = "us-central1"
+  description   = "my description"
+  ip_cidr_range = "2001:db8::/48"
+  mode          = "EXTERNAL_IPV6_FORWARDING_RULE_CREATION"
+  parent_prefix = google_compute_public_advertised_prefix.advertised.id
+}
