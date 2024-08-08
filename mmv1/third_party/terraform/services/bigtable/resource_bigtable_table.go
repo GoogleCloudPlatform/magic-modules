@@ -64,7 +64,7 @@ func ResourceBigtableTable() *schema.Resource {
 						},
 						"type": {
 							Type:        schema.TypeString,
-							Required:    false,
+							Optional:    true,
 							Description: `The type of the column family.`,
 						},
 					},
