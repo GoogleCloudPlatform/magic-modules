@@ -115,12 +115,12 @@ func forceNewIfNetworkIPNotUpdatableFunc(d tpgresource.TerraformResourceDiff) er
 
 	for i := 0; i < newCount.(int); i++ {
 		prefix := fmt.Sprintf("network_interface.%d", i)
-		networkKey := prefix + ".network"
+		oldN, newN := d.GetChange(prefix + ".network")
 		subnetworkKey := prefix + ".subnetwork"
 		subnetworkProjectKey := prefix + ".subnetwork_project"
 		networkIPKey := prefix + ".network_ip"
 		if d.HasChange(networkIPKey) {
-			if !d.HasChange(networkKey) && !d.HasChange(subnetworkKey) && !d.HasChange(subnetworkProjectKey) {
+			if tpgresource.CompareSelfLinkOrResourceName("", oldN.(string), newN.(string), nil) && !d.HasChange(subnetworkKey) && !d.HasChange(subnetworkProjectKey) {
 				if err := d.ForceNew(networkIPKey); err != nil {
 					return err
 				}
