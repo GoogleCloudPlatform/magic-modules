@@ -67,7 +67,7 @@ func dataSourceGoogleLatestKmsCryptoKeyVersionLatestRead(d *schema.ResourceData,
 		return err
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{KMSBasePath}}{{crypto_key}}/cryptoKeyVersions")
+	url, err := tpgresource.ReplaceVars(d, config, "{{KMSBasePath}}{{crypto_key}}/cryptoKeyVersions?filter=state=ENABLED")
 	if err != nil {
 		return err
 	}
