@@ -65,7 +65,7 @@ parameters:
     immutable: true
     url_param_only: true
     diff_suppress_func: 'folderPrefixSuppress'
-    custom_expand: 'templates/terraform/custom_expand/autokey_config_folder.go.erb'
+    custom_expand: 'templates/terraform/custom_expand/kms_autokey_config_folder.go.erb'
     description: |
       The folder for which to retrieve config.
 properties:
