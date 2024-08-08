@@ -28,7 +28,7 @@ provider "google" {
 }
 
 resource "google_storage_bucket" "my-test-bucket" {
-  name     = "test-bucket"
+  name     = "test-bucket-1"
   location = "EU"
 
   website {

@@ -1,6 +1,6 @@
 [
   {
-    "name": "//storage.googleapis.com/test-bucket",
+    "name": "//storage.googleapis.com/test-bucket-1",
     "asset_type": "storage.googleapis.com/Bucket",
     "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
     "resource": {
