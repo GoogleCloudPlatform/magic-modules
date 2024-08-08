@@ -153,7 +153,6 @@ If you were relying on accessing an individual environment variable by index (fo
 
 Cloud Run does not provide a default value for liveness probe. Now removing this field
 will remove the liveness probe from the Cloud Run service.
-<<<<<<< HEAD
 
 ### retyped `containers.env` to SET from ARRAY
 
