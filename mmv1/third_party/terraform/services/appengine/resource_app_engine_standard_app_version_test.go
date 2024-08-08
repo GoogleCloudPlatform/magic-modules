@@ -9,8 +9,7 @@ import (
 )
 
 func TestAccAppEngineStandardAppVersion_update(t *testing.T) {
-	// https://github.com/hashicorp/terraform-provider-google/issues/18936
-	acctest.SkipIfVcr(t)
+	t.Skip("https://github.com/hashicorp/terraform-provider-google/issues/18936")
 	t.Parallel()
 
 	context := map[string]interface{}{
