@@ -16,7 +16,7 @@ import (
 
 func TestAccAppEngineFlexibleAppVersion_update(t *testing.T) {
   // https://github.com/hashicorp/terraform-provider-google/issues/18239
-  skipIfVcr(t)
+  acctest.skipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
