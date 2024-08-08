@@ -1,0 +1,16 @@
+resource "google_compute_network_firewall_policy" "policy" {
+  name = "{{index $.Vars "policy_name"}}"
+  project = "{{index $.TestEnvVars "project"}}"
+  description = "Sample global network firewall policy"
+}
+
+resource "google_compute_network" "network" {
+  name = "{{index $.Vars "network_name"}}"
+}
+
+resource "google_compute_network_firewall_policy_association" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "association_name"}}"
+  attachment_target = google_compute_network.network.id
+  firewall_policy =  google_compute_network_firewall_policy.policy.name
+  project =  "{{index $.TestEnvVars "project"}}"
+}

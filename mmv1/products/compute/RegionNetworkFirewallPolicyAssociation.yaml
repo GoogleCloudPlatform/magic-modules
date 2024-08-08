@@ -1,0 +1,101 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the License);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'RegionNetworkFirewallPolicyAssociation'
+kind: 'compute#firewallPolicyAssociation'
+base_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}'
+id_format: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/associations/{{name}}'
+self_link: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/getAssociation?name={{name}}'
+create_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/addAssociation'
+delete_verb: :POST
+delete_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/removeAssociation?name={{name}}'
+import_format: [
+  'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/associations/{{name}}',
+  '{{project}}/{{firewall_policy}}/{{name}}'
+]
+immutable: true
+description: |
+  The Compute NetworkFirewallPolicyAssociation resource
+references: !ruby/object:Api::Resource::ReferenceLinks
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionNetworkFirewallPolicies/addAssociation'
+timeouts: !ruby/object:Api::Timeouts
+  insert_minutes: 20
+  delete_minutes: 20
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    kind: 'compute#operation'
+    path: 'name'
+    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'targetLink'
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'status'
+    complete: 'DONE'
+    allowed:
+      - 'PENDING'
+      - 'RUNNING'
+      - 'DONE'
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error/errors'
+    message: 'message'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'region_network_firewall_policy_association'
+    primary_resource_id: 'default'
+    vars:
+      policy_name: 'my-policy'
+      association_name: 'my-association'
+      network_name: 'my-network'
+    test_env_vars:
+      project: :PROJECT_NAME
+      region: :REGION
+parameters:
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'firewallPolicy'
+    resource: 'FirewallPolicy'
+    imports: 'name'
+    description: |
+      The firewall policy ID of the association.
+    required: true
+    immutable: true
+    url_param_only: true
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+  - !ruby/object:Api::Type::String
+    name: 'region'
+    description: 'The location of this resource.'
+    url_param_only: true
+    immutable: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    required: true
+    immutable: true
+    description: |
+      The name for an association.
+  - !ruby/object:Api::Type::String
+    name: 'attachmentTarget'
+    required: true
+    immutable: true
+    description: |
+      The target that the firewall policy is attached to.
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+  - !ruby/object:Api::Type::String
+    name: 'shortName'
+    output: true
+    immutable: true
+    description: |
+      The short name of the firewall policy of the association.
