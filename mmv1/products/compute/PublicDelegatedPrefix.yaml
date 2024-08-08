@@ -51,16 +51,6 @@ examples:
       prefixes_name: 'my-prefix'
     test_env_vars:
       desc: :PAP_DESCRIPTION
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'public_delegated_prefixes_ipv6'
-    primary_resource_id: 'prefixes'
-    # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
-    # resource_compute_public_advertised_prefix_test.go
-    skip_test: true
-    vars:
-      prefixes_name: 'my-prefix'
-    test_env_vars:
-      desc: :PAP_DESCRIPTION
 properties:
   - !ruby/object:Api::Type::String
     name: 'region'
@@ -93,13 +83,6 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'ipCidrRange'
     description:
-      The IP address range, in CIDR format, represented by this public
-      delegated prefix.
+      The IPv4 address range, in CIDR format, represented by this public
+      advertised prefix.
     required: true
-  - !ruby/object:Api::Type::Enum
-    name: 'mode'
-    description:
-      The public delegated prefix mode for IPv6 only.
-    values:
-      - :DELEGATION
-      - :EXTERNAL_IPV6_FORWARDING_RULE_CREATION

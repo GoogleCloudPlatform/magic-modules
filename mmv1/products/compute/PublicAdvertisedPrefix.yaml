@@ -51,16 +51,6 @@ examples:
       prefixes_name: 'my-prefix'
     test_env_vars:
       desc: :PAP_DESCRIPTION
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'public_advertised_prefixes_ipv6'
-    primary_resource_id: 'prefixes'
-    # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
-    # resource_compute_public_advertised_prefix_test.go
-    skip_test: true
-    vars:
-      prefixes_name: 'my-prefix'
-    test_env_vars:
-      desc: :PAP_DESCRIPTION
 properties:
   - !ruby/object:Api::Type::String
     name: 'description'
@@ -82,23 +72,11 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'ipCidrRange'
     description:
-      The address range, in CIDR format, represented by this public advertised
-      prefix.
+      The IPv4 address range, in CIDR format, represented by this public
+      advertised prefix.
     required: true
   - !ruby/object:Api::Type::String
     name: 'sharedSecret'
     output: true
     description: |
       Output Only. The shared secret to be used for reverse DNS verification.
-  - !ruby/object:Api::Type::Enum
-    name: 'pdpScope'
-    description: |
-      Specifies how child public delegated prefix will be scoped. It could be one of following values:
-
-      REGIONAL: The public delegated prefix is regional only. The provisioning will take a few minutes.
-      GLOBAL: The public delegated prefix is global only. The provisioning will take ~4 weeks.
-      GLOBAL_AND_REGIONAL [output only]: The public delegated prefixes is BYOIP V1 legacy prefix. This is output only value and no longer supported in BYOIP V2.
-    values:
-      - :REGIONAL
-      - :GLOBAL
-      - :GLOBAL_AND_REGIONAL

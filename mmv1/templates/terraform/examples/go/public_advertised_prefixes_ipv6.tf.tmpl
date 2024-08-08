@@ -1,7 +1,0 @@
-resource "google_compute_public_advertised_prefix" "{{$.PrimaryResourceId}}" {
-  name                = "{{index $.Vars "prefixes_name"}}"
-  description         = "{{index $.TestEnvVars "desc"}}"
-  dns_verification_ip = "2001:db8::55"
-  ip_cidr_range       = "2001:db8::/40"
-  pdp_scope           = "REGIONAL"
-}
