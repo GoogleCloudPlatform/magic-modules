@@ -1,0 +1,204 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Spoke'
+description: "The NetworkConnectivity Spoke resource"
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/network-connectivity/docs/network-connectivity-center/concepts/overview'
+  api: 'https://cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1beta/projects.locations.spokes'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/spokes'
+self_link: 'projects/{{project}}/locations/{{location}}/spokes/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/spokes?spokeId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'targetLink'
+    resource_inside_response: false
+  error:
+    path: 'error/errors'
+    message: 'message'
+custom_code:
+legacy_long_form_project: true
+examples:
+  - name: 'network_connectivity_spoke_linked_vpc_network_basic'
+    primary_resource_id: 'primary'
+    vars:
+      network_name: 'net'
+      hub_name: 'hub1'
+      spoke_name: 'spoke1'
+  - name: 'network_connectivity_spoke_router_appliance_basic'
+    primary_resource_id: 'primary'
+    vars:
+      network_name: 'basic-network'
+      subnetwork_name: 'basic-subnetwork'
+      instance_name: 'basic-instance'
+      hub_name: 'basic-hub1'
+      spoke_name: 'basic-spoke'
+parameters:
+  - name: 'location'
+    type: String
+    description: The location for the resource
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: Immutable. The name of the spoke. Spoke names must be unique.
+    required: true
+    immutable: true
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+  - name: 'createTime'
+    type: String
+    description: Output only. The time the spoke was created.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: Output only. The time the spoke was last updated.
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: Optional labels in key:value format. For more information about labels, see [Requirements for labels](https://cloud.google.com/resource-manager/docs/creating-managing-labels#requirements).
+  - name: 'description'
+    type: String
+    description: An optional description of the spoke.
+  - name: 'hub'
+    type: ResourceRef
+    description: Immutable. The URI of the hub that this spoke is attached to.
+    required: true
+    immutable: true
+    resource: 'hub'
+    imports: 'name'
+  - name: 'linkedVpnTunnels'
+    type: NestedObject
+    description: The URIs of linked VPN tunnel resources
+    immutable: true
+    conflicts:
+      - linked_interconnect_attachments
+      - linked_router_appliance_instances
+      - linked_vpc_network
+    properties:
+      - name: 'uris'
+        type: Array
+        description: The URIs of linked VPN tunnel resources.
+        required: true
+        immutable: true
+        item_type:
+          type: String
+      - name: 'siteToSiteDataTransfer'
+        type: Boolean
+        description: A value that controls whether site-to-site data transfer is enabled for these resources. Note that data transfer is available only in supported locations.
+        required: true
+        immutable: true
+  - name: 'linkedInterconnectAttachments'
+    type: NestedObject
+    description: A collection of VLAN attachment resources. These resources should be redundant attachments that all advertise the same prefixes to Google Cloud. Alternatively, in active/passive configurations, all attachments should be capable of advertising the same prefixes.
+    immutable: true
+    conflicts:
+      - linked_vpn_tunnels
+      - linked_router_appliance_instances
+      - linked_vpc_network
+    properties:
+      - name: 'uris'
+        type: Array
+        description: The URIs of linked interconnect attachment resources
+        required: true
+        immutable: true
+        item_type:
+          type: String
+      - name: 'siteToSiteDataTransfer'
+        type: Boolean
+        description: A value that controls whether site-to-site data transfer is enabled for these resources. Note that data transfer is available only in supported locations.
+        required: true
+        immutable: true
+  - name: 'linkedRouterApplianceInstances'
+    type: NestedObject
+    description: The URIs of linked Router appliance resources
+    immutable: true
+    conflicts:
+      - linked_interconnect_attachments
+      - linked_vpn_tunnels
+      - linked_vpc_network
+    properties:
+      - name: 'instances'
+        type: Array
+        description: The list of router appliance instances
+        required: true
+        immutable: true
+        item_type:
+          description: The list of router appliance instances
+          type: NestedObject
+          properties:
+            - name: 'virtualMachine'
+              type: String
+              description: The URI of the virtual machine resource
+              immutable: true
+              diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+            - name: 'ipAddress'
+              type: String
+              description: The IP address on the VM to use for peering.
+              immutable: true
+      - name: 'siteToSiteDataTransfer'
+        type: Boolean
+        description: A value that controls whether site-to-site data transfer is enabled for these resources. Note that data transfer is available only in supported locations.
+        required: true
+        immutable: true
+  - name: 'linkedVpcNetwork'
+    type: NestedObject
+    description: VPC network that is associated with the spoke.
+    immutable: true
+    conflicts:
+      - linked_interconnect_attachments
+      - linked_router_appliance_instances
+      - linked_vpn_tunnels
+    properties:
+      - name: 'uri'
+        type: String
+        description: The URI of the VPC network resource.
+        required: true
+        immutable: true
+        diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+      - name: 'excludeExportRanges'
+        type: Array
+        description: IP ranges encompassing the subnets to be excluded from peering.
+        immutable: true
+        item_type:
+          type: String
+  - name: 'uniqueId'
+    type: String
+    description: Output only. The Google-generated UUID for the spoke. This value is unique across all spoke resources. If a spoke is deleted and another with the same name is created, the new spoke is assigned a different unique_id.
+    output: true
+  - name: 'state'
+    type: String
+    description: Output only. The current lifecycle state of this spoke.
+    output: true
+    exactly_one_of:
+      - 'STATE_UNSPECIFIED'
+      - 'CREATING'
+      - 'ACTIVE'
+      - 'DELETING'
