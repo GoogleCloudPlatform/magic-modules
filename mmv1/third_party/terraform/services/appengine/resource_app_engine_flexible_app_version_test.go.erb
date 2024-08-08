@@ -419,4 +419,22 @@ resource "google_storage_bucket_object" "main" {
 }`, context)
 }
 
+# Remove when generated test is enabled
+func testAccCheckAppEngineFlexibleAppVersionDestroyProducer(t *testing.T) func(s *terraform.State) error {
+  return func(s *terraform.State) error {
+    for name, rs := range s.RootModule().Resources {
+      if rs.Type != "google_app_engine_flexible_app_version" {
+        continue
+      }
+      if strings.HasPrefix(name, "data.") {
+        continue
+      }
+
+      log.Printf("[DEBUG] Ignoring destroy during test")
+    }
+
+    return nil
+  }
+}
+
 <% end -%>
