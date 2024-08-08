@@ -1,0 +1,7 @@
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	if v == nil {
+        	return v
+    	}
+
+	return string.Replace(v.(string), "/folders", "", 1), nil
+}

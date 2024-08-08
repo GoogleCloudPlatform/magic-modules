@@ -40,6 +40,7 @@ id_format: 'folders/{{folder}}/autokeyConfig'
 import_format: ['folders/{{folder}}/autokeyConfig']
 min_version: beta
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/autokey_config_folder_diff.go.erb
   test_check_destroy: templates/terraform/custom_check_destroy/kms_autokey_config.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
@@ -63,6 +64,8 @@ parameters:
     required: true
     immutable: true
     url_param_only: true
+    diff_suppress_func: 'folderPrefixSuppress'
+    custom_expand: 'templates/terraform/custom_expand/autokey_config_folder.go.erb'
     description: |
       The folder for which to retrieve config.
 properties:
