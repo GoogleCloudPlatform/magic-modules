@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -207,9 +207,9 @@ func TestAccComputeRouterPeer_Ipv6Basic(t *testing.T) {
 }
 
 func TestAccComputeRouterPeer_Ipv4BasicCreateUpdate(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  routerName := fmt.Sprintf("tf-test-router-%s", acctest.RandString(t, 10))
+	routerName := fmt.Sprintf("tf-test-router-%s", acctest.RandString(t, 10))
 	resourceName := "google_compute_router_peer.foobar"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -235,8 +235,8 @@ func TestAccComputeRouterPeer_Ipv4BasicCreateUpdate(t *testing.T) {
 					testAccCheckComputeRouterPeerExists(
 						t, resourceName),
 					resource.TestCheckResourceAttr(resourceName, "enable_ipv4", "true"),
-          resource.TestCheckResourceAttr(resourceName, "ipv4_nexthop_address", "169.254.1.2"),
-          resource.TestCheckResourceAttr(resourceName, "peer_ipv4_nexthop_address", "169.254.1.1"),
+					resource.TestCheckResourceAttr(resourceName, "ipv4_nexthop_address", "169.254.1.2"),
+					resource.TestCheckResourceAttr(resourceName, "peer_ipv4_nexthop_address", "169.254.1.1"),
 				),
 			},
 			{

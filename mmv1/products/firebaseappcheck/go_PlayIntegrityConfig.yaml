@@ -1,0 +1,83 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'PlayIntegrityConfig'
+description: |
+  An app's Play Integrity configuration object. Note that your registered SHA-256 certificate fingerprints are used to validate tokens issued by the Play Integrity API.
+  Make sure your `google_firebase_android_app` has at least one `sha256_hashes` present.
+references:
+  guides:
+    'Official Documentation': 'https://firebase.google.com/docs/app-check'
+  api: 'https://firebase.google.com/docs/reference/appcheck/rest/v1/projects.apps.playIntegrityConfig'
+docs:
+base_url: 'projects/{{project}}/apps/{{app_id}}/playIntegrityConfig'
+self_link: 'projects/{{project}}/apps/{{app_id}}/playIntegrityConfig'
+create_url: 'projects/{{project}}/apps/{{app_id}}/playIntegrityConfig?updateMask=tokenTtl'
+create_verb: 'PATCH'
+update_verb: 'PATCH'
+update_mask: true
+skip_delete: true
+import_format:
+  - 'projects/{{project}}/apps/{{app_id}}/playIntegrityConfig'
+  - '{{project}}/{{app_id}}'
+  - '{{app_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+examples:
+  - name: 'firebase_app_check_play_integrity_config_minimal'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      package_name: 'package.name.playintegrity'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    external_providers: ["random", "time"]
+  - name: 'firebase_app_check_play_integrity_config_full'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      package_name: 'package.name.playintegrity'
+      token_ttl: '7200s'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'token_ttl': '"7200s"'
+    external_providers: ["random", "time"]
+parameters:
+  - name: 'app_id'
+    type: String
+    description: |
+      The ID of an
+      [Android App](https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects.androidApps#AndroidApp.FIELDS.app_id).
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The relative resource name of the Play Integrity configuration object
+    output: true
+  - name: 'tokenTtl'
+    type: String
+    description: |
+      Specifies the duration for which App Check tokens exchanged from Play Integrity artifacts will be valid.
+      If unset, a default value of 1 hour is assumed. Must be between 30 minutes and 7 days, inclusive.
+
+      A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
+    default_from_api: true

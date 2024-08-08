@@ -1,0 +1,117 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'FeaturestoreEntitytypeFeature'
+description: |-
+  Feature Metadata information that describes an attribute of an entity type. For example, apple is an entity type, and color is a feature that describes apple.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featurestores.entityTypes.features'
+docs:
+base_url: '{{entitytype}}/features'
+self_link: '{{entitytype}}/features/{{name}}'
+create_url: '{{entitytype}}/features?featureId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - '{{%entitytype}}/features/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+  include_project: true
+custom_code:
+  extra_schema_entry: 'templates/terraform/extra_schema_entry/go/vertex_ai_featurestore_entitytype_feature.go.tmpl'
+  encoder: 'templates/terraform/encoders/go/vertex_ai_featurestore_entitytype_feature.go.tmpl'
+  pre_create: 'templates/terraform/constants/go/vertex_ai_featurestore_entitytype_feature.go.tmpl'
+  pre_delete: 'templates/terraform/constants/go/vertex_ai_featurestore_entitytype_feature.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/go/vertex_ai_featurestore_entitytype_feature.go.tmpl'
+examples:
+  - name: 'vertex_ai_featurestore_entitytype_feature'
+    primary_resource_id: 'feature'
+    vars:
+      name: 'terraform'
+      project: 'vertex-ai'
+      kms_key_name: 'kms-name'
+  - name: 'vertex_ai_featurestore_entitytype_feature_with_beta_fields'
+    primary_resource_id: 'feature'
+    min_version: 'beta'
+    vars:
+      name: 'terraform2'
+      project: 'vertex-ai'
+      kms_key_name: 'kms-name'
+parameters:
+  - name: 'entitytype'
+    type: String
+    description:
+      The name of the Featurestore to use, in the format
+      projects/{project}/locations/{location}/featurestores/{featurestore}/entityTypes/{entitytype}.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description:
+      The name of the feature. The feature can be up to 64 characters long and
+      can consist only of ASCII Latin letters A-Z and a-z, underscore(_), and
+      ASCII digits 0-9 starting with a letter. The value will be unique given an
+      entity type.
+    url_param_only: true
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+  - name: 'etag'
+    type: String
+    description: Used to perform consistent read-modify-write updates.
+    ignore_read: true
+    output: true
+  - name: 'createTime'
+    type: String
+    description: |
+      The timestamp of when the entity type was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: |
+      The timestamp when the entity type was most recently updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      A set of key/value label pairs to assign to the feature.
+    immutable: false
+  - name: 'description'
+    type: String
+    description: Description of the feature.
+  - name: 'valueType'
+    type: String
+    description: |
+      Type of Feature value. Immutable. https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featurestores.entityTypes.features#ValueType
+    required: true
+    immutable: true

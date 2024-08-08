@@ -1027,7 +1027,7 @@ func (r Resource) IgnoreReadPropertiesToString(e resource.Examples) string {
 		props = append(props, fmt.Sprintf("\"%s\"", tp))
 	}
 	for _, tp := range r.IgnoreReadLabelsFields(r.PropertiesWithExcluded()) {
-		props = append(props, fmt.Sprintf("\"%s\"", google.Underscore(tp)))
+		props = append(props, fmt.Sprintf("\"%s\"", tp))
 	}
 	for _, tp := range ignoreReadFields(r.AllUserProperties()) {
 		props = append(props, fmt.Sprintf("\"%s\"", tp))
@@ -1295,6 +1295,21 @@ func (r Resource) IamParentSourceType() string {
 	return t
 }
 
+func (r Resource) IamImportFormat() string {
+	var importFormat string
+	if len(r.IamPolicy.ImportFormat) > 0 {
+		importFormat = r.IamPolicy.ImportFormat[0]
+	} else {
+		importFormat = r.IamPolicy.SelfLink
+		if importFormat == "" {
+			importFormat = r.SelfLinkUrl()
+		}
+	}
+
+	importFormat = regexp.MustCompile(`\{\{%?(\w+)\}\}`).ReplaceAllString(importFormat, "%s")
+	return strings.ReplaceAll(importFormat, r.ProductMetadata.BaseUrl, "")
+}
+
 func (r Resource) IamImportQualifiersForTest() string {
 	var importFormat string
 	if len(r.IamPolicy.ImportFormat) > 0 {
@@ -1312,9 +1327,11 @@ func (r Resource) IamImportQualifiersForTest() string {
 		if param == "project" {
 			if i != len(params)-1 {
 				// If the last parameter is project then we want to create a new project to use for the test, so don't default from the environment
-				importQualifiers = append(importQualifiers, "envvar.GetTestProjectFromEnv()")
-			} else {
-				importQualifiers = append(importQualifiers, `context["project_id"]`)
+				if r.IamPolicy.TestProjectName == "" {
+					importQualifiers = append(importQualifiers, "envvar.GetTestProjectFromEnv()")
+				} else {
+					importQualifiers = append(importQualifiers, `context["project_id"]`)
+				}
 			}
 		} else if param == "zone" && r.IamPolicy.SubstituteZoneValue {
 			importQualifiers = append(importQualifiers, "envvar.GetTestZoneFromEnv()")
@@ -1377,7 +1394,7 @@ func (r Resource) GetPropertyUpdateMasksGroups(properties []*Type, maskPrefix st
 	maskGroups := map[string][]string{}
 	for _, prop := range properties {
 		if prop.FlattenObject {
-			maps.Copy(maskGroups, r.GetPropertyUpdateMasksGroups(prop.Properties, prop.ApiName))
+			maps.Copy(maskGroups, r.GetPropertyUpdateMasksGroups(prop.Properties, prop.ApiName+"."))
 		} else if len(prop.UpdateMaskFields) > 0 {
 			maskGroups[google.Underscore(prop.Name)] = prop.UpdateMaskFields
 		} else {
@@ -1516,7 +1533,9 @@ func (r Resource) CustomUpdatePropertiesByKey(properties []*Type, updateUrl stri
 		UpdateVerb:      updateVerb,
 		UpdateId:        updateId,
 		FingerprintName: fingerprintName}
-	return groupedProperties[groupedProperty]
+	return google.Reject(groupedProperties[groupedProperty], func(p *Type) bool {
+		return p.UrlParamOnly
+	})
 }
 
 func (r Resource) PropertyNamesToStrings(properties []*Type) []string {

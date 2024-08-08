@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -635,6 +635,26 @@ func TestAccBigQueryTable_MaterializedView_NonIncremental_basic(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "require_partition_filter", "time_partitioning.0.require_partition_filter"},
+			},
+		},
+	})
+}
+
+func TestAccBigQueryExternalDataTable_deltaLake(t *testing.T) {
+	t.Parallel()
+
+	bucketName := acctest.TestBucketName(t)
+
+	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	tableID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryTableFromGCSDeltaLake(datasetID, tableID, bucketName),
 			},
 		},
 	})
@@ -2640,6 +2660,44 @@ resource "google_bigquery_table" "test" {
   ]
 }
 `, connectionID, datasetID, bucketName, objectName, tableID, metadataCacheMode, maxStaleness)
+}
+
+func testAccBigQueryTableFromGCSDeltaLake(datasetID, tableID, bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "test" {
+  dataset_id = "%s"
+}
+
+resource "google_storage_bucket" "test" {
+  name          = "%s"
+  location      = "US"
+  force_destroy = true
+}
+
+# Setup Empty Delta Lake table in Bucket.
+
+// Upload Metadata File.
+resource "google_storage_bucket_object" "metadata" {
+	name    = "_delta_log/00000000000000000000.json"
+	source = "./test-fixtures/simple/metadata/00000000000000000000.json"
+	bucket = google_storage_bucket.test.name
+}
+
+resource "google_bigquery_table" "test" {
+  deletion_protection = false
+  table_id   = "%s"
+  dataset_id = google_bigquery_dataset.test.dataset_id
+  external_data_configuration {
+    autodetect    = true
+    source_format = "DELTA_LAKE"
+	reference_file_schema_uri = "gs://${google_storage_bucket.test.name}/${google_storage_bucket_object.metadata.name}"
+
+    source_uris = [
+      "gs://${google_storage_bucket.test.name}/*",
+    ]
+  }
+}
+`, datasetID, bucketName, tableID)
 }
 
 func testAccBigQueryTableFromGCSParquet(datasetID, tableID, bucketName, objectName string) string {

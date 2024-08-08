@@ -1,0 +1,119 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Snapshot'
+description: |
+  A Google Cloud Filestore snapshot.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/filestore/docs/snapshots'
+    'Creating Snapshots': 'https://cloud.google.com/filestore/docs/create-snapshots'
+  api: 'https://cloud.google.com/filestore/docs/reference/rest/v1/projects.locations.instances.snapshots'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/instances/{{instance}}/snapshots'
+self_link: 'projects/{{project}}/locations/{{location}}/instances/{{instance}}/snapshots/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/instances/{{instance}}/snapshots?snapshotId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+mutex: 'filestore/{{project}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+error_abort_predicates:
+
+  - 'transport_tpg.Is429QuotaError'
+examples:
+  - name: 'filestore_snapshot_basic'
+    primary_resource_id: 'snapshot'
+    vars:
+      snapshot_name: 'test-snapshot'
+      instance_name: 'test-instance-for-snapshot'
+  - name: 'filestore_snapshot_full'
+    primary_resource_id: 'snapshot'
+    vars:
+      snapshot_name: 'test-snapshot'
+      instance_name: 'test-instance-for-snapshot'
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The name of the location of the instance. This can be a region for ENTERPRISE tier instances.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'instance'
+    type: String
+    description: |
+      The resource name of the filestore instance.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The resource name of the snapshot. The name must be unique within the specified instance.
+
+      The name must be 1-63 characters long, and comply with
+      RFC1035. Specifically, the name must be 1-63 characters long and match
+      the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the
+      first character must be a lowercase letter, and all following
+      characters must be a dash, lowercase letter, or digit, except the last
+      character, which cannot be a dash.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'description'
+    type: String
+    description: |
+      A description of the snapshot with 2048 characters or less. Requests with longer descriptions will be rejected.
+  - name: 'state'
+    type: Enum
+    description: |
+      The snapshot state.
+    output: true
+    enum_values:
+      - 'CREATING'
+      - 'READY'
+      - 'DELETING'
+  - name: 'createTime'
+    type: Time
+    description: |
+      The time when the snapshot was created in RFC3339 text format.
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      Resource labels to represent user-provided metadata.
+  - name: 'filesystemUsedBytes'
+    type: String
+    description: |
+      The amount of bytes needed to allocate a full copy of the snapshot content.
+    output: true

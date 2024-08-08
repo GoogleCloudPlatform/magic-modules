@@ -1,0 +1,80 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Project'
+description: |
+  A Google Cloud Firebase instance. This enables Firebase resources on a given google project.
+  Since a FirebaseProject is actually also a GCP Project, a FirebaseProject uses underlying GCP
+  identifiers (most importantly, the projectId) as its own for easy interop with GCP APIs.
+  Once Firebase has been added to a Google Project it cannot be removed.
+min_version: 'beta'
+references:
+  guides:
+    'Official Documentation': 'https://firebase.google.com/'
+  api: 'https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects'
+docs:
+base_url: 'projects/{{project}}'
+self_link: 'projects/{{project}}'
+create_url: 'projects/{{project}}:addFirebase'
+skip_delete: true
+immutable: true
+import_format:
+  - 'projects/{{project}}'
+  - '{{project}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+  constants: 'templates/terraform/constants/go/firebase_project.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/go/firebase_project.go.tmpl'
+skip_sweeper: true
+examples:
+  - name: 'firebase_project_basic'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      instance_name: 'memory-cache'
+      project_name: 'my-project'
+    test_env_vars:
+      org_id: 'ORG_ID'
+parameters:
+properties:
+  - name: 'projectNumber'
+    type: String
+    description: |
+      The number of the google project that firebase is enabled on.
+    min_version: 'beta'
+    output: true
+  - name: 'displayName'
+    type: String
+    description: |
+      The GCP project display name
+    min_version: 'beta'
+    output: true

@@ -1,0 +1,187 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Field'
+description: |
+  Represents a single field in the database.
+  Fields are grouped by their "Collection Group", which represent all collections
+  in the database with the same id.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/firestore/docs/query-data/indexing'
+  api: 'https://cloud.google.com/firestore/docs/reference/rest/v1/projects.databases.collectionGroups.fields'
+docs:
+  warning: |
+    This resource creates a Firestore Single Field override on a project that
+     already has a Firestore database. If you haven't already created it, you may
+    create a `google_firestore_database` resource with `location_id` set to your
+    chosen location.
+base_url: 'projects/{{project}}/databases/{{database}}/collectionGroups/{{collection}}/fields'
+self_link: '{{name}}'
+create_url: 'projects/{{project}}/databases/{{database}}/collectionGroups/{{collection}}/fields/{{field}}'
+create_verb: 'PATCH'
+update_verb: 'PATCH'
+update_mask: true
+immutable: false
+import_format:
+  - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+  encoder: 'templates/terraform/encoders/go/firestore_field.go.tmpl'
+  custom_delete: 'templates/terraform/custom_delete/go/firestore_field_delete.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/go/firestore_field.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/go/firestore_field.go.tmpl'
+skip_sweeper: true
+error_retry_predicates:
+
+  - 'transport_tpg.FirestoreField409RetryUnderlyingDataChanged'
+examples:
+  - name: 'firestore_field_basic'
+    primary_resource_id: 'basic'
+    vars:
+      database_id: 'database-id'
+      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
+  - name: 'firestore_field_timestamp'
+    primary_resource_id: 'timestamp'
+    vars:
+      database_id: 'database-id'
+      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
+  - name: 'firestore_field_match_override'
+    primary_resource_id: 'match_override'
+    vars:
+      database_id: 'database-id'
+      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
+parameters:
+properties:
+  - name: 'database'
+    type: String
+    description: |
+      The Firestore database id. Defaults to `"(default)"`.
+    url_param_only: true
+    default_value: "(default)"
+  - name: 'collection'
+    type: String
+    description: |
+      The id of the collection group to configure.
+    url_param_only: true
+    required: true
+  - name: 'field'
+    type: String
+    description: |
+      The id of the field to configure.
+    url_param_only: true
+    required: true
+  - name: 'name'
+    type: String
+    description: |
+      The name of this field. Format:
+      `projects/{{project}}/databases/{{database}}/collectionGroups/{{collection}}/fields/{{field}}`
+    output: true
+  - name: 'indexConfig'
+    type: NestedObject
+    description: |
+      The single field index configuration for this field.
+      Creating an index configuration for this field will override any inherited configuration with the
+      indexes specified. Configuring the index configuration with an empty block disables all indexes on
+      the field.
+    send_empty_value: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/firestore_field_index_config.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/go/firestore_field_index_config.go.tmpl'
+    properties:
+      - name: 'indexes'
+        type: Array
+        description:
+          The indexes to configure on the field. Order or array contains must be
+          specified.
+        is_set: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'queryScope'
+              type: Enum
+              description: |
+                The scope at which a query is run. Collection scoped queries require you specify
+                the collection at query time. Collection group scope allows queries across all
+                collections with the same id.
+              default_value: "COLLECTION"
+              enum_values:
+                - 'COLLECTION'
+                - 'COLLECTION_GROUP'
+            - name: 'order'
+              type: Enum
+              description: |
+                Indicates that this field supports ordering by the specified order or comparing using =, <, <=, >, >=, !=.
+                Only one of `order` and `arrayConfig` can be specified.
+              exactly_one_of:
+                - 'order'
+                - 'arrayConfig'
+              enum_values:
+                - 'ASCENDING'
+                - 'DESCENDING'
+            - name: 'arrayConfig'
+              type: Enum
+              description: |
+                Indicates that this field supports operations on arrayValues. Only one of `order` and `arrayConfig` can
+                be specified.
+              exactly_one_of:
+                - 'order'
+                - 'arrayConfig'
+              enum_values:
+                - 'CONTAINS'
+  - name: 'ttlConfig'
+    type: NestedObject
+    description: |
+       The TTL configuration for this Field. If set to an empty block (i.e. `ttl_config {}`), a TTL policy is configured based on the field. If unset, a TTL policy is not configured (or will be disabled upon updating the resource).
+    send_empty_value: true
+    custom_expand: 'templates/terraform/custom_expand/go/empty_object_if_set.go.tmpl'
+    properties:
+      - name: 'state'
+        type: Enum
+        description: |
+          The state of TTL (time-to-live) configuration for documents that have this Field set.
+        output: true
+        enum_values:
+          - 'CREATING'
+          - 'ACTIVE'
+          - 'NEEDS_REPAIR'

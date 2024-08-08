@@ -10,8 +10,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 // Test that services can be enabled and disabled on a project
@@ -37,13 +37,21 @@ func TestAccProjectService_basic(t *testing.T) {
 				ResourceName:            "google_project_service.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
+				{{- if ne $.TargetVersionName "ga" }}
+				ImportStateVerifyIgnore: []string{"disable_on_destroy", "check_if_service_has_usage_on_destroy"},
+				{{- else }}
 				ImportStateVerifyIgnore: []string{"disable_on_destroy"},
+				{{- end }}
 			},
 			{
 				ResourceName:            "google_project_service.test2",
 				ImportState:             true,
 				ImportStateVerify:       true,
+				{{- if ne $.TargetVersionName "ga" }}
+				ImportStateVerifyIgnore: []string{"disable_on_destroy", "project", "check_if_service_has_usage_on_destroy"},
+				{{- else }}
 				ImportStateVerifyIgnore: []string{"disable_on_destroy", "project"},
+				{{- end }}
 			},
 			// Use a separate TestStep rather than a CheckDestroy because we need the project to still exist.
 			{
@@ -91,7 +99,11 @@ func TestAccProjectService_disableDependentServices(t *testing.T) {
 				ResourceName:            "google_project_service.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
+				{{- if ne $.TargetVersionName "ga" }}
+				ImportStateVerifyIgnore: []string{"disable_on_destroy", "check_if_service_has_usage_on_destroy"},
+				{{- else }}
 				ImportStateVerifyIgnore: []string{"disable_on_destroy"},
+				{{- end }}
 			},
 			{
 				Config:      testAccProjectService_dependencyRemoved(services, pid, org, billingId),
@@ -104,11 +116,11 @@ func TestAccProjectService_disableDependentServices(t *testing.T) {
 				ResourceName:            "google_project_service.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-			  {{- if ne $.TargetVersionName "ga" }}
-			  ImportStateVerifyIgnore: []string{"disable_on_destroy", "check_if_service_has_usage_on_destroy"},
-			  {{- else }}
-			  ImportStateVerifyIgnore: []string{"disable_on_destroy"},
-			  {{- end }}
+				{{- if ne $.TargetVersionName "ga" }}
+				ImportStateVerifyIgnore: []string{"disable_on_destroy", "check_if_service_has_usage_on_destroy"},
+				{{- else }}
+				ImportStateVerifyIgnore: []string{"disable_on_destroy"},
+				{{- end }}
 			},
 			{
 				Config:             testAccProjectService_dependencyRemoved(services, pid, org, billingId),
@@ -170,9 +182,9 @@ func TestAccProjectService_renamedService(t *testing.T) {
 				ImportStateVerify:       true,
 				{{- if ne $.TargetVersionName "ga" }}
 				ImportStateVerifyIgnore: []string{"disable_on_destroy", "check_if_service_has_usage_on_destroy", "disable_dependent_services"},
-        {{- else }}
-        ImportStateVerifyIgnore: []string{"disable_on_destroy", "disable_dependent_services"},
-        {{- end }}
+				{{- else }}
+				ImportStateVerifyIgnore: []string{"disable_on_destroy", "disable_dependent_services"},
+				{{- end }}
 			},
 		},
 	})
@@ -207,8 +219,6 @@ func testAccCheckProjectService(t *testing.T, services []string, pid string, exp
 
 {{ if ne $.TargetVersionName `ga` -}}
 func TestAccProjectService_checkUsageOfServices(t *testing.T) {
-	// Multiple fine-grained resources
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
@@ -226,7 +236,11 @@ func TestAccProjectService_checkUsageOfServices(t *testing.T) {
 				ResourceName:            "google_project_service.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
+				{{- if ne $.TargetVersionName "ga" }}
+				ImportStateVerifyIgnore: []string{"disable_on_destroy", "check_if_service_has_usage_on_destroy", "disable_dependent_services"},
+				{{- else }}
 				ImportStateVerifyIgnore: []string{"disable_on_destroy", "disable_dependent_services"},
+				{{- end }}
 			},
 			{
 				Config: testAccProjectService_checkUsage(services, pid, org, "true"),

@@ -234,6 +234,14 @@ properties:
         name: 'useDefault'
         description: |
           If True, indicates to use the default project's binary authorization policy. If False, binary authorization will be disabled.
+        conflicts:
+          - policy
+      - !ruby/object:Api::Type::String
+        name: 'policy'
+        description: |
+          The path to a binary authorization policy. Format: projects/{project}/platforms/cloudRun/{policy-name}
+        conflicts:
+          - use_default
   - !ruby/object:Api::Type::String
     name: 'startExecutionToken'
     description: |-

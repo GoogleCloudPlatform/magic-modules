@@ -1,0 +1,356 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Cluster'
+description: |
+  An Anthos cluster running on customer owned infrastructure.
+references:
+  guides:
+    'API reference': 'https://cloud.google.com/anthos/clusters/docs/multi-cloud/reference/rest/v1/projects.locations.attachedClusters'
+    'Multicloud overview': 'https://cloud.google.com/anthos/clusters/docs/multi-cloud'
+  api: 'https://cloud.google.com/anthos/clusters/docs/multi-cloud/reference/rest'
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/attachedClusters/{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/attachedClusters'
+self_link: 'projects/{{project}}/locations/{{location}}/attachedClusters/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/attachedClusters?attached_cluster_id={{name}}'
+update_url: 'projects/{{project}}/locations/{{location}}/attachedClusters/{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+delete_url: 'projects/{{project}}/locations/{{location}}/attachedClusters/{{name}}'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/attachedClusters/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    full_url: 'https://{{location}}-gkemulticloud.googleapis.com/v1/{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error/errors'
+    message: 'message'
+custom_code:
+  constants: 'templates/terraform/constants/go/containerattached_cluster_diff.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/go/containerattached_update.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/go/container_attached_deletion_policy.go.tmpl'
+examples:
+  - name: 'container_attached_cluster_basic'
+    primary_resource_id: 'primary'
+    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
+    vars:
+      name: 'basic'
+  - name: 'container_attached_cluster_full'
+    primary_resource_id: 'primary'
+    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
+    vars:
+      name: 'basic'
+  - name: 'container_attached_cluster_ignore_errors'
+    primary_resource_id: 'primary'
+    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
+    vars:
+      name: 'basic'
+    ignore_read_extra:
+      - 'deletion_policy'
+virtual_fields:
+  - name: 'deletion_policy'
+    description: 'Policy to determine what flags to send on delete.'
+    type: Enum
+    default_value: "DELETE"
+parameters:
+properties:
+  - name: 'location'
+    type: String
+    description: |
+      The location for the resource
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'name'
+    type: String
+    description: |
+      The name of this resource.
+    required: true
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+  - name: 'description'
+    type: String
+    description: |
+      A human readable description of this attached cluster. Cannot be longer
+      than 255 UTF-8 encoded bytes.
+  - name: 'oidcConfig'
+    type: NestedObject
+    description: |
+      OIDC discovery information of the target cluster.
+
+      Kubernetes Service Account (KSA) tokens are JWT tokens signed by the cluster
+      API server. This fields indicates how GCP services
+      validate KSA tokens in order to allow system workloads (such as GKE Connect
+      and telemetry agents) to authenticate back to GCP.
+
+      Both clusters with public and private issuer URLs are supported.
+      Clusters with public issuers only need to specify the `issuer_url` field
+      while clusters with private issuers need to provide both
+      `issuer_url` and `jwks`.
+    required: true
+    properties:
+      - name: 'issuerUrl'
+        type: String
+        description: |
+          A JSON Web Token (JWT) issuer URI. `issuer` must start with `https://`
+        required: true
+        immutable: true
+      - name: 'jwks'
+        type: String
+        description: |
+          OIDC verification keys in JWKS format (RFC 7517).
+        immutable: true
+  - name: 'platformVersion'
+    type: String
+    description: |
+      The platform version for the cluster (e.g. `1.23.0-gke.1`).
+    required: true
+  - name: 'distribution'
+    type: String
+    description: |
+      The Kubernetes distribution of the underlying attached cluster. Supported values:
+      "eks", "aks".
+    required: true
+    immutable: true
+  - name: 'clusterRegion'
+    type: String
+    description: |
+      Output only. The region where this cluster runs.
+
+      For EKS clusters, this is an AWS region. For AKS clusters,
+      this is an Azure region.
+    output: true
+  - name: 'fleet'
+    type: NestedObject
+    description: |
+      Fleet configuration.
+    required: true
+    properties:
+      - name: 'membership'
+        type: String
+        description: |
+          The name of the managed Hub Membership resource associated to this
+          cluster. Membership names are formatted as
+          projects/<project-number>/locations/global/membership/<cluster-id>.
+        output: true
+      - name: 'project'
+        type: String
+        description: |
+          The number of the Fleet host project where this cluster will be registered.
+        required: true
+        immutable: true
+        validation:
+          regex: '^projects/[0-9]+$'
+  - name: 'state'
+    type: String
+    description: |
+      The current state of the cluster. Possible values:
+      STATE_UNSPECIFIED, PROVISIONING, RUNNING, RECONCILING, STOPPING, ERROR,
+      DEGRADED
+    output: true
+  - name: 'uid'
+    type: String
+    description: |
+      A globally unique identifier for the cluster.
+    output: true
+  - name: 'reconciling'
+    type: Boolean
+    description: |
+      If set, there are currently changes in flight to the cluster.
+    output: true
+  - name: 'createTime'
+    type: String
+    description: |
+      Output only. The time at which this cluster was created.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: |
+      The time at which this cluster was last updated.
+    output: true
+  - name: 'kubernetesVersion'
+    type: String
+    description: |
+      The Kubernetes version of the cluster.
+    output: true
+  - name: 'annotations'
+    type: KeyValueAnnotations
+    description: |
+      Optional. Annotations on the cluster. This field has the same
+      restrictions as Kubernetes annotations. The total size of all keys and
+      values combined is limited to 256k. Key can have 2 segments: prefix (optional)
+      and name (required), separated by a slash (/). Prefix must be a DNS subdomain.
+      Name must be 63 characters or less, begin and end with alphanumerics,
+      with dashes (-), underscores (_), dots (.), and alphanumerics between.
+  - name: 'workloadIdentityConfig'
+    type: NestedObject
+    description: |
+      Workload Identity settings.
+    output: true
+    properties:
+      - name: 'identityProvider'
+        type: String
+        description: |
+          The ID of the OIDC Identity Provider (IdP) associated to
+          the Workload Identity Pool.
+      - name: 'issuerUri'
+        type: String
+        description: |
+          The OIDC issuer URL for this cluster.
+      - name: 'workloadPool'
+        type: String
+        description: |
+          The Workload Identity Pool associated to the cluster.
+  - name: 'loggingConfig'
+    type: NestedObject
+    description: |
+      Logging configuration.
+    # If the user doesn't specify a loggingConfig, the server will supply a default value. Instead of
+    # letting that happen and allowing the config and state to get mismatched, just manually send an
+    # empty object if the user doesn't set anything and require the user to explicitly set the field if a
+    # value is desired.
+    # If the loggingConfig passed to the server is empty, an empty object is returned, so the diff in that
+    # case needs to be ignored.
+    send_empty_value: true
+    allow_empty_object: true
+    diff_suppress_func: 'suppressAttachedClustersLoggingConfigDiff'
+    custom_expand: 'templates/terraform/custom_expand/go/containerattached_cluster_empty_logging.go.tmpl'
+    properties:
+      - name: 'componentConfig'
+        type: NestedObject
+        description: |
+          The configuration of the logging components
+        send_empty_value: true
+        allow_empty_object: true
+        properties:
+          - name: 'enableComponents'
+            type: Array
+            description: |
+              The components to be enabled.
+            send_empty_value: true
+            allow_empty_object: true
+            item_type:
+              type: Enum
+              description: |
+                The components of the logging configuration.
+              enum_values:
+                - 'SYSTEM_COMPONENTS'
+                - 'WORKLOADS'
+  - name: 'errors'
+    type: Array
+    description: |
+      A set of errors found in the cluster.
+    output: true
+    item_type:
+      description: |
+        Describes errors found on attached clusters.
+      type: NestedObject
+      properties:
+        - name: 'message'
+          type: String
+          description: |
+            Human-friendly description of the error.
+  - name: 'authorization'
+    type: NestedObject
+    description: |
+      Configuration related to the cluster RBAC settings.
+    custom_flatten: 'templates/terraform/custom_flatten/go/containerattached_cluster_authorization_user.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/go/containerattached_cluster_authorization_user.go.tmpl'
+    properties:
+      - name: 'adminUsers'
+        type: Array
+        description: |
+          Users that can perform operations as a cluster admin. A managed
+          ClusterRoleBinding will be created to grant the `cluster-admin` ClusterRole
+          to the users. Up to ten admin users can be provided.
+
+          For more info on RBAC, see
+          https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles
+        item_type:
+          type: String
+      - name: 'adminGroups'
+        type: Array
+        description: |
+          Groups that can perform operations as a cluster admin. A managed
+          ClusterRoleBinding will be created to grant the `cluster-admin` ClusterRole
+          to the groups. Up to ten admin groups can be provided.
+
+          For more info on RBAC, see
+          https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles
+        item_type:
+          type: String
+  - name: 'monitoringConfig'
+    type: NestedObject
+    description: |
+      Monitoring configuration.
+    default_from_api: true
+    allow_empty_object: true
+    properties:
+      - name: 'managedPrometheusConfig'
+        type: NestedObject
+        description: |
+          Enable Google Cloud Managed Service for Prometheus in the cluster.
+        allow_empty_object: true
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            description: |
+              Enable Managed Collection.
+  - name: 'binaryAuthorization'
+    type: NestedObject
+    description: |
+      Binary Authorization configuration.
+    default_from_api: true
+    allow_empty_object: true
+    properties:
+      - name: 'evaluationMode'
+        type: Enum
+        description: |
+          Configure Binary Authorization evaluation mode.
+        enum_values:
+          - 'DISABLED'
+          - 'PROJECT_SINGLETON_POLICY_ENFORCE'
+  - name: 'proxyConfig'
+    type: NestedObject
+    description: |
+      Support for proxy configuration.
+    properties:
+      - name: 'kubernetesSecret'
+        type: NestedObject
+        description: |
+          The Kubernetes Secret resource that contains the HTTP(S) proxy configuration.
+        properties:
+          - name: 'name'
+            type: String
+            description: |
+              Name of the kubernetes secret containing the proxy config.
+            required: true
+          - name: 'namespace'
+            type: String
+            description: |
+              Namespace of the kubernetes secret containing the proxy config.
+            required: true

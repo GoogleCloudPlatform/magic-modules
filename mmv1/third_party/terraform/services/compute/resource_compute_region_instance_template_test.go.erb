@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -715,6 +715,15 @@ func TestAccComputeRegionInstanceTemplate_ConfidentialInstanceConfigMain(t *test
 					testAccCheckComputeRegionInstanceTemplateHasConfidentialInstanceConfig(&instanceTemplate2, false, "SEV_SNP"),
 				),
 			},
+			<% unless version == "ga" -%>
+			{
+				Config: testAccComputeRegionInstanceTemplateConfidentialInstanceConfigEnableTdx(acctest.RandString(t, 10), "TDX"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionInstanceTemplateExists(t, "google_compute_region_instance_template.foobar5", &instanceTemplate),
+					testAccCheckComputeRegionInstanceTemplateHasConfidentialInstanceConfig(&instanceTemplate, false, "TDX"),
+				),
+			},
+			<% end -%>
 		},
 	})
 }
@@ -2972,6 +2981,42 @@ resource "google_compute_region_instance_template" "foobar4" {
 `, suffix, minCpuPlatform, confidentialInstanceType, suffix, minCpuPlatform, confidentialInstanceType)
 }
 
+<% unless version == "ga" -%>
+func testAccComputeRegionInstanceTemplateConfidentialInstanceConfigEnableTdx(suffix string, confidentialInstanceType string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image3" {
+  family  = "ubuntu-2204-lts"
+  project = "tdx-guest-images"
+}
+
+resource "google_compute_region_instance_template" "foobar5" {
+  name         = "tf-test-instance-template-%s"
+  machine_type = "c3-standard-4"
+  region       = "us-central1"
+
+  disk {
+    source_image = data.google_compute_image.my_image3.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  confidential_instance_config {
+    confidential_instance_type  = %q
+  }
+
+  scheduling {
+    on_host_maintenance = "TERMINATE"
+  }
+
+}
+`, suffix, confidentialInstanceType)
+}
+<% end -%>
+
 func testAccComputeRegionInstanceTemplateAdvancedMachineFeatures(suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -3518,7 +3563,7 @@ resource "google_compute_region_instance_template" "foobar" {
   }
 
   partner_metadata = {
-  	"test.compute.googleapis.com" = jsonencode({ 
+  	"test.compute.googleapis.com" = jsonencode({
   		entries = {
   			key1 = "value1"
   			key2 = 2

@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -52,7 +52,7 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 				ResourceName:            "google_vmwareengine_private_cloud.vmw-engine-pc",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "update_time", "type", "deletion_parameters"},
+				ImportStateVerifyIgnore: []string{"location", "name", "update_time", "type", "deletion_parameters", "deletion_delay_hours"},
 			},
 			{
 				Config: testPrivateCloudUpdateConfig(context),
@@ -72,7 +72,7 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 				ResourceName:            "google_vmwareengine_private_cloud.vmw-engine-pc",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "update_time", "type", "deletion_parameters"},
+				ImportStateVerifyIgnore: []string{"location", "name", "update_time", "type", "deletion_parameters", "deletion_delay_hours"},
 			},
 		},
 	})
