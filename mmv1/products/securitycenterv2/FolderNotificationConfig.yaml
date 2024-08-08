@@ -20,6 +20,8 @@ update_verb: :PATCH
 update_mask: true
 import_format:
   - 'folders/{{folder}}/locations/{{location}}/notificationConfigs/{{config_id}}'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  post_import: templates/terraform/post_import/folder_notification_config.go.erb
 description: |
   A Cloud Security Command Center (Cloud SCC) notification configs. A
   notification config is a Cloud SCC resource that contains the

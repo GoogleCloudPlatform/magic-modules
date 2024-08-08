@@ -41,9 +41,6 @@ func TestAccSecurityCenterV2FolderNotificationConfig_basic(t *testing.T) {
 				ResourceName:      "google_scc_v2_folder_notification_config.default",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{
-					"folder", "config_id",
-				},
 			},
 			{
 				Config: testAccSecurityCenterV2FolderNotificationConfig_update(context),
@@ -56,9 +53,6 @@ func TestAccSecurityCenterV2FolderNotificationConfig_basic(t *testing.T) {
 				ResourceName:      "google_scc_v2_folder_notification_config.default",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{
-					"folder", "config_id",
-				},
 			},
 		},
 	})
