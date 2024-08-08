@@ -35,7 +35,7 @@ type ServicesCall interface {
 // to declare a Google Cloud Project resource.
 func ResourceGoogleProject() *schema.Resource {
 	return &schema.Resource{
-		SchemaVersion: 2,
+		SchemaVersion: 1,
 
 		Create: resourceGoogleProjectCreate,
 		Read:   resourceGoogleProjectRead,
@@ -58,14 +58,6 @@ func ResourceGoogleProject() *schema.Resource {
 		},
 
 		MigrateState: resourceGoogleProjectMigrateState,
-
-		StateUpgraders: []schema.StateUpgrader{
-			{
-				Type:    resourceGoogleProjectV1().CoreConfigSchema().ImpliedType(),
-				Upgrade: resourceGoogleProjectStateUpgradeV1,
-				Version: 1,
-			},
-		},
 
 		Schema: map[string]*schema.Schema{
 			"project_id": {
