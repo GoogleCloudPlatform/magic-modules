@@ -1,0 +1,16 @@
+resource "google_folder" "folder" {
+  display_name = "<%= ctx[:vars]['folder_name'] %>"
+  parent       = "organizations/<%= ctx[:test_env_vars]["org_id"] %>"
+}
+
+resource "google_compute_firewall_policy" "policy" {
+  parent      = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"
+  short_name  = "<%= ctx[:vars]['policy_name'] %>"
+  description = "Example Resource"
+}
+
+resource "google_compute_firewall_policy_association" "<%= ctx[:primary_resource_id] %>" {
+  firewall_policy = google_compute_firewall_policy.policy.name
+  attachment_target = google_folder.folder.name
+  name = "<%= ctx[:vars]['association_name'] %>"
+}

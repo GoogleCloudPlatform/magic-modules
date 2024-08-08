@@ -1,0 +1,16 @@
+resource "google_folder" "folder" {
+  display_name = "{{index $.Vars "folder_name"}}"
+  parent       = "organizations/{{index $.TestEnvVars "org_id"}}"
+}
+
+resource "google_compute_firewall_policy" "policy" {
+  parent      = "organizations/{{index $.TestEnvVars "org_id"}}"
+  short_name  = "{{index $.Vars "policy_name"}}"
+  description = "Example Resource"
+}
+
+resource "google_compute_firewall_policy_association" "{{$.PrimaryResourceId}}" {
+  firewall_policy = google_compute_firewall_policy.policy.name
+  attachment_target = google_folder.folder.name
+  name = "{{index $.Vars "association_name"}}"
+}
