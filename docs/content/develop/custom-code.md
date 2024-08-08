@@ -160,7 +160,7 @@ The parameters the function receives are:
 
 The function returns a final value that will be stored in Terraform state for the field, which will be compared with the user's configuration to determine if there is a diff.
 
-## Inject code before / after CRUD operations and Import
+## Inject code before / after CRUD operations and Import {#pre_post_injection}
 
 ```yaml
 custom_code: !ruby/object:Provider::Terraform::CustomCode
