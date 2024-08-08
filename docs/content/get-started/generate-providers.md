@@ -34,6 +34,7 @@ If you are familiar with Docker or Podman, you may want to use the experimental 
 1. Use rbenv to install ruby 3.1.0
    ```bash
    rbenv install 3.1.0
+   rbenv init
    ```
 1. [Install go](https://go.dev/doc/install)
 1. Add the following values to your environment settings such as `.bashrc`:
