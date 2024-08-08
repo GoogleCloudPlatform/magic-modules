@@ -1,4 +1,4 @@
-resource "google_storage_bucket" "<%= ctx[:primary_resource_id] %>" {
+resource "google_storage_bucket" "default" {
   name          = "<%= ctx[:vars]['bucket_name'] %>"
   location      = "US"
   force_destroy = true
@@ -10,7 +10,7 @@ resource "google_storage_bucket" "<%= ctx[:primary_resource_id] %>" {
 resource "google_storage_bucket_object" "example_mp4" {
   name   = "example.mp4"
   source = "./test-fixtures/example.mp4"
-  bucket = google_storage_bucket.<%= ctx[:primary_resource_id] %>.name
+  bucket = google_storage_bucket.default.name
 }
 
 resource "google_transcoder_job" "<%= ctx[:primary_resource_id] %>" {
@@ -29,10 +29,10 @@ resource "google_transcoder_job_template" "default" {
   config {
     inputs {
       key = "input0"
-      uri = google_storage_bucket_object.example_mp4.self_link
+      uri = "gs://${google_storage_bucket.default.name}/${google_storage_bucket_object.example_mp4.name}"
     }
     output {
-      uri = "${google_storage_bucket.<%= ctx[:primary_resource_id] %>.self_link}/transcoded.mp4"
+      uri = "gs://${google_storage_bucket.default.name}/outputs/"
     }
     edit_list {
       key               = "atom0"
