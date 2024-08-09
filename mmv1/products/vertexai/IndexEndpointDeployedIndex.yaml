@@ -278,7 +278,7 @@ properties:
             item_type: Api::Type::String
   - !ruby/object:Api::Type::Array
     name: reservedIpRanges
-    # Note: The API docs doesn't describe this field as immutable but we have observed that attempt to update this field are unsuccessful. There isn't an API error saying the fields cannot be updated, but instead the new values are ignored and not used to update the resource.
+    # This field is not updatable via the mutateDeployedIndex method in the API, which is the only update method usable by this 'fine-grained' resource. This is why the field is marked as immutable despite the API docs not marking the field as immutable.
     immutable: true
     description: |
       A list of reserved ip ranges under the VPC network that can be used for this DeployedIndex.
