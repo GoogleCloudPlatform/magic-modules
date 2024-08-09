@@ -374,8 +374,12 @@ func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error
 
 		if v, ok := column["family"]; ok {
 			log.Printf("[DEBUG] adding column family %q", v)
+			valueType, err := getType(column["type"])
+			if err != nil {
+				return err
+			}
 			config := bigtable.Family{
-				ValueType: column["type"].(bigtable.Type),
+				ValueType: valueType,
 			}
 			if err := c.CreateColumnFamilyWithConfig(ctx, name, v.(string), config); err != nil {
 				return fmt.Errorf("Error creating column family %q: %s", v, err)
