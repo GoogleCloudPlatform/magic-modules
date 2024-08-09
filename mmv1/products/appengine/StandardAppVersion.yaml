@@ -84,6 +84,7 @@ examples:
       account_id: 'my-account'
     test_env_vars:
       org_id: :ORG_ID
+    external_providers: ["archive"]
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'service'

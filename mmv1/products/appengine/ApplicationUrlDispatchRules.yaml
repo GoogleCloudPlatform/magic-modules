@@ -54,6 +54,7 @@ examples:
     primary_resource_id: 'web_service'
     vars:
       bucket_name: 'appengine-test-bucket'
+    external_providers: ["archive"]
 properties:
   - !ruby/object:Api::Type::Array
     name: 'dispatchRules'

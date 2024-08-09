@@ -76,6 +76,7 @@ examples:
       org_id: 'ORG_ID'
     ignore_read_extra:
       - 'delete_service_on_destroy'
+    external_providers: ["archive"]
 virtual_fields:
   - name: 'noop_on_destroy'
     description: |

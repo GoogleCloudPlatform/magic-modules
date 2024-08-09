@@ -39,8 +39,14 @@ resource "google_storage_bucket" "bucket" {
   location = "US"
 }
 
+data "archive_file" "app" {
+  type        = "zip"
+  source_dir = "./test-fixtures/hello-world-node-standard"
+  output_path = "./test-fixtures/hello-world-node-standard.zip"
+}
+
 resource "google_storage_bucket_object" "object" {
   name   = "hello-world.zip"
   bucket = google_storage_bucket.bucket.name
-  source = "./test-fixtures/hello-world.zip"
+  source = data.archive_file.app.output_path
 }
