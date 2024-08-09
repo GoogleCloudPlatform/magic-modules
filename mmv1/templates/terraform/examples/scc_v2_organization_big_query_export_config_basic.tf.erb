@@ -1,5 +1,5 @@
 resource "google_scc_v2_organization_scc_big_query_exports" "<%= ctx[:primary_resource_id] %>" {
-  export_id    = "<%= ctx[:vars]['export_id'] %>"
+  big_query_export_id    = "<%= ctx[:vars]['big_query_export_id'] %>"
   organization = "<%= ctx[:test_env_vars]['org_id'] %>"
   dataset      = "<%= ctx[:vars]['dataset'] %>"
   location     = "global"

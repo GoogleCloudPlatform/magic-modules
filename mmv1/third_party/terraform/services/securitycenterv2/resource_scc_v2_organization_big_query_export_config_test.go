@@ -21,7 +21,7 @@ func TestAccSecurityCenterV2OrganizationBigQueryExportConfig_basic(t *testing.T)
 		"dataset_id": dataset_id, 
 		"dataset": fmt.Sprintf("projects/%s/datasets/%s",
 					envvar.GetTestProjectFromEnv(), dataset_id),
-		"export_id": "tf-test-export-"+randomSuffix,
+		"big_query_export_id": "tf-test-export-"+randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -64,7 +64,7 @@ resource "google_bigquery_dataset" "default" {
 }
 
 resource "google_scc_v2_organization_scc_big_query_exports" "default" {
-  export_id    = "%{export_id}"
+  big_query_export_id    = "%{big_query_export_id}"
   organization = "%{org_id}"
   dataset      = "%{dataset}"
   location     = "global"
@@ -90,7 +90,7 @@ resource "google_bigquery_dataset" "default" {
 }
 
 resource "google_scc_v2_organization_scc_big_query_exports" "default" {
-  export_id    = "%{export_id}"
+  big_query_export_id    = "%{big_query_export_id}"
   organization = "%{org_id}"
   dataset      = "%{dataset}"
   location     = "global"
