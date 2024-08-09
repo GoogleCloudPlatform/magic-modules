@@ -113,10 +113,16 @@ func TestAccBigtableTable_familyType(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccBigtableTable_familyType(instanceName, tableName, family, `{"aggregate_type": {
-					"sum": {}
-					"input_type": { "int64_type": { "encoding": { "big_endian_bytes": {} } } }
-				  }}`),
+				Config: testAccBigtableTable_familyType(instanceName, tableName, family, `{
+					"aggregate_type": {
+						"sum": {},
+						"input_type": {
+							"int64_type": {
+								"big_endian_bytes": {}
+							}
+						}
+					}
+				}`),
 			},
 			{
 				ResourceName:      "google_bigtable_table.table",

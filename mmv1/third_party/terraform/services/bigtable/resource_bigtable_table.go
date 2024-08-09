@@ -374,12 +374,8 @@ func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error
 
 		if v, ok := column["family"]; ok {
 			log.Printf("[DEBUG] adding column family %q", v)
-			valueType, err := getType(column["type"])
-			if err != nil {
-				return err
-			}
 			config := bigtable.Family{
-				ValueType: valueType,
+				ValueType: column["type"].(bigtable.Type),
 			}
 			if err := c.CreateColumnFamilyWithConfig(ctx, name, v.(string), config); err != nil {
 				return fmt.Errorf("Error creating column family %q: %s", v, err)
@@ -513,7 +509,7 @@ func FlattenColumnFamily(families []bigtable.FamilyInfo) []map[string]interface{
 	for _, f := range families {
 		data := make(map[string]interface{})
 		data["family"] = f.Name
-		data["type"] = f.ValueType
+		//data["type"] = f.ValueType
 		result = append(result, data)
 	}
 
@@ -542,7 +538,7 @@ func resourceBigtableTableImport(d *schema.ResourceData, meta interface{}) ([]*s
 }
 
 func getType(input interface{}) (bigtable.Type, error) {
-	if input == nil {
+	if input == nil || input.(string) == "" {
 		return nil, nil
 	}
 	inputType := input.(string)
