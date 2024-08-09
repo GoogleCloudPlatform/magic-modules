@@ -1,0 +1,982 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: Models
+base_url: projects/{{project}}/locations/{{region}}/models
+create_url: 'projects/{{project}}/locations/{{region}}/modelsPRE_CREATE_REPLACE_ME'
+delete_url: '{{name}}'
+self_link: '{{name}}'
+
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.models'
+description: |-
+  A trained machine learning Model.
+id_format: '{{name}}'
+autogen_async: false
+exclude_import: true
+async: !ruby/object:Api::OpAsync
+  actions:
+    - create
+    - delete
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  decoder: templates/terraform/decoders/vertex_ai_models.go.erb
+  encoder: templates/terraform/encoders/vertex_ai_models.go.erb
+  pre_create: templates/terraform/pre_create/vertex_ai_models.go.erb
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'vertex_ai_model_basic'
+    skip_import_test: true
+    primary_resource_id: 'model'
+    vars:
+      display_name: 'test-model'
+      kms_key_name: 'kms-name'
+    test_vars_overrides:
+      kms_key_name: 'acctest.BootstrapKMSKeyWithPurposeInLocation(t, "ASYMMETRIC_SIGN",
+        "us-central1").CryptoKey.Name'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'vertex_ai_model_upload_basic'
+    skip_import_test: true
+    primary_resource_id: 'upload_model'
+    vars:
+      display_name: 'test-model-upload-basic'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'vertex_ai_model_upload_container_spec'
+    skip_import_test: true
+    primary_resource_id: 'upload_model'
+    vars:
+      display_name: 'test-model-upload-container-spec'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'vertex_ai_model_upload_explanation_spec_examples_one'
+    skip_import_test: true
+    primary_resource_id: 'examplesOneModel'
+    vars:
+      examples_one_display_name: 'test-model-upload-explanation-spec-example-one'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'vertex_ai_model_upload_explanation_spec_examples_two'
+    skip_import_test: true
+    primary_resource_id: 'examplesTwoModel'
+    vars:
+      examples_two_display_name: 'test-model-upload-explanation-spec-example-two'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'vertex_ai_model_upload_explanation_spec_integrated_gradients'
+    skip_import_test: true
+    primary_resource_id: 'integratedGradientsModel'
+    vars:
+      integrated_gradients_display_name: 'test-model-upload-explanation-spec-integrated-gradients'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'vertex_ai_model_upload_explanation_spec_xrai_attribution'
+    skip_import_test: true
+    primary_resource_id: 'xraiAttributionModel'
+    vars:
+      xrai_attribution_display_name: 'test-model-upload-explanation-spec-xrai-attribution'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'vertex_ai_model_upload_explanation_spec_sampled_shapely'
+    skip_import_test: true
+    primary_resource_id: 'sampledShapelyModel'
+    vars:
+      sampled_shapely_display_name: 'test-model-upload-explanation-spec-sampled-shapely'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'vertex_ai_model_upload_predict_schemata'
+    skip_import_test: true
+    primary_resource_id: 'upload_model'
+    vars:
+      display_name: 'test-model-upload-predict-schemata'
+parameters:
+  - !ruby/object:Api::Type::String
+    name: region
+    description: The region of the Model. eg us-central1
+    url_param_only: true
+    immutable: true
+    default_from_api: true
+properties:
+  ## output only properties ##
+  - !ruby/object:Api::Type::Array
+    name: 'supportedDeploymentResourcesTypes'
+    output: true
+    description: |
+        When this Model is deployed, its prediction resources are described by the prediction_resources field of the Endpoint.deployed_models object.
+    item_type: !ruby/object:Api::Type::Enum
+      name: deploymentResourcesType
+      immutable: true
+      description: |
+        The content of this Model that may be exported.
+      values:
+        - :DEDICATED_RESOURCES
+        - :AUTOMATIC_RESOURCES
+        - :SHARED_RESOURCES
+  - !ruby/object:Api::Type::Array
+    name: 'supportedInputStorageFormats'
+    output: true
+    description: |
+        The formats this Model supports in BatchPredictionJob.input_config. If PredictSchemata.instance_schema_uri exists, the instances should be given as per that schema.
+    item_type: Api::Type::String
+  - !ruby/object:Api::Type::Array
+    name: 'supportedOutputStorageFormats'
+    output: true
+    description: |
+        The formats this Model supports in BatchPredictionJob.input_config. If PredictSchemata.instance_schema_uri exists, the instances should be given as per that schema.
+    item_type: Api::Type::String
+  - !ruby/object:Api::Type::String
+    name: 'metadataArtifact'
+    description: The resource name of the Artifact that was created in MetadataStore when creating the Model.
+    output: true
+  - !ruby/object:Api::Type::Array
+    name: 'deployedModels'
+    output: true
+    description: The pointers to DeployedModels created from this Model. Note that Model could have been deployed to Endpoints in different Locations.
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'endpoint'
+          output: true
+          immutable: true
+          description: A resource name of an Endpoint.
+        - !ruby/object:Api::Type::String
+          name: 'deployedModelId'
+          output: true
+          immutable: true
+          description: An ID of a DeployedModel in the above Endpoint.
+  - !ruby/object:Api::Type::String
+    name: 'etag'
+    description: Used to perform consistent read-modify-write updates.
+    output: true
+    ignore_read: true
+  - !ruby/object:Api::Type::Array
+    name: 'supportedExportFormats'
+    output: true
+    description: |
+      The formats in which this Model may be exported. If empty, this Model is not available for export.
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: id
+          output: true
+          description: |
+            The ID of the export format.
+        - !ruby/object:Api::Type::Enum
+          name: exportableContent
+          output: true
+          immutable: true
+          description: |
+            The content of this Model that may be exported.
+          values:
+            - :ARTIFACT
+            - :IMAGE
+  - !ruby/object:Api::Type::String
+    name: 'trainerPipeline'
+    output: true
+    description: |
+      The resource name of the TrainingPipeline that uploaded this Model, if any.
+  - !ruby/object:Api::Type::String
+    name: 'versionId'
+    description: The version ID of the Model.
+    immutable: true
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'versionCreateTime'
+    output: true
+    description: |
+      The timestamp of when this version was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+  - !ruby/object:Api::Type::String
+    name: 'versionUpdateTime'
+    output: true
+    description: |
+      The timestamp of when this version was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+  - !ruby/object:Api::Type::String
+    name: 'versionDescription'
+    output: true
+    description: |
+      The description of this version
+  - !ruby/object:Api::Type::String
+    name: 'createTime'
+    output: true
+    description: |
+      The timestamp of when the Model was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+  - !ruby/object:Api::Type::String
+    name: 'updateTime'
+    output: true
+    description: |
+      The timestamp of when the MetadataStore was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description:
+      The name of the Model. This value may be up to 60 characters, and
+      valid characters are [a-z0-9_]. The first character cannot be a number.
+    output: true
+    # url_param_only: true
+    custom_flatten: templates/terraform/custom_flatten/vertex_ai_name_from_model.go.erb
+  ## root properties ##
+  - !ruby/object:Api::Type::String
+    name: 'pipelineJob'
+    output: true
+    description: |
+      This field is populated if the model is produced by a pipeline job.
+  - !ruby/object:Api::Type::String
+    name: 'artifactUri'
+    immutable: true
+    description: |
+      The path to the directory containing the Model artifact and any of its supporting files.
+  - !ruby/object:Api::Type::String
+    name: 'displayName'
+    at_least_one_of:
+      - model
+      - displayName
+    description:
+      The display name of the Model. The name can be up to 128 characters long
+      and can consist of any UTF-8 characters.
+  - !ruby/object:Api::Type::Array
+    name: 'versionAliases'
+    default_from_api: true
+    description:
+      user provided version aliases so that a model version can be referenced via alias.
+    item_type: Api::Type::String
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
+    description: The labels with user-defined metadata to organize your Models.
+  - !ruby/object:Api::Type::String
+    name: 'sourceModel'
+    at_least_one_of:
+      - model
+      - displayName
+    description: |
+      The resource name of the Model to copy. That Model must be in the same Project
+  - !ruby/object:Api::Type::String
+    name: 'modelId'
+    ignore_read: true
+    description: |
+      Copy sourceModel into a new Model with this ID. The ID will become the final component of the model resource name.
+  - !ruby/object:Api::Type::String
+    name: 'parentModel'
+    description: |
+      Specify this field to copy sourceModel into this existing Model as a new version.
+  - !ruby/object:Api::Type::String
+    name: 'description'
+    description: Description of the Model.
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: 'metadataSchemaUri'
+    immutable: true
+    description: |
+      Points to a YAML file stored on Google Cloud Storage describing additional information about the Model, that is specific to it.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'predictSchemata'
+    description: |
+      The schemata that describe formats of the Model's predictions and explanations as given and returned via PredictionService.Predict and PredictionService.Explain.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: instanceSchemaUri
+        immutable: true
+        description: |
+          Points to a YAML file stored on Google Cloud Storage describing the format of a single instance, which are used in PredictRequest.instances, ExplainRequest.instances and BatchPredictionJob.input_config.
+      - !ruby/object:Api::Type::String
+        name: parametersSchemaUri
+        immutable: true
+        description: |
+          Points to a YAML file stored on Google Cloud Storage describing the parameters of prediction and explanation via PredictRequest.parameters, ExplainRequest.parameters and BatchPredictionJob.model_parameters.
+      - !ruby/object:Api::Type::String
+        name: predictionSchemaUri
+        immutable: true
+        description: |
+          Points to a YAML file stored on Google Cloud Storage describing the format of a single prediction produced by this Model, which are returned via PredictResponse.predictions, ExplainResponse.explanations, and BatchPredictionJob.output_config.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'containerSpec'
+    description: |
+      The specification of the container that is to be used when deploying this Model.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'imageUri'
+        required: true
+        immutable: true
+        description: URI of the Docker image to be used as the custom container for serving predictions.
+      - !ruby/object:Api::Type::Array
+        name: 'command'
+        immutable: true
+        description: Specifies the command that runs when the container starts. This overrides the container's ENTRYPOINT.
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::Array
+        name: 'args'
+        immutable: true
+        description: Specifies arguments for the command that runs when the container starts.
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::Array
+        name: 'env'
+        immutable: true
+        description: List of environment variables to set in the container.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'name'
+              required: true
+              description: name of the environment variable. Must be a valid C identifier.
+            - !ruby/object:Api::Type::String
+              name: 'value'
+              required: true
+              description: Variables that reference a $(VAR_NAME) are expanded using the previous defined environment variables in the container and any service environment variables.
+      - !ruby/object:Api::Type::Array
+        name: 'ports'
+        immutable: true
+        description: List of ports to expose from the container.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Integer
+              name: 'containerPort'
+              required: true
+              description: The number of the port to expose on the pod's IP address. Must be a valid port number, between 1 and 65535 inclusive.
+      - !ruby/object:Api::Type::String
+        name: 'predictRoute'
+        immutable: true
+        description: HTTP path on the container to send prediction requests to.
+      - !ruby/object:Api::Type::String
+        name: 'healthRoute'
+        immutable: true
+        description: HTTP path on the container to send health checks to.
+      - !ruby/object:Api::Type::Array
+        name: 'grpcPorts'
+        immutable: true
+        description: List of ports to expose from the container.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Integer
+              name: 'containerPort'
+              required: true
+              description: The number of the port to expose on the pod's IP address. Must be a valid port number, between 1 and 65535 inclusive.
+      - !ruby/object:Api::Type::String
+        name: 'deploymentTimeout'
+        immutable: true
+        description: Deployment timeout. Limit for deployment timeout is 2 hours.
+      - !ruby/object:Api::Type::Integer
+        name: 'sharedMemorySizeMb'
+        immutable: true
+        description: The amount of the VM memory to reserve as the shared memory for the model in megabytes.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'startupProbe'
+        immutable: true
+        description: Specification for Kubernetes startup probe.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'periodSeconds'
+            immutable: true
+            default_value: 10
+            description: How often (in seconds) to perform the probe. Default to 10 seconds. Minimum value is 1. Must be less than timeoutSeconds.
+          - !ruby/object:Api::Type::Integer
+            name: 'timeoutSeconds'
+            immutable: true
+            default_value: 1
+            description: Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Must be greater or equal to periodSeconds.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'exec'
+            description: Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Must be greater or equal to periodSeconds.
+            properties:
+              - !ruby/object:Api::Type::Array
+                name: 'command'
+                description: Command is the command line to execute inside the container, the working directory for the command is root ('/') in the container's filesystem.
+                item_type: Api::Type::String
+      - !ruby/object:Api::Type::NestedObject
+        name: 'healthProbe'
+        immutable: true
+        description: Specification for Kubernetes readiness probe.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'periodSeconds'
+            immutable: true
+            default_value: 10
+            description: How often (in seconds) to perform the probe. Default to 10 seconds. Minimum value is 1. Must be less than timeoutSeconds.
+          - !ruby/object:Api::Type::Integer
+            name: 'timeoutSeconds'
+            immutable: true
+            default_value: 1
+            description: Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Must be greater or equal to periodSeconds.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'exec'
+            description: Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Must be greater or equal to periodSeconds.
+            properties:
+              - !ruby/object:Api::Type::Array
+                name: 'command'
+                description: Command is the command line to execute inside the container, the working directory for the command is root ('/') in the container's filesystem.
+                item_type: Api::Type::String
+  - !ruby/object:Api::Type::NestedObject
+    name: 'encryptionSpec'
+    immutable: true
+    description: |
+      Customer-managed encryption key spec for a MetadataStore. If set, this MetadataStore and all sub-resources of this MetadataStore will be secured by this key.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'kmsKeyName'
+        description: |
+          Required. The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource.
+          Has the form: projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key. The key needs to be in the same region as where the resource is created.
+        immutable: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'metadata'
+    description: An additional information about the Index
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'contentsDeltaUri'
+        required: true
+        description: |-
+          Allows inserting, updating  or deleting the contents of the Matching Engine Index.
+          The string must be a valid Cloud Storage directory path. If this
+          field is set when calling IndexService.UpdateIndex, then no other
+          Index field can be also updated as part of the same call.
+          The expected structure and format of the files this URI points to is
+          described at https://cloud.google.com/vertex-ai/docs/matching-engine/using-matching-engine#input-data-format
+        custom_flatten: templates/terraform/custom_flatten/vertex_ai_index_ignore_contents_delta_uri.go.erb
+      - !ruby/object:Api::Type::Boolean
+        name: 'isCompleteOverwrite'
+        description: |-
+          If this field is set together with contentsDeltaUri when calling IndexService.UpdateIndex,
+          then existing content of the Index will be replaced by the data from the contentsDeltaUri.
+        default_value: false
+        custom_flatten: templates/terraform/custom_flatten/vertex_ai_index_ignore_is_complete_overwrite.go.erb
+      - !ruby/object:Api::Type::NestedObject
+        name: 'config'
+        immutable: true
+        description: The configuration of the Matching Engine Index.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'dimensions'
+            description: The number of dimensions of the input vectors.
+            required: true
+          - !ruby/object:Api::Type::Integer
+            name: 'approximateNeighborsCount'
+            description: |-
+              The default number of neighbors to find via approximate search before exact reordering is
+              performed. Exact reordering is a procedure where results returned by an
+              approximate search algorithm are reordered via a more expensive distance computation.
+              Required if tree-AH algorithm is used.
+          - !ruby/object:Api::Type::String
+            name: 'shardSize'
+            description: |-
+              Index data is split into equal parts to be processed. These are called "shards".
+              The shard size must be specified when creating an index. The value must be one of the followings:
+              * SHARD_SIZE_SMALL: Small (2GB)
+              * SHARD_SIZE_MEDIUM: Medium (20GB)
+              * SHARD_SIZE_LARGE: Large (50GB)
+            immutable: true
+            default_from_api: true
+          - !ruby/object:Api::Type::String
+            name: 'distanceMeasureType'
+            description: |-
+              The distance measure used in nearest neighbor search. The value must be one of the followings:
+              * SQUARED_L2_DISTANCE: Euclidean (L_2) Distance
+              * L1_DISTANCE: Manhattan (L_1) Distance
+              * COSINE_DISTANCE: Cosine Distance. Defined as 1 - cosine similarity.
+              * DOT_PRODUCT_DISTANCE: Dot Product Distance. Defined as a negative of the dot product
+            default_value: 'DOT_PRODUCT_DISTANCE'
+          - !ruby/object:Api::Type::String
+            name: 'featureNormType'
+            description: |-
+              Type of normalization to be carried out on each vector. The value must be one of the followings:
+              * UNIT_L2_NORM: Unit L2 normalization type
+              * NONE: No normalization type is specified.
+            default_value: 'NONE'
+            ignore_read: true
+          - !ruby/object:Api::Type::NestedObject
+            name: 'algorithmConfig'
+            description:
+              The configuration with regard to the algorithms used for efficient
+              search.
+            properties:
+              - !ruby/object:Api::Type::NestedObject
+                name: 'treeAhConfig'
+                exactly_one_of:
+                  - treeAhConfig
+                  - bruteForceConfig
+                description: |-
+                  Configuration options for using the tree-AH algorithm (Shallow tree + Asymmetric Hashing).
+                  Please refer to this paper for more details: https://arxiv.org/abs/1908.10396
+                properties:
+                  - !ruby/object:Api::Type::Integer
+                    name: 'leafNodeEmbeddingCount'
+                    description:
+                      Number of embeddings on each leaf node. The default value
+                      is 1000 if not set.
+                    default_value: 1000
+                  - !ruby/object:Api::Type::Integer
+                    name: 'leafNodesToSearchPercent'
+                    description: |-
+                      The default percentage of leaf nodes that any query may be searched. Must be in
+                      range 1-100, inclusive. The default value is 10 (means 10%) if not set.
+                    default_value: 10
+              - !ruby/object:Api::Type::NestedObject
+                name: 'bruteForceConfig'
+                allow_empty_object: true
+                send_empty_value: true
+                properties: []
+                exactly_one_of:
+                  - treeAhConfig
+                  - bruteForceConfig
+                description: |-
+                  Configuration options for using brute force search, which simply implements the
+                  standard linear search in the database for each query.
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'model'
+    resource: 'Models'
+    imports: 'displayName'
+    description: |
+      The Model to create.
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+  - !ruby/object:Api::Type::NestedObject
+    name: 'explanationSpec'
+    description: The pointers to DeployedModels created from this Model. Note that Model could have been deployed to Endpoints in different Locations.
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: 'parameters'
+        required: true
+        description: Parameters that configure explaining of the Model's predictions.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'topK'
+            description: If populated, returns attributions for top K indices of outputs (defaults to 1).
+            default_value: 1
+            immutable: true
+          - !ruby/object:Api::Type::Array
+            name: 'outputIndices'
+            description: If populated, only returns attributions that have outputIndex contained in outputIndices.
+            immutable: true
+            item_type: Api::Type::Double
+          ## Union field method can be only one of the following
+          - !ruby/object:Api::Type::NestedObject
+            name: 'sampledShapleyAttribution'
+            description: An attribution method that approximates Shapley values for features that contribute to the label being predicted.
+            immutable: true
+            properties:
+              - !ruby/object:Api::Type::Integer
+                name: 'pathCount'
+                description: The number of feature permutations to consider when approximating the Shapley values. Valid range of its value is [1, 50], inclusively.
+                required: true
+          - !ruby/object:Api::Type::NestedObject
+            name: 'integratedGradientsAttribution'
+            description: An attribution method that computes Aumann-Shapley values taking advantage of the model's fully differentiable structure.
+            properties:
+              - !ruby/object:Api::Type::Integer
+                name: 'stepCount'
+                description: The number of feature permutations to consider when approximating the Shapley values. Valid range of its value is [1, 100], inclusively.
+                required: true
+              - !ruby/object:Api::Type::NestedObject
+                name: 'smoothGradConfig'
+                description: When enabled, the gradients are approximated by averaging the gradients from noisy samples in the vicinity of the inputs.
+                properties:
+                  - !ruby/object:Api::Type::Integer
+                    name: 'noisySampleCount'
+                    description: The number of gradient samples to use for approximation. Valid range of its value is [1, 50].
+                    default_value: 3
+                  - !ruby/object:Api::Type::Double
+                    name: 'noiseSigma'
+                    at_least_one_of:
+                      - explanationSpec.parameters.integratedGradientsAttribution.smoothGradConfig.noiseSigma
+                      - explanationSpec.parameters.integratedGradientsAttribution.smoothGradConfig.featureNoiseSigma
+                    description: This is a single float value and will be used to add noise to all the features.
+                  - !ruby/object:Api::Type::NestedObject
+                    name: 'featureNoiseSigma'
+                    at_least_one_of:
+                      - explanationSpec.parameters.integratedGradientsAttribution.smoothGradConfig.noiseSigma
+                      - explanationSpec.parameters.integratedGradientsAttribution.smoothGradConfig.featureNoiseSigma
+                    description: The number of gradient samples to use for approximation.
+                    properties:
+                      - !ruby/object:Api::Type::Array
+                        name: 'noiseSigma'
+                        description: The number of gradient samples to use for approximation.
+                        item_type: !ruby/object:Api::Type::NestedObject
+                          properties:
+                            - !ruby/object:Api::Type::String
+                              name: 'name'
+                              description: The name of the input feature for which noise sigma is provided.
+                            - !ruby/object:Api::Type::Double
+                              name: 'sigma'
+                              description: This represents the standard deviation of the Gaussian kernel that will be used to add noise to the feature prior to computing gradients.
+                              default_value: 0.1
+              - !ruby/object:Api::Type::NestedObject
+                name: 'blurBaselineConfig'
+                description: Config for IG with blur baseline.
+                required: true
+                properties:
+                  - !ruby/object:Api::Type::Double
+                    name: 'maxBlurSigma'
+                    description: The standard deviation of the blur kernel for the blurred baseline.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'xraiAttribution'
+            description: An attribution method that redistributes Integrated Gradients attribution to segmented regions, taking advantage of the model's fully differentiable structure.
+            properties:
+              - !ruby/object:Api::Type::Integer
+                name: 'stepCount'
+                description: The number of feature permutations to consider when approximating the Shapley values. Valid range of its value is [1, 100], inclusively.
+                required: true
+              - !ruby/object:Api::Type::NestedObject
+                name: 'smoothGradConfig'
+                description: When enabled, the gradients are approximated by averaging the gradients from noisy samples in the vicinity of the inputs.
+                properties:
+                  - !ruby/object:Api::Type::Integer
+                    name: 'noisySampleCount'
+                    description: The number of gradient samples to use for approximation. Valid range of its value is [1, 50].
+                    default_value: 3
+                  - !ruby/object:Api::Type::Double
+                    name: 'noiseSigma'
+                    description: This is a single float value and will be used to add noise to all the features.
+                    default_value: 0.1
+                  - !ruby/object:Api::Type::NestedObject
+                    name: 'featureNoiseSigma'
+                    description: The number of gradient samples to use for approximation.
+                    properties:
+                      - !ruby/object:Api::Type::Array
+                        name: 'noiseSigma'
+                        description: The number of gradient samples to use for approximation.
+                        item_type: !ruby/object:Api::Type::NestedObject
+                          properties:
+                            - !ruby/object:Api::Type::String
+                              name: 'name'
+                              description: The name of the input feature for which noise sigma is provided.
+                            - !ruby/object:Api::Type::Double
+                              name: 'sigma'
+                              description: This represents the standard deviation of the Gaussian kernel that will be used to add noise to the feature prior to computing gradients.
+                              default_value: 0.1
+              - !ruby/object:Api::Type::NestedObject
+                name: 'blurBaselineConfig'
+                description: Config for IG with blur baseline.
+                required: true
+                properties:
+                  - !ruby/object:Api::Type::Double
+                    name: 'maxBlurSigma'
+                    default_value: 0.0
+                    description: The standard deviation of the blur kernel for the blurred baseline.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'examples'
+            description: Description of the Model.
+            properties:
+              - !ruby/object:Api::Type::Integer
+                name: 'neighborCount'
+                description: The number of neighbors to return when querying for examples.
+              - !ruby/object:Api::Type::NestedObject
+                name: 'exampleGcsSource'
+                description: The number of neighbors to return when querying for examples.
+                properties:
+                  - !ruby/object:Api::Type::Enum
+                    name: 'dataFormat'
+                    description: 'The format in which instances are given, if not specified, assume its JSONL format. Currently only JSONL format is supported.'
+                    values:
+                      - :JSONL
+                  - !ruby/object:Api::Type::NestedObject
+                    name: 'gcsSource'
+                    description: 'The Cloud Storage location for the input instances.'
+                    properties:
+                      - !ruby/object:Api::Type::Array
+                        name: 'uris'
+                        required: true
+                        description: 'Google Cloud Storage URI(-s) to the input file(s). May contain wildcards.'
+                        item_type: Api::Type::String
+              - !ruby/object:Api::Type::NestedObject
+                name: 'nearestNeighborSearchConfig'
+                description: The number of neighbors to return when querying for examples.
+                exactly_one_of:
+                  - presets
+                  - nearestNeighborSearchConfig
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: 'contentsDeltaUri'
+                    required: true
+                    description: |-
+                      Allows inserting, updating  or deleting the contents of the Matching Engine Index.
+                      The string must be a valid Cloud Storage directory path. If this
+                      field is set when calling IndexService.UpdateIndex, then no other
+                      Index field can be also updated as part of the same call.
+                      The expected structure and format of the files this URI points to is
+                      described at https://cloud.google.com/vertex-ai/docs/matching-engine/using-matching-engine#input-data-format
+                    custom_flatten: templates/terraform/custom_flatten/vertex_ai_index_ignore_contents_delta_uri.go.erb
+                  - !ruby/object:Api::Type::Boolean
+                    name: 'isCompleteOverwrite'
+                    description: |-
+                      If this field is set together with contentsDeltaUri when calling IndexService.UpdateIndex,
+                      then existing content of the Index will be replaced by the data from the contentsDeltaUri.
+                    default_value: false
+                    custom_flatten: templates/terraform/custom_flatten/vertex_ai_index_ignore_is_complete_overwrite.go.erb
+                  - !ruby/object:Api::Type::NestedObject
+                    name: 'config'
+                    immutable: true
+                    description: The configuration of the Matching Engine Index.
+                    properties:
+                      - !ruby/object:Api::Type::Integer
+                        name: 'dimensions'
+                        description: The number of dimensions of the input vectors.
+                        required: true
+                      - !ruby/object:Api::Type::Integer
+                        name: 'approximateNeighborsCount'
+                        description: |-
+                          The default number of neighbors to find via approximate search before exact reordering is
+                          performed. Exact reordering is a procedure where results returned by an
+                          approximate search algorithm are reordered via a more expensive distance computation.
+                          Required if tree-AH algorithm is used.
+                      - !ruby/object:Api::Type::String
+                        name: 'shardSize'
+                        description: |-
+                          Index data is split into equal parts to be processed. These are called "shards".
+                          The shard size must be specified when creating an index. The value must be one of the followings:
+                          * SHARD_SIZE_SMALL: Small (2GB)
+                          * SHARD_SIZE_MEDIUM: Medium (20GB)
+                          * SHARD_SIZE_LARGE: Large (50GB)
+                        immutable: true
+                        default_from_api: true
+                      - !ruby/object:Api::Type::String
+                        name: 'distanceMeasureType'
+                        description: |-
+                          The distance measure used in nearest neighbor search. The value must be one of the followings:
+                          * SQUARED_L2_DISTANCE: Euclidean (L_2) Distance
+                          * L1_DISTANCE: Manhattan (L_1) Distance
+                          * COSINE_DISTANCE: Cosine Distance. Defined as 1 - cosine similarity.
+                          * DOT_PRODUCT_DISTANCE: Dot Product Distance. Defined as a negative of the dot product
+                        default_value: 'DOT_PRODUCT_DISTANCE'
+                      - !ruby/object:Api::Type::String
+                        name: 'featureNormType'
+                        description: |-
+                          Type of normalization to be carried out on each vector. The value must be one of the followings:
+                          * UNIT_L2_NORM: Unit L2 normalization type
+                          * NONE: No normalization type is specified.
+                        default_value: 'NONE'
+                        ignore_read: true
+                      - !ruby/object:Api::Type::NestedObject
+                        name: 'algorithmConfig'
+                        description:
+                          The configuration with regard to the algorithms used for efficient
+                          search.
+                        properties:
+                          - !ruby/object:Api::Type::NestedObject
+                            name: 'treeAhConfig'
+                            exactly_one_of:
+                              - treeAhConfig
+                              - bruteForceConfig
+                            description: |-
+                              Configuration options for using the tree-AH algorithm (Shallow tree + Asymmetric Hashing).
+                              Please refer to this paper for more details: https://arxiv.org/abs/1908.10396
+                            properties:
+                              - !ruby/object:Api::Type::Integer
+                                name: 'leafNodeEmbeddingCount'
+                                description:
+                                  Number of embeddings on each leaf node. The default value
+                                  is 1000 if not set.
+                                default_value: 1000
+                              - !ruby/object:Api::Type::Integer
+                                name: 'leafNodesToSearchPercent'
+                                description: |-
+                                  The default percentage of leaf nodes that any query may be searched. Must be in
+                                  range 1-100, inclusive. The default value is 10 (means 10%) if not set.
+                                default_value: 10
+                          - !ruby/object:Api::Type::NestedObject
+                            name: 'bruteForceConfig'
+                            allow_empty_object: true
+                            send_empty_value: true
+                            properties: []
+                            exactly_one_of:
+                              - treeAhConfig
+                              - bruteForceConfig
+                            description: |-
+                              Configuration options for using brute force search, which simply implements the
+                              standard linear search in the database for each query.
+              - !ruby/object:Api::Type::NestedObject
+                name: 'presets'
+                exactly_one_of:
+                  - presets
+                  - nearestNeighborSearchConfig
+                description: Simplified preset configuration, which automatically sets configuration values based on the desired query speed-precision trade-off and modality.
+                properties:
+                  - !ruby/object:Api::Type::Enum
+                    name: 'modality'
+                    description: The modality of the uploaded model, which automatically configures the distance measurement and feature normalization for the underlying example index and queries
+                    values:
+                      - :IMAGE
+                      - :TEXT
+                      - :TABULAR
+                  - !ruby/object:Api::Type::Enum
+                    name: 'query'
+                    description: Preset option controlling parameters for speed-precision trade-off when querying for examples. If omitted, defaults to PRECISE.
+                    values:
+                      - :PRECISE
+                      - :FAST
+      - !ruby/object:Api::Type::NestedObject
+        name: 'metadata'
+        description: metadata describing the Model's input and output for explanation.
+        properties:
+          - !ruby/object:Api::Type::Map
+            name: 'inputs'
+            key_name: 'name'
+            description: The resource name of the Artifact that was created in MetadataStore when creating the Model.
+            required: true
+            value_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'inputTensorName'
+                  description: |
+                    name of the input tensor for this feature. Required and is only applicable to Vertex AI-provided images for Tensorflow.
+                - !ruby/object:Api::Type::Enum
+                  name: 'encoding'
+                  description: |
+                    Defines how the feature is encoded into the input tensor. Defaults to IDENTITY.
+                  values:
+                    - IDENTITY
+                    - BAG_OF_FEATURES
+                    - BAG_OF_FEATURES_SPARSE
+                    - IDENTITY_SPARSE
+                    - INDICATOR
+                    - COMBINED_EMBEDDING
+                    - CONCAT_EMBEDDING
+                - !ruby/object:Api::Type::String
+                  name: 'modality'
+                  default_value: 'numeric'
+                  description: |
+                    Modality of the feature. Valid values are: numeric, image.
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'featureValueDomain'
+                  description: |
+                    The domain details of the input feature value. Like min/max, original mean or standard deviation if normalized.
+                  properties:
+                    - !ruby/object:Api::Type::Double
+                      name: 'minValue'
+                      description: |
+                        The minimum permissible value for this feature.
+                    - !ruby/object:Api::Type::Double
+                      name: 'maxValue'
+                      description: |
+                        The maximum permissible value for this feature.
+                    - !ruby/object:Api::Type::Double
+                      name: 'originalMean'
+                      description: |
+                        If this input feature has been normalized to a mean value of 0, the originalMean specifies the mean value of the domain prior to normalization.
+                    - !ruby/object:Api::Type::Double
+                      name: 'originalStddev'
+                      description: |
+                        If this input feature has been normalized to a standard deviation of 1.0, the originalStddev specifies the standard deviation of the domain prior to normalization.
+                - !ruby/object:Api::Type::String
+                  name: 'indicesTensorName'
+                  description: |
+                    Specifies the index of the values of the input tensor.
+                - !ruby/object:Api::Type::String
+                  name: 'denseShapeTensorName'
+                  description: |
+                    Specifies the shape of the values of the input if the input is a sparse representation.
+                - !ruby/object:Api::Type::Array
+                  name: 'indexFeatureMapping'
+                  required: true
+                  description: |
+                    A list of feature names for each index in the input tensor.
+                  item_type: Api::Type::String
+                - !ruby/object:Api::Type::String
+                  name: 'encodedTensorName'
+                  description: |
+                    Encoded tensor is a transformation of the input tensor.
+                - !ruby/object:Api::Type::Array
+                  name: 'encodedBaselines'
+                  description: |
+                    A list of baselines for the encoded tensor.
+                  item_type: Api::Type::Double
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'visualization'
+                  required: true
+                  description: |
+                    Visualization configurations for image explanation.
+                  properties:
+                    - !ruby/object:Api::Type::Enum
+                      name: 'type'
+                      description: |
+                        type of the image visualization. Only applicable to Integrated Gradients attribution.
+                      values:
+                        - :PIXELS
+                        - :OUTLINES
+                    - !ruby/object:Api::Type::Enum
+                      name: 'polarity'
+                      description: |
+                        Whether to only highlight pixels with positive contributions, negative or both. Defaults to POSITIVE.
+                      default_value: :BOTH
+                      values:
+                        - :POSITIVE
+                        - :NEGATIVE
+                        - :BOTH
+                    - !ruby/object:Api::Type::Enum
+                      name: 'colorMap'
+                      description: |
+                        The color scheme used for highlighting areas.
+                      values:
+                        - :PINK_GREEN
+                        - :VIRIDIS
+                        - :RED
+                        - :GREEN
+                        - :RED_GREEN
+                        - :PINK_WHITE_GREEN
+                    - !ruby/object:Api::Type::Double
+                      name: 'clipPercentUpperbound'
+                      description: |
+                        Excludes attributions above the specified percentile from the highlighted areas.
+                      default_value: 99.9
+                    - !ruby/object:Api::Type::Integer
+                      name: 'clipPercentLowerbound'
+                      description: |
+                        Excludes attributions below the specified percentile, from the highlighted areas.
+                      default_value: 62
+                    - !ruby/object:Api::Type::Enum
+                      name: 'overlayType'
+                      description: |
+                        How the original image is displayed in the visualization.
+                      values:
+                        - :NONE
+                        - :ORIGINAL
+                        - :GRAYSCALE
+                        - :MASK_BLACK
+                - !ruby/object:Api::Type::String
+                  name: 'groupName'
+                  required: true
+                  description: |
+                    name of the group that the input belongs to. Features with the same group name will be treated as one feature when computing attributions.
+          - !ruby/object:Api::Type::Map
+            name: 'outputs'
+            key_name: 'name'
+            description: The resource name of the Artifact that was created in MetadataStore when creating the Model.
+            required: true
+            value_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'outputTensorName'
+                  required: true
+                  description: |
+                    name of the output tensor.
+                - !ruby/object:Api::Type::Array
+                  name: 'indexDisplayNameMapping'
+                  description: |
+                    Static mapping between the index and display name.
+                  item_type: Api::Type::String
+                - !ruby/object:Api::Type::String
+                  name: 'displayNameMappingKey'
+                  description: |
+                    Specify a field name in the prediction to look for the display name.
+          - !ruby/object:Api::Type::String
+            name: 'featureAttributionsSchemaUri'
+            description: Points to a YAML file stored on Google Cloud Storage describing the format of the feature attributions.
+            output: true
+          - !ruby/object:Api::Type::String
+            name: 'latentSpaceSource'
+            description: name of the source to generate embeddings for example based explanations.
