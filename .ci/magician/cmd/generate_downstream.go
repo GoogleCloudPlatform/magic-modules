@@ -335,6 +335,14 @@ func createCommit(scratchRepo *source.Repo, commitMessage string, rnr exec.ExecR
 	commitSha = strings.TrimSpace(commitSha)
 	fmt.Printf("Commit sha on the branch is: `%s`\n", commitSha)
 
+	variablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s.txt", scratchRepo.Name)
+	fmt.Println("variablePath: ", variablePath)
+
+	err = rnr.WriteFile(variablePath, commitSha)
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+
 	return commitSha, err
 }
 
