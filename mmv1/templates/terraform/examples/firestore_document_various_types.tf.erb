@@ -1,0 +1,79 @@
+resource "google_project" "project" {
+  project_id = "<%= ctx[:vars]['project_id'] %>"
+  name       = "<%= ctx[:vars]['project_id'] %>"
+  org_id     = "<%= ctx[:test_env_vars]['org_id'] %>"
+}
+
+resource "time_sleep" "wait_60_seconds" {
+  depends_on = [google_project.project]
+
+  create_duration = "60s"
+}
+
+resource "google_project_service" "firestore" {
+  project = google_project.project.project_id
+  service = "firestore.googleapis.com"
+
+  # Needed for CI tests for permissions to propagate, should not be needed for actual usage
+  depends_on = [time_sleep.wait_60_seconds]
+}
+
+resource "google_firestore_database" "database" {
+  project     = google_project.project.project_id
+  name        = "(default)"
+  location_id = "nam5"
+  type        = "FIRESTORE_NATIVE"
+
+  depends_on = [google_project_service.firestore]
+}
+
+resource "google_firestore_document" "some_other_document" {
+  project     = google_project.project.project_id
+  database    = google_firestore_database.database.name
+  collection  = "somenewcollection"
+  document_id = "<%= ctx[:vars]['other_document_id'] %>"
+
+  fields = jsonencode({
+    f = { stringValue = "a field value" }
+  })
+}
+
+resource "google_firestore_document" "<%= ctx[:primary_resource_id] %>" {
+  project     = google_project.project.project_id
+  database    = google_firestore_database.database.name
+  collection  = "somenewcollection"
+  document_id = "<%= ctx[:vars]['document_id'] %>"
+  # See https://firebase.google.com/docs/firestore/reference/rpc/google.firestore.v1#google.firestore.v1.Value 
+  fields = jsonencode({
+    a_string_field = { stringValue = "a_string_value" }
+    an_integer_field = { integerValue = "54321" }
+    a_double_field = { doubleValue = 2.71828 }
+    a_bool_field = { booleanValue = true }
+    an_array_field = {
+        arrayValue = {
+            values: [
+                { stringValue = "an_array_entry" },
+                { stringValue = "another_array_entry" }
+            ]
+        }
+    }
+    a_map_field = {
+        mapValue = {
+            fields: {
+                key1 = { stringValue = "a_map_value_of_type_string" }
+                key2 = { integerValue = "2000" }
+            }
+        }
+    }
+    a_null_field = { nullValue = null }
+    a_latlng_field = {
+      geoPointValue = {
+        latitude = 12.0
+        longitude = 34.0
+      }
+    }
+    a_reference_field = {
+      referenceValue = resource.google_firestore_document.some_other_document.name
+    }
+  })
+}
