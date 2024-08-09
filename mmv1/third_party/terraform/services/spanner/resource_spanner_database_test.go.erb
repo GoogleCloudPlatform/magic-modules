@@ -653,9 +653,9 @@ resource "google_spanner_database" "database" {
 
   encryption_config {
   	kms_key_names = [
-	  "google_kms_crypto_key.example-key-us-central1.id",
-	  "google_kms_crypto_key.example-key-us-east1.id",
-	  "google_kms_crypto_key.example-key-us-east4.id",
+	  google_kms_crypto_key.example-key-us-central1.id,
+	  google_kms_crypto_key.example-key-us-east1.id,
+	  google_kms_crypto_key.example-key-us-east4.id,
 	]
   }
 
