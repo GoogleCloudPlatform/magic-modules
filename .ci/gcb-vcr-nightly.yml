@@ -2,10 +2,15 @@
 steps:
     - name: 'gcr.io/graphite-docker-images/go-plus'
       id: gcb-vcr-nightly
-      entrypoint: '/workspace/.ci/scripts/go-plus/vcr-cassette-update/vcr_cassette_update.sh'
-      secretEnv: ["GOOGLE_BILLING_ACCOUNT", "GOOGLE_CUST_ID", "GOOGLE_IDENTITY_USER", "GOOGLE_MASTER_BILLING_ACCOUNT", "GOOGLE_ORG", "GOOGLE_ORG_2", "GOOGLE_ORG_DOMAIN", "GOOGLE_PROJECT", "GOOGLE_PROJECT_NUMBER", "GOOGLE_SERVICE_ACCOUNT", "SA_KEY", "GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION"]
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
+      secretEnv: ["GOOGLE_BILLING_ACCOUNT", "GOOGLE_CUST_ID", "GOOGLE_IDENTITY_USER", "GOOGLE_MASTER_BILLING_ACCOUNT", "GOOGLE_ORG", "GOOGLE_ORG_2", "GOOGLE_ORG_DOMAIN", "GOOGLE_PROJECT", "GOOGLE_PROJECT_NUMBER", "GOOGLE_SERVICE_ACCOUNT", "SA_KEY", "GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION", "GITHUB_TOKEN_CLASSIC"]
+      env:
+        - "GOOGLE_REGION=us-central1"
+        - "GOOGLE_ZONE=us-central1-a"
+        - "USER=magician"
       args:
-          - $BUILD_ID
+        - 'vcr-cassette-update'
+        - $BUILD_ID
 
 # Long timeout to enable waiting on VCR test
 timeout: 20000s
@@ -39,3 +44,5 @@ availableSecrets:
       env: SA_KEY
     - versionName: projects/673497134629/secrets/ci-test-public-advertised-prefix-description/versions/latest
       env: GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION
+    - versionName: projects/673497134629/secrets/github-classic--repo-workflow/versions/latest
+      env: GITHUB_TOKEN_CLASSIC
