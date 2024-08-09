@@ -457,7 +457,7 @@ func testAccBigtableColumnFamilyExists(t *testing.T, table_name_space, family st
 		if err != nil {
 			return fmt.Errorf("Error retrieving table. Could not find %s in %s.", rs.Primary.Attributes["name"], rs.Primary.Attributes["instance_name"])
 		}
-		for _, data := range bigtable.FlattenColumnFamily(table.Families) {
+		for _, data := range bigtable.FlattenColumnFamily(table.FamilyInfos) {
 			if data["family"] != family {
 				return fmt.Errorf("Error checking column family. Could not find column family %s in %s.", family, rs.Primary.Attributes["name"])
 			}
