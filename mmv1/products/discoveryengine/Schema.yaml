@@ -56,9 +56,6 @@ async: !ruby/object:Api::OpAsync
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "discoveryengine_schema_basic"
-    primary_resource_id: 'basic'
-    primary_resource_name:
-      'fmt.Sprintf("tf_test_schema%s", context["random_suffix"])'
     vars:
       data_store_id: "data-store-id"
       schema_id: "schema-id"
@@ -99,3 +96,13 @@ properties:
     name: 'jsonSchema'
     description: |
       The JSON representation of the schema.
+    exactly_one_of:
+      - struct_schema
+      - json_schema
+    custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
+    custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
+    state_func:
+      'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
+      return s }'
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'validation.StringIsJSON'
