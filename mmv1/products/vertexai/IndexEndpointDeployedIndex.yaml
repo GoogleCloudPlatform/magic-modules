@@ -258,6 +258,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: deployedIndexAuthConfig
     description: If set, the authentication is enabled for the private endpoint.
+    # This field (and its nested fields) is not updatable via the mutateDeployedIndex method in the API, which is the only update method usable by this 'fine-grained' resource. This is why the field is marked as immutable despite the API docs not marking the field as immutable.
     immutable: true
     properties:
       - !ruby/object:Api::Type::NestedObject
