@@ -126,7 +126,10 @@ type Examples struct {
 	IgnoreReadExtra []string `yaml:"ignore_read_extra"`
 
 	// Whether to skip generating tests for this resource
-	SkipTest bool `yaml:"skip_test"`
+	ExcludeTest bool `yaml:"exclude_test"`
+
+	// Skip test reason for this resource
+	SkipTest string `yaml:"skip_test"`
 
 	// Whether to skip generating docs for this example
 	SkipDocs bool `yaml:"skip_docs"`
@@ -350,7 +353,7 @@ func SubstituteTestPaths(config string) string {
 // check :test_vars_overrides, type: Hash
 // check :ignore_read_extra, type: Array, item_type: String, default: []
 // check :primary_resource_name, type: String
-// check :skip_test, type: TrueClass
+// check :exclude_test, type: TrueClass
 // check :skip_import_test, type: TrueClass
 // check :skip_docs, type: TrueClass
 // check :config_path, type: String, default: "templates/terraform/examples///{name}.tf.erb"

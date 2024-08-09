@@ -53,7 +53,7 @@ examples:
   - name: 'apigee_environment_group_basic'
     vars:
       envgroup_name: 'my-envgroup'
-    skip_test: true
+    exclude_test: true
   - name: 'apigee_environment_group_basic_test'
     primary_resource_id: 'apigee_environment_group'
     test_env_vars:

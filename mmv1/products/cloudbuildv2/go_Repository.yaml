@@ -60,9 +60,9 @@ examples:
       repository_name: 'repository'
     skip_docs: true
   - name: 'cloudbuildv2_repository_ghe_doc'
-    skip_test: true
+    exclude_test: true
   - name: 'cloudbuildv2_repository_github_doc'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'location'
     type: String

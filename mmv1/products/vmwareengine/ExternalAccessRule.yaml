@@ -49,7 +49,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "vmware_engine_external_access_rule_basic"
     primary_resource_id: "vmw-engine-external-access-rule"
-    skip_test: true   # update tests will take care of create and update. The test id dependent on PC creation, which is expensive and requires node reservation.
+    exclude_test: true   # update tests will take care of create and update. The test id dependent on PC creation, which is expensive and requires node reservation.
     vars:
       name: "sample-external-access-rule"
       network_id: "sample-nw"
@@ -60,7 +60,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "vmware_engine_external_access_rule_full"
     primary_resource_id: "vmw-engine-external-access-rule"
-    skip_test: true   # update tests will take care of create and update. The test id dependent on PC creation, which is expensive and requires node reservation.
+    exclude_test: true   # update tests will take care of create and update. The test id dependent on PC creation, which is expensive and requires node reservation.
     vars:
       name: "sample-external-access-rule"
       network_id: "sample-nw"

@@ -54,20 +54,20 @@ mutex: '{{name}}'
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'access_context_manager_service_perimeter_basic'
-    skip_test: true
+    exclude_test: true
     primary_resource_id: 'service-perimeter'
     vars:
       access_level_name: 'chromeos_no_lock'
       service_perimeter_name: 'restrict_storage'
   - !ruby/object:Provider::Terraform::Examples
     name: 'access_context_manager_service_perimeter_secure_data_exchange'
-    skip_test: true
+    exclude_test: true
     primary_resource_id: 'secure-data-exchange'
     vars:
       access_level_name: 'secure_data_exchange'
   - !ruby/object:Provider::Terraform::Examples
     name: 'access_context_manager_service_perimeter_dry-run'
-    skip_test: true
+    exclude_test: true
     primary_resource_id: 'service-perimeter'
     vars:
       service_perimeter_name: 'restrict_bigquery_dryrun_storage'

@@ -31,6 +31,9 @@ import (
 )
 {{ $example := $.FirstTestExample }}
 func TestAcc{{ $.ResourceName }}IamBindingGenerated(t *testing.T) {
+	{{- if $example.SkipTest }}
+	t.Skip("$example.SkipTest")
+	{{- end }}
 	t.Parallel()
 {{ template "IamContext" $ }}
 

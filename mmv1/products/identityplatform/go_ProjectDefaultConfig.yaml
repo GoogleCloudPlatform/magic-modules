@@ -40,7 +40,7 @@ deprecation_message: '`google_identity_platform_config` is deprecated and will b
 examples:
   - name: 'identity_platform_project_default_config'
     primary_resource_id: 'default'
-    skip_test: true
+    exclude_test: true
 parameters:
 properties:
   - name: 'name'

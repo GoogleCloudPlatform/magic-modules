@@ -115,7 +115,7 @@ module Provider
       attr_reader :ignore_read_extra
 
       # Whether to skip generating tests for this resource
-      attr_reader :skip_test
+      attr_reader :exclude_test
 
       # Whether to skip generating docs for this example
       attr_reader :skip_docs
@@ -310,7 +310,7 @@ module Provider
         check :test_vars_overrides, type: Hash
         check :ignore_read_extra, type: Array, item_type: String, default: []
         check :primary_resource_name, type: String
-        check :skip_test, type: TrueClass
+        check :exclude_test, type: TrueClass
         check :skip_import_test, type: TrueClass
         check :skip_docs, type: TrueClass
         check :config_path, type: String, default: "templates/terraform/examples/#{name}.tf.erb"

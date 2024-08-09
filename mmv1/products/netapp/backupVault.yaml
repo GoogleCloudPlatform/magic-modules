@@ -39,7 +39,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'netapp_backup_vault'
     primary_resource_id: 'test_backup_vault'
-    skip_test: true
+    exclude_test: true
     vars:
       backup_vault_name: 'test-backup-vault'
 parameters:

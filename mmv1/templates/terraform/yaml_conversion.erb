@@ -413,7 +413,7 @@ custom_code:
   post_create_failure: '<%= object.convert_go_file( object.custom_code.post_create_failure )%>'
 <%    end -%>
 <%  end -%>
-<% 
+<%
 custom_diff = object.custom_diff.reject {
   |cdiff| cdiff == "tpgresource.SetLabelsDiff" || cdiff == "tpgresource.SetMetadataLabelsDiff" || cdiff == "tpgresource.SetAnnotationsDiff" || cdiff == "tpgresource.SetMetadataAnnotationsDiff"
 }
@@ -537,8 +537,8 @@ examples:
 <%      unless example.external_providers.nil? -%>
     external_providers: <%= example.external_providers %>
 <%      end -%>
-<%      unless example.skip_test.nil? -%>
-    skip_test: <%= example.skip_test %>
+<%      unless example.exclude_test.nil? -%>
+    exclude_test: <%= example.exclude_test %>
 <%      end -%>
 <%      unless example.skip_import_test.nil? -%>
     skip_import_test: <%= example.skip_import_test %>

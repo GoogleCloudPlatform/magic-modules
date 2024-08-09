@@ -41,13 +41,13 @@ examples:
     test_env_vars:
       project: 'PROJECT_NAME'
       org_id: 'ORG_ID'
-    skip_test: true
+    exclude_test: true
   - name: 'project_access_approval_active_key_version'
     primary_resource_id: 'project_access_approval'
     test_env_vars:
       project: 'PROJECT_NAME'
       org_id: 'ORG_ID'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'project_id'
     type: String

@@ -45,7 +45,7 @@ custom_code:
 examples:
   - name: 'kms_crypto_key_version_basic'
     primary_resource_id: 'example-key'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'cryptoKey'
     type: String

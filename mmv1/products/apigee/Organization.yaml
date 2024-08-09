@@ -50,7 +50,7 @@ autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'apigee_organization_cloud_basic'
-    skip_test:
+    exclude_test:
       true
   # This is a more verbose version of the above that creates all
   # the resources needed for the acceptance test.
@@ -68,7 +68,7 @@ examples:
     skip_vcr: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'apigee_organization_cloud_basic_disable_vpc_peering'
-    skip_test:
+    exclude_test:
       true
   # This is a more verbose version of the above that creates all
   # the resources needed for the acceptance test.
@@ -86,7 +86,7 @@ examples:
     skip_vcr: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'apigee_organization_cloud_full'
-    skip_test:
+    exclude_test:
       true
   # This is a more verbose version of the above that creates all
   # the resources needed for the acceptance test. While all Apigee
@@ -107,7 +107,7 @@ examples:
     skip_vcr: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'apigee_organization_cloud_full_disable_vpc_peering'
-    skip_test:
+    exclude_test:
       true
   # This is a more verbose version of the above that creates all
   # the resources needed for the acceptance test. While all Apigee

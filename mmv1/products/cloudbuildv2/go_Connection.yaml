@@ -57,9 +57,9 @@ examples:
     vars:
       connection_name: 'tf-test-connection'
   - name: 'cloudbuildv2_connection_ghe'
-    skip_test: true
+    exclude_test: true
   - name: 'cloudbuildv2_connection_github'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'name'
     type: String

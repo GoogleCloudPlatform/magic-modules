@@ -45,7 +45,7 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
-    skip_test: true
+    exclude_test: true
   - name: 'apigee_environment_keyvaluemaps_test'
     primary_resource_id: 'apigee_environment_keyvaluemaps'
     test_env_vars:

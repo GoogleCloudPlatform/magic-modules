@@ -71,7 +71,7 @@ examples:
     primary_resource_id: 'default-endpoint'
     vars:
       neg_name: 'my-lb-neg'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'globalNetworkEndpointGroup'
     type: ResourceRef

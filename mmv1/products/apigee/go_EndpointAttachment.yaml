@@ -52,7 +52,7 @@ custom_code:
 skip_sweeper: true
 examples:
   - name: 'apigee_endpoint_attachment_basic'
-    skip_test: true
+    exclude_test: true
   - name: 'apigee_endpoint_attachment_basic_test'
     primary_resource_id: 'apigee_endpoint_attachment'
     test_env_vars:

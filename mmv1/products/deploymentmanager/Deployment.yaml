@@ -73,7 +73,7 @@ examples:
       ])"
     vars:
       deployment_name: 'my-deployment'
-    skip_test: true
+    exclude_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'deployment_manager_deployment_imports'
     primary_resource_id: 'deployment'
@@ -82,7 +82,7 @@ examples:
       ])"
     vars:
       deployment_name: 'my-deployment'
-    skip_test: true
+    exclude_test: true
 custom_code:
   !ruby/object:Provider::Terraform::CustomCode  # post-create failure: Delete deployment if an invalid deployment was created
   post_create_failure: 'templates/terraform/post_create_failure/delete_on_failure.go.erb'

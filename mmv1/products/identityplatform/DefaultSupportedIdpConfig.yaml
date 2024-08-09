@@ -32,7 +32,7 @@ examples:
       'idp_config'
       # Skip test due to operating on singleton and the handwritten update test handles this
       # If we could spin up a project and enable identity platform we could test this separately
-    skip_test: true
+    exclude_test: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'

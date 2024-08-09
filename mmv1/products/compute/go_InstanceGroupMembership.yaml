@@ -78,7 +78,7 @@ examples:
       network_name: 'network'
       instance_group_name: 'instance-group'
       instance_name: 'instance'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'zone'
     type: ResourceRef

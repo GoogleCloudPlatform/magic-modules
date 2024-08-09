@@ -27,7 +27,7 @@ id_format: '{{parent}}/{{name}}'
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'iam_access_boundary_policy_basic'
-    skip_test: true
+    exclude_test: true
     primary_resource_id: 'example'
     vars:
       policy_name: 'my-ab-policy'

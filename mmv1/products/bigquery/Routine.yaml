@@ -80,7 +80,7 @@ examples:
       dataset_id: 'dataset_id'
       routine_id: 'routine_id'
   - !ruby/object:Provider::Terraform::Examples
-    skip_test: true
+    exclude_test: true
     name: 'bigquery_routine_remote_function'
     primary_resource_id: 'remote_function'
     vars:

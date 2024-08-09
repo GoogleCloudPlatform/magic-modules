@@ -46,7 +46,7 @@ examples:
     skip_docs: true
   - name: 'privateca_certificate_generated_key'
     primary_resource_id: 'default'
-    skip_test: true
+    exclude_test: true
   - name: 'privateca_certificate_with_template'
     primary_resource_id: 'default'
     vars:

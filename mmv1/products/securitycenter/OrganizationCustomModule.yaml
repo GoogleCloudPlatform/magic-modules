@@ -32,7 +32,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "scc_organization_custom_module_basic"
     primary_resource_id: "example"
-    skip_test: true
+    exclude_test: true
     vars:
       display_name: basic_custom_module
     test_env_vars:
@@ -42,7 +42,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "scc_organization_custom_module_full"
     primary_resource_id: "example"
-    skip_test: true
+    exclude_test: true
     vars:
       display_name: full_custom_module
     test_env_vars:

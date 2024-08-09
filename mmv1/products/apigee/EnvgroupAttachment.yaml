@@ -49,7 +49,7 @@ skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'apigee_environment_group_attachment_basic'
-    skip_test:
+    exclude_test:
       true
       # This is a more verbose version of the above that creates all
       # the resources needed for the acceptance test.

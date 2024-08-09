@@ -55,62 +55,62 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkehub_feature_multi_cluster_ingress'
-    skip_test: true
+    exclude_test: true
     primary_resource_name: 'fmt.Sprint("multiclusteringress")'
     primary_resource_id: 'feature'
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkehub_feature_multi_cluster_service_discovery'
-    skip_test: true
+    exclude_test: true
     primary_resource_name: 'fmt.Sprint("multiclusterservicediscovery")'
     primary_resource_id: 'feature'
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkehub_feature_anthos_service_mesh'
-    skip_test: true
+    exclude_test: true
     primary_resource_name: 'fmt.Sprint("servicemesh")'
     primary_resource_id: 'feature'
   - !ruby/object:Provider::Terraform::Examples
     name: 'enable_fleet_observability_for_default_logs_with_COPY'
-    skip_test: true
+    exclude_test: true
     primary_resource_name: 'fmt.Sprint("fleetobservability")'
     primary_resource_id: 'feature'
   - !ruby/object:Provider::Terraform::Examples
     name: 'enable_fleet_observability_for_scope_logs_with_MOVE'
-    skip_test: true
+    exclude_test: true
     primary_resource_name: 'fmt.Sprint("fleetobservability")'
     primary_resource_id: 'feature'
   - !ruby/object:Provider::Terraform::Examples
     name: 'enable_fleet_observability_for_both_default_and_scope_logs'
-    skip_test: true
+    exclude_test: true
     primary_resource_name: 'fmt.Sprint("fleetobservability")'
     primary_resource_id: 'feature'
   - !ruby/object:Provider::Terraform::Examples
     name: 'enable_fleet_default_member_config_service_mesh'
-    skip_test: true
+    exclude_test: true
     primary_resource_name: 'fmt.Sprintf("servicemesh")'
     primary_resource_id: 'feature'
   - !ruby/object:Provider::Terraform::Examples
     name: 'enable_fleet_default_member_config_configmanagement'
-    skip_test: true
+    exclude_test: true
     primary_resource_name: 'fmt.Sprintf("configmanagement")'
     primary_resource_id: 'feature'
   - !ruby/object:Provider::Terraform::Examples
     name: 'enable_fleet_default_member_config_policycontroller'
-    skip_test: true
+    exclude_test: true
     primary_resource_name: 'fmt.Sprintf("policycontroller")'
     primary_resource_id: 'feature'
   - !ruby/object:Provider::Terraform::Examples
     name: 'enable_fleet_default_member_config_policycontroller_full'
-    skip_test: true
+    exclude_test: true
     primary_resource_name: 'fmt.Sprintf("policycontroller")'
     primary_resource_id: 'feature'
   - !ruby/object:Provider::Terraform::Examples
     name: 'enable_fleet_default_member_config_policycontroller_minimal'
-    skip_test: true
+    exclude_test: true
     primary_resource_name: 'fmt.Sprintf("policycontroller")'
     primary_resource_id: 'feature'
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkehub_feature_clusterupgrade'
-    skip_test: true
+    exclude_test: true
     primary_resource_name: 'fmt.Sprint("clusterupgrade")'
     primary_resource_id: 'feature'
 autogen_async: true

@@ -64,7 +64,7 @@ examples:
       key_name: 'test-key'
       backend_name: 'my-backend-service'
       igm_name: 'my-webservers'
-    skip_test: true
+    exclude_test: true
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'backendService'

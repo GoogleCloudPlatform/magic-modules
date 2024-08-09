@@ -59,7 +59,7 @@ examples:
     skip_import_test:
       true
       # skip the test until Active Directory setup issue got resolved
-    skip_test: true
+    exclude_test: true
 parameters:
   - !ruby/object:Api::Type::String
     name: peeringId

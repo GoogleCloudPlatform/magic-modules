@@ -63,7 +63,7 @@ examples:
     primary_resource_id: 'access-level'
     vars:
       access_level_name: 'chromeos_no_lock'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'parent'
     type: String

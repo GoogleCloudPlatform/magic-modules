@@ -47,7 +47,7 @@ examples:
     primary_resource_id: 'commitment'
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_reservation_capacity_commitment_docs'
-    skip_test: true
+    exclude_test: true
 parameters:
   - !ruby/object:Api::Type::String
     name: 'capacityCommitmentId'

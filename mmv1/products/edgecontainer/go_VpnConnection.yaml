@@ -49,7 +49,7 @@ custom_code:
 examples:
   - name: 'edgecontainer_vpn_connection'
     primary_resource_id: 'default'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'name'
     type: String

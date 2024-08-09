@@ -38,6 +38,9 @@ import (
 )
 {{ range $e := $.Res.TestExamples }}
 func TestAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T) {
+	{{- if $e.SkipTest }}
+	t.Skip("$e.SkipTest")
+	{{- end }}
 	{{- if $e.SkipVcr }}
 	acctest.SkipIfVcr(t)
 	{{- end }}

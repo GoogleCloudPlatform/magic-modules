@@ -63,7 +63,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'router_nat_basic'
     primary_resource_id: 'nat'
-    skip_test: true
+    exclude_test: true
     vars:
       router_name: 'my-router'
       nat_name: 'my-router-nat'
@@ -72,7 +72,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'router_nat_manual_ips'
     primary_resource_id: 'nat_manual'
-    skip_test: true
+    exclude_test: true
     vars:
       router_name: 'my-router'
       nat_name: 'my-router-nat'
@@ -82,7 +82,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'router_nat_rules'
     primary_resource_id: 'nat_rules'
-    skip_test: true
+    exclude_test: true
     vars:
       router_name: 'my-router'
       nat_name: 'my-router-nat'
@@ -94,7 +94,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'router_nat_private'
     primary_resource_id: 'nat_type'
-    skip_test: true
+    exclude_test: true
     min_version: beta
     vars:
       router_name: 'my-router'

@@ -36,7 +36,7 @@ examples:
     name: 'kms_ekm_connection_basic'
     primary_resource_id:
       'example-ekmconnection'
-    skip_test: true
+    exclude_test: true
     vars:
       ekmconnection_name: 'ekmconnection_example'
 parameters:

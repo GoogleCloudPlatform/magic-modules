@@ -42,7 +42,7 @@ examples:
       account_name: 'bqowner'
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_dataset_cmek'
-    skip_test: true
+    exclude_test: true
     primary_resource_id: 'dataset'
     vars:
       dataset_id: 'example_dataset'
@@ -87,7 +87,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_dataset_external_reference_aws'
     primary_resource_id: 'dataset'
-    skip_test: true
+    exclude_test: true
     vars:
       dataset_id: 'example_dataset'
   - !ruby/object:Provider::Terraform::Examples

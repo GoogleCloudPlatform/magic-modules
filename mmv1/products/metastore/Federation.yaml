@@ -51,7 +51,7 @@ import_format:
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataproc_metastore_federation_basic'
-    skip_test: true  # https://github.com/hashicorp/terraform-provider-google/issues/13710
+    exclude_test: true  # https://github.com/hashicorp/terraform-provider-google/issues/13710
     primary_resource_id: 'default'
     primary_resource_name:
       'fmt.Sprintf("tf-test-metastore-fed%s", context["random_suffix"])'
@@ -60,7 +60,7 @@ examples:
       service_id: 'metastore-service'
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataproc_metastore_federation_bigquery'
-    skip_test: true  # https://github.com/hashicorp/terraform-provider-google/issues/13710
+    exclude_test: true  # https://github.com/hashicorp/terraform-provider-google/issues/13710
     primary_resource_id: 'default'
     primary_resource_name:
       'fmt.Sprintf("tf-test-metastore-fed%s", context["random_suffix"])'

@@ -49,7 +49,7 @@ examples:
       note_name: 'test-attestor-note'
       key_name: 'test-attestor-key'
       keyring_name: 'test-attestor-key-ring'
-    skip_test: true
+    exclude_test: true
 parameters:
 properties:
   - name: 'name'

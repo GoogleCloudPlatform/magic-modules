@@ -87,7 +87,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dns_managed_zone_private_forwarding'
     primary_resource_id: 'private-zone'
-    skip_test: true
+    exclude_test: true
     vars:
       zone_name: 'private-zone'
       network_1_name: 'network-1'

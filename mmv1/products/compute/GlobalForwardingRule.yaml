@@ -48,7 +48,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'external_ssl_proxy_lb_mig_backend'
     primary_resource_id: 'default'
-    skip_test: true
+    exclude_test: true
     vars:
       ssl_proxy_xlb_network: 'ssl-proxy-xlb-network'
       ssl_proxy_xlb_subnet: 'ssl-proxy-xlb-subnet'

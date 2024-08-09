@@ -73,7 +73,7 @@ examples:
     min_version: 'beta'
     vars:
       sec_policy_name: 'policyfornetworkmatch'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'region'
     type: String

@@ -50,10 +50,10 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'apigee_addons_basic'
-    skip_test: true
+    exclude_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'apigee_addons_full'
-    skip_test: true
+    exclude_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'apigee_addons_test'
     primary_resource_id: 'apigee_org_addons'

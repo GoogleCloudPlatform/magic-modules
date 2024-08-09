@@ -68,7 +68,7 @@ examples:
       ha_vpn_gateway2_name: 'ha-vpn-2'
       network2_name: 'network2'
       router2_name: 'ha-vpn-router2'
-    skip_test: true
+    exclude_test: true
     skip_docs: true
     skip_vcr: true
   - name: 'compute_ha_vpn_gateway_encrypted_interconnect'
@@ -81,7 +81,7 @@ examples:
       address2_name: 'test-address2'
       router_name: 'test-router'
       network_name: 'test-network'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'region'
     type: ResourceRef

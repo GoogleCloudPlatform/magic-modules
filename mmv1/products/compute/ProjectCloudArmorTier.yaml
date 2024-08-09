@@ -31,11 +31,11 @@ import_format: ['projects/{{project}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'compute_project_cloud_armor_tier_basic'
-    skip_test: true
+    exclude_test: true
     primary_resource_id: 'cloud_armor_tier_config'
   - !ruby/object:Provider::Terraform::Examples
     name: 'compute_project_cloud_armor_tier_project_set'
-    skip_test: true
+    exclude_test: true
     primary_resource_id: 'cloud_armor_tier_config'
     vars:
       project_id: 'your_project_id'
