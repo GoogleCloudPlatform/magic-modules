@@ -76,7 +76,7 @@ func TestAccIAM2DenyPolicy_iamDenyPolicyFolderParent(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"name", "parent"},
 			},
-      {
+			{
 				Config: testAccIAM2DenyPolicy_iamDenyPolicyFolderUpdate(context),
 			},
 			{
@@ -96,6 +96,7 @@ resource "google_project" "project" {
   name            = "tf-test%{random_suffix}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
 }
 
 resource "google_iam_deny_policy" "example" {
@@ -142,6 +143,7 @@ resource "google_project" "project" {
   name            = "tf-test%{random_suffix}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
 }
 
 resource "google_iam_deny_policy" "example" {

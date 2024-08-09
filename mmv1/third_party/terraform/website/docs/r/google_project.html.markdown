@@ -78,9 +78,6 @@ The following arguments are supported:
     See [Google Cloud Billing API Access Control](https://cloud.google.com/billing/docs/how-to/billing-access)
     for more details.
 
-* `skip_delete` - (Optional) If true, the Terraform resource can be deleted
-    without deleting the Project via the Google API. `skip_delete` is deprecated and will be removed in a future major release. The new release adds support for `deletion_policy` instead.
-
 * `labels` - (Optional) A set of key/value label pairs to assign to the project.
   **Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
 	Please refer to the field 'effective_labels' for all of the labels present on the resource.
@@ -97,6 +94,11 @@ The following arguments are supported:
     network slot available to create the project successfully, even if you set `auto_create_network` to
     `false`. Note that when `false`, Terraform enables `compute.googleapis.com` on the project to interact
     with the GCE API and currently leaves it enabled.
+
+* `deletion_policy` -  (Optional) The deletion policy for the Project. Setting PREVENT will protect the project
+   against any destroy actions caused by a terraform apply or terraform destroy. Setting ABANDON allows the resource 
+   to be abandoned rather than deleted, i.e., the Terraform resource can be deleted without deleting the Project via 
+   the Google API. Possible values are: "PREVENT", "ABANDON", "DELETE". Default value is `PREVENT`.
 
 ## Attributes Reference
 

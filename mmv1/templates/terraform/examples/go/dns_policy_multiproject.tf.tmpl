@@ -30,6 +30,7 @@ resource "google_project" "project_1" {
   project_id      = "{{index $.Vars "project_1_name"}}"
   org_id          = "{{index $.TestEnvVars "org_id"}}"
   billing_account = "{{index $.TestEnvVars "billing_account"}}"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project" "project_2" {
@@ -37,6 +38,7 @@ resource "google_project" "project_2" {
   project_id      = "{{index $.Vars "project_2_name"}}"
   org_id          = "{{index $.TestEnvVars "org_id"}}"
   billing_account = "{{index $.TestEnvVars "billing_account"}}"
+  deletion_policy = "DELETE"
 }
 
 resource "google_compute_network" "network_1_project_1" {
