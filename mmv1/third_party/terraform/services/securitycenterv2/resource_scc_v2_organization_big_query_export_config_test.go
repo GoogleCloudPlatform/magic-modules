@@ -1,6 +1,7 @@
 package securitycenterv2_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -12,11 +13,12 @@ func TestAccSecurityCenterV2OrganizationBigQueryExportConfig_basic(t *testing.T)
 	t.Parallel()
 
 	randomSuffix := acctest.RandString(t, 10)
+	dataset_id := "tf_test_" + randomSuffix
 
 	context := map[string]interface{}{
 		"org_id":        envvar.GetTestOrgFromEnv(t),
 		"random_suffix": randomSuffix,
-		"dataset_id": "tf_test_" + randomSuffix,
+		"dataset_id": dataset_id, 
 		"dataset": fmt.Sprintf("projects/%s/datasets/%s",
 					envvar.GetTestProjectFromEnv(), dataset_id),
 		"export_id": "tf-test-export-"+randomSuffix,
@@ -30,7 +32,7 @@ func TestAccSecurityCenterV2OrganizationBigQueryExportConfig_basic(t *testing.T)
 				Config: testAccSecurityCenterV2OrganizationBigQueryExportConfig_basic(context),
 			},
 			{
-				ResourceName:      "google_scc_v2_bqexport.default",
+				ResourceName:      "google_scc_v2_organization_scc_big_query_exports.default",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -38,7 +40,7 @@ func TestAccSecurityCenterV2OrganizationBigQueryExportConfig_basic(t *testing.T)
 				Config: testAccSecurityCenterV2OrganizationBigQueryExportConfig_update(context),
 			},
 			{
-				ResourceName:      "google_scc_v2_bqexport.default",
+				ResourceName:      "google_scc_v2_organization_scc_big_query_exports.default",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -61,7 +63,7 @@ resource "google_bigquery_dataset" "default" {
   }
 }
 
-resource "google_scc_v2_bqexport" "default" {
+resource "google_scc_v2_organization_scc_big_query_exports" "default" {
   export_id    = "%{export_id}"
   organization = "%{org_id}"
   dataset      = "%{dataset}"
@@ -87,7 +89,7 @@ resource "google_bigquery_dataset" "default" {
   }
 }
 
-resource "google_scc_v2_bqexport" "default" {
+resource "google_scc_v2_organization_scc_big_query_exports" "default" {
   export_id    = "%{export_id}"
   organization = "%{org_id}"
   dataset      = "%{dataset}"

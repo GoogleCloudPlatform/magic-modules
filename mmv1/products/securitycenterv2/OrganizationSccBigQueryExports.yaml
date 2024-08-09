@@ -15,7 +15,7 @@
 name: 'OrganizationSccBigQueryExports'
 base_url: organizations/{{organization}}/locations/{{location}}/bigQueryExports
 self_link: organizations/{{organization}}/locations/{{location}}/bigQueryExports/{{export_id}}
-create_url: organizations/{{organization}}/locations/{{location}}/bigQueryExports/?exportId={{export_id}}
+create_url: organizations/{{organization}}/locations/{{location}}/bigQueryExports/{{export_id}}
 update_verb: :PATCH
 update_mask: true
 import_format:
@@ -37,7 +37,6 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'scc_v2_organization_big_query_export_config_basic'
     primary_resource_id: 'custom_big_query_export_config'
-    skip_test: true
     vars:
       export_id: 'my-export'
       dataset: 'my-dataset'
