@@ -15,5 +15,5 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
         	return v
     	}
 
-	return string.Replace(v.(string), "folders/", "", 1), nil
+	return strings.Replace(v.(string), "folders/", "", 1), nil
 }
