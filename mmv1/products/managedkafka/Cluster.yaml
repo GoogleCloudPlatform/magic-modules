@@ -19,7 +19,7 @@ id_format: projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}
 name: Cluster
-description: An Apache Kafka for BigQuery cluster. Apache Kafka is a trademark owned by the Apache Software Foundation.
+description: A Managed Service for Apache Kafka cluster. Apache Kafka is a trademark owned by the Apache Software Foundation.
 min_version: beta
 update_verb: :PATCH
 update_mask: true
@@ -67,7 +67,7 @@ async: !ruby/object:Api::OpAsync
 parameters:
   - !ruby/object:Api::Type::String
     name: location
-    description: "ID of the location of the Apache Kafka for BigQuery resource. See
+    description: "ID of the location of the Kafka resource. See
       https://cloud.google.com/managed-kafka/docs/locations for a list of
       supported locations."
     url_param_only: true
