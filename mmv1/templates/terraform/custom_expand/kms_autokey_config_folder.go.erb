@@ -17,5 +17,5 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d t
         	return v
     	}
 
-	return "123456789", nil
+	return string.Replace(v.(string), "folders/", "", 1), nil
 }
