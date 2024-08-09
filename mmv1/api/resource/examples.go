@@ -128,6 +128,9 @@ type Examples struct {
 	// Whether to skip generating tests for this resource
 	ExcludeTest bool `yaml:"exclude_test"`
 
+	// Skip test reason for this resource
+	SkipTest string `yaml:"skip_test"`
+
 	// Whether to skip generating docs for this example
 	SkipDocs bool `yaml:"skip_docs"`
 
