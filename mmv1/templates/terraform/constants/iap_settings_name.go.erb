@@ -1,0 +1,28 @@
+// Suppress all diff for the field name
+func NameDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	 
+	arrayNew := strings.Split(new, "/")
+	arrayOld := strings.Split(old, "/")
+	if len(arrayNew) != len(arrayOld) {
+		return false
+	}
+	
+	serviceName := arrayNew[len(arrayNew)-1]
+	serviceId := arrayOld[len(arrayOld)-1]
+	
+	if !isServiceIdFormat(serviceName) && isServiceIdFormat(serviceId) {
+		return true
+	} 	
+	if isServiceIdFormat(serviceName) && isServiceIdFormat(serviceId) && serviceName == serviceId {
+		return true
+	}
+	if !isServiceIdFormat(serviceName) && !isServiceIdFormat(serviceId) && serviceName == serviceId { 
+		return true
+	}
+	return true
+}
+
+func isServiceIdFormat(s string) bool {
+	re := regexp.MustCompile(`^[0-9]+$`)
+	return re.MatchString(s)
+}
