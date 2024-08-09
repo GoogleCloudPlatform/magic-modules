@@ -97,7 +97,6 @@ properties:
     description: |
       The JSON representation of the schema.
     exactly_one_of:
-      - struct_schema
       - json_schema
     custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
     custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
