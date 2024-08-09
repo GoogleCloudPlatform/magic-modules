@@ -39,24 +39,24 @@ properties:
     output: true
   - !ruby/object:Api::Type::String
     name: description
-    description: 'Optional. The description of the instance. 2048 characters or less. '
+    description: 'The description of the instance. 2048 characters or less. '
   - !ruby/object:Api::Type::String
     name: state
-    description: "Output only. The instance state. \n Possible values:\n STATE_UNSPECIFIED\nCREATING\nACTIVE\nDELETING\nFAILED\nUPGRADING"
+    description: "The instance state. \n Possible values:\n STATE_UNSPECIFIED\nCREATING\nACTIVE\nDELETING\nFAILED\nUPGRADING"
     output: true
   - !ruby/object:Api::Type::String
     name: createTime
-    description: 'Output only. The time when the instance was created. '
+    description: 'The time when the instance was created. '
     output: true
   - !ruby/object:Api::Type::String
     name: updateTime
-    description: 'Output only. The time when the instance was updated. '
+    description: 'The time when the instance was updated. '
     output: true
   - !ruby/object:Api::Type::KeyValueLabels
     name: labels
     output:
     api_name:
-    description: "Optional. Cloud Labels are a flexible and lightweight mechanism for
+    description: "Cloud Labels are a flexible and lightweight mechanism for
       organizing cloud\nresources into groups that reflect a customer's organizational
       needs and\ndeployment strategies. Cloud Labels can be used to filter collections
       of\nresources. They can be used to control how resource metrics are aggregated.\nAnd
@@ -79,7 +79,7 @@ properties:
     immutable: true
   - !ruby/object:Api::Type::String
     name: daosVersion
-    description: 'Output only. The version of DAOS software running in the instance '
+    description: 'The version of DAOS software running in the instance '
     output: true
   - !ruby/object:Api::Type::Array
     name: accessPoints
@@ -89,19 +89,19 @@ properties:
     output: true
   - !ruby/object:Api::Type::String
     name: network
-    description: "Optional. Immutable. The name of the Google Compute Engine\n[VPC network](https://cloud.google.com/vpc/docs/vpc)
+    description: "Immutable. The name of the Google Compute Engine\n[VPC network](https://cloud.google.com/vpc/docs/vpc)
       to which the\ninstance is connected. "
     immutable: true
   - !ruby/object:Api::Type::String
     name: reservedIpRange
-    description: "Optional. Immutable. Contains the id of the allocated IP address range
+    description: "Immutable. Contains the id of the allocated IP address range
       associated with the\nprivate service access connection for example, \"test-default\"
       associated\nwith IP range 10.0.0.0/29. If no range id is provided all ranges will
       be\nconsidered. "
     immutable: true
   - !ruby/object:Api::Type::String
     name: effectiveReservedIpRange
-    description: "Output only. Immutable. Contains the id of the allocated IP address
+    description: "Immutable. Contains the id of the allocated IP address
       range associated with the\nprivate service access connection for example, \"test-default\"
       associated\nwith IP range 10.0.0.0/29. This field is populated by the service
       and\nand contains the value currently used by the service. "
@@ -109,12 +109,12 @@ properties:
     output: true
   - !ruby/object:Api::Type::String
     name: fileStripeLevel
-    description: "Optional. Stripe level for files.\nMIN better suited for small size
+    description: "Stripe level for files.\nMIN better suited for small size
       files.\nMAX higher throughput performance for larger files. \n Possible values:\n
       FILE_STRIPE_LEVEL_UNSPECIFIED\nFILE_STRIPE_LEVEL_MIN\nFILE_STRIPE_LEVEL_BALANCED\nFILE_STRIPE_LEVEL_MAX"
   - !ruby/object:Api::Type::String
     name: directoryStripeLevel
-    description: "Optional. Stripe level for directories.\nMIN when directory has a
+    description: "Stripe level for directories.\nMIN when directory has a
       small number of files.\nMAX when directory has a large number of files. \n Possible
       values:\n DIRECTORY_STRIPE_LEVEL_UNSPECIFIED\nDIRECTORY_STRIPE_LEVEL_MIN\nDIRECTORY_STRIPE_LEVEL_BALANCED\nDIRECTORY_STRIPE_LEVEL_MAX"
 parameters:
