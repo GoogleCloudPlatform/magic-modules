@@ -46,7 +46,7 @@ var WorkbenchInstanceProvidedMetadata = []string{
     "generate-diagnostics-bucket",
     "generate-diagnostics-file",
     "generate-diagnostics-options",
-	"google-logging-enabled",
+    "google-logging-enabled",
     "image-url",
     "install-monitoring-agent",
     "install-nvidia-driver",
