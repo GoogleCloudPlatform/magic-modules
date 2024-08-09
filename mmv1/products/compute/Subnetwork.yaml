@@ -130,7 +130,7 @@ virtual_fields:
     name: 'send_secondary_ip_range_if_empty'
     description: |
       Controls the removal behavior of secondary_ip_range.
-      When false, removing secondary_ip_range from config will not produce a diff as 
+      When false, removing secondary_ip_range from config will not produce a diff as
       the provider will default to the API's value.
       When true, the provider will treat removing secondary_ip_range as sending an
       empty list of secondary IP ranges to the API.
