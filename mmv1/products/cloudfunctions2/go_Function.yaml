@@ -511,6 +511,7 @@ properties:
         description:
           'Environment variables that shall be available during function
           execution.'
+        default_from_api: true
         diff_suppress_func: 'environmentVariablesDiffSuppress'
       - name: 'maxInstanceCount'
         type: Integer
