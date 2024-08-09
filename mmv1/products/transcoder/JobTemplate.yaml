@@ -1,0 +1,948 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: "JobTemplate"
+self_link: "projects/{{project}}/locations/{{location}}/jobTemplates/{{job_template_id}}"
+base_url: "projects/{{project}}/locations/{{location}}/jobTemplates"
+create_url: "projects/{{project}}/locations/{{location}}/jobTemplates?jobTemplateId={{job_template_id}}"
+update_verb: :PATCH
+update_mask: true
+description: "Transcoding Job Template Resource"
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    "Transcoder": "https://cloud.google.com/transcoder/docs/"
+  api: "https://cloud.google.com/transcoder/docs/reference/rest/v1/projects.locations.jobTemplates"
+import_format: ["projects/{{project}}/locations/{{location}}/jobTemplates/{{job_template_id}}"]
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "transcoder_job_template_basic"
+    primary_resource_id: "default"
+    vars:
+      job_template_id: "example-job-template"
+parameters:
+  - !ruby/object:Api::Type::String
+    name: "jobTemplateId"
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      ID to use for the Transcoding job template.
+  - !ruby/object:Api::Type::String
+    name: "location"
+    immutable: true
+    required: true
+    url_param_only: true
+    description: |
+      The location of the transcoding job template resource.
+properties:
+  - !ruby/object:Api::Type::String
+    name: "name"
+    description: |
+      The resource name of the job template.
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+    output: true
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: "labels"
+    description: |
+      The labels associated with this job template. You can use these to organize and group your job templates.
+  - !ruby/object:Api::Type::NestedObject
+    name: "config"
+    description: |
+      The configuration for this template.
+    properties:
+      - !ruby/object:Api::Type::Array
+        name: "inputs"
+        description: |
+          List of input assets stored in Cloud Storage.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: "key"
+              description: |
+                A unique key for this input. Must be specified when using advanced mapping and edit lists.
+            - !ruby/object:Api::Type::String
+              name: "uri"
+              description: |
+                URI of the media. Input files must be at least 5 seconds in duration and stored in Cloud Storage (for example, gs://bucket/inputs/file.mp4).
+                If empty, the value is populated from Job.input_uri.
+            - !ruby/object:Api::Type::NestedObject
+              name: "preprocessingConfig"
+              description: |
+                Preprocessing configurations.
+              properties:
+                - !ruby/object:Api::Type::NestedObject
+                  name: "color"
+                  description: |
+                    Color preprocessing configuration.
+                  properties:
+                    - !ruby/object:Api::Type::Integer
+                      name: "saturation"
+                      description: |
+                        Control color saturation of the video
+                      default_from_api: true
+                    - !ruby/object:Api::Type::Integer
+                      name: "contrast"
+                      description: |
+                        Control black and white contrast of the video.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::Integer
+                      name: "brightness"
+                      description: |
+                        Control brightness of the video.
+                      default_from_api: true
+                - !ruby/object:Api::Type::NestedObject
+                  name: "denoise"
+                  description: |
+                    Denoise preprocessing configuration.
+                  properties:
+                    - !ruby/object:Api::Type::Integer
+                      name: "strength"
+                      description: |
+                        Set strength of the denoise.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::String
+                      name: "tune"
+                      description: |
+                        Set the denoiser mode.
+                      default_from_api: true
+                - !ruby/object:Api::Type::NestedObject
+                  name: "deblock"
+                  description: |
+                    Deblock preprocessing configuration.
+                  properties:
+                    - !ruby/object:Api::Type::Integer
+                      name: "strength"
+                      description: |
+                        Set strength of the deblocker.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::Boolean
+                      name: "enabled"
+                      description: |
+                        Enable deblocker.
+                - !ruby/object:Api::Type::NestedObject
+                  name: "audio"
+                  description: |
+                    Audio preprocessing configuration.
+                  properties:
+                    - !ruby/object:Api::Type::Integer
+                      name: "lufs"
+                      description: |
+                        Specify audio loudness normalization in loudness units relative to full scale (LUFS).
+                      default_from_api: true
+                - !ruby/object:Api::Type::NestedObject
+                  name: "crop"
+                  description: |
+                    Specify the video cropping configuration.
+                  properties:
+                    - !ruby/object:Api::Type::Integer
+                      name: "topPixels"
+                      description: |
+                        The number of pixels to crop from the top.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::Integer
+                      name: "bottomPixels"
+                      description: |
+                        The number of pixels to crop from the bottom.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::Integer
+                      name: "leftPixels"
+                      description: |
+                        The number of pixels to crop from the left.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::Integer
+                      name: "rightPixels"
+                      description: |
+                        The number of pixels to crop from the right.
+                      default_from_api: true
+                - !ruby/object:Api::Type::NestedObject
+                  name: "pad"
+                  description: |
+                    Specify the video pad filter configuration.
+                  properties:
+                    - !ruby/object:Api::Type::Integer
+                      name: "topPixels"
+                      description: |
+                        The number of pixels to add to the top.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::Integer
+                      name: "bottomPixels"
+                      description: |
+                        The number of pixels to add to the bottom.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::Integer
+                      name: "leftPixels"
+                      description: |
+                        The number of pixels to add to the left.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::Integer
+                      name: "rightPixels"
+                      description: |
+                        The number of pixels to add to the right.
+                      default_from_api: true
+                - !ruby/object:Api::Type::NestedObject
+                  name: "deinterlace"
+                  description: |
+                    Specify the video pad filter configuration.
+                  properties:
+                    - !ruby/object:Api::Type::NestedObject
+                      name: "yadif"
+                      description: |
+                        Specifies the Yet Another Deinterlacing Filter Configuration.
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: "mode"
+                          description: |
+                            Specifies the deinterlacing mode to adopt.
+                          default_from_api: true
+                        - !ruby/object:Api::Type::Boolean
+                          name: "disableSpatialInterlacing"
+                          description: |
+                            Disable spacial interlacing.
+                        - !ruby/object:Api::Type::String
+                          name: "parity"
+                          description: |
+                            The picture field parity assumed for the input interlaced video.
+                          default_from_api: true
+                        - !ruby/object:Api::Type::Boolean
+                          name: "deinterlaceAllFrames"
+                          description: |
+                            Deinterlace all frames rather than just the frames identified as interlaced.
+                    - !ruby/object:Api::Type::NestedObject
+                      name: "bwdif"
+                      description: |
+                        Bob Weaver Deinterlacing Filter Configuration.
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: "mode"
+                          description: |
+                            Specifies the deinterlacing mode to adopt.
+                          default_from_api: true
+                        - !ruby/object:Api::Type::String
+                          name: "parity"
+                          description: |
+                            The picture field parity assumed for the input interlaced video.
+                          default_from_api: true
+                        - !ruby/object:Api::Type::Boolean
+                          name: "deinterlaceAllFrames"
+                          description: |
+                            Deinterlace all frames rather than just the frames identified as interlaced.
+      - !ruby/object:Api::Type::Array
+        name: "editList"
+        description: |
+          List of input assets stored in Cloud Storage.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: "key"
+              description: |
+                A unique key for this atom.
+            - !ruby/object:Api::Type::Array
+              name: "inputs"
+              item_type: Api::Type::String
+              description: |
+                List of values identifying files that should be used in this atom.
+            - !ruby/object:Api::Type::Time
+              name: "startTimeOffset"
+              description: |
+                Start time in seconds for the atom, relative to the input file timeline.
+            - !ruby/object:Api::Type::Time
+              name: "endTimeOffset"
+              description: |
+                End time in seconds for the atom, relative to the input file timeline.
+      - !ruby/object:Api::Type::Array
+        name: "elementaryStreams"
+        description: |
+          List of input assets stored in Cloud Storage.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: "key"
+              description: |
+                A unique key for this atom.
+            - !ruby/object:Api::Type::NestedObject
+              name: "videoStream"
+              description: |
+                Encoding of a video stream.
+              properties:
+                - !ruby/object:Api::Type::NestedObject
+                  name: "h264"
+                  description: |
+                    H264 codec settings
+                  properties:
+                    - !ruby/object:Api::Type::Integer
+                      name: "widthPixels"
+                      description: |
+                        The width of the video in pixels.
+                    - !ruby/object:Api::Type::Integer
+                      name: "heightPixels"
+                      description: |
+                        The height of the video in pixels.
+                    - !ruby/object:Api::Type::Integer
+                      name: "frameRate"
+                      description: The target video frame rate in frames per second (FPS).
+                      required: true
+                    - !ruby/object:Api::Type::Enum
+                      name: "frameRateConversionStrategy"
+                      description: |
+                        Frame rate conversion strategy for desired frame rate.
+                      default_from_api: true
+                      values:
+                        - :FRAME_RATE_CONVERSION_STRATEGY_UNSPECIFIED
+                        - :DOWNSAMPLE
+                        - :DROP_DUPLICATE
+                    - !ruby/object:Api::Type::Integer
+                      name: "bitrateBps"
+                      description: The video bitrate in bits per second.
+                      required: true
+                    - !ruby/object:Api::Type::String
+                      name: "pixelFormat"
+                      description: Pixel format to use.
+                    - !ruby/object:Api::Type::String
+                      name: "rateControlMode"
+                      description: Specify the mode.
+                    - !ruby/object:Api::Type::Integer
+                      name: "crfLevel"
+                      description: Target CRF level.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::Boolean
+                      name: "allowOpenGop"
+                      description: Specifies whether an open Group of Pictures (GOP) structure should be allowed or not.
+                    - !ruby/object:Api::Type::Boolean
+                      name: "enableTwoPass"
+                      description: Use two-pass encoding strategy to achieve better video quality.
+                    - !ruby/object:Api::Type::Integer
+                      name: "vbvSizeBits"
+                      description: Size of the Video Buffering Verifier (VBV) buffer in bits.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::Integer
+                      name: "vbvFullnessBits"
+                      description: Initial fullness of the Video Buffering Verifier (VBV) buffer in bits.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::String
+                      name: "entropyCoder"
+                      description: The entropy coder to use.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::Boolean
+                      name: "bPyramid"
+                      description: Allow B-pyramid for reference frame selection.
+                    - !ruby/object:Api::Type::Integer
+                      name: "bFrameCount"
+                      description: The number of consecutive B-frames.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::Integer
+                      name: "aqStrength"
+                      description: Specify the intensity of the adaptive quantizer (AQ).
+                      default_from_api: true
+                    - !ruby/object:Api::Type::String
+                      name: "profile"
+                      description: Enforces the specified codec profile.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::String
+                      name: "tune"
+                      description: Enforces the specified codec tune.
+                    - !ruby/object:Api::Type::String
+                      name: "preset"
+                      description: Enforces the specified codec preset.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::Integer
+                      name: "gopFrameCount"
+                      description: Select the GOP size based on the specified frame count.
+                    - !ruby/object:Api::Type::Time
+                      name: "gopDuration"
+                      description: Select the GOP size based on the specified duration.
+                - !ruby/object:Api::Type::NestedObject
+                  name: "h265"
+                  description: |
+                    H265 codec settings
+                  properties:
+                    - !ruby/object:Api::Type::Integer
+                      name: "widthPixels"
+                      description: |
+                        The width of the video in pixels.
+                    - !ruby/object:Api::Type::Integer
+                      name: "heightPixels"
+                      description: |
+                        The height of the video in pixels.
+                    - !ruby/object:Api::Type::Integer
+                      name: "frameRate"
+                      description: The target video frame rate in frames per second (FPS).
+                      required: true
+                    - !ruby/object:Api::Type::Enum
+                      name: "frameRateConversionStrategy"
+                      description: |
+                        Frame rate conversion strategy for desired frame rate.
+                      default_from_api: true
+                      values:
+                        - :FRAME_RATE_CONVERSION_STRATEGY_UNSPECIFIED
+                        - :DOWNSAMPLE
+                        - :DROP_DUPLICATE
+                    - !ruby/object:Api::Type::Integer
+                      name: "bitrateBps"
+                      description: The video bitrate in bits per second.
+                      required: true
+                    - !ruby/object:Api::Type::String
+                      name: "pixelFormat"
+                      description: Pixel format to use.
+                    - !ruby/object:Api::Type::String
+                      name: "rateControlMode"
+                      description: Specify the mode.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::Integer
+                      name: "crfLevel"
+                      description: Target CRF level.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::Boolean
+                      name: "allowOpenGop"
+                      description: Specifies whether an open Group of Pictures (GOP) structure should be allowed or not.
+                    - !ruby/object:Api::Type::Boolean
+                      name: "enableTwoPass"
+                      description: Use two-pass encoding strategy to achieve better video quality.
+                    - !ruby/object:Api::Type::Integer
+                      name: "vbvSizeBits"
+                      description: Size of the Video Buffering Verifier (VBV) buffer in bits.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::Integer
+                      name: "vbvFullnessBits"
+                      description: Initial fullness of the Video Buffering Verifier (VBV) buffer in bits.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::String
+                      name: "entropyCoder"
+                      description: The entropy coder to use.
+                    - !ruby/object:Api::Type::Boolean
+                      name: "bPyramid"
+                      description: Allow B-pyramid for reference frame selection.
+                    - !ruby/object:Api::Type::Integer
+                      name: "bFrameCount"
+                      description: The number of consecutive B-frames.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::Integer
+                      name: "aqStrength"
+                      description: Specify the intensity of the adaptive quantizer (AQ).
+                      default_from_api: true
+                    - !ruby/object:Api::Type::String
+                      name: "profile"
+                      description: Enforces the specified codec profile.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::String
+                      name: "tune"
+                      description: Enforces the specified codec tune.
+                    - !ruby/object:Api::Type::String
+                      name: "preset"
+                      description: Enforces the specified codec preset.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::Integer
+                      name: "gopFrameCount"
+                      description: Select the GOP size based on the specified frame count.
+                    - !ruby/object:Api::Type::Time
+                      name: "gopDuration"
+                      description: Select the GOP size based on the specified duration.
+                - !ruby/object:Api::Type::NestedObject
+                  name: "vp9"
+                  description: |
+                    VP9 codec settings
+                  properties:
+                    - !ruby/object:Api::Type::Integer
+                      name: "widthPixels"
+                      description: |
+                        The width of the video in pixels.
+                    - !ruby/object:Api::Type::Integer
+                      name: "heightPixels"
+                      description: |
+                        The height of the video in pixels.
+                    - !ruby/object:Api::Type::Integer
+                      name: "frameRate"
+                      description: The target video frame rate in frames per second (FPS).
+                      required: true
+                    - !ruby/object:Api::Type::Enum
+                      name: "frameRateConversionStrategy"
+                      description: |
+                        Frame rate conversion strategy for desired frame rate.
+                      default_from_api: true
+                      values:
+                        - :FRAME_RATE_CONVERSION_STRATEGY_UNSPECIFIED
+                        - :DOWNSAMPLE
+                        - :DROP_DUPLICATE
+                    - !ruby/object:Api::Type::Integer
+                      name: "bitrateBps"
+                      description: The video bitrate in bits per second.
+                      required: true
+                    - !ruby/object:Api::Type::String
+                      name: "pixelFormat"
+                      description: Pixel format to use.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::String
+                      name: "profile"
+                      description: Enforces the specified codec profile.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::Integer
+                      name: "gopFrameCount"
+                      description: Select the GOP size based on the specified frame count.
+                    - !ruby/object:Api::Type::Time
+                      name: "gopDuration"
+                      description: Select the GOP size based on the specified duration.
+                    - !ruby/object:Api::Type::Integer
+                      name: crfLevel
+                      description: |-
+                        Target CRF level. Must be between 10 and 36, where 10 is the highest
+                        quality and 36 is the most efficient compression. The default is 21.
+                        **Note:** This field is not supported.
+                    - !ruby/object:Api::Type::String
+                      name: rateControlMode
+                      description: |-
+                        Specify the mode. The default is `vbr`. Supported rate control modes: -
+                        `vbr` - variable bitrate
+            - !ruby/object:Api::Type::NestedObject
+              name: "audioStream"
+              description: |
+                Encoding of an audio stream.
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: "codec"
+                  description: The codec for this audio stream.
+                  default_from_api: true
+                - !ruby/object:Api::Type::Integer
+                  name: "bitrateBps"
+                  description: Audio bitrate in bits per second.
+                  required: true
+                - !ruby/object:Api::Type::Integer
+                  name: "channelCount"
+                  description: Number of audio channels.
+                  default_from_api: true
+                - !ruby/object:Api::Type::Array
+                  name: "channelLayout"
+                  item_type: Api::Type::String
+                  description: |
+                    A list of channel names specifying layout of the audio channels.
+                  default_from_api: true
+                - !ruby/object:Api::Type::NestedObject
+                  name: "mapping"
+                  description: |
+                    The mapping for the JobConfig.edit_list atoms with audio EditAtom.inputs.
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: "atomKey"
+                      description: |
+                        The EditAtom.key that references the atom with audio inputs in the JobConfig.edit_list.
+                      required: true
+                    - !ruby/object:Api::Type::String
+                      name: "inputKey"
+                      description: |
+                        The Input.key that identifies the input file.
+                      required: true
+                    - !ruby/object:Api::Type::Integer
+                      name: "inputTrack"
+                      description: |
+                        The zero-based index of the track in the input file.
+                      required: true
+                    - !ruby/object:Api::Type::Integer
+                      name: "inputChannel"
+                      description: |
+                        The zero-based index of the channel in the input audio stream.
+                      required: true
+                    - !ruby/object:Api::Type::Integer
+                      name: "outputChannel"
+                      description: |
+                        The zero-based index of the channel in the output audio stream.
+                      required: true
+                    - !ruby/object:Api::Type::Integer
+                      name: "gainDb"
+                      description: |
+                        Audio volume control in dB. Negative values decrease volume, positive values increase.
+                - !ruby/object:Api::Type::Integer
+                  name: "sampleRateHertz"
+                  description: |
+                    The audio sample rate in Hertz.
+                - !ruby/object:Api::Type::String
+                  name: "languageCode"
+                  description: |
+                    The BCP-47 language code, such as en-US or sr-Latn. For more information, see https://www.unicode.org/reports/tr35/#Unicode_locale_identifier.
+                - !ruby/object:Api::Type::String
+                  name: "displayName"
+                  description: |
+                    The name for this particular audio stream that will be added to the HLS/DASH manifest.
+            - !ruby/object:Api::Type::NestedObject
+              name: "textStream"
+              description: |
+                Encoding of a text stream.
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: "codec"
+                  description: The codec for this text stream.
+                  default_from_api: true
+                - !ruby/object:Api::Type::String
+                  name: "languageCode"
+                  description: The BCP-47 language code, such as en-US or sr-Latn. For more information, see https://www.unicode.org/reports/tr35/#Unicode_locale_identifier.
+                - !ruby/object:Api::Type::NestedObject
+                  name: "mapping"
+                  description: |
+                    The mapping for the JobConfig.edit_list atoms with text EditAtom.inputs.
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: "atomKey"
+                      description: |
+                        The EditAtom.key that references atom with text inputs in the JobConfig.edit_list.
+                      required: true
+                    - !ruby/object:Api::Type::String
+                      name: "inputKey"
+                      description: |
+                        The Input.key that identifies the input file.
+                      required: true
+                    - !ruby/object:Api::Type::Integer
+                      name: "inputTrack"
+                      description: |
+                        The zero-based index of the track in the input file.
+                      required: true
+                - !ruby/object:Api::Type::String
+                  name: "displayName"
+                  description: |
+                    The name for this particular text stream that will be added to the HLS/DASH manifest.
+      - !ruby/object:Api::Type::Array
+        name: "muxStreams"
+        description: |
+          Multiplexing settings for output stream.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: "key"
+              description: |
+                A unique key for this multiplexed stream.
+            - !ruby/object:Api::Type::String
+              name: "fileName"
+              description: |
+                The name of the generated file.
+              default_from_api: true
+            - !ruby/object:Api::Type::String
+              name: "container"
+              description: |
+                The container format.
+              default_from_api: true
+            - !ruby/object:Api::Type::Array
+              name: "elementaryStreams"
+              item_type: Api::Type::String
+              description: |
+                List of ElementaryStream.key values multiplexed in this stream.
+            - !ruby/object:Api::Type::NestedObject
+              name: "segmentSettings"
+              description: |
+                Segment settings for ts, fmp4 and vtt.
+              properties:
+                - !ruby/object:Api::Type::Time
+                  name: "segmentDuration"
+                  description: |
+                    Duration of the segments in seconds
+                - !ruby/object:Api::Type::Boolean
+                  name: "individualSegments"
+                  description: |
+                    Whether to create an individual segment file or not.
+            - !ruby/object:Api::Type::String
+              name: "encryptionId"
+              description: |
+                Identifier of the encryption configuration to use.
+            - !ruby/object:Api::Type::NestedObject
+              name: "fmp4"
+              description: |
+                fmp4 container configuration.
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: "codecTag"
+                  description: |
+                    Specify the codec tag string that will be used in the media bitstream.
+                  default_from_api: true
+      - !ruby/object:Api::Type::Array
+        name: "manifests"
+        description: |
+          Manifest configuration.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: "fileName"
+              description: |
+                The name of the generated file.
+              default_from_api: true
+            - !ruby/object:Api::Type::Enum
+              name: "type"
+              required: true
+              description: |
+                Type of the manifest.
+              default_from_api: true
+              values:
+                - :MANIFEST_TYPE_UNSPECIFIED
+                - :HLS
+                - :DASH
+            - !ruby/object:Api::Type::Array
+              name: "muxStreams"
+              item_type: Api::Type::String
+              description: |
+                List of user supplied MuxStream.key values that should appear in this manifest.
+            - !ruby/object:Api::Type::NestedObject
+              name: "dash"
+              description: |
+                DASH manifest configuration.
+              properties:
+                - !ruby/object:Api::Type::Enum
+                  name: "segmentReferenceScheme"
+                  description: |
+                    The segment reference scheme for a DASH manifest.
+                  default_from_api: true
+                  values:
+                    - :SEGMENT_REFERENCE_SCHEME_UNSPECIFIED
+                    - :SEGMENT_LIST
+                    - :SEGMENT_TEMPLATE_NUMBER
+      - !ruby/object:Api::Type::NestedObject
+        name: "output"
+        description: |
+          Location of output file(s) in a Cloud Storage bucket.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: "uri"
+            description: |
+              URI for the output file(s). For example, gs://my-bucket/outputs/.
+            default_from_api: true
+      - !ruby/object:Api::Type::Array
+        name: "adBreaks"
+        description: |
+          Ad break.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Time
+              name: "startTimeOffset"
+              description: |
+                Start time in seconds for the ad break, relative to the output file timeline
+              default_from_api: true
+      - !ruby/object:Api::Type::NestedObject
+        name: "pubsubDestination"
+        description: |
+          Pub/Sub destination.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: "topic"
+            description: |
+              The name of the Pub/Sub topic to publish job completion notification to. For example: projects/{project}/topics/{topic}.
+      - !ruby/object:Api::Type::Array
+        name: "spriteSheets"
+        description: |
+          List of output sprite sheets. Spritesheets require at least one VideoStream in the Jobconfig.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: "format"
+              description: |
+                Format type.
+              default_from_api: true
+            - !ruby/object:Api::Type::String
+              name: "filePrefix"
+              description: |
+                File name prefix for the generated sprite sheets.
+              required: true
+            - !ruby/object:Api::Type::Integer
+              name: "spriteWidthPixels"
+              description: |
+                The width of sprite in pixels.
+              required: true
+            - !ruby/object:Api::Type::Integer
+              name: "spriteHeightPixels"
+              description: |
+                The height of sprite in pixels.
+              required: true
+            - !ruby/object:Api::Type::Integer
+              name: "columnCount"
+              description: |
+                The maximum number of sprites per row in a sprite sheet.
+              default_from_api: true
+            - !ruby/object:Api::Type::Integer
+              name: "rowCount"
+              description: |
+                The maximum number of rows per sprite sheet.
+              default_from_api: true
+            - !ruby/object:Api::Type::Time
+              name: "startTimeOffset"
+              description: |
+                Start time in seconds, relative to the output file timeline.
+              default_from_api: true
+            - !ruby/object:Api::Type::Time
+              name: "endTimeOffset"
+              description: |
+                End time in seconds, relative to the output file timeline.
+              default_from_api: true
+            - !ruby/object:Api::Type::Integer
+              name: "quality"
+              description: |
+                The quality of the generated sprite sheet.
+              default_from_api: true
+            - !ruby/object:Api::Type::Integer
+              name: "totalCount"
+              description: |
+                Total number of sprites.
+              default_from_api: true
+            - !ruby/object:Api::Type::Time
+              name: "interval"
+              description: |
+                Starting from 0s, create sprites at regular intervals. Specify the interval value in seconds.
+              default_from_api: true
+      - !ruby/object:Api::Type::Array
+        name: "overlays"
+        description: |
+          List of overlays on the output video, in descending Z-order.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::NestedObject
+              name: "image"
+              description: |
+                Image overlay.
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: "uri"
+                  description: |
+                    URI of the image in Cloud Storage. For example, gs://bucket/inputs/image.png.
+                  required: true
+                - !ruby/object:Api::Type::NestedObject
+                  name: "resolution"
+                  description: |
+                    2D normalized coordinates.
+                  properties:
+                    - !ruby/object:Api::Type::Integer
+                      name: "x"
+                      description: |
+                        Normalized x coordinate.
+                    - !ruby/object:Api::Type::Integer
+                      name: "y"
+                      description: |
+                        Normalized y coordinate.
+                - !ruby/object:Api::Type::Integer
+                  name: "alpha"
+                  description: |
+                    Target image opacity.
+            - !ruby/object:Api::Type::Array
+              name: "animations"
+              description: |
+                List of animations. The list should be chronological, without any time overlap.
+              item_type: !ruby/object:Api::Type::NestedObject
+                properties:
+                  - !ruby/object:Api::Type::NestedObject
+                    name: "animationStatic"
+                    description: |
+                      Display static overlay object.
+                    properties:
+                      - !ruby/object:Api::Type::NestedObject
+                        name: "xy"
+                        description: |
+                          Normalized coordinates based on output video resolution.
+                        properties:
+                          - !ruby/object:Api::Type::Integer
+                            name: "x"
+                            description: |
+                              Normalized x coordinate.
+                          - !ruby/object:Api::Type::Integer
+                            name: "y"
+                            description: |
+                              Normalized y coordinate.
+                      - !ruby/object:Api::Type::Time
+                        name: "startTimeOffset"
+                        description: |
+                          The time to start displaying the overlay object, in seconds
+                        default_from_api: true
+                  - !ruby/object:Api::Type::NestedObject
+                    name: "animationFade"
+                    description: |
+                      Display overlay object with fade animation.
+                    properties:
+                      - !ruby/object:Api::Type::NestedObject
+                        name: "xy"
+                        description: |
+                          Normalized coordinates based on output video resolution.
+                        properties:
+                          - !ruby/object:Api::Type::Integer
+                            name: "x"
+                            description: |
+                              Normalized x coordinate.
+                          - !ruby/object:Api::Type::Integer
+                            name: "y"
+                            description: |
+                              Normalized y coordinate.
+                      - !ruby/object:Api::Type::Time
+                        name: "startTimeOffset"
+                        description: |
+                          The time to start the fade animation, in seconds.
+                        default_from_api: true
+                      - !ruby/object:Api::Type::Time
+                        name: "endTimeOffset"
+                        description: |
+                          The time to end the fade animation, in seconds.
+                        default_from_api: true
+                      - !ruby/object:Api::Type::Enum
+                        name: fadeType
+                        description: |
+                          Required. Type of fade animation: `FADE_IN` or `FADE_OUT`.
+                          The possible values are:
+
+                          * `FADE_TYPE_UNSPECIFIED`: The fade type is not specified.
+
+                          * `FADE_IN`: Fade the overlay object into view.
+
+                          * `FADE_OUT`: Fade the overlay object out of view.
+                        required: true
+                        values:
+                          - :FADE_TYPE_UNSPECIFIED
+                          - :FADE_IN
+                          - :FADE_OUT
+                  - !ruby/object:Api::Type::NestedObject
+                    name: "animationEnd"
+                    description: |
+                      End previous animation.
+                    properties:
+                      - !ruby/object:Api::Type::Time
+                        name: "startTimeOffset"
+                        description: |
+                          The time to end overlay object, in seconds.
+                        default_from_api: true
+      - !ruby/object:Api::Type::Array
+        name: "encryptions"
+        description: |
+          List of encryption configurations for the content.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: "id"
+              description: |
+                Identifier for this set of encryption options.
+              required: true
+            - !ruby/object:Api::Type::NestedObject
+              name: "sampleAes"
+              description: |
+                Configuration for SAMPLE-AES encryption.
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: "scheme"
+                  description: |
+                    Specify the encryption scheme.
+            - !ruby/object:Api::Type::NestedObject
+              name: "mpegCenc"
+              description: |
+                Configuration for MPEG Common Encryption (MPEG-CENC).
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: "scheme"
+                  description: |
+                    Specify the encryption scheme.
+                  required: true
+            - !ruby/object:Api::Type::NestedObject
+              name: "secretManagerKeySource"
+              description: |
+                Configuration for secrets stored in Google Secret Manager.
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: "secretVersion"
+                  description: |
+                    The name of the Secret Version containing the encryption key in the following format: projects/{project}/secrets/{secret_id}/versions/{version_number}.
+                  required: true
