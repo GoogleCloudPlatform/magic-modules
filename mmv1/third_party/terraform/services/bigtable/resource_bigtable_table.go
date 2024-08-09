@@ -10,10 +10,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
+
+	btapb "google.golang.org/genproto/googleapis/bigtable/admin/v2"
 )
 
 func ResourceBigtableTable() *schema.Resource {
@@ -58,6 +61,11 @@ func ResourceBigtableTable() *schema.Resource {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: `The name of the column family.`,
+						},
+						"type": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: `The type of the column family.`,
 						},
 					},
 				},
@@ -212,7 +220,7 @@ func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error
 	}
 
 	// Set the column families if given.
-	columnFamilies := make(map[string]bigtable.GCPolicy)
+	columnFamilies := make(map[string]bigtable.Family)
 	if d.Get("column_family.#").(int) > 0 {
 		columns := d.Get("column_family").(*schema.Set).List()
 
@@ -220,12 +228,19 @@ func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error
 			column := co.(map[string]interface{})
 
 			if v, ok := column["family"]; ok {
-				// By default, there is no GC rules.
-				columnFamilies[v.(string)] = bigtable.NoGcPolicy()
+				valueType, err := getType(column["type"])
+				if err != nil {
+					return err
+				}
+				columnFamilies[v.(string)] = bigtable.Family{
+					// By default, there is no GC rules.
+					GCPolicy:  bigtable.NoGcPolicy(),
+					ValueType: valueType,
+				}
 			}
 		}
 	}
-	tblConf.Families = columnFamilies
+	tblConf.ColumnFamilies = columnFamilies
 
 	// This method may return before the table's creation is complete - we may need to wait until
 	// it exists in the future.
@@ -281,7 +296,7 @@ func resourceBigtableTableRead(d *schema.ResourceData, meta interface{}) error {
 	if err := d.Set("project", project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
 	}
-	if err := d.Set("column_family", FlattenColumnFamily(table.Families)); err != nil {
+	if err := d.Set("column_family", FlattenColumnFamily(table.FamilyInfos)); err != nil {
 		return fmt.Errorf("Error setting column_family: %s", err)
 	}
 
@@ -359,7 +374,10 @@ func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error
 
 		if v, ok := column["family"]; ok {
 			log.Printf("[DEBUG] adding column family %q", v)
-			if err := c.CreateColumnFamily(ctx, name, v.(string)); err != nil {
+			config := bigtable.Family{
+				ValueType: column["type"].(bigtable.Type),
+			}
+			if err := c.CreateColumnFamilyWithConfig(ctx, name, v.(string), config); err != nil {
 				return fmt.Errorf("Error creating column family %q: %s", v, err)
 			}
 		}
@@ -485,12 +503,13 @@ func resourceBigtableTableDestroy(d *schema.ResourceData, meta interface{}) erro
 	return nil
 }
 
-func FlattenColumnFamily(families []string) []map[string]interface{} {
+func FlattenColumnFamily(families []bigtable.FamilyInfo) []map[string]interface{} {
 	result := make([]map[string]interface{}, 0, len(families))
 
 	for _, f := range families {
 		data := make(map[string]interface{})
-		data["family"] = f
+		data["family"] = f.Name
+		//data["type"] = f.ValueType
 		result = append(result, data)
 	}
 
@@ -516,4 +535,39 @@ func resourceBigtableTableImport(d *schema.ResourceData, meta interface{}) ([]*s
 	d.SetId(id)
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func getType(input interface{}) (bigtable.Type, error) {
+	if input == nil || input.(string) == "" {
+		return nil, nil
+	}
+	inputType := input.(string)
+	switch inputType {
+	case "intsum":
+		return bigtable.AggregateType{
+			Input:      bigtable.Int64Type{},
+			Aggregator: bigtable.SumAggregator{},
+		}, nil
+	case "intmin":
+		return bigtable.AggregateType{
+			Input:      bigtable.Int64Type{},
+			Aggregator: bigtable.MinAggregator{},
+		}, nil
+	case "intmax":
+		return bigtable.AggregateType{
+			Input:      bigtable.Int64Type{},
+			Aggregator: bigtable.MaxAggregator{},
+		}, nil
+	case "inthll":
+		return bigtable.AggregateType{
+			Input:      bigtable.Int64Type{},
+			Aggregator: bigtable.HllppUniqueCountAggregator{},
+		}, nil
+	}
+	unm := protojson.UnmarshalOptions{}
+	output := &btapb.Type{}
+	if err := unm.Unmarshal([]byte(inputType), output); err != nil {
+		return nil, err
+	}
+	return bigtable.ProtoToType(output), nil
 }

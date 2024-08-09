@@ -90,6 +90,57 @@ func TestAccBigtableTable_family(t *testing.T) {
 	})
 }
 
+func TestAccBigtableTable_familyType(t *testing.T) {
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	family := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigtableTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigtableTable_familyType(instanceName, tableName, family, "intsum"),
+			},
+			{
+				ResourceName:      "google_bigtable_table.table",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccBigtableTable_familyType(instanceName, tableName, family, `{
+					"aggregate_type": {
+						"sum": {},
+						"input_type": {
+							"int64_type": {
+								"big_endian_bytes": {}
+							}
+						}
+					}
+				}`),
+			},
+			{
+				ResourceName:      "google_bigtable_table.table",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccBigtableTable_familyType(instanceName, tableName, family, "intsum"),
+			},
+			{
+				ResourceName:      "google_bigtable_table.table",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccBigtableTable_deletion_protection_protected(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
 	acctest.SkipIfVcr(t)
@@ -457,7 +508,7 @@ func testAccBigtableColumnFamilyExists(t *testing.T, table_name_space, family st
 		if err != nil {
 			return fmt.Errorf("Error retrieving table. Could not find %s in %s.", rs.Primary.Attributes["name"], rs.Primary.Attributes["instance_name"])
 		}
-		for _, data := range bigtable.FlattenColumnFamily(table.Families) {
+		for _, data := range bigtable.FlattenColumnFamily(table.FamilyInfos) {
 			if data["family"] != family {
 				return fmt.Errorf("Error checking column family. Could not find column family %s in %s.", family, rs.Primary.Attributes["name"])
 			}
@@ -588,6 +639,32 @@ resource "google_bigtable_table" "table" {
   }
 }
 `, instanceName, instanceName, tableName, family)
+}
+
+func testAccBigtableTable_familyType(instanceName, tableName, family, familyType string) string {
+	return fmt.Sprintf(`
+resource "google_bigtable_instance" "instance" {
+  name = "%s"
+
+  cluster {
+    cluster_id = "%s"
+    zone       = "us-central1-b"
+  }
+
+  instance_type = "DEVELOPMENT"
+  deletion_protection = false
+}
+
+resource "google_bigtable_table" "table" {
+  name          = "%s"
+  instance_name = google_bigtable_instance.instance.name
+
+  column_family {
+    family = "%s"
+	type = "%s"
+  }
+}
+`, instanceName, instanceName, tableName, family, familyType)
 }
 
 func testAccBigtableTable_deletion_protection(instanceName, tableName, deletionProtection, family string) string {
