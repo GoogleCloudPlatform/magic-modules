@@ -84,7 +84,7 @@ examples:
     primary_resource_id: 'service-perimeter-dry-run-resource'
     vars:
       service_perimeter_name: 'restrict_all'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'perimeterName'
     type: ResourceRef

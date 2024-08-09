@@ -36,7 +36,7 @@ examples:
     name: "logging_organization_settings_all"
     primary_resource_id: "example"
     # Covered by update test.
-    skip_test: true
+    exclude_test: true
     vars:
       key_name: "kms-key"
     test_env_vars:

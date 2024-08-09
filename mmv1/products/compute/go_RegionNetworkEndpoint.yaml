@@ -87,7 +87,7 @@ examples:
       subnetwork_name: 'subnetwork'
       instance_name: 'instance'
       neg_name: 'portmap-neg'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'region'
     type: ResourceRef

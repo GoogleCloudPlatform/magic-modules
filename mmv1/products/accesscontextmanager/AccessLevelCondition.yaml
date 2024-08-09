@@ -71,7 +71,7 @@ mutex: '{{access_level}}'
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'access_context_manager_access_level_condition_basic'
-    skip_test: true
+    exclude_test: true
     primary_resource_id: 'access-level-condition'
     vars:
       access_level_name: 'chromeos_no_lock'

@@ -72,7 +72,7 @@ examples:
     name: 'region_security_policy_rule_with_network_match'
     # it needs to run synchronously because a region can have only one google_compute_network_edge_security_service.
     # there is a robust handwritten test which covers this scenario.
-    skip_test: true
+    exclude_test: true
     primary_resource_id: 'policy_rule_network_match'
     min_version: 'beta'
     vars:

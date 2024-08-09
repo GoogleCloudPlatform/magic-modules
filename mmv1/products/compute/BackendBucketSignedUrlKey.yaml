@@ -64,7 +64,7 @@ examples:
       key_name: 'test-key'
       backend_name: 'test-signed-backend-bucket'
       bucket_name: 'test-storage-bucket'
-    skip_test: true
+    exclude_test: true
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'backendBucket'

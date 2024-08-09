@@ -94,7 +94,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'datastream_stream_postgresql'
     primary_resource_id: 'default'
-    skip_test: true
+    exclude_test: true
     vars:
       stream_id: 'my-stream'
       source_connection_profile_id: 'source-profile'
@@ -102,7 +102,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'datastream_stream_oracle'
     primary_resource_id: 'default'
-    skip_test: true
+    exclude_test: true
     vars:
       stream_id: 'my-stream'
       source_connection_profile_id: 'source-profile'
@@ -110,7 +110,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'datastream_stream_sql_server'
     primary_resource_id: 'default'
-    skip_test: true
+    exclude_test: true
     vars:
       database_name: 'db'
       database_password: 'password'

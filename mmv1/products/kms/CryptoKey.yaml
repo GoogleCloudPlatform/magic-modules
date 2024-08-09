@@ -43,11 +43,11 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'kms_crypto_key_basic'
     primary_resource_id: 'example-key'
-    skip_test: true
+    exclude_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'kms_crypto_key_asymmetric_sign'
     primary_resource_id: 'example-asymmetric-sign-key'
-    skip_test: true
+    exclude_test: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_delete: templates/terraform/custom_delete/kms_crypto_key.erb
   custom_import: templates/terraform/custom_import/kms_crypto_key.go.erb

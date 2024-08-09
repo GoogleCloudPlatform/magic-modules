@@ -55,7 +55,7 @@ examples:
       deletion_protection: 'true'
     test_vars_overrides:
       'deletion_protection': 'false'
-    skip_test: true
+    exclude_test: true
   - name: 'compute_interconnect_basic_test'
     primary_resource_id: 'example-interconnect'
     vars:

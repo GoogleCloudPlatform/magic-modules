@@ -74,7 +74,7 @@ examples:
       keyring_name: 'example-keyring'
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataproc_metastore_service_cmek_example'
-    skip_test: true
+    exclude_test: true
     primary_resource_id: 'default'
     vars:
       metastore_service_name: 'example-service'
@@ -83,7 +83,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataproc_metastore_service_endpoint'
     skip_docs: true
-    skip_test: true  # https://github.com/hashicorp/terraform-provider-google/issues/13710
+    exclude_test: true  # https://github.com/hashicorp/terraform-provider-google/issues/13710
     primary_resource_id: 'endpoint'
     vars:
       metastore_service_name: 'metastore-endpoint'
@@ -101,7 +101,7 @@ examples:
       metastore_service_name: 'metastore-metadata'
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataproc_metastore_service_private_service_connect'
-    skip_test: true
+    exclude_test: true
     primary_resource_id: default
     vars:
       metastore_service_name: 'metastore-srv'
@@ -109,7 +109,7 @@ examples:
       subnet_name: 'my-subnetwork'
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataproc_metastore_service_private_service_connect_custom_routes'
-    skip_test: true
+    exclude_test: true
     min_version: beta
     primary_resource_id: default
     vars:

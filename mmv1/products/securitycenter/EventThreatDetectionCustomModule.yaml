@@ -31,7 +31,7 @@ examples:
     name: "scc_event_threat_detection_custom_module"
     primary_resource_id: "example"
     # Has a handwritten update test
-    skip_test: true
+    exclude_test: true
     vars:
       display_name: basic_custom_module
       type: 'CONFIGURABLE_BAD_IP'

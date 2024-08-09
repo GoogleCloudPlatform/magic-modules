@@ -30,23 +30,23 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'org_policy_policy_enforce'
     primary_resource_id: 'primary'
-    skip_test: true
+    exclude_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'org_policy_policy_folder'
     primary_resource_id: 'primary'
-    skip_test: true
+    exclude_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'org_policy_policy_organization'
     primary_resource_id: 'primary'
-    skip_test: true
+    exclude_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'org_policy_policy_project'
     primary_resource_id: 'primary'
-    skip_test: true
+    exclude_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'org_policy_policy_dry_run_spec'
     primary_resource_id: 'primary'
-    skip_test: true
+    exclude_test: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/org_policy_policy.go.erb
   encoder: templates/terraform/encoders/org_policy_policy.go.erb

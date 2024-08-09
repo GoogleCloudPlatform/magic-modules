@@ -34,7 +34,7 @@ import_format: ['tagKeys/{{name}}', '{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'tag_key_basic'
-    skip_test: true
+    exclude_test: true
     primary_resource_id: 'key'
     vars:
       short_name: 'keyname'

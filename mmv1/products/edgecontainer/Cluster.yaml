@@ -79,7 +79,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "edgecontainer_local_control_plane_cluster"
     primary_resource_id: "default"
-    skip_test: true
+    exclude_test: true
     vars:
       edgecontainer_cluster_name: "local-control-plane-cluster"
 properties:

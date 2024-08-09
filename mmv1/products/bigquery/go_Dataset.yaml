@@ -57,7 +57,7 @@ examples:
       dataset_id: 'example_dataset'
       key_name: 'example-key'
       keyring_name: 'example-keyring'
-    skip_test: true
+    exclude_test: true
   - name: 'bigquery_dataset_authorized_dataset'
     primary_resource_id: 'dataset'
     vars:
@@ -93,7 +93,7 @@ examples:
     primary_resource_id: 'dataset'
     vars:
       dataset_id: 'example_dataset'
-    skip_test: true
+    exclude_test: true
   - name: 'bigquery_dataset_resource_tags'
     primary_resource_id: 'dataset'
     primary_resource_name: 'fmt.Sprintf("tf_test_dataset%s", context["random_suffix"])'

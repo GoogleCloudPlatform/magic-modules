@@ -43,7 +43,7 @@ examples:
     name:
       'cloud_identity_groups_basic'
       # Has a handwritten test due to CloudIdentityGroup-related tests needing to run synchronously
-    skip_test: true
+    exclude_test: true
     primary_resource_id: 'cloud_identity_group_basic'
     vars:
       id_group: 'my-identity-group'

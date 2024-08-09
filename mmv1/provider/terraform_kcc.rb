@@ -77,7 +77,7 @@ module Provider
       product_name = product_name(data.product.name)
       object_name = object_name(data.name)
       kind = product_name + object_name
-      # skip_test examples and examples with test_env_vars should also be
+      # exclude_test examples and examples with test_env_vars should also be
       # included. Whether and how to convert them into KCC examples will be
       # handled separately.
       examples = data.object.examples
@@ -85,7 +85,7 @@ module Provider
 
       examples.each do |example|
         folder_name = "#{product_name}-#{kind}-#{example.name}"
-        folder_name += '-skipped' if example.skip_test
+        folder_name += '-skipped' if example.exclude_test
         target_folder = File.join('samples', folder_name)
 
         FileUtils.mkpath target_folder

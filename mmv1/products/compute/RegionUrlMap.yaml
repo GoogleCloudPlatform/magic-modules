@@ -86,7 +86,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'int_https_lb_https_redirect'
     primary_resource_id: 'redirect'
-    skip_test: true
+    exclude_test: true
     vars:
       l7_ilb_network: 'l7-ilb-network'
       l7_ilb_proxy_subnet: 'l7-ilb-proxy-subnet'
@@ -128,7 +128,7 @@ examples:
       l7_xlb_proxy: 'l7-xlb-proxy'
       l7_xlb_forwarding_rule: 'l7-xlb-forwarding-rule'
     skip_docs: true
-    skip_test: true  # Similar to other samples
+    exclude_test: true  # Similar to other samples
     min_version: beta
   - !ruby/object:Provider::Terraform::Examples
     name: "region_url_map_path_template_match"

@@ -56,7 +56,7 @@ examples:
     name: "vmware_engine_private_cloud_basic"
     config_path: "templates/terraform/examples/vmware_engine_private_cloud_basic.tf.erb"
     primary_resource_id: "vmw-engine-pc"
-    skip_test: true   # update tests will take care of create and update. PC creation is expensive and node reservation is required.
+    exclude_test: true   # update tests will take care of create and update. PC creation is expensive and node reservation is required.
     vars:
       private_cloud_id: "sample-pc"
       network_id: "pc-nw"
@@ -67,7 +67,7 @@ examples:
     name: "vmware_engine_private_cloud_full"
     config_path: "templates/terraform/examples/vmware_engine_private_cloud_full.tf.erb"
     primary_resource_id: "vmw-engine-pc"
-    skip_test: true   # update tests will take care of create and update. PC creation is expensive and node reservation is required.
+    exclude_test: true   # update tests will take care of create and update. PC creation is expensive and node reservation is required.
     vars:
       private_cloud_id: "sample-pc"
       network_id: "pc-nw"

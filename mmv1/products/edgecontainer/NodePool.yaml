@@ -54,15 +54,15 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "edgecontainer_node_pool"
     primary_resource_id: "default"
-    skip_test: true
+    exclude_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: "edgecontainer_node_pool_with_cmek"
     primary_resource_id: "default"
-    skip_test: true
+    exclude_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: "edgecontainer_local_control_plane_node_pool"
     primary_resource_id: "default"
-    skip_test: true
+    exclude_test: true
   # Skip the docs generation for the edgecontainer_local_control_plane_node_pool_internal test
   # to avoid leaking the machine name, and node location to public.
   # Skip the vcr test because as we only have limited machine resources and we don't want it run
@@ -73,7 +73,7 @@ examples:
     primary_resource_id: "default"
     skip_docs: true
     skip_vcr: true
-    skip_test: true
+    exclude_test: true
 parameters:
   - !ruby/object:Api::Type::String
     name: "name"

@@ -44,7 +44,7 @@ examples:
     primary_resource_id: 'example-ekmconnection'
     vars:
       ekmconnection_name: 'ekmconnection_example'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'location'
     type: String

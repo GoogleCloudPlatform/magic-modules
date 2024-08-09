@@ -49,7 +49,7 @@ exclude_import: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     # docs only, testing is done in a DocumentSchema update test
-    skip_test: true
+    exclude_test: true
     name: "document_ai_warehouse_location"
     primary_resource_id: "example"
 timeouts: !ruby/object:Api::Timeouts

@@ -51,7 +51,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'network_security_firewall_endpoint_basic'
     primary_resource_id: 'default'
-    skip_test: true   # update tests will take care of create and update. Firewall endpoint creation is too long.
+    exclude_test: true   # update tests will take care of create and update. Firewall endpoint creation is too long.
     vars:
       resource_name: 'my-firewall-endpoint'
     test_env_vars:

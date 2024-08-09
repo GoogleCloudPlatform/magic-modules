@@ -44,7 +44,7 @@ import_format: ['{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'access_context_manager_access_level_basic'
-    skip_test: true
+    exclude_test: true
     primary_resource_id: 'access-level'
     vars:
       access_level_name: 'chromeos_no_lock'

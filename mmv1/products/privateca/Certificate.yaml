@@ -40,7 +40,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'privateca_certificate_generated_key'
     primary_resource_id: 'default'
-    skip_test: true
+    exclude_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'privateca_certificate_with_template'
     primary_resource_id: 'default'

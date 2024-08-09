@@ -18,7 +18,7 @@ import (
 )
 
 <%# Since most resources define a "basic" config as their first example, we can reuse that config to create a resource to test IAM resources with. -%>
-<% example = object.examples.reject(&:skip_test)
+<% example = object.examples.reject(&:exclude_test)
          .reject { |e| @api.version_obj_or_closest(version) < @api.version_obj_or_closest(e.min_version) }
          .first -%>
 <% resource_name = object.__product.name  + object.name -%>

@@ -53,7 +53,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "vmware_engine_external_address_basic"
     primary_resource_id: "vmw-engine-external-address"
-    skip_test: true   # update tests will take care of all CRUD tests. Parent PC creation is expensive and node reservation is required.
+    exclude_test: true   # update tests will take care of all CRUD tests. Parent PC creation is expensive and node reservation is required.
     vars:
       name: "sample-external-address"
       network_id: "pc-nw"

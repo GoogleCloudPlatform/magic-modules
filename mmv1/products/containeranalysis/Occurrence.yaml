@@ -32,7 +32,7 @@ examples:
     name:
       'container_analysis_occurrence_kms'
       # Occurrence requires custom logic for signing payloads.
-    skip_test: true
+    exclude_test: true
     primary_resource_id: 'occurrence'
     vars:
       note_name: 'attestation-note'

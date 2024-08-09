@@ -50,7 +50,7 @@ skip_sweeper: true
 examples:
   - name: 'document_ai_warehouse_location'
     primary_resource_id: 'example'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'project_number'
     type: String

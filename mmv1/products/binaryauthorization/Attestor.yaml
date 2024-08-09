@@ -40,7 +40,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'binary_authorization_attestor_kms'
     primary_resource_id: 'attestor'
-    skip_test: true
+    exclude_test: true
     vars:
       attestor_name: 'test-attestor'
       note_name: 'test-attestor-note'

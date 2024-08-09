@@ -31,7 +31,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'edgenetwork_subnet'
     primary_resource_id: 'example_subnet'
-    skip_test: true
+    exclude_test: true
     vars:
       edgenetwork_subnet_id: 'example-subnet'
       edgenetwork_network_id: 'example-network'
@@ -41,7 +41,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'edgenetwork_subnet_with_vlan_id'
     primary_resource_id: 'example_subnet_with_vlan_id'
-    skip_test: true
+    exclude_test: true
     vars:
       edgenetwork_subnet_id: 'example-subnet-with-vlan-id'
       edgenetwork_network_id: 'example-network'

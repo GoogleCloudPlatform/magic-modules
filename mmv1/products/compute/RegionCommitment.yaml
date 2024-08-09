@@ -55,7 +55,7 @@ examples:
     primary_resource_id: 'foobar'
     # Creating a resource means signing a contract
     # Spanning years that cannot be deleted
-    skip_test: true
+    exclude_test: true
     vars:
       region_commitment_name: 'my-region-commitment'
   - !ruby/object:Provider::Terraform::Examples
@@ -63,7 +63,7 @@ examples:
     primary_resource_id: 'foobar'
     # Creating a resource means signing a contract
     # Spanning years that cannot be deleted
-    skip_test: true
+    exclude_test: true
     vars:
       region_commitment_name: 'my-full-commitment'
 parameters:

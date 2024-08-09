@@ -72,7 +72,7 @@ examples:
       instance_name: 'my-instance'
       client_id: 'my-client-id'
       client_secret: 'my-client-secret'
-    skip_test: true
+    exclude_test: true
   - name: 'looker_instance_enterprise_full_test'
     primary_resource_id: 'looker-instance'
     vars:

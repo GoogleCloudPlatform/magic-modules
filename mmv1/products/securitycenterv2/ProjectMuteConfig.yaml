@@ -31,7 +31,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'scc_v2_project_mute_config_basic'
     primary_resource_id: 'default'
-    skip_test: true
+    exclude_test: true
     vars:
       mute_config_id: 'my-config'
     test_env_vars:

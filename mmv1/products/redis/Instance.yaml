@@ -85,7 +85,7 @@ examples:
       prevent_destroy: 'false'
     oics_vars_overrides:
       prevent_destroy: 'false'
-    skip_test: true
+    exclude_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'redis_instance_private_service_test'
     primary_resource_id: 'cache'
@@ -114,7 +114,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'redis_instance_cmek'
     primary_resource_id: 'cache'
-    skip_test: true
+    exclude_test: true
     vars:
       instance_name: 'cmek-memory-cache'
       network_name: 'redis-test-network'

@@ -419,7 +419,7 @@ examples:
     primary_resource_id: "basic_example"
     vars:
       auth_config_name: 'test-authconfig'
-    skip_test: true # This is already part of other examples.
+    exclude_test: true # This is already part of other examples.
   - !ruby/object:Provider::Terraform::Examples
     name: "integrations_auth_config_advance"
     primary_resource_id: "advance_example"

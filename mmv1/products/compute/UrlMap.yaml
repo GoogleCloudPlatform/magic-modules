@@ -110,7 +110,7 @@ examples:
       http_lb_proxy: "http-lb-proxy"
       http_content_rule: "http-content-rule"
     skip_docs: true
-    skip_test: true     # Very similar to external_http_lb_mig_backend_custom_header
+    exclude_test: true     # Very similar to external_http_lb_mig_backend_custom_header
     ignore_read_extra:
       - "metadata"
       - "metadata_startup_script"

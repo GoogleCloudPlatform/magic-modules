@@ -68,7 +68,7 @@ exclude_tgc: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'instance_group_membership'
-    skip_test: true
+    exclude_test: true
     vars:
       network_name: 'network'
       instance_group_name: 'instance-group'

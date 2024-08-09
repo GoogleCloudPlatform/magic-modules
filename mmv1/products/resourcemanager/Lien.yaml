@@ -34,7 +34,7 @@ import_format: ['{{parent}}/{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'resource_manager_lien'
-    skip_test: true
+    exclude_test: true
     primary_resource_id: 'lien'
     vars:
       project_id: 'staging-project'

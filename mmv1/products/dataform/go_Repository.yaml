@@ -47,7 +47,7 @@ examples:
       dataform_repository_name: 'dataform_repository'
       data: 'secret-data'
       secret_name: 'my-secret'
-    skip_test: true
+    exclude_test: true
   - name: 'dataform_repository_with_cloudsource_repo'
     primary_resource_id: 'dataform_repository'
     primary_resource_name: 'fmt.Sprintf("tf_test_dataform_repository%s", context["random_suffix"])'

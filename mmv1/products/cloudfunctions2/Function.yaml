@@ -114,7 +114,7 @@ examples:
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
       - 'build_config.0.source.0.storage_source.0.bucket'
-    skip_test: true
+    exclude_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudfunctions2_basic_gcs'
     primary_resource_id: 'function'
@@ -268,7 +268,7 @@ examples:
       - 'build_config.0.source.0.storage_source.0.bucket'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudfunctions2_cmek_docs'
-    skip_test: true # this example file will cause IAM conflicts between tests if used to make a test
+    exclude_test: true # this example file will cause IAM conflicts between tests if used to make a test
     primary_resource_id: 'function'
     min_version: beta
     vars:

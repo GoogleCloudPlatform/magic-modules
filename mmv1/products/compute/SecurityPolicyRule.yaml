@@ -57,7 +57,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'security_policy_rule_default_rule'
     primary_resource_id: 'policy_rule'
-    skip_test: true
+    exclude_test: true
     vars:
       sec_policy_name: 'policyruletest'
       project_id: :PROJECT_NAME

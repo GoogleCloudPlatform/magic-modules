@@ -26,14 +26,14 @@ legacy_name: 'google_project_access_approval_settings'
 import_format: ['projects/{{project_id}}/accessApprovalSettings']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    skip_test: true
+    exclude_test: true
     name: 'project_access_approval_full'
     primary_resource_id: 'project_access_approval'
     test_env_vars:
       project: :PROJECT_NAME
       org_id: :ORG_ID
   - !ruby/object:Provider::Terraform::Examples
-    skip_test: true
+    exclude_test: true
     name: 'project_access_approval_active_key_version'
     primary_resource_id: 'project_access_approval'
     test_env_vars:

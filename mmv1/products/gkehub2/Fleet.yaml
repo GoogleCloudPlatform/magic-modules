@@ -48,7 +48,7 @@ autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "gkehub_fleet_basic"
-    skip_test: true
+    exclude_test: true
     primary_resource_id: "default"
 id_format: "projects/{{project}}/locations/global/fleets/default"
 import_format: ["projects/{{project}}/locations/global/fleets/default"]

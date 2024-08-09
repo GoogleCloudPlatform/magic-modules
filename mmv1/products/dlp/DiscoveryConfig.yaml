@@ -32,20 +32,20 @@ id_format: '{{parent}}/discoveryConfigs/{{name}}'
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dlp_discovery_config_basic'
-    skip_test: true
+    exclude_test: true
     primary_resource_id: 'basic'
     test_env_vars:
       project: :PROJECT_NAME
       location: :REGION
   - !ruby/object:Provider::Terraform::Examples
     name: 'dlp_discovery_config_actions'
-    skip_test: true
+    exclude_test: true
     primary_resource_id: 'actions'
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
     name: 'dlp_discovery_config_org_running'
-    skip_test: true
+    exclude_test: true
     primary_resource_id: 'org_running'
     test_env_vars:
       project: :PROJECT_NAME
@@ -58,25 +58,25 @@ examples:
       organization: :ORG_ID
   - !ruby/object:Provider::Terraform::Examples
     name: 'dlp_discovery_config_conditions_cadence'
-    skip_test: true
+    exclude_test: true
     primary_resource_id: 'conditions_cadence'
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
     name: 'dlp_discovery_config_filter_regexes_and_conditions'
-    skip_test: true
+    exclude_test: true
     primary_resource_id: 'filter_regexes_and_conditions'
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
     name: 'dlp_discovery_config_cloud_sql'
-    skip_test: true
+    exclude_test: true
     primary_resource_id: 'cloud_sql'
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
     name: 'dlp_discovery_config_cloud_storage'
-    skip_test: true
+    exclude_test: true
     primary_resource_id: 'cloud_storage'
     test_env_vars:
       project: :PROJECT_NAME

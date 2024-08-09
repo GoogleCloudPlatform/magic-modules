@@ -54,7 +54,7 @@ examples:
     primary_resource_id:
       'default'
       # sensitive labels will fail the import verification step.
-    skip_test: true
+    exclude_test: true
     vars:
       display_name: 'Sensitive Notification Channel test'
 virtual_fields:

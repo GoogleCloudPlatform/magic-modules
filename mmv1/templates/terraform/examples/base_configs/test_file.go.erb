@@ -35,7 +35,7 @@ terraform_name = object.legacy_name || "google_#{tf_product}_#{tf_resource}"
 <%
 # Check if the example has a version specified and that version is lower than the compiler's version
 object.examples
-  .reject(&:skip_test)
+  .reject(&:exclude_test)
   .reject { |e| !e.min_version.nil? && Api::Product::Version::ORDER.index(@target_version_name) < Api::Product::Version::ORDER.index(e.min_version) }
   .each do |example|
 

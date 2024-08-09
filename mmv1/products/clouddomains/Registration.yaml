@@ -59,7 +59,7 @@ examples:
     name: "clouddomains_registration_full"
     primary_resource_id: "my_registration"
     # Must be tested in staging environment with all-time unique domains
-    skip_test: true
+    exclude_test: true
     # ignore_read_extra:
     #   - 'contact_settings.0.registrant_contact.0.phone_number'
     #   - 'contact_settings.0.registrant_contact.0.fax_number'

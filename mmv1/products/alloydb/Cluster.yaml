@@ -77,7 +77,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'alloydb_cluster_restore'
     primary_resource_id: 'source'
-    skip_test: true
+    exclude_test: true
     vars:
       alloydb_cluster_name: 'alloydb-source-cluster'
       alloydb_backup_restored_cluster_name: 'alloydb-backup-restored'
@@ -97,7 +97,7 @@ examples:
       alloydb_primary_cluster_name: 'alloydb-primary-cluster'
       alloydb_primary_instance_name: 'alloydb-primary-instance'
       alloydb_secondary_cluster_name: 'alloydb-secondary-cluster'
-    skip_test: true
+    exclude_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'alloydb_secondary_cluster_basic_test'
     primary_resource_id: 'secondary'

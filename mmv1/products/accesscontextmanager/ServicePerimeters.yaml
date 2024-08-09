@@ -33,7 +33,7 @@ import_format: ['{{parent}}/servicePerimeters']
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'access_context_manager_service_perimeters_basic'
-    skip_test: true
+    exclude_test: true
     primary_resource_id: 'service-perimeter'
     vars:
       access_level_name: 'chromeos_no_lock'

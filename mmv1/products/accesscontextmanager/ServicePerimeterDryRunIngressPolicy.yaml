@@ -47,7 +47,7 @@ description: |
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'access_context_manager_service_perimeter_dry_run_ingress_policy'
-    skip_test: true
+    exclude_test: true
 autogen_async: true
 exclude_tgc: true
 # Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter

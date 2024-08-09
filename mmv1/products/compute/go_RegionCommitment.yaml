@@ -55,12 +55,12 @@ examples:
     primary_resource_id: 'foobar'
     vars:
       region_commitment_name: 'my-region-commitment'
-    skip_test: true
+    exclude_test: true
   - name: 'compute_region_commitment_full'
     primary_resource_id: 'foobar'
     vars:
       region_commitment_name: 'my-full-commitment'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'region'
     type: ResourceRef

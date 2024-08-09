@@ -20,7 +20,7 @@ terraform_name = object.legacy_name || "google_#{tf_product}_#{tf_resource}"
 # @api.version_obj_or_closest(version) is slightly wrong; we want the _object_ version or the generation version.
 # Ultimately this will not matter though, since the API default should always be less than the object default.
 object.examples
-  .reject(&:skip_test)
+  .reject(&:exclude_test)
   .reject { |e| @api.version_obj_or_closest(version) < @api.version_obj_or_closest(e.min_version) }
   .each do |example|
 

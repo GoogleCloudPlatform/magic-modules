@@ -36,7 +36,7 @@ examples:
     name: 'dataform_repository'
     # This example is used in the docs to address this issue
     # See : https://github.com/hashicorp/terraform-provider-google/issues/17335
-    skip_test: true
+    exclude_test: true
     primary_resource_id: dataform_repository
     primary_resource_name:
       'fmt.Sprintf("tf_test_dataform_repository%s", context["random_suffix"])'

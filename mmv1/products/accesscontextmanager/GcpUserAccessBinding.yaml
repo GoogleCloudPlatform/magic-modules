@@ -29,7 +29,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'access_context_manager_gcp_user_access_binding_basic'
     # Has a handwritten test due to AccessPolicy-related tests needing to run synchronously
-    skip_test: true
+    exclude_test: true
     primary_resource_id: 'gcp_user_access_binding'
     vars:
       group_id: 'my-identity-group'

@@ -71,11 +71,11 @@ examples:
       deletion_protection: 'false'
     oics_vars_overrides:
       deletion_protection: 'false'
-    skip_test: true
+    exclude_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'datastream_connection_profile_sql_server'
     primary_resource_id: 'default'
-    skip_test: true
+    exclude_test: true
     vars:
       database_name: 'db'
       database_password: 'password'

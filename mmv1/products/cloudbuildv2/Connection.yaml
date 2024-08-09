@@ -52,10 +52,10 @@ examples:
       connection_name: 'tf-test-connection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuildv2_connection_ghe'
-    skip_test: true
+    exclude_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuildv2_connection_github'
-    skip_test: true
+    exclude_test: true
 parameters:
   - !ruby/object:Api::Type::String
     name: name

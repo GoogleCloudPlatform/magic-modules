@@ -67,7 +67,7 @@ examples:
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
-    skip_test: true
+    exclude_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'alloydb_secondary_instance_basic'
     primary_resource_id: 'secondary'
@@ -80,7 +80,7 @@ examples:
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
-    skip_test: true
+    exclude_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'alloydb_instance_basic_test'
     primary_resource_id: 'default'

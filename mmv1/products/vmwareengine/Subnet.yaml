@@ -52,7 +52,7 @@ autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "vmware_engine_subnet_user_defined"
-    skip_test: true   # update tests will take care of read and update. Parent PC creation is expensive and node reservation is required.
+    exclude_test: true   # update tests will take care of read and update. Parent PC creation is expensive and node reservation is required.
     primary_resource_id: "vmw-engine-subnet"
     vars:
       private_cloud_id: "sample-pc"

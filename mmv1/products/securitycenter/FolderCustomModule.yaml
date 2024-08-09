@@ -33,7 +33,7 @@ examples:
     name: "scc_folder_custom_module_basic"
     primary_resource_id: "example"
     external_providers: ["random", "time"]
-    skip_test: true
+    exclude_test: true
     vars:
       folder_display_name: "folder-name"
       display_name: basic_custom_module
@@ -46,7 +46,7 @@ examples:
     name: "scc_folder_custom_module_full"
     primary_resource_id: "example"
     external_providers: ["random", "time"]
-    skip_test: true
+    exclude_test: true
     vars:
       folder_display_name: "folder-name"
       display_name: full_custom_module

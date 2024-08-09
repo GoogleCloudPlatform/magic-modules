@@ -80,7 +80,7 @@ examples:
     vars:
       access_level_name: 'chromeos_no_lock'
       account_id: 'my-account-id'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'accessLevel'
     type: ResourceRef

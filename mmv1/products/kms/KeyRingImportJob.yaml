@@ -40,7 +40,7 @@ examples:
     vars:
       keyring: 'keyring-example'
       cryptokey: 'cryptokey-example'
-    skip_test: true
+    exclude_test: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/kms_key_ring_import_job.go.erb
 parameters:

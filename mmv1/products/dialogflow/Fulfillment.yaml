@@ -32,7 +32,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dialogflow_fulfillment_basic'
     primary_resource_id: 'basic_fulfillment'
-    skip_test: true
+    exclude_test: true
     vars:
       fulfillment_name: 'basic-fulfillment'
 # Skip sweeper gen since this is a child resource.

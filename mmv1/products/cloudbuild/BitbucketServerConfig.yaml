@@ -56,7 +56,7 @@ examples:
     primary_resource_id: 'bbs-config-with-repos'
     vars:
       config_id: 'bbs-config'
-    skip_test: true
+    exclude_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuild_bitbucket_server_config_peered_network'
     primary_resource_id: 'bbs-config-with-peered-network'

@@ -108,7 +108,7 @@ examples:
     ignore_read_extra:
       - 'metadata'
       - 'metadata_startup_script'
-    skip_test: true
+    exclude_test: true
     skip_docs: true
   - name: 'url_map_path_template_match'
     primary_resource_id: 'urlmap'

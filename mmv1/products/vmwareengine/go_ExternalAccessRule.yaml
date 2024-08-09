@@ -57,7 +57,7 @@ examples:
       network_policy_id: 'sample-np'
     test_env_vars:
       region: 'REGION'
-    skip_test: true
+    exclude_test: true
   - name: 'vmware_engine_external_access_rule_full'
     primary_resource_id: 'vmw-engine-external-access-rule'
     vars:
@@ -69,7 +69,7 @@ examples:
       external_address_id: 'sample-ea'
     test_env_vars:
       region: 'REGION'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'parent'
     type: String

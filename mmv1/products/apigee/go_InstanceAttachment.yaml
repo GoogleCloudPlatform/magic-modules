@@ -57,7 +57,7 @@ examples:
       project_id: 'my-project'
       instance_name: 'my-instance-name'
       environment_name: 'my-environment-name'
-    skip_test: true
+    exclude_test: true
   - name: 'apigee_instance_attachment_basic_test'
     primary_resource_id: 'apigee_instance_attachment'
     test_env_vars:

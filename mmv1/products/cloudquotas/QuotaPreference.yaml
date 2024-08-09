@@ -34,7 +34,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "cloudquotas_quota_preference_basic"
     primary_resource_id: "preference"
-    skip_test: true
+    exclude_test: true
     vars:
       name: "compute_googleapis_com-CPUS-per-project_us-east1"
     test_env_vars:

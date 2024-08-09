@@ -61,7 +61,7 @@ examples:
     vars:
       sec_policy_name: 'policyruletest'
       project_id: 'PROJECT_NAME'
-    skip_test: true
+    exclude_test: true
   - name: 'security_policy_rule_multiple_rules'
     primary_resource_id: 'policy_rule_one'
     vars:

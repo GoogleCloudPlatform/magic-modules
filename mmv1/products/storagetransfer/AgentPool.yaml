@@ -29,7 +29,7 @@ examples:
     primary_resource_id:
       'example'
       # Skip generating this test as the example is covered in resource_storage_transfer_agent_pool_test.go
-    skip_test: true
+    exclude_test: true
     vars:
       agent-pool-name: 'agent-pool-example'
     test_env_vars:

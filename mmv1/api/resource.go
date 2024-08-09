@@ -1262,7 +1262,7 @@ func (r Resource) IamAttributes() []string {
 // we can reuse that config to create a resource to test IAM resources with.
 func (r Resource) FirstTestExample() resource.Examples {
 	examples := google.Reject(r.Examples, func(e resource.Examples) bool {
-		return e.SkipTest
+		return e.ExcludeTest
 	})
 	examples = google.Reject(examples, func(e resource.Examples) bool {
 		return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(e.MinVersion)) < 0)
@@ -1273,7 +1273,7 @@ func (r Resource) FirstTestExample() resource.Examples {
 
 func (r Resource) ExamplePrimaryResourceId() string {
 	examples := google.Reject(r.Examples, func(e resource.Examples) bool {
-		return e.SkipTest
+		return e.ExcludeTest
 	})
 	examples = google.Reject(examples, func(e resource.Examples) bool {
 		return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(e.MinVersion)) < 0)
@@ -1552,7 +1552,7 @@ func (r Resource) IsExcluded() bool {
 
 func (r Resource) TestExamples() []resource.Examples {
 	return google.Reject(google.Reject(r.Examples, func(e resource.Examples) bool {
-		return e.SkipTest
+		return e.ExcludeTest
 	}), func(e resource.Examples) bool {
 		return e.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, e.MinVersion)
 	})

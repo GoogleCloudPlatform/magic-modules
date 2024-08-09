@@ -47,11 +47,11 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'access_context_manager_access_policy_basic'
-    skip_test: true
+    exclude_test: true
     primary_resource_id: 'access-policy'
   - !ruby/object:Provider::Terraform::Examples
     name: 'access_context_manager_access_policy_scoped'
-    skip_test: true
+    exclude_test: true
     skip_import_test: true
     primary_resource_id: 'access-policy'
     test_env_vars:

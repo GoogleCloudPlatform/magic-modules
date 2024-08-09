@@ -78,12 +78,12 @@ examples:
       metastore_service_name: 'example-service'
       key_name: 'example-key'
       keyring_name: 'example-keyring'
-    skip_test: true
+    exclude_test: true
   - name: 'dataproc_metastore_service_endpoint'
     primary_resource_id: 'endpoint'
     vars:
       metastore_service_name: 'metastore-endpoint'
-    skip_test: true
+    exclude_test: true
     skip_docs: true
   - name: 'dataproc_metastore_service_aux'
     primary_resource_id: 'aux'
@@ -101,7 +101,7 @@ examples:
       metastore_service_name: 'metastore-srv'
       network_name: 'my-network'
       subnet_name: 'my-subnetwork'
-    skip_test: true
+    exclude_test: true
   - name: 'dataproc_metastore_service_private_service_connect_custom_routes'
     primary_resource_id: 'default'
     min_version: 'beta'
@@ -109,7 +109,7 @@ examples:
       metastore_service_name: 'metastore-srv'
       network_name: 'my-network'
       subnet_name: 'my-subnetwork'
-    skip_test: true
+    exclude_test: true
   - name: 'dataproc_metastore_service_telemetry'
     primary_resource_id: 'telemetry'
     vars:

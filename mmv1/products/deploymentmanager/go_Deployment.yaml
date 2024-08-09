@@ -71,13 +71,13 @@ examples:
     primary_resource_name: 'fmt.Sprintf("tf-test-my-deployment-%s", context["random_suffix"])'
     vars:
       deployment_name: 'my-deployment'
-    skip_test: true
+    exclude_test: true
   - name: 'deployment_manager_deployment_imports'
     primary_resource_id: 'deployment'
     primary_resource_name: 'fmt.Sprintf("tf-test-my-deployment-%s", context["random_suffix"])'
     vars:
       deployment_name: 'my-deployment'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'createPolicy'
     type: Enum

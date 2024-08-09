@@ -63,7 +63,7 @@ examples:
   - name: 'apigee_environment_basic'
     vars:
       environment_name: 'my-environment'
-    skip_test: true
+    exclude_test: true
   - name: 'apigee_environment_basic_test'
     primary_resource_id: 'apigee_environment'
     primary_resource_name: 'fmt.Sprintf("organizations/tf-test%s", context["random_suffix"]), fmt.Sprintf("tf-test%s", context["random_suffix"])'

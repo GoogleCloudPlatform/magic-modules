@@ -52,7 +52,7 @@ examples:
     vars:
       display_name: 'my-query'
       dataset_id: 'my_dataset'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'location'
     type: String

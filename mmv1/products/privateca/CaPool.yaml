@@ -64,7 +64,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'privateca_quickstart'
     primary_resource_id: 'default'
-    skip_test: true
+    exclude_test: true
     skip_docs: true
     vars:
       my_ca_pool: 'my-ca-pool'

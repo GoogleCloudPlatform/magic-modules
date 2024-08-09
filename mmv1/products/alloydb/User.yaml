@@ -42,7 +42,7 @@ examples:
       network_name: 'alloydb-network'
     ignore_read_extra:
       - 'password'
-    skip_test: true
+    exclude_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'alloydb_user_builtin_test'
     primary_resource_id: 'user1'
@@ -67,7 +67,7 @@ examples:
       alloydb_cluster_pass: 'cluster_secret'
       alloydb_user_name: 'user2@foo.com'
       network_name: 'alloydb-network'
-    skip_test: true
+    exclude_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'alloydb_user_iam_test'
     primary_resource_id: 'user2'
