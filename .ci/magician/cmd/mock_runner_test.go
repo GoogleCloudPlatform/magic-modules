@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"magician/exec"
 	"os"
 	"path/filepath"
 	"sort"
@@ -31,7 +32,7 @@ import (
 type ParameterList []any
 
 type MockRunner interface {
-	ExecRunner
+	exec.ExecRunner
 	Calls(method string) ([]ParameterList, bool)
 }
 

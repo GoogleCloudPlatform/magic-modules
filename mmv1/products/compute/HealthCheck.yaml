@@ -175,7 +175,6 @@ properties:
     item_type: Api::Type::String
     min_size: 3
     max_size: 3
-    min_version: beta
     description: |
       The list of cloud regions from which health checks are performed. If
       any regions are specified, then exactly 3 regions should be specified.

@@ -93,7 +93,7 @@ func listGDEnvironmentVariables() string {
 	return result
 }
 
-func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller) error {
+func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh GithubClient, rnr exec.ExecRunner, ctlr *source.Controller) error {
 	if baseBranch == "" {
 		baseBranch = "main"
 	}
@@ -177,7 +177,7 @@ func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh G
 	return nil
 }
 
-func cloneRepo(mmRepo *source.Repo, baseBranch, repo, version, command, ref string, rnr ExecRunner, ctlr *source.Controller) (*source.Repo, *source.Repo, string, error) {
+func cloneRepo(mmRepo *source.Repo, baseBranch, repo, version, command, ref string, rnr exec.ExecRunner, ctlr *source.Controller) (*source.Repo, *source.Repo, string, error) {
 	downstreamRepo := &source.Repo{
 		Title:  repo,
 		Branch: baseBranch,
@@ -244,7 +244,7 @@ func cloneRepo(mmRepo *source.Repo, baseBranch, repo, version, command, ref stri
 	return downstreamRepo, scratchRepo, commitMessage, nil
 }
 
-func setGitConfig(rnr ExecRunner) error {
+func setGitConfig(rnr exec.ExecRunner) error {
 	if _, err := rnr.Run("git", []string{"config", "--local", "user.name", "Modular Magician"}, nil); err != nil {
 		return err
 	}
@@ -254,7 +254,7 @@ func setGitConfig(rnr ExecRunner) error {
 	return nil
 }
 
-func runMake(downstreamRepo *source.Repo, command string, rnr ExecRunner) error {
+func runMake(downstreamRepo *source.Repo, command string, rnr exec.ExecRunner) error {
 	switch downstreamRepo.Title {
 	case "terraform-google-conversion":
 		if _, err := rnr.Run("make", []string{"clean-tgc", "OUTPUT_PATH=" + downstreamRepo.Path}, nil); err != nil {
@@ -308,7 +308,7 @@ func getPullRequest(baseBranch, ref string, gh GithubClient) (*github.PullReques
 	return nil, fmt.Errorf("no pr found with merge commit sha %s and base branch %s", ref, baseBranch)
 }
 
-func createCommit(scratchRepo *source.Repo, commitMessage string, rnr ExecRunner) (string, error) {
+func createCommit(scratchRepo *source.Repo, commitMessage string, rnr exec.ExecRunner) (string, error) {
 	if err := rnr.PushDir(scratchRepo.Path); err != nil {
 		return "", err
 	}
@@ -338,7 +338,7 @@ func createCommit(scratchRepo *source.Repo, commitMessage string, rnr ExecRunner
 	return commitSha, err
 }
 
-func addChangelogEntry(downstreamRepo *source.Repo, pullRequest *github.PullRequest, rnr ExecRunner) error {
+func addChangelogEntry(downstreamRepo *source.Repo, pullRequest *github.PullRequest, rnr exec.ExecRunner) error {
 	if err := rnr.PushDir(downstreamRepo.Path); err != nil {
 		return err
 	}
@@ -349,7 +349,7 @@ func addChangelogEntry(downstreamRepo *source.Repo, pullRequest *github.PullRequ
 	return rnr.PopDir()
 }
 
-func mergePullRequest(downstreamRepo, scratchRepo *source.Repo, scratchRepoSha string, pullRequest *github.PullRequest, rnr ExecRunner, gh GithubClient) error {
+func mergePullRequest(downstreamRepo, scratchRepo *source.Repo, scratchRepoSha string, pullRequest *github.PullRequest, rnr exec.ExecRunner, gh GithubClient) error {
 	fmt.Printf(`Base: %s:%s
 Head: %s:%s
 `, downstreamRepo.Owner, downstreamRepo.Branch, scratchRepo.Owner, scratchRepo.Branch)
