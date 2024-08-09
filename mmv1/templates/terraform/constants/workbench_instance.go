@@ -27,7 +27,7 @@ var WorkbenchInstanceProvidedMetadata = []string{
     "agent-health-check-interval-seconds",
     "agent-health-check-path",
     "container",
-	"cos-update-strategy",
+    "cos-update-strategy",
     "custom-container-image",
     "custom-container-payload",
     "data-disk-uri",
