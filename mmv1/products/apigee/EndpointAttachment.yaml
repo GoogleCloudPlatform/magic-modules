@@ -89,10 +89,6 @@ parameters:
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
-    name: 'testField'
-    description: |
-      dummy field to trigger test
-  - !ruby/object:Api::Type::String
     name: 'name'
     description: |
       Name of the Endpoint Attachment in the following format:
