@@ -37,6 +37,12 @@ examples:
     vars:
       instance_name: 'test-instance'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'filestore_instance_basic_ipv6'
+    skip_docs: true
+    primary_resource_id: 'instance'
+    vars:
+      instance_name: 'test-instance'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'filestore_instance_full'
     primary_resource_id: 'instance'
     vars:
