@@ -45,7 +45,7 @@ examples:
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
-    skip_test: true
+    exclude_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'alloydb_backup_basic_test'
     primary_resource_id: 'default'
@@ -71,7 +71,7 @@ examples:
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
-    skip_test: true
+    exclude_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'alloydb_backup_full_test'
     primary_resource_id: 'default'

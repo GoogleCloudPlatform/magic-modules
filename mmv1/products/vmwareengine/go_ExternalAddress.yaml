@@ -64,7 +64,7 @@ examples:
       private_cloud_id: 'sample-pc'
       management_cluster_id: 'sample-mgmt-cluster'
       network_policy_id: 'sample-np'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'parent'
     type: String

@@ -42,19 +42,19 @@ error_retry_predicates:
 examples:
   - name: 'org_policy_policy_enforce'
     primary_resource_id: 'primary'
-    skip_test: true
+    exclude_test: true
   - name: 'org_policy_policy_folder'
     primary_resource_id: 'primary'
-    skip_test: true
+    exclude_test: true
   - name: 'org_policy_policy_organization'
     primary_resource_id: 'primary'
-    skip_test: true
+    exclude_test: true
   - name: 'org_policy_policy_project'
     primary_resource_id: 'primary'
-    skip_test: true
+    exclude_test: true
   - name: 'org_policy_policy_dry_run_spec'
     primary_resource_id: 'primary'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'parent'
     type: String

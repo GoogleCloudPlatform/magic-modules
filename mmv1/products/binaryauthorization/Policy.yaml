@@ -32,14 +32,14 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'binary_authorization_policy_basic'
     primary_resource_id: 'policy'
-    skip_test: true
+    exclude_test: true
     vars:
       attestor_name: 'test-attestor'
       note_name: 'test-attestor-note'
   - !ruby/object:Provider::Terraform::Examples
     name: 'binary_authorization_policy_global_evaluation'
     primary_resource_id: 'policy'
-    skip_test: true
+    exclude_test: true
     vars:
       attestor_name: 'test-attestor'
       note_name: 'test-attestor-note'

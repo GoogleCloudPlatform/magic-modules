@@ -27,7 +27,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dialogflow_intent_basic'
     primary_resource_id: 'basic_intent'
-    skip_test: true
+    exclude_test: true
     vars:
       intent_name: 'basic-intent'
   - !ruby/object:Provider::Terraform::Examples

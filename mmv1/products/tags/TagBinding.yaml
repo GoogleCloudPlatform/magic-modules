@@ -36,7 +36,7 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'tag_binding_basic'
-    skip_test: true
+    exclude_test: true
     primary_resource_id: 'binding'
     vars:
       key_short_name: 'keyname'

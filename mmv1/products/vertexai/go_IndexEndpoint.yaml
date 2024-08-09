@@ -49,7 +49,7 @@ examples:
     vars:
       address_name: 'address-name'
       network_name: 'network-name'
-    skip_test: true
+    exclude_test: true
   - name: 'vertex_ai_index_endpoint_test'
     primary_resource_id: 'index_endpoint'
     vars:

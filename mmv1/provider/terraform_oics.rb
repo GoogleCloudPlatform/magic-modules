@@ -41,7 +41,7 @@ module Provider
       return unless generate_docs
 
       examples = data.object.examples
-                     .reject(&:skip_test)
+                     .reject(&:exclude_test)
                      .reject { |e| !e.test_env_vars.nil? && e.test_env_vars.any? }
                      .reject { |e| @version < @api.version_obj_or_closest(e.min_version) }
 

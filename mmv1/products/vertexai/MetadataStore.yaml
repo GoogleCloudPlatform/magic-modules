@@ -48,7 +48,7 @@ id_format: '{{name}}'
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'vertex_ai_metadata_store'
-    skip_test: true
+    exclude_test: true
     primary_resource_id: 'store'
     vars:
       name: 'test-store'

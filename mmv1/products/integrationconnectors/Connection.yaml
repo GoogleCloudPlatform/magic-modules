@@ -42,7 +42,7 @@ examples:
     primary_resource_id: "pubsubconnection"
     vars:
       connection_name: "test-pubsub"
-    skip_test: true
+    exclude_test: true
     ignore_read_extra:
       - 'status.0.description'
   - !ruby/object:Provider::Terraform::Examples
@@ -51,7 +51,7 @@ examples:
     vars:
       connection_name: "test-zendesk"
       secret_id: "test-secret"
-    skip_test: true
+    exclude_test: true
     ignore_read_extra:
       - 'status.0.description'
   - !ruby/object:Provider::Terraform::Examples
@@ -61,7 +61,7 @@ examples:
       connection_name: "test-zendesk"
       secret_id: "test-secret"
     skip_docs: true
-    skip_test: true
+    exclude_test: true
     ignore_read_extra:
       - 'status.0.description'
   - !ruby/object:Provider::Terraform::Examples
@@ -71,7 +71,7 @@ examples:
       connection_name: "test-box"
       secret_id: "test-secret"
     skip_docs: true
-    skip_test: true
+    exclude_test: true
     ignore_read_extra:
       - 'status.0.description'
   - !ruby/object:Provider::Terraform::Examples
@@ -81,7 +81,7 @@ examples:
       connection_name: "test-box"
       secret_id: "test-secret"
     skip_docs: true
-    skip_test: true
+    exclude_test: true
     ignore_read_extra:
       - 'status.0.description'
   - !ruby/object:Provider::Terraform::Examples
@@ -91,7 +91,7 @@ examples:
       connection_name: "test-box"
       secret_id: "test-secret"
     skip_docs: true
-    skip_test: true
+    exclude_test: true
     ignore_read_extra:
       - 'status.0.description'
   - !ruby/object:Provider::Terraform::Examples
@@ -101,7 +101,7 @@ examples:
       connection_name: "test-box"
       secret_id: "test-secret"
     skip_docs: true
-    skip_test: true
+    exclude_test: true
     ignore_read_extra:
       - 'status.0.description'
 async: !ruby/object:Api::OpAsync

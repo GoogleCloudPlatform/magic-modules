@@ -64,7 +64,7 @@ examples:
       'ha_gateway1'
       # Multiple fine-grained resources
     skip_vcr: true
-    skip_test: true
+    exclude_test: true
     skip_docs: true
     vars:
       ha_vpn_gateway1_name: 'ha-vpn-1'
@@ -78,7 +78,7 @@ examples:
     primary_resource_id:
       'vpn-gateway'
       # TODO: https://github.com/hashicorp/terraform-provider-google/issues/11504
-    skip_test: true
+    exclude_test: true
     vars:
       ha_vpn_gateway_name: 'test-ha-vpngw'
       interconnect_attachment1_name: 'test-interconnect-attachment1'

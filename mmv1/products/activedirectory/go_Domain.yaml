@@ -62,7 +62,7 @@ examples:
     vars:
       name: 'myorg'
       domain_name: 'tfgen'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'domainName'
     type: String

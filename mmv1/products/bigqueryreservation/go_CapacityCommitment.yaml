@@ -48,7 +48,7 @@ examples:
     external_providers: ["random", "time"]
     skip_docs: true
   - name: 'bigquery_reservation_capacity_commitment_docs'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'capacityCommitmentId'
     type: String

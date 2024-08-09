@@ -37,7 +37,7 @@ examples:
       instance_name: 'test-instance'
       network_name: 'test-network'
       address_name: 'address'
-    skip_test: true
+    exclude_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'memcache_instance_basic_test'
     primary_resource_id: 'instance'

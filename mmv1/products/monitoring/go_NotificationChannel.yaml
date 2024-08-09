@@ -69,7 +69,7 @@ examples:
     primary_resource_id: 'default'
     vars:
       display_name: 'Sensitive Notification Channel test'
-    skip_test: true
+    exclude_test: true
 virtual_fields:
   - name: 'force_delete'
     description: |

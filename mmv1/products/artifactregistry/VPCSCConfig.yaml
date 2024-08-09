@@ -33,7 +33,7 @@ skip_delete: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     # Requires VPC SC Policy configured on organization
-    skip_test: true
+    exclude_test: true
     name: 'artifact_registry_vpcsc_config'
     primary_resource_id: 'my-config'
 autogen_async: false

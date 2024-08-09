@@ -37,7 +37,7 @@ examples:
       node_name: 'test-tpu'
       global_address_name: 'my-global-address'
       network_name: 'tpu-node-network'
-    skip_test: true
+    exclude_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'tpu_node_full_test'
     primary_resource_id: 'tpu'

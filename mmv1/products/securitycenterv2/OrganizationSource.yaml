@@ -39,7 +39,7 @@ examples:
     name:
       'scc_source_basic'
       # resource can't be destroyed, so checkdestroy fails unnecessarily
-    skip_test: true
+    exclude_test: true
     primary_resource_id: 'custom_source'
     vars:
       source_display_name: 'My Source'

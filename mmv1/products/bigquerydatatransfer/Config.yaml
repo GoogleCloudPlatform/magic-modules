@@ -40,14 +40,14 @@ custom_diff: [
 ]
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    skip_test: true
+    exclude_test: true
     name: 'bigquerydatatransfer_config_scheduled_query'
     primary_resource_id: 'query_config'
     vars:
       display_name: 'my-query'
       dataset_id: 'my_dataset'
   - !ruby/object:Provider::Terraform::Examples
-    skip_test: true
+    exclude_test: true
     name: 'bigquerydatatransfer_config_salesforce'
     primary_resource_id: 'salesforce_config'
     vars:

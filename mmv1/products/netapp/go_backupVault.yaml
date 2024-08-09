@@ -50,7 +50,7 @@ examples:
     primary_resource_id: 'test_backup_vault'
     vars:
       backup_vault_name: 'test-backup-vault'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'location'
     type: String

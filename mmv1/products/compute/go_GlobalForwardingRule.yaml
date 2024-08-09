@@ -67,7 +67,7 @@ examples:
       - 'port_range'
       - 'target'
       - 'ip_address'
-    skip_test: true
+    exclude_test: true
   - name: 'external_tcp_proxy_lb_mig_backend'
     primary_resource_id: 'default'
     min_version: 'beta'

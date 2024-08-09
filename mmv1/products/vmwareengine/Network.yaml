@@ -55,7 +55,7 @@ examples:
     name: "vmware_engine_network_legacy"
     external_providers: ["random", "time"]
     primary_resource_id: "vmw-engine-network"
-    skip_test: true   # update tests will take care of create and update. Legacy network needs to be created on an isolated project.
+    exclude_test: true   # update tests will take care of create and update. Legacy network needs to be created on an isolated project.
     vars:
       proj_id: "vmw-proj"
     test_env_vars:

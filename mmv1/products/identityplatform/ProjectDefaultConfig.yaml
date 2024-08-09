@@ -43,7 +43,7 @@ examples:
       'default'
       # skip tests for this resource until we ensure other settings will not be cleared
       # see https://github.com/hashicorp/terraform-provider-google/issues/13327
-    skip_test: true
+    exclude_test: true
 
 properties:
   - !ruby/object:Api::Type::String

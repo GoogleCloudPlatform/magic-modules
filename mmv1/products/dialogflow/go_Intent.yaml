@@ -41,7 +41,7 @@ examples:
     primary_resource_id: 'basic_intent'
     vars:
       intent_name: 'basic-intent'
-    skip_test: true
+    exclude_test: true
   - name: 'dialogflow_intent_full'
     primary_resource_id: 'full_intent'
     vars:

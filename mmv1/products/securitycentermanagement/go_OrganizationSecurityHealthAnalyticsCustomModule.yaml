@@ -44,7 +44,7 @@ examples:
       org_id: 'ORG_ID'
     test_vars_overrides:
       'sleep': 'true'
-    skip_test: true
+    exclude_test: true
   - name: 'scc_management_organization_security_health_analytics_custom_module_full'
     primary_resource_id: 'example'
     vars:
@@ -53,7 +53,7 @@ examples:
       org_id: 'ORG_ID'
     test_vars_overrides:
       'sleep': 'true'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'organization'
     type: String

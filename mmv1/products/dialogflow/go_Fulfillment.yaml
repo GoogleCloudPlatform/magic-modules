@@ -46,7 +46,7 @@ examples:
     primary_resource_id: 'basic_fulfillment'
     vars:
       fulfillment_name: 'basic-fulfillment'
-    skip_test: true
+    exclude_test: true
 parameters:
 properties:
   - name: 'name'

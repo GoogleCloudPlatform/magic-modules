@@ -55,7 +55,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "vmware_engine_cluster_basic"
     primary_resource_id: "vmw-engine-ext-cluster"
-    skip_test: true   # update tests will take care of create and update. PC and cluster creation is expensive and node reservation is required.
+    exclude_test: true   # update tests will take care of create and update. PC and cluster creation is expensive and node reservation is required.
     vars:
       name: "ext-cluster"
       private_cloud_id: "sample-pc"
@@ -66,7 +66,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "vmware_engine_cluster_full"
     primary_resource_id: "vmw-ext-cluster"
-    skip_test: true   # update tests will take care of create and update. PC and cluster creation is expensive and node reservation is required.
+    exclude_test: true   # update tests will take care of create and update. PC and cluster creation is expensive and node reservation is required.
     vars:
       name: "ext-cluster"
       private_cloud_id: "sample-pc"

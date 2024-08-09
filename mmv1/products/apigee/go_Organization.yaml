@@ -52,7 +52,7 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/go/apigee_organization.go.tmpl'
 examples:
   - name: 'apigee_organization_cloud_basic'
-    skip_test: true
+    exclude_test: true
   - name: 'apigee_organization_cloud_basic_test'
     primary_resource_id: 'org'
     test_env_vars:
@@ -63,7 +63,7 @@ examples:
     skip_docs: true
     skip_vcr: true
   - name: 'apigee_organization_cloud_basic_disable_vpc_peering'
-    skip_test: true
+    exclude_test: true
   - name: 'apigee_organization_cloud_basic_disable_vpc_peering_test'
     primary_resource_id: 'org'
     test_env_vars:
@@ -74,7 +74,7 @@ examples:
     skip_docs: true
     skip_vcr: true
   - name: 'apigee_organization_cloud_full'
-    skip_test: true
+    exclude_test: true
   - name: 'apigee_organization_cloud_full_test'
     primary_resource_id: 'org'
     min_version: 'beta'
@@ -86,7 +86,7 @@ examples:
     skip_docs: true
     skip_vcr: true
   - name: 'apigee_organization_cloud_full_disable_vpc_peering'
-    skip_test: true
+    exclude_test: true
   - name: 'apigee_organization_cloud_full_disable_vpc_peering_test'
     primary_resource_id: 'org'
     min_version: 'beta'

@@ -78,7 +78,7 @@ examples:
       deletion_protection: 'true'
     test_vars_overrides:
       'deletion_protection': 'false'
-    skip_test: true
+    exclude_test: true
   - name: 'datastream_connection_profile_sql_server'
     primary_resource_id: 'default'
     vars:
@@ -91,7 +91,7 @@ examples:
       sql_server_root_password: 'root-password'
     test_vars_overrides:
       'deletion_protection': 'false'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'connectionProfileId'
     type: String

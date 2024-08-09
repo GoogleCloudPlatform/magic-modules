@@ -45,7 +45,7 @@ async: !ruby/object:Api::OpAsync
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'compute_interconnect_basic'
-    skip_test: true
+    exclude_test: true
     primary_resource_id: 'example-interconnect'
     vars:
       interconnect_name: 'example-interconnect'

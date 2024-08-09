@@ -71,7 +71,7 @@ examples:
     primary_resource_id: 'instance'
     vars:
       instance_name: 'test-instance'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'zone'
     type: String

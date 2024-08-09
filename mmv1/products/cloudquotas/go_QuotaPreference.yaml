@@ -43,7 +43,7 @@ examples:
       name: 'compute_googleapis_com-CPUS-per-project_us-east1'
     test_env_vars:
       project: 'PROJECT_NAME'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'parent'
     type: String

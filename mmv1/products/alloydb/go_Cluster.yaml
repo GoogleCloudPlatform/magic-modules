@@ -89,14 +89,14 @@ examples:
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
-    skip_test: true
+    exclude_test: true
   - name: 'alloydb_secondary_cluster_basic'
     primary_resource_id: 'secondary'
     vars:
       alloydb_primary_cluster_name: 'alloydb-primary-cluster'
       alloydb_primary_instance_name: 'alloydb-primary-instance'
       alloydb_secondary_cluster_name: 'alloydb-secondary-cluster'
-    skip_test: true
+    exclude_test: true
   - name: 'alloydb_secondary_cluster_basic_test'
     primary_resource_id: 'secondary'
     vars:

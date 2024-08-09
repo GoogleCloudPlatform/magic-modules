@@ -48,7 +48,7 @@ custom_code:
 examples:
   - name: 'artifact_registry_vpcsc_config'
     primary_resource_id: 'my-config'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'location'
     type: String

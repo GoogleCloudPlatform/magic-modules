@@ -74,7 +74,7 @@ examples:
     name: 'app_engine_flexible_app_version'
     primary_resource_id: 'myapp_v1'
     # https://github.com/hashicorp/terraform-provider-google/issues/19040
-    skip_test: true
+    exclude_test: true
     ignore_read_extra:
       - 'noop_on_destroy'
       - 'deployment.0.zip'

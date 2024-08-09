@@ -40,12 +40,12 @@ examples:
     primary_resource_id: 'organization_access_approval'
     test_env_vars:
       org_id: 'ORG_ID'
-    skip_test: true
+    exclude_test: true
   - name: 'organization_access_approval_active_key_version'
     primary_resource_id: 'organization_access_approval'
     test_env_vars:
       org_id: 'ORG_ID'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'organization_id'
     type: String

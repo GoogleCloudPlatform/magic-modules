@@ -84,7 +84,7 @@ examples:
       profile: 'my-profileid'
     ignore_read_extra:
       - 'oracle.0.password'
-    skip_test: true
+    exclude_test: true
   - name: 'database_migration_service_connection_profile_alloydb'
     primary_resource_id: 'alloydbprofile'
     vars:
@@ -93,7 +93,7 @@ examples:
       network_name: 'vpc-network'
     ignore_read_extra:
       - 'alloydb.0.settings.0.initial_user.0.password'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'connectionProfileId'
     type: String

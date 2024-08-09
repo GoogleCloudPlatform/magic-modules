@@ -771,7 +771,7 @@ module Provider
 
     def generate_resource_tests(pwd, data)
       return if data.object.examples
-                    .reject(&:skip_test)
+                    .reject(&:exclude_test)
                     .reject do |e|
                   @api.version_obj_or_closest(data.version) \
                 < @api.version_obj_or_closest(e.min_version)
@@ -840,7 +840,7 @@ module Provider
                       self)
 
         # Only generate test if testable examples exist.
-        unless data.object.examples.reject(&:skip_test).empty?
+        unless data.object.examples.reject(&:exclude_test).empty?
           data.generate(
             pwd,
             'templates/terraform/examples/base_configs/iam_test_file.go.erb',

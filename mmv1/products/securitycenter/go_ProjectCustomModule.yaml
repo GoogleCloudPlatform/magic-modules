@@ -40,12 +40,12 @@ examples:
     primary_resource_id: 'example'
     vars:
       display_name: 'basic_custom_module'
-    skip_test: true
+    exclude_test: true
   - name: 'scc_project_custom_module_full'
     primary_resource_id: 'example'
     vars:
       display_name: 'full_custom_module'
-    skip_test: true
+    exclude_test: true
 parameters:
 properties:
   - name: 'name'

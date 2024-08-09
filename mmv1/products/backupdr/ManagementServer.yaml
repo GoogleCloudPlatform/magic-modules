@@ -39,7 +39,7 @@ examples:
       managementserver_name: 'ms-console'
     test_env_vars:
       project: :PROJECT_NAME
-    skip_test: true
+    exclude_test: true
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'

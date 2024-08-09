@@ -26,7 +26,7 @@ legacy_name: 'google_folder_access_approval_settings'
 import_format: ['folders/{{folder_id}}/accessApprovalSettings']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    skip_test: true
+    exclude_test: true
     name: 'folder_access_approval_full'
     primary_resource_id: 'folder_access_approval'
     vars:
@@ -34,7 +34,7 @@ examples:
     test_env_vars:
       org_id: :ORG_ID
   - !ruby/object:Provider::Terraform::Examples
-    skip_test: true
+    exclude_test: true
     name: 'folder_access_approval_active_key_version'
     primary_resource_id: 'folder_access_approval'
     vars:

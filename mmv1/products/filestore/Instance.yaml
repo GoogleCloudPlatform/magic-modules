@@ -51,7 +51,7 @@ examples:
     name: 'filestore_instance_enterprise'
     primary_resource_id: 'instance'
     # https://github.com/GoogleCloudPlatform/magic-modules/pull/5875#discussion_r844285335
-    skip_test: true
+    exclude_test: true
     vars:
       instance_name: 'test-instance'
 custom_code: !ruby/object:Provider::Terraform::CustomCode

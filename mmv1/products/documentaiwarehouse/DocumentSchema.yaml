@@ -28,7 +28,7 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
 examples:
   - !ruby/object:Provider::Terraform::Examples
     # docs only, testing is done in an update test
-    skip_test: true
+    exclude_test: true
     name: "document_ai_warehouse_document_schema_text"
     primary_resource_id: "example_text"
 parameters:

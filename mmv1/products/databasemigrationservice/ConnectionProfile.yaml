@@ -85,7 +85,7 @@ examples:
       - 'oracle.0.password'
     vars:
       profile: 'my-profileid'
-    skip_test: true
+    exclude_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'database_migration_service_connection_profile_alloydb'
     primary_resource_id: 'alloydbprofile'
@@ -95,7 +95,7 @@ examples:
       profile: 'my-profileid'
       global_address_name: 'private-ip-alloc'
       network_name: 'vpc-network'
-    skip_test: true
+    exclude_test: true
 parameters:
   - !ruby/object:Api::Type::String
     name: 'connectionProfileId'
