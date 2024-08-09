@@ -290,6 +290,7 @@ properties:
     item_type: Api::Type::String
   - !ruby/object:Api::Type::String
     name: deploymentGroup
+    # This field is not updatable via the mutateDeployedIndex method in the API, which is the only update method usable by this 'fine-grained' resource. This is why the field is marked as immutable despite the API docs not marking the field as immutable.
     immutable: true
     default_value: 'default'
     description: |
