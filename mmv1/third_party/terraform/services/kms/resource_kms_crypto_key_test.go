@@ -317,6 +317,7 @@ func TestAccKmsCryptoKey_destroyDuration(t *testing.T) {
 	})
 }
 
+<% unless version == "ga" -%>
 func TestAccKmsCryptoKey_keyAccessJustificationsPolicy(t *testing.T) {
 	t.Parallel()
 
@@ -363,6 +364,7 @@ func TestAccKmsCryptoKey_keyAccessJustificationsPolicy(t *testing.T) {
 		},
 	})
 }
+<% end -%>
 
 func TestAccKmsCryptoKey_importOnly(t *testing.T) {
 	t.Parallel()
@@ -836,6 +838,7 @@ resource "google_kms_crypto_key" "crypto_key" {
 `, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName)
 }
 
+<% unless version == "ga" -%>
 func testGoogleKmsCryptoKey_keyAccessJustificationsPolicy(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, allowed_access_reason string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
@@ -868,6 +871,7 @@ resource "google_kms_crypto_key" "crypto_key" {
 }
 `, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, allowed_access_reason)
 }
+<% end -%>
 
 func testGoogleKmsCryptoKey_importOnly(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName string) string {
 	return fmt.Sprintf(`
