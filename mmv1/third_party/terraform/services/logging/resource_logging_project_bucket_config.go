@@ -42,6 +42,14 @@ var loggingProjectBucketConfigSchema = map[string]*schema.Schema{
 		Computed:    true,
 		Description: `An optional description for this bucket.`,
 	},
+	"restricted_fields": {
+		Type:        schema.TypeList,
+		Optional:    true,
+		Description: `Optional fields to configure with field-level access`,
+		Elem: &schema.Schema{
+			Type: schema.TypeString,
+		},
+	},
 	"locked": {
 		Type:        schema.TypeBool,
 		Optional:    true,
@@ -210,6 +218,7 @@ func resourceLoggingProjectBucketConfigCreate(d *schema.ResourceData, meta inter
 	obj := make(map[string]interface{})
 	obj["name"] = d.Get("name")
 	obj["description"] = d.Get("description")
+	obj["restrictedFields"] = d.Get("restricted_fields")
 	obj["locked"] = d.Get("locked")
 	obj["retentionDays"] = d.Get("retention_days")
 	// Only set analyticsEnabled if it has been explicitly preferenced.
@@ -299,6 +308,9 @@ func resourceLoggingProjectBucketConfigRead(d *schema.ResourceData, meta interfa
 	if err := d.Set("description", res["description"]); err != nil {
 		return fmt.Errorf("Error setting description: %s", err)
 	}
+	if err := d.Set("restricted_fields", res["restrictedFields"]); err != nil {
+		return fmt.Errorf("Error setting restricted_fields: %s", err)
+	}
 	if err := d.Set("locked", res["locked"]); err != nil {
 		return fmt.Errorf("Error setting locked: %s", err)
 	}
@@ -367,6 +379,7 @@ func resourceLoggingProjectBucketConfigUpdate(d *schema.ResourceData, meta inter
 
 	obj["retentionDays"] = d.Get("retention_days")
 	obj["description"] = d.Get("description")
+	obj["restrictedFields"] = d.Get("restricted_fields")
 	obj["cmekSettings"] = expandCmekSettings(d.Get("cmek_settings"))
 	obj["indexConfigs"] = expandIndexConfigs(d.Get("index_configs"))
 
@@ -376,6 +389,9 @@ func resourceLoggingProjectBucketConfigUpdate(d *schema.ResourceData, meta inter
 	}
 	if d.HasChange("description") {
 		updateMask = append(updateMask, "description")
+	}
+	if d.HasChange("restricted_fields") {
+		updateMask = append(updateMask, "restrictedFields")
 	}
 	if d.HasChange("cmek_settings") {
 		updateMask = append(updateMask, "cmekSettings")

@@ -216,6 +216,77 @@ func TestAccLoggingBucketConfigBillingAccount_basic(t *testing.T) {
 	})
 }
 
+func testAccLoggingBucketConfigBillingAccount_restrictedFields(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix":        acctest.RandString(t, 10),
+		"billing_account_name": "billingAccounts/" + envvar.GetTestMasterBillingAccountFromEnv(t),
+		"org_id":               envvar.GetTestOrgFromEnv(t),
+		"bucket_id":            "_Default",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLoggingBucketConfigBillingAccount_restrictedFields(context, "jsonPayload"),
+			},
+			{
+				ResourceName:            "google_logging_billing_account_bucket_config.restricted_fields",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"billing_account"},
+			},
+			{
+				Config: testAccLoggingBucketConfigBillingAccount_restrictedFields(context, "jsonPayload.url"),
+			},
+			{
+				ResourceName:            "google_logging_billing_account_bucket_config.restricted_fields",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"billing_account"},
+			},
+		},
+	})
+}
+
+func TestAccLoggingBucketConfigOrganization_restrictedFields(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"bucket_id":     "_Default",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLoggingBucketConfigOrganization_restrictedFields(context, "jsonPayload"),
+			},
+			{
+				ResourceName:            "google_logging_organization_bucket_config.restricted_fields",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"organization"},
+			},
+			{
+				Config: testAccLoggingBucketConfigOrganization_restrictedFields(context, "jsonPayload.url"),
+			},
+			{
+				ResourceName:            "google_logging_organization_bucket_config.restricted_fields",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"organization"},
+			},
+		},
+	})
+}
+
 func TestAccLoggingBucketConfigOrganization_basic(t *testing.T) {
 	t.Parallel()
 
@@ -485,6 +556,22 @@ resource "google_logging_billing_account_bucket_config" "basic" {
 `, context), retention, retention)
 }
 
+func testAccLoggingBucketConfigBillingAccount_restrictedFields(context map[string]interface{}, restrictedField string) string {
+	return fmt.Sprintf(acctest.Nprintf(`
+
+data "google_billing_account" "default" {
+	billing_account = "%{billing_account_name}"
+}
+
+resource "google_logging_billing_account_bucket_config" "restricted_fields" {
+	billing_account    = data.google_billing_account.default.billing_account
+	location  = "global"
+	restricted_fields = ["%s"]
+	bucket_id = "_Default"
+}
+`, context), restrictedField)
+}
+
 func testAccLoggingBucketConfigOrganization_basic(context map[string]interface{}, retention int) string {
 	return fmt.Sprintf(acctest.Nprintf(`
 data "google_organization" "default" {
@@ -499,6 +586,21 @@ resource "google_logging_organization_bucket_config" "basic" {
 	bucket_id = "_Default"
 }
 `, context), retention, retention)
+}
+
+func testAccLoggingBucketConfigOrganization_restrictedFields(context map[string]interface{}, restrictedField int) string {
+	return fmt.Sprintf(acctest.Nprintf(`
+data "google_organization" "default" {
+	organization = "%{org_id}"
+}
+
+resource "google_logging_organization_bucket_config" "restricted_fields" {
+	organization    = data.google_organization.default.organization
+	location  = "global"
+	restricted_fields = ["%s"]
+	bucket_id = "_Default"
+}
+`, context), restrictedField)
 }
 
 func getLoggingBucketConfigs(context map[string]interface{}) map[string]string {
@@ -648,4 +750,62 @@ resource "google_logging_project_bucket_config" "basic" {
 	}
 }
 `, context), urlIndexType, statusIndexType)
+}
+
+func TestAccLoggingBucketConfigProject_restrictedFields(t *testing.T) {
+
+	context := map[string]interface{}{
+		"project_name":    "tf-test-" + acctest.RandString(t, 10),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"bucket_id":       "tf-test-bucket-" + acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLoggingBucketConfigProject_restrictedFields(context, "jsonPayload"),
+			},
+			{
+				ResourceName:            "google_logging_project_bucket_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"project"},
+			},
+			{
+				Config: testAccLoggingBucketConfigProject_restrictedFields(context, "jsonPayload.url"),
+			},
+			{
+				ResourceName:            "google_logging_project_bucket_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"project"},
+			},
+		},
+	})
+}
+
+func testAccLoggingBucketConfigProject_restrictedFields(context map[string]interface{}, restrictedField string) string {
+	return fmt.Sprintf(acctest.Nprintf(`
+
+resource "google_project" "default" {
+	project_id      = "%{project_name}"
+	name            = "%{project_name}"
+	org_id          = "%{org_id}"
+	billing_account = "%{billing_account}"
+}
+
+resource "google_logging_project_bucket_config" "basic" {
+	project        	= google_project.default.name
+	location       	= "us-east1"
+	retention_days 	= 30
+	description    	= "restrictedFields test"
+	bucket_id      	= "%{bucket_id}"
+
+	restricted_fields = ["%s"]
+
+}
+`, context), restrictedField)
 }

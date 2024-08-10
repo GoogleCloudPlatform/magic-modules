@@ -109,6 +109,22 @@ resource "google_logging_project_bucket_config" "example-project-bucket-index-co
 }
 ```
 
+Create logging bucket with field-level access
+
+```hcl
+resource "google_logging_project_bucket_config" "example-project-bucket-restricted-fields" {
+  project          = "project_id"
+  location         = "global"
+  retention_days   = 30
+  bucket_id        = "custom-bucket"
+
+  restricted_fields = [
+    "jsonPayload.url",
+    "jsonPayload.data"
+  ]
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -130,6 +146,8 @@ The following arguments are supported:
 * `cmek_settings` - (Optional) The CMEK settings of the log bucket. If present, new log entries written to this log bucket are encrypted using the CMEK key provided in this configuration. If a log bucket has CMEK settings, the CMEK settings cannot be disabled later by updating the log bucket. Changing the KMS key is allowed. Structure is [documented below](#nested_cmek_settings).
 
 * `index_configs` - (Optional) A list of indexed fields and related configuration data. Structure is [documented below](#nested_index_configs).
+
+* `restricted_fields` - (Optional) A list of restricted fields requiring `logging.fields.access` permission to view. See [field-level access documentation](https://cloud.google.com/logging/docs/field-level-acl)
 
 <a name="nested_cmek_settings"></a>The `cmek_settings` block supports:
 
