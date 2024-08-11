@@ -808,6 +808,7 @@ resource "google_kms_key_ring" "key_ring" {
 `, projectId, projectId, projectOrg, projectBillingAccount, keyRingName)
 }
 
+<% unless version == 'ga' -%>
 func testGoogleKmsCryptoKey_removedBeta(projectId, projectOrg, projectBillingAccount, keyRingName string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
@@ -832,6 +833,7 @@ resource "google_kms_key_ring" "key_ring" {
 }
 `, projectId, projectId, projectOrg, projectBillingAccount, keyRingName)
 }
+<% end -%>
 
 func testGoogleKmsCryptoKey_destroyDuration(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName string) string {
 	return fmt.Sprintf(`
