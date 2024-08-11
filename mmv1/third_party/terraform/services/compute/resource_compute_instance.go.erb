@@ -2462,22 +2462,42 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		}
 
 		if d.HasChange("min_cpu_platform") || d.HasChange("machine_type") {
-			mcp := d.Get("min_cpu_platform")
-			mt, err := tpgresource.ParseMachineTypesFieldValue(d.Get("machine_type").(string), d, config)
+			err = transport_tpg.Retry(transport_tpg.RetryOptions{
+				RetryFunc: func() error {
+					instance, err := config.NewComputeClient(userAgent).Instances.Get(project, zone, instance.Name).Do() //fetch instance for fingerprints
+					if err != nil {
+						return fmt.Errorf("Error retrieving instance: %s", err)
+					}
+					instanceFromConfig, err := expandComputeInstance(project, d, config) //need raw disk encryption keys from config for the Instaces.Update() call
+					if err != nil {
+						return fmt.Errorf("Error retrieving instance config: %s", err)
+					}
+					for _, disk := range instanceFromConfig.Disks {
+						disk.InitializeParams = nil //cannot have both `initialize_params` and source `specified`
+					}
+					mcp := d.Get("min_cpu_platform")
+					mt, err := tpgresource.ParseMachineTypesFieldValue(d.Get("machine_type").(string), d, config)
+					if err != nil {
+						return fmt.Errorf("Error retrieving instance's machine_type: %s", err)
+					}
+
+					instance.Disks = instanceFromConfig.Disks
+					instance.MinCpuPlatform = mcp.(string)
+					instance.MachineType = mt.RelativeLink()
+
+					op, err := config.NewComputeClient(userAgent).Instances.Update(project, zone, instance.Name, instance).Do()
+					if err != nil {
+						return fmt.Errorf("Error updating instance: %s", err)
+					}
+					opErr := ComputeOperationWaitTime(config, op, project, "updating instance", userAgent, d.Timeout(schema.TimeoutUpdate))
+					if opErr != nil {
+						return opErr
+					}
+					return nil
+				},
+			})
 			if err != nil {
 				return err
-			}
-
-			instance.MinCpuPlatform = mcp.(string)
-			instance.MachineType = mt.RelativeLink()
-
-			op, err := config.NewComputeClient(userAgent).Instances.Update(project, zone, instance.Name, instance).Do()
-			if err != nil {
-				return err
-			}
-			opErr := ComputeOperationWaitTime(config, op, project, "updating min cpu platform and machine_type", userAgent, d.Timeout(schema.TimeoutUpdate))
-			if opErr != nil {
-				return opErr
 			}
 		}
 
