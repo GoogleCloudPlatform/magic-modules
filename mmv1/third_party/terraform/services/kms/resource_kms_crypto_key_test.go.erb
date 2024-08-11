@@ -843,6 +843,7 @@ resource "google_kms_crypto_key" "crypto_key" {
 func testGoogleKmsCryptoKey_keyAccessJustificationsPolicy(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, allowed_access_reason string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
+  provider = google-beta
   name            = "%s"
   project_id      = "%s"
   org_id          = "%s"
@@ -850,11 +851,13 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_project_service" "acceptance" {
+  provider = google-beta
   project = google_project.acceptance.project_id
   service = "cloudkms.googleapis.com"
 }
 
 resource "google_kms_key_ring" "key_ring" {
+  provider = google-beta
   project  = google_project_service.acceptance.project
   name     = "%s"
   location = "us-central1"
