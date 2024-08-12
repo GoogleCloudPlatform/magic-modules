@@ -89,7 +89,7 @@ func TestAccFolder_moveParent(t *testing.T) {
 	})
 }
 
-// Test that a Project resource can be created with tags
+// Test that a Folder resource can be created with tags
 func TestAccFolder_tags(t *testing.T) {
 	t.Parallel()
 
