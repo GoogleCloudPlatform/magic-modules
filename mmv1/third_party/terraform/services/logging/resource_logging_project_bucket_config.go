@@ -170,6 +170,7 @@ func resourceLoggingProjectBucketConfigAcquireOrCreate(parentType string, iDFunc
 		if err != nil {
 			return err
 		}
+
 		if parentType == "project" {
 			//logging bucket can be created only at the project level, in future api may allow for folder, org and other parent resources
 
