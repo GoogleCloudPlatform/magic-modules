@@ -14,19 +14,26 @@ func TestAccSecurityCenterV2OrganizationBigQueryExportConfig_basic(t *testing.T)
 
 	randomSuffix := acctest.RandString(t, 10)
 	dataset_id := "tf_test_" + randomSuffix
+	orgID :=        envvar.GetTestOrgFromEnv(t)
 
 	context := map[string]interface{}{
-		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"org_id":        orgID,
 		"random_suffix": randomSuffix,
 		"dataset_id": dataset_id, 
 		"dataset": fmt.Sprintf("projects/%s/datasets/%s",
 					envvar.GetTestProjectFromEnv(), dataset_id),
 		"big_query_export_id": "tf-test-export-"+randomSuffix,
+		"name": fmt.Sprintf("organizations/%s/locations/global/bigQueryExports/%s",
+					orgID, "tf-test-export-"+randomSuffix),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {},
+			"time":   {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSecurityCenterV2OrganizationBigQueryExportConfig_basic(context),
@@ -63,13 +70,21 @@ resource "google_bigquery_dataset" "default" {
   }
 }
 
+resource "time_sleep" "wait_1_minute" {
+	depends_on = [google_bigquery_dataset.default]
+	create_duration = "2m"
+}
+
 resource "google_scc_v2_organization_scc_big_query_exports" "default" {
+  name		   = "%{name}"
   big_query_export_id    = "%{big_query_export_id}"
   organization = "%{org_id}"
   dataset      = "%{dataset}"
   location     = "global"
   description  = "Cloud Security Command Center Findings Big Query Export Config"
   filter       = "state=\"ACTIVE\" AND NOT mute=\"MUTED\""
+
+  depends_on = [time_sleep.wait_1_minute]
 }
 `, context)
 }
@@ -90,6 +105,7 @@ resource "google_bigquery_dataset" "default" {
 }
 
 resource "google_scc_v2_organization_scc_big_query_exports" "default" {
+  name		   = "%{name}"
   big_query_export_id    = "%{big_query_export_id}"
   organization = "%{org_id}"
   dataset      = "%{dataset}"
