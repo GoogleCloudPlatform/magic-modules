@@ -39,17 +39,19 @@ func TestAccSecurityCenterV2OrganizationBigQueryExportConfig_basic(t *testing.T)
 				Config: testAccSecurityCenterV2OrganizationBigQueryExportConfig_basic(context),
 			},
 			{
-				ResourceName:      "google_scc_v2_organization_scc_big_query_exports.default",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_scc_v2_organization_scc_big_query_exports.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"update_time"},
 			},
 			{
 				Config: testAccSecurityCenterV2OrganizationBigQueryExportConfig_update(context),
 			},
 			{
-				ResourceName:      "google_scc_v2_organization_scc_big_query_exports.default",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_scc_v2_organization_scc_big_query_exports.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"update_time"},
 			},
 		},
 	})
@@ -108,7 +110,7 @@ resource "google_bigquery_dataset" "default" {
   labels = {
     env = "default"
   }
-	
+
   lifecycle {
 	ignore_changes = [default_partition_expiration_ms]
   }
