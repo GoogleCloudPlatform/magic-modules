@@ -39,13 +39,6 @@ examples:
     skip_test: true
     vars:
       ekmconnection_name: 'ekmconnection_example'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'kms_ekm_connection_basic_test'
-    primary_resource_id:
-      'example-ekmconnection'
-    skip_docs: true
-    vars:
-      ekmconnection_name: 'ekmconnection_example_test'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   parent_resource_attribute: 'name'
   method_name_separator: ':'

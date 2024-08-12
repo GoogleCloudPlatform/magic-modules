@@ -72,6 +72,11 @@ resource "google_kms_ekm_connection" "example-ekmconnection" {
       }
   }
 }
+resource "google_kms_ekm_connection_iam_member" "add_viewer" {
+  name = google_kms_ekm_connection.example-ekmconnection.id
+  role    = "roles/viewer"
+  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-ekms.iam.gserviceaccount.com"
+}
 `, context)
 }
 
