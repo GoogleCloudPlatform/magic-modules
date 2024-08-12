@@ -56,6 +56,7 @@ async: !ruby/object:Api::OpAsync
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "discoveryengine_schema_basic"
+    primary_resource_id: 'basic'
     vars:
       data_store_id: "data-store-id"
       schema_id: "schema-id"
@@ -98,8 +99,7 @@ properties:
       The JSON representation of the schema.
     exactly_one_of:
       - json_schema
-    custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
-    custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
+    custom_flatten: 'templates/terraform/custom_flatten/discoveryengine_schema_json_schema.go.erb'
     state_func:
       'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
       return s }'
