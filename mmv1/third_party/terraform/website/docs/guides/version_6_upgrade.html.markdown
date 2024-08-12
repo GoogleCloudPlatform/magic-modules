@@ -126,6 +126,20 @@ Removed in favor of field `settings.ip_configuration.ssl_mode`.
 
 An empty value means the setting should be cleared.
 
+## Resources: `google_container_cluster`, `google_container_node_pool`, and `google_compute_instance`
+
+### `guest_accelerator = []` is no longer valid configuration
+
+To explicitly set an empty list of objects, set `guest_accelerator.count = 0`.
+
+Previously, to explicitly set `guest_accelerator` as an empty list of objects, the specific configuration `guest_accelerator = []` was necessary.
+This was to maintain compatability in behavior between Terraform versions 0.11 and 0.12 using a special setting ["attributes as blocks"](https://developer.hashicorp.com/terraform/language/attr-as-blocks).
+This special setting causes other breakages so it is now removed, with setting `guest_accelerator.count = 0` available as an alternative form of empty `guest_accelerator` object.
+
+### `guest_accelerator.gpu_driver_installation_config = []` and `guest_accelerator.gpu_sharing_config = []` are no longer valid configuration
+
+These were never intended to be set this way. Removing the fields from configuration should not produce a diff.
+
 ## Resource: `google_domain`
 
 ### Domain deletion now prevented by default with `deletion_protection`
@@ -204,16 +218,6 @@ Users will need to check their configuration for any `google_vpc_access_connecto
 resource blocks that contain both fields in a conflicting pair, and remove one of those fields.
 The fields that are removed from the configuration will still have Computed values,
 that are derived from the API.
-
-## Resource: `google_storage_bucket`
-
-### `lifecycle_rule.condition.no_age` is now removed
-
-Previously `lifecycle_rule.condition.age` attirbute was being set zero value by default and `lifecycle_rule.condition.no_age` was introduced to prevent that.
-Now `lifecycle_rule.condition.no_age` is no longer supported and `lifecycle_rule.condition.age` won't set a zero value by default.
-Removed in favor of the field `lifecycle_rule.condition.send_age_if_zero` which can be used to set zero value for `lifecycle_rule.condition.age` attribute. 
-
-For a seamless update, if your state today uses `no_age=true`, update it to remove `no_age` and set `send_age_if_zero=false`. If you do not use `no_age=true`, you will need to add `send_age_if_zero=true` to your state to avoid any changes after updating to 6.0.0. 
 
 ## Removals
 

@@ -80,7 +80,6 @@ examples:
       - deletion_policy
   - !ruby/object:Provider::Terraform::Examples
     name: 'firestore_cmek_database'
-    min_version: beta
     primary_resource_id: 'database'
     vars:
       database_id: "cmek-database-id"
@@ -121,7 +120,6 @@ examples:
       - deletion_policy
   - !ruby/object:Provider::Terraform::Examples
     name: 'firestore_cmek_database_in_datastore_mode'
-    min_version: beta
     primary_resource_id: 'database'
     vars:
       database_id: "cmek-database-id"
@@ -270,7 +268,6 @@ properties:
     output: true
   - !ruby/object:Api::Type::NestedObject
     name: cmekConfig
-    min_version: beta
     immutable: true
     description: |
        The CMEK (Customer Managed Encryption Key) configuration for a Firestore
