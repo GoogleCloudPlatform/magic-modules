@@ -69,6 +69,10 @@ resource "google_bigquery_dataset" "default" {
   labels = {
     env = "default"
   }
+
+  lifecycle {
+	ignore_changes = [default_partition_expiration_ms]
+  }
 }
 
 resource "time_sleep" "wait_1_minute" {
@@ -103,6 +107,10 @@ resource "google_bigquery_dataset" "default" {
 
   labels = {
     env = "default"
+  }
+	
+  lifecycle {
+	ignore_changes = [default_partition_expiration_ms]
   }
 }
 
