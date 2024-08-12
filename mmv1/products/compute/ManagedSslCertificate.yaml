@@ -107,7 +107,6 @@ properties:
     api_name: 'id'
     description: 'The unique identifier for the resource.'
     output: true
-    default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
