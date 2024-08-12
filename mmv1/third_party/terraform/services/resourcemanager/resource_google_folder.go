@@ -65,11 +65,12 @@ func ResourceGoogleFolder() *schema.Resource {
 				Computed:    true,
 				Description: `Timestamp when the Folder was created. Assigned by the server. A timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds. Example: "2014-10-02T15:01:23.045123456Z".`,
 			},
-			"deletion_protection": {
-				Type:        schema.TypeBool,
+			"tags": {
+				Type:        schema.TypeMap,
 				Optional:    true,
-				Default:     true,
-				Description: `When the field is set to true or unset in Terraform state, a terraform apply or terraform destroy that would delete the instance will fail. When the field is set to false, deleting the instance is allowed.`,
+				ForceNew:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Description: `A map of resource manager tags. Resource manager tag keys and values have the same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456. The field is ignored when empty.`,
 			},
 		},
 		UseJSONNumber: true,
@@ -85,6 +86,14 @@ func resourceGoogleFolderCreate(d *schema.ResourceData, meta interface{}) error 
 
 	displayName := d.Get("display_name").(string)
 	parent := d.Get("parent").(string)
+
+	folder := &cloudresourcemanager.Folder{
+		DisplayName: displayName,
+		Parent:      parent,
+	}
+	if _, ok := d.GetOk("tags"); ok {
+		folder.Tags = tpgresource.ExpandStringMap(d, "tags")
+	}
 
 	var op *resourceManagerV3.Operation
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
@@ -142,12 +151,7 @@ func resourceGoogleFolderRead(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Folder Not Found : %s", d.Id()))
 	}
-	// Explicitly set client-side fields to default values if unset
-	if _, ok := d.GetOkExists("deletion_protection"); !ok {
-		if err := d.Set("deletion_protection", true); err != nil {
-			return fmt.Errorf("Error setting deletion_protection: %s", err)
-		}
-	}
+
 	if err := d.Set("name", folder.Name); err != nil {
 		return fmt.Errorf("Error setting name: %s", err)
 	}
@@ -177,19 +181,6 @@ func resourceGoogleFolderUpdate(d *schema.ResourceData, meta interface{}) error 
 	if err != nil {
 		return err
 	}
-
-	clientSideFields := map[string]bool{"deletion_protection": true}
-	clientSideOnly := true
-	for field := range ResourceGoogleFolder().Schema {
-		if d.HasChange(field) && !clientSideFields[field] {
-			clientSideOnly = false
-			break
-		}
-	}
-	if clientSideOnly {
-		return nil
-	}
-
 	displayName := d.Get("display_name").(string)
 
 	d.Partial(true)
@@ -246,11 +237,6 @@ func resourceGoogleFolderDelete(d *schema.ResourceData, meta interface{}) error 
 	if err != nil {
 		return err
 	}
-
-	if d.Get("deletion_protection").(bool) {
-		return fmt.Errorf("cannot destroy folder without setting deletion_protection=false and running `terraform apply`")
-	}
-
 	displayName := d.Get("display_name").(string)
 
 	var op *resourceManagerV3.Operation

@@ -2,6 +2,7 @@ package resourcemanager_test
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -83,6 +84,41 @@ func TestAccFolder_moveParent(t *testing.T) {
 					testAccCheckGoogleFolderParent(&folder2, parent),
 					testAccCheckGoogleFolderDisplayName(&folder2, folder2DisplayName),
 				),
+			},
+		},
+	})
+}
+
+// Test that a Project resource can be created with tags
+func TestAccFolder_tags(t *testing.T) {
+	t.Parallel()
+
+	org := envvar.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("%s-%d", TestPrefix, acctest.RandInt(t))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFolder_tags(pid, org, map[string]string{org + "/env": "test"}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleFolderExists("google_folder.acceptance", pid),
+				),
+			},
+			// Make sure import supports tags
+			{
+				ResourceName:            "google_folder.acceptance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"tags", "deletion_protection"}, // we don't read tags back
+			},
+			// Update tags tries to replace project but fails due to deletion protection
+			{
+				Config:      testAccFolder_tags(pid, org, map[string]string{org + "/env": "staging"}),
+				ExpectError: regexp.MustCompile("deletion_protection"),
+			},
+			{
+				Config: testAccFolder_tagsAllowDestroy(pid, org, map[string]string{org + "/env": "test"}),
 			},
 		},
 	})
