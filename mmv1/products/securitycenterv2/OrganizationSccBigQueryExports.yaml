@@ -85,28 +85,28 @@ properties:
   - !ruby/object:Api::Type::String
     name: dataset
     description: |
-      The dataset to write findings' updates to. 
-      Its format is "projects/[projectId]/datasets/[bigquery_dataset_id]". 
+      The dataset to write findings' updates to.
+      Its format is "projects/[projectId]/datasets/[bigquery_dataset_id]".
       BigQuery Dataset unique ID must contain only letters (a-z, A-Z), numbers (0-9), or underscores (_).
   - !ruby/object:Api::Type::String
     name: createTime
     output: true
     description: |
       The time at which the BigQuery export was created. This field is set by the server and will be ignored if provided on export on creation.
-      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. 
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
       Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
   - !ruby/object:Api::Type::String
     name: updateTime
     output: true
     description: |
       The most recent time at which the BigQuery export was updated. This field is set by the server and will be ignored if provided on export creation or update.
-      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. 
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
       Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
   - !ruby/object:Api::Type::String
     name: mostRecentEditor
     output: true
     description: |
-      Email address of the user who last edited the BigQuery export. 
+      Email address of the user who last edited the BigQuery export.
       This field is set by the server and will be ignored if provided on export creation or update.
   - !ruby/object:Api::Type::String
     name: principal
