@@ -19,24 +19,26 @@ func IsShrinkageIpCidr(_ context.Context, old, new, _ interface{}) bool {
 }
 
 func sendSecondaryIpRangeIfEmptyDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	if diff.Id() == "" {
+		return nil
+	}
+
 	sendZero := diff.Get("send_secondary_ip_range_if_empty").(bool)
 	if !sendZero {
 		return nil
 	}
 
-	configValueIsEmpty := false
 	configSecondaryIpRange := diff.GetRawConfig().GetAttr("secondary_ip_range")
-
-	// IsNull check can be deleted when SchemaConfigModeAttr is removed
-	if configSecondaryIpRange.IsNull() {
-		configValueIsEmpty = true
-	} else {
-		configSlice := configSecondaryIpRange.AsValueSlice()
-		configValueIsEmpty = len(configSlice) == 0
+	if !configSecondaryIpRange.IsKnown() {
+		return nil
 	}
+	configValueIsEmpty := configSecondaryIpRange.IsNull() || configSecondaryIpRange.LengthInt() == 0
 
-	stateSecondaryIpRange, ok := diff.GetOk("secondary_ip_range")
-	stateValueIsEmpty := !ok || len(stateSecondaryIpRange.([]interface{})) == 0
+	stateSecondaryIpRange := diff.GetRawState().GetAttr("secondary_ip_range")
+	if !stateSecondaryIpRange.IsKnown() {
+		return nil
+	}
+	stateValueIsEmpty := stateSecondaryIpRange.IsNull() || stateSecondaryIpRange.LengthInt() == 0
 
 	if configValueIsEmpty && !stateValueIsEmpty {
 		log.Printf("[DEBUG] setting secondary_ip_range to newly empty")

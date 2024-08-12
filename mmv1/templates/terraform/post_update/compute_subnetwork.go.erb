@@ -1,8 +1,8 @@
 if v, ok := d.GetOk("send_secondary_ip_range_if_empty"); ok && v.(bool) {
 	if sv, ok := d.GetOk("secondary_ip_range"); ok {
-		configValue := d.GetRawConfig().GetAttr("secondary_ip_range").AsValueSlice()
+		configValue := d.GetRawConfig().GetAttr("secondary_ip_range")
 		stateValue := sv.([]interface{})
-		if len(configValue) == 0 && len(stateValue) != 0 {
+		if configValue.LengthInt() == 0 && len(stateValue) != 0 {
 			log.Printf("[DEBUG] Sending empty secondary_ip_range in update")
 			obj := make(map[string]interface{})
 			obj["secondaryIpRanges"] = make([]interface{}, 0)
