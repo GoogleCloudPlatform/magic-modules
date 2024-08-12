@@ -320,9 +320,9 @@ in GCP, including the labels configured through Terraform, the system, and other
 
 ## Resource: `google_workstations_workstation_config`
 
-### Disable SSH to root VM is set to true by default for workstation config.
+### `host.gce_instance.disable_ssh` now defaults to true
 
-* `disableSSH` field is set to true when creating configs. To enable SSH, please set `disableSSH` to false.
+* `disable_ssh` field now defaults to true. To enable SSH, please set `disable_ssh` to false.
 
 ## Removals
 
