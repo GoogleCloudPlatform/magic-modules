@@ -14,17 +14,17 @@ func TestAccSecurityCenterV2OrganizationBigQueryExportConfig_basic(t *testing.T)
 
 	randomSuffix := acctest.RandString(t, 10)
 	dataset_id := "tf_test_" + randomSuffix
-	orgID :=        envvar.GetTestOrgFromEnv(t)
+	orgID := envvar.GetTestOrgFromEnv(t)
 
 	context := map[string]interface{}{
 		"org_id":        orgID,
 		"random_suffix": randomSuffix,
-		"dataset_id": dataset_id, 
+		"dataset_id":    dataset_id,
 		"dataset": fmt.Sprintf("projects/%s/datasets/%s",
-					envvar.GetTestProjectFromEnv(), dataset_id),
-		"big_query_export_id": "tf-test-export-"+randomSuffix,
+			envvar.GetTestProjectFromEnv(), dataset_id),
+		"big_query_export_id": "tf-test-export-" + randomSuffix,
 		"name": fmt.Sprintf("organizations/%s/locations/global/bigQueryExports/%s",
-					orgID, "tf-test-export-"+randomSuffix),
+			orgID, "tf-test-export-"+randomSuffix),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

@@ -37,6 +37,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'scc_v2_organization_big_query_export_config_basic'
     primary_resource_id: 'custom_big_query_export_config'
+    external_providers: ["random", "time"]
+    skip_test: true
     vars:
       big_query_export_id: 'my-export'
       dataset: 'my-dataset'
