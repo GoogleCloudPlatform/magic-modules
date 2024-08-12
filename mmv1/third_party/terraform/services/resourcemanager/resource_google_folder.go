@@ -67,7 +67,7 @@ func ResourceGoogleFolder() *schema.Resource {
 			},
 			"deletion_protection": {
 				Type:        schema.TypeBool,
-				Optional:    true
+				Optional:    true,
 				Default:     true,
 				Description: `When the field is set to true or unset in Terraform state, a terraform apply or terraform destroy that would delete the instance will fail. When the field is set to false, deleting the instance is allowed.`,
 			},
@@ -105,10 +105,7 @@ func resourceGoogleFolderCreate(d *schema.ResourceData, meta interface{}) error 
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
 			var reqErr error
-			op, reqErr = config.NewResourceManagerV3Client(userAgent).Folders.Create(&resourceManagerV3.Folder{
-				DisplayName: displayName,
-				Parent:      parent,
-			}).Do()
+			op, reqErr = config.NewResourceManagerV3Client(userAgent).Folders.Create(folder).Do()
 			return reqErr
 		},
 		Timeout: d.Timeout(schema.TimeoutCreate),
@@ -157,14 +154,12 @@ func resourceGoogleFolderRead(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Folder Not Found : %s", d.Id()))
 	}
-
 	// Explicitly set client-side fields to default values if unset
 	if _, ok := d.GetOkExists("deletion_protection"); !ok {
 		if err := d.Set("deletion_protection", true); err != nil {
 			return fmt.Errorf("Error setting deletion_protection: %s", err)
 		}
 	}
-
 	if err := d.Set("name", folder.Name); err != nil {
 		return fmt.Errorf("Error setting name: %s", err)
 	}
