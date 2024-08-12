@@ -80,6 +80,92 @@ resource "google_kms_ekm_connection_iam_member" "add_viewer" {
 `, context)
 }
 
+func testAccKMSEkmConnection_kmsEkmConnectionBasicExample_iam_binding(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_secret_manager_secret_version" "raw_der" {
+  secret = "playground-cert"
+  project = "315636579862"
+}
+data "google_secret_manager_secret_version" "hostname" {
+  secret = "external-uri"
+  project = "315636579862"
+}
+data "google_secret_manager_secret_version" "servicedirectoryservice" {
+  secret = "external-servicedirectoryservice"
+  project = "315636579862"
+}
+data "google_project" "vpc-project" {
+  project_id = "cloud-ekm-refekm-playground"
+}
+data "google_project" "project" {
+}
+resource "google_kms_ekm_connection" "example-ekmconnection" {
+  name            	= "tf_test_ekmconnection_example%{random_suffix}"
+  location		= "us-central1"
+  key_management_mode 	= "MANUAL"
+  service_resolvers  	{
+      service_directory_service  = data.google_secret_manager_secret_version.servicedirectoryservice.secret_data
+      hostname 			 = data.google_secret_manager_secret_version.hostname.secret_data
+      server_certificates        {
+      		raw_der	= data.google_secret_manager_secret_version.raw_der.secret_data
+      }
+  }
+}
+resource "google_kms_ekm_connection_iam_binding" "ekm_admin" {
+  name = google_kms_ekm_connection.example-ekmconnection.id
+  role    = "roles/cloudkms.ekmConnectionsAdmin"
+  members  = ["serviceAccount:service-${data.google_project.project.number}@gcp-sa-ekms.iam.gserviceaccount.com"]
+}
+`, context)
+}
+
+func testAccKMSEkmConnection_kmsEkmConnectionBasicExample_iam_policy(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_secret_manager_secret_version" "raw_der" {
+  secret = "playground-cert"
+  project = "315636579862"
+}
+data "google_secret_manager_secret_version" "hostname" {
+  secret = "external-uri"
+  project = "315636579862"
+}
+data "google_secret_manager_secret_version" "servicedirectoryservice" {
+  secret = "external-servicedirectoryservice"
+  project = "315636579862"
+}
+data "google_project" "vpc-project" {
+  project_id = "cloud-ekm-refekm-playground"
+}
+data "google_project" "project" {
+}
+resource "google_kms_ekm_connection" "example-ekmconnection" {
+  name            	= "tf_test_ekmconnection_example%{random_suffix}"
+  location		= "us-central1"
+  key_management_mode 	= "MANUAL"
+  service_resolvers  	{
+      service_directory_service  = data.google_secret_manager_secret_version.servicedirectoryservice.secret_data
+      hostname 			 = data.google_secret_manager_secret_version.hostname.secret_data
+      server_certificates        {
+      		raw_der	= data.google_secret_manager_secret_version.raw_der.secret_data
+      }
+  }
+}
+data "google_iam_policy" "ekm_admin" {
+  binding {
+    role = "roles/cloudkms.ekmConnectionsAdmin"
+
+    members = [
+      "serviceAccount:service-${data.google_project.project.number}@gcp-sa-ekms.iam.gserviceaccount.com",
+    ]
+  }
+}
+resource "google_kms_ekm_connection_iam_policy" "policy" {
+  name = google_kms_ekm_connection.example-ekmconnection.id
+  policy_data = data.google_iam_policy.ekm_admin.policy_data
+}
+`, context)
+}
+
 func testAccKMSEkmConnection_kmsEkmConnectionBasicExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "vpc-project" {
