@@ -1,28 +1,22 @@
 resource "google_kms_key_ring" "keyring" {
   provider = google-beta
   
-  name     = "keyring-example"
-  location = "<%= ctx[:vars]['region'] %>"
+  name     = "<%= ctx[:vars]['key_ring_name'] %>"
+  location = "us-central1"
 }
 
-resource "google_kms_crypto_key" "example-key" {
+resource "google_kms_crypto_key" "example_key" {
   provider = google-beta
   
-  name            = "crypto-key-example"
+  name            = "<%= ctx[:vars]['crypto_key_name'] %>"
   key_ring        = google_kms_key_ring.keyring.id
-
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 
 resource "google_dataform_config" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
-
-  region  = "<%= ctx[:vars]['region'] %>"
-
-  default_kms_key_name = google_kms_crypto_key.id
+  name = "dataform_config"
+  default_kms_key_name = google_kms_crypto_key.example_key.id
 }
 
 

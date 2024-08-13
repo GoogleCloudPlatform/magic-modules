@@ -30,7 +30,8 @@ examples:
     primary_resource_id: dataform_config
     min_version: beta
     vars:
-      region: 'us-central1'
+      key_ring_name: example-key-ring
+      crypto_key_name: example-crypto-key-name
 parameters:
   - !ruby/object:Api::Type::String
     name: 'region'
