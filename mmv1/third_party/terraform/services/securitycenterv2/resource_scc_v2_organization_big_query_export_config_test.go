@@ -79,7 +79,7 @@ resource "google_bigquery_dataset" "default" {
 
 resource "time_sleep" "wait_1_minute" {
 	depends_on = [google_bigquery_dataset.default]
-	create_duration = "2m"
+	create_duration = "3m"
 }
 
 resource "google_scc_v2_organization_scc_big_query_exports" "default" {
@@ -95,7 +95,7 @@ resource "google_scc_v2_organization_scc_big_query_exports" "default" {
 }
 
 resource "time_sleep" "wait_for_cleanup" {
-	create_duration = "2m"
+	create_duration = "3m"
 	depends_on = [google_scc_v2_organization_scc_big_query_exports.default]
 }
 `, context)
@@ -132,7 +132,7 @@ resource "google_scc_v2_organization_scc_big_query_exports" "default" {
 }
 
 resource "time_sleep" "wait_for_cleanup" {
-	create_duration = "2m"
+	create_duration = "3m"
 	depends_on = [google_scc_v2_organization_scc_big_query_exports.default]
 }
 `, context)
