@@ -8,8 +8,8 @@ resource "google_discovery_engine_data_store" "document_workspace_config" {
   create_advanced_site_search = true
   workspace_config {
     layout_based_chunking_config {
-      dasher_customer_id = "GOOGLE_DRIVE"
-      type               = "test-dasher-id"
+      dasher_customer_id = "test-dasher-id"
+      type               = "GOOGLE_DRIVE"
     }
   }
   document_processing_config {
