@@ -29,6 +29,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Schedule inspection scan': 'https://cloud.google.com/dlp/docs/schedule-inspection-scan'
   api: 'https://cloud.google.com/dlp/docs/reference/rest/v2/projects.locations.discoveryConfigs'
 id_format: '{{parent}}/discoveryConfigs/{{name}}'
+skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dlp_discovery_config_basic'
