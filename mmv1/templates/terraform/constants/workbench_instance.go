@@ -69,7 +69,7 @@ var WorkbenchInstanceProvidedMetadata = []string{
     "report-system-status",
     "restriction",
     "serial-port-logging-enable",
-	"service-account-mode",
+    "service-account-mode",
     "shutdown-script",
     "title",
     "use-collaborative",
