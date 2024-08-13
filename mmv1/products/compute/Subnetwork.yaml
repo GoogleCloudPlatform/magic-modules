@@ -129,6 +129,7 @@ examples:
     primary_resource_id: 'subnetwork-reserved-internal-range'
     vars:
       subnetwork_name: 'subnetwork-reserved-internal-range'
+      network_name: 'network-reserved-internal-range'
   - !ruby/object:Provider::Terraform::Examples
     name: 'subnetwork_reserved_secondary_range'
     min_version: beta
