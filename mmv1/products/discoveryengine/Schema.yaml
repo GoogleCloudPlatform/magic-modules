@@ -24,8 +24,6 @@ immutable: true
 base_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas'
 self_link: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas/{{schema_id}}'
 create_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas?schemaId={{schema_id}}'
-update_verb: :PATCH
-update_mask: true
 delete_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas/{{schema_id}}'
 import_format:
   [
