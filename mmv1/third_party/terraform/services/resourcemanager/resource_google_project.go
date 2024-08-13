@@ -32,7 +32,7 @@ type ServicesCall interface {
 }
 
 // ResourceGoogleProject returns a *schema.Resource that allows a customer
-// to declare a Google Cloud Project resource. test
+// to declare a Google Cloud Project resource.
 func ResourceGoogleProject() *schema.Resource {
 	return &schema.Resource{
 		SchemaVersion: 1,
