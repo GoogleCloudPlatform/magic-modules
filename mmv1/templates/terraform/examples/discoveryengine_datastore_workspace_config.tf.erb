@@ -1,0 +1,20 @@
+resource "google_discovery_engine_data_store" "document_workspace_config" {
+  location                    = "global"
+  data_store_id               = "<%= ctx[:vars]['data_store_id'] %>"
+  display_name                = "tf-test-structured-datastore"
+  industry_vertical           = "GENERIC"
+  content_config              = "GOOGLE_WORKSPACE"
+  solution_types              = ["SOLUTION_TYPE_SEARCH"]
+  create_advanced_site_search = true
+  workspace_config {
+    layout_based_chunking_config {
+      dasher_customer_id = "GOOGLE_DRIVE"
+      type               = "test-dasher-id"
+    }
+  }
+  document_processing_config {
+    default_parsing_config  {
+      digital_parsing_config {}
+    }
+  }      
+}

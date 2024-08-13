@@ -1,4 +1,4 @@
-resource "google_discovery_engine_data_store" "document_processing_config_ocr" {
+resource "google_discovery_engine_data_store" "document_processing_config_layout" {
   location                    = "global"
   data_store_id               = "<%= ctx[:vars]['data_store_id'] %>"
   display_name                = "tf-test-structured-datastore"
@@ -9,6 +9,12 @@ resource "google_discovery_engine_data_store" "document_processing_config_ocr" {
   document_processing_config {
     default_parsing_config {
       layout_parsing_config {}
+    }
+    chunking_config {
+      layout_based_chunking_config {
+        chunk_size                = 500
+        include_ancestor_headings = true
+      }
     }
   }      
 }

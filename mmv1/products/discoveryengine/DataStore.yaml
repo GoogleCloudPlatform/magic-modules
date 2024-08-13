@@ -70,6 +70,14 @@ examples:
       'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
     vars:
       data_store_id: "data-store-id"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "discoveryengine_datastore_workspace_config"
+    skip_docs: true
+    primary_resource_id: 'workspace_config'
+    primary_resource_name:
+      'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
+    vars:
+      data_store_id: "data-store-id"
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
