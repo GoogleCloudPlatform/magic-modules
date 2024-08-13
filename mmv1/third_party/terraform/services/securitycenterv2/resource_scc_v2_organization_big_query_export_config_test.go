@@ -93,6 +93,11 @@ resource "google_scc_v2_organization_scc_big_query_exports" "default" {
 
   depends_on = [time_sleep.wait_1_minute]
 }
+
+resource "time_sleep" "wait_for_cleanup" {
+	create_duration = "2m"
+	depends_on = [google_scc_v2_organization_scc_big_query_exports.default]
+}
 `, context)
 }
 
@@ -124,6 +129,11 @@ resource "google_scc_v2_organization_scc_big_query_exports" "default" {
   location     = "global"
   description  = "SCC Findings Big Query Export Update"
   filter       = "state=\"ACTIVE\" AND NOT mute=\"MUTED\""
+}
+
+resource "time_sleep" "wait_for_cleanup" {
+	create_duration = "2m"
+	depends_on = [google_scc_v2_organization_scc_big_query_exports.default]
 }
 `, context)
 }
