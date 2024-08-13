@@ -142,6 +142,7 @@ properties:
               name: 'name'
               description: |
                 Name of the secure tag, created with TagManager's TagValue API.
+              diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
             - !ruby/object:Api::Type::Enum
               name: 'state'
               output: true
@@ -250,6 +251,7 @@ properties:
           name: 'name'
           description: |
             Name of the secure tag, created with TagManager's TagValue API.
+          diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
         - !ruby/object:Api::Type::Enum
           name: 'state'
           output: true

@@ -68,6 +68,9 @@ examples:
       org_id: :ORG_ID
       region: :REGION
       service_account: :SERVICE_ACCT
+custom_diff: [
+  'tpgresource.DefaultProviderRegion'
+]
 parameters:
   - !ruby/object:Api::Type::String
     name: 'firewallPolicy'
@@ -140,13 +143,14 @@ properties:
       - !ruby/object:Api::Type::Array
         name: 'srcSecureTags'
         description: |
-          regionNetworkFirewallPolicies.list of secure tag values, which should be matched at the source of the traffic. For INGRESS rule, if all the srcSecureTag are INEFFECTIVE, and there is no srcIpRange, this rule will be ignored. Maximum number of source tag values allowed is 256.
+          List of secure tag values, which should be matched at the source of the traffic. For INGRESS rule, if all the srcSecureTag are INEFFECTIVE, and there is no srcIpRange, this rule will be ignored. Maximum number of source tag values allowed is 256.
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String
               name: 'name'
               description: |
                 Name of the secure tag, created with TagManager's TagValue API.
+              diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
             - !ruby/object:Api::Type::Enum
               name: 'state'
               output: true
@@ -255,6 +259,7 @@ properties:
           name: 'name'
           description: |
             Name of the secure tag, created with TagManager's TagValue API.
+          diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
         - !ruby/object:Api::Type::Enum
           name: 'state'
           output: true
