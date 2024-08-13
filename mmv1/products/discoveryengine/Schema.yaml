@@ -20,6 +20,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Provide a schema for your data store': 'https://cloud.google.com/generative-ai-app-builder/docs/provide-schema'
   api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.collections.dataStores.schemas'
 
+immutable: true
 base_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas'
 self_link: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas/{{schema_id}}'
 create_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas?schemaId={{schema_id}}'
@@ -97,6 +98,7 @@ properties:
     name: 'jsonSchema'
     description: |
       The JSON representation of the schema.
+    immutable: true
     exactly_one_of:
       - json_schema
     custom_flatten: 'templates/terraform/custom_flatten/discoveryengine_schema_json_schema.go.erb'
