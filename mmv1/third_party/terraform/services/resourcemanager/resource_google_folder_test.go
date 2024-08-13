@@ -94,31 +94,33 @@ func TestAccFolder_tags(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("%s-%d", TestPrefix, acctest.RandInt(t))
+	parent := "organizations/" + org
+	folderDisplayName := "tf-test-" + acctest.RandString(t, 10)
+	folder_tags := resourceManagerV3.Folder{}
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFolder_tags(pid, org, map[string]string{org + "/env": "test"}),
+				Config: testAccFolder_tags(folderDisplayName, parent, map[string]string{org + "/env": "test"}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGoogleFolderExists("google_folder.acceptance", pid),
+					testAccCheckGoogleFolderExists(t, "google_folder.folder_tags", &folder_tags),
 				),
 			},
 			// Make sure import supports tags
 			{
-				ResourceName:            "google_folder.acceptance",
+				ResourceName:            "google_folder.folder_tags",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"tags", "deletion_protection"}, // we don't read tags back
 			},
 			// Update tags tries to replace project but fails due to deletion protection
 			{
-				Config:      testAccFolder_tags(pid, org, map[string]string{org + "/env": "staging"}),
+				Config:      testAccFolder_tags(folderDisplayName, org, map[string]string{org + "/env": "staging"}),
 				ExpectError: regexp.MustCompile("deletion_protection"),
 			},
 			{
-				Config: testAccFolder_tagsAllowDestroy(pid, org, map[string]string{org + "/env": "test"}),
+				Config: testAccFolder_tagsAllowDestroy(folderDisplayName, parent, map[string]string{org + "/env": "test"}),
 			},
 		},
 	})
@@ -193,6 +195,39 @@ resource "google_folder" "folder1" {
   deletion_protection = false
 }
 `, folder, parent)
+}
+
+func testAccFolder_tags(folder, parent string, tags map[string]string) string {
+	r := fmt.Sprintf(`
+resource "google_folder" "folder_tags" {
+  display_name = "%s"
+  parent       = "%s"
+  tags = {`, folder, parent)
+
+	l := ""
+	for key, value := range tags {
+		l += fmt.Sprintf("%q = %q\n", key, value)
+	}
+
+	l += fmt.Sprintf("}\n}")
+	return r + l
+}
+
+func testAccFolder_tagsAllowDestroy(folder, parent string, tags map[string]string) string {
+	r := fmt.Sprintf(`
+resource "google_folder" "folder_tags" {
+  display_name = "%s"
+  parent       = "%s"
+  deletion_protection = false
+  tags = {`, folder, parent)
+
+	l := ""
+	for key, value := range tags {
+		l += fmt.Sprintf("%q = %q\n", key, value)
+	}
+
+	l += fmt.Sprintf("}\n}")
+	return r + l
 }
 
 func testAccFolder_move(folder1, folder2, parent string) string {

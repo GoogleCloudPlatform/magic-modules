@@ -93,7 +93,7 @@ func resourceGoogleFolderCreate(d *schema.ResourceData, meta interface{}) error 
 	displayName := d.Get("display_name").(string)
 	parent := d.Get("parent").(string)
 
-	folder := &cloudresourcemanager.Folder{
+	folder := &resourceManagerV3.Folder{
 		DisplayName: displayName,
 		Parent:      parent,
 	}
