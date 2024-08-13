@@ -37,21 +37,24 @@ func TestAccComputeAddress_internal(t *testing.T) {
 				Config: testAccComputeAddress_internal(acctest.RandString(t, 10)),
 			},
 			{
-				ResourceName:      "google_compute_address.internal",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_address.internal",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"terraform_labels"},
 			},
 
 			{
-				ResourceName:      "google_compute_address.internal_with_subnet",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_address.internal_with_subnet",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"terraform_labels"},
 			},
 
 			{
-				ResourceName:      "google_compute_address.internal_with_subnet_and_address",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_address.internal_with_subnet_and_address",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"terraform_labels"},
 			},
 		},
 	})
@@ -73,9 +76,10 @@ func TestAccComputeAddress_networkTier_withLabels(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      "google_compute_address.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_address.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"terraform_labels"},
 			},
 			{
 				Config: testAccComputeAddress_networkTier_withLabels(acctest.RandString(t, 10)),
@@ -123,9 +127,10 @@ func TestAccComputeAddress_networkTier_withLabels(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      "google_compute_address.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_address.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"terraform_labels"},
 			},
 		},
 	})
@@ -269,9 +274,10 @@ func TestAccComputeAddress_withProviderDefaultLabels(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      "google_compute_address.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_address.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"terraform_labels"},
 			},
 		},
 	})
@@ -524,6 +530,10 @@ func TestAccComputeAddress_withAttributionRemoved(t *testing.T) {
 
 func testAccComputeAddress_networkTier_withLabels(i string) string {
 	return fmt.Sprintf(`
+provider "google" {
+  add_terraform_attribution_label = false
+}
+
 resource "google_compute_address" "foobar" {
   name         = "tf-test-address-%s"
   network_tier = "STANDARD"
@@ -538,6 +548,10 @@ resource "google_compute_address" "foobar" {
 
 func testAccComputeAddress_networkTier_withLabelsUpdate(i string) string {
 	return fmt.Sprintf(`
+provider "google" {
+  add_terraform_attribution_label = false
+}
+
 resource "google_compute_address" "foobar" {
   name         = "tf-test-address-%s"
   network_tier = "STANDARD"
@@ -556,6 +570,7 @@ provider "google" {
   default_labels = {
     default_key1 = "default_value1"
   }
+  add_terraform_attribution_label = false
 }
 
 resource "google_compute_address" "foobar" {
@@ -576,6 +591,7 @@ provider "google" {
   default_labels = {
     default_key1 = "default_value1"
   }
+  add_terraform_attribution_label = false
 }
 
 resource "google_compute_address" "foobar" {
@@ -598,6 +614,7 @@ provider "google" {
     default_key1 = "default_value1"
     env          = "foo"
   }
+  add_terraform_attribution_label = false
 }
 
 resource "google_compute_address" "foobar" {
@@ -748,6 +765,10 @@ resource "google_compute_address" "internal_with_subnet_and_address" {
 
 func testAccComputeAddress_networkTier(i string) string {
 	return fmt.Sprintf(`
+provider "google" {
+  add_terraform_attribution_label = false
+}
+
 resource "google_compute_address" "foobar" {
   name         = "tf-test-address-%s"
   network_tier = "STANDARD"
@@ -765,9 +786,10 @@ func TestAccComputeAddress_internalIpv6(t *testing.T) {
 				Config: testAccComputeAddress_internalIpv6(acctest.RandString(t, 10)),
 			},
 			{
-				ResourceName:      "google_compute_address.ipv6",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_address.ipv6",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"terraform_labels"},
 			},
 		},
 	})

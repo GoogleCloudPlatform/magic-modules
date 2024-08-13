@@ -21,9 +21,10 @@ func TestAccComputeGlobalAddress_ipv6(t *testing.T) {
 				Config: testAccComputeGlobalAddress_ipv6(acctest.RandString(t, 10)),
 			},
 			{
-				ResourceName:      "google_compute_global_address.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_global_address.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"terraform_labels"},
 			},
 		},
 	})
@@ -41,9 +42,10 @@ func TestAccComputeGlobalAddress_internal(t *testing.T) {
 				Config: testAccComputeGlobalAddress_internal(acctest.RandString(t, 10), acctest.RandString(t, 10)),
 			},
 			{
-				ResourceName:      "google_compute_global_address.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_global_address.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"terraform_labels"},
 			},
 		},
 	})

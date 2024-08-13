@@ -97,7 +97,7 @@ func TestAccComputeForwardingRule_internalTcpUdpLbWithMigBackendExampleUpdate(t 
 				ResourceName:            "google_compute_forwarding_rule.google_compute_forwarding_rule",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"backend_service", "network", "subnetwork", "region"},
+				ImportStateVerifyIgnore: []string{"backend_service", "network", "subnetwork", "region", "terraform_labels"},
 			},
 			{
 				Config: testAccComputeForwardingRule_internalTcpUdpLbWithMigBackendExampleUpdate(context),
@@ -106,7 +106,7 @@ func TestAccComputeForwardingRule_internalTcpUdpLbWithMigBackendExampleUpdate(t 
 				ResourceName:            "google_compute_forwarding_rule.google_compute_forwarding_rule",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"backend_service", "network", "subnetwork", "region"},
+				ImportStateVerifyIgnore: []string{"backend_service", "network", "subnetwork", "region", "terraform_labels"},
 			},
 		},
 	})
