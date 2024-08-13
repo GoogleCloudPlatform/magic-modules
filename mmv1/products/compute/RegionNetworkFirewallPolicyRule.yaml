@@ -68,9 +68,6 @@ examples:
       org_id: :ORG_ID
       region: :REGION
       service_account: :SERVICE_ACCT
-custom_diff: [
-  'tpgresource.DefaultProviderRegion'
-]
 parameters:
   - !ruby/object:Api::Type::String
     name: 'firewallPolicy'
