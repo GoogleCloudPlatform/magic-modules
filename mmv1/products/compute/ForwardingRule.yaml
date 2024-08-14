@@ -255,6 +255,12 @@ properties:
 
       This can only be set to true for load balancers that have their
       `loadBalancingScheme` set to `INTERNAL`.
+  - !ruby/object:Api::Type::Integer
+    name: 'forwardingRuleId'
+    description: |
+      The unique identifier number for the resource. This identifier is defined by the server.
+    api_name: id
+    output: true
   - !ruby/object:Api::Type::String
     name: 'pscConnectionId'
     description: 'The PSC connection id of the PSC Forwarding Rule.'
