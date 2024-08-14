@@ -14,14 +14,14 @@
 --- !ruby/object:Api::Resource
 name: 'NetworkFirewallPolicyRule'
 kind: 'compute#firewallPolicyRule'
-base_url: 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}'
-id_format: 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/{{priority}}'
-self_link: 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/getRule?priority={{priority}}'
-create_url: 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/addRule'
+base_url: '{{firewall_policy}}'
+id_format: '{{firewall_policy}}/{{priority}}'
+self_link: '{{firewall_policy}}/getRule?priority={{priority}}'
+create_url: '{{firewall_policy}}/addRule'
 update_verb: :POST
-update_url: 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/patchRule?priority={{priority}}'
+update_url: '{{firewall_policy}}/patchRule?priority={{priority}}'
 delete_verb: :POST
-delete_url: 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/removeRule?priority={{priority}}'
+delete_url: '{{firewall_policy}}/removeRule?priority={{priority}}'
 import_format: [
   'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/{{priority}}',
   '{{project}}/{{firewall_policy}}/{{priority}}',
@@ -36,24 +36,6 @@ timeouts: !ruby/object:Api::Timeouts
   delete_minutes: 20
 references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/networkFirewallPolicies/addRule'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    kind: 'compute#operation'
-    path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
-    wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
-    path: 'targetLink'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'status'
-    complete: 'DONE'
-    allowed:
-      - 'PENDING'
-      - 'RUNNING'
-      - 'DONE'
-  error: !ruby/object:Api::OpAsync::Error
-    path: 'error/errors'
-    message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'network_firewall_policy_rule'
@@ -68,6 +50,11 @@ examples:
       org_id: :ORG_ID
       region: :REGION
       service_account: :SERVICE_ACCT
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  post_create: 'templates/terraform/constants/compute_network_firewall_policy_rule_operation.go.erb'
+  post_delete: 'templates/terraform/constants/compute_network_firewall_policy_rule_operation.go.erb'
+  custom_import: 'templates/terraform/custom_import/firewall_policy_rule_import.go.erb'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'firewallPolicy'
@@ -75,6 +62,12 @@ parameters:
       The firewall policy of the resource.
     required: true
     url_param_only: true
+    immutable: true
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+  - !ruby/object:Api::Type::String
+    name: 'project'
+    description: |
+      The project for the resource
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
 properties:
