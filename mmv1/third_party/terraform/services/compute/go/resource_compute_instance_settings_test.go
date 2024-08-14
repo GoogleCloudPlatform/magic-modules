@@ -12,7 +12,7 @@ func TestAccComputeInstanceSettings_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":   acctest.RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -27,7 +27,7 @@ func TestAccComputeInstanceSettings_update(t *testing.T) {
 				ResourceName:            "google_compute_instance_settings.gce_instance_settings",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zone"},
+				ImportStateVerifyIgnore: []string{"zone", "fingerprint"},
 			},
 			{
 				Config: testAccComputeInstanceSettings_update(context),
@@ -36,7 +36,7 @@ func TestAccComputeInstanceSettings_update(t *testing.T) {
 				ResourceName:            "google_compute_instance_settings.gce_instance_settings",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zone"},
+				ImportStateVerifyIgnore: []string{"zone", "fingerprint"},
 			},
 			{
 				Config: testAccComputeInstanceSettings_delete(context),
@@ -45,7 +45,7 @@ func TestAccComputeInstanceSettings_update(t *testing.T) {
 				ResourceName:            "google_compute_instance_settings.gce_instance_settings",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zone"},
+				ImportStateVerifyIgnore: []string{"zone", "fingerprint"},
 			},
 		},
 	})

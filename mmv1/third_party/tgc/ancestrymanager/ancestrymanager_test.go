@@ -1032,6 +1032,8 @@ func TestParseAncestryPath_Fail(t *testing.T) {
 }
 
 func TestInitAncestryCache(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name    string
 		entries map[string]string
@@ -1082,9 +1084,23 @@ func TestInitAncestryCache(t *testing.T) {
 				"organizations/123":  {"organizations/123"},
 			},
 		},
+		{
+			name: "project id key with project number ancestry",
+			entries: map[string]string{
+				"projects/test-proj": "organizations/456/projects/123",
+			},
+			want: map[string][]string{
+				"projects/test-proj": {"projects/123", "organizations/456"},
+				"projects/123":       {"projects/123", "organizations/456"},
+				"organizations/456":  {"organizations/456"},
+			},
+		},
 	}
 	for _, test := range tests {
+		test := test
 		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
 			m := &manager{
 				ancestorCache: make(map[string][]string),
 			}

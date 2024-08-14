@@ -113,12 +113,10 @@ func TestAcc{{ $.ResourceName }}IamMemberGenerated(t *testing.T) {
 
 func TestAcc{{ $.ResourceName }}IamPolicyGenerated(t *testing.T) {
 	t.Parallel()
-
-{{- if $.IamPolicy.AdminIamRole }}
+{{ if $.IamPolicy.AdminIamRole }}
 	// This may skip test, so do it first
 	sa := envvar.GetTestServiceAccountFromEnv(t)
-{{-  end }}
-{{ template "IamContext" $ }}
+{{-  end }}{{ template "IamContext" $ }}
 {{- if $.IamPolicy.AdminIamRole }}
 	context["service_account"] = sa
 {{-  end }}

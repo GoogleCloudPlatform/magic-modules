@@ -39,6 +39,14 @@ examples:
     skip_test: true
     vars:
       ekmconnection_name: 'ekmconnection_example'
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  parent_resource_attribute: 'name'
+  method_name_separator: ':'
+  fetch_iam_policy_verb: :GET
+  iam_conditions_request_type: :QUERY_PARAM_NESTED
+  import_format: [
+    'projects/{{project}}/locations/{{location}}/ekmConnections/{{name}}'
+  ]
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
