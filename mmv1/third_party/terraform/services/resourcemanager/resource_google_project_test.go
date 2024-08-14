@@ -257,7 +257,7 @@ func TestAccProject_tags(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"tags", "deletion_policy"}, // we don't read tags back
 			},
-			// Update tags tries to replace project but fails due to deletion protection
+			// Update tags tries to replace project but fails due to deletion policy
 			{
 				Config:      testAccProject_tags(pid, org, map[string]string{org + "/env": "staging"}),
 				ExpectError: regexp.MustCompile("deletion_policy"),

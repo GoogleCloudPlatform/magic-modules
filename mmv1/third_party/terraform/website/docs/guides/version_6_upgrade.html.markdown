@@ -346,3 +346,9 @@ explicitly set this field to `DELETE` in your configuration and run `terraform a
 `skip_delete` value of `false` can be changed to a `deletion_policy` value of `DELETE` and
 a `skip_delete` value of `true` to a `deletion_policy` value of `ABANDON` for equivalent
 behavior.
+
+### Tagging at creation is now supported with `tags` field
+
+The field `tags` has been added which can be used to apply resource manager tags at creation time.
+
+**`tags` is an immutable field and causes resource replacement for any mutations made to the field.**
