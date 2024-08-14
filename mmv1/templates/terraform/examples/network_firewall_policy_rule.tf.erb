@@ -20,7 +20,7 @@ resource "google_compute_network_firewall_policy_rule" "<%= ctx[:primary_resourc
   direction               = "INGRESS"
   disabled                = false
   enable_logging          = true
-  firewall_policy         = google_compute_network_firewall_policy.basic_network_firewall_policy.name
+  firewall_policy         = google_compute_network_firewall_policy.basic_network_firewall_policy.id
   priority                = 1000
   rule_name               = "test-rule"
   target_service_accounts = ["<%= ctx[:test_env_vars]['service_account'] %>"]
