@@ -1,3 +1,5 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
 package kms
 
 import (
@@ -209,9 +211,8 @@ func flattenKMSCryptoKeyVersionsList(d *schema.ResourceData, meta interface{}, v
 		data["name"] = flattenKmsCryptoKeyVersionName(version["name"], d)
 		data["crypto_key"] = cryptoKeyId
 
-		data["version"] = flattenKmsCryptoKeyVersionVersion(version["name"], d)
 		data["state"] = flattenKmsCryptoKeyVersionState(version["state"], d)
-		data["protection_label"] = flattenKmsCryptoKeyVersionProtectionLevel(version["protectionLevel"], d)
+		data["protection_level"] = flattenKmsCryptoKeyVersionProtectionLevel(version["protectionLevel"], d)
 		data["algorithm"] = flattenKmsCryptoKeyVersionAlgorithm(version["algorithm"], d)
 
 		versions = append(versions, data)
