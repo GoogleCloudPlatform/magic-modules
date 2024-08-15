@@ -154,6 +154,12 @@ func listGCEnvironmentVariables() string {
 func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, projectId, commitSha string, gh GithubClient, rnr exec.ExecRunner, ctlr *source.Controller) error {
 	errors := map[string][]string{"Other": []string{}}
 
+	// TODO(ScottSuarez) - temporary fix to ensure the label is removed.
+	// Once we migrate to the new trigger there is an explicit task
+	// for this and this line can be removed.
+	gh.RemoveLabel(fmt.Sprint(prNumber), "awaiting-approval")
+	// ------------------------------------------------------------
+
 	pullRequest, err := gh.GetPullRequest(strconv.Itoa(prNumber))
 	if err != nil {
 		fmt.Printf("Error getting pull request: %v\n", err)
