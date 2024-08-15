@@ -18,7 +18,7 @@ base_url: b?project={{project}}
 self_link: b/{{name}}?projection=full
 collection_url_key: items
 description: |
-  The Bucket resource represents a bucket in Google Cloud Storage. There is
+  The Bucket resources represents a bucket in Google Cloud Storage. There is
   a single global namespace shared by all buckets. For more information, see
   Bucket Name Requirements.
 
