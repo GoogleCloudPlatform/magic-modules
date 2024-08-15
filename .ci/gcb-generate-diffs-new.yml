@@ -77,7 +77,7 @@ steps:
       env:
         - BASE_BRANCH=$_BASE_BRANCH
       args:
-          - 'remove-awaiting-approval-label'
+          - 'remove-label'
           - $_PR_NUMBER
           - 'awaiting-approval'
 
