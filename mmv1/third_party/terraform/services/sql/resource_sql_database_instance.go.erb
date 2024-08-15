@@ -7,12 +7,15 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"slices"
 	"strings"
 	"time"
 
 	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/id"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -28,6 +31,39 @@ import (
 
 // Match fully-qualified or relative URLs
 const privateNetworkLinkRegex = "^(?:http(?:s)?://.+/)?projects/(" + verify.ProjectRegex + ")/global/networks/((?:[a-z](?:[-a-z0-9]*[a-z0-9])?))$"
+
+// We declare variables for functions interacting with external component. They
+// will be mocked during unit tests.
+var (
+	generateUserAgentString = func(d *schema.ResourceData, userAgent string) (string, error) {
+		return tpgresource.GenerateUserAgentString(d, userAgent)
+	}
+	getProject = func(d *schema.ResourceData, config *transport_tpg.Config) (string, error) {
+		return tpgresource.GetProject(d, config)
+	}
+	instancesGet = func(config *transport_tpg.Config, userAgent, project, instanceName string) (*sqladmin.DatabaseInstance, error) {
+		return config.NewSqlAdminClient(userAgent).Instances.Get(project, instanceName).Do()
+	}
+	instancesUpdate = func(config *transport_tpg.Config, userAgent, project, instanceName string, instance *sqladmin.DatabaseInstance) (*sqladmin.Operation, error) {
+		return config.NewSqlAdminClient(userAgent).Instances.Update(project, instanceName, instance).Do()
+	}
+	instancesPatch = func(config *transport_tpg.Config, userAgent, project, instanceName string, instance *sqladmin.DatabaseInstance) (*sqladmin.Operation, error) {
+		return config.NewSqlAdminClient(userAgent).Instances.Patch(project, instanceName, instance).Do()
+	}
+	instancesPromoteReplica = func(config *transport_tpg.Config, userAgent, project, instanceName string) (*sqladmin.Operation, error) {
+		return config.NewSqlAdminClient(userAgent).Instances.PromoteReplica(project, instanceName).Do()
+	}
+	instancesSwitchover = func(config *transport_tpg.Config, userAgent, project, instanceName string) (*sqladmin.Operation, error) {
+		return config.NewSqlAdminClient(userAgent).Instances.Switchover(project, instanceName).Do()
+	}
+	instancesRestoreBackup = func(config *transport_tpg.Config, userAgent, project, instanceId string, backupRequest *sqladmin.InstancesRestoreBackupRequest) (*sqladmin.Operation, error) {
+		return config.NewSqlAdminClient(userAgent).Instances.RestoreBackup(project, instanceId, backupRequest).Do()
+	}
+	usersUpdate = func(config *transport_tpg.Config, userAgent, project, instanceName string, user *sqladmin.User, host, name string) (*sqladmin.Operation, error) {
+		return config.NewSqlAdminClient(userAgent).Users.Update(project, instanceName, user).Host(host).Name(name).Do()
+	}
+	sqlAdminOperationWaitTime = SqlAdminOperationWaitTime
+)
 
 var sqlDatabaseAuthorizedNetWorkSchemaElem *schema.Resource = &schema.Resource{
 	Schema: map[string]*schema.Schema{
@@ -81,7 +117,6 @@ var (
 		"settings.0.ip_configuration.0.enable_private_path_for_google_cloud_services",
 		"settings.0.ip_configuration.0.psc_config",
 		"settings.0.ip_configuration.0.ssl_mode",
-		"settings.0.ip_configuration.0.server_ca_mode",
 	}
 
 	maintenanceWindowKeys = []string{
@@ -122,17 +157,19 @@ var (
 func ResourceSqlDatabaseInstance() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceSqlDatabaseInstanceCreate,
-		Read:   resourceSqlDatabaseInstanceRead,
-		Update: resourceSqlDatabaseInstanceUpdate,
-		Delete: resourceSqlDatabaseInstanceDelete,
+		Read: func(resourceData *schema.ResourceData, meta interface{}) error {
+			return resourceSqlDatabaseInstanceRead(resourceData, meta)
+		},
+		UpdateContext: resourceSqlDatabaseInstanceUpdate,
+		Delete:        resourceSqlDatabaseInstanceDelete,
 		Importer: &schema.ResourceImporter{
 			State: resourceSqlDatabaseInstanceImport,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(90 * time.Minute),
-			Update: schema.DefaultTimeout(90 * time.Minute),
-			Delete: schema.DefaultTimeout(90 * time.Minute),
+			Create: schema.DefaultTimeout(40 * time.Minute),
+			Update: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 
 		CustomizeDiff: customdiff.All(
@@ -402,11 +439,6 @@ is set to true. Defaults to ZONAL.`,
 							Optional:    true,
 							Description: `Enables Vertex AI Integration.`,
 						},
-						"enable_dataplex_integration": {
-							Type:             schema.TypeBool,
-							Optional:         true,
-							Description:      `Enables Dataplex Integration.`,
-						},
 						"disk_size": {
 							Type:     schema.TypeInt,
 							Optional: true,
@@ -448,7 +480,6 @@ is set to true. Defaults to ZONAL.`,
 										Optional:     true,
 										AtLeastOneOf: ipConfigurationKeys,
 										Description:  `Whether SSL connections over IP are enforced or not. To change this field, also set the corresponding value in ssl_mode if it has been set too.`,
-										Deprecated:   "`require_ssl` will be fully deprecated in a future major release. For now, please use `ssl_mode` with a compatible `require_ssl` value instead.",
 									},
 									"private_network": {
 										Type:             schema.TypeString,
@@ -498,15 +529,7 @@ is set to true. Defaults to ZONAL.`,
 										Optional:     true,
 										Computed:     true,
 										ValidateFunc: validation.StringInSlice([]string{"ALLOW_UNENCRYPTED_AND_ENCRYPTED", "ENCRYPTED_ONLY", "TRUSTED_CLIENT_CERTIFICATE_REQUIRED"}, false),
-										Description:  `Specify how SSL connection should be enforced in DB connections. This field provides more SSL enforcement options compared to require_ssl. To change this field, also set the correspoding value in require_ssl until next major release.`,
-										AtLeastOneOf: ipConfigurationKeys,
-									},
-                                                                        "server_ca_mode": {
-                                                                                Type:         schema.TypeString,
-                                                                                Optional:     true,
-                                                                                Computed:     true,
-                                                                                ValidateFunc: validation.StringInSlice([]string{"CA_MODE_UNSPECIFIED", "GOOGLE_MANAGED_INTERNAL_CA", "GOOGLE_MANAGED_CAS_CA"}, false),
-                                                                                Description:  `Specify how the server certificate's Certificate Authority is hosted.`,
+										Description:  `Specify how SSL connection should be enforced in DB connections. This field provides more SSL enforcment options compared to require_ssl. To change this field, also set the correspoding value in require_ssl.`,
 										AtLeastOneOf: ipConfigurationKeys,
 									},
 								},
@@ -585,7 +608,6 @@ is set to true. Defaults to ZONAL.`,
 						"insights_config": {
 							Type:     schema.TypeList,
 							Optional: true,
-							Computed: true,
 							MaxItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -674,7 +696,7 @@ is set to true. Defaults to ZONAL.`,
 							Optional:     true,
 							Computed:     true,
 							ValidateFunc: validation.StringInSlice([]string{"NOT_REQUIRED", "REQUIRED"}, false),
-							Description:  `Enables the enforcement of Cloud SQL Auth Proxy or Cloud SQL connectors for all the connections. If enabled, all the direct connections are rejected.`,
+							Description:  `Specifies if connections must use Cloud SQL connectors.`,
 						},
 						"deletion_protection_enabled": {
 							Type:        schema.TypeBool,
@@ -885,6 +907,38 @@ is set to true. Defaults to ZONAL.`,
 				},
 				Description: `The configuration for replication.`,
 			},
+			"replica_names": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: `The replicas of the instance.`,
+			},
+			"replication_cluster": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"failover_dr_replica_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Optional:    true,
+							Description: `If the instance is a primary instance, then this field identifies the disaster recovery (DR) replica.`,
+						},
+						"dr_replica": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Optional:    true,
+							Description: `Read-only field that indicates whether the replica is a DR replica.`,
+						},
+					},
+				},
+				Description: `A primary instance and disaster recovery (DR) replica pair.`,
+			},
 			"server_ca_cert": {
 				Type:      schema.TypeList,
 				Computed:  true,
@@ -1068,7 +1122,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	if v, ok := d.GetOk("name"); ok {
 		name = v.(string)
 	} else {
-		name = id.UniqueId()
+		name = resource.UniqueId()
 	}
 
 	if err := d.Set("name", name); err != nil {
@@ -1209,7 +1263,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	if patchData != nil {
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() (rerr error) {
-				op, rerr = config.NewSqlAdminClient(userAgent).Instances.Patch(project, instance.Name, patchData).Do()
+				op, rerr = instancesPatch(config, userAgent, project, instance.Name, patchData)
 				return rerr
 			},
 			Timeout:              d.Timeout(schema.TimeoutUpdate),
@@ -1288,7 +1342,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion
 		Tier:                      _settings["tier"].(string),
 		Edition:                   _settings["edition"].(string),
 		AdvancedMachineFeatures:   expandSqlServerAdvancedMachineFeatures(_settings["advanced_machine_features"].([]interface{})),
-		ForceSendFields:           []string{"StorageAutoResize", "EnableGoogleMlIntegration", "EnableDataplexIntegration"},
+		ForceSendFields:           []string{"StorageAutoResize", "EnableGoogleMlIntegration"},
 		ActivationPolicy:          _settings["activation_policy"].(string),
 		ActiveDirectoryConfig:     expandActiveDirectoryConfig(_settings["active_directory_config"].([]interface{})),
 		DenyMaintenancePeriods:    expandDenyMaintenancePeriod(_settings["deny_maintenance_period"].([]interface{})),
@@ -1302,7 +1356,6 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion
 		PricingPlan:               _settings["pricing_plan"].(string),
 		DeletionProtectionEnabled: _settings["deletion_protection_enabled"].(bool),
 		EnableGoogleMlIntegration: _settings["enable_google_ml_integration"].(bool),
-		EnableDataplexIntegration: _settings["enable_dataplex_integration"].(bool),
 		UserLabels:                tpgresource.ConvertStringMap(_settings["user_labels"].(map[string]interface{})),
 		BackupConfiguration:       expandBackupConfiguration(_settings["backup_configuration"].([]interface{})),
 		DatabaseFlags:             expandDatabaseFlags(_settings["database_flags"].(*schema.Set).List()),
@@ -1417,7 +1470,6 @@ func expandIpConfiguration(configured []interface{}, databaseVersion string) *sq
 		ForceSendFields:                         forceSendFields,
 		PscConfig:                               expandPscConfig(_ipConfiguration["psc_config"].(*schema.Set).List()),
 		SslMode:                                 _ipConfiguration["ssl_mode"].(string),
-		ServerCaMode:                            _ipConfiguration["server_ca_mode"].(string),
 	}
 }
 
@@ -1594,12 +1646,12 @@ func expandPasswordValidationPolicy(configured []interface{}) *sqladmin.Password
 
 func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := tpgresource.GetProject(d, config)
+	project, err := getProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -1607,7 +1659,7 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 	var instance *sqladmin.DatabaseInstance
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (rerr error) {
-			instance, rerr = config.NewSqlAdminClient(userAgent).Instances.Get(project, d.Get("name").(string)).Do()
+			instance, rerr = instancesGet(config, userAgent, project, d.Get("name").(string))
 			return rerr
 		},
 		Timeout:              d.Timeout(schema.TimeoutRead),
@@ -1651,8 +1703,18 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 		}
 	}
 
-	if err := d.Set("replica_configuration", flattenReplicaConfiguration(instance.ReplicaConfiguration, d)); err != nil {
-		log.Printf("[WARN] Failed to set SQL Database Instance Replica Configuration")
+	if instance.ReplicaConfiguration != nil {
+		if err := d.Set("replica_configuration", flattenReplicaConfiguration(instance.ReplicaConfiguration, d)); err != nil {
+			log.Printf("[WARN] Failed to set SQL Database Instance Replica Configuration")
+		}
+	}
+	if err := d.Set("replica_names", instance.ReplicaNames); err != nil {
+		return fmt.Errorf("Error setting replica_names: %w", err)
+	}
+	if instance.ReplicationCluster != nil {
+		if err := d.Set("replication_cluster", flattenReplicationCluster(instance.ReplicationCluster, d)); err != nil {
+			return fmt.Errorf("Error setting replication_cluster: %w", err)
+		}
 	}
 	ipAddresses := flattenIpAddresses(instance.IpAddresses)
 	if err := d.Set("ip_address", ipAddresses); err != nil {
@@ -1708,33 +1770,44 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 	return nil
 }
 
-func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
+type replicaDRKind int
+
+const (
+	replicaDRNone replicaDRKind = iota
+	replicaDRByPromote
+	replicaDRBySwitchover
+)
+
+func resourceSqlDatabaseInstanceUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	project, err := tpgresource.GetProject(d, config)
+	project, err := getProject(d, config)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	var maintenance_version string
 	if v, ok := d.GetOk("maintenance_version"); ok {
 		maintenance_version = v.(string)
 	}
 
-	promoteReadReplicaRequired := false
+	replicaDRKind := replicaDRNone
 	if d.HasChange("instance_type") {
 		oldInstanceType, newInstanceType := d.GetChange("instance_type")
 
 		if isReplicaPromoteRequested(nil, oldInstanceType, newInstanceType, nil) {
-			err = checkPromoteConfigurations(d)
-			if err != nil {
-				return err
+			if isSwitchoverRequested(ctx, d) {
+				replicaDRKind = replicaDRBySwitchover
+			} else {
+				err = checkPromoteConfigurations(ctx, d)
+				if err != nil {
+					return diag.FromErr(err)
+				}
+				replicaDRKind = replicaDRByPromote
 			}
-
-			promoteReadReplicaRequired = true
 		}
 	}
 
@@ -1749,22 +1822,22 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		instance = &sqladmin.DatabaseInstance{Settings: &sqladmin.Settings{ActivationPolicy: "ALWAYS"}}
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() (rerr error) {
-				op, rerr = config.NewSqlAdminClient(userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
+				op, rerr = instancesPatch(config, userAgent, project, d.Get("name").(string), instance)
 				return rerr
 			},
 			Timeout:              d.Timeout(schema.TimeoutUpdate),
 			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
 		})
 		if err != nil {
-			return fmt.Errorf("Error, failed to patch instance settings for %s: %s", instance.Name, err)
+			return diag.FromErr(fmt.Errorf("Error, failed to patch instance settings for %s: %s", instance.Name, err))
 		}
-		err = SqlAdminOperationWaitTime(config, op, project, "Patch Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
+		err = sqlAdminOperationWaitTime(config, op, project, "Patch Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		err = resourceSqlDatabaseInstanceRead(d, meta)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
@@ -1774,22 +1847,22 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		instance = &sqladmin.DatabaseInstance{DatabaseVersion: databaseVersion}
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() (rerr error) {
-				op, rerr = config.NewSqlAdminClient(userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
+				op, rerr = instancesPatch(config, userAgent, project, d.Get("name").(string), instance)
 				return rerr
 			},
 			Timeout:              d.Timeout(schema.TimeoutUpdate),
 			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
 		})
 		if err != nil {
-			return fmt.Errorf("Error, failed to patch instance settings for %s: %s", instance.Name, err)
+			return diag.FromErr(fmt.Errorf("Error, failed to patch instance settings for %s: %s", instance.Name, err))
 		}
-		err = SqlAdminOperationWaitTime(config, op, project, "Patch Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
+		err = sqlAdminOperationWaitTime(config, op, project, "Patch Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		err = resourceSqlDatabaseInstanceRead(d, meta)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
@@ -1810,15 +1883,15 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 			name = "sqlserver"
 			if len(password) == 0 {
 				if err := d.Set("root_password", oldPwd.(string)); err != nil {
-					return fmt.Errorf("Error re-setting root_password: %s", err)
+					return diag.FromErr(fmt.Errorf("Error re-setting root_password: %s", err))
 				}
-				return fmt.Errorf("Error, root password cannot be empty for SQL Server instance.")
+				return diag.FromErr(fmt.Errorf("Error, root password cannot be empty for SQL Server instance."))
 			}
 		} else {
 			if err := d.Set("root_password", oldPwd.(string)); err != nil {
-				return fmt.Errorf("Error re-setting root_password: %s", err)
+				return diag.FromErr(fmt.Errorf("Error re-setting root_password: %s", err))
 			}
-			return fmt.Errorf("Error, invalid database version")
+			return diag.FromErr(fmt.Errorf("Error, invalid database version"))
 		}
 		instance := d.Get("name").(string)
 
@@ -1832,7 +1905,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		defer transport_tpg.MutexStore.Unlock(instanceMutexKey(project, instance))
 		var op *sqladmin.Operation
 		updateFunc := func() error {
-			op, err = config.NewSqlAdminClient(userAgent).Users.Update(project, instance, user).Host(host).Name(name).Do()
+			op, err = usersUpdate(config, userAgent, project, instance, user, host, name)
 			return err
 		}
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
@@ -1842,18 +1915,18 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 
 		if err != nil {
 			if err := d.Set("root_password", oldPwd.(string)); err != nil {
-				return fmt.Errorf("Error re-setting root_password: %s", err)
+				return diag.FromErr(fmt.Errorf("Error re-setting root_password: %s", err))
 			}
-			return fmt.Errorf("Error, failed to update root_password : %s", err)
+			return diag.FromErr(fmt.Errorf("Error, failed to update root_password : %s", err))
 		}
 
-		err = SqlAdminOperationWaitTime(config, op, project, "Insert User", userAgent, d.Timeout(schema.TimeoutUpdate))
+		err = sqlAdminOperationWaitTime(config, op, project, "Insert User", userAgent, d.Timeout(schema.TimeoutUpdate))
 
 		if err != nil {
 			if err := d.Set("root_password", oldPwd.(string)); err != nil {
-				return fmt.Errorf("Error re-setting root_password: %s", err)
+				return diag.FromErr(fmt.Errorf("Error re-setting root_password: %s", err))
 			}
-			return fmt.Errorf("Error, failed to update root_password : %s", err)
+			return diag.FromErr(fmt.Errorf("Error, failed to update root_password : %s", err))
 		}
 	}
 
@@ -1863,44 +1936,57 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		instance = &sqladmin.DatabaseInstance{MaintenanceVersion: maintenance_version}
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() (rerr error) {
-				op, rerr = config.NewSqlAdminClient(userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
+				op, rerr = instancesPatch(config, userAgent, project, d.Get("name").(string), instance)
 				return rerr
 			},
 			Timeout:              d.Timeout(schema.TimeoutUpdate),
 			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
 		})
 		if err != nil {
-			return fmt.Errorf("Error, failed to patch instance settings for %s: %s", instance.Name, err)
+			return diag.FromErr(fmt.Errorf("Error, failed to patch instance settings for %s: %s", instance.Name, err))
 		}
-		err = SqlAdminOperationWaitTime(config, op, project, "Patch Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
+		err = sqlAdminOperationWaitTime(config, op, project, "Patch Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		err = resourceSqlDatabaseInstanceRead(d, meta)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
-	if promoteReadReplicaRequired {
-		err = transport_tpg.Retry(transport_tpg.RetryOptions{
-			RetryFunc: func() (rerr error) {
-				op, rerr = config.NewSqlAdminClient(userAgent).Instances.PromoteReplica(project, d.Get("name").(string)).Do()
+	if replicaDRKind != replicaDRNone {
+		var retryFunc func() (rerr error)
+		switch replicaDRKind {
+		case replicaDRByPromote:
+			retryFunc = func() (rerr error) {
+				op, rerr = instancesPromoteReplica(config, userAgent, project, d.Get("name").(string))
 				return rerr
-			},
+			}
+		case replicaDRBySwitchover:
+			retryFunc = func() (rerr error) {
+				op, rerr = instancesSwitchover(config, userAgent, project, d.Get("name").(string))
+				return rerr
+			}
+		default:
+			return diag.FromErr(fmt.Errorf("unknown replica DR scenario: %v", replicaDRKind))
+		}
+
+		err = transport_tpg.Retry(transport_tpg.RetryOptions{
+			RetryFunc:            retryFunc,
 			Timeout:              d.Timeout(schema.TimeoutUpdate),
 			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
 		})
 		if err != nil {
-			return fmt.Errorf("Error, failed to promote read replica instance as primary stand-alone %s: %s", instance.Name, err)
+			return diag.FromErr(fmt.Errorf("Error, failed to promote read replica instance as primary stand-alone %s: %s", d.Get("name"), err))
 		}
-		err = SqlAdminOperationWaitTime(config, op, project, "Promote Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
+		err = sqlAdminOperationWaitTime(config, op, project, "Promote Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		err = resourceSqlDatabaseInstanceRead(d, meta)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
@@ -1913,22 +1999,22 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		instance = &sqladmin.DatabaseInstance{Settings: &sqladmin.Settings{Edition: edition, Tier: tier, DataCacheConfig: dataCacheConfig}}
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() (rerr error) {
-				op, rerr = config.NewSqlAdminClient(userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
+				op, rerr = instancesPatch(config, userAgent, project, d.Get("name").(string), instance)
 				return rerr
 			},
 			Timeout:              d.Timeout(schema.TimeoutUpdate),
 			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
 		})
 		if err != nil {
-			return fmt.Errorf("Error, failed to patch instance settings for %s: %s", instance.Name, err)
+			return diag.FromErr(fmt.Errorf("Error, failed to patch instance settings for %s: %s", instance.Name, err))
 		}
-		err = SqlAdminOperationWaitTime(config, op, project, "Patch Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
+		err = sqlAdminOperationWaitTime(config, op, project, "Patch Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		err = resourceSqlDatabaseInstanceRead(d, meta)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
@@ -1960,21 +2046,32 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		instance.DatabaseVersion = databaseVersion
 	}
 
+	if d.HasChange("replication_cluster.0.failover_dr_replica_name") {
+		newFailoverDrReplicaName := d.Get("replication_cluster.0.failover_dr_replica_name").(string)
+		if instance.ReplicationCluster == nil {
+			instance.ReplicationCluster = &sqladmin.ReplicationCluster{
+				FailoverDrReplicaName: newFailoverDrReplicaName,
+			}
+		} else {
+			instance.ReplicationCluster.FailoverDrReplicaName = newFailoverDrReplicaName
+		}
+	}
+
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (rerr error) {
-			op, rerr = config.NewSqlAdminClient(userAgent).Instances.Update(project, d.Get("name").(string), instance).Do()
+			op, rerr = instancesUpdate(config, userAgent, project, d.Get("name").(string), instance)
 			return rerr
 		},
 		Timeout:              d.Timeout(schema.TimeoutUpdate),
 		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
 	})
 	if err != nil {
-		return fmt.Errorf("Error, failed to update instance settings for %s: %s", instance.Name, err)
+		return diag.FromErr(fmt.Errorf("Error, failed to update instance settings for %s: %s", instance.Name, err))
 	}
 
-	err = SqlAdminOperationWaitTime(config, op, project, "Update Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
+	err = sqlAdminOperationWaitTime(config, op, project, "Update Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Perform a backup restore if the backup context exists and has changed
@@ -1982,12 +2079,12 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		if d.HasChange("restore_backup_context") {
 			err = sqlDatabaseInstanceRestoreFromBackup(d, config, userAgent, project, d.Get("name").(string), r)
 			if err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 		}
 	}
 
-	return resourceSqlDatabaseInstanceRead(d, meta)
+	return diag.FromErr(resourceSqlDatabaseInstanceRead(d, meta))
 }
 
 func maintenanceVersionDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
@@ -2128,7 +2225,6 @@ func flattenSettings(settings *sqladmin.Settings, d *schema.ResourceData) []map[
 	data["disk_autoresize_limit"] = settings.StorageAutoResizeLimit
 
 	data["enable_google_ml_integration"] = settings.EnableGoogleMlIntegration
-	data["enable_dataplex_integration"] = settings.EnableDataplexIntegration
 
 	if settings.UserLabels != nil {
 		data["user_labels"] = settings.UserLabels
@@ -2259,7 +2355,6 @@ func flattenIpConfiguration(ipConfiguration *sqladmin.IpConfiguration, d *schema
 		"allocated_ip_range": ipConfiguration.AllocatedIpRange,
 		"require_ssl":        ipConfiguration.RequireSsl,
 		"enable_private_path_for_google_cloud_services": ipConfiguration.EnablePrivatePathForGoogleCloudServices,
-		"server_ca_mode":                                ipConfiguration.ServerCaMode,
 	}
 
 	if ipConfiguration.AuthorizedNetworks != nil {
@@ -2349,6 +2444,16 @@ func flattenReplicaConfiguration(replicaConfiguration *sqladmin.ReplicaConfigura
 	}
 
 	return rc
+}
+
+func flattenReplicationCluster(replicationCluster *sqladmin.ReplicationCluster, d *schema.ResourceData) []map[string]interface{} {
+	data := make(map[string]interface{})
+	if replicationCluster.FailoverDrReplicaName != "" {
+		data["failover_dr_replica_name"] = replicationCluster.FailoverDrReplicaName
+	}
+	data["dr_replica"] = replicationCluster.DrReplica
+
+	return []map[string]interface{}{data}
 }
 
 func flattenIpAddresses(ipAddresses []*sqladmin.IpMapping) []map[string]interface{} {
@@ -2483,7 +2588,7 @@ func sqlDatabaseInstanceRestoreFromBackup(d *schema.ResourceData, config *transp
 	var op *sqladmin.Operation
 	err := transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (operr error) {
-			op, operr = config.NewSqlAdminClient(userAgent).Instances.RestoreBackup(project, instanceId, backupRequest).Do()
+			op, operr = instancesRestoreBackup(config, userAgent, project, instanceId, backupRequest)
 			return operr
 		},
 		Timeout:              d.Timeout(schema.TimeoutUpdate),
@@ -2515,6 +2620,20 @@ func isMasterInstanceNameSet(_ context.Context, oldMasterInstanceName interface{
 	return true
 }
 
+func isSwitchoverRequested(ctx context.Context, d *schema.ResourceData) bool {
+	originalPrimaryName, _ := d.GetChange("master_instance_name")
+	_, newReplicaNames := d.GetChange("replica_names")
+	if !slices.Contains(newReplicaNames.([]interface{}), originalPrimaryName) {
+		return false
+	}
+	dbVersion, _ := d.GetChange("database_version")
+	if !strings.HasPrefix(dbVersion.(string), "MYSQL") && !strings.HasPrefix(dbVersion.(string), "POSTGRES") {
+		tflog.Warn(ctx, fmt.Sprintf("switchover is not supported for %q", dbVersion))
+		return false
+	}
+	return true
+}
+
 func isReplicaPromoteRequested(_ context.Context, oldInstanceType interface{}, newInstanceType interface{}, _ interface{}) bool {
 	oldInstanceType = oldInstanceType.(string)
 	newInstanceType = newInstanceType.(string)
@@ -2526,16 +2645,16 @@ func isReplicaPromoteRequested(_ context.Context, oldInstanceType interface{}, n
 	return false
 }
 
-func checkPromoteConfigurations(d *schema.ResourceData) error {
+func checkPromoteConfigurations(ctx context.Context, d *schema.ResourceData) error {
 	masterInstanceName := d.GetRawConfig().GetAttr("master_instance_name")
 	replicaConfiguration := d.GetRawConfig().GetAttr("replica_configuration").AsValueSlice()
 
 	return validatePromoteConfigurations(masterInstanceName, replicaConfiguration)
 }
 
-func checkPromoteConfigurationsAndUpdateDiff(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
-	masterInstanceName := diff.GetRawConfig().GetAttr("master_instance_name")
-	replicaConfiguration := diff.GetRawConfig().GetAttr("replica_configuration").AsValueSlice()
+func checkPromoteConfigurationsAndUpdateDiff(ctx context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+		masterInstanceName := diff.GetRawConfig().GetAttr("master_instance_name")
+			replicaConfiguration := diff.GetRawConfig().GetAttr("replica_configuration").AsValueSlice()
 
 	err := validatePromoteConfigurations(masterInstanceName, replicaConfiguration)
 	if err != nil {
