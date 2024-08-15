@@ -209,10 +209,9 @@ func TestAccComputeRegionDisk_cloneDisk(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            "google_compute_region_disk.regiondisk-clone",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_region_disk.regiondisk-clone",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -238,19 +237,17 @@ func TestAccComputeRegionDisk_featuresUpdated(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            "google_compute_region_disk.regiondisk",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_region_disk.regiondisk",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccComputeRegionDisk_featuresUpdated(diskName),
 			},
 			{
-				ResourceName:            "google_compute_region_disk.regiondisk",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_region_disk.regiondisk",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

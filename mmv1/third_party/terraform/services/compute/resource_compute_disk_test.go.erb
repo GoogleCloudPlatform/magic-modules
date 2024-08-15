@@ -448,28 +448,25 @@ func TestAccComputeDisk_pdHyperDiskProvisionedIopsLifeCycle(t *testing.T) {
 				Config: testAccComputeDisk_pdHyperDiskProvisionedIopsLifeCycle(context_1),
 			},
 			{
-				ResourceName:            "google_compute_disk.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_disk.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccComputeDisk_pdHyperDiskProvisionedIopsLifeCycle(context_2),
 			},
 			{
-				ResourceName:            "google_compute_disk.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_disk.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccComputeDisk_pdHyperDiskProvisionedIopsLifeCycle(context_3),
 			},
 			{
-				ResourceName:            "google_compute_disk.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_disk.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -503,28 +500,25 @@ func TestAccComputeDisk_pdHyperDiskProvisionedThroughputLifeCycle(t *testing.T) 
 				Config: testAccComputeDisk_pdHyperDiskProvisionedThroughputLifeCycle(context_1),
 			},
 			{
-				ResourceName:            "google_compute_disk.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_disk.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccComputeDisk_pdHyperDiskProvisionedThroughputLifeCycle(context_2),
 			},
 			{
-				ResourceName:            "google_compute_disk.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_disk.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccComputeDisk_pdHyperDiskProvisionedThroughputLifeCycle(context_3),
 			},
 			{
-				ResourceName:            "google_compute_disk.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_disk.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -547,19 +541,17 @@ func TestAccComputeDisk_fromSnapshot(t *testing.T) {
 				Config: testAccComputeDisk_fromSnapshot(projectName, firstDiskName, snapshotName, diskName, "self_link"),
 			},
 			{
-				ResourceName:            "google_compute_disk.seconddisk",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_disk.seconddisk",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccComputeDisk_fromSnapshot(projectName, firstDiskName, snapshotName, diskName, "name"),
 			},
 			{
-				ResourceName:            "google_compute_disk.seconddisk",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_disk.seconddisk",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -617,11 +609,10 @@ func TestAccComputeDisk_encryptionKMS(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            "google_compute_disk.foobar",
-				ImportStateId:           importID,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_disk.foobar",
+				ImportStateId:     importID,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -658,10 +649,9 @@ func TestAccComputeDisk_pdHyperDiskEnableConfidentialCompute(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            "google_compute_disk.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_disk.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -682,10 +672,9 @@ func TestAccComputeDisk_deleteDetach(t *testing.T) {
 				Config: testAccComputeDisk_deleteDetach(instanceName, diskName),
 			},
 			{
-				ResourceName:            "google_compute_disk.foo",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_disk.foo",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			// this needs to be a second step so we refresh and see the instance
 			// listed as attached to the disk; the instance is created after the
@@ -695,10 +684,9 @@ func TestAccComputeDisk_deleteDetach(t *testing.T) {
 				Config: testAccComputeDisk_deleteDetach(instanceName, diskName),
 			},
 			{
-				ResourceName:            "google_compute_disk.foo",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_disk.foo",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -722,10 +710,9 @@ func TestAccComputeDisk_deleteDetachIGM(t *testing.T) {
 				Config: testAccComputeDisk_deleteDetachIGM(diskName, mgrName),
 			},
 			{
-				ResourceName:            "google_compute_disk.foo",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_disk.foo",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			// this needs to be a second step so we refresh and see the instance
 			// listed as attached to the disk; the instance is created after the
@@ -735,30 +722,27 @@ func TestAccComputeDisk_deleteDetachIGM(t *testing.T) {
 				Config: testAccComputeDisk_deleteDetachIGM(diskName, mgrName),
 			},
 			{
-				ResourceName:            "google_compute_disk.foo",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_disk.foo",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			// Change the disk name to recreate the instances
 			{
 				Config: testAccComputeDisk_deleteDetachIGM(diskName2, mgrName),
 			},
 			{
-				ResourceName:            "google_compute_disk.foo",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_disk.foo",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			// Add the extra step like before
 			{
 				Config: testAccComputeDisk_deleteDetachIGM(diskName2, mgrName),
 			},
 			{
-				ResourceName:            "google_compute_disk.foo",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_disk.foo",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -777,10 +761,9 @@ func TestAccComputeDisk_pdExtremeImplicitProvisionedIops(t *testing.T) {
 				Config: testAccComputeDisk_pdExtremeImplicitProvisionedIops(diskName),
 			},
 			{
-				ResourceName:            "google_compute_disk.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_disk.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -801,10 +784,9 @@ func TestAccComputeDisk_resourcePolicies(t *testing.T) {
 				Config: testAccComputeDisk_resourcePolicies(diskName, policyName),
 			},
 			{
-				ResourceName:            "google_compute_disk.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_disk.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -826,19 +808,17 @@ func TestAccComputeDisk_updateResourcePolicies(t *testing.T) {
 				Config: testAccComputeDisk_resourcePolicies(diskName, policyName),
 			},
 			{
-				ResourceName:            "google_compute_disk.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_disk.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccComputeDisk_updateResourcePolicies(diskName, policyName),
 			},
 			{
-				ResourceName:            "google_compute_disk.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_disk.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -859,10 +839,9 @@ func TestAccComputeDisk_multiWriter(t *testing.T) {
 				Config: testAccComputeDisk_multiWriter(instanceName, diskName, true),
 			},
 			{
-				ResourceName:            "google_compute_disk.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_disk.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -936,9 +915,9 @@ func TestAccComputeDisk_cloneDisk(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            "google_compute_disk.disk-clone",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_compute_disk.disk-clone",
+				ImportState:       true,
+				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 		},
@@ -958,18 +937,18 @@ func TestAccComputeDisk_featuresUpdated(t *testing.T) {
 				Config: testAccComputeDisk_features(diskName),
 			},
 			{
-				ResourceName:            "google_compute_disk.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_compute_disk.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
 				Config: testAccComputeDisk_featuresUpdated(diskName),
 			},
 			{
-				ResourceName:            "google_compute_disk.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_compute_disk.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 		},
@@ -1654,10 +1633,9 @@ func TestAccComputeDisk_storagePoolSpecified(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            "google_compute_disk.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_disk.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -1761,10 +1739,9 @@ func TestAccComputeDisk_accessModeSpecified(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            "google_compute_disk.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_disk.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
                         // Update Access Mode
 			{       
@@ -1774,10 +1751,9 @@ func TestAccComputeDisk_accessModeSpecified(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            "google_compute_disk.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_disk.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

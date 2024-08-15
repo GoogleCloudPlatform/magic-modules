@@ -26,7 +26,7 @@ func TestAccComputeSnapshot_encryption(t *testing.T) {
 				ResourceName:            "google_compute_snapshot.foobar",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"snapshot_encryption_key", "source_disk", "source_disk_encryption_key", "zone", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"snapshot_encryption_key", "source_disk", "source_disk_encryption_key", "zone"},
 			},
 		},
 	})
@@ -52,7 +52,7 @@ func TestAccComputeSnapshot_encryptionCMEK(t *testing.T) {
 				ResourceName:            "google_compute_snapshot.foobar",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zone", "snapshot_encryption_key", "source_disk_encryption_key", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"zone", "snapshot_encryption_key", "source_disk_encryption_key"},
 			},
 		},
 	})

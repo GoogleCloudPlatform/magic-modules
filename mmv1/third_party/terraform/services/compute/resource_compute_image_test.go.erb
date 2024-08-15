@@ -99,10 +99,9 @@ func TestAccComputeImage_basedondisk(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            "google_compute_image.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_image.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -128,10 +127,9 @@ func TestAccComputeImage_sourceImage(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            "google_compute_image.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_image.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -160,10 +158,9 @@ func TestAccComputeImage_sourceSnapshot(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            "google_compute_image.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_image.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -242,7 +239,6 @@ func TestAccComputeImage_imageEncryptionKey(t *testing.T) {
 				ResourceName:            "google_compute_image.image",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
 			},
 		},
 	})

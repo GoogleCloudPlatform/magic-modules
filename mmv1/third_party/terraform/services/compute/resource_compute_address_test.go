@@ -37,24 +37,21 @@ func TestAccComputeAddress_internal(t *testing.T) {
 				Config: testAccComputeAddress_internal(acctest.RandString(t, 10)),
 			},
 			{
-				ResourceName:            "google_compute_address.internal",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_address.internal",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 
 			{
-				ResourceName:            "google_compute_address.internal_with_subnet",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_address.internal_with_subnet",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 
 			{
-				ResourceName:            "google_compute_address.internal_with_subnet_and_address",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_address.internal_with_subnet_and_address",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -76,10 +73,9 @@ func TestAccComputeAddress_networkTier_withLabels(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            "google_compute_address.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_address.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccComputeAddress_networkTier_withLabels(acctest.RandString(t, 10)),
@@ -127,10 +123,9 @@ func TestAccComputeAddress_networkTier_withLabels(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            "google_compute_address.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_address.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -274,10 +269,9 @@ func TestAccComputeAddress_withProviderDefaultLabels(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            "google_compute_address.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_address.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -786,10 +780,9 @@ func TestAccComputeAddress_internalIpv6(t *testing.T) {
 				Config: testAccComputeAddress_internalIpv6(acctest.RandString(t, 10)),
 			},
 			{
-				ResourceName:            "google_compute_address.ipv6",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ResourceName:      "google_compute_address.ipv6",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
