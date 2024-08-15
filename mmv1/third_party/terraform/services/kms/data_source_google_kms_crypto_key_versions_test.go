@@ -9,7 +9,7 @@ import (
 )
 
 func TestAccDataSourceGoogleKmsCryptoKeyVersions_basic(t *testing.T) {
-	symKey := acctest.BootstrapKMSKey(t)
+	asymSignKey := acctest.BootstrapKMSKeyWithPurpose(t, "ASYMMETRIC_SIGN")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
