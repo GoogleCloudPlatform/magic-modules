@@ -37,12 +37,6 @@ The following arguments are supported:
 * `crypto_key` - (Required) The `id` of the Google Cloud Platform CryptoKey to which the key version belongs. This is also the `id` field of the 
 `google_kms_crypto_key` resource/datasource.
 
-<a name="nested_public_key"></a>The `public_key` block, if present, contains:
-
-* `pem` - The public key, encoded in PEM format. For more information, see the RFC 7468 sections for General Considerations and Textual Encoding of Subject Public Key Info.
-
-* `algorithm` - The CryptoKeyVersionAlgorithm that this CryptoKeyVersion supports.
-
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:
