@@ -151,7 +151,7 @@ func listGCEnvironmentVariables() string {
 	return result
 }
 
-func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, projectId, commitSha string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller) error {
+func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, projectId, commitSha string, gh GithubClient, rnr exec.ExecRunner, ctlr *source.Controller) error {
 	errors := map[string][]string{"Other": []string{}}
 
 	pullRequest, err := gh.GetPullRequest(strconv.Itoa(prNumber))
@@ -206,6 +206,21 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			fmt.Println("Failed to fetch old branch: ", err)
 			errors[repo.Title] = append(errors[repo.Title], "Failed to clone repo at old branch")
 			repo.Cloned = false
+			continue
+		}
+		if repo.Name == "terraform-provider-google-beta" || repo.Name == "terraform-provider-google" {
+			if err := ctlr.Checkout(repo, oldBranch); err != nil {
+				errors[repo.Title] = append(errors[repo.Title], fmt.Sprintf("Failed to checkout branch %s", oldBranch))
+				repo.Cloned = false
+				continue
+			}
+			rnr.PushDir(repo.Path)
+			if _, err := rnr.Run("make", []string{"build"}, nil); err != nil {
+				errors[repo.Title] = append(errors[repo.Title], fmt.Sprintf("Failed to build branch %s", oldBranch))
+				repo.Cloned = false
+			}
+			rnr.PopDir()
+			ctlr.Checkout(repo, newBranch)
 		}
 	}
 
@@ -399,7 +414,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 }
 
 // Build the diff processor for tpg or tpgb
-func buildDiffProcessor(diffProcessorPath, providerLocalPath string, env map[string]string, rnr ExecRunner) error {
+func buildDiffProcessor(diffProcessorPath, providerLocalPath string, env map[string]string, rnr exec.ExecRunner) error {
 	for _, path := range []string{"old", "new", "bin"} {
 		if err := rnr.RemoveAll(filepath.Join(diffProcessorPath, path)); err != nil {
 			return err
@@ -419,7 +434,7 @@ func buildDiffProcessor(diffProcessorPath, providerLocalPath string, env map[str
 	return rnr.PopDir()
 }
 
-func computeBreakingChanges(diffProcessorPath string, rnr ExecRunner) ([]BreakingChange, error) {
+func computeBreakingChanges(diffProcessorPath string, rnr exec.ExecRunner) ([]BreakingChange, error) {
 	if err := rnr.PushDir(diffProcessorPath); err != nil {
 		return nil, err
 	}
@@ -439,7 +454,7 @@ func computeBreakingChanges(diffProcessorPath string, rnr ExecRunner) ([]Breakin
 	return changes, rnr.PopDir()
 }
 
-func changedSchemaResources(diffProcessorPath string, rnr ExecRunner) ([]string, error) {
+func changedSchemaResources(diffProcessorPath string, rnr exec.ExecRunner) ([]string, error) {
 	if err := rnr.PushDir(diffProcessorPath); err != nil {
 		return nil, err
 	}
@@ -465,7 +480,7 @@ func changedSchemaResources(diffProcessorPath string, rnr ExecRunner) ([]string,
 // Run the missing test detector and return the results.
 // Returns an empty string unless there are missing tests.
 // Error will be nil unless an error occurs during setup.
-func detectMissingTests(diffProcessorPath, tpgbLocalPath string, rnr ExecRunner) (map[string]*MissingTestInfo, error) {
+func detectMissingTests(diffProcessorPath, tpgbLocalPath string, rnr exec.ExecRunner) (map[string]*MissingTestInfo, error) {
 	if err := rnr.PushDir(diffProcessorPath); err != nil {
 		return nil, err
 	}

@@ -65,9 +65,9 @@ examples:
       service_perimeter_name: 'restrict_all'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/access_context_manager_service_perimeter_resource.go.erb
-  pre_update: templates/terraform/pre_create/access_context_manager_service_perimeter_dry_run_resource.go.erb
-  pre_create: templates/terraform/pre_create/access_context_manager_service_perimeter_dry_run_resource.go.erb
-  pre_delete: templates/terraform/pre_create/access_context_manager_service_perimeter_dry_run_resource.go.erb
+  pre_update: templates/terraform/pre_create/access_context_manager_dry_run_resource.go.erb
+  pre_create: templates/terraform/pre_create/access_context_manager_dry_run_resource.go.erb
+  pre_delete: templates/terraform/pre_create/access_context_manager_dry_run_resource.go.erb
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'perimeterName'

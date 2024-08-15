@@ -38,7 +38,6 @@ var ttvEnvironmentVariables = [...]string{
 	"GOPATH",
 	"GOOGLE_BILLING_ACCOUNT",
 	"GOOGLE_CUST_ID",
-	"GOOGLE_FIRESTORE_PROJECT",
 	"GOOGLE_IDENTITY_USER",
 	"GOOGLE_MASTER_BILLING_ACCOUNT",
 	"GOOGLE_ORG",
@@ -134,7 +133,7 @@ var testTerraformVCRCmd = &cobra.Command{
 	},
 }
 
-func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, baseBranch string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller, vt *vcr.Tester) error {
+func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, baseBranch string, gh GithubClient, rnr exec.ExecRunner, ctlr *source.Controller, vt *vcr.Tester) error {
 	newBranch := "auto-pr-" + prNumber
 	oldBranch := newBranch + "-old"
 

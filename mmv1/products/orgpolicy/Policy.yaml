@@ -51,7 +51,7 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/org_policy_policy.go.erb
   encoder: templates/terraform/encoders/org_policy_policy.go.erb
   pre_read: templates/terraform/pre_read/org_policy_policy.go.erb
-  pre_update: templates/terraform/pre_update/org_policy_policy.go.tmpl
+  pre_update: templates/terraform/pre_update/org_policy_policy.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: parent
