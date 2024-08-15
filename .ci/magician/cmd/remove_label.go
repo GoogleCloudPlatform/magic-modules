@@ -24,15 +24,16 @@ import (
 
 // removeLabelCmd represents the remove-awaiting-approval-label command
 var removeLabelCmd = &cobra.Command{
-	Use:   "remove-awaiting-approval-label",
-	Short: "remove awaiting-approval label",
-	Long: `This command processes pull requests and performs various validations and actions based on the PR's metadata and author.
+	Use:   "remove-label",
+	Short: "remove label",
+	Long: `This command removes the supplied label from the github pull request.
 
 	 The following PR details are expected as arguments:
 	 1. PR Number
+	 2. Label to remove
 
 	 The command performs the following steps:
-	 1. Remove the 'awaiting-approval' label from the PR.
+	 1. Remove the 'args[1]' label from the PR.
 	 `,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		prNumber := args[0]

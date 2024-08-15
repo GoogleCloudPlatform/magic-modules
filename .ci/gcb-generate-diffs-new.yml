@@ -76,7 +76,7 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/build-environment'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
-      id: remove-awaiting-approval-label
+      id: remove-label
       secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS"]
       waitFor: ["build-magician-binary"]
       env:
@@ -84,6 +84,7 @@ steps:
       args:
           - 'remove-awaiting-approval-label'
           - $_PR_NUMBER
+          - 'awaiting-approval'
 
     - name: 'gcr.io/graphite-docker-images/build-environment'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
