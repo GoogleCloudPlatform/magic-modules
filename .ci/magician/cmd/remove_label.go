@@ -22,7 +22,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// removeLabelCmd represents the remove-awaiting-approval-label command
+// removeLabelCmd represents the remove-label command
 var removeLabelCmd = &cobra.Command{
 	Use:   "remove-label",
 	Short: "remove label",
