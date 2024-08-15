@@ -123,6 +123,20 @@ examples:
     vars:
       subnetwork_name: 'subnet-cidr-overlap'
       network_name: 'net-cidr-overlap'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'subnetwork_reserved_internal_range'
+    min_version: beta
+    primary_resource_id: 'subnetwork-reserved-internal-range'
+    vars:
+      subnetwork_name: 'subnetwork-reserved-internal-range'
+      network_name: 'network-reserved-internal-range'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'subnetwork_reserved_secondary_range'
+    min_version: beta
+    primary_resource_id: 'subnetwork-reserved-secondary-range'
+    vars:
+      subnetwork_name: 'subnetwork-reserved-secondary-range'
+      network_name: 'network-reserved-secondary-range'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -142,16 +156,25 @@ properties:
     output: true
   - !ruby/object:Api::Type::String
     name: 'ipCidrRange'
+    default_from_api: true
     description: |
       The range of internal addresses that are owned by this subnetwork.
       Provide this property when you create the subnetwork. For example,
       10.0.0.0/8 or 192.168.0.0/16. Ranges must be unique and
       non-overlapping within a network. Only IPv4 is supported.
-    required: true
+      Field is optional when `reserved_internal_range` is defined, otherwise required.
+    required: false
     update_verb: :POST
     update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}/expandIpCidrRange'
     validation: !ruby/object:Provider::Terraform::Validation
       function: 'verify.ValidateIpCidrRange'
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'reservedInternalRange'
+    description: |
+      The ID of the reserved internal range. Must be prefixed with `networkconnectivity.googleapis.com`
+      E.g. `networkconnectivity.googleapis.com/projects/{project}/locations/global/internalRanges/{rangeId}`
+    resource: 'InternalRange'
+    imports: 'selfLink'
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
@@ -238,7 +261,8 @@ properties:
             must be unique within the subnetwork.
         - !ruby/object:Api::Type::String
           name: 'ipCidrRange'
-          required: true
+          required: false
+          default_from_api: true
           validation: !ruby/object:Provider::Terraform::Validation
             function: 'verify.ValidateIpCidrRange'
           description: |
@@ -246,6 +270,14 @@ properties:
             range. Provide this property when you create the subnetwork.
             Ranges must be unique and non-overlapping with all primary and
             secondary IP ranges within a network. Only IPv4 is supported.
+            Field is optional when `reserved_internal_range` is defined, otherwise required.
+        - !ruby/object:Api::Type::ResourceRef
+          name: 'reservedInternalRange'
+          description: |
+            The ID of the reserved internal range. Must be prefixed with `networkconnectivity.googleapis.com`
+            E.g. `networkconnectivity.googleapis.com/projects/{project}/locations/global/internalRanges/{rangeId}`
+          resource: 'InternalRange'
+          imports: 'selfLink'
   - !ruby/object:Api::Type::Boolean
     name: 'privateIpGoogleAccess'
     description: |
