@@ -37,17 +37,17 @@ The following arguments are supported:
 * `crypto_key` - (Required) The `id` of the Google Cloud Platform CryptoKey to which the key version belongs. This is also the `id` field of the 
 `google_kms_crypto_key` resource/datasource.
 
-<a name="nested_public_key"></a>The `public_key` block, if present, contains:
-
-* `pem` - The public key, encoded in PEM format. For more information, see the RFC 7468 sections for General Considerations and Textual Encoding of Subject Public Key Info.
-
-* `algorithm` - The CryptoKeyVersionAlgorithm that this CryptoKeyVersion supports.
-
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:
 
 * `versions` - A list of all the retrieved crypto key versions from the provided crypto key. This list is influenced by the provided filter argument.
+
+<a name="nested_public_key"></a>The `public_key` block, if present, contains:
+
+* `pem` - The public key, encoded in PEM format. For more information, see the RFC 7468 sections for General Considerations and Textual Encoding of Subject Public Key Info.
+
+* `algorithm` - The CryptoKeyVersionAlgorithm that this CryptoKeyVersion supports.
 
 See [google_kms_crypto_key_version](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/kms_crypto_key_version) resource for details of the available attributes on each crypto key version.
 
