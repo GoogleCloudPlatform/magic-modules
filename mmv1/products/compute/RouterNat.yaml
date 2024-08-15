@@ -159,8 +159,8 @@ properties:
     immutable: true
     ignore_read: true
     conflicts:
-    - natIps
-    - drainNatIps
+      - natIps
+      - drainNatIps
     send_empty_value: true
     is_set: true
     set_hash_func: computeRouterNatIPsHash
