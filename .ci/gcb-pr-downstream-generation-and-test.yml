@@ -72,7 +72,7 @@ steps:
     - name: 'gcr.io/graphite-docker-images/build-environment'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: remove-label
-      secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS"]
+      secretEnv: ["GITHUB_TOKEN_MAGIC_MODULES"]
       waitFor: ["build-magician-binary"]
       env:
         - BASE_BRANCH=$_BASE_BRANCH
