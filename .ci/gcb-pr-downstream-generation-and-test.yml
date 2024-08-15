@@ -71,22 +71,6 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/build-environment'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
-      id: build-magician-binary
-      waitFor: ["merged"]
-
-    - name: 'gcr.io/graphite-docker-images/build-environment'
-      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
-      id: remove-awaiting-approval-label
-      secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS"]
-      waitFor: ["build-magician-binary"]
-      env:
-        - BASE_BRANCH=$_BASE_BRANCH
-      args:
-          - 'remove-awaiting-approval-label'
-          - $_PR_NUMBER
-
-    - name: 'gcr.io/graphite-docker-images/build-environment'
-      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: tpg-head
       secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS"]
       waitFor: ["build-magician-binary"]
