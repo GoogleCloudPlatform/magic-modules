@@ -1,3 +1,4 @@
+// A custom_create function similar to the generated code when using a nested_query, but replaces the encoder with a custom one instead of just injecting it;
 userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 if err != nil {
   return err
@@ -65,7 +66,7 @@ if err != nil {
 }
 
 // Store the ID now
-id, err := tpgresource.ReplaceVars(d, config, "{{project}}/{{region}}/{{router}}/{{router.name}}")
+id, err := tpgresource.ReplaceVars(d, config, "{{project}}/{{region}}/{{router}}/{{router_nat}}")
 if err != nil {
   return fmt.Errorf("Error constructing id: %s", err)
 }

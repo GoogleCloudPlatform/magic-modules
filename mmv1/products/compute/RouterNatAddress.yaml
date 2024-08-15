@@ -53,9 +53,20 @@ async: !ruby/object:Api::OpAsync
     path: 'error/errors'
     message: 'message'
 exclude_tgc: true
-id_format: '{{project}}/{{region}}/{{router}}/{{router.name}}'
+id_format: '{{project}}/{{region}}/{{router}}/{{routerNat}}'
 mutex: router/{{region}}/{{router}}
-# We use a custom code for CREATE since the generated code does not replace the encoder when using nested_query parameter
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'router_nat_address_count'
+    primary_resource_id: 'nat_address'
+    skip_test: true
+    vars:
+      router_name: 'my-router'
+      nat_name: 'my-router-nat'
+      network_name: 'my-network'
+      subnet_name: 'my-subnetwork'
+      address_name: 'nat-manual-ip'
+# ToDo: We use a custom code for CREATE since the generated code is erroneously not replacing the encoder, this could be related to using a combination of parameters such as nested_query
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_create: templates/terraform/custom_create/router_nat_address_nested_query_create_encoder.go.erb
   encoder: 'templates/terraform/encoders/router_nat_address_patch_on_create.go.erb'

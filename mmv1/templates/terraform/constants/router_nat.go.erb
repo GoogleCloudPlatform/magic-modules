@@ -175,3 +175,12 @@ func computeRouterNatRulesHash(v interface{}) int {
 	<% end -%>
 	return routerNatRulesHash
 }
+
+func hasInitialNatIpsDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	obj, ok := d.GetOk("initial_nat_ips")
+	if ok {
+		log.Printf("[DEBUG] supressing natIps diff, initialNatIps found: %+v", obj)
+		return true
+	}
+	return false
+}
