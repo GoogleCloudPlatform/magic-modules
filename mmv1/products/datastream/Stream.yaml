@@ -1139,8 +1139,7 @@ properties:
             send_empty_value: true
             allow_empty_object: true
             immutable: true
-            exactly_one_of:
-              - destination_config.0.bigquery_destination_config.0.merge
+            conflicts:
               - destination_config.0.bigquery_destination_config.0.append_only
             description: |
               Merge mode defines that all changes to a table will be merged at the destination Google BigQuery
@@ -1152,9 +1151,8 @@ properties:
             send_empty_value: true
             allow_empty_object: true
             immutable: true
-            exactly_one_of:
+            conflicts:
               - destination_config.0.bigquery_destination_config.0.merge
-              - destination_config.0.bigquery_destination_config.0.append_only
             description: |
               AppendOnly mode defines that the stream of changes (INSERT, UPDATE-INSERT, UPDATE-DELETE and DELETE
               events) to a source table will be written to the destination Google BigQuery table, retaining the
