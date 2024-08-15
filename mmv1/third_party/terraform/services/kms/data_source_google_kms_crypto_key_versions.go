@@ -15,7 +15,7 @@ import (
 )
 
 func DataSourceGoogleKmsCryptoKeyVersions() *schema.Resource {
-	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceKMSCryptoKeyVersion().Schema)
+	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(DataSourceGoogleKmsCryptoKeyVersion().Schema)
 
 	dsSchema["id"] = &schema.Schema{
 		Type:     schema.TypeString,
@@ -38,12 +38,33 @@ func DataSourceGoogleKmsCryptoKeyVersions() *schema.Resource {
 					Schema: dsSchema,
 				},
 			},
+			"public_key": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"algorithm": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"pem": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
 		},
 	}
 }
 
 func dataSourceGoogleKmsCryptoKeyVersionsRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
+
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
 
 	cryptoKeyId, err := ParseKmsCryptoKeyId(d.Get("crypto_key").(string), config)
 	if err != nil {
@@ -54,7 +75,7 @@ func dataSourceGoogleKmsCryptoKeyVersionsRead(d *schema.ResourceData, meta inter
 	d.SetId(id)
 
 	log.Printf("[DEBUG] Searching for cryptoKeyVersions in crypto key %s", cryptoKeyId.CryptoKeyId())
-	versions, err := dataSourceKMSCryptoKeyVersionsList(d, meta, cryptoKeyId.CryptoKeyId())
+	versions, err := dataSourceKMSCryptoKeyVersionsList(d, meta, cryptoKeyId.CryptoKeyId(), userAgent)
 	if err != nil {
 		return err
 	}
@@ -71,61 +92,56 @@ func dataSourceGoogleKmsCryptoKeyVersionsRead(d *schema.ResourceData, meta inter
 	} else {
 		log.Printf("[DEBUG] Found 0 versions in crypto key %s", cryptoKeyId.CryptoKeyId())
 	}
-	// this is meant for latest_version
-	// url, err = tpgresource.ReplaceVars(d, config, "{{KMSBasePath}}{{crypto_key}}")
-	// if err != nil {
-	// 	return err
-	// }
 
-	// log.Printf("[DEBUG] Getting purpose of CryptoKey: %#v", url)
-	// res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-	// 	Config:    config,
-	// 	Method:    "GET",
-	// 	Project:   cryptoKeyId.KeyRingId.Project,
-	// 	RawURL:    url,
-	// 	UserAgent: userAgent,
-	// })
-	// if err != nil {
-	// 	return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("KmsCryptoKey %q", d.Id()), url)
-	// }
+	url, err := tpgresource.ReplaceVars(d, config, "{{KMSBasePath}}{{crypto_key}}")
+	if err != nil {
+		return err
+	}
 
-	// if res["purpose"] == "ASYMMETRIC_SIGN" || res["purpose"] == "ASYMMETRIC_DECRYPT" {
-	// 	url, err = tpgresource.ReplaceVars(d, config, "{{KMSBasePath}}{{crypto_key}}/cryptoKeyVersions/{{version}}/publicKey")
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	log.Printf("[DEBUG] Getting public key of CryptoKeyVersion: %#v", url)
+	log.Printf("[DEBUG] Getting purpose of CryptoKey: %#v", url)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   cryptoKeyId.KeyRingId.Project,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("KmsCryptoKey %q", d.Id()), url)
+	}
 
-	// 	res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-	// 		Config:               config,
-	// 		Method:               "GET",
-	// 		Project:              cryptoKeyId.KeyRingId.Project,
-	// 		RawURL:               url,
-	// 		UserAgent:            userAgent,
-	// 		Timeout:              d.Timeout(schema.TimeoutRead),
-	// 		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsCryptoKeyVersionsPendingGeneration},
-	// 	})
+	if res["purpose"] == "ASYMMETRIC_SIGN" || res["purpose"] == "ASYMMETRIC_DECRYPT" {
+		url, err = tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{KMSBasePath}}{{crypto_key}}/cryptoKeyVersions/%d/publicKey", d.Get("versions.0.version")))
+		if err != nil {
+			return err
+		}
+		log.Printf("[DEBUG] Getting public key of CryptoKeyVersion: %#v", url)
 
-	// 	if err != nil {
-	// 		log.Printf("Error generating public key: %s", err)
-	// 		return err
-	// 	}
+		res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:               config,
+			Method:               "GET",
+			Project:              cryptoKeyId.KeyRingId.Project,
+			RawURL:               url,
+			UserAgent:            userAgent,
+			Timeout:              d.Timeout(schema.TimeoutRead),
+			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsCryptoKeyVersionsPendingGeneration},
+		})
 
-	// 	if err := d.Set("public_key", flattenKmsCryptoKeyVersionPublicKey(res, d)); err != nil {
-	// 		return fmt.Errorf("Error setting CryptoKeyVersion public key: %s", err)
-	// 	}
-	// }
-	// d.SetId(fmt.Sprintf("//cloudkms.googleapis.com/v1/%s/cryptoKeyVersions/%d", d.Get("crypto_key"), d.Get("version")))
+		if err != nil {
+			log.Printf("Error generating public key: %s", err)
+			return err
+		}
+
+		if err := d.Set("public_key", flattenKmsCryptoKeyVersionPublicKey(res, d)); err != nil {
+			return fmt.Errorf("Error setting CryptoKeyVersion public key: %s", err)
+		}
+	}
 
 	return nil
 }
 
-func dataSourceKMSCryptoKeyVersionsList(d *schema.ResourceData, meta interface{}, cryptoKeyId string) ([]interface{}, error) {
+func dataSourceKMSCryptoKeyVersionsList(d *schema.ResourceData, meta interface{}, cryptoKeyId string, userAgent string) ([]interface{}, error) {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
-	if err != nil {
-		return nil, err
-	}
 
 	url, err := tpgresource.ReplaceVars(d, config, "{{KMSBasePath}}{{crypto_key}}/cryptoKeyVersions?filter=state=ENABLED")
 	if err != nil {
@@ -210,6 +226,7 @@ func flattenKMSCryptoKeyVersionsList(d *schema.ResourceData, meta interface{}, v
 		data["id"] = version["name"]
 		data["name"] = flattenKmsCryptoKeyVersionName(version["name"], d)
 		data["crypto_key"] = cryptoKeyId
+		data["version"] = flattenKmsCryptoKeyVersionVersion(version["name"], d)
 
 		data["state"] = flattenKmsCryptoKeyVersionState(version["state"], d)
 		data["protection_level"] = flattenKmsCryptoKeyVersionProtectionLevel(version["protectionLevel"], d)
@@ -220,51 +237,3 @@ func flattenKMSCryptoKeyVersionsList(d *schema.ResourceData, meta interface{}, v
 
 	return versions, nil
 }
-
-// func flattenKmsCryptoKeyVersionNameLatest(v interface{}, d *schema.ResourceData) interface{} {
-// 	return v
-// }
-
-// func flattenKmsCryptoKeyVersionStateLatest(v interface{}, d *schema.ResourceData) interface{} {
-// 	return v
-// }
-
-// func flattenKmsCryptoKeyVersionProtectionLevelLatest(v interface{}, d *schema.ResourceData) interface{} {
-// 	return v
-// }
-
-// func flattenKmsCryptoKeyVersionAlgorithmLatest(v interface{}, d *schema.ResourceData) interface{} {
-// 	return v
-// }
-
-// func flattenKmsCryptoKeyVersionLatest(versionsList []interface{}, d *schema.ResourceData, config *transport_tpg.Config, cryptoKeyId string) (interface{}, error) {
-// 	latestVersion := versionsList[len(versionsList)-1].(map[string]interface{})
-// 	parsedId, err := parseKmsCryptoKeyVersionId(latestVersion["name"].(string), config)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	data := map[string]interface{}{}
-// 	// The google_kms_crypto_key resource and dataset set
-// 	// id as the value of name (projects/{{project}}/locations/{{location}}/keyRings/{{keyRing}}/cryptoKeys/{{name}})
-// 	// and set name is set as just {{name}}.
-// 	data["id"] = latestVersion["name"]
-// 	data["name"] = parsedId.Name
-// 	data["crypto_key"] = cryptoKeyId
-
-// 	// fields can be found in `data_source_google_kms_crypto_key_version.go`
-// 	data["version"] = flattenKmsCryptoKeyVersionVersion(latestVersion["name"], d)
-// 	data["algorithm"] = flattenKmsCryptoKeyVersionAlgorithm(latestVersion["algorithm"], d)
-// 	data["protection_level"] = flattenKmsCryptoKeyVersionProtectionLevel(latestVersion["protectionLevel"], d)
-// 	data["state"] = flattenKmsCryptoKeyVersionState(latestVersion["state"], d)
-// 	data["public_key"] = flattenKmsCryptoKeyVersionPublicKey(latestVersion["publicKey"], d)
-
-// 	return data, nil
-// }
-// func flattenKmsCryptoKeyVersionPublicKeyPemLatest(v interface{}, d *schema.ResourceData) interface{} {
-// 	return v
-// }
-
-// func flattenKmsCryptoKeyVersionPublicKeyAlgorithmLatest(v interface{}, d *schema.ResourceData) interface{} {
-// 	return v
-// }
