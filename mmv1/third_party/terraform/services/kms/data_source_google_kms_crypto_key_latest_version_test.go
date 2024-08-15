@@ -19,7 +19,7 @@ func TestAccDataSourceGoogleKmsCryptoKeyLatestVersion_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleKmsCryptoKeyLatestVersion_basic(asymSignKey.CryptoKey.Name),
-				Check:  resource.TestCheckResourceAttr("data.google_kms_crypto_key_latest_version.version", "version", "1"),
+				Check:  resource.TestCheckResourceAttr("data.google_kms_crypto_key_latest_version.version", "version", "2"),
 			},
 			// Asymmetric keys should have a public key
 			{
