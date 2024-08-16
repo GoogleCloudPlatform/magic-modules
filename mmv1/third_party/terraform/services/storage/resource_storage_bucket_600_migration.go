@@ -527,6 +527,7 @@ func ResourceStorageBucketStateUpgradeV1(_ context.Context, rawState map[string]
 	log.Printf("[DEBUG] Attributes after migration: %#v", rawState)
 	return rawState, nil
 }
+<<<<<<< HEAD
 
 func resourceStorageBucketV2() *schema.Resource {
 	return &schema.Resource{
@@ -1054,3 +1055,5 @@ func ResourceStorageBucketStateUpgradeV2(_ context.Context, rawState map[string]
 	log.Printf("[DEBUG] Attributes after migration: %#v", rawState)
 	return rawState, nil
 }
+=======
+>>>>>>> 006aa8b22 (Add send_age_if_zero field and deprecate no_age (#11431))
