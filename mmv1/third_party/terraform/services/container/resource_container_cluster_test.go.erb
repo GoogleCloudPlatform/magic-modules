@@ -3286,7 +3286,6 @@ func TestAccContainerCluster_withIdentityServiceConfig(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccContainerCluster_withSecretManagerConfig(t *testing.T) {
 	t.Parallel()
 
@@ -3337,7 +3336,6 @@ func TestAccContainerCluster_withSecretManagerConfig(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccContainerCluster_withLoggingConfig(t *testing.T) {
 	t.Parallel()
@@ -9477,7 +9475,6 @@ resource "google_container_cluster" "primary" {
 `, name, networkName, subnetworkName)
 }
 
-<% unless version == 'ga' -%>
 func testAccContainerCluster_withSecretManagerConfigEnabled(name, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
@@ -9510,7 +9507,6 @@ resource "google_container_cluster" "primary" {
 }
 `, name, networkName, subnetworkName)
 }
-<% end -%>
 
 func testAccContainerCluster_withLoggingConfigEnabled(name, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
