@@ -63,7 +63,7 @@ func TestAccDataSourceGoogleClientConfig_invalidCredentials(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccCheckGoogleClientConfig_credentialsInProviderConfig(),
+				Config:      testAccCheckGoogleClientConfig_basic,
 				ExpectError: regexp.MustCompile("Error setting access_token"),
 			},
 		},
@@ -73,7 +73,3 @@ func TestAccDataSourceGoogleClientConfig_invalidCredentials(t *testing.T) {
 const testAccCheckGoogleClientConfig_basic = `
 data "google_client_config" "current" { }
 `
-
-func testAccCheckGoogleClientConfig_credentialsInProviderConfig() string {
-	return `data "google_client_config" "current" {}`
-}
