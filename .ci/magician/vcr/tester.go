@@ -3,7 +3,6 @@ package vcr
 import (
 	"fmt"
 	"io/fs"
-	"magician/exec"
 	"magician/provider"
 	"path/filepath"
 	"regexp"
@@ -50,7 +49,7 @@ type logKey struct {
 
 type Tester struct {
 	env           map[string]string           // shared environment variables for running tests
-	rnr           exec.ExecRunner             // for running commands and manipulating files
+	rnr           ExecRunner                  // for running commands and manipulating files
 	baseDir       string                      // the directory in which this tester was created
 	saKeyPath     string                      // where sa_key.json is relative to baseDir
 	cassettePaths map[provider.Version]string // where cassettes are relative to baseDir by version
@@ -68,7 +67,7 @@ var testResultsExpression = regexp.MustCompile(`(?m:^--- (PASS|FAIL|SKIP): (Test
 var testPanicExpression = regexp.MustCompile(`^panic: .*`)
 
 // Create a new tester in the current working directory and write the service account key file.
-func NewTester(env map[string]string, rnr exec.ExecRunner) (*Tester, error) {
+func NewTester(env map[string]string, rnr ExecRunner) (*Tester, error) {
 	saKeyPath := "sa_key.json"
 	if err := rnr.WriteFile(saKeyPath, env["SA_KEY"]); err != nil {
 		return nil, err
