@@ -2620,6 +2620,7 @@ resource "google_sql_database_instance" "instance" {
 				psc_enabled               = true
 				allowed_consumer_projects = []
 			}
+			ipv4_enabled = false
 		}
 	}
 	// default newtwork on the testing project is eligible for OLD_NETWORK_ARCHITECTURE
@@ -2646,6 +2647,7 @@ resource "google_sql_database_instance" "instance" {
 				psc_enabled               = true
 				allowed_consumer_projects = []
 			}
+			ipv4_enabled = false
 		}
 	}
 	sql_network_architecture = "NEW_NETWORK_ARCHITECTURE"
