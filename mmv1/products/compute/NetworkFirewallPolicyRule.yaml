@@ -69,6 +69,7 @@ parameters:
     description: |
       The project for the resource
     immutable: true
+    default_from_api: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
 properties:
   - !ruby/object:Api::Type::String
