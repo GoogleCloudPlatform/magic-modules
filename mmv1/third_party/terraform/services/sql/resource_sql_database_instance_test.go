@@ -88,6 +88,12 @@ func TestAccSqlDatabaseInstance_networkArchitecture(t *testing.T) {
 					checkInstanceTypeIsPresent("google_sql_database_instance.instance"),
 				),
 			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
 		},
 	})
 }
@@ -2606,6 +2612,14 @@ resource "google_sql_database_instance" "instance" {
 		tier = "db-g1-small"
 	}
 	sql_network_architecture = "OLD_NETWORK_ARCHITECTURE"
+
+	// default newtwork on the testing project is eligible for OLD_NETWORK_ARCHITECTURE https://github.com/hashicorp/terraform-provider-google/issues/17552#issuecomment-2253118992
+	network_interface {
+		network = "default"
+	
+		access_config {
+		  // Ephemeral IP
+	}
 }
 `
 
@@ -2619,6 +2633,13 @@ resource "google_sql_database_instance" "instance" {
 		tier = "db-g1-small"
 	}
 	sql_network_architecture = "NEW_NETWORK_ARCHITECTURE"
+
+	network_interface {
+		network = "default"
+	
+		access_config {
+		  // Ephemeral IP
+	}
 }
 `
 
