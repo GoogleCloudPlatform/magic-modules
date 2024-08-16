@@ -2619,6 +2619,7 @@ resource "google_sql_database_instance" "instance" {
 	
 		access_config {
 		  // Ephemeral IP
+		}
 	}
 }
 `
@@ -2639,6 +2640,7 @@ resource "google_sql_database_instance" "instance" {
 	
 		access_config {
 		  // Ephemeral IP
+		}
 	}
 }
 `
