@@ -1,7 +1,9 @@
 resource "google_alloydb_cluster" "primary" {
   cluster_id = "<%= ctx[:vars]['alloydb_primary_cluster_name'] %>"
   location   = "us-central1"
-  network    = google_compute_network.default.id
+  network_config {
+    network = google_compute_network.default.id
+  }
 }
 
 resource "google_alloydb_instance" "primary" {
