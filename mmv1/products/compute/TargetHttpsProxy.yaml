@@ -221,7 +221,7 @@ properties:
       load balancer (classic), this option is not available publicly.
   - !ruby/object:Api::Type::ResourceRef
     name: 'serverTlsPolicy'
-    resource: 'ServerTlsPolicy'
+    resource: 'ServerSslPolicy'
     imports: 'selfLink'
     description: |
       A URL referring to a networksecurity.ServerTlsPolicy
@@ -239,5 +239,7 @@ properties:
       receive a resourceInUseByAnotherResource error. Use lifecycle.create_before_destroy
       within the ServerTlsPolicy resource to avoid this.
     update_verb: :PATCH
+    update_url: 'projects/{{project}}/global/targetHttpsProxies/{{name}}'
+    fingerprint_name: 'fingerprint'
     update_url: 'projects/{{project}}/global/targetHttpsProxies/{{name}}'
     fingerprint_name: 'fingerprint'
