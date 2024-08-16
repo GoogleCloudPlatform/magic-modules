@@ -54,7 +54,7 @@ func TestAccRedisCluster_createClusterWithZoneDistribution(t *testing.T) {
                 Steps: []resource.TestStep{
                         {
                                 // create cluster with replica count 1
-                                Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: false, zoneDistributionMode: "SINGLE_ZONE", zone: "us-central1-b"}),
+                                Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, deletionProtectionEnabled: false, zoneDistributionMode: "SINGLE_ZONE", zone: "us-central1-b"}),
                         },
                         {
                                 ResourceName:      "google_redis_cluster.test",
@@ -64,7 +64,7 @@ func TestAccRedisCluster_createClusterWithZoneDistribution(t *testing.T) {
                         },
                         {
                                 // clean up the resource
-                                Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: false, zoneDistributionMode: "SINGLE_ZONE", zone: "us-central1-b"}),
+                                Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, deletionProtectionEnabled: false, zoneDistributionMode: "SINGLE_ZONE", zone: "us-central1-b"}),
                         },
                 },
         })
