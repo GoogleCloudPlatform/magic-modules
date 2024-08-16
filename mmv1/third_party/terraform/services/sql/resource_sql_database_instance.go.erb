@@ -936,7 +936,7 @@ is set to true. Defaults to ZONAL.`,
 			},
 			"sql_network_architecture": {
 				Type:         schema.TypeString,
-				Optional:	  true,
+				Optional:     true,
 				Computed:     true,
 				ValidateFunc: validation.StringInSlice([]string{"NEW_NETWORK_ARCHITECTURE", "OLD_NETWORK_ARCHITECTURE"}, false),
 				Description:  `The SQL network architecture for the instance. The valid values are:- 'NEW_NETWORK_ARCHITECTURE'and 'OLD_NETWORK_ARCHITECTURE'.`,
