@@ -16,7 +16,7 @@ import (
 
 func TestAccSecurityCenterManagement(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
-		"organization": TestAccSecurityCenterManagementOrganizationEventThreatDetectionCustomModule,
+		"organization": testAccSecurityCenterManagementOrganizationEventThreatDetectionCustomModule,
 	}
 
 	for name, tc := range testCases {
@@ -32,7 +32,7 @@ func TestAccSecurityCenterManagement(t *testing.T) {
 }
 
 
-func TestAccSecurityCenterManagementOrganizationEventThreatDetectionCustomModule(t *testing.T) {
+func testAccSecurityCenterManagementOrganizationEventThreatDetectionCustomModule(t *testing.T) {
 	// t.Parallel()
 
 	context := map[string]interface{}{
