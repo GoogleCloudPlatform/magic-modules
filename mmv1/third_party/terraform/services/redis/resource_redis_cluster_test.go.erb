@@ -102,7 +102,6 @@ func TestAccRedisCluster_updateReplicaCount(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"psc_configs"},
 			},
 			{
-			{
 				// update replica count to 0
 				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, deletionProtectionEnabled: true, zoneDistributionMode: "MULTI_ZONE"}),
 			},
