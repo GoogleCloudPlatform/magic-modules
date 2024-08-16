@@ -544,10 +544,10 @@ func resourceStorageBucketV2() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: `The name of the bucket.`,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				Description:  `The name of the bucket.`,
 				ValidateFunc: verify.ValidateGCSName,
 			},
 
@@ -581,11 +581,11 @@ func resourceStorageBucketV2() *schema.Resource {
 			},
 
 			"labels": {
-				Type:        schema.TypeMap,
+				Type:         schema.TypeMap,
 				ValidateFunc: labelKeyValidator,
-				Optional:    true,
-				Elem:        &schema.Schema{Type: schema.TypeString},
-				Description: `A set of key/value label pairs to assign to the bucket.`,
+				Optional:     true,
+				Elem:         &schema.Schema{Type: schema.TypeString},
+				Description:  `A set of key/value label pairs to assign to the bucket.`,
 			},
 
 			"terraform_labels": {
@@ -814,10 +814,10 @@ func resourceStorageBucketV2() *schema.Resource {
 							Description: `While set to true, autoclass automatically transitions objects in your bucket to appropriate storage classes based on each object's access pattern.`,
 						},
 						"terminal_storage_class": {
-								Type:        schema.TypeString,
-								Optional:    true,
-								Computed:    true,
-								Description: `The storage class that objects in the bucket eventually transition to if they are not read for a certain length of time. Supported values include: NEARLINE, ARCHIVE.`,
+							Type:        schema.TypeString,
+							Optional:    true,
+							Computed:    true,
+							Description: `The storage class that objects in the bucket eventually transition to if they are not read for a certain length of time. Supported values include: NEARLINE, ARCHIVE.`,
 						},
 					},
 				},
@@ -871,7 +871,7 @@ func resourceStorageBucketV2() *schema.Resource {
 							AtLeastOneOf: []string{"website.0.main_page_suffix", "website.0.not_found_page"},
 							Description:  `The custom object to return when a requested resource is not found.`,
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-								return  old != "" && new == ""
+								return old != "" && new == ""
 							},
 						},
 					},
@@ -942,8 +942,8 @@ func resourceStorageBucketV2() *schema.Resource {
 			},
 
 			"default_event_based_hold": {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
 				Description: `Whether or not to automatically apply an eventBasedHold to new objects added to the bucket.`,
 			},
 
@@ -999,9 +999,9 @@ func resourceStorageBucketV2() *schema.Resource {
 				Description: `The bucket's custom location configuration, which specifies the individual regions that comprise a dual-region bucket. If the bucket is designated a single or multi-region, the parameters are empty.`,
 			},
 			"rpo": {
-				Type: schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
 				Description: `Specifies the RPO setting of bucket. If set 'ASYNC_TURBO', The Turbo Replication will be enabled for the dual-region bucket. Value 'DEFAULT' will set RPO setting to default. Turbo Replication is only for buckets in dual-regions.See the docs for more details.`,
 			},
 			"public_access_prevention": {
@@ -1016,7 +1016,7 @@ func resourceStorageBucketV2() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 				Description: `The bucket's soft delete policy, which defines the period of time that soft-deleted objects will be retained, and cannot be permanently deleted. If it is not provided, by default Google Cloud Storage sets this to default soft delete policy`,
-				Elem : &schema.Resource{
+				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"retention_duration_seconds": {
 							Type:        schema.TypeInt,
