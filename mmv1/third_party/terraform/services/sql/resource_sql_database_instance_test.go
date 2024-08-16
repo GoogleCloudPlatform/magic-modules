@@ -2616,6 +2616,10 @@ resource "google_sql_database_instance" "instance" {
 		tier = "db-g1-small"
 		ip_configuration {
 			private_network = data.google_compute_network.default.id
+			psc_config {
+				psc_enabled               = true
+				allowed_consumer_projects = []
+			}
 		}
 	}
 	// default newtwork on the testing project is eligible for OLD_NETWORK_ARCHITECTURE
@@ -2638,6 +2642,10 @@ resource "google_sql_database_instance" "instance" {
 		tier = "db-g1-small"
 		ip_configuration {
 			private_network = data.google_compute_network.default.id
+			psc_config {
+				psc_enabled               = true
+				allowed_consumer_projects = []
+			}
 		}
 	}
 	sql_network_architecture = "NEW_NETWORK_ARCHITECTURE"
