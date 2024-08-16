@@ -53,7 +53,7 @@ examples:
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: 'templates/terraform/constants/compute_network_firewall_policy_rule_operation.go.erb'
   post_delete: 'templates/terraform/constants/compute_network_firewall_policy_rule_operation.go.erb'
-  custom_import: 'templates/terraform/custom_import/firewall_policy_rule_import.go.erb'
+  custom_import: 'templates/terraform/custom_import/network_firewall_policy_rule_import.go.erb'
   test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb'
 parameters:
   - !ruby/object:Api::Type::String
