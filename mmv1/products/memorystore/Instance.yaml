@@ -1,0 +1,259 @@
+---
+!ruby/object:Api::Resource
+base_url: "/v1beta/projects/{{project}}/locations/{{location}}/instances"
+create_url: "/v1beta/projects/{{project}}/locations/{{location}}/instances?instanceId={{instance_id}}"
+self_link: "/v1beta/projects/{{project}}/locations/{{location}}/instances/{{instance_id}}"
+id_format: "/v1beta/projects/{{project}}/locations/{{location}}/instances/{{instance_id}}"
+import_format:
+  - "/v1beta/projects/{{project}}/locations/{{location}}/instances/{{instance_id}}"
+name: Instance
+description: Description
+update_verb: :PATCH
+update_mask: true
+autogen_async: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: name
+    description: "Identifier. Unique name of the instance.\nFormat: projects/{project}/locations/{location}/instances/{instance} "
+    output: true
+  - !ruby/object:Api::Type::String
+    name: createTime
+    description: "Output only. Creation timestamp of the instance. "
+    output: true
+  - !ruby/object:Api::Type::String
+    name: updateTime
+    description: "Output only. Latest update timestamp of the instance. "
+    output: true
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: labels
+    output:
+    api_name:
+    description: "Optional. Labels to represent user-provided metadata. "
+    min_version:
+    ignore_write:
+    update_verb:
+    update_url:
+    immutable:
+  - !ruby/object:Api::Type::String
+    name: state
+    description:
+      "Output only. Current state of the instance. \n Possible values:\n
+      STATE_UNSPECIFIED\nCREATING\nACTIVE\nUPDATING\nDELETING"
+    output: true
+  - !ruby/object:Api::Type::NestedObject
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: targetShardCount
+            description: "Output only. Target number of shards for the instance. "
+            output: true
+          - !ruby/object:Api::Type::Integer
+            name: targetReplicaCount
+            description:
+              "Output only. Target number of replica nodes per shard for the
+              instance. "
+            output: true
+        name: updateInfo
+        description: "Represents information about instance with state UPDATING. "
+    name: stateInfo
+    description: "Additional information about the state of the instance. "
+  - !ruby/object:Api::Type::String
+    name: uid
+    description: "Output only. System assigned, unique identifier for the instance. "
+    output: true
+  - !ruby/object:Api::Type::Integer
+    name: replicaCount
+    description:
+      "Optional. Number of replica nodes per shard. If omitted the default
+      is 0 replicas. "
+  - !ruby/object:Api::Type::String
+    name: authorizationMode
+    description:
+      "Optional. Immutable. Authorization mode of the instance. \n Possible
+      values:\n AUTHORIZATION_MODE_UNSPECIFIED\nAUTH_DISABLED\nIAM_AUTH"
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: transitEncryptionMode
+    description:
+      "Optional. Immutable. In-transit encryption mode of the instance. \n
+      Possible values:\n TRANSIT_ENCRYPTION_MODE_UNSPECIFIED\nTRANSIT_ENCRYPTION_DISABLED\nSERVER_AUTHENTICATION"
+    immutable: true
+  - !ruby/object:Api::Type::Integer
+    name: shardCount
+    description: "Required. Number of shards for the instance. "
+    required: true
+  - !ruby/object:Api::Type::Array
+    name: discoveryEndpoints
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: address
+          description:
+            "Output only. IP address of the exposed endpoint clients connect
+            to. "
+          output: true
+        - !ruby/object:Api::Type::Integer
+          name: port
+          description: "Output only. The port number of the exposed endpoint. "
+          output: true
+        - !ruby/object:Api::Type::String
+          name: network
+          description:
+            "Output only. The network where the IP address of the discovery
+            endpoint will be\nreserved, in the form of\nprojects/{network_project}/global/networks/{network_id}. "
+          output: true
+    description:
+      "Output only. Endpoints clients can connect to the instance through.
+      Currently only one\ndiscovery endpoint is supported. "
+    output: true
+  - !ruby/object:Api::Type::String
+    name: nodeType
+    description:
+      "Optional. Immutable. Machine type for individual nodes of the instance.
+      \n Possible values:\n NODE_TYPE_UNSPECIFIED\nSHARED_CORE_NANO\nHIGHMEM_MEDIUM\nHIGHMEM_XLARGE\nSTANDARD_SMALL"
+    immutable: true
+  - !ruby/object:Api::Type::NestedObject
+    properties:
+      - !ruby/object:Api::Type::String
+        name: mode
+        description: "Optional. Current persistence mode. \n Possible values:\n PERSISTENCE_MODE_UNSPECIFIED\nDISABLED\nRDB\nAOF"
+      - !ruby/object:Api::Type::NestedObject
+        properties:
+          - !ruby/object:Api::Type::String
+            name: rdbSnapshotPeriod
+            description:
+              "Optional. Period between RDB snapshots. \n Possible values:\n
+              SNAPSHOT_PERIOD_UNSPECIFIED\nONE_HOUR\nSIX_HOURS\nTWELVE_HOURS\nTWENTY_FOUR_HOURS"
+          - !ruby/object:Api::Type::String
+            name: rdbSnapshotStartTime
+            description:
+              "Optional. Time that the first snapshot was/will be attempted,
+              and to which future\nsnapshots will be aligned. If not provided, the current
+              time will be\nused. "
+        name: rdbConfig
+        description: "Configuration for RDB based persistence. "
+      - !ruby/object:Api::Type::NestedObject
+        properties:
+          - !ruby/object:Api::Type::String
+            name: appendFsync
+            description: "Optional. The fsync mode. \n Possible values:\n APPEND_FSYNC_UNSPECIFIED\nNEVER\nEVERY_SEC\nALWAYS"
+        name: aofConfig
+        description: "Configuration for AOF based persistence. "
+    name: persistenceConfig
+    description: "Represents persistence configuration for a instance. "
+  - !ruby/object:Api::Type::String
+    name: engineVersion
+    description: "Optional. Immutable. Engine version of the instance. "
+    immutable: true
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: engineConfigs
+    output:
+    api_name:
+    description: "Optional. User-provided engine configurations for the instance. "
+    min_version:
+    ignore_write:
+    update_verb:
+    update_url:
+    immutable:
+  - !ruby/object:Api::Type::NestedObject
+    properties:
+      - !ruby/object:Api::Type::Double
+        name: sizeGb
+        description: "Output only. Memory size in GB of the node. "
+        output: true
+    name: nodeConfig
+    description: "Represents configuration for nodes of the instance. "
+  - !ruby/object:Api::Type::NestedObject
+    properties:
+      - !ruby/object:Api::Type::String
+        name: zone
+        description:
+          "Optional. Defines zone where all resources will be allocated with
+          SINGLE_ZONE mode.\nIgnored for MULTI_ZONE mode. "
+      - !ruby/object:Api::Type::String
+        name: mode
+        description:
+          "Optional. Current zone distribution mode. Defaults to MULTI_ZONE.
+          \n Possible values:\n ZONE_DISTRIBUTION_MODE_UNSPECIFIED\nMULTI_ZONE\nSINGLE_ZONE"
+    name: zoneDistributionConfig
+    description: "Zone distribution configuration for allocation of instance resources. "
+  - !ruby/object:Api::Type::Boolean
+    name: deletionProtectionEnabled
+    description: "Optional. If set to true deletion of the instance will fail. "
+  - !ruby/object:Api::Type::Array
+    name: pscAutoConnections
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: pscConnectionId
+          description:
+            "Output only. The PSC connection id of the forwarding rule connected
+            to the\nservice attachment. "
+          output: true
+        - !ruby/object:Api::Type::String
+          name: ipAddress
+          description:
+            "Output only. The IP allocated on the consumer network for the
+            PSC forwarding rule. "
+          output: true
+        - !ruby/object:Api::Type::String
+          name: forwardingRule
+          description: "Output only. The URI of the consumer side forwarding rule.\nFormat:\nprojects/{project}/regions/{region}/forwardingRules/{forwarding_rule} "
+          output: true
+        - !ruby/object:Api::Type::String
+          name: projectId
+          description:
+            "Required. The consumer project_id where the forwarding rule is
+            created from. "
+          required: true
+        - !ruby/object:Api::Type::String
+          name: network
+          description:
+            "Required. The consumer network where the IP address resides, in
+            the form of\nprojects/{project_id}/global/networks/{network_id}. "
+          required: true
+    description:
+      "Required. Immutable. User inputs and resource details of the auto-created
+      PSC connections. "
+    immutable: true
+    required: true
+parameters:
+  - !ruby/object:Api::Type::String
+    name: location
+    description:
+      "Resource ID segment making up resource `name`. It identifies the resource
+      within its parent collection as described in https://google.aip.dev/122. See documentation
+      for resource type `memorystore.googleapis.com/CertificateAuthority`. "
+    url_param_only: true
+    required: true
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: instanceId
+    description:
+      "Required. The ID to use for the instance, which will become the final
+      component of\nthe instance's resource name.\n\nThis value is subject to the following
+      restrictions:\n\n* Must be 4-63 characters in length\n* Must begin with a letter
+      or digit\n* Must contain only lowercase letters, digits, and hyphens\n* Must not
+      end with a hyphen\n* Must be unique within a location "
+    url_param_only: true
+    required: true
+    immutable: true
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: name
+    base_url: "{{op_id}}"
+    wait_ms: 1000
+    timeouts:
+  result: !ruby/object:Api::OpAsync::Result
+    path: response
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: done
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: error
+    message: message
