@@ -2607,20 +2607,6 @@ data "google_compute_network" "default" {
 	name = "default"
 }
 
-resource "google_compute_global_address" "private_ip_address" {
-	name          = "private-ip-address%s"
-	purpose       = "VPC_PEERING"
-	address_type  = "INTERNAL"
-	prefix_length = 16
-	network       = data.google_compute_network.default.id
-}
-
-resource "google_service_networking_connection" "private_vpc_connection" {
-	network                 = data.google_compute_network.default.id
-	service                 = "servicenetworking.googleapis.com"
-	reserved_peering_ranges = [google_compute_global_address.private_ip_address.name]
-}
-
 resource "google_sql_database_instance" "instance" {
 	name                = "%s"
 	region              = "us-central1"
@@ -2629,13 +2615,12 @@ resource "google_sql_database_instance" "instance" {
 	settings {
 		tier = "db-g1-small"
 		ip_configuration {
-			ipv4_enabled    = false
 			private_network = data.google_compute_network.default.id
 		}
 	}
-	// default newtwork on the testing project is eligible for OLD_NETWORK_ARCHITECTURE https://github.com/hashicorp/terraform-provider-google/issues/17552#issuecomment-2253118992
+	// default newtwork on the testing project is eligible for OLD_NETWORK_ARCHITECTURE
+	// see https://github.com/hashicorp/terraform-provider-google/issues/17552#issuecomment-2253118992
 	sql_network_architecture = "OLD_NETWORK_ARCHITECTURE"
-	depends_on = [google_service_networking_connection.private_vpc_connection]
 }
 `
 
@@ -2644,20 +2629,6 @@ data "google_compute_network" "default" {
 	name = "default"
 }
 
-resource "google_compute_global_address" "private_ip_address" {
-	name          = "private-ip-address%s"
-	purpose       = "VPC_PEERING"
-	address_type  = "INTERNAL"
-	prefix_length = 16
-	network       = data.google_compute_network.default.id
-}
-
-resource "google_service_networking_connection" "private_vpc_connection" {
-	network                 = data.google_compute_network.default.id
-	service                 = "servicenetworking.googleapis.com"
-	reserved_peering_ranges = [google_compute_global_address.private_ip_address.name]
-}
-
 resource "google_sql_database_instance" "instance" {
 	name                = "%s"
 	region              = "us-central1"
@@ -2666,13 +2637,10 @@ resource "google_sql_database_instance" "instance" {
 	settings {
 		tier = "db-g1-small"
 		ip_configuration {
-			ipv4_enabled    = false
 			private_network = data.google_compute_network.default.id
 		}
 	}
-	// default newtwork on the testing project is eligible for OLD_NETWORK_ARCHITECTURE https://github.com/hashicorp/terraform-provider-google/issues/17552#issuecomment-2253118992
 	sql_network_architecture = "NEW_NETWORK_ARCHITECTURE"
-	depends_on = [google_service_networking_connection.private_vpc_connection]
 }
 `
 
