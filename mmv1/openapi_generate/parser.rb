@@ -27,6 +27,7 @@ module OpenAPIGenerate
     def run
       openapi_dir = Dir[@folder]
       raise "No OpenAPI files found in #{@folder}" if openapi_dir.empty?
+
       openapi_dir.each do |openapi_file|
         write_yaml(openapi_file, @output)
       end
