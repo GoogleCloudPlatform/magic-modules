@@ -267,3 +267,11 @@ func GenerateFakeCredentialsJson(testId string) string {
 	json := fmt.Sprintf(`{"private_key_id": "foo","private_key": "bar","client_email": "%s@example.com","client_id": "id@foo.com","type": "service_account"}`, testId)
 	return json
 }
+
+// Returns a fake credentials JSON string with the client_email set to a test-specific value
+// Escaping the quotes here allows you to use this value as an argument in a provider block
+// in the config of an acceptance test
+func GenerateEscapedFakeCredentialsJson(testId string) string {
+	json := fmt.Sprintf(`{\"private_key_id\": \"foo\",\"private_key\": \"bar\",\"client_email\": \"%s@example.com\",\"client_id\": \"id@foo.com\",\"type\": \"service_account\"}`, testId)
+	return json
+}
