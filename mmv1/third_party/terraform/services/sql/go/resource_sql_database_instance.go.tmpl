@@ -934,11 +934,11 @@ is set to true. Defaults to ZONAL.`,
 				Description: `The link to service attachment of PSC instance.`,
 			},
 			"sql_network_architecture": {
-				Type:        schema.TypeString,
-				Optional: 	true,
-				Computed:    true,
+				Type:         schema.TypeString,
+				Optional:	  true,
+				Computed:     true,
 				ValidateFunc: validation.StringInSlice([]string{"NEW_NETWORK_ARCHITECTURE", "OLD_NETWORK_ARCHITECTURE"}, false),
-				Description: `The SQL network architecture for the instance. The valid values are:- 'NEW_NETWORK_ARCHITECTURE'and 'OLD_NETWORK_ARCHITECTURE'.`,
+				Description:  `The SQL network architecture for the instance. The valid values are:- 'NEW_NETWORK_ARCHITECTURE'and 'OLD_NETWORK_ARCHITECTURE'.`,
 			},
 			"dns_name": {
 				Type:        schema.TypeString,
@@ -1718,7 +1718,6 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 	return nil
 }
 
-
 func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
@@ -1943,12 +1942,12 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		}
 	}
 	
+	// update the other fields of the instance
 	s := d.Get("settings")
 	instance = &sqladmin.DatabaseInstance{
 		Settings: expandSqlDatabaseInstanceSettings(desiredSetting.([]interface{}), databaseVersion),
 		SqlNetworkArchitecture: d.Get("sql_network_architecture").(string),
 	}
-
 	_settings := s.([]interface{})[0].(map[string]interface{})
 	// Instance.Patch operation on completion updates the settings proto version by +8. As terraform does not know this it tries
 	// to make an update call with the proto version before patch and fails. To resolve this issue we update the setting version
