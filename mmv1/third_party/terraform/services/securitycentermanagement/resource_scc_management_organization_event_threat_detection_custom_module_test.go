@@ -15,7 +15,7 @@ import (
 )
 
 func TestAccSecurityCenterManagementOrganizationEventThreatDetectionCustomModule(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 
 	context := map[string]interface{}{
 		"org_id":        envvar.GetTestOrgFromEnv(t),
