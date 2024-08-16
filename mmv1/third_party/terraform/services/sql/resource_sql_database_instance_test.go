@@ -2603,6 +2603,10 @@ resource "google_sql_database_instance" "instance" {
 `
 
 var testGoogleSqlDatabaseInstance_old_netowrk_architecture = `
+data "google_compute_network" "default" {
+	name = "default"
+}
+
 resource "google_sql_database_instance" "instance" {
 	name                = "%s"
 	region              = "us-central1"
@@ -2610,21 +2614,21 @@ resource "google_sql_database_instance" "instance" {
 	deletion_protection = false
 	settings {
 		tier = "db-g1-small"
-	}
-	sql_network_architecture = "OLD_NETWORK_ARCHITECTURE"
-
-	// default newtwork on the testing project is eligible for OLD_NETWORK_ARCHITECTURE https://github.com/hashicorp/terraform-provider-google/issues/17552#issuecomment-2253118992
-	network_interface {
-		network = "default"
-	
-		access_config {
-		  // Ephemeral IP
+		ip_configuration {
+			ipv4_enabled    = false
+			private_network = data.google_compute_network.default.id
 		}
 	}
+	// default newtwork on the testing project is eligible for OLD_NETWORK_ARCHITECTURE https://github.com/hashicorp/terraform-provider-google/issues/17552#issuecomment-2253118992
+	sql_network_architecture = "OLD_NETWORK_ARCHITECTURE"
 }
 `
 
 var testGoogleSqlDatabaseInstance_new_netowrk_architecture = `
+data "google_compute_network" "default" {
+	name = "default"
+}
+
 resource "google_sql_database_instance" "instance" {
 	name                = "%s"
 	region              = "us-central1"
@@ -2632,16 +2636,12 @@ resource "google_sql_database_instance" "instance" {
 	deletion_protection = false
 	settings {
 		tier = "db-g1-small"
-	}
-	sql_network_architecture = "NEW_NETWORK_ARCHITECTURE"
-
-	network_interface {
-		network = "default"
-	
-		access_config {
-		  // Ephemeral IP
+		ip_configuration {
+			ipv4_enabled    = false
+			private_network = data.google_compute_network.default.id
 		}
 	}
+	sql_network_architecture = "NEW_NETWORK_ARCHITECTURE"
 }
 `
 
