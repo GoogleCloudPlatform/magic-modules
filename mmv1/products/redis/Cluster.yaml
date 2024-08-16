@@ -70,7 +70,7 @@ examples:
       policy_name: "mypolicy"
       subnet_name: "mysubnet"
       network_name: "mynetwork"
-      prevent_destroy: 'true'
+      deletion_protection_enabled: 'true'
     test_vars_overrides:
       deletion_protection_enabled: 'false'
     oics_vars_overrides:
