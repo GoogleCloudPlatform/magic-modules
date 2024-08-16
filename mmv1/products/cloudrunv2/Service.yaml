@@ -49,6 +49,19 @@ async: !ruby/object:Api::OpAsync
 id_format: 'projects/{{project}}/locations/{{location}}/services/{{name}}'
 import_format: ['projects/{{project}}/locations/{{location}}/services/{{name}}']
 autogen_async: true
+virtual_fields:
+  - !ruby/object:Api::Type::Boolean
+    name: 'deletion_protection'
+    default_value: true
+    description: |
+      Whether Terraform will be prevented from destroying the service. Defaults to true.
+      When a`terraform destroy` or `terraform apply` would delete the service,
+      the command will fail if this field is not set to false in Terraform state.
+      When the field is set to true or unset in Terraform state, a `terraform apply`
+      or `terraform destroy` that would delete the service will fail.
+      When the field is set to false, deleting the service is allowed.
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_delete: 'templates/terraform/pre_delete/cloudrunv2_service_deletion_policy.go.erb'
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_basic'
@@ -56,11 +69,15 @@ examples:
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_limits'
     primary_resource_id: 'default'
     vars:
       cloud_run_service_name: 'cloudrun-service'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_sql'
     primary_resource_id: 'default'
@@ -74,6 +91,8 @@ examples:
       deletion_protection: 'false'
     oics_vars_overrides:
       deletion_protection: 'false'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_vpcaccess'
     primary_resource_id: 'default'
@@ -83,18 +102,24 @@ examples:
       vpc_access_connector_name: 'run-vpc'
       vpc_compute_subnetwork_name: 'run-subnetwork'
       compute_network_name: 'run-network'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_directvpc'
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_probes'
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_secret'
     primary_resource_id: 'default'
@@ -102,6 +127,8 @@ examples:
     vars:
       cloud_run_service_name: 'cloudrun-service'
       secret_id: 'secret-1'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_multicontainer'
     min_version: 'beta'
@@ -110,20 +137,24 @@ examples:
       random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
-
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_mount_gcs'
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service-%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
-
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_mount_nfs'
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service-%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
+    ignore_read_extra:
+      - 'deletion_protection'
 
 parameters:
   - !ruby/object:Api::Type::String
@@ -250,6 +281,14 @@ properties:
         name: 'useDefault'
         description: |
           If True, indicates to use the default project's binary authorization policy. If False, binary authorization will be disabled.
+        conflicts:
+          - policy
+      - !ruby/object:Api::Type::String
+        name: 'policy'
+        description: |
+          The path to a binary authorization policy. Format: projects/{project}/platforms/cloudRun/{policy-name}
+        conflicts:
+          - use_default
   - !ruby/object:Api::Type::Array
     name: 'customAudiences'
     description: |
@@ -266,6 +305,11 @@ properties:
         name: 'minInstanceCount'
         description: |
           Minimum number of instances for the service, to be divided among all revisions receiving traffic.
+  - !ruby/object:Api::Type::Boolean
+    name: 'defaultUriDisabled'
+    min_version: beta
+    description: |-
+      Disables public resolution of the default URI of this service.
   - !ruby/object:Api::Type::NestedObject
     name: 'template'
     required: true
@@ -356,6 +400,8 @@ properties:
 
           A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
         default_from_api: true
+        validation: !ruby/object:Provider::Terraform::Validation
+          regex: '^[0-9]+(?:\.[0-9]{1,9})?s$'
       - !ruby/object:Api::Type::String
         name: 'serviceAccount'
         description: |-
@@ -390,6 +436,7 @@ properties:
               name: 'env'
               description: |-
                 List of environment variables to set in the container.
+              is_set: true
               item_type: !ruby/object:Api::Type::NestedObject
                 properties:
                   - !ruby/object:Api::Type::String
@@ -489,7 +536,6 @@ properties:
               name: 'livenessProbe'
               description: |-
                 Periodic probe of container liveness. Container will be restarted if the probe fails. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
-              default_from_api: true
               properties:
                 - !ruby/object:Api::Type::Integer
                   name: 'initialDelaySeconds'
@@ -821,6 +867,7 @@ properties:
         name: 'maxInstanceRequestConcurrency'
         description: |-
           Sets the maximum number of requests that each serving instance can receive.
+          If not specified or 0, defaults to 80 when requested CPU >= 1 and defaults to 1 when requested CPU < 1.
         default_from_api: true
       - !ruby/object:Api::Type::Boolean
         name: 'sessionAffinity'

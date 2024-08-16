@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -120,14 +120,13 @@ func TestAccComputeRouterInterface_withPrivateIpAddress(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccComputeRouterInterface_withIPVersionV4(t *testing.T) {
 	t.Parallel()
 
 	routerName := fmt.Sprintf("tf-test-router-%s", acctest.RandString(t, 10))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRouterInterfaceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -150,7 +149,7 @@ func TestAccComputeRouterInterface_withIPVersionV6(t *testing.T) {
 	routerName := fmt.Sprintf("tf-test-router-%s", acctest.RandString(t, 10))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRouterInterfaceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -166,7 +165,6 @@ func TestAccComputeRouterInterface_withIPVersionV6(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func testAccCheckComputeRouterInterfaceDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
@@ -561,23 +559,19 @@ resource "google_compute_router_interface" "foobar" {
 `, routerName, routerName, routerName, routerName, routerName)
 }
 
-<% unless version == 'ga' -%>
 func testAccComputeRouterInterfaceWithIpVersionIPV6(routerName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "foobar" {
-  provider = google-beta
   name = "%s-net"
 }
 
 resource "google_compute_subnetwork" "foobar" {
-  provider = google-beta
   name          = "%s-subnet"
   network       = google_compute_network.foobar.self_link
   ip_cidr_range = "10.0.0.0/16"
 }
 
 resource "google_compute_router" "foobar" {
-  provider = google-beta
   name    = "%s"
   network = google_compute_network.foobar.self_link
   bgp {
@@ -586,7 +580,6 @@ resource "google_compute_router" "foobar" {
 }
 
 resource "google_compute_router_interface" "foobar" {
-  provider = google-beta
   name     = "%s-interface"
   router   = google_compute_router.foobar.name
   region   = google_compute_router.foobar.region
@@ -599,19 +592,16 @@ resource "google_compute_router_interface" "foobar" {
 func testAccComputeRouterInterfaceWithIpVersionIPV4(routerName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "foobar" {
-  provider = google-beta
   name = "%s-net"
 }
 
 resource "google_compute_subnetwork" "foobar" {
-  provider = google-beta
   name          = "%s-subnet"
   network       = google_compute_network.foobar.self_link
   ip_cidr_range = "10.0.0.0/16"
 }
 
 resource "google_compute_router" "foobar" {
-  provider = google-beta
   name    = "%s"
   network = google_compute_network.foobar.self_link
   bgp {
@@ -620,7 +610,6 @@ resource "google_compute_router" "foobar" {
 }
 
 resource "google_compute_router_interface" "foobar" {
-  provider = google-beta
   name     = "%s-interface"
   router   = google_compute_router.foobar.name
   region   = google_compute_router.foobar.region
@@ -629,4 +618,3 @@ resource "google_compute_router_interface" "foobar" {
 }
 `, routerName, routerName, routerName, routerName)
 }
-<% end -%>

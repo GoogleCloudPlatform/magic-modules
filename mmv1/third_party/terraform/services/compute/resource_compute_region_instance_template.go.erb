@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/id"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -77,11 +77,11 @@ func ResourceComputeRegionInstanceTemplate() *schema.Resource {
 				Description: `Creates a unique name beginning with the specified prefix. Conflicts with name.`,
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
 					// https://cloud.google.com/compute/docs/reference/latest/instanceTemplates#resource
-					// uuid is 26 characters, limit the prefix to 37.
+					// uuid is 9 characters, limit the prefix to 54.
 					value := v.(string)
-					if len(value) > 37 {
+					if len(value) > 54 {
 						errors = append(errors, fmt.Errorf(
-							"%q cannot be longer than 37 characters, name is limited to 63", k))
+							"%q cannot be longer than 54 characters, name is limited to 63", k))
 					}
 					return
 				},
@@ -354,6 +354,17 @@ Google Cloud KMS.`,
 				Description: `Metadata key/value pairs to make available from within instances created from this template.`,
 			},
 
+			<% unless version == 'ga' -%>
+			"partner_metadata": {
+				Type:                  schema.TypeMap,
+				Optional:              true,
+				DiffSuppressFunc:      ComparePartnerMetadataDiff,
+				DiffSuppressOnRefresh: true,
+				Elem:                  &schema.Schema{Type: schema.TypeString},
+				Description:           `Partner Metadata Map made available within the instance.`,
+			},
+			<% end -%>
+
 			"metadata_startup_script": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -483,7 +494,7 @@ Google Cloud KMS.`,
 										Type:             schema.TypeString,
 										Required:         true,
 										ForceNew:         true,
-										DiffSuppressFunc: tpgresource.IpCidrRangeDiffSuppress,
+										DiffSuppressFunc: IpCidrRangeDiffSuppress,
 										Description:      `The IP CIDR range represented by this alias IP range. This IP CIDR range must belong to the specified subnetwork and cannot contain IP addresses reserved by system or used by other network interfaces. At the time of writing only a netmask (e.g. /24) may be supplied, with a CIDR format resulting in an API error.`,
 									},
 									"subnetwork_range_name": {
@@ -664,7 +675,6 @@ Google Cloud KMS.`,
 							AtLeastOneOf: schedulingInstTemplateKeys,
 							Description:  `Specifies the action GCE should take when SPOT VM is preempted.`,
 						},
-<% unless version == 'ga' -%>
 						"max_run_duration" : {
 							Type:        schema.TypeList,
 							Optional:    true,
@@ -692,6 +702,25 @@ be from 0 to 999,999,999 inclusive.`,
 								},
 							},
 						},
+						"on_instance_stop_action": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							ForceNew:    true,
+							Description: `Defines the behaviour for instances with the instance_termination_action.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"discard_local_ssd": {
+										Type:     schema.TypeBool,
+										Optional:    true,
+										Description: `If true, the contents of any attached Local SSD disks will be discarded.`,
+										Default:      false,
+										ForceNew:    true,
+									},
+								},
+							},
+						},
+<% unless version == 'ga' -%>
 						"maintenance_interval" : {
 							Type:        schema.TypeString,
 							Optional:    true,
@@ -823,14 +852,6 @@ be from 0 to 999,999,999 inclusive.`,
 				Description: `The Confidential VM config being used by the instance. on_host_maintenance has to be set to TERMINATE or this will fail to create.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						<% if version == "ga" -%>
-						"enable_confidential_compute": {
-							Type:        schema.TypeBool,
-							Required:    true,
-							ForceNew:    true,
-							Description: `Defines whether the instance should have confidential compute enabled.`,
-						},
-						<% else -%>
 						"enable_confidential_compute": {
 							Type:        schema.TypeBool,
 							Optional:    true,
@@ -838,6 +859,7 @@ be from 0 to 999,999,999 inclusive.`,
 							Description: `Defines whether the instance should have confidential compute enabled. Field will be deprecated in a future release.`,
 							AtLeastOneOf: []string{"confidential_instance_config.0.enable_confidential_compute", "confidential_instance_config.0.confidential_instance_type"},
 						},
+						<% if version == "ga" -%>
 						"confidential_instance_type": {
 							Type:        schema.TypeString,
 							Optional:    true,
@@ -846,6 +868,18 @@ be from 0 to 999,999,999 inclusive.`,
 								Specifies which confidential computing technology to use.
 								This could be one of the following values: SEV, SEV_SNP.
 								If SEV_SNP, min_cpu_platform = "AMD Milan" is currently required.`,
+							AtLeastOneOf: []string{"confidential_instance_config.0.enable_confidential_compute", "confidential_instance_config.0.confidential_instance_type"},
+						},
+						<% else -%>
+						"confidential_instance_type": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							ForceNew:    true,
+							Description: `
+								The confidential computing technology the instance uses.
+								SEV is an AMD feature. TDX is an Intel feature. One of the following
+								values is required: SEV, SEV_SNP, TDX. If SEV_SNP, min_cpu_platform =
+								"AMD Milan" is currently required.`,
 							AtLeastOneOf: []string{"confidential_instance_config.0.enable_confidential_compute", "confidential_instance_config.0.confidential_instance_type"},
 						},
 						<% end -%>
@@ -936,7 +970,7 @@ be from 0 to 999,999,999 inclusive.`,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Set:         schema.HashString,
 				Description: `A set of key/value label pairs to assign to instances created from this template,
-				
+
 				**Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
 				Please refer to the field 'effective_labels' for all of the labels present on the resource.`,
 			},
@@ -1046,6 +1080,13 @@ func resourceComputeRegionInstanceTemplateCreate(d *schema.ResourceData, meta in
 		return err
 	}
 
+	<% unless version == 'ga' -%>
+	PartnerMetadata, err := resourceInstancePartnerMetadata(d)
+	if err != nil {
+		return err
+	}
+	<% end -%>
+
 	networks, err := expandNetworkInterfaces(d, config)
 	if err != nil {
 		return err
@@ -1073,6 +1114,9 @@ func resourceComputeRegionInstanceTemplateCreate(d *schema.ResourceData, meta in
 		MinCpuPlatform:             d.Get("min_cpu_platform").(string),
 		Disks:                      disks,
 		Metadata:                   metadata,
+		<% unless version == 'ga' -%>
+		PartnerMetadata:            PartnerMetadata,
+		<% end -%>
 		NetworkInterfaces:          networks,
 		NetworkPerformanceConfig:   networkPerformanceConfig,
 		Scheduling:                 scheduling,
@@ -1100,9 +1144,14 @@ func resourceComputeRegionInstanceTemplateCreate(d *schema.ResourceData, meta in
 	if v, ok := d.GetOk("name"); ok {
 		itName = v.(string)
 	} else if v, ok := d.GetOk("name_prefix"); ok {
-		itName = resource.PrefixedUniqueId(v.(string))
+		prefix := v.(string)
+		if len(prefix) > 37 {
+			itName = tpgresource.ReducedPrefixedUniqueId(prefix)
+		} else {
+			itName = id.PrefixedUniqueId(prefix)
+		}
 	} else {
-		itName = resource.UniqueId()
+		itName = id.UniqueId()
 	}
 
 	instanceTemplate := make(map[string]interface{})
@@ -1164,6 +1213,13 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 		return err
 	}
 
+	<% unless version == 'ga' -%>
+	url, err = transport_tpg.AddQueryParams(url, map[string]string{"view": "FULL"})
+	if err != nil {
+		return err
+	}
+	<% end -%>
+
 	instanceTemplate, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config: config,
 		Method: "GET",
@@ -1212,6 +1268,18 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 			return fmt.Errorf("Error setting metadata: %s", err)
 		}
 	}
+
+	<% unless version == 'ga' -%>
+	if instanceProperties.PartnerMetadata != nil {
+		partnerMetadata, err := flattenPartnerMetadata(instanceProperties.PartnerMetadata)
+		if err != nil {
+			return fmt.Errorf("Error parsing partner metadata: %s", err)
+		}
+		if err = d.Set("partner_metadata", partnerMetadata); err != nil {
+			return fmt.Errorf("Error setting partner metadata: %s", err)
+		}
+	}
+	<% end -%>
 
 	// Set the tags fingerprint if there is one.
 	if instanceProperties.Tags != nil {

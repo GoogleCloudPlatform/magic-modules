@@ -11,6 +11,7 @@ resource "google_project" "service_project" {
   name = "Service Project"
   org_id = "{{index $.TestEnvVars "org_id"}}"
   billing_account = "{{index $.TestEnvVars "billing_account"}}"
+  deletion_policy = "DELETE"
 }
 
 # Enable Compute API
@@ -84,7 +85,7 @@ resource "google_compute_instance_template" "instance_template" {
     }
   }
   disk {
-    source_image = "debian-cloud/debian-10"
+    source_image = "debian-cloud/debian-12"
     auto_delete  = true
     boot         = true
   }

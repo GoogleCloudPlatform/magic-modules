@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -39,6 +39,7 @@ func testAccDataSourceGoogleCloudRunV2Service_basic(name, location string) strin
 resource "google_cloud_run_v2_service" "hello" {
   name     = "%s"
   location = "%s"
+  deletion_protection = false
   ingress  = "INGRESS_TRAFFIC_ALL"
   
   template {
@@ -93,6 +94,7 @@ func testAccDataSourceGoogleCloudRunV2Service_bindIAMPermission(name, location s
 resource "google_cloud_run_v2_service" "hello" {
   name     = "%s"
   location = "%s"
+  deletion_protection = false
   ingress  = "INGRESS_TRAFFIC_ALL"
   
   template {

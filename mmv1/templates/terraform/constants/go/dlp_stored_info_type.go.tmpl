@@ -1,4 +1,4 @@
-{{- /*
+{{/*
 	The license inside this block applies to this file
 	Copyright 2024 Google Inc.
 	Licensed under the Apache License, Version 2.0 (the "License");
@@ -9,7 +9,7 @@
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License.
-*/}}
+*/ -}}
 // This customizeDiff allows updating the dictionary, regex, and large_custom_dictionary fields, but
 // it recreates the resource if changing between these fields. e.g., updating the regex field should
 // be allowed, while changing from regex to dictionary should trigger the recreation of the resource.

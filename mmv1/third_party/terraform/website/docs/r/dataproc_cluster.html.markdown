@@ -4,7 +4,7 @@ description: |-
   Manages a Cloud Dataproc cluster resource.
 ---
 
-# google\_dataproc\_cluster
+# google_dataproc_cluster
 
 Manages a Cloud Dataproc cluster resource within GCP.
 
@@ -521,6 +521,11 @@ cluster_config {
 
 	* `num_local_ssds` - (Optional) The amount of local SSD disks that will be
 	attached to each master cluster node. Defaults to 0.
+
+	* `local_ssd_interface` - Optional. Interface type of local SSDs (default is "scsi").
+	Valid values: "scsi" (Small Computer System Interface), "nvme" (Non-Volatile
+	Memory Express). See
+	[local SSD performance](https://cloud.google.com/compute/docs/disks/local-ssd#performance).
 
 * `accelerators` (Optional) The Compute Engine accelerator (GPU) configuration for these instances. Can be specified multiple times.
 

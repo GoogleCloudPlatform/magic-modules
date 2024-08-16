@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -96,7 +96,9 @@ resource "google_container_cluster" "kubes" {
   deletion_protection = false
   network    = "%s"
   subnetwork    = "%s"
-
+  resource_labels = {
+    created-by = "terraform"
+  }
 }
 
 data "google_container_cluster" "kubes" {

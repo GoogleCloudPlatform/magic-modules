@@ -1,4 +1,3 @@
-# [START cloudloadbalancing_target_http_proxy_http_keep_alive_timeout]
 resource "google_compute_target_http_proxy" "<%= ctx[:primary_resource_id] %>" {
   name                        = "<%= ctx[:vars]['target_http_proxy_name'] %>"
   http_keep_alive_timeout_sec = 610
@@ -41,4 +40,3 @@ resource "google_compute_http_health_check" "default" {
   check_interval_sec = 1
   timeout_sec        = 1
 }
-# [END cloudloadbalancing_target_http_proxy_http_keep_alive_timeout]

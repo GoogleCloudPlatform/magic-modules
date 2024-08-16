@@ -1,4 +1,3 @@
-# [START cloud_sql_sqlserver_instance_public_ip]
 resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
   name                 = "<%= ctx[:vars]['sqlserver_public_ip_instance_name'] %>"
   region               = "europe-west4"
@@ -20,4 +19,3 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
   }
   deletion_protection =  "<%= ctx[:vars]['deletion_protection'] %>"
 }
-# [END cloud_sql_sqlserver_instance_public_ip]

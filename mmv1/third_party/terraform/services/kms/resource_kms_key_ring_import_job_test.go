@@ -3,7 +3,7 @@ package kms_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -25,7 +25,7 @@ func TestAccKmsKeyRingImportJob_basic(t *testing.T) {
 				ResourceName:            "google_kms_key_ring_import_job.import-job",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"key_ring", "import_job_id", "stateß"},
+				ImportStateVerifyIgnore: []string{"key_ring", "import_job_id", "state"},
 			},
 		},
 	})

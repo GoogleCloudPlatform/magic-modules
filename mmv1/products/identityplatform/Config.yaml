@@ -116,7 +116,7 @@ properties:
               A map of <test phone number, fake code> that can be used for phone auth testing.
       - !ruby/object:Api::Type::NestedObject
         name: anonymous
-        custom_flatten: 'templates/terraform/custom_flatten/identity_platform_config_anonymous.go'
+        custom_flatten: 'templates/terraform/custom_flatten/identity_platform_config_anonymous.go.erb'
         description: |
           Configuration options related to authenticating an anonymous user.
         properties:
@@ -233,6 +233,7 @@ properties:
     name: 'smsRegionConfig'
     description: |
       Configures the regions where users are allowed to send verification SMS for the project or tenant. This is based on the calling code of the destination phone number.
+    default_from_api: true
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'allowByDefault'

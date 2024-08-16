@@ -73,7 +73,3 @@ resource "google_cloudfunctions2_function" "<%= ctx[:primary_resource_id] %>" {
 
   depends_on = [time_sleep.wait_60s]
 }
-
-output "function_uri" { 
-  value = google_cloudfunctions2_function.function.service_config[0].uri
-}

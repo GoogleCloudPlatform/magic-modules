@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -22,7 +22,7 @@ func TestAccComputeRegionBackendService_basic(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeRegionBackendService_basic(serviceName, checkName),
 			},
 			{
@@ -30,7 +30,7 @@ func TestAccComputeRegionBackendService_basic(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeRegionBackendService_basicModified(
 					serviceName, checkName, extraCheckName),
 			},
@@ -54,7 +54,7 @@ func TestAccComputeRegionBackendService_ilbBasic_withUnspecifiedProtocol(t *test
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeRegionBackendService_ilbBasic_withUnspecifiedProtocol(serviceName, checkName),
 			},
 			{
@@ -142,7 +142,7 @@ func TestAccComputeRegionBackendService_withBackendMultiNic(t *testing.T) {
                 ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
                 CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
                 Steps: []resource.TestStep{
-                        resource.TestStep{
+                        {
                                 Config: testAccComputeRegionBackendService_withBackendMultiNic(
                                         serviceName, net1Name, net2Name, igName, itName, checkName, 10),
                         },
@@ -166,7 +166,7 @@ func TestAccComputeRegionBackendService_withConnectionDrainingAndUpdate(t *testi
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeRegionBackendService_withConnectionDraining(serviceName, checkName, 10),
 			},
 			{
@@ -174,7 +174,7 @@ func TestAccComputeRegionBackendService_withConnectionDrainingAndUpdate(t *testi
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeRegionBackendService_basic(serviceName, checkName),
 			},
 			{
@@ -263,6 +263,14 @@ func TestAccComputeRegionBackendService_withBackendAndIAP(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
+      {
+				Config: testAccComputeRegionBackendService_ilbBasic(backendName, checkName),
+			},
+			{
+				ResourceName:      "google_compute_region_backend_service.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 			{
 				Config: testAccComputeRegionBackendService_ilbBasicwithIAP(backendName, checkName),
 			},
@@ -271,14 +279,6 @@ func TestAccComputeRegionBackendService_withBackendAndIAP(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
         ImportStateVerifyIgnore: []string{"iap.0.oauth2_client_secret"},
-			},
-			{
-				Config: testAccComputeRegionBackendService_ilbBasic(backendName, checkName),
-			},
-			{
-				ResourceName:      "google_compute_region_backend_service.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
 			},
 		},
 	})
@@ -590,7 +590,8 @@ resource "google_compute_region_backend_service" "foobar" {
   health_checks = [google_compute_health_check.zero.self_link]
   region        = "us-central1"
 
-  protocol = "%s"
+  protocol                        = "%s"
+  connection_draining_timeout_sec = 0
   failover_policy {
       # Disable connection drain on failover cannot be set when the protocol is UDP
       drop_traffic_if_unhealthy = "%s"
@@ -616,7 +617,8 @@ resource "google_compute_region_backend_service" "foobar" {
   health_checks = [google_compute_health_check.zero.self_link]
   region        = "us-central1"
 
-  protocol = "%s"
+  protocol                        = "%s"
+  connection_draining_timeout_sec = 0
   failover_policy {
       # Disable connection drain on failover cannot be set when the protocol is UDP
       drop_traffic_if_unhealthy = "%s"
@@ -704,6 +706,7 @@ resource "google_compute_region_backend_service" "lipsum" {
 
   backend {
     group    = google_compute_instance_group_manager.foobar.instance_group
+    balancing_mode = "CONNECTION"
 <% unless version.nil? || version == 'ga' -%>
     failover = true
   }
@@ -773,6 +776,7 @@ resource "google_compute_region_backend_service" "lipsum" {
 
   backend {
     group = google_compute_instance_group_manager.foobar.instance_group
+    balancing_mode = "CONNECTION"
 <% unless version.nil? || version == 'ga' -%>
     failover = true
   }
@@ -875,6 +879,7 @@ resource "google_compute_region_backend_service" "lipsum" {
   backend {
     group    = google_compute_instance_group_manager.foobar.instance_group
     capacity_scaler = 1.0
+    balancing_mode = "CONNECTION"
   }
 
   health_checks = [google_compute_health_check.default.self_link]
@@ -1043,6 +1048,7 @@ resource "google_compute_region_backend_service" "foobar" {
   }
 
   iap {
+    enabled              = true
     oauth2_client_id     = "test"
     oauth2_client_secret = "test"
   }

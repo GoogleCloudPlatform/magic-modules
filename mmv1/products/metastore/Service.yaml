@@ -143,6 +143,27 @@ examples:
     primary_resource_id: 'backup'
     vars:
       metastore_service_name: 'backup'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dataproc_metastore_service_autoscaling_max_scaling_factor'
+    primary_resource_id: 'test_resource'
+    vars:
+      metastore_service_name: 'test-service'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dataproc_metastore_service_autoscaling_min_and_max_scaling_factor'
+    primary_resource_id: 'test_resource'
+    vars:
+      metastore_service_name: 'test-service'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dataproc_metastore_service_autoscaling_min_scaling_factor'
+    primary_resource_id: 'test_resource'
+    vars:
+      metastore_service_name: 'test-service'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dataproc_metastore_service_autoscaling_no_limit_config'
+    min_version: beta
+    primary_resource_id: 'test_resource'
+    vars:
+      metastore_service_name: 'test-service'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'serviceId'
@@ -228,6 +249,7 @@ properties:
         exactly_one_of:
           - scaling_config.0.instance_size
           - scaling_config.0.scaling_factor
+          - scaling_config.0.autoscaling_config
         conflicts:
           - tier
         values:
@@ -241,6 +263,33 @@ properties:
         description: |
           Scaling factor, in increments of 0.1 for values less than 1.0, and increments of 1.0 for values greater than 1.0.
         required: false
+      - !ruby/object:Api::Type::NestedObject
+        name: 'autoscalingConfig'
+        min_version: beta
+        description: |
+          Represents the autoscaling configuration of a metastore service.
+        required: false
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'autoscalingEnabled'
+            description: |
+              Defines whether autoscaling is enabled. The default value is false.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'limitConfig'
+            default_from_api: true
+            description: |
+              Represents the limit configuration of a metastore service.
+            properties:
+              - !ruby/object:Api::Type::Double
+                name: 'minScalingFactor'
+                description: |
+                  The minimum scaling factor that the service will autoscale to. The default value is 0.1.
+                default_from_api: true
+              - !ruby/object:Api::Type::Double
+                name: 'maxScalingFactor'
+                description: |
+                  The maximum scaling factor that the service will autoscale to. The default value is 6.0.
+                default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: 'scheduledBackup'
     description: |

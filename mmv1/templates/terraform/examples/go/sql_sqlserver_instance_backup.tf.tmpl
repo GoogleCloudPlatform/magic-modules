@@ -1,4 +1,3 @@
-# [START cloud_sql_sqlserver_instance_backup]
 resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
   name             = "{{index $.Vars "sqlserver_instance_backup"}}"
   region           = "us-central1"
@@ -13,4 +12,3 @@ resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
   }
   deletion_protection =  "{{index $.Vars "deletion_protection"}}"
 }
-# [END cloud_sql_sqlserver_instance_backup]

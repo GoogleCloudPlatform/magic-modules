@@ -13,9 +13,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	<% unless version == "ga" -%>
 	"github.com/hashicorp/terraform-provider-google/google/verify"
-	<% end -%>
 	"google.golang.org/api/googleapi"
 
 <% if version == "ga" -%>
@@ -82,8 +80,7 @@ func ResourceComputeRouterInterface() *schema.Resource {
 				Computed:       true,
 				AtLeastOneOf:   []string{"ip_range", "interconnect_attachment", "subnetwork", "vpn_tunnel"},
 				Description:    `The IP address and range of the interface. The IP range must be in the RFC3927 link-local IP space. Changing this forces a new interface to be created.`,
-			},
-			<% unless version == 'ga' -%>
+			},	
 			"ip_version": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -92,7 +89,6 @@ func ResourceComputeRouterInterface() *schema.Resource {
 				ValidateFunc: verify.ValidateEnum([]string{"IPV4", "IPV6"}),
 				Description:  `IP version of this interface.`,
 			},
-			<% end -%>
 			"private_ip_address": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -191,11 +187,9 @@ func resourceComputeRouterInterfaceCreate(d *schema.ResourceData, meta interface
 		iface.IpRange = ipRangeVal.(string)
 	}
 
-	<% unless version == 'ga' -%>
 	if ipVersionVal, ok := d.GetOk("ip_version"); ok {
 		iface.IpVersion = ipVersionVal.(string)
 	}
-	<% end -%>
 
 	if privateIpVal, ok := d.GetOk("private_ip_address"); ok {
 		iface.PrivateIpAddress = privateIpVal.(string)
@@ -288,11 +282,9 @@ func resourceComputeRouterInterfaceRead(d *schema.ResourceData, meta interface{}
 			if err := d.Set("ip_range", iface.IpRange); err != nil {
 				return fmt.Errorf("Error setting ip_range: %s", err)
 			}
-			<% unless version == 'ga' -%>
 			if err := d.Set("ip_version", iface.IpVersion); err != nil {
 				return fmt.Errorf("Error setting ip_version: %s", err)
 			}
-			<% end -%>
 			if err := d.Set("private_ip_address", iface.PrivateIpAddress); err != nil {
 				return fmt.Errorf("Error setting private_ip_address: %s", err)
 			}

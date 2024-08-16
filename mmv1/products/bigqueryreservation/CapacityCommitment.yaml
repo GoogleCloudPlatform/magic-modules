@@ -37,12 +37,12 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_reservation_capacity_commitment_basic'
-    pull_external: true
+    external_providers: ["random", "time"]
     skip_docs: true
     primary_resource_id: 'commitment'
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_reservation_capacity_commitment_no_id'
-    pull_external: true
+    external_providers: ["random", "time"]
     skip_docs: true
     primary_resource_id: 'commitment'
   - !ruby/object:Provider::Terraform::Examples

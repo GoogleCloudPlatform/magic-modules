@@ -32,31 +32,30 @@ var testTGCCmd = &cobra.Command{
         1. COMMIT_SHA
         2. PR_NUMBER
 	`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		commit := os.Getenv("COMMIT_SHA")
 		pr := os.Getenv("PR_NUMBER")
 
 		githubToken, ok := lookupGithubTokenOrFallback("GITHUB_TOKEN_MAGIC_MODULES")
 		if !ok {
-			fmt.Println("Did not provide GITHUB_TOKEN_MAGIC_MODULES or GITHUB_TOKEN environment variables")
-			os.Exit(1)
+			return fmt.Errorf("did not provide GITHUB_TOKEN_MAGIC_MODULES or GITHUB_TOKEN environment variables")
 		}
 		gh := github.NewClient(githubToken)
 
-		execTestTGC(commit, pr, gh)
+		return execTestTGC(commit, pr, gh)
 	},
 }
 
-func execTestTGC(commit, pr string, gh ttGithub) {
+func execTestTGC(commit, pr string, gh ttGithub) error {
 	if err := gh.CreateWorkflowDispatchEvent("test-tgc.yml", map[string]any{
 		"owner":  "modular-magician",
 		"repo":   "terraform-google-conversion",
 		"branch": "auto-pr-" + pr,
 		"sha":    commit,
 	}); err != nil {
-		fmt.Printf("Error creating workflow dispatch event: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("error creating workflow dispatch event: %w", err)
 	}
+	return nil
 }
 
 func init() {

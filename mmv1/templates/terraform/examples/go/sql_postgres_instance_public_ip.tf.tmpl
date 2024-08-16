@@ -1,4 +1,3 @@
-# [START cloud_sql_postgres_instance_public_ip]  
 resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
   database_version = "POSTGRES_14"
   name             = "{{index $.Vars "postgres_public_ip_instance_name"}}"
@@ -19,4 +18,3 @@ resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
   }
   deletion_protection =  "{{index $.Vars "deletion_protection"}}"
 }
-# [END cloud_sql_postgres_instance_public_ip]

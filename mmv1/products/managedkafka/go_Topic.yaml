@@ -1,0 +1,90 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Topic'
+description: An Apache Kafka for BigQuery topic. Apache Kafka is a trademark owned by the Apache Software Foundation.
+min_version: 'beta'
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/topics/{{topic_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/topics'
+self_link: 'projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/topics/{{topic_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/topics?topicId={{topic_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/topics/{{topic_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+examples:
+  - name: 'managedkafka_topic_basic'
+    primary_resource_id: 'example'
+    min_version: 'beta'
+    vars:
+      cluster_id: 'my-cluster'
+      topic_id: 'my-topic'
+parameters:
+  - name: 'location'
+    type: String
+    description: "ID of the location of the Apache Kafka for BigQuery resource. See
+      https://cloud.google.com/managed-kafka/docs/locations for a list of
+      supported locations."
+    min_version: 'beta'
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'cluster'
+    type: String
+    description: "The cluster name."
+    min_version: 'beta'
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'topicId'
+    type: String
+    description: "The ID to use for the topic, which will become the final
+      component of the topic's name. This value is structured like: `my-topic-name`."
+    min_version: 'beta'
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: "The name of the topic. The `topic` segment is used when
+      connecting directly to the cluster. Must be in the format `projects/PROJECT_ID/locations/LOCATION/clusters/CLUSTER_ID/topics/TOPIC_ID`."
+    min_version: 'beta'
+    output: true
+  - name: 'partitionCount'
+    type: Integer
+    description: "The number of partitions in a topic. You can increase the partition
+      count for a topic, but you cannot decrease it. Increasing partitions
+      for a topic that uses a key might change how messages are distributed."
+    min_version: 'beta'
+  - name: 'replicationFactor'
+    type: Integer
+    description: "The number of replicas of each partition. A replication factor of 3 is
+      recommended for high availability."
+    min_version: 'beta'
+    required: true
+    immutable: true
+  - name: 'configs'
+    type: KeyValuePairs
+    description: "Configuration for the topic that are overridden from the cluster
+      defaults. The key of the map is a Kafka topic property name,
+      for example: `cleanup.policy=compact`, `compression.type=producer`."
+    min_version: 'beta'

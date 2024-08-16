@@ -1,0 +1,73 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'ProjectCloudArmorTier'
+base_url: 'projects/{{project}}'
+create_url: 'projects/{{project}}/setCloudArmorTier'
+update_url: 'projects/{{project}}/setCloudArmorTier'
+read_query_params: '?fields=cloudArmorTier'
+create_verb: :POST
+update_verb: :POST
+description: |
+  Sets the Cloud Armor tier of the project.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Subscribing to Cloud Armor Enterprise': 'https://cloud.google.com/armor/docs/managed-protection-overview#subscribing_to_plus'
+  api:
+    'https://cloud.google.com/compute/docs/reference/rest/v1/projects/setCloudArmorTier'
+id_format: 'projects/{{project}}'
+import_format: ['projects/{{project}}']
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'compute_project_cloud_armor_tier_basic'
+    skip_test: true
+    primary_resource_id: 'cloud_armor_tier_config'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'compute_project_cloud_armor_tier_project_set'
+    skip_test: true
+    primary_resource_id: 'cloud_armor_tier_config'
+    vars:
+      project_id: 'your_project_id'
+    test_env_vars:
+      org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    kind: 'compute#operation'
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'targetLink'
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'status'
+    complete: 'DONE'
+    allowed:
+      - 'PENDING'
+      - 'RUNNING'
+      - 'DONE'
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error/errors'
+    message: 'message'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_delete: templates/terraform/custom_delete/only_remove_from_state.go.erb
+properties:
+  - !ruby/object:Api::Type::Enum
+    name: 'cloudArmorTier'
+    required: true
+    description: |
+      Managed protection tier to be set.
+    values:
+      - :CA_STANDARD
+      - :CA_ENTERPRISE_PAYGO

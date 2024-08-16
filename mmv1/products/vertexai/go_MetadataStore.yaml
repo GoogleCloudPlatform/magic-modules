@@ -1,0 +1,119 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'MetadataStore'
+description: |-
+  Instance of a metadata store. Contains a set of metadata that can be queried.
+min_version: 'beta'
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.metadataStores'
+docs:
+id_format: '{{name}}'
+base_url: 'projects/{{project}}/locations/{{region}}/metadataStores'
+self_link: 'projects/{{project}}/locations/{{region}}/metadataStores/{{name}}'
+create_url: 'projects/{{project}}/locations/{{region}}/metadataStores?metadataStoreId={{name}}'
+immutable: true
+timeouts:
+  insert_minutes: 40
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+    timeouts:
+      insert_minutes: 40
+      update_minutes: 20
+      delete_minutes: 20
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'vertex_ai_metadata_store'
+    primary_resource_id: 'store'
+    vars:
+      name: 'test-store'
+    skip_test: true
+parameters:
+  - name: 'region'
+    type: String
+    description: The region of the Metadata Store. eg us-central1
+    min_version: 'beta'
+    url_param_only: true
+    immutable: true
+    default_from_api: true
+properties:
+  - name: 'name'
+    type: String
+    description:
+      The name of the MetadataStore. This value may be up to 60 characters, and
+      valid characters are [a-z0-9_]. The first character cannot be a number.
+    min_version: 'beta'
+    url_param_only: true
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+  - name: 'description'
+    type: String
+    description: Description of the MetadataStore.
+    min_version: 'beta'
+    immutable: true
+  - name: 'createTime'
+    type: String
+    description: |
+      The timestamp of when the MetadataStore was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+    min_version: 'beta'
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: |
+      The timestamp of when the MetadataStore was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+    min_version: 'beta'
+    output: true
+  - name: 'encryptionSpec'
+    type: NestedObject
+    description: |
+      Customer-managed encryption key spec for a MetadataStore. If set, this MetadataStore and all sub-resources of this MetadataStore will be secured by this key.
+    min_version: 'beta'
+    immutable: true
+    properties:
+      - name: 'kmsKeyName'
+        type: String
+        description: |
+          Required. The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource.
+          Has the form: projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key. The key needs to be in the same region as where the resource is created.
+        min_version: 'beta'
+        immutable: true
+  - name: 'state'
+    type: NestedObject
+    description: |
+      State information of the MetadataStore.
+    min_version: 'beta'
+    output: true
+    properties:
+      - name: 'diskUtilizationBytes'
+        type: String
+        description: |
+          The disk utilization of the MetadataStore in bytes.
+        min_version: 'beta'
+        output: true

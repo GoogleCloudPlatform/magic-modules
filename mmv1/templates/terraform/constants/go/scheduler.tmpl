@@ -16,7 +16,19 @@ func validateAuthHeaders(_ context.Context, diff *schema.ResourceDiff, v interfa
     return nil
 }
 
+// Suppress diffs in below cases
+// "https://hello-rehvs75zla-uc.a.run.app/" -> "https://hello-rehvs75zla-uc.a.run.app"
+// "https://hello-rehvs75zla-uc.a.run.app" -> "https://hello-rehvs75zla-uc.a.run.app/"
+func LastSlashDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+	if last := len(new) - 1; last >= 0 && new[last] == '/' {
+		new = new[:last]
+	}
 
+	if last := len(old) - 1; last >= 0 && old[last] == '/' {
+		old = old[:last]
+	}
+	return new == old
+}
 
 func authHeaderDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
     // If generating an `oauth_token` and `scope` is not provided in the configuration,
@@ -57,7 +69,7 @@ func validateHttpHeaders() schema.SchemaValidateFunc {
 			return
 		}
 		r := regexp.MustCompile(`(X-Google-|X-AppEngine-).*`)
-		for key, _ := range headers {
+		for key := range headers {
 			if r.MatchString(key) {
 				es = append(es, fmt.Errorf("Cannot set the %s header on %s", key, k))
 				return

@@ -4,7 +4,7 @@ description: |-
   Manages a VM instance template resource within GCE.
 ---
 
-# google\_compute\_instance\_template
+# google_compute_instance_template
 
 -> **Note**: Global instance templates can be used in any region. To lower the impact of outages outside your region and gain data residency within your region, use [google_compute_region_instance_template](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_region_instance_template).
 
@@ -295,7 +295,14 @@ The following arguments are supported:
   this blank, Terraform will auto-generate a unique name.
 
 * `name_prefix` - (Optional) Creates a unique name beginning with the specified
-  prefix. Conflicts with `name`.
+  prefix. Conflicts with `name`. Max length is 54 characters.
+  Prefixes with lengths longer than 37 characters will use a shortened
+  UUID that will be more prone to collisions.
+
+  Resulting name for a `name_prefix` <= 37 characters:
+  `name_prefix` + YYYYmmddHHSSssss + 8 digit incremental counter
+  Resulting name for a `name_prefix` 38 - 54 characters:
+  `name_prefix` + YYmmdd + 3 digit incremental counter
 
 * `can_ip_forward` - (Optional) Whether to allow sending and receiving of
     packets with non-matching source or destination IPs. This defaults to false.
@@ -375,6 +382,8 @@ The following arguments are supported:
 
 * `advanced_machine_features` (Optional) - Configure Nested Virtualisation and Simultaneous Hyper Threading on this VM. Structure is [documented below](#nested_advanced_machine_features)
 
+* `partner_metadata` - (optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) key/value pair represents partner metadata assigned to instance template where key represent a defined namespace and value is a json string represent the entries associted with the namespace.
+
 <a name="nested_disk"></a>The `disk` block supports:
 
 * `auto_delete` - (Optional) Whether or not the disk should be auto-deleted.
@@ -434,7 +443,7 @@ The following arguments are supported:
 ~> **Note:** Either `source`, `source_image`, or `source_snapshot` is **required** in a disk block unless the disk type is `local-ssd`. Check the API [docs](https://cloud.google.com/compute/docs/reference/rest/v1/instanceTemplates/insert) for details.
 
 * `disk_type` - (Optional) The GCE disk type. Such as `"pd-ssd"`, `"local-ssd"`,
-    `"pd-balanced"` or `"pd-standard"`.
+    `"pd-balanced"` or `"pd-standard"`, `"hyperdisk-balanced"`, `"hyperdisk-throughput"` or `"hyperdisk-extreme"`.
 
 * `disk_size_gb` - (Optional) The size of the image in gigabytes. If not
     specified, it will inherit the size of its base image. For SCRATCH disks,
@@ -587,17 +596,9 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `instance_termination_action` - (Optional) Describe the type of termination action for `SPOT` VM. Can be `STOP` or `DELETE`.  Read more on [here](https://cloud.google.com/compute/docs/instances/create-use-spot)
 
-* `max_run_duration` -  (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) The duration of the instance. Instance will run and be terminated after then, the termination action could be defined in `instance_termination_action`. Only support `DELETE` `instance_termination_action` at this point. Structure is [documented below](#nested_max_run_duration).
-<a name="nested_max_run_duration"></a>The `max_run_duration` block supports:
+* `max_run_duration` -  (Optional) The duration of the instance. Instance will run and be terminated after then, the termination action could be defined in `instance_termination_action`. Structure is [documented below](#nested_max_run_duration).
 
-* `nanos` - (Optional) Span of time that's a fraction of a second at nanosecond
-    resolution. Durations less than one second are represented with a 0
-    `seconds` field and a positive `nanos` field. Must be from 0 to
-     999,999,999 inclusive.
-
-* `seconds` - (Required) Span of time at a resolution of a second. Must be from 0 to
-   315,576,000,000 inclusive. Note: these bounds are computed from: 60
-   sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years.
+* `on_instance_stop_action` - (Optional) Specifies the action to be performed when the instance is terminated using `max_run_duration` and `STOP` `instance_termination_action`. Only support `true` `discard_local_ssd` at this point. Structure is [documented below](#nested_on_instance_stop_action).
 
 * `maintenance_interval` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Specifies the frequency of planned maintenance events. The accepted values are: `PERIODIC`.
 
@@ -612,6 +613,21 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 * `seconds` - (Required) Span of time at a resolution of a second. Must be from 0 to
    315,576,000,000 inclusive. Note: these bounds are computed from: 60
    sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years.
+
+<a name="nested_max_run_duration"></a>The `max_run_duration` block supports:
+
+* `nanos` - (Optional) Span of time that's a fraction of a second at nanosecond
+	resolution. Durations less than one second are represented with a 0
+	`seconds` field and a positive `nanos` field. Must be from 0 to
+	 999,999,999 inclusive.
+
+* `seconds` - (Required) Span of time at a resolution of a second. Must be from 0 to
+   315,576,000,000 inclusive. Note: these bounds are computed from: 60
+   sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years.
+
+<a name="nested_on_instance_stop_action"></a>The `on_instance_stop_action` block supports:
+
+* `discard_local_ssd` - (Optional) Whether to discard local SSDs attached to the VM while terminating using `max_run_duration`. Only supports `true` at this point.
 
 <a name="nested_guest_accelerator"></a>The `guest_accelerator` block supports:
 
@@ -651,9 +667,9 @@ The `specific_reservation` block supports:
 
 <a name="nested_confidential_instance_config"></a>The `confidential_instance_config` block supports:
 
-* `enable_confidential_compute` (Optional) Defines whether the instance should have confidential compute enabled with AMD SEV. [`on_host_maintenance`](#on_host_maintenance) has to be set to TERMINATE or this will fail to create the VM.
+* `enable_confidential_compute` (Optional) Defines whether the instance should have confidential compute enabled with AMD SEV. If enabled, [`on_host_maintenance`](#on_host_maintenance) can be set to MIGRATE if [`min_cpu_platform`](#min_cpu_platform) is set to `"AMD Milan"`. Otherwise, [`on_host_maintenance`](#on_host_maintenance) has to be set to TERMINATE or this will fail to create the VM.
 
-* `confidential_instance_type` (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Defines the confidential computing technology the instance uses. SEV is an AMD feature. One of the following values: `SEV`, `SEV_SNP`. [`on_host_maintenance`](#on_host_maintenance) has to be set to TERMINATE or this will fail to create the VM. If `SEV_SNP`, currently [`min_cpu_platform`](#min_cpu_platform) has to be set to `"AMD Milan"` or this will fail to create the VM.
+* `confidential_instance_type` (Optional) Defines the confidential computing technology the instance uses. SEV is an AMD feature. TDX is an Intel feature. One of the following values is required: `SEV`, `SEV_SNP`, `TDX`. [`on_host_maintenance`](#on_host_maintenance) can be set to MIGRATE if [`confidential_instance_type`](#confidential_instance_type) is set to `SEV` and [`min_cpu_platform`](#min_cpu_platform) is set to `"AMD Milan"`. Otherwise, [`on_host_maintenance`](#on_host_maintenance) has to be set to TERMINATE or this will fail to create the VM. If `SEV_SNP`, currently [`min_cpu_platform`](#min_cpu_platform) has to be set to `"AMD Milan"` or this will fail to create the VM. TDX is only available in beta.
 
 <a name="nested_network_performance_config"></a>The `network_performance_config` block supports:
 

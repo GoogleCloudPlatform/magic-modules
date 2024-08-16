@@ -48,9 +48,11 @@ module Provider
       false
     end
 
-    def generate(output_folder, types, _product_path, _dump_yaml, generate_code, generate_docs)
+    def generate(output_folder, types, product_path, _dump_yaml, generate_code, generate_docs, \
+                 go_yaml)
       @base_url = @version.base_url
-      generate_objects(output_folder, types, generate_code, generate_docs)
+      generate_objects(output_folder, types, generate_code, generate_docs, product_path, \
+                       go_yaml)
       compile_product_files(output_folder)
     end
 

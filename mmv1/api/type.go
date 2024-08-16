@@ -21,6 +21,7 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
+	"golang.org/x/exp/slices"
 )
 
 // Represents a property type
@@ -137,9 +138,12 @@ type Type struct {
 	// ====================
 	// Array Fields
 	// ====================
-	ItemType *Type `yaml:"item_type"`
-	MinSize  int   `yaml:"min_size"`
-	MaxSize  int   `yaml:"max_size"`
+	ItemType *Type  `yaml:"item_type"`
+	MinSize  string `yaml:"min_size"`
+	MaxSize  string `yaml:"max_size"`
+	// Adds a ValidateFunc to the item schema
+	ItemValidation resource.Validation `yaml:"item_validation"`
+
 	// __name
 	ParentName string
 
@@ -210,16 +214,16 @@ type Type struct {
 	// because in Terraform the key has to be a property of the object.
 	//
 	// The name of the key. Used in the Terraform schema as a field name.
-	KeyName string `yaml:"key_name`
+	KeyName string `yaml:"key_name"`
 
 	// A description of the key's format. Used in Terraform to describe
 	// the field in documentation.
-	KeyDescription string `yaml:"key_description`
+	KeyDescription string `yaml:"key_description"`
 
 	// ====================
 	// KeyValuePairs Fields
 	// ====================
-	IgnoreWrite bool `yaml:"ignore_write`
+	IgnoreWrite bool `yaml:"ignore_write"`
 
 	// ====================
 	// Schema Modifications
@@ -292,12 +296,14 @@ func (t *Type) SetDefault(r *Resource) {
 	switch {
 	case t.IsA("Array"):
 		t.ItemType.ParentName = t.Name
-		t.ItemType.ParentMetadata = t.ParentMetadata
+		t.ItemType.ParentMetadata = t
 		t.ItemType.SetDefault(r)
 	case t.IsA("Map"):
-		t.KeyExpander = "tpgresource.ExpandString"
+		if t.KeyExpander == "" {
+			t.KeyExpander = "tpgresource.ExpandString"
+		}
 		t.ValueType.ParentName = t.Name
-		t.ValueType.ParentMetadata = t.ParentMetadata
+		t.ValueType.ParentMetadata = t
 		t.ValueType.SetDefault(r)
 	case t.IsA("NestedObject"):
 		if t.Name == "" {
@@ -411,11 +417,15 @@ func (t Type) TerraformLineage() string {
 	return fmt.Sprintf("%s.0.%s", t.ParentMetadata.TerraformLineage(), google.Underscore(t.Name))
 }
 
-func (t Type) EnumValuesToString() string {
+func (t Type) EnumValuesToString(quoteSeperator string, addEmpty bool) string {
 	var values []string
 
 	for _, val := range t.EnumValues {
-		values = append(values, fmt.Sprintf("`%s`", val))
+		values = append(values, fmt.Sprintf("%s%s%s", quoteSeperator, val, quoteSeperator))
+	}
+
+	if addEmpty && !slices.Contains(values, "\"\"") && !t.Required {
+		values = append(values, "\"\"")
 	}
 
 	return strings.Join(values, ", ")
@@ -438,7 +448,15 @@ func (t *Type) GetPrefix() string {
 
 			t.Prefix = fmt.Sprintf("%s%s", nestedPrefix, t.ResourceMetadata.ResourceName())
 		} else {
-			t.Prefix = fmt.Sprintf("%s%s", t.ParentMetadata.GetPrefix(), t.ParentMetadata.TitlelizeProperty())
+			if t.ParentMetadata != nil && (t.ParentMetadata.IsA("Array") || t.ParentMetadata.IsA("Map")) {
+				t.Prefix = t.ParentMetadata.GetPrefix()
+			} else {
+				if t.ParentMetadata != nil && t.ParentMetadata.ParentMetadata != nil && t.ParentMetadata.ParentMetadata.IsA("Map") {
+					t.Prefix = fmt.Sprintf("%s%s", t.ParentMetadata.GetPrefix(), t.ParentMetadata.ParentMetadata.TitlelizeProperty())
+				} else {
+					t.Prefix = fmt.Sprintf("%s%s", t.ParentMetadata.GetPrefix(), t.ParentMetadata.TitlelizeProperty())
+				}
+			}
 		}
 	}
 	return t.Prefix
@@ -687,6 +705,10 @@ func (t Type) Deprecated() bool {
 	return t.DeprecationMessage != ""
 }
 
+func (t *Type) GetDescription() string {
+	return strings.TrimRight(t.Description, "\n")
+}
+
 // // private
 
 // // A constant value to be provided as field
@@ -818,6 +840,45 @@ func (t Type) ItemTypeClass() string {
 	}
 
 	return t.ItemType.Type
+}
+
+func (t Type) TFType(s string) string {
+	switch s {
+	case "Boolean":
+		return "schema.TypeBool"
+	case "Double":
+		return "schema.TypeFloat"
+	case "Integer":
+		return "schema.TypeInt"
+	case "String":
+		return "schema.TypeString"
+	case "Time":
+		return "schema.TypeString"
+	case "Enum":
+		return "schema.TypeString"
+	case "ResourceRef":
+		return "schema.TypeString"
+	case "NestedObject":
+		return "schema.TypeList"
+	case "Array":
+		return "schema.TypeList"
+	case "KeyValuePairs":
+		return "schema.TypeMap"
+	case "KeyValueLabels":
+		return "schema.TypeMap"
+	case "KeyValueTerraformLabels":
+		return "schema.TypeMap"
+	case "KeyValueEffectiveLabels":
+		return "schema.TypeMap"
+	case "KeyValueAnnotations":
+		return "schema.TypeMap"
+	case "Map":
+		return "schema.TypeSet"
+	case "Fingerprint":
+		return "schema.TypeString"
+	}
+
+	return "schema.TypeString"
 }
 
 // // Represents an enum, and store is valid values
@@ -1216,4 +1277,140 @@ func (t Type) PropertyNsPrefix() []string {
 		google.Camelize(t.ResourceMetadata.ProductMetadata.Name, "upper"),
 		"Property",
 	}
+}
+
+// "Namespace" - prefix with product and resource - a property with
+// information from the "object" variable
+
+func (t Type) NamespaceProperty() string {
+	name := google.Camelize(t.Name, "upper")
+	p := t
+	for p.Parent() != nil {
+		p = *p.Parent()
+		name = fmt.Sprintf("%s%s", google.Camelize(p.Name, "upper"), name)
+	}
+
+	return fmt.Sprintf("%s%s%s", google.Camelize(t.ResourceMetadata.ProductMetadata.ApiName, "lower"), t.ResourceMetadata.Name, name)
+}
+
+// def namespace_property_from_object(property, object)
+//
+//	name = property.name.camelize
+//	until property.parent.nil?
+//	  property = property.parent
+//	  name = property.name.camelize + name
+//	end
+//
+//	"#{property.__resource.__product.api_name.camelize(:lower)}#{object.name}#{name}"
+//
+// end
+
+func (t Type) CustomTemplate(templatePath string, appendNewline bool) string {
+	return resource.ExecuteTemplate(&t, templatePath, appendNewline)
+}
+
+func (t *Type) GetIdFormat() string {
+	return t.ResourceMetadata.GetIdFormat()
+}
+
+func (t *Type) GoLiteral(value interface{}) string {
+	switch v := value.(type) {
+	case int:
+		return fmt.Sprintf("%d", v)
+	case float64:
+		return fmt.Sprintf("%.1f", v)
+	case bool:
+		return fmt.Sprintf("%v", v)
+	case string:
+		if !strings.HasPrefix(v, "\"") {
+			return fmt.Sprintf("\"%s\"", v)
+		}
+		return v
+	case []string:
+		for i, val := range v {
+			v[i] = fmt.Sprintf("\"%v\"", val)
+		}
+		return fmt.Sprintf("[]string{%s}", strings.Join(v, ","))
+
+	default:
+		panic(fmt.Errorf("unknown go literal type %+v", value))
+	}
+}
+
+// def force_new?(property, resource)
+func (t *Type) IsForceNew() bool {
+	if t.IsA("KeyValueLabels") && t.ResourceMetadata.RootLabels() {
+		return false
+	}
+
+	if t.IsA("KeyValueTerraformLabels") && !t.ResourceMetadata.Updatable() && !t.ResourceMetadata.RootLabels() {
+		return true
+	}
+
+	parent := t.Parent()
+	return (!t.Output || t.IsA("KeyValueEffectiveLabels")) &&
+		(t.Immutable ||
+			(t.ResourceMetadata.Immutable && t.UpdateUrl == "" &&
+				(parent == nil ||
+					(parent.IsForceNew() &&
+						!(parent.FlattenObject && t.IsA("KeyValueLabels"))))))
+}
+
+// Returns an updated path for a given Terraform field path (e.g.
+// 'a_field', 'parent_field.0.child_name'). Returns nil if the property
+// is not included in the resource's properties and removes keys that have
+// been flattened
+// FYI: Fields that have been renamed should use the new name, however, flattened
+// fields still need to be included, ie:
+// flattenedField > newParent > renameMe should be passed to this function as
+// flattened_field.0.new_parent.0.im_renamed
+// TODO(emilymye): Change format of input for
+// exactly_one_of/at_least_one_of/etc to use camelcase, MM properities and
+// convert to snake in this method
+// def get_property_schema_path(schema_path, resource)
+func (t *Type) GetPropertySchemaPath(schemaPath string) string {
+	nestedProps := t.ResourceMetadata.UserProperites()
+
+	var pathTkns []string
+	for _, pname := range strings.Split(schemaPath, ".0.") {
+		camelPname := google.Camelize(pname, "lower")
+		index := slices.IndexFunc(nestedProps, func(p *Type) bool {
+			return p.Name == camelPname
+		})
+
+		// if we couldn't find it, see if it was renamed at the top level
+		if index == -1 {
+			index = slices.IndexFunc(nestedProps, func(p *Type) bool {
+				return p.Name == schemaPath
+			})
+		}
+
+		if index == -1 {
+			continue
+		}
+
+		prop := nestedProps[index]
+
+		nestedProps = prop.NestedProperties()
+		if !prop.FlattenObject {
+			pathTkns = append(pathTkns, google.Underscore(pname))
+		}
+	}
+
+	if len(pathTkns) == 0 || pathTkns[len(pathTkns)-1] == "" {
+		return ""
+	}
+
+	return strings.Join(pathTkns[:], ".0.")
+}
+
+func (t Type) GetPropertySchemaPathList(propertyList []string) []string {
+	var list []string
+	for _, path := range propertyList {
+		path = t.GetPropertySchemaPath(path)
+		if path != "" {
+			list = append(list, path)
+		}
+	}
+	return list
 }

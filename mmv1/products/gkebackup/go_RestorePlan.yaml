@@ -1,0 +1,632 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'RestorePlan'
+description: |
+  Represents a Restore Plan instance.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke'
+  api: 'https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke/reference/rest/v1/projects.locations.restorePlans'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/restorePlans'
+create_url: 'projects/{{project}}/locations/{{location}}/restorePlans?restorePlanId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_attribute: 'name'
+  base_url: 'projects/{{project}}/locations/{{location}}/restorePlans/{{name}}'
+  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/restorePlans/{{name}}'
+    - '{{name}}'
+custom_code:
+examples:
+  - name: 'gkebackup_restoreplan_all_namespaces'
+    primary_resource_id: 'all_ns'
+    primary_resource_name: 'fmt.Sprintf("tf-test-restore-all-ns%s", context["random_suffix"])'
+    vars:
+      name: 'restore-all-ns'
+      network_name: 'default'
+      subnetwork_name: 'default'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+  - name: 'gkebackup_restoreplan_rollback_namespace'
+    primary_resource_id: 'rollback_ns'
+    vars:
+      name: 'rollback-ns'
+      network_name: 'default'
+      subnetwork_name: 'default'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+  - name: 'gkebackup_restoreplan_protected_application'
+    primary_resource_id: 'rollback_app'
+    vars:
+      name: 'rollback-app'
+      network_name: 'default'
+      subnetwork_name: 'default'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+  - name: 'gkebackup_restoreplan_all_cluster_resources'
+    primary_resource_id: 'all_cluster_resources'
+    vars:
+      name: 'all-groupkinds'
+      network_name: 'default'
+      subnetwork_name: 'default'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+  - name: 'gkebackup_restoreplan_rename_namespace'
+    primary_resource_id: 'rename_ns'
+    vars:
+      name: 'rename-ns'
+      network_name: 'default'
+      subnetwork_name: 'default'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+  - name: 'gkebackup_restoreplan_second_transformation'
+    primary_resource_id: 'transform_rule'
+    vars:
+      name: 'transform-rule'
+      network_name: 'default'
+      subnetwork_name: 'default'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+  - name: 'gkebackup_restoreplan_gitops_mode'
+    primary_resource_id: 'gitops_mode'
+    vars:
+      name: 'gitops-mode'
+      network_name: 'default'
+      subnetwork_name: 'default'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+  - name: 'gkebackup_restoreplan_restore_order'
+    primary_resource_id: 'restore_order'
+    vars:
+      name: 'restore-order'
+      network_name: 'default'
+      subnetwork_name: 'default'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+  - name: 'gkebackup_restoreplan_volume_res'
+    primary_resource_id: 'volume_res'
+    vars:
+      name: 'volume-res'
+      network_name: 'default'
+      subnetwork_name: 'default'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The region of the Restore Plan.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The full name of the BackupPlan Resource.
+    required: true
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/go/shortname_to_url.go.tmpl'
+  - name: 'uid'
+    type: String
+    description: |
+      Server generated, unique identifier of UUID format.
+    output: true
+  - name: 'description'
+    type: String
+    description: |
+      User specified descriptive string for this RestorePlan.
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      Description: A set of custom labels supplied by the user.
+      A list of key->value pairs.
+      Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+    immutable: false
+  - name: 'backupPlan'
+    type: String
+    description: |
+      A reference to the BackupPlan from which Backups may be used
+      as the source for Restores created via this RestorePlan.
+    required: true
+    immutable: true
+  - name: 'cluster'
+    type: String
+    description: |
+      The source cluster from which Restores will be created via this RestorePlan.
+    required: true
+    immutable: true
+  - name: 'restoreConfig'
+    type: NestedObject
+    description: |
+      Defines the configuration of Restores created via this RestorePlan.
+    required: true
+    properties:
+      - name: 'allNamespaces'
+        type: Boolean
+        description: |
+          If True, restore all namespaced resources in the Backup.
+          Setting this field to False will result in an error.
+        exactly_one_of:
+          - 'restoreConfig.0.allNamespaces'
+          - 'restoreConfig.0.excludedNamespaces'
+          - 'restoreConfig.0.selectedNamespaces'
+          - 'restoreConfig.0.selectedApplications'
+          - 'restoreConfig.0.noNamespaces'
+      - name: 'excludedNamespaces'
+        type: NestedObject
+        description: |
+          A list of selected namespaces excluded from restoration.
+          All namespaces except those in this list will be restored.
+        exactly_one_of:
+          - 'restoreConfig.0.allNamespaces'
+          - 'restoreConfig.0.excludedNamespaces'
+          - 'restoreConfig.0.selectedNamespaces'
+          - 'restoreConfig.0.selectedApplications'
+          - 'restoreConfig.0.noNamespaces'
+        properties:
+          - name: 'namespaces'
+            type: Array
+            description: |
+              A list of Kubernetes Namespaces.
+            required: true
+            item_type:
+              type: String
+      - name: 'selectedNamespaces'
+        type: NestedObject
+        description: |
+          A list of selected namespaces to restore from the Backup.
+          The listed Namespaces and all resources contained in them will be restored.
+        exactly_one_of:
+          - 'restoreConfig.0.allNamespaces'
+          - 'restoreConfig.0.excludedNamespaces'
+          - 'restoreConfig.0.selectedNamespaces'
+          - 'restoreConfig.0.selectedApplications'
+          - 'restoreConfig.0.noNamespaces'
+        properties:
+          - name: 'namespaces'
+            type: Array
+            description: |
+              A list of Kubernetes Namespaces.
+            required: true
+            item_type:
+              type: String
+      - name: 'selectedApplications'
+        type: NestedObject
+        description: |
+          A list of selected ProtectedApplications to restore.
+          The listed ProtectedApplications and all the resources
+          to which they refer will be restored.
+        exactly_one_of:
+          - 'restoreConfig.0.allNamespaces'
+          - 'restoreConfig.0.excludedNamespaces'
+          - 'restoreConfig.0.selectedNamespaces'
+          - 'restoreConfig.0.selectedApplications'
+          - 'restoreConfig.0.noNamespaces'
+        properties:
+          - name: 'namespacedNames'
+            type: Array
+            description: |
+              A list of namespaced Kubernetes resources.
+            required: true
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'namespace'
+                  type: String
+                  description: |
+                    The namespace of a Kubernetes Resource.
+                  required: true
+                - name: 'name'
+                  type: String
+                  description: |
+                    The name of a Kubernetes Resource.
+                  required: true
+      - name: 'noNamespaces'
+        type: Boolean
+        description: |
+          Do not restore any namespaced resources if set to "True".
+          Specifying this field to "False" is not allowed.
+        exactly_one_of:
+          - 'restoreConfig.0.allNamespaces'
+          - 'restoreConfig.0.excludedNamespaces'
+          - 'restoreConfig.0.selectedNamespaces'
+          - 'restoreConfig.0.selectedApplications'
+          - 'restoreConfig.0.noNamespaces'
+      - name: 'namespacedResourceRestoreMode'
+        type: Enum
+        description: |
+          Defines the behavior for handling the situation where sets of namespaced resources
+          being restored already exist in the target cluster.
+          This MUST be set to a value other than `NAMESPACED_RESOURCE_RESTORE_MODE_UNSPECIFIED`
+          if the `namespacedResourceRestoreScope` is anything other than `noNamespaces`.
+          See https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke/reference/rest/v1/RestoreConfig#namespacedresourcerestoremode
+          for more information on each mode.
+        enum_values:
+          - 'DELETE_AND_RESTORE'
+          - 'FAIL_ON_CONFLICT'
+          - 'MERGE_SKIP_ON_CONFLICT'
+          - 'MERGE_REPLACE_VOLUME_ON_CONFLICT'
+          - 'MERGE_REPLACE_ON_CONFLICT'
+      - name: 'volumeDataRestorePolicy'
+        type: Enum
+        description: |
+          Specifies the mechanism to be used to restore volume data.
+          This should be set to a value other than `NAMESPACED_RESOURCE_RESTORE_MODE_UNSPECIFIED`
+          if the `namespacedResourceRestoreScope` is anything other than `noNamespaces`.
+          If not specified, it will be treated as `NO_VOLUME_DATA_RESTORATION`.
+          See https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke/reference/rest/v1/RestoreConfig#VolumeDataRestorePolicy
+          for more information on each policy option.
+        enum_values:
+          - 'RESTORE_VOLUME_DATA_FROM_BACKUP'
+          - 'REUSE_VOLUME_HANDLE_FROM_BACKUP'
+          - 'NO_VOLUME_DATA_RESTORATION'
+      - name: 'clusterResourceRestoreScope'
+        type: NestedObject
+        description: |
+          Identifies the cluster-scoped resources to restore from the Backup.
+        properties:
+          - name: 'allGroupKinds'
+            type: Boolean
+            description: |
+              If True, all valid cluster-scoped resources will be restored.
+              Mutually exclusive to any other field in `clusterResourceRestoreScope`.
+            exactly_one_of:
+              - 'restoreConfig.0.clusterResourceRestoreScope.0.allGroupKinds'
+              - 'restoreConfig.0.clusterResourceRestoreScope.0.excludedGroupKinds'
+              - 'restoreConfig.0.clusterResourceRestoreScope.0.selectedGroupKinds'
+              - 'restoreConfig.0.clusterResourceRestoreScope.0.noGroupKinds'
+          - name: 'excludedGroupKinds'
+            type: Array
+            description: |
+              A list of cluster-scoped resource group kinds to NOT restore from the backup.
+              If specified, all valid cluster-scoped resources will be restored except
+              for those specified in the list.
+              Mutually exclusive to any other field in `clusterResourceRestoreScope`.
+            exactly_one_of:
+              - 'restoreConfig.0.clusterResourceRestoreScope.0.allGroupKinds'
+              - 'restoreConfig.0.clusterResourceRestoreScope.0.excludedGroupKinds'
+              - 'restoreConfig.0.clusterResourceRestoreScope.0.selectedGroupKinds'
+              - 'restoreConfig.0.clusterResourceRestoreScope.0.noGroupKinds'
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'resourceGroup'
+                  type: String
+                  description: |
+                    API Group string of a Kubernetes resource, e.g.
+                    "apiextensions.k8s.io", "storage.k8s.io", etc.
+                    Use empty string for core group.
+                - name: 'resourceKind'
+                  type: String
+                  description: |
+                    Kind of a Kubernetes resource, e.g.
+                    "CustomResourceDefinition", "StorageClass", etc.
+          - name: 'selectedGroupKinds'
+            type: Array
+            description: |
+              A list of cluster-scoped resource group kinds to restore from the backup.
+              If specified, only the selected resources will be restored.
+              Mutually exclusive to any other field in the `clusterResourceRestoreScope`.
+            exactly_one_of:
+              - 'restoreConfig.0.clusterResourceRestoreScope.0.allGroupKinds'
+              - 'restoreConfig.0.clusterResourceRestoreScope.0.excludedGroupKinds'
+              - 'restoreConfig.0.clusterResourceRestoreScope.0.selectedGroupKinds'
+              - 'restoreConfig.0.clusterResourceRestoreScope.0.noGroupKinds'
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'resourceGroup'
+                  type: String
+                  description: |
+                    API Group string of a Kubernetes resource, e.g.
+                    "apiextensions.k8s.io", "storage.k8s.io", etc.
+                    Use empty string for core group.
+                - name: 'resourceKind'
+                  type: String
+                  description: |
+                    Kind of a Kubernetes resource, e.g.
+                    "CustomResourceDefinition", "StorageClass", etc.
+          - name: 'noGroupKinds'
+            type: Boolean
+            description: |
+              If True, no cluster-scoped resources will be restored.
+              Mutually exclusive to any other field in `clusterResourceRestoreScope`.
+            exactly_one_of:
+              - 'restoreConfig.0.clusterResourceRestoreScope.0.allGroupKinds'
+              - 'restoreConfig.0.clusterResourceRestoreScope.0.excludedGroupKinds'
+              - 'restoreConfig.0.clusterResourceRestoreScope.0.selectedGroupKinds'
+              - 'restoreConfig.0.clusterResourceRestoreScope.0.noGroupKinds'
+      - name: 'clusterResourceConflictPolicy'
+        type: Enum
+        description: |
+          Defines the behavior for handling the situation where cluster-scoped resources
+          being restored already exist in the target cluster.
+          This MUST be set to a value other than `CLUSTER_RESOURCE_CONFLICT_POLICY_UNSPECIFIED`
+          if `clusterResourceRestoreScope` is anyting other than `noGroupKinds`.
+          See https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke/reference/rest/v1/RestoreConfig#clusterresourceconflictpolicy
+          for more information on each policy option.
+        enum_values:
+          - 'USE_EXISTING_VERSION'
+          - 'USE_BACKUP_VERSION'
+      - name: 'transformationRules'
+        type: Array
+        description: |
+          A list of transformation rules to be applied against Kubernetes
+          resources as they are selected for restoration from a Backup.
+          Rules are executed in order defined - this order matters,
+          as changes made by a rule may impact the filtering logic of subsequent
+          rules. An empty list means no transformation will occur.
+        item_type:
+          description: |
+            A transformation rule to be applied against Kubernetes resources
+            as they are selected for restoration from a Backup.
+            A rule contains both filtering logic
+            (which resources are subject to transform) and transformation logic.
+          type: NestedObject
+          properties:
+            - name: 'description'
+              type: String
+              description: |
+                The description is a user specified string description
+                of the transformation rule.
+            - name: 'resourceFilter'
+              type: NestedObject
+              description: |
+                This field is used to specify a set of fields that should be used to
+                determine which resources in backup should be acted upon by the
+                supplied transformation rule actions, and this will ensure that only
+                specific resources are affected by transformation rule actions.
+              properties:
+                - name: 'namespaces'
+                  type: Array
+                  description: |
+                    (Filtering parameter) Any resource subject to transformation must
+                    be contained within one of the listed Kubernetes Namespace in the
+                    Backup. If this field is not provided, no namespace filtering will
+                    be performed (all resources in all Namespaces, including all
+                    cluster-scoped resources, will be candidates for transformation).
+                    To mix cluster-scoped and namespaced resources in the same rule,
+                    use an empty string ("") as one of the target namespaces.
+                  item_type:
+                    type: String
+                - name: 'groupKinds'
+                  type: Array
+                  description: |
+                    (Filtering parameter) Any resource subject to transformation must
+                    belong to one of the listed "types". If this field is not provided,
+                    no type filtering will be performed
+                    (all resources of all types matching previous filtering parameters
+                    will be candidates for transformation).
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: 'resourceGroup'
+                        type: String
+                        description: |
+                          API Group string of a Kubernetes resource, e.g.
+                          "apiextensions.k8s.io", "storage.k8s.io", etc.
+                          Use empty string for core group.
+                      - name: 'resourceKind'
+                        type: String
+                        description: |
+                          Kind of a Kubernetes resource, e.g.
+                          "CustomResourceDefinition", "StorageClass", etc.
+                - name: 'jsonPath'
+                  type: String
+                  description: |
+                    This is a JSONPath expression that matches specific fields of
+                    candidate resources and it operates as a filtering parameter
+                    (resources that are not matched with this expression will not
+                    be candidates for transformation).
+            - name: 'fieldActions'
+              type: Array
+              description: |
+                A list of transformation rule actions to take against candidate
+                resources. Actions are executed in order defined - this order
+                matters, as they could potentially interfere with each other and
+                the first operation could affect the outcome of the second operation.
+              required: true
+              item_type:
+                description: |
+                  TransformationRuleAction defines a TransformationRule action
+                  based on the JSON Patch RFC (https://www.rfc-editor.org/rfc/rfc6902)
+                type: NestedObject
+                properties:
+                  - name: 'op'
+                    type: Enum
+                    description: |
+                      Specifies the operation to perform.
+                    required: true
+                    enum_values:
+                      - 'REMOVE'
+                      - 'MOVE'
+                      - 'COPY'
+                      - 'ADD'
+                      - 'TEST'
+                      - 'REPLACE'
+                  - name: 'fromPath'
+                    type: String
+                    description: |
+                      A string containing a JSON Pointer value that references the
+                      location in the target document to move the value from.
+                  - name: 'path'
+                    type: String
+                    description: |
+                      A string containing a JSON-Pointer value that references a
+                      location within the target document where the operation is performed.
+                  - name: 'value'
+                    type: String
+                    description: |
+                      A string that specifies the desired value in string format
+                      to use for transformation.
+      - name: 'volumeDataRestorePolicyBindings'
+        type: Array
+        description: |
+          A table that binds volumes by their scope to a restore policy. Bindings
+          must have a unique scope. Any volumes not scoped in the bindings are
+          subject to the policy defined in volume_data_restore_policy.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'policy'
+              type: Enum
+              description: |
+                Specifies the mechanism to be used to restore this volume data.
+                See https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke/reference/rest/v1/RestoreConfig#VolumeDataRestorePolicy
+                for more information on each policy option.
+              required: true
+              enum_values:
+                - 'RESTORE_VOLUME_DATA_FROM_BACKUP'
+                - 'REUSE_VOLUME_HANDLE_FROM_BACKUP'
+                - 'NO_VOLUME_DATA_RESTORATION'
+            - name: 'volumeType'
+              type: Enum
+              description: |
+                The volume type, as determined by the PVC's
+                bound PV, to apply the policy to.
+              required: true
+              enum_values:
+                - 'GCE_PERSISTENT_DISK'
+      - name: 'restoreOrder'
+        type: NestedObject
+        description: |
+          It contains custom ordering to use on a Restore.
+        properties:
+          - name: 'groupKindDependencies'
+            type: Array
+            description: |
+              A list of group kind dependency pairs
+              that is used by Backup for GKE to
+              generate a group kind restore order.
+            required: true
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'satisfying'
+                  type: NestedObject
+                  description: |
+                    The satisfying group kind must be restored first
+                    in order to satisfy the dependency.
+                  required: true
+                  properties:
+                    - name: 'resourceGroup'
+                      type: String
+                      description: |
+                        API Group of a Kubernetes resource, e.g.
+                        "apiextensions.k8s.io", "storage.k8s.io", etc.
+                        Use empty string for core group.
+                    - name: 'resourceKind'
+                      type: String
+                      description: |
+                        Kind of a Kubernetes resource, e.g.
+                        "CustomResourceDefinition", "StorageClass", etc.
+                - name: 'requiring'
+                  type: NestedObject
+                  description: |
+                    The requiring group kind requires that the satisfying
+                    group kind be restored first.
+                  required: true
+                  properties:
+                    - name: 'resourceGroup'
+                      type: String
+                      description: |
+                        API Group of a Kubernetes resource, e.g.
+                        "apiextensions.k8s.io", "storage.k8s.io", etc.
+                        Use empty string for core group.
+                    - name: 'resourceKind'
+                      type: String
+                      description: |
+                        Kind of a Kubernetes resource, e.g.
+                        "CustomResourceDefinition", "StorageClass", etc.
+  - name: 'state'
+    type: String
+    description: |
+      The State of the RestorePlan.
+    output: true
+  - name: 'stateReason'
+    type: String
+    description: |
+      Detailed description of why RestorePlan is in its current state.
+    output: true

@@ -1,0 +1,10 @@
+config := meta.(*transport_tpg.Config)
+name, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}name{{"}}"}}")
+if err != nil {
+    return nil, err
+}
+res["name"] = name
+// "encrypted" field is retained for backward compatibility and the value of encrypted will always be true. Apigee X and hybrid do not support unencrypted key value maps.
+res["encrypted"] = true
+
+return res, nil

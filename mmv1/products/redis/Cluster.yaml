@@ -62,6 +62,19 @@ examples:
       deletion_protection_enabled: 'false'
     oics_vars_overrides:
       deletion_protection_enabled: 'false'
+  - !ruby/object:Provider::Terraform::Examples
+    name: "redis_cluster_ha_single_zone"
+    primary_resource_id: "cluster-ha-single-zone"
+    vars:
+      cluster_name: "ha-cluster-single-zone"
+      policy_name: "mypolicy"
+      subnet_name: "mysubnet"
+      network_name: "mynetwork"
+      prevent_destroy: 'true'
+    test_vars_overrides:
+      deletion_protection_enabled: 'false'
+    oics_vars_overrides:
+      deletion_protection_enabled: 'false'
 properties:
   - !ruby/object:Api::Type::Time
     name: createTime
@@ -123,6 +136,24 @@ properties:
     default_from_api: true
     immutable: true
     required: false
+  - !ruby/object:Api::Type::NestedObject
+    name: zoneDistributionConfig
+    description: Immutable. Zone distribution config for Memorystore Redis cluster.
+    immutable: true
+    properties:
+      - !ruby/object:Api::Type::Enum
+        name: mode
+        description: |
+          Immutable. The mode for zone distribution for Memorystore Redis cluster.
+          If not provided, MULTI_ZONE will be used as default
+        values:
+          - :MULTI_ZONE
+          - :SINGLE_ZONE
+        default_from_api: true
+      - !ruby/object:Api::Type::String
+        name: zone
+        description: |
+          Immutable. The zone for single zone Memorystore Redis cluster.
   - !ruby/object:Api::Type::Array
     name: 'pscConfigs'
     description: |

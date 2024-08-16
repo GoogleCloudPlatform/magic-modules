@@ -1,40 +1,40 @@
-{{- define "propertyDocumentation" }}
+{{ "" }}
 * `{{ underscore $.Name }}` -
   {{- if and (eq $.MinVersion "beta") (not (eq $.ResourceMetadata.MinVersion "beta")) }}
     {{- if $.Required }}
-  (Required, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html){{ if $.DeprecationMessage }}, Deprecated {{ end }})
+  (Required, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html){{ if $.DeprecationMessage }}, Deprecated{{ end }})
     {{- else if not $.Output }}
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html){{ if $.DeprecationMessage }}, Deprecated {{ end }})
+  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html){{ if $.DeprecationMessage }}, Deprecated{{ end }})
     {{- else if and $.Output $.ParentMetadata }}
-  (Output, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html){{ if $.DeprecationMessage }}, Deprecated {{ end }})
+  (Output, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html){{ if $.DeprecationMessage }}, Deprecated{{ end }})
     {{- else }}
-  ([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html){{ if $.DeprecationMessage }}, Deprecated {{ end }})
+  ([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html){{ if $.DeprecationMessage }}, Deprecated{{ end }})
     {{- end}}
   {{- else }}    
     {{- if $.Required }}
-  (Required{{ if $.DeprecationMessage }}, Deprecated {{ end }})
+  (Required{{ if $.DeprecationMessage }}, Deprecated{{ end }})
     {{- else if not $.Output }}
-  (Optional{{ if $.DeprecationMessage }}, Deprecated {{ end }})
+  (Optional{{ if $.DeprecationMessage }}, Deprecated{{ end }})
     {{- else if and $.Output $.ParentMetadata }}
-  (Output{{ if $.DeprecationMessage }}, Deprecated {{ end }})
+  (Output{{ if $.DeprecationMessage }}, Deprecated{{ end }})
     {{- else if $.DeprecationMessage }}
   (Deprecated)
     {{- end}}
   {{- end }}
-  {{ $.Description }}
+  {{- $.ResourceMetadata.FormatDocDescription $.Description true -}}
   {{- if and (and ($.IsA "Array") ($.ItemType.IsA "Enum")) (and (not $.Output) (not $.ItemType.SkipDocsValues))}}
-    {{- if not (or $.ItemType.DefaultValue (eq $.ItemType.DefaultValue "")) }}
-    Default value is [`{{ $.ItemType.DefaultValue }}`].
+    {{- if $.ItemType.DefaultValue }}
+  Default value is `{{ $.ItemType.DefaultValue }}`.
     {{- end }}
-    Each value may be one of: {{ $.ItemType.EnumValuesToString }}.
-  {{- else if and ($.IsA "Enum") (and (not $.Output) (not (and $.ItemType $.ItemType.SkipDocsValues)))}}
-    {{- if not (or $.DefaultValue (eq $.DefaultValue "")) }}
-    Default value is [`{{ $.DefaultValue }}`].
+  Each value may be one of: {{ $.ItemType.EnumValuesToString "`" false }}.
+  {{- else if and ($.IsA "Enum") (and (not $.Output) (not $.SkipDocsValues))}}
+    {{- if $.DefaultValue }}
+  Default value is `{{ $.DefaultValue }}`.
     {{- end }}
-    Possible values are: {{ $.EnumValuesToString }}.
+  Possible values are: {{ $.EnumValuesToString "`" false }}.
   {{- end }}
   {{- if $.Sensitive }}
-    **Note**: This property is sensitive and will not be displayed in the plan.
+  **Note**: This property is sensitive and will not be displayed in the plan.
   {{- end }}
   {{- if and (not $.FlattenObject) $.NestedProperties }}
   Structure is [documented below](#nested_{{ underscore $.Name }}).
@@ -42,5 +42,5 @@
   {{- if $.DeprecationMessage }}
 
   ~> **Warning:** {{ $.DeprecationMessage }}
-  {{- end }}
-{{ end }}
+  {{- end -}}
+{{ "" }}

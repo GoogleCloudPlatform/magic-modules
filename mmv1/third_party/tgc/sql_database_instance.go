@@ -11,7 +11,7 @@ package google
 import (
 	"regexp"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/id"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/converters/google/resources/cai"
@@ -65,7 +65,7 @@ func GetSQLDatabaseInstanceApiObject(d tpgresource.TerraformResourceData, config
 	if v, ok := d.GetOk("name"); ok {
 		name = v.(string)
 	} else {
-		name = resource.UniqueId()
+		name = id.UniqueId()
 	}
 
 	instance := &sqladmin.DatabaseInstance{
@@ -189,10 +189,11 @@ func expandIpConfiguration(configured []interface{}) *sqladmin.IpConfiguration {
 
 	return &sqladmin.IpConfiguration{
 		Ipv4Enabled:        _ipConfiguration["ipv4_enabled"].(bool),
-		RequireSsl:         _ipConfiguration["require_ssl"].(bool),
 		PrivateNetwork:     _ipConfiguration["private_network"].(string),
 		AuthorizedNetworks: expandAuthorizedNetworks(_ipConfiguration["authorized_networks"].(*schema.Set).List()),
-		ForceSendFields:    []string{"Ipv4Enabled", "RequireSsl"},
+		ForceSendFields:    []string{"Ipv4Enabled"},
+		NullFields:         []string{"RequireSsl"},
+		SslMode:            _ipConfiguration["ssl_mode"].(string),
 	}
 }
 func expandAuthorizedNetworks(configured []interface{}) []*sqladmin.AclEntry {

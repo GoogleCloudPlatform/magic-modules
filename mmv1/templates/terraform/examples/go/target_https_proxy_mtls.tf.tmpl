@@ -1,4 +1,3 @@
-# [START cloudloadbalancing_target_https_proxy_mtls]
 data "google_project" "project" {
   provider = google-beta
 }
@@ -90,4 +89,3 @@ resource "google_compute_http_health_check" "default" {
   check_interval_sec = 1
   timeout_sec        = 1
 }
-# [END cloudloadbalancing_target_https_proxy_mtls]

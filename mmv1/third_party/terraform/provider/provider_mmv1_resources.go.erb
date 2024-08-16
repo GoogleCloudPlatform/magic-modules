@@ -8,12 +8,14 @@ import (
 	  "github.com/hashicorp/terraform-provider-google/google/services/<%= service -%>"
 	<% end -%>
 
+	<% if version == 'ga' -%>
 	"github.com/hashicorp/terraform-provider-google/google/services/composer"
+	"github.com/hashicorp/terraform-provider-google/google/services/siteverification"
+	<% end -%>
 	"github.com/hashicorp/terraform-provider-google/google/services/container"
 	"github.com/hashicorp/terraform-provider-google/google/services/containeraws"
 	"github.com/hashicorp/terraform-provider-google/google/services/containerazure"
 	"github.com/hashicorp/terraform-provider-google/google/services/dataflow"
-	"github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
 )
 
@@ -26,6 +28,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_active_folder":                             resourcemanager.DataSourceGoogleActiveFolder(),
 	"google_alloydb_locations":                         alloydb.DataSourceAlloydbLocations(),
 	"google_alloydb_supported_database_flags":          alloydb.DataSourceAlloydbSupportedDatabaseFlags(),
+	"google_artifact_registry_docker_image":            artifactregistry.DataSourceArtifactRegistryDockerImage(),
 	"google_artifact_registry_repository":              artifactregistry.DataSourceArtifactRegistryRepository(),
 	"google_apphub_discovered_workload":		    apphub.DataSourceApphubDiscoveredWorkload(),
 	"google_app_engine_default_service_account":        appengine.DataSourceGoogleAppEngineDefaultServiceAccount(),
@@ -47,8 +50,10 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	<% unless version == 'ga' -%>
 	"google_cloud_asset_resources_search_all":          cloudasset.DataSourceGoogleCloudAssetResourcesSearchAll(),
 	<% end -%>
+	"google_cloud_asset_search_all_resources":          cloudasset.DataSourceGoogleCloudAssetSearchAllResources(),
 	"google_cloud_identity_groups":                     cloudidentity.DataSourceGoogleCloudIdentityGroups(),
 	"google_cloud_identity_group_memberships":          cloudidentity.DataSourceGoogleCloudIdentityGroupMemberships(),
+	"google_cloud_identity_group_transitive_memberships":  cloudidentity.DataSourceGoogleCloudIdentityGroupTransitiveMemberships(),
 	"google_cloud_identity_group_lookup":               cloudidentity.DataSourceGoogleCloudIdentityGroupLookup(),
 	"google_cloud_quotas_quota_info":                   cloudquotas.DataSourceGoogleCloudQuotasQuotaInfo(),
 	"google_cloud_quotas_quota_infos":                  cloudquotas.DataSourceGoogleCloudQuotasQuotaInfos(),
@@ -57,6 +62,10 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_cloud_run_v2_job":                          cloudrunv2.DataSourceGoogleCloudRunV2Job(),
 	"google_cloud_run_v2_service":                      cloudrunv2.DataSourceGoogleCloudRunV2Service(),
 	"google_composer_environment":                      composer.DataSourceGoogleComposerEnvironment(),
+	<% unless version == 'ga' -%>
+	"google_composer_user_workloads_config_map":        composer.DataSourceGoogleComposerUserWorkloadsConfigMap(),
+	"google_composer_user_workloads_secret":            composer.DataSourceGoogleComposerUserWorkloadsSecret(),
+	<% end -%>
 	"google_composer_image_versions":                   composer.DataSourceGoogleComposerImageVersions(),
 	"google_compute_address":                           compute.DataSourceGoogleComputeAddress(),
 	"google_compute_addresses":                         compute.DataSourceGoogleComputeAddresses(),
@@ -94,10 +103,12 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_compute_router":                            compute.DataSourceGoogleComputeRouter(),
 	"google_compute_router_nat":                        compute.DataSourceGoogleComputeRouterNat(),
 	"google_compute_router_status":                     compute.DataSourceGoogleComputeRouterStatus(),
+	"google_compute_security_policy":                   compute.DataSourceGoogleComputeSecurityPolicy(),
 	"google_compute_snapshot":                          compute.DataSourceGoogleComputeSnapshot(),
 	"google_compute_ssl_certificate":                   compute.DataSourceGoogleComputeSslCertificate(),
 	"google_compute_ssl_policy":                        compute.DataSourceGoogleComputeSslPolicy(),
 	"google_compute_subnetwork":                        compute.DataSourceGoogleComputeSubnetwork(),
+	"google_compute_subnetworks":                       compute.DataSourceGoogleComputeSubnetworks(),
 	"google_compute_vpn_gateway":                       compute.DataSourceGoogleComputeVpnGateway(),
 	"google_compute_zones":                             compute.DataSourceGoogleComputeZones(),
 	"google_container_azure_versions":                  containerazure.DataSourceGoogleContainerAzureVersions(),
@@ -114,6 +125,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_dns_managed_zone":                          dns.DataSourceDnsManagedZone(),
 	"google_dns_managed_zones":                         dns.DataSourceDnsManagedZones(),
 	"google_dns_record_set":                            dns.DataSourceDnsRecordSet(),
+	"google_gke_hub_membership_binding":                gkehub2.DataSourceGoogleGkeHubMembershipBinding(),
 	"google_filestore_instance":                        filestore.DataSourceGoogleFilestoreInstance(),
 	"google_iam_policy":                                resourcemanager.DataSourceGoogleIamPolicy(),
 	"google_iam_role":                                  resourcemanager.DataSourceGoogleIamRole(),
@@ -124,8 +136,10 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	<% end -%>
 	"google_iap_client":                                iap.DataSourceGoogleIapClient(),
 	"google_kms_crypto_key":                            kms.DataSourceGoogleKmsCryptoKey(),
+	"google_kms_crypto_keys":                           kms.DataSourceGoogleKmsCryptoKeys(),
 	"google_kms_crypto_key_version":                    kms.DataSourceGoogleKmsCryptoKeyVersion(),
 	"google_kms_key_ring":                              kms.DataSourceGoogleKmsKeyRing(),
+	"google_kms_key_rings":                              kms.DataSourceGoogleKmsKeyRings(),
 	"google_kms_secret":                                kms.DataSourceGoogleKmsSecret(),
 	"google_kms_secret_ciphertext":                     kms.DataSourceGoogleKmsSecretCiphertext(),
 	<% unless version == 'ga' -%>
@@ -171,6 +185,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_service_account_id_token":                  resourcemanager.DataSourceGoogleServiceAccountIdToken(),
 	"google_service_account_jwt":                       resourcemanager.DataSourceGoogleServiceAccountJwt(),
 	"google_service_account_key":                       resourcemanager.DataSourceGoogleServiceAccountKey(),
+	"google_site_verification_token":                   siteverification.DataSourceSiteVerificationToken(),
 	"google_sourcerepo_repository":                     sourcerepo.DataSourceGoogleSourceRepoRepository(),
 	"google_spanner_instance":                          spanner.DataSourceSpannerInstance(),
 	"google_sql_ca_certs":                              sql.DataSourceGoogleSQLCaCerts(),
@@ -218,15 +233,11 @@ var handwrittenDatasources = map[string]*schema.Resource{
 
 var generatedIAMDatasources = map[string]*schema.Resource{
 	// ####### START generated IAM datasources ###########
-	<%
-	resources_for_version.each do |object|
-		unless object[:iam_class_name].nil?
-	-%>
+	<% resources_for_version.each do |object| -%>
+	<% unless object[:iam_class_name].nil? -%>
 	"<%= object[:terraform_name] -%>_iam_policy":               tpgiamresource.DataSourceIamPolicy(<%= object[:iam_class_name] -%>IamSchema, <%= object[:iam_class_name] -%>IamUpdaterProducer),
-	<%
-		end
-	end
-	-%>
+	<% end -%>
+	<% end -%>
 	// ####### END generated IAM datasources ###########
 }
 
@@ -247,6 +258,7 @@ var handwrittenIAMDatasources = map[string]*schema.Resource{
 	"google_kms_crypto_key_iam_policy":             tpgiamresource.DataSourceIamPolicy(kms.IamKmsCryptoKeySchema, kms.NewKmsCryptoKeyIamUpdater),
 	"google_spanner_instance_iam_policy":           tpgiamresource.DataSourceIamPolicy(spanner.IamSpannerInstanceSchema, spanner.NewSpannerInstanceIamUpdater),
 	"google_spanner_database_iam_policy":           tpgiamresource.DataSourceIamPolicy(spanner.IamSpannerDatabaseSchema, spanner.NewSpannerDatabaseIamUpdater),
+	"google_storage_managed_folder_iam_policy":     tpgiamresource.DataSourceIamPolicy(storage.StorageManagedFolderIamSchema, storage.StorageManagedFolderIamUpdaterProducer),
 	"google_organization_iam_policy":               tpgiamresource.DataSourceIamPolicy(resourcemanager.IamOrganizationSchema, resourcemanager.NewOrganizationIamUpdater),
 	"google_project_iam_policy":                    tpgiamresource.DataSourceIamPolicy(resourcemanager.IamProjectSchema, resourcemanager.NewProjectIamUpdater),
 	"google_pubsub_subscription_iam_policy":        tpgiamresource.DataSourceIamPolicy(pubsub.IamPubsubSubscriptionSchema, pubsub.NewPubsubSubscriptionIamUpdater),
@@ -263,18 +275,12 @@ var generatedResources = map[string]*schema.Resource{
 	<% 	unless object[:resource_name].nil? -%>
 		"<%= object[:terraform_name] -%>": <%= object[:resource_name] -%>(),
 	<%  end -%>
-	<%
-	    unless object[:iam_class_name].nil?
-	-%>
+	<% unless object[:iam_class_name].nil? -%>
 		"<%= object[:terraform_name] -%>_iam_binding":              tpgiamresource.ResourceIamBinding(<%= object[:iam_class_name] -%>IamSchema, <%= object[:iam_class_name] -%>IamUpdaterProducer, <%= object[:iam_class_name] -%>IdParseFunc),
 		"<%= object[:terraform_name] -%>_iam_member":               tpgiamresource.ResourceIamMember(<%= object[:iam_class_name] -%>IamSchema, <%= object[:iam_class_name] -%>IamUpdaterProducer, <%= object[:iam_class_name] -%>IdParseFunc),
 		"<%= object[:terraform_name] -%>_iam_policy":               tpgiamresource.ResourceIamPolicy(<%= object[:iam_class_name] -%>IamSchema, <%= object[:iam_class_name] -%>IamUpdaterProducer, <%= object[:iam_class_name] -%>IdParseFunc),
-	<%
-	    end # unless object[:iam_class_name].nil?
-	-%>
-	<%
-	end     # resources_for_version.each do
-	-%>
+	<% end -%>
+	<% end -%>
 }
 
 var handwrittenResources = map[string]*schema.Resource{
@@ -289,6 +295,7 @@ var handwrittenResources = map[string]*schema.Resource{
 	"google_bigtable_gc_policy":                    bigtable.ResourceBigtableGCPolicy(),
 	"google_bigtable_instance":                     bigtable.ResourceBigtableInstance(),
 	"google_bigtable_table":                        bigtable.ResourceBigtableTable(),
+	"google_bigtable_authorized_view":              bigtable.ResourceBigtableAuthorizedView(),
 	"google_billing_subaccount":                    resourcemanager.ResourceBillingSubaccount(),
 	"google_cloudfunctions_function":               cloudfunctions.ResourceCloudFunctionsFunction(),
 	"google_composer_environment":                  composer.ResourceComposerEnvironment(),
@@ -426,6 +433,9 @@ var handwrittenIAMResources = map[string]*schema.Resource{
 	"google_spanner_database_iam_binding":          tpgiamresource.ResourceIamBinding(spanner.IamSpannerDatabaseSchema, spanner.NewSpannerDatabaseIamUpdater, spanner.SpannerDatabaseIdParseFunc),
 	"google_spanner_database_iam_member":           tpgiamresource.ResourceIamMember(spanner.IamSpannerDatabaseSchema, spanner.NewSpannerDatabaseIamUpdater, spanner.SpannerDatabaseIdParseFunc),
 	"google_spanner_database_iam_policy":           tpgiamresource.ResourceIamPolicy(spanner.IamSpannerDatabaseSchema, spanner.NewSpannerDatabaseIamUpdater, spanner.SpannerDatabaseIdParseFunc),
+	"google_storage_managed_folder_iam_binding":    tpgiamresource.ResourceIamBinding(storage.StorageManagedFolderIamSchema, storage.StorageManagedFolderIamUpdaterProducer, storage.StorageManagedFolderIdParseFunc),
+	"google_storage_managed_folder_iam_member":     tpgiamresource.ResourceIamMember(storage.StorageManagedFolderIamSchema, storage.StorageManagedFolderIamUpdaterProducer, storage.StorageManagedFolderIdParseFunc),
+	"google_storage_managed_folder_iam_policy":     tpgiamresource.ResourceIamPolicy(storage.StorageManagedFolderIamSchema, storage.StorageManagedFolderIamUpdaterProducer, storage.StorageManagedFolderIdParseFunc),
 	"google_organization_iam_binding":              tpgiamresource.ResourceIamBinding(resourcemanager.IamOrganizationSchema, resourcemanager.NewOrganizationIamUpdater, resourcemanager.OrgIdParseFunc),
 	"google_organization_iam_member":               tpgiamresource.ResourceIamMember(resourcemanager.IamOrganizationSchema, resourcemanager.NewOrganizationIamUpdater, resourcemanager.OrgIdParseFunc),
 	"google_organization_iam_policy":               tpgiamresource.ResourceIamPolicy(resourcemanager.IamOrganizationSchema, resourcemanager.NewOrganizationIamUpdater, resourcemanager.OrgIdParseFunc),

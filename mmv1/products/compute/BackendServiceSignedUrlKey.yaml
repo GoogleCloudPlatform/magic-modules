@@ -38,7 +38,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -58,7 +58,7 @@ mutex: signedUrlKey/{{project}}/backendServices/{{backend_service}}/
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'backend_service_signed_url_key'
-    pull_external: true
+    external_providers: ["random", "time"]
     primary_resource_id: 'backend_key'
     vars:
       key_name: 'test-key'

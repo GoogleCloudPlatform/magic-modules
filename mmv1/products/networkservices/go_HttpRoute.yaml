@@ -1,0 +1,619 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'HttpRoute'
+description: |
+  HttpRoute is the resource defining how HTTP traffic should be routed by a Mesh or Gateway resource.
+min_version: 'beta'
+references:
+  guides:
+    'Setup HTTP Services': 'https://cloud.google.com/traffic-director/docs/set-up-envoy-http-mesh'
+  api: 'https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1beta1/projects.locations.httpRoutes'
+docs:
+base_url: 'projects/{{project}}/locations/global/httpRoutes'
+self_link: 'projects/{{project}}/locations/global/httpRoutes/{{name}}'
+create_url: 'projects/{{project}}/locations/global/httpRoutes?httpRouteId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/global/httpRoutes/{{name}}'
+timeouts:
+  insert_minutes: 30
+  update_minutes: 30
+  delete_minutes: 30
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+    timeouts:
+      insert_minutes: 30
+      update_minutes: 30
+      delete_minutes: 30
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'network_services_http_route_basic'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      resource_name: 'my-http-route'
+  - name: 'network_services_http_route_matches_and_actions'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      resource_name: 'my-http-route'
+  - name: 'network_services_http_route_actions'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      resource_name: 'my-http-route'
+  - name: 'network_services_http_route_mesh_basic'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      mesh_name: 'my-mesh'
+      resource_name: 'my-http-route'
+parameters:
+  - name: 'name'
+    type: String
+    description: |
+      Name of the HttpRoute resource.
+    min_version: 'beta'
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'selfLink'
+    type: String
+    description: |
+      Server-defined URL of this resource.
+    min_version: 'beta'
+    output: true
+  - name: 'createTime'
+    type: Time
+    description: |
+      Time the HttpRoute was created in UTC.
+    min_version: 'beta'
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      Time the HttpRoute was updated in UTC.
+    min_version: 'beta'
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: Set of label tags associated with the HttpRoute resource.
+    min_version: 'beta'
+    immutable: false
+  - name: 'description'
+    type: String
+    description: |
+      A free-text description of the resource. Max length 1024 characters.
+    min_version: 'beta'
+  - name: 'hostnames'
+    type: Array
+    description: |
+      Set of hosts that should match against the HTTP host header to select a HttpRoute to process the request.
+    min_version: 'beta'
+    required: true
+    item_type:
+      type: String
+  - name: 'meshes'
+    type: Array
+    description: |
+      Meshes defines a list of meshes this HttpRoute is attached to, as one of the routing rules to route the requests served by the mesh.
+      Each mesh reference should match the pattern: projects/*/locations/global/meshes/<mesh_name>.
+      The attached Mesh should be of a type SIDECAR.
+    min_version: 'beta'
+    send_empty_value: true
+    item_type:
+      type: String
+  - name: 'gateways'
+    type: Array
+    description: |
+      Gateways defines a list of gateways this HttpRoute is attached to, as one of the routing rules to route the requests served by the gateway.
+      Each gateway reference should match the pattern: projects/*/locations/global/gateways/<gateway_name>
+    min_version: 'beta'
+    send_empty_value: true
+    item_type:
+      type: String
+  - name: 'rules'
+    type: Array
+    description: |
+      Rules that define how traffic is routed and handled.
+    min_version: 'beta'
+    required: true
+    send_empty_value: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'matches'
+          type: Array
+          description: |
+            A list of matches define conditions used for matching the rule against incoming HTTP requests. Each match is independent, i.e. this rule will be matched if ANY one of the matches is satisfied.
+            If no matches field is specified, this rule will unconditionally match traffic.
+            If a default rule is desired to be configured, add a rule with no matches specified to the end of the rules list.
+          min_version: 'beta'
+          send_empty_value: true
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'ignoreCase'
+                type: Boolean
+                description: |
+                  Specifies if prefixMatch and fullPathMatch matches are case sensitive. The default value is false.
+                min_version: 'beta'
+                send_empty_value: true
+              - name: 'fullPathMatch'
+                type: String
+                description: |
+                  The HTTP request path value should exactly match this value.
+                min_version: 'beta'
+                exactly_one_of:
+                  - 'fullPathMatch'
+                  - 'prefixMatch'
+                  - 'regexMatch'
+              - name: 'prefixMatch'
+                type: String
+                description: |
+                  The HTTP request path value must begin with specified prefixMatch. prefixMatch must begin with a /.
+                min_version: 'beta'
+                exactly_one_of:
+                  - 'fullPathMatch'
+                  - 'prefixMatch'
+                  - 'regexMatch'
+              - name: 'regexMatch'
+                type: String
+                description: |
+                  The HTTP request path value must satisfy the regular expression specified by regexMatch after removing any query parameters and anchor supplied with the original URL. For regular expression grammar, please see https://github.com/google/re2/wiki/Syntax
+                min_version: 'beta'
+                exactly_one_of:
+                  - 'fullPathMatch'
+                  - 'prefixMatch'
+                  - 'regexMatch'
+              - name: 'queryParameters'
+                type: Array
+                description: |
+                  Specifies a list of query parameters to match against.
+                min_version: 'beta'
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: 'queryParameter'
+                      type: String
+                      description: |
+                        The name of the query parameter to match.
+                      min_version: 'beta'
+                    - name: 'exactMatch'
+                      type: String
+                      description: |
+                        The value of the query parameter must exactly match the contents of exactMatch.
+                      min_version: 'beta'
+                      exactly_one_of:
+                        - 'exactMatch'
+                        - 'regexMatch'
+                        - 'presentMatch'
+                    - name: 'regexMatch'
+                      type: String
+                      description: |
+                        The value of the query parameter must match the regular expression specified by regexMatch.For regular expression grammar, please see https://github.com/google/re2/wiki/Syntax
+                      min_version: 'beta'
+                      exactly_one_of:
+                        - 'exactMatch'
+                        - 'regexMatch'
+                        - 'presentMatch'
+                    - name: 'presentMatch'
+                      type: Boolean
+                      description: |
+                        Specifies that the QueryParameterMatcher matches if request contains query parameter, irrespective of whether the parameter has a value or not.
+                      min_version: 'beta'
+                      exactly_one_of:
+                        - 'exactMatch'
+                        - 'regexMatch'
+                        - 'presentMatch'
+              - name: 'headers'
+                type: Array
+                description: |
+                  Specifies a list of HTTP request headers to match against.
+                min_version: 'beta'
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: 'header'
+                      type: String
+                      description: |
+                        The name of the HTTP header to match against.
+                      min_version: 'beta'
+                    - name: 'invertMatch'
+                      type: Boolean
+                      description: |
+                        If specified, the match result will be inverted before checking. Default value is set to false.
+                      min_version: 'beta'
+                      send_empty_value: true
+                    - name: 'exactMatch'
+                      type: String
+                      description: |
+                        The value of the header should match exactly the content of exactMatch.
+                      min_version: 'beta'
+                      exactly_one_of:
+                        - 'exactMatch'
+                        - 'regexMatch'
+                        - 'prefixMatch'
+                        - 'presentMatch'
+                        - 'suffixMatch'
+                        - 'rangeMatch'
+                    - name: 'regexMatch'
+                      type: String
+                      description: |
+                        The value of the header must match the regular expression specified in regexMatch.
+                      min_version: 'beta'
+                      exactly_one_of:
+                        - 'exactMatch'
+                        - 'regexMatch'
+                        - 'prefixMatch'
+                        - 'presentMatch'
+                        - 'suffixMatch'
+                        - 'rangeMatch'
+                    - name: 'prefixMatch'
+                      type: String
+                      description: |
+                        The value of the header must start with the contents of prefixMatch.
+                      min_version: 'beta'
+                      exactly_one_of:
+                        - 'exactMatch'
+                        - 'regexMatch'
+                        - 'prefixMatch'
+                        - 'presentMatch'
+                        - 'suffixMatch'
+                        - 'rangeMatch'
+                    - name: 'presentMatch'
+                      type: Boolean
+                      description: |
+                        A header with headerName must exist. The match takes place whether or not the header has a value.
+                      min_version: 'beta'
+                      exactly_one_of:
+                        - 'exactMatch'
+                        - 'regexMatch'
+                        - 'prefixMatch'
+                        - 'presentMatch'
+                        - 'suffixMatch'
+                        - 'rangeMatch'
+                    - name: 'suffixMatch'
+                      type: String
+                      description: |
+                        The value of the header must end with the contents of suffixMatch.
+                      min_version: 'beta'
+                      exactly_one_of:
+                        - 'exactMatch'
+                        - 'regexMatch'
+                        - 'prefixMatch'
+                        - 'presentMatch'
+                        - 'suffixMatch'
+                        - 'rangeMatch'
+                    - name: 'rangeMatch'
+                      type: NestedObject
+                      description: |
+                        If specified, the rule will match if the request header value is within the range.
+                      min_version: 'beta'
+                      exactly_one_of:
+                        - 'exactMatch'
+                        - 'regexMatch'
+                        - 'prefixMatch'
+                        - 'presentMatch'
+                        - 'suffixMatch'
+                        - 'rangeMatch'
+                      properties:
+                        - name: 'start'
+                          type: Integer
+                          description: |
+                            Start of the range (inclusive).
+                          min_version: 'beta'
+                          required: true
+                        - name: 'end'
+                          type: Integer
+                          description: |
+                            End of the range (exclusive).
+                          min_version: 'beta'
+                          required: true
+        - name: 'action'
+          type: NestedObject
+          description: |
+            The detailed rule defining how to route matched traffic.
+          min_version: 'beta'
+          send_empty_value: true
+          properties:
+            - name: 'destinations'
+              type: Array
+              description: |
+                The destination to which traffic should be forwarded.
+              min_version: 'beta'
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'serviceName'
+                    type: String
+                    description: |
+                      The URL of a BackendService to route traffic to.
+                    min_version: 'beta'
+                  - name: 'weight'
+                    type: Integer
+                    description: |
+                      Specifies the proportion of requests forwarded to the backend referenced by the serviceName field. This is computed as: weight/Sum(weights in this destination list). For non-zero values, there may be some epsilon from the exact proportion defined here depending on the precision an implementation supports.
+                      If only one serviceName is specified and it has a weight greater than 0, 100% of the traffic is forwarded to that backend.
+                      If weights are specified for any one service name, they need to be specified for all of them.
+                      If weights are unspecified for all services, then, traffic is distributed in equal proportions to all of them.
+                    min_version: 'beta'
+            - name: 'redirect'
+              type: NestedObject
+              description: |
+                If set, the request is directed as configured by this field.
+              min_version: 'beta'
+              properties:
+                - name: 'hostRedirect'
+                  type: String
+                  description: |
+                    The host that will be used in the redirect response instead of the one that was supplied in the request.
+                  min_version: 'beta'
+                - name: 'pathRedirect'
+                  type: String
+                  description: |
+                    The path that will be used in the redirect response instead of the one that was supplied in the request. pathRedirect can not be supplied together with prefixRedirect. Supply one alone or neither. If neither is supplied, the path of the original request will be used for the redirect.
+                  min_version: 'beta'
+                - name: 'prefixRewrite'
+                  type: String
+                  description: |
+                    Indicates that during redirection, the matched prefix (or path) should be swapped with this value.
+                  min_version: 'beta'
+                - name: 'responseCode'
+                  type: String
+                  description: |
+                    The HTTP Status code to use for the redirect.
+                  min_version: 'beta'
+                - name: 'httpsRedirect'
+                  type: Boolean
+                  description: |
+                    If set to true, the URL scheme in the redirected request is set to https.
+                  min_version: 'beta'
+                - name: 'stripQuery'
+                  type: Boolean
+                  description: |
+                    If set to true, any accompanying query portion of the original URL is removed prior to redirecting the request.
+                  min_version: 'beta'
+                - name: 'portRedirect'
+                  type: Integer
+                  description: |
+                    The port that will be used in the redirected request instead of the one that was supplied in the request.
+                  min_version: 'beta'
+            - name: 'faultInjectionPolicy'
+              type: NestedObject
+              description: |
+                The specification for fault injection introduced into traffic to test the resiliency of clients to backend service failure.
+              min_version: 'beta'
+              properties:
+                - name: 'delay'
+                  type: NestedObject
+                  description: |
+                    Specification of how client requests are delayed as part of fault injection before being sent to a destination.
+                  min_version: 'beta'
+                  properties:
+                    - name: 'fixedDelay'
+                      type: String
+                      description: |
+                        Specify a fixed delay before forwarding the request.
+                      min_version: 'beta'
+                    - name: 'percentage'
+                      type: Integer
+                      description: |
+                        The percentage of traffic on which delay will be injected.
+                      min_version: 'beta'
+                      send_empty_value: true
+                - name: 'abort'
+                  type: NestedObject
+                  description: |
+                    Specification of how client requests are aborted as part of fault injection before being sent to a destination.
+                  min_version: 'beta'
+                  properties:
+                    - name: 'httpStatus'
+                      type: Integer
+                      description: |
+                        The HTTP status code used to abort the request.
+                      min_version: 'beta'
+                    - name: 'percentage'
+                      type: Integer
+                      description: |
+                        The percentage of traffic which will be aborted.
+                      min_version: 'beta'
+                      send_empty_value: true
+            - name: 'requestHeaderModifier'
+              type: NestedObject
+              description: |
+                The specification for modifying the headers of a matching request prior to delivery of the request to the destination.
+              min_version: 'beta'
+              properties:
+                - name: 'set'
+                  type: KeyValuePairs
+                  description: |
+                    Completely overwrite/replace the headers with given map where key is the name of the header, value is the value of the header.
+                  min_version: 'beta'
+                - name: 'add'
+                  type: KeyValuePairs
+                  description: |
+                    Add the headers with given map where key is the name of the header, value is the value of the header.
+                  min_version: 'beta'
+                - name: 'remove'
+                  type: Array
+                  description: |
+                    Remove headers (matching by header names) specified in the list.
+                  min_version: 'beta'
+                  item_type:
+                    type: String
+            - name: 'responseHeaderModifier'
+              type: NestedObject
+              description: |
+                The specification for modifying the headers of a response prior to sending the response back to the client.
+              min_version: 'beta'
+              properties:
+                - name: 'set'
+                  type: KeyValuePairs
+                  description: |
+                    Completely overwrite/replace the headers with given map where key is the name of the header, value is the value of the header.
+                  min_version: 'beta'
+                - name: 'add'
+                  type: KeyValuePairs
+                  description: |
+                    Add the headers with given map where key is the name of the header, value is the value of the header.
+                  min_version: 'beta'
+                - name: 'remove'
+                  type: Array
+                  description: |
+                    Remove headers (matching by header names) specified in the list.
+                  min_version: 'beta'
+                  item_type:
+                    type: String
+            - name: 'urlRewrite'
+              type: NestedObject
+              description: |
+                The specification for rewrite URL before forwarding requests to the destination.
+              min_version: 'beta'
+              properties:
+                - name: 'pathPrefixRewrite'
+                  type: String
+                  description: |
+                    Prior to forwarding the request to the selected destination, the matching portion of the requests path is replaced by this value.
+                  min_version: 'beta'
+                - name: 'hostRewrite'
+                  type: String
+                  description: |
+                    Prior to forwarding the request to the selected destination, the requests host header is replaced by this value.
+                  min_version: 'beta'
+            - name: 'timeout'
+              type: String
+              description: |
+                Specifies the timeout for selected route.
+              min_version: 'beta'
+            - name: 'retryPolicy'
+              type: NestedObject
+              description: |
+                Specifies the retry policy associated with this route.
+              min_version: 'beta'
+              properties:
+                - name: 'retryConditions'
+                  type: Array
+                  description: |
+                    Specifies one or more conditions when this retry policy applies.
+                  min_version: 'beta'
+                  item_type:
+                    type: String
+                - name: 'numRetries'
+                  type: Integer
+                  description: |
+                    Specifies the allowed number of retries.
+                  min_version: 'beta'
+                - name: 'perTryTimeout'
+                  type: String
+                  description: |
+                    Specifies a non-zero timeout per retry attempt. A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
+                  min_version: 'beta'
+            - name: 'requestMirrorPolicy'
+              type: NestedObject
+              description: |
+                Specifies the policy on how requests intended for the routes destination are shadowed to a separate mirrored destination.
+              min_version: 'beta'
+              properties:
+                - name: 'destination'
+                  type: NestedObject
+                  description: |
+                    The destination the requests will be mirrored to.
+                  min_version: 'beta'
+                  properties:
+                    - name: 'serviceName'
+                      type: String
+                      description: |
+                        The URL of a BackendService to route traffic to.
+                      min_version: 'beta'
+                    - name: 'weight'
+                      type: Integer
+                      description: |
+                        Specifies the proportion of requests forwarded to the backend referenced by the serviceName field. This is computed as: weight/Sum(weights in this destination list). For non-zero values, there may be some epsilon from the exact proportion defined here depending on the precision an implementation supports.
+                        If only one serviceName is specified and it has a weight greater than 0, 100% of the traffic is forwarded to that backend.
+                        If weights are specified for any one service name, they need to be specified for all of them.
+                        If weights are unspecified for all services, then, traffic is distributed in equal proportions to all of them.
+                      min_version: 'beta'
+            - name: 'corsPolicy'
+              type: NestedObject
+              description: |
+                The specification for allowing client side cross-origin requests.
+              min_version: 'beta'
+              properties:
+                - name: 'allowOrigins'
+                  type: Array
+                  description: |
+                    Specifies the list of origins that will be allowed to do CORS requests.
+                  min_version: 'beta'
+                  item_type:
+                    type: String
+                - name: 'allowOriginRegexes'
+                  type: Array
+                  description: |
+                    Specifies the regular expression patterns that match allowed origins.
+                  min_version: 'beta'
+                  item_type:
+                    type: String
+                - name: 'allowMethods'
+                  type: Array
+                  description: |
+                    Specifies the content for Access-Control-Allow-Methods header.
+                  min_version: 'beta'
+                  item_type:
+                    type: String
+                - name: 'allowHeaders'
+                  type: Array
+                  description: |
+                    Specifies the content for Access-Control-Allow-Headers header.
+                  min_version: 'beta'
+                  item_type:
+                    type: String
+                - name: 'exposeHeaders'
+                  type: Array
+                  description: |
+                    Specifies the content for Access-Control-Expose-Headers header.
+                  min_version: 'beta'
+                  item_type:
+                    type: String
+                - name: 'maxAge'
+                  type: String
+                  description: |
+                    Specifies how long result of a preflight request can be cached in seconds.
+                  min_version: 'beta'
+                - name: 'allowCredentials'
+                  type: Boolean
+                  description: |
+                    In response to a preflight request, setting this to true indicates that the actual request can include user credentials.
+                  min_version: 'beta'
+                - name: 'disabled'
+                  type: Boolean
+                  description: |
+                    If true, the CORS policy is disabled. The default value is false, which indicates that the CORS policy is in effect.
+                  min_version: 'beta'

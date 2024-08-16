@@ -20,7 +20,9 @@
 <% else -%>
 <% if tf_types.include?(property.class) -%>
 func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-<% if property.is_a?(Api::Type::NestedObject) -%>
+<% if property.ignore_read -%>
+  return d.Get("<%= property.terraform_lineage -%>")
+<% elsif property.is_a?(Api::Type::NestedObject) -%>
   if v == nil {
     return nil
   }

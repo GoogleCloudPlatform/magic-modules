@@ -3,7 +3,7 @@ package datalossprevention_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -15,6 +15,12 @@ func TestAccDataLossPreventionDiscoveryConfig_Update(t *testing.T) {
 		"actions":    testAccDataLossPreventionDiscoveryConfig_ActionsUpdate,
 		"conditions": testAccDataLossPreventionDiscoveryConfig_ConditionsCadenceUpdate,
 		"filter":     testAccDataLossPreventionDiscoveryConfig_FilterUpdate,
+		"cloud_sql":  testAccDataLossPreventionDiscoveryConfig_CloudSqlUpdate,
+		"bq_single":  testAccDataLossPreventionDiscoveryConfig_BqSingleTable,
+		"sql_single": testAccDataLossPreventionDiscoveryConfig_SqlSingleTable,
+		"secrets":    testAccDataLossPreventionDiscoveryConfig_SecretsUpdate,
+		"gcs":        testAccDataLossPreventionDiscoveryConfig_CloudStorageUpdate,
+		"gcs_single": testAccDataLossPreventionDiscoveryConfig_CloudStorageSingleBucket,
 	}
 	for name, tc := range testCases {
 		// shadow the tc variable into scope so that when
@@ -48,7 +54,7 @@ func testAccDataLossPreventionDiscoveryConfig_BasicUpdate(t *testing.T) {
 				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "parent", "last_run_time", "update_time"},
+				ImportStateVerifyIgnore: []string{"location", "parent", "last_run_time", "update_time", "errors"},
 			},
 			{
 				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdate(context),
@@ -57,7 +63,7 @@ func testAccDataLossPreventionDiscoveryConfig_BasicUpdate(t *testing.T) {
 				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "parent", "last_run_time", "update_time"},
+				ImportStateVerifyIgnore: []string{"location", "parent", "last_run_time", "update_time", "errors"},
 			},
 		},
 	})
@@ -84,7 +90,7 @@ func testAccDataLossPreventionDiscoveryConfig_OrgUpdate(t *testing.T) {
 				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "parent", "last_run_time", "update_time"},
+				ImportStateVerifyIgnore: []string{"location", "parent", "last_run_time", "update_time", "errors"},
 			},
 			{
 				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigOrgFolderPaused(context),
@@ -93,7 +99,7 @@ func testAccDataLossPreventionDiscoveryConfig_OrgUpdate(t *testing.T) {
 				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "parent", "last_run_time", "update_time"},
+				ImportStateVerifyIgnore: []string{"location", "parent", "last_run_time", "update_time", "errors"},
 			},
 		},
 	})
@@ -119,7 +125,7 @@ func testAccDataLossPreventionDiscoveryConfig_ActionsUpdate(t *testing.T) {
 				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "parent", "last_run_time", "update_time"},
+				ImportStateVerifyIgnore: []string{"location", "parent", "last_run_time", "update_time", "errors"},
 			},
 			{
 				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigActions(context),
@@ -128,7 +134,7 @@ func testAccDataLossPreventionDiscoveryConfig_ActionsUpdate(t *testing.T) {
 				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "parent", "last_run_time", "update_time"},
+				ImportStateVerifyIgnore: []string{"location", "parent", "last_run_time", "update_time", "errors"},
 			},
 			{
 				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigActionsSensitivity(context),
@@ -137,7 +143,7 @@ func testAccDataLossPreventionDiscoveryConfig_ActionsUpdate(t *testing.T) {
 				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "parent", "last_run_time", "update_time"},
+				ImportStateVerifyIgnore: []string{"location", "parent", "last_run_time", "update_time", "errors"},
 			},
 		},
 	})
@@ -163,7 +169,7 @@ func testAccDataLossPreventionDiscoveryConfig_ConditionsCadenceUpdate(t *testing
 				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "parent", "last_run_time", "update_time"},
+				ImportStateVerifyIgnore: []string{"location", "parent", "last_run_time", "update_time", "errors"},
 			},
 			{
 				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigConditionsCadence(context),
@@ -172,7 +178,7 @@ func testAccDataLossPreventionDiscoveryConfig_ConditionsCadenceUpdate(t *testing
 				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "parent", "last_run_time", "update_time"},
+				ImportStateVerifyIgnore: []string{"location", "parent", "last_run_time", "update_time", "errors"},
 			},
 		},
 	})
@@ -198,7 +204,7 @@ func testAccDataLossPreventionDiscoveryConfig_FilterUpdate(t *testing.T) {
 				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "parent", "last_run_time", "update_time"},
+				ImportStateVerifyIgnore: []string{"location", "parent", "last_run_time", "update_time", "errors"},
 			},
 			{
 				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigFilterRegexesAndConditions(context),
@@ -207,7 +213,217 @@ func testAccDataLossPreventionDiscoveryConfig_FilterUpdate(t *testing.T) {
 				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "parent", "last_run_time", "update_time"},
+				ImportStateVerifyIgnore: []string{"location", "parent", "last_run_time", "update_time", "errors"},
+			},
+		},
+	})
+}
+
+func testAccDataLossPreventionDiscoveryConfig_CloudSqlUpdate(t *testing.T) {
+
+	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"location":      envvar.GetTestRegionFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataLossPreventionDiscoveryConfigDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigStartCloudSql(context),
+			},
+			{
+				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "parent", "last_run_time", "update_time", "errors"},
+			},
+			{
+				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdateCloudSql(context),
+			},
+			{
+				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "parent", "last_run_time", "update_time", "errors"},
+			},
+		},
+	})
+}
+
+func testAccDataLossPreventionDiscoveryConfig_BqSingleTable(t *testing.T) {
+
+	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"location":      envvar.GetTestRegionFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataLossPreventionDiscoveryConfigDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigStart(context),
+			},
+			{
+				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "parent", "last_run_time", "update_time", "errors"},
+			},
+			{
+				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigBqSingleUpdate(context),
+			},
+			{
+				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "parent", "last_run_time", "update_time", "errors"},
+			},
+		},
+	})
+}
+
+func testAccDataLossPreventionDiscoveryConfig_SqlSingleTable(t *testing.T) {
+
+	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"location":      envvar.GetTestRegionFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataLossPreventionDiscoveryConfigDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigStartCloudSql(context),
+			},
+			{
+				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "parent", "last_run_time", "update_time", "errors"},
+			},
+			{
+				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigCloudSqlSingleUpdate(context),
+			},
+			{
+				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "parent", "last_run_time", "update_time", "errors"},
+			},
+		},
+	})
+}
+
+func testAccDataLossPreventionDiscoveryConfig_CloudStorageUpdate(t *testing.T) {
+
+	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"location":      envvar.GetTestRegionFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataLossPreventionDiscoveryConfigDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigStartCloudStorage(context),
+			},
+			{
+				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "parent", "last_run_time", "update_time", "errors"},
+			},
+			{
+				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdateCloudStorage(context),
+			},
+			{
+				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "parent", "last_run_time", "update_time", "errors"},
+			},
+		},
+	})
+}
+
+func testAccDataLossPreventionDiscoveryConfig_CloudStorageSingleBucket(t *testing.T) {
+
+	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"location":      envvar.GetTestRegionFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataLossPreventionDiscoveryConfigDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigStartCloudStorage(context),
+			},
+			{
+				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "parent", "last_run_time", "update_time", "errors"},
+			},
+			{
+				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigCloudStorageSingleUpdate(context),
+			},
+			{
+				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "parent", "last_run_time", "update_time", "errors"},
+			},
+		},
+	})
+}
+
+func testAccDataLossPreventionDiscoveryConfig_SecretsUpdate(t *testing.T) {
+
+	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"location":      envvar.GetTestRegionFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataLossPreventionDiscoveryConfigDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigSecretsStart(context),
+			},
+			{
+				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "parent", "last_run_time", "update_time", "errors"},
+			},
+			{
+				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigSecretsUpdate(context),
+			},
+			{
+				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "parent", "last_run_time", "update_time", "errors"},
 			},
 		},
 	})
@@ -326,7 +542,7 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
 	actions {
         export_data {
             profile_table {
-                project_id = "project"
+                project_id = "%{project}"
                 dataset_id = "dataset"
                 table_id = "table"
             }
@@ -577,6 +793,453 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
         big_query_target {
             filter {
                 other_tables {}
+            }
+        }
+    }
+    inspect_templates = ["projects/%{project}/inspectTemplates/${google_data_loss_prevention_inspect_template.basic.name}"]
+}
+`, context)
+}
+
+func testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigStartCloudSql(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_data_loss_prevention_inspect_template" "basic" {
+    parent = "projects/%{project}"
+    description = "Description"
+    display_name = "Display"
+    inspect_config {
+        info_types {
+            name = "EMAIL_ADDRESS"
+        }
+    }
+}
+resource "google_data_loss_prevention_discovery_config" "basic" {
+    parent = "projects/%{project}/locations/%{location}"
+    location = "%{location}"
+    status = "RUNNING"
+    targets {
+        cloud_sql_target {
+            filter {
+                collection {
+                    include_regexes {
+                        patterns {
+                            project_id_regex = ".*"
+                            instance_regex = ".*"
+                            database_regex = "do-not-scan.*"
+                            database_resource_name_regex = ".*"
+                        }
+                    }
+                }
+            }
+            conditions {
+                database_engines = ["MYSQL", "POSTGRES"]
+                types = ["DATABASE_RESOURCE_TYPE_ALL_SUPPORTED_TYPES"]
+            }
+            disabled {}
+        }
+    }
+    targets {
+        cloud_sql_target {
+            filter {
+                others {}
+            }
+            generation_cadence {
+                schema_modified_cadence {
+                    types = ["NEW_COLUMNS"]
+                    frequency = "UPDATE_FREQUENCY_MONTHLY"
+                }
+                refresh_frequency = "UPDATE_FREQUENCY_MONTHLY"
+            }
+        }
+    }
+    inspect_templates = ["projects/%{project}/inspectTemplates/${google_data_loss_prevention_inspect_template.basic.name}"]
+}
+`, context)
+}
+
+func testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdateCloudSql(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_data_loss_prevention_inspect_template" "basic" {
+    parent = "projects/%{project}"
+    description = "Description"
+    display_name = "Display"
+    inspect_config {
+        info_types {
+            name = "EMAIL_ADDRESS"  
+        }
+    }
+}
+resource "google_data_loss_prevention_discovery_config" "basic" {
+    parent = "projects/%{project}/locations/%{location}"
+    location = "%{location}"
+    status = "RUNNING"
+    targets {
+        cloud_sql_target {
+            filter {
+                collection {
+                    include_regexes {
+                        patterns {
+                            project_id_regex = ".*"
+                            instance_regex = ".*"
+                            database_regex = ".*"
+                            database_resource_name_regex = "mytable.*"
+                        }
+                    }
+                }
+            }
+            conditions {
+                database_engines = ["ALL_SUPPORTED_DATABASE_ENGINES"]
+                types = ["DATABASE_RESOURCE_TYPE_TABLE"]
+            }
+            generation_cadence {
+                schema_modified_cadence {
+                    types = ["NEW_COLUMNS", "REMOVED_COLUMNS"]
+                    frequency = "UPDATE_FREQUENCY_DAILY"
+                }
+                refresh_frequency = "UPDATE_FREQUENCY_MONTHLY"
+            }
+        }
+    }
+    targets {
+        cloud_sql_target {
+            filter {
+                others {}
+            }
+            generation_cadence {
+                schema_modified_cadence {
+                    types = ["NEW_COLUMNS", "REMOVED_COLUMNS"]
+                    frequency = "UPDATE_FREQUENCY_DAILY"
+                }
+                refresh_frequency = "UPDATE_FREQUENCY_DAILY"
+            }
+        }
+    }
+    inspect_templates = ["projects/%{project}/inspectTemplates/${google_data_loss_prevention_inspect_template.basic.name}"]
+}
+`, context)
+}
+
+func testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigBqSingleUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_data_loss_prevention_inspect_template" "basic" {
+	parent = "projects/%{project}"
+	description = "Description"
+	display_name = "Display"
+
+	inspect_config {
+		info_types {
+			name = "EMAIL_ADDRESS"
+		}
+	}
+}
+resource "google_bigquery_dataset" "default" {
+    dataset_id                  = "tf_test_%{random_suffix}"
+    friendly_name               = "terraform-test"
+    description                 = "Description for the dataset created by terraform"
+    location                    = "US"
+    default_table_expiration_ms = 3600000
+
+    labels = {
+        env = "default"
+    }
+}
+resource "google_bigquery_table" "default" {
+    dataset_id          = google_bigquery_dataset.default.dataset_id
+    table_id            = "tf_test_%{random_suffix}"
+    deletion_protection = false
+
+    labels = {
+        env = "default"
+    }
+
+    schema = <<EOF
+        [
+        {
+            "name": "quantity",
+            "type": "NUMERIC",
+            "mode": "NULLABLE",
+            "description": "The quantity"
+        },
+        {
+            "name": "name",
+            "type": "STRING",
+            "mode": "NULLABLE",
+            "description": "Name of the object"
+        }
+        ]
+    EOF
+}
+
+resource "google_data_loss_prevention_discovery_config" "basic" {
+    parent = "projects/%{project}/locations/%{location}"
+    location = "%{location}"
+    display_name = "display name"
+    status = "RUNNING"
+
+    targets {
+        big_query_target {
+            filter {
+                table_reference {
+                    dataset_id = google_bigquery_dataset.default.dataset_id
+                    table_id = google_bigquery_table.default.table_id
+				}
+            }
+        }
+    }
+    inspect_templates = ["projects/%{project}/inspectTemplates/${google_data_loss_prevention_inspect_template.basic.name}"]
+}
+`, context)
+}
+
+func testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigCloudSqlSingleUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_data_loss_prevention_inspect_template" "basic" {
+    parent = "projects/%{project}"
+    description = "Description"
+    display_name = "Display"
+    inspect_config {
+        info_types {
+            name = "EMAIL_ADDRESS"  
+        }
+    }
+}
+resource "google_sql_database_instance" "instance" {
+    name             = "tf-test-instance-%{random_suffix}"
+    database_version = "POSTGRES_14"
+    region           = "%{location}"
+
+    settings {
+        tier = "db-f1-micro"
+    }
+  
+    deletion_protection = false
+}
+resource "google_sql_database" "db" {
+    instance = google_sql_database_instance.instance.name
+    name     = "database"
+}
+data "google_project" "project" {
+}
+resource "google_project_iam_member" "dlp_role" {
+    project = "%{project}"
+    role    = "roles/dlp.projectdriver"
+    member = "serviceAccount:service-${data.google_project.project.number}@dlp-api.iam.gserviceaccount.com"
+}
+resource "google_data_loss_prevention_discovery_config" "basic" {
+    parent = "projects/%{project}/locations/%{location}"
+    location = "%{location}"
+    status = "RUNNING"
+    targets {
+        cloud_sql_target {
+            filter {
+                database_resource_reference {
+                    project_id = "%{project}"
+                    instance = google_sql_database_instance.instance.name
+                    database = "database"
+                    database_resource = "resource"
+                }
+            }
+            conditions {
+                database_engines = ["ALL_SUPPORTED_DATABASE_ENGINES"]
+                types = ["DATABASE_RESOURCE_TYPE_TABLE"]
+            }
+            generation_cadence {
+                schema_modified_cadence {
+                    types = ["NEW_COLUMNS", "REMOVED_COLUMNS"]
+                    frequency = "UPDATE_FREQUENCY_DAILY"
+                }
+                refresh_frequency = "UPDATE_FREQUENCY_MONTHLY"
+            }
+        }
+    }
+    inspect_templates = ["projects/%{project}/inspectTemplates/${google_data_loss_prevention_inspect_template.basic.name}"]
+}
+`, context)
+}
+
+func testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigSecretsStart(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_data_loss_prevention_discovery_config" "basic" {
+    parent = "projects/%{project}/locations/%{location}"
+    location = "%{location}"
+    status = "RUNNING"
+    targets {
+       secrets_target {}
+    }
+}
+`, context)
+}
+
+func testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigSecretsUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_data_loss_prevention_discovery_config" "basic" {
+    parent = "projects/%{project}/locations/%{location}"
+    location = "%{location}"
+    status = "PAUSED"
+    targets {
+       secrets_target {}
+    }
+}
+`, context)
+}
+
+func testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigStartCloudStorage(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_data_loss_prevention_inspect_template" "basic" {
+    parent = "projects/%{project}"
+    description = "Description"
+    display_name = "Display"
+    inspect_config {
+        info_types {
+            name = "EMAIL_ADDRESS"
+        }
+    }
+}
+resource "google_data_loss_prevention_discovery_config" "basic" {
+    parent = "projects/%{project}/locations/%{location}"
+    location = "%{location}"
+    status = "RUNNING"
+    targets {
+        cloud_storage_target {
+            filter {
+                others {}
+            }
+			generation_cadence {
+                inspect_template_modified_cadence {
+                    frequency = "UPDATE_FREQUENCY_MONTHLY"
+                }
+                refresh_frequency = "UPDATE_FREQUENCY_MONTHLY"
+            }
+        }
+
+    }
+    inspect_templates = ["projects/%{project}/inspectTemplates/${google_data_loss_prevention_inspect_template.basic.name}"]
+}
+`, context)
+}
+
+func testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdateCloudStorage(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_data_loss_prevention_inspect_template" "basic" {
+    parent = "projects/%{project}"
+    description = "Description"
+    display_name = "Display"
+    inspect_config {
+        info_types {
+            name = "EMAIL_ADDRESS"  
+        }
+    }
+}
+resource "google_data_loss_prevention_discovery_config" "basic" {
+    parent = "projects/%{project}/locations/%{location}"
+    location = "%{location}"
+    status = "RUNNING"
+    targets {
+        cloud_storage_target {
+            filter {
+                collection {
+                    include_regexes {
+                        patterns {
+                            cloud_storage_regex {
+                                project_id_regex = "foo-project"
+                                bucket_name_regex = "bucket"
+                            }
+                        }
+                    }
+                }
+            }
+            conditions {
+                created_after = "2023-10-02T15:01:23Z"
+                min_age = "10800s"
+                cloud_storage_conditions {
+                    included_object_attributes = ["ALL_SUPPORTED_OBJECTS"]
+                    included_bucket_attributes = ["ALL_SUPPORTED_BUCKETS"]
+                }
+            }
+            generation_cadence {
+                inspect_template_modified_cadence {
+                    frequency = "UPDATE_FREQUENCY_DAILY"
+                }
+                refresh_frequency = "UPDATE_FREQUENCY_MONTHLY"
+            }
+        }
+    }
+    targets {
+        cloud_storage_target {
+            filter {
+                collection {
+                    include_regexes {
+                        patterns {
+                            cloud_storage_regex {
+                                project_id_regex = "foo-project"
+                                bucket_name_regex = "do-not-scan"
+                            }
+                        }
+                    }
+                }
+            }
+            disabled {}
+        }
+    }
+    targets {
+        cloud_storage_target {
+            filter {
+                others {}
+            }
+            generation_cadence {
+                inspect_template_modified_cadence {
+                    frequency = "UPDATE_FREQUENCY_MONTHLY"
+                }
+                refresh_frequency = "UPDATE_FREQUENCY_MONTHLY"
+            }
+        }
+    }
+    inspect_templates = ["projects/%{project}/inspectTemplates/${google_data_loss_prevention_inspect_template.basic.name}"]
+}
+`, context)
+}
+
+func testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigCloudStorageSingleUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_data_loss_prevention_inspect_template" "basic" {
+    parent = "projects/%{project}"
+    description = "Description"
+    display_name = "Display"
+    inspect_config {
+        info_types {
+            name = "EMAIL_ADDRESS"  
+        }
+    }
+}
+resource "google_storage_bucket" "testbucket" {
+	name                        = "dlp_test_bucket%{random_suffix}"
+	location                    = "%{location}"
+	uniform_bucket_level_access = true
+}
+data "google_project" "project" {
+}
+resource "google_project_iam_member" "dlp_role" {
+    project = "%{project}"
+    role    = "roles/dlp.projectdriver"
+    member = "serviceAccount:service-${data.google_project.project.number}@dlp-api.iam.gserviceaccount.com"
+}
+resource "google_data_loss_prevention_discovery_config" "basic" {
+    parent = "projects/%{project}/locations/%{location}"
+    location = "%{location}"
+    status = "RUNNING"
+    targets {
+        cloud_storage_target {
+            filter {
+                cloud_storage_resource_reference {
+                    project_id = "%{project}"
+                    bucket_name = google_storage_bucket.testbucket.name
+                }
+            }
+			generation_cadence {
+                inspect_template_modified_cadence {
+                    frequency = "UPDATE_FREQUENCY_DAILY"
+                }
+                refresh_frequency = "UPDATE_FREQUENCY_DAILY"
             }
         }
     }

@@ -1,0 +1,152 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'InternalRange'
+description:
+  'The internal range resource for IPAM operations within a VPC network. Used to represent a private address range along with behavioral characterstics of that range (its usage and peering behavior). Networking resources can link to this range if they are created as belonging to it.'
+references:
+  guides:
+    'Use internal ranges': 'https://cloud.google.com/vpc/docs/create-use-internal-ranges'
+  api: 'https://cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1/projects.locations.internalRanges'
+docs:
+base_url: 'projects/{{project}}/locations/global/internalRanges'
+self_link: 'projects/{{project}}/locations/global/internalRanges/{{name}}'
+create_url: 'projects/{{project}}/locations/global/internalRanges?internalRangeId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/global/internalRanges/{{name}}'
+timeouts:
+  insert_minutes: 30
+  update_minutes: 30
+  delete_minutes: 30
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+    timeouts:
+      insert_minutes: 30
+      update_minutes: 30
+      delete_minutes: 30
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'network_connectivity_internal_ranges_basic'
+    primary_resource_id: 'default'
+    vars:
+      internal_range_name: 'basic'
+      network_name: 'internal-ranges'
+  - name: 'network_connectivity_internal_ranges_automatic_reservation'
+    primary_resource_id: 'default'
+    vars:
+      internal_range_name: 'automatic-reservation'
+      network_name: 'internal-ranges'
+  - name: 'network_connectivity_internal_ranges_external_ranges'
+    primary_resource_id: 'default'
+    vars:
+      internal_range_name: 'external-ranges'
+      network_name: 'internal-ranges'
+  - name: 'network_connectivity_internal_ranges_reserve_with_overlap'
+    primary_resource_id: 'default'
+    vars:
+      internal_range_name: 'overlap-range'
+      network_name: 'internal-ranges'
+parameters:
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The name of the policy based route.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      User-defined labels.
+  - name: 'description'
+    type: String
+    description: |
+      An optional description of this resource.
+  - name: 'ipCidrRange'
+    type: String
+    description: |
+      The IP range that this internal range defines.
+    default_from_api: true
+  - name: 'network'
+    type: ResourceRef
+    description: |
+      Fully-qualified URL of the network that this route applies to, for example: projects/my-project/global/networks/my-network.
+    required: true
+    resource: 'Network'
+    imports: 'selfLink'
+  - name: 'usage'
+    type: Enum
+    description: |
+      The type of usage set for this InternalRange.
+    required: true
+    enum_values:
+      - 'FOR_VPC'
+      - 'EXTERNAL_TO_VPC'
+  - name: 'peering'
+    type: Enum
+    description: |
+      The type of peering set for this internal range.
+    required: true
+    enum_values:
+      - 'FOR_SELF'
+      - 'FOR_PEER'
+      - 'NOT_SHARED'
+  - name: 'prefixLength'
+    type: Integer
+    description: |
+      An alternate to ipCidrRange. Can be set when trying to create a reservation that automatically finds a free range of the given size.
+      If both ipCidrRange and prefixLength are set, there is an error if the range sizes do not match. Can also be used during updates to change the range size.
+  - name: 'targetCidrRange'
+    type: Array
+    description: |
+      Optional. Can be set to narrow down or pick a different address space while searching for a free range.
+      If not set, defaults to the "10.0.0.0/8" address space. This can be used to search in other rfc-1918 address spaces like "172.16.0.0/12" and "192.168.0.0/16" or non-rfc-1918 address spaces used in the VPC.
+    item_type:
+      type: String
+  - name: 'users'
+    type: Array
+    description: |
+      Output only. The list of resources that refer to this internal range.
+      Resources that use the internal range for their range allocation are referred to as users of the range.
+      Other resources mark themselves as users while doing so by creating a reference to this internal range. Having a user, based on this reference, prevents deletion of the internal range referred to. Can be empty.
+    output: true
+    item_type:
+      type: String
+  - name: 'overlaps'
+    type: Array
+    description: |
+      Optional. Types of resources that are allowed to overlap with the current internal range.
+    item_type:
+      type: Enum
+      description: |
+        Overlap settings.
+      enum_values:
+        - 'OVERLAP_ROUTE_RANGE'
+        - 'OVERLAP_EXISTING_SUBNET_RANGE'

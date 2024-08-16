@@ -1,0 +1,160 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Note'
+description: |
+  A Container Analysis note is a high-level piece of metadata that
+  describes a type of analysis that can be done for a resource.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/container-analysis/'
+    'Creating Attestations (Occurrences)': 'https://cloud.google.com/binary-authorization/docs/making-attestations'
+  api: 'https://cloud.google.com/container-analysis/api/reference/rest/'
+docs:
+id_format: 'projects/{{project}}/notes/{{name}}'
+base_url: 'projects/{{project}}/notes?noteId={{name}}'
+self_link: 'projects/{{project}}/notes/{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+mutex: 'projects/{{project}}/notes/{{name}}'
+import_format:
+  - 'projects/{{project}}/notes/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+iam_policy:
+  method_name_separator: ':'
+  fetch_iam_policy_verb: 'POST'
+  allowed_iam_role: 'roles/containeranalysis.notes.occurrences.viewer'
+  parent_resource_attribute: 'note'
+  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  import_format:
+    - 'projects/{{project}}/notes/{{name}}'
+    - '{{name}}'
+custom_code:
+  encoder: 'templates/terraform/encoders/go/containeranalysis_attestation_field_name.go.tmpl'
+  decoder: 'templates/terraform/decoders/go/containeranalysis_attestation_field_name.go.tmpl'
+examples:
+  - name: 'container_analysis_note_basic'
+    primary_resource_id: 'note'
+    primary_resource_name: 'fmt.Sprintf("tf-test-attestor-note%s", context["random_suffix"])'
+    vars:
+      note_name: 'attestor-note'
+  - name: 'container_analysis_note_attestation_full'
+    primary_resource_id: 'note'
+    vars:
+      note_name: 'attestor-note'
+parameters:
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The name of the note.
+    required: true
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+  - name: 'shortDescription'
+    type: String
+    description: |
+      A one sentence description of the note.
+  - name: 'longDescription'
+    type: String
+    description: |
+      A detailed description of the note
+  - name: 'kind'
+    type: Enum
+    description: |
+      The type of analysis this note describes
+    output: true
+    enum_values:
+      - 'NOTE_KIND_UNSPECIFIED'
+      - 'VULNERABILITY'
+      - 'BUILD'
+      - 'IMAGE'
+      - 'PACKAGE'
+      - 'DEPLOYMENT'
+      - 'DISCOVERY'
+      - 'ATTESTATION'
+      - 'UPGRADE'
+  - name: 'relatedUrl'
+    type: Array
+    description: |
+      URLs associated with this note and related metadata.
+    is_set: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'url'
+          type: String
+          description: |
+            Specific URL associated with the resource.
+          required: true
+        - name: 'label'
+          type: String
+          description: |
+            Label to describe usage of the URL
+  - name: 'expirationTime'
+    type: Time
+    description: |
+      Time of expiration for this note. Leave empty if note does not expire.
+  - name: 'createTime'
+    type: Time
+    description: The time this note was created.
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: The time this note was last updated.
+    output: true
+  - name: 'relatedNoteNames'
+    type: Array
+    description: |
+      Names of other notes related to this note.
+    is_set: true
+    item_type:
+      type: String
+  - name: 'attestationAuthority'
+    type: NestedObject
+    description: |
+      Note kind that represents a logical attestation "role" or "authority".
+      For example, an organization might have one AttestationAuthority for
+      "QA" and one for "build". This Note is intended to act strictly as a
+      grouping mechanism for the attached Occurrences (Attestations). This
+      grouping mechanism also provides a security boundary, since IAM ACLs
+      gate the ability for a principle to attach an Occurrence to a given
+      Note. It also provides a single point of lookup to find all attached
+      Attestation Occurrences, even if they don't all live in the same
+      project.
+    required: true
+    properties:
+      - name: 'hint'
+        type: NestedObject
+        description: |
+          This submessage provides human-readable hints about the purpose of
+          the AttestationAuthority. Because the name of a Note acts as its
+          resource reference, it is important to disambiguate the canonical
+          name of the Note (which might be a UUID for security purposes)
+          from "readable" names more suitable for debug output. Note that
+          these hints should NOT be used to look up AttestationAuthorities
+          in security sensitive contexts, such as when looking up
+          Attestations to verify.
+        required: true
+        properties:
+          - name: 'humanReadableName'
+            type: String
+            description: |
+              The human readable name of this Attestation Authority, for
+              example "qa".
+            required: true

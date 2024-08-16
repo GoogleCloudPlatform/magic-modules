@@ -49,7 +49,7 @@ examples:
       example_zone_googlecloudexample: 'example-zone-googlecloudexample'
       dns_name: "googlecloudexample.net."
     test_vars_overrides:
-      dns_name: '"mz.gcp.tfacc.hashicorptest.com."'
+      dns_name: '"m-z.gcp.tfacc.hashicorptest.com."'
     ignore_read_extra:
       - 'force_destroy'
   - !ruby/object:Provider::Terraform::Examples
@@ -61,8 +61,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dns_managed_zone_basic'
     primary_resource_id: 'example-zone'
-    pull_external:
-      true
+    external_providers: ["random", "time"]
       # Randomness from random provider
     skip_vcr: true
   - !ruby/object:Provider::Terraform::Examples

@@ -1,0 +1,158 @@
+[
+    {
+        "name": "//bigquery.googleapis.com/projects/{{.Provider.project}}/datasets/stpostgres",
+        "asset_type": "bigquery.googleapis.com/Dataset",
+        "resource": {
+            "version": "v2",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/bigquery/v2/rest",
+            "discovery_name": "Dataset",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "datasetReference": {
+                    "datasetId": "stpostgres"
+                },
+                "description": "Database of postgres",
+                "friendlyName": "stpostgres",
+                "location": "us-central1"
+            }
+        },
+        "ancestors": ["organizations/{{.OrgID}}"],
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
+    },
+    {
+        "name": "//cloudsql.googleapis.com/projects/{{.Provider.project}}/instances/instance-stream-name",
+        "asset_type": "sqladmin.googleapis.com/Instance",
+        "resource": {
+            "version": "v1beta4",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/sqladmin/v1beta4/rest",
+            "discovery_name": "DatabaseInstance",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "databaseVersion": "MYSQL_8_0",
+                "name": "instance-stream-name",
+                "project": "{{.Provider.project}}",
+                "region": "us-central1",
+                "settings": {
+                    "activationPolicy": "ALWAYS",
+                    "availabilityType": "ZONAL",
+                    "backupConfiguration": {
+                        "binaryLogEnabled": true,
+                        "enabled": true
+                    },
+                    "dataDiskType": "PD_SSD",
+                    "ipConfiguration": {
+                        "authorizedNetworks": [
+                            {
+                                "value": "34.72.28.29"
+                            },
+                            {
+                                "value": "34.71.242.81"
+                            },
+                            {
+                                "value": "34.67.234.134"
+                            },
+                            {
+                                "value": "34.67.6.157"
+                            },
+                            {
+                                "value": "34.72.239.218"
+                            }
+                        ],
+                        "ipv4Enabled": true,
+                        "requireSsl": null
+                    },
+                    "pricingPlan": "PER_USE",
+                    "storageAutoResize": true,
+                    "tier": "db-f1-micro"
+                }
+            }
+        },
+        "ancestors": ["organizations/{{.OrgID}}"],
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
+    },
+    {
+        "name": "//datastream.googleapis.com/projects/{{.Provider.project}}/locations/us-central1/connectionProfiles/dest-st-profile",
+        "asset_type": "datastream.googleapis.com/ConnectionProfile",
+        "resource": {
+            "version": "v1",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/datastream/v1/rest",
+            "discovery_name": "ConnectionProfile",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "bigqueryProfile": {},
+                "displayName": "Connection profile"
+            }
+        },
+        "ancestors": ["organizations/{{.OrgID}}"],
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
+    },
+    {
+        "name": "//datastream.googleapis.com/projects/{{.Provider.project}}/locations/us-central1/connectionProfiles/source-profile-st",
+        "asset_type": "datastream.googleapis.com/ConnectionProfile",
+        "resource": {
+            "version": "v1",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/datastream/v1/rest",
+            "discovery_name": "ConnectionProfile",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "bigqueryProfile": null,
+                "displayName": "Source connection profile",
+                "mysqlProfile": {
+                    "port": 3306,
+                    "username": "my-user"
+                }
+            }
+        },
+        "ancestors": ["organizations/{{.OrgID}}"],
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
+    },
+    {
+        "name": "//datastream.googleapis.com/projects/{{.Provider.project}}/locations/us-central1/streams/postgres-bigquery",
+        "asset_type": "datastream.googleapis.com/Stream",
+        "resource": {
+            "version": "v1",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/datastream/v1/rest",
+            "discovery_name": "Stream",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "backfillAll": {},
+                "backfillNone": null,
+                "destinationConfig": {
+                    "bigqueryDestinationConfig": {
+                        "appendOnly": {},
+                        "dataFreshness": "900s",
+                        "merge": null
+                    }
+                },
+                "displayName": "postgres to bigQuery",
+                "sourceConfig": {
+                    "mysqlSourceConfig": {
+                        "maxConcurrentBackfillTasks": 0,
+                        "maxConcurrentCdcTasks": 0
+                    },
+                    "oracleSourceConfig": null,
+                    "postgresqlSourceConfig": null,
+                    "sqlServerSourceConfig": null
+                }
+            }
+        },
+        "ancestors": ["organizations/{{.OrgID}}"],
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
+    },
+    {
+        "name": "//sqladmin.googleapis.com/projects/{{.Provider.project}}/instances/instance-stream-name/databases/db",
+        "asset_type": "sqladmin.googleapis.com/Database",
+        "resource": {
+            "version": "v1beta4",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/sqladmin/v1beta4/rest",
+            "discovery_name": "Database",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "instance": "instance-stream-name",
+                "name": "db"
+            }
+        },
+        "ancestors": ["organizations/{{.OrgID}}"],
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
+    }
+]

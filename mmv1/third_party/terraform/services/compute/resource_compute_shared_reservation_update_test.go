@@ -3,13 +3,12 @@ package compute_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccComputeSharedReservation_update(t *testing.T) {
-	acctest.SkipIfVcr(t) // large number of parallel resources.
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -62,6 +61,7 @@ resource "google_project" "owner_project" {
   name            = "tf-test%{random_suffix}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
 }
 
 
@@ -76,6 +76,7 @@ resource "google_project" "guest_project" {
   name            = "tf-test-2%{random_suffix}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project" "guest_project_second" {
@@ -83,6 +84,7 @@ resource "google_project" "guest_project_second" {
   name            = "tf-test-3%{random_suffix}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project" "guest_project_third" {
@@ -90,6 +92,7 @@ resource "google_project" "guest_project_third" {
   name            = "tf-test-4%{random_suffix}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
 }
 
 resource "google_organization_policy" "shared_reservation_org_policy" {
@@ -151,6 +154,7 @@ resource "google_project" "owner_project" {
   name            = "tf-test%{random_suffix}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_service" "compute" {
@@ -164,6 +168,7 @@ resource "google_project" "guest_project" {
   name            = "tf-test-2%{random_suffix}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project" "guest_project_second" {
@@ -171,6 +176,7 @@ resource "google_project" "guest_project_second" {
   name            = "tf-test-3%{random_suffix}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project" "guest_project_third" {
@@ -178,6 +184,7 @@ resource "google_project" "guest_project_third" {
   name            = "tf-test-4%{random_suffix}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
 }
 
 resource "google_organization_policy" "shared_reservation_org_policy" {

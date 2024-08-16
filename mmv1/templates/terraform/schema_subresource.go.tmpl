@@ -13,20 +13,21 @@
   # limitations under the License.
 */}}
 {{define "SchemaSubResource"}}
+{{if and (eq .Type "Array") (.IsSet) (eq .ItemType.Type "NestedObject")}}
   {{ if and (.IsSet) (eq .Type "Array") (eq .ItemType.Type "NestedObject")  -}}
-func ##TODO NameSpacePropertyFromObject Schema() *schema.Resource {
+func {{ .NamespaceProperty }}Schema() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
-            {{- range $prop := $.ItemType.Properties }}
+            {{- range $prop := $.ResourceMetadata.OrderProperties $.ItemType.Properties }}
             {{template "SchemaFields" $prop}}
             {{- end }}
 		},
 	}
 }
   {{ end -}}
-
+{{end}}
   {{ if .NestedProperties }}
-    {{- range $prop := $.ItemType.Properties }}
+    {{- range $prop := $.NestedProperties }}
 {{template "SchemaSubResource" $prop}}
     {{- end }}
   {{- end }}

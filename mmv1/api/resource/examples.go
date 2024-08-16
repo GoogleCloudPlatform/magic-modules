@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"net/url"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"text/template"
 
@@ -66,7 +67,6 @@ type Examples struct {
 	// test_env_vars is a Hash from template variable names to one of the
 	// following symbols:
 	//  - :PROJECT_NAME
-	//  - :FIRESTORE_PROJECT_NAME
 	//  - :CREDENTIALS
 	//  - :REGION
 	//  - :ORG_ID
@@ -149,19 +149,20 @@ type Examples struct {
 
 	// If the example should be skipped during VCR testing.
 	// This is the case when something about the resource or config causes VCR to fail for example
-	// a resource with a unique identifier generated within the resource via resource.UniqueId()
+	// a resource with a unique identifier generated within the resource via id.UniqueId()
 	// Or a config with two fine grained resources that have a race condition during create
 	SkipVcr bool `yaml:"skip_vcr"`
 
-	// Set for false by default. Set to true if you need to pull external provider for your
-	// testcase. Think before adding as there is latency and adds an external dependency to
+	// Specify which external providers are needed for the testcase.
+	// Think before adding as there is latency and adds an external dependency to
 	// your test so avoid if you can.
-	PullExternal bool `yaml:"pull_external"`
+	ExternalProviders []string `yaml:"external_providers"`
 
 	DocumentationHCLText string
 	TestHCLText          string
 }
 
+// Set default value for fields
 func (e *Examples) UnmarshalYAML(n *yaml.Node) error {
 	type exampleAlias Examples
 	aliasObj := (*exampleAlias)(e)
@@ -171,7 +172,9 @@ func (e *Examples) UnmarshalYAML(n *yaml.Node) error {
 		return err
 	}
 
-	e.ConfigPath = fmt.Sprintf("templates/terraform/examples/go/%s.tf.tmpl", e.Name)
+	if e.ConfigPath == "" {
+		e.ConfigPath = fmt.Sprintf("templates/terraform/examples/go/%s.tf.tmpl", e.Name)
+	}
 	e.SetHCLText()
 
 	return nil
@@ -179,13 +182,44 @@ func (e *Examples) UnmarshalYAML(n *yaml.Node) error {
 
 // Executes example templates for documentation and tests
 func (e *Examples) SetHCLText() {
-	e.DocumentationHCLText = ExecuteHCL(e)
+	originalVars := e.Vars
+	originalTestEnvVars := e.TestEnvVars
+	docTestEnvVars := make(map[string]string)
+	docs_defaults := map[string]string{
+		"PROJECT_NAME":        "my-project-name",
+		"CREDENTIALS":         "my/credentials/filename.json",
+		"REGION":              "us-west1",
+		"ORG_ID":              "123456789",
+		"ORG_DOMAIN":          "example.com",
+		"ORG_TARGET":          "123456789",
+		"BILLING_ACCT":        "000000-0000000-0000000-000000",
+		"MASTER_BILLING_ACCT": "000000-0000000-0000000-000000",
+		"SERVICE_ACCT":        "my@service-account.com",
+		"CUST_ID":             "A01b123xz",
+		"IDENTITY_USER":       "cloud_identity_user",
+		"PAP_DESCRIPTION":     "description",
+	}
 
-	copy := e
+	// Apply doc defaults to test_env_vars from YAML
+	for key := range e.TestEnvVars {
+		docTestEnvVars[key] = docs_defaults[e.TestEnvVars[key]]
+	}
+	e.TestEnvVars = docTestEnvVars
+	e.DocumentationHCLText = ExecuteTemplate(e, e.ConfigPath, true)
+	e.DocumentationHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(e.DocumentationHCLText, "\n")
+
+	// Remove region tags
+	re1 := regexp.MustCompile(`# \[[a-zA-Z_ ]+\]\n`)
+	re2 := regexp.MustCompile(`\n# \[[a-zA-Z_ ]+\]`)
+	e.DocumentationHCLText = re1.ReplaceAllString(e.DocumentationHCLText, "")
+	e.DocumentationHCLText = re2.ReplaceAllString(e.DocumentationHCLText, "")
+
+	testVars := make(map[string]string)
+	testTestEnvVars := make(map[string]string)
 	// Override vars to inject test values into configs - will have
 	//   - "a-example-var-value%{random_suffix}""
 	//   - "%{my_var}" for overrides that have custom Golang values
-	for key, value := range copy.Vars {
+	for key, value := range originalVars {
 		var newVal string
 		if strings.Contains(value, "-") {
 			newVal = fmt.Sprintf("tf-test-%s", value)
@@ -199,25 +233,45 @@ func (e *Examples) SetHCLText() {
 		if len(newVal) > 54 {
 			newVal = newVal[:54]
 		}
-		copy.Vars[key] = fmt.Sprintf("%s%%{random_suffix}", newVal)
+		testVars[key] = fmt.Sprintf("%s%%{random_suffix}", newVal)
 	}
 
 	// Apply overrides from YAML
-	for key := range copy.TestVarsOverrides {
-		copy.Vars[key] = fmt.Sprintf("%%{%s}", key)
+	for key := range e.TestVarsOverrides {
+		testVars[key] = fmt.Sprintf("%%{%s}", key)
+	}
+	for key := range originalTestEnvVars {
+		testTestEnvVars[key] = fmt.Sprintf("%%{%s}", key)
 	}
 
-	e.TestHCLText = ExecuteHCL(copy)
+	e.Vars = testVars
+	e.TestEnvVars = testTestEnvVars
+	e.TestHCLText = ExecuteTemplate(e, e.ConfigPath, true)
+	e.TestHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(e.TestHCLText, "\n")
+	// Remove region tags
+	e.TestHCLText = re1.ReplaceAllString(e.TestHCLText, "")
+	e.TestHCLText = re2.ReplaceAllString(e.TestHCLText, "")
+	e.TestHCLText = SubstituteTestPaths(e.TestHCLText)
+
+	// Reset the example
+	e.Vars = originalVars
+	e.TestEnvVars = originalTestEnvVars
 }
 
-func ExecuteHCL(e *Examples) string {
-	templatePath := e.ConfigPath
+func ExecuteTemplate(e any, templatePath string, appendNewline bool) string {
 	templates := []string{
 		templatePath,
+		"templates/terraform/expand_resource_ref.tmpl",
+		"templates/terraform/custom_flatten/go/bigquery_table_ref.go.tmpl",
+		"templates/terraform/flatten_property_method.go.tmpl",
+		"templates/terraform/expand_property_method.go.tmpl",
+		"templates/terraform/update_mask.go.tmpl",
+		"templates/terraform/nested_query.go.tmpl",
+		"templates/terraform/unordered_list_customize_diff.go.tmpl",
 	}
 	templateFileName := filepath.Base(templatePath)
 
-	tmpl, err := template.New(templateFileName).ParseFiles(templates...)
+	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).ParseFiles(templates...)
 	if err != nil {
 		glog.Exit(err)
 	}
@@ -229,121 +283,12 @@ func ExecuteHCL(e *Examples) string {
 
 	rs := contents.String()
 
-	if !strings.HasSuffix(rs, "\n") {
+	if !strings.HasSuffix(rs, "\n") && appendNewline {
 		rs = fmt.Sprintf("%s\n", rs)
 	}
 
 	return rs
 }
-
-// func (e *Examples) config_documentation(pwd) {
-// docs_defaults = {
-//   PROJECT_NAME: 'my-project-name',
-//   FIRESTORE_PROJECT_NAME: 'my-project-name',
-//   CREDENTIALS: 'my/credentials/filename.json',
-//   REGION: 'us-west1',
-//   ORG_ID: '123456789',
-//   ORG_DOMAIN: 'example.com',
-//   ORG_TARGET: '123456789',
-//   BILLING_ACCT: '000000-0000000-0000000-000000',
-//   MASTER_BILLING_ACCT: '000000-0000000-0000000-000000',
-//   SERVICE_ACCT: 'my@service-account.com',
-//   CUST_ID: 'A01b123xz',
-//   IDENTITY_USER: 'cloud_identity_user',
-//   PAP_DESCRIPTION: 'description'
-// }
-// @vars ||= {}
-// @test_env_vars ||= {}
-// body = lines(compile_file(
-//                {
-//                  vars:,
-//                  test_env_vars: test_env_vars.to_h { |k, v| [k, docs_defaults[v]] },
-//                  primary_resource_id:
-//                },
-//                "//{pwd}///{config_path}"
-//              ))
-
-// // Remove region tags
-// body = body.gsub(/// \[[a-zA-Z_ ]+\]\n/, '')
-// body = body.gsub(/\n// \[[a-zA-Z_ ]+\]/, '')
-// lines(compile_file(
-//         { content: body },
-//         "//{pwd}/templates/terraform/examples/base_configs/documentation.tf.erb"
-//       ))
-// }
-
-// func (e *Examples) config_test(pwd) {
-// body = config_test_body(pwd)
-// lines(compile_file(
-//         {
-//           content: body
-//         },
-//         "//{pwd}/templates/terraform/examples/base_configs/test_body.go.erb"
-//       ))
-// }
-
-// rubocop:disable Style/FormatStringToken
-// func (e *Examples) config_test_body(pwd) {
-// @vars ||= {}
-// @test_env_vars ||= {}
-// @test_vars_overrides ||= {}
-
-// // Construct map for vars to inject into config - will have
-// //   - "a-example-var-value%{random_suffix}""
-// //   - "%{my_var}" for overrides that have custom Golang values
-// rand_vars = vars.map do |k, v|
-//   // Some resources only allow underscores.
-//   testv = if v.include?('-')
-//             "tf-test-//{v}"
-//           elsif v.include?('_')
-//             "tf_test_//{v}"
-//           else
-//             // Some vars like descriptions shouldn't have prefix
-//             v
-//           end
-//   // Random suffix is 10 characters and standard name length <= 64
-//   testv = "//{testv[0...54]}%{random_suffix}"
-//   [k, testv]
-// end
-
-// rand_vars = rand_vars.to_h
-// overrides = test_vars_overrides.to_h { |k, _| [k, "%{//{k}}"] }
-// body = lines(compile_file(
-//                {
-//                  vars: rand_vars.merge(overrides),
-//                  test_env_vars: test_env_vars.to_h { |k, _| [k, "%{//{k}}"] },
-//                  primary_resource_id:,
-//                  primary_resource_type:
-//                },
-//                "//{pwd}///{config_path}"
-//              ))
-
-// // Remove region tags
-// body = body.gsub(/// \[[a-zA-Z_ ]+\]\n/, '')
-// body = body.gsub(/\n// \[[a-zA-Z_ ]+\]/, '')
-// substitute_test_paths body
-// }
-
-// func (e *Examples) config_oics(pwd) {
-// @vars ||= []
-// @oics_vars_overrides ||= {}
-
-// rand_vars = vars.to_h { |k, str| [k, "//{str}-${local.name_suffix}"] }
-
-// // Examples with test_env_vars are skipped elsewhere
-// body = lines(compile_file(
-//                {
-//                  vars: rand_vars.merge(oics_vars_overrides),
-//                  primary_resource_id:
-//                },
-//                "//{pwd}///{config_path}"
-//              ))
-
-// // Remove region tags
-// body = body.gsub(/// \[[a-zA-Z_ ]+\]\n/, '')
-// body = body.gsub(/\n// \[[a-zA-Z_ ]+\]/, '')
-// substitute_example_paths body
-// }
 
 func (e *Examples) OiCSLink() string {
 	v := url.Values{}
@@ -366,7 +311,7 @@ func (e *Examples) OiCSLink() string {
 }
 
 func (e *Examples) TestSlug(productName, resourceName string) string {
-	ret := fmt.Sprintf("%s%s_%sExample", productName, resourceName, google.Camelize(e.Name, "upper"))
+	ret := fmt.Sprintf("%s%s_%sExample", productName, resourceName, google.Camelize(e.Name, "lower"))
 	return ret
 }
 
@@ -377,27 +322,23 @@ func (e *Examples) ResourceType(terraformName string) string {
 	return terraformName
 }
 
-// rubocop:disable Layout/LineLength
-// func (e *Examples) substitute_test_paths(config) {
-// config.gsub!('../static/img/header-logo.png', 'test-fixtures/header-logo.png')
-// config.gsub!('path/to/private.key', 'test-fixtures/test.key')
-// config.gsub!('path/to/certificate.crt', 'test-fixtures/test.crt')
-// config.gsub!('path/to/index.zip', '%{zip_path}')
-// config.gsub!('verified-domain.com', 'tf-test-domain%{random_suffix}.gcp.tfacc.hashicorptest.com')
-// config.gsub!('path/to/id_rsa.pub', 'test-fixtures/ssh_rsa.pub')
-// config
-// }
+func SubstituteExamplePaths(config string) string {
+	config = strings.ReplaceAll(config, "../static/img/header-logo.png", "../static/header-logo.png")
+	config = strings.ReplaceAll(config, "path/to/private.key", "../static/ssl_cert/test.key")
+	config = strings.ReplaceAll(config, "path/to/id_rsa.pub", "../static/ssh_rsa.pub")
+	config = strings.ReplaceAll(config, "path/to/certificate.crt", "../static/ssl_cert/test.crt")
+	return config
+}
 
-// func (e *Examples) substitute_example_paths(config) {
-// config.gsub!('../static/img/header-logo.png', '../static/header-logo.png')
-// config.gsub!('path/to/private.key', '../static/ssl_cert/test.key')
-// config.gsub!('path/to/id_rsa.pub', '../static/ssh_rsa.pub')
-// config.gsub!('path/to/certificate.crt', '../static/ssl_cert/test.crt')
-// config
-// end
-// // rubocop:enable Layout/LineLength
-// // rubocop:enable Style/FormatStringToken
-// }
+func SubstituteTestPaths(config string) string {
+	config = strings.ReplaceAll(config, "../static/img/header-logo.png", "test-fixtures/header-logo.png")
+	config = strings.ReplaceAll(config, "path/to/private.key", "test-fixtures/test.key")
+	config = strings.ReplaceAll(config, "path/to/certificate.crt", "test-fixtures/test.crt")
+	config = strings.ReplaceAll(config, "path/to/index.zip", "%{zip_path}")
+	config = strings.ReplaceAll(config, "verified-domain.com", "tf-test-domain%{random_suffix}.gcp.tfacc.hashicorptest.com")
+	config = strings.ReplaceAll(config, "path/to/id_rsa.pub", "test-fixtures/ssh_rsa.pub")
+	return config
+}
 
 // func (e *Examples) validate() {
 // super
@@ -414,8 +355,10 @@ func (e *Examples) ResourceType(terraformName string) string {
 // check :skip_docs, type: TrueClass
 // check :config_path, type: String, default: "templates/terraform/examples///{name}.tf.erb"
 // check :skip_vcr, type: TrueClass
-// check :pull_external, type: :boolean, default: false
 // }
+
+// TODO
+// validate_external_providers
 
 // func (e *Examples) merge(other) {
 // result = self.class.new

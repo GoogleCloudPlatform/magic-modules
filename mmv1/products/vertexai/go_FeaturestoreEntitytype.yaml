@@ -1,0 +1,213 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'FeaturestoreEntitytype'
+description: |-
+  An entity type is a type of object in a system that needs to be modeled and have stored information about. For example, driver is an entity type, and driver0 is an instance of an entity type driver.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featurestores.entityTypes'
+docs:
+base_url: '{{featurestore}}/entityTypes'
+self_link: '{{featurestore}}/entityTypes/{{name}}'
+create_url: '{{featurestore}}/entityTypes?entityTypeId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - '{{%featurestore}}/entityTypes/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+  include_project: true
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_type: 'featurestore'
+  fetch_iam_policy_verb: 'POST'
+  parent_resource_attribute: 'entitytype'
+  example_config_body: 'templates/terraform/iam/example_config_body/go/vertex_ai_featurestore_entitytype.tf.tmpl'
+  import_format:
+    - '{{%featurestore}}/entityTypes/{{name}}'
+    - '{{name}}'
+  min_version: 'beta'
+custom_code:
+  extra_schema_entry: 'templates/terraform/extra_schema_entry/go/vertex_ai_featurestore_entitytype.go.tmpl'
+  encoder: 'templates/terraform/encoders/go/vertex_ai_featurestore_entitytype.go.tmpl'
+  pre_create: 'templates/terraform/constants/go/vertex_ai_featurestore_entitytype.go.tmpl'
+  pre_delete: 'templates/terraform/constants/go/vertex_ai_featurestore_entitytype.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/go/vertex_ai_featurestore_entitytype.go.tmpl'
+skip_sweeper: true
+examples:
+  - name: 'vertex_ai_featurestore_entitytype'
+    primary_resource_id: 'entity'
+    primary_resource_name: 'fmt.Sprintf("projects/%s/locations/%s/featurestores/%s", envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(), fmt.Sprintf("terraform%s", context["random_suffix"])), fmt.Sprintf("terraform%s", context["random_suffix"])'
+    vars:
+      name: 'terraform'
+      project: 'vertex-ai'
+      kms_key_name: 'kms-name'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    test_vars_overrides:
+      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+  - name: 'vertex_ai_featurestore_entitytype_with_beta_fields'
+    primary_resource_id: 'entity'
+    min_version: 'beta'
+    vars:
+      name: 'terraform2'
+      project: 'vertex-ai'
+      kms_key_name: 'kms-name'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    test_vars_overrides:
+      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+parameters:
+  - name: 'featurestore'
+    type: String
+    description:
+      The name of the Featurestore to use, in the format
+      projects/{project}/locations/{location}/featurestores/{featurestore}.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description:
+      The name of the EntityType. This value may be up to 60 characters, and
+      valid characters are [a-z0-9_]. The first character cannot be a number.
+    url_param_only: true
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+  - name: 'description'
+    type: String
+    description: Optional. Description of the EntityType.
+  - name: 'etag'
+    type: String
+    description: Used to perform consistent read-modify-write updates.
+    ignore_read: true
+    output: true
+  - name: 'createTime'
+    type: String
+    description: |
+      The timestamp of when the featurestore was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: |
+      The timestamp of when the featurestore was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      A set of key/value label pairs to assign to this EntityType.
+    immutable: false
+  - name: 'monitoringConfig'
+    type: NestedObject
+    description: |
+      The default monitoring configuration for all Features under this EntityType.
+
+      If this is populated with [FeaturestoreMonitoringConfig.monitoring_interval] specified, snapshot analysis monitoring is enabled. Otherwise, snapshot analysis monitoring is disabled.
+    properties:
+      - name: 'snapshotAnalysis'
+        type: NestedObject
+        description: |
+          The config for Snapshot Analysis Based Feature Monitoring.
+        properties:
+          - name: 'disabled'
+            type: Boolean
+            description: |
+              The monitoring schedule for snapshot analysis. For EntityType-level config: unset / disabled = true indicates disabled by default for Features under it; otherwise by default enable snapshot analysis monitoring with monitoringInterval for Features under it.
+            default_value: false
+          - name: 'monitoringInterval'
+            type: String
+            description: |
+              Configuration of the snapshot analysis based monitoring pipeline running interval. The value is rolled up to full day.
+
+              A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
+            min_version: 'beta'
+            default_from_api: true
+            deprecation_message: '`monitoring_interval` is deprecated and will be removed in a future release.'
+          - name: 'monitoringIntervalDays'
+            type: Integer
+            description: |
+              Configuration of the snapshot analysis based monitoring pipeline running interval. The value indicates number of days. The default value is 1.
+              If both FeaturestoreMonitoringConfig.SnapshotAnalysis.monitoring_interval_days and [FeaturestoreMonitoringConfig.SnapshotAnalysis.monitoring_interval][] are set when creating/updating EntityTypes/Features, FeaturestoreMonitoringConfig.SnapshotAnalysis.monitoring_interval_days will be used.
+            default_value: 1
+          - name: 'stalenessDays'
+            type: Integer
+            description: |
+              Customized export features time window for snapshot analysis. Unit is one day. The default value is 21 days. Minimum value is 1 day. Maximum value is 4000 days.
+            default_value: 21
+      - name: 'importFeaturesAnalysis'
+        type: NestedObject
+        description: |
+          The config for ImportFeatures Analysis Based Feature Monitoring.
+        properties:
+          - name: 'state'
+            type: String
+            description: |
+              Whether to enable / disable / inherite default hebavior for import features analysis. The value must be one of the values below:
+              * DEFAULT: The default behavior of whether to enable the monitoring. EntityType-level config: disabled.
+              * ENABLED: Explicitly enables import features analysis. EntityType-level config: by default enables import features analysis for all Features under it.
+              * DISABLED: Explicitly disables import features analysis. EntityType-level config: by default disables import features analysis for all Features under it.
+          - name: 'anomalyDetectionBaseline'
+            type: String
+            description: |
+              Defines the baseline to do anomaly detection for feature values imported by each [entityTypes.importFeatureValues][] operation. The value must be one of the values below:
+              * LATEST_STATS: Choose the later one statistics generated by either most recent snapshot analysis or previous import features analysis. If non of them exists, skip anomaly detection and only generate a statistics.
+              * MOST_RECENT_SNAPSHOT_STATS: Use the statistics generated by the most recent snapshot analysis if exists.
+              * PREVIOUS_IMPORT_FEATURES_STATS: Use the statistics generated by the previous import features analysis if exists.
+      - name: 'numericalThresholdConfig'
+        type: NestedObject
+        description: |
+          Threshold for numerical features of anomaly detection. This is shared by all objectives of Featurestore Monitoring for numerical features (i.e. Features with type (Feature.ValueType) DOUBLE or INT64).
+        properties:
+          - name: 'value'
+            type: Double
+            description: |
+              Specify a threshold value that can trigger the alert. For numerical feature, the distribution distance is calculated by Jensen–Shannon divergence. Each feature must have a non-zero threshold if they need to be monitored. Otherwise no alert will be triggered for that feature. The default value is 0.3.
+            required: true
+      - name: 'categoricalThresholdConfig'
+        type: NestedObject
+        description: |
+          Threshold for categorical features of anomaly detection. This is shared by all types of Featurestore Monitoring for categorical features (i.e. Features with type (Feature.ValueType) BOOL or STRING).
+        properties:
+          - name: 'value'
+            type: Double
+            description: |
+              Specify a threshold value that can trigger the alert. For categorical feature, the distribution distance is calculated by L-inifinity norm. Each feature must have a non-zero threshold if they need to be monitored. Otherwise no alert will be triggered for that feature. The default value is 0.3.
+            required: true
+  - name: 'offlineStorageTtlDays'
+    type: Integer
+    description: |
+      Config for data retention policy in offline storage. TTL in days for feature values that will be stored in offline storage. The Feature Store offline storage periodically removes obsolete feature values older than offlineStorageTtlDays since the feature generation time. If unset (or explicitly set to 0), default to 4000 days TTL.
+    min_version: 'beta'
+    default_value: 4000

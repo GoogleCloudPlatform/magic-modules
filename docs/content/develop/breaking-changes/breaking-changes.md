@@ -82,6 +82,9 @@ For more information, see
 * <a name="field-removing-diff-suppress"></a> Removing diff suppression from a field.
   * For MMv1 resources, removing `diff_suppress_func` from a field.
   * For handwritten resources, removing `DiffSuppressFunc` from a field.
+* <a name="field-adding-subfield-to-config-mode-attr"></a> Adding a subfield to
+  a SchemaConfigModeAttr field.
+  * Subfields of SchemaConfigModeAttr fields are treated as required even if the schema says they are optional.
 * Removing update support from a field.
 
 ### Making validation more strict

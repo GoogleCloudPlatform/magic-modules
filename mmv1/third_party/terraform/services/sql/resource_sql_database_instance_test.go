@@ -11,8 +11,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/sql"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
@@ -548,6 +548,30 @@ func TestAccSqlDatabaseInstance_maintenance(t *testing.T) {
 			{
 				Config: fmt.Sprintf(
 					testGoogleSqlDatabaseInstance_maintenance, masterID),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func TestAccSqlDatabaseInstance_maintenance_update_track_week5(t *testing.T) {
+	t.Parallel()
+
+	masterID := acctest.RandInt(t)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(
+					testGoogleSqlDatabaseInstance_maintenance_week5, masterID),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -1384,6 +1408,38 @@ func TestAccSqlDatabaseInstance_EnableGoogleMlIntegration(t *testing.T) {
 			},
 			{
 				Config: testGoogleSqlDatabaseInstance_EnableGoogleMlIntegration(masterID, false, "POSTGRES_14", "db-custom-2-10240"),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "root_password"},
+			},
+		},
+	})
+}
+
+func TestAccSqlDatabaseInstance_EnableGoogleDataplexIntegration(t *testing.T) {
+	t.Parallel()
+
+	masterID := acctest.RandInt(t)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstance_EnableDataplexIntegration(masterID, true),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "root_password"},
+			},
+			{
+				Config: testGoogleSqlDatabaseInstance_EnableDataplexIntegration(masterID, false),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -2320,9 +2376,8 @@ func TestAccSqlDatabaseInstance_updateSslOptionsForPostgreSQL(t *testing.T) {
 		// We don't do ImportStateVerify for the ssl_mode because of the implementation. The ssl_mode is expected to be discarded if the local state doesn't have it.
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName, databaseVersion, false, "ALLOW_UNENCRYPTED_AND_ENCRYPTED"),
+				Config: testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName, databaseVersion, "ALLOW_UNENCRYPTED_AND_ENCRYPTED"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.require_ssl", "false"),
 					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.ssl_mode", "ALLOW_UNENCRYPTED_AND_ENCRYPTED"),
 				),
 			},
@@ -2333,9 +2388,8 @@ func TestAccSqlDatabaseInstance_updateSslOptionsForPostgreSQL(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection", "settings.0.ip_configuration.0.ssl_mode"},
 			},
 			{
-				Config: testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName, databaseVersion, false, "ENCRYPTED_ONLY"),
+				Config: testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName, databaseVersion, "ENCRYPTED_ONLY"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.require_ssl", "false"),
 					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.ssl_mode", "ENCRYPTED_ONLY"),
 				),
 			},
@@ -2346,9 +2400,8 @@ func TestAccSqlDatabaseInstance_updateSslOptionsForPostgreSQL(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection", "settings.0.ip_configuration.0.ssl_mode"},
 			},
 			{
-				Config: testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName, databaseVersion, true, "TRUSTED_CLIENT_CERTIFICATE_REQUIRED"),
+				Config: testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName, databaseVersion, "TRUSTED_CLIENT_CERTIFICATE_REQUIRED"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.require_ssl", "true"),
 					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.ssl_mode", "TRUSTED_CLIENT_CERTIFICATE_REQUIRED"),
 				),
 			},
@@ -2359,9 +2412,8 @@ func TestAccSqlDatabaseInstance_updateSslOptionsForPostgreSQL(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection", "settings.0.ip_configuration.0.ssl_mode"},
 			},
 			{
-				Config: testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName, databaseVersion, false, "ALLOW_UNENCRYPTED_AND_ENCRYPTED"),
+				Config: testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName, databaseVersion, "ALLOW_UNENCRYPTED_AND_ENCRYPTED"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.require_ssl", "false"),
 					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.ssl_mode", "ALLOW_UNENCRYPTED_AND_ENCRYPTED"),
 				),
 			},
@@ -2375,7 +2427,33 @@ func TestAccSqlDatabaseInstance_updateSslOptionsForPostgreSQL(t *testing.T) {
 	})
 }
 
-func testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName string, databaseVersion string, requireSsl bool, sslMode string) string {
+func TestAccSqlDatabaseInstance_useInternalCaByDefault(t *testing.T) {
+	t.Parallel()
+
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+	resourceName := "google_sql_database_instance.instance"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(testGoogleSqlDatabaseInstance_basic3, databaseName),
+				Check:  resource.ComposeTestCheckFunc(resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_ca_mode", "GOOGLE_MANAGED_INTERNAL_CA")),
+			},
+			{
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName string, databaseVersion string, sslMode string) string {
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "instance" {
   name                = "%s"
@@ -2383,14 +2461,13 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "%s"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
     ip_configuration {
       ipv4_enabled = true
-      require_ssl = %t
       ssl_mode = "%s"
     }
   }
-}`, databaseName, databaseVersion, requireSsl, sslMode)
+}`, databaseName, databaseVersion, sslMode)
 }
 
 func testAccSqlDatabaseInstance_sqlMysqlInstancePvpExample(context map[string]interface{}) string {
@@ -2401,7 +2478,7 @@ resource "google_sql_database_instance" "mysql_pvp_instance_name" {
   database_version = "MYSQL_8_0"
   root_password = "abcABC123!"
   settings {
-    tier              = "db-f1-micro"
+    tier              = "db-g1-small"
     password_validation_policy {
       min_length  = 6
       complexity  =  "COMPLEXITY_DEFAULT"
@@ -2421,7 +2498,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
   }
 }
 `
@@ -2433,7 +2510,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
   }
 }
 `
@@ -2445,7 +2522,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_8_0"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
   }
 }
 `
@@ -2474,7 +2551,7 @@ resource "google_sql_database_instance" "instance" {
     collation = "Polish_CI_AS"
     ip_configuration {
       ipv4_enabled = true
-      require_ssl = true
+      ssl_mode = "ENCRYPTED_ONLY"
     }
   }
 }
@@ -2953,6 +3030,7 @@ resource "google_project" "testproject" {
   project_id          = "%s"
   org_id              = "%s"
   billing_account     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_sql_database_instance" "instance" {
@@ -2962,7 +3040,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_8_0"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
 	backup_configuration {
 		enabled = true
 		binary_log_enabled = true
@@ -2980,6 +3058,7 @@ resource "google_project" "testproject" {
   project_id          = "%s"
   org_id              = "%s"
   billing_account     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_sql_database_instance" "instance" {
@@ -2989,7 +3068,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_8_0"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
     ip_configuration {
 		psc_config {
 			psc_enabled = true
@@ -3013,6 +3092,7 @@ resource "google_project" "testproject" {
   project_id          = "%s"
   org_id              = "%s"
   billing_account     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_sql_database_instance" "instance" {
@@ -3022,7 +3102,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_8_0"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
     ip_configuration {
 		psc_config {
 			psc_enabled = true
@@ -3046,6 +3126,7 @@ resource "google_project" "testproject" {
   project_id          = "%s"
   org_id              = "%s"
   billing_account     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_sql_database_instance" "instance" {
@@ -3055,7 +3136,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_8_0"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
     ip_configuration {
 		psc_config {
 			psc_enabled = true
@@ -3080,6 +3161,7 @@ resource "google_project" "testproject" {
   project_id          = "%s"
   org_id              = "%s"
   billing_account     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_sql_database_instance" "instance" {
@@ -3089,7 +3171,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_8_0"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
     ip_configuration {
 		psc_config {
 			psc_enabled = true
@@ -3160,7 +3242,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
     ip_configuration {
       ipv4_enabled       = "false"
       private_network    = data.google_compute_network.servicenet.self_link
@@ -3183,7 +3265,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
     ip_configuration {
       ipv4_enabled       = "false"
       private_network    = data.google_compute_network.servicenet.self_link
@@ -3206,7 +3288,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
     ip_configuration {
       ipv4_enabled       = "false"
       private_network    = data.google_compute_network.servicenet.self_link
@@ -3224,7 +3306,7 @@ resource "google_sql_database_instance" "replica1" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
     ip_configuration {
       ipv4_enabled       = "false"
       private_network    = data.google_compute_network.servicenet.self_link
@@ -3258,7 +3340,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
     ip_configuration {
       ipv4_enabled       = "false"
       private_network    = data.google_compute_network.servicenet.self_link
@@ -3298,7 +3380,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
     ip_configuration {
       ipv4_enabled       = "false"
       private_network    = data.google_compute_network.servicenet.self_link
@@ -3323,7 +3405,7 @@ resource "google_sql_database_instance" "clone1" {
   }
 
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
     backup_configuration {
       enabled = false
     }
@@ -3339,7 +3421,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier                   = "db-f1-micro"
+    tier                   = "db-g1-small"
     location_preference {
       zone = "us-central1-f"
     }
@@ -3370,7 +3452,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier                   = "db-f1-micro"
+    tier                   = "db-g1-small"
     availability_type      = "REGIONAL"
     location_preference {
       zone           = "us-central1-f"
@@ -3405,7 +3487,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = %s
   settings {
-    tier                   = "db-f1-micro"
+    tier                   = "db-g1-small"
     location_preference {
       zone = "us-central1-f"
 	}
@@ -3437,7 +3519,7 @@ resource "google_sql_database_instance" "instance" {
   deletion_protection = false
   maintenance_version = "MYSQL_5_7_37.R20210508.01_03"
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
   }
 }
 `
@@ -3450,7 +3532,7 @@ resource "google_sql_database_instance" "instance" {
   deletion_protection         = false
   settings {
 	deletion_protection_enabled = %s
-    tier                        = "db-f1-micro"
+    tier                        = "db-g1-small"
   }
 }
 `
@@ -3466,7 +3548,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
     ip_configuration {
       ipv4_enabled    = "false"
       private_network = google_compute_network.servicenet.self_link
@@ -3553,7 +3635,7 @@ resource "google_sql_database_instance" "instance_master" {
   deletion_protection = false
 
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
 
     backup_configuration {
       enabled            = true
@@ -3571,7 +3653,7 @@ resource "google_sql_database_instance" "instance_slave" {
   master_instance_name = google_sql_database_instance.instance_master.name
 
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
   }
 }
 `
@@ -3584,7 +3666,7 @@ resource "google_sql_database_instance" "instance" {
   deletion_protection = false
 
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
 
     availability_type = "REGIONAL"
 
@@ -3604,7 +3686,7 @@ resource "google_sql_database_instance" "instance" {
   deletion_protection = false
 
   settings {
-    tier                  = "db-f1-micro"
+    tier                  = "db-g1-small"
     disk_autoresize       = true
     disk_autoresize_limit = 50
     disk_size             = 15
@@ -3621,12 +3703,31 @@ resource "google_sql_database_instance" "instance" {
   deletion_protection = false
 
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
 
     maintenance_window {
       day          = 7
       hour         = 3
       update_track = "canary"
+    }
+  }
+}
+`
+
+var testGoogleSqlDatabaseInstance_maintenance_week5 = `
+resource "google_sql_database_instance" "instance" {
+  name                = "tf-test-%d"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
+  deletion_protection = false
+
+  settings {
+    tier = "db-f1-micro"
+
+    maintenance_window {
+      day          = 7
+      hour         = 3
+      update_track = "week5"
     }
   }
 }
@@ -3639,7 +3740,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier                   = "db-f1-micro"
+    tier                   = "db-g1-small"
 
     ip_configuration {
       authorized_networks {
@@ -3659,7 +3760,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier                   = "db-f1-micro"
+    tier                   = "db-g1-small"
 
     ip_configuration {
       ipv4_enabled = "true"
@@ -3675,7 +3776,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier                   = "db-f1-micro"
+    tier                   = "db-g1-small"
   }
 }
 
@@ -3699,7 +3800,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
     user_labels = {
       track    = "production"
       location = "western-division"
@@ -3714,7 +3815,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
     user_labels = {
       track = "production"
     }
@@ -3730,7 +3831,7 @@ resource "google_sql_database_instance" "instance" {
   deletion_protection = false
 
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
 
     insights_config {
       query_insights_enabled  = true
@@ -3915,6 +4016,22 @@ resource "google_sql_database_instance" "instance" {
 `, masterID, dbVersion, masterID, tier, enableGoogleMlIntegration)
 }
 
+func testGoogleSqlDatabaseInstance_EnableDataplexIntegration(masterID int, enableDataplexIntegration bool) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "instance" {
+  name                = "tf-test-%d"
+  region              = "us-central1"
+  database_version    = "MYSQL_8_0"
+  deletion_protection = false
+  root_password		  = "rand-pwd-%d"
+  settings {
+    tier = "db-custom-2-10240"
+	enable_dataplex_integration = %t
+  }
+}
+`, masterID, masterID, enableDataplexIntegration)
+}
+
 func testGoogleSqlDatabaseInstance_BackupRetention(masterID int) string {
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "instance" {
@@ -3923,7 +4040,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_8_0"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
     backup_configuration {
       enabled                        = true
       start_time                     = "00:00"
@@ -3946,7 +4063,7 @@ resource "google_sql_database_instance" "instance" {
   region           = "us-central1"
 
   settings {
-	tier = "db-f1-micro"
+	tier = "db-g1-small"
 	backup_configuration {
 		enabled            = "false"
 	}
@@ -3965,7 +4082,7 @@ resource "google_sql_database_instance" "instance" {
   region           = "us-central1"
 
   settings {
-	tier = "db-f1-micro"
+	tier = "db-g1-small"
 	backup_configuration {
 		enabled            = "false"
 	}
@@ -4026,7 +4143,7 @@ resource "google_sql_database_instance" "instance" {
   region           = "us-central1"
 
   settings {
-	tier = "db-f1-micro"
+	tier = "db-g1-small"
 	backup_configuration {
 		enabled            = false
 	}
@@ -4159,7 +4276,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
 
     database_flags {
       name  = "character_set_server"
@@ -4181,7 +4298,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
 
     database_flags {
       name  = "auto_increment_increment"
@@ -4207,7 +4324,7 @@ resource "google_sql_database_instance" "master" {
     disk_autoresize   = true
     disk_size         = 10
     disk_type         = "PD_SSD"
-    tier              = "db-f1-micro"
+    tier              = "db-g1-small"
 
     activation_policy = "ALWAYS"
     pricing_plan      = "PER_USE"
@@ -4238,7 +4355,7 @@ resource "google_sql_database_instance" "replica" {
     failover_target = false
   }
   settings {
-    tier              = "db-f1-micro"
+    tier              = "db-g1-small"
     availability_type = "ZONAL"
     pricing_plan      = "PER_USE"
     disk_autoresize   = true
@@ -4278,7 +4395,7 @@ resource "google_sql_database_instance" "master" {
     disk_autoresize   = true
     disk_size         = 10
     disk_type         = "PD_SSD"
-    tier              = "db-f1-micro"
+    tier              = "db-g1-small"
 
     activation_policy = "ALWAYS"
     pricing_plan      = "PER_USE"
@@ -4309,7 +4426,7 @@ resource "google_sql_database_instance" "replica" {
     failover_target = false
   }
   settings {
-    tier              = "db-f1-micro"
+    tier              = "db-g1-small"
     availability_type = "ZONAL"
     pricing_plan      = "PER_USE"
     disk_autoresize   = true
@@ -4359,7 +4476,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "%s"
   deletion_protection = %t
   settings {
-    tier              = "db-f1-micro"
+    tier              = "db-g1-small"
     activation_policy = "%s"
   }
 }

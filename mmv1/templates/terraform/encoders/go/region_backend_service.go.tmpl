@@ -1,4 +1,4 @@
-{{- /*
+{{/*
 	The license inside this block applies to this file
 	Copyright 2024 Google Inc.
 	Licensed under the Apache License, Version 2.0 (the "License");
@@ -9,7 +9,7 @@
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License.
-*/}}
+*/ -}}
 // The RegionBackendService API's Update / PUT API is badly formed and behaves like
 // a PATCH field for at least IAP. When sent a `null` `iap` field, the API
 // doesn't disable an existing field. To work around this, we need to emulate
@@ -32,7 +32,7 @@ if d.Get("load_balancing_scheme").(string) == "EXTERNAL_MANAGED" || d.Get("load_
 	return obj, nil
 }
 
-{{- if ne $.TargetVersionName "ga" }}
+{{ if ne $.TargetVersionName `ga` -}}
 // To remove subsetting on an ILB, "NONE" must be specified. If subsetting
 // isn't specified, we set the value to NONE to make this use case work.
 _, ok := obj["subsetting"]
