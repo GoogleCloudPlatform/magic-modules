@@ -2,6 +2,7 @@ package resourcemanager_test
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -70,14 +71,13 @@ func TestAccDataSourceGoogleClientConfig_credentialsInProviderConfig(t *testing.
 			{
 				Config: testAccCheckGoogleClientConfig_credentialsInProviderConfig(goodCreds),
 				Check: resource.ComposeTestCheckFunc(
+					// This field is set when credentials are valid
 					resource.TestCheckResourceAttrSet(resourceName, "access_token"),
 				),
 			},
 			{
-				Config: testAccCheckGoogleClientConfig_credentialsInProviderConfig(badCreds),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(resourceName, "access_token"),
-				),
+				Config:      testAccCheckGoogleClientConfig_credentialsInProviderConfig(badCreds),
+				ExpectError: regexp.MustCompile("Error setting access_token"),
 			},
 		},
 	})
