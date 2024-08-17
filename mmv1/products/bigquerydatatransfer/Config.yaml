@@ -54,6 +54,14 @@ examples:
       dataset_id: 'example_dataset'
       key_name: 'example-key'
       keyring_name: 'example-keyring'
+  - !ruby/object:Provider::Terraform::Examples
+    skip_test: true
+    name: 'bigquerydatatransfer_config_salesforce'
+    primary_resource_id: 'salesforce_config'
+    vars:
+      display_name: 'my-salesforce-config'
+      dataset_id: 'my_dataset'
+
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'

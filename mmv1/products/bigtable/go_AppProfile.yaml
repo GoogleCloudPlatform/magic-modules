@@ -151,6 +151,8 @@ properties:
     description: |
       The standard options used for isolating this app profile's traffic from other use cases.
     default_from_api: true
+    conflicts:
+      - data_boost_isolation_read_only
     properties:
       - name: 'priority'
         type: Enum
@@ -161,3 +163,17 @@ properties:
           - 'PRIORITY_LOW'
           - 'PRIORITY_MEDIUM'
           - 'PRIORITY_HIGH'
+  - name: 'dataBoostIsolationReadOnly'
+    type: NestedObject
+    description: |
+      Specifies that this app profile is intended for read-only usage via the Data Boost feature.
+    conflicts:
+      - standard_isolation
+    properties:
+      - name: 'computeBillingOwner'
+        type: Enum
+        description: |
+          The Compute Billing Owner for this Data Boost App Profile.
+        required: true
+        enum_values:
+          - 'HOST_PAYS'

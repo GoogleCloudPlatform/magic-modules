@@ -25,7 +25,6 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   parent_resource_attribute: 'table_id'
   fetch_iam_policy_verb: :POST
   allowed_iam_role: 'roles/bigquery.dataOwner'
-  iam_conditions_request_type: :REQUEST_BODY
   iam_policy_version: '1'
 id_format: '{{table_id}}'
 import_format:
@@ -332,6 +331,7 @@ properties:
           - :ORC
           - :PARQUET
           - :ICEBERG
+          - :DELTA_LAKE
       # TODO: Investigate if this is feasible as a ResourceRef
       # This is a very complicated ResourceRef (one-to-many, where the many are cross-product).
       - !ruby/object:Api::Type::Array

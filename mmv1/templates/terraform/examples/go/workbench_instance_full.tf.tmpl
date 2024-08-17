@@ -14,6 +14,14 @@ resource "google_compute_address" "static" {
   name = "{{index $.Vars "network_name"}}"
 }
 
+resource "google_service_account_iam_binding" "act_as_permission" {
+  service_account_id = "projects/{{index $.TestEnvVars "project_id"}}/serviceAccounts/{{index $.TestEnvVars "service_account"}}"
+  role               = "roles/iam.serviceAccountUser"
+  members = [
+    "user:example@example.com",
+  ]
+}
+
 resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
   name = "{{index $.Vars "instance_name"}}"
   location = "us-central1-a"
@@ -72,7 +80,7 @@ resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
 
   disable_proxy_access = "true"
 
-  instance_owners  = [ "{{index $.TestEnvVars "service_account"}}"]
+  instance_owners  = ["example@example.com"]
 
   labels = {
     k = "val"

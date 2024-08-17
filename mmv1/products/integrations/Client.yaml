@@ -128,6 +128,7 @@ examples:
     skip_vcr: true
     vars:
       key_ring_name: my-keyring
+      service_account_id: service-acc
   - !ruby/object:Provider::Terraform::Examples
     name: "integrations_client_deprecated_fields"
     primary_resource_id: "example"

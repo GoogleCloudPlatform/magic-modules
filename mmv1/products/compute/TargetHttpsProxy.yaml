@@ -29,7 +29,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -221,7 +221,7 @@ properties:
       load balancer (classic), this option is not available publicly.
   - !ruby/object:Api::Type::ResourceRef
     name: 'serverTlsPolicy'
-    resource: 'SslPolicy'
+    resource: 'ServerSslPolicy'
     imports: 'selfLink'
     description: |
       A URL referring to a networksecurity.ServerTlsPolicy
@@ -233,3 +233,6 @@ properties:
       INTERNAL_SELF_MANAGED and which with EXTERNAL, EXTERNAL_MANAGED
       loadBalancingScheme consult ServerTlsPolicy documentation.
       If left blank, communications are not encrypted.
+    update_verb: :PATCH
+    update_url: 'projects/{{project}}/global/targetHttpsProxies/{{name}}'
+    fingerprint_name: 'fingerprint'

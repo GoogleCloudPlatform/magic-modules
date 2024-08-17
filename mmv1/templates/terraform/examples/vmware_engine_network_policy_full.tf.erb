@@ -1,5 +1,5 @@
 resource "google_vmwareengine_network" "network-policy-nw" {
-    name              = "standard-full-nw"
+    name              = "<%= ctx[:vars]['network_name'] %>"
     location          = "global" 
     type              = "STANDARD"
     description       = "VMwareEngine standard network sample"
@@ -7,7 +7,7 @@ resource "google_vmwareengine_network" "network-policy-nw" {
 
 resource "google_vmwareengine_network_policy" "<%= ctx[:primary_resource_id] %>" {
     location = "<%= ctx[:test_env_vars]['region'] %>"
-    name = "<%= ctx[:vars]['name'] %>"
+    name = "<%= ctx[:vars]['network_policy_name'] %>"
     edge_services_cidr = "192.168.30.0/26"
     vmware_engine_network = google_vmwareengine_network.network-policy-nw.id
     description = "Sample Network Policy"
