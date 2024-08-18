@@ -298,7 +298,7 @@ properties:
           Scaling settings for this Revision.
         default_from_api: true
         validation:
-          function: 'ValidateTemplateRevisionScaling' 
+          function: 'ValidateTemplateRevisionScaling'
         properties:
           - name: 'minInstanceCount'
             type: Integer

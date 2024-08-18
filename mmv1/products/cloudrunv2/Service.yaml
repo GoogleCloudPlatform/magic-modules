@@ -627,10 +627,10 @@ properties:
                     HTTPGet specifies the http request to perform. Exactly one of HTTPGet or TCPSocket must be specified.
                   send_empty_value: true
                   allow_empty_object: true
-                    # exactly_one_of:
-                    #   - template.0.containers.0.startupProbe.0.httpGet
-                    #   - template.0.containers.0.startupProbe.0.tcpSocket
-                    #   - template.0.containers.0.startupProbe.0.grpc
+                  # exactly_one_of:
+                  #   - template.0.containers.0.startupProbe.0.httpGet
+                  #   - template.0.containers.0.startupProbe.0.tcpSocket
+                  #   - template.0.containers.0.startupProbe.0.grpc
                   properties:
                     - !ruby/object:Api::Type::String
                       name: 'path'
@@ -666,10 +666,10 @@ properties:
                     TCPSocket specifies an action involving a TCP port. Exactly one of HTTPGet or TCPSocket must be specified.
                   send_empty_value: true
                   allow_empty_object: true
-                    # exactly_one_of:
-                    #   - template.0.containers.0.startupProbe.0.httpGet
-                    #   - template.0.containers.0.startupProbe.0.tcpSocket
-                    #   - template.0.containers.0.startupProbe.0.grpc
+                  # exactly_one_of:
+                  #   - template.0.containers.0.startupProbe.0.httpGet
+                  #   - template.0.containers.0.startupProbe.0.tcpSocket
+                  #   - template.0.containers.0.startupProbe.0.grpc
                   properties:
                     - !ruby/object:Api::Type::Integer
                       name: port
