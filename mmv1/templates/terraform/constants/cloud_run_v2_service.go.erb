@@ -1,0 +1,20 @@
+func ValidateTemplateRevisionScaling(v interface{}, k string) (ws []string, errors []error) {
+
+	l := v.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return
+	}
+
+	raw := l[0]
+	original := raw.(map[string]interface{})
+
+	minInstanceCount := original["min_instance_count"].(int)
+	maxInstanceCount := original["max_instance_count"].(int)
+
+	if minInstanceCount > maxInstanceCount {
+		errors = append(errors, fmt.Errorf(
+			"%q: min_instance_count (%d) cannot be greater than max_instance_count (%d).", k, minInstanceCount, maxInstanceCount))
+	}
+
+	return
+}

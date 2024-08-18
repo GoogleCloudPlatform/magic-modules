@@ -49,6 +49,8 @@ async: !ruby/object:Api::OpAsync
 id_format: 'projects/{{project}}/locations/{{location}}/services/{{name}}'
 import_format: ['projects/{{project}}/locations/{{location}}/services/{{name}}']
 autogen_async: true
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/cloud_run_v2_service.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_basic'
@@ -311,6 +313,8 @@ properties:
         description: |
           Scaling settings for this Revision.
         default_from_api: true
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'ValidateTemplateRevisionScaling'
         properties:
           - !ruby/object:Api::Type::Integer
             name: 'minInstanceCount'
