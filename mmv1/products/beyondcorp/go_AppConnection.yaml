@@ -1,0 +1,151 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'AppConnection'
+description:
+  "A BeyondCorp AppConnection resource represents a BeyondCorp protected
+  AppConnection to a remote application.\nIt creates all the necessary GCP
+  components needed for creating a BeyondCorp protected AppConnection.
+  \nMultiple connectors can be authorised for a single AppConnection.\n"
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/beyondcorp-enterprise/docs/enable-app-connector'
+  api: 'https://cloud.google.com/beyondcorp/docs/reference/rest#rest-resource:-v1.projects.locations.appconnections'
+docs:
+base_url: 'projects/{{project}}/locations/{{region}}/appConnections'
+self_link: 'projects/{{project}}/locations/{{region}}/appConnections/{{name}}'
+create_url: 'projects/{{project}}/locations/{{region}}/appConnections?app_connection_id={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 30
+  update_minutes: 30
+  delete_minutes: 30
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+    timeouts:
+      insert_minutes: 30
+      update_minutes: 30
+      delete_minutes: 30
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'beyondcorp_app_connection_basic'
+    primary_resource_id: 'app_connection'
+    primary_resource_name: 'fmt.Sprintf("tf_test_my_app_connection%s", context["random_suffix"])'
+    vars:
+      account_id: 'my-account'
+      app_connector_name: 'my-app-connector'
+      app_connection_name: 'my-app-connection'
+  - name: 'beyondcorp_app_connection_full'
+    primary_resource_id: 'app_connection'
+    primary_resource_name: 'fmt.Sprintf("tf_test_my_app_connection%s", context["random_suffix"])'
+    vars:
+      account_id: 'my-account'
+      app_gateway_name: 'my-app-gateway'
+      app_connector_name: 'my-app-connector'
+      app_connection_name: 'my-app-connection'
+      display_name: 'some display name'
+parameters:
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      ID of the AppConnection.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'region'
+    type: String
+    description: |
+      The region of the AppConnection.
+    url_param_only: true
+    immutable: true
+  - name: 'displayName'
+    type: String
+    description: |
+      An arbitrary user-provided name for the AppConnection.
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      Resource labels to represent user provided metadata.
+    immutable: false
+  - name: 'type'
+    type: String
+    description: |
+      The type of network connectivity used by the AppConnection. Refer
+      to https://cloud.google.com/beyondcorp/docs/reference/rest/v1/projects.locations.appConnections#type
+      for a list of possible values.
+    immutable: true
+  - name: 'applicationEndpoint'
+    type: NestedObject
+    description: |
+      Address of the remote application endpoint for the BeyondCorp AppConnection.
+    required: true
+    properties:
+      - name: 'host'
+        type: String
+        description: |
+          Hostname or IP address of the remote application endpoint.
+        required: true
+      - name: 'port'
+        type: Integer
+        description: |
+          Port of the remote application endpoint.
+        required: true
+  - name: 'connectors'
+    type: Array
+    description: |
+      List of AppConnectors that are authorised to be associated with this AppConnection
+    item_type:
+      type: String
+  - name: 'gateway'
+    type: NestedObject
+    description: |
+      Gateway used by the AppConnection.
+    default_from_api: true
+    properties:
+      - name: 'appGateway'
+        type: String
+        description: |
+          AppGateway name in following format: projects/{project_id}/locations/{locationId}/appgateways/{gateway_id}.
+        required: true
+      - name: 'type'
+        type: String
+        description: |
+          The type of hosting used by the gateway. Refer to
+          https://cloud.google.com/beyondcorp/docs/reference/rest/v1/projects.locations.appConnections#Type_1
+          for a list of possible values.
+      - name: 'uri'
+        type: String
+        description: |
+          Server-defined URI for this resource.
+        output: true
+      - name: 'ingressPort'
+        type: Integer
+        description: |
+          Ingress port reserved on the gateways for this AppConnection, if not specified or zero, the default port is 19443.
+        output: true

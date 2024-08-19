@@ -32,7 +32,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
-  type: "PollAsync"
+  type: 'PollAsync'
   check_response_func_existence: 'transport_tpg.PollCheckForExistence'
   check_response_func_absence: 'transport_tpg.PollCheckForAbsence'
   suppress_error: false
@@ -46,12 +46,11 @@ custom_code:
 examples:
   - name: 'pubsub_schema_basic'
     primary_resource_id: 'example'
-    primary_resource_name: 'example'
+    primary_resource_name: 'fmt.Sprintf("tf-test-example-schema%s", context["random_suffix"])'
     vars:
       schema_name: 'example-schema'
   - name: 'pubsub_schema_protobuf'
     primary_resource_id: 'example'
-    primary_resource_name: 'example'
     vars:
       schema_name: 'example'
     test_env_vars:
@@ -59,7 +58,9 @@ examples:
 parameters:
   - name: 'name'
     type: String
-    description: "The ID to use for the schema, which will become the final component of the schema's resource name."
+    description:
+      The ID to use for the schema, which will become the final component of the
+      schema's resource name.
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
@@ -68,8 +69,8 @@ parameters:
 properties:
   - name: 'type'
     type: Enum
-    description: "The type of the schema definition"
-    default_value: TYPE_UNSPECIFIED
+    description: The type of the schema definition
+    default_value: "TYPE_UNSPECIFIED"
     enum_values:
       - 'TYPE_UNSPECIFIED'
       - 'PROTOCOL_BUFFER'

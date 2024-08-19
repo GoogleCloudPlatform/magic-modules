@@ -583,7 +583,9 @@ module Api
 
       def item_type_class
         return @item_type \
-          if @item_type.instance_of?(Class)
+          if @item_type.instance_of?(Class) \
+            || @item_type.is_a?(Api::Type::ResourceRef) \
+            || @item_type.is_a?(Api::Type::Enum)
 
         Object.const_get(@item_type)
       end

@@ -56,7 +56,6 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/alloydb_instance.go.erb
   pre_create: templates/terraform/pre_create/alloydb_instance.go.erb
   pre_delete: templates/terraform/pre_delete/alloydb_instance.go.erb
-  post_create: templates/terraform/post_create/alloydb_instance.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'alloydb_instance_basic'
@@ -106,6 +105,17 @@ examples:
       network_name: 'alloydb-secondary-network'
     test_vars_overrides:
       network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
+    ignore_read_extra:
+      - 'reconciling'
+      - 'update_time'
+    skip_docs: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'alloydb_instance_psc_test'
+    primary_resource_id: 'default'
+    vars:
+      alloydb_cluster_name: 'alloydb-cluster'
+      alloydb_instance_name: 'alloydb-instance'
+      network_name: 'alloydb-network'
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
@@ -238,6 +248,36 @@ properties:
         name: 'queryPlansPerMinute'
         description: 'Number of query execution plans captured by Insights per minute for all queries combined. The default value is 5. Any integer between 0 and 20 is considered valid.'
   - !ruby/object:Api::Type::NestedObject
+    name: 'observabilityConfig'
+    description: 'Configuration for enhanced query insights.'
+    default_from_api: true
+    min_version: beta
+    properties:
+      - !ruby/object:Api::Type::Boolean
+        name: 'enabled'
+        description: 'Observability feature status for an instance.'
+      - !ruby/object:Api::Type::Boolean
+        name: 'preserveComments'
+        description: 'Preserve comments in the query string.'
+      - !ruby/object:Api::Type::Boolean
+        name: 'trackWaitEvents'
+        description: 'Record wait events during query execution for an instance.'
+      - !ruby/object:Api::Type::Boolean
+        name: 'trackWaitEventTypes'
+        description: 'Record wait event types during query execution for an instance.'
+      - !ruby/object:Api::Type::Integer
+        name: 'maxQueryStringLength'
+        description: 'Query string length. The default value is 10240. Any integer between 1024 and 100000 is considered valid.'
+      - !ruby/object:Api::Type::Boolean
+        name: 'recordApplicationTags'
+        description: 'Record application tags for an instance. This flag is turned "on" by default.'
+      - !ruby/object:Api::Type::Integer
+        name: 'queryPlansPerMinute'
+        description: 'Number of query execution plans captured by Insights per minute for all queries combined. The default value is 5. Any integer between 0 and 200 is considered valid.'
+      - !ruby/object:Api::Type::Boolean
+        name: 'trackActiveQueries'
+        description: 'Track actively running queries. If not set, default value is "off".'
+  - !ruby/object:Api::Type::NestedObject
     name: 'readPoolConfig'
     description: 'Read pool specific config. If the instance type is READ_POOL, this configuration must be provided.'
     properties:
@@ -279,6 +319,33 @@ properties:
             values:
               - :ENCRYPTED_ONLY
               - :ALLOW_UNENCRYPTED_AND_ENCRYPTED
+  - !ruby/object:Api::Type::NestedObject
+    name: 'pscInstanceConfig'
+    default_from_api: true
+    description: |
+      Configuration for Private Service Connect (PSC) for the instance.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'serviceAttachmentLink'
+        output: true
+        description: |
+          The service attachment created when Private Service Connect (PSC) is enabled for the instance.
+          The name of the resource will be in the format of
+          `projects/<alloydb-tenant-project-number>/regions/<region-name>/serviceAttachments/<service-attachment-name>`
+      - !ruby/object:Api::Type::Array
+        name: allowedConsumerProjects
+        item_type: Api::Type::String
+        description: |
+          List of consumer projects that are allowed to create PSC endpoints to service-attachments to this instance.
+          These should be specified as project numbers only.
+        item_validation: !ruby/object:Provider::Terraform::Validation
+          regex: '^\d+$'
+      - !ruby/object:Api::Type::String
+        name: 'pscDnsName'
+        output: true
+        description: |
+          The DNS name of the instance for PSC connectivity.
+          Name convention: <uid>.<uid>.<region>.alloydb-psc.goog
   - !ruby/object:Api::Type::NestedObject
     name: 'networkConfig'
     description: |

@@ -55,6 +55,11 @@ type BreakingChange struct {
 	DocumentationReference string
 }
 
+type MissingTestInfo struct {
+	SuggestedTest string
+	Tests         []string
+}
+
 type Errors struct {
 	Title  string
 	Errors []string
@@ -64,7 +69,7 @@ type diffCommentData struct {
 	PrNumber        int
 	Diffs           []Diff
 	BreakingChanges []BreakingChange
-	MissingTests    string
+	MissingTests    map[string]*MissingTestInfo
 	Errors          []Errors
 }
 
@@ -97,13 +102,12 @@ var generateCommentCmd = &cobra.Command{
 	5. Report the results in a PR comment.
 	6. Run unit tests for the missing test detector.
 	`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		env := make(map[string]string, len(gcEnvironmentVariables))
 		for _, ev := range gcEnvironmentVariables {
 			val, ok := os.LookupEnv(ev)
 			if !ok {
-				fmt.Printf("Did not provide %s environment variable\n", ev)
-				os.Exit(1)
+				return fmt.Errorf("did not provide %s environment variable", ev)
 			}
 			env[ev] = val
 		}
@@ -111,24 +115,21 @@ var generateCommentCmd = &cobra.Command{
 		for _, tokenName := range []string{"GITHUB_TOKEN_DOWNSTREAMS", "GITHUB_TOKEN_MAGIC_MODULES"} {
 			val, ok := lookupGithubTokenOrFallback(tokenName)
 			if !ok {
-				fmt.Printf("Did not provide %s or GITHUB_TOKEN environment variable\n", tokenName)
-				os.Exit(1)
+				return fmt.Errorf("did not provide %s or GITHUB_TOKEN environment variable", tokenName)
 			}
 			env[tokenName] = val
 		}
 		gh := github.NewClient(env["GITHUB_TOKEN_MAGIC_MODULES"])
 		rnr, err := exec.NewRunner()
 		if err != nil {
-			fmt.Println("Error creating a runner: ", err)
-			os.Exit(1)
+			return fmt.Errorf("error creating a runner: %w", err)
 		}
 		ctlr := source.NewController(filepath.Join("workspace", "go"), "modular-magician", env["GITHUB_TOKEN_DOWNSTREAMS"], rnr)
 		prNumber, err := strconv.Atoi(env["PR_NUMBER"])
 		if err != nil {
-			fmt.Println("Error parsing PR_NUMBER: ", err)
-			os.Exit(1)
+			return fmt.Errorf("error parsing PR_NUMBER: %w", err)
 		}
-		execGenerateComment(
+		return execGenerateComment(
 			prNumber,
 			env["GITHUB_TOKEN_MAGIC_MODULES"],
 			env["BUILD_ID"],
@@ -150,8 +151,14 @@ func listGCEnvironmentVariables() string {
 	return result
 }
 
-func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, projectId, commitSha string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller) {
+func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, projectId, commitSha string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller) error {
 	errors := map[string][]string{"Other": []string{}}
+
+	// TODO(ScottSuarez) - temporary fix to ensure the label is removed.
+	// Once we migrate to the new trigger there is an explicit task
+	// for this and this line can be removed.
+	gh.RemoveLabel(fmt.Sprint(prNumber), "awaiting-approval")
+	// ------------------------------------------------------------
 
 	pullRequest, err := gh.GetPullRequest(strconv.Itoa(prNumber))
 	if err != nil {
@@ -205,6 +212,21 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			fmt.Println("Failed to fetch old branch: ", err)
 			errors[repo.Title] = append(errors[repo.Title], "Failed to clone repo at old branch")
 			repo.Cloned = false
+			continue
+		}
+		if repo.Name == "terraform-provider-google-beta" || repo.Name == "terraform-provider-google" {
+			if err := ctlr.Checkout(repo, oldBranch); err != nil {
+				errors[repo.Title] = append(errors[repo.Title], fmt.Sprintf("Failed to checkout branch %s", oldBranch))
+				repo.Cloned = false
+				continue
+			}
+			rnr.PushDir(repo.Path)
+			if _, err := rnr.Run("make", []string{"build"}, nil); err != nil {
+				errors[repo.Title] = append(errors[repo.Title], fmt.Sprintf("Failed to build branch %s", oldBranch))
+				repo.Cloned = false
+			}
+			rnr.PopDir()
+			ctlr.Checkout(repo, newBranch)
 		}
 	}
 
@@ -387,15 +409,14 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	// Post diff comment
 	message, err := formatDiffComment(data)
 	if err != nil {
-		fmt.Println("Error formatting message: ", err)
 		fmt.Printf("Data: %v\n", data)
-		os.Exit(1)
+		return fmt.Errorf("error formatting message: %w", err)
 	}
 	if err := gh.PostComment(strconv.Itoa(prNumber), message); err != nil {
-		fmt.Printf("Error posting comment to PR %d: %v\n", prNumber, err)
 		fmt.Println("Comment: ", message)
-		os.Exit(1)
+		return fmt.Errorf("error posting comment to PR %d: %w", prNumber, err)
 	}
+	return nil
 }
 
 // Build the diff processor for tpg or tpgb
@@ -465,17 +486,21 @@ func changedSchemaResources(diffProcessorPath string, rnr ExecRunner) ([]string,
 // Run the missing test detector and return the results.
 // Returns an empty string unless there are missing tests.
 // Error will be nil unless an error occurs during setup.
-func detectMissingTests(diffProcessorPath, tpgbLocalPath string, rnr ExecRunner) (string, error) {
+func detectMissingTests(diffProcessorPath, tpgbLocalPath string, rnr ExecRunner) (map[string]*MissingTestInfo, error) {
 	if err := rnr.PushDir(diffProcessorPath); err != nil {
-		return "", err
+		return nil, err
 	}
 
 	output, err := rnr.Run("bin/diff-processor", []string{"detect-missing-tests", fmt.Sprintf("%s/google-beta/services", tpgbLocalPath)}, nil)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return output, rnr.PopDir()
+	var missingTests map[string]*MissingTestInfo
+	if err = json.Unmarshal([]byte(output), &missingTests); err != nil {
+		return nil, err
+	}
+	return missingTests, rnr.PopDir()
 }
 
 func formatDiffComment(data diffCommentData) (string, error) {

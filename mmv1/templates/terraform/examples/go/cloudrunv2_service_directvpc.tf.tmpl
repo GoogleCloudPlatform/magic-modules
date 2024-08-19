@@ -12,7 +12,6 @@ resource "google_cloud_run_v2_service" "{{$.PrimaryResourceId}}" {
         subnetwork = "default"
         tags = ["tag1", "tag2", "tag3"]
       }
-      egress = "ALL_TRAFFIC"
     }
   }
 }

@@ -29,6 +29,13 @@ privateCloudPollRead := func(d *schema.ResourceData, meta interface{}) transport
             if err != nil {
                 return res, err
             }
+            // if resource exists but is marked for deletion
+            log.Printf("[DEBUG] Fetching state of the private cloud.")
+            v, ok := res["state"]
+            if ok && v.(string) == "DELETED" {
+                log.Printf("[DEBUG] The Private cloud has been successfully marked for delayed deletion.")
+                return nil, nil
+            }
             return res, nil
         }
     }

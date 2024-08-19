@@ -1,0 +1,283 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Instance'
+description: An Instance is an installation of an Extension into a user's project.
+min_version: 'beta'
+references:
+  guides:
+    'Official Documentation': 'https://firebase.google.com/products/extensions'
+docs:
+base_url: 'projects/{{project}}/instances/'
+self_link: 'projects/{{project}}/instances/{{instance_id}}'
+create_url: 'projects/{{project}}/instances?instanceId={{instance_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/instances/{{instance_id}}'
+  - '{{project}}/{{instance_id}}'
+  - '{{instance_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'update', 'delete']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'firebase_extentions_instance_resize_image'
+    primary_resource_id: 'resize_image'
+    min_version: 'beta'
+    vars:
+      instance-id: 'storage-resize-images'
+      bucket_id: 'bucket-id'
+      service-account-id: 's-a'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'location': '"us-central1"'
+parameters:
+  - name: 'instance_id'
+    type: String
+    description: |
+      The ID to use for the Extension Instance, which will become the final
+      component of the instance's name.
+    min_version: 'beta'
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The fully-qualified resource name of the Extension Instance.
+    min_version: 'beta'
+    output: true
+  - name: 'createTime'
+    type: Time
+    description: The time at which the Extension Instance was created.
+    min_version: 'beta'
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: The time at which the Extension Instance was updated.
+    min_version: 'beta'
+    output: true
+  - name: 'config'
+    type: NestedObject
+    description: |
+      The current Config of the Extension Instance.
+    min_version: 'beta'
+    required: true
+    update_mask_fields:
+      - 'config.params'
+      - 'config.system_params'
+      - 'config.extension_ref'
+      - 'config.extension_version'
+      - 'config.allowed_event_types'
+      - 'config.eventarc_channel'
+    properties:
+      - name: 'name'
+        type: String
+        description: The unique identifier for this configuration.
+        min_version: 'beta'
+        output: true
+      - name: 'createTime'
+        type: Time
+        description: The time at which the Extension Instance Config was created.
+        min_version: 'beta'
+        output: true
+      - name: 'params'
+        type: KeyValuePairs
+        description: |
+          Environment variables that may be configured for the Extension
+        min_version: 'beta'
+        required: true
+      - name: 'systemParams'
+        type: KeyValuePairs
+        description: |
+          Params whose values are only available at deployment time.
+          Unlike other params, these will not be set as environment variables on
+          functions. See a full list of system parameters at
+          https://firebase.google.com/docs/extensions/publishers/parameters#system_parameters
+        min_version: 'beta'
+        default_from_api: true
+      - name: 'extensionRef'
+        type: String
+        description: The ref of the Extension from the Registry (e.g. publisher-id/awesome-extension)
+        # Installing from an extensionRef is the only way for now
+        min_version: 'beta'
+        required: true
+        immutable: true
+      - name: 'extensionVersion'
+        type: String
+        description: |
+          The version of the Extension from the Registry (e.g. 1.0.3). If left blank, latest is assumed.
+        min_version: 'beta'
+        default_from_api: true
+      - name: 'allowedEventTypes'
+        type: Array
+        description: |
+          List of extension events selected by consumer that extension is allowed to
+          emit, identified by their types.
+        min_version: 'beta'
+        item_type:
+          type: String
+      - name: 'eventarcChannel'
+        type: String
+        description: |
+          Fully qualified Eventarc resource name that consumers should use for event triggers.
+        min_version: 'beta'
+        default_from_api: true
+      - name: 'populatedPostinstallContent'
+        type: String
+        description: |
+          Postinstall instructions to be shown for this Extension, with
+          template strings representing function and parameter values substituted
+          with actual values. These strings include: ${param:FOO},
+          ${function:myFunc.url},
+          ${function:myFunc.name}, and ${function:myFunc.location}
+        min_version: 'beta'
+        output: true
+  - name: 'state'
+    type: Enum
+    description: |
+      The current state of the Extension Instance.
+        DEPLOYING:
+          The Extension Instance is waiting on an Operation to complete. Could
+          resolve to `ACTIVE`, `PAUSED`, `ERRORED`.
+        UNINSTALLING:
+          The Extension Instance is being removed from the project. Could resolve
+          to `ERRORED`, but more likely the instance will soon cease to exist.
+        ACTIVE:
+          The Extension Instance is installed and ready.
+        ERRORED:
+          The Extension Instance encountered an error while `DEPLOYING` or
+          `UNINSTALLING`.
+        PAUSED:
+          The Extension's resources have been removed from the project, but the
+          Config remains so the Instance can be restored.
+    min_version: 'beta'
+    output: true
+    enum_values:
+      - 'DEPLOYING'
+      - 'UNINSTALLING'
+      - 'ACTIVE'
+      - 'ERRORED'
+      - 'PAUSED'
+  - name: 'errorStatus'
+    type: NestedObject
+    description: |
+      If this Instance has `state: ERRORED`, the error messages
+      will be found here.
+    min_version: 'beta'
+    output: true
+    properties:
+      - name: 'code'
+        type: Integer
+        description: |
+          The status code, which should be an enum value of google.rpc.Code.
+        min_version: 'beta'
+      - name: 'message'
+        type: String
+        description: |
+          A developer-facing error message, which should be in English.
+        min_version: 'beta'
+      - name: 'details'
+        type: Array
+        description: |
+          A list of messages that carry the error details.
+        min_version: 'beta'
+        item_type:
+          type: KeyValuePairs
+  - name: 'serviceAccountEmail'
+    type: String
+    description: |
+      The email of the service account to be used at runtime by compute resources
+      created for the operation of the Extension instance.
+    min_version: 'beta'
+    output: true
+  - name: 'lastOperationName'
+    type: String
+    description: |
+      The name of the last operation that acted on this Extension
+      Instance
+    min_version: 'beta'
+    output: true
+  - name: 'lastOperationType'
+    type: String
+    description: |
+      The type of the last operation that acted on the Extension Instance.
+    min_version: 'beta'
+    output: true
+  - name: 'etag'
+    type: Fingerprint
+    description: |
+      A weak etag that is computed by the server based on other configuration
+      values and may be sent on update and delete requests to ensure the
+      client has an up-to-date value before proceeding.
+    min_version: 'beta'
+    output: true
+  - name: 'runtimeData'
+    type: NestedObject
+    description: Data set by the extension instance at runtime.
+    min_version: 'beta'
+    output: true
+    properties:
+      - name: 'stateUpdateTime'
+        type: Time
+        description: The time of the last state update.
+        min_version: 'beta'
+      - name: 'processingState'
+        type: NestedObject
+        description: The processing state for the extension instance
+        min_version: 'beta'
+        properties:
+          - name: 'state'
+            type: String
+            description: The processing state of the extension instance.
+            min_version: 'beta'
+          - name: 'detailMessage'
+            type: String
+            description: |
+              Details about the processing. e.g. This could include the type of
+              processing in progress or it could list errors or failures.
+              This information will be shown in the console on the detail page
+              for the extension instance.
+            min_version: 'beta'
+      - name: 'fatalError'
+        type: NestedObject
+        description: The fatal error state for the extension instance
+        min_version: 'beta'
+        properties:
+          - name: 'errorMessage'
+            type: String
+            description: |
+              The error message. This is set by the extension developer to give
+              more detail on why the extension is unusable and must be re-installed
+              or reconfigured.
+            min_version: 'beta'

@@ -44,9 +44,11 @@ func TestExecWaitForCommit(t *testing.T) {
 			baseBranch: "main",
 			calledMethods: []string{
 				"git merge-base --is-ancestor sha origin/sync-branch",
-				"git log --pretty=%H --reverse origin/sync-branch..origin/main",
+				"git rev-parse --short origin/sync-branch",
+				"git rev-parse --short sha~",
 				"git fetch origin sync-branch",
-				"git log --pretty=%H --reverse origin/sync-branch..origin/main",
+				"git rev-parse --short origin/sync-branch",
+				"git rev-parse --short sha~",
 			},
 			runResults: map[string][]runResult{
 				"cwd git [merge-base --is-ancestor sha origin/sync-branch] map[]": {
@@ -55,12 +57,20 @@ func TestExecWaitForCommit(t *testing.T) {
 						err: fmt.Errorf("exit error 1"),
 					},
 				},
-				"cwd git [log --pretty=%H --reverse origin/sync-branch..origin/main] map[]": {
+				"cwd git [rev-parse --short origin/sync-branch] map[]": {
 					{
-						out: "sha2\nsha\n\n",
+						out: "sha-x",
 					},
 					{
-						out: "sha\n\n",
+						out: "sha-z",
+					},
+				},
+				"cwd git [rev-parse --short sha~] map[]": {
+					{
+						out: "sha-y",
+					},
+					{
+						out: "sha-z",
 					},
 				},
 				"cwd git [fetch origin sync-branch] map[]": {

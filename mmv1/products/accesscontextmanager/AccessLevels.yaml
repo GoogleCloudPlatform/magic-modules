@@ -22,6 +22,13 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Access Policy Quickstart': 'https://cloud.google.com/access-context-manager/docs/quickstart'
   api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.accessLevels'
+docs: !ruby/object:Provider::Terraform::Docs
+  warning: |
+    This resource is authoritative over the access levels under an access policy. Due to a limitation in Terraform,
+    it will overwrite all preexisting access levels during a create opration without displaying the old values on
+    the left side of plan. To prevent this, we recommend importing the resource before applying it if overwriting
+    preexisting rules, as the plan will correctly display the complete changes to your access policy if the
+    resource is present in state.
 description: |
   Replace all existing Access Levels in an Access Policy with the Access Levels provided. This is done atomically.
   This is a bulk edit of all Access Levels and may override existing Access Levels created by `google_access_context_manager_access_level`,

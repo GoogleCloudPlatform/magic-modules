@@ -1,18 +1,3 @@
-// Temporarily remove the enablePublicIp field if it is set to true since the
-// API prohibits creating instances with public IP enabled.
-var nc map[string]interface{}
-if obj["networkConfig"] == nil {
-  nc = make(map[string]interface{})
-} else {
-  nc = obj["networkConfig"].(map[string]interface{})
-}
-if nc["enablePublicIp"] == true {
-  delete(nc, "enablePublicIp")
-  delete(nc, "authorizedExternalNetworks")
-}
-obj["networkConfig"] = nc
-
-
 // Read the config and call createsecondary api if instance_type is SECONDARY
 
 if instanceType := d.Get("instance_type"); instanceType == "SECONDARY" {

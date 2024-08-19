@@ -26,7 +26,7 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
     ['projects/{{project}}/locations/{{location}}/queues/{{name}}', '{{name}}']
 id_format: 'projects/{{project}}/locations/{{location}}/queues/{{name}}'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: 'templates/terraform/constants/cloud_tasks_retry_config_custom_diff.go'
+  constants: 'templates/terraform/constants/cloud_tasks_retry_config_custom_diff.go.erb'
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'queue_basic'

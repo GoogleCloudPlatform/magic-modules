@@ -1,0 +1,236 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'FeatureOnlineStoreFeatureview'
+description: |-
+  FeatureView is representation of values that the FeatureOnlineStore will serve based on its syncConfig.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featureOnlineStores.featureViews'
+docs:
+base_url: 'projects/{{project}}/locations/{{region}}/featureOnlineStores/{{feature_online_store}}/featureViews'
+self_link: 'projects/{{project}}/locations/{{region}}/featureOnlineStores/{{feature_online_store}}/featureViews/{{name}}'
+create_url: 'projects/{{project}}/locations/{{region}}/featureOnlineStores/{{feature_online_store}}/featureViews?featureViewId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{region}}/featureOnlineStores/{{feature_online_store}}/featureViews/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'vertex_ai_featureonlinestore_featureview'
+    primary_resource_id: 'featureview'
+    vars:
+      name: 'example_feature_view'
+  - name: 'vertex_ai_featureonlinestore_featureview_feature_registry'
+    primary_resource_id: 'featureview_featureregistry'
+    vars:
+      name: 'example_feature_view_feature_registry'
+  - name: 'vertex_ai_featureonlinestore_featureview_cross_project'
+    primary_resource_id: 'cross_project_featureview'
+    vars:
+      name: 'example_cross_project_featureview'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    ignore_read_extra:
+      - 'feature_registry_source.0.project_number'
+    external_providers: ["time"]
+  - name: 'vertex_ai_featureonlinestore_featureview_with_vector_search'
+    primary_resource_id: 'featureview_vector_search'
+    min_version: 'beta'
+    vars:
+      name: 'example_feature_view_vector_search'
+parameters:
+  - name: 'featureOnlineStore'
+    type: String
+    description:
+      The name of the FeatureOnlineStore to use for the featureview.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'region'
+    type: String
+    description: The region for the resource. It should be the same as the featureonlinestore region.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description:
+      Name of the FeatureView. This value may be up to 60 characters, and
+      valid characters are [a-z0-9_]. The first character cannot be a number.
+    url_param_only: true
+    immutable: true
+  - name: 'createTime'
+    type: String
+    description: |
+      The timestamp of when the featureOnlinestore was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: |
+      The timestamp of when the featureOnlinestore was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      A set of key/value label pairs to assign to this FeatureView.
+    immutable: false
+  - name: 'syncConfig'
+    type: NestedObject
+    description: |
+      Configures when data is to be synced/updated for this FeatureView. At the end of the sync the latest featureValues for each entityId of this FeatureView are made ready for online serving.
+    properties:
+      - name: 'cron'
+        type: String
+        description: |
+          Cron schedule (https://en.wikipedia.org/wiki/Cron) to launch scheduled runs.
+          To explicitly set a timezone to the cron tab, apply a prefix in the cron tab: "CRON_TZ=${IANA_TIME_ZONE}" or "TZ=${IANA_TIME_ZONE}".
+        default_from_api: true
+  - name: 'bigQuerySource'
+    type: NestedObject
+    description: |
+      Configures how data is supposed to be extracted from a BigQuery source to be loaded onto the FeatureOnlineStore.
+    exactly_one_of:
+      - 'big_query_source'
+      - 'feature_registry_source'
+    properties:
+      - name: 'uri'
+        type: String
+        description: |
+          The BigQuery view URI that will be materialized on each sync trigger based on FeatureView.SyncConfig.
+        required: true
+      - name: 'entityIdColumns'
+        type: Array
+        description: |
+          Columns to construct entityId / row keys. Start by supporting 1 only.
+        required: true
+        item_type:
+          type: String
+  - name: 'featureRegistrySource'
+    type: NestedObject
+    description: |
+      Configures the features from a Feature Registry source that need to be loaded onto the FeatureOnlineStore.
+    conflicts:
+      - vector_search_config
+    exactly_one_of:
+      - 'big_query_source'
+      - 'feature_registry_source'
+    properties:
+      - name: 'featureGroups'
+        type: Array
+        description: |
+          List of features that need to be synced to Online Store.
+        required: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'featureGroupId'
+              type: String
+              description: |
+                Identifier of the feature group.
+              required: true
+            - name: 'featureIds'
+              type: Array
+              description: |
+                Identifiers of features under the feature group.
+              required: true
+              item_type:
+                type: String
+      - name: 'projectNumber'
+        type: String
+        description: |
+          The project number of the parent project of the feature Groups.
+        custom_flatten: 'templates/terraform/custom_flatten/go/vertex_ai_feature_view_ignore_project_number.go.tmpl'
+  - name: 'vectorSearchConfig'
+    type: NestedObject
+    description: |
+      Configuration for vector search. It contains the required configurations to create an index from source data, so that approximate nearest neighbor (a.k.a ANN) algorithms search can be performed during online serving.
+    min_version: 'beta'
+    immutable: true
+    conflicts:
+      - feature_registry_source
+    properties:
+      - name: 'embeddingColumn'
+        type: String
+        description: |
+          Column of embedding. This column contains the source data to create index for vector search.
+        required: true
+      - name: 'filterColumns'
+        type: Array
+        description: |
+          Columns of features that are used to filter vector search results.
+        item_type:
+          type: String
+      - name: 'crowdingColumn'
+        type: String
+        description: |
+          Column of crowding. This column contains crowding attribute which is a constraint on a neighbor list produced by nearest neighbor search requiring that no more than some value k' of the k neighbors returned have the same value of crowdingAttribute.
+      - name: 'distanceMeasureType'
+        type: Enum
+        description: |
+          The distance measure used in nearest neighbor search.
+          For details on allowed values, see the [API documentation](https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.featureOnlineStores.featureViews#DistanceMeasureType).
+        enum_values:
+          - 'SQUARED_L2_DISTANCE'
+          - 'COSINE_DISTANCE'
+          - 'DOT_PRODUCT_DISTANCE'
+      - name: 'treeAhConfig'
+        type: NestedObject
+        description: |
+          Configuration options for the tree-AH algorithm (Shallow tree + Asymmetric Hashing). Please refer to this paper for more details: https://arxiv.org/abs/1908.10396
+        exactly_one_of:
+          - 'treeAhConfig'
+          - 'bruteForceConfig'
+        properties:
+          - name: 'leafNodeEmbeddingCount'
+            type: String
+            description: |
+              Number of embeddings on each leaf node. The default value is 1000 if not set.
+            default_from_api: true
+      - name: 'bruteForceConfig'
+        type: NestedObject
+        description: |
+          Configuration options for using brute force search, which simply implements the standard linear search in the database for each query. It is primarily meant for benchmarking and to generate the ground truth for approximate search.
+        send_empty_value: true
+        allow_empty_object: true
+        exactly_one_of:
+          - 'treeAhConfig'
+          - 'bruteForceConfig'
+        properties:
+          []
+      - name: 'embeddingDimension'
+        type: Integer
+        description: |
+          The number of dimensions of the input embedding.

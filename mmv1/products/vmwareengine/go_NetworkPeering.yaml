@@ -1,0 +1,172 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'NetworkPeering'
+description: |
+  Represents a network peering resource. Network peerings are global resources.
+references:
+  guides:
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/networks/addPeering'
+docs:
+base_url: 'projects/{{project}}/locations/global/networkPeering'
+self_link: 'projects/{{project}}/locations/global/networkPeerings/{{name}}'
+create_url: 'projects/{{project}}/locations/global/networkPeerings?networkPeeringId={{name}}'
+update_verb: 'PATCH'
+import_format:
+  - 'projects/{{project}}/locations/global/networkPeerings/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'vmware_engine_network_peering_ven'
+    primary_resource_id: 'vmw-engine-network-peering'
+    vars:
+      name: 'sample-network-peering'
+    test_env_vars:
+      region: 'REGION'
+  - name: 'vmware_engine_network_peering_standard'
+    primary_resource_id: 'vmw-engine-network-peering'
+    vars:
+      name: 'sample-network-peering'
+    test_env_vars:
+      region: 'REGION'
+parameters:
+  - name: 'name'
+    type: String
+    description: |
+      The ID of the Network Peering.
+
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'createTime'
+    type: Time
+    description: |
+      Creation time of this resource.
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and
+      up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      Last updated time of this resource.
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine
+      fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+
+    output: true
+  - name: 'peerNetwork'
+    type: String
+    description: |
+      The relative resource name of the network to peer with a standard VMware Engine network.
+      The provided network can be a consumer VPC network or another standard VMware Engine network.
+
+    required: true
+  - name: 'exportCustomRoutes'
+    type: Boolean
+    description: |
+      True if custom routes are exported to the peered network; false otherwise.
+
+    send_empty_value: true
+    default_value: true
+  - name: 'importCustomRoutes'
+    type: Boolean
+    description: |
+      True if custom routes are imported from the peered network; false otherwise.
+
+    send_empty_value: true
+    default_value: true
+  - name: 'exportCustomRoutesWithPublicIp'
+    type: Boolean
+    description: |
+      True if all subnet routes with a public IP address range are exported; false otherwise.
+
+    send_empty_value: true
+    default_value: true
+  - name: 'importCustomRoutesWithPublicIp'
+    type: Boolean
+    description: |
+      True if custom routes are imported from the peered network; false otherwise.
+
+    send_empty_value: true
+    default_value: true
+  - name: 'state'
+    type: String
+    description: |
+      State of the network peering.
+      This field has a value of 'ACTIVE' when there's a matching configuration in the peer network.
+      New values may be added to this enum when appropriate.
+
+    output: true
+  - name: 'stateDetails'
+    type: String
+    description: |
+      Details about the current state of the network peering.
+
+    output: true
+  - name: 'peerNetworkType'
+    type: Enum
+    description: |
+      The type of the network to peer with the VMware Engine network.
+    required: true
+    enum_values:
+      - 'STANDARD'
+      - 'VMWARE_ENGINE_NETWORK'
+      - 'PRIVATE_SERVICES_ACCESS'
+      - 'NETAPP_CLOUD_VOLUMES'
+      - 'THIRD_PARTY_SERVICE'
+      - 'DELL_POWERSCALE'
+  - name: 'uid'
+    type: String
+    description: |
+      System-generated unique identifier for the resource.
+
+    output: true
+  - name: 'vmwareEngineNetwork'
+    type: String
+    description: |
+      The relative resource name of the VMware Engine network. Specify the name in the following form:
+      projects/{project}/locations/{location}/vmwareEngineNetworks/{vmwareEngineNetworkId} where {project}
+      can either be a project number or a project ID.
+
+    required: true
+  - name: 'description'
+    type: String
+    description: |
+      User-provided description for this network peering.
+
+  - name: 'vmwareEngineNetworkCanonical'
+    type: String
+    description: |
+      The canonical name of the VMware Engine network in the form:
+      projects/{project_number}/locations/{location}/vmwareEngineNetworks/{vmwareEngineNetworkId}
+    output: true

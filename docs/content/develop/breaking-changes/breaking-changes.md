@@ -63,6 +63,8 @@ For more information, see
 * <a name="field-becoming-computed"></a> Making a settable field read-only
   * For MMv1 resources, adding `output: true` to an existing field.
   * For handwritten resources, adding `Computed: true` to a field that does not have `Optional: true` set.
+  * Even if there is no valid scenario where a field can be set, changing it to read-only may be a breaking change for
+    modules that depend on the provider.
 * <a name="field-oc-to-c"></a> Removing support for API-side defaults
   * For MMv1 resources, removing `default_from_api: true`.
   * For handwritten resources, altering a field schema with `Computed: true` + `Optional: true`
@@ -82,6 +84,9 @@ For more information, see
 * <a name="field-removing-diff-suppress"></a> Removing diff suppression from a field.
   * For MMv1 resources, removing `diff_suppress_func` from a field.
   * For handwritten resources, removing `DiffSuppressFunc` from a field.
+* <a name="field-adding-subfield-to-config-mode-attr"></a> Adding a subfield to
+  a SchemaConfigModeAttr field.
+  * Subfields of SchemaConfigModeAttr fields are treated as required even if the schema says they are optional.
 * Removing update support from a field.
 
 ### Making validation more strict

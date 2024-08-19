@@ -24,7 +24,8 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Internet NEGs Official Documentation': 'https://cloud.google.com/load-balancing/docs/negs/internet-neg-concepts'
   api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionNetworkEndpointGroups'
 description: |
-  A regional NEG that can support Serverless Products and proxying traffic to external backends.
+  A regional NEG that can support Serverless Products, proxying traffic to
+  external backends and providing traffic to the PSC port mapping endpoints.
 
   Recreating a region network endpoint group that's in use by another resource will give a
   `resourceInUseByAnotherResource` error. Use `lifecycle.create_before_destroy`
@@ -33,7 +34,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -102,6 +103,14 @@ examples:
     vars:
       neg_name: 'ip-port-neg'
       network_name: 'network'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'region_network_endpoint_group_portmap'
+    primary_resource_id: 'region_network_endpoint_group_portmap'
+    min_version: 'beta'
+    vars:
+      network_name: 'network'
+      subnetwork_name: 'subnetwork'
+      neg_name: 'portmap-neg'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
@@ -139,6 +148,7 @@ properties:
       - :PRIVATE_SERVICE_CONNECT
       - :INTERNET_IP_PORT
       - :INTERNET_FQDN_PORT
+      - :GCE_VM_IP_PORTMAP
     default_value: :SERVERLESS
   - !ruby/object:Api::Type::String
     name: 'pscTargetService'

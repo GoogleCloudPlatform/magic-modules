@@ -90,7 +90,7 @@ resource "google_compute_instance_template" "instance_template" {
   }
 
   disk {
-    source_image = "debian-cloud/debian-10"
+    source_image = "debian-cloud/debian-12"
     auto_delete  = true
     boot         = true
   }
@@ -177,9 +177,7 @@ resource "google_compute_firewall" "fw_ilb_to_backends" {
 	  google_compute_firewall.fw_iap
   ]
 }
-# [END cloudloadbalancing_int_http_gce]
 
-# [START lb_traffic_extension]
 resource "google_network_services_lb_traffic_extension" "<%= ctx[:primary_resource_id] %>" {
   name     = "<%= ctx[:vars]['lb_traffic_extension_name'] %>"
   description = "my traffic extension"
@@ -334,4 +332,3 @@ resource "google_compute_region_backend_service" "callouts_backend" {
 	  google_compute_region_backend_service.default
   ]
 }
-# [END lb_traffic_extension]

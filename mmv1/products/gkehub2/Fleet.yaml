@@ -130,6 +130,7 @@ properties:
             values:
               - DISABLED
               - BASIC
+              - ENTERPRISE
           - !ruby/object:Api::Type::Enum
             name: "vulnerabilityMode"
             description: Sets which mode to use for vulnerability scanning.

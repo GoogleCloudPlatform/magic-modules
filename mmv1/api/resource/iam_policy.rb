@@ -138,7 +138,7 @@ module Api
         check :import_format, type: Array, item_type: String
         check(
           :example_config_body,
-          type: String, default: 'templates/terraform/iam/iam_attributes.tf.erb'
+          type: String, default: 'templates/terraform/iam/iam_attributes.go.erb'
         )
         check :iam_policy_version, type: String
         check :min_version, type: String

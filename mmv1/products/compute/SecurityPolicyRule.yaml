@@ -34,7 +34,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -123,6 +123,27 @@ properties:
           #   name: 'location'
           #   description: |
           #     Optional. String indicating the location of the expression for error reporting, e.g. a file name and a position in the file.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'exprOptions'
+        description: |
+          The configuration options available when specifying a user defined CEVAL expression (i.e., 'expr').
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'recaptchaOptions'
+            required: true
+            description: |
+              reCAPTCHA configuration options to be applied for the rule. If the rule does not evaluate reCAPTCHA tokens, this field has no effect.
+            properties:
+              - !ruby/object:Api::Type::Array
+                name: 'actionTokenSiteKeys'
+                description: |
+                  A list of site keys to be used during the validation of reCAPTCHA action-tokens. The provided site keys need to be created from reCAPTCHA API under the same project where the security policy is created.
+                item_type: Api::Type::String
+              - !ruby/object:Api::Type::Array
+                name: 'sessionTokenSiteKeys'
+                description: |
+                  A list of site keys to be used during the validation of reCAPTCHA session-tokens. The provided site keys need to be created from reCAPTCHA API under the same project where the security policy is created.
+                item_type: Api::Type::String
       - !ruby/object:Api::Type::NestedObject
         name: 'config'
         description: |

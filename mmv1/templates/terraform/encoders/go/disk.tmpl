@@ -10,7 +10,7 @@ if err != nil {
 	return nil, err
 }
 
-{{- if eq $.Name "Disk" }}
+{{ if eq $.Name "Disk" -}}
 if v, ok := d.GetOk("type"); ok {
 	log.Printf("[DEBUG] Loading disk type: %s", v.(string))
 	diskType, err := readDiskType(config, d, v.(string))

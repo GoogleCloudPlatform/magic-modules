@@ -1,4 +1,3 @@
-# [START cloud_sql_mysql_instance_pitr]
 resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
   name             = "{{index $.Vars "mysql_instance_pitr"}}"
   region           = "asia-northeast1"
@@ -14,9 +13,7 @@ resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
   }
   deletion_protection =  "{{index $.Vars "deletion_protection"}}"
 }
-# [END cloud_sql_mysql_instance_pitr]
 
-# [START cloud_sql_postgres_instance_pitr]
 resource "google_sql_database_instance" "postgres_instance_pitr" {
   name             = "{{index $.Vars "postgres_instance__pitr"}}"
   region           = "us-central1"
@@ -32,4 +29,3 @@ resource "google_sql_database_instance" "postgres_instance_pitr" {
   }
   deletion_protection =  "{{index $.Vars "deletion_protection"}}"
 }
-# [END cloud_sql_postgres_instance_pitr]

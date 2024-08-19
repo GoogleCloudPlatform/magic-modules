@@ -1,5 +1,4 @@
 resource "google_compute_network_attachment" "default" {
-    provider = google-beta
     name = "{{index $.Vars "resource_name"}}"
     region = "us-central1"
     description = "basic network attachment description"
@@ -19,13 +18,11 @@ resource "google_compute_network_attachment" "default" {
 }
 
 resource "google_compute_network" "default" {
-    provider = google-beta
     name = "{{index $.Vars "network_name"}}"
     auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-    provider = google-beta
     name = "{{index $.Vars "subnetwork_name"}}"
     region = "us-central1"
 
@@ -34,7 +31,6 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_project" "rejected_producer_project" {
-    provider = google-beta
     project_id      = "{{index $.Vars "rejected_producer_project_name"}}"
     name            = "{{index $.Vars "rejected_producer_project_name"}}"
     org_id          = "{{index $.TestEnvVars "org_id"}}"
@@ -42,7 +38,6 @@ resource "google_project" "rejected_producer_project" {
 }
 
 resource "google_project" "accepted_producer_project" {
-    provider = google-beta
     project_id      = "{{index $.Vars "accepted_producer_project_name"}}"
     name            = "{{index $.Vars "accepted_producer_project_name"}}"
     org_id          = "{{index $.TestEnvVars "org_id"}}"

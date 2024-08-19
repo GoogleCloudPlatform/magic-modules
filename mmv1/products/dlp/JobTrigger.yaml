@@ -117,6 +117,13 @@ examples:
       trigger: 'trigger'
     test_env_vars:
       project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_job_trigger_timespan_config_big_query'
+    primary_resource_id: 'timespan_config_big_query'
+    vars:
+      trigger: 'trigger'
+    test_env_vars:
+      project: :PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/dlp_job_trigger.go.erb
   decoder: templates/terraform/decoders/dlp_job_trigger.go.erb
@@ -939,6 +946,7 @@ properties:
                 description: |
                   How to sample rows if not all rows are scanned. Meaningful only when used in conjunction with either
                   rowsLimit or rowsLimitPercent. If not specified, rows are scanned in the order BigQuery reads them.
+                  If TimespanConfig is set, set this to an empty string to avoid using the default value.
                 values:
                   - :TOP
                   - :RANDOM_START

@@ -106,6 +106,23 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
+    name: 'gkebackup_backupplan_permissive'
+    primary_resource_id: 'permissive'
+    vars:
+      name: 'permissive-plan'
+      cluster_name: 'permissive-cluster'
+      deletion_protection: 'true'
+      network_name: 'default'
+      subnetwork_name: 'default'
+    test_vars_overrides:
+      deletion_protection: 'false'
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      subnetwork_name: 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+    oics_vars_overrides:
+      deletion_protection: 'false'
+    test_env_vars:
+      project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
     name: 'gkebackup_backupplan_rpo_daily_window'
     primary_resource_id: 'rpo_daily_window'
     vars:
@@ -441,6 +458,12 @@ properties:
                   required: true
                   description: |
                     The name of a Kubernetes Resource.
+      - !ruby/object:Api::Type::Boolean
+        name: permissiveMode
+        description: |
+          This flag specifies whether Backups will not fail when
+          Backup for GKE detects Kubernetes configuration that is
+          non-standard or requires additional setup to restore.
   - !ruby/object:Api::Type::Integer
     name: protectedPodCount
     output: true

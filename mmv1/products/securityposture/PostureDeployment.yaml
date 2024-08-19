@@ -32,16 +32,7 @@ autogen_async: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     base_url: '{{op_id}}'
-examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'securityposture_posture_deployment_basic'
-    primary_resource_id: 'postureDeployment'
-    vars:
-      posture_id: "posture_1"
-      deployment_id: "posture_deployment_1"
-    test_env_vars:
-      org_id: :ORG_ID
-      project_number: :PROJECT_NUMBER
+
 parameters:
   - !ruby/object:Api::Type::String
     name: parent

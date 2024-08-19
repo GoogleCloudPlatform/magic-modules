@@ -15,7 +15,7 @@ on:
 
 jobs:
   request-review:
-    if: github.event.pull_request && github.event.pull_request.draft == false && (github.event.sender.login == github.event.pull_request.user.login || github.event.action != 'created')
+    if: (github.event.action == 'created' && github.event.issue.draft == false && github.event.comment.user.login == github.event.issue.user.login) || (github.event.action != 'created' && github.event.pull_request.draft == false)
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
@@ -35,5 +35,5 @@ jobs:
           cd .ci/magician
           go build .
       - name: Request reviewer
-        run: .ci/magician/magician request-reviewer ${{ github.event.pull_request.number }}
+        run: .ci/magician/magician request-reviewer ${{ github.event.pull_request.number || github.event.issue.number }}
 

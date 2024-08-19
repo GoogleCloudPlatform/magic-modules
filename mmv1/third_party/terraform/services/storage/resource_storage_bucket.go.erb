@@ -20,7 +20,7 @@ import (
 
 	"github.com/gammazero/workerpool"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -48,12 +48,17 @@ func ResourceStorageBucket() *schema.Resource {
 			Read:   schema.DefaultTimeout(4 * time.Minute),
 		},
 
-		SchemaVersion: 1,
+		SchemaVersion: 2,
 		StateUpgraders: []schema.StateUpgrader{
 			{
 				Type:    resourceStorageBucketV0().CoreConfigSchema().ImpliedType(),
 				Upgrade: ResourceStorageBucketStateUpgradeV0,
 				Version: 0,
+			},
+			{
+				Type:    resourceStorageBucketV1().CoreConfigSchema().ImpliedType(),
+				Upgrade: ResourceStorageBucketStateUpgradeV1,
+				Version: 1,
 			},
 		},
 
@@ -229,6 +234,7 @@ func ResourceStorageBucket() *schema.Resource {
 									},
 									"no_age": {
 										Type:        schema.TypeBool,
+										Deprecated:  "`no_age` is deprecated and will be removed in a future major release. Use `send_age_if_zero` instead.",
 										Optional:    true,
 										Description: `While set true, age value will be omitted.Required to set true when age is unset in the config file.`,
 									},
@@ -261,6 +267,12 @@ func ResourceStorageBucket() *schema.Resource {
 										Optional:    true,
 										Elem:        &schema.Schema{Type: schema.TypeString},
 										Description: `One or more matching name suffixes to satisfy this condition.`,
+									},
+									"send_age_if_zero": {
+										Type:        schema.TypeBool,
+										Optional:    true,
+										Default:     true,
+										Description: `While set true, age value will be sent in the request even for zero value of the field. This field is only useful for setting 0 value to the age field. It can be used alone or together with age.`,
 									},
 									"send_days_since_noncurrent_time_if_zero": {
 										Type:        schema.TypeBool,
@@ -496,6 +508,9 @@ func ResourceStorageBucket() *schema.Resource {
 							MinItems: 2,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
+								StateFunc: func(s interface{}) string {
+									return strings.ToUpper(s.(string))
+								},
 							},
 							Description: `The list of individual regions that comprise a dual-region bucket. See the docs for a list of acceptable regions. Note: If any of the data_locations changes, it will recreate the bucket.`,
 						},
@@ -1026,15 +1041,15 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 	}
 
 	// remove empty bucket
-	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
+	err = retry.Retry(1*time.Minute, func() *retry.RetryError {
 		err := config.NewStorageClient(userAgent).Buckets.Delete(bucket).Do()
 		if err == nil {
 			return nil
 		}
 		if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 429 {
-			return resource.RetryableError(gerr)
+			return retry.RetryableError(gerr)
 		}
-		return resource.NonRetryableError(err)
+		return retry.NonRetryableError(err)
 	})
 	if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 409 && strings.Contains(gerr.Message, "not empty") && listError != nil {
 		return fmt.Errorf("could not delete non-empty bucket due to error when listing contents: %v", listError)
@@ -1169,9 +1184,15 @@ func flattenBucketCustomPlacementConfig(cfc *storage.BucketCustomPlacementConfig
 func expandBucketDataLocations(configured interface{}) []string {
 	l := configured.(*schema.Set).List()
 
+	// Since we only want uppercase values to prevent unnecessary diffs, we can do a comparison
+	// to determine whether or not to include the value as part of the request.
+
+	// This extra check comes from the limitations of both DiffStateFunc and StateFunc towards types of Sets,Lists, and Maps.
 	req := make([]string, 0, len(l))
 	for _, raw := range l {
-		req = append(req, raw.(string))
+		if raw.(string) == strings.ToUpper(raw.(string)) {
+			req = append(req, raw.(string))
+		}
 	}
 	return req
 }
@@ -1387,13 +1408,21 @@ func flattenBucketLifecycleRuleCondition(index int, d *schema.ResourceData, cond
 			ruleCondition["with_state"] = "ARCHIVED"
 		}
 	}
-  // setting no_age value from state config since it is terraform only variable and not getting value from backend.
+	// Setting the lifecycle condition virtual fields from the state file if they
+	// are already present otherwise setting them to individual default values.
 	if v, ok := d.GetOk(fmt.Sprintf("lifecycle_rule.%d.condition",index)); ok{
 		state_condition := v.(*schema.Set).List()[0].(map[string]interface{})
 		ruleCondition["no_age"] = state_condition["no_age"].(bool)
 		ruleCondition["send_days_since_noncurrent_time_if_zero"] = state_condition["send_days_since_noncurrent_time_if_zero"].(bool)
 		ruleCondition["send_days_since_custom_time_if_zero"] = state_condition["send_days_since_custom_time_if_zero"].(bool)
 		ruleCondition["send_num_newer_versions_if_zero"] = state_condition["send_num_newer_versions_if_zero"].(bool)
+		ruleCondition["send_age_if_zero"] = state_condition["send_age_if_zero"].(bool)
+	}  else {
+		ruleCondition["no_age"] = false
+		ruleCondition["send_age_if_zero"] = true
+		ruleCondition["send_days_since_noncurrent_time_if_zero"] = false
+		ruleCondition["send_days_since_custom_time_if_zero"] = false
+		ruleCondition["send_num_newer_versions_if_zero"] = false
 	}
 
 	return ruleCondition
@@ -1543,13 +1572,15 @@ func expandStorageBucketLifecycleRuleCondition(v interface{}) (*storage.BucketLi
 
 	condition := conditions[0].(map[string]interface{})
 	transformed := &storage.BucketLifecycleRuleCondition{}
-	// Setting high precedence of no_age over age when both used together.
+	// Setting high precedence of no_age over age and send_age_if_zero.
 	// Only sets age value when no_age is not present or no_age is present and has false value
 	if v, ok := condition["no_age"]; !ok || !(v.(bool)) {
 		if v, ok := condition["age"]; ok {
 			age := int64(v.(int))
-			transformed.Age = &age
-			transformed.ForceSendFields = append(transformed.ForceSendFields, "Age")
+			u, ok := condition["send_age_if_zero"]
+			if age > 0 || (ok && u.(bool)) {
+				transformed.Age = &age
+			}
 		}
 	}
 
@@ -1663,6 +1694,9 @@ func resourceGCSBucketLifecycleRuleConditionHash(v interface{}) int {
 	if v, ok := m["no_age"]; ok && v.(bool){
 		buf.WriteString(fmt.Sprintf("%t-", v.(bool)))
 	} else {
+		if v, ok := m["send_age_if_zero"]; ok {
+			buf.WriteString(fmt.Sprintf("%t-", v.(bool)))
+		}
 		if v, ok := m["age"]; ok {
 			buf.WriteString(fmt.Sprintf("%d-", v.(int)))
 		}

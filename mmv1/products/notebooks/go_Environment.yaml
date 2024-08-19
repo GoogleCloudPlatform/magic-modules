@@ -1,0 +1,126 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Environment'
+description: |
+  A Cloud AI Platform Notebook environment.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/ai-platform-notebooks'
+  api: 'https://cloud.google.com/ai-platform/notebooks/docs/reference/rest'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/environments'
+self_link: 'projects/{{project}}/locations/{{location}}/environments/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/environments?environmentId={{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'notebook_environment_basic'
+    primary_resource_id: 'environment'
+    vars:
+      environment_name: 'notebooks-environment'
+parameters:
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The name specified for the Environment instance.
+      Format: projects/{project_id}/locations/{location}/environments/{environmentId}
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'location'
+    type: ResourceRef
+    description: 'A reference to the zone where the machine resides.'
+    url_param_only: true
+    required: true
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/go/resource_from_self_link.go.tmpl'
+    resource: 'Location'
+    imports: 'name'
+  - name: 'displayName'
+    type: String
+    description: |
+      Display name of this environment for the UI.
+  - name: 'description'
+    type: String
+    description: |
+      A brief description of this environment.
+  - name: 'postStartupScript'
+    type: String
+    description: |
+      Path to a Bash script that automatically runs after a notebook instance fully boots up.
+      The path must be a URL or Cloud Storage path. Example: "gs://path-to-file/file-name"
+  - name: 'createTime'
+    type: Time
+    description: 'Instance creation time'
+    output: true
+  - name: 'vmImage'
+    type: NestedObject
+    description: |
+      Use a Compute Engine VM image to start the notebook instance.
+    exactly_one_of:
+      - 'vm_image'
+      - 'container_image'
+    properties:
+      - name: 'project'
+        type: String
+        description: |
+          The name of the Google Cloud project that this VM image belongs to.
+          Format: projects/{project_id}
+        required: true
+      - name: 'imageName'
+        type: String
+        description: |
+          Use VM image name to find the image.
+      - name: 'imageFamily'
+        type: String
+        description: |
+          Use this VM image family to find the image; the newest image in this family will be used.
+  - name: 'containerImage'
+    type: NestedObject
+    description: |
+      Use a container image to start the notebook instance.
+    exactly_one_of:
+      - 'vm_image'
+      - 'container_image'
+    properties:
+      - name: 'repository'
+        type: String
+        description: |
+          The path to the container image repository.
+          For example: gcr.io/{project_id}/{imageName}
+        required: true
+      - name: 'tag'
+        type: String
+        description: |
+          The tag of the container image. If not specified, this defaults to the latest tag.

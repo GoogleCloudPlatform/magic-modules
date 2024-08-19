@@ -55,6 +55,7 @@ examples:
     primary_resource_id: 'tpu'
     vars:
       vm_name: 'test-tpu'
+    skip_vcr: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'tpu_v2_vm_full'
     min_version: 'beta'
@@ -66,6 +67,7 @@ examples:
       subnet_name: 'tpu-subnet'
       sa_id: 'tpu-sa'
       disk_name: 'tpu-disk'
+    skip_vcr: true
 parameters:
   - !ruby/object:Api::Type::String
     name: 'zone'

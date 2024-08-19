@@ -14,9 +14,9 @@
 */}}
 {{- define "SchemaFields"}}
 {{- if .FlattenObject -}}
-	{{- range $prop := orderProperties .Properties -}}
-		{{- template "SchemaFields" $prop -}}
-	{{- end -}}
+	{{- range $prop := .ResourceMetadata.OrderProperties .Properties -}}
+    {{ template "SchemaFields" $prop }}
+	{{ end -}}
 {{- else -}}
 "{{underscore .Name -}}": {
 {{ if .IsSet -}}
@@ -40,10 +40,10 @@
 {{ if .DeprecationMessage -}}
   Deprecated: "{{ .DeprecationMessage }}",
 {{ end -}}
-{{ if .Immutable -}}
+{{ if .IsForceNew -}}
   ForceNew: true,
 {{ end -}}
-{{ if .Validation -}}
+{{ if and (not .Output) .Validation -}}
 	{{ if .Validation.Regex -}}
   ValidateFunc: verify.ValidateRegexp(`{{ .Validation.Regex -}}`),
 	{{ else if .Validation.Function -}}
@@ -66,7 +66,7 @@
   {{- if .ItemType.DefaultValue -}}
 Default value: {{ .ItemType.DefaultValue -}}
   {{- end -}}
-Possible values: [{{- .EnumValuesToString "\"" false -}}]
+{{- " "}}Possible values: [{{- .ItemType.EnumValuesToString "\"" false -}}]
   {{- else if and (eq .Type "Enum") (not .Output) -}}
     {{- if .DefaultValue -}}
       {{- " "}}Default value: "{{ .DefaultValue -}}"
@@ -79,7 +79,7 @@ Possible values: [{{- .EnumValuesToString "\"" false -}}]
   {{ end -}}
   Elem: &schema.Resource{
     Schema: map[string]*schema.Schema{
-      {{- range $prop := orderProperties $.Properties }}
+      {{- range $prop := .ResourceMetadata.OrderProperties $.Properties }}
       {{template "SchemaFields" $prop}}
       {{- end }}
     },
@@ -97,7 +97,7 @@ Possible values: [{{- .EnumValuesToString "\"" false -}}]
     {{ else -}}
       Elem: &schema.Resource{
         Schema: map[string]*schema.Schema{
-            {{- range $prop := orderProperties $.ItemType.Properties }}
+            {{- range $prop := .ResourceMetadata.OrderProperties $.ItemType.Properties }}
             {{template "SchemaFields" $prop}}
             {{- end }}
         },
@@ -106,24 +106,32 @@ Possible values: [{{- .EnumValuesToString "\"" false -}}]
   {{ else if eq .ItemType.Type "String" -}}
       Elem: &schema.Schema{
         Type: schema.Type{{ .ItemTypeClass -}},
+        {{ template "ItemValidation" . -}}
       },
   {{ else if eq .ItemType.Type "Enum" -}}
       Elem: &schema.Schema{
-        Type: schema.Type{{ .ItemTypeClass -}},
-        ValidateFunc: verify.ValidateEnum([]string{ {{- .ItemType.EnumValuesToString "\"" true -}} }),
+        Type: schema.TypeString,
+        {{- if not .Output }}
+        ValidateFunc: verify.ValidateEnum([]string{ {{- .ItemType.EnumValuesToString "\"" false -}} }),
+        {{- end }}
       },
   {{ else -}}
       Elem: &schema.Schema{
-        Type: schema.Type{{ .ItemTypeClass -}},
     {{ if eq .ItemType.Type "ResourceRef" -}}
+        Type: schema.TypeString,
+        {{- if not .Output }}
         DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
+        {{- end }}
+    {{ else -}}
+        Type: {{ .TFType .ItemType.Type }},
     {{ end -}}
+    {{ template "ItemValidation" . -}}
       },
   {{ end -}}
   {{ if .IsSet -}}
     {{ if .SetHashFunc -}}
     Set: {{ .SetHashFunc -}},
-    {{ else if or (eq .ItemType "String") (eq .ItemType.Type "Enum") -}}
+    {{ else if or (eq .ItemType.Type "String") (eq .ItemType.Type "Enum") -}}
     Set: schema.HashString,
     {{ else -}}
     // Default schema.HashSchema is used.
@@ -140,11 +148,11 @@ Possible values: [{{- .EnumValuesToString "\"" false -}}]
 				{{ if .KeyDiffSuppressFunc -}}
 					DiffSuppressFunc: {{ .KeyDiffSuppressFunc }},
 				{{ end -}}
-				{{ if .Immutable -}}
+				{{ if .IsForceNew -}}
 				ForceNew: true,
 				{{ end -}}
 			},
-      {{- range $prop := orderProperties $.ValueType.Properties }}
+      {{- range $prop := .ResourceMetadata.OrderProperties $.ValueType.Properties }}
         {{template "SchemaFields" $prop}}
       {{- end }}
 		},
@@ -156,21 +164,32 @@ Possible values: [{{- .EnumValuesToString "\"" false -}}]
 {{ if .Sensitive -}}
     Sensitive: true,
 {{ end -}}
-{{ if .DefaultValue -}}
+{{ if not (eq .DefaultValue nil ) -}}
     Default: {{ .GoLiteral .DefaultValue -}},
 {{ end -}}
-{{ if .Conflicting -}}
-    ConflictsWith: {{ .GoLiteral .Conflicting  -}},
+{{ if or .Conflicting .Conflicts -}}
+    ConflictsWith: {{ .GoLiteral (.GetPropertySchemaPathList .Conflicting)  -}},
 {{ end -}}
-{{ if .AtLeastOneOfList -}}
-    AtLeastOneOf: {{ .GoLiteral .AtLeastOneOfList  -}},
+{{ if or .AtLeastOneOfList .AtLeastOneOf -}}
+    AtLeastOneOf: {{ .GoLiteral (.GetPropertySchemaPathList .AtLeastOneOfList) -}},
 {{ end -}}
-{{ if .ExactlyOneOfList -}}
-    ExactlyOneOf: {{ .GoLiteral .ExactlyOneOfList  -}},
+{{ if or .ExactlyOneOfList .ExactlyOneOf -}}
+    ExactlyOneOf: {{ .GoLiteral (.GetPropertySchemaPathList .ExactlyOneOfList) -}},
 {{ end -}}
-{{ if .RequiredWithList -}}
-    RequiredWith: {{ .GoLiteral .RequiredWithList  -}},
+{{ if or .RequiredWithList .RequiredWith -}}
+    RequiredWith: {{ .GoLiteral (.GetPropertySchemaPathList .RequiredWithList) -}},
 {{ end -}}
 },
 {{- end -}}
+{{- end -}}
+{{- define "ItemValidation" -}}
+  {{ if not .Output -}}
+    {{ if .ItemValidation -}}
+      {{ if .ItemValidation.Regex -}}
+      ValidateFunc: verify.ValidateRegexp(`{{ .ItemValidation.Regex -}}`),
+      {{ else if .ItemValidation.Function -}}
+      ValidateFunc: {{ .ItemValidation.Function -}},
+      {{ end  -}}
+    {{ end -}}
+  {{- end }}
 {{- end -}}

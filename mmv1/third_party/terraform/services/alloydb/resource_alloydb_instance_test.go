@@ -3,7 +3,7 @@ package alloydb_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -655,6 +655,9 @@ resource "google_alloydb_instance" "default" {
   cluster       = google_alloydb_cluster.default.name
   instance_id   = "tf-test-alloydb-instance%{random_suffix}"
   instance_type = "PRIMARY"
+  database_flags = {
+    "password.enforce_complexity" = "on"
+  }
 
   network_config {
     enable_public_ip = %{enable_public_ip}
@@ -666,6 +669,9 @@ resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network    = data.google_compute_network.default.id
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
 }
 
 data "google_project" "project" {}
@@ -682,6 +688,9 @@ resource "google_alloydb_instance" "default" {
   cluster       = google_alloydb_cluster.default.name
   instance_id   = "tf-test-alloydb-instance%{random_suffix}"
   instance_type = "PRIMARY"
+  database_flags = {
+    "password.enforce_complexity" = "on"
+  }
 
   network_config {
     enable_public_ip = %{enable_public_ip}
@@ -695,6 +704,9 @@ resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network    = data.google_compute_network.default.id
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
 }
 
 data "google_project" "project" {}
@@ -702,5 +714,82 @@ data "google_project" "project" {}
 data "google_compute_network" "default" {
 	name = "%{network_name}"
 }
+`, context)
+}
+
+func TestAccAlloydbInstance_updatePscInstanceConfig(t *testing.T) {
+	t.Parallel()
+
+	random_suffix := acctest.RandString(t, 10)
+	context := map[string]interface{}{
+		"random_suffix": random_suffix,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAlloydbInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAlloydbInstance_pscInstanceConfig(context),
+			},
+			{
+				Config: testAccAlloydbInstance_updatePscInstanceConfigAllowlist(context),
+			},
+		},
+	})
+}
+
+func testAccAlloydbInstance_pscInstanceConfig(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_instance" "default" {
+  cluster       = google_alloydb_cluster.default.name
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
+  instance_type = "PRIMARY"
+  machine_config {
+    cpu_count = 2
+  }
+  psc_instance_config {
+	allowed_consumer_projects = ["${data.google_project.project.number}"]
+  }
+}
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  location   = "us-central1"
+  psc_config {
+	psc_enabled = true
+  }
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
+}
+data "google_project" "project" {}
+`, context)
+}
+
+func testAccAlloydbInstance_updatePscInstanceConfigAllowlist(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_instance" "default" {
+  cluster       = google_alloydb_cluster.default.name
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
+  instance_type = "PRIMARY"
+  machine_config {
+    cpu_count = 2
+  }
+  psc_instance_config {
+	allowed_consumer_projects = ["${data.google_project.project.number}", "1044355742748"]
+  }
+}
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  location   = "us-central1"
+  psc_config {
+	psc_enabled = true
+  }
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
+}
+data "google_project" "project" {}
 `, context)
 }

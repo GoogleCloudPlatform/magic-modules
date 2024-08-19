@@ -40,9 +40,9 @@ type IamPolicy struct {
 	// While Compute subnetwork uses {resource}/getIamPolicy
 	MethodNameSeparator string `yaml:"method_name_separator"`
 
-	// The terraform type of the parent resource if it is not the same as the
-	// IAM resource. The IAP product needs these as its IAM policies refer
-	// to compute resources
+	// The terraform type (e.g. 'google_endpoints_service') of the parent resource
+	// if it is not the same as the IAM resource. The IAP product needs these
+	// as its IAM policies refer to compute resources.
 	ParentResourceType string `yaml:"parent_resource_type"`
 
 	// Some resources allow retrieving the IAM policy with GET requests,
@@ -84,7 +84,7 @@ type IamPolicy struct {
 
 	// Some resources (IAP) use fields named differently from the parent resource.
 	// We need to use the parent's attributes to create an IAM policy, but they may not be
-	// named as the IAM IAM resource expects.
+	// named as the IAM resource expects.
 	// This allows us to specify a file (relative to MM root) containing a partial terraform
 	// config with the test/example attributes of the IAM resource.
 	ExampleConfigBody string `yaml:"example_config_body"`

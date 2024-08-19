@@ -1,4 +1,4 @@
-{{- /*
+{{/*
 	The license inside this block applies to this file
 	Copyright 2024 Google Inc.
 	Licensed under the Apache License, Version 2.0 (the "License");
@@ -9,7 +9,7 @@
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License.
-*/}}
+*/ -}}
 	newObj := make(map[string]interface{})
 	config := meta.(*transport_tpg.Config)
 	maskId := ""
@@ -37,10 +37,27 @@
 		// Set project_map.
 		projectMap := make(map[string]interface{})
 		old, new := d.GetChange("share_settings")
-		oldMap := old.([]interface{})[0].(map[string]interface{})["project_map"]
-		newMap := new.([]interface{})[0].(map[string]interface{})["project_map"]
-		before := oldMap.(*schema.Set)
-		after := newMap.(*schema.Set)
+
+		var before *schema.Set
+		if oldSlice, ok := old.([]interface{}); ok && len(oldSlice) > 0 {
+			if oldMap, ok := oldSlice[0].(map[string]interface{})["project_map"]; ok {
+				before = oldMap.(*schema.Set)
+			} else {
+				before = schema.NewSet(schema.HashString, []interface{}{})
+			}
+		} else {
+			before = schema.NewSet(schema.HashString, []interface{}{})
+		}
+		var after *schema.Set
+		if newSlice, ok := new.([]interface{}); ok && len(newSlice) > 0 {
+			if newMap, ok := newSlice[0].(map[string]interface{})["project_map"]; ok {
+				after = newMap.(*schema.Set)
+			} else {
+				after = schema.NewSet(schema.HashString, []interface{}{})
+			}
+		} else {
+			after = schema.NewSet(schema.HashString, []interface{}{})
+		}
 
 		for _, raw := range after.Difference(before).List() {
 			original := raw.(map[string]interface{})
@@ -56,10 +73,10 @@
 			}
 			projectMap[transformedId] = singleProject
 			// add added projects to updateMask
-			if firstProject != true {
-				maskId = fmt.Sprintf("%s%s", "&paths=shareSettings.projectMap.", original["project_id"])
+			if !firstProject {
+				maskId = fmt.Sprintf("%s%s", "&paths=shareSettings.projectMap.", original["id"])
 			} else {
-				maskId = fmt.Sprintf("%s%s", "?paths=shareSettings.projectMap.", original["project_id"])
+				maskId = fmt.Sprintf("%s%s", "?paths=shareSettings.projectMap.", original["id"])
 				firstProject = false
 			}
 			decodedPath, _ := url.QueryUnescape(maskId)
@@ -86,7 +103,7 @@
 				projectNum := project.ProjectNumber
 				projectIdOrNum = fmt.Sprintf("%d", projectNum)
 			}
-			if firstProject != true {
+			if !firstProject {
 				maskId = fmt.Sprintf("%s%s", "&paths=shareSettings.projectMap.", projectIdOrNum)
 			} else {
 				maskId = fmt.Sprintf("%s%s", "?paths=shareSettings.projectMap.", projectIdOrNum)

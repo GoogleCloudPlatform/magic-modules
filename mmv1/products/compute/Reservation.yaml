@@ -36,7 +36,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -141,6 +141,7 @@ properties:
         description: |
           Type of sharing for this shared-reservation
         default_from_api: true
+        immutable: true
       - !ruby/object:Api::Type::Map
         name: 'projectMap'
         description: |
