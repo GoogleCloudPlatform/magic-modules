@@ -45,6 +45,10 @@ func TestAccDataSourceSecretManagerSecrets_basic(t *testing.T) {
 
 func testAccDataSourceSecretManagerSecrets_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+provider "google" {
+  add_terraform_attribution_label = false
+}
+
 resource "google_secret_manager_secret" "foo" {
   secret_id = "tf-test-secret-%{random_suffix}"
 
@@ -100,6 +104,10 @@ func TestAccDataSourceSecretManagerSecrets_filter(t *testing.T) {
 
 func testAccDataSourceSecretManagerSecrets_filter(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+provider "google" {
+  add_terraform_attribution_label = false
+}
+
 resource "google_secret_manager_secret" "foo" {
   secret_id = "tf-test-secret-%{random_suffix}"
 
