@@ -111,3 +111,21 @@ properties:
     description: |
       Whether to import the custom routes to the peer network.
     send_empty_value: true
+  - !ruby/object:Api::Type::Boolean
+    name: 'exportSubnetRoutesWithPublicIp'
+    description: |
+      Whether subnet routes with public IP range are exported.
+      The default value is true, all subnet routes are exported.
+      IPv4 special-use ranges are always exported to peers and
+      are not controlled by this field.
+    send_empty_value: true
+    required: true
+  - !ruby/object:Api::Type::Boolean
+    name: 'importSubnetRoutesWithPublicIp'
+    description: |
+      Whether subnet routes with public IP range are imported.
+      The default value is false.
+      IPv4 special-use ranges are always imported from peers and
+      are not controlled by this field.
+    send_empty_value: true
+    required: true
