@@ -52,6 +52,7 @@ import_format:
 taint_resource_on_failed_create: true
 autogen_async: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: 'templates/terraform/constants/cloudfunctions2_function.go.erb'
   encoder: 'templates/terraform/encoders/cloudfunctions2_runtime_update_policy.go.erb'
 examples:
   - !ruby/object:Provider::Terraform::Examples
@@ -67,9 +68,9 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: '"./test-fixtures/function-source.zip"'
       location:
         '"us-central1"'
+      zip_path: '"./test-fixtures/function-source.zip"'
         # ignore these fields during import step
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
@@ -105,10 +106,10 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: '"./test-fixtures/function-source.zip"'
       primary_resource_id: '"terraform-test"'
       location:
         '"us-central1"'
+      zip_path: '"./test-fixtures/function-source.zip"'
         # ignore these fields during import step
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
@@ -172,9 +173,9 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: '"./test-fixtures/function-source.zip"'
       location:
         '"us-central1"'
+      zip_path: '"./test-fixtures/function-source.zip"'
         # ignore these fields during import step
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
@@ -191,8 +192,8 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: '"./test-fixtures/function-source.zip"'
       location: '"us-central1"'
+      zip_path: '"./test-fixtures/function-source.zip"'
       policyChanged:
         "acctest.BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
         \"roles/cloudkms.cryptoKeyEncrypterDecrypter\"\
@@ -212,8 +213,8 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: '"./test-fixtures/function-source.zip"'
       location: '"us-central1"'
+      zip_path: '"./test-fixtures/function-source.zip"'
       policyChanged:
         "acctest.BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
         \"roles/cloudkms.cryptoKeyEncrypterDecrypter\"\
@@ -233,9 +234,9 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: '"./test-fixtures/function-source.zip"'
       location:
         '"us-central1"'
+      zip_path: '"./test-fixtures/function-source.zip"'
         # ignore these fields during import step
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
@@ -258,9 +259,9 @@ examples:
       project: :PROJECT_NAME
     test_vars_overrides:
       kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-      zip_path: '"./test-fixtures/function-source.zip"'
       location:
         '"us-central1"'
+      zip_path: '"./test-fixtures/function-source.zip"'
     # ignore these fields during import step
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
@@ -422,6 +423,7 @@ properties:
               - !ruby/object:Api::Type::Integer
                 name: 'generation'
                 default_from_api: true
+                custom_flatten: 'templates/terraform/custom_flatten/cloudfunctions2_function_source_generation.go.erb'
                 description: |
                   Google Cloud Storage generation for the object. If the generation
                   is omitted, the latest generation will be used.
@@ -559,6 +561,8 @@ properties:
         description:
           'Environment variables that shall be available during function
           execution.'
+        default_from_api: true
+        diff_suppress_func: 'environmentVariablesDiffSuppress'
       - !ruby/object:Api::Type::Integer
         name: 'maxInstanceCount'
         description: |

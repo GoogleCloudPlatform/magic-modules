@@ -44,6 +44,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
@@ -60,6 +61,7 @@ collection_url_key: 'items'
 iam_policy:
   parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}'
+  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/zones/{{zone}}/disks/{{name}}'
     - '{{name}}'
@@ -284,7 +286,6 @@ properties:
     type: KeyValueLabels
     description: |
       Labels to apply to this disk.  A list of key->value pairs.
-    immutable: false
     update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}/setLabels'
     update_verb: 'POST'
   - name: 'name'
@@ -501,3 +502,16 @@ properties:
     immutable: true
     diff_suppress_func: 'tpgresource.CompareResourceNames'
     custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+  - name: 'accessMode'
+    type: String
+    description: |
+      The accessMode of the disk.
+      For example:
+      * READ_WRITE_SINGLE
+      * READ_WRITE_MANY
+      * READ_ONLY_SINGLE
+    required: false
+    immutable: false
+    default_from_api: true
+    update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}?paths=accessMode'
+    update_verb: 'PATCH'

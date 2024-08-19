@@ -29,6 +29,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
@@ -57,6 +58,7 @@ examples:
       billing_account: 'BILLING_ACCT'
   - name: 'network_attachment_instance_usage'
     primary_resource_id: 'default'
+    min_version: 'beta'
     vars:
       resource_name: 'basic-network-attachment'
       network_name: 'basic-network'

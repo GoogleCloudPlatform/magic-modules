@@ -1,0 +1,419 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'ConnectionProfile'
+description: |
+  A set of reusable connection configurations to be used as a source or destination for a stream.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/datastream/docs/create-connection-profiles'
+  api: 'https://cloud.google.com/datastream/docs/reference/rest/v1/projects.locations.connectionProfiles'
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/connectionProfiles/{{connection_profile_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/connectionProfiles'
+self_link: 'projects/{{project}}/locations/{{location}}/connectionProfiles/{{connection_profile_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/connectionProfiles?connectionProfileId={{connection_profile_id}}&force={{create_without_validation}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/connectionProfiles/{{connection_profile_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'datastream_connection_profile_basic'
+    primary_resource_id: 'default'
+    vars:
+      connection_profile_id: 'my-profile'
+  - name: 'datastream_connection_profile_postgresql_private_connection'
+    primary_resource_id: 'default'
+    vars:
+      private_connection_id: 'my-connection'
+      connection_profile_id: 'my-profile'
+      network_name: 'my-network'
+      database_instance_name: 'my-instance'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+    external_providers: ["random", "time"]
+    skip_vcr: true
+  - name: 'datastream_connection_profile_full'
+    primary_resource_id: 'default'
+    vars:
+      connection_profile_id: 'my-profile'
+    ignore_read_extra:
+      - 'forward_ssh_connectivity.0.password'
+  - name: 'datastream_connection_profile_postgres'
+    primary_resource_id: 'default'
+    vars:
+      connection_profile_id: 'my-profile'
+      database_instance_name: 'my-instance'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+    skip_test: true
+  - name: 'datastream_connection_profile_sql_server'
+    primary_resource_id: 'default'
+    vars:
+      database_name: 'db'
+      database_password: 'password'
+      database_user: 'user'
+      deletion_protection: 'true'
+      source_connection_profile_id: 'source-profile'
+      sql_server_name: 'sql-server'
+      sql_server_root_password: 'root-password'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+    skip_test: true
+parameters:
+  - name: 'connectionProfileId'
+    type: String
+    description: |-
+      The connection profile identifier.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'create_without_validation'
+    type: Boolean
+    description: |-
+      Create the connection profile without validating it.
+    url_param_only: true
+    required: false
+    immutable: true
+    default_value: false
+  - name: 'location'
+    type: String
+    description: |
+      The name of the location this connection profile is located in.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: The resource's name.
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: Labels.
+    immutable: false
+  - name: 'displayName'
+    type: String
+    description: Display name.
+    required: true
+  - name: 'oracleProfile'
+    type: NestedObject
+    description: |
+      Oracle database profile.
+    exactly_one_of:
+      - 'oracle_profile'
+      - 'gcs_profile'
+      - 'mysql_profile'
+      - 'bigquery_profile'
+      - 'postgresql_profile'
+      - 'sql_server_profile'
+    properties:
+      - name: 'hostname'
+        type: String
+        description: |
+          Hostname for the Oracle connection.
+        required: true
+      - name: 'port'
+        type: Integer
+        description: |
+          Port for the Oracle connection.
+        default_value: 1521
+      - name: 'username'
+        type: String
+        description: |
+          Username for the Oracle connection.
+        required: true
+      - name: 'password'
+        type: String
+        description: |
+          Password for the Oracle connection.
+        required: true
+        sensitive: true
+        custom_flatten: 'templates/terraform/custom_flatten/go/datastream_connection_profile_oracle_profile_password.go.tmpl'
+      - name: 'databaseService'
+        type: String
+        description: |
+          Database for the Oracle connection.
+        required: true
+      - name: 'connectionAttributes'
+        type: KeyValuePairs
+        description: Connection string attributes
+  - name: 'gcsProfile'
+    type: NestedObject
+    description: |
+      Cloud Storage bucket profile.
+    exactly_one_of:
+      - 'oracle_profile'
+      - 'gcs_profile'
+      - 'mysql_profile'
+      - 'bigquery_profile'
+      - 'postgresql_profile'
+      - 'sql_server_profile'
+    properties:
+      - name: 'bucket'
+        type: String
+        description: |
+          The Cloud Storage bucket name.
+        required: true
+      - name: 'rootPath'
+        type: String
+        description: |
+          The root path inside the Cloud Storage bucket.
+  - name: 'mysqlProfile'
+    type: NestedObject
+    description: |
+      MySQL database profile.
+    exactly_one_of:
+      - 'oracle_profile'
+      - 'gcs_profile'
+      - 'mysql_profile'
+      - 'bigquery_profile'
+      - 'postgresql_profile'
+      - 'sql_server_profile'
+    properties:
+      - name: 'hostname'
+        type: String
+        description: |
+          Hostname for the MySQL connection.
+        required: true
+      - name: 'port'
+        type: Integer
+        description: |
+          Port for the MySQL connection.
+        default_value: 3306
+      - name: 'username'
+        type: String
+        description: |
+          Username for the MySQL connection.
+        required: true
+      - name: 'password'
+        type: String
+        description: |
+          Password for the MySQL connection.
+        required: true
+        sensitive: true
+        custom_flatten: 'templates/terraform/custom_flatten/go/datastream_connection_profile_mysql_profile_password.go.tmpl'
+      - name: 'sslConfig'
+        type: NestedObject
+        description: |
+          SSL configuration for the MySQL connection.
+        properties:
+          - name: 'clientKey'
+            type: String
+            description: |
+              PEM-encoded private key associated with the Client Certificate.
+              If this field is used then the 'client_certificate' and the
+              'ca_certificate' fields are mandatory.
+            immutable: true
+            sensitive: true
+            custom_flatten: 'templates/terraform/custom_flatten/go/datastream_connection_profile_mysql_profile_ssl_config_client_key.go.tmpl'
+          - name: 'clientKeySet'
+            type: Boolean
+            description: |
+              Indicates whether the clientKey field is set.
+            output: true
+          - name: 'clientCertificate'
+            type: String
+            description: |
+              PEM-encoded certificate that will be used by the replica to
+              authenticate against the source database server. If this field
+              is used then the 'clientKey' and the 'caCertificate' fields are
+              mandatory.
+            immutable: true
+            sensitive: true
+            custom_flatten: 'templates/terraform/custom_flatten/go/datastream_connection_profile_mysql_profile_ssl_config_client_certificate.go.tmpl'
+          - name: 'clientCertificateSet'
+            type: Boolean
+            description: |
+              Indicates whether the clientCertificate field is set.
+            output: true
+          - name: 'caCertificate'
+            type: String
+            description: |
+              PEM-encoded certificate of the CA that signed the source database
+              server's certificate.
+            immutable: true
+            sensitive: true
+            custom_flatten: 'templates/terraform/custom_flatten/go/datastream_connection_profile_mysql_profile_ssl_config_ca_certificate.go.tmpl'
+          - name: 'caCertificateSet'
+            type: Boolean
+            description: |
+              Indicates whether the clientKey field is set.
+            output: true
+  - name: 'bigqueryProfile'
+    type: NestedObject
+    description: |
+      BigQuery warehouse profile.
+    send_empty_value: true
+    allow_empty_object: true
+    exactly_one_of:
+      - 'oracle_profile'
+      - 'gcs_profile'
+      - 'mysql_profile'
+      - 'bigquery_profile'
+      - 'postgresql_profile'
+      - 'sql_server_profile'
+    properties:
+      []
+  - name: 'postgresqlProfile'
+    type: NestedObject
+    description: |
+      PostgreSQL database profile.
+    exactly_one_of:
+      - 'oracle_profile'
+      - 'gcs_profile'
+      - 'mysql_profile'
+      - 'bigquery_profile'
+      - 'postgresql_profile'
+      - 'sql_server_profile'
+    properties:
+      - name: 'hostname'
+        type: String
+        description: |
+          Hostname for the PostgreSQL connection.
+        required: true
+      - name: 'port'
+        type: Integer
+        description: |
+          Port for the PostgreSQL connection.
+        default_value: 5432
+      - name: 'username'
+        type: String
+        description: |
+          Username for the PostgreSQL connection.
+        required: true
+      - name: 'password'
+        type: String
+        description: |
+          Password for the PostgreSQL connection.
+        required: true
+        sensitive: true
+        custom_flatten: 'templates/terraform/custom_flatten/go/datastream_connection_profile_postgresql_profile_password.go.tmpl'
+      - name: 'database'
+        type: String
+        description: |
+          Database for the PostgreSQL connection.
+        required: true
+  - name: 'sqlServerProfile'
+    type: NestedObject
+    description: |
+      SQL Server database profile.
+    exactly_one_of:
+      - 'oracle_profile'
+      - 'gcs_profile'
+      - 'mysql_profile'
+      - 'bigquery_profile'
+      - 'postgresql_profile'
+      - 'sql_server_profile'
+    properties:
+      - name: 'hostname'
+        type: String
+        description: |
+          Hostname for the SQL Server connection.
+        required: true
+      - name: 'port'
+        type: Integer
+        description: |
+          Port for the SQL Server connection.
+        default_value: 1433
+      - name: 'username'
+        type: String
+        description: |
+          Username for the SQL Server connection.
+        required: true
+      - name: 'password'
+        type: String
+        description: |
+          Password for the SQL Server connection.
+        required: true
+        sensitive: true
+        custom_flatten: 'templates/terraform/custom_flatten/go/datastream_connection_profile_sql_server_profile_password.go.tmpl'
+      - name: 'database'
+        type: String
+        description: |
+          Database for the SQL Server connection.
+        required: true
+  - name: 'forwardSshConnectivity'
+    type: NestedObject
+    description: |
+      Forward SSH tunnel connectivity.
+    conflicts:
+      - private_connectivity
+    properties:
+      - name: 'hostname'
+        type: String
+        description: |
+          Hostname for the SSH tunnel.
+        required: true
+      - name: 'username'
+        type: String
+        description: |
+          Username for the SSH tunnel.
+        required: true
+      - name: 'port'
+        type: Integer
+        description: |
+          Port for the SSH tunnel.
+        default_value: 22
+      - name: 'password'
+        type: String
+        description: |
+          SSH password.
+        immutable: true
+        sensitive: true
+        conflicts:
+          - forward_ssh_connectivity.0.private_key
+        custom_flatten: 'templates/terraform/custom_flatten/go/datastream_connection_profile_forward_ssh_connectivity_password.go.tmpl'
+      - name: 'privateKey'
+        type: String
+        description: |
+          SSH private key.
+        immutable: true
+        sensitive: true
+        conflicts:
+          - forward_ssh_connectivity.0.password
+        custom_flatten: 'templates/terraform/custom_flatten/go/datastream_connection_profile_forward_ssh_connectivity_private_key.go.tmpl'
+  - name: 'privateConnectivity'
+    type: NestedObject
+    description: |
+      Private connectivity.
+    conflicts:
+      - forward_ssh_connectivity
+    properties:
+      - name: 'privateConnection'
+        type: String
+        description: |
+          A reference to a private connection resource. Format: `projects/{project}/locations/{location}/privateConnections/{name}`
+        required: true

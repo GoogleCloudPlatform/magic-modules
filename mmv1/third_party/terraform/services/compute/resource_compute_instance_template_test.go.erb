@@ -14,8 +14,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
@@ -805,6 +805,15 @@ func TestAccComputeInstanceTemplate_ConfidentialInstanceConfigMain(t *testing.T)
 					testAccCheckComputeInstanceTemplateHasConfidentialInstanceConfig(&instanceTemplate2, false, "SEV_SNP"),
 				),
 			},
+			<% unless version == "ga" -%>
+			{
+				Config: testAccComputeInstanceTemplateConfidentialInstanceConfigEnableTdx(acctest.RandString(t, 10), "TDX"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceTemplateExists(t, "google_compute_instance_template.foobar5", &instanceTemplate),
+					testAccCheckComputeInstanceTemplateHasConfidentialInstanceConfig(&instanceTemplate, false, "TDX"),
+				),
+			},
+			<% end -%>
 		},
 	})
 }
@@ -1044,7 +1053,7 @@ func TestAccComputeInstanceTemplate_managedEnvoy(t *testing.T) {
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
-		}, 
+		},
 	})
 }
 
@@ -1076,7 +1085,6 @@ func TestAccComputeInstanceTemplate_spot(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccComputeInstanceTemplate_spot_maxRunDuration_deleteTerminationAction(t *testing.T) {
 	t.Parallel()
 
@@ -1219,7 +1227,6 @@ func TestAccComputeInstanceTemplate_spot_maxRunDuration(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccComputeInstanceTemplate_localSsdRecoveryTimeout(t *testing.T) {
 	t.Parallel()
@@ -1624,7 +1631,7 @@ func testAccCheckComputeInstanceTemplateExistsInProject(t *testing.T, n, p strin
 		found, err := config.NewComputeClient(config.UserAgent).InstanceTemplates.Get(
 			p, templateName).View("FULL").Do()
 		<% end -%>
-		
+
 		if err != nil {
 			return err
 		}
@@ -1770,7 +1777,6 @@ func testAccCheckComputeInstanceTemplateInstanceTerminationAction(instanceTempla
 }
 
 
-<% unless version == 'ga' -%>
 func testAccCheckComputeInstanceTemplateMaxRunDuration(instanceTemplate *compute.InstanceTemplate, instance_max_run_duration_want compute.Duration) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if !reflect.DeepEqual(*instanceTemplate.Properties.Scheduling.MaxRunDuration, instance_max_run_duration_want) {
@@ -1780,7 +1786,6 @@ func testAccCheckComputeInstanceTemplateMaxRunDuration(instanceTemplate *compute
 		return nil
 	}
 }
-<% end -%>
 
 
 func testAccCheckComputeInstanceTemplateLocalSsdRecoveryTimeout(instanceTemplate *compute.InstanceTemplate, instance_local_ssd_recovery_timeout_want compute.Duration) resource.TestCheckFunc {
@@ -2607,8 +2612,8 @@ resource "google_compute_instance_template" "foobar" {
 func testAccComputeInstanceTemplate_with375GbScratchDisk(suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-	family  = "centos-7"
-	project = "centos-cloud"
+	family  = "debian-12"
+	project = "debian-cloud"
 }
 resource "google_compute_instance_template" "foobar" {
   name           = "tf-test-instance-template-%s"
@@ -2642,8 +2647,8 @@ resource "google_compute_instance_template" "foobar" {
 func testAccComputeInstanceTemplate_with18TbScratchDisk(suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-	family  = "centos-7"
-	project = "centos-cloud"
+	family  = "debian-12"
+	project = "debian-cloud"
 }
 
 resource "google_compute_instance_template" "foobar" {
@@ -3298,8 +3303,8 @@ resource "google_compute_instance_template" "foobar" {
 func testAccComputeInstanceTemplate_shieldedVmConfig(suffix string, enableSecureBoot bool, enableVtpm bool, enableIntegrityMonitoring bool) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "centos-7"
-  project = "centos-cloud"
+  family  = "debian-12"
+  project = "debian-cloud"
 }
 
 resource "google_compute_instance_template" "foobar" {
@@ -3445,6 +3450,41 @@ resource "google_compute_instance_template" "foobar4" {
 `, suffix, minCpuPlatform, confidentialInstanceType, suffix, minCpuPlatform, confidentialInstanceType)
 }
 
+<% unless version == "ga" -%>
+func testAccComputeInstanceTemplateConfidentialInstanceConfigEnableTdx(suffix string, confidentialInstanceType string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image3" {
+  family  = "ubuntu-2204-lts"
+  project = "tdx-guest-images"
+}
+
+resource "google_compute_instance_template" "foobar5" {
+  name         = "tf-test-instance5-template-%s"
+  machine_type = "c3-standard-4"
+
+  disk {
+    source_image = data.google_compute_image.my_image3.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  confidential_instance_config {
+    confidential_instance_type = %q
+  }
+
+  scheduling {
+    on_host_maintenance = "TERMINATE"
+  }
+
+}
+`, suffix, confidentialInstanceType)
+}
+<% end -%>
+
 func testAccComputeInstanceTemplateAdvancedMachineFeatures(suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -3484,8 +3524,8 @@ resource "google_compute_instance_template" "foobar" {
 func testAccComputeInstanceTemplate_enableDisplay(suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "centos-7"
-  project = "centos-cloud"
+  family  = "debian-12"
+  project = "debian-cloud"
 }
 
 resource "google_compute_instance_template" "foobar" {
@@ -3846,12 +3886,10 @@ resource "google_compute_instance_template" "foobar" {
     automatic_restart = false
     provisioning_model = "SPOT"
     instance_termination_action = "%s"
-<% unless version == 'ga' -%>
     max_run_duration {
 	nanos = 123
 	seconds = 60
     }
-<% end -%>
 
   }
 
@@ -3866,7 +3904,6 @@ resource "google_compute_instance_template" "foobar" {
 `, suffix, instanceTerminationAction)
 }
 
-<% unless version == 'ga' -%>
 func testAccComputeInstanceTemplate_maxRunDuration_onInstanceStopAction(suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -3914,7 +3951,6 @@ resource "google_compute_instance_template" "foobar" {
 }
 `, suffix)
 }
-<% end -%>
 
 func testAccComputeInstanceTemplate_localSsdRecoveryTimeout(suffix string) string {
 	return fmt.Sprintf(`
@@ -3983,7 +4019,7 @@ resource "google_compute_instance_template" "foobar" {
   }
 
   partner_metadata = {
-  	"test.compute.googleapis.com" = jsonencode({ 
+  	"test.compute.googleapis.com" = jsonencode({
   		entries = {
   			key1 = "value1"
   			key2 = 2

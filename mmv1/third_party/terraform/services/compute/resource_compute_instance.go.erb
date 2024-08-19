@@ -73,6 +73,7 @@ var (
 		"boot_disk.0.initialize_params.0.provisioned_iops",
 		"boot_disk.0.initialize_params.0.provisioned_throughput",
 		"boot_disk.0.initialize_params.0.enable_confidential_compute",
+		"boot_disk.0.initialize_params.0.storage_pool",
 	}
 
 	schedulingKeys = []string{
@@ -83,10 +84,10 @@ var (
 		"scheduling.0.min_node_cpus",
 		"scheduling.0.provisioning_model",
 		"scheduling.0.instance_termination_action",
-<% unless version == 'ga' -%>
 		"scheduling.0.max_run_duration",
-		"scheduling.0.maintenance_interval",
 		"scheduling.0.on_instance_stop_action",
+<% unless version == 'ga' -%>
+		"scheduling.0.maintenance_interval",
 <% end -%>
 		"scheduling.0.local_ssd_recovery_timeout",
 	}
@@ -115,11 +116,13 @@ func forceNewIfNetworkIPNotUpdatableFunc(d tpgresource.TerraformResourceDiff) er
 	for i := 0; i < newCount.(int); i++ {
 		prefix := fmt.Sprintf("network_interface.%d", i)
 		networkKey := prefix + ".network"
+		oldN, newN := d.GetChange(networkKey)
 		subnetworkKey := prefix + ".subnetwork"
+		oldS, newS := d.GetChange(subnetworkKey)
 		subnetworkProjectKey := prefix + ".subnetwork_project"
 		networkIPKey := prefix + ".network_ip"
 		if d.HasChange(networkIPKey) {
-			if !d.HasChange(networkKey) && !d.HasChange(subnetworkKey) && !d.HasChange(subnetworkProjectKey) {
+			if tpgresource.CompareSelfLinkOrResourceName("", oldS.(string), newS.(string), nil) && !d.HasChange(subnetworkProjectKey) && tpgresource.CompareSelfLinkOrResourceName("", oldN.(string), newN.(string), nil) {
 				if err := d.ForceNew(networkIPKey); err != nil {
 					return err
 				}
@@ -269,7 +272,7 @@ func ResourceComputeInstance() *schema.Resource {
 										AtLeastOneOf: initializeParamsKeys,
 										Description:  `A map of resource manager tags. Resource manager tag keys and values have the same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456. The field is ignored (both PUT & PATCH) when empty.`,
 									},
-									
+
 									"provisioned_iops": {
 										Type:         schema.TypeInt,
 										Optional:     true,
@@ -294,6 +297,15 @@ func ResourceComputeInstance() *schema.Resource {
 										AtLeastOneOf: initializeParamsKeys,
 										ForceNew:     true,
 										Description:  `A flag to enable confidential compute mode on boot disk`,
+									},
+
+									"storage_pool": {
+										Type:             schema.TypeString,
+										Optional:         true,
+										AtLeastOneOf:     initializeParamsKeys,
+										ForceNew:         true,
+										DiffSuppressFunc: tpgresource.CompareResourceNames,
+										Description:      `The URL of the storage pool in which the new disk is created`,
 									},
 								},
 							},
@@ -826,7 +838,6 @@ func ResourceComputeInstance() *schema.Resource {
 							AtLeastOneOf:  schedulingKeys,
 							Description:   `Specifies the action GCE should take when SPOT VM is preempted.`,
 						},
-<% unless version == 'ga' -%>
 						"max_run_duration" : {
 							Type:        schema.TypeList,
 							Optional:    true,
@@ -872,6 +883,7 @@ be from 0 to 999,999,999 inclusive.`,
 								},
 							},
 						},
+<% unless version == 'ga' -%>
 						"maintenance_interval": {
 							Type:          schema.TypeString,
 							Optional:      true,
@@ -1059,9 +1071,10 @@ be from 0 to 999,999,999 inclusive.`,
 							Type:        schema.TypeString,
 							Optional:    true,
 							Description: `
-								Specifies which confidential computing technology to use.
-								This could be one of the following values: SEV, SEV_SNP.
-								If SEV_SNP, min_cpu_platform = "AMD Milan" is currently required.`,
+								The confidential computing technology the instance uses.
+								SEV is an AMD feature. TDX is an Intel feature. One of the following
+								values is required: SEV, SEV_SNP, TDX. If SEV_SNP, min_cpu_platform =
+								"AMD Milan" is currently required. TDX is only available in beta.`,
 							AtLeastOneOf: []string{"confidential_instance_config.0.enable_confidential_compute", "confidential_instance_config.0.confidential_instance_type"},
 						},
 					},
@@ -2131,6 +2144,9 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 					Fingerprint:     instNetworkInterface.Fingerprint,
 					ForceSendFields: []string{"AliasIpRanges"},
 				}
+				if commonAliasIpRanges := CheckForCommonAliasIp(instNetworkInterface, networkInterface); len(commonAliasIpRanges) > 0 {
+					ni.AliasIpRanges = commonAliasIpRanges
+				}
 				op, err := config.NewComputeClient(userAgent).Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, ni).Do()
 				if err != nil {
 					return errwrap.Wrapf("Error removing alias_ip_range: {{err}}", err)
@@ -2433,11 +2449,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		desiredStatus := d.Get("desired_status").(string)
 
 		if statusBeforeUpdate == "RUNNING" && desiredStatus != "TERMINATED" && !d.Get("allow_stopping_for_update").(bool) {
-<% unless version == 'ga' -%>
 			return fmt.Errorf("Changing the machine_type, min_cpu_platform, service_account, enable_display, shielded_instance_config, scheduling.node_affinities, scheduling.max_run_duration " +
-<% else -%>
-			return fmt.Errorf("Changing the machine_type, min_cpu_platform, service_account, enable_display, shielded_instance_config, scheduling.node_affinities " +
-<% end -%>
 				"or network_interface.[#d].(network/subnetwork/subnetwork_project) or advanced_machine_features on a started instance requires stopping it. " +
 				"To acknowledge this, please set allow_stopping_for_update = true in your config. " +
 				"You can also stop it by setting desired_status = \"TERMINATED\", but the instance will not be restarted after the update.")
@@ -2990,6 +3002,10 @@ func expandBootDisk(d *schema.ResourceData, config *transport_tpg.Config, projec
 		if _, ok := d.GetOk("boot_disk.0.initialize_params.0.resource_manager_tags"); ok {
 			disk.InitializeParams.ResourceManagerTags = tpgresource.ExpandStringMap(d, "boot_disk.0.initialize_params.0.resource_manager_tags")
 		}
+
+		if v, ok := d.GetOk("boot_disk.0.initialize_params.0.storage_pool"); ok {
+			disk.InitializeParams.StoragePool = v.(string)
+		}
 	}
 
 	if v, ok := d.GetOk("boot_disk.0.mode"); ok {
@@ -3032,6 +3048,7 @@ func flattenBootDisk(d *schema.ResourceData, disk *compute.AttachedDisk, config 
 			"provisioned_iops": diskDetails.ProvisionedIops,
 			"provisioned_throughput": diskDetails.ProvisionedThroughput,
 			"enable_confidential_compute": diskDetails.EnableConfidentialCompute,
+			"storage_pool": tpgresource.GetResourceNameFromSelfLink(diskDetails.StoragePool),
 		}}
 	}
 
@@ -3163,4 +3180,21 @@ func isEmptyServiceAccountBlock(d *schema.ResourceData) bool {
 		return true
 	}
 	return false
+}
+
+// Alias ip ranges cannot be removed and created at the same time. This checks if there are any unchanged alias ip ranges
+// to be kept in between the PATCH operations on Network Interface
+func CheckForCommonAliasIp(old, new *compute.NetworkInterface) []*compute.AliasIpRange {
+	newAliasIpMap := make(map[string]bool)
+	for _, ipRange := range new.AliasIpRanges {
+		newAliasIpMap[ipRange.IpCidrRange] = true
+	}
+
+	resultAliasIpRanges := make([]*compute.AliasIpRange, 0)
+	for _, val := range old.AliasIpRanges {
+		if newAliasIpMap[val.IpCidrRange] {
+			resultAliasIpRanges = append(resultAliasIpRanges, val)
+		}
+	}
+	return resultAliasIpRanges
 }

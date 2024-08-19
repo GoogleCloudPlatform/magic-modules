@@ -1,0 +1,100 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Location'
+description: |
+  A location is used to initialize a project.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/document-warehouse/docs/overview'
+  api: 'https://cloud.google.com/document-warehouse/docs/reference/rest/v1/projects.locations'
+docs:
+id_format: 'projects/{{project_number}}/locations/{{location}}'
+base_url: 'projects/{{project_number}}/locations/{{location}}:initialize'
+skip_read: true
+skip_delete: true
+immutable: true
+exclude_import: true
+timeouts:
+  insert_minutes: 30
+  update_minutes: 30
+  delete_minutes: 30
+autogen_async: true
+async:
+  actions: ['create']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+skip_sweeper: true
+examples:
+  - name: 'document_ai_warehouse_location'
+    primary_resource_id: 'example'
+    skip_test: true
+parameters:
+  - name: 'project_number'
+    type: String
+    description: |
+      The unique identifier of the project.
+    url_param_only: true
+    required: true
+  - name: 'location'
+    type: String
+    description: |
+      The location in which the instance is to be provisioned. It takes the form projects/{projectNumber}/locations/{location}.
+    url_param_only: true
+    required: true
+properties:
+  - name: 'databaseType'
+    type: Enum
+    description: |
+      The type of database used to store customer data.
+    required: true
+    enum_values:
+      - 'DB_INFRA_SPANNER'
+      - 'DB_CLOUD_SQL_POSTGRES'
+  - name: 'accessControlMode'
+    type: Enum
+    description: |
+      The access control mode for accessing the customer data.
+    required: true
+    enum_values:
+      - 'ACL_MODE_DOCUMENT_LEVEL_ACCESS_CONTROL_GCI'
+      - 'ACL_MODE_DOCUMENT_LEVEL_ACCESS_CONTROL_BYOID'
+      - 'ACL_MODE_UNIVERSAL_ACCESS'
+  - name: 'kmsKey'
+    type: String
+    description: |
+      The KMS key used for CMEK encryption. It is required that
+      the kms key is in the same region as the endpoint. The
+      same key will be used for all provisioned resources, if
+      encryption is available. If the kmsKey is left empty, no
+      encryption will be enforced.
+  - name: 'documentCreatorDefaultRole'
+    type: Enum
+    description: |
+      The default role for the person who create a document.
+    enum_values:
+      - 'DOCUMENT_ADMIN'
+      - 'DOCUMENT_EDITOR'
+      - 'DOCUMENT_VIEWER'

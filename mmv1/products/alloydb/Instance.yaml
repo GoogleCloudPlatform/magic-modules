@@ -109,6 +109,17 @@ examples:
       - 'reconciling'
       - 'update_time'
     skip_docs: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'alloydb_instance_psc_test'
+    primary_resource_id: 'default'
+    vars:
+      alloydb_cluster_name: 'alloydb-cluster'
+      alloydb_instance_name: 'alloydb-instance'
+      network_name: 'alloydb-network'
+    ignore_read_extra:
+      - 'reconciling'
+      - 'update_time'
+    skip_docs: true
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'cluster'
@@ -237,6 +248,36 @@ properties:
         name: 'queryPlansPerMinute'
         description: 'Number of query execution plans captured by Insights per minute for all queries combined. The default value is 5. Any integer between 0 and 20 is considered valid.'
   - !ruby/object:Api::Type::NestedObject
+    name: 'observabilityConfig'
+    description: 'Configuration for enhanced query insights.'
+    default_from_api: true
+    min_version: beta
+    properties:
+      - !ruby/object:Api::Type::Boolean
+        name: 'enabled'
+        description: 'Observability feature status for an instance.'
+      - !ruby/object:Api::Type::Boolean
+        name: 'preserveComments'
+        description: 'Preserve comments in the query string.'
+      - !ruby/object:Api::Type::Boolean
+        name: 'trackWaitEvents'
+        description: 'Record wait events during query execution for an instance.'
+      - !ruby/object:Api::Type::Boolean
+        name: 'trackWaitEventTypes'
+        description: 'Record wait event types during query execution for an instance.'
+      - !ruby/object:Api::Type::Integer
+        name: 'maxQueryStringLength'
+        description: 'Query string length. The default value is 10240. Any integer between 1024 and 100000 is considered valid.'
+      - !ruby/object:Api::Type::Boolean
+        name: 'recordApplicationTags'
+        description: 'Record application tags for an instance. This flag is turned "on" by default.'
+      - !ruby/object:Api::Type::Integer
+        name: 'queryPlansPerMinute'
+        description: 'Number of query execution plans captured by Insights per minute for all queries combined. The default value is 5. Any integer between 0 and 200 is considered valid.'
+      - !ruby/object:Api::Type::Boolean
+        name: 'trackActiveQueries'
+        description: 'Track actively running queries. If not set, default value is "off".'
+  - !ruby/object:Api::Type::NestedObject
     name: 'readPoolConfig'
     description: 'Read pool specific config. If the instance type is READ_POOL, this configuration must be provided.'
     properties:
@@ -280,6 +321,7 @@ properties:
               - :ALLOW_UNENCRYPTED_AND_ENCRYPTED
   - !ruby/object:Api::Type::NestedObject
     name: 'pscInstanceConfig'
+    default_from_api: true
     description: |
       Configuration for Private Service Connect (PSC) for the instance.
     properties:

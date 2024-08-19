@@ -31,6 +31,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/global/operations/{{op_id}}'
@@ -289,7 +290,6 @@ properties:
     type: KeyValueLabels
     description: |
       Labels to apply to this forwarding rule.  A list of key->value pairs.
-    immutable: false
     update_url: 'projects/{{project}}/global/forwardingRules/{{name}}/setLabels'
     update_verb: 'POST'
   - name: 'labelFingerprint'

@@ -11,7 +11,7 @@ This page provides guidelines for reviewing a Magic Modules pull request (PR).
    * is linked to a GitHub issue or an internal bug
       * if not, check the [issue tracker](https://github.com/hashicorp/terraform-provider-google/issues) to see whether the feature has already been requested and add the issues in the description, if any.
    * establishes clear context itself via title or description.
-2. If the PR adds any new resource, ensure that the resource does not already exists in the [GA provider](https://github.com/hashicorp/terraform-provider-google) or [beta provider](https://github.com/hashicorp/terraform-provider-google-beta)
+2. If the PR adds any new resource, ensure that the resource does not already exist in the [GA provider](https://github.com/hashicorp/terraform-provider-google) or [beta provider](https://github.com/hashicorp/terraform-provider-google-beta)
 1. Read through all the changes in the PR, generated code in the downstreams and the API documentation to ensure that:
    1. the resource schema added in the PR matches the API structure.
    1. the features are added in the correct version
@@ -46,4 +46,4 @@ This page provides guidelines for reviewing a Magic Modules pull request (PR).
 1. Check documentation to ensure
    1. resouce-level and field-level documentation are generated correctly for MMv1-based resource
    1. documentation is added manually for handwritten resources.   
-1. Check if release notes capture all changes in the PR, and are correctly formatted following the guidance in [write release notes]({{< ref "release-notes" >}}) before merge the PR.
+1. Check if release notes capture all changes in the PR, and are correctly formatted following the guidance in [write release notes]({{< ref "release-notes" >}}) before merging the PR.

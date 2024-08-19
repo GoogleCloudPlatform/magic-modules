@@ -201,11 +201,10 @@ resource "{{ $.IamTerraformName }}_member" "member" {
 ## Argument Reference
 
 The following arguments are supported:
-
 {{ range $param := $.IamSelfLinkProperties }}
-{{-   if eq $param.Name "name" -}}
+{{-   if eq $param.Name "name" }}
 * `{{ $.IamParentResourceName }}` - (Required) Used to find the parent resource to bind the IAM policy to
-{{-   else if or (eq (underscore $param.Name) "region") (eq (underscore $param.Name) "zone") }}
+{{-   else if or (or (eq (underscore $param.Name) "region") (eq (underscore $param.Name) "zone")) (eq (underscore $param.Name) "location") }}
 * `{{ underscore $param.Name }}` - (Optional) {{ $param.Description }} Used to find the parent resource to bind the IAM policy to. If not specified,
   the value will be parsed from the identifier of the parent resource. If no {{ underscore $param.Name }} is provided in the parent identifier and no
   {{ underscore $param.Name }} is specified, it is taken from the provider configuration.
@@ -298,8 +297,8 @@ $ terraform import {{ $.IamTerraformName }}_policy.editor {{ $.FirstIamImportIdF
 
 -> **Custom Roles**: If you're importing a IAM resource with a custom role, make sure to use the
  full name of the custom role, e.g. `[projects/my-project|organizations/my-org]/roles/my-custom-role`.
+{{- if contains $.BaseUrl "{{project}}" }}
 
-{{ if contains $.BaseUrl "{{project}}" -}}
 ## User Project Overrides
 
 This resource supports [User Project Overrides](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#user_project_override).

@@ -23,12 +23,14 @@ references:
 docs:
 base_url: 'projects/{{project}}/regions/{{region}}/resourcePolicies'
 has_self_link: true
-immutable: true
+update_url: 'projects/{{project}}/regions/{{region}}/resourcePolicies/{{name}}'
+update_verb: 'PATCH'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'

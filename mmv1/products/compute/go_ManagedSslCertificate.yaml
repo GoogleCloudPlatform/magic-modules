@@ -48,6 +48,7 @@ timeouts:
   update_minutes: 30
   delete_minutes: 30
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/global/operations/{{op_id}}'

@@ -1,0 +1,75 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'AutokeyConfig'
+description: |
+  `AutokeyConfig` is a singleton resource used to configure the auto-provisioning
+  flow of CryptoKeys for CMEK.
+
+
+  ~> **Note:** AutokeyConfigs cannot be deleted from Google Cloud Platform.
+  Destroying a Terraform-managed AutokeyConfig will remove it from state but
+  *will not delete the resource from the project.*
+min_version: 'beta'
+references:
+  guides:
+    'Cloud KMS with Autokey': 'https://cloud.google.com/kms/docs/kms-with-autokey'
+  api: 'https://cloud.google.com/kms/docs/reference/rest/v1/AutokeyConfig'
+docs:
+id_format: 'folders/{{folder}}/autokeyConfig'
+base_url: 'folders/{{folder}}/autokeyConfig'
+self_link: 'folders/{{folder}}/autokeyConfig'
+create_url: 'folders/{{folder}}/autokeyConfig?updateMask=keyProject'
+create_verb: 'PATCH'
+update_url: 'folders/{{folder}}/autokeyConfig?updateMask=keyProject'
+update_verb: 'PATCH'
+delete_url: 'folders/{{folder}}/autokeyConfig?updateMask=keyProject'
+delete_verb: 'PATCH'
+import_format:
+  - 'folders/{{folder}}/autokeyConfig'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  test_check_destroy: 'templates/terraform/custom_check_destroy/go/kms_autokey_config.go.tmpl'
+examples:
+  - name: 'kms_autokey_config_all'
+    primary_resource_id: 'example-autokeyconfig'
+    min_version: 'beta'
+    vars:
+      folder_name: 'my-folder'
+      key_project_name: 'key-proj'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    external_providers: ["random", "time"]
+parameters:
+  - name: 'folder'
+    type: String
+    description: |
+      The folder for which to retrieve config.
+    min_version: 'beta'
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'keyProject'
+    type: String
+    description: |
+      The target key project for a given folder where KMS Autokey will provision a
+      CryptoKey for any new KeyHandle the Developer creates. Should have the form
+      `projects/<project_id_or_number>`.
+    min_version: 'beta'

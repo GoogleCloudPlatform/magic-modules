@@ -1,0 +1,231 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Workload'
+description: 'Workload represents a binary deployment (such as Managed Instance Groups (MIGs), GKE deployments, etc.) that performs the smallest logical subset of business functionality.
+  It registers identified workload to the Application.'
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/applications/{{application_id}}/workloads/{{workload_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/applications/{{application_id}}/workloads'
+self_link: 'projects/{{project}}/locations/{{location}}/applications/{{application_id}}/workloads/{{workload_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/applications/{{application_id}}/workloads?workloadId={{workload_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/applications/{{application_id}}/workloads/{{workload_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'apphub_workload_basic'
+    primary_resource_id: 'example'
+    vars:
+      application_id: 'example-application-1'
+      service_project_attachment_id: 'project-1'
+      ilb_network: 'l7-ilb-network'
+      ilb_subnet: 'l7-ilb-subnet'
+      instance_template: 'l7-ilb-mig-template'
+      mig: 'l7-ilb-mig1'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    external_providers: ["random", "time"]
+  - name: 'apphub_workload_full'
+    primary_resource_id: 'example'
+    vars:
+      application_id: 'example-application-1'
+      service_project_attachment_id: 'project-1'
+      display_name: 'Example Service Full'
+      description: 'Register service for testing'
+      business_name: 'Alice'
+      business_email: 'alice@google.com'
+      developer_name: 'Bob'
+      developer_email: 'bob@google.com'
+      operator_name: 'Charlie'
+      operator_email: 'charlie@google.com'
+      ilb_network: 'l7-ilb-network'
+      ilb_subnet: 'l7-ilb-subnet'
+      instance_template: 'l7-ilb-mig-template'
+      mig: 'l7-ilb-mig1'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    external_providers: ["random", "time"]
+parameters:
+  - name: 'location'
+    type: String
+    description: 'Part of `parent`.  Full resource name of a parent Application. Example: projects/{HOST_PROJECT_ID}/locations/{LOCATION}/applications/{APPLICATION_ID}'
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'applicationId'
+    type: String
+    description: 'Part of `parent`.  Full resource name of a parent Application. Example: projects/{HOST_PROJECT_ID}/locations/{LOCATION}/applications/{APPLICATION_ID}'
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'workloadId'
+    type: String
+    description: 'The Workload identifier.'
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: "Identifier. The resource name of the Workload. Format:\"projects/{host-project-id}/locations/{location}/applications/{application-id}/workloads/{workload-id}\""
+    output: true
+  - name: 'displayName'
+    type: String
+    description: 'User-defined name for the Workload.'
+  - name: 'description'
+    type: String
+    description: 'User-defined description of a Workload.'
+  - name: 'workloadReference'
+    type: NestedObject
+    description: 'Reference of an underlying compute resource represented by the Workload.'
+    output: true
+    properties:
+      - name: 'uri'
+        type: String
+        description: 'Output only. The underlying compute resource uri.'
+        output: true
+  - name: 'workloadProperties'
+    type: NestedObject
+    description: 'Properties of an underlying compute resource represented by the Workload.'
+    output: true
+    properties:
+      - name: 'gcpProject'
+        type: String
+        description: "Output only. The service project identifier that the underlying
+          cloud resource resides in. Empty for non cloud resources."
+        output: true
+      - name: 'location'
+        type: String
+        description: "Output only. The location that the underlying compute resource resides
+          in (e.g us-west1)."
+        output: true
+      - name: 'zone'
+        type: String
+        description: "Output only. The location that the underlying compute resource resides
+          in if it is zonal (e.g us-west1-a)."
+        output: true
+  - name: 'discoveredWorkload'
+    type: String
+    description: 'Immutable. The resource name of the original discovered workload.'
+    required: true
+    immutable: true
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+  - name: 'attributes'
+    type: NestedObject
+    description: 'Consumer provided attributes.'
+    properties:
+      - name: 'criticality'
+        type: NestedObject
+        description: 'Criticality of the Application, Service, or Workload'
+        properties:
+          - name: 'type'
+            type: Enum
+            description: 'Criticality type.'
+            required: true
+            enum_values:
+              - 'MISSION_CRITICAL'
+              - 'HIGH'
+              - 'MEDIUM'
+              - 'LOW'
+      - name: 'environment'
+        type: NestedObject
+        description: 'Environment of the Application, Service, or Workload'
+        properties:
+          - name: 'type'
+            type: Enum
+            description: 'Environment type.'
+            required: true
+            enum_values:
+              - 'PRODUCTION'
+              - 'STAGING'
+              - 'TEST'
+              - 'DEVELOPMENT'
+      - name: 'developerOwners'
+        type: Array
+        description: 'Developer team that owns development and coding.'
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'displayName'
+              type: String
+              description: 'Contact''s name.'
+            - name: 'email'
+              type: String
+              description: 'Email address of the contacts.'
+              required: true
+      - name: 'operatorOwners'
+        type: Array
+        description: 'Operator team that ensures runtime and operations.'
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'displayName'
+              type: String
+              description: 'Contact''s name.'
+            - name: 'email'
+              type: String
+              description: 'Email address of the contacts.'
+              required: true
+      - name: 'businessOwners'
+        type: Array
+        description: 'Business team that ensures user needs are met and value is delivered'
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'displayName'
+              type: String
+              description: 'Contact''s name.'
+            - name: 'email'
+              type: String
+              description: 'Email address of the contacts.'
+              required: true
+  - name: 'createTime'
+    type: String
+    description: 'Output only. Create time.'
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: 'Output only. Update time.'
+    output: true
+  - name: 'uid'
+    type: String
+    description: "Output only. A universally unique identifier (UUID) for the `Workload` in the UUID4 format."
+    output: true
+  - name: 'state'
+    type: String
+    description: "Output only. Workload state. Possible values:  STATE_UNSPECIFIED CREATING ACTIVE DELETING DETACHED"
+    output: true

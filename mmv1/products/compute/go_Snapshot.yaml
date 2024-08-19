@@ -45,6 +45,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     full_url: 'selfLink'
@@ -60,6 +61,7 @@ async:
 collection_url_key: 'items'
 iam_policy:
   parent_resource_attribute: 'name'
+  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/global/snapshots/{{name}}'
     - '{{name}}'
@@ -234,7 +236,6 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: Labels to apply to this Snapshot.
-    immutable: false
     update_url: 'projects/{{project}}/global/snapshots/{{name}}/setLabels'
     update_verb: 'POST'
   - name: 'labelFingerprint'

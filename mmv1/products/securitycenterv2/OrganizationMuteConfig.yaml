@@ -1,0 +1,106 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'OrganizationMuteConfig'
+base_url: organizations/{{organization}}/locations/{{location}}/muteConfigs
+self_link: 'organizations/{{organization}}/locations/{{location}}/muteConfigs/{{mute_config_id}}'
+create_url: organizations/{{organization}}/locations/{{location}}/muteConfigs?muteConfigId={{mute_config_id}}
+update_verb: :PATCH
+update_mask: true
+import_format:
+  - 'organizations/{{organization}}/locations/{{location}}/muteConfigs/{{mute_config_id}}'
+description: |
+  Mute Findings is a volume management feature in Security Command Center
+  that lets you manually or programmatically hide irrelevant findings,
+  and create filters to automatically silence existing and future
+  findings based on criteria you specify.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v2/organizations.muteConfigs'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'scc_v2_organization_mute_config_basic'
+    primary_resource_id: 'default'
+    vars:
+      mute_config_id: 'my-config'
+    test_env_vars:
+      org_id: :ORG_ID
+parameters:
+  - !ruby/object:Api::Type::String
+    name: organization
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The organization whose Cloud Security Command Center the Mute
+      Config lives in.
+  - !ruby/object:Api::Type::String
+    name: location
+    immutable: true
+    url_param_only: true
+    default_value: global
+    description: |
+      location Id is provided by organization. If not provided, Use global as default.
+  - !ruby/object:Api::Type::String
+    name: mute_config_id
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      Unique identifier provided by the client within the parent scope.
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    output: true
+    description: |
+      Name of the mute config. Its format is
+      organizations/{organization}/locations/global/muteConfigs/{configId},
+      folders/{folder}/locations/global/muteConfigs/{configId},
+      or projects/{project}/locations/global/muteConfigs/{configId}
+  - !ruby/object:Api::Type::String
+    name: 'description'
+    description: A description of the mute config.
+  - !ruby/object:Api::Type::String
+    name: 'filter'
+    description: |
+      An expression that defines the filter to apply across create/update
+      events of findings. While creating a filter string, be mindful of
+      the scope in which the mute configuration is being created. E.g.,
+      If a filter contains project = X but is created under the
+      project = Y scope, it might not match any findings.
+    required: true
+  - !ruby/object:Api::Type::String
+    name: 'createTime'
+    description: |
+      The time at which the mute config was created. This field is set by
+      the server and will be ignored if provided on config creation.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'updateTime'
+    description: |
+      Output only. The most recent time at which the mute config was
+      updated. This field is set by the server and will be ignored if
+      provided on config creation or update.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'mostRecentEditor'
+    description: |
+      Email address of the user who last edited the mute config. This
+      field is set by the server and will be ignored if provided on
+      config creation or update.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'type'
+    description: |
+      The type of the mute config.
+    required: true

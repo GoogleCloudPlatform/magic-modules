@@ -29,6 +29,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/global/operations/{{op_id}}'
@@ -75,3 +76,8 @@ properties:
       The IPv4 address range, in CIDR format, represented by this public
       advertised prefix.
     required: true
+  - name: 'sharedSecret'
+    type: String
+    description: |
+      Output Only. The shared secret to be used for reverse DNS verification.
+    output: true

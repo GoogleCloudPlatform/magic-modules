@@ -1,0 +1,51 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Web'
+description: |
+  Only used to generate IAM resources
+exclude_resource: true
+docs:
+id_format: 'projects/{{project}}/iap_web'
+base_url: 'projects/{{project}}/iap_web'
+self_link: 'projects/{{project}}/iap_web'
+import_format:
+  - 'projects/{{project}}/iap_web'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_type: 'google_project_service'
+  fetch_iam_policy_verb: 'POST'
+  allowed_iam_role: 'roles/iap.httpsResourceAccessor'
+  parent_resource_attribute: 'project'
+  iam_conditions_request_type: 'REQUEST_BODY'
+  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+custom_code:
+examples:
+  - name: 'iap_project'
+    primary_resource_id: 'project_service'
+    primary_resource_name: 'fmt.Sprintf("tf-test%s", context["random_suffix"])'
+    test_env_vars:
+      org_id: 'ORG_ID'
+    external_providers: ["random", "time"]
+parameters:
+properties:
+  - name: 'name'
+    type: String
+    description: Dummy property.
+    required: true

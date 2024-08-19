@@ -674,7 +674,6 @@ Google Cloud KMS.`,
 							AtLeastOneOf: schedulingInstTemplateKeys,
 							Description:  `Specifies the action GCE should take when SPOT VM is preempted.`,
 						},
-{{- if ne $.TargetVersionName "ga" }}
 						"max_run_duration" : {
 							Type:        schema.TypeList,
 							Optional:    true,
@@ -720,6 +719,7 @@ be from 0 to 999,999,999 inclusive.`,
 								},
 							},
 						},
+{{- if ne $.TargetVersionName "ga" }}
 						"maintenance_interval" : {
 							Type:        schema.TypeString,
 							Optional:    true,

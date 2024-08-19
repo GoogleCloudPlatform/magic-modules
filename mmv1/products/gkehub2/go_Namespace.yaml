@@ -1,0 +1,141 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Namespace'
+description: |
+  Namespace represents a namespace across the Fleet.
+references:
+  guides:
+    'Registering a Cluster': 'https://cloud.google.com/anthos/multicluster-management/connect/registering-a-cluster#register_cluster'
+  api: 'https://cloud.google.com/anthos/fleet-management/docs/reference/rest/v1/projects.locations.scopes.namespaces'
+docs:
+id_format: 'projects/{{project}}/locations/global/scopes/{{scope_id}}/namespaces/{{scope_namespace_id}}'
+base_url: 'projects/{{project}}/locations/global/scopes/{{scope_id}}/namespaces'
+self_link: 'projects/{{project}}/locations/global/scopes/{{scope_id}}/namespaces/{{scope_namespace_id}}'
+create_url: 'projects/{{project}}/locations/global/scopes/{{scope_id}}/namespaces/?scope_namespace_id={{scope_namespace_id}}'
+update_url: 'projects/{{project}}/locations/global/scopes/{{scope_id}}/namespaces/{{scope_namespace_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/global/scopes/{{scope_id}}/namespaces/{{scope_namespace_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    kind: 'gkehub#operation'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error/errors'
+    message: 'message'
+custom_code:
+skip_sweeper: true
+examples:
+  - name: 'gkehub_namespace_basic'
+    primary_resource_id: 'namespace'
+    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+    ignore_read_extra:
+      - 'scope'
+parameters:
+  - name: 'scope_id'
+    type: String
+    description: |
+      Id of the scope
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'scopeNamespaceId'
+    type: String
+    description: |
+      The client-provided identifier of the namespace.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'name'
+    type: String
+    description: |
+      The resource name for the namespace
+    output: true
+  - name: 'uid'
+    type: String
+    description: |
+      Google-generated UUID for this resource.
+    output: true
+  - name: 'createTime'
+    type: Time
+    description: |
+      Time the Namespace was created in UTC.
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      Time the Namespace was updated in UTC.
+    output: true
+  - name: 'deleteTime'
+    type: Time
+    description: |
+      Time the Namespace was deleted in UTC.
+    output: true
+  - name: 'scope'
+    type: ResourceRef
+    description: |
+      The name of the Scope instance.
+    required: true
+    immutable: true
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+    resource: 'Scope'
+    imports: 'name'
+  - name: 'state'
+    type: NestedObject
+    description: |
+      State of the namespace resource.
+    output: true
+    properties:
+      - name: 'code'
+        type: Enum
+        description: |
+          Code describes the state of a Namespace resource.
+        output: true
+        enum_values:
+          - 'CODE_UNSPECIFIED'
+          - 'CREATING'
+          - 'READY'
+          - 'DELETING'
+          - 'UPDATING'
+  - name: 'namespaceLabels'
+    type: KeyValuePairs
+    description: |
+      Namespace-level cluster namespace labels. These labels are applied
+      to the related namespace of the member clusters bound to the parent
+      Scope. Scope-level labels (`namespace_labels` in the Fleet Scope
+      resource) take precedence over Namespace-level labels if they share
+      a key. Keys and values must be Kubernetes-conformant.
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      Labels for this Namespace.
+    immutable: false

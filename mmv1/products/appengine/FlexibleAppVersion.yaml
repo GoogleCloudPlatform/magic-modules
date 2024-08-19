@@ -36,7 +36,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'appengine#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -73,6 +73,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'app_engine_flexible_app_version'
     primary_resource_id: 'myapp_v1'
+    # https://github.com/hashicorp/terraform-provider-google/issues/19040
+    skip_test: true
     ignore_read_extra:
       - 'noop_on_destroy'
       - 'deployment.0.zip'

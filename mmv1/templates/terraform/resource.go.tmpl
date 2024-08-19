@@ -47,7 +47,6 @@ import (
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
     "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
     "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -131,7 +130,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
         ),
 {{- end}}
 
-{{- if $.DeprecationMessage }}
+{{ if $.DeprecationMessage }}
         DeprecationMessage: "{{ $.DeprecationMessage -}}",
 {{- end}}
 
@@ -165,7 +164,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
                 ForceNew: true,
             },
 {{- end}}
-{{if $.HasSelfLink -}}
+{{- if $.HasSelfLink }}
             "self_link": {
                 Type:     schema.TypeString,
                 Computed: true,
@@ -291,15 +290,15 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
         Body: obj,
         Timeout: d.Timeout(schema.TimeoutCreate),
         Headers: headers,
-{{if $.ErrorRetryPredicates -}}
+{{- if $.ErrorRetryPredicates }}
         ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
 {{- end}}
-{{- if $.ErrorAbortPredicates -}}
+{{- if $.ErrorAbortPredicates }}
         ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{ join $.ErrorAbortPredicates "," -}}{{"}"}},
 {{- end}}
     })
     if err != nil {
-{{- if and ($.CustomCode.PostCreateFailure) ($.GetAsync) -}}
+{{- if and ($.CustomCode.PostCreateFailure) (not $.GetAsync) -}}
         resource{{ $.ResourceName -}}PostCreateFailure(d, meta)
 {{- end}}
         return fmt.Errorf("Error creating {{ $.Name -}}: %s", err)
@@ -338,7 +337,8 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{-          if not $.TaintResourceOnFailedCreate -}}
         // The resource didn't actually create
         d.SetId("")
-{{ end}}
+
+{{ end -}}
         return fmt.Errorf("Error waiting to create {{ $.Name -}}: %s", err)
     }
 
@@ -389,7 +389,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     if err != nil {
 {{if $.CustomCode.PostCreateFailure -}}
         resource{{ $.ResourceName -}}PostCreateFailure(d, meta)
-{{- end}}
+{{ end}}
 {{-          if not $.TaintResourceOnFailedCreate -}}
         // The resource didn't actually create
         d.SetId("")
@@ -408,10 +408,12 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{if $.GetAsync.IsA "PollAsync" -}}
     err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName -}}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence -}}, "Creating {{ $.Name -}}", d.Timeout(schema.TimeoutCreate), {{ $.GetAsync.TargetOccurrences -}})
     if err != nil {
-{{if $.GetAsync.SuppressError -}}
+{{- if $.GetAsync.SuppressError -}}
+
         log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name }} %q finished updating: %q", d.Id(), err)
-{{-        else -}}
-{{if $.CustomCode.PostCreateFailure -}}
+
+{{-        else }}
+{{- if $.CustomCode.PostCreateFailure -}}
         resource{{ $.ResourceName -}}PostCreateFailure(d, meta)
 {{- end}}
         return fmt.Errorf("Error waiting to create {{ $.Name -}}: %s", err)
@@ -481,14 +483,14 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
 {{if $.ErrorRetryPredicates -}}
             ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
 {{- end}}
-{{- if $.ErrorAbortPredicates -}}
+{{- if $.ErrorAbortPredicates }}
             ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorAbortPredicates "," -}}{{"}"}},
 {{- end}}
         })
         if err != nil {
             return res, err
         }
-{{- if or $.NestedQuery $.CustomCode.Decoder }}
+{{- if $.CustomCode.Decoder }}
 {{""}}
 {{- end }}
 {{- if $.NestedQuery }}
@@ -500,7 +502,9 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
         if res == nil {
             return nil, tpgresource.Fake404("nested", "{{ $.ResourceName }}")
         }
-
+{{- if not $.CustomCode.Decoder }}
+{{""}}
+{{- end }}
 {{- end -}}
 {{- if $.CustomCode.Decoder -}}
         res, err = resource{{ $.ResourceName -}}Decoder(d, meta, res)
@@ -510,7 +514,7 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
         if res == nil {
             return nil, tpgresource.Fake404("decoded", "{{ $.ResourceName }}")
         }
-{{- end }}
+{{ end }}
         return res, nil
 {{    end  -}}
     }
@@ -558,7 +562,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
     }
 
     headers := make(http.Header)
-    {{- if $.CustomCode.PreRead -}}
+    {{- if $.CustomCode.PreRead }}
         {{ $.CustomTemplate $.CustomCode.PreRead false -}}
     {{- end }}
     res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
@@ -568,10 +572,10 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         RawURL: url,
         UserAgent: userAgent,
         Headers: headers,
-{{if $.ErrorRetryPredicates -}}
+{{- if $.ErrorRetryPredicates }}
         ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
 {{- end}}
-{{- if $.ErrorAbortPredicates -}}
+{{- if $.ErrorAbortPredicates }}
         ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorAbortPredicates "," -}}{{"}"}},
 {{- end}}
     })
@@ -615,7 +619,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 
   // Explicitly set virtual fields to default values if unset
 {{- range $prop := $.VirtualFields }}
-{{      if not (eq $prop.DefaultValue nil) -}}
+{{-      if not (eq $prop.DefaultValue nil) }}
     if _, ok := d.GetOkExists("{{ $prop.Name -}}"); !ok {
         if err := d.Set("{{ $prop.Name -}}", {{ $prop.GoLiteral $prop.DefaultValue -}}); err != nil {
             return fmt.Errorf("Error setting {{ $prop.Name -}}: %s", err)
@@ -773,7 +777,7 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
     }
 {{-                 end}}
 {{-             end}}
-{{              if $.SupportsIndirectUserProjectOverride -}}
+{{-              if $.SupportsIndirectUserProjectOverride -}}
     if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
         billingProject = parts[1]
     }
@@ -797,10 +801,10 @@ if len(updateMask) > 0 {
         Body: obj,
         Timeout: d.Timeout(schema.TimeoutUpdate),
 		Headers:   headers,
-{{              if $.ErrorRetryPredicates -}}
+{{-              if $.ErrorRetryPredicates }}
         ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
 {{-             end}}
-{{-             if $.ErrorAbortPredicates -}}
+{{-             if $.ErrorAbortPredicates }}
         ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorAbortPredicates "," -}}{{"}"}},
 {{-             end}}
     })
@@ -1168,7 +1172,7 @@ func resource{{ $.ResourceName }}Import(d *schema.ResourceData, meta interface{}
             {{- end }}
         {{- end }}
         {{- if $.CustomCode.PostImport }}
-            {{- $.CustomTemplate $.CustomCode.PostImport false -}}
+            {{ $.CustomTemplate $.CustomCode.PostImport false -}}
         {{- end }}
 
     return []*schema.ResourceData{d}, nil
@@ -1206,10 +1210,11 @@ func resource{{ $.ResourceName -}}Decoder(d *schema.ResourceData, meta interface
 }
 {{- end }}
 {{- if $.CustomCode.PostCreateFailure }}
-func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta interface{}) {
     {{- $.CustomTemplate $.CustomCode.PostCreateFailure false -}}
 }
 {{- end }}
 {{- if and $.SchemaVersion $.StateUpgraders }}
+
     {{ $.CustomTemplate $.StateMigrationFile false -}}
 {{- end }}

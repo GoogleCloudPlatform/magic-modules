@@ -116,6 +116,7 @@ examples:
       cloud_run_job_name: 'cloudrun-job'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_job_run_job'
+    min_version: beta
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-job%s\", context[\"random_suffix\"\
       ])"
@@ -233,6 +234,14 @@ properties:
         name: 'useDefault'
         description: |
           If True, indicates to use the default project's binary authorization policy. If False, binary authorization will be disabled.
+        conflicts:
+          - policy
+      - !ruby/object:Api::Type::String
+        name: 'policy'
+        description: |
+          The path to a binary authorization policy. Format: projects/{project}/platforms/cloudRun/{policy-name}
+        conflicts:
+          - use_default
   - !ruby/object:Api::Type::String
     name: 'startExecutionToken'
     description: |-
@@ -313,7 +322,7 @@ properties:
                 - !ruby/object:Api::Type::Array
                   name: 'args'
                   description: |-
-                    Arguments to the entrypoint. The docker image's CMD is used if this is not provided. Variable references $(VAR_NAME) are expanded using the container's environment. If a variable cannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded, regardless of whether the variable exists or not. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell
+                    Arguments to the entrypoint. The docker image's CMD is used if this is not provided. Variable references are not supported in Cloud Run.
                   item_type: Api::Type::String
                 - !ruby/object:Api::Type::Array
                   name: 'env'
@@ -329,7 +338,7 @@ properties:
                       - !ruby/object:Api::Type::String
                         name: 'value'
                         description: |-
-                          Variable references $(VAR_NAME) are expanded using the previous defined environment variables in the container and any route environment variables. If a variable cannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded, regardless of whether the variable exists or not. Defaults to "", and the maximum length is 32768 bytes
+                          Literal value of the environment variable. Defaults to "" and the maximum allowed length is 32768 characters. Variable references are not supported in Cloud Run.
                         # exactly_one_of:
                         #   - template.0.template.0.containers.0.env.0.value
                         #   - template.0.template.0.containers.0.env.0.valueSource

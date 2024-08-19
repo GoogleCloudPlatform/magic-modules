@@ -10,7 +10,7 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */ -}}
-{{- if ne $.TargetVersionName "ga" }}
+{{- if ne $.TargetVersionName "ga" -}}
 // Resource object was flattened in GA API
 if resourceuri, ok := obj["resourceUri"]; ok {
 	obj["resource"] = map[string]interface{}{
@@ -34,7 +34,7 @@ if v, ok := obj["attestation"]; ok && v != nil {
 		},
 	}
 }
-{{- else }}
+{{- else -}}
 // encoder logic only in non-GA versions
 {{- end }}
 

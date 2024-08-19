@@ -47,11 +47,39 @@ var testTGCCmd = &cobra.Command{
 }
 
 func execTestTGC(commit, pr string, gh ttGithub) error {
+	contentTPGB, err := os.ReadFile("/workspace/commitSHA_modular-magician_terraform-provider-google-beta.txt")
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+
+	contentTGC, err := os.ReadFile("/workspace/commitSHA_modular-magician_terraform-google-conversion.txt")
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+
+	commitShaOrBranchUpstreamTPGB := string(contentTPGB)
+	commitShaOrBranchUpstreamTGC := string(contentTGC)
+
+	if commitShaOrBranchUpstreamTPGB == "" {
+		// fall back to branch if commit SHA can't be found
+		commitShaOrBranchUpstreamTPGB = "auto-pr-" + pr
+	}
+
+	if commitShaOrBranchUpstreamTGC == "" {
+		// fall back to branch if commit SHA can't be found
+		commitShaOrBranchUpstreamTGC = "auto-pr-" + pr
+	}
+
+	fmt.Println("commitShaOrBranchUpstreamTPGB: ", commitShaOrBranchUpstreamTPGB)
+	fmt.Println("commitShaOrBranchUpstreamTGC: ", commitShaOrBranchUpstreamTGC)
+
 	if err := gh.CreateWorkflowDispatchEvent("test-tgc.yml", map[string]any{
-		"owner":  "modular-magician",
-		"repo":   "terraform-google-conversion",
-		"branch": "auto-pr-" + pr,
-		"sha":    commit,
+		"owner":       "modular-magician",
+		"repo":        "terraform-google-conversion",
+		"tpgb-branch": commitShaOrBranchUpstreamTPGB,
+		"tgc-branch":  commitShaOrBranchUpstreamTGC,
+		"pr-number":   pr,
+		"sha":         commit,
 	}); err != nil {
 		return fmt.Errorf("error creating workflow dispatch event: %w", err)
 	}
