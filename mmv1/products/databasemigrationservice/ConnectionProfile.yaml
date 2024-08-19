@@ -203,22 +203,22 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'host'
         required_with:
-        - 'mysql.0.port'
-        - 'mysql.0.username'
+          - 'mysql.0.port'
+          - 'mysql.0.username'
         description: |
           The IP or hostname of the source MySQL database.
       - !ruby/object:Api::Type::Integer
         name: 'port'
         required_with:
-        - 'mysql.0.host'
-        - 'mysql.0.username'
+          - 'mysql.0.host'
+          - 'mysql.0.username'
         description: |
           The network port of the source MySQL database.
       - !ruby/object:Api::Type::String
         name: 'username'
         required_with:
-        - 'mysql.0.host'
-        - 'mysql.0.port'
+          - 'mysql.0.host'
+          - 'mysql.0.port'
         description: |
           The username that Database Migration Service will use to connect to the database. The value is encrypted when stored in Database Migration Service.
       - !ruby/object:Api::Type::String
@@ -298,25 +298,25 @@ properties:
       - !ruby/object:Api::Type::Integer
         name: 'port'
         required_with:
-        - 'postgresql.0.host'
-        - 'postgresql.0.username'
-        - 'postgresql.0.password'
+          - 'postgresql.0.host'
+          - 'postgresql.0.username'
+          - 'postgresql.0.password'
         description: |
           The network port of the source MySQL database.
       - !ruby/object:Api::Type::String
         name: 'username'
         required_with:
-        - 'postgresql.0.host'
-        - 'postgresql.0.port'
-        - 'postgresql.0.password'
+          - 'postgresql.0.host'
+          - 'postgresql.0.port'
+          - 'postgresql.0.password'
         description: |
           The username that Database Migration Service will use to connect to the database. The value is encrypted when stored in Database Migration Service.
       - !ruby/object:Api::Type::String
         name: 'password'
         required_with:
-        - 'postgresql.0.host'
-        - 'postgresql.0.port'
-        - 'postgresql.0.username'
+          - 'postgresql.0.host'
+          - 'postgresql.0.port'
+          - 'postgresql.0.username'
         immutable: true
         description: |
           Input only. The password for the user that Database Migration Service will be using to connect to the database.
