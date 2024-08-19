@@ -53,7 +53,7 @@ async: !ruby/object:Api::OpAsync
     path: 'error/errors'
     message: 'message'
 exclude_tgc: true
-id_format: '{{project}}/{{region}}/{{router}}/{{routerNat}}'
+id_format: 'projects/{{project}}/regions/{{region}}/routers/{{router}}/{{router_nat}}'
 mutex: router/{{region}}/{{router}}
 examples:
   - !ruby/object:Provider::Terraform::Examples
@@ -66,11 +66,15 @@ examples:
       network_name: 'my-network'
       subnet_name: 'my-subnetwork'
       address_name: 'nat-manual-ip'
-# ToDo: We use a custom code for CREATE since the generated code is erroneously not replacing the encoder, this could be related to using a combination of parameters such as nested_query
+# ToDo: We use a custom code for CREATE since the generated code is erroneously not replacing the generated encoder with the custom one provided
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: 'templates/terraform/constants/router_nat_address.go.erb'
   custom_create: templates/terraform/custom_create/router_nat_address_nested_query_create_encoder.go.erb
   encoder: 'templates/terraform/encoders/router_nat_address_patch_on_create.go.erb'
   update_encoder: 'templates/terraform/encoders/router_nat_address_update_skip_encoder.go.erb'
+custom_diff: [
+  'resourceComputeRouterNatAddressDrainNatIpsCustomDiff',
+]
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'router'
@@ -115,4 +119,17 @@ properties:
       resource: 'Address'
       imports: 'selfLink'
       description: 'A reference to an address to be associated with this NAT'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
+  - !ruby/object:Api::Type::Array
+    name: 'drainNatIps'
+    description: |
+      A list of URLs of the IP resources to be drained. These IPs must be
+      valid static external IPs that have been assigned to the NAT.
+    send_empty_value: true
+    is_set: true
+    item_type: !ruby/object:Api::Type::ResourceRef
+      name: 'address'
+      resource: 'Address'
+      imports: 'selfLink'
+      description: 'A reference to an address associated with this NAT'
     custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
