@@ -126,6 +126,20 @@ Removed in favor of field `settings.ip_configuration.ssl_mode`.
 
 An empty value means the setting should be cleared.
 
+## Resources: `google_container_cluster`, `google_container_node_pool`, and `google_compute_instance`
+
+### `guest_accelerator = []` is no longer valid configuration
+
+To explicitly set an empty list of objects, set `guest_accelerator.count = 0`.
+
+Previously, to explicitly set `guest_accelerator` as an empty list of objects, the specific configuration `guest_accelerator = []` was necessary.
+This was to maintain compatability in behavior between Terraform versions 0.11 and 0.12 using a special setting ["attributes as blocks"](https://developer.hashicorp.com/terraform/language/attr-as-blocks).
+This special setting causes other breakages so it is now removed, with setting `guest_accelerator.count = 0` available as an alternative form of empty `guest_accelerator` object.
+
+### `guest_accelerator.gpu_driver_installation_config = []` and `guest_accelerator.gpu_sharing_config = []` are no longer valid configuration
+
+These were never intended to be set this way. Removing the fields from configuration should not produce a diff.
+
 ## Resource: `google_domain`
 
 ### Domain deletion now prevented by default with `deletion_protection`
@@ -159,6 +173,16 @@ will remove the liveness probe from the Cloud Run service.
 Previously, `containers.env` was a list, making it order-dependent. It is now a set.
 
 If you were relying on accessing an individual environment variable by index (for example, `google_cloud_run_v2_service.template.containers.0.env.0.name`), then that will now need to by hash (for example, `google_cloud_run_v2_service.template.containers.0.env.<some-hash>.name`).
+
+## Resource: `google_compute_subnetwork`
+
+### `secondary_ip_range = []` is no longer valid configuration
+
+To explicitly set an empty list of objects, use `send_secondary_ip_range_if_empty = true` and completely remove `secondary_ip_range` from config.
+
+Previously, to explicitly set `secondary_ip_range` as an empty list of objects, the specific configuration `secondary_ip_range = []` was necessary.
+This was to maintain compatability in behavior between Terraform versions 0.11 and 0.12 using a special setting ["attributes as blocks"](https://developer.hashicorp.com/terraform/language/attr-as-blocks).
+This special setting causes other breakages so it is now removed, with `send_secondary_ip_range_if_empty` available instead.
 
 ## Resource: `google_compute_backend_service`
 
@@ -210,3 +234,15 @@ that are derived from the API.
 ### Resource: `google_identity_platform_project_default_config` is now removed
 
 `google_identity_platform_project_default_config` is removed in favor of `google_identity_platform_project_config`
+
+## Resource: `google_storage_bucket`
+
+### `lifecycle_rule.condition.no_age` is now removed
+
+Previously `lifecycle_rule.condition.age` attribute was being set to zero by default and `lifecycle_rule.condition.no_age` was introduced to prevent that.
+Now `lifecycle_rule.condition.no_age` is no longer supported and `lifecycle_rule.condition.age` won't be set to zero by default.
+Removed in favor of the field `lifecycle_rule.condition.send_age_if_zero` which can be used to set a zero value for the `lifecycle_rule.condition.age` attribute. 
+
+For a seamless update, if your state today uses `no_age=true`, update it to remove `no_age` and set `send_age_if_zero=false`. If you do not use `no_age=true` and desire to continue creating rules with an `age=0` condition, you will need to add `send_age_if_zero=true` to your state to avoid any changes after updating to 6.0.0. 
+
+With the 6.0.0 update, `send_age_if_zero` will be set to `false` by default unless declared explicitly `true`, and `age=0` conditions will be removed from existing buckets next time your `lifecycle_rule.condition` configuration is updated.
