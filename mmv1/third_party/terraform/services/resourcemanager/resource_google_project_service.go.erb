@@ -6,7 +6,10 @@ import (
 	"log"
 	"strings"
 	"time"
+	<% unless version == 'ga' -%>
 	"regexp"
+	<% end -%>
+
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
