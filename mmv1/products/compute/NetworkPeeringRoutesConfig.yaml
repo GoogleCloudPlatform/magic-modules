@@ -115,7 +115,6 @@ properties:
     name: 'exportSubnetRoutesWithPublicIp'
     description: |
       Whether subnet routes with public IP range are exported.
-      All subnet routes are exported.
       IPv4 special-use ranges are always exported to peers and
       are not controlled by this field.
     send_empty_value: true
