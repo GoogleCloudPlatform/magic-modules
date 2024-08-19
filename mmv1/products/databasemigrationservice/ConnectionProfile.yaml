@@ -96,6 +96,24 @@ examples:
       global_address_name: 'private-ip-alloc'
       network_name: 'vpc-network'
     skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'database_migration_service_connection_profile_existing_mysql'
+    primary_resource_id: 'existing-mysql'
+    vars:
+      destination_csql: 'destination-csql'
+      destination_cp: 'destination-cp'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'database_migration_service_connection_profile_existing_postgres'
+    primary_resource_id: 'existing-psql'
+    vars:
+      destination_csql: 'destination-csql'
+      destination_cp: 'destination-cp'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'database_migration_service_connection_profile_existing_alloydb'
+    primary_resource_id: 'existing-alloydb'
+    vars:
+      destination_alloydb: 'destination-alloydb'
+      destination_cp: 'destination-cp'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'connectionProfileId'
