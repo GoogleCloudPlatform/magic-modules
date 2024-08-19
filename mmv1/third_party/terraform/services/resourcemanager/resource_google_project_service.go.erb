@@ -2,22 +2,24 @@
 package resourcemanager
 
 import (
-	"fmt"
-	"log"
-	"strings"
-	"time"
-	"regexp"
+    "fmt"
+    "log"
+    "strings"
+    "time"
+	<% unless version == 'ga' -%>
+    "regexp"
+	<% end -%>
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	tpgserviceusage "github.com/hashicorp/terraform-provider-google/google/services/serviceusage"
-	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-	"github.com/hashicorp/terraform-provider-google/google/verify"
+    tpgserviceusage "github.com/hashicorp/terraform-provider-google/google/services/serviceusage"
+    "github.com/hashicorp/terraform-provider-google/google/tpgresource"
+    transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+    "github.com/hashicorp/terraform-provider-google/google/verify"
 
-	"google.golang.org/api/googleapi"
-	"google.golang.org/api/serviceusage/v1"
+    "google.golang.org/api/googleapi"
+    "google.golang.org/api/serviceusage/v1"
 )
 
 // These services can only be enabled as a side-effect of enabling other services,
