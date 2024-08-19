@@ -167,6 +167,15 @@ func TestAccLoggingBucketConfigProject_testReleaseChange(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"project"},
 			},
+			{
+				Config: testAccLoggingBucketConfigProject_analyticsEnabled(context, true),
+			},
+			{
+				ResourceName:            "google_logging_project_bucket_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"project"},
+			},
 		},
 	})
 }
