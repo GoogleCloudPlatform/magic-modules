@@ -212,11 +212,7 @@ func resourceLoggingProjectBucketConfigCreate(d *schema.ResourceData, meta inter
 	obj["description"] = d.Get("description")
 	obj["locked"] = d.Get("locked")
 	obj["retentionDays"] = d.Get("retention_days")
-	// Only set analyticsEnabled if it has been explicitly preferenced.
-	analyticsRawValue := d.GetRawConfig().GetAttr("enable_analytics")
-	if !analyticsRawValue.IsNull() {
-		obj["analyticsEnabled"] = analyticsRawValue.True()
-	}
+	obj["analyticsEnabled"] = d.Get("enable_analytics")
 	obj["cmekSettings"] = expandCmekSettings(d.Get("cmek_settings"))
 	obj["indexConfigs"] = expandIndexConfigs(d.Get("index_configs"))
 

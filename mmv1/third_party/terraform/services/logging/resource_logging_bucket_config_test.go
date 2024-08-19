@@ -140,6 +140,37 @@ func TestAccLoggingBucketConfigProject_analyticsEnabled(t *testing.T) {
 	})
 }
 
+func TestAccLoggingBucketConfigProject_testReleaseChange(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix":   acctest.RandString(t, 10),
+		"project_name":    "tf-test-" + acctest.RandString(t, 10),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"bucket_id":       "tf-test-bucket-" + acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLoggingBucketConfigProject_analyticsEnabled(context, false),
+			},
+			{
+				ResourceName:            "google_logging_project_bucket_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"project"},
+			},
+		},
+	})
+}
+
 func TestAccLoggingBucketConfigProject_cmekSettings(t *testing.T) {
 	t.Parallel()
 
