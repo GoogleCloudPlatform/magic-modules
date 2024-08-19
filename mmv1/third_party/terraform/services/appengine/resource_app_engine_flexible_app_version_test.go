@@ -3,7 +3,7 @@ package appengine_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -19,7 +19,7 @@ func TestAccAppEngineFlexibleAppVersion_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckAppEngineFlexibleAppVersionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -47,6 +47,7 @@ func TestAccAppEngineFlexibleAppVersion_update(t *testing.T) {
 func testAccAppEngineFlexibleAppVersion_python(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_project" "my_project" {
+  provider = google-beta
   name = "tf-test-appeng-flex%{random_suffix}"
   project_id = "tf-test-appeng-flex%{random_suffix}"
   org_id = "%{org_id}"
@@ -54,6 +55,7 @@ resource "google_project" "my_project" {
 }
 
 resource "google_project_service" "compute" {
+  provider = google-beta
   project = google_project.my_project.project_id
   service = "compute.googleapis.com"
 
@@ -61,6 +63,7 @@ resource "google_project_service" "compute" {
 }
 
 resource "google_project_service" "appengineflex" {
+  provider = google-beta
   project = google_project.my_project.project_id
   service = "appengineflex.googleapis.com"
 
@@ -68,13 +71,37 @@ resource "google_project_service" "appengineflex" {
   depends_on = [google_project_service.compute]
 }
 
+resource "google_project_service" "appengine" {
+  provider = google-beta
+  project = google_project.my_project.project_id
+  service = "appengine.googleapis.com"
+
+  disable_dependent_services = false
+  depends_on = [google_project_service.compute]
+}
+
+resource "google_project_service_identity" "gae_flex_sa" {
+  provider = google-beta
+
+  project = google_project_service.appengineflex.project
+  service = "appengineflex.googleapis.com"
+}
+
+// <PROJECT_ID>@appspot.gserviceaccount.com
+data "google_app_engine_default_service_account" "default" {
+  provider = google-beta
+  project = google_project_service.appengine.project
+}
+
 resource "google_compute_network" "network" {
+  provider = google-beta
   project                 = google_project_service.compute.project
   name                    = "custom"
   auto_create_subnetworks = "false"
 }
 
 resource "google_compute_subnetwork" "subnetwork" {
+  provider = google-beta
   project                  = google_project_service.compute.project
   name                     = "custom"
   region                   = "us-central1"
@@ -83,31 +110,43 @@ resource "google_compute_subnetwork" "subnetwork" {
   private_ip_google_access = true
 }
 
-resource "google_service_account" "custom_service_account" {
-  project      = google_project_service.appengineflex.project
-  account_id   = "tf-test-app-eng-%{random_suffix}"
-  display_name = "Service account for GAE acc test"
-}
-
 resource "google_app_engine_application" "app" {
-  project     = google_project_service.appengineflex.project
+  provider = google-beta
+  project     = google_project.my_project.project_id
   location_id = "us-central"
 }
 
-resource "google_project_iam_member" "storage_viewer" {
-  project     = google_project.my_project.project_id
-  role    = "roles/storage.admin"
-  member  = "serviceAccount:${google_service_account.custom_service_account.email}"
+resource "google_project_iam_member" "network_gae_flex_sa" {
+  provider = google-beta
+  project  = google_project_service.appengineflex.project
+  role     = "roles/compute.networkUser"
+  member   = "serviceAccount:${google_project_service_identity.gae_flex_sa.email}"
 }
 
-resource "google_project_iam_member" "gae_api" {
-  project = google_project_service.appengineflex.project
-  role    = "roles/compute.networkUser"
-  member  = "serviceAccount:${google_service_account.custom_service_account.email}"
+resource "google_project_iam_member" "network_gae_sa" {
+  provider = google-beta
+  project  = google_project_service.appengineflex.project
+  role     = "roles/compute.networkUser"
+  member  = "serviceAccount:${data.google_app_engine_default_service_account.default.email}"
+}
+
+resource "google_project_iam_member" "storage_admin_gae_flex_sa" {
+  provider = google-beta
+  project  = google_project.my_project.project_id
+  role     = "roles/storage.admin"
+  member   = "serviceAccount:${google_project_service_identity.gae_flex_sa.email}"
+}
+
+resource "google_project_iam_member" "storage_admin_gae_sa" {
+  provider = google-beta
+  project  = google_project_service.appengine.project
+  role     = "roles/storage.admin"
+  member  = "serviceAccount:${data.google_app_engine_default_service_account.default.email}"
 }
 
 resource "google_app_engine_standard_app_version" "foo" {
-  project    = google_project_iam_member.gae_api.project
+  provider = google-beta
+  project    = google_project_iam_member.storage_admin_gae_sa.project
   version_id = "v1"
   service    = "default"
   runtime    = "python38"
@@ -119,12 +158,12 @@ resource "google_app_engine_standard_app_version" "foo" {
   deployment {
     files {
       name = "main.py"
-      source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/${google_storage_bucket_object.main.name}"
+      source_url = google_storage_bucket_object.main.media_link
     }
 
     files {
       name = "requirements.txt"
-      source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/${google_storage_bucket_object.requirements.name}"
+      source_url = google_storage_bucket_object.requirements.media_link
     }
   }
 
@@ -133,11 +172,14 @@ resource "google_app_engine_standard_app_version" "foo" {
   }
 
   noop_on_destroy = true
-  service_account = google_service_account.custom_service_account.email
+  depends_on = [
+    google_project_iam_member.storage_admin_gae_sa
+  ]
 }
 
 resource "google_app_engine_flexible_app_version" "foo" {
-  project    = google_project_iam_member.gae_api.project
+  provider = google-beta
+  project    = google_project_iam_member.storage_admin_gae_flex_sa.project
   version_id = "v1"
   service    = "custom"
   runtime    = "python"
@@ -162,17 +204,17 @@ resource "google_app_engine_flexible_app_version" "foo" {
   deployment {
     files {
       name = "main.py"
-      source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/${google_storage_bucket_object.main.name}"
+      source_url = google_storage_bucket_object.main.media_link
     }
 
     files {
       name = "requirements.txt"
-      source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/${google_storage_bucket_object.requirements.name}"
+      source_url = google_storage_bucket_object.requirements.media_link
     }
 
     files {
       name = "app.yaml"
-      source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/${google_storage_bucket_object.yaml.name}"
+      source_url = google_storage_bucket_object.yaml.media_link
     }
   }
 
@@ -201,30 +243,36 @@ resource "google_app_engine_flexible_app_version" "foo" {
   }
 
   noop_on_destroy = true
-  service_account = google_service_account.custom_service_account.email
 
-  depends_on = [google_app_engine_standard_app_version.foo]
+  depends_on = [
+    google_app_engine_standard_app_version.foo,
+    google_project_iam_member.storage_admin_gae_flex_sa,
+  ]
 }
 
 resource "google_storage_bucket" "bucket" {
+  provider = google-beta
   project  = google_project.my_project.project_id
   name     = "tf-test-%{random_suffix}-flex-ae-bucket"
   location = "US"
 }
 
 resource "google_storage_bucket_object" "yaml" {
+  provider = google-beta
   name   = "app.yaml"
   bucket = google_storage_bucket.bucket.name
   source = "./test-fixtures/hello-world-flask/app.yaml"
 }
 
 resource "google_storage_bucket_object" "requirements" {
+  provider = google-beta
   name   = "requirements.txt"
   bucket = google_storage_bucket.bucket.name
   source = "./test-fixtures/hello-world-flask/requirements.txt"
 }
 
 resource "google_storage_bucket_object" "main" {
+  provider = google-beta
   name   = "main.py"
   bucket = google_storage_bucket.bucket.name
   source = "./test-fixtures/hello-world-flask/main.py"
@@ -234,6 +282,7 @@ resource "google_storage_bucket_object" "main" {
 func testAccAppEngineFlexibleAppVersion_pythonUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_project" "my_project" {
+  provider = google-beta
   name = "tf-test-appeng-flex%{random_suffix}"
   project_id = "tf-test-appeng-flex%{random_suffix}"
   org_id = "%{org_id}"
@@ -241,6 +290,7 @@ resource "google_project" "my_project" {
 }
 
 resource "google_project_service" "compute" {
+  provider = google-beta
   project = google_project.my_project.project_id
   service = "compute.googleapis.com"
 
@@ -248,6 +298,7 @@ resource "google_project_service" "compute" {
 }
 
 resource "google_project_service" "appengineflex" {
+  provider = google-beta
   project = google_project.my_project.project_id
   service = "appengineflex.googleapis.com"
 
@@ -255,13 +306,37 @@ resource "google_project_service" "appengineflex" {
   depends_on = [google_project_service.compute]
 }
 
+resource "google_project_service" "appengine" {
+  provider = google-beta
+  project = google_project.my_project.project_id
+  service = "appengine.googleapis.com"
+
+  disable_dependent_services = false
+  depends_on = [google_project_service.compute]
+}
+
+resource "google_project_service_identity" "gae_flex_sa" {
+  provider = google-beta
+
+  project = google_project_service.appengineflex.project
+  service = "appengineflex.googleapis.com"
+}
+
+// <PROJECT_ID>@appspot.gserviceaccount.com
+data "google_app_engine_default_service_account" "default" {
+  provider = google-beta
+  project = google_project_service.appengine.project
+}
+
 resource "google_compute_network" "network" {
+  provider = google-beta
   project                 = google_project_service.compute.project
   name                    = "custom"
   auto_create_subnetworks = "false"
 }
 
 resource "google_compute_subnetwork" "subnetwork" {
+  provider = google-beta
   project                  = google_project_service.compute.project
   name                     = "custom"
   region                   = "us-central1"
@@ -270,31 +345,43 @@ resource "google_compute_subnetwork" "subnetwork" {
   private_ip_google_access = true
 }
 
-resource "google_service_account" "custom_service_account" {
-  project      = google_project_service.appengineflex.project
-  account_id   = "tf-test-app-eng-%{random_suffix}"
-  display_name = "Service account for GAE acc test"
-}
-
 resource "google_app_engine_application" "app" {
-  project     = google_project_service.appengineflex.project
+  provider = google-beta
+  project     = google_project.my_project.project_id
   location_id = "us-central"
 }
 
-resource "google_project_iam_member" "storage_viewer" {
-  project     = google_project.my_project.project_id
-  role    = "roles/storage.admin"
-  member  = "serviceAccount:${google_service_account.custom_service_account.email}"
+resource "google_project_iam_member" "network_gae_flex_sa" {
+  provider = google-beta
+  project  = google_project_service.appengineflex.project
+  role     = "roles/compute.networkUser"
+  member   = "serviceAccount:${google_project_service_identity.gae_flex_sa.email}"
 }
 
-resource "google_project_iam_member" "gae_api" {
-  project = google_project_service.appengineflex.project
-  role    = "roles/compute.networkUser"
-  member  = "serviceAccount:${google_service_account.custom_service_account.email}"
+resource "google_project_iam_member" "network_gae_sa" {
+  provider = google-beta
+  project  = google_project_service.appengineflex.project
+  role     = "roles/compute.networkUser"
+  member  = "serviceAccount:${data.google_app_engine_default_service_account.default.email}"
+}
+
+resource "google_project_iam_member" "storage_admin_gae_flex_sa" {
+  provider = google-beta
+  project  = google_project.my_project.project_id
+  role     = "roles/storage.admin"
+  member   = "serviceAccount:${google_project_service_identity.gae_flex_sa.email}"
+}
+
+resource "google_project_iam_member" "storage_admin_gae_sa" {
+  provider = google-beta
+  project  = google_project_service.appengine.project
+  role     = "roles/storage.admin"
+  member  = "serviceAccount:${data.google_app_engine_default_service_account.default.email}"
 }
 
 resource "google_app_engine_standard_app_version" "foo" {
-  project    = google_project_iam_member.gae_api.project
+  provider = google-beta
+  project    = google_project_iam_member.storage_admin_gae_sa.project
   version_id = "v1"
   service    = "default"
   runtime    = "python38"
@@ -306,12 +393,12 @@ resource "google_app_engine_standard_app_version" "foo" {
   deployment {
     files {
       name = "main.py"
-      source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/${google_storage_bucket_object.main.name}"
+      source_url = google_storage_bucket_object.main.media_link
     }
 
     files {
       name = "requirements.txt"
-      source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/${google_storage_bucket_object.requirements.name}"
+      source_url = google_storage_bucket_object.requirements.media_link
     }
   }
 
@@ -320,11 +407,15 @@ resource "google_app_engine_standard_app_version" "foo" {
   }
 
   noop_on_destroy = true
-  service_account = google_service_account.custom_service_account.email
+  depends_on = [
+    google_project_iam_member.gae_api,
+    google_project_iam_member.storage_admin_gae_sa
+  ]
 }
 
 resource "google_app_engine_flexible_app_version" "foo" {
-  project    = google_project_iam_member.gae_api.project
+  provider = google-beta
+  project    = google_project_iam_member.storage_admin_gae_flex_sa.project
   version_id = "v1"
   service    = "custom"
   runtime    = "python"
@@ -349,17 +440,17 @@ resource "google_app_engine_flexible_app_version" "foo" {
   deployment {
     files {
       name = "main.py"
-      source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/${google_storage_bucket_object.main.name}"
+      source_url = google_storage_bucket_object.main.media_link
     }
 
     files {
       name = "requirements.txt"
-      source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/${google_storage_bucket_object.requirements.name}"
+      source_url = google_storage_bucket_object.requirements.media_link
     }
 
     files {
       name = "app.yaml"
-      source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/${google_storage_bucket_object.yaml.name}"
+      source_url = google_storage_bucket_object.yaml.media_link
     }
   }
 
@@ -388,30 +479,36 @@ resource "google_app_engine_flexible_app_version" "foo" {
   }
 
   delete_service_on_destroy = true
-  service_account = google_service_account.custom_service_account.email
-
-  depends_on = [google_app_engine_standard_app_version.foo]
+  
+  depends_on = [
+    google_app_engine_standard_app_version.foo,
+    google_project_iam_member.storage_admin_gae_flex_sa,
+  ]
 }
 
 resource "google_storage_bucket" "bucket" {
+  provider = google-beta
   project  = google_project.my_project.project_id
   name     = "tf-test-%{random_suffix}-flex-ae-bucket"
   location = "US"
 }
 
 resource "google_storage_bucket_object" "yaml" {
+  provider = google-beta
   name   = "app.yaml"
   bucket = google_storage_bucket.bucket.name
   source = "./test-fixtures/hello-world-flask/app.yaml"
 }
 
 resource "google_storage_bucket_object" "requirements" {
+  provider = google-beta
   name   = "requirements.txt"
   bucket = google_storage_bucket.bucket.name
   source = "./test-fixtures/hello-world-flask/requirements.txt"
 }
 
 resource "google_storage_bucket_object" "main" {
+  provider = google-beta
   name   = "main.py"
   bucket = google_storage_bucket.bucket.name
   source = "./test-fixtures/hello-world-flask/main.py"
