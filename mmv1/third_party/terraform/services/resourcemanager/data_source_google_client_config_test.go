@@ -50,16 +50,12 @@ func TestAccDataSourceGoogleClientConfig_omitLocation(t *testing.T) {
 	})
 }
 
-// Test checks how the data source behaves when invalid credentials are used
-// This test sets them as an ENV
 func TestAccDataSourceGoogleClientConfig_invalidCredentials(t *testing.T) {
-	// t.Parallel() - Cannot use as we change ENVs
-
 	badCreds := acctest.GenerateFakeCredentialsJson("test")
 	t.Setenv("GOOGLE_CREDENTIALS", badCreds)
 
 	acctest.VcrTest(t, resource.TestCase{
-		// PreCheck cannot be set as usual, as test has GOOGLE_CREDENTIALS unset
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
