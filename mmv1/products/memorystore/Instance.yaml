@@ -7,10 +7,26 @@ id_format: "/v1beta/projects/{{project}}/locations/{{location}}/instances/{{inst
 import_format:
   - "/v1beta/projects/{{project}}/locations/{{location}}/instances/{{instance_id}}"
 name: Instance
-description: Description
+description: A Google Cloud Memorystore instance.
 update_verb: :PATCH
 update_mask: true
 autogen_async: true
+min_version: beta
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "memorystore_ha"
+    primary_resource_id: "instance-ha"
+    min_version: beta
+    vars:
+      instance_name: "ha-instance"
+      policy_name: "mypolicy"
+      subnet_name: "mysubnet"
+      network_name: "mynetwork"
+      prevent_destroy: "true"
+    test_vars_overrides:
+      prevent_destroy: "false"
+    oics_vars_overrides:
+      prevent_destroy: "false"
 properties:
   - !ruby/object:Api::Type::String
     name: name
