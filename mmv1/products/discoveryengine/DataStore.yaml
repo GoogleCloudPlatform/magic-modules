@@ -70,14 +70,6 @@ examples:
       'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
     vars:
       data_store_id: "data-store-id"
-  - !ruby/object:Provider::Terraform::Examples
-    name: "discoveryengine_datastore_workspace_config"
-    skip_docs: true
-    primary_resource_id: 'document_workspace_config'
-    primary_resource_name:
-      'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
-    vars:
-      data_store_id: "data-store-id"
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -167,39 +159,8 @@ properties:
       - :NO_CONTENT
       - :CONTENT_REQUIRED
       - :PUBLIC_WEBSITE
-      - :GOOGLE_WORKSPACE
     immutable: true
     required: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'workspaceConfig'
-    description: |
-      Config to store data store type configuration for workspace data. This must be set when DataStore.content_config is set as DataStore.ContentConfig.GOOGLE_WORKSPACE.
-    required: false
-    properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: 'layoutBasedChunkingConfig'
-        allow_empty_object: true
-        send_empty_value: true
-        description: |
-          Configuration for the layout based chunking.
-        required: false
-        properties:
-          - !ruby/object:Api::Type::Enum
-            name: 'type'
-            required: false
-            values:
-              - :GOOGLE_DRIVE
-              - :GOOGLE_MAIL
-              - :GOOGLE_SITES
-              - :GOOGLE_CALENDAR
-              - :GOOGLE_GROUPS
-            description: |
-              The Google Workspace data source.
-          - !ruby/object:Api::Type::Boolean
-            name: 'dasherCustomerId'
-            required: false
-            description: |
-              Obfuscated Dasher customer id.
   - !ruby/object:Api::Type::NestedObject
     name: 'documentProcessingConfig'
     immutable: true
