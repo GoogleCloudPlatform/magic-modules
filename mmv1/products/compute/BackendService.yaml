@@ -275,8 +275,8 @@ properties:
           name: 'preference'
           default_from_api: true
           description: |
-            Indicates whether this backend should be fully utilized before 
-            sending traffic to backends with default preference. The possible 
+            Indicates whether this backend should be fully utilized before
+            sending traffic to backends with default preference. The possible
             values are PREFERRED and DEFAULT.
           values:
             - :PREFERRED
