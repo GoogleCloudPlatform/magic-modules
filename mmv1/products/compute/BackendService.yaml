@@ -271,6 +271,16 @@ properties:
           description: |
             Used when balancingMode is UTILIZATION. This ratio defines the
             CPU utilization target for the group. Valid range is [0.0, 1.0].
+        - !ruby/object:Api::Type::Enum
+          name: 'preference'
+          default_from_api: true
+          description: |
+            Indicates whether this backend should be fully utilized before 
+            sending traffic to backends with default preference. The possible 
+            values are PREFERRED and DEFAULT.
+          values:
+            - :PREFERRED
+            - :DEFAULT
   - !ruby/object:Api::Type::NestedObject
     name: 'circuitBreakers'
     description: |
