@@ -132,6 +132,17 @@ func setLabelsFields(labelsField string, d *schema.ResourceDiff, meta interface{
 	return nil
 }
 
+func SetLabelsDiffWithoutAttributionLabel(c context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	config := meta.(*transport_tpg.Config)
+	previouslySetValue := config.AddTerraformAttributionLabel
+	config.AddTerraformAttributionLabel = false
+
+	err := SetLabelsDiff(c, d, meta)
+
+	config.AddTerraformAttributionLabel = previouslySetValue
+	return err
+}
+
 // The CustomizeDiff func to set the values of terraform_labels and effective_labels fields
 // when labels field is at the root level and named "labels".
 func SetLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
