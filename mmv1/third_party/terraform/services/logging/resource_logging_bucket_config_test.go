@@ -177,7 +177,6 @@ func TestAccLoggingBucketConfigProject_testReleaseChange(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"project"},
 			},
 		},
-		},
 	})
 }
 
