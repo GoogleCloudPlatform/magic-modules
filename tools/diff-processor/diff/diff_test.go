@@ -5,9 +5,9 @@ import (
 
 	newProvider "google/provider/new/google/provider"
 	newTpgresource "google/provider/new/google/tpgresource"
-	oldTpgresource "google/provider/new/google/tpgresource"
 	newVerify "google/provider/new/google/verify"
 	oldProvider "google/provider/old/google/provider"
+	oldTpgresource "google/provider/old/google/tpgresource"
 	oldVerify "google/provider/old/google/verify"
 
 	"github.com/davecgh/go-spew/spew"
@@ -218,11 +218,12 @@ func testValidateDiagFunc2(v interface{}, p cty.Path) diag.Diagnostics {
 	return diag.Diagnostics{}
 }
 
-func TestFieldChanged(t *testing.T) {
+func TestDiffFields(t *testing.T) {
 	cases := map[string]struct {
-		oldField      *schema.Schema
-		newField      *schema.Schema
-		expectChanged bool
+		oldField          *schema.Schema
+		newField          *schema.Schema
+		expectChanged     bool
+		expectedConflicts *FieldConflictSetsDiff
 	}{
 		"both nil": {
 			oldField:      nil,
@@ -391,6 +392,10 @@ func TestFieldChanged(t *testing.T) {
 				ConflictsWith: []string{"field_two", "field_three"},
 			},
 			expectChanged: true,
+			expectedConflicts: &FieldConflictSetsDiff{
+				Old: makeFieldConflictSetsFromKey("field_one,field_two///"),
+				New: makeFieldConflictSetsFromKey("field_three,field_two///"),
+			},
 		},
 		"ExactlyOneOf reordered": {
 			oldField: &schema.Schema{
@@ -409,6 +414,10 @@ func TestFieldChanged(t *testing.T) {
 				ExactlyOneOf: []string{"field_two", "field_three"},
 			},
 			expectChanged: true,
+			expectedConflicts: &FieldConflictSetsDiff{
+				Old: makeFieldConflictSetsFromKey("/field_one,field_two//"),
+				New: makeFieldConflictSetsFromKey("/field_three,field_two//"),
+			},
 		},
 		"AtLeastOneOf reordered": {
 			oldField: &schema.Schema{
@@ -427,6 +436,10 @@ func TestFieldChanged(t *testing.T) {
 				AtLeastOneOf: []string{"field_two", "field_three"},
 			},
 			expectChanged: true,
+			expectedConflicts: &FieldConflictSetsDiff{
+				Old: makeFieldConflictSetsFromKey("//field_one,field_two/"),
+				New: makeFieldConflictSetsFromKey("//field_three,field_two/"),
+			},
 		},
 		"RequiredWith reordered": {
 			oldField: &schema.Schema{
@@ -445,6 +458,10 @@ func TestFieldChanged(t *testing.T) {
 				RequiredWith: []string{"field_two", "field_three"},
 			},
 			expectChanged: true,
+			expectedConflicts: &FieldConflictSetsDiff{
+				Old: makeFieldConflictSetsFromKey("///field_one,field_two"),
+				New: makeFieldConflictSetsFromKey("///field_three,field_two"),
+			},
 		},
 		"simple Elem unset -> set": {
 			oldField: &schema.Schema{},
@@ -984,7 +1001,8 @@ func TestFieldChanged(t *testing.T) {
 		tc := tc
 		t.Run(tn, func(t *testing.T) {
 			t.Parallel()
-			changed := fieldChanged(tc.oldField, tc.newField)
+			fd := diffFields(tc.oldField, tc.newField)
+			changed := fd != nil
 			if changed != tc.expectChanged {
 				if diff := cmp.Diff(tc.oldField, tc.newField); diff != "" {
 					t.Errorf("want %t; got %t.\nField diff (-old, +new):\n%s",
@@ -999,6 +1017,10 @@ func TestFieldChanged(t *testing.T) {
 						spew.Sdump(tc.oldField),
 						spew.Sdump(tc.newField),
 					)
+				}
+			} else if changed {
+				if diff := cmp.Diff(tc.expectedConflicts, fd.Conflicts); diff != "" {
+					t.Errorf("Conflicts different than expected. (-want, +got):\n%s", diff)
 				}
 			}
 		})
@@ -1151,10 +1173,102 @@ func TestComputeSchemaDiff(t *testing.T) {
 						New: &schema.Resource{},
 					},
 					Fields: map[string]FieldDiff{
-						"field_two.field_four": FieldDiff{
+						"field_two.field_four": {
 							Old: nil,
 							New: &schema.Schema{
 								Type: schema.TypeInt,
+							},
+						},
+					},
+				},
+			},
+		},
+		"new-nested-field-with-conflicts": {
+			oldResourceMap: map[string]*schema.Resource{
+				"google_service_one_resource_two": {
+					Schema: map[string]*schema.Schema{
+						"field_one": {
+							Type: schema.TypeString,
+						},
+						"field_two": {
+							Type: schema.TypeList,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"field_three": {
+										Type: schema.TypeString,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			newResourceMap: map[string]*schema.Resource{
+				"google_service_one_resource_two": {
+					Schema: map[string]*schema.Schema{
+						"field_one": {
+							Type: schema.TypeString,
+						},
+						"field_two": {
+							Type: schema.TypeList,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"field_three": {
+										Type: schema.TypeString,
+										ConflictsWith: []string{
+											"field_two.0.field_three",
+											"field_two.0.field_four",
+										},
+									},
+									"field_four": {
+										Type: schema.TypeInt,
+										ConflictsWith: []string{
+											"field_two.0.field_three",
+											"field_two.0.field_four",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			expectedSchemaDiff: SchemaDiff{
+				"google_service_one_resource_two": ResourceDiff{
+					ResourceConfig: ResourceConfigDiff{
+						Old: &schema.Resource{},
+						New: &schema.Resource{},
+						Conflicts: &FieldConflictSetsDiff{
+							New: makeFieldConflictSetsFromKey("field_two.field_four,field_two.field_three///"),
+						},
+					},
+					Fields: map[string]FieldDiff{
+						"field_two.field_three": {
+							Old: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							New: &schema.Schema{
+								Type: schema.TypeString,
+								ConflictsWith: []string{
+									"field_two.0.field_three",
+									"field_two.0.field_four",
+								},
+							},
+							Conflicts: &FieldConflictSetsDiff{
+								New: makeFieldConflictSetsFromKey("field_two.field_four,field_two.field_three///"),
+							},
+						},
+						"field_two.field_four": {
+							Old: nil,
+							New: &schema.Schema{
+								Type: schema.TypeInt,
+								ConflictsWith: []string{
+									"field_two.0.field_three",
+									"field_two.0.field_four",
+								},
+							},
+							Conflicts: &FieldConflictSetsDiff{
+								New: makeFieldConflictSetsFromKey("field_two.field_four,field_two.field_three///"),
 							},
 						},
 					},
@@ -1247,7 +1361,7 @@ func TestComputeSchemaDiff(t *testing.T) {
 						New: &schema.Resource{},
 					},
 					Fields: map[string]FieldDiff{
-						"field_two.field_four": FieldDiff{
+						"field_two.field_four": {
 							Old: nil,
 							New: &schema.Schema{Type: schema.TypeInt},
 						},
@@ -1259,7 +1373,7 @@ func TestComputeSchemaDiff(t *testing.T) {
 						New: &schema.Resource{},
 					},
 					Fields: map[string]FieldDiff{
-						"field_two.field_four": FieldDiff{
+						"field_two.field_four": {
 							Old: nil,
 							New: &schema.Schema{Type: schema.TypeInt},
 						},
@@ -1289,7 +1403,7 @@ func TestComputeSchemaDiff(t *testing.T) {
 						New: &schema.Resource{},
 					},
 					Fields: map[string]FieldDiff{
-						"field_one": FieldDiff{
+						"field_one": {
 							Old: &schema.Schema{Type: schema.TypeString},
 							New: nil,
 						},
@@ -1314,7 +1428,7 @@ func TestComputeSchemaDiff(t *testing.T) {
 						New: nil,
 					},
 					Fields: map[string]FieldDiff{
-						"field_one": FieldDiff{
+						"field_one": {
 							Old: &schema.Schema{Type: schema.TypeString},
 							New: nil,
 						},
@@ -1339,7 +1453,7 @@ func TestComputeSchemaDiff(t *testing.T) {
 						New: &schema.Resource{},
 					},
 					Fields: map[string]FieldDiff{
-						"field_one": FieldDiff{
+						"field_one": {
 							Old: nil,
 							New: &schema.Schema{Type: schema.TypeString},
 						},
