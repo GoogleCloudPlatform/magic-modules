@@ -146,7 +146,7 @@ resource "google_compute_network" "foobar" {
 
 resource "google_compute_global_address" "foobar" {
   address       = "172.20.181.0"
-  description   = "Description2"
+  description   = "Description"
   name          = "tf-test-address-%{random_suffix}"
   labels        = {
   	foo = "baz"
