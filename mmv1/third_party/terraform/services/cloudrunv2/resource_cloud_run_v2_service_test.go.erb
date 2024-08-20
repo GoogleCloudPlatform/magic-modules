@@ -212,6 +212,7 @@ resource "google_compute_network" "custom_test" {
 }
 <% unless version == 'ga' -%>
 func TestAccCloudRunV2Service_cloudrunv2ServiceGcsVolume(t *testing.T) {
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
