@@ -5409,7 +5409,6 @@ func expandPodSecurityPolicyConfig(configured interface{}) *container.PodSecurit
 }
 <% end -%>
 
-<% unless version == 'ga' -%>
 func expandSecretManagerConfig(configured interface{}) *container.SecretManagerConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -5422,7 +5421,6 @@ func expandSecretManagerConfig(configured interface{}) *container.SecretManagerC
 		ForceSendFields: []string{"Enabled"},
 	}
 }
-<% end -%>
 
 func expandDefaultMaxPodsConstraint(v interface{}) *container.MaxPodsConstraint {
 	if v == nil {
