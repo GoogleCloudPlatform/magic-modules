@@ -14,7 +14,7 @@ autogen_async: true
 min_version: beta
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "memorystore_ha"
+    name: "memorystore_instance_ha"
     primary_resource_id: "instance-ha"
     min_version: beta
     vars:
