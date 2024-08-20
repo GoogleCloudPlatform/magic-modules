@@ -56,7 +56,7 @@ func SetDataSourceLabels(d *schema.ResourceData) error {
 }
 
 // Sets the values of terraform_labels and effective_labels fields when labels field is in root level
-func setLabelsFields(labelsField string, d *schema.ResourceDiff, meta interface{}) error {
+func setLabelsFields(labelsField string, d *schema.ResourceDiff, meta interface{}, skipAttribution bool) error {
 	raw := d.Get(labelsField)
 	if raw == nil {
 		return nil
@@ -92,7 +92,7 @@ func setLabelsFields(labelsField string, d *schema.ResourceDiff, meta interface{
 	}
 
 	// Append optional label indicating the resource was provisioned using Terraform
-	if config.AddTerraformAttributionLabel {
+	if !skipAttribution && config.AddTerraformAttributionLabel {
 		if el, ok := d.Get("effective_labels").(map[string]any); ok {
 			_, hasExistingLabel := el[transport_tpg.AttributionKey]
 			if hasExistingLabel ||
@@ -132,28 +132,21 @@ func setLabelsFields(labelsField string, d *schema.ResourceDiff, meta interface{
 	return nil
 }
 
-func SetLabelsDiffWithoutAttributionLabel(c context.Context, d *schema.ResourceDiff, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
-	previouslySetValue := config.AddTerraformAttributionLabel
-	config.AddTerraformAttributionLabel = false
-
-	err := SetLabelsDiff(c, d, meta)
-
-	config.AddTerraformAttributionLabel = previouslySetValue
-	return err
+func SetLabelsDiffWithoutAttributionLabel(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	return setLabelsFields("labels", d, meta, true)
 }
 
 // The CustomizeDiff func to set the values of terraform_labels and effective_labels fields
 // when labels field is at the root level and named "labels".
 func SetLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
-	return setLabelsFields("labels", d, meta)
+	return setLabelsFields("labels", d, meta, false)
 }
 
 // The CustomizeDiff func to set the values of terraform_labels and effective_labels fields
 // when labels field is at the root level and has a diffent name (e.g. resource_labels) than "labels"
 func SetDiffForLabelsWithCustomizedName(labelsField string) func(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	return func(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
-		return setLabelsFields(labelsField, d, meta)
+		return setLabelsFields(labelsField, d, meta, false)
 	}
 }
 
