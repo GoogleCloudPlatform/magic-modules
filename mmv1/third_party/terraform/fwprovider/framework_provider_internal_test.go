@@ -9,12 +9,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestFrameworkProvider_impl(t *testing.T) {
-	var _ provider.ProviderWithMetaSchema = New("test")
+	primary := &schema.Provider{}
+	var _ provider.ProviderWithMetaSchema = New(primary)
 }
 
 func TestFrameworkProvider_CredentialsValidator(t *testing.T) {
