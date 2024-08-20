@@ -1,0 +1,21 @@
+resource "google_cloud_run_v2_service" "<%= ctx[:primary_resource_id] %>" {
+  provider = google-beta
+  name     = "<%= ctx[:vars]['cloud_run_service_name'] %>"
+
+  location     = "us-central1"
+  launch_stage = "BETA"
+
+  template {
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+    }
+    service_mesh {
+      mesh = google_network_services_mesh.mesh.id
+    }
+  }
+}
+
+resource "google_network_services_mesh" "mesh" {
+  provider = google-beta
+  name     = "<%= ctx[:vars]['mesh_name'] %>"
+}
