@@ -13,22 +13,22 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
-func TestAccSecurityCenterManagementOrganizationHelathAnalytics(t *testing.T) {
-	testCases := map[string]func(t *testing.T){
-		"organization": testAccSecurityCenterManagementOrganizationSecurityHealthAnalyticsCustomModule,
-	}
+// func testAccSecurityCenterManagementOrganizationHelathAnalytics(t *testing.T) {
+// 	testCases := map[string]func(t *testing.T){
+// 		"organization": testAccSecurityCenterManagementOrganizationSecurityHealthAnalyticsCustomModule,
+// 	}
 
-	for name, tc := range testCases {
-		// shadow the tc variable into scope so that when
-		// the loop continues, if t.Run hasn't executed tc(t)
-		// yet, we don't have a race condition
-		// see https://github.com/golang/go/wiki/CommonMistakes#using-goroutines-on-loop-iterator-variables
-		tc := tc
-		t.Run(name, func(t *testing.T) {
-			tc(t)
-		})
-	}
-}
+// 	for name, tc := range testCases {
+// 		// shadow the tc variable into scope so that when
+// 		// the loop continues, if t.Run hasn't executed tc(t)
+// 		// yet, we don't have a race condition
+// 		// see https://github.com/golang/go/wiki/CommonMistakes#using-goroutines-on-loop-iterator-variables
+// 		tc := tc
+// 		t.Run(name, func(t *testing.T) {
+// 			tc(t)
+// 		})
+// 	}
+// }
 
 // Custom Module tests cannot be run in parallel without running into 409 Conflict reponses.
 // Run them as individual steps of an update test instead.

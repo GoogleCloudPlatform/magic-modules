@@ -16,6 +16,9 @@ import (
 
 func TestAccSecurityCenterManagement(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
+		"orgSecurity": testAccSecurityCenterManagementOrganizationSecurityHealthAnalyticsCustomModule,
+		"folderSecurity": testAccSecurityCenterManagementFolderSecurityHealthAnalyticsCustomModule,
+		"projectSecurity": testAccSecurityCenterManagementProjectSecurityHealthAnalyticsCustomModule,
 		"organization": testAccSecurityCenterManagementOrganizationEventThreatDetectionCustomModule,
 	}
 
