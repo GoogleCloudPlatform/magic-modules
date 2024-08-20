@@ -78,6 +78,8 @@ examples:
     primary_resource_id: 'cgroup'
     vars:
       name: 'gce-policy'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/compute_resource_policy.go.erb
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: region
@@ -142,7 +144,8 @@ properties:
                   where HH : [00-23] and MM : [00] GMT. eg: 21:00
                 required: true
                 validation: !ruby/object:Provider::Terraform::Validation
-                  regex: '^([01][0-9]|2[0-3]):00$'
+                  function: 'verify.ValidateHourlyOnly'
+                diff_suppress_func: 'HourlyFormatSuppressDiff'
           - !ruby/object:Api::Type::NestedObject
             name: 'dailySchedule'
             description: |
@@ -165,7 +168,8 @@ properties:
                   both 13:00-5 and 08:00 are valid.
                 required: true
                 validation: !ruby/object:Provider::Terraform::Validation
-                  regex: '^([01][0-9]|2[0-3]):00$'
+                  function: 'verify.ValidateHourlyOnly'
+                diff_suppress_func: 'HourlyFormatSuppressDiff'
           - !ruby/object:Api::Type::NestedObject
             name: 'weeklySchedule'
             description: |
