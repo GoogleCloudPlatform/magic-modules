@@ -23,6 +23,13 @@ description: |
   the same zone. After you define this association, Cloud Firewall forwards the
   zonal workload traffic in your VPC network that requires layer 7 inspection to
   the attached firewall endpoint.
+docs: !ruby/object:Provider::Terraform::Docs
+  warning: |
+    If you are using User ADCs (Application Default Credentials) with this resource,
+    you must specify a `billing_project_id` and set `user_project_override` to true
+    in the provider configuration. Otherwise the ACM API will return a 403 error.
+    Your account must have the `serviceusage.services.use` permission on the
+    `billing_project_id` you defined.
 references:
   !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/firewall/docs/reference/network-security/rest/v1/projects.locations.firewallEndpointAssociations#FirewallEndpointAssociation'

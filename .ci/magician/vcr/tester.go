@@ -3,7 +3,6 @@ package vcr
 import (
 	"fmt"
 	"io/fs"
-	"magician/exec"
 	"magician/provider"
 	"path/filepath"
 	"regexp"
@@ -50,7 +49,7 @@ type logKey struct {
 
 type Tester struct {
 	env           map[string]string           // shared environment variables for running tests
-	rnr           exec.ExecRunner             // for running commands and manipulating files
+	rnr           ExecRunner                  // for running commands and manipulating files
 	baseDir       string                      // the directory in which this tester was created
 	saKeyPath     string                      // where sa_key.json is relative to baseDir
 	cassettePaths map[provider.Version]string // where cassettes are relative to baseDir by version
@@ -68,7 +67,7 @@ var testResultsExpression = regexp.MustCompile(`(?m:^--- (PASS|FAIL|SKIP): (Test
 var testPanicExpression = regexp.MustCompile(`^panic: .*`)
 
 // Create a new tester in the current working directory and write the service account key file.
-func NewTester(env map[string]string, rnr exec.ExecRunner) (*Tester, error) {
+func NewTester(env map[string]string, rnr ExecRunner) (*Tester, error) {
 	saKeyPath := "sa_key.json"
 	if err := rnr.WriteFile(saKeyPath, env["SA_KEY"]); err != nil {
 		return nil, err
@@ -128,6 +127,17 @@ func (vt *Tester) fetchBucketPath(bucketPath, cassettePath string) error {
 		return err
 	}
 	return nil
+}
+
+// CassettePath returns the local cassette path.
+func (vt *Tester) CassettePath(version provider.Version) string {
+	return vt.cassettePaths[version]
+}
+
+// LogPath returns the local log path.
+func (vt *Tester) LogPath(mode Mode, version provider.Version) string {
+	lgky := logKey{mode, version}
+	return vt.logPaths[lgky]
 }
 
 // Run the vcr tests in the given mode and provider version and return the result.
@@ -200,7 +210,7 @@ func (vt *Tester) Run(mode Mode, version provider.Version, testDirs []string) (*
 	}
 	var printedEnv string
 	for ev, val := range env {
-		if ev == "SA_KEY" || strings.HasPrefix(ev, "GITHUB_TOKEN") {
+		if ev == "SA_KEY" || ev == "GOOGLE_CREDENTIALS" || strings.HasPrefix(ev, "GITHUB_TOKEN") {
 			val = "{hidden}"
 		}
 		printedEnv += fmt.Sprintf("%s=%s\n", ev, val)

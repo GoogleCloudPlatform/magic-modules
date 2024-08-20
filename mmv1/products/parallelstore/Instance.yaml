@@ -22,7 +22,6 @@ name: Instance
 description: A Parallelstore Instance.
 update_verb: :PATCH
 update_mask: true
-min_version: beta
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
@@ -36,14 +35,14 @@ examples:
 properties:
   - !ruby/object:Api::Type::String
     name: name
-    description: "The resource name of the instance, in the format\n`projects/{project}/locations/{location}/instances/{instance_id}` "
+    description: "Identifier. The resource name of the instance, in the format\n`projects/{project}/locations/{location}/instances/{instance_id}` "
     output: true
   - !ruby/object:Api::Type::String
     name: description
     description: 'The description of the instance. 2048 characters or less. '
   - !ruby/object:Api::Type::String
     name: state
-    description: "The instance state. \n Possible values:\n STATE_UNSPECIFIED\nCREATING\nACTIVE\nDELETING\nFAILED"
+    description: "The instance state. \n Possible values:\n STATE_UNSPECIFIED\nCREATING\nACTIVE\nDELETING\nFAILED\nUPGRADING"
     output: true
   - !ruby/object:Api::Type::String
     name: createTime
@@ -55,6 +54,8 @@ properties:
     output: true
   - !ruby/object:Api::Type::KeyValueLabels
     name: labels
+    output:
+    api_name:
     description: "Cloud Labels are a flexible and lightweight mechanism for
       organizing cloud\nresources into groups that reflect a customer's organizational
       needs and\ndeployment strategies. Cloud Labels can be used to filter collections
@@ -72,7 +73,7 @@ properties:
       value  would prove problematic if we were to\nallow \"_\" in a future release. "
   - !ruby/object:Api::Type::String
     name: capacityGib
-    description: 'Immutable. Storage capacity of Parallelstore instance in
+    description: 'Required. Immutable. Storage capacity of Parallelstore instance in
       Gibibytes (GiB). '
     required: true
     immutable: true
@@ -83,7 +84,7 @@ properties:
   - !ruby/object:Api::Type::Array
     name: accessPoints
     item_type: Api::Type::String
-    description: "List of access_points.\nContains a list of IPv4 addresses
+    description: "Output only. List of access_points.\nContains a list of IPv4 addresses
       used for client side configuration. "
     output: true
   - !ruby/object:Api::Type::String
@@ -106,6 +107,16 @@ properties:
       and\nand contains the value currently used by the service. "
     immutable: true
     output: true
+  - !ruby/object:Api::Type::String
+    name: fileStripeLevel
+    description: "Stripe level for files.\nMIN better suited for small size
+      files.\nMAX higher throughput performance for larger files. \n Possible values:\n
+      FILE_STRIPE_LEVEL_UNSPECIFIED\nFILE_STRIPE_LEVEL_MIN\nFILE_STRIPE_LEVEL_BALANCED\nFILE_STRIPE_LEVEL_MAX"
+  - !ruby/object:Api::Type::String
+    name: directoryStripeLevel
+    description: "Stripe level for directories.\nMIN when directory has a
+      small number of files.\nMAX when directory has a large number of files. \n Possible
+      values:\n DIRECTORY_STRIPE_LEVEL_UNSPECIFIED\nDIRECTORY_STRIPE_LEVEL_MIN\nDIRECTORY_STRIPE_LEVEL_BALANCED\nDIRECTORY_STRIPE_LEVEL_MAX"
 parameters:
   - !ruby/object:Api::Type::String
     name: location
