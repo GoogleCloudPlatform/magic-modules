@@ -15,7 +15,6 @@ examples:
     primary_resource_id: 'backup-vault-test'
     vars:
       backup_vault_id: 'backup-vault-test'
-      effective_time: "%{effective_time}"
     test_env_vars:
       project: :PROJECT_NAME
 properties:
