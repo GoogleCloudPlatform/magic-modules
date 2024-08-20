@@ -122,12 +122,27 @@ resource "google_app_engine_application" "app" {
   location_id = "us-central"
 }
 
-resource "google_project_iam_member" "gae_api" {
+resource "google_project_iam_member" "network_user_gae_sa" {
   provider = google-beta
   project = google_project_service.appengineflex.project
   role    = "roles/compute.networkUser"
-  member  = "serviceAccount:service-${google_project.my_project.number}@gae-api-prod.google.com.iam.gserviceaccount.com"
+  member  = "serviceAccount:${data.google_app_engine_default_service_account.default.email}"
 }
+
+resource "google_project_iam_member" "storage_admin_gae_sa" {
+  provider = google-beta
+  project = google_project_service.appengineflex.project
+  role    = "roles/storage.admin"
+  member  = "serviceAccount:${data.google_app_engine_default_service_account.default.email}"
+}
+
+resource "google_project_iam_member" "storage_admin_gae_flex_sa" {
+  provider = google-beta
+  project = google_project_service.appengineflex.project
+  role    = "roles/storage.admin"
+  member  = "serviceAccount:${google_project_service_identity.gae_flex_sa.email}"
+}
+
 
 resource "google_app_engine_standard_app_version" "foo" {
   provider = google-beta
@@ -158,6 +173,7 @@ resource "google_app_engine_standard_app_version" "foo" {
 
   noop_on_destroy = true
   depends_on = [
+    google_project_iam_member.network_user_gae_sa,
     google_project_iam_member.storage_admin_gae_sa
   ]
 }
@@ -336,11 +352,25 @@ resource "google_app_engine_application" "app" {
   location_id = "us-central"
 }
 
-resource "google_project_iam_member" "gae_api" {
+resource "google_project_iam_member" "network_user_gae_sa" {
   provider = google-beta
   project = google_project_service.appengineflex.project
   role    = "roles/compute.networkUser"
-  member  = "serviceAccount:service-${google_project.my_project.number}@gae-api-prod.google.com.iam.gserviceaccount.com"
+  member  = "serviceAccount:${data.google_app_engine_default_service_account.default.email}"
+}
+
+resource "google_project_iam_member" "storage_admin_gae_sa" {
+  provider = google-beta
+  project = google_project_service.appengineflex.project
+  role    = "roles/storage.admin"
+  member  = "serviceAccount:${data.google_app_engine_default_service_account.default.email}"
+}
+
+resource "google_project_iam_member" "storage_admin_gae_flex_sa" {
+  provider = google-beta
+  project = google_project_service.appengineflex.project
+  role    = "roles/storage.admin"
+  member  = "serviceAccount:${google_project_service_identity.gae_flex_sa.email}"
 }
 
 resource "google_app_engine_standard_app_version" "foo" {
@@ -372,7 +402,7 @@ resource "google_app_engine_standard_app_version" "foo" {
 
   noop_on_destroy = true
   depends_on = [
-    google_project_iam_member.gae_api,
+    google_project_iam_member.network_user_gae_sa,
     google_project_iam_member.storage_admin_gae_sa
   ]
 }

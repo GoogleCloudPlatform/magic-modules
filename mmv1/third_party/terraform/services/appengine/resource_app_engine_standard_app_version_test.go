@@ -71,6 +71,8 @@ resource "google_project_service" "gae" {
   service = "appengine.googleapis.com"
 
   disable_dependent_services = false
+}
+
 resource "google_app_engine_application" "app" {
   project     = google_project_service.gae.project
   location_id = "us-central"
@@ -82,7 +84,7 @@ resource "google_service_account" "custom_service_account" {
   display_name = "Service account for GAE acc test"
 }
 
-resource "google_project_iam_member" "storage_viewer" {
+resource "google_project_iam_member" "storage_admin" {
   project = google_project.my_project.project_id
   role    = "roles/storage.admin"
   member  = "serviceAccount:${google_service_account.custom_service_account.email}"
@@ -163,7 +165,6 @@ resource "google_project" "my_project" {
   billing_account = "%{billing_account}"
 }
 
-
 resource "google_project_service" "gae" {
   project = google_project.my_project.project_id
   service = "appengine.googleapis.com"
@@ -193,7 +194,7 @@ resource "google_service_account" "custom_service_account" {
   display_name = "Service account for GAE acc test"
 }
 
-resource "google_project_iam_member" "storage_viewer" {
+resource "google_project_iam_member" "storage_admin" {
   project = google_project.my_project.project_id
   role    = "roles/storage.admin"
   member  = "serviceAccount:${google_service_account.custom_service_account.email}"
@@ -314,7 +315,7 @@ resource "google_service_account" "custom_service_account" {
   display_name = "Service account for GAE acc test"
 }
 
-resource "google_project_iam_member" "storage_viewer" {
+resource "google_project_iam_member" "storage_admin" {
   project = google_project.my_project.project_id
   role    = "roles/storage.admin"
   member  = "serviceAccount:${google_service_account.custom_service_account.email}"
