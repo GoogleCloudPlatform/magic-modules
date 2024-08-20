@@ -311,6 +311,7 @@ func testAccCloudRunV2Job_cloudrunv2JobWithDirectVPCAndNamedBinAuthPolicyUpdate(
 
 <% unless version == 'ga' -%>
 func TestAccCloudRunV2Job_cloudrunv2JobWithGcsUpdate(t *testing.T) {
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	jobName := fmt.Sprintf("tf-test-cloudrun-service%s", acctest.RandString(t, 10))
@@ -399,6 +400,7 @@ func testAccCloudRunV2Job_cloudrunv2JobWithGcsVolume(context map[string]interfac
 }
 
 func TestAccCloudRunV2Job_cloudrunv2JobWithNfsUpdate(t *testing.T) {
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	jobName := fmt.Sprintf("tf-test-cloudrun-service%s", acctest.RandString(t, 10))

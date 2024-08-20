@@ -19,6 +19,8 @@ update_url: 'projects/{{project}}/locations/{{location}}/lakes/{{lake}}/tasks/{{
 delete_url: 'projects/{{project}}/locations/{{location}}/lakes/{{lake}}/tasks/{{task_id}}'
 update_verb: :PATCH
 update_mask: true
+# User-provided label cannot start with goog-
+skip_attribution_label: true
 description: |
   A Dataplex task represents the work that you want Dataplex to do on a schedule. It encapsulates code, parameters, and the schedule.
 async: !ruby/object:Api::OpAsync
