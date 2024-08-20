@@ -12,7 +12,7 @@ if _, ok := obj["certificateManagerCertificates"]; ok {
 // in the "PATCH" payload so if you were to remove a server TLS policy from a target HTTPS proxy, it would NOT remove
 // the association.
 if _, ok := obj["serverTlsPolicy"]; !ok {
-        obj["serverTlsPolicy"] = nil
+	obj["serverTlsPolicy"] = nil
 }
 
 return obj, nil
