@@ -47,6 +47,7 @@ autogen_async: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/vmwareengine_private_cloud.go.erb
   decoder: "templates/terraform/decoders/private_cloud.go.erb"
+  pre_create: templates/terraform/pre_create/vmwareengine_private_cloud.go.erb
   pre_delete: templates/terraform/pre_delete/vmwareengine_private_cloud.go.erb
   post_delete: "templates/terraform/post_delete/private_cloud.go.erb"
   post_update: "templates/terraform/post_update/private_cloud.go.erb"
