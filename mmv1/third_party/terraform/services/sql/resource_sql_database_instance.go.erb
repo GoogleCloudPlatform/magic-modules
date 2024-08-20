@@ -2627,7 +2627,8 @@ func isSwitchoverRequested(ctx context.Context, d *schema.ResourceData) bool {
 		return false
 	}
 	dbVersion, _ := d.GetChange("database_version")
-	if !strings.HasPrefix(dbVersion.(string), "MYSQL") && !strings.HasPrefix(dbVersion.(string), "POSTGRES") {
+	tflog.Warn(ctx, fmt.Sprintf("asdf isswtichoverrequested dbversion is %q", dbVersion))
+	if !strings.HasPrefix(dbVersion.(string), "SQLSERVER") {
 		tflog.Warn(ctx, fmt.Sprintf("switchover is not supported for %q", dbVersion))
 		return false
 	}
@@ -2637,7 +2638,7 @@ func isSwitchoverRequested(ctx context.Context, d *schema.ResourceData) bool {
 func isReplicaPromoteRequested(_ context.Context, oldInstanceType interface{}, newInstanceType interface{}, _ interface{}) bool {
 	oldInstanceType = oldInstanceType.(string)
 	newInstanceType = newInstanceType.(string)
-
+	log.Printf("asdf in isreplicapromoterequested")
 	if newInstanceType == "CLOUD_SQL_INSTANCE" && oldInstanceType == "READ_REPLICA_INSTANCE" {
 		return true
 	}
