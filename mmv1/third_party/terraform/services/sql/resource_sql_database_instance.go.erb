@@ -126,6 +126,7 @@ var (
 	}
 
 	replicaConfigurationKeys = []string{
+		"replica_configuration.0.cascadable_replica",
 		"replica_configuration.0.ca_certificate",
 		"replica_configuration.0.client_certificate",
 		"replica_configuration.0.client_key",
@@ -832,6 +833,13 @@ is set to true. Defaults to ZONAL.`,
 							AtLeastOneOf: replicaConfigurationKeys,
 							Description:  `PEM representation of the trusted CA's x509 certificate.`,
 						},
+						"cascadable_replica": {
+							Type: schema.TypeBool,
+							Optional: true,
+							ForceNew: true,
+							AtLeastOneOf: replicaConfigurationKeys, 
+							Description: `Specifies if a SQL Server replica is a cascadable replica. A cascadable replica is a SQL Server cross region replica that supports replica(s) under it.`,
+						},
 						"client_certificate": {
 							Type:         schema.TypeString,
 							Optional:     true,
@@ -1380,6 +1388,7 @@ func expandReplicaConfiguration(configured []interface{}) *sqladmin.ReplicaConfi
 
 	_replicaConfiguration := configured[0].(map[string]interface{})
 	return &sqladmin.ReplicaConfiguration{
+		CascadableReplica: _replicaConfiguration["cascadable_replica"].(bool),
 		FailoverTarget: _replicaConfiguration["failover_target"].(bool),
 
 		// MysqlReplicaConfiguration has been flattened in the TF schema, so
@@ -2423,6 +2432,7 @@ func flattenReplicaConfiguration(replicaConfiguration *sqladmin.ReplicaConfigura
 
 	if replicaConfiguration != nil {
 		data := map[string]interface{}{
+			"cascadable_replica": replicaConfiguration.CascadableReplica,
 			"failover_target": replicaConfiguration.FailoverTarget,
 
 			// Don't attempt to assign anything from replicaConfiguration.MysqlReplicaConfiguration,
