@@ -309,7 +309,6 @@ func testAccCloudRunV2Job_cloudrunv2JobWithDirectVPCAndNamedBinAuthPolicyUpdate(
 `, context)
 }
 
-<% unless version == 'ga' -%>
 func TestAccCloudRunV2Job_cloudrunv2JobWithGcsUpdate(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
@@ -465,6 +464,7 @@ func testAccCloudRunV2Job_cloudrunv2JobWithNfsVolume(context map[string]interfac
 `, context)
 }
 
+<% unless version == 'ga' -%>
 func TestAccCloudRunV2Job_cloudrunv2JobWithStartExecutionTokenUpdate(t *testing.T) {
 	t.Parallel()
 

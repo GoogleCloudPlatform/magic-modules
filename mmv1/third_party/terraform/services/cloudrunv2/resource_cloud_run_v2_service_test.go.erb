@@ -210,7 +210,6 @@ resource "google_compute_network" "custom_test" {
 }
 `, context)
 }
-<% unless version == 'ga' -%>
 func TestAccCloudRunV2Service_cloudrunv2ServiceGcsVolume(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
@@ -313,7 +312,6 @@ resource "google_service_account" "service_account" {
 }
 `, context)
 }
-<%end -%>
 func TestAccCloudRunV2Service_cloudrunv2ServiceTCPProbesUpdate(t *testing.T) {
 	t.Parallel()
 
