@@ -1,0 +1,10 @@
+# [START sql_mysql_instance_new_network_architecture]
+resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
+  database_version = "MYSQL_8_0"
+  name             = "<%= ctx[:vars]['mysql_instance'] %>"
+  region           = "us-central1"
+
+  sql_network_architecture = "NEW_NETWORK_ARCHITECTURE"
+  deletion_protection = "<%= ctx[:vars]['deletion_protection'] %>"
+}
+# [END sql_mysql_instance_new_network_architecture]
