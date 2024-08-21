@@ -1350,7 +1350,7 @@ resource "google_dataflow_flex_template_job" "flex_job_kms" {
   kms_key_name		= "%s"
 
 }
-`, topicName, bucket, crypto_key, job)
+`, topicName, bucket, job, crypto_key)
 }
 
 func testAccDataflowFlexTemplateJob_additionalExperiments(job, bucket, topicName string, experiments []string) string {

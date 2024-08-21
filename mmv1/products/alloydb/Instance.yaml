@@ -109,6 +109,17 @@ examples:
       - 'reconciling'
       - 'update_time'
     skip_docs: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'alloydb_instance_psc_test'
+    primary_resource_id: 'default'
+    vars:
+      alloydb_cluster_name: 'alloydb-cluster'
+      alloydb_instance_name: 'alloydb-instance'
+      network_name: 'alloydb-network'
+    ignore_read_extra:
+      - 'reconciling'
+      - 'update_time'
+    skip_docs: true
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'cluster'
@@ -310,6 +321,7 @@ properties:
               - :ALLOW_UNENCRYPTED_AND_ENCRYPTED
   - !ruby/object:Api::Type::NestedObject
     name: 'pscInstanceConfig'
+    default_from_api: true
     description: |
       Configuration for Private Service Connect (PSC) for the instance.
     properties:

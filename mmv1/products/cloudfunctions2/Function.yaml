@@ -423,6 +423,7 @@ properties:
               - !ruby/object:Api::Type::Integer
                 name: 'generation'
                 default_from_api: true
+                custom_flatten: 'templates/terraform/custom_flatten/cloudfunctions2_function_source_generation.go.erb'
                 description: |
                   Google Cloud Storage generation for the object. If the generation
                   is omitted, the latest generation will be used.
@@ -560,6 +561,7 @@ properties:
         description:
           'Environment variables that shall be available during function
           execution.'
+        default_from_api: true
         diff_suppress_func: 'environmentVariablesDiffSuppress'
       - !ruby/object:Api::Type::Integer
         name: 'maxInstanceCount'
