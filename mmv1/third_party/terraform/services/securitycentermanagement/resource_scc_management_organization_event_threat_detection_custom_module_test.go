@@ -16,10 +16,10 @@ import (
 
 func TestAccSecurityCenterManagement(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
-		"orgSecurity": testAccSecurityCenterManagementOrganizationSecurityHealthAnalyticsCustomModule,
-		"folderSecurity": testAccSecurityCenterManagementFolderSecurityHealthAnalyticsCustomModule,
+		"orgSecurity":     testAccSecurityCenterManagementOrganizationSecurityHealthAnalyticsCustomModule,
+		"folderSecurity":  testAccSecurityCenterManagementFolderSecurityHealthAnalyticsCustomModule,
 		"projectSecurity": testAccSecurityCenterManagementProjectSecurityHealthAnalyticsCustomModule,
-		"organization": testAccSecurityCenterManagementOrganizationEventThreatDetectionCustomModule,
+		"organization":    testAccSecurityCenterManagementOrganizationEventThreatDetectionCustomModule,
 	}
 
 	for name, tc := range testCases {
@@ -33,7 +33,6 @@ func TestAccSecurityCenterManagement(t *testing.T) {
 		})
 	}
 }
-
 
 func testAccSecurityCenterManagementOrganizationEventThreatDetectionCustomModule(t *testing.T) {
 	// t.Parallel()
