@@ -50,6 +50,19 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
 id_format: 'projects/{{project}}/locations/{{location}}/jobs/{{name}}'
 import_format: ['projects/{{project}}/locations/{{location}}/jobs/{{name}}']
 autogen_async: true
+virtual_fields:
+  - !ruby/object:Api::Type::Boolean
+    name: 'deletion_protection'
+    default_value: true
+    description: |
+      Whether Terraform will be prevented from destroying the job. Defaults to true.
+      When a`terraform destroy` or `terraform apply` would delete the job,
+      the command will fail if this field is not set to false in Terraform state.
+      When the field is set to true or unset in Terraform state, a `terraform apply`
+      or `terraform destroy` that would delete the job will fail.
+      When the field is set to false, deleting the job is allowed.
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_delete: 'templates/terraform/pre_delete/cloudrunv2_job_deletion_policy.go.erb'
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_job_basic'
@@ -59,11 +72,15 @@ examples:
       ])"
     vars:
       cloud_run_job_name: 'cloudrun-job'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_job_limits'
     primary_resource_id: 'default'
     vars:
       cloud_run_job_name: 'cloudrun-job'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_job_sql'
     primary_resource_id: 'default'
@@ -79,6 +96,8 @@ examples:
       deletion_protection: 'false'
     oics_vars_overrides:
       deletion_protection: 'false'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_job_vpcaccess'
     primary_resource_id: 'default'
@@ -90,6 +109,8 @@ examples:
       vpc_access_connector_name: 'run-vpc'
       vpc_compute_subnetwork_name: 'run-subnetwork'
       compute_network_name: 'run-network'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_job_directvpc'
     primary_resource_id: 'default'
@@ -97,6 +118,8 @@ examples:
       ])"
     vars:
       cloud_run_job_name: 'cloudrun-job'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_job_secret'
     primary_resource_id: 'default'
@@ -106,6 +129,8 @@ examples:
     vars:
       cloud_run_job_name: 'cloudrun-job'
       secret_id: 'secret'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_job_emptydir'
     min_version: 'beta'
@@ -114,6 +139,8 @@ examples:
       ])"
     vars:
       cloud_run_job_name: 'cloudrun-job'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_job_run_job'
     min_version: beta
@@ -122,6 +149,8 @@ examples:
       ])"
     vars:
       cloud_run_job_name: 'cloudrun-job'
+    ignore_read_extra:
+      - 'deletion_protection'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -328,6 +357,7 @@ properties:
                   name: 'env'
                   description: |-
                     List of environment variables to set in the container.
+                  is_set: true
                   item_type: !ruby/object:Api::Type::NestedObject
                     properties:
                       - !ruby/object:Api::Type::String
