@@ -70,6 +70,6 @@ resource "google_kms_autokey_config" "<%= ctx[:primary_resource_id] %>" {
 # Wait delay after setting AutokeyConfig, to prevent diffs on reapply,
 # because setting the config takes a little to fully propagate.
 resource "time_sleep" "wait_autokey_propagation" {
-  create_duration = "15s"
+  create_duration = "30s"
   depends_on      = [google_kms_autokey_config.<%= ctx[:primary_resource_id] %>]
 }

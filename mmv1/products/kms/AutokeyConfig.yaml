@@ -39,6 +39,8 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 id_format: 'folders/{{folder}}/autokeyConfig'
 import_format: ['folders/{{folder}}/autokeyConfig']
 min_version: beta
+# Using a handwritten sweeper because of pre_delete.
+skip_sweeper: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/autokey_config_folder_diff.go.erb
   pre_create: templates/terraform/pre_create/kms_autokey_config_folder.go.erb
