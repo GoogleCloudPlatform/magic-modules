@@ -1023,8 +1023,7 @@ properties:
             name: 'transactionLogs'
             allow_empty_object: true
             send_empty_value: true
-            exactly_one_of:
-              - source_config.0.sql_server_source_config.transaction_logs
+            conflicts:
               - source_config.0.sql_server_source_config.change_tables
             description: |
               CDC reader reads from transaction logs.
@@ -1033,9 +1032,8 @@ properties:
             name: 'changeTables'
             allow_empty_object: true
             send_empty_value: true
-            exactly_one_of:
+            conflicts:
               - source_config.0.sql_server_source_config.transaction_logs
-              - source_config.0.sql_server_source_config.change_tables
             description: |
               CDC reader reads from change tables.
             properties: []
