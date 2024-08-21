@@ -154,7 +154,7 @@ properties:
     name: 'accelerators'
     description: |
       List of the type and count of accelerator cards attached to the
-      node template 
+      node template
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::Integer
