@@ -116,6 +116,7 @@ properties:
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'defaultExchangeConfig'
+        immutable: true
         allow_empty_object: true
         send_empty_value: true
         exactly_one_of:
@@ -126,6 +127,7 @@ properties:
         properties: []
       - !ruby/object:Api::Type::NestedObject
         name: 'dcrExchangeConfig'
+        immutable: true
         allow_empty_object: true
         send_empty_value: true
         exactly_one_of:
