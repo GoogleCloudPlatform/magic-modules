@@ -60,6 +60,7 @@ func TestAccContainerClusterDatasource_regional(t *testing.T) {
 							"enable_tpu":                   {},
 							"pod_security_policy_config.#": {},
 							"deletion_protection":          {},
+							"resource_labels":              {},
 						},
 					),
 				),

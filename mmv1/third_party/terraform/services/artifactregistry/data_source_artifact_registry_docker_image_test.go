@@ -11,6 +11,7 @@ import (
 )
 
 func TestAccDataSourceArtifactRegistryDockerImage(t *testing.T) {
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	resourceName := "data.google_artifact_registry_docker_image.test"

@@ -11,6 +11,7 @@ import (
 )
 
 func TestAccNetworkSecurityClientTlsPolicy_update(t *testing.T) {
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	clientTlsPolicyName := fmt.Sprintf("tf-test-client-tls-policy-%s", acctest.RandString(t, 10))

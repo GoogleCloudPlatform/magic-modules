@@ -350,7 +350,6 @@ service/firestore-controlplane:
   - google_firestore_database
 service/firestore-dataplane:
   resources:
-  - google_datastore_index
   - google_firestore_document
   - google_firestore_field
   - google_firestore_index

@@ -12,6 +12,7 @@ import (
 )
 
 func TestAccRedisCluster_createClusterWithNodeType(t *testing.T) {
+
 	t.Parallel()
 
 	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
@@ -23,7 +24,7 @@ func TestAccRedisCluster_createClusterWithNodeType(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// create cluster with replica count 1
-				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 1, shardCount: 3, preventDestroy: true, nodeType: "REDIS_STANDARD_SMALL", zoneDistributionMode: "MULTI_ZONE"}),
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 1, shardCount: 3, deletionProtectionEnabled: true, nodeType: "REDIS_STANDARD_SMALL", zoneDistributionMode: "MULTI_ZONE"}),
 			},
 			{
 				ResourceName:            "google_redis_cluster.test",
@@ -33,7 +34,7 @@ func TestAccRedisCluster_createClusterWithNodeType(t *testing.T) {
 			},
 			{
 				// clean up the resource
-				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: false, nodeType: "REDIS_STANDARD_SMALL", zoneDistributionMode: "MULTI_ZONE"}),
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 1, shardCount: 3, deletionProtectionEnabled: false, nodeType: "REDIS_STANDARD_SMALL", zoneDistributionMode: "MULTI_ZONE"}),
 			},
 		},
 	})
@@ -53,7 +54,7 @@ func TestAccRedisCluster_createClusterWithZoneDistribution(t *testing.T) {
                 Steps: []resource.TestStep{
                         {
                                 // create cluster with replica count 1
-                                Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: false, zoneDistributionMode: "SINGLE_ZONE", zone: "us-central1-b"}),
+                                Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, deletionProtectionEnabled: false, zoneDistributionMode: "SINGLE_ZONE", zone: "us-central1-b"}),
                         },
                         {
                                 ResourceName:      "google_redis_cluster.test",
@@ -63,7 +64,7 @@ func TestAccRedisCluster_createClusterWithZoneDistribution(t *testing.T) {
                         },
                         {
                                 // clean up the resource
-                                Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: false, zoneDistributionMode: "SINGLE_ZONE", zone: "us-central1-b"}),
+                                Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, deletionProtectionEnabled: false, zoneDistributionMode: "SINGLE_ZONE", zone: "us-central1-b"}),
                         },
                 },
         })
@@ -82,7 +83,7 @@ func TestAccRedisCluster_updateReplicaCount(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// create cluster with replica count 1
-				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 1, shardCount: 3, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE"}),
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 1, shardCount: 3, deletionProtectionEnabled: true, zoneDistributionMode: "MULTI_ZONE"}),
 			},
 			{
 				ResourceName:            "google_redis_cluster.test",
@@ -92,21 +93,17 @@ func TestAccRedisCluster_updateReplicaCount(t *testing.T) {
 			},
 			{
 				// update replica count to 2
-				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 2, shardCount: 3, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE"}),
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 2, shardCount: 3, deletionProtectionEnabled: true, zoneDistributionMode: "MULTI_ZONE"}),
 			},
 			{
 				ResourceName:            "google_redis_cluster.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"psc_configs"},
-			},
-			{
-				// clean up the resource
-				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 1, shardCount: 3, preventDestroy: false, zoneDistributionMode: "MULTI_ZONE"}),
 			},
 			{
 				// update replica count to 0
-				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE"}),
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, deletionProtectionEnabled: true, zoneDistributionMode: "MULTI_ZONE"}),
 			},
 			{
 				ResourceName:            "google_redis_cluster.test",
@@ -116,7 +113,7 @@ func TestAccRedisCluster_updateReplicaCount(t *testing.T) {
 			},
 			{
 				// clean up the resource
-				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: false, zoneDistributionMode: "MULTI_ZONE"}),
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, deletionProtectionEnabled: false, zoneDistributionMode: "MULTI_ZONE"}),
 			},
 		},
 	})
@@ -135,7 +132,7 @@ func TestAccRedisCluster_updateShardCount(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// create cluster with shard count 3
-				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 1, shardCount: 3, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE"}),
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 1, shardCount: 3, deletionProtectionEnabled: true, zoneDistributionMode: "MULTI_ZONE"}),
 			},
 			{
 				ResourceName:            "google_redis_cluster.test",
@@ -145,7 +142,7 @@ func TestAccRedisCluster_updateShardCount(t *testing.T) {
 			},
 			{
 				// update shard count to 5
-				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 1, shardCount: 5, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE"}),
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 1, shardCount: 5, deletionProtectionEnabled: true, zoneDistributionMode: "MULTI_ZONE"}),
 			},
 			{
 				ResourceName:            "google_redis_cluster.test",
@@ -155,7 +152,7 @@ func TestAccRedisCluster_updateShardCount(t *testing.T) {
 			},
 			{
 				// clean up the resource
-				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 1, shardCount: 5, preventDestroy: false, zoneDistributionMode: "MULTI_ZONE"}),
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 1, shardCount: 5, deletionProtectionEnabled: false, zoneDistributionMode: "MULTI_ZONE"}),
 			},
 		},
 	})
@@ -214,11 +211,51 @@ func TestAccRedisCluster_updateRedisConfigs(t *testing.T) {
 	})
 }
 
+// Validate that deletion protection enabled/disabled cluster is created updated 
+func TestAccRedisCluster_createUpdateDeletionProtection(t *testing.T) {
+	t.Parallel()
+
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckRedisClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// create cluster with deletion protection set to false
+        		Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, deletionProtectionEnabled: false, zoneDistributionMode: "MULTI_ZONE"}),
+			},
+			{
+				ResourceName:            "google_redis_cluster.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"psc_configs"},
+			},
+			{
+				// update deletion protection to true
+        		Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, deletionProtectionEnabled: true, zoneDistributionMode: "MULTI_ZONE"}),
+			},
+			{
+				ResourceName:            "google_redis_cluster.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"psc_configs"},
+			},
+			{
+				// update deletion protection to false and delete the cluster
+        		Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, deletionProtectionEnabled: false, zoneDistributionMode: "MULTI_ZONE"}),
+			},
+
+		},
+	})
+}
+
 type ClusterParams struct {
 	name                 string
 	replicaCount   			 int
 	shardCount     			 int
-	preventDestroy 			 bool
+	deletionProtectionEnabled bool
 	nodeType             string
 	redisConfigs         map[string]string
 	zoneDistributionMode string
@@ -226,13 +263,6 @@ type ClusterParams struct {
 }
 
 func createOrUpdateRedisCluster(params *ClusterParams) string {
-	lifecycleBlock := ""
-	if params.preventDestroy {
-		lifecycleBlock = `
-		lifecycle {
-			prevent_destroy = true
-		}`
-	}
 	var strBuilder strings.Builder
 	for key, value := range params.redisConfigs {
 		strBuilder.WriteString(fmt.Sprintf("%s =  \"%s\"\n", key, value))
@@ -255,6 +285,7 @@ resource "google_redis_cluster" "test" {
 	replica_count = %d
 	shard_count = %d
 	node_type = "%s"
+	deletion_protection_enabled = %v
 	region         = "us-central1"
 	psc_configs {
 			network = google_compute_network.producer_net.id
@@ -264,9 +295,8 @@ resource "google_redis_cluster" "test" {
 	}
   %s
 	depends_on = [
-			google_network_connectivity_service_connection_policy.default
-		]
-	%s
+          google_network_connectivity_service_connection_policy.default
+        ]
 }
 
 resource "google_network_connectivity_service_connection_policy" "default" {
@@ -294,7 +324,7 @@ resource "google_compute_network" "producer_net" {
 	name                    = "%s"
 	auto_create_subnetworks = false
 }
-`, params.name, params.replicaCount, params.shardCount, params.nodeType, strBuilder.String(), zoneDistributionConfigBlock, lifecycleBlock, params.name, params.name, params.name)
+`, params.name, params.replicaCount, params.shardCount, params.nodeType, params.deletionProtectionEnabled, strBuilder.String(), zoneDistributionConfigBlock, params.name, params.name, params.name)
 }
 
 <% end -%>
