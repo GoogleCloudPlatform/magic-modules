@@ -403,7 +403,7 @@ properties:
       - !ruby/object:Api::Type::Array
         name: 'serviceAttachments'
         description: |
-          List of egress service attachment configurations. 
+          List of egress service attachment configurations.
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::Enum
