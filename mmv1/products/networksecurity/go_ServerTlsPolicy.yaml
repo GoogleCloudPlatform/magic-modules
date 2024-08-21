@@ -53,6 +53,7 @@ custom_code:
 examples:
   - name: 'network_security_server_tls_policy_basic'
     primary_resource_id: 'default'
+    skip_vcr: true
     min_version: 'beta'
     vars:
       resource_name: 'my-server-tls-policy'
