@@ -290,9 +290,9 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'host'
         required_with:
-        - 'postgresql.0.port'
-        - 'postgresql.0.username'
-        - 'postgresql.0.password'
+          - 'postgresql.0.port'
+          - 'postgresql.0.username'
+          - 'postgresql.0.password'
         description: |
           The IP or hostname of the source MySQL database.
       - !ruby/object:Api::Type::Integer
