@@ -82,6 +82,32 @@ parameters:
     immutable: true
     ignore_read: true
     default_from_api: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: "redis_cluster_rdb"
+    primary_resource_id: "cluster-rdb"
+    vars:
+      cluster_name: "rdb-cluster"
+      policy_name: "mypolicy"
+      subnet_name: "mysubnet"
+      network_name: "mynetwork"
+      prevent_destroy: 'true'
+    test_vars_overrides:
+      prevent_destroy: 'false'
+    oics_vars_overrides:
+      prevent_destroy: 'false'
+  - !ruby/object:Provider::Terraform::Examples
+    name: "redis_cluster_aof"
+    primary_resource_id: "cluster-aof"
+    vars:
+      cluster_name: "aof-cluster"
+      policy_name: "mypolicy"
+      subnet_name: "mysubnet"
+      network_name: "mynetwork"
+      prevent_destroy: 'true'
+    test_vars_overrides:
+      prevent_destroy: 'false'
+    oics_vars_overrides:
+      prevent_destroy: 'false'
 properties:
   - name: 'createTime'
     type: Time
@@ -286,6 +312,74 @@ properties:
       Configure Redis Cluster behavior using a subset of native Redis configuration parameters.
       Please check Memorystore documentation for the list of supported parameters:
       https://cloud.google.com/memorystore/docs/cluster/supported-instance-configurations
+  - !ruby/object:Api::Type::NestedObject
+    name: persistenceConfig
+    description: Persistence config (RDB, AOF) for the cluster.
+    default_from_api: true
+    properties:
+      - !ruby/object:Api::Type::Enum
+        name: 'mode'
+        description: |
+          Optional. Controls whether Persistence features are enabled. If not provided, the existing value will be used.
+
+          - DISABLED: 	Persistence (both backup and restore) is disabled for the cluster.
+          - RDB: RDB based Persistence is enabled.
+          - AOF: AOF based Persistence is enabled.
+        values:
+          - :PERSISTENCE_MODE_UNSPECIFIED
+          - :DISABLED
+          - :RDB
+          - :AOF
+        default_from_api: true
+      - !ruby/object:Api::Type::NestedObject
+        name: rdbConfig
+        description: |
+          RDB configuration. This field will be ignored if mode is not RDB.
+        default_from_api: true
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'rdbSnapshotPeriod'
+            default_from_api: true
+            description: |
+              Optional. Available snapshot periods for scheduling.
+
+              - ONE_HOUR:	Snapshot every 1 hour.
+              - SIX_HOURS:	Snapshot every 6 hours.
+              - TWELVE_HOURS:	Snapshot every 12 hours.
+              - TWENTY_FOUR_HOURS:	Snapshot every 24 hours.
+            values:
+              - :SNAPSHOT_PERIOD_UNSPECIFIED
+              - :ONE_HOUR
+              - :SIX_HOURS
+              - :TWELVE_HOURS
+              - :TWENTY_FOUR_HOURS
+          - !ruby/object:Api::Type::Time
+            name: 'rdbSnapshotStartTime'
+            description: |
+              The time that the first snapshot was/will be attempted, and to which
+              future snapshots will be aligned.
+              If not provided, the current time will be used.
+            default_from_api: true
+      - !ruby/object:Api::Type::NestedObject
+        name: aofConfig
+        description: |
+          AOF configuration. This field will be ignored if mode is not AOF.
+        default_from_api: true
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'appendFsync'
+            default_from_api: true
+            description: |
+              Optional. Available fsync modes.
+
+              - :NO - Do not explicilty call fsync(). Rely on OS defaults.
+              - :EVERYSEC - Call fsync() once per second in a background thread. A balance between performance and durability.
+              - :ALWAYS - Call fsync() for earch write command.
+            values:
+              - :APPEND_FSYNC_UNSPECIFIED
+              - :NO
+              - :EVERYSEC
+              - :ALWAYS
   - name: 'maintenancePolicy'
     type: NestedObject
     description: Maintenance policy for a cluster
