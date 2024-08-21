@@ -71,8 +71,10 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/subnetwork.erb
   extra_schema_entry: templates/terraform/extra_schema_entry/subnetwork.erb
+  post_update: templates/terraform/post_update/compute_subnetwork.go.erb
 custom_diff: [
   'customdiff.ForceNewIfChange("ip_cidr_range", IsShrinkageIpCidr)',
+  'sendSecondaryIpRangeIfEmptyDiff',
 ]
 examples:
   - !ruby/object:Provider::Terraform::Examples
@@ -123,6 +125,16 @@ examples:
     vars:
       subnetwork_name: 'subnet-cidr-overlap'
       network_name: 'net-cidr-overlap'
+virtual_fields:
+  - !ruby/object:Api::Type::Boolean
+    name: 'send_secondary_ip_range_if_empty'
+    description: |
+      Controls the removal behavior of secondary_ip_range.
+      When false, removing secondary_ip_range from config will not produce a diff as
+      the provider will default to the API's value.
+      When true, the provider will treat removing secondary_ip_range as sending an
+      empty list of secondary IP ranges to the API.
+      Defaults to false.
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -216,10 +228,8 @@ properties:
       to either primary or secondary ranges.
 
       **Note**: This field uses [attr-as-block mode](https://www.terraform.io/docs/configuration/attr-as-blocks.html) to avoid
-      breaking users during the 0.12 upgrade. To explicitly send a list
-      of zero objects you must use the following syntax:
-      `example=[]`
-      For more details about this behavior, see [this section](https://www.terraform.io/docs/configuration/attr-as-blocks.html#defining-a-fixed-object-collection-value).
+      breaking users during the 0.12 upgrade. To explicitly send a list of zero objects,
+      set `send_secondary_ip_range_if_empty = true`
     update_verb: :PATCH
     update_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
     update_id: 'secondaryIpRanges'
