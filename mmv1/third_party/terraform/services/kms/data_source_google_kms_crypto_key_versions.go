@@ -1,5 +1,7 @@
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
 package kms
 
 import (
@@ -96,17 +98,17 @@ func dataSourceGoogleKmsCryptoKeyVersionsRead(d *schema.ResourceData, meta inter
 		return err
 	}
 
-	if len(versions) > 0 {
-		log.Printf("[DEBUG] Found %d cryptoKeyVersions in crypto key %s", len(versions), cryptoKeyId.CryptoKeyId())
-		value, err := flattenKMSCryptoKeyVersionsList(d, config, versions, cryptoKeyId.CryptoKeyId())
-		if err != nil {
-			return fmt.Errorf("error flattening cryptoKeyVersions list: %s", err)
-		}
-		if err := d.Set("versions", value); err != nil {
-			return fmt.Errorf("error setting versions: %s", err)
-		}
-	} else {
-		log.Printf("[DEBUG] Found 0 versions in crypto key %s", cryptoKeyId.CryptoKeyId())
+	log.Printf("[DEBUG] Found %d cryptoKeyVersions in crypto key %s", len(versions), cryptoKeyId.CryptoKeyId())
+	value, err := flattenKMSCryptoKeyVersionsList(d, config, versions, cryptoKeyId.CryptoKeyId())
+	if err != nil {
+		return fmt.Errorf("error flattening cryptoKeyVersions list: %s", err)
+	}
+	if err := d.Set("versions", value); err != nil {
+		return fmt.Errorf("error setting versions: %s", err)
+	}
+
+	if len(value) == 0 {
+		return nil
 	}
 
 	url, err := tpgresource.ReplaceVars(d, config, "{{KMSBasePath}}{{crypto_key}}")
@@ -159,7 +161,7 @@ func dataSourceGoogleKmsCryptoKeyVersionsRead(d *schema.ResourceData, meta inter
 func dataSourceKMSCryptoKeyVersionsList(d *schema.ResourceData, meta interface{}, cryptoKeyId string, userAgent string) ([]interface{}, error) {
 	config := meta.(*transport_tpg.Config)
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{KMSBasePath}}{{crypto_key}}/cryptoKeyVersions")
+	url, err := tpgresource.ReplaceVars(d, config, "{{KMSBasePath}}{{crypto_key}}/cryptoKeyVersions?filter=state=ENABLED")
 	if err != nil {
 		return nil, err
 	}
