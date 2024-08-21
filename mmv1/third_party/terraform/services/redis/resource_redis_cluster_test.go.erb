@@ -39,7 +39,6 @@ func TestAccRedisCluster_createClusterWithNodeType(t *testing.T) {
 	})
 }
 
-
 // Validate zone distribution for the cluster.
 func TestAccRedisCluster_createClusterWithZoneDistribution(t *testing.T) {
         t.Parallel()
@@ -67,6 +66,62 @@ func TestAccRedisCluster_createClusterWithZoneDistribution(t *testing.T) {
                         },
                 },
         })
+}
+
+func TestAccRedisCluster_persistenceCreateClusterWithRDB(t *testing.T) {
+	t.Parallel()
+
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckRedisClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// create cluster with RDB enabled
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: true, nodeType: "REDIS_STANDARD_SMALL", zoneDistributionMode: "MULTI_ZONE", persistenceBlock: "persistence_config {\nmode = \"RDB\"\nrdb_config {\nrdb_snapshot_period = \"ONE_HOUR\"\nrdb_snapshot_start_time = \"2024-10-02T15:01:23Z\"\n}\n}"}),
+			},
+			{
+				ResourceName:            "google_redis_cluster.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"psc_configs"},
+			},
+			{
+				// clean up the resource
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: false, nodeType: "REDIS_STANDARD_SMALL", zoneDistributionMode: "MULTI_ZONE", persistenceBlock: "persistence_config {\nmode = \"RDB\"\nrdb_config {\nrdb_snapshot_period = \"ONE_HOUR\"\nrdb_snapshot_start_time = \"2024-10-02T15:01:23Z\"\n}\n}"}),
+			},
+		},
+	})
+}
+
+func TestAccRedisCluster_persistenceCreateClusterWithAOF(t *testing.T) {
+	t.Parallel()
+
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckRedisClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// create cluster with AOF enabled
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: true, nodeType: "REDIS_STANDARD_SMALL", zoneDistributionMode: "MULTI_ZONE", persistenceBlock: "persistence_config {\nmode = \"AOF\"\naof_config{\nappend_fsync = \"EVERYSEC\"\n}\n}"}),
+			},
+			{
+				ResourceName:            "google_redis_cluster.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"psc_configs"},
+			},
+			{
+				// clean up the resource
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: false, nodeType: "REDIS_STANDARD_SMALL", zoneDistributionMode: "MULTI_ZONE", persistenceBlock: "persistence_config {\nmode = \"AOF\"\naof_config{\nappend_fsync = \"EVERYSEC\"\n}\n}"}),
+			},
+		},
+	})
 }
 
 // Validate that replica count is updated for the cluster
@@ -214,6 +269,45 @@ func TestAccRedisCluster_updateRedisConfigs(t *testing.T) {
 	})
 }
 
+// Validate that persistence is updated for the cluster
+func TestAccRedisCluster_persistenceUpdate(t *testing.T) {
+	t.Parallel()
+
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckRedisClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// create cluster with AOF enabled
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: true, nodeType: "REDIS_STANDARD_SMALL", zoneDistributionMode: "MULTI_ZONE", persistenceBlock:"persistence_config {\nmode = \"AOF\"\n}\n"}),
+			},
+			{
+				ResourceName:            "google_redis_cluster.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"psc_configs"},
+			},
+			{
+				// update persistence to RDB
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: true, nodeType: "REDIS_STANDARD_SMALL", zoneDistributionMode: "MULTI_ZONE", persistenceBlock:"persistence_config {\nmode = \"RDB\"\n}\n"}),
+			},
+			{
+				ResourceName:            "google_redis_cluster.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"psc_configs"},
+			},
+			{
+				// clean up the resource
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: false, nodeType: "REDIS_STANDARD_SMALL", zoneDistributionMode: "MULTI_ZONE", persistenceBlock:"persistence_config {\nmode = \"RDB\"\n}\n"}),
+			},
+		},
+	})
+}
+
 type ClusterParams struct {
 	name                 string
 	replicaCount   			 int
@@ -222,7 +316,8 @@ type ClusterParams struct {
 	nodeType             string
 	redisConfigs         map[string]string
 	zoneDistributionMode string
-	zone 								 string
+	zone                 string
+	persistenceBlock      string
 }
 
 func createOrUpdateRedisCluster(params *ClusterParams) string {
@@ -233,9 +328,9 @@ func createOrUpdateRedisCluster(params *ClusterParams) string {
 			prevent_destroy = true
 		}`
 	}
-	var strBuilder strings.Builder
+	var redisConfigsStrBuilder strings.Builder
 	for key, value := range params.redisConfigs {
-		strBuilder.WriteString(fmt.Sprintf("%s =  \"%s\"\n", key, value))
+		redisConfigsStrBuilder.WriteString(fmt.Sprintf("%s =  \"%s\"\n", key, value))
 	}
 
 	zoneDistributionConfigBlock := ``
@@ -262,11 +357,12 @@ resource "google_redis_cluster" "test" {
 	redis_configs = {
 		%s
 	}
-  %s
+  	%s
+	%s
+  	%s
 	depends_on = [
 			google_network_connectivity_service_connection_policy.default
 		]
-	%s
 }
 
 resource "google_network_connectivity_service_connection_policy" "default" {
@@ -294,7 +390,7 @@ resource "google_compute_network" "producer_net" {
 	name                    = "%s"
 	auto_create_subnetworks = false
 }
-`, params.name, params.replicaCount, params.shardCount, params.nodeType, strBuilder.String(), zoneDistributionConfigBlock, lifecycleBlock, params.name, params.name, params.name)
+`, params.name, params.replicaCount, params.shardCount, params.nodeType, redisConfigsStrBuilder.String(), zoneDistributionConfigBlock, params.persistenceBlock, lifecycleBlock, params.name, params.name, params.name)
 }
 
 <% end -%>
