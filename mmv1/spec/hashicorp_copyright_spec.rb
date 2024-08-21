@@ -12,16 +12,15 @@
 # limitations under the License.
 
 require 'spec_helper'
-require 'provider/core'
+require 'provider/terraform'
 
 describe 'Provider::Core.expected_output_folder?' do
   # Inputs for tests
-  config = 'foo'
   api = Api::Compiler.new(File.read('spec/data/good-file.yaml')).run
   version_name = 'ga'
   start_time = Time.now
 
-  provider = Provider::Core.new(config, api, version_name, start_time)
+  provider = Provider::Terraform.new(api, version_name, start_time)
 
   # rubocop:disable Layout/LineLength
   it 'should identify `terraform-provider-google` as an expected output folder' do

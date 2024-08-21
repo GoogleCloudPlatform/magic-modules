@@ -50,8 +50,11 @@ examples:
     primary_resource_id: 'default'
     vars:
       trust_config_name: 'trust-config'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  pre_update: templates/terraform/pre_update/certificate_manager_trust_config.go.erb
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'certificate_manager_trust_config_allowlisted_certificates'
+    primary_resource_id: 'default'
+    vars:
+      trust_config_name: 'trust-config'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -87,7 +90,6 @@ properties:
   - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: 'Set of label tags associated with the trust config.'
-    immutable: true
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
@@ -124,3 +126,15 @@ properties:
                   PEM intermediate certificate used for building up paths for validation.
                   Each certificate provided in PEM format may occupy up to 5kB.
                 sensitive: true
+  - !ruby/object:Api::Type::Array
+    name: allowlistedCertificates
+    description: |
+       Allowlisted PEM-encoded certificates. A certificate matching an allowlisted certificate is always considered valid as long as
+       the certificate is parseable, proof of private key possession is established, and constraints on the certificate's SAN field are met.
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'pemCertificate'
+          description: |
+            PEM certificate that is allowlisted. The certificate can be up to 5k bytes, and must be a parseable X.509 certificate.
+          required: true

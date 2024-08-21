@@ -64,6 +64,12 @@ examples:
       # Randomness
     skip_vcr: true
   - !ruby/object:Provider::Terraform::Examples
+    name: 'spanner_instance_with_autoscaling'
+    primary_resource_id:
+      'example'
+      # Randomness
+    skip_vcr: true
+  - !ruby/object:Provider::Terraform::Examples
     name: 'spanner_instance_multi_regional'
     primary_resource_id:
       'example'
@@ -91,8 +97,6 @@ properties:
       A unique identifier for the instance, which cannot be changed after
       the instance is created. The name must be between 6 and 30 characters
       in length.
-
-
       If not provided, a random string starting with `tf-` will be selected.
     immutable: true
     required: true
@@ -134,6 +138,7 @@ properties:
     exactly_one_of:
       - num_nodes
       - processing_units
+      - autoscaling_config
   - !ruby/object:Api::Type::Integer
     name: 'processingUnits'
     description: |
@@ -142,6 +147,7 @@ properties:
     exactly_one_of:
       - num_nodes
       - processing_units
+      - autoscaling_config
     default_from_api: true
   - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
@@ -156,3 +162,80 @@ properties:
     values:
       - :READY
       - :CREATING
+  - !ruby/object:Api::Type::NestedObject
+    name: 'autoscalingConfig'
+    description: |
+      The autoscaling configuration. Autoscaling is enabled if this field is set.
+      When autoscaling is enabled, num_nodes and processing_units are treated as,
+      OUTPUT_ONLY fields and reflect the current compute capacity allocated to
+      the instance.
+    exactly_one_of:
+      - num_nodes
+      - processing_units
+      - autoscaling_config
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: 'autoscalingLimits'
+        description: |
+          Defines scale in controls to reduce the risk of response latency
+          and outages due to abrupt scale-in events. Users can define the minimum and
+          maximum compute capacity allocated to the instance, and the autoscaler will
+          only scale within that range. Users can either use nodes or processing
+          units to specify the limits, but should use the same unit to set both the
+          min_limit and max_limit.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'minProcessingUnits'
+            description: |
+              Specifies minimum number of processing units allocated to the instance.
+              If set, this number should be multiples of 1000.
+            exactly_one_of:
+              - min_processing_units
+              - min_nodes
+          - !ruby/object:Api::Type::Integer
+            name: 'maxProcessingUnits'
+            description: |
+              Specifies maximum number of processing units allocated to the instance.
+              If set, this number should be multiples of 1000 and be greater than or equal to
+              min_processing_units.
+            exactly_one_of:
+              - max_processing_units
+              - max_nodes
+          - !ruby/object:Api::Type::Integer
+            name: 'minNodes'
+            description: |
+              Specifies number of nodes allocated to the instance. If set, this number
+              should be greater than or equal to 1.
+            exactly_one_of:
+              - min_processing_units
+              - min_nodes
+            required_with:
+              - max_nodes
+          - !ruby/object:Api::Type::Integer
+            name: 'maxNodes'
+            description: |
+              Specifies maximum number of nodes allocated to the instance. If set, this number
+              should be greater than or equal to min_nodes.
+            exactly_one_of:
+              - max_processing_units
+              - max_nodes
+            required_with:
+              - min_nodes
+      - !ruby/object:Api::Type::NestedObject
+        name: 'autoscalingTargets'
+        description: |
+          Defines scale in controls to reduce the risk of response latency
+          and outages due to abrupt scale-in events
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'highPriorityCpuUtilizationPercent'
+            description: |
+              Specifies the target high priority cpu utilization percentage that the autoscaler
+              should be trying to achieve for the instance.
+              This number is on a scale from 0 (no utilization) to 100 (full utilization)..
+          - !ruby/object:Api::Type::Integer
+            name: 'storageUtilizationPercent'
+            description: |
+              Specifies the target storage utilization percentage that the autoscaler
+              should be trying to achieve for the instance.
+              This number is on a scale from 0 (no utilization) to 100 (full utilization).

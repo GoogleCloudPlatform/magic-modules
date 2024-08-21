@@ -23,6 +23,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/run/docs/reference/rest/v2/projects.locations.jobs'
 description: |
   A Cloud Run Job resource that references a container image which is run to completion.
+taint_resource_on_failed_create: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
@@ -56,6 +57,11 @@ examples:
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-job%s\",
       context[\"random_suffix\"\
       ])"
+    vars:
+      cloud_run_job_name: 'cloudrun-job'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudrunv2_job_limits'
+    primary_resource_id: 'default'
     vars:
       cloud_run_job_name: 'cloudrun-job'
   - !ruby/object:Provider::Terraform::Examples
@@ -108,6 +114,14 @@ examples:
       ])"
     vars:
       cloud_run_job_name: 'cloudrun-job'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudrunv2_job_run_job'
+    min_version: beta
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-job%s\", context[\"random_suffix\"\
+      ])"
+    vars:
+      cloud_run_job_name: 'cloudrun-job'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -123,7 +137,6 @@ properties:
     url_param_only: true
     description: |
       Name of the Job.
-    pattern: projects/{{project}}/locations/{{location}}/jobs/{{name}}
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
@@ -221,6 +234,30 @@ properties:
         name: 'useDefault'
         description: |
           If True, indicates to use the default project's binary authorization policy. If False, binary authorization will be disabled.
+        conflicts:
+          - policy
+      - !ruby/object:Api::Type::String
+        name: 'policy'
+        description: |
+          The path to a binary authorization policy. Format: projects/{project}/platforms/cloudRun/{policy-name}
+        conflicts:
+          - use_default
+  - !ruby/object:Api::Type::String
+    name: 'startExecutionToken'
+    description: |-
+      A unique string used as a suffix creating a new execution upon job create or update. The Job will become ready when the execution is successfully started.
+      The sum of job name and token length must be fewer than 63 characters.
+    conflicts:
+      - run_execution_token
+    min_version: beta
+  - !ruby/object:Api::Type::String
+    name: 'runExecutionToken'
+    description: |-
+      A unique string used as a suffix creating a new execution upon job create or update. The Job will become ready when the execution is successfully completed.
+      The sum of job name and token length must be fewer than 63 characters.
+    conflicts:
+      - start_execution_token
+    min_version: beta
   - !ruby/object:Api::Type::NestedObject
     name: 'template'
     required: true
@@ -285,7 +322,7 @@ properties:
                 - !ruby/object:Api::Type::Array
                   name: 'args'
                   description: |-
-                    Arguments to the entrypoint. The docker image's CMD is used if this is not provided. Variable references $(VAR_NAME) are expanded using the container's environment. If a variable cannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded, regardless of whether the variable exists or not. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell
+                    Arguments to the entrypoint. The docker image's CMD is used if this is not provided. Variable references are not supported in Cloud Run.
                   item_type: Api::Type::String
                 - !ruby/object:Api::Type::Array
                   name: 'env'
@@ -301,7 +338,7 @@ properties:
                       - !ruby/object:Api::Type::String
                         name: 'value'
                         description: |-
-                          Variable references $(VAR_NAME) are expanded using the previous defined environment variables in the container and any route environment variables. If a variable cannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded, regardless of whether the variable exists or not. Defaults to "", and the maximum length is 32768 bytes
+                          Literal value of the environment variable. Defaults to "" and the maximum allowed length is 32768 characters. Variable references are not supported in Cloud Run.
                         # exactly_one_of:
                         #   - template.0.template.0.containers.0.env.0.value
                         #   - template.0.template.0.containers.0.env.0.valueSource
@@ -337,7 +374,7 @@ properties:
                     - !ruby/object:Api::Type::KeyValuePairs
                       name: 'limits'
                       description: |-
-                        Only memory and CPU are supported. Note: The only supported values for CPU are '1', '2', '4', and '8'. Setting 4 CPU requires at least 2Gi of memory. The values of the map is string form of the 'quantity' k8s type: https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
+                        Only memory and CPU are supported. Use key `cpu` for CPU limit and `memory` for memory limit. Note: The only supported values for CPU are '1', '2', '4', and '8'. Setting 4 CPU requires at least 2Gi of memory. The values of the map is string form of the 'quantity' k8s type: https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
                       default_from_api: true
                 - !ruby/object:Api::Type::Array
                   name: 'ports'
@@ -394,6 +431,8 @@ properties:
                   #   - template.0.template.0.volumes.0.secret
                   #   - template.0.template.0.volumes.0.cloudSqlInstance
                   #   - template.0.template.0.volumes.0.emptyDir
+                  #   - template.0.volumes.0.gcs
+                  #   - template.0.volumes.0.nfs
                   properties:
                     - !ruby/object:Api::Type::String
                       name: 'secret'
@@ -432,6 +471,8 @@ properties:
                   #   - template.0.template.0.volumes.0.secret
                   #   - template.0.template.0.volumes.0.cloudSqlInstance
                   #   - template.0.template.0.volumes.0.emptyDir
+                  #   - template.0.volumes.0.gcs
+                  #   - template.0.volumes.0.nfs
                   properties:
                     - !ruby/object:Api::Type::Array
                       name: 'instances'
@@ -447,6 +488,8 @@ properties:
                   #   - template.0.template.0.volumes.0.secret
                   #   - template.0.template.0.volumes.0.cloudSqlInstance
                   #   - template.0.template.0.volumes.0.emptyDir
+                  #   - template.0.volumes.0.gcs
+                  #   - template.0.volumes.0.nfs
                   properties:
                     - !ruby/object:Api::Type::Enum
                       name: 'medium'
@@ -459,6 +502,52 @@ properties:
                       name: 'sizeLimit'
                       description: |-
                           Limit on the storage usable by this EmptyDir volume. The size limit is also applicable for memory medium. The maximum usage on memory medium EmptyDir would be the minimum value between the SizeLimit specified here and the sum of memory limits of all containers in a pod. This field's values are of the 'Quantity' k8s type: https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/. The default is nil which means that the limit is undefined. More info: https://kubernetes.io/docs/concepts/storage/volumes/#emptydir.
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'gcs'
+                  description: |-
+                    Cloud Storage bucket mounted as a volume using GCSFuse. This feature requires the launch stage to be set to ALPHA or BETA.
+                  min_version: beta
+                  # exactly_one_of:
+                  #   - template.0.volumes.0.secret
+                  #   - template.0.volumes.0.cloudSqlInstance
+                  #   - template.0.volumes.0.emptyDir
+                  #   - template.0.volumes.0.gcs
+                  #   - template.0.volumes.0.nfs
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'bucket'
+                      required: true
+                      description: |-
+                        Name of the cloud storage bucket to back the volume. The resource service account must have permission to access the bucket.
+                    - !ruby/object:Api::Type::Boolean
+                      name: 'readOnly'
+                      description: |-
+                        If true, mount this volume as read-only in all mounts. If false, mount this volume as read-write.
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'nfs'
+                  description: |-
+                    NFS share mounted as a volume. This feature requires the launch stage to be set to ALPHA or BETA.
+                  min_version: beta
+                  # exactly_one_of:
+                  #   - template.0.volumes.0.secret
+                  #   - template.0.volumes.0.cloudSqlInstance
+                  #   - template.0.volumes.0.emptyDir
+                  #   - template.0.volumes.0.gcs
+                  #   - template.0.volumes.0.nfs
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'server'
+                      required: true
+                      description: |-
+                        Hostname or IP address of the NFS server.
+                    - !ruby/object:Api::Type::String
+                      name: 'path'
+                      description: |-
+                        Path that is exported by the NFS server.
+                    - !ruby/object:Api::Type::Boolean
+                      name: 'readOnly'
+                      description: |-
+                        If true, mount this volume as read-only in all mounts.
           - !ruby/object:Api::Type::String
             name: 'timeout'
             description: |-
@@ -466,6 +555,8 @@ properties:
 
               A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
             default_from_api: true
+            validation: !ruby/object:Provider::Terraform::Validation
+              regex: '^[0-9]+(?:\.[0-9]{1,9})?s$'
           - !ruby/object:Api::Type::String
             name: 'serviceAccount'
             description: |-

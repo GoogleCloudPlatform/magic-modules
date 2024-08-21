@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -299,10 +299,18 @@ func TestAccDataflowFlexTemplateJob_withKmsKey(t *testing.T) {
 
 	randStr := acctest.RandString(t, 10)
 	job := "tf-test-dataflow-job-" + randStr
-	key_ring := "tf-test-dataflow-kms-ring-" + randStr
-	crypto_key := "tf-test-dataflow-kms-key-" + randStr
+	kms := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
+	cryptoKey := kms.CryptoKey.Name
 	bucket := "tf-test-dataflow-bucket-" + randStr
 	topic := "tf-test-topic" + randStr
+
+	if acctest.BootstrapPSARole(t, "service-", "compute-system", "roles/cloudkms.cryptoKeyEncrypterDecrypter") {
+		t.Fatal("Stopping the test because a role was added to the policy.")
+	}
+
+	if acctest.BootstrapPSARole(t, "service-", "dataflow-service-producer-prod", "roles/cloudkms.cryptoKeyEncrypterDecrypter") {
+		t.Fatal("Stopping the test because a role was added to the policy.")
+	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -310,7 +318,7 @@ func TestAccDataflowFlexTemplateJob_withKmsKey(t *testing.T) {
 		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataflowFlexTemplateJob_kms(job, key_ring, crypto_key, bucket, topic),
+				Config: testAccDataflowFlexTemplateJob_kms(job, cryptoKey, bucket, topic),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataflowFlexJobExists(t, "google_dataflow_flex_template_job.flex_job_kms", false),
 				),
@@ -434,6 +442,162 @@ func TestAccDataflowFlexTemplateJob_withProviderDefaultLabels(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "container_spec_gcs_path", "labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func TestAccDataflowJob_withAttributionLabelCreationOnly(t *testing.T) {
+	// Dataflow responses include serialized java classes and bash commands
+	// This makes body comparison infeasible
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	randStr := acctest.RandString(t, 10)
+	bucket := "tf-test-dataflow-gcs-" + randStr
+	job := "tf-test-dataflow-job-" + randStr
+	add := "true"
+	strategy := "CREATION_ONLY"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataflowJob_attributionLabelCreate(bucket, job, add, strategy),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_dataflow_job.big_data", "labels.%", "1"),
+					resource.TestCheckResourceAttr("google_dataflow_job.big_data", "labels.user_label", "foo"),
+
+					resource.TestCheckResourceAttr("google_dataflow_job.big_data", "terraform_labels.%", "2"),
+					resource.TestCheckResourceAttr("google_dataflow_job.big_data", "terraform_labels.goog-terraform-provisioned", "true"),
+					resource.TestCheckResourceAttr("google_dataflow_job.big_data", "terraform_labels.user_label", "foo"),
+
+					resource.TestCheckResourceAttr("google_dataflow_job.big_data", "effective_labels.%", "5"), // Includes 3 server generated labels
+				),
+			},
+			{
+				ResourceName:            "google_dataflow_job.big_data",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccDataflowJob_attributionLabelUpdate(bucket, job, add, strategy),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_dataflow_job.big_data", "labels.%", "1"),
+					resource.TestCheckResourceAttr("google_dataflow_job.big_data", "labels.user_label", "bar"),
+
+					resource.TestCheckResourceAttr("google_dataflow_job.big_data", "terraform_labels.%", "2"),
+					resource.TestCheckResourceAttr("google_dataflow_job.big_data", "terraform_labels.goog-terraform-provisioned", "true"),
+					resource.TestCheckResourceAttr("google_dataflow_job.big_data", "terraform_labels.user_label", "bar"),
+
+					resource.TestCheckResourceAttr("google_dataflow_job.big_data", "effective_labels.%", "5"), // Includes 3 server generated labels
+				),
+			},
+			{
+				ResourceName:            "google_dataflow_job.big_data",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func TestAccDataflowJob_withAttributionLabelProactive(t *testing.T) {
+	// Dataflow responses include serialized java classes and bash commands
+	// This makes body comparison infeasible
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	randStr := acctest.RandString(t, 10)
+	bucket := "tf-test-dataflow-gcs-" + randStr
+	job := "tf-test-dataflow-job-" + randStr
+	strategy := "PROACTIVE"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataflowJob_attributionLabelCreate(bucket, job, "false", strategy),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_dataflow_job.big_data", "labels.%", "1"),
+					resource.TestCheckResourceAttr("google_dataflow_job.big_data", "labels.user_label", "foo"),
+
+					resource.TestCheckResourceAttr("google_dataflow_job.big_data", "terraform_labels.%", "1"),
+					resource.TestCheckResourceAttr("google_dataflow_job.big_data", "terraform_labels.user_label", "foo"),
+
+					resource.TestCheckResourceAttr("google_dataflow_job.big_data", "effective_labels.%", "4"), // Includes 3 server generated labels
+				),
+			},
+			{
+				ResourceName:            "google_dataflow_job.big_data",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccDataflowJob_attributionLabelUpdate(bucket, job, "true", strategy),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_dataflow_job.big_data", "labels.%", "1"),
+					resource.TestCheckResourceAttr("google_dataflow_job.big_data", "labels.user_label", "bar"),
+
+					resource.TestCheckResourceAttr("google_dataflow_job.big_data", "terraform_labels.%", "2"),
+					resource.TestCheckResourceAttr("google_dataflow_job.big_data", "terraform_labels.goog-terraform-provisioned", "true"),
+					resource.TestCheckResourceAttr("google_dataflow_job.big_data", "terraform_labels.user_label", "bar"),
+
+					resource.TestCheckResourceAttr("google_dataflow_job.big_data", "effective_labels.%", "5"), // Includes 3 server generated labels
+				),
+			},
+			{
+				ResourceName:            "google_dataflow_job.big_data",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+// Test implementation of enabling streaming engine via parameters or via argument in resource block
+// NOTE: these fields are immutable, so the resource is being recreated between both test steps.
+func TestAccDataflowFlexTemplateJob_enableStreamingEngine(t *testing.T) {
+	// Dataflow responses include serialized java classes and bash commands
+	// This makes body comparison infeasible
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	randStr := acctest.RandString(t, 10)
+	job := "tf-test-dataflow-job-" + randStr
+	bucket := "tf-test-dataflow-bucket-" + randStr
+	topic := "tf-test-topic" + randStr
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataflowFlexTemplateJob_enableStreamingEngine_param(job, bucket, topic),
+				Check: resource.ComposeTestCheckFunc(
+					// Is set
+					resource.TestCheckResourceAttr("google_dataflow_flex_template_job.flex_job", "parameters.enableStreamingEngine", "true"),
+					// Is not set
+					resource.TestCheckNoResourceAttr("google_dataflow_flex_template_job.flex_job", "enable_streaming_engine"),
+				),
+			},
+			{
+				Config: testAccDataflowFlexTemplateJob_enableStreamingEngine_field(job, bucket, topic),
+				Check: resource.ComposeTestCheckFunc(
+					// Now is unset
+					resource.TestCheckNoResourceAttr("google_dataflow_flex_template_job.flex_job", "parameters.enableStreamingEngine"),
+					// Now is set
+					resource.TestCheckResourceAttr("google_dataflow_flex_template_job.flex_job", "enable_streaming_engine", "true"),
+				),
 			},
 		},
 	})
@@ -1134,7 +1298,7 @@ resource "google_dataflow_flex_template_job" "flex_job_ipconfig" {
 `, topicName, network, subnetwork, bucket, job)
 }
 
-func testAccDataflowFlexTemplateJob_kms(job, key_ring, crypto_key, bucket, topicName string) string {
+func testAccDataflowFlexTemplateJob_kms(job, crypto_key, bucket, topicName string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
 
@@ -1167,29 +1331,6 @@ resource "google_storage_bucket_object" "schema" {
 EOF
 }
 
-resource "google_project_iam_member" "kms-project-dataflow-binding" {
-  project = data.google_project.project.project_id
-  role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member  = "serviceAccount:service-${data.google_project.project.number}@dataflow-service-producer-prod.iam.gserviceaccount.com"
-}
-
-resource "google_project_iam_member" "kms-project-compute-binding" {
-  project = data.google_project.project.project_id
-  role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member  = "serviceAccount:service-${data.google_project.project.number}@compute-system.iam.gserviceaccount.com"
-}
-
-resource "google_kms_key_ring" "keyring" {
-  name     = "%s"
-  location = "global"
-}
-
-resource "google_kms_crypto_key" "crypto_key" {
-  name            = "%s"
-  key_ring        = google_kms_key_ring.keyring.id
-  rotation_period = "100000s"
-}
-
 data "google_storage_bucket_object" "flex_template" {
   name   = "latest/flex/Streaming_Data_Generator"
   bucket = "dataflow-templates"
@@ -1206,10 +1347,10 @@ resource "google_dataflow_flex_template_job" "flex_job_kms" {
   labels = {
    "my_labels" = "value"
   }
-  kms_key_name		= google_kms_crypto_key.crypto_key.id
+  kms_key_name		= "%s"
 
 }
-`, topicName, bucket, key_ring, crypto_key, job)
+`, topicName, bucket, job, crypto_key)
 }
 
 func testAccDataflowFlexTemplateJob_additionalExperiments(job, bucket, topicName string, experiments []string) string {
@@ -1521,6 +1662,68 @@ resource "google_dataflow_flex_template_job" "flex_job_fullupdate" {
 `, topicName, randStr, bucket, job)
 }
 
+func testAccDataflowJob_attributionLabelCreate(bucket, job, add, strategy string) string {
+	return fmt.Sprintf(`
+provider "google" {
+  add_terraform_attribution_label               = %s
+  terraform_attribution_label_addition_strategy = %q
+}
+
+resource "google_storage_bucket" "temp" {
+  name          = "%s"
+  location      = "US"
+  force_destroy = true
+}
+
+resource "google_dataflow_job" "big_data" {
+  name = "%s"
+
+  labels = {
+    user_label = "foo"
+  }
+
+  template_gcs_path = "%s"
+  temp_gcs_location = google_storage_bucket.temp.url
+  parameters = {
+    inputFile = "%s"
+    output    = "${google_storage_bucket.temp.url}/output"
+  }
+  on_delete = "cancel"
+}
+`, add, strategy, bucket, job, testDataflowJobTemplateWordCountUrl, testDataflowJobSampleFileUrl)
+}
+
+func testAccDataflowJob_attributionLabelUpdate(bucket, job, add, strategy string) string {
+	return fmt.Sprintf(`
+provider "google" {
+  add_terraform_attribution_label              = %s
+  terraform_attribution_label_addition_strategy = %q
+}
+
+resource "google_storage_bucket" "temp" {
+  name          = "%s"
+  location      = "US"
+  force_destroy = true
+}
+
+resource "google_dataflow_job" "big_data" {
+  name = "%s"
+
+  labels = {
+    user_label = "bar"
+  }
+
+  template_gcs_path = "%s"
+  temp_gcs_location = google_storage_bucket.temp.url
+  parameters = {
+    inputFile = "%s"
+    output    = "${google_storage_bucket.temp.url}/output"
+  }
+  on_delete = "cancel"
+}
+`, add, strategy, bucket, job, testDataflowJobTemplateWordCountUrl, testDataflowJobSampleFileUrl)
+}
+
 func testAccDataflowFlexJobHasOption(t *testing.T, res, option, expectedValue string, wait bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if wait {
@@ -1578,4 +1781,115 @@ func testAccDataflowFlexJobExists(t *testing.T, resource string, wait bool) reso
 	}
 }
 
+// Set parameters.enableStreamingEngine value in parameters map to control feature enablement (versus using enable_streaming_engine field)
+func testAccDataflowFlexTemplateJob_enableStreamingEngine_param(job, bucket, topicName string) string {
+	return fmt.Sprintf(`
+
+resource "google_pubsub_topic" "example" {
+  name = "%s"
+}
+
+data "google_storage_bucket_object" "flex_template" {
+  name   = "latest/flex/Streaming_Data_Generator"
+  bucket = "dataflow-templates"
+}
+
+resource "google_storage_bucket" "bucket" {
+  name = "%s"
+  location = "US-CENTRAL1"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_object" "schema" {
+  name = "schema.json"
+  bucket = google_storage_bucket.bucket.name
+  content = <<EOF
+{
+	"eventId": "{{uuid()}}",
+	"eventTimestamp": {{timestamp()}},
+	"ipv4": "{{ipv4()}}",
+	"ipv6": "{{ipv6()}}",
+	"country": "{{country()}}",
+	"username": "{{username()}}",
+	"quest": "{{random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road")}}",
+	"score": {{integer(100, 10000)}},
+	"completed": {{bool()}}
+}
+EOF
+}
+
+resource "google_dataflow_flex_template_job" "flex_job" {
+  name = "%s"
+  container_spec_gcs_path = "gs://${data.google_storage_bucket_object.flex_template.bucket}/${data.google_storage_bucket_object.flex_template.name}"
+  on_delete = "cancel"
+  parameters = {
+    schemaLocation = "gs://${google_storage_bucket_object.schema.bucket}/schema.json"
+    qps = "1"
+    topic = google_pubsub_topic.example.id
+    enableStreamingEngine = true
+  }
+  labels = {
+   "my_labels" = "value"
+  }
+}
+`, topicName, bucket, job)
+}
+
+// Set enable_streaming_engine field to control feature enablement (versus using parameters.enableStreamingEngine)
+func testAccDataflowFlexTemplateJob_enableStreamingEngine_field(job, bucket, topicName string) string {
+	return fmt.Sprintf(`
+
+resource "google_pubsub_topic" "example" {
+  name = "%s"
+}
+
+data "google_storage_bucket_object" "flex_template" {
+  name   = "latest/flex/Streaming_Data_Generator"
+  bucket = "dataflow-templates"
+}
+
+resource "google_storage_bucket" "bucket" {
+  name = "%s"
+  location = "US-CENTRAL1"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_object" "schema" {
+  name = "schema.json"
+  bucket = google_storage_bucket.bucket.name
+  content = <<EOF
+{
+	"eventId": "{{uuid()}}",
+	"eventTimestamp": {{timestamp()}},
+	"ipv4": "{{ipv4()}}",
+	"ipv6": "{{ipv6()}}",
+	"country": "{{country()}}",
+	"username": "{{username()}}",
+	"quest": "{{random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road")}}",
+	"score": {{integer(100, 10000)}},
+	"completed": {{bool()}}
+}
+EOF
+}
+
+resource "google_dataflow_flex_template_job" "flex_job" {
+  name = "%s"
+  container_spec_gcs_path = "gs://${data.google_storage_bucket_object.flex_template.bucket}/${data.google_storage_bucket_object.flex_template.name}"
+  on_delete = "cancel"
+
+  enable_streaming_engine = true
+
+  parameters = {
+    schemaLocation = "gs://${google_storage_bucket_object.schema.bucket}/schema.json"
+    qps = "1"
+    topic = google_pubsub_topic.example.id
+  }
+  labels = {
+   "my_labels" = "value"
+  }
+}
+`, topicName, bucket, job)
+}
 <% end -%>

@@ -11,12 +11,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'provider/abstract_core'
-
 module Provider
-  class Terraform < Provider::AbstractCore
+  class Terraform
     # Functions to compile sub-templates.
     module SubTemplate
+      def build_newyaml_field(property, object, pwd)
+        compile_template "#{pwd}/templates/terraform/yaml_conversion_field.erb",
+                         property:,
+                         object:,
+                         pwd:
+      end
+
       def build_schema_property(property, object, pwd)
         compile_template "#{pwd}/templates/terraform/schema_property.erb",
                          property:,

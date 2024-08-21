@@ -6,6 +6,8 @@ resource "google_container_cluster" "primary" {
     workload_pool = "<%= ctx[:test_env_vars]['project'] %>.svc.id.goog"
   }
   deletion_protection  = "<%= ctx[:vars]['deletion_protection'] %>"
+  network       = "<%= ctx[:vars]['network_name'] %>"
+  subnetwork    = "<%= ctx[:vars]['subnetwork_name'] %>"
 }
 
 resource "google_gke_hub_membership" "membership" {

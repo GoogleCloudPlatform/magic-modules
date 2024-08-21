@@ -27,11 +27,8 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
   parent_resource_attribute: 'name'
   base_url: projects/{{project}}/locations/{{location}}/services/{{name}}
-  import_format:
-    [
-      'projects/{{project}}/locations/{{location}}/services/{{name}}',
-      '{{name}}',
-    ]
+  import_format: ['projects/{{project}}/locations/{{location}}/services/{{name}}', '{{name}}']
+taint_resource_on_failed_create: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
@@ -56,17 +53,18 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_basic'
     primary_resource_id: 'default'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service%s\",
-      context[\"\
-      random_suffix\"])"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service%s\", context[\"random_suffix\"])"
+    vars:
+      cloud_run_service_name: 'cloudrun-service'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudrunv2_service_limits'
+    primary_resource_id: 'default'
     vars:
       cloud_run_service_name: 'cloudrun-service'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_sql'
     primary_resource_id: 'default'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
-      context[\"random_suffix\"\
-      ])"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
       secret_id: 'secret-1'
@@ -79,9 +77,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_vpcaccess'
     primary_resource_id: 'default'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
-      context[\"random_suffix\"\
-      ])"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
       vpc_access_connector_name: 'run-vpc'
@@ -90,25 +86,19 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_directvpc'
     primary_resource_id: 'default'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
-      context[\"random_suffix\"\
-      ])"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_probes'
     primary_resource_id: 'default'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
-      context[\"random_suffix\"\
-      ])"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_secret'
     primary_resource_id: 'default'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
-      context[\"random_suffix\"\
-      ])"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
       secret_id: 'secret-1'
@@ -120,6 +110,21 @@ examples:
       random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
+
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudrunv2_service_mount_gcs'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service-%s\", context[\"random_suffix\"])"
+    vars:
+      cloud_run_service_name: 'cloudrun-service'
+
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudrunv2_service_mount_nfs'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service-%s\", context[\"random_suffix\"])"
+    vars:
+      cloud_run_service_name: 'cloudrun-service'
+
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -135,7 +140,6 @@ properties:
     url_param_only: true
     description: |
       Name of the Service.
-    pattern: projects/{{project}}/locations/{{location}}/services/{{name}}
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
@@ -246,13 +250,35 @@ properties:
         name: 'useDefault'
         description: |
           If True, indicates to use the default project's binary authorization policy. If False, binary authorization will be disabled.
+        conflicts:
+          - policy
+      - !ruby/object:Api::Type::String
+        name: 'policy'
+        description: |
+          The path to a binary authorization policy. Format: projects/{project}/platforms/cloudRun/{policy-name}
+        conflicts:
+          - use_default
   - !ruby/object:Api::Type::Array
     name: 'customAudiences'
-    min_version: beta
     description: |
       One or more custom audiences that you want this service to support. Specify each custom audience as the full URL in a string. The custom audiences are encoded in the token and used to authenticate requests.
       For more information, see https://cloud.google.com/run/docs/configuring/custom-audiences.
     item_type: Api::Type::String
+  - !ruby/object:Api::Type::NestedObject
+    name: 'scaling'
+    min_version: beta
+    description: |
+      Scaling settings that apply to the whole service
+    properties:
+      - !ruby/object:Api::Type::Integer
+        name: 'minInstanceCount'
+        description: |
+          Minimum number of instances for the service, to be divided among all revisions receiving traffic.
+  - !ruby/object:Api::Type::Boolean
+    name: 'defaultUriDisabled'
+    min_version: beta
+    description: |-
+      Disables public resolution of the default URI of this service.
   - !ruby/object:Api::Type::NestedObject
     name: 'template'
     required: true
@@ -343,6 +369,8 @@ properties:
 
           A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
         default_from_api: true
+        validation: !ruby/object:Provider::Terraform::Validation
+          regex: '^[0-9]+(?:\.[0-9]{1,9})?s$'
       - !ruby/object:Api::Type::String
         name: 'serviceAccount'
         description: |-
@@ -371,7 +399,7 @@ properties:
             - !ruby/object:Api::Type::Array
               name: 'args'
               description: |-
-                Arguments to the entrypoint. The docker image's CMD is used if this is not provided. Variable references $(VAR_NAME) are expanded using the container's environment. If a variable cannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded, regardless of whether the variable exists or not. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell
+                Arguments to the entrypoint. The docker image's CMD is used if this is not provided. Variable references are not supported in Cloud Run.
               item_type: Api::Type::String
             - !ruby/object:Api::Type::Array
               name: 'env'
@@ -383,11 +411,11 @@ properties:
                     name: 'name'
                     required: true
                     description: |-
-                      Name of the environment variable. Must be a C_IDENTIFIER, and mnay not exceed 32768 characters.
+                      Name of the environment variable. Must be a C_IDENTIFIER, and may not exceed 32768 characters.
                   - !ruby/object:Api::Type::String
                     name: 'value'
                     description: |-
-                      Variable references $(VAR_NAME) are expanded using the previous defined environment variables in the container and any route environment variables. If a variable cannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded, regardless of whether the variable exists or not. Defaults to "", and the maximum length is 32768 bytes
+                      Literal value of the environment variable. Defaults to "" and the maximum allowed length is 32768 characters. Variable references are not supported in Cloud Run.
                     # exactly_one_of:
                     #   - template.0.containers.0.env.0.value
                     #   - template.0.containers.0.env.0.valueSource
@@ -422,18 +450,20 @@ properties:
                 - !ruby/object:Api::Type::KeyValuePairs
                   name: 'limits'
                   description: |-
-                    Only memory and CPU are supported. Note: The only supported values for CPU are '1', '2', '4', and '8'. Setting 4 CPU requires at least 2Gi of memory. The values of the map is string form of the 'quantity' k8s type: https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
+                    Only memory and CPU are supported. Use key `cpu` for CPU limit and `memory` for memory limit. Note: The only supported values for CPU are '1', '2', '4', and '8'. Setting 4 CPU requires at least 2Gi of memory. The values of the map is string form of the 'quantity' k8s type: https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
                   default_from_api: true
                 - !ruby/object:Api::Type::Boolean
                   name: 'cpuIdle'
                   description: |-
-                    Determines whether CPU should be throttled or not outside of requests.
+                    Determines whether CPU is only allocated during requests. True by default if the parent `resources` field is not set. However, if
+                    `resources` is set, this field must be explicitly set to true to preserve the default behavior.
                 - !ruby/object:Api::Type::Boolean
                   name: 'startupCpuBoost'
                   description: |-
                     Determines whether CPU should be boosted on startup of a new container instance above the requested CPU threshold, this can help reduce cold-start latency.
             - !ruby/object:Api::Type::Array
               name: 'ports'
+              max_size: 1
               description: |-
                 List of ports to expose from the container. Only a single port can be specified. The specified ports must be listening on all interfaces (0.0.0.0) within the container to be accessible.
 
@@ -550,6 +580,17 @@ properties:
                         The name of the service to place in the gRPC HealthCheckRequest
                         (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
                         If this is not specified, the default behavior is defined by gRPC.
+                - !ruby/object:Api::Type::NestedObject
+                  name: tcpSocket
+                  description: TCPSocketAction describes an action based on opening a socket
+                  properties:
+                    - !ruby/object:Api::Type::Integer
+                      name: port
+                      description: |-
+                        Port number to access on the container. Must be in the range 1 to 65535.
+                        If not specified, defaults to the exposed port of the container, which
+                        is the value of container.ports[0].containerPort.
+                      required: true
             - !ruby/object:Api::Type::NestedObject
               name: 'startupProbe'
               description: |-
@@ -581,8 +622,7 @@ properties:
                   description: |-
                     HTTPGet specifies the http request to perform. Exactly one of HTTPGet or TCPSocket must be specified.
                   send_empty_value: true
-                  allow_empty_object:
-                    true
+                  allow_empty_object: true
                     # exactly_one_of:
                     #   - template.0.containers.0.startupProbe.0.httpGet
                     #   - template.0.containers.0.startupProbe.0.tcpSocket
@@ -621,8 +661,7 @@ properties:
                   description: |-
                     TCPSocket specifies an action involving a TCP port. Exactly one of HTTPGet or TCPSocket must be specified.
                   send_empty_value: true
-                  allow_empty_object:
-                    true
+                  allow_empty_object: true
                     # exactly_one_of:
                     #   - template.0.containers.0.startupProbe.0.httpGet
                     #   - template.0.containers.0.startupProbe.0.tcpSocket
@@ -661,7 +700,6 @@ properties:
               name: 'dependsOn'
               description: |-
                 Containers which should be started before this container. If specified the container will wait to start until all containers with the listed names are healthy.
-              min_version: beta
               item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: 'volumes'
@@ -719,6 +757,7 @@ properties:
               #   - template.0.volumes.0.secret
               #   - template.0.volumes.0.cloudSqlInstance
               #   - template.0.volumes.0.emptyDir
+              #   - template.0.volumes.0.gcs
               properties:
                 - !ruby/object:Api::Type::Array
                   name: 'instances'
@@ -735,6 +774,7 @@ properties:
               #   - template.0.volumes.0.secret
               #   - template.0.volumes.0.cloudSqlInstance
               #   - template.0.volumes.0.emptyDir
+              #   - template.0.volumes.0.gcs
               properties:
                 - !ruby/object:Api::Type::Enum
                   name: 'medium'
@@ -746,7 +786,41 @@ properties:
                 - !ruby/object:Api::Type::String
                   name: 'sizeLimit'
                   description: |-
-                      Limit on the storage usable by this EmptyDir volume. The size limit is also applicable for memory medium. The maximum usage on memory medium EmptyDir would be the minimum value between the SizeLimit specified here and the sum of memory limits of all containers in a pod. This field's values are of the 'Quantity' k8s type: https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/. The default is nil which means that the limit is undefined. More info: https://kubernetes.io/docs/concepts/storage/volumes/#emptydir.
+                    Limit on the storage usable by this EmptyDir volume. The size limit is also applicable for memory medium. The maximum usage on memory medium EmptyDir would be the minimum value between the SizeLimit specified here and the sum of memory limits of all containers in a pod. This field's values are of the 'Quantity' k8s type: https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/. The default is nil which means that the limit is undefined. More info: https://kubernetes.io/docs/concepts/storage/volumes/#emptydir.
+            - !ruby/object:Api::Type::NestedObject
+              name: 'gcs'
+              description: |-
+                Cloud Storage bucket mounted as a volume using GCSFuse. This feature is only supported in the gen2 execution environment and requires launch-stage to be set to ALPHA or BETA.
+              # exactly_one_of:
+              #   - template.0.volumes.0.secret
+              #   - template.0.volumes.0.cloudSqlInstance
+              #   - template.0.volumes.0.emptyDir
+              #   - template.0.volumes.0.gcs
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: bucket
+                  description: GCS Bucket name
+                  required: true
+                - !ruby/object:Api::Type::Boolean
+                  name: readOnly
+                  description: If true, mount the GCS bucket as read-only
+                  required: false
+            - !ruby/object:Api::Type::NestedObject
+              name: nfs
+              description: Represents an NFS mount.
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: server
+                  description: Hostname or IP address of the NFS server
+                  required: true
+                - !ruby/object:Api::Type::String
+                  name: path
+                  description: Path that is exported by the NFS server.
+                  required: true
+                - !ruby/object:Api::Type::Boolean
+                  name: readOnly
+                  description: If true, mount the NFS volume as read only
+                  required: false
       - !ruby/object:Api::Type::Enum
         name: 'executionEnvironment'
         description: |-
@@ -762,6 +836,7 @@ properties:
         name: 'maxInstanceRequestConcurrency'
         description: |-
           Sets the maximum number of requests that each serving instance can receive.
+          If not specified or 0, defaults to 80 when requested CPU >= 1 and defaults to 1 when requested CPU < 1.
         default_from_api: true
       - !ruby/object:Api::Type::Boolean
         name: 'sessionAffinity'

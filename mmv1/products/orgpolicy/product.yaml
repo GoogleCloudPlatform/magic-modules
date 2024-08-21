@@ -23,7 +23,3 @@ versions:
     base_url: https://orgpolicy.googleapis.com/v2/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Organization Policy API
-    url: https://console.cloud.google.com/apis/api/orgpolicy.googleapis.com/overview

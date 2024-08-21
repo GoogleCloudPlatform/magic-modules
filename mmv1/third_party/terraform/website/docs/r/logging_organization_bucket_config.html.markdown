@@ -4,7 +4,7 @@ description: |-
   Manages a organization-level logging bucket config.
 ---
 
-# google\_logging\_organization\_bucket\_config
+# google_logging_organization_bucket_config
 
 Manages a organization-level logging bucket config. For more information see
 [the official logging documentation](https://cloud.google.com/logging/docs/) and
@@ -20,10 +20,15 @@ data "google_organization" "default" {
 }
 
 resource "google_logging_organization_bucket_config" "basic" {
-	organization    = data.google_organization.default.organization
-	location  = "global"
-	retention_days = 30
-	bucket_id = "_Default"
+  organization   = data.google_organization.default.organization
+  location       = "global"
+  retention_days = 30
+  bucket_id      = "_Default"
+  
+  index_configs {
+    field_path = "jsonPayload.request.status"
+    type       = "INDEX_TYPE_STRING"
+  }
 }
 ```
 
@@ -40,6 +45,15 @@ The following arguments are supported:
 * `description` - (Optional) Describes this bucket.
 
 * `retention_days` - (Optional) Logs will be retained by default for this amount of time, after which they will automatically be deleted. The minimum retention period is 1 day. If this value is set to zero at bucket creation time, the default time of 30 days will be used. Bucket retention can not be increased on buckets outside of projects.
+
+* `index_configs` - (Optional) A list of indexed fields and related configuration data. Structure is [documented below](#nested_index_configs).
+
+<a name="nested_index_configs"></a>The `index_configs` block supports:
+
+* `field_path` - The LogEntry field path to index.
+  Note that some paths are automatically indexed, and other paths are not eligible for indexing. See [indexing documentation](https://cloud.google.com/logging/docs/analyze/custom-index) for details.
+
+* `type` - The type of data in this index. Allowed types include `INDEX_TYPE_UNSPECIFIED`, `INDEX_TYPE_STRING` and `INDEX_TYPE_INTEGER`.
 
 ## Attributes Reference
 

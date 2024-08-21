@@ -9,8 +9,8 @@ import (
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 <% if version == "ga" -%>
 	"google.golang.org/api/compute/v1"
@@ -517,6 +517,9 @@ resource "google_compute_image" "image" {
     kms_key_self_link       = data.google_kms_crypto_key.key.id
     kms_key_service_account = google_service_account.test.email
   }
+  depends_on = [
+    google_kms_crypto_key_iam_member.crypto_key
+  ]
 }
 `, kmsRingName, kmsKeyName, suffix, suffix)
 }

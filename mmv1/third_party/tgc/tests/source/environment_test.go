@@ -12,14 +12,13 @@ const (
 	defaultAncestry           = "organization/12345/folder/67890"
 	defaultBillingAccount     = "000AA0-A0B00A-AA00AA"
 	defaultCustId             = "A00ccc00a"
-	defaultFirestoreProject   = "firebar"
 	defaultFolder             = "67890"
 	defaultIdentityUser       = "foo"
 	defaultOrganization       = "12345"
 	defaultOrganizationDomain = "meep.test.com"
 	defaultOrganizationTarget = "13579"
 	defaultProject            = "foobar"
-	defaultProviderVersion    = "5.0.0"
+	defaultProviderVersion    = "5.5.0" // if dev override is enabled, the provider version is ignored in terraform execution
 	defaultRegion             = "us-central1"
 	defaultServiceAccount     = "meep@foobar.iam.gserviceaccount.com"
 )
@@ -67,12 +66,6 @@ func getTestCustIdFromEnv(t *testing.T) string {
 
 func getTestIdentityUserFromEnv(t *testing.T) string {
 	return defaultIdentityUser
-}
-
-// Firestore can't be enabled at the same time as Datastore, so we need a new
-// project to manage it until we can enable Firestore programmatically.
-func getTestFirestoreProjectFromEnv(t *testing.T) string {
-	return defaultFirestoreProject
 }
 
 func getTestOrgFromEnv(t *testing.T) string {

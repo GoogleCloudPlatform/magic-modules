@@ -18,6 +18,7 @@ self_link: '{{perimeter}}'
 create_verb: :PATCH
 delete_verb: :PATCH
 update_mask: true
+immutable: true
 identity:
   - ingressFrom
   - ingressTo
@@ -30,6 +31,7 @@ nested_query: !ruby/object:Api::Resource::NestedQuery
 references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.servicePerimeters#ingresspolicy'
 description: |
+  Manage a single IngressPolicy in the status (enforced) configuration for a service perimeter.
   IngressPolicies match requests based on ingressFrom and ingressTo stanzas. For an ingress policy to match,
   both the ingressFrom and ingressTo stanzas must be matched. If an IngressPolicy matches a request,
   the request is allowed through the perimeter boundary from outside the perimeter.
@@ -38,10 +40,19 @@ description: |
   For access from private networks, using the project of the hosting network is required.
   Individual ingress policies can be limited by restricting which services and/
   or actions they match using the ingressTo field.
+
+  ~> **Note:** By default, updates to this resource will remove the IngressPolicy from the
+  from the perimeter and add it back in a non-atomic manner. To ensure that the new IngressPolicy
+  is added before the old one is removed, add a `lifecycle` block with `create_before_destroy = true` to this resource.
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'access_context_manager_service_perimeter_ingress_policy'
+    skip_test: true
 autogen_async: true
 exclude_tgc: true
 # Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter
 skip_sweeper: true
+exclude_import: true
 id_format: '{{perimeter}}'
 import_format: ['{{perimeter}}']
 mutex: '{{perimeter}}'
@@ -55,7 +66,6 @@ parameters:
     description: |
       The name of the Service Perimeter to add this resource to.
     required: true
-    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::NestedObject
@@ -103,7 +113,10 @@ properties:
               description: |
                 A Google Cloud resource that is allowed to ingress the perimeter.
                 Requests from these resources will be allowed to access perimeter data.
-                Currently only projects are allowed. Format `projects/{project_number}`
+                Currently only projects and VPCs are allowed.
+                Project format: `projects/{projectNumber}`
+                VPC network format:
+                `//compute.googleapis.com/projects/{PROJECT_ID}/global/networks/{NAME}`.
                 The project may be in any Google Cloud organization, not just the
                 organization that the perimeter is defined in. `*` is not allowed, the case
                 of allowing all Google Cloud resources only is not supported.

@@ -26,7 +26,7 @@ import_format:
   ['projects/{{project}}/datasets/{{dataset_id}}/routines/{{routine_id}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: 'big_query_routine_basic'
+    name: 'bigquery_routine_basic'
     primary_resource_id: 'sproc'
     primary_resource_name: "fmt.Sprintf(\"tf_test_dataset_id%s\",
       context[\"random_suffix\"\
@@ -35,7 +35,7 @@ examples:
       dataset_id: 'dataset_id'
       routine_id: 'routine_id'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'big_query_routine_json'
+    name: 'bigquery_routine_json'
     primary_resource_id: 'sproc'
     primary_resource_name: "fmt.Sprintf(\"tf_test_dataset_id%s\",
       context[\"random_suffix\"\
@@ -44,13 +44,48 @@ examples:
       dataset_id: 'dataset_id'
       routine_id: 'routine_id'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'big_query_routine_tvf'
+    name: 'bigquery_routine_tvf'
     primary_resource_id: 'sproc'
     primary_resource_name: "fmt.Sprintf(\"tf_test_dataset_id%s\",
       context[\"random_suffix\"\
       ]), fmt.Sprintf(\"tf_test_table_id%s\", context[\"random_suffix\"])"
     vars:
       dataset_id: 'dataset_id'
+      routine_id: 'routine_id'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'bigquery_routine_pyspark'
+    primary_resource_id: 'pyspark'
+    vars:
+      dataset_id: 'dataset_id'
+      connection_id: 'connection_id'
+      routine_id: 'routine_id'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'bigquery_routine_pyspark_mainfile'
+    primary_resource_id: 'pyspark_mainfile'
+    vars:
+      dataset_id: 'dataset_id'
+      connection_id: 'connection_id'
+      routine_id: 'routine_id'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'bigquery_routine_spark_jar'
+    primary_resource_id: 'spark_jar'
+    vars:
+      dataset_id: 'dataset_id'
+      connection_id: 'connection_id'
+      routine_id: 'routine_id'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'bigquery_routine_data_governance_type'
+    primary_resource_id: 'custom_masking_routine'
+    vars:
+      dataset_id: 'dataset_id'
+      routine_id: 'routine_id'
+  - !ruby/object:Provider::Terraform::Examples
+    skip_test: true
+    name: 'bigquery_routine_remote_function'
+    primary_resource_id: 'remote_function'
+    vars:
+      dataset_id: 'dataset_id'
+      connection_id: 'connection_id'
       routine_id: 'routine_id'
 properties:
   - !ruby/object:Api::Type::NestedObject
@@ -101,6 +136,9 @@ properties:
     values:
       - :SQL
       - :JAVASCRIPT
+      - :PYTHON
+      - :JAVA
+      - :SCALA
   - !ruby/object:Api::Type::Array
     name: 'arguments'
     description: Input/output argument of a function or a stored procedure.
@@ -201,3 +239,96 @@ properties:
       - :DETERMINISM_LEVEL_UNSPECIFIED
       - :DETERMINISTIC
       - :NOT_DETERMINISTIC
+  - !ruby/object:Api::Type::Enum
+    name: 'dataGovernanceType'
+    description: If set to DATA_MASKING, the function is validated and made available as a masking function. For more information, see https://cloud.google.com/bigquery/docs/user-defined-functions#custom-mask
+    values:
+      - :DATA_MASKING
+  - !ruby/object:Api::Type::NestedObject
+    name: 'sparkOptions'
+    description: |
+      Optional. If language is one of "PYTHON", "JAVA", "SCALA", this field stores the options for spark stored procedure.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'connection'
+        description: |
+          Fully qualified name of the user-provided Spark connection object.
+          Format: "projects/{projectId}/locations/{locationId}/connections/{connectionId}"
+      - !ruby/object:Api::Type::String
+        name: 'runtimeVersion'
+        description: Runtime version. If not specified, the default runtime version is used.
+      - !ruby/object:Api::Type::String
+        name: 'containerImage'
+        description: Custom container image for the runtime environment.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: "properties"
+        description: |
+          Configuration properties as a set of key/value pairs, which will be passed on to the Spark application.
+          For more information, see Apache Spark and the procedure option list.
+          An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+        default_from_api: true
+      - !ruby/object:Api::Type::String
+        name: 'mainFileUri'
+        description: |
+          The main file/jar URI of the Spark application.
+          Exactly one of the definitionBody field and the mainFileUri field must be set for Python.
+          Exactly one of mainClass and mainFileUri field should be set for Java/Scala language type.
+      - !ruby/object:Api::Type::Array
+        name: 'pyFileUris'
+        description: |
+          Python files to be placed on the PYTHONPATH for PySpark application. Supported file types: .py, .egg, and .zip. For more information about Apache Spark, see Apache Spark.
+        item_type: Api::Type::String
+        default_from_api: true
+      - !ruby/object:Api::Type::Array
+        name: 'jarUris'
+        description: |
+          JARs to include on the driver and executor CLASSPATH. For more information about Apache Spark, see Apache Spark.
+        item_type: Api::Type::String
+        default_from_api: true
+      - !ruby/object:Api::Type::Array
+        name: 'fileUris'
+        description: |
+          Files to be placed in the working directory of each executor. For more information about Apache Spark, see Apache Spark.
+        item_type: Api::Type::String
+        default_from_api: true
+      - !ruby/object:Api::Type::Array
+        name: 'archiveUris'
+        description: |
+          Archive files to be extracted into the working directory of each executor. For more information about Apache Spark, see Apache Spark.
+        item_type: Api::Type::String
+        default_from_api: true
+      - !ruby/object:Api::Type::String
+        name: 'mainClass'
+        description: |
+          The fully qualified name of a class in jarUris, for example, com.example.wordcount.
+          Exactly one of mainClass and main_jar_uri field should be set for Java/Scala language type.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'remoteFunctionOptions'
+    description: Remote function specific options.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'endpoint'
+        description: |
+          Endpoint of the user-provided remote service, e.g.
+          `https://us-east1-my_gcf_project.cloudfunctions.net/remote_add`
+      - !ruby/object:Api::Type::String
+        name: 'connection'
+        description: |
+          Fully qualified name of the user-provided connection object which holds
+          the authentication information to send requests to the remote service.
+          Format: "projects/{projectId}/locations/{locationId}/connections/{connectionId}"
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'userDefinedContext'
+        description: |
+          User-defined context as a set of key/value pairs, which will be sent as function
+          invocation context together with batched arguments in the requests to the remote
+          service. The total number of bytes of keys and values must be less than 8KB.
+
+          An object containing a list of "key": value pairs. Example:
+          `{ "name": "wrench", "mass": "1.3kg", "count": "3" }`.
+        default_from_api: true
+      - !ruby/object:Api::Type::String
+        name: 'maxBatchingRows'
+        description: |
+          Max number of rows in each batch sent to the remote service. If absent or if 0,
+          BigQuery dynamically decides the number of rows in a batch.

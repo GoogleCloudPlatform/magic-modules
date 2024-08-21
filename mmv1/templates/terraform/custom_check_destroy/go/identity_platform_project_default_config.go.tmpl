@@ -1,0 +1,45 @@
+config := acctest.GoogleProviderConfig(t)
+
+url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}IdentityPlatformBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/config")
+if err != nil {
+    return err
+}
+
+billingProject := ""
+
+if config.BillingProject != "" {
+    billingProject = config.BillingProject
+}
+
+res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config: config,
+	Method: "GET",
+	Project: billingProject,
+	RawURL: url,
+	UserAgent: config.UserAgent,
+})
+if err != nil {
+    return fmt.Errorf("something went wrong trying to get the IdentityPlatformProjectDefaultConfig at %s", url)
+}
+
+signIn := res["signIn"]
+if signIn == nil {
+    return nil
+}
+
+original := signIn.(map[string]interface{})
+if len(original) == 0 {
+    return nil
+}
+
+transformed := make(map[string]interface{})
+transformed["email"] =
+    flattenIdentityPlatformProjectDefaultConfigSignInEmail(original["email"], nil, nil)
+transformed["phone_number"] =
+    flattenIdentityPlatformProjectDefaultConfigSignInPhoneNumber(original["phoneNumber"], nil, nil)
+transformed["anonymous"] =
+    flattenIdentityPlatformProjectDefaultConfigSignInAnonymous(original["anonymous"], nil, nil)
+
+if transformed["email"] != nil || transformed["phone_number"] != nil || transformed["anonymous"] != nil {
+    return fmt.Errorf("IdentityPlatformProjectDefaultConfig still exists at %s", url)
+}

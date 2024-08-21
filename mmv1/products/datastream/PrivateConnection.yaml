@@ -14,7 +14,7 @@
 --- !ruby/object:Api::Resource
 name: 'PrivateConnection'
 base_url: 'projects/{{project}}/locations/{{location}}/privateConnections'
-create_url: 'projects/{{project}}/locations/{{location}}/privateConnections?privateConnectionId={{private_connection_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/privateConnections?privateConnectionId={{private_connection_id}}&force={{create_without_validation}}'
 self_link: 'projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}'
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
@@ -23,6 +23,10 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 description: |
   The PrivateConnection resource is used to establish private connectivity between Datastream and a customer's network.
 immutable: true
+schema_version: 1
+state_upgraders: true
+# Skipping the sweeper since the resource needs force-deletion
+skip_sweeper: true
 id_format: projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}
 import_format:
   [
@@ -39,12 +43,21 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/private_connection.go.erb
   post_create: templates/terraform/post_create/private_connection.go.erb
   post_import: templates/terraform/post_import/private_connection.go.erb
+  pre_delete: templates/terraform/pre_delete/private_connection.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: privateConnectionId
     description: |-
       The private connectivity identifier.
     required: true
+    immutable: true
+    url_param_only: true
+  - !ruby/object:Api::Type::Boolean
+    name: create_without_validation
+    description: |-
+      If set to true, will skip validations.
+    required: false
+    default_value: false
     immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::String

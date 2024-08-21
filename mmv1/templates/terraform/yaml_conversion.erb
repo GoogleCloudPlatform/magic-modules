@@ -1,0 +1,589 @@
+NOT CONVERTED - RUN YAML MODE
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+<%
+#common attrs
+-%>
+name: '<%= object.name %>'
+<%  unless object.kind.nil? -%>
+kind: '<%= object.kind %>'
+<%  end -%>
+<%  unless object.legacy_name.nil? -%>
+legacy_name: '<%= object.legacy_name %>'
+<%  end -%>
+description:
+<%  unless object.min_version.nil? -%>
+<%  unless object.min_version.name == 'ga' -%>
+min_version: '<%= object.min_version.name %>'
+<%  end -%>
+<%  end -%>
+<%  unless !object.exclude_resource -%>
+exclude_resource: <%= object.exclude_resource %>
+<%  end -%>
+<%  unless !object.exclude -%>
+exclude: <%= object.exclude %>
+<%  end -%>
+<%  unless object.readonly.nil? -%>
+readonly: <%= object.readonly %>
+<%  end -%>
+<%
+#references blocks
+-%>
+<%  unless object.references.nil? -%>
+references:
+<%    unless object.references.guides.nil? -%>
+  guides:
+<%       object.references.guides.each do |title, link| -%>
+    '<%= title -%>': '<%= link %>'
+<%      end -%>
+<%    end -%>
+<%    unless object.references.api.nil? -%>
+  api: '<%= object.references.api %>'
+<%    end -%>
+<%  end -%>
+<%
+#docs blocks
+-%>
+<%  unless object.docs.nil? -%>
+docs:
+<%    unless object.docs.warning.nil? -%>
+  warning:
+<%    end -%>
+<%    unless object.docs.note.nil? -%>
+  note:
+<%    end -%>
+<%    unless object.docs.required_properties.nil? -%>
+  required_properties:
+<%    end -%>
+<%    unless object.docs.optional_properties.nil? -%>
+  optional_properties:
+<%    end -%>
+<%    unless object.docs.attributes.nil? -%>
+  attributes:
+<%    end -%>
+<%  end -%>
+<%
+#url/http attrs
+-%>
+<%  unless object.id_format.nil? -%>
+id_format: '<%= object.id_format %>'
+<%  end -%>
+<%  unless object.base_url.nil? -%>
+base_url: '<%= object.base_url %>'
+<%  end -%>
+<%  unless object.cai_base_url.nil? -%>
+cai_base_url: '<%= object.cai_base_url %>'
+<%  end -%>
+<%  unless object.self_link.nil? -%>
+self_link: '<%= object.self_link %>'
+<%  end -%>
+<%  unless !object.has_self_link -%>
+has_self_link: <%= object.has_self_link %>
+<%  end -%>
+<%  unless object.create_url.nil? -%>
+create_url: '<%= object.create_url %>'
+<%  end -%>
+<%  unless object.create_verb.to_s == 'POST' -%>
+create_verb: '<%= object.create_verb.to_s %>'
+<%  end -%>
+<%  unless object.update_url.nil? -%>
+update_url: '<%= object.update_url %>'
+<%  end -%>
+<%  unless object.update_verb.to_s == 'PUT' -%>
+update_verb: '<%= object.update_verb.to_s %>'
+<%  end -%>
+<%  unless object.update_mask.nil? -%>
+update_mask: <%= object.update_mask %>
+<%  end -%>
+<%  unless object.read_verb.to_s == 'GET' -%>
+read_verb: '<%= object.read_verb.to_s %>'
+<%  end -%>
+<%  unless object.read_query_params.nil? %>
+read_query_params: '<%= object.read_query_params %>'
+<%  end -%>
+<%  unless !object.skip_read -%>
+skip_read: <%= object.skip_read %>
+<%  end -%>
+<%  unless object.delete_url.nil? -%>
+delete_url: '<%= object.delete_url %>'
+<%  end -%>
+<%  unless object.delete_verb.to_s == 'DELETE' -%>
+delete_verb: '<%= object.delete_verb.to_s %>'
+<%  end -%>
+<%  unless !object.skip_delete -%>
+skip_delete: <%= object.skip_delete %>
+<%  end -%>
+<%  unless object.immutable.nil? -%>
+immutable: <%= object.immutable %>
+<%  end -%>
+<%  unless object.mutex.nil? -%>
+mutex: '<%= object.mutex %>'
+<%  end -%>
+<%
+#import
+-%>
+<%  unless object.import_format.empty? -%>
+import_format:
+<%    object.import_format.each do |iformat| -%>
+  - '<%= iformat %>'
+<%    end -%>
+<%  end -%>
+<%  unless !object.exclude_import -%>
+exclude_import: <%= object.exclude_import %>
+<%  end -%>
+<%
+#timeouts
+-%>
+<%  unless object.timeouts.nil? -%>
+timeouts:
+<%    unless object.timeouts.insert_minutes.nil? -%>
+  insert_minutes: <%= object.timeouts.insert_minutes %>
+<%    end -%>
+<%    unless object.timeouts.update_minutes.nil? -%>
+  update_minutes: <%= object.timeouts.update_minutes %>
+<%    end -%>
+<%    unless object.timeouts.delete_minutes.nil? -%>
+  delete_minutes: <%= object.timeouts.delete_minutes %>
+<%    end -%>
+<%  end -%>
+<%
+#async
+-%>
+<%  unless !object.autogen_async -%>
+autogen_async: <%= object.autogen_async %>
+<%  end -%>
+<%  unless object.async.nil? -%>
+async:
+<%    if object.async.is_a? Provider::Terraform::PollAsync -%>
+  type: 'PollAsync'
+<%      unless object.async.check_response_func_existence.nil? -%>
+  check_response_func_existence: '<%= object.async.check_response_func_existence %>'
+<%      end -%>
+<%      unless object.async.check_response_func_absence.nil? -%>
+  check_response_func_absence: '<%= object.async.check_response_func_absence %>'
+<%      end -%>
+<%      unless object.async.custom_poll_read.nil? -%>
+  custom_poll_read: '<%= object.async.custom_poll_read %>'
+<%      end -%>
+<%      unless object.async.suppress_error.nil? -%>
+  suppress_error: <%= object.async.suppress_error %>
+<%      end -%>
+<%      unless object.async.target_occurrences.nil? -%>
+  target_occurrences: <%= object.async.target_occurrences %>
+<%      end -%>
+<%    end -%>
+  actions: ['<%= object.async.actions.join('\', \'') %>']
+<%    if object.async.is_a? Api::OpAsync -%>
+  type: 'OpAsync'
+<% #async.operation %>
+<%    unless object.async.operation.nil? -%>
+  operation:
+<%      unless object.async.operation.base_url.nil? -%>
+    base_url: '<%= object.async.operation.base_url %>'
+<%      end -%>
+<%      unless object.async.operation.full_url.nil? -%>
+    full_url: '<%= object.async.operation.full_url %>'
+<%      end -%>
+<%      unless object.async.operation.kind.nil? -%>
+    kind: '<%= object.async.operation.kind %>'
+<%      end -%>
+<%      unless object.async.operation.path.nil? -%>
+    path: '<%= object.async.operation.path %>'
+<%      end -%>
+<%      unless object.async.operation.wait_ms.nil? -%>
+    wait_ms: <%= object.async.operation.wait_ms %>
+<%      end -%>
+<% #async.operation.timeouts %>
+<%      unless object.async.operation.timeouts.nil? -%>
+    timeouts:
+<%        unless object.async.operation.timeouts.insert_minutes.nil? -%>
+      insert_minutes: <%= object.async.operation.timeouts.insert_minutes %>
+<%        end -%>
+<%        unless object.async.operation.timeouts.update_minutes.nil? -%>
+      update_minutes: <%= object.async.operation.timeouts.update_minutes %>
+<%        end -%>
+<%        unless object.async.operation.timeouts.delete_minutes.nil? -%>
+      delete_minutes: <%= object.async.operation.timeouts.delete_minutes %>
+<%        end -%>
+<%      end -%>
+<%    end -%>
+<% #async.result %>
+<%    unless object.async.result.nil? -%>
+  result:
+<%      unless object.async.result.path.nil? -%>
+    path: '<%= object.async.result.path %>'
+<%      end -%>
+<%      unless object.async.result.resource_inside_response.nil? -%>
+    resource_inside_response: <%= object.async.result.resource_inside_response %>
+<%      end -%>
+<%    end -%>
+<% #async.error %>
+<%    unless object.async.error.nil? -%>
+  error:
+<%      unless object.async.error.path.nil? -%>
+    path: '<%= object.async.error.path %>'
+<%      end -%>
+<%      unless object.async.error.message.nil? -%>
+    message: '<%= object.async.error.message %>'
+<%      end -%>
+<%    end -%>
+<%    unless !object.async.include_project -%>
+  include_project: <%= object.async.include_project %>
+<%    end -%>
+<%    end -%>
+<%  end -%>
+<%
+#collection/identity url
+-%>
+<%  unless object.collection_url_key == object.name.plural.camelize(:lower) -%>
+collection_url_key: '<%= object.collection_url_key %>'
+<%  end -%>
+<%  unless object.instance_variable_get("@identity").nil? -%>
+identity:
+<%  object.instance_variable_get("@identity").each do |id| -%>
+  - <%= id %>
+<%    end -%>
+<%  end -%>
+<%  unless object.nested_query.nil? -%>
+nested_query:
+<%    unless object.nested_query.keys.nil? -%>
+  keys:
+<%       object.nested_query.keys.each do |key| -%>
+    - <%= key %>
+<%      end -%>
+<%    end -%>
+<%    unless object.nested_query.is_list_of_ids.nil? -%>
+  is_list_of_ids: <%= object.nested_query.is_list_of_ids %>
+<%    end -%>
+<%    unless object.nested_query.modify_by_patch.nil? -%>
+  modify_by_patch: <%= object.nested_query.modify_by_patch %>
+<%    end -%>
+<%  end -%>
+<%
+#IAM
+-%>
+<%  unless object.iam_policy.nil? -%>
+iam_policy:
+<%    unless !object.iam_policy.exclude -%>
+  exclude: <%= object.iam_policy.exclude %>
+<%    end -%>
+<%    unless !object.iam_policy.exclude_tgc -%>
+  exclude_tgc: <%= object.iam_policy.exclude_tgc %>
+<%    end -%>
+<%    unless !object.iam_policy.skip_import_test -%>
+  skip_import_test: <%= object.iam_policy.skip_import_test %>
+<%    end -%>
+<%    unless object.iam_policy.method_name_separator == '/' -%>
+  method_name_separator: '<%= object.iam_policy.method_name_separator %>'
+<%    end -%>
+<%    unless object.iam_policy.parent_resource_type.nil? -%>
+  parent_resource_type: '<%= object.iam_policy.parent_resource_type %>'
+<%    end -%>
+<%    unless object.iam_policy.fetch_iam_policy_verb.to_s == 'GET'  -%>
+  fetch_iam_policy_verb: '<%= object.iam_policy.fetch_iam_policy_verb.to_s %>'
+<%    end -%>
+<%    unless object.iam_policy.fetch_iam_policy_method == 'getIamPolicy' -%>
+  fetch_iam_policy_method: '<%= object.iam_policy.fetch_iam_policy_method %>'
+<%    end -%>
+<%    unless object.iam_policy.set_iam_policy_verb.to_s == 'POST'  -%>
+  set_iam_policy_verb: '<%= object.iam_policy.set_iam_policy_verb.to_s %>'
+<%    end -%>
+<%    unless object.iam_policy.set_iam_policy_method == 'setIamPolicy' -%>
+  set_iam_policy_method: '<%= object.iam_policy.set_iam_policy_method %>'
+<%    end -%>
+<%    unless object.iam_policy.wrapped_policy_obj -%>
+  wrapped_policy_obj: <%= object.iam_policy.wrapped_policy_obj %>
+<%    end -%>
+<%    unless object.iam_policy.allowed_iam_role == 'roles/viewer' -%>
+  allowed_iam_role: '<%= object.iam_policy.allowed_iam_role %>'
+<%    end -%>
+<%    unless object.iam_policy.admin_iam_role.nil? -%>
+  admin_iam_role: '<%= object.iam_policy.admin_iam_role %>'
+<%    end -%>
+<%    unless object.iam_policy.parent_resource_attribute == 'id' -%>
+  parent_resource_attribute: '<%= object.iam_policy.parent_resource_attribute %>'
+<%    end -%>
+<%    unless object.iam_policy.test_project_name.nil? -%>
+  test_project_name: '<%= object.iam_policy.test_project_name %>'
+<%    end -%>
+<%    unless object.iam_policy.iam_conditions_request_type.nil? -%>
+  iam_conditions_request_type: '<%= object.iam_policy.iam_conditions_request_type %>'
+<%    end -%>
+<%    unless object.iam_policy.base_url.nil? -%>
+  base_url: '<%= object.iam_policy.base_url %>'
+<%    end -%>
+<%    unless object.iam_policy.example_config_body.nil? -%>
+  example_config_body: '<%= object.convert_go_file( object.iam_policy.example_config_body ) %>'
+<%    end -%>
+<%    unless object.iam_policy.self_link.nil? -%>
+  self_link: '<%= object.iam_policy.self_link %>'
+<%    end -%>
+<%    unless object.iam_policy.custom_diff_suppress.nil? -%>
+  custom_diff_suppress: '<%= object.convert_go_file(object.iam_policy.custom_diff_suppress ) %>'
+<%    end -%>
+<%    unless object.iam_policy.import_format.nil? -%>
+  import_format:
+<%      object.iam_policy.import_format.each do |iformat| -%>
+    - '<%= iformat %>'
+<%      end -%>
+<%    end -%>
+<%    unless object.iam_policy.iam_policy_version.nil? -%>
+  iam_policy_version: '<%= object.iam_policy.iam_policy_version %>'
+<%    end -%>
+<%    unless object.iam_policy.min_version.nil? -%>
+  min_version: '<%= object.iam_policy.min_version %>'
+<%    end -%>
+<%    unless object.iam_policy.substitute_zone_value -%>
+  substitute_zone_value: <%= object.iam_policy.substitute_zone_value %>
+<%    end -%>
+<%  end -%>
+<%
+#custom code
+-%>
+<%  unless object.custom_code.nil? -%>
+custom_code:
+<%    unless object.custom_code.extra_schema_entry.nil? -%>
+  extra_schema_entry: '<%= object.convert_go_file( object.custom_code.extra_schema_entry) %>'
+<%    end -%>
+<%    unless object.custom_code.constants.nil? -%>
+  constants: '<%= object.convert_go_file( object.custom_code.constants) %>'
+<%    end -%>
+<%    unless object.custom_code.encoder.nil? -%>
+  encoder: '<%= object.convert_go_file( object.custom_code.encoder )%>'
+<%    end -%>
+<%    unless object.custom_code.update_encoder.nil? -%>
+  update_encoder: '<%= object.convert_go_file( object.custom_code.update_encoder )%>'
+<%    end -%>
+<%    unless object.custom_code.decoder.nil? -%>
+  decoder: '<%= object.convert_go_file( object.custom_code.decoder )%>'
+<%    end -%>
+<%    unless object.custom_code.pre_create.nil? -%>
+  pre_create: '<%= object.convert_go_file( object.custom_code.pre_create )%>'
+<%    end -%>
+<%    unless object.custom_code.post_create.nil? -%>
+  post_create: '<%= object.convert_go_file( object.custom_code.post_create )%>'
+<%    end -%>
+<%    unless object.custom_code.post_delete.nil? -%>
+  post_delete: '<%= object.convert_go_file( object.custom_code.post_delete )%>'
+<%    end -%>
+<%    unless object.custom_code.custom_create.nil? -%>
+  custom_create: '<%= object.convert_go_file( object.custom_code.custom_create )%>'
+<%    end -%>
+<%    unless object.custom_code.pre_read.nil? -%>
+  pre_read: '<%= object.convert_go_file( object.custom_code.pre_read )%>'
+<%    end -%>
+<%    unless object.custom_code.pre_update.nil? -%>
+  pre_update: '<%= object.convert_go_file( object.custom_code.pre_update )%>'
+<%    end -%>
+<%    unless object.custom_code.post_update.nil? -%>
+  post_update: '<%= object.convert_go_file( object.custom_code.post_update )%>'
+<%    end -%>
+<%    unless object.custom_code.custom_update.nil? -%>
+  custom_update: '<%= object.convert_go_file( object.custom_code.custom_update )%>'
+<%    end -%>
+<%    unless object.custom_code.pre_delete.nil? -%>
+  pre_delete: '<%= object.convert_go_file( object.custom_code.pre_delete )%>'
+<%    end -%>
+<%    unless object.custom_code.custom_delete.nil? -%>
+  custom_delete: '<%= object.convert_go_file( object.custom_code.custom_delete ) %>'
+<%    end -%>
+<%    unless object.custom_code.custom_import.nil? -%>
+  custom_import: '<%= object.convert_go_file( object.custom_code.custom_import )%>'
+<%    end -%>
+<%    unless object.custom_code.post_import.nil? -%>
+  post_import: '<%= object.convert_go_file( object.custom_code.post_import )%>'
+<%    end -%>
+<%    unless object.custom_code.test_check_destroy.nil? -%>
+  test_check_destroy: '<%= object.convert_go_file( object.custom_code.test_check_destroy )%>'
+<%    end -%>
+<%    unless object.custom_code.post_create_failure.nil? -%>
+  post_create_failure: '<%= object.convert_go_file( object.custom_code.post_create_failure )%>'
+<%    end -%>
+<%  end -%>
+<% 
+custom_diff = object.custom_diff.reject {
+  |cdiff| cdiff == "tpgresource.SetLabelsDiff" || cdiff == "tpgresource.SetMetadataLabelsDiff" || cdiff == "tpgresource.SetAnnotationsDiff" || cdiff == "tpgresource.SetMetadataAnnotationsDiff"
+}
+-%>
+<%  unless custom_diff.empty? -%>
+custom_diff:
+<%    custom_diff.each do |cdiff| -%>
+  - '<%= cdiff %>'
+<%    end -%>
+<%  end -%>
+<%  unless !object.skip_default_cdiff -%>
+skip_default_cdiff: <%= object.skip_default_cdiff %>
+<%  end -%>
+<%
+#terraform overrides
+-%>
+<%  unless object.filename_override.nil? -%>
+filename_override: '<%= object.filename_override %>'
+<%  end -%>
+<%  unless object.exclude_tgc.nil? -%>
+exclude_tgc: <%= object.exclude_tgc %>
+<%  end -%>
+<%  unless !object.skip_sweeper -%>
+skip_sweeper: <%= object.skip_sweeper %>
+<%  end -%>
+<%    if !object.sweeper.nil? && !object.sweeper.sweepable_identifier_field.nil? -%>
+sweeper:
+  sweepable_identifier_field: <%= object.sweeper.sweepable_identifier_field %>
+<%  end -%>
+<%  unless object.error_retry_predicates.nil? -%>
+error_retry_predicates:
+<%    object.error_retry_predicates.each do |erpred| %>
+  - '<%= erpred -%>'
+<%    end -%>
+<%  end -%>
+<%  unless object.error_abort_predicates.nil? -%>
+error_abort_predicates:
+<%    object.error_abort_predicates.each do |eapred| %>
+  - '<%= eapred -%>'
+<%    end -%>
+<%  end -%>
+<%  unless object.schema_version.nil? -%>
+schema_version: <%= object.schema_version %>
+<%  end -%>
+<%  unless object.state_upgrade_base_schema_version == 0 -%>
+state_upgrade_base_schema_version: <%= object.state_upgrade_base_schema_version %>
+<%  end -%>
+<%  unless !object.state_upgraders -%>
+state_upgraders: <%= object.state_upgraders %>
+<%  end -%>
+<%  unless object.migrate_state.nil? -%>
+migrate_state: '<%= object.migrate_state %>'
+<%  end -%>
+<%  unless !object.legacy_long_form_project -%>
+legacy_long_form_project: <%= object.legacy_long_form_project %>
+<%  end -%>
+<%  unless !object.supports_indirect_user_project_override -%>
+supports_indirect_user_project_override: <%= object.supports_indirect_user_project_override %>
+<%  end -%>
+<%  unless object.read_error_transform.nil? -%>
+read_error_transform: '<%= object.read_error_transform %>'
+<%  end -%>
+<%  unless !object.taint_resource_on_failed_create -%>
+taint_resource_on_failed_create: <%= object.taint_resource_on_failed_create %>
+<%  end -%>
+<%  unless object.deprecation_message.nil? -%>
+deprecation_message: '<%= object.deprecation_message %>'
+<%  end -%>
+<%
+#examples
+-%>
+<%  unless object.examples.empty? -%>
+examples:
+<%    object.examples.each do |example| -%>
+  - name: '<%= example.name %>'
+<%      unless example.config_path == "templates/terraform/examples/#{example.name}.tf.erb" -%>
+    config_path: '<%= object.convert_go_file(example.config_path) %>'
+<%      end -%>
+<%      unless example.primary_resource_id.nil? -%>
+    primary_resource_id: '<%= example.primary_resource_id %>'
+<%      end -%>
+<%      unless example.primary_resource_name.nil? -%>
+    primary_resource_name: '<%= example.primary_resource_name %>'
+<%      end -%>
+<%      unless example.min_version.nil? -%>
+    min_version: '<%= example.min_version %>'
+<%      end -%>
+<%      unless example.region_override.nil? -%>
+    region_override: '<%= example.region_override %>'
+<%      end -%>
+<%      unless example.vars.nil? -%>
+<%      unless example.vars.empty? -%>
+    vars:
+<%         example.vars.each do |vname, val| -%>
+      <%= vname -%>: '<%= val %>'
+<%        end -%>
+<%      end -%>
+<%      end -%>
+<%      unless example.test_env_vars.nil? -%>
+<%      unless example.test_env_vars.empty? -%>
+    test_env_vars:
+<%         example.test_env_vars.each do |vname, val| -%>
+      <%= vname -%>: '<%= val %>'
+<%        end -%>
+<%      end -%>
+<%      end -%>
+<%      unless example.test_vars_overrides.nil? -%>
+<%      unless example.test_vars_overrides.empty? -%>
+    test_vars_overrides:
+<%         example.test_vars_overrides.each do |vname, val| -%>
+      '<%= vname -%>': '<%= val %>'
+<%        end -%>
+<%      end -%>
+<%      end -%>
+<%      unless example.ignore_read_extra.empty? -%>
+    ignore_read_extra:
+<%        example.ignore_read_extra.each do |irextra| -%>
+      - '<%= irextra %>'
+<%        end -%>
+<%      end -%>
+<%      unless example.external_providers.nil? -%>
+    external_providers: <%= example.external_providers %>
+<%      end -%>
+<%      unless example.skip_test.nil? -%>
+    skip_test: <%= example.skip_test %>
+<%      end -%>
+<%      unless example.skip_import_test.nil? -%>
+    skip_import_test: <%= example.skip_import_test %>
+<%      end -%>
+<%      unless example.skip_docs.nil? -%>
+    skip_docs: <%= example.skip_docs %>
+<%      end -%>
+<%      unless example.skip_vcr.nil? -%>
+    skip_vcr: <%= example.skip_vcr %>
+<%      end -%>
+<%    end -%>
+<%  end -%>
+<%
+#virtual fields
+-%>
+<%  unless object.virtual_fields.empty? -%>
+virtual_fields:
+<%    object.virtual_fields.each do |vfield| -%>
+  - name: '<%= vfield.name %>'
+    description:
+<%      unless vfield.type.nil? -%>
+    type: <%= vfield.type.to_s.gsub("Api::Type::", "") %>
+<%      end -%>
+<%      unless vfield.default_value.nil? -%>
+    default_value: <%= go_literal(vfield.default_value) %>
+<%      end -%>
+<%      unless vfield.immutable.nil? -%>
+    immutable: <%= vfield.immutable %>
+<%      end -%>
+<%    end -%>
+<%  end -%>
+<%
+#fields
+-%>
+<%  unless object.parameters.nil? -%>
+parameters:
+<%    object.parameters.each do |prop| -%>
+<%=    lines(build_newyaml_field(prop, object, pwd)) -%>
+<%     end -%>
+<%   end -%>
+<%  unless object.properties.nil? -%>
+properties:
+<%    object.properties.each do |prop| -%>
+<%= lines(build_newyaml_field(prop, object, pwd)) -%>
+<%     end -%>
+<%   end -%>
+<%#  end -%>
+

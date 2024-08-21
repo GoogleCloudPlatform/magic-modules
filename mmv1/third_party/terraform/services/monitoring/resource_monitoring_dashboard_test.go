@@ -7,8 +7,8 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -110,6 +110,15 @@ func TestAccMonitoringDashboard_update(t *testing.T) {
 			},
 			{
 				Config: testAccMonitoringDashboard_gridLayout(),
+			},
+			{
+				ResourceName:            "google_monitoring_dashboard.dashboard",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"project"},
+			},
+			{
+				Config: testAccMonitoringDashboard_gridLayoutUpdate(),
 			},
 			{
 				ResourceName:            "google_monitoring_dashboard.dashboard",
@@ -231,6 +240,52 @@ resource "google_monitoring_dashboard" "dashboard" {
             "label": "y1Axis",
             "scale": "LINEAR"
           }
+        }
+      }
+    ]
+  }
+}
+
+EOF
+}
+`)
+}
+
+func testAccMonitoringDashboard_gridLayoutUpdate() string {
+	return fmt.Sprintf(`
+resource "google_monitoring_dashboard" "dashboard" {
+  dashboard_json = <<EOF
+{
+  "displayName": "Grid Layout Example",
+  "gridLayout": {
+    "columns": "2",
+    "widgets": [
+      {
+        "title": "Widget 1",
+        "xyChart": {
+          "dataSets": [{
+            "timeSeriesQuery": {
+              "timeSeriesFilter": {
+                "filter": "metric.type=\"agent.googleapis.com/nginx/connections/accepted_count\"",
+                "aggregation": {
+                  "perSeriesAligner": "ALIGN_RATE"
+                }
+              },
+              "unitOverride": "1"
+            },
+            "plotType": "LINE"
+          }],
+          "timeshiftDuration": "0s",
+          "yAxis": {
+            "label": "y1Axis",
+            "scale": "LINEAR"
+          }
+        }
+      },
+      {
+        "text": {
+          "content": "Widget 2",
+          "format": "MARKDOWN"
         }
       }
     ]

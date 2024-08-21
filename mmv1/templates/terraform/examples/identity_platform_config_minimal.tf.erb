@@ -16,7 +16,33 @@ resource "google_project_service" "identitytoolkit" {
 
 resource "google_identity_platform_config" "default" {
   project = google_project.default.project_id
-  
+  client {
+    permissions {
+      disabled_user_deletion = false
+      disabled_user_signup   = true
+    }
+  }
+
+  mfa {
+    enabled_providers = ["PHONE_SMS"]
+    provider_configs {
+      state = "ENABLED"
+      totp_provider_config {
+        adjacent_intervals = 3
+      }
+    }
+    state = "ENABLED"
+  }
+  monitoring {
+    request_logging {
+      enabled = true
+    }
+  }
+  multi_tenant {
+    allow_tenants           = true
+    default_tenant_location = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"
+  }
+
   depends_on = [
     google_project_service.identitytoolkit
   ]

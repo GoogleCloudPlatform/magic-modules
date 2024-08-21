@@ -12,10 +12,9 @@
 # limitations under the License.
 
 require 'api/async'
-require 'provider/abstract_core'
 
 module Provider
-  class Terraform < Provider::AbstractCore
+  class Terraform
     # Async implementation for polling in Terraform
     class PollAsync < Api::Async
       # Details how to poll for an eventually-consistent resource state.

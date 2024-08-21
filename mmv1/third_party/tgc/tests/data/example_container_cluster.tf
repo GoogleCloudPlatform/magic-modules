@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+ 
 terraform {
   required_providers {
     google = {
@@ -28,26 +28,34 @@ provider "google" {
 }
 
 resource "google_service_account" "default" {
-  account_id   = "service-account-id"
+  account_id   = "service-account-cc"
   display_name = "Service Account"
 }
 
 resource "google_container_cluster" "primary" {
-  name     = "my-gke-cluster"
+  name     = "cluster-test"
   location = "us-central1"
 
   # We can't create a cluster with no node pool defined, but we want to only use
   # separately managed node pools. So we create the smallest possible default
   # node pool and immediately delete it.
   remove_default_node_pool = true
-  initial_node_count = 1
+  initial_node_count = 3
+
+  database_encryption {
+    state = "DECRYPTED"
+  } 
+
+  release_channel {
+    channel = "RAPID"
+  }
 }
 
 resource "google_container_node_pool" "primary_preemptible_nodes" {
-  name       = "my-node-pool"
+  name       = "node-pool-test"
   location   = "us-central1"
   cluster    = google_container_cluster.primary.name
-  node_count = 1
+  node_count = 3
 
   node_config {
     preemptible  = true
@@ -61,6 +69,11 @@ resource "google_container_node_pool" "primary_preemptible_nodes" {
     oauth_scopes = [
       "https://www.googleapis.com/auth/cloud-platform",
     ]
+  }
+
+  management {
+    auto_repair = true
+    auto_upgrade = true
   }
 }
 

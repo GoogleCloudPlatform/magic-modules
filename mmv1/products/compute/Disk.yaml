@@ -42,7 +42,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -362,7 +362,7 @@ properties:
       disk interfaces are automatically determined on attachment.
     description: |
       Specifies the disk interface to use for attaching this disk, which is either SCSI or NVME. The default is SCSI.
-    diff_suppress_func: 'tpgresource.AlwaysDiffSuppress'
+    diff_suppress_func: AlwaysDiffSuppress
   - !ruby/object:Api::Type::String
     name: 'sourceDisk'
     description: |
@@ -383,10 +383,17 @@ properties:
       be used to determine whether the image was taken from the current
       or a previous instance of a given disk name.
     output: true
+  - !ruby/object:Api::Type::String
+    name: 'DiskId'
+    description: |
+      The unique identifier for the resource. This identifier is defined by the server.
+    output: true
+    api_name: id
   - !ruby/object:Api::Type::ResourceRef
     name: 'type'
     resource: 'DiskType'
     imports: 'selfLink'
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
     description: |
       URL of the disk type resource describing which disk type to use to
       create the disk. Provide this when creating the disk.
@@ -433,7 +440,6 @@ properties:
     description: |
       Whether this disk is using confidential compute mode.
       Note: Only supported on hyperdisk skus, disk_encryption_key is required when setting to true
-    min_version: beta
     required: false
     default_from_api: true
   - !ruby/object:Api::Type::Boolean
@@ -478,23 +484,11 @@ properties:
     is_set: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
-        - !ruby/object:Api::Type::Enum
+        - !ruby/object:Api::Type::String
           name: 'type'
           required: true
           description: |
             The type of supported feature. Read [Enabling guest operating system features](https://cloud.google.com/compute/docs/images/create-delete-deprecate-private-images#guest-os-features) to see a list of available options.
-          values:
-            - :MULTI_IP_SUBNET
-            - :SECURE_BOOT
-            - :SEV_CAPABLE
-            - :UEFI_COMPATIBLE
-            - :VIRTIO_SCSI_MULTIQUEUE
-            - :WINDOWS
-            - :GVNIC
-            - :SEV_LIVE_MIGRATABLE
-            - :SEV_SNP_CAPABLE
-            - :SUSPEND_RESUME_COMPATIBLE
-            - :TDX_CAPABLE
   - !ruby/object:Api::Type::Array
     name: 'licenses'
     description: Any applicable license URI.
@@ -506,3 +500,27 @@ properties:
       resource: 'License'
       imports: 'selfLink'
     custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
+  - !ruby/object:Api::Type::String
+    name: 'storagePool'
+    required: false
+    immutable: true
+    description: |
+      The URL of the storage pool in which the new disk is created.
+      For example:
+      * https://www.googleapis.com/compute/v1/projects/{project}/zones/{zone}/storagePools/{storagePool}
+      * /projects/{project}/zones/{zone}/storagePools/{storagePool}
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+  - !ruby/object:Api::Type::String
+    name: 'accessMode'
+    required: false
+    immutable: false
+    description: |
+      The accessMode of the disk.
+      For example:
+      * READ_WRITE_SINGLE
+      * READ_WRITE_MANY
+      * READ_ONLY_SINGLE
+    default_from_api: true
+    update_verb: :PATCH
+    update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}?paths=accessMode'

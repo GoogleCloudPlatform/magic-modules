@@ -1,0 +1,24 @@
+[
+    {
+        "name": "//datastream.googleapis.com/projects/{{.Provider.project}}/locations/us-central1/connectionProfiles/my-profile",
+        "asset_type": "datastream.googleapis.com/ConnectionProfile",
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+        "resource": {
+            "version": "v1",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/datastream/v1/rest",
+            "discovery_name": "ConnectionProfile",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "bigqueryProfile": null,
+                "displayName": "Connection profile",
+                "gcsProfile": {
+                    "bucket": "my-bucket",
+                    "rootPath": "/path"
+                }
+            }
+        },
+        "ancestors": [
+            "organizations/{{.OrgID}}"
+        ]
+    }
+]

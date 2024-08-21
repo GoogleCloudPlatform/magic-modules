@@ -7,8 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+  "github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/cloudrunv2"
 )
 
@@ -45,6 +46,7 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceFullUpdate(t *testing.T) {
 		},
 	})
 }
+
 
 func testAccCloudRunV2Service_cloudrunv2ServiceFull(context map[string]interface{}) string {
 	return acctest.Nprintf(`
@@ -109,7 +111,6 @@ resource "google_service_account" "service_account" {
 }
 `, context)
 }
-
 func testAccCloudRunV2Service_cloudrunv2ServiceFullUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_cloud_run_v2_service" "default" {
@@ -208,7 +209,108 @@ resource "google_compute_network" "custom_test" {
 }
 `, context)
 }
+<% unless version == 'ga' -%>
+func TestAccCloudRunV2Service_cloudrunv2ServiceGcsVolume(t *testing.T) {
+	t.Parallel()
 
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCloudRunV2ServiceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCloudRunV2Service_cloudrunv2ServiceGcsVolume(context),
+			},
+			{
+				ResourceName:            "google_cloud_run_v2_service.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location", "annotations", "labels", "terraform_labels", "launch_stage"},
+                        },
+              },
+	})
+}
+
+func testAccCloudRunV2Service_cloudrunv2ServiceGcsVolume(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_cloud_run_v2_service" "default" {
+  name     = "tf-test-cloudrun-service%{random_suffix}"
+  description = "description creating"
+  location = "us-central1"
+  launch_stage = "BETA"
+  annotations = {
+    generated-by = "magic-modules"
+  }
+  ingress = "INGRESS_TRAFFIC_ALL"
+  labels = {
+    label-1 = "value-1"
+  }
+  client = "client-1"
+  client_version = "client-version-1"
+  template {
+    labels = {
+      label-1 = "value-1"
+    }
+    timeout = "300s"
+    service_account = google_service_account.service_account.email
+    execution_environment = "EXECUTION_ENVIRONMENT_GEN2"
+    scaling {
+      max_instance_count = 3
+      min_instance_count = 1
+    }
+    annotations = {
+      generated-by = "magic-modules"
+    }
+    volumes {
+      name = "gcs"
+      gcs {
+        bucket = "gcp-public-data-landsat"
+        read_only = true
+      }
+    }
+    containers {
+      name = "container-1"
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+      env {
+        name = "SOURCE"
+        value = "remote"
+      }
+      env {
+        name = "TARGET"
+        value = "home"
+      }
+      ports {
+        name = "h2c"
+        container_port = 8080
+      }
+      volume_mounts {
+        name = "gcs"
+        mount_path = "/mnt/landsat"
+      }
+      resources {
+        cpu_idle = true
+        startup_cpu_boost = true
+        limits = {
+          cpu = "4"
+          memory = "2Gi"
+        }
+      }
+    }
+    session_affinity = false
+  }
+}
+
+resource "google_service_account" "service_account" {
+  account_id   = "tf-test-my-account%{random_suffix}"
+  display_name = "Test Service Account"
+}
+`, context)
+}
+<%end -%>
 func TestAccCloudRunV2Service_cloudrunv2ServiceTCPProbesUpdate(t *testing.T) {
 	t.Parallel()
 
@@ -598,6 +700,7 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceWithDirectVPCUpdate(t *testing.T)
 	serviceName := fmt.Sprintf("tf-test-cloudrun-service%s", acctest.RandString(t, 10))
 	context := map[string]interface{}{
 		"service_name": serviceName,
+		"project": envvar.GetTestProjectFromEnv(),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -615,7 +718,7 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceWithDirectVPCUpdate(t *testing.T)
 				ImportStateVerifyIgnore: []string{"name", "location"},
 			},
 			{
-				Config: testAccCloudRunV2Service_cloudRunServiceWithDirectVPCUpdate(context),
+				Config: testAccCloudRunV2Service_cloudRunServiceWithDirectVPCAndNamedBinAuthPolicyUpdate(context),
 			},
 			{
 				ResourceName:            "google_cloud_run_v2_service.default",
@@ -632,7 +735,7 @@ func testAccCloudRunV2Service_cloudRunServiceWithDirectVPC(context map[string]in
 resource "google_cloud_run_v2_service" "default" {
   name     = "%{service_name}"
   location = "us-central1"
-  launch_stage = "BETA"
+  launch_stage = "GA"
   template {
     containers {
       image = "us-docker.pkg.dev/cloudrun/container/hello"
@@ -647,12 +750,16 @@ resource "google_cloud_run_v2_service" "default" {
 `, context)
 }
 
-func testAccCloudRunV2Service_cloudRunServiceWithDirectVPCUpdate(context map[string]interface{}) string {
+func testAccCloudRunV2Service_cloudRunServiceWithDirectVPCAndNamedBinAuthPolicyUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_cloud_run_v2_service" "default" {
   name     = "%{service_name}"
   location = "us-central1"
-  launch_stage = "BETA"
+  launch_stage = "GA"
+  binary_authorization {
+    policy = "projects/%{project}/platforms/cloudRun/policies/my-policy"
+    breakglass_justification = "Some justification"
+  }
   template {
     containers {
       image = "us-docker.pkg.dev/cloudrun/container/hello"
@@ -668,7 +775,6 @@ resource "google_cloud_run_v2_service" "default" {
 `, context)
 }
 
-<% unless version == "ga" -%>
 func TestAccCloudRunV2Service_cloudrunv2ServiceCustomAudienceUpdate(t *testing.T) {
 	t.Parallel()
 
@@ -676,7 +782,7 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceCustomAudienceUpdate(t *testing.T
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudRunV2ServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -713,7 +819,6 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceCustomAudienceUpdate(t *testing.T
 func testAccCloudRunV2Service_cloudRunServiceUpdateWithoutCustomAudience(serviceName string) string {
 	return fmt.Sprintf(`
 resource "google_cloud_run_v2_service" "default" {
-  provider     = google-beta
   name         = "%s"
   location     = "us-central1"
 
@@ -732,10 +837,8 @@ resource "google_cloud_run_v2_service" "default" {
 func testAccCloudRunV2Service_cloudRunServiceUpdateWithCustomAudience(serviceName string, customAudience string) string {
 	return fmt.Sprintf(`
 resource "google_cloud_run_v2_service" "default" {
-  provider         = google-beta
   name             = "%s"
   location         = "us-central1"
-  launch_stage     = "BETA"
   custom_audiences = ["%s"]
 
   template {
@@ -748,5 +851,208 @@ resource "google_cloud_run_v2_service" "default" {
   }
 }
 `, serviceName, customAudience)
+}
+
+func TestAccCloudRunV2Service_cloudrunv2ServiceAttributionLabel(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix":        acctest.RandString(t, 10),
+		"add_attribution":      "true",
+		"attribution_strategy": "CREATION_ONLY",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCloudRunV2ServiceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCloudRunV2Service_cloudrunv2ServiceWithAttributionLabel(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_cloud_run_v2_service.default", "labels.%", "1"),
+					resource.TestCheckResourceAttr("google_cloud_run_v2_service.default", "labels.user_label", "foo"),
+
+					resource.TestCheckResourceAttr("google_cloud_run_v2_service.default", "terraform_labels.%", "2"),
+					resource.TestCheckResourceAttr("google_cloud_run_v2_service.default", "terraform_labels.user_label", "foo"),
+					resource.TestCheckResourceAttr("google_cloud_run_v2_service.default", "terraform_labels.goog-terraform-provisioned", "true"),
+
+					resource.TestCheckResourceAttr("google_cloud_run_v2_service.default", "effective_labels.%", "2"),
+					resource.TestCheckResourceAttr("google_cloud_run_v2_service.default", "effective_labels.user_label", "foo"),
+					resource.TestCheckResourceAttr("google_cloud_run_v2_service.default", "effective_labels.goog-terraform-provisioned", "true"),
+				),
+			},
+			{
+				Config: testAccCloudRunV2Service_cloudrunv2ServiceWithAttributionLabelUpdate(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_cloud_run_v2_service.default", "labels.%", "1"),
+					resource.TestCheckResourceAttr("google_cloud_run_v2_service.default", "labels.user_label", "bar"),
+
+					resource.TestCheckResourceAttr("google_cloud_run_v2_service.default", "terraform_labels.%", "2"),
+					resource.TestCheckResourceAttr("google_cloud_run_v2_service.default", "terraform_labels.user_label", "bar"),
+					resource.TestCheckResourceAttr("google_cloud_run_v2_service.default", "terraform_labels.goog-terraform-provisioned", "true"),
+
+					resource.TestCheckResourceAttr("google_cloud_run_v2_service.default", "effective_labels.%", "2"),
+					resource.TestCheckResourceAttr("google_cloud_run_v2_service.default", "effective_labels.user_label", "bar"),
+					resource.TestCheckResourceAttr("google_cloud_run_v2_service.default", "effective_labels.goog-terraform-provisioned", "true"),
+				),
+			},
+		},
+	})
+}
+
+func testAccCloudRunV2Service_cloudrunv2ServiceWithAttributionLabel(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+provider "google" {
+  add_terraform_attribution_label               = %{add_attribution}
+  terraform_attribution_label_addition_strategy = "%{attribution_strategy}"
+}
+
+resource "google_cloud_run_v2_service" "default" {
+  name     = "tf-test-cloudrun-service%{random_suffix}"
+  location = "us-central1"
+
+  labels = {
+    user_label = "foo"
+  }
+
+  template {
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+      ports {
+        container_port = 8080
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccCloudRunV2Service_cloudrunv2ServiceWithAttributionLabelUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+provider "google" {
+  add_terraform_attribution_label               = %{add_attribution}
+  terraform_attribution_label_addition_strategy = "%{attribution_strategy}"
+}
+
+resource "google_cloud_run_v2_service" "default" {
+  name     = "tf-test-cloudrun-service%{random_suffix}"
+  location = "us-central1"
+
+  labels = {
+    user_label = "bar"
+  }
+
+  template {
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+      ports {
+        container_port = 8080
+      }
+    }
+  }
+}
+`, context)
+}
+
+<% unless version == 'ga' -%>
+func TestAccCloudRunV2Service_cloudrunv2ServiceWithServiceMinInstances(t *testing.T) {
+  t.Parallel()
+  context := map[string]interface{} {
+    "random_suffix" : acctest.RandString(t, 10),
+  }
+  acctest.VcrTest(t, resource.TestCase {
+    PreCheck: func() { acctest.AccTestPreCheck(t)},
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+    CheckDestroy: testAccCheckCloudRunV2ServiceDestroyProducer(t),
+    Steps: []resource.TestStep{
+       {
+        Config: testAccCloudRunV2Service_cloudrunv2ServiceWithMinInstancesAndDefaultUriDisabled(context),
+      },
+      {
+        ResourceName: "google_cloud_run_v2_service.default",
+        ImportState: true,
+        ImportStateVerify: true,
+        ImportStateVerifyIgnore: []string{"name", "location", "annotations", "labels", "terraform_labels", "launch_stage"},
+      },
+      {
+        Config: testAccCloudRunV2Service_cloudrunv2ServiceWithNoMinInstances(context),
+      },
+      {
+        ResourceName: "google_cloud_run_v2_service.default",
+        ImportState: true,
+        ImportStateVerify: true,
+        ImportStateVerifyIgnore: []string{"name", "location", "annotations", "labels", "terraform_labels", "launch_stage"},
+      },
+
+    }, 
+  })
+}
+
+func testAccCloudRunV2Service_cloudrunv2ServiceWithNoMinInstances(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_cloud_run_v2_service" "default" {
+  name     = "tf-test-cloudrun-service%{random_suffix}"
+  description = "description creating"
+  location = "us-central1"
+  launch_stage = "BETA"
+  annotations = {
+    generated-by = "magic-modules"
+  }
+  ingress = "INGRESS_TRAFFIC_ALL"
+  labels = {
+    label-1 = "value-1"
+  }
+  client = "client-1"
+  client_version = "client-version-1"
+  template {
+    containers {
+      name = "container-1"
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+      }
+    }
+  lifecycle {
+    ignore_changes = [
+      launch_stage,
+    ]
+  }
+}
+
+`, context)
+}
+func testAccCloudRunV2Service_cloudrunv2ServiceWithMinInstancesAndDefaultUriDisabled(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_cloud_run_v2_service" "default" {
+  name     = "tf-test-cloudrun-service%{random_suffix}"
+  description = "description creating"
+  location = "us-central1"
+  launch_stage = "BETA"
+  annotations = {
+    generated-by = "magic-modules"
+  }
+  ingress = "INGRESS_TRAFFIC_ALL"
+  labels = {
+    label-1 = "value-1"
+  }
+  client = "client-1"
+  client_version = "client-version-1"
+  scaling {
+    min_instance_count = 1
+  }
+  default_uri_disabled = true
+  template {
+    containers {
+      name = "container-1"
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+    }
+  }
+  lifecycle {
+    ignore_changes = [
+      launch_stage,
+    ]
+  }
+}
+
+`, context)
 }
 <% end -%>

@@ -103,6 +103,27 @@ examples:
       name: 'id-'
     test_env_vars:
       project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_job_trigger_multiple_actions'
+    primary_resource_id: 'basic'
+    vars:
+      trigger: 'trigger'
+    test_env_vars:
+      project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_job_trigger_cloud_storage_optional_timespan_autopopulation'
+    primary_resource_id: 'basic'
+    vars:
+      trigger: 'trigger'
+    test_env_vars:
+      project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_job_trigger_timespan_config_big_query'
+    primary_resource_id: 'timespan_config_big_query'
+    vars:
+      trigger: 'trigger'
+    test_env_vars:
+      project: :PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/dlp_job_trigger.go.erb
   decoder: templates/terraform/decoders/dlp_job_trigger.go.erb
@@ -709,32 +730,40 @@ properties:
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: 'timespanConfig'
-            description: Information on where to inspect
+            description: Configuration of the timespan of the items to include in scanning
             properties:
               - !ruby/object:Api::Type::String
                 name: 'startTime'
+                description: Exclude files, tables, or rows older than this value. If not set, no lower time limit is applied.
                 at_least_one_of:
                   - inspect_job.0.storage_config.0.timespan_config.0.start_time
                   - inspect_job.0.storage_config.0.timespan_config.0.end_time
-                description: Exclude files or rows older than this value.
+                  - inspect_job.0.storage_config.0.timespan_config.0.enable_auto_population_of_timespan_config
+                conflicts:
+                  - inspect_job.0.storage_config.0.timespan_config.0.enable_auto_population_of_timespan_config
               - !ruby/object:Api::Type::String
                 name: 'endTime'
+                description: Exclude files, tables, or rows newer than this value. If not set, no upper time limit is applied.
                 at_least_one_of:
                   - inspect_job.0.storage_config.0.timespan_config.0.start_time
                   - inspect_job.0.storage_config.0.timespan_config.0.end_time
-                description:
-                  Exclude files or rows newer than this value. If set to zero,
-                  no upper time limit is applied.
+                  - inspect_job.0.storage_config.0.timespan_config.0.enable_auto_population_of_timespan_config
               - !ruby/object:Api::Type::Boolean
                 name: 'enableAutoPopulationOfTimespanConfig'
                 description: |
                   When the job is started by a JobTrigger we will automatically figure out a valid startTime to avoid
                   scanning files that have not been modified since the last time the JobTrigger executed. This will
-                  be based on the time of the execution of the last run of the JobTrigger.
+                  be based on the time of the execution of the last run of the JobTrigger or the timespan endTime
+                  used in the last run of the JobTrigger.
+                at_least_one_of:
+                  - inspect_job.0.storage_config.0.timespan_config.0.start_time
+                  - inspect_job.0.storage_config.0.timespan_config.0.end_time
+                  - inspect_job.0.storage_config.0.timespan_config.0.enable_auto_population_of_timespan_config
+                conflicts:
+                  - inspect_job.0.storage_config.0.timespan_config.0.start_time
               - !ruby/object:Api::Type::NestedObject
                 name: 'timestampField'
-                description: Information on where to inspect
-                required: true
+                description: Specification of the field containing the timestamp of scanned items.
                 properties:
                   - !ruby/object:Api::Type::String
                     name: 'name'
@@ -917,6 +946,7 @@ properties:
                 description: |
                   How to sample rows if not all rows are scanned. Meaningful only when used in conjunction with either
                   rowsLimit or rowsLimitPercent. If not specified, rows are scanned in the order BigQuery reads them.
+                  If TimespanConfig is set, set this to an empty string to avoid using the default value.
                 values:
                   - :TOP
                   - :RANDOM_START
@@ -1012,7 +1042,7 @@ properties:
       - !ruby/object:Api::Type::Array
         name: 'actions'
         description: |
-          A task to execute on the completion of a job.
+          Configuration block for the actions to execute on the completion of a job. Can be specified multiple times, but only one for each type. Each action block supports fields documented below. This argument is processed in [attribute-as-blocks mode](https://www.terraform.io/docs/configuration/attr-as-blocks.html).
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::NestedObject

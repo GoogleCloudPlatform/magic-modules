@@ -14,7 +14,6 @@
 ---
 !ruby/object:Api::Resource
 name: "Network"
-min_version: beta
 base_url: "projects/{{project}}/locations/{{location}}/vmwareEngineNetworks"
 self_link: "projects/{{project}}/locations/{{location}}/vmwareEngineNetworks/{{name}}"
 create_url: "projects/{{project}}/locations/{{location}}/vmwareEngineNetworks?vmwareEngineNetworkId={{name}}"
@@ -44,12 +43,19 @@ async: !ruby/object:Api::OpAsync
 import_format:
   ["projects/{{project}}/locations/{{location}}/vmwareEngineNetworks/{{name}}"]
 autogen_async: true
+
+# There is a handwritten sweeper that provides a list of locations to sweep
+skip_sweeper: true
+
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "vmware_engine_network_legacy"
-    pull_external: true
-    min_version: beta
+    name: "vmware_engine_network_standard"
     primary_resource_id: "vmw-engine-network"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "vmware_engine_network_legacy"
+    external_providers: ["random", "time"]
+    primary_resource_id: "vmw-engine-network"
+    skip_test: true   # update tests will take care of create and update. Legacy network needs to be created on an isolated project.
     vars:
       proj_id: "vmw-proj"
     test_env_vars:
@@ -119,6 +125,7 @@ properties:
       VMware Engine network type.
     values:
       - :LEGACY
+      - :STANDARD
 
   - !ruby/object:Api::Type::String
     name: "uid"

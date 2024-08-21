@@ -156,8 +156,7 @@ formatting.
 
 ## Prior Art
 
-This package is based on a bunch of experiments with the [Google Cloud Platform
-Terraform provider](https://github.com/terraform-providers/terraform-provider-google)
+This package is based on a bunch of experiments with the [Terraform provider for Google Cloud](https://github.com/terraform-providers/terraform-provider-google)
 and the lessons learned while generating it. It is also based on prior art in
 the community:
 

@@ -4,13 +4,13 @@
 
 <%= lines(autogen_notice(:go, pwd)) -%>
 
-package <%= product_ns.downcase -%>_test
+package <%= object.__product.name .downcase -%>_test
 
 import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"<%= import_path() -%>/acctest"
 	"<%= import_path() -%>/envvar"
@@ -21,12 +21,12 @@ import (
 <% example = object.examples.reject(&:skip_test)
          .reject { |e| @api.version_obj_or_closest(version) < @api.version_obj_or_closest(e.min_version) }
          .first -%>
-<% resource_name = product_ns + object.name -%>
+<% resource_name = object.__product.name  + object.name -%>
 <%
 individual_url = object.iam_policy.self_link || object.self_link_url
 -%>
 <%
-  tf_product = (object.__product.legacy_name || product_ns).underscore
+  tf_product = (object.__product.legacy_name || object.__product.name ).underscore
   resource_ns = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
   resource_ns_iam = resource_ns + '_iam'
 -%>
@@ -50,16 +50,19 @@ import_url = import_format.gsub(/({{)%?(\w+)(}})/, '%s').gsub(object.__product.b
 				<% import_qualifiers.push('context["project_id"]') -%>
 			<% end -%>
 		<% end -%>
-        <% elsif param == 'zone' and object.iam_policy.substitute_zone_value -%>
-                <% import_qualifiers.push('envvar.GetTestZoneFromEnv()') -%>
+	<% elsif param == 'zone' and object.iam_policy.substitute_zone_value -%>
+		<% import_qualifiers.push('envvar.GetTestZoneFromEnv()') -%>
 	<% elsif param == 'region' || param == 'location' -%>
 		<% if example.region_override.nil? -%>
-				<% import_qualifiers.push('envvar.GetTestRegionFromEnv()') -%>
-			<% else -%>
-				<% import_qualifiers.push("\"#{example.region_override}\"") -%>
-			<% end -%>
+			<% import_qualifiers.push('envvar.GetTestRegionFromEnv()') -%>
+		<% else -%>
+			<% import_qualifiers.push("\"#{example.region_override}\"") -%>
+		<% end -%>
 	<% elsif param == 'universe_domain' -%>
-			<% import_qualifiers.push('envvar.GetTestUniverseDomainFromEnv()') -%>
+		<% import_qualifiers.push('envvar.GetTestUniverseDomainFromEnv()') -%>
+	<% else -%>
+		<%# The parameter was not added to import_qualifiers, so break out of the loop to avoid subsequent parameters being in the wrong position -%>
+		<% break -%>
 	<% end -%>
 <% end -%>
 func TestAcc<%= resource_name -%>IamBindingGenerated(t *testing.T) {
@@ -73,10 +76,11 @@ func TestAcc<%= resource_name -%>IamBindingGenerated(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 <% else -%>
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		<% if example.pull_external -%>
+		<% if !example.external_providers.nil? && !example.external_providers.empty? -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
-			"time": {},
+		<% example.external_providers.each do |provider| -%>
+			"<%= provider %>": {},
+		<% end -%>
 		},
 		<% end -%>
 <% end -%>
@@ -120,10 +124,11 @@ func TestAcc<%= resource_name -%>IamMemberGenerated(t *testing.T) {
 <% else -%>
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 <% end -%>
-		<% if example.pull_external -%>
+		<% if !example.external_providers.nil? && !example.external_providers.empty? -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
-			"time": {},
+		<% example.external_providers.each do |provider| -%>
+			"<%= provider %>": {},
+		<% end -%>
 		},
 		<% end -%>
 		Steps: []resource.TestStep{
@@ -162,10 +167,11 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated(t *testing.T) {
 <% else -%>
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 <% end -%>
-		<% if example.pull_external -%>
+		<% if !example.external_providers.nil? && !example.external_providers.empty? -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
-			"time": {},
+		<% example.external_providers.each do |provider| -%>
+			"<%= provider %>": {},
+		<% end -%>
 		},
 		<% end -%>
 		Steps: []resource.TestStep{
@@ -209,10 +215,11 @@ func TestAcc<%= resource_name -%>IamBindingGenerated_withCondition(t *testing.T)
 <% else -%>
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 <% end -%>
-		<% if example.pull_external -%>
+		<% if !example.external_providers.nil? && !example.external_providers.empty? -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
-			"time": {},
+		<% example.external_providers.each do |provider| -%>
+			"<%= provider %>": {},
+		<% end -%>
 		},
 		<% end -%>
 		Steps: []resource.TestStep{
@@ -245,10 +252,11 @@ func TestAcc<%= resource_name -%>IamBindingGenerated_withAndWithoutCondition(t *
 <% else -%>
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 <% end -%>
-		<% if example.pull_external -%>
+		<% if !example.external_providers.nil? && !example.external_providers.empty? -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
-			"time": {},
+		<% example.external_providers.each do |provider| -%>
+			"<%= provider %>": {},
+		<% end -%>
 		},
 		<% end -%>
 		Steps: []resource.TestStep{
@@ -291,10 +299,11 @@ func TestAcc<%= resource_name -%>IamMemberGenerated_withCondition(t *testing.T) 
 <% else -%>
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 <% end -%>
-		<% if example.pull_external -%>
+		<% if !example.external_providers.nil? && !example.external_providers.empty? -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
-			"time": {},
+		<% example.external_providers.each do |provider| -%>
+			"<%= provider %>": {},
+		<% end -%>
 		},
 		<% end -%>
 		Steps: []resource.TestStep{
@@ -327,10 +336,11 @@ func TestAcc<%= resource_name -%>IamMemberGenerated_withAndWithoutCondition(t *t
 <% else -%>
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 <% end -%>
-		<% if example.pull_external -%>
+		<% if !example.external_providers.nil? && !example.external_providers.empty? -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
-			"time": {},
+		<% example.external_providers.each do |provider| -%>
+			"<%= provider %>": {},
+		<% end -%>
 		},
 		<% end -%>
 		Steps: []resource.TestStep{
@@ -389,10 +399,11 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated_withCondition(t *testing.T) 
 <% else -%>
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 <% end -%>
-		<% if example.pull_external -%>
+		<% if !example.external_providers.nil? && !example.external_providers.empty? -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
-			"time": {},
+		<% example.external_providers.each do |provider| -%>
+			"<%= provider %>": {},
+		<% end -%>
 		},
 		<% end -%>
 		Steps: []resource.TestStep{

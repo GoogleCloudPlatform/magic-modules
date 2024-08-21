@@ -9,7 +9,9 @@ resource "google_alloydb_backup" "<%= ctx[:primary_resource_id] %>" {
 resource "google_alloydb_cluster" "<%= ctx[:primary_resource_id] %>" {
   cluster_id = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
   location   = "us-central1"
-  network    = google_compute_network.default.id
+  network_config {
+    network = google_compute_network.default.id
+  }
 }
 
 resource "google_alloydb_instance" "<%= ctx[:primary_resource_id] %>" {

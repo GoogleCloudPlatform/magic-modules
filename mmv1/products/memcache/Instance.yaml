@@ -64,7 +64,6 @@ properties:
     required: true
     immutable: true
     url_param_only: true
-    pattern: projects/{{project}}/locations/{{region}}/instances/{{name}}
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   - !ruby/object:Api::Type::String
     name: 'displayName'
@@ -149,6 +148,9 @@ properties:
     default_value: :MEMCACHE_1_5
     values:
       - :MEMCACHE_1_5
+      - :MEMCACHE_1_6_15
+    update_url: 'projects/{{project}}/locations/{{region}}/instances/{{name}}:upgrade'
+    update_verb: :POST
   - !ruby/object:Api::Type::NestedObject
     name: nodeConfig
     description: |
@@ -309,3 +311,12 @@ properties:
           can not go beyond, including reschedule.
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
+  - !ruby/object:Api::Type::Array
+    name: 'reservedIpRangeId'
+    immutable: true
+    description: |
+      Contains the name of allocated IP address ranges associated with
+      the private service access connection for example, "test-default"
+      associated with IP range 10.0.0.0/29.
+    ignore_read: true
+    item_type: Api::Type::String

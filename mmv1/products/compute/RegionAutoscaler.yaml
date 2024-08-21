@@ -32,7 +32,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -117,6 +117,7 @@ properties:
           to. This is required when creating or updating an autoscaler. The
           maximum number of replicas should not be lower than minimal number
           of replicas.
+        send_empty_value: true
         required: true
       - !ruby/object:Api::Type::Integer
         name: 'cooldownPeriod'
@@ -265,7 +266,6 @@ properties:
               required: true
             - !ruby/object:Api::Type::Double
               name: 'singleInstanceAssignment'
-              min_version: beta
               description: |
                 If scaling is based on a per-group metric value that represents the
                 total amount of work to be done or resource usage, set this value to
@@ -341,7 +341,6 @@ properties:
                 (if you are using gce_instance resource type). If multiple
                 TimeSeries are returned upon the query execution, the autoscaler
                 will sum their respective values to obtain its scaling value.
-              min_version: beta
       - !ruby/object:Api::Type::NestedObject
         name: 'loadBalancingUtilization'
         description: |

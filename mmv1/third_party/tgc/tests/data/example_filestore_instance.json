@@ -24,6 +24,7 @@
             "network": "default"
           }
         ],
+        "protocol": "NFS_V3",
         "tier": "BASIC_SSD"
       }
     }

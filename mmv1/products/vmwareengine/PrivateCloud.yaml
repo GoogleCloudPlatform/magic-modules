@@ -13,15 +13,14 @@
 
 --- !ruby/object:Api::Resource
 name: 'PrivateCloud'
-min_version: beta
 base_url: 'projects/{{project}}/locations/{{location}}/privateClouds'
 self_link: 'projects/{{project}}/locations/{{location}}/privateClouds/{{name}}'
-delete_url: 'projects/{{project}}/locations/{{location}}/privateClouds/{{name}}?delay_hours=0'
+delete_url: 'projects/{{project}}/locations/{{location}}/privateClouds/{{name}}'
 create_url: 'projects/{{project}}/locations/{{location}}/privateClouds?privateCloudId={{name}}'
 update_verb: :PATCH
 references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/vmware-engine/docs/reference/rest/v1/projects.locations.privateClouds'
-description: / Represents a private cloud resource. Private clouds are zonal resources.
+description: Represents a private cloud resource. Private clouds are zonal resources.
 error_abort_predicates: ['transport_tpg.Is429QuotaError']
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
@@ -29,7 +28,7 @@ async: !ruby/object:Api::OpAsync
     base_url: "{{op_id}}"
     wait_ms: 5000
     timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 210
+      insert_minutes: 240
       update_minutes: 190
       delete_minutes: 150
   result: !ruby/object:Api::OpAsync::Result
@@ -46,8 +45,11 @@ async: !ruby/object:Api::OpAsync
 import_format: ["projects/{{project}}/locations/{{location}}/privateClouds/{{name}}"]
 autogen_async: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  post_delete: "templates/terraform/post_delete/private_cloud.go.erb"
+  constants: templates/terraform/constants/vmwareengine_private_cloud.go.erb
   decoder: "templates/terraform/decoders/private_cloud.go.erb"
+  pre_create: templates/terraform/pre_create/vmwareengine_private_cloud.go.erb
+  pre_delete: templates/terraform/pre_delete/vmwareengine_private_cloud.go.erb
+  post_delete: "templates/terraform/post_delete/private_cloud.go.erb"
   post_update: "templates/terraform/post_update/private_cloud.go.erb"
   update_encoder: "templates/terraform/update_encoder/private_cloud.go.erb"
 examples:
@@ -55,7 +57,6 @@ examples:
     name: "vmware_engine_private_cloud_basic"
     config_path: "templates/terraform/examples/vmware_engine_private_cloud_basic.tf.erb"
     primary_resource_id: "vmw-engine-pc"
-    min_version: beta
     skip_test: true   # update tests will take care of create and update. PC creation is expensive and node reservation is required.
     vars:
       private_cloud_id: "sample-pc"
@@ -66,7 +67,6 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "vmware_engine_private_cloud_full"
     config_path: "templates/terraform/examples/vmware_engine_private_cloud_full.tf.erb"
-    min_version: beta
     primary_resource_id: "vmw-engine-pc"
     skip_test: true   # update tests will take care of create and update. PC creation is expensive and node reservation is required.
     vars:
@@ -75,7 +75,15 @@ examples:
       management_cluster_id: "sample-mgmt-cluster"
     test_env_vars:
       region: :REGION
-
+virtual_fields:
+  - !ruby/object:Api::Type::Integer
+    name: "deletion_delay_hours"
+    description: |
+      The number of hours to delay this request. You can set this value to an hour between 0 to 8, where setting it to 0 starts the deletion request immediately. If no value is set, a default value is set at the API Level.
+  - !ruby/object:Api::Type::Boolean
+    name: "send_deletion_delay_hours_if_zero"
+    description: |
+      While set true, deletion_delay_hours value will be sent in the request even for zero value of the field. This field is only useful for setting 0 value to the deletion_delay_hours field. It can be used both alone and together with deletion_delay_hours.
 parameters:
   - !ruby/object:Api::Type::String
     name: "location"
@@ -91,19 +99,16 @@ parameters:
     url_param_only: true
     description: |
       The ID of the PrivateCloud.
-
 properties:
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
       User-provided description for this private cloud.
-
   - !ruby/object:Api::Type::String
     name: 'uid'
     output: true
     description: |
       System-generated unique identifier for the resource.
-
   - !ruby/object:Api::Type::Enum
     name: 'state'
     description: |
@@ -116,7 +121,6 @@ properties:
       - :FAILED
       - :DELETED
       - :PURGING
-
   - !ruby/object:Api::Type::NestedObject
     name: 'networkConfig'
     required: true
@@ -129,21 +133,18 @@ properties:
         description: |
           Management CIDR used by VMware management appliances.
         required: true
-
       - !ruby/object:Api::Type::String
         name: 'vmwareEngineNetwork'
         description: |
           The relative resource name of the VMware Engine network attached to the private cloud.
           Specify the name in the following form: projects/{project}/locations/{location}/vmwareEngineNetworks/{vmwareEngineNetworkId}
           where {project} can either be a project number or a project ID.
-
       - !ruby/object:Api::Type::String
         name: 'vmwareEngineNetworkCanonical'
         output: true
         description: |
           The canonical name of the VMware Engine network in
           the form: projects/{project_number}/locations/{location}/vmwareEngineNetworks/{vmwareEngineNetworkId}
-
       - !ruby/object:Api::Type::Integer
         name: 'managementIpAddressLayoutVersion'
         output: true
@@ -154,7 +155,11 @@ properties:
           as it does not support all features.
           * managementIpAddressLayoutVersion=2: Indicates the latest IP address layout
           used by all newly created private clouds. This version supports all current features.
-
+      - !ruby/object:Api::Type::String
+        name: 'dnsServerIp'
+        output: true
+        description: |
+          DNS Server IP of the Private Cloud.
   - !ruby/object:Api::Type::NestedObject
     name: 'managementCluster'
     required: true
@@ -195,7 +200,19 @@ properties:
                 This number must always be one of `nodeType.availableCustomCoreCounts`.
                 If zero is provided max value from `nodeType.availableCustomCoreCounts` will be used.
                 This cannot be changed once the PrivateCloud is created.
-
+      - !ruby/object:Api::Type::NestedObject
+        name: 'stretchedClusterConfig'
+        description: |
+          The stretched cluster configuration for the private cloud.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'preferredLocation'
+            description: |
+              Zone that will remain operational when connection between the two zones is lost.
+          - !ruby/object:Api::Type::String
+            name: 'secondaryLocation'
+            description: |
+              Additional zone for a higher level of availability and load balancing.
   - !ruby/object:Api::Type::NestedObject
     name: 'hcx'
     output: true
@@ -206,12 +223,10 @@ properties:
         name: 'internalIp'
         description: |
           Internal IP address of the appliance.
-
       - !ruby/object:Api::Type::String
         name: 'version'
         description: |
           Version of the appliance.
-
       - !ruby/object:Api::Type::Enum
         name: 'state'
         description: |
@@ -219,12 +234,10 @@ properties:
         values:
           - :ACTIVE
           - :CREATING
-
       - !ruby/object:Api::Type::String
         name: 'fqdn'
         description: |
           Fully qualified domain name of the appliance.
-
   - !ruby/object:Api::Type::NestedObject
     name: 'nsx'
     output: true
@@ -235,12 +248,10 @@ properties:
         name: 'internalIp'
         description: |
           Internal IP address of the appliance.
-
       - !ruby/object:Api::Type::String
         name: 'version'
         description: |
           Version of the appliance.
-
       - !ruby/object:Api::Type::Enum
         name: 'state'
         description: |
@@ -248,12 +259,10 @@ properties:
         values:
           - :ACTIVE
           - :CREATING
-
       - !ruby/object:Api::Type::String
         name: 'fqdn'
         description: |
           Fully qualified domain name of the appliance.
-
   - !ruby/object:Api::Type::NestedObject
     name: 'vcenter'
     output: true
@@ -264,12 +273,10 @@ properties:
         name: 'internalIp'
         description: |
           Internal IP address of the appliance.
-
       - !ruby/object:Api::Type::String
         name: 'version'
         description: |
           Version of the appliance.
-
       - !ruby/object:Api::Type::Enum
         name: 'state'
         description: |
@@ -277,8 +284,18 @@ properties:
         values:
           - :ACTIVE
           - :CREATING
-
       - !ruby/object:Api::Type::String
         name: 'fqdn'
         description: |-
           Fully qualified domain name of the appliance.
+  - !ruby/object:Api::Type::Enum
+    name: 'type'
+    description: |
+      Initial type of the private cloud.
+    immutable: true
+    ignore_read: true
+    diff_suppress_func: vmwareenginePrivateCloudStandardTypeDiffSuppressFunc
+    values:
+      - :STANDARD
+      - :TIME_LIMITED
+      - :STRETCHED

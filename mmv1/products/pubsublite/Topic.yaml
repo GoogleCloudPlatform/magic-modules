@@ -112,6 +112,5 @@ properties:
         imports: 'name'
         description: |
           The Reservation to use for this topic's throughput capacity.
-        pattern: 'projects/{{project}}/locations/{{region}}/reservations/{{name}}'
         diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
         custom_expand: templates/terraform/custom_expand/pubsublite_topic_reservation_config_throughput_reservation.go.erb

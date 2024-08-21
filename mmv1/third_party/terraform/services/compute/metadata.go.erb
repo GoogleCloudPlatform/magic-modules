@@ -2,7 +2,15 @@
 package compute
 
 import (
+	<% unless version == 'ga' -%>
+	"encoding/json"
+	<% end -%>
 	"errors"
+	<% unless version == 'ga' -%>
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"google.golang.org/api/googleapi"
+	"reflect"
+	<% end -%>
 	"sort"
 
 <% if version == "ga" -%>
@@ -161,3 +169,64 @@ func resourceInstanceMetadata(d tpgresource.TerraformResourceData) (*compute.Met
 
 	return m, nil
 }
+<% unless version == 'ga' -%>
+
+func resourceInstancePartnerMetadata(d tpgresource.TerraformResourceData) (map[string]compute.StructuredEntries, error) {
+	partnerMetadata := make(map[string]compute.StructuredEntries)
+	partnerMetadataMap := d.Get("partner_metadata").(map[string]interface{})
+	if len(partnerMetadataMap) > 0 {
+		for key, value := range partnerMetadataMap {
+			var jsonMap map[string]interface{}
+			err := json.Unmarshal([]byte(value.(string)), &jsonMap)
+			if err != nil {
+				return nil, err
+			}
+			structuredEntries := jsonMap["entries"].(map[string]interface{})
+			structuredEntriesJson, err := json.Marshal(&structuredEntries)
+			if err != nil {
+				return nil, err
+			}
+			partnerMetadata[key] = compute.StructuredEntries{
+				Entries: googleapi.RawMessage(structuredEntriesJson),
+			}
+		}
+	}
+	return partnerMetadata, nil
+}
+
+func resourceInstancePatchPartnerMetadata(d tpgresource.TerraformResourceData, currentPartnerMetadata map[string]compute.StructuredEntries) map[string]compute.StructuredEntries {
+	partnerMetadata, _ := resourceInstancePartnerMetadata(d)
+	for key := range currentPartnerMetadata {
+		if _, ok := partnerMetadata[key]; !ok {
+			partnerMetadata[key] = compute.StructuredEntries{}
+		}
+	}
+	return partnerMetadata
+
+}
+func flattenPartnerMetadata(partnerMetadata map[string]compute.StructuredEntries) (map[string]string, error) {
+	partnerMetadataMap := make(map[string]string)
+	for key, value := range partnerMetadata {
+
+		jsonString, err := json.Marshal(&value)
+		if err != nil {
+			return nil, err
+		}
+		if value.Entries != nil {
+			partnerMetadataMap[key] = string(jsonString)
+		}
+
+	}
+	return partnerMetadataMap, nil
+}
+func ComparePartnerMetadataDiff(_, old, new string, d *schema.ResourceData) bool {
+	var oldJson map[string]interface{}
+	var newJson map[string]interface{}
+	json.Unmarshal([]byte(old), &oldJson)
+	json.Unmarshal([]byte(new), &newJson)
+	if reflect.DeepEqual(oldJson, newJson) {
+		return true
+	}
+	return false
+}
+<% end -%>

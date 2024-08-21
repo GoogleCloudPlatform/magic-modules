@@ -51,6 +51,9 @@ import_format:
   ['projects/{{project}}/locations/{{location}}/functions/{{name}}']
 taint_resource_on_failed_create: true
 autogen_async: true
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: 'templates/terraform/constants/cloudfunctions2_function.go.erb'
+  encoder: 'templates/terraform/encoders/cloudfunctions2_runtime_update_policy.go.erb'
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudfunctions2_basic'
@@ -65,9 +68,9 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: '"./test-fixtures/function-source.zip"'
       location:
         '"us-central1"'
+      zip_path: '"./test-fixtures/function-source.zip"'
         # ignore these fields during import step
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
@@ -103,10 +106,10 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: '"./test-fixtures/function-source.zip"'
       primary_resource_id: '"terraform-test"'
       location:
         '"us-central1"'
+      zip_path: '"./test-fixtures/function-source.zip"'
         # ignore these fields during import step
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
@@ -157,6 +160,28 @@ examples:
       - 'build_config.0.source.0.storage_source.0.object'
       - 'build_config.0.source.0.storage_source.0.bucket'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudfunctions2_basic_builder'
+    primary_resource_id: 'function'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-function-v2%s\",
+      context[\"random_suffix\"\
+      ])"
+    vars:
+      function: 'function-v2'
+      bucket_name: 'gcf-source'
+      zip_path: 'function-source.zip'
+      service_account: 'gcf-sa'
+    test_env_vars:
+      project: :PROJECT_NAME
+    test_vars_overrides:
+      location:
+        '"us-central1"'
+      zip_path: '"./test-fixtures/function-source.zip"'
+        # ignore these fields during import step
+    ignore_read_extra:
+      - 'build_config.0.source.0.storage_source.0.object'
+      - 'build_config.0.source.0.storage_source.0.bucket'
+    external_providers: ["random", "time"]
+  - !ruby/object:Provider::Terraform::Examples
     name: 'cloudfunctions2_secret_env'
     primary_resource_id: 'function'
     vars:
@@ -167,8 +192,8 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: '"./test-fixtures/function-source.zip"'
       location: '"us-central1"'
+      zip_path: '"./test-fixtures/function-source.zip"'
       policyChanged:
         "acctest.BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
         \"roles/cloudkms.cryptoKeyEncrypterDecrypter\"\
@@ -188,8 +213,8 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: '"./test-fixtures/function-source.zip"'
       location: '"us-central1"'
+      zip_path: '"./test-fixtures/function-source.zip"'
       policyChanged:
         "acctest.BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
         \"roles/cloudkms.cryptoKeyEncrypterDecrypter\"\
@@ -209,15 +234,17 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: '"./test-fixtures/function-source.zip"'
       location:
         '"us-central1"'
+      zip_path: '"./test-fixtures/function-source.zip"'
         # ignore these fields during import step
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
       - 'build_config.0.source.0.storage_source.0.bucket'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudfunctions2_cmek'
+    skip_docs: true # the example file is written in a repetitive way to help acc tests, so exclude
+    skip_vcr: true
     primary_resource_id: 'function'
     min_version: beta
     vars:
@@ -232,10 +259,66 @@ examples:
       project: :PROJECT_NAME
     test_vars_overrides:
       kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-      zip_path: '"./test-fixtures/function-source.zip"'
       location:
         '"us-central1"'
+      zip_path: '"./test-fixtures/function-source.zip"'
     # ignore these fields during import step
+    ignore_read_extra:
+      - 'build_config.0.source.0.storage_source.0.object'
+      - 'build_config.0.source.0.storage_source.0.bucket'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudfunctions2_cmek_docs'
+    skip_test: true # this example file will cause IAM conflicts between tests if used to make a test
+    primary_resource_id: 'function'
+    min_version: beta
+    vars:
+      function: 'function-cmek'
+      bucket_name: 'gcf-source'
+      zip_path: 'function-source.zip'
+      kms_service_name: 'cloudkms.googleapis.com'
+      cmek-repo: 'cmek-repo'
+      unencoded-ar-repo: 'ar-repo'
+      kms_key_name: 'cmek-key'
+      project: 'my-project-name'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudfunctions2_abiu'
+    primary_resource_id: 'function'
+    min_version: beta
+    vars:
+      bucket_name: 'gcf-source'
+      service_account: 'gcf-sa'
+      topic: 'functions2-topic'
+      function: 'gcf-function'
+      zip_path: 'function-source.zip'
+    test_env_vars:
+      project: :PROJECT_NAME
+    test_vars_overrides:
+      zip_path: '"./test-fixtures/function-source-pubsub.zip"'
+      primary_resource_id: '"terraform-test"'
+      location:
+        '"europe-west6"'
+        # ignore these fields during import step
+    ignore_read_extra:
+      - 'build_config.0.source.0.storage_source.0.object'
+      - 'build_config.0.source.0.storage_source.0.bucket'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudfunctions2_abiu_on_deploy'
+    primary_resource_id: 'function'
+    min_version: beta
+    vars:
+      bucket_name: 'gcf-source'
+      service_account: 'gcf-sa'
+      topic: 'functions2-topic'
+      function: 'gcf-function'
+      zip_path: 'function-source.zip'
+    test_env_vars:
+      project: :PROJECT_NAME
+    test_vars_overrides:
+      zip_path: '"./test-fixtures/function-source-pubsub.zip"'
+      primary_resource_id: '"terraform-test"'
+      location:
+        '"europe-west6"'
+        # ignore these fields during import step
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
       - 'build_config.0.source.0.storage_source.0.bucket'
@@ -262,7 +345,6 @@ properties:
     description: |
       A user-defined name of the function. Function names must
       be unique globally and match pattern `projects/*/locations/*/functions/*`.
-    pattern: projects/{{project}}/locations/{{location}}/functions/{{name}}
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
     custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
   - !ruby/object:Api::Type::String
@@ -341,6 +423,7 @@ properties:
               - !ruby/object:Api::Type::Integer
                 name: 'generation'
                 default_from_api: true
+                custom_flatten: 'templates/terraform/custom_flatten/cloudfunctions2_function_source_generation.go.erb'
                 description: |
                   Google Cloud Storage generation for the object. If the generation
                   is omitted, the latest generation will be used.
@@ -406,6 +489,38 @@ properties:
         name: 'dockerRepository'
         description: |
           User managed repository created in Artifact Registry optionally with a customer managed encryption key.
+        default_from_api: true
+      - !ruby/object:Api::Type::String
+        name: 'serviceAccount'
+        description: 'The fully-qualified name of the service account to be used for building the container.'
+        default_from_api: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'automaticUpdatePolicy'
+        description: |
+          Security patches are applied automatically to the runtime without requiring
+          the function to be redeployed.
+        exactly_one_of:
+          - automatic_update_policy
+          - on_deploy_update_policy
+        send_empty_value: true
+        allow_empty_object: true
+        default_from_api: true
+        properties: []
+      - !ruby/object:Api::Type::NestedObject
+        name: 'onDeployUpdatePolicy'
+        description: |
+          Security patches are only applied when a function is redeployed.
+        exactly_one_of:
+          - automatic_update_policy
+          - on_deploy_update_policy
+        send_empty_value: true
+        allow_empty_object: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'runtimeVersion'
+            output: true
+            description: |
+              The runtime version which was used during latest function deployment.
   - !ruby/object:Api::Type::NestedObject
     name: 'serviceConfig'
     description: 'Describes the Service being deployed.'
@@ -446,6 +561,8 @@ properties:
         description:
           'Environment variables that shall be available during function
           execution.'
+        default_from_api: true
+        diff_suppress_func: 'environmentVariablesDiffSuppress'
       - !ruby/object:Api::Type::Integer
         name: 'maxInstanceCount'
         description: |
@@ -577,6 +694,7 @@ properties:
           events originating in this region. It can be the same
           region as the function, a different region or multi-region, or the global
           region. If not provided, defaults to the same region as the function.
+        default_from_api: true
       - !ruby/object:Api::Type::String
         name: 'eventType'
         description: 'Required. The type of event to observe.'
@@ -615,7 +733,10 @@ properties:
         default_from_api: true
       - !ruby/object:Api::Type::String
         name: 'serviceAccountEmail'
-        description: 'The email of the service account for this function.'
+        description: |
+          Optional. The email of the trigger's service account. The service account
+          must have permission to invoke Cloud Run services. If empty, defaults to the
+          Compute Engine default service account: {project_number}-compute@developer.gserviceaccount.com.
         default_from_api: true
       - !ruby/object:Api::Type::Enum
         name: 'retryPolicy'

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -200,6 +201,61 @@ func ParseZonalFieldValue(resourceType, fieldValue, projectSchemaField, zoneSche
 	}
 
 	project, err := GetProjectFromSchema(projectSchemaField, d, config)
+	if err != nil {
+		return nil, err
+	}
+
+	r = regexp.MustCompile(fmt.Sprintf(ZonalPartialLinkBasePattern, resourceType))
+	if parts := r.FindStringSubmatch(fieldValue); parts != nil {
+		return &ZonalFieldValue{
+			Project:      project,
+			Zone:         parts[1],
+			Name:         parts[2],
+			ResourceType: resourceType,
+		}, nil
+	}
+
+	if len(zoneSchemaField) == 0 {
+		return nil, fmt.Errorf("Invalid field format. Got '%s', expected format '%s'", fieldValue, fmt.Sprintf(GlobalLinkTemplate, "{project}", resourceType, "{name}"))
+	}
+
+	zone, ok := d.GetOk(zoneSchemaField)
+	if !ok {
+		zone = config.Zone
+		if zone == "" {
+			return nil, fmt.Errorf("A zone must be specified")
+		}
+	}
+
+	return &ZonalFieldValue{
+		Project:      project,
+		Zone:         zone.(string),
+		Name:         GetResourceNameFromSelfLink(fieldValue),
+		ResourceType: resourceType,
+	}, nil
+}
+
+// Parses a zonal field supporting 5 different formats:
+// - https://www.googleapis.com/compute/ANY_VERSION/projects/{my_project}/zones/{zone}/{resource_type}/{resource_name}
+// - projects/{my_project}/zones/{zone}/{resource_type}/{resource_name}
+// - zones/{zone}/{resource_type}/{resource_name}
+// - resource_name
+// - "" (empty string). RelativeLink() returns empty if isEmptyValid is true.
+//
+// If the project is not specified, it first tries to get the project from the `projectSchemaField` and then fallback on the default project.
+// If the zone is not specified, it takes the value of `zoneSchemaField`.
+func ParseZonalFieldValueDiff(resourceType, fieldValue, projectSchemaField, zoneSchemaField string, d *schema.ResourceDiff, config *transport_tpg.Config, isEmptyValid bool) (*ZonalFieldValue, error) {
+	r := regexp.MustCompile(fmt.Sprintf(ZonalLinkBasePattern, resourceType))
+	if parts := r.FindStringSubmatch(fieldValue); parts != nil {
+		return &ZonalFieldValue{
+			Project:      parts[1],
+			Zone:         parts[2],
+			Name:         parts[3],
+			ResourceType: resourceType,
+		}, nil
+	}
+
+	project, err := GetProjectFromDiff(d, config)
 	if err != nil {
 		return nil, err
 	}
@@ -460,4 +516,33 @@ func ParseProjectFieldValue(resourceType, fieldValue, projectSchemaField string,
 
 		ResourceType: resourceType,
 	}, nil
+}
+
+// ExtractFieldByPattern returns the value of a field extracted from a parent field according to the given regular expression pattern.
+// An error is returned if the field already has a value different than the value extracted.
+func ExtractFieldByPattern(fieldName, fieldValue, parentFieldValue, pattern string) (string, error) {
+	var extractedValue string
+	// Fetch value from container if the container exists.
+	if parentFieldValue != "" {
+		r := regexp.MustCompile(pattern)
+		m := r.FindStringSubmatch(parentFieldValue)
+		if m != nil && len(m) >= 2 {
+			extractedValue = m[1]
+		} else if fieldValue == "" {
+			// The pattern didn't match and the value doesn't exist.
+			return "", fmt.Errorf("parent of %q has no matching values from pattern %q in value %q", fieldName, pattern, parentFieldValue)
+		}
+	}
+
+	// If both values exist and are different, error
+	if fieldValue != "" && extractedValue != "" && fieldValue != extractedValue {
+		return "", fmt.Errorf("%q has conflicting values of %q (from parent) and %q (from self)", fieldName, extractedValue, fieldValue)
+	}
+
+	// If value does not exist, use the value in container.
+	if fieldValue == "" {
+		return extractedValue, nil
+	}
+
+	return fieldValue, nil
 }

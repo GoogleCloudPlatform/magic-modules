@@ -27,9 +27,8 @@ provider "google" {
   {{if .Provider.credentials }}credentials = "{{.Provider.credentials}}"{{end}}
 }
 
-resource "google_compute_instance" "my-test-instance" {
-  project      = "{{.Provider.project}}"
-  name         = "my-instance"
+resource "google_compute_instance" "my-test-instance"{
+  name         = "my-compute-instance"
   machine_type = "n1-standard-1"
   zone         = "us-central1-a"
 
@@ -58,5 +57,9 @@ resource "google_compute_instance" "my-test-instance" {
 
   service_account {
     scopes = ["cloud-platform"]
+  }
+
+  advanced_machine_features {
+    enable_nested_virtualization = true
   }
 }

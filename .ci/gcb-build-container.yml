@@ -1,0 +1,15 @@
+---
+# substitutions:
+#   _IMAGE_NAME: 'gcr.io/graphite-docker-images/bash-plus:latest'
+#   _DIRECTORY: '.ci/containers/bash-plus'
+
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', '$_IMAGE_NAME', '.']
+    dir: '$_DIRECTORY'
+
+images:
+  - '$_IMAGE_NAME'
+
+logsBucket: 'gs://cloudbuild-container-builder-logs'
+

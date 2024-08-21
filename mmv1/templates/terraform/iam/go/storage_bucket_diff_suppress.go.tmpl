@@ -1,0 +1,3 @@
+func {{$.ResourceName}}DiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+	return tpgresource.CompareResourceNames("", old, new, nil)
+}

@@ -3,7 +3,7 @@ package dataproc_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"google.golang.org/api/dataproc/v1"
 
@@ -18,6 +18,10 @@ func TestAccDataprocClusterLabelsMigration_withoutLabels_withoutChanges(t *testi
 
 	rnd := acctest.RandString(t, 10)
 	var cluster dataproc.Cluster
+	networkName := acctest.BootstrapSharedTestNetwork(t, "dataproc-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "dataproc-cluster", networkName)
+	acctest.BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
+
 	oldVersion := map[string]resource.ExternalProvider{
 		"google": {
 			VersionConstraint: "4.65.0", // a version that doesn't separate user defined labels and system labels
@@ -30,11 +34,11 @@ func TestAccDataprocClusterLabelsMigration_withoutLabels_withoutChanges(t *testi
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
-				Config:            testAccDataprocCluster_withoutLabels(rnd),
+				Config:            testAccDataprocCluster_withoutLabels(rnd, subnetworkName),
 				ExternalProviders: oldVersion,
 			},
 			{
-				Config:                   testAccDataprocCluster_withoutLabels(rnd),
+				Config:                   testAccDataprocCluster_withoutLabels(rnd, subnetworkName),
 				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_labels", &cluster),
@@ -45,7 +49,7 @@ func TestAccDataprocClusterLabelsMigration_withoutLabels_withoutChanges(t *testi
 				),
 			},
 			{
-				Config:                   testAccDataprocCluster_withLabels(rnd),
+				Config:                   testAccDataprocCluster_withLabels(rnd, subnetworkName),
 				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_labels", &cluster),
@@ -67,6 +71,10 @@ func TestAccDataprocClusterLabelsMigration_withLabels_withoutChanges(t *testing.
 
 	rnd := acctest.RandString(t, 10)
 	var cluster dataproc.Cluster
+	networkName := acctest.BootstrapSharedTestNetwork(t, "dataproc-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "dataproc-cluster", networkName)
+	acctest.BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
+
 	oldVersion := map[string]resource.ExternalProvider{
 		"google": {
 			VersionConstraint: "4.65.0", // a version that doesn't separate user defined labels and system labels
@@ -79,11 +87,11 @@ func TestAccDataprocClusterLabelsMigration_withLabels_withoutChanges(t *testing.
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
-				Config:            testAccDataprocCluster_withLabels(rnd),
+				Config:            testAccDataprocCluster_withLabels(rnd, subnetworkName),
 				ExternalProviders: oldVersion,
 			},
 			{
-				Config:                   testAccDataprocCluster_withLabels(rnd),
+				Config:                   testAccDataprocCluster_withLabels(rnd, subnetworkName),
 				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_labels", &cluster),
@@ -96,7 +104,7 @@ func TestAccDataprocClusterLabelsMigration_withLabels_withoutChanges(t *testing.
 				),
 			},
 			{
-				Config:                   testAccDataprocCluster_withLabelsUpdate(rnd),
+				Config:                   testAccDataprocCluster_withLabelsUpdate(rnd, subnetworkName),
 				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_labels", &cluster),
@@ -119,6 +127,10 @@ func TestAccDataprocClusterLabelsMigration_withUpdate(t *testing.T) {
 
 	rnd := acctest.RandString(t, 10)
 	var cluster dataproc.Cluster
+	networkName := acctest.BootstrapSharedTestNetwork(t, "dataproc-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "dataproc-cluster", networkName)
+	acctest.BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
+
 	oldVersion := map[string]resource.ExternalProvider{
 		"google": {
 			VersionConstraint: "4.65.0", // a version that doesn't separate user defined labels and system labels
@@ -131,11 +143,11 @@ func TestAccDataprocClusterLabelsMigration_withUpdate(t *testing.T) {
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
-				Config:            testAccDataprocCluster_withoutLabels(rnd),
+				Config:            testAccDataprocCluster_withoutLabels(rnd, subnetworkName),
 				ExternalProviders: oldVersion,
 			},
 			{
-				Config:                   testAccDataprocCluster_withLabels(rnd),
+				Config:                   testAccDataprocCluster_withLabels(rnd, subnetworkName),
 				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_labels", &cluster),
@@ -148,7 +160,7 @@ func TestAccDataprocClusterLabelsMigration_withUpdate(t *testing.T) {
 				),
 			},
 			{
-				Config:                   testAccDataprocCluster_withoutLabels(rnd),
+				Config:                   testAccDataprocCluster_withoutLabels(rnd, subnetworkName),
 				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_labels", &cluster),

@@ -25,13 +25,12 @@ description: |
   balancing. Global forwarding rules can only be used for HTTP load
   balancing.
 
-  For more information, see
-  https://cloud.google.com/compute/docs/load-balancing/http/
+  For more information, see https://cloud.google.com/compute/docs/load-balancing/http/
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -238,7 +237,6 @@ properties:
       * When the `target` is a Private Service Connect Google APIs
       bundle, you must specify an `IPAddress`.
 
-
       Otherwise, you can optionally specify an IP address that references an
       existing static (reserved) IP address resource. When omitted, Google Cloud
       assigns an ephemeral IP address.
@@ -256,7 +254,6 @@ properties:
         * `global/addresses/address-name`
         * `address-name`
 
-
       The forwarding rule's `target`,
       and in most cases, also the `loadBalancingScheme`, determine the
       type of IP address that you can use. For detailed information, see
@@ -266,7 +263,7 @@ properties:
       When reading an `IPAddress`, the API always returns the IP
       address number.
     default_from_api: true
-    diff_suppress_func: 'tpgresource.InternalIpDiffSuppress'
+    diff_suppress_func: InternalIpDiffSuppress
   - !ruby/object:Api::Type::Enum
     name: 'IPProtocol'
     description: |
@@ -423,25 +420,27 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'portRange'
     description: |
-      This field can only be used:
-
-      * If `IPProtocol` is one of TCP, UDP, or SCTP.
-      * By backend service-based network load balancers, target pool-based
-      network load balancers, internal proxy load balancers, external proxy load
-      balancers, Traffic Director, external protocol forwarding, and Classic VPN.
-      Some products have restrictions on what ports can be used. See
+      The `portRange` field has the following limitations:
+      * It requires that the forwarding rule `IPProtocol` be TCP, UDP, or SCTP,
+      and
+      * It's applicable only to the following products: external passthrough
+      Network Load Balancers, internal and external proxy Network Load
+      Balancers, internal and external Application Load Balancers, external
+      protocol forwarding, and Classic VPN.
+      * Some products have restrictions on what ports can be used. See
       [port specifications](https://cloud.google.com/load-balancing/docs/forwarding-rule-concepts#port_specifications)
       for details.
 
+      For external forwarding rules, two or more forwarding rules cannot use the
+      same `[IPAddress, IPProtocol]` pair, and cannot have overlapping
+      `portRange`s.
 
-      * TargetHttpProxy: 80, 8080
-      * TargetHttpsProxy: 443
-      * TargetTcpProxy: 25, 43, 110, 143, 195, 443, 465, 587, 700, 993, 995,
-                        1883, 5222
-      * TargetSslProxy: 25, 43, 110, 143, 195, 443, 465, 587, 700, 993, 995,
-                        1883, 5222
-      * TargetVpnGateway: 500, 4500
-    diff_suppress_func: 'tpgresource.PortRangeDiffSuppress'
+      For internal forwarding rules within the same VPC network, two or more
+      forwarding rules cannot use the same `[IPAddress, IPProtocol]` pair, and
+      cannot have overlapping `portRange`s.
+
+      @pattern: \d+(?:-\d+)?
+    diff_suppress_func: PortRangeDiffSuppress
     # This is a multi-resource resource reference (TargetHttp(s)Proxy,
     # TargetSslProxy, TargetTcpProxy, TargetVpnGateway, TargetPool,
     # TargetInstance)
@@ -477,11 +476,36 @@ properties:
         *  `vpc-sc` - [ APIs that support VPC Service Controls](https://cloud.google.com/vpc-service-controls/docs/supported-products).
         *  `all-apis` - [All supported Google APIs](https://cloud.google.com/vpc/docs/private-service-connect#supported-apis).
 
-
       For Private Service Connect forwarding rules that forward traffic to managed services, the target must be a service attachment.
     update_verb: :POST
     update_url: 'projects/{{project}}/global/forwardingRules/{{name}}/setTarget'
     diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+  - !ruby/object:Api::Type::Array
+    name: 'serviceDirectoryRegistrations'
+    description: |
+      Service Directory resources to register this forwarding rule with.
+
+      Currently, only supports a single Service Directory resource.
+    min_size: 0
+    max_size: 1
+    immutable: true
+    default_from_api: true
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'namespace'
+          description: |
+            Service Directory namespace to register the forwarding rule under.
+          immutable: true
+          default_from_api: true
+        - !ruby/object:Api::Type::String
+          name: 'serviceDirectoryRegion'
+          description: |
+            [Optional] Service Directory region to register this global forwarding rule under.
+            Default to "us-central1". Only used for PSC for Google APIs. All PSC for
+            Google APIs Forwarding Rules on the same network should use the same Service
+            Directory region.
+          immutable: true
   - !ruby/object:Api::Type::Array
     name: sourceIpRanges
     description: If not empty, this Forwarding Rule will only forward the traffic when the source IP address matches one of the IP addresses or CIDR ranges set here. Note that a Forwarding Rule can only have up to 64 source IP ranges, and this field can only be used with a regional Forwarding Rule whose scheme is EXTERNAL. Each sourceIpRange entry should be either an IP address (for example, 1.2.3.4) or a CIDR range (for example, 1.2.3.0/24).

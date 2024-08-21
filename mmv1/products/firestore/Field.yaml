@@ -20,6 +20,8 @@ immutable: false
 update_verb: :PATCH
 update_mask: true
 create_verb: :PATCH
+error_retry_predicates:
+  ["transport_tpg.FirestoreField409RetryUnderlyingDataChanged"]
 description: |
   Represents a single field in the database.
   Fields are grouped by their "Collection Group", which represent all collections
@@ -46,6 +48,7 @@ async: !ruby/object:Api::OpAsync
     path: 'error'
     message: 'message'
 autogen_async: true
+# Sweeper skipped as this resource has customized deletion.
 skip_sweeper: true
 import_format: ['{{name}}']
 docs: !ruby/object:Provider::Terraform::Docs
@@ -58,20 +61,35 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'firestore_field_basic'
     primary_resource_id: 'basic'
+    vars:
+      database_id: 'database-id'
+      delete_protection_state: "DELETE_PROTECTION_ENABLED"
     test_env_vars:
-      project_id: :FIRESTORE_PROJECT_NAME
+      project_id: :PROJECT_NAME
+    test_vars_overrides:
+      delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
   - !ruby/object:Provider::Terraform::Examples
     name: 'firestore_field_timestamp'
     primary_resource_id: 'timestamp'
+    vars:
+      database_id: 'database-id'
+      delete_protection_state: "DELETE_PROTECTION_ENABLED"
     test_env_vars:
-      project_id: :FIRESTORE_PROJECT_NAME
+      project_id: :PROJECT_NAME
+    test_vars_overrides:
+      delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
   - !ruby/object:Provider::Terraform::Examples
     name: 'firestore_field_match_override'
     primary_resource_id: 'match_override'
+    vars:
+      database_id: 'database-id'
+      delete_protection_state: "DELETE_PROTECTION_ENABLED"
     test_env_vars:
-      project_id: :FIRESTORE_PROJECT_NAME
+      project_id: :PROJECT_NAME
+    test_vars_overrides:
+      delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/index_self_link_as_name_set_project.go.erb
+  custom_import: templates/terraform/custom_import/firestore_field.go.erb
   encoder: templates/terraform/encoders/firestore_field.go.erb
   custom_delete: templates/terraform/custom_delete/firestore_field_delete.go.erb
   test_check_destroy: templates/terraform/custom_check_destroy/firestore_field.go.erb
@@ -81,18 +99,21 @@ properties:
     default_value: '(default)'
     description: |
       The Firestore database id. Defaults to `"(default)"`.
+    immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::String
     name: 'collection'
     description: |
       The id of the collection group to configure.
     required: true
+    immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::String
     name: 'field'
     description: |
       The id of the field to configure.
     required: true
+    immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::String
     name: name

@@ -28,7 +28,7 @@ provider "google" {
 }
 
 resource "google_bigquery_dataset" "example-dataset" {
-  dataset_id                  = "test-dataset"
+  dataset_id                  = "test_dataset"
   location                    = "EU"
   project                     = "{{.Provider.project}}"
   default_table_expiration_ms = 3600000

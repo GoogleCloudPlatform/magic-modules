@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -24,9 +24,10 @@ func TestAccMemcacheInstance_update(t *testing.T) {
 				Config: testAccMemcacheInstance_update(prefix, name, network),
 			},
 			{
-				ResourceName:      "google_memcache_instance.test",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_memcache_instance.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"reserved_ip_range_id"},
 			},
 			{
 				Config: testAccMemcacheInstance_update2(prefix, name, network),
@@ -59,6 +60,7 @@ resource "google_memcache_instance" "test" {
       "max-item-size" = "8388608"
     }
   }
+  reserved_ip_range_id = ["tf-bootstrap-addr-memcache-instance-update-1"]
 }
 
 data "google_compute_network" "memcache_network" {
@@ -86,6 +88,8 @@ resource "google_memcache_instance" "test" {
       "max-item-size" = "8388608"
     }
   }
+
+  memcache_version = "MEMCACHE_1_6_15"
 }
 
 data "google_compute_network" "memcache_network" {

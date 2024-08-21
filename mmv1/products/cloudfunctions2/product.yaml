@@ -23,7 +23,3 @@ versions:
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://cloudfunctions.googleapis.com/v2/
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Cloud Functions API
-    url: https://console.cloud.google.com/apis/library/cloudfunctions.googleapis.com/

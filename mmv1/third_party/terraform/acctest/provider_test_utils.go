@@ -2,18 +2,15 @@ package acctest
 
 import (
 	"context"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/provider"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -31,6 +28,9 @@ func init() {
 	}
 }
 
+// GoogleProviderConfig returns a configured SDKv2 provider.
+// This function is typically used in CheckDestroy functions in acceptance tests. The provider client is used to make GET requests to check a resource is destroyed.
+// Either a preexisting configured SDKv2 provider for the given test name is returned, or a new one is configured with empty (but non-nil) terraform.ResourceConfig
 func GoogleProviderConfig(t *testing.T) *transport_tpg.Config {
 	configsLock.RLock()
 	config, ok := configs[t.Name()]
@@ -71,40 +71,31 @@ func AccTestPreCheck(t *testing.T) {
 	}
 }
 
-// GetTestRegion has the same logic as the provider's GetRegion, to be used in tests.
-func GetTestRegion(is *terraform.InstanceState, config *transport_tpg.Config) (string, error) {
-	if res, ok := is.Attributes["region"]; ok {
-		return res, nil
+// AccTestPreCheck_AdcCredentialsOnly is a PreCheck function for acceptance tests that use ADCs when
+func AccTestPreCheck_AdcCredentialsOnly(t *testing.T) {
+	if v := os.Getenv("GOOGLE_CREDENTIALS_FILE"); v != "" {
+		t.Log("Ignoring GOOGLE_CREDENTIALS_FILE; acceptance test doesn't use credentials other than ADCs")
 	}
-	if config.Region != "" {
-		return config.Region, nil
-	}
-	return "", fmt.Errorf("%q: required field is not set", "region")
-}
 
-// GetTestProject has the same logic as the provider's GetProject, to be used in tests.
-func GetTestProject(is *terraform.InstanceState, config *transport_tpg.Config) (string, error) {
-	if res, ok := is.Attributes["project"]; ok {
-		return res, nil
+	// Fail on set creds
+	if v := transport_tpg.MultiEnvSearch(envvar.CredsEnvVarsExcludingAdcs()); v != "" {
+		t.Fatalf("This acceptance test only uses ADCs, so all of %s must be unset", strings.Join(envvar.CredsEnvVarsExcludingAdcs(), ", "))
 	}
-	if config.Project != "" {
-		return config.Project, nil
-	}
-	return "", fmt.Errorf("%q: required field is not set", "project")
-}
 
-// Some tests fail during VCR. One common case is race conditions when creating resources.
-// If a test config adds two fine-grained resources with the same parent it is undefined
-// which will be created first, causing VCR to fail ~50% of the time
-func SkipIfVcr(t *testing.T) {
-	if IsVcrEnabled() {
-		t.Skipf("VCR enabled, skipping test: %s", t.Name())
+	// Fail on ADC ENV not set
+	if v := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS"); v == "" {
+		t.Fatalf("GOOGLE_APPLICATION_CREDENTIALS must be set for acceptance tests that are dependent on ADCs")
 	}
-}
 
-func SleepInSecondsForTest(t int) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		time.Sleep(time.Duration(t) * time.Second)
-		return nil
+	if v := transport_tpg.MultiEnvSearch(envvar.ProjectEnvVars); v == "" {
+		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(envvar.ProjectEnvVars, ", "))
+	}
+
+	if v := transport_tpg.MultiEnvSearch(envvar.RegionEnvVars); v == "" {
+		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(envvar.RegionEnvVars, ", "))
+	}
+
+	if v := transport_tpg.MultiEnvSearch(envvar.ZoneEnvVars); v == "" {
+		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(envvar.ZoneEnvVars, ", "))
 	}
 }

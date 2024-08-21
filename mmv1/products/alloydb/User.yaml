@@ -24,6 +24,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'AlloyDB': 'https://cloud.google.com/alloydb/docs/'
   api: 'https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.clusters.users/create'
 import_format: ['projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/users/{{user_id}}']
+# Skipping the sweeper because instances will be deleted during cluster sweeps
 skip_sweeper: true
 autogen_async: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode

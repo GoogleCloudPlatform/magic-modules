@@ -1,0 +1,10 @@
+resource "google_compute_region_backend_service" "<%= ctx[:primary_resource_id] %>" {
+  name                  = "<%= ctx[:vars]['region_backend_service_name'] %>"
+  region                = "us-central1"
+  protocol              = "HTTP"
+  load_balancing_scheme = "EXTERNAL"
+  iap {
+    oauth2_client_id     = "abc"
+    oauth2_client_secret = "xyz"
+  }
+}

@@ -1,0 +1,50 @@
+name: downstreams
+permissions: read-all
+
+on:
+  push:
+    branches:
+      - main
+      - 'FEATURE-BRANCH-*'
+
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || format('commit-{0}', github.sha) }}
+  cancel-in-progress: true
+
+jobs:
+
+  terraform-provider-google:
+    uses: ./.github/workflows/build-downstream.yml
+    with:
+      repo: 'terraform-provider-google'
+  terraform-provider-google-beta:
+    uses: ./.github/workflows/build-downstream.yml
+    with:
+      repo: 'terraform-provider-google-beta'
+  terraform-google-conversion:
+    uses: ./.github/workflows/build-downstream.yml
+    with:
+      repo: 'terraform-google-conversion'
+  docs-examples:
+    uses: ./.github/workflows/build-downstream.yml
+    with:
+      repo: 'docs-examples'
+
+  unit-test-terraform-provider-google:
+    name: terraform-provider-google
+    needs: terraform-provider-google
+    uses: ./.github/workflows/unit-test-tpg.yml
+    with:
+      repo: 'terraform-provider-google'
+
+  unit-test-terraform-provider-googele-beta:
+    name: terraform-provider-google-beta
+    needs: terraform-provider-google-beta
+    uses: ./.github/workflows/unit-test-tpg.yml
+    with:
+      repo: 'terraform-provider-google-beta'
+
+  unit-test-terraform-google-conversion:
+    name: terraform-google-conversion
+    needs: [terraform-google-conversion, terraform-provider-google-beta]
+    uses: ./.github/workflows/unit-test-tgc.yml

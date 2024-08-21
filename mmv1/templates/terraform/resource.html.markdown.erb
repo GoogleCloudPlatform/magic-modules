@@ -36,11 +36,10 @@
     directly inserted from YAML.
 -%>
 <%
-  tf_product = (object.__product.legacy_name || product_ns).underscore
+  tf_product = (object.__product.legacy_name || object.__product.name ).underscore
   tf_subcategory = (object.__product.display_name)
   terraform_name = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
   properties = object.all_user_properties
-  sensitive_props = object.all_nested_properties(object.root_properties).select(&:sensitive)
   # In order of preference, use TF override,
   # general defined timeouts, or default Timeouts
   timeouts = object.timeouts
@@ -54,7 +53,7 @@ description: |-
 <%= indent(object.description.first_sentence, 2) %>
 ---
 
-# <%= terraform_name.gsub("_", "\\_") %>
+# <%= terraform_name %>
 <% if object.deprecation_message -%>
 ~> **Warning:** <%= object.deprecation_message %>
 <% end -%>
@@ -74,7 +73,7 @@ To get more information about <%= object.name -%>, see:
 <%   end # object...api.nil? -%>
 <%   if !object.references.guides.empty? -%>
 * How-to Guides
-<%     object.references.guides.each do |title, link| -%>
+<%     object.references.guides.sort.each do |title, link| -%>
     * [<%= title -%>](<%= link -%>)
 <%     end # object...guides.each -%>
 <%   end # object...guides.empty? -%>
@@ -87,9 +86,9 @@ To get more information about <%= object.name -%>, see:
 
 ~> **Note:** <%= object.docs.note -%>
 <%- end -%>
-<%- if !sensitive_props.empty? -%>
+<%- if !object.sensitive_props.empty? -%>
 <%-
-  sense_props = sensitive_props.map! {|prop| "`"+prop.lineage+"`"}.join(', ')
+  sense_props = object.sensitive_props.map! {|prop| "`"+prop.lineage+"`"}.join(', ')
 -%>
 
 ~> **Warning:** All arguments including the following potentially sensitive
@@ -179,7 +178,7 @@ This resource provides the following
 [Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options:
 
 - `create` - Default is <%= timeouts.insert_minutes -%> minutes.
-<% if updatable?(object, properties) -%>
+<% if updatable?(object, properties) || object.root_labels? -%>
 - `update` - Default is <%= timeouts.update_minutes -%> minutes.
 <% end -%>
 - `delete` - Default is <%= timeouts.delete_minutes -%> minutes.

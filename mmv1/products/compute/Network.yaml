@@ -28,7 +28,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -70,6 +70,9 @@ virtual_fields:
       If set to `true`, default routes (`0.0.0.0/0`) will be deleted
       immediately after network creation. Defaults to `false`.
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  decoder: templates/terraform/decoders/compute_network.go.erb
+  encoder: templates/terraform/encoders/compute_network.go.erb
+  update_encoder: templates/terraform/update_encoder/compute_network.go.erb
   post_create: templates/terraform/post_create/compute_network_delete_default_route.erb
 properties:
   - !ruby/object:Api::Type::String
@@ -100,6 +103,11 @@ properties:
     required: true
     validation: !ruby/object:Provider::Terraform::Validation
       function: 'verify.ValidateGCEName'
+  - !ruby/object:Api::Type::String
+    name: 'numericId'
+    description: |
+      The unique identifier for the resource. This identifier is defined by the server.
+    output: true
   - !ruby/object:Api::Type::Boolean
     name: 'autoCreateSubnetworks'
     description: |

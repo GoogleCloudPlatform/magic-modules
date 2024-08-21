@@ -1,0 +1,21 @@
+resource "google_api_gateway_api" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  api_id = "{{index $.Vars "api_id"}}"
+}
+
+resource "google_api_gateway_api_config" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  api = google_api_gateway_api.{{$.PrimaryResourceId}}.api_id
+  api_config_id = "{{index $.Vars "config_id"}}"
+  display_name = "MM Dev API Config"
+  labels = {
+    environment = "dev"
+  }
+
+  openapi_documents {
+    document {
+      path = "spec.yaml"
+      contents = filebase64("test-fixtures/openapi.yaml")
+    }
+  }
+}

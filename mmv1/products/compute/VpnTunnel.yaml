@@ -28,7 +28,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -54,31 +54,8 @@ examples:
       esp_forwarding_rule_name: 'fr-esp'
       udp500_forwarding_rule_name: 'fr-udp500'
       udp4500_forwarding_rule_name: 'fr-udp4500'
-      route_name: 'route1'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'vpn_tunnel_beta'
-    primary_resource_id: 'tunnel1'
-    min_version: beta
-    vars:
-      vpn_tunnel_name: 'tunnel-1'
-      target_vpn_gateway_name: 'vpn-1'
-      network_name: 'network-1'
-      address_name: 'vpn-static-ip'
-      esp_forwarding_rule_name: 'fr-esp'
-      udp500_forwarding_rule_name: 'fr-udp500'
-      udp4500_forwarding_rule_name: 'fr-udp4500'
       route_name:
         'route1'
-        # Add test_vars_overrides and oics_vars_overrides to fix the failing test,
-        # which is caused by upgradting terraform-plugin-sdk to 2.24.0.
-      provider_name: 'google-beta'
-      provider_alias: ''
-    test_vars_overrides:
-      provider_name: '"google-beta.us-central1"'
-      provider_alias: '"alias  = \"us-central1\""'
-    oics_vars_overrides:
-      provider_name: 'google-beta'
-      provider_alias: ''
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/vpn_tunnel.erb
   encoder: templates/terraform/encoders/vpn_tunnel.go.erb
@@ -235,7 +212,6 @@ properties:
     description: Labels to apply to this VpnTunnel.
     update_verb: :POST
     update_url: 'projects/{{project}}/regions/{{region}}/vpnTunnels/{{name}}/setLabels'
-    min_version: beta
   - !ruby/object:Api::Type::Fingerprint
     name: 'labelFingerprint'
     description: |
@@ -243,7 +219,6 @@ properties:
       internally during updates.
     update_url: 'projects/{{project}}/regions/{{region}}/vpnTunnels/{{name}}/setLabels'
     update_verb: :POST
-    min_version: beta
   - !ruby/object:Api::Type::String
     name: 'detailedStatus'
     output: true

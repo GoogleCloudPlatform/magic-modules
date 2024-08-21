@@ -1,0 +1,98 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'DeviceCheckConfig'
+description: |
+  An app's DeviceCheck configuration object. Note that the Team ID registered with your
+  app is used as part of the validation process. Make sure your `google_firebase_apple_app` has a team_id present.
+references:
+  guides:
+    'Official Documentation': 'https://firebase.google.com/docs/app-check'
+  api: 'https://firebase.google.com/docs/reference/appcheck/rest/v1/projects.apps.deviceCheckConfig'
+docs:
+base_url: 'projects/{{project}}/apps/{{app_id}}/deviceCheckConfig'
+self_link: 'projects/{{project}}/apps/{{app_id}}/deviceCheckConfig'
+create_url: 'projects/{{project}}/apps/{{app_id}}/deviceCheckConfig?updateMask=tokenTtl,keyId,privateKey'
+create_verb: 'PATCH'
+update_verb: 'PATCH'
+update_mask: true
+skip_delete: true
+import_format:
+  - 'projects/{{project}}/apps/{{app_id}}/deviceCheckConfig'
+  - '{{project}}/{{app_id}}'
+  - '{{app_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+examples:
+  - name: 'firebase_app_check_device_check_config_full'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      bundle_id: 'bundle.id.devicecheck'
+      key_id: 'Key ID'
+      private_key_path: 'path/to/private-key.p8'
+      team_id: '9987654321'
+      token_ttl: '7200s'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'private_key_path': '"test-fixtures/private-key-2.p8"'
+      'team_id': '"9987654321"'
+      'token_ttl': '"7200s"'
+    external_providers: ["random", "time"]
+parameters:
+  - name: 'app_id'
+    type: String
+    description: |
+      The ID of an
+      [Apple App](https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects.iosApps#IosApp.FIELDS.app_id).
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The relative resource name of the DeviceCheck configuration object
+    output: true
+  - name: 'tokenTtl'
+    type: String
+    description: |
+      Specifies the duration for which App Check tokens exchanged from DeviceCheck artifacts will be valid.
+      If unset, a default value of 1 hour is assumed. Must be between 30 minutes and 7 days, inclusive.
+
+      A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
+    default_from_api: true
+  - name: 'keyId'
+    type: String
+    description: |
+      The key identifier of a private key enabled with DeviceCheck, created in your Apple Developer account.
+    required: true
+  - name: 'privateKey'
+    type: String
+    description: |
+      The contents of the private key (.p8) file associated with the key specified by keyId.
+    required: true
+    ignore_read: true
+    sensitive: true
+  - name: 'privateKeySet'
+    type: Boolean
+    description: |
+      Whether the privateKey field was previously set. Since App Check will never return the
+      privateKey field, this field is the only way to find out whether it was previously set.
+    output: true

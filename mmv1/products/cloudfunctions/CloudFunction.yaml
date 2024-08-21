@@ -77,7 +77,6 @@ properties:
     description: |
       A user-defined name of the function. Function names must
       be unique globally and match pattern `projects/*/locations/*/functions/*`.
-    pattern: projects/{{project}}/locations/{{location}}/functions/{{name}}
   - !ruby/object:Api::Type::String
     name: 'description'
     description: 'User-provided description of a function.'
@@ -119,6 +118,10 @@ properties:
     name: 'serviceAccountEmail'
     output: true
     description: 'The email of the service account for this function.'
+  - !ruby/object:Api::Type::String
+    name: 'buildServiceAccount'
+    default_from_api: true
+    description: 'The fully-qualified name of the service account to be used for the build step of deploying this function'
   - !ruby/object:Api::Type::String
     name: 'updateTime'
     output: true

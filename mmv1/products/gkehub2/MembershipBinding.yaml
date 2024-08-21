@@ -50,10 +50,14 @@ examples:
     primary_resource_name: "fmt.Sprintf(\"tf-test-membership%s\", context[\"random_suffix\"]), fmt.Sprintf(\"tf-test-membership-binding%s\", context[\"random_suffix\"])"
     primary_resource_id: "membership_binding"
     vars:
-      cluster_name: "basiccluster"
+      cluster_name: "basic-cluster"
       deletion_protection: 'true'
+      network_name: 'default'
+      subnetwork_name: 'default'
     test_vars_overrides:
       deletion_protection: 'false'
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      subnetwork_name: 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       deletion_protection: 'false'
     test_env_vars:

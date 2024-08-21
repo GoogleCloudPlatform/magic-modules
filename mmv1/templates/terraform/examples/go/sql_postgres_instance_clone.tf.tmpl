@@ -1,0 +1,19 @@
+resource "google_sql_database_instance" "source" {
+  name             = "{{index $.Vars "postgres_instance_source_name"}}"
+  region           = "us-central1"
+  database_version = "POSTGRES_12"
+  settings {
+    tier = "db-n1-standard-2"
+  }
+  deletion_protection =  "{{index $.Vars "deletion_protection"}}"
+}
+
+resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
+  name             = "{{index $.Vars "postgres_instance_clone_name"}}"
+  region           = "us-central1"
+  database_version = "POSTGRES_12"
+  clone {
+    source_instance_name = google_sql_database_instance.source.id
+  }
+  deletion_protection =  "{{index $.Vars "deletion_protection"}}"
+}

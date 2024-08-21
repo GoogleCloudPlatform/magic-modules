@@ -1,0 +1,1 @@
+{{if ge .SinceDays 5}}@GoogleCloudPlatform/terraform-team {{end}}{{range .CoreReviewers}}@{{ . }} {{end}}This PR has been waiting for review for {{if lt .SinceDays 5}}{{.SinceDays}} weekdays{{else if eq .SinceDays 5}}1 week{{else}}{{weekdaysToWeeks .SinceDays}} weeks{{end}}. Please take a look! Use the label `disable-review-reminders` to disable these notifications.

@@ -1,7 +1,7 @@
 ---
 title: "Add a datasource"
 summary: "Datasources are like terraform resources except they don't *create* anything."
-weight: 60
+weight: 40
 aliases:
   - /docs/how-to/add-handwritten-datasource
   - /how-to/add-handwritten-datasource
@@ -24,14 +24,14 @@ a new datasource there are 5 steps to doing so.
 1. Add Schema and Read operation implementation
    - If there is `labels` field with type `KeyValueLabels` in the corresponding resource, in the datasource Read operation implementation, after the resource read method, call the function `tpgresource.SetDataSourceLabels(d)` to make `labels` and `terraform_labels` have all of the labels on the resource.
    - If there is `annotations` field with type `KeyValueAnnotations` in the corresponding resource, in the datasource Read operation implementation, after the resource read method, call the function `tpgresource.SetDataSourceAnnotations(d)` to make `annotations` have all of the annotations on the resource.
-1. Add the datasource to the `provider.go.erb` index
+1. Register the datasource to `handwrittenDatasources` in [`magic-modules/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.erb`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.erb)
 1. Implement a test which will create and resources and read the corresponding
   datasource
 1. [Add documentation](#add-documentation)
 
 For creating a datasource based off an existing resource you can [make use of the
-schema directly](https://github.com/GoogleCloudPlatform/magic-modules/blob/1d293f7bfadacaa20580874c8e8634827fb99a14/mmv1/third_party/terraform/data_sources/data_source_cloud_run_service.go).
-Otherwise [implementing the schema directly](https://github.com/GoogleCloudPlatform/magic-modules/blob/1d293f7bfadacaa20580874c8e8634827fb99a14/mmv1/third_party/terraform/data_sources/data_source_google_compute_address.go),
+schema directly](https://github.com/GoogleCloudPlatform/magic-modules/blob/8a8ffc3384a59340f47efe97f18611b6672da9bd/mmv1/third_party/terraform/services/cloudrun/data_source_cloud_run_service.go).
+Otherwise [implementing the schema directly](https://github.com/GoogleCloudPlatform/magic-modules/blob/8a8ffc3384a59340f47efe97f18611b6672da9bd/mmv1/third_party/terraform/services/compute/data_source_google_compute_address.go),
 similar to normal resource creation, is the desired path.
 
 ## Resourceless Datasources

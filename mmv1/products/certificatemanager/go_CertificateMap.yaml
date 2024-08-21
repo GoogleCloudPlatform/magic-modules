@@ -1,0 +1,121 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'CertificateMap'
+description: |
+  CertificateMap defines a collection of certificate configurations,
+  which are usable by any associated target proxies
+docs:
+base_url: 'projects/{{project}}/locations/global/certificateMaps'
+self_link: 'projects/{{project}}/locations/global/certificateMaps/{{name}}'
+create_url: 'projects/{{project}}/locations/global/certificateMaps?certificateMapId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/global/certificateMaps/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'certificate_manager_certificate_map_basic'
+    primary_resource_id: 'default'
+    vars:
+      cert_map_name: 'cert-map'
+parameters:
+  - name: 'name'
+    type: String
+    description: |
+      A user-defined name of the Certificate Map. Certificate Map names must be unique
+      globally and match the pattern `projects/*/locations/*/certificateMaps/*`.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'description'
+    type: String
+    description: |
+      A human-readable description of the resource.
+  - name: 'createTime'
+    type: String
+    description: |
+      Creation timestamp of a Certificate Map. Timestamp is in RFC3339 UTC "Zulu" format,
+      accurate to nanoseconds with up to nine fractional digits.
+      Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      Update timestamp of a Certificate Map. Timestamp is in RFC3339 UTC "Zulu" format,
+      accurate to nanoseconds with up to nine fractional digits.
+      Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      Set of labels associated with a Certificate Map resource.
+    immutable: false
+  - name: 'gclbTargets'
+    type: Array
+    description: |
+      A list of target proxies that use this Certificate Map
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'ipConfigs'
+          type: Array
+          description: |
+            An IP configuration where this Certificate Map is serving
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'ipAddress'
+                type: String
+                description: |
+                  An external IP address
+              - name: 'ports'
+                type: Array
+                description: |
+                  A list of ports
+                item_type:
+                  type: Integer
+        - name: 'targetHttpsProxy'
+          type: String
+          description: |
+            Proxy name must be in the format projects/*/locations/*/targetHttpsProxies/*.
+            This field is part of a union field `target_proxy`: Only one of `targetHttpsProxy` or
+            `targetSslProxy` may be set.
+        - name: 'targetSslProxy'
+          type: String
+          description: |
+            Proxy name must be in the format projects/*/locations/*/targetSslProxies/*.
+            This field is part of a union field `target_proxy`: Only one of `targetHttpsProxy` or
+            `targetSslProxy` may be set.

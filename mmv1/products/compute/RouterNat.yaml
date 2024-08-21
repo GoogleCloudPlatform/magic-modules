@@ -38,7 +38,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{regions}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -236,7 +236,8 @@ properties:
   - !ruby/object:Api::Type::Integer
     name: minPortsPerVm
     description: |
-      Minimum number of ports allocated to a VM from this NAT.
+      Minimum number of ports allocated to a VM from this NAT. Defaults to 64 for static port allocation and 32 dynamic port allocation if not set.
+    default_from_api: true
   - !ruby/object:Api::Type::Integer
     name: maxPortsPerVm
     description: |
@@ -307,6 +308,17 @@ properties:
           - :ERRORS_ONLY
           - :TRANSLATIONS_ONLY
           - :ALL
+  - !ruby/object:Api::Type::Array
+    name: 'endpointTypes'
+    immutable: true
+    min_size: 1
+    description: |
+      Specifies the endpoint Types supported by the NAT Gateway.
+      Supported values include:
+            `ENDPOINT_TYPE_VM`, `ENDPOINT_TYPE_SWG`,
+            `ENDPOINT_TYPE_MANAGED_PROXY_LB`.
+    default_from_api: true
+    item_type: Api::Type::String
   - !ruby/object:Api::Type::Array
     name: rules
     description: 'A list of rules associated with this NAT.'
@@ -436,3 +448,13 @@ properties:
       - :PUBLIC
       - :PRIVATE
     default_value: :PUBLIC
+  - !ruby/object:Api::Type::Enum
+    name: 'autoNetworkTier'
+    description: |
+      The network tier to use when automatically reserving NAT IP addresses.
+      Must be one of: PREMIUM, STANDARD. If not specified, then the current
+      project-level default tier is used.
+    values:
+      - :PREMIUM
+      - :STANDARD
+    default_from_api: true

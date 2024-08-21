@@ -40,18 +40,6 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
     skip_test: true
-  - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
-    name: 'backup_dr_management_server_test'
-    primary_resource_id: 'ms-console'
-    vars:
-      network_name: 'vpc-network'
-      managementserver_name: 'ms-console'
-    test_env_vars:
-      project: :PROJECT_NAME
-    test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
-    skip_docs: true
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -87,7 +75,6 @@ properties:
           description: |
             Network with format `projects/{{project_id}}/global/networks/{{network_id}}`
           required: true
-          pattern: projects/{{project}}/global/networks/{{network}}
         - !ruby/object:Api::Type::Enum
           name: 'peeringMode'
           description: |

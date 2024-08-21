@@ -2,8 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	"os"
+
+	"github.com/spf13/cobra"
 )
 
 const rootCmdDesc = "Utilities for interacting with diffs between Terraform schema versions."
@@ -21,6 +22,8 @@ func newRootCmd() (*cobra.Command, *rootOptions, error) {
 		SilenceErrors: true,
 	}
 	cmd.AddCommand(newBreakingChangesCmd(o))
+	cmd.AddCommand(newChangedSchemaResourcesCmd(o))
+	cmd.AddCommand(newDetectMissingTestsCmd(o))
 	return cmd, o, nil
 }
 

@@ -21,9 +21,13 @@ description: |
   There is no persistent data associated with this resource.
 create_verb: :PATCH
 delete_verb: :PATCH
+deprecation_message: >-
+  `google_identity_platform_config` is deprecated and will be removed in the next major release
+  of the provider. Use the `google_identity_platform_config` resource instead. It contains a more
+  comprehensive list of fields, and was created before `google_identity_platform_project_default_config`
+  was added.
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   test_check_destroy: templates/terraform/custom_check_destroy/identity_platform_project_default_config.go.erb
-  resource_definition: templates/terraform/resource_definition/identity_platform_project_default_config_deprecation.go.erb
 docs: !ruby/object:Provider::Terraform::Docs
   warning: |
     If you are using User ADCs (Application Default Credentials) with this resource,

@@ -173,6 +173,14 @@ type Resource struct {
 	Reference *Link
 	// Guides point to non-rest useful context for the resource.
 	Guides []Link
+
+	// The current schema version
+	SchemaVersion int
+	// The schema versions from 0 to the current schema version
+	SchemaVersions []int
+
+	// Whether to generate long form versions of resource sample tests
+	GenerateLongFormTests bool
 }
 
 type Link struct {
@@ -280,6 +288,16 @@ func (r Resource) DCLPackage() DCLPackageNameWithVersion {
 func (r Resource) Updatable() bool {
 	for _, p := range r.SchemaProperties() {
 		if !p.ForceNew && !(!p.Optional && p.Computed) {
+			return true
+		}
+	}
+	return false
+}
+
+// The resource has other mutable fields, besides "labels" and "terraform_labels" fields
+func (r Resource) HasMutableNonLabelsFields() bool {
+	for _, p := range r.SchemaProperties() {
+		if !p.IsResourceLabels() && p.Name() != "terraform_labels" && !p.ForceNew && !(!p.Optional && p.Computed) {
 			return true
 		}
 	}
@@ -682,6 +700,24 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 		res.TerraformProductName = &scpn
 	}
 
+	// Resource Override: StateUpgrade
+	stateUpgrade := StateUpgradeDetails{}
+	stateUpgradeOk, err := overrides.ResourceOverrideWithDetails(StateUpgrade, &stateUpgrade, location)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to decode state upgrade details: %v", err)
+	}
+	if stateUpgradeOk {
+		res.SchemaVersion = stateUpgrade.SchemaVersion
+		res.SchemaVersions = make([]int, res.SchemaVersion)
+		for i := range res.SchemaVersions {
+			res.SchemaVersions[i] = i
+		}
+	}
+
+	if overrides.ResourceOverride(GenerateLongFormTests, location) {
+		res.GenerateLongFormTests = true
+	}
+
 	res.Samples = res.loadSamples()
 
 	return &res, nil
@@ -948,7 +984,23 @@ func (r *Resource) loadDCLSamples() []Sample {
 			sample.IgnoreRead = append(sample.IgnoreRead, "annotations")
 		}
 
+		if r.GenerateLongFormTests {
+			longFormSample := sample
+			longFormSample.LongForm = true
+			var longFormDependencies []Dependency
+			mainResourceLongForm := longFormSample.generateSampleDependencyWithName(primaryResource, "primary")
+			longFormDependencies = append(longFormDependencies, mainResourceLongForm)
+			for _, dFileName := range longFormSample.DependencyFileNames {
+				longFormDependency := sample.generateSampleDependency(dFileName)
+				longFormDependencies = append(longFormDependencies, longFormDependency)
+			}
+			longFormSample.DependencyList = longFormDependencies
+			longFormSample.TestSlug += "LongForm"
+			samples = append(samples, longFormSample)
+		}
+
 		samples = append(samples, sample)
+
 	}
 
 	return samples

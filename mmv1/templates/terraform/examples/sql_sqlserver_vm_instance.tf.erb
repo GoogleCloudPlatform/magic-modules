@@ -14,7 +14,6 @@ resource "google_compute_subnetwork" "default" {
   network       = google_compute_network.default.id
 }
 
-# [START cloud_sql_sqlserver_vm_instance]
 resource "google_compute_instance" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
   name     = "<%= ctx[:vars]['sqlserver_vm'] %>"
@@ -39,9 +38,7 @@ resource "google_compute_instance" "<%= ctx[:primary_resource_id] %>" {
     subnetwork         = google_compute_subnetwork.default.id
   }
 }
-# [END cloud_sql_sqlserver_vm_instance]
 
-# [START cloud_sql_sqlserver_vm_firewall_rule]
 resource "google_compute_firewall" "sql_server_1433" {
   provider      = google-beta
   name          = "<%= ctx[:vars]['sql_server_1433_3'] %>"
@@ -55,4 +52,3 @@ resource "google_compute_firewall" "sql_server_1433" {
   priority      = 1000
   source_ranges = ["0.0.0.0/0"]
 }
-# [END cloud_sql_sqlserver_vm_firewall_rule]

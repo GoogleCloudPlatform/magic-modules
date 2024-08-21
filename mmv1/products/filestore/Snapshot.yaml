@@ -70,7 +70,6 @@ properties:
     required: true
     immutable: true
     url_param_only: true
-    pattern: projects/{{project}}/locations/{{location}}/instances/{{instance}}/snapshots/{{name}}
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |

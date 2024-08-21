@@ -11,9 +11,20 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
         with:
           path: repo
+
+      - name: Set up Go
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+        with:
+          go-version: '^1.21.0'
+
+      - name: Build
+        run: |
+          cd repo/tools/go-changelog/cmd/changelog-pr-body-check
+          go build
+
       - name: Check Changelog
         env:
           GITHUB_OWNER: GoogleCloudPlatform
@@ -21,4 +32,4 @@ jobs:
           GITHUB_TOKEN: ${{github.token}}
         run: |
           cd repo/tools/go-changelog/cmd/changelog-pr-body-check
-          go run . ${{github.event.pull_request.number}}
+          ./changelog-pr-body-check ${{github.event.pull_request.number}}

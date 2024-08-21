@@ -1,9 +1,6 @@
 name: Provider Build and Unit Test
 
-permissions:
-  actions: read
-  contents: read
-  statuses: write
+permissions: read-all
 
 env:
   status_suffix: "-build-and-unit-tests"
@@ -22,38 +19,25 @@ on:
       branch:
         description: 'The branch or sha of the provider execute against'
         required: true
+      pr-number:
+        description: 'The pull request number in magic-modules repository'
+        required: true
       sha:
         description: "The commit SHA in magic-modules repository where the status result will be posted"
         required: true
 
 concurrency:
-  group: test-tpg-${{ github.event.inputs.owner }}-${{ github.event.inputs.repo }}-${{ github.event.inputs.branch }}
+  group: test-tpg-${{ github.event.inputs.owner }}-${{ github.event.inputs.repo }}-${{ github.event.inputs.pr-number }}
   cancel-in-progress: true
 
 jobs:
   build-and-unit-test:
+    permissions:
+      statuses: write
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v3
-      with:
-        repository: ${{ github.event.inputs.owner }}/${{ github.event.inputs.repo }}
-        ref: ${{ github.event.inputs.branch }}
-        path: provider
-        fetch-depth: 2
-    - name: Check for Code Changes
-      id: pull_request
-      run: |
-        cd provider
-        gofiles=$(git diff --name-only HEAD~1 | { grep -e "\.go$" -e "go.mod$" -e "go.sum$" || test $? = 1; })
-        if [ -z "$gofiles" ]; then
-          echo "has_changes=false" >> $GITHUB_OUTPUT
-        else
-          echo "has_changes=true" >> $GITHUB_OUTPUT
-        fi
     - name: Get Job URL
-      if: ${{ !cancelled() }}
       id: get_job
       run: |
         response=$(curl --get -Ss -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}/jobs")
@@ -70,30 +54,41 @@ jobs:
         "target_url": "${{ steps.get_job.outputs.url }}",
         "state": "pending"
         }'
+    - name: Checkout Repository
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+      with:
+        repository: ${{ github.event.inputs.owner }}/${{ github.event.inputs.repo }}
+        ref: ${{ github.event.inputs.branch }}
+        fetch-depth: 2
+    - name: Check for Code Changes
+      id: pull_request
+      run: |
+        gofiles=$(git diff --name-only HEAD~1 | { grep -e "\.go$" -e "test-fixtures" -e "go.mod$" -e "go.sum$" || test $? = 1; })
+        if [ -z "$gofiles" ]; then
+          echo "has_changes=false" >> $GITHUB_OUTPUT
+        else
+          echo "has_changes=true" >> $GITHUB_OUTPUT
+        fi
     - name: Set up Go
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
-      uses: actions/setup-go@v4
+      uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
       with:
-        go-version: '^1.19.1'
+        go-version: '^1.21'
     - name: Build Provider
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |
-        cd provider
         go build
     - name: Run Unit Tests
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |
-        cd provider
-        make testnolint
+        make testnolint TESTARGS="-p 4"
     - name: Lint Check
       if: ${{ !cancelled() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |
-        cd provider
         make lint
     - name: Documentation Check
       if: ${{ !cancelled() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |
-        cd provider
         make docscheck
     - name: Post Result Status to Pull Request
       if: ${{ !cancelled() }}

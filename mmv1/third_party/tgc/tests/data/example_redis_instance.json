@@ -1,0 +1,45 @@
+[
+  {
+    "name": "//compute.googleapis.com/projects/{{.Provider.project}}/global/networks/redis-test-network",
+    "asset_type": "compute.googleapis.com/Network",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "v1",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
+      "discovery_name": "Network",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "autoCreateSubnetworks": true,
+        "name": "redis-test-network",
+        "networkFirewallPolicyEnforcementOrder": "AFTER_CLASSIC_FIREWALL"
+      }
+    }
+  },
+  {
+    "name": "//redis.googleapis.com/projects/{{.Provider.project}}/locations/us-central1/instances/ha-memory-cache",
+    "asset_type": "redis.googleapis.com/Instance",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "v1",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/redis/v1/rest",
+      "discovery_name": "Instance",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "alternativeLocationId": "us-central1-f",
+        "connectMode": "DIRECT_PEERING",
+        "displayName": "Terraform Test Instance",
+        "labels": {
+          "my_key": "my_val",
+          "other_key": "other_val"
+        },
+        "locationId": "us-central1-a",
+        "memorySizeGb": 1,
+        "name": "projects/{{.Provider.project}}/locations/us-central1/instances/ha-memory-cache",
+        "redisVersion": "REDIS_4_0",
+        "reservedIpRange": "192.168.0.0/29",
+        "tier": "STANDARD_HA",
+        "transitEncryptionMode": "DISABLED"
+      }
+    }
+  }
+]

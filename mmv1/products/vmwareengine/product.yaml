@@ -16,11 +16,10 @@ name: Vmwareengine
 display_name: Cloud VMware Engine
 versions:
   - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://vmwareengine.googleapis.com/v1/
+  - !ruby/object:Api::Product::Version
     name: beta
     base_url: https://vmwareengine.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: VMwareEngine API
-    url: https://console.cloud.google.com/apis/library/vmwareengine.googleapis.com/

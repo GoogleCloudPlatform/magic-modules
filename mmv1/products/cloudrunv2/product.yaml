@@ -23,7 +23,3 @@ versions:
   - !ruby/object:Api::Product::Version
     name: beta
     base_url: https://run.googleapis.com/v2/
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Cloud Run API
-    url: https://console.cloud.google.com/apis/library/run.googleapis.com/

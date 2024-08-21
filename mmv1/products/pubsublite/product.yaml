@@ -21,7 +21,3 @@ versions:
     cai_base_url: https://pubsublite.googleapis.com/v1/admin/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Cloud Pub/Sub Lite API
-    url: https://console.cloud.google.com/apis/library/pubsublite.googleapis.com/

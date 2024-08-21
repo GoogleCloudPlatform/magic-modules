@@ -1,0 +1,110 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'GatewaySecurityPolicy'
+description: |
+  The GatewaySecurityPolicy resource contains a collection of GatewaySecurityPolicyRules and associated metadata.
+references:
+  guides:
+  api: 'https://cloud.google.com/secure-web-proxy/docs/reference/network-security/rest/v1/projects.locations.gatewaySecurityPolicies'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/gatewaySecurityPolicies'
+self_link: 'projects/{{project}}/locations/{{location}}/gatewaySecurityPolicies/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/gatewaySecurityPolicies?gatewaySecurityPolicyId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/gatewaySecurityPolicies/{{name}}'
+timeouts:
+  insert_minutes: 30
+  update_minutes: 30
+  delete_minutes: 30
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+    timeouts:
+      insert_minutes: 30
+      update_minutes: 30
+      delete_minutes: 30
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'network_security_gateway_security_policy_basic'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-gateway-security-policy'
+  - name: 'network_security_gateway_security_policy_tls_inspection_basic'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      resource_name: 'my-gateway-security-policy'
+      privateca_ca_tls_name: 'my-tls-inspection-policy'
+      privateca_ca_pool_name: 'my-basic-ca-pool'
+      privateca_certificate_authority_id: 'my-basic-certificate-authority'
+parameters:
+  - name: 'name'
+    type: String
+    description: |
+      Name of the resource. Name is of the form projects/{project}/locations/{location}/gatewaySecurityPolicies/{gatewaySecurityPolicy}
+      gatewaySecurityPolicy should match the pattern:(^a-z?$).
+    url_param_only: true
+    required: true
+  - name: 'location'
+    type: String
+    description: |
+      The location of the gateway security policy.
+      The default value is `global`.
+    url_param_only: true
+    default_value: "global"
+properties:
+  - name: 'selfLink'
+    type: String
+    description: |
+      Server-defined URL of this resource.
+    output: true
+  - name: 'createTime'
+    type: Time
+    description: |
+      The timestamp when the resource was created.
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z"
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      The timestamp when the resource was updated.
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true
+  - name: 'description'
+    type: String
+    description: |
+      A free-text description of the resource. Max length 1024 characters.
+  - name: 'tlsInspectionPolicy'
+    type: String
+    description: |
+      Name of a TlsInspectionPolicy resource that defines how TLS inspection is performed for any rule that enables it.
+    min_version: 'beta'
+    ignore_read: true

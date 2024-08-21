@@ -71,7 +71,7 @@ examples:
     ignore_read_extra:
       - 'deletion_policy'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/containerattached_cluster_diff.go
+  constants: templates/terraform/constants/containerattached_cluster_diff.go.erb
   pre_update: templates/terraform/pre_update/containerattached_update.go.erb
   pre_delete: templates/terraform/pre_delete/container_attached_deletion_policy.go.erb
 virtual_fields:
@@ -138,7 +138,8 @@ properties:
     name: distribution
     description: |
       The Kubernetes distribution of the underlying attached cluster. Supported values:
-      "eks", "aks".
+      "eks", "aks", "generic". The generic distribution provides the ability to register
+      or migrate any CNCF conformant cluster.
     required: true
     immutable: true
   - !ruby/object:Api::Type::String
@@ -337,3 +338,23 @@ properties:
         values:
           - :DISABLED
           - :PROJECT_SINGLETON_POLICY_ENFORCE
+  - !ruby/object:Api::Type::NestedObject
+    name: proxyConfig
+    description: |
+      Support for proxy configuration.
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: kubernetesSecret
+        description: |
+          The Kubernetes Secret resource that contains the HTTP(S) proxy configuration.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: name
+            required: true
+            description: |
+              Name of the kubernetes secret containing the proxy config.
+          - !ruby/object:Api::Type::String
+            name: namespace
+            required: true
+            description: |
+              Namespace of the kubernetes secret containing the proxy config.

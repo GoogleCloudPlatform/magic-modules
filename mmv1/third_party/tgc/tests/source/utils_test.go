@@ -14,8 +14,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/caiasset"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/caiasset"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai"
 	"github.com/google/go-cmp/cmp"
 	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 	"go.uber.org/zap/zaptest"
@@ -74,6 +74,7 @@ func terraformExec(t *testing.T, executable, dir string, args ...string) []byte 
 		"GOOGLE_PROJECT=" + data.Provider["project"],
 		"GOOGLE_FOLDER=" + data.FolderID,
 		"GOOGLE_ORG=" + data.OrgID,
+		"GOOGLE_OAUTH_ACCESS_TOKEN=fake-token", // GOOGLE_OAUTH_ACCESS_TOKEN is required so terraform plan does not require the google authentication cert
 	}
 	if os.Getenv("TF_CLI_CONFIG_FILE") != "" {
 		cmd.Env = append(cmd.Env, "TF_CLI_CONFIG_FILE="+os.Getenv("TF_CLI_CONFIG_FILE"))

@@ -106,6 +106,28 @@ See [Enabling CMEK for Logging Buckets](https://cloud.google.com/logging/docs/ro
 			},
 		},
 	},
+	"index_configs": {
+		Type:        schema.TypeSet,
+		MaxItems:    20,
+		Optional:    true,
+		Description: `A list of indexed fields and related configuration data.`,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"field_path": {
+					Type:        schema.TypeString,
+					Required:    true,
+					Description: `The LogEntry field path to index.`,
+				},
+				"type": {
+					Type:     schema.TypeString,
+					Required: true,
+					Description: `The type of data in this index
+Note that some paths are automatically indexed, and other paths are not eligible for indexing. See [indexing documentation]( https://cloud.google.com/logging/docs/view/advanced-queries#indexed-fields) for details.
+For example: jsonPayload.request.status`,
+				},
+			},
+		},
+	},
 }
 
 func projectBucketConfigID(d *schema.ResourceData, config *transport_tpg.Config) (string, error) {
@@ -165,7 +187,7 @@ func resourceLoggingProjectBucketConfigAcquireOrCreate(parentType string, iDFunc
 				UserAgent: userAgent,
 			})
 			if res == nil {
-				log.Printf("[DEGUG] Loggin Bucket not exist %s", id)
+				log.Printf("[DEBUG] Logging Bucket does not exist %s", id)
 				// we need to pass the id in here because we don't want to set it in state
 				// until we know there won't be any errors on create
 				return resourceLoggingProjectBucketConfigCreate(d, meta, id)
@@ -190,10 +212,15 @@ func resourceLoggingProjectBucketConfigCreate(d *schema.ResourceData, meta inter
 	obj["description"] = d.Get("description")
 	obj["locked"] = d.Get("locked")
 	obj["retentionDays"] = d.Get("retention_days")
-	obj["analyticsEnabled"] = d.Get("enable_analytics")
+	// Only set analyticsEnabled if it has been explicitly preferenced.
+	analyticsRawValue := d.GetRawConfig().GetAttr("enable_analytics")
+	if !analyticsRawValue.IsNull() {
+		obj["analyticsEnabled"] = analyticsRawValue.True()
+	}
 	obj["cmekSettings"] = expandCmekSettings(d.Get("cmek_settings"))
+	obj["indexConfigs"] = expandIndexConfigs(d.Get("index_configs"))
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{LoggingBasePath}}projects/{{project}}/locations/{{location}}/buckets?bucketId={{bucket_id}}")
+	url, err := tpgresource.ReplaceVars(d, config, "{{LoggingBasePath}}projects/{{project}}/locations/{{location}}/buckets:createAsync?bucketId={{bucket_id}}")
 	if err != nil {
 		return err
 	}
@@ -226,6 +253,13 @@ func resourceLoggingProjectBucketConfigCreate(d *schema.ResourceData, meta inter
 	}
 
 	d.SetId(id)
+	var opRes map[string]interface{}
+	// Wait for the operation to complete
+	waitErr := LoggingOperationWaitTimeWithResponse(config, res, &opRes, "Bucket to create", userAgent, d.Timeout(schema.TimeoutCreate))
+	if waitErr != nil {
+		d.SetId("")
+		return waitErr
+	}
 
 	log.Printf("[DEBUG] Finished creating Bucket %q: %#v", d.Id(), res)
 
@@ -282,6 +316,10 @@ func resourceLoggingProjectBucketConfigRead(d *schema.ResourceData, meta interfa
 		return fmt.Errorf("Error setting cmek_settings: %s", err)
 	}
 
+	if err := d.Set("index_configs", flattenIndexConfigs(res["indexConfigs"])); err != nil {
+		return fmt.Errorf("Error setting index_configs: %s", err)
+	}
+
 	return nil
 }
 
@@ -305,19 +343,24 @@ func resourceLoggingProjectBucketConfigUpdate(d *schema.ResourceData, meta inter
 	if d.HasChange("enable_analytics") {
 		obj["analyticsEnabled"] = d.Get("enable_analytics")
 		updateMaskAnalytics = append(updateMaskAnalytics, "analyticsEnabled")
-		url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMaskAnalytics, ",")})
+		asyncUrl := url + ":updateAsync"
+		asyncUrl, err = transport_tpg.AddQueryParams(asyncUrl, map[string]string{"updateMask": strings.Join(updateMaskAnalytics, ",")})
 		if err != nil {
 			return err
 		}
-		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
-			Method:    "PATCH",
-			RawURL:    url,
+			Method:    "POST",
+			RawURL:    asyncUrl,
 			UserAgent: userAgent,
 			Body:      obj,
 			Timeout:   d.Timeout(schema.TimeoutUpdate),
 		})
-		if err != nil {
+
+		var opRes map[string]interface{}
+		// Wait for the operation to complete
+		waitErr := LoggingOperationWaitTimeWithResponse(config, res, &opRes, "Updating Bucket with analytics", userAgent, d.Timeout(schema.TimeoutCreate))
+		if waitErr != nil {
 			return fmt.Errorf("Error updating Logging Bucket Config %q: %s", d.Id(), err)
 		}
 	}
@@ -325,6 +368,8 @@ func resourceLoggingProjectBucketConfigUpdate(d *schema.ResourceData, meta inter
 	obj["retentionDays"] = d.Get("retention_days")
 	obj["description"] = d.Get("description")
 	obj["cmekSettings"] = expandCmekSettings(d.Get("cmek_settings"))
+	obj["indexConfigs"] = expandIndexConfigs(d.Get("index_configs"))
+
 	updateMask := []string{}
 	if d.HasChange("retention_days") {
 		updateMask = append(updateMask, "retentionDays")
@@ -335,6 +380,10 @@ func resourceLoggingProjectBucketConfigUpdate(d *schema.ResourceData, meta inter
 	if d.HasChange("cmek_settings") {
 		updateMask = append(updateMask, "cmekSettings")
 	}
+	if d.HasChange("index_configs") {
+		updateMask = append(updateMask, "indexConfigs")
+	}
+
 	url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
 	if err != nil {
 		return err

@@ -78,6 +78,30 @@ examples:
     vars:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'bigquery_dataset_external_reference_aws_test'
+    primary_resource_id: 'dataset'
+    skip_docs: true
+    vars:
+      dataset_id: 'example_dataset'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'bigquery_dataset_external_reference_aws'
+    primary_resource_id: 'dataset'
+    skip_test: true
+    vars:
+      dataset_id: 'example_dataset'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'bigquery_dataset_resource_tags'
+    primary_resource_id: 'dataset'
+    primary_resource_name:
+      'fmt.Sprintf("tf_test_dataset%s", context["random_suffix"])'
+    skip_docs: true
+    vars:
+      dataset_id: 'dataset'
+      tag_key1: 'tag_key1'
+      tag_value1: 'tag_value1'
+      tag_key2: 'tag_key2'
+      tag_value2: 'tag_value2'
 virtual_fields:
   - !ruby/object:Api::Type::Boolean
     name: 'delete_contents_on_destroy'
@@ -128,17 +152,9 @@ properties:
           name: 'specialGroup'
           description: |
             A special group to grant access to. Possible values include:
-
-
             * `projectOwners`: Owners of the enclosing project.
-
-
             * `projectReaders`: Readers of the enclosing project.
-
-
             * `projectWriters`: Writers of the enclosing project.
-
-
             * `allAuthenticatedUsers`: All authenticated BigQuery users.
         - !ruby/object:Api::Type::String
           name: 'iamMember'
@@ -252,8 +268,6 @@ properties:
     description: |
       The default lifetime of all tables in the dataset, in milliseconds.
       The minimum value is 3600000 milliseconds (one hour).
-
-
       Once this property is set, all newly-created tables in the dataset
       will have an `expirationTime` property set to the creation time plus
       the value in this property, and changing the value will only affect
@@ -270,8 +284,6 @@ properties:
     description: |
       The default partition expiration for all partitioned tables in
       the dataset, in milliseconds.
-
-
       Once this property is set, all newly-created partitioned tables in
       the dataset will have an `expirationMs` property in the `timePartitioning`
       settings set to this value, and changing the value will only
@@ -291,6 +303,25 @@ properties:
     description: |
       A hash of the resource.
     output: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'externalDatasetReference'
+    description: |
+     Information about the external metadata storage where the dataset is defined.
+    immutable: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'externalSource'
+        description: |
+          External source that backs this dataset.
+        required: true
+        immutable: true
+      - !ruby/object:Api::Type::String
+        name: 'connection'
+        description: |
+          The connection id that is used to access the externalSource.
+          Format: projects/{projectId}/locations/{locationId}/connections/{connectionId}
+        required: true
+        immutable: true
   - !ruby/object:Api::Type::String
     name: 'friendlyName'
     description: A descriptive name for the dataset
@@ -311,14 +342,10 @@ properties:
     description: |
       The geographic location where the dataset should reside.
       See [official docs](https://cloud.google.com/bigquery/docs/dataset-locations).
-
-
       There are two types of locations, regional or multi-regional. A regional
       location is a specific geographic place, such as Tokyo, and a multi-regional
       location is a large geographic area, such as the United States, that
       contains at least two geographic places.
-
-
       The default value is multi-regional location `US`.
       Changing this forces a new resource to be created.
     default_value: US
@@ -369,3 +396,11 @@ properties:
 
       LOGICAL is the default if this flag isn't specified.
     default_from_api: true
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: 'resourceTags'
+    description: |
+      The tags attached to this table. Tag keys are globally unique. Tag key is expected to be
+      in the namespaced format, for example "123456789012/environment" where 123456789012 is the
+      ID of the parent organization or project resource for this tag key. Tag value is expected
+      to be the short name, for example "Production". See [Tag definitions](/iam/docs/tags-access-control#definitions)
+      for more details.

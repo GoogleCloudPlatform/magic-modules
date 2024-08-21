@@ -42,7 +42,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -308,7 +308,7 @@ properties:
       disk interfaces are automatically determined on attachment.
     description: |
       Specifies the disk interface to use for attaching this disk, which is either SCSI or NVME. The default is SCSI.
-    diff_suppress_func: 'tpgresource.AlwaysDiffSuppress'
+    diff_suppress_func: AlwaysDiffSuppress
   - !ruby/object:Api::Type::String
     name: 'sourceDisk'
     description: |

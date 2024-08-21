@@ -1,6 +1,6 @@
 package google
 
-import "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/cai"
+import "github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/converters/google/resources/cai"
 
 // JsonMap converts a given value to a map[string]interface{} that
 // matches its JSON format.

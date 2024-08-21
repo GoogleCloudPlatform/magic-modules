@@ -20,10 +20,12 @@ has_self_link: true
 collection_url_key: 'items'
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation': 'https://cloud.google.com/load-balancing/docs/negs/serverless-neg-concepts'
+    'Serverless NEGs Official Documentation': 'https://cloud.google.com/load-balancing/docs/negs/serverless-neg-concepts'
+    'Internet NEGs Official Documentation': 'https://cloud.google.com/load-balancing/docs/negs/internet-neg-concepts'
   api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionNetworkEndpointGroups'
 description: |
-  A regional NEG that can support Serverless Products.
+  A regional NEG that can support Serverless Products, proxying traffic to
+  external backends and providing traffic to the PSC port mapping endpoints.
 
   Recreating a region network endpoint group that's in use by another resource will give a
   `resourceInUseByAnotherResource` error. Use `lifecycle.create_before_destroy`
@@ -32,7 +34,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -68,6 +70,11 @@ examples:
     vars:
       neg_name: 'appengine-neg'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'region_network_endpoint_group_appengine_empty'
+    primary_resource_id: 'appengine_neg'
+    vars:
+      neg_name: 'appengine-neg'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'region_network_endpoint_group_psc'
     primary_resource_id: 'psc_neg'
     vars:
@@ -84,13 +91,33 @@ examples:
       forwarding_rule_name: 'psc-forwarding-rule'
       service_attachment_name: 'psc-service-attachment'
       health_check_name: 'psc-healthcheck'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'region_network_endpoint_group_internet_ip_port'
+    primary_resource_id: 'region_network_endpoint_group_internet_ip_port'
+    vars:
+      neg_name: 'ip-port-neg'
+      network_name: 'network'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'region_network_endpoint_group_internet_fqdn_port'
+    primary_resource_id: 'region_network_endpoint_group_internet_fqdn_port'
+    vars:
+      neg_name: 'ip-port-neg'
+      network_name: 'network'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'region_network_endpoint_group_portmap'
+    primary_resource_id: 'region_network_endpoint_group_portmap'
+    min_version: 'beta'
+    vars:
+      network_name: 'network'
+      subnetwork_name: 'subnetwork'
+      neg_name: 'portmap-neg'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
     resource: 'Region'
     imports: 'name'
     description: |
-      A reference to the region where the Serverless NEGs Reside.
+      A reference to the region where the regional NEGs reside.
     required: true
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
@@ -115,14 +142,19 @@ properties:
   - !ruby/object:Api::Type::Enum
     name: 'networkEndpointType'
     description: |
-      Type of network endpoints in this network endpoint group. Defaults to SERVERLESS
+      Type of network endpoints in this network endpoint group. Defaults to SERVERLESS.
     values:
       - :SERVERLESS
       - :PRIVATE_SERVICE_CONNECT
+      - :INTERNET_IP_PORT
+      - :INTERNET_FQDN_PORT
+      - :GCE_VM_IP_PORTMAP
     default_value: :SERVERLESS
   - !ruby/object:Api::Type::String
     name: 'pscTargetService'
     description: |
+      This field is only used for PSC and INTERNET NEGs.
+
       The target service url used to set up private service connection to
       a Google API or a PSC Producer Service Attachment.
   - !ruby/object:Api::Type::ResourceRef
@@ -130,7 +162,8 @@ properties:
     resource: 'Network'
     imports: 'selfLink'
     description: |
-      This field is only used for PSC.
+      This field is only used for PSC and INTERNET NEGs.
+
       The URL of the network to which all network endpoints in the NEG belong. Uses
       "default" project network if unspecified.
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
@@ -139,7 +172,8 @@ properties:
     resource: 'Subnetwork'
     imports: 'selfLink'
     description: |
-      This field is only used for PSC.
+      This field is only used for PSC NEGs.
+
       Optional URL of the subnetwork to which all network endpoints in the NEG belong.
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::NestedObject
@@ -149,7 +183,8 @@ properties:
       - app_engine
       - serverless_deployment
     description: |
-      Only valid when networkEndpointType is "SERVERLESS".
+      This field is only used for SERVERLESS NEGs.
+
       Only one of cloud_run, app_engine, cloud_function or serverless_deployment may be set.
     properties:
       - !ruby/object:Api::Type::String
@@ -189,8 +224,10 @@ properties:
       - cloud_function
       - serverless_deployment
     allow_empty_object: true
+    send_empty_value: true
     description: |
-      Only valid when networkEndpointType is "SERVERLESS".
+      This field is only used for SERVERLESS NEGs.
+
       Only one of cloud_run, app_engine, cloud_function or serverless_deployment may be set.
     properties:
       - !ruby/object:Api::Type::String
@@ -223,7 +260,8 @@ properties:
       - app_engine
       - serverless_deployment
     description: |
-      Only valid when networkEndpointType is "SERVERLESS".
+      This field is only used for SERVERLESS NEGs.
+
       Only one of cloud_run, app_engine, cloud_function or serverless_deployment may be set.
     properties:
       - !ruby/object:Api::Type::String
@@ -256,8 +294,10 @@ properties:
       - cloud_function
       - app_engine
     allow_empty_object: true
+    send_empty_value: true
     description: |
-      Only valid when networkEndpointType is "SERVERLESS".
+      This field is only used for SERVERLESS NEGs.
+
       Only one of cloudRun, appEngine, cloudFunction or serverlessDeployment may be set.
     properties:
       - !ruby/object:Api::Type::String

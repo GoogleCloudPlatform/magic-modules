@@ -1,0 +1,30 @@
+resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "instance_name"}}"
+  location = "us-central1-a"
+
+  gce_setup {
+    machine_type = "e2-standard-4"
+
+    shielded_instance_config {
+      enable_secure_boot = false
+      enable_vtpm = false
+      enable_integrity_monitoring = false
+    }
+
+    service_accounts {
+      email = "{{index $.TestEnvVars "service_account"}}"
+    }
+
+    metadata = {
+      terraform = "true"
+    }
+
+  }
+
+  labels = {
+    k = "val"
+  }
+
+  desired_state = "STOPPED"
+
+}

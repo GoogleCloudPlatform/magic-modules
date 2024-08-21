@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: Entry
+name: "Entry"
 base_url: '{{entry_group}}/entries'
 create_url: '{{entry_group}}/entries?entryId={{entry_id}}'
 self_link: '{{name}}'

@@ -61,6 +61,15 @@ examples:
       network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
     skip_docs: true
   - !ruby/object:Provider::Terraform::Examples
+    name: "vertex_ai_index_endpoint_with_psc"
+    primary_resource_id: "index_endpoint"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "vertex_ai_index_endpoint_with_false_psc"
+    primary_resource_id: "index_endpoint"
+    # It's not distinguishable if the psc is false or not set, so we need to skip the test.
+    skip_import_test: true
+    skip_docs: true
+  - !ruby/object:Provider::Terraform::Examples
     name: "vertex_ai_index_endpoint_with_public_endpoint"
     primary_resource_id: "index_endpoint"
     test_vars_overrides:
@@ -109,6 +118,28 @@ properties:
       [Format](https://cloud.google.com/compute/docs/reference/rest/v1/networks/insert): `projects/{project}/global/networks/{network}`.
       Where `{project}` is a project number, as in `12345`, and `{network}` is network name.
     immutable: true
+    conflicts:
+      - privateServiceConnectConfig
+  - !ruby/object:Api::Type::NestedObject
+    name: privateServiceConnectConfig
+    immutable: true
+    default_from_api: true
+    description: |-
+      Optional. Configuration for private service connect. `network` and `privateServiceConnectConfig` are mutually exclusive.
+    conflicts:
+      - network
+    custom_flatten: templates/terraform/custom_flatten/vertex_ai_index_endpoint_private_service_connect_config.go.erb
+    properties:
+      - !ruby/object:Api::Type::Boolean
+        name: enablePrivateServiceConnect
+        description: If set to true, the IndexEndpoint is created without private service access.
+        immutable: true
+        required: true
+      - !ruby/object:Api::Type::Array
+        name: projectAllowlist
+        description: A list of Projects from which the forwarding rule will target the service attachment.
+        item_type: Api::Type::String
+        immutable: true
   - !ruby/object:Api::Type::Boolean
     name: publicEndpointEnabled
     immutable: true

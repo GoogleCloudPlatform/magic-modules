@@ -20,10 +20,6 @@ versions:
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://networkmanagement.googleapis.com/v1/
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Network Management API
-    url: https://console.cloud.google.com/apis/library/networkmanagement.googleapis.com/
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'

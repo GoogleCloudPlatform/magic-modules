@@ -15,13 +15,12 @@ require 'uri'
 require 'api/object'
 require 'compile/core'
 require 'google/golang_utils'
-require 'provider/abstract_core'
 
 module Provider
-  class Terraform < Provider::AbstractCore
+  class Terraform
     # Generates configs to be shown as examples in docs and outputted as tests
     # from a shared template
-    class Examples < Api::Object
+    class Examples < Google::YamlValidator
       include Compile::Core
       include Google::GolangUtils
 
@@ -57,7 +56,6 @@ module Provider
       # test_env_vars is a Hash from template variable names to one of the
       # following symbols:
       #  - :PROJECT_NAME
-      #  - :FIRESTORE_PROJECT_NAME
       #  - :CREDENTIALS
       #  - :REGION
       #  - :ORG_ID
@@ -140,24 +138,31 @@ module Provider
 
       # If the example should be skipped during VCR testing.
       # This is the case when something about the resource or config causes VCR to fail for example
-      # a resource with a unique identifier generated within the resource via resource.UniqueId()
+      # a resource with a unique identifier generated within the resource via id.UniqueId()
       # Or a config with two fine grained resources that have a race condition during create
       attr_reader :skip_vcr
 
-      # Set for false by default. Set to true if you need to pull external provider for your
-      # testcase. Think before adding as there is latency and adds an external dependency to
+      # Specify which external providers are needed for your testcase.
+      # Think before adding as there is latency and adds an external dependency to
       # your test so avoid if you can.
-      attr_reader :pull_external
+      attr_reader :external_providers
+
+      # Official providers supported by HashiCorp
+      # https://registry.terraform.io/search/providers?namespace=hashicorp&tier=official
+      HASHICORP_PROVIDERS = %w[aws random null template azurerm kubernetes local external time vault
+                               archive tls helm azuread http cloudinit tfe dns consul vsphere
+                               nomad awscc googleworkspace hcp boundary ad azurestack opc oraclepaas
+                               hcs salesforce].freeze
 
       def config_documentation(pwd)
         docs_defaults = {
           PROJECT_NAME: 'my-project-name',
-          FIRESTORE_PROJECT_NAME: 'my-project-name',
           CREDENTIALS: 'my/credentials/filename.json',
           REGION: 'us-west1',
           ORG_ID: '123456789',
           ORG_DOMAIN: 'example.com',
           ORG_TARGET: '123456789',
+          PROJECT_NUMBER: '1111111111111',
           BILLING_ACCT: '000000-0000000-0000000-000000',
           MASTER_BILLING_ACCT: '000000-0000000-0000000-000000',
           SERVICE_ACCT: 'my@service-account.com',
@@ -266,7 +271,7 @@ module Provider
           open_in_editor: 'main.tf',
           cloudshell_print: './motd',
           cloudshell_tutorial: './tutorial.md'
-        }
+        }.sort
         URI::HTTPS.build(
           host: 'console.cloud.google.com',
           path: '/cloudshell/open',
@@ -310,7 +315,8 @@ module Provider
         check :skip_docs, type: TrueClass
         check :config_path, type: String, default: "templates/terraform/examples/#{name}.tf.erb"
         check :skip_vcr, type: TrueClass
-        check :pull_external, type: :boolean, default: false
+
+        validate_external_providers
       end
 
       def merge(other)
@@ -329,6 +335,22 @@ module Provider
         end
 
         result
+      end
+
+      def validate_external_providers
+        check :external_providers, type: Array, item_type: String
+
+        return if external_providers.nil?
+
+        unallowed_providers = []
+        @external_providers.each do |p|
+          unallowed_providers.append(p) unless HASHICORP_PROVIDERS.include?(p)
+        end
+
+        return if unallowed_providers.empty?
+
+        raise "Providers #{unallowed_providers} are not allowed." \
+              'Only providers published by HashiCorp are allowed.'
       end
     end
   end

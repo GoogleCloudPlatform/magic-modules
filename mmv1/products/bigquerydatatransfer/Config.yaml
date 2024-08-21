@@ -46,6 +46,13 @@ examples:
     vars:
       display_name: 'my-query'
       dataset_id: 'my_dataset'
+  - !ruby/object:Provider::Terraform::Examples
+    skip_test: true
+    name: 'bigquerydatatransfer_config_salesforce'
+    primary_resource_id: 'salesforce_config'
+    vars:
+      display_name: 'my-salesforce-config'
+      dataset_id: 'my_dataset'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -99,7 +106,8 @@ properties:
       jun 13:15, and first sunday of quarter 00:00. See more explanation
       about the format here:
       https://cloud.google.com/appengine/docs/flexible/python/scheduling-jobs-with-cron-yaml#the_schedule_format
-      NOTE: the granularity should be at least 8 hours, or less frequent.
+      NOTE: The minimum interval time between recurring transfers depends
+      on the data source; refer to the documentation for your data source.
   - !ruby/object:Api::Type::NestedObject
     name: 'scheduleOptions'
     description: |

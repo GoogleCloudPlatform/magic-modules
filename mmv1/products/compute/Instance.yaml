@@ -24,7 +24,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -181,6 +181,32 @@ properties:
                 disks.source is required.  To create a disk with one of
                 the public operating system images, specify the image
                 by its family name.
+            - !ruby/object:Api::Type::Integer
+              name: 'provisionedIops'
+              description: |
+                Indicates how many IOPS to provision for the disk. This
+                sets the number of I/O operations per second that the
+                disk can handle. Note: Updating currently is only supported for
+                hyperdisk skus via disk update api/gcloud without the need to
+                delete and recreate the disk, hyperdisk allows for an update of
+                IOPS every 4 hours. To update your hyperdisk more frequently,
+                you'll need to manually delete and recreate it.
+            - !ruby/object:Api::Type::Integer
+              name: 'provisionedThroughput'
+              description: |
+                Indicates how much throughput to provision for the disk.
+                This sets the number of throughput mb per second that
+                the disk can handle. Note: Updating currently is only supported
+                for hyperdisk skus via disk update api/gcloud without the need
+                to delete and recreate the disk, hyperdisk allows for an update
+                of throughput every 4 hours. To update your hyperdisk more
+                frequently, you'll need to manually delete and recreate it.
+            - !ruby/object:Api::Type::Boolean
+              name: 'enableConfidentialCompute'
+              description: |
+                Whether this disk is using confidential compute mode.
+                Note: Only supported on hyperdisk skus, disk_encryption_key
+                is required when setting to true.
             - !ruby/object:Api::Type::NestedObject
               name: 'sourceImageEncryptionKey'
               description: |
@@ -206,6 +232,15 @@ properties:
                     customer-supplied encryption key that protects this
                     resource.
                   output: true
+            - !ruby/object:Api::Type::String
+              name: 'storagePool'
+              required: false
+              immutable: true
+              description: |
+                The URL of the storage pool in which the new disk is created.
+                For example:
+                * https://www.googleapis.com/compute/v1/projects/{project}/zones/{zone}/storagePools/{storagePool}
+                * /projects/{project}/zones/{zone}/storagePools/{storagePool}
         - !ruby/object:Api::Type::Enum
           name: 'interface'
           description: |
@@ -500,7 +535,6 @@ properties:
         - !ruby/object:Api::Type::ResourceRef
           name: 'networkAttachment'
           resource: 'networkAttachment'
-          min_version: beta
           imports: 'selfLink'
           description: |
             The URL of the network attachment that this interface should connect to in the following format:
@@ -580,7 +614,25 @@ properties:
     properties:
       - !ruby/object:Api::Type::Boolean
         name: 'enableConfidentialCompute'
-        description: Enables confidential computing
+        description: Enables confidential computing with AMD SEV.
+        at_least_one_of:
+          - confidential_instance_config.0.enable_confidential_compute
+          - confidential_instance_config.0.confidential_instance_type
+        deprecation_message: "`enableConfidentialCompute` is deprecated and will be removed in a future major release. Use `confidentialInstanceType: SEV` instead."
+      - !ruby/object:Api::Type::Enum
+        name: 'confidentialInstanceType'
+        description: |
+          The confidential computing technology the instance uses.
+          SEV is an AMD feature. TDX is an Intel feature. One of the following
+          values is required: SEV, SEV_SNP, TDX. If SEV_SNP, min_cpu_platform =
+          "AMD Milan" is currently required. TDX is only available in beta.
+        values:
+          - :SEV
+          - :SEV_SNP
+          - :TDX
+        at_least_one_of:
+          - confidential_instance_config.0.enable_confidential_compute
+          - confidential_instance_config.0.confidential_instance_type
   - !ruby/object:Api::Type::Enum
     name: 'status'
     description: |

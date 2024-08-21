@@ -3,7 +3,7 @@ package alloydb_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -562,5 +562,234 @@ data "google_project" "project" {}
 data "google_compute_network" "default" {
 	name = "%{network_name}"
 }
+`, context)
+}
+
+// This test passes if an instance can be created with public IP enabled,
+// and update the authorized external networks.
+func TestAccAlloydbInstance_networkConfig(t *testing.T) {
+	t.Parallel()
+
+	suffix := acctest.RandString(t, 10)
+	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-networkconfig")
+
+	context1 := map[string]interface{}{
+		"random_suffix":                suffix,
+		"network_name":                 networkName,
+		"enable_public_ip":             true,
+		"authorized_external_networks": "",
+	}
+	context2 := map[string]interface{}{
+		"random_suffix":    suffix,
+		"network_name":     networkName,
+		"enable_public_ip": true,
+		"authorized_external_networks": `
+		authorized_external_networks {
+			cidr_range = "8.8.8.8/30"
+		}
+		authorized_external_networks {
+			cidr_range = "8.8.4.4/30"
+		}
+		`,
+	}
+	context3 := map[string]interface{}{
+		"random_suffix":    suffix,
+		"network_name":     networkName,
+		"enable_public_ip": true,
+		"cidr_range":       "8.8.8.8/30",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAlloydbInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAlloydbInstance_networkConfig(context1),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.enable_public_ip", "true"),
+				),
+			},
+			{
+				ResourceName:            "google_alloydb_instance.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time"},
+			},
+			{
+				Config: testAccAlloydbInstance_networkConfig(context2),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.enable_public_ip", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.authorized_external_networks.0.cidr_range", "8.8.8.8/30"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.authorized_external_networks.1.cidr_range", "8.8.4.4/30"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.authorized_external_networks.#", "2"),
+				),
+			},
+			{
+				ResourceName:            "google_alloydb_instance.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time"},
+			},
+			{
+				Config: testAccAlloydbInstance_networkConfigWithAnAuthNetwork(context3),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.enable_public_ip", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.authorized_external_networks.0.cidr_range", "8.8.8.8/30"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.authorized_external_networks.#", "1"),
+				),
+			},
+			{
+				ResourceName:            "google_alloydb_instance.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time"},
+			},
+		},
+	})
+}
+
+func testAccAlloydbInstance_networkConfig(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_instance" "default" {
+  cluster       = google_alloydb_cluster.default.name
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
+  instance_type = "PRIMARY"
+  database_flags = {
+    "password.enforce_complexity" = "on"
+  }
+
+  network_config {
+    enable_public_ip = %{enable_public_ip}
+    %{authorized_external_networks}
+  }	
+}
+
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  location   = "us-central1"
+  network    = data.google_compute_network.default.id
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
+}
+
+data "google_project" "project" {}
+
+data "google_compute_network" "default" {
+	name = "%{network_name}"
+}
+`, context)
+}
+
+func testAccAlloydbInstance_networkConfigWithAnAuthNetwork(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_instance" "default" {
+  cluster       = google_alloydb_cluster.default.name
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
+  instance_type = "PRIMARY"
+  database_flags = {
+    "password.enforce_complexity" = "on"
+  }
+
+  network_config {
+    enable_public_ip = %{enable_public_ip}
+    authorized_external_networks {
+      cidr_range = "%{cidr_range}"
+    }
+  }	
+}
+
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  location   = "us-central1"
+  network    = data.google_compute_network.default.id
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
+}
+
+data "google_project" "project" {}
+
+data "google_compute_network" "default" {
+	name = "%{network_name}"
+}
+`, context)
+}
+
+func TestAccAlloydbInstance_updatePscInstanceConfig(t *testing.T) {
+	t.Parallel()
+
+	random_suffix := acctest.RandString(t, 10)
+	context := map[string]interface{}{
+		"random_suffix": random_suffix,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAlloydbInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAlloydbInstance_pscInstanceConfig(context),
+			},
+			{
+				Config: testAccAlloydbInstance_updatePscInstanceConfigAllowlist(context),
+			},
+		},
+	})
+}
+
+func testAccAlloydbInstance_pscInstanceConfig(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_instance" "default" {
+  cluster       = google_alloydb_cluster.default.name
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
+  instance_type = "PRIMARY"
+  machine_config {
+    cpu_count = 2
+  }
+  psc_instance_config {
+	allowed_consumer_projects = ["${data.google_project.project.number}"]
+  }
+}
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  location   = "us-central1"
+  psc_config {
+	psc_enabled = true
+  }
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
+}
+data "google_project" "project" {}
+`, context)
+}
+
+func testAccAlloydbInstance_updatePscInstanceConfigAllowlist(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_instance" "default" {
+  cluster       = google_alloydb_cluster.default.name
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
+  instance_type = "PRIMARY"
+  machine_config {
+    cpu_count = 2
+  }
+  psc_instance_config {
+	allowed_consumer_projects = ["${data.google_project.project.number}", "1044355742748"]
+  }
+}
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  location   = "us-central1"
+  psc_config {
+	psc_enabled = true
+  }
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
+}
+data "google_project" "project" {}
 `, context)
 }

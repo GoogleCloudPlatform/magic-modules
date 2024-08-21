@@ -30,6 +30,7 @@ timeouts: !ruby/object:Api::Timeouts
   delete_minutes: 90
 autogen_async: true
 error_abort_predicates: ['transport_tpg.Is429QuotaError']
+skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'looker_instance_basic'
@@ -69,10 +70,18 @@ examples:
       client_id: 'my-client-id'
       client_secret: 'my-client-secret'
     test_vars_overrides:
-      address_name: 'acctest.BootstrapSharedTestGlobalAddress(t, "looker-vpc-network-1", acctest.AddressWithPrefixLength(20))'
+      address_name: 'acctest.BootstrapSharedTestGlobalAddress(t, "looker-vpc-network-3", acctest.AddressWithPrefixLength(8))'
       kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "looker-vpc-network-1", acctest.AddressWithPrefixLength(20))'
+      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "looker-vpc-network-3", acctest.ServiceNetworkWithPrefixLength(8))'
     skip_docs: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'looker_instance_custom_domain'
+    primary_resource_id: 'looker-instance'
+    vars:
+      instance_name: 'my-instance'
+      client_id: 'my-client-id'
+      client_secret: 'my-client-secret'
+      custom_domain: 'my-custom-domain'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'region'
@@ -331,7 +340,7 @@ properties:
     immutable: true
     url_param_only: true
     validation: !ruby/object:Provider::Terraform::Validation
-      regex: '^[a-z][a-z0-9-]{0,39}[a-z0-9]$'
+      regex: '^[a-z][a-z0-9-]{0,61}[a-z0-9]$'
   # Oauth Object
   - !ruby/object:Api::Type::NestedObject
     name: oauthConfig
@@ -354,8 +363,8 @@ properties:
     name: platformEdition
     description: |
       Platform editions for a Looker instance. Each edition maps to a set of instance features, like its size. Must be one of these values:
-      - LOOKER_CORE_TRIAL: trial instance
-      - LOOKER_CORE_STANDARD: pay as you go standard instance
+      - LOOKER_CORE_TRIAL: trial instance (Currently Unavailable)
+      - LOOKER_CORE_STANDARD: pay as you go standard instance (Currently Unavailable)
       - LOOKER_CORE_STANDARD_ANNUAL: subscription standard instance
       - LOOKER_CORE_ENTERPRISE_ANNUAL: subscription enterprise instance
       - LOOKER_CORE_EMBED_ANNUAL: subscription embed instance
@@ -416,3 +425,19 @@ properties:
         description: |
           Number of additional Developer Users to allocate to the Looker Instance.
   # UserMetadata Object - End
+  # CustomDomain Object
+  - !ruby/object:Api::Type::NestedObject
+    name: customDomain
+    description: |
+      Custom domain settings for a Looker instance.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'domain'
+        description: |
+          Domain name
+      - !ruby/object:Api::Type::String
+        name: 'state'
+        description: |
+          Status of the custom domain.
+        output: true
+  # CustomDomain Object - End

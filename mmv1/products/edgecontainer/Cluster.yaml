@@ -22,6 +22,9 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 base_url: 'projects/{{project}}/locations/{{location}}/clusters'
 self_link: 'projects/{{project}}/locations/{{location}}/clusters/{{name}}'
 create_url: 'projects/{{project}}/locations/{{location}}/clusters?cluster_id={{name}}'
+update_url: 'projects/{{project}}/locations/{{location}}/clusters/{{name}}'
+update_verb: :PATCH
+update_mask: true
 autogen_async: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
@@ -29,9 +32,9 @@ async: !ruby/object:Api::OpAsync
     base_url: '{{op_id}}'
     wait_ms: 1000
     timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 60
-      update_minutes: 60
-      delete_minutes: 60
+      insert_minutes: 480
+      update_minutes: 480
+      delete_minutes: 480
   result: !ruby/object:Api::OpAsync::Result
     path: 'response'
   status: !ruby/object:Api::OpAsync::Status
@@ -253,6 +256,37 @@ properties:
                   An RRULE (https://tools.ietf.org/html/rfc5545#section-3.8.5.3) for how
                   this window recurs. They go on for the span of time between the start and
                   end time.
+      - !ruby/object:Api::Type::Array
+        name: "maintenanceExclusions"
+        required: false
+        description: |
+          Exclusions to automatic maintenance. Non-emergency maintenance should not occur
+          in these windows. Each exclusion has a unique name and may be active or expired.
+          The max number of maintenance exclusions allowed at a given time is 3.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::NestedObject
+              name: "window"
+              default_from_api: true
+              description: |
+                Represents an arbitrary window of time.
+              properties:
+                - !ruby/object:Api::Type::Time
+                  name: "startTime"
+                  description: |
+                    The time that the window first starts.
+                  default_from_api: true
+                - !ruby/object:Api::Type::Time
+                  name: "endTime"
+                  description: |
+                    The time that the window ends. The end time must take place after the
+                    start time.
+                  default_from_api: true
+            - !ruby/object:Api::Type::String
+              name: "id"
+              default_from_api: true
+              description: |
+                A unique (per cluster) id for the window.
   - !ruby/object:Api::Type::String
     name: "controlPlaneVersion"
     description: |

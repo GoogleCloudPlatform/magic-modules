@@ -7,7 +7,7 @@ aliases:
 
 # Best practices
 
-The following is a list of best practices that contributions are expected to follow in order to ensure a consistent UX for the Google Terraform provider internally and also compared to other Terraform providers.
+The following is a list of best practices that contributions are expected to follow in order to ensure a consistent UX for the Terraform provider for Google Cloud internally and also compared to other Terraform providers.
 
 ## ForceNew
 
@@ -19,7 +19,7 @@ Some fields or resources may be possible to update in place, but only under spec
 
 In complex cases, it is better to mark the field `ForceNew` to ensure that users can apply their configurations successfully.
 
-### Mitigating data loss risk via deletion_protection
+### Mitigating data loss risk via deletion_protection {#deletion_protection}
 
 Some resources, such as databases, have a significant risk of unrecoverable data loss if the resource is accidentally deleted due to a change to a ForceNew field. For these resources, the best practice is to add a `deletion_protection` field that defaults to `true`, which prevents the resource from being deleted if enabled. Although it is a small breaking change, for users, the benefits of `deletion_protection` defaulting to `true` outweigh the cost.
 
@@ -30,21 +30,23 @@ A resource can have up to two `deletion_protection` fields (with different names
 
 Resources that do not have a significant risk of unrecoverable data loss or similar critical concern will not be given `deletion_protection` fields.
 
+See [Client-side fields]({{< ref "/develop/client-side-fields" >}}) for information about adding `deletion_protection` fields.
+
 {{< hint info >}}
 **Note:** The previous best practice was a field called `force_delete` that defaulted to `false`. This is still present on some resources for backwards-compatibility reasons, but `deletion_protection` is preferred going forward.
 {{< /hint >}}
 
-## Deletion policy
+## Deletion policy {#deletion_policy}
 
 Some resources need to let users control the actions taken add deletion time. For these resources, the best practice is to add a `deletion_policy` enum field that defaults to an empty string and allows special values that control the deletion behavior.
 
 One common example is `ABANDON`, which is useful if the resource is safe to delete from Terraform but could cause problems if deleted from the API - for example, `google_bigtable_gc_policy` deletion can fail in replicated instances. `ABANDON` indicates that attempts to delete the resource should remove it from state without actually deleting it.
 
-See [magic-modules#13107](https://github.com/hashicorp/terraform-provider-google/pull/13107) for an example of adding a `deletion_policy` field to an existing resource.
+See [Client-side fields]({{< ref "/develop/client-side-fields" >}}) for information about adding `deletion_policy` fields.
 
 ## Add labels and annotations support
 
-The new labels model and the new annotations model are introduced in [Terraform Google Provider 5.0.0](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/version_5_upgrade#provider).
+The new labels model and the new annotations model are introduced in [Terraform provider for Google Cloud 5.0.0](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/version_5_upgrade#provider).
 
 There are now three label-related fields with the new labels model:
 * The `labels` field is now non-authoritative and only manages the label keys defined in your configuration for the resource.

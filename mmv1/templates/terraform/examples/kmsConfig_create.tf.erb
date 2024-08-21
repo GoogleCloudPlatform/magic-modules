@@ -1,0 +1,17 @@
+resource "google_kms_key_ring" "keyring" {
+  name     = "<%= ctx[:vars]['key_ring_value'] %>"
+  location = "us-central1"
+}
+
+resource "google_kms_crypto_key" "crypto_key" {
+  name            = "<%= ctx[:vars]['crypto_name'] %>"
+  key_ring        = google_kms_key_ring.keyring.id
+  # rotation_period = "7776000s"
+}
+
+resource "google_netapp_kmsconfig" "<%= ctx[:primary_resource_id] %>" {
+  name = "<%= ctx[:vars]['kms_name'] %>"
+  description="this is a test description"
+  crypto_key_name=google_kms_crypto_key.crypto_key.id
+  location="us-central1"
+}

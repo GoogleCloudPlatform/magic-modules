@@ -1,9 +1,10 @@
 package alloydb_test
 
 import (
+	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -491,7 +492,7 @@ resource "google_alloydb_cluster" "default" {
   encryption_config {
     kms_key_name = google_kms_crypto_key.key.id
   }
-  depends_on = [google_kms_crypto_key_iam_binding.crypto_key]
+  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
 }
 resource "google_compute_network" "default" {
   name = "tf-test-alloydb-cluster%{random_suffix}"
@@ -505,12 +506,10 @@ resource "google_kms_crypto_key" "key" {
   name     = "%{key_name}"
   key_ring = google_kms_key_ring.keyring.id
 }
-resource "google_kms_crypto_key_iam_binding" "crypto_key" {
+resource "google_kms_crypto_key_iam_member" "crypto_key" {
   crypto_key_id = google_kms_crypto_key.key.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  members = [
-	"serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com",
-  ]
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com"
 }
 `, context)
 }
@@ -582,7 +581,7 @@ resource "google_alloydb_cluster" "default" {
   lifecycle {
 	prevent_destroy = true
   }
-  depends_on = [google_kms_crypto_key_iam_binding.crypto_key]
+  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
 }
 
 resource "google_compute_network" "default" {
@@ -601,12 +600,10 @@ resource "google_kms_crypto_key" "key" {
   key_ring = google_kms_key_ring.keyring.id
 }
 
-resource "google_kms_crypto_key_iam_binding" "crypto_key" {
+resource "google_kms_crypto_key_iam_member" "crypto_key" {
   crypto_key_id = google_kms_crypto_key.key.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  members = [
-	"serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com",
-  ]
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com"
 }
 `, context)
 }
@@ -632,9 +629,9 @@ resource "google_alloydb_cluster" "default" {
     }
   }
   lifecycle {
-	prevent_destroy = true
+    prevent_destroy = true
   }
-  depends_on = [google_kms_crypto_key_iam_binding.crypto_key]
+  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
 }
 
 resource "google_compute_network" "default" {
@@ -654,24 +651,20 @@ resource "google_kms_crypto_key" "key" {
 }
 
 resource "google_kms_crypto_key" "key2" {
-	name     = "%{key_name}-2"
-	key_ring = google_kms_key_ring.keyring.id
+  name     = "%{key_name}-2"
+  key_ring = google_kms_key_ring.keyring.id
 }
 
-resource "google_kms_crypto_key_iam_binding" "crypto_key" {
+resource "google_kms_crypto_key_iam_member" "crypto_key" {
   crypto_key_id = google_kms_crypto_key.key.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  members = [
-	"serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com",
-  ]
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com"
 }
 
-resource "google_kms_crypto_key_iam_binding" "crypto_key2" {
-	crypto_key_id = google_kms_crypto_key.key2.id
-	role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-	members = [
-	  "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com",
-	]
+resource "google_kms_crypto_key_iam_member" "crypto_key2" {
+  crypto_key_id = google_kms_crypto_key.key2.id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com"
 }
 `, context)
 }
@@ -696,7 +689,7 @@ resource "google_alloydb_cluster" "default" {
       retention_period = "510s"
     }
   }
-  depends_on = [google_kms_crypto_key_iam_binding.crypto_key]
+  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
 }
 
 resource "google_compute_network" "default" {
@@ -720,20 +713,16 @@ resource "google_kms_crypto_key" "key2" {
 	key_ring = google_kms_key_ring.keyring.id
 }
 
-resource "google_kms_crypto_key_iam_binding" "crypto_key" {
+resource "google_kms_crypto_key_iam_member" "crypto_key" {
   crypto_key_id = google_kms_crypto_key.key.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  members = [
-	"serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com",
-  ]
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com"
 }
 
-resource "google_kms_crypto_key_iam_binding" "crypto_key2" {
-	crypto_key_id = google_kms_crypto_key.key2.id
-	role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-	members = [
-	  "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com",
-	]
+resource "google_kms_crypto_key_iam_member" "crypto_key2" {
+  crypto_key_id = google_kms_crypto_key.key2.id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com"
 }
 `, context)
 }
@@ -1042,7 +1031,7 @@ resource "google_alloydb_cluster" "default" {
   lifecycle {
 	prevent_destroy = true
   }
-  depends_on = [google_kms_crypto_key_iam_binding.crypto_key]
+  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
 }
 
 resource "google_compute_network" "default" {
@@ -1051,12 +1040,10 @@ resource "google_compute_network" "default" {
 
 data "google_project" "project" {}
 
-resource "google_kms_crypto_key_iam_binding" "crypto_key" {
+resource "google_kms_crypto_key_iam_member" "crypto_key" {
   crypto_key_id = "%{key_name}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  members = [
-    "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com",
-  ]
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com"
 }
 `, context)
 }
@@ -1074,7 +1061,7 @@ resource "google_alloydb_cluster" "default" {
       kms_key_name = "%{key_name}"
     }
   }
-  depends_on = [google_kms_crypto_key_iam_binding.crypto_key]
+  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
 }
 
 resource "google_compute_network" "default" {
@@ -1083,12 +1070,10 @@ resource "google_compute_network" "default" {
 
 data "google_project" "project" {}
 
-resource "google_kms_crypto_key_iam_binding" "crypto_key" {
+resource "google_kms_crypto_key_iam_member" "crypto_key" {
 	crypto_key_id = "%{key_name}"
 	role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-	members = [
-	  "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com",
-	]
+	member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com"
   }
 `, context)
 }
@@ -1181,5 +1166,168 @@ resource "google_compute_global_address" "private_ip_alloc" {
 	network       = google_compute_network.default.id
   }
   
+`, context)
+}
+
+// Ensures cluster creation works with correctly specified maintenance update policy.
+func TestAccAlloydbCluster_withMaintenanceWindows(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAlloydbCluster_withMaintenanceWindows(context),
+			},
+			{
+				ResourceName:      "google_alloydb_cluster.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccAlloydbCluster_withMaintenanceWindows(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  location   = "us-central1"
+  network_config {
+	network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  }
+  maintenance_update_policy {
+    maintenance_windows {
+      day = "WEDNESDAY"
+      start_time {
+        hours = 12
+        minutes = 0
+        seconds = 0
+        nanos = 0
+      }
+    }
+  }
+}
+data "google_project" "project" {}
+resource "google_compute_network" "default" {
+  name = "tf-test-alloydb-cluster%{random_suffix}"
+}
+`, context)
+}
+
+// Ensures cluster creation throws expected errors for incorrect configurations of maintenance update policy.
+func TestAccAlloydbCluster_withMaintenanceWindowsMissingFields(t *testing.T) {
+	t.Parallel()
+	acctest.SkipIfVcr(t)
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccAlloydbCluster_withMaintenanceWindowMissingStartTime(context),
+				ExpectError: regexp.MustCompile("Error: Insufficient start_time blocks"),
+			},
+			{
+				Config:      testAccAlloydbCluster_withMaintenanceWindowMissingDay(context),
+				ExpectError: regexp.MustCompile("Error: Missing required argument"),
+			},
+		},
+	})
+}
+
+func testAccAlloydbCluster_withMaintenanceWindowMissingStartTime(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  location   = "us-central1"
+  network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  
+  maintenance_update_policy {
+    maintenance_windows {
+      day = "WEDNESDAY"
+    }
+  }
+}
+
+resource "google_compute_network" "default" {
+  name     = "tf-test-alloydb-cluster%{random_suffix}"
+}
+
+data "google_project" "project" {}
+`, context)
+}
+
+func testAccAlloydbCluster_withMaintenanceWindowMissingDay(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  location   = "us-central1"
+  network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  
+  maintenance_update_policy {
+    maintenance_windows {
+      start_time {
+        hours = 12
+        minutes = 0
+        seconds = 0
+        nanos = 0
+      }
+    }
+  }
+}
+
+resource "google_compute_network" "default" {
+  name     = "tf-test-alloydb-cluster%{random_suffix}"
+}
+
+data "google_project" "project" {}
+`, context)
+}
+
+// Ensures cluster creation succeeds for a Private Service Connect enabled cluster.
+func TestAccAlloydbCluster_withPrivateServiceConnect(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAlloydbCluster_withPrivateServiceConnect(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "psc_config.0.psc_enabled", "true"),
+				),
+			},
+		},
+	})
+}
+
+func testAccAlloydbCluster_withPrivateServiceConnect(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  location   = "us-central1"
+  psc_config {
+    psc_enabled = true
+  }
+}
+data "google_project" "project" {}
 `, context)
 }

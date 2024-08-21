@@ -4,7 +4,7 @@ description: |-
   Manages a project-level logging sink.
 ---
 
-# google\_logging\_project\_sink
+# google_logging_project_sink
 
 Manages a project-level logging sink. For more information see:
 
@@ -17,6 +17,9 @@ Manages a project-level logging sink. For more information see:
 ~> **Note:** You must have [granted the "Logs Configuration Writer"](https://cloud.google.com/logging/docs/access-control) IAM role (`roles/logging.configWriter`) to the credentials used with terraform.
 
 ~> **Note** You must [enable the Cloud Resource Manager API](https://console.cloud.google.com/apis/library/cloudresourcemanager.googleapis.com)
+
+~> **Note:** The `_Default` and `_Required` logging sinks are automatically created for a given project and cannot be deleted. Creating a resource of this type will acquire and update the resource that already exists at the desired location. These sinks cannot be removed so deleting this resource will remove the sink config from your terraform state but will leave the logging sink unchanged. The sinks that are currently automatically created are "_Default" and "_Required".
+
 
 ## Example Usage - Basic Sink
 
@@ -164,10 +167,9 @@ resource "google_logging_project_sink" "log-bucket" {
 
 The following arguments are supported:
 
-* `name` - (Required) The name of the logging sink.
+* `name` - (Required) The name of the logging sink. Logging automatically creates two sinks: `_Required` and `_Default`.
 
-* `destination` - (Required) The destination of the sink (or, in other words, where logs are written to). Can be a
-    Cloud Storage bucket, a PubSub topic, a BigQuery dataset or a Cloud Logging bucket . Examples:
+* `destination` - (Required) The destination of the sink (or, in other words, where logs are written to). Can be a Cloud Storage bucket, a PubSub topic, a BigQuery dataset, a Cloud Logging bucket, or a Google Cloud project. Examples:
 
     - `storage.googleapis.com/[GCS_BUCKET]`
     - `bigquery.googleapis.com/projects/[PROJECT_ID]/datasets/[DATASET]`

@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/GoogleCloudPlatform/magic-modules/tools/issue-labeler/labeler"
 	"github.com/golang/glog"
 )
 
@@ -16,15 +17,15 @@ var flagDryRun = flag.Bool("backfill-dry-run", false, "when combined with backfi
 func main() {
 	flag.Parse()
 
-	regexpLabels, err := buildRegexLabels(enrolledTeamsYaml)
+	regexpLabels, err := labeler.BuildRegexLabels(labeler.EnrolledTeamsYaml)
 	if err != nil {
 		glog.Exitf("Error building regex labels: %v", err)
 	}
 
 	if *flagBackfillDate == "" {
 		issueBody := os.Getenv("ISSUE_BODY")
-		affectedResources := extractAffectedResources(issueBody)
-		labels := computeLabels(affectedResources, regexpLabels)
+		affectedResources := labeler.ExtractAffectedResources(issueBody)
+		labels := labeler.ComputeLabels(affectedResources, regexpLabels)
 
 		if len(labels) > 0 {
 			labels = append(labels, "forward/review")
@@ -32,8 +33,9 @@ func main() {
 			fmt.Println(`["` + strings.Join(labels, `", "`) + `"]`)
 		}
 	} else {
-		issues := getIssues(*flagBackfillDate)
-		issueUpdates := computeIssueUpdates(issues, regexpLabels)
-		updateIssues(issueUpdates, *flagDryRun)
+		repository := "hashicorp/terraform-provider-google"
+		issues := labeler.GetIssues(repository, *flagBackfillDate)
+		issueUpdates := labeler.ComputeIssueUpdates(issues, regexpLabels)
+		labeler.UpdateIssues(repository, issueUpdates, *flagDryRun)
 	}
 }

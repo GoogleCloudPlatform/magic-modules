@@ -1,5 +1,10 @@
 resource "google_gke_hub_scope" "<%= ctx[:primary_resource_id] %>" {
-  scope_id = "tf-test-scope%{random_suffix}"
+  scope_id = "<%= ctx[:vars]['resource_name'] %>"
+  namespace_labels = {
+      keyb = "valueb"
+      keya = "valuea"
+      keyc = "valuec" 
+  }
   labels = {
       keyb = "valueb"
       keya = "valuea"

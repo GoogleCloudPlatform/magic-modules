@@ -1,0 +1,5 @@
+resource "google_dataplex_entry_group" "{{$.PrimaryResourceId}}" {
+  entry_group_id = "{{index $.Vars "entry_group_name"}}"
+  project = "{{index $.TestEnvVars "project_name"}}"
+  location = "us-central1"
+}

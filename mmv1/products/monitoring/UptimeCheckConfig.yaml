@@ -72,13 +72,14 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/monitoring_uptime_check_config.go.erb
   custom_import: templates/terraform/custom_import/self_link_as_name.erb
   post_create: templates/terraform/post_create/set_computed_name.erb
+  custom_delete: templates/terraform/custom_delete/monitoring_uptime_check_config.go.erb
 properties:
   - !ruby/object:Api::Type::String
     name: name
     output: true
     description:
       A unique resource name for this UptimeCheckConfig. The format is
-      projects/[PROJECT_ID]/uptimeCheckConfigs/[UPTIME_CHECK_ID].
+      `projects/[PROJECT_ID]/uptimeCheckConfigs/[UPTIME_CHECK_ID]`.
   - !ruby/object:Api::Type::String
     name: uptimeCheckId
     api_name: id
@@ -104,8 +105,8 @@ properties:
     required: true
     description:
       The maximum amount of time to wait for the request to complete (must be
-      between 1 and 60 seconds). Accepted formats
-      https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.Duration
+      between 1 and 60 seconds). [See the accepted formats](
+      https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.Duration)
   - !ruby/object:Api::Type::Array
     name: contentMatchers
     description:
@@ -167,11 +168,20 @@ properties:
     immutable: true
     description:
       The checker type to use for the check. If the monitored resource type is
-      servicedirectory_service, checkerType must be set to VPC_CHECKERS.
+      `servicedirectory_service`, `checker_type` must be set to `VPC_CHECKERS`.
     values:
       - :STATIC_IP_CHECKERS
       - :VPC_CHECKERS
     default_from_api: true
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: userLabels
+    description:
+      User-supplied key/value data to be used for organizing and
+      identifying the `UptimeCheckConfig` objects.
+      The field can contain up to 64 entries. Each key and value is limited to
+      63 Unicode characters or 128 bytes, whichever is smaller. Labels and
+      values can contain only lowercase letters, numerals, underscores, and
+      dashes. Keys must begin with a letter.
   - !ruby/object:Api::Type::NestedObject
     name: httpCheck
     description: Contains information needed to make an HTTP or HTTPS check.
@@ -181,7 +191,7 @@ properties:
         immutable: true
         description:
           The HTTP request method to use for the check. If set to
-          METHOD_UNSPECIFIED then requestMethod defaults to GET.
+          `METHOD_UNSPECIFIED` then `request_method` defaults to `GET`.
         default_value: :GET
         values:
           - :METHOD_UNSPECIFIED
@@ -193,6 +203,16 @@ properties:
         values:
           - :TYPE_UNSPECIFIED
           - :URL_ENCODED
+          - :USER_PROVIDED
+      - !ruby/object:Api::Type::String
+        name: customContentType
+        description:
+          A user provided content type header to use for the check. The invalid
+          configurations outlined in the `content_type` field apply to
+          custom_content_type`, as well as the following
+            1. `content_type` is `URL_ENCODED` and `custom_content_type` is set.
+            2. `content_type` is `USER_PROVIDED` and `custom_content_type` is not
+            set.
       - !ruby/object:Api::Type::NestedObject
         name: authInfo
         at_least_one_of:
@@ -203,8 +223,9 @@ properties:
           - http_check.0.use_ssl
           - http_check.0.mask_headers
         description:
-          The authentication information. Optional when creating an HTTP check;
-          defaults to empty.
+          The authentication information using username and password.
+          Optional when creating an HTTP check; defaults to empty.
+          Do not use with other authentication fields.
         properties:
           - !ruby/object:Api::Type::String
             name: password
@@ -216,6 +237,18 @@ properties:
             name: username
             required: true
             description: The username to authenticate.
+      - !ruby/object:Api::Type::NestedObject
+        name: serviceAgentAuthentication
+        description: The authentication information using the Monitoring Service Agent.
+          Optional when creating an HTTPS check; defaults to empty.
+          Do not use with other authentication fields.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: type
+            description: The type of authentication to use.
+            values:
+              - :SERVICE_AGENT_AUTHENTICATION_TYPE_UNSPECIFIED
+              - :OIDC_TOKEN
       - !ruby/object:Api::Type::Integer
         name: port
         at_least_one_of:
@@ -227,8 +260,9 @@ properties:
           - http_check.0.mask_headers
         description:
           The port to the page to run the check against. Will be combined with
-          host (specified within the MonitoredResource) and path to construct
-          the full URL. Optional (defaults to 80 without SSL, or 443 with SSL).
+          `host` (specified within the [`monitored_resource`](#nested_monitored_resource))
+          and path to construct the full URL. Optional (defaults to 80 without
+          SSL, or 443 with SSL).
         default_from_api: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: headers
@@ -243,11 +277,11 @@ properties:
           The list of headers to send as part of the uptime check request. If
           two headers have the same key and different values, they should be
           entered as a single header, with the value being a comma-separated
-          list of all the desired values as described at
-          https://www.w3.org/Protocols/rfc2616/rfc2616.txt (page 31). Entering
-          two separate headers with the same key in a Create call will cause the
-          first to be overwritten by the second. The maximum number of headers
-          allowed is 100.
+          list of all the desired values as described in
+          [RFC 2616 (page 31)](https://www.w3.org/Protocols/rfc2616/rfc2616.txt).
+          Entering two separate headers with the same key in a Create call will
+          cause the first to be overwritten by the second. The maximum number
+          of headers allowed is 100.
         default_from_api: true
       - !ruby/object:Api::Type::String
         name: path
@@ -262,8 +296,8 @@ properties:
         description:
           The path to the page to run the check against. Will be combined with
           the host (specified within the MonitoredResource) and port to
-          construct the full URL. If the provided path does not begin with "/",
-          a "/" will be prepended automatically. Optional (defaults to "/").
+          construct the full URL. If the provided path does not begin with `/`,
+          a `/` will be prepended automatically. Optional (defaults to `/`).
         diff_suppress_func: resourceMonitoringUptimeCheckConfigHttpCheckPathDiffSuppress
       - !ruby/object:Api::Type::Boolean
         name: useSsl
@@ -280,8 +314,8 @@ properties:
         description:
           Boolean specifying whether to include SSL certificate validation as a
           part of the Uptime check. Only applies to checks where
-          monitoredResource is set to uptime_url. If useSsl is false, setting
-          validateSsl to true has no effect.
+          `monitored_resource` is set to `uptime_url`. If `use_ssl` is `false`, setting
+          `validate_ssl` to `true` has no effect.
       - !ruby/object:Api::Type::Boolean
         name: maskHeaders
         at_least_one_of:
@@ -296,19 +330,19 @@ properties:
           Encryption should be specified for any headers related to
           authentication that you do not wish to be seen when retrieving the
           configuration. The server will be responsible for encrypting the
-          headers. On Get/List calls, if mask_headers is set to True then the
-          headers will be obscured with ******.
+          headers. On Get/List calls, if `mask_headers` is set to `true` then the
+          headers will be obscured with `******`.
       - !ruby/object:Api::Type::String
         name: body
         description:
-          The request body associated with the HTTP POST request. If contentType
-          is URL_ENCODED, the body passed in must be URL-encoded. Users can
-          provide a Content-Length header via the headers field or the API will
-          do so. If the requestMethod is GET and body is not empty, the API will
+          The request body associated with the HTTP POST request. If `content_type`
+          is `URL_ENCODED`, the body passed in must be URL-encoded. Users can
+          provide a `Content-Length` header via the `headers` field or the API will
+          do so. If the `request_method` is `GET` and `body` is not empty, the API will
           return an error. The maximum byte size is 1 megabyte. Note - As with
           all bytes fields JSON representations are base64 encoded. e.g.
-          "foo=bar" in URL-encoded form is "foo%3Dbar" and in base64 encoding is
-          "Zm9vJTI1M0RiYXI=".
+          `foo=bar` in URL-encoded form is `foo%3Dbar` and in base64 encoding is
+          `Zm9vJTI1M0RiYXI=`.
       - !ruby/object:Api::Type::Array
         name: acceptedResponseStatusCodes
         description:
@@ -330,6 +364,16 @@ properties:
                 - :STATUS_CLASS_4XX
                 - :STATUS_CLASS_5XX
                 - :STATUS_CLASS_ANY
+      - !ruby/object:Api::Type::NestedObject
+        name: pingConfig
+        description:
+          Contains information needed to add pings to an HTTP check.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: pingsCount
+            required: true
+            description:
+              Number of ICMP pings. A maximum of 3 ICMP pings is currently supported.
   - !ruby/object:Api::Type::NestedObject
     name: tcpCheck
     description: Contains information needed to make a TCP check.
@@ -339,8 +383,18 @@ properties:
         required: true
         description:
           The port to the page to run the check against. Will be combined with
-          host (specified within the MonitoredResource) to construct the full
+          host (specified within the `monitored_resource`) to construct the full
           URL.
+      - !ruby/object:Api::Type::NestedObject
+        name: pingConfig
+        description:
+          Contains information needed to add pings to a TCP check.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: pingsCount
+            required: true
+            description:
+              Number of ICMP pings. A maximum of 3 ICMP pings is currently supported.
   - !ruby/object:Api::Type::NestedObject
     name: resourceGroup
     immutable: true
@@ -377,12 +431,18 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: monitoredResource
     immutable: true
-    description:
-      'The monitored resource
+    description: |
+      The [monitored resource]
       (https://cloud.google.com/monitoring/api/resources) associated with the
       configuration. The following monitored resource types are supported for
-      uptime checks:  uptime_url  gce_instance  gae_app  aws_ec2_instance
-      aws_elb_load_balancer  k8s_service  servicedirectory_service'
+      uptime checks:
+      * `aws_ec2_instance`
+      * `aws_elb_load_balancer`
+      * `gae_app`
+      * `gce_instance`
+      * `k8s_service`
+      * `servicedirectory_service`
+      * `uptime_url`
     exactly_one_of:
       - monitored_resource
       - resource_group
@@ -394,21 +454,19 @@ properties:
         required: true
         description:
           The monitored resource type. This field must match the type field of a
-          MonitoredResourceDescriptor
-          (https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.monitoredResourceDescriptors#MonitoredResourceDescriptor)
+          [`MonitoredResourceDescriptor`](https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.monitoredResourceDescriptors#MonitoredResourceDescriptor)
           object. For example, the type of a Compute Engine VM instance is
-          gce_instance. For a list of types, see Monitoring resource types
-          (https://cloud.google.com/monitoring/api/resources) and Logging
-          resource types
-          (https://cloud.google.com/logging/docs/api/v2/resource-list).
+          `gce_instance`. For a list of types, see [Monitoring resource types](https://cloud.google.com/monitoring/api/resources)
+          and [Logging resource types](https://cloud.google.com/logging/docs/api/v2/resource-list).
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         immutable: true
         required: true
+        diff_suppress_func: resourceMonitoringUptimeCheckConfigMonitoredResourceLabelsDiffSuppress
         description:
           Values for all of the labels listed in the associated monitored
           resource descriptor. For example, Compute Engine VM instances use the
-          labels "project_id", "instance_id", and "zone".
+          labels `project_id`, `instance_id`, and `zone`.
   - !ruby/object:Api::Type::NestedObject
     name: syntheticMonitor
     immutable: true

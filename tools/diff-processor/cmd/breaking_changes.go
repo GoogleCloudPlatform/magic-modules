@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"encoding/json"
+	"fmt"
 	newProvider "google/provider/new/google/provider"
 	oldProvider "google/provider/old/google/provider"
 
@@ -8,8 +10,8 @@ import (
 	"os"
 	"sort"
 
-	"github.com/GoogleCloudPlatform/magic-modules/.ci/diff-processor/diff"
-	"github.com/GoogleCloudPlatform/magic-modules/.ci/diff-processor/rules"
+	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
+	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/breaking_changes"
 	"github.com/spf13/cobra"
 )
 
@@ -41,13 +43,12 @@ func newBreakingChangesCmd(rootOptions *rootOptions) *cobra.Command {
 }
 func (o *breakingChangesOptions) run() error {
 	schemaDiff := o.computeSchemaDiff()
-	breakingChanges := rules.ComputeBreakingChanges(schemaDiff)
-	sort.Strings(breakingChanges)
-	for _, breakingChange := range breakingChanges {
-		_, err := o.stdout.Write([]byte(breakingChange + "\n"))
-		if err != nil {
-			return err
-		}
+	breakingChanges := breaking_changes.ComputeBreakingChanges(schemaDiff)
+	sort.Slice(breakingChanges, func(i, j int) bool {
+		return breakingChanges[i].Message < breakingChanges[j].Message
+	})
+	if err := json.NewEncoder(o.stdout).Encode(breakingChanges); err != nil {
+		return fmt.Errorf("error encoding json: %w", err)
 	}
 	return nil
 }

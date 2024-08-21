@@ -14,7 +14,6 @@
 ---
 !ruby/object:Api::Resource
 name: "Cluster"
-min_version: beta
 base_url: "{{parent}}/clusters"
 create_url: "{{parent}}/clusters?clusterId={{name}}"
 self_link: "{{parent}}/clusters/{{name}}"
@@ -50,10 +49,11 @@ async: !ruby/object:Api::OpAsync
 import_format: ["{{%parent}}/clusters/{{name}}"]
 id_format: "{{parent}}/clusters/{{name}}"
 autogen_async: true
+# There is a handwritten sweeper that provides a list of locations to sweep
+skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "vmware_engine_cluster_basic"
-    min_version: beta
     primary_resource_id: "vmw-engine-ext-cluster"
     skip_test: true   # update tests will take care of create and update. PC and cluster creation is expensive and node reservation is required.
     vars:
@@ -65,7 +65,6 @@ examples:
       region: :REGION
   - !ruby/object:Provider::Terraform::Examples
     name: "vmware_engine_cluster_full"
-    min_version: beta
     primary_resource_id: "vmw-ext-cluster"
     skip_test: true   # update tests will take care of create and update. PC and cluster creation is expensive and node reservation is required.
     vars:

@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccNotebooksRuntime_update(t *testing.T) {
@@ -25,6 +25,7 @@ func TestAccNotebooksRuntime_update(t *testing.T) {
 				ResourceName:            "google_notebooks_runtime.runtime",
 				ImportState:             true,
 				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
 				Config: testAccNotebooksRuntime_update(context),
@@ -33,6 +34,7 @@ func TestAccNotebooksRuntime_update(t *testing.T) {
 				ResourceName:            "google_notebooks_runtime.runtime",
 				ImportState:             true,
 				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
 				Config: testAccNotebooksRuntime_basic(context),
@@ -41,6 +43,7 @@ func TestAccNotebooksRuntime_update(t *testing.T) {
 				ResourceName:            "google_notebooks_runtime.runtime",
 				ImportState:             true,
 				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 		},
 	})
@@ -87,15 +90,22 @@ resource "google_notebooks_runtime" "runtime" {
   }
   virtual_machine {
     virtual_machine_config {
-     machine_type = "n1-standard-4"
+     machine_type = "n1-standard-8"
       data_disk {
         initialize_params {
           disk_size_gb = "100"
           disk_type = "PD_STANDARD"
         }
       }
+      accelerator_config {
+        core_count = "1"
+        type = "NVIDIA_TESLA_V100"
+      }
       reserved_ip_range = "192.168.255.0/24"
     }
+  }
+  labels = {
+    k = "val"
   }
 }
 `, context)

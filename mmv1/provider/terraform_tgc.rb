@@ -13,6 +13,7 @@
 
 require 'provider/terraform_oics'
 require 'fileutils'
+require 'set'
 
 module Provider
   # Code generator for a library converting terraform state to gcp objects.
@@ -22,7 +23,8 @@ module Provider
       false
     end
 
-    def generate(output_folder, types, _product_path, _dump_yaml, generate_code, generate_docs)
+    def generate(output_folder, types, product_path, _dump_yaml, generate_code, generate_docs, \
+                 go_yaml)
       # Temporary shim to generate the missing resources directory. Can be removed
       # once the folder exists downstream.
       resources_folder = File.join(output_folder, 'converters/google/resources')
@@ -33,7 +35,9 @@ module Provider
         output_folder,
         types,
         generate_code,
-        generate_docs
+        generate_docs,
+        product_path,
+        go_yaml
       )
     end
 
@@ -82,10 +86,6 @@ module Provider
     def validate_non_defined_tests(file_set, non_defined_tests)
       if non_defined_tests.any? { |test| !file_set.member?("#{test}.json") }
         raise "test file named #{test}.json expected but found none"
-      end
-
-      if non_defined_tests.any? { |test| !file_set.member?("#{test}.tfplan.json") }
-        raise "test file named #{test}.tfplan.json expected but found none"
       end
 
       return unless non_defined_tests.any? { |test| !file_set.member?("#{test}.tf") }
@@ -251,8 +251,6 @@ module Provider
                         'third_party/terraform/services/compute/image.go'],
                        ['converters/google/resources/services/compute/disk_type.go',
                         'third_party/terraform/services/compute/disk_type.go'],
-                       ['converters/google/resources/services/logging/extract.go',
-                        'third_party/terraform/services/logging/extract.go'],
                        ['converters/google/resources/services/kms/kms_utils.go',
                         'third_party/terraform/services/kms/kms_utils.go'],
                        ['converters/google/resources/services/sourcerepo/source_repo_utils.go',
@@ -310,7 +308,37 @@ module Provider
                        ['converters/google/convert.go',
                         'third_party/tgc/convert.go'],
                        ['converters/google/convert_test.go',
-                        'third_party/tgc/convert_test.go']
+                        'third_party/tgc/convert_test.go'],
+                       ['converters/google/resources/compute_instance_group.go',
+                        'third_party/tgc/compute_instance_group.go'],
+                       ['converters/google/resources/job.go',
+                        'third_party/tgc/job.go'],
+                       ['converters/google/resources/service_account_key.go',
+                        'third_party/tgc/service_account_key.go'],
+                       ['converters/google/resources/compute_target_pool.go',
+                        'third_party/tgc/compute_target_pool.go'],
+                       ['converters/google/resources/dataproc_cluster.go',
+                        'third_party/tgc/dataproc_cluster.go'],
+                       ['converters/google/resources/composer_environment.go',
+                        'third_party/tgc/composer_environment.go'],
+                       ['converters/google/resources/commitment.go',
+                        'third_party/tgc/commitment.go'],
+                       ['converters/google/resources/firebase_project.go',
+                        'third_party/tgc/firebase_project.go'],
+                       ['converters/google/resources/appengine_application.go',
+                        'third_party/tgc/appengine_application.go'],
+                       ['converters/google/resources/apikeys_key.go',
+                        'third_party/tgc/apikeys_key.go'],
+                       ['converters/google/resources/logging_folder_bucket_config.go',
+                        'third_party/tgc/logging_folder_bucket_config.go'],
+                       ['converters/google/resources/logging_organization_bucket_config.go',
+                        'third_party/tgc/logging_organization_bucket_config.go'],
+                       ['converters/google/resources/logging_project_bucket_config.go',
+                        'third_party/tgc/logging_project_bucket_config.go'],
+                       ['converters/google/resources/logging_billing_account_bucket_config.go',
+                        'third_party/tgc/logging_billing_account_bucket_config.go'],
+                       ['converters/google/resources/appengine_standard_version.go',
+                        'third_party/tgc/appengine_standard_version.go']
                      ])
     end
 

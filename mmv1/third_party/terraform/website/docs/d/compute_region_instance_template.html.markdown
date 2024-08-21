@@ -4,7 +4,7 @@ description: |-
   Get a VM instance template within GCE.
 ---
 
-# google\_compute\_region\_instance\_template
+# google_compute_region_instance_template
 
 Get information about a VM instance template resource within GCE. For more information see
 [the official documentation](https://cloud.google.com/compute/docs/instance-templates)
@@ -33,7 +33,7 @@ The following arguments are supported:
 - `name` - (Optional) The name of the instance template. One of `name` or `filter` must be provided.
 
 - `filter` - (Optional) A filter to retrieve the instance templates.
-    See [gcloud topic filters](https://cloud.google.com/sdk/gcloud/reference/topic/filters) for reference.
+    See [API filter parameter documentation](https://cloud.google.com/compute/docs/reference/rest/v1/regionInstanceTemplates/list#body.QUERY_PARAMETERS.filter) for reference.
     If multiple instance templates match, either adjust the filter or specify `most_recent`. One of `name` or `filter` must be provided.
 
 - `most_recent` - (Optional) If `filter` is provided, ensures the most recent template is returned when multiple instance templates match. One of `name` or `filter` must be provided.
@@ -124,6 +124,11 @@ The following arguments are supported:
 
 * `disk_name` - Name of the disk. When not provided, this defaults
     to the name of the instance.
+
+* `provisioned_iops` - Indicates how many IOPS to provision for the disk. This
+    sets the number of I/O operations per second that the disk can handle.
+    Values must be between 10,000 and 120,000. For more details, see the
+    [Extreme persistent disk documentation](https://cloud.google.com/compute/docs/disks/extreme-persistent-disk).
 
 * `source_image` - The image from which to
     initialize this disk. This can be one of: the image's `self_link`,

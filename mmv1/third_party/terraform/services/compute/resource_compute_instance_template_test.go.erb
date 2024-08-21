@@ -3,6 +3,9 @@
 package compute_test
 
 import (
+<% unless version == 'ga' -%>
+	"encoding/json"
+<% end -%>
 	"fmt"
 	"reflect"
 	"regexp"
@@ -11,16 +14,21 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 
 <% if version == "ga" -%>
 	"google.golang.org/api/compute/v1"
 <% else -%>
 	compute "google.golang.org/api/compute/v0.beta"
+<% end -%>
+
+<% unless version == 'ga' -%>
+	"google.golang.org/api/googleapi"
 <% end -%>
 )
 
@@ -772,6 +780,7 @@ func TestAccComputeInstanceTemplate_ConfidentialInstanceConfigMain(t *testing.T)
 	t.Parallel()
 
 	var instanceTemplate compute.InstanceTemplate
+	var instanceTemplate2 compute.InstanceTemplate
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -779,12 +788,32 @@ func TestAccComputeInstanceTemplate_ConfidentialInstanceConfigMain(t *testing.T)
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplateConfidentialInstanceConfig(acctest.RandString(t, 10), true),
+				Config: testAccComputeInstanceTemplateConfidentialInstanceConfigEnable(acctest.RandString(t, 10), "SEV"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(t, "google_compute_instance_template.foobar", &instanceTemplate),
-					testAccCheckComputeInstanceTemplateHasConfidentialInstanceConfig(&instanceTemplate, true),
+					testAccCheckComputeInstanceTemplateHasConfidentialInstanceConfig(&instanceTemplate, true, "SEV"),
+					testAccCheckComputeInstanceTemplateExists(t, "google_compute_instance_template.foobar2", &instanceTemplate2),
+					testAccCheckComputeInstanceTemplateHasConfidentialInstanceConfig(&instanceTemplate2, true, ""),
 				),
 			},
+			{
+				Config: testAccComputeInstanceTemplateConfidentialInstanceConfigNoEnable(acctest.RandString(t, 10), "AMD Milan", "SEV_SNP"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceTemplateExists(t, "google_compute_instance_template.foobar3", &instanceTemplate),
+					testAccCheckComputeInstanceTemplateHasConfidentialInstanceConfig(&instanceTemplate, false, "SEV_SNP"),
+					testAccCheckComputeInstanceTemplateExists(t, "google_compute_instance_template.foobar4", &instanceTemplate2),
+					testAccCheckComputeInstanceTemplateHasConfidentialInstanceConfig(&instanceTemplate2, false, "SEV_SNP"),
+				),
+			},
+			<% unless version == "ga" -%>
+			{
+				Config: testAccComputeInstanceTemplateConfidentialInstanceConfigEnableTdx(acctest.RandString(t, 10), "TDX"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceTemplateExists(t, "google_compute_instance_template.foobar5", &instanceTemplate),
+					testAccCheckComputeInstanceTemplateHasConfidentialInstanceConfig(&instanceTemplate, false, "TDX"),
+				),
+			},
+			<% end -%>
 		},
 	})
 }
@@ -1024,7 +1053,7 @@ func TestAccComputeInstanceTemplate_managedEnvoy(t *testing.T) {
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
-		}, 
+		},
 	})
 }
 
@@ -1056,8 +1085,7 @@ func TestAccComputeInstanceTemplate_spot(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
-func TestAccComputeInstanceTemplate_spot_maxRunDuration(t *testing.T) {
+func TestAccComputeInstanceTemplate_spot_maxRunDuration_deleteTerminationAction(t *testing.T) {
 	t.Parallel()
 
 	var instanceTemplate compute.InstanceTemplate
@@ -1065,6 +1093,7 @@ func TestAccComputeInstanceTemplate_spot_maxRunDuration(t *testing.T) {
 	// Define in testAccComputeInstanceTemplate_spot
 	expectedMaxRunDuration.Nanos = 123
 	expectedMaxRunDuration.Seconds = 60
+	var instanceTerminationAction = "DELETE"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1072,14 +1101,14 @@ func TestAccComputeInstanceTemplate_spot_maxRunDuration(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_spot_maxRunDuration(acctest.RandString(t, 10)),
+				Config: testAccComputeInstanceTemplate_spot_maxRunDuration(acctest.RandString(t, 10), instanceTerminationAction),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(
 						t, "google_compute_instance_template.foobar", &instanceTemplate),
 					testAccCheckComputeInstanceTemplateAutomaticRestart(&instanceTemplate, false),
 					testAccCheckComputeInstanceTemplatePreemptible(&instanceTemplate, true),
 					testAccCheckComputeInstanceTemplateProvisioningModel(&instanceTemplate, "SPOT"),
-					testAccCheckComputeInstanceTemplateInstanceTerminationAction(&instanceTemplate, "DELETE"),
+					testAccCheckComputeInstanceTemplateInstanceTerminationAction(&instanceTemplate, instanceTerminationAction),
 					testAccCheckComputeInstanceTemplateMaxRunDuration(&instanceTemplate, expectedMaxRunDuration),
 				),
 			},
@@ -1091,7 +1120,113 @@ func TestAccComputeInstanceTemplate_spot_maxRunDuration(t *testing.T) {
 		},
 	})
 }
-<% end -%>
+
+func TestAccComputeInstanceTemplate_spot_maxRunDuration_stopTerminationAction(t *testing.T) {
+	t.Parallel()
+
+	var instanceTemplate compute.InstanceTemplate
+	var expectedMaxRunDuration = compute.Duration{}
+	// Define in testAccComputeInstanceTemplate_spot
+	expectedMaxRunDuration.Nanos = 123
+	expectedMaxRunDuration.Seconds = 60
+	var instanceTerminationAction = "STOP"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceTemplate_spot_maxRunDuration(acctest.RandString(t, 10), instanceTerminationAction),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceTemplateExists(
+						t, "google_compute_instance_template.foobar", &instanceTemplate),
+					testAccCheckComputeInstanceTemplateAutomaticRestart(&instanceTemplate, false),
+					testAccCheckComputeInstanceTemplatePreemptible(&instanceTemplate, true),
+					testAccCheckComputeInstanceTemplateProvisioningModel(&instanceTemplate, "SPOT"),
+					testAccCheckComputeInstanceTemplateInstanceTerminationAction(&instanceTemplate, instanceTerminationAction),
+					testAccCheckComputeInstanceTemplateMaxRunDuration(&instanceTemplate, expectedMaxRunDuration),
+				),
+			},
+			{
+				ResourceName:      "google_compute_instance_template.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccComputeInstanceTemplate_maxRunDuration_onInstanceStopAction(t *testing.T) {
+	t.Parallel()
+
+	var instanceTemplate compute.InstanceTemplate
+	var expectedMaxRunDuration = compute.Duration{}
+	// Define in testAccComputeInstanceTemplate_maxRunDuration_onInstanceStopAction
+	expectedMaxRunDuration.Nanos = 123
+	expectedMaxRunDuration.Seconds = 600
+	var instanceTerminationAction = "STOP"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceTemplate_maxRunDuration_onInstanceStopAction(acctest.RandString(t, 10)),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceTemplateExists(
+						t, "google_compute_instance_template.foobar", &instanceTemplate),
+					testAccCheckComputeInstanceTemplateAutomaticRestart(&instanceTemplate, false),
+					testAccCheckComputeInstanceTemplateInstanceTerminationAction(&instanceTemplate, instanceTerminationAction),
+					testAccCheckComputeInstanceTemplateMaxRunDuration(&instanceTemplate, expectedMaxRunDuration),
+				),
+			},
+			{
+				ResourceName:      "google_compute_instance_template.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+
+func TestAccComputeInstanceTemplate_spot_maxRunDuration(t *testing.T) {
+	t.Parallel()
+
+	var instanceTemplate compute.InstanceTemplate
+	var expectedMaxRunDuration = compute.Duration{}
+	// Define in testAccComputeInstanceTemplate_spot
+	expectedMaxRunDuration.Nanos = 123
+	expectedMaxRunDuration.Seconds = 60
+	var instanceTerminationAction = "DELETE"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceTemplate_spot_maxRunDuration(acctest.RandString(t, 10), instanceTerminationAction),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceTemplateExists(
+						t, "google_compute_instance_template.foobar", &instanceTemplate),
+					testAccCheckComputeInstanceTemplateAutomaticRestart(&instanceTemplate, false),
+					testAccCheckComputeInstanceTemplatePreemptible(&instanceTemplate, true),
+					testAccCheckComputeInstanceTemplateProvisioningModel(&instanceTemplate, "SPOT"),
+					testAccCheckComputeInstanceTemplateInstanceTerminationAction(&instanceTemplate, instanceTerminationAction),
+					testAccCheckComputeInstanceTemplateMaxRunDuration(&instanceTemplate, expectedMaxRunDuration),
+				),
+			},
+			{
+				ResourceName:      "google_compute_instance_template.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
 
 func TestAccComputeInstanceTemplate_localSsdRecoveryTimeout(t *testing.T) {
 	t.Parallel()
@@ -1123,6 +1258,43 @@ func TestAccComputeInstanceTemplate_localSsdRecoveryTimeout(t *testing.T) {
 		},
 	})
 }
+
+<% unless version == 'ga' -%>
+func TestAccComputeInstanceTemplate_partnerMetadata(t *testing.T) {
+	t.Parallel()
+
+	var instanceTemplate compute.InstanceTemplate
+	var namespace = "test.compute.googleapis.com"
+	expectedPartnerMetadata := make(map[string]compute.StructuredEntries)
+	expectedPartnerMetadata[namespace] = compute.StructuredEntries{
+		Entries: googleapi.RawMessage(`{"key1": "value1", "key2": 2,"key3": {"key31":"value31"}}`),
+	}
+
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceTemplate_partnerMetadata(acctest.RandString(t, 10)),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceTemplateExists(
+						t, "google_compute_instance_template.foobar", &instanceTemplate),
+					testAccCheckComputeInstanceTemplatePartnerMetadata(&instanceTemplate, expectedPartnerMetadata),
+				),
+			},
+			{
+				ResourceName:      "google_compute_instance_template.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{fmt.Sprintf("partner_metadata.%s", namespace)},
+			},
+		},
+	})
+
+}
+<% end -%>
 
 func TestAccComputeInstanceTemplate_sourceSnapshotEncryptionKey(t *testing.T) {
 	t.Parallel()
@@ -1193,7 +1365,7 @@ func TestAccComputeInstanceTemplate_sourceImageEncryptionKey(t *testing.T) {
 	})
 }
 
-<% if version == "beta" -%>
+<% unless version == 'ga' -%>
 func TestAccComputeInstanceTemplate_NetworkAttachment(t *testing.T) {
 	t.Parallel()
 
@@ -1234,6 +1406,179 @@ func TestAccComputeInstanceTemplate_NetworkAttachment(t *testing.T) {
 	})
 }
 <% end -%>
+
+func TestAccComputeInstanceTemplate_migration(t *testing.T) {
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	var instanceTemplate compute.InstanceTemplate
+	var instanceTemplateUpdate compute.InstanceTemplate
+
+	suffix := acctest.RandString(t, 10)
+	oldVersion := map[string]resource.ExternalProvider{
+		"google": {
+			VersionConstraint: "4.84.0", // a version that doesn't separate user defined labels and system labels
+			Source:            "registry.terraform.io/hashicorp/google",
+		},
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config:            testAccComputeInstanceTemplate_basic(suffix),
+				ExternalProviders: oldVersion,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceTemplateExists(
+						t, "google_compute_instance_template.foobar", &instanceTemplate),
+				),
+			},
+			{
+				Config: testAccComputeInstanceTemplate_basic(suffix),
+				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceTemplateExists(
+						t, "google_compute_instance_template.foobar", &instanceTemplateUpdate),
+					testAccCheckComputeInstanceTemplateNotRecreated(&instanceTemplate, &instanceTemplateUpdate),
+					testAccCheckComputeInstanceTemplateTag(&instanceTemplateUpdate, "foo"),
+					testAccCheckComputeInstanceTemplateMetadata(&instanceTemplateUpdate, "foo", "bar"),
+					testAccCheckComputeInstanceTemplateContainsLabel(&instanceTemplateUpdate, "my_label", "foobar"),
+					testAccCheckComputeInstanceTemplateLacksShieldedVmConfig(&instanceTemplateUpdate),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeInstanceTemplate_withLabels(t *testing.T) {
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	var instanceTemplate compute.InstanceTemplate
+	var instanceTemplateUpdate compute.InstanceTemplate
+	suffix := acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceTemplate_withProviderDefaultLabels(suffix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceTemplateExists(
+						t, "google_compute_instance_template.foobar", &instanceTemplate),
+					testAccCheckComputeInstanceTemplateContainsLabel(&instanceTemplate, "my_label", "foobar"),
+					testAccCheckComputeInstanceTemplateContainsLabel(&instanceTemplate, "env", "test"),
+					testAccCheckComputeInstanceTemplateContainsLabel(&instanceTemplate, "default_key1", "default_value1"),
+					resource.TestCheckResourceAttr("google_compute_instance_template.foobar", "labels.my_label", "foobar"),
+					resource.TestCheckResourceAttr("google_compute_instance_template.foobar", "labels.env", "test"),
+					resource.TestCheckResourceAttr("google_compute_instance_template.foobar", "terraform_labels.my_label", "foobar"),
+					resource.TestCheckResourceAttr("google_compute_instance_template.foobar", "terraform_labels.env", "test"),
+					resource.TestCheckResourceAttr("google_compute_instance_template.foobar", "terraform_labels.default_key1", "default_value1"),
+				),
+			},
+			{
+				ResourceName:            "google_compute_instance_template.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testAccComputeInstanceTemplate_moveLabelToProvderDefaultLabels(suffix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceTemplateExists(
+						t, "google_compute_instance_template.foobar", &instanceTemplateUpdate),
+					testAccCheckComputeInstanceTemplateNotRecreated(&instanceTemplate, &instanceTemplateUpdate),
+					testAccCheckComputeInstanceTemplateContainsLabel(&instanceTemplateUpdate, "my_label", "foobar"),
+					testAccCheckComputeInstanceTemplateContainsLabel(&instanceTemplateUpdate, "env", "test"),
+					testAccCheckComputeInstanceTemplateContainsLabel(&instanceTemplateUpdate, "default_key1", "default_value1"),
+					resource.TestCheckResourceAttr("google_compute_instance_template.foobar", "labels.my_label", "foobar"),
+					resource.TestCheckResourceAttr("google_compute_instance_template.foobar", "terraform_labels.my_label", "foobar"),
+					resource.TestCheckResourceAttr("google_compute_instance_template.foobar", "terraform_labels.env", "test"),
+					resource.TestCheckResourceAttr("google_compute_instance_template.foobar", "terraform_labels.default_key1", "default_value1"),
+				),
+			},
+			{
+				ResourceName:            "google_compute_instance_template.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func TestAccComputeInstanceTemplate_resourceManagerTags(t *testing.T) {
+	t.Parallel()
+
+	var instanceTemplate compute.InstanceTemplate
+	var instanceTemplateName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+    context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+		"instance_name": instanceTemplateName,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceTemplate_resourceManagerTags(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceTemplateExists(
+						t, "google_compute_instance_template.foobar", &instanceTemplate)),
+			},
+		},
+	})
+}
+
+func TestUnitComputeInstanceTemplate_IpCidrRangeDiffSuppress(t *testing.T) {
+	cases := map[string]struct {
+		Old, New           string
+		ExpectDiffSuppress bool
+	}{
+		"single ip address": {
+			Old:                "10.2.3.4",
+			New:                "10.2.3.5",
+			ExpectDiffSuppress: false,
+		},
+		"cidr format string": {
+			Old:                "10.1.2.0/24",
+			New:                "10.1.3.0/24",
+			ExpectDiffSuppress: false,
+		},
+		"netmask same mask": {
+			Old:                "10.1.2.0/24",
+			New:                "/24",
+			ExpectDiffSuppress: true,
+		},
+		"netmask different mask": {
+			Old:                "10.1.2.0/24",
+			New:                "/32",
+			ExpectDiffSuppress: false,
+		},
+		"add netmask": {
+			Old:                "",
+			New:                "/24",
+			ExpectDiffSuppress: false,
+		},
+		"remove netmask": {
+			Old:                "/24",
+			New:                "",
+			ExpectDiffSuppress: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		if tpgcompute.IpCidrRangeDiffSuppress("ip_cidr_range", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
+		}
+	}
+}
 
 func testAccCheckComputeInstanceTemplateDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
@@ -1279,8 +1624,14 @@ func testAccCheckComputeInstanceTemplateExistsInProject(t *testing.T, n, p strin
 
 		splits := strings.Split(rs.Primary.ID, "/")
 		templateName := splits[len(splits)-1]
+		<% if version == "ga" -%>
 		found, err := config.NewComputeClient(config.UserAgent).InstanceTemplates.Get(
 			p, templateName).Do()
+		<% else -%>
+		found, err := config.NewComputeClient(config.UserAgent).InstanceTemplates.Get(
+			p, templateName).View("FULL").Do()
+		<% end -%>
+
 		if err != nil {
 			return err
 		}
@@ -1426,7 +1777,6 @@ func testAccCheckComputeInstanceTemplateInstanceTerminationAction(instanceTempla
 }
 
 
-<% unless version == 'ga' -%>
 func testAccCheckComputeInstanceTemplateMaxRunDuration(instanceTemplate *compute.InstanceTemplate, instance_max_run_duration_want compute.Duration) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if !reflect.DeepEqual(*instanceTemplate.Properties.Scheduling.MaxRunDuration, instance_max_run_duration_want) {
@@ -1436,7 +1786,6 @@ func testAccCheckComputeInstanceTemplateMaxRunDuration(instanceTemplate *compute
 		return nil
 	}
 }
-<% end -%>
 
 
 func testAccCheckComputeInstanceTemplateLocalSsdRecoveryTimeout(instanceTemplate *compute.InstanceTemplate, instance_local_ssd_recovery_timeout_want compute.Duration) resource.TestCheckFunc {
@@ -1447,6 +1796,36 @@ func testAccCheckComputeInstanceTemplateLocalSsdRecoveryTimeout(instanceTemplate
 		return nil
 	}
 }
+
+<% unless version == 'ga' -%>
+func testAccCheckComputeInstanceTemplatePartnerMetadata(instanceTemplate *compute.InstanceTemplate, expectedPartnerMetadata map[string]compute.StructuredEntries) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if instanceTemplate == nil {
+			return fmt.Errorf("instance template is nil")
+		}
+		if instanceTemplate.Properties.PartnerMetadata == nil {
+			return fmt.Errorf("no partner metadata")
+		}
+		expectedPartnerMetadataMap := make(map[string]interface{})
+		acutalPartnerMetadataMap := make(map[string]interface{})
+		for key, value := range instanceTemplate.Properties.PartnerMetadata {
+			var jsonMap map[string]interface{}
+			json.Unmarshal(value.Entries, jsonMap)
+			acutalPartnerMetadataMap[key] = jsonMap
+		}
+		for key, value := range expectedPartnerMetadata {
+			var jsonMap map[string]interface{}
+			json.Unmarshal(value.Entries, jsonMap)
+			expectedPartnerMetadataMap[key] = jsonMap
+		}
+		if !reflect.DeepEqual(acutalPartnerMetadataMap, expectedPartnerMetadataMap) {
+			return fmt.Errorf("got the wrong instance partne metadata action: have: %+v; want: %+v", acutalPartnerMetadataMap, expectedPartnerMetadataMap)
+		}
+		return nil
+
+	}
+}
+<% end -%>
 
 func testAccCheckComputeInstanceTemplateAutomaticRestart(instanceTemplate *compute.InstanceTemplate, automaticRestart bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -1525,7 +1904,7 @@ func testAccCheckComputeInstanceTemplateHasAliasIpRange(instanceTemplate *comput
 	return func(s *terraform.State) error {
 		for _, networkInterface := range instanceTemplate.Properties.NetworkInterfaces {
 			for _, aliasIpRange := range networkInterface.AliasIpRanges {
-				if aliasIpRange.SubnetworkRangeName == subnetworkRangeName && (aliasIpRange.IpCidrRange == iPCidrRange || tpgresource.IpCidrRangeDiffSuppress("ip_cidr_range", aliasIpRange.IpCidrRange, iPCidrRange, nil)) {
+				if aliasIpRange.SubnetworkRangeName == subnetworkRangeName && (aliasIpRange.IpCidrRange == iPCidrRange || tpgcompute.IpCidrRangeDiffSuppress("ip_cidr_range", aliasIpRange.IpCidrRange, iPCidrRange, nil)) {
 					return nil
 				}
 			}
@@ -1573,7 +1952,7 @@ func testAccCheckComputeInstanceTemplateHasMinCpuPlatform(instanceTemplate *comp
 	}
 }
 
-<% if version == "beta" -%>
+<% unless version == 'ga' -%>
 func testAccCheckComputeInstanceTemplateHasNetworkAttachment(instanceTemplate *compute.InstanceTemplate, networkAttachmentName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, networkInterface := range instanceTemplate.Properties.NetworkInterfaces {
@@ -1646,11 +2025,14 @@ func testAccCheckComputeInstanceTemplateHasShieldedVmConfig(instanceTemplate *co
 	}
 }
 
-func testAccCheckComputeInstanceTemplateHasConfidentialInstanceConfig(instanceTemplate *compute.InstanceTemplate, EnableConfidentialCompute bool) resource.TestCheckFunc {
+func testAccCheckComputeInstanceTemplateHasConfidentialInstanceConfig(instanceTemplate *compute.InstanceTemplate, EnableConfidentialCompute bool, ConfidentialInstanceType string) resource.TestCheckFunc {
 
 	return func(s *terraform.State) error {
 		if instanceTemplate.Properties.ConfidentialInstanceConfig.EnableConfidentialCompute != EnableConfidentialCompute {
 			return fmt.Errorf("Wrong ConfidentialInstanceConfig EnableConfidentialCompute: expected %t, got, %t", EnableConfidentialCompute, instanceTemplate.Properties.ConfidentialInstanceConfig.EnableConfidentialCompute)
+		}
+		if instanceTemplate.Properties.ConfidentialInstanceConfig.ConfidentialInstanceType != ConfidentialInstanceType {
+			return fmt.Errorf("Wrong ConfidentialInstanceConfig ConfidentialInstanceType: expected %s, got, %s", ConfidentialInstanceType, instanceTemplate.Properties.ConfidentialInstanceConfig.ConfidentialInstanceType)
 		}
 
 		return nil
@@ -1678,8 +2060,118 @@ func testAccCheckComputeInstanceTemplateHasDiskResourcePolicy(instanceTemplate *
 	}
 }
 
+func testAccCheckComputeInstanceTemplateNotRecreated(instanceTemplate *compute.InstanceTemplate, instanceTemplateUpdate *compute.InstanceTemplate) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if instanceTemplate.Id != instanceTemplateUpdate.Id {
+			return fmt.Errorf("The resource has been recreated: expected %d, got %d", instanceTemplate.Id, instanceTemplateUpdate.Id)
+		}
+
+		return nil
+	}
+}
+
 func testAccComputeInstanceTemplate_basic(suffix string) string {
 	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "foobar" {
+  name           = "tf-test-instance-template-%s"
+  machine_type   = "e2-medium"
+  can_ip_forward = false
+  tags           = ["foo", "bar"]
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  scheduling {
+    preemptible       = false
+    automatic_restart = true
+  }
+
+  metadata = {
+    foo = "bar"
+  }
+
+  service_account {
+    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+  }
+
+  labels = {
+    my_label = "foobar"
+  }
+}
+`, suffix)
+}
+
+func testAccComputeInstanceTemplate_withProviderDefaultLabels(suffix string) string {
+	return fmt.Sprintf(`
+provider "google" {
+  default_labels = {
+    default_key1 = "default_value1"
+  }
+}
+
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "foobar" {
+  name           = "tf-test-instance-template-%s"
+  machine_type   = "e2-medium"
+  can_ip_forward = false
+  tags           = ["foo", "bar"]
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  scheduling {
+    preemptible       = false
+    automatic_restart = true
+  }
+
+  metadata = {
+    foo = "bar"
+  }
+
+  service_account {
+    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+  }
+
+  labels = {
+    my_label = "foobar"
+	env = "test"
+  }
+}
+`, suffix)
+}
+
+func testAccComputeInstanceTemplate_moveLabelToProvderDefaultLabels(suffix string) string {
+	return fmt.Sprintf(`
+provider "google" {
+  default_labels = {
+    default_key1 = "default_value1"
+    env = "test"
+  }
+}
+
 data "google_compute_image" "my_image" {
   family  = "debian-11"
   project = "debian-cloud"
@@ -2120,8 +2612,8 @@ resource "google_compute_instance_template" "foobar" {
 func testAccComputeInstanceTemplate_with375GbScratchDisk(suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-	family  = "centos-7"
-	project = "centos-cloud"
+	family  = "debian-12"
+	project = "debian-cloud"
 }
 resource "google_compute_instance_template" "foobar" {
   name           = "tf-test-instance-template-%s"
@@ -2155,13 +2647,13 @@ resource "google_compute_instance_template" "foobar" {
 func testAccComputeInstanceTemplate_with18TbScratchDisk(suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-	family  = "centos-7"
-	project = "centos-cloud"
+	family  = "debian-12"
+	project = "debian-cloud"
 }
 
 resource "google_compute_instance_template" "foobar" {
   name           = "tf-test-instance-template-%s"
-  machine_type   = "n2-standard-16"
+  machine_type   = "n2-standard-64"
   can_ip_forward = false
   disk {
     source_image = data.google_compute_image.my_image.name
@@ -2811,8 +3303,8 @@ resource "google_compute_instance_template" "foobar" {
 func testAccComputeInstanceTemplate_shieldedVmConfig(suffix string, enableSecureBoot bool, enableVtpm bool, enableIntegrityMonitoring bool) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "centos-7"
-  project = "centos-cloud"
+  family  = "debian-12"
+  project = "debian-cloud"
 }
 
 resource "google_compute_instance_template" "foobar" {
@@ -2839,7 +3331,7 @@ resource "google_compute_instance_template" "foobar" {
 `, suffix, enableSecureBoot, enableVtpm, enableIntegrityMonitoring)
 }
 
-func testAccComputeInstanceTemplateConfidentialInstanceConfig(suffix string, enableConfidentialCompute bool) string {
+func testAccComputeInstanceTemplateConfidentialInstanceConfigEnable(suffix string, confidentialInstanceType string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family  = "ubuntu-2004-lts"
@@ -2852,7 +3344,7 @@ resource "google_compute_instance_template" "foobar" {
 
   disk {
     source_image = data.google_compute_image.my_image.self_link
-	auto_delete  = true
+    auto_delete  = true
     boot         = true
   }
 
@@ -2861,16 +3353,137 @@ resource "google_compute_instance_template" "foobar" {
   }
 
   confidential_instance_config {
-    enable_confidential_compute       = %t
+    enable_confidential_compute       = true
+    confidential_instance_type        = %q
   }
 
   scheduling {
-	  on_host_maintenance = "TERMINATE"
+    on_host_maintenance = "TERMINATE"
   }
 
 }
-`, suffix, enableConfidentialCompute)
+
+resource "google_compute_instance_template" "foobar2" {
+  name         = "tf-test-instance2-template-%s"
+  machine_type = "n2d-standard-2"
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  confidential_instance_config {
+    enable_confidential_compute       = true
+  }
+
+  scheduling {
+    on_host_maintenance = "TERMINATE"
+  }
+
 }
+`, suffix, confidentialInstanceType, suffix)
+}
+
+func testAccComputeInstanceTemplateConfidentialInstanceConfigNoEnable(suffix string, minCpuPlatform, confidentialInstanceType string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image2" {
+  family  = "ubuntu-2004-lts"
+  project = "ubuntu-os-cloud"
+}
+
+resource "google_compute_instance_template" "foobar3" {
+  name         = "tf-test-instance3-template-%s"
+  machine_type = "n2d-standard-2"
+
+  disk {
+    source_image = data.google_compute_image.my_image2.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  min_cpu_platform = %q
+
+  confidential_instance_config {
+    enable_confidential_compute       = false
+    confidential_instance_type        = %q
+  }
+
+  scheduling {
+    on_host_maintenance = "TERMINATE"
+  }
+
+}
+resource "google_compute_instance_template" "foobar4" {
+  name         = "tf-test-instance4-template-%s"
+  machine_type = "n2d-standard-2"
+
+  disk {
+    source_image = data.google_compute_image.my_image2.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  min_cpu_platform = %q
+
+  confidential_instance_config {
+    confidential_instance_type        = %q
+  }
+
+  scheduling {
+    on_host_maintenance = "TERMINATE"
+  }
+
+}
+`, suffix, minCpuPlatform, confidentialInstanceType, suffix, minCpuPlatform, confidentialInstanceType)
+}
+
+<% unless version == "ga" -%>
+func testAccComputeInstanceTemplateConfidentialInstanceConfigEnableTdx(suffix string, confidentialInstanceType string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image3" {
+  family  = "ubuntu-2204-lts"
+  project = "tdx-guest-images"
+}
+
+resource "google_compute_instance_template" "foobar5" {
+  name         = "tf-test-instance5-template-%s"
+  machine_type = "c3-standard-4"
+
+  disk {
+    source_image = data.google_compute_image.my_image3.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  confidential_instance_config {
+    confidential_instance_type = %q
+  }
+
+  scheduling {
+    on_host_maintenance = "TERMINATE"
+  }
+
+}
+`, suffix, confidentialInstanceType)
+}
+<% end -%>
 
 func testAccComputeInstanceTemplateAdvancedMachineFeatures(suffix string) string {
 	return fmt.Sprintf(`
@@ -2911,8 +3524,8 @@ resource "google_compute_instance_template" "foobar" {
 func testAccComputeInstanceTemplate_enableDisplay(suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "centos-7"
-  project = "centos-cloud"
+  family  = "debian-12"
+  project = "debian-cloud"
 }
 
 resource "google_compute_instance_template" "foobar" {
@@ -3245,7 +3858,7 @@ resource "google_compute_instance_template" "foobar" {
 `, suffix)
 }
 
-func testAccComputeInstanceTemplate_spot_maxRunDuration(suffix string) string {
+func testAccComputeInstanceTemplate_spot_maxRunDuration(suffix string, instanceTerminationAction string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family  = "debian-11"
@@ -3272,18 +3885,64 @@ resource "google_compute_instance_template" "foobar" {
     preemptible       = true
     automatic_restart = false
     provisioning_model = "SPOT"
-    instance_termination_action = "DELETE"
-<% unless version == 'ga' -%>
+    instance_termination_action = "%s"
     max_run_duration {
 	nanos = 123
 	seconds = 60
     }
-<% end -%>
 
   }
 
   metadata = {
     foo = "bar"
+  }
+
+  service_account {
+    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+  }
+}
+`, suffix, instanceTerminationAction)
+}
+
+func testAccComputeInstanceTemplate_maxRunDuration_onInstanceStopAction(suffix string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "foobar" {
+  name           = "tf-test-instance-template-%s"
+  machine_type   = "e2-medium"
+  can_ip_forward = false
+  tags           = ["foo", "bar"]
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  scheduling {
+    automatic_restart = false
+    provisioning_model = "STANDARD"
+    instance_termination_action = "STOP"
+    max_run_duration {
+	nanos = 123
+	seconds = 600
+    }
+	on_instance_stop_action {
+		discard_local_ssd = true
+	}
+
+  }
+
+  metadata = {
+	foo = "bar"
   }
 
   service_account {
@@ -3335,6 +3994,50 @@ resource "google_compute_instance_template" "foobar" {
 `, suffix)
 }
 
+<% unless version == 'ga' -%>
+func testAccComputeInstanceTemplate_partnerMetadata(suffix string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "foobar" {
+  name           = "tf-test-instance-template-%s"
+  machine_type   = "e2-medium"
+  can_ip_forward = false
+  tags           = ["foo", "bar"]
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  partner_metadata = {
+  	"test.compute.googleapis.com" = jsonencode({
+  		entries = {
+  			key1 = "value1"
+  			key2 = 2
+  			key3 = {
+  				key31 = "value31"
+  			}
+  		}
+  	})
+  }
+
+  service_account {
+    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+  }
+}
+`, suffix)
+}
+<% end -%>
+
 func testAccComputeInstanceTemplate_sourceSnapshotEncryptionKey(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_kms_key_ring" "ring" {
@@ -3379,6 +4082,10 @@ resource "google_compute_snapshot" "snapshot" {
     kms_key_self_link       = data.google_kms_crypto_key.key.id
     kms_key_service_account = google_service_account.test.email
   }
+
+  depends_on = [
+    google_kms_crypto_key_iam_member.crypto_key
+  ]
 }
 
 resource "google_compute_instance_template" "template" {
@@ -3398,6 +4105,10 @@ resource "google_compute_instance_template" "template" {
   network_interface {
     network = "default"
   }
+
+  depends_on = [
+    google_kms_crypto_key_iam_member.crypto_key
+  ]
 }
 `, context)
 }
@@ -3437,8 +4148,11 @@ resource "google_compute_image" "image" {
     kms_key_self_link       = data.google_kms_crypto_key.key.id
     kms_key_service_account = google_service_account.test.email
   }
-}
 
+  depends_on = [
+    google_kms_crypto_key_iam_member.crypto_key
+  ]
+}
 
 resource "google_compute_instance_template" "template" {
   name           = "tf-test-instance-template-%{random_suffix}"
@@ -3457,11 +4171,60 @@ resource "google_compute_instance_template" "template" {
   network_interface {
     network = "default"
   }
+
+  depends_on = [
+    google_kms_crypto_key_iam_member.crypto_key
+  ]
 }
 `, context)
 }
 
-<% if version == "beta" -%>
+func testAccComputeInstanceTemplate_resourceManagerTags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_tags_tag_key" "key" {
+  parent = "projects/%{project}"
+  short_name = "foobarbaz%{random_suffix}"
+  description = "For foo/bar resources."
+}
+
+resource "google_tags_tag_value" "value" {
+  parent = "tagKeys/${google_tags_tag_key.key.name}"
+  short_name = "foo%{random_suffix}"
+  description = "For foo resources."
+}
+
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "foobar" {
+  name         = "%{instance_name}"
+  machine_type = "e2-medium"
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    disk_size_gb = 10
+    boot         = true
+
+    resource_manager_tags = {
+      "tagKeys/${google_tags_tag_key.key.name}" = "tagValues/${google_tags_tag_value.value.name}"
+    }
+  }
+
+  resource_manager_tags = {
+    "tagKeys/${google_tags_tag_key.key.name}" = "tagValues/${google_tags_tag_value.value.name}"
+  }
+
+  network_interface {
+    network = "default"
+  }
+}
+`, context)
+}
+
+<% unless version == 'ga' -%>
 func testAccComputeInstanceTemplate_network_attachment(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_image" "my_image" {

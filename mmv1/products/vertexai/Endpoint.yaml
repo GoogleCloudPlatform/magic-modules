@@ -22,6 +22,13 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
   api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.endpoints'
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  method_name_separator: ':'
+  fetch_iam_policy_verb: :POST
+  parent_resource_attribute: endpoint
+  import_format: ['projects/{{project}}/locations/{{location}}/endpoints/{{name}}', '{{name}}']
+  example_config_body: 'templates/terraform/iam/example_config_body/vertex_ai_endpoint.tf.erb'
+  min_version: beta
 async: !ruby/object:Api::OpAsync
   actions:
     - create

@@ -1,0 +1,135 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'Client'
+description: |
+  Application Integration Client.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/application-integration/docs/overview'
+    'Set up Application Integration': 'https://cloud.google.com/application-integration/docs/setup-application-integration'
+  api: 'https://cloud.google.com/application-integration/docs/reference/rest/v1/projects.locations.clients'
+base_url: 'projects/{{project}}/locations/{{location}}/clients'
+self_link: 'projects/{{project}}/locations/{{location}}/clients'
+immutable: true
+create_url: 'projects/{{project}}/locations/{{location}}/clients:provision'
+delete_url: 'projects/{{project}}/locations/{{location}}/clients:deprovision'
+delete_verb: :POST
+autogen_async: false
+import_format:
+  [
+    'projects/{{project}}/locations/{{location}}/clients',
+  ]
+mutex: Client/{{location}}
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  decoder: templates/terraform/decoders/integrations_client.go.erb
+  pre_create: templates/terraform/pre_create/integrations_client.go.erb
+parameters:
+  - !ruby/object:Api::Type::String
+    name: 'location'
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      Location in which client needs to be provisioned.
+properties:
+  - !ruby/object:Api::Type::NestedObject
+    name: 'cloudKmsConfig'
+    description: |
+      Cloud KMS config for AuthModule to encrypt/decrypt credentials.
+    immutable: true
+    ignore_read: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: "kmsLocation"
+        required: true
+        description: |
+          Location name of the key ring, e.g. "us-west1".
+      - !ruby/object:Api::Type::String
+        name: "kmsRing"
+        required: true
+        description: |
+          A key ring organizes keys in a specific Google Cloud location and allows you to
+          manage access control on groups of keys. A key ring's name does not need to be
+          unique across a Google Cloud project, but must be unique within a given location.
+      - !ruby/object:Api::Type::String
+        name: "key"
+        required: true
+        description: |
+          A Cloud KMS key is a named object containing one or more key versions, along
+          with metadata for the key. A key exists on exactly one key ring tied to a
+          specific location.
+      - !ruby/object:Api::Type::String
+        name: "keyVersion"
+        description: |
+          Each version of a key contains key material used for encryption or signing.
+          A key's version is represented by an integer, starting at 1. To decrypt data
+          or verify a signature, you must use the same key version that was used to
+          encrypt or sign the data.
+      - !ruby/object:Api::Type::String
+        name: "kmsProjectId"
+        description: |
+          The Google Cloud project id of the project where the kms key stored. If empty,
+          the kms key is stored at the same project as customer's project and ecrypted
+          with CMEK, otherwise, the kms key is stored in the tenant project and
+          encrypted with GMEK.
+    conflicts:
+      - provision_gmek
+  - !ruby/object:Api::Type::Boolean
+    name: 'createSampleWorkflows'
+    description: |
+      Indicates if sample workflow should be created along with provisioning.
+    immutable: true
+    ignore_read: true
+    deprecation_message: "`create_sample_workflows` is deprecated and will be removed in a future major release. Use `create_sample_integrations` instead."
+    conflicts:
+      - create_sample_integrations
+  - !ruby/object:Api::Type::Boolean
+    name: 'createSampleIntegrations'
+    description: |
+      Indicates if sample integrations should be created along with provisioning.
+    immutable: true
+    ignore_read: true
+    conflicts:
+      - create_sample_workflows
+  - !ruby/object:Api::Type::Boolean
+    name: 'provisionGmek'
+    description: |
+      Indicates provision with GMEK or CMEK.
+    deprecation_message: "`provision_gmek` is deprecated and will be removed in a future major release. Client would be provisioned as gmek if `cloud_kms_config` is not given."
+    immutable: true
+    ignore_read: true
+    conflicts:
+      - cloud_kms_config
+  - !ruby/object:Api::Type::String
+    name: 'runAsServiceAccount'
+    description: |
+      User input run-as service account, if empty, will bring up a new default service account.
+    immutable: true
+    ignore_read: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "integrations_client_basic"
+    primary_resource_id: "example"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "integrations_client_full"
+    primary_resource_id: "example"
+    skip_vcr: true
+    vars:
+      key_ring_name: my-keyring
+      service_account_id: service-acc
+  - !ruby/object:Provider::Terraform::Examples
+    name: "integrations_client_deprecated_fields"
+    primary_resource_id: "example"
+    skip_docs: true

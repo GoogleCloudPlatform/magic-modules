@@ -27,7 +27,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -41,6 +41,13 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  encoder: templates/terraform/encoders/compute_region_target_https_proxy.go.erb
+  # update_encoder is usually the same as encoder by default. This resource is an uncommon case where the whole resource
+  # is marked to be immutable, but we have a field specific update that overrides it (e.g certifiacteManagerCertificates).
+  # This causes the encoder logic to not be applied during update.
+  update_encoder: templates/terraform/encoders/compute_region_target_https_proxy.go.erb
+  decoder: templates/terraform/decoders/compute_region_target_https_proxy.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'region_target_https_proxy_basic'
@@ -51,6 +58,26 @@ examples:
       region_url_map_name: 'url-map'
       region_backend_service_name: 'backend-service'
       region_health_check_name: 'http-health-check'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'region_target_https_proxy_mtls'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      target_https_proxy_name: 'test-mtls-proxy'
+      ssl_certificate_name: 'my-certificate'
+      url_map_name: 'url-map'
+      backend_service_name: 'backend-service'
+      http_health_check_name: 'http-health-check'
+      server_tls_policy_name: 'my-tls-policy'
+      trust_config_name: 'my-trust-config'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'region_target_https_proxy_certificate_manager_certificate'
+    primary_resource_id: 'default'
+    vars:
+      region_target_https_proxy_name: 'target-http-proxy'
+      certificate_manager_certificate_name: 'my-certificate'
+      region_url_map_name: 'url-map'
+      region_backend_service_name: 'backend-service'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
@@ -110,12 +137,24 @@ properties:
   #   update_url:
   #     'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setQuicOverride'
   - !ruby/object:Api::Type::Array
+    name: 'certificateManagerCertificates'
+    description: |
+      URLs to certificate manager certificate resources that are used to authenticate connections between users and the load balancer.
+      sslCertificates and certificateManagerCertificates can't be defined together.
+      Accepted format is `//certificatemanager.googleapis.com/projects/{project}/locations/{location}/certificates/{resourceName}` or just the self_link `projects/{project}/locations/{location}/certificates/{resourceName}`
+    update_verb: :POST
+    update_url: 'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setSslCertificates'
+    item_type: Api::Type::String
+    custom_expand: 'templates/terraform/custom_expand/certificate_manager_certificate_construct_full_url.go.erb'
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
+    conflicts:
+      - ssl_certificates
+  - !ruby/object:Api::Type::Array
     name: 'sslCertificates'
     description: |
-      A list of RegionSslCertificate resources that are used to authenticate
-      connections between users and the load balancer. Currently, exactly
-      one SSL certificate must be specified.
-    required: true
+      URLs to SslCertificate resources that are used to authenticate connections between users and the load balancer.
+      At least one SSL certificate must be specified. Currently, you may specify up to 15 SSL certificates.
+      sslCertificates do not apply when the load balancing scheme is set to INTERNAL_SELF_MANAGED.
     update_verb: :POST
     update_url: 'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setSslCertificates'
     item_type: !ruby/object:Api::Type::ResourceRef
@@ -124,6 +163,8 @@ properties:
       imports: 'selfLink'
       description: 'The SSL certificates used by this TargetHttpsProxy'
     custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
+    conflicts:
+      - certificate_manager_certificates
   - !ruby/object:Api::Type::ResourceRef
     name: 'sslPolicy'
     resource: 'RegionSslPolicy'
@@ -132,11 +173,11 @@ properties:
       A reference to the Region SslPolicy resource that will be associated with
       the TargetHttpsProxy resource. If not set, the TargetHttpsProxy
       resource will not have any SSL policy configured.
-  # 2022 May 28 - setSslPolicy method not yet listed
-  # https://cloud.google.com/compute/docs/reference/rest/beta/regionTargetHttpsProxies
-  #  update_verb: :POST
-  #  update_url:
-  #    'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setSslPolicy'
+    update_id: 'sslPolicy'
+    fingerprint_name: 'fingerprint'
+    update_verb: :PATCH
+    update_url:
+      'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}'
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::ResourceRef
     name: 'urlMap'
@@ -149,3 +190,27 @@ properties:
     update_verb: :POST
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
     update_url: 'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setUrlMap'
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'serverTlsPolicy'
+    resource: 'SslPolicy'
+    imports: 'selfLink'
+    description: |
+      A URL referring to a networksecurity.ServerTlsPolicy
+      resource that describes how the proxy should authenticate inbound
+      traffic. serverTlsPolicy only applies to a global TargetHttpsProxy
+      attached to globalForwardingRules with the loadBalancingScheme
+      set to INTERNAL_SELF_MANAGED or EXTERNAL or EXTERNAL_MANAGED.
+      For details which ServerTlsPolicy resources are accepted with
+      INTERNAL_SELF_MANAGED and which with EXTERNAL, EXTERNAL_MANAGED
+      loadBalancingScheme consult ServerTlsPolicy documentation.
+      If left blank, communications are not encrypted.
+
+      If you remove this field from your configuration at the same time as
+      deleting or recreating a referenced ServerTlsPolicy resource, you will
+      receive a resourceInUseByAnotherResource error. Use lifecycle.create_before_destroy
+      within the ServerTlsPolicy resource to avoid this.
+    update_id: 'serverTlsPolicy'
+    fingerprint_name: 'fingerprint'
+    update_verb: :PATCH
+    update_url:
+      'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}'

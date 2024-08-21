@@ -1,0 +1,16 @@
+resource "google_project" "default" {
+  provider = google-beta
+
+  project_id = "{{index $.Vars "project_name"}}"
+  name       = "{{index $.Vars "project_name"}}"
+  org_id     = "{{index $.TestEnvVars "org_id"}}"
+
+  labels = {
+    "firebase" = "enabled"
+  }
+}
+
+resource "google_firebase_project" "default" {
+  provider = google-beta
+  project  = google_project.default.project_id
+}

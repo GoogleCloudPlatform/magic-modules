@@ -69,6 +69,13 @@ examples:
     test_env_vars:
       billing_acct: :MASTER_BILLING_ACCT
   - !ruby/object:Provider::Terraform::Examples
+    name: 'billing_budget_notify_project_recipient'
+    primary_resource_id: 'budget'
+    vars:
+      budget_name: 'Example Billing Budget'
+    test_env_vars:
+      billing_acct: :MASTER_BILLING_ACCT
+  - !ruby/object:Provider::Terraform::Examples
     name: 'billing_budget_customperiod'
     primary_resource_id: 'budget'
     vars:
@@ -440,6 +447,7 @@ properties:
       - 'notificationsRule.schemaVersion'
       - 'notificationsRule.monitoringNotificationChannels'
       - 'notificationsRule.disableDefaultIamRecipients'
+      - 'notificationsRule.enableProjectLevelRecipients'
     properties:
       - !ruby/object:Api::Type::String
         name: pubsubTopic
@@ -479,3 +487,21 @@ properties:
           when a threshold is exceeded. Default recipients are
           those with Billing Account Administrators and Billing
           Account Users IAM roles for the target account.
+      - !ruby/object:Api::Type::Boolean
+        name: enableProjectLevelRecipients
+        default_value: false
+        description: |
+          When set to true, and when the budget has a single project configured,
+          notifications will be sent to project level recipients of that project.
+          This field will be ignored if the budget has multiple or no project configured.
+
+          Currently, project level recipients are the users with Owner role on a cloud project.
+  - !ruby/object:Api::Type::Enum
+    name: ownershipScope
+    description: |
+      The ownership scope of the budget. The ownership scope and users'
+      IAM permissions determine who has full access to the budget's data.
+    values:
+      - :OWNERSHIP_SCOPE_UNSPECIFIED
+      - :ALL_USERS
+      - :BILLING_ACCOUNT

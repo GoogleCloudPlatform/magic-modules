@@ -164,6 +164,7 @@ properties:
         name: 'githubSettings'
         description: |
           Settings of integration with GitHub.
+        custom_flatten: 'templates/terraform/custom_flatten/dialogflowcx_agent_git_integration_settings_github_settings.go.erb'  # accessToken comes from config, no response
         properties:
           - !ruby/object:Api::Type::String
             name: 'displayName'
@@ -183,7 +184,6 @@ properties:
               The access token used to authenticate the access to the GitHub repository.
             sensitive: true
             ignore_read: true
-            custom_flatten: 'templates/terraform/custom_flatten/dialogflowcx_agent_git_integration_settings_github_settings_access_token.go.erb'
           - !ruby/object:Api::Type::Array
             name: 'branches'
             description: |

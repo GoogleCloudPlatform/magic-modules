@@ -6,7 +6,7 @@ import (
 	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccComputeForwardingRule_update(t *testing.T) {
@@ -20,19 +20,19 @@ func TestAccComputeForwardingRule_update(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeForwardingRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeForwardingRule_basic(poolName, ruleName),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_forwarding_rule.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
         ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeForwardingRule_update(poolName, ruleName),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_forwarding_rule.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -56,19 +56,19 @@ func TestAccComputeForwardingRule_ip(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeForwardingRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeForwardingRule_ip(addrName, poolName, ruleName, addressRefFieldID),
 			},
-			resource.TestStep{
+			{
 				ResourceName:            "google_compute_forwarding_rule.foobar",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"ip_address"}, // ignore ip_address because we've specified it by ID
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeForwardingRule_ip(addrName, poolName, ruleName, addressRefFieldRaw),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_forwarding_rule.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -124,11 +124,11 @@ func TestAccComputeForwardingRule_networkTier(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeForwardingRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeForwardingRule_networkTier(poolName, ruleName),
 			},
 
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_forwarding_rule.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -151,11 +151,11 @@ func TestAccComputeForwardingRule_serviceDirectoryRegistrations(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeForwardingRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeForwardingRule_serviceDirectoryRegistrations(poolName, ruleName, svcDirNamespace, serviceName),
 			},
 
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_forwarding_rule.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -177,10 +177,10 @@ func TestAccComputeForwardingRule_forwardingRuleVpcPscExampleUpdate(t *testing.T
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeForwardingRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeForwardingRule_forwardingRuleVpcPscExample(context),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_forwarding_rule.default",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -192,6 +192,7 @@ func TestAccComputeForwardingRule_forwardingRuleVpcPscExampleUpdate(t *testing.T
 				ResourceName:      "google_compute_forwarding_rule.default",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
 				Config: testAccComputeForwardingRule_forwardingRuleVpcPscExampleUpdate(context, false),
@@ -200,6 +201,7 @@ func TestAccComputeForwardingRule_forwardingRuleVpcPscExampleUpdate(t *testing.T
 				ResourceName:      "google_compute_forwarding_rule.default",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 		},
 	})
@@ -298,6 +300,10 @@ func TestAccComputeForwardingRule_forwardingRuleIpAddressIpv6(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeForwardingRule_forwardingRuleIpAddressIpv6(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(
+						"google_compute_forwarding_rule.external", "forwarding_rule_id"),
+				),
 			},
 			{
 				ResourceName:            "google_compute_forwarding_rule.external",
@@ -448,7 +454,7 @@ resource "google_compute_instance_template" "instance_template" {
     }
   }
   disk {
-    source_image = "debian-cloud/debian-10"
+    source_image = "debian-cloud/debian-12"
     auto_delete  = true
     boot         = true
   }
@@ -561,7 +567,7 @@ resource "google_compute_instance" "vm_test" {
   }
   boot_disk {
     initialize_params {
-      image = "debian-cloud/debian-10"
+      image = "debian-cloud/debian-12"
     }
   }
 }
@@ -649,6 +655,9 @@ resource "google_compute_forwarding_rule" "default" {
   ip_address              = google_compute_address.consumer_address.id
   allow_psc_global_access = false
   %{lifecycle_block}
+  labels = {
+    "foo" = "bar"
+  }
 }
 
 // Consumer service endpoint

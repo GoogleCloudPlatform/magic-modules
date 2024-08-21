@@ -1,0 +1,88 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'RecaptchaV3Config'
+description: |
+  An app's reCAPTCHA V3 configuration object.
+references:
+  guides:
+    'Official Documentation': 'https://firebase.google.com/docs/app-check'
+  api: 'https://firebase.google.com/docs/reference/appcheck/rest/v1/projects.apps.recaptchaV3Config'
+docs:
+base_url: 'projects/{{project}}/apps/{{app_id}}/recaptchaV3Config'
+self_link: 'projects/{{project}}/apps/{{app_id}}/recaptchaV3Config'
+create_url: 'projects/{{project}}/apps/{{app_id}}/recaptchaV3Config?updateMask=tokenTtl,siteSecret'
+create_verb: 'PATCH'
+update_verb: 'PATCH'
+update_mask: true
+skip_delete: true
+import_format:
+  - 'projects/{{project}}/apps/{{app_id}}/recaptchaV3Config'
+  - '{{project}}/{{app_id}}'
+  - '{{app_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+examples:
+  - name: 'firebase_app_check_recaptcha_v3_config_basic'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      token_ttl: '7200s'
+      site_secret: '6Lf9YnQpAAAAAC3-MHmdAllTbPwTZxpUw5d34YzX'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'token_ttl': '"7200s"'
+      'site_secret': '"6Lf9YnQpAAAAAC3-MHmdAllTbPwTZxpUw5d34YzX"'
+    external_providers: ["random", "time"]
+parameters:
+  - name: 'app_id'
+    type: String
+    description: |
+      The ID of an
+      [Web App](https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects.webApps#WebApp.FIELDS.app_id).
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The relative resource name of the reCAPTCHA V3 configuration object
+    output: true
+  - name: 'tokenTtl'
+    type: String
+    description: |
+      Specifies the duration for which App Check tokens exchanged from reCAPTCHA V3 artifacts will be valid.
+      If unset, a default value of 1 hour is assumed. Must be between 30 minutes and 7 days, inclusive.
+
+      A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
+    default_from_api: true
+  - name: 'siteSecret'
+    type: String
+    description: |
+      The site secret used to identify your service for reCAPTCHA v3 verification.
+      For security reasons, this field will never be populated in any response.
+    required: true
+    ignore_read: true
+    sensitive: true
+  - name: 'siteSecretSet'
+    type: Boolean
+    description: |
+      Whether the siteSecret was previously set. Since we will never return the siteSecret field, this field is the only way to find out whether it was previously set.
+    output: true

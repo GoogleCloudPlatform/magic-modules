@@ -9,13 +9,13 @@
 -%>
 updateMask := []string{}
 <%
-  masks_for_props = get_property_update_masks_groups(update_body_properties)
+  masks_for_props = get_property_update_masks_groups(object.update_body_properties)
   masks_for_props.each do |prop_name, masks| -%>
 
 if d.HasChange("<%= prop_name %>") {
   updateMask = append(updateMask, <%= masks.map{|m| "\"#{m}\"" }.join(",\n") %>)
 }
-<% end # update_body_properties.each -%>
+<% end # object.update_body_properties.each -%>
 // updateMask is a URL parameter but not present in the schema, so ReplaceVars
 // won't set it
 url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
