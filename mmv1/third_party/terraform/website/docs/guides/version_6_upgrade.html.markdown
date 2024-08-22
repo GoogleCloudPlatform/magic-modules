@@ -86,14 +86,12 @@ terraform {
 }
 ```
 
-## Provider
+## Provider: Terraform provider attribution label is added to new resources by default
 
-### Provider attribution label is enabled by default
-
-Version 5.0.0 introduced the `goog-terraform-provisioned = true` label that could
+Version 5.16.0 introduced the `goog-terraform-provisioned = true` label that could
 be automatically added to resources, making it easy to identify resources created
 by the provider when using other tools such as `gcloud` or the GCP web console. In
-5.0.0 the label needed to be enabled explicitly; in 6.0.0 the default is to add the
+5.16.0 the label needed to be enabled explicitly; in 6.0.0 the default is to add the
 label to all newly created resources. This behavior can be disabled in the provider
 configuration. For example:
 
@@ -103,7 +101,7 @@ provider "google" {
 }
 ```
 
-### `name_prefix` max length has been extended from 37 to 54 characters for multiple resources
+## Provider: `name_prefix` max length has been extended from 37 to 54 characters for multiple resources
 
 Affected resources: `google_compute_instance_template`, `google_compute_region_instance_template`, `google_compute_ssl_certificate`,
 and `google_compute_region_ssl_certificate`
@@ -112,7 +110,7 @@ Previously, the max length of `name_prefix` was 37 characters since the autogene
 the total max length for names of 63 characters.
 In 6.0.0, providing a `name_prefix` larger than 37 characters will prompt the provider to use a shortened suffix of only 9 characters, leading to a new max of 54 characters for `name_prefix`. This shortened suffix is inevitably more prone to collisions, so use the longer max `name_prefix` length with caution.
 
-### Opt-out deletion protection is added to several resources, including google_project
+## Provider: Opt-out deletion protection is added to several resources, including google_project
 
 Affected resources: `google_cloud_run_v2_job`, `google_cloud_run_v2_service`, `google_domain`, `google_folder`, 
 `google_project`
@@ -121,7 +119,7 @@ Protection against Terraform deleting these resources has been added via a new f
 
 ## Resource: `google_alloydb_cluster` 
 
-## `network` is now removed
+### `network` is now removed
 
 `network` has been removed in favor of `network_config.network`
 
@@ -340,22 +338,22 @@ and then run `terraform apply` to apply the change.
 
 ## Resource: `google_integrations_client`
 
-### `create_sample_worklfows` and `provision_gmek` is now removed
+### `create_sample_workflows` and `provision_gmek` is now removed
 
-`create_sample_worklfows` and `provision_gmek` is now removed in favor of `create_sample_integrations`
+`create_sample_workflows` and `provision_gmek` is now removed in favor of `create_sample_integrations`
 
 ## Resource: `google_project`
 
 ### Project deletion now prevented by default with `deletion_policy`
 
-The field `skip_delete` is removed and the default value for `deletion_policy` is now
-`PREVENT` instead of `DELETE`. The `PREVENT` value for `deletion_policy` stops Terraform
-from deleting or recreating your project. Setting this field to `ABANDON` allows the
-resource to be abandoned instead of deleted. To remove deletion protection entirely,
-explicitly set this field to `DELETE` in your configuration and run `terraform apply`. A
-`skip_delete` value of `false` can be changed to a `deletion_policy` value of `DELETE` and
-a `skip_delete` value of `true` to a `deletion_policy` value of `ABANDON` for equivalent
-behavior.
+The default value for `deletion_policy` is now `PREVENT` instead of `DELETE`. The `PREVENT` value for `deletion_policy` stops Terraform
+from deleting or recreating your project. To remove deletion protection entirely,
+explicitly set this field to `DELETE` in your configuration and run `terraform apply`.
+Alternatively, setting this field to `ABANDON` allows Terraform to remove your project from state without destroying it.
+
+### `skip_delete` is now removed
+
+`skip_delete` has been removed in favor of `deletion_policy`. In order to get the same behavior as `skip_delete = true`, set `deletion_policy = ABANDON`. Be aware that `deletion_policy = ABANDON` will override the error-on-delete behaviour that the `PREVENT` policy applies.
 
 ## Resource: `google_pubsub_topic`
 
