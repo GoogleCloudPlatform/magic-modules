@@ -23,7 +23,7 @@ func TestAccSecurityCenterV2FolderBigQueryExportConfig_basic(t *testing.T) {
 		"dataset": fmt.Sprintf("projects/%s/datasets/%s",
 			envvar.GetTestProjectFromEnv(), dataset_id),
 		"big_query_export_id": "tf-test-export-" + randomSuffix,
-		"folder_name": "tf-test-folder-name-" + randomSuffix,
+		"folder_name":         "tf-test-folder-name-" + randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -62,6 +62,8 @@ func testAccSecurityCenterV2FolderBigQueryExportConfig_basic(context map[string]
 resource "google_folder" "folder" {
   parent       = "organizations/%{org_id}"
   display_name = "%{folder_name}"
+
+  deletion_protection = false
 }
 
 resource "google_bigquery_dataset" "default" {
@@ -115,6 +117,8 @@ func testAccSecurityCenterV2FolderBigQueryExportConfig_update(context map[string
 resource "google_folder" "folder" {
   parent       = "organizations/%{org_id}"
   display_name = "%{folder_name}"
+
+  deletion_protection = false
 }
 
 resource "google_bigquery_dataset" "default" {
