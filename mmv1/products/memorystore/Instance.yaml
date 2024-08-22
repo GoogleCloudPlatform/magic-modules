@@ -1,11 +1,11 @@
 ---
 !ruby/object:Api::Resource
-base_url: "/v1beta/projects/{{project}}/locations/{{location}}/instances"
-create_url: "/v1beta/projects/{{project}}/locations/{{location}}/instances?instanceId={{instance_id}}"
-self_link: "/v1beta/projects/{{project}}/locations/{{location}}/instances/{{instance_id}}"
-id_format: "/v1beta/projects/{{project}}/locations/{{location}}/instances/{{instance_id}}"
+base_url: "projects/{{project}}/locations/{{location}}/instances"
+create_url: "projects/{{project}}/locations/{{location}}/instances?instanceId={{instance_id}}"
+self_link: "projects/{{project}}/locations/{{location}}/instances/{{instance_id}}"
+id_format: "projects/{{project}}/locations/{{location}}/instances/{{instance_id}}"
 import_format:
-  - "/v1beta/projects/{{project}}/locations/{{location}}/instances/{{instance_id}}"
+  - "projects/{{project}}/locations/{{location}}/instances/{{instance_id}}"
 name: Instance
 description: A Google Cloud Memorystore instance.
 update_verb: :PATCH
@@ -89,12 +89,14 @@ properties:
       "Optional. Immutable. Authorization mode of the instance. \n Possible
       values:\n AUTHORIZATION_MODE_UNSPECIFIED\nAUTH_DISABLED\nIAM_AUTH"
     immutable: true
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: transitEncryptionMode
     description:
       "Optional. Immutable. In-transit encryption mode of the instance. \n
       Possible values:\n TRANSIT_ENCRYPTION_MODE_UNSPECIFIED\nTRANSIT_ENCRYPTION_DISABLED\nSERVER_AUTHENTICATION"
     immutable: true
+    default_from_api: true
   - !ruby/object:Api::Type::Integer
     name: shardCount
     description: "Required. Number of shards for the instance. "
@@ -129,15 +131,18 @@ properties:
       "Optional. Immutable. Machine type for individual nodes of the instance.
       \n Possible values:\n NODE_TYPE_UNSPECIFIED\nSHARED_CORE_NANO\nHIGHMEM_MEDIUM\nHIGHMEM_XLARGE\nSTANDARD_SMALL"
     immutable: true
+    default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     properties:
       - !ruby/object:Api::Type::String
         name: mode
         description: "Optional. Current persistence mode. \n Possible values:\n PERSISTENCE_MODE_UNSPECIFIED\nDISABLED\nRDB\nAOF"
+        default_from_api: true
       - !ruby/object:Api::Type::NestedObject
         properties:
           - !ruby/object:Api::Type::String
             name: rdbSnapshotPeriod
+            default_from_api: true
             description:
               "Optional. Period between RDB snapshots. \n Possible values:\n
               SNAPSHOT_PERIOD_UNSPECIFIED\nONE_HOUR\nSIX_HOURS\nTWELVE_HOURS\nTWENTY_FOUR_HOURS"
@@ -154,6 +159,7 @@ properties:
           - !ruby/object:Api::Type::String
             name: appendFsync
             description: "Optional. The fsync mode. \n Possible values:\n APPEND_FSYNC_UNSPECIFIED\nNEVER\nEVERY_SEC\nALWAYS"
+            default_from_api: true
         name: aofConfig
         description: "Configuration for AOF based persistence. "
     name: persistenceConfig
@@ -162,6 +168,7 @@ properties:
     name: engineVersion
     description: "Optional. Immutable. Engine version of the instance. "
     immutable: true
+    default_from_api: true
   - !ruby/object:Api::Type::KeyValuePairs
     name: engineConfigs
     output:
@@ -189,6 +196,7 @@ properties:
           SINGLE_ZONE mode.\nIgnored for MULTI_ZONE mode. "
       - !ruby/object:Api::Type::String
         name: mode
+        default_from_api: true
         description:
           "Optional. Current zone distribution mode. Defaults to MULTI_ZONE.
           \n Possible values:\n ZONE_DISTRIBUTION_MODE_UNSPECIFIED\nMULTI_ZONE\nSINGLE_ZONE"
@@ -197,6 +205,7 @@ properties:
   - !ruby/object:Api::Type::Boolean
     name: deletionProtectionEnabled
     description: "Optional. If set to true deletion of the instance will fail. "
+    default_value: true
   - !ruby/object:Api::Type::Array
     name: pscAutoConnections
     item_type: !ruby/object:Api::Type::NestedObject
