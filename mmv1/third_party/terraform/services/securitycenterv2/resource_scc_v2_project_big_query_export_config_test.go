@@ -23,8 +23,8 @@ func TestAccSecurityCenterV2ProjectBigQueryExportConfig_basic(t *testing.T) {
 		"dataset": fmt.Sprintf("projects/%s/datasets/%s",
 			envvar.GetTestProjectFromEnv(), dataset_id),
 		"big_query_export_id": "tf-test-export-" + randomSuffix,
-		"name": fmt.Sprintf("organizations/%s/locations/global/bigQueryExports/%s",
-			orgID, "tf-test-export-"+randomSuffix),
+		"name": fmt.Sprintf("projects/%s/locations/global/bigQueryExports/%s",
+			envvar.GetTestProjectFromEnv(), "tf-test-export-"+randomSuffix),
 		"project":  envvar.GetTestProjectFromEnv(),
 	}
 
