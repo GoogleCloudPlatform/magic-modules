@@ -423,7 +423,7 @@ func ResourceComputeInstanceGroupManager() *schema.Resource {
 				Description: `When used with wait_for_instances specifies the status to wait for. When STABLE is specified this resource will wait until the instances are stable before returning. When UPDATED is set, it will wait for the version target to be reached and any per instance configs to be effective and all instances configs to be effective as well as all instances to be stable before returning.`,
 			},
 			"stateful_internal_ip": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Optional:    true,
 				Description: `External IPs considered stateful by the instance group. `,
 				Elem: &schema.Resource{
@@ -444,7 +444,7 @@ func ResourceComputeInstanceGroupManager() *schema.Resource {
 				},
 			},
 			"stateful_external_ip": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Optional:    true,
 				Description: `External IPs considered stateful by the instance group. `,
 				Elem: &schema.Resource{
@@ -858,10 +858,10 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 	if err = d.Set("stateful_disk", flattenStatefulPolicy(manager.StatefulPolicy)); err != nil {
 		return fmt.Errorf("Error setting stateful_disk in state: %s", err.Error())
 	}
-	if err = d.Set("stateful_internal_ip", flattenStatefulPolicyStatefulInternalIps(d, manager.StatefulPolicy)); err != nil {
+	if err = d.Set("stateful_internal_ip", flattenStatefulPolicyStatefulInternalIps(manager.StatefulPolicy)); err != nil {
 		return fmt.Errorf("Error setting stateful_internal_ip in state: %s", err.Error())
 	}
-	if err = d.Set("stateful_external_ip", flattenStatefulPolicyStatefulExternalIps(d, manager.StatefulPolicy)); err != nil {
+	if err = d.Set("stateful_external_ip", flattenStatefulPolicyStatefulExternalIps(manager.StatefulPolicy)); err != nil {
 		return fmt.Errorf("Error setting stateful_external_ip in state: %s", err.Error())
 	}
 	if err := d.Set("fingerprint", manager.Fingerprint); err != nil {
@@ -1203,9 +1203,9 @@ func expandStatefulPolicy(d *schema.ResourceData) *compute.StatefulPolicy {
 
 	if d.HasChange("stateful_internal_ip") {
 		oldInternalIps, newInternalIps := d.GetChange("stateful_internal_ip")
-		preservedState.InternalIPs = expandStatefulIps(newInternalIps.([]interface{}))
+		preservedState.InternalIPs = expandStatefulIps(newInternalIps.(*schema.Set).List())
 		// Remove Internal Ips
-		for _, raw := range oldInternalIps.([]interface{}) {
+		for _, raw := range oldInternalIps.(*schema.Set).List() {
 			data := raw.(map[string]interface{})
 			networkIp := data["interface_name"].(string)
 			if _, exist := preservedState.InternalIPs[networkIp]; !exist {
@@ -1217,9 +1217,9 @@ func expandStatefulPolicy(d *schema.ResourceData) *compute.StatefulPolicy {
 
 	if d.HasChange("stateful_external_ip") {
 		oldExternalIps, newExternalIps := d.GetChange("stateful_external_ip")
-		preservedState.ExternalIPs = expandStatefulIps(newExternalIps.([]interface{}))
+		preservedState.ExternalIPs = expandStatefulIps(newExternalIps.(*schema.Set).List())
 		// Remove External Ips
-		for _, raw := range oldExternalIps.([]interface{}) {
+		for _, raw := range oldExternalIps.(*schema.Set).List() {
 			data := raw.(map[string]interface{})
 			networkIp := data["interface_name"].(string)
 			if _, exist := preservedState.ExternalIPs[networkIp]; !exist {
@@ -1412,20 +1412,36 @@ func flattenStatefulPolicy(statefulPolicy *compute.StatefulPolicy) []map[string]
 	return result
 }
 
-func flattenStatefulPolicyStatefulInternalIps(d *schema.ResourceData, statefulPolicy *compute.StatefulPolicy) []map[string]interface{} {
-	if statefulPolicy == nil || statefulPolicy.PreservedState == nil || statefulPolicy.PreservedState.InternalIPs == nil {
-		return make([]map[string]interface{}, 0, 0)
+func flattenStatefulPolicyStatefulInternalIps(statefulPolicy *compute.StatefulPolicy) []map[string]interface{} {
+		if statefulPolicy == nil || statefulPolicy.PreservedState == nil || statefulPolicy.PreservedState.InternalIPs == nil {
+			return make([]map[string]interface{}, 0, 0)
+		}
+		result := make([]map[string]interface{}, 0, len(statefulPolicy.PreservedState.InternalIPs))
+		for interfaceName, internalIp := range statefulPolicy.PreservedState.InternalIPs {
+		data := map[string]interface{}{
+		"interface_name": interfaceName,
+		"delete_rule": internalIp.AutoDelete,
 	}
 
-	return flattenStatefulPolicyStatefulIps(d, "stateful_internal_ip", statefulPolicy.PreservedState.InternalIPs)
+		result = append(result, data)
+	}
+	return result
 }
 
-func flattenStatefulPolicyStatefulExternalIps(d *schema.ResourceData, statefulPolicy *compute.StatefulPolicy) []map[string]interface{} {
+func flattenStatefulPolicyStatefulExternalIps(statefulPolicy *compute.StatefulPolicy) []map[string]interface{} {
 	if statefulPolicy == nil || statefulPolicy.PreservedState == nil || statefulPolicy.PreservedState.ExternalIPs == nil {
-		return make([]map[string]interface{}, 0)
+		return make([]map[string]interface{}, 0, 0)
 	}
+	result := make([]map[string]interface{}, 0, len(statefulPolicy.PreservedState.ExternalIPs))
+	for interfaceName, externalIp := range statefulPolicy.PreservedState.ExternalIPs {
+		data := map[string]interface{}{
+			"interface_name": interfaceName,
+			"delete_rule": externalIp.AutoDelete,
+		}
 
-	return flattenStatefulPolicyStatefulIps(d, "stateful_external_ip", statefulPolicy.PreservedState.ExternalIPs)
+		result = append(result, data)
+	}
+	return result
 }
 
 func flattenStatefulPolicyStatefulIps(d *schema.ResourceData, ipfieldName string, ips map[string]compute.StatefulPolicyPreservedStateNetworkIp) []map[string]interface{} {
