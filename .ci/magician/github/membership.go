@@ -91,10 +91,6 @@ func IsCoreContributor(user string) bool {
 }
 
 func IsCoreReviewer(user string) bool {
-	// TESTING PURPOSES
-	if user == "trodge" {
-		return false
-	}
 	_, isCoreReviewer := reviewerRotation[user]
 	return isCoreReviewer
 }
