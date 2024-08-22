@@ -57,11 +57,11 @@ examples:
       policy_name: "mypolicy"
       subnet_name: "mysubnet"
       network_name: "mynetwork"
-      prevent_destroy: 'true'
+      deletion_protection_enabled: 'true'
     test_vars_overrides:
-      prevent_destroy: 'false'
+      deletion_protection_enabled: 'false'
     oics_vars_overrides:
-      prevent_destroy: 'false'
+      deletion_protection_enabled: 'false'
   - !ruby/object:Provider::Terraform::Examples
     name: "redis_cluster_ha_single_zone"
     primary_resource_id: "cluster-ha-single-zone"
@@ -70,11 +70,11 @@ examples:
       policy_name: "mypolicy"
       subnet_name: "mysubnet"
       network_name: "mynetwork"
-      prevent_destroy: 'true'
+      deletion_protection_enabled: 'true'
     test_vars_overrides:
-      prevent_destroy: 'false'
+      deletion_protection_enabled: 'false'
     oics_vars_overrides:
-      prevent_destroy: 'false'
+      deletion_protection_enabled: 'false'
 properties:
   - !ruby/object:Api::Type::Time
     name: createTime
@@ -262,6 +262,14 @@ properties:
     description: |
       Required. Number of shards for the Redis cluster.
     required: true
+  - !ruby/object:Api::Type::Boolean
+    name: deletionProtectionEnabled
+    description: |
+      Optional. Indicates if the cluster is deletion protected or not.
+      If the value if set to true, any delete cluster operation will fail.
+      Default value is true.
+    required: false
+    default_value: true
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'redisConfigs'
     description: |

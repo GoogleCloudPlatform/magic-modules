@@ -51,8 +51,20 @@ async: !ruby/object:Api::OpAsync
 id_format: '{{name}}'
 import_format: ['{{name}}']
 autogen_async: true
+virtual_fields:
+  - !ruby/object:Api::Type::Boolean
+    name: 'deletion_protection'
+    default_value: true
+    description: |
+      Whether Terraform will be prevented from destroying the domain. Defaults to true.
+      When a`terraform destroy` or `terraform apply` would delete the domain,
+      the command will fail if this field is not set to false in Terraform state.
+      When the field is set to true or unset in Terraform state, a `terraform apply`
+      or `terraform destroy` that would delete the domain will fail.
+      When the field is set to false, deleting the domain is allowed.
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/self_link_as_name.erb
+  pre_delete: 'templates/terraform/pre_delete/active_directory_domain.go.erb'
 error_abort_predicates: ['transport_tpg.Is429QuotaError']
 examples:
   - !ruby/object:Provider::Terraform::Examples
@@ -67,6 +79,8 @@ examples:
         tfgen
         # skip the test until Active Directory setup issue got resolved
     skip_test: true
+    ignore_read_extra:
+      - 'deletion_protection'
 parameters:
   - !ruby/object:Api::Type::String
     name: domainName
