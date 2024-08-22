@@ -1333,7 +1333,7 @@ func TestAccCloudRunService_csiVolume(t *testing.T) {
 				ResourceName:            "google_cloud_run_service.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "metadata.0.annotations", "metadata.0.labels", "metadata.0.terraform_labels", "status.0.conditions"},
+				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "metadata.0.annotations", "metadata.0.effective_annotations", "metadata.0.labels", "metadata.0.terraform_labels", "status.0.conditions"},
 			},
 			{
 				Config: testAccCloudRunService_cloudRunServiceUpdateWithGcsVolume(name, project,),
@@ -1342,7 +1342,7 @@ func TestAccCloudRunService_csiVolume(t *testing.T) {
 				ResourceName:            "google_cloud_run_service.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "metadata.0.annotations", "metadata.0.labels", "metadata.0.terraform_labels", "status.0.conditions"},
+				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "metadata.0.annotations", "metadata.0.effective_annotations", "metadata.0.labels", "metadata.0.terraform_labels", "status.0.conditions"},
                               },
                         },
       })
