@@ -184,9 +184,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'encryptionConfiguration'
     description: |
-      The default encryption key for a transfer. Once this property is set,
-      all newly-created transferConfigs will have encryption key set to
-      this value.
+      The name of the KMS key used for encrypting BigQuery data.
     properties:
       - !ruby/object:Api::Type::String
         name: 'kmsKeyName'
