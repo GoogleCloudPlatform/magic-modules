@@ -18,6 +18,8 @@ self_link: 'projects/{{project}}/locations/{{location}}/dataScans/{{data_scan_id
 create_url: 'projects/{{project}}/locations/{{location}}/dataScans?dataScanId={{data_scan_id}}'
 update_verb: :PATCH
 update_mask: true
+# User-provided label cannot start with goog-
+skip_attribution_label: true
 import_format:
   [
     'projects/{{project}}/locations/{{location}}/dataScans/{{data_scan_id}}',
