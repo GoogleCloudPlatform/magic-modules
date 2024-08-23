@@ -53,7 +53,6 @@ func TestAccComputeTargetHttpsProxy_update(t *testing.T) {
 					testAccComputeTargetHttpsProxyHasSslCertificate(t, "tf-test-httpsproxy-cert1-"+resourceSuffix, &proxy),
 					testAccComputeTargetHttpsProxyHasSslCertificate(t, "tf-test-httpsproxy-cert2-"+resourceSuffix, &proxy),
 					testAccComputeTargetHttpsProxyHasNullServerTlsPolicy(t, &proxy),
-					testAccComputeTargetHttpsProxyHasNullServerTlsPolicy(t, &proxy),
 				),
 			},
 		},
@@ -151,7 +150,6 @@ func testAccComputeTargetHttpsProxyDescription(description string, proxy *comput
 			return fmt.Errorf("Wrong description: expected '%s' got '%s'", description, proxy.Description)
 		}
 
-
 		return nil
 	}
 }
@@ -181,16 +179,6 @@ func testAccComputeTargetHttpsProxyHasServerTlsPolicy(t *testing.T, policy strin
 		}
 
 		return fmt.Errorf("Server Tls Policy not found: expected '%s'", serverTlsPolicyUrl)
-	}
-}
-
-func testAccComputeTargetHttpsProxyHasNullServerTlsPolicy(t *testing.T, proxy *compute.TargetHttpsProxy) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		if proxy.ServerTlsPolicy != "" {
-			return fmt.Errorf("Server Tls Policy found: expected 'null'")
-		}
-
-		return nil
 	}
 }
 
@@ -315,9 +303,6 @@ resource "google_compute_target_https_proxy" "foobar" {
     google_compute_ssl_certificate.foobar1.self_link,
     google_compute_ssl_certificate.foobar2.self_link,
   ]
-  quic_override     = "ENABLE"
-  tls_early_data    = "STRICT"
-  server_tls_policy = null
   quic_override     = "ENABLE"
   tls_early_data    = "STRICT"
   server_tls_policy = null

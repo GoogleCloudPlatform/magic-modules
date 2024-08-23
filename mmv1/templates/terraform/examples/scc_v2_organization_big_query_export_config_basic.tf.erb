@@ -19,11 +19,7 @@ resource "google_scc_v2_organization_scc_big_query_exports" "<%= ctx[:primary_re
   name         = "<%= ctx[:vars]['name'] %>"
   big_query_export_id    = "<%= ctx[:vars]['big_query_export_id'] %>"
   organization = "<%= ctx[:test_env_vars]['org_id'] %>"
-<<<<<<< HEAD
-  dataset      = google_bigquery_dataset.default.id
-=======
   dataset      = "<%= ctx[:vars]['dataset'] %>"
->>>>>>> bfa2270b5 (Add Resource for V2 SCC Findings Exports to Big Query Organization Config (#11428))
   location     = "global"
   description  = "Cloud Security Command Center Findings Big Query Export Config"
   filter       = "state=\"ACTIVE\" AND NOT mute=\"MUTED\""
