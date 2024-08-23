@@ -2,7 +2,7 @@ resource "google_memorystore_instance" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
   instance_id        = "<%= ctx[:vars]['instance_name'] %>"
   shard_count    = 3
-  psc_auto_connections {
+  desired_psc_auto_connections {
     network = google_compute_network.producer_net.id
     project_id = data.google_project.project.project_id
   }

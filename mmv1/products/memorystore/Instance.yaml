@@ -14,6 +14,7 @@ autogen_async: true
 min_version: beta
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/memorystore_instance.go.erb
+  decoder: templates/terraform/decoders/memorystore_instance.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "memorystore_instance_ha"
@@ -232,12 +233,14 @@ properties:
           output: true
         - !ruby/object:Api::Type::String
           name: projectId
-          description: "The consumer project_id where the forwarding rule is
+          description:
+            "Output only. The consumer project_id where the forwarding rule is
             created from. "
           output: true
         - !ruby/object:Api::Type::String
           name: network
-          description: "The consumer network where the IP address resides, in
+          description:
+            "Output only. The consumer network where the IP address resides, in
             the form of\nprojects/{project_id}/global/networks/{network_id}. "
           output: true
     description:
@@ -267,11 +270,11 @@ parameters:
     immutable: true
 virtual_fields:
   - !ruby/object:Api::Type::Array
-    name: desiredPscAutoConnections
+    name: desired_psc_auto_connections
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::String
-          name: projectId
+          name: project_id
           description:
             "Required. The consumer project_id where the forwarding rule is
             created from. "

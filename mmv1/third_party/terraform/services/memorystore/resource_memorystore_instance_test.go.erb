@@ -229,7 +229,7 @@ resource "google_memorystore_instance" "test" {
 	shard_count = %d
 	node_type = "%s"
 	location         = "europe-west1"
-	psc_auto_connections {
+	desired_psc_auto_connections {
 			network = google_compute_network.producer_net.id
             project_id = data.google_project.project.project_id
 	}
