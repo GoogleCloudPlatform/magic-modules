@@ -105,7 +105,7 @@ func TestAccBigtableTable_familyType(t *testing.T) {
 		CheckDestroy:             testAccCheckBigtableTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBigtableTable_familyType(instanceName, tableName, family, "intsum"),
+				Config: testAccBigtableTable_familyType(instanceName, tableName, family, "intmax"),
 			},
 			{
 				ResourceName:      "google_bigtable_table.table",
@@ -114,11 +114,13 @@ func TestAccBigtableTable_familyType(t *testing.T) {
 			},
 			{
 				Config: testAccBigtableTable_familyType(instanceName, tableName, family, `{
-					"aggregate_type": {
-						"sum": {},
-						"input_type": {
-							"int64_type": {
-								"big_endian_bytes": {}
+					"aggregateType": {
+						"max": {},
+						"inputType": {
+							"int64Type": {
+								"encoding": {
+									"bigEndianBytes": {}
+								}
 							}
 						}
 					}
@@ -130,7 +132,7 @@ func TestAccBigtableTable_familyType(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccBigtableTable_familyType(instanceName, tableName, family, "intsum"),
+				Config: testAccBigtableTable_familyType(instanceName, tableName, family, "intmax"),
 			},
 			{
 				ResourceName:      "google_bigtable_table.table",
@@ -508,7 +510,11 @@ func testAccBigtableColumnFamilyExists(t *testing.T, table_name_space, family st
 		if err != nil {
 			return fmt.Errorf("Error retrieving table. Could not find %s in %s.", rs.Primary.Attributes["name"], rs.Primary.Attributes["instance_name"])
 		}
-		for _, data := range bigtable.FlattenColumnFamily(table.FamilyInfos) {
+		families, err := bigtable.FlattenColumnFamily(table.FamilyInfos)
+		if err != nil {
+			return fmt.Errorf("Error flattening column families: %v", err)
+		}
+		for _, data := range families {
 			if data["family"] != family {
 				return fmt.Errorf("Error checking column family. Could not find column family %s in %s.", family, rs.Primary.Attributes["name"])
 			}
@@ -661,7 +667,9 @@ resource "google_bigtable_table" "table" {
 
   column_family {
     family = "%s"
-	type = "%s"
+	type =  <<EOF
+%s
+EOF
   }
 }
 `, instanceName, instanceName, tableName, family, familyType)
