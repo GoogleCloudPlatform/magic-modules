@@ -42,6 +42,8 @@ Example filter values if filtering on state.
 
 * `"state:ENABLED"` will retrieve the latest cryptoKeyVersion that has the state "ENABLED".
 
+[See the documentation about using filters](https://cloud.google.com/kms/docs/sorting-and-filtering)
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are
