@@ -39,6 +39,19 @@ func DataSourceGoogleKmsLatestCryptoKeyVersion() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"filter": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Description: `
+					The filter argument is used to add a filter query parameter that limits which cryptoKeyVersions are retrieved by the data source: ?filter={{filter}}.
+					Example values:
+					
+					* "name:my-cryptokey-version-" will retrieve cryptoKeyVersions that contain "my-key-" anywhere in their name. Note: names take the form projects/{{project}}/locations/{{location}}/keyRings/{{keyRing}}/cryptoKeys/{{cryptoKey}}/cryptoKeyVersions/{{cryptoKeyVersion}}.
+					* "name=projects/my-project/locations/global/keyRings/my-key-ring/cryptoKeys/my-key-1/cryptoKeyVersions/1" will only retrieve a key with that exact name.
+					
+					[See the documentation about using filters](https://cloud.google.com/kms/docs/sorting-and-filtering)
+				`,
+			},
 			"public_key": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -73,6 +86,9 @@ func dataSourceGoogleKmsLatestCryptoKeyVersionRead(d *schema.ResourceData, meta 
 	}
 
 	id := fmt.Sprintf("%s/latestCryptoKeyVersion", cryptoKeyId.CryptoKeyId())
+	if filter, ok := d.GetOk("filter"); ok {
+		id += "/filter=" + filter.(string)
+	}
 	d.SetId(id)
 
 	versions, err := dataSourceKMSCryptoKeyVersionsList(d, meta, cryptoKeyId.CryptoKeyId(), userAgent)
@@ -158,7 +174,6 @@ func dataSourceGoogleKmsLatestCryptoKeyVersionRead(d *schema.ResourceData, meta 
 			return fmt.Errorf("Error setting CryptoKeyVersion public key: %s", err)
 		}
 	}
-	d.SetId(fmt.Sprintf("//cloudkms.googleapis.com/v1/%s/cryptoKeyVersions/%d", d.Get("crypto_key"), d.Get("version")))
 
 	return nil
 }

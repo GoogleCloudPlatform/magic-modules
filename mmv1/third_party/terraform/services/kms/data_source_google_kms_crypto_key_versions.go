@@ -159,7 +159,7 @@ func dataSourceGoogleKmsCryptoKeyVersionsRead(d *schema.ResourceData, meta inter
 func dataSourceKMSCryptoKeyVersionsList(d *schema.ResourceData, meta interface{}, cryptoKeyId string, userAgent string) ([]interface{}, error) {
 	config := meta.(*transport_tpg.Config)
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{KMSBasePath}}{{crypto_key}}/cryptoKeyVersions?filter=state=ENABLED")
+	url, err := tpgresource.ReplaceVars(d, config, "{{KMSBasePath}}{{crypto_key}}/cryptoKeyVersions")
 	if err != nil {
 		return nil, err
 	}
