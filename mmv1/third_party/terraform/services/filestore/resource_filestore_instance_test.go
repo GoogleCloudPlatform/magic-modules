@@ -164,7 +164,7 @@ resource "google_filestore_instance" "instance" {
   networks {
     network           = "default"
     modes             = ["MODE_IPV4"]
-    reserved_ip_range = "172.19.31.0/29"
+    reserved_ip_range = "172.19.30.0/29"
   }
 }
 `, name)
@@ -185,8 +185,58 @@ resource "google_filestore_instance" "instance" {
   networks {
     network           = "default"
     modes             = ["MODE_IPV4"]
-    reserved_ip_range = "172.19.31.8/29"
+    reserved_ip_range = "172.19.31.0/29"
   }
 }
 `, name)
 }
+
+func TestAccFilestoreInstance_filestoreInstanceTagsExample(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckFilestoreInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFilestoreInstance_filestoreInstanceTagsExample(context),
+			},
+			{
+				ResourceName:            "google_filestore_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "zone"},
+			},
+		},
+	})
+}
+
+func testAccFilestoreInstance_filestoreInstanceTagsExample(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_filestore_instance" "instance" {
+  name = "tf-test-test-instance-with-tags%{random_suffix}"
+  location = "us-central1"
+  tier = "ENTERPRISE"
+  capacity = 1024
+  description = "My instance with tags"
+  file_share {
+    name = "my-file-share"
+    capacity = 1024
+  }
+  labels = {
+    "key1" = "value1"
+    "key2" = "value2"
+  }
+  tags = {
+    "key1" = "value1"
+    "key2" = "value2"
+  }
+}
+`, context)
+}
+

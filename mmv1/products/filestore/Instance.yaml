@@ -48,6 +48,16 @@ examples:
     vars:
       instance_name: 'test-instance'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'filestore_instance_tags'
+    primary_resource_id: 'instance'
+    vars:
+      instance_name: 'test-instance'
+      tags_instance_name: 'test-instance-with-tags'
+      tags_key1: 'value1'
+      tags_key2: 'value2'
+      subnetwork_name: 'Instance-subnet'
+      network_name: 'instance-network'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'filestore_instance_enterprise'
     primary_resource_id: 'instance'
     # https://github.com/GoogleCloudPlatform/magic-modules/pull/5875#discussion_r844285335
@@ -265,3 +275,23 @@ properties:
     immutable: true
     description: |
       KMS key name used for data encryption.
+  - !ruby/object:Api::Type::Map
+    name: 'tags'
+    key_name: key1
+    key_description: |
+      A key of resource manager tags.
+    value_type: !ruby/object:Api::Type::NestedObject
+      name: value
+      description: |
+        A value of resource manager tags.
+      properties:
+         - !ruby/object:Api::Type::String
+           name: 'value1'
+           description: 'Tag value for key1.'
+    description: |
+      A map of resource manager tags_.
+      Resource manager tag keys and values have the same definition as resource manager tags.
+      Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456.
+      The field is ignored (both PUT & PATCH) when empty.
+    output: false
+    immutable: true

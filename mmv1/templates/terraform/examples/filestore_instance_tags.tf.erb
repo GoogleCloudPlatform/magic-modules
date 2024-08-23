@@ -1,0 +1,16 @@
+resource "google_filestore_instance" "<%= ctx[:primary_resource_id] %>" {
+  name = "<%= ctx[:vars]['tags_instance_name'] %>"
+  location = "us-central1"
+  tier = "ENTERPRISE"
+  capacity = 1024
+  description = "My instance with tags"
+  file_share {
+    name = "my-file-share"
+    capacity = 1024
+  }
+  labels = {
+    "key1" = "value1"
+    "key2" = "value2"
+  }
+  tags = "key1 = value1"
+}
