@@ -44,10 +44,10 @@ func DataSourceGoogleKmsLatestCryptoKeyVersion() *schema.Resource {
 				Optional: true,
 				Description: `
 					The filter argument is used to add a filter query parameter that limits which type of cryptoKeyVersion is retrieved as the latest by the data source: ?filter={{filter}}. When no value is provided there is no filtering.
-								
+
 					Example filter values if filtering on state.
-								
-					* `"state:ENABLED"` will retrieve the latest cryptoKeyVersion that has the state "ENABLED".
+
+					* "state:ENABLED" will retrieve the latest cryptoKeyVersion that has the state "ENABLED".
 
 					[See the documentation about using filters](https://cloud.google.com/kms/docs/sorting-and-filtering)
 				`,
