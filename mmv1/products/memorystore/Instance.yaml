@@ -12,6 +12,8 @@ update_verb: :PATCH
 update_mask: true
 autogen_async: true
 min_version: beta
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  encoder: templates/terraform/encoders/memorystore_instance.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "memorystore_instance_ha"
@@ -83,6 +85,7 @@ properties:
     description:
       "Optional. Number of replica nodes per shard. If omitted the default
       is 0 replicas. "
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: authorizationMode
     description:
@@ -152,6 +155,7 @@ properties:
               "Optional. Time that the first snapshot was/will be attempted,
               and to which future\nsnapshots will be aligned. If not provided, the current
               time will be\nused. "
+            default_from_api: true
         name: rdbConfig
         description: "Configuration for RDB based persistence. "
       - !ruby/object:Api::Type::NestedObject
@@ -228,21 +232,18 @@ properties:
           output: true
         - !ruby/object:Api::Type::String
           name: projectId
-          description:
-            "Required. The consumer project_id where the forwarding rule is
+          description: "The consumer project_id where the forwarding rule is
             created from. "
-          required: true
+          output: true
         - !ruby/object:Api::Type::String
           name: network
-          description:
-            "Required. The consumer network where the IP address resides, in
+          description: "The consumer network where the IP address resides, in
             the form of\nprojects/{project_id}/global/networks/{network_id}. "
-          required: true
+          output: true
     description:
-      "Required. Immutable. User inputs and resource details of the auto-created
+      "Output only. User inputs and resource details of the auto-created
       PSC connections. "
-    immutable: true
-    required: true
+    output: true
 parameters:
   - !ruby/object:Api::Type::String
     name: location
@@ -264,6 +265,27 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
+virtual_fields:
+  - !ruby/object:Api::Type::Array
+    name: desiredPscAutoConnections
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: projectId
+          description:
+            "Required. The consumer project_id where the forwarding rule is
+            created from. "
+          required: true
+        - !ruby/object:Api::Type::String
+          name: network
+          description:
+            "Required. The consumer network where the IP address resides, in
+            the form of\nprojects/{project_id}/global/networks/{network_id}. "
+          required: true
+    description: "Required. Immutable. User inputs for the auto-created
+      PSC connections. "
+    immutable: true
+    required: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: name
