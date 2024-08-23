@@ -42,10 +42,6 @@ examples:
     vars:
       big_query_export_id: 'my-export'
       dataset: 'my-dataset'
-<<<<<<< HEAD
-=======
-      dataset_id: 'my_dataset_id'
->>>>>>> bfa2270b5 (Add Resource for V2 SCC Findings Exports to Big Query Organization Config (#11428))
       name: 'my-export'
     test_env_vars:
       org_id: :ORG_ID
