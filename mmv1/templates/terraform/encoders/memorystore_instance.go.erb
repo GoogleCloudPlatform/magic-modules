@@ -1,0 +1,27 @@
+    v, ok := d.GetOk("desired_psc_auto_connections")
+	if !ok {
+		return obj, nil // No desired connections, nothing to update
+	}
+	l := v.([]interface{})
+	req := make([]interface{}, 0, len(l))
+	for _, raw := range l {
+		if raw == nil {
+			continue
+		}
+		original := raw.(map[string]interface{})
+		transformed := make(map[string]interface{})
+
+		transformedProjectId := original["project_id"]
+		if val := reflect.ValueOf(transformedProjectId); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+			transformed["projectId"] = transformedProjectId
+		}
+
+		transformedNetwork := original["network"]
+		if val := reflect.ValueOf(transformedNetwork); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+			transformed["network"] = transformedNetwork
+		}
+
+		req = append(req, transformed)
+	}
+	obj["psc_auto_connections"] = req
+	return obj, nil

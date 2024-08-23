@@ -1,0 +1,16 @@
+v := res["psc_auto_connections"]
+	l := v.([]interface{})
+	transformed := make([]interface{}, 0, len(l))
+	for _, raw := range l {
+		original := raw.(map[string]interface{})
+		if len(original) < 1 {
+			// Do not include empty json objects coming back from the api
+			continue
+		}
+		transformed = append(transformed, map[string]interface{}{
+			"project_id": original["projectId"],
+			"network":    original["network"],
+		})
+	}
+	d.Set("desired_psc_auto_connections", transformed)
+	return res, nil
