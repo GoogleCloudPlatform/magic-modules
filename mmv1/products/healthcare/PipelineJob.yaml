@@ -21,7 +21,7 @@ description: |
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Creating a PipelineJob': 'https://cloud.google.com/healthcare-api/private/healthcare-data-engine/docs/reference/rest/v1alpha2/projects.locations.datasets.pipelineJobs#PipelineJob'
-  api: 'https://cloud.google.com/healthcare-api/private/healthcare-data-engine/docs/reference/rest/v1alpha2/projects.locations.datasets.pipelineJobs#PipelineJob'
+  api: 'https://cloud.google.com/healthcare-api/healthcare-data-engine/docs/reference/rest/v1/projects.locations.datasets.pipelineJobs'
 base_url: 'projects/{{project}}/locations/{{location}}/datasets/{{dataset}}/pipelineJobs'
 self_link: 'projects/{{project}}/locations/{{location}}/datasets/{{dataset}}/pipelineJobs/{{name}}'
 create_url: 'projects/{{project}}/locations/{{location}}/datasets/{{dataset}}/pipelineJobs?pipelineJobId={{name}}'
@@ -44,4 +44,270 @@ parameters:
       Healthcare Dataset under which the Pipeline Job is to run     
 
 properties:
-  # Fields go here
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: |
+      Specifies the name of the pipeline job. This field is user-assigned.
+    required: true
+  - !ruby/object:Api::Type::Boolean
+    name: 'disableLineage'
+    description: |
+      If true, disables writing lineage for the pipeline.
+    required: false
+    default_value: false
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
+    required: false
+    description: |
+      User-supplied key-value pairs used to organize Pipeline Jobs.
+      
+      Label keys must be between 1 and 63 characters long, have a UTF-8 encoding of 
+      maximum 128 bytes, and must conform to the following PCRE regular expression: 
+      [\p{Ll}\p{Lo}][\p{Ll}\p{Lo}\p{N}_-]{0,62}
+      
+      Label values are optional, must be between 1 and 63 characters long, have a 
+      UTF-8 encoding of maximum 128 bytes, and must conform to the following PCRE 
+      regular expression: [\p{Ll}\p{Lo}\p{N}_-]{0,63}
+      
+      No more than 64 labels can be associated with a given pipeline.
+      
+      An object containing a list of "key": value pairs. 
+      Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+  - !ruby/object:Api::Type::NestedObject
+    name: mappingPipelineJob
+    description: |
+      Specifies mapping configuration.
+    required: false
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: mappingConfig
+        description: |
+          The location of the mapping configuration.
+        required: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: description
+            description: |
+              Describes the mapping configuration.
+            required: false
+          - !ruby/object:Api::Type::NestedObject
+            name: dataMapperConfigSource
+            description: |
+              Specifies the path to the mapping configuration for Data Mapper pipeline.
+            required: true
+            properties:
+              - !ruby/object:Api::Type::String
+                name: mapping
+                description: |
+                  Specifies the name of the mapping in the Data Mapper workspace.
+                required: true 
+              - !ruby/object:Api::Type::String
+                name: mappingVersionId
+                description: |
+                  Specifies the version ID used to select the Mapping with the name, mapping.
+                required: false
+              - !ruby/object:Api::Type::String
+                name: parameterKey
+                description: |
+                  If set, specifies the name of the parameter key used to select SQL 
+                  variable parameter values for this mapping. Otherwise the default 
+                  value for each SQL variable is used.
+                required: true
+              - !ruby/object:Api::Type::NestedObject
+                name: gcs
+                description: |
+                  The Cloud Storage location of the Data Mapper configuration files. 
+                  Configuration source must be either a Data Mapper workspace or 
+                  a Cloud Storage location but cannot be both.
+                required: true
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: uriPrefix
+                    description: |
+                      The Cloud Storage location URI that must locate either a bucket 
+                      root or a directory within a bucket, and the contents at this 
+                      location must contain the structured Data Mapper configurations.
+
+                      Example: gs://bucketName/path/to/configDir
+                    required: true
+          - !ruby/object:Api::Type::NestedObject
+            name: whistleConfigSource
+            description: |
+              Specifies the path to the mapping configuration for harmonization pipeline.
+            required: true
+            properties:
+              - !ruby/object:Api::Type::String
+                name: uri
+                description: |
+                  Main configuration file which has the entrypoint or the root function. 
+                  Example: gs://{bucket-id}/{path/to/import-root/dir}/entrypoint-file-name.wstl.
+                required: true
+              - !ruby/object:Api::Type::String
+                name: importUriPrefix
+                description: |
+                  Directory path where all the Whistle files are located. 
+                  Example: gs://{bucket-id}/{path/to/import-root/dir}
+                required: true
+      - !ruby/object:Api::Type::NestedObject
+        name: fhirStreamingSource
+        description: |
+          A streaming FHIR data source.
+        required: false
+        properties:
+          - !ruby/object:Api::Type::String
+            name: fhirStore
+            description: |
+              The path to the FHIR store in the format projects/{projectId}/locations/{locationId}/datasets/{datasetId}/fhirStores/{fhirStoreId}.
+            required: true
+          - !ruby/object:Api::Type::String
+            name: description
+            description: |
+              Describes the streaming FHIR data source.
+            required: false
+      - !ruby/object:Api::Type::NestedObject
+        name: cloudSpannerSource
+        description: |
+          Cloud Spanner data source.
+        required: false
+        properties:
+          - !ruby/object:Api::Type::String
+            name: databasePath
+            description: |
+              The path to the cloud spanner source database in the format projects/{projectId}/instances/{instance_id}/databases/{database_id}.
+            required: true
+          - !ruby/object:Api::Type::String
+            name: changeStream
+            description: |
+              Change stream name.
+            required: true
+          - !ruby/object:Api::Type::String
+            name: description
+            description: |
+              Describes the cloud spanner data source.
+            required: false
+      - !ruby/object:Api::Type::String
+        name: fhirStoreDestination
+        description: |
+          If set, the mapping pipeline will write snapshots to this 
+          FHIR store without assigning stable IDs. You must 
+          grant your pipeline project's Cloud Healthcare Service 
+          Agent serviceaccount healthcare.fhirResources.executeBundle 
+          and healthcare.fhirResources.create permissions on the 
+          destination store. The destination store must set 
+          [disableReferentialIntegrity][FhirStore.disable_referential_integrity] 
+          to true. The destination store must use FHIR version R4. 
+          Format: project/{projectID}/locations/{locationID}/datasets/{datasetName}/fhirStores/{fhirStoreID}.
+        required: false
+      - !ruby/object:Api::Type::Boolean
+        name: reconciliationDestination
+        description: |
+          If set to true, a mapping pipeline will send output snapshots 
+          to the reconciliation pipeline in its dataset. A reconciliation 
+          pipeline must exist in this dataset before a mapping pipeline 
+          with a reconciliation destination can be created.
+        required: false
+  - !ruby/object:Api::Type::NestedObject
+    name: reconciliationPipelineJob
+    description: |
+      Specifies reconciliation configuration.
+    required: false
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: mergeConfig
+        description: |
+          Specifies the location of the reconciliation configuration.
+        required: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: description
+            description: |
+              Describes the mapping configuration.
+            required: false
+          - !ruby/object:Api::Type::NestedObject
+            name: dataMapperConfigSource
+            description: |
+              Specifies the path to the mapping configuration for Data Mapper pipeline.
+            required: true
+            properties:
+              - !ruby/object:Api::Type::String
+                name: mapping
+                description: |
+                  Describes the mapping configuration.
+                required: true
+              - !ruby/object:Api::Type::String
+                name: mappingVersionId
+                description: |
+                  Specifies the version ID used to select the Mapping with the name, mapping.
+                required: false
+              - !ruby/object:Api::Type::String
+                name: parameterKey
+                description: |
+                  If set, specifies the name of the parameter key used to select 
+                  SQL variable parameter values for this mapping. 
+                  Otherwise the default value for each SQL variable is used.
+                required: true
+              - !ruby/object:Api::Type::NestedObject
+                name: gcs
+                description: |
+                  The Cloud Storage location of the Data Mapper configuration files. 
+                  Configuration source must be either a Data Mapper workspace or a 
+                  Cloud Storage location but cannot be both.
+                required: true
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: uriPrefix
+                    description: |
+                      The Cloud Storage location URI that must locate either a bucket 
+                      root or a directory within a bucket, and the contents at this 
+                      location must contain the structured Data Mapper configurations.
+                      Example: gs://bucketName/path/to/configDir
+                    required: true
+          - !ruby/object:Api::Type::NestedObject
+            name: whistleConfigSource
+            description: |
+              Specifies the path to the mapping configuration for harmonization pipeline.
+            required: true
+            properties:
+              - !ruby/object:Api::Type::String
+                name: uri
+                description: |
+                  Main configuration file which has the entrypoint or the root function. 
+                  Example: gs://{bucket-id}/{path/to/import-root/dir}/entrypoint-file-name.wstl.
+                required: true
+              - !ruby/object:Api::Type::String
+                name: importUriPrefix
+                description: |
+                  Directory path where all the Whistle files are located. 
+                  Example: gs://{bucket-id}/{path/to/import-root/dir}
+                required: true
+      - !ruby/object:Api::Type::String
+        name: matchingUriPrefix
+        description: |
+          Specifies the top level directory of the matching configs used 
+          in all mapping pipelines, which extract properties for resources 
+          to be matched on. 
+          Example: gs://{bucket-id}/{path/to/matching/configs}
+        required: true
+      - !ruby/object:Api::Type::String
+        name: fhirStoreDestination
+        description: |
+          The harmonized FHIR store to write harmonized FHIR resources to, 
+          in the format of: project/{projectID}/locations/{locationID}/datasets/{datasetName}/fhirStores/{id}
+        required: false
+  - !ruby/object:Api::Type::NestedObject
+    name: backfillPipelineJob
+    description: |
+      Specifies the backfill configuration.
+    required: false
+    properties:
+      - !ruby/object:Api::Type::String
+        name: mappingPipelineJob
+        description: |
+          Specifies the mapping pipeline job to backfill, the name format 
+          should follow: projects/{projectId}/locations/{locationId}/datasets/{datasetId}/pipelineJobs/{pipelineJobId}.
+        required: false
+
+
+
+
+
