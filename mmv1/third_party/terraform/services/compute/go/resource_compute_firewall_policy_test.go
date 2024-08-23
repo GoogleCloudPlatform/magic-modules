@@ -3,6 +3,7 @@ package compute_test
 import (
 	"fmt"
 	"testing"
+
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
@@ -50,10 +51,11 @@ func TestAccComputeFirewallPolicy_update(t *testing.T) {
 }
 
 func testAccComputeFirewallPolicy_basic(org, policyName, folderName string) string {
-  return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_folder" "folder" {
   display_name = "%s"
   parent       = "%s"
+  deletion_protection = false
 }
 
 resource "google_compute_firewall_policy" "default" {
@@ -65,10 +67,11 @@ resource "google_compute_firewall_policy" "default" {
 }
 
 func testAccComputeFirewallPolicy_update(org, policyName, folderName string) string {
-  return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_folder" "folder" {
   display_name = "%s"
   parent       = "%s"
+  deletion_protection = false
 }
 
 resource "google_compute_firewall_policy" "default" {

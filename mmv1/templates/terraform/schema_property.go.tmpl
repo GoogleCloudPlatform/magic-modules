@@ -27,9 +27,6 @@
 {{ if .DefaultFromApi -}}
 	Computed: true,
 	Optional: true,
-	{{ if .SchemaConfigModeAttr -}}
-	ConfigMode: schema.SchemaConfigModeAttr,
-	{{ end -}}
 {{ else if .Required -}}
   Required: true,
 {{ else if .Output -}}

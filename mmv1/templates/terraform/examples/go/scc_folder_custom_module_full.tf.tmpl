@@ -1,6 +1,7 @@
 resource "google_folder" "folder" {
   parent       = "organizations/{{index $.TestEnvVars "org_id"}}"
   display_name = "{{index $.Vars "folder_display_name"}}"
+  deletion_protection = false
 }
 
 resource "google_scc_folder_custom_module" "{{$.PrimaryResourceId}}" {
