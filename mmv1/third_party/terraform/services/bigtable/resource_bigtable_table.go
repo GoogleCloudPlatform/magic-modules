@@ -382,7 +382,7 @@ func toFamilyMap(set *schema.Set) (map[string]bigtable.Family, error) {
 	for _, item := range set.List() {
 		column := item.(map[string]interface{})
 
-		if v, ok := column["family"]; ok {
+		if v, ok := column["family"]; ok && v != "" {
 			valueType, err := getType(column["type"])
 			if err != nil {
 				return nil, err
@@ -457,15 +457,17 @@ func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error
 			return fmt.Errorf("Error creating column family %q: %s", cfn, err)
 		}
 	}
-	for cf, _ := range familyMapDiffKeys(oMap, nMap) {
-		log.Printf("[DEBUG] removing column family %q", cf)
-		if err := c.DeleteColumnFamily(ctx, name, cf); err != nil {
-			return fmt.Errorf("Error deleting column family %q: %s", cf, err)
+	for cfn, _ := range familyMapDiffKeys(oMap, nMap) {
+		log.Printf("[DEBUG] removing column family %q", cfn)
+		if err := c.DeleteColumnFamily(ctx, name, cfn); err != nil {
+			return fmt.Errorf("Error deleting column family %q: %s", cfn, err)
 		}
 	}
-	for cf, _ := range familyMapDiffValueTypes(nMap, oMap) {
-		fmt.Printf("Updating column family: %q\n", cf)
-		return fmt.Errorf("Attempted to change type on existing column family: %q", cf)
+	for cfn, cf := range familyMapDiffValueTypes(nMap, oMap) {
+		log.Printf("[DEBUG] updating column family: %q", cfn)
+		if err := c.UpdateFamily(ctx, name, cfn, cf); err != nil {
+			return fmt.Errorf("Error update column family %q: %s", cfn, err)
+		}
 	}
 
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, d.Timeout(schema.TimeoutCreate))

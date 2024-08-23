@@ -139,6 +139,10 @@ func TestAccBigtableTable_familyType(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				Config:      testAccBigtableTable_familyType(instanceName, tableName, family, "intmin"),
+				ExpectError: regexp.MustCompile(".*Immutable fields 'value_type' cannot be updated.*"),
+			},
 		},
 	})
 }
