@@ -67,9 +67,9 @@ parameters:
   - !ruby/object:Api::Type::String
     name: 'region'
     description: 'The location of this resource.'
+    url_param_only: true
     immutable: true
     default_from_api: true
-    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::String
     name: 'project'
     description: |

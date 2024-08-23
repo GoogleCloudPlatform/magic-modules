@@ -113,7 +113,7 @@ func TestAccComputeRegionNetworkFirewallPolicyRule_multipleRules(t *testing.T) {
 	})
 }
 
-func TestAccComputeRegionNetworkFirewallPolicyRule_RegionalHandWritten(t *testing.T) {
+func TestAccComputeRegionNetworkFirewallPolicyRule_regionalHandWritten(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -130,7 +130,7 @@ func TestAccComputeRegionNetworkFirewallPolicyRule_RegionalHandWritten(t *testin
 		CheckDestroy:             testAccCheckComputeRegionNetworkFirewallPolicyRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionNetworkFirewallPolicyRule_RegionalHandWritten(context),
+				Config: testAccComputeRegionNetworkFirewallPolicyRule_regionalHandWritten(context),
 			},
 			{
 				ResourceName:      "google_compute_region_network_firewall_policy_rule.primary",
@@ -138,7 +138,7 @@ func TestAccComputeRegionNetworkFirewallPolicyRule_RegionalHandWritten(t *testin
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccComputeRegionNetworkFirewallPolicyRule_RegionalHandWrittenUpdate0(context),
+				Config: testAccComputeRegionNetworkFirewallPolicyRule_regionalHandWrittenUpdate(context),
 			},
 			{
 				ResourceName:      "google_compute_region_network_firewall_policy_rule.primary",
@@ -149,7 +149,7 @@ func TestAccComputeRegionNetworkFirewallPolicyRule_RegionalHandWritten(t *testin
 	})
 }
 
-func testAccComputeRegionNetworkFirewallPolicyRule_RegionalHandWritten(context map[string]interface{}) string {
+func testAccComputeRegionNetworkFirewallPolicyRule_regionalHandWritten(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_network_security_address_group" "basic_regional_networksecurity_address_group" {
   name        = "tf-test-policy%{random_suffix}"
@@ -222,7 +222,7 @@ resource "google_tags_tag_value" "basic_value" {
 `, context)
 }
 
-func testAccComputeRegionNetworkFirewallPolicyRule_RegionalHandWrittenUpdate0(context map[string]interface{}) string {
+func testAccComputeRegionNetworkFirewallPolicyRule_regionalHandWrittenUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_network_security_address_group" "basic_regional_networksecurity_address_group" {
   name        = "tf-test-policy%{random_suffix}"
