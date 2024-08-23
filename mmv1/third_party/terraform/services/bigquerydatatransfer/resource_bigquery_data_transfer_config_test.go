@@ -387,9 +387,6 @@ func testAccBigqueryDataTransferConfig_CMEK(t *testing.T) {
 	// Uses time.Now
 	acctest.SkipIfVcr(t)
 	random_suffix := acctest.RandString(t, 10)
-	now := time.Now().UTC()
-	start_time := now.Add(1 * time.Hour).Format(time.RFC3339)
-	end_time := now.AddDate(0, 1, 0).Format(time.RFC3339)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -397,7 +394,7 @@ func testAccBigqueryDataTransferConfig_CMEK(t *testing.T) {
 		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBigqueryDataTransferConfig_CMEK(random_suffix),
+				Config: testAccBigqueryDataTransferConfig_CMEK_basic(random_suffix),
 			},
 			{
 				ResourceName:            "google_bigquery_data_transfer_config.query_config",
@@ -793,7 +790,7 @@ resource "google_bigquery_data_transfer_config" "copy_config" {
 `, random_suffix, random_suffix, random_suffix)
 }
 
-func testAccBigqueryDataTransferConfig_CMEK(random_suffix string) string {
+func testAccBigqueryDataTransferConfig_CMEK_basic(random_suffix string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {
 }
