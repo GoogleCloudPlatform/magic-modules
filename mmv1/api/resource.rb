@@ -321,9 +321,7 @@ module Api
             type: Array,
             default: []
 
-      if !@virtual_fields.nil?
-        @virtual_fields.each { |field| field.client_side = true }
-      end
+      @virtual_fields&.each { |field| field.client_side = true }
 
       check :custom_code, type: Provider::Terraform::CustomCode,
                           default: Provider::Terraform::CustomCode.new

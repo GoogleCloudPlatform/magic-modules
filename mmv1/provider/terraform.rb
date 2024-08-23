@@ -563,10 +563,9 @@ module Provider
 
     def force_new?(property, resource)
       # Client-side fields don't inherit immutability
-      if property.client_side
-        return property.immutable
-      end
-      return (
+      return property.immutable if property.client_side
+
+      (
         (!property.output || property.is_a?(Api::Type::KeyValueEffectiveLabels)) &&
         (property.immutable ||
           (resource.immutable && property.update_url.nil? && property.immutable.nil? &&
@@ -577,10 +576,10 @@ module Provider
             )
           )
         )
-      ) ||
-        (property.is_a?(Api::Type::KeyValueTerraformLabels) &&
-          !updatable?(resource, resource.all_user_properties) && !resource.root_labels?
-        )
+      ) || (
+        property.is_a?(Api::Type::KeyValueTerraformLabels) &&
+        !updatable?(resource, resource.all_user_properties) && !resource.root_labels?
+      )
     end
 
     # Returns tuples of (fieldName, list of update masks) for
