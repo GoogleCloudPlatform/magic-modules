@@ -1,5 +1,4 @@
 resource "google_network_security_server_tls_policy" "<%= ctx[:primary_resource_id] %>" {
-  provider               = google-beta
   name                   = "<%= ctx[:vars]['resource_name'] %>"
   labels                 = {
     foo = "bar"
@@ -15,16 +14,6 @@ resource "google_network_security_server_tls_policy" "<%= ctx[:primary_resource_
     client_validation_ca {
       grpc_endpoint {
         target_uri = "unix:mypath"
-      }
-    }
-    client_validation_ca {
-      grpc_endpoint {
-        target_uri = "unix:abc/mypath"
-      }
-    }
-    client_validation_ca {
-      certificate_provider_instance {
-        plugin_instance = "google_cloud_private_spiffe"
       }
     }
   }
