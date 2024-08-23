@@ -329,6 +329,12 @@ func (r *Resource) UnmarshalYAML(n *yaml.Node) error {
 		r.CollectionUrlKey = google.Camelize(google.Plural(r.Name), "lower")
 	}
 
+	if len(r.VirtualFields) > 0 {
+		for _, f := range r.VirtualFields {
+			f.ClientSide = true
+		}
+	}
+
 	return nil
 }
 

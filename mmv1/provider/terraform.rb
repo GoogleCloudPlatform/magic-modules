@@ -562,7 +562,11 @@ module Provider
     end
 
     def force_new?(property, resource)
-      (
+      # Client-side fields don't inherit immutability
+      if property.client_side
+        return property.immutable
+      end
+      return (
         (!property.output || property.is_a?(Api::Type::KeyValueEffectiveLabels)) &&
         (property.immutable ||
           (resource.immutable && property.update_url.nil? && property.immutable.nil? &&

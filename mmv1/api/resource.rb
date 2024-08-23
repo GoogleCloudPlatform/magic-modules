@@ -321,6 +321,10 @@ module Api
             type: Array,
             default: []
 
+      if !@virtual_fields.nil?
+        @virtual_fields.each { |field| field.client_side = true }
+      end
+
       check :custom_code, type: Provider::Terraform::CustomCode,
                           default: Provider::Terraform::CustomCode.new
       check :sweeper, type: Provider::Terraform::Sweeper, default: Provider::Terraform::Sweeper.new
