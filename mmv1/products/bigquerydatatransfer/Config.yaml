@@ -184,13 +184,13 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'encryptionConfiguration'
     description: |
-      The name of the KMS key used for encrypting BigQuery data.
+      Represents the encryption configuration for a transfer.
     properties:
       - !ruby/object:Api::Type::String
         name: 'kmsKeyName'
         required: true
         description: |
-          Describes the Cloud KMS encryption key that will be used for encrypting BigQuery data.
+          The name of the KMS key used for encrypting BigQuery data.
   - !ruby/object:Api::Type::Boolean
     name: 'disabled'
     description: |
