@@ -62,3 +62,32 @@ func resourceComputeRouterNatAddressDrainNatIpsCustomDiff(_ context.Context, dif
 	}
 	return nil
 }
+
+func resourceComputeRouterNatAddressDeleteOnlyNatIps(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+	items, err := resourceComputeRouterNatAddressListForPatch(d, meta)
+	if err != nil {
+		return nil, err
+	}
+
+	idx, item, err := resourceComputeRouterNatAddressFindNestedObjectInList(d, meta, items)
+	if err != nil {
+		return nil, err
+	}
+
+	// Return error if item to update does not exist.
+	if item == nil {
+		return nil, fmt.Errorf("Unable to update RouterNatAddress %q - not found in list", d.Id())
+	}
+
+	if item["natIps"] != nil {
+		croppedNatIps := item["natIps"].([]interface{})[:1]
+		item["natIps"] = croppedNatIps
+	}
+
+	items[idx] = item
+	// Return list with new item added
+	res := map[string]interface{}{
+		"nats": items,
+	}
+	return res, nil
+}

@@ -54,8 +54,19 @@ func TestAccComputeRouterNatAddress_withAddressCountDecrease(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {},
+		},
 		CheckDestroy:             testAccCheckComputeRouterNatAddressDestroyProducer(t),
 		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRouterNatAddress_withAddressCount(routerName, "2"),
+			},
+			{
+				ResourceName:      "google_compute_router_nat_address.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 			{
 				Config: testAccComputeRouterNatAddress_withAddressCount(routerName, "3"),
 			},
@@ -69,6 +80,40 @@ func TestAccComputeRouterNatAddress_withAddressCountDecrease(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_compute_router_nat_address.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccComputeRouterNatAddress_withAddressRemoved(t *testing.T) {
+	t.Parallel()
+
+	testId := acctest.RandString(t, 10)
+	routerName := fmt.Sprintf("tf-test-router-nat-%s", testId)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {},
+		},
+		CheckDestroy:             testAccCheckComputeRouterNatAddressDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRouterNatAddressWithNatIps(routerName),
+			},
+			{
+				ResourceName:      "google_compute_router_nat_address.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRouterNatAddressWithAddressRemoved(routerName),
+			},
+			{
+				ResourceName:      "google_compute_router_nat.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -126,6 +171,10 @@ func TestAccComputeRouterNatAddress_withNatIpsAndDrainNatIps(t *testing.T) {
 
 func testAccComputeRouterNatAddress_withAddressCount(routerName, routerCount string) string {
 	return fmt.Sprintf(`
+resource "random_id" "group-manager-suffix" {
+  byte_length = 4
+}
+
 resource "google_compute_network" "foobar" {
   name = "%s-net"
 }
@@ -145,8 +194,12 @@ resource "google_compute_router" "foobar" {
 
 resource "google_compute_address" "foobar" {
   count = %s
-  name = "%s-address-${count.index}"
+	name = "%s-address-${count.index}-${random_id.group-manager-suffix.hex}"
   region = google_compute_subnetwork.foobar.region
+
+	lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "google_compute_router_nat_address" "foobar" {
@@ -237,6 +290,27 @@ resource "google_compute_router_nat_address" "foobar" {
   router_nat = google_compute_router_nat.foobar.name
   region = google_compute_router_nat.foobar.region
 }
+
+resource "google_compute_router_nat" "foobar" {
+  name     = "%s"
+  router   = google_compute_router.foobar.name
+  region   = google_compute_router.foobar.region
+
+  nat_ip_allocate_option = "MANUAL_ONLY"
+  initial_nat_ips = [google_compute_address.addr4.self_link]
+
+  source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
+  subnetwork {
+    name                    = google_compute_subnetwork.foobar.self_link
+    source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
+  }
+}
+`, testAccComputeRouterNatAddressBaseResourcesWithNatIps(routerName), routerName)
+}
+
+func testAccComputeRouterNatAddressWithAddressRemoved(routerName string) string {
+	return fmt.Sprintf(`
+%s
 
 resource "google_compute_router_nat" "foobar" {
   name     = "%s"

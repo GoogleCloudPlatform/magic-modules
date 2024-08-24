@@ -70,6 +70,7 @@ examples:
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: 'templates/terraform/constants/router_nat_address.go.erb'
   custom_create: templates/terraform/custom_create/router_nat_address_nested_query_create_encoder.go.erb
+  pre_delete: templates/terraform/pre_delete/compute_router_nat_address_delete_nat_ips_only.go.erb
   encoder: 'templates/terraform/encoders/router_nat_address_patch_on_create.go.erb'
   update_encoder: 'templates/terraform/encoders/router_nat_address_update_skip_encoder.go.erb'
 custom_diff: [
