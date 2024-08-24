@@ -1,6 +1,4 @@
-<% autogen_exception -%>
 package netapp
-<% unless version == 'ga' -%>
 
 import (
 	"context"
@@ -15,12 +13,12 @@ import (
 )
 
 func init() {
-	sweeper.AddTestSweepers("Netappkmsconfig", testSweepNetappkmsconfig)
+	sweeper.AddTestSweepers("NetappactiveDirectory", testSweepNetappactiveDirectory)
 }
 
 // At the time of writing, the CI only passes us-central1 as the region
-func testSweepNetappkmsconfig(region string) error {
-	resourceName := "Netappkmsconfig"
+func testSweepNetappactiveDirectory(region string) error {
+	resourceName := "NetappactiveDirectory"
 	log.Printf("[INFO][SWEEPER_LOG] Starting sweeper for %s", resourceName)
 
 	config, err := sweeper.SharedConfigForRegion(region)
@@ -40,8 +38,8 @@ func testSweepNetappkmsconfig(region string) error {
 
     regions := []string{"us-central1", "us-west2", "us-east4"}
     for _, r := range regions {
-        log.Printf("[INFO][SWEEPER_LOG] Starting sweeper for %s in %s", resourceName, r)    
-        
+        log.Printf("[INFO][SWEEPER_LOG] Starting sweeper for %s in %s", resourceName, r)
+
         // Setup variables to replace in list template
         d := &tpgresource.ResourceDataMock{
             FieldsInSchema: map[string]interface{}{
@@ -53,7 +51,7 @@ func testSweepNetappkmsconfig(region string) error {
             },
         }
 
-        listTemplate := strings.Split("https://netapp.googleapis.com/v1/projects/{{project}}/locations/{{location}}/kmsConfigs", "?")[0]
+        listTemplate := strings.Split("https://netapp.googleapis.com/v1/projects/{{project}}/locations/{{location}}/activeDirectories", "?")[0]
         listUrl, err := tpgresource.ReplaceVars(d, config, listTemplate)
         if err != nil {
             log.Printf("[INFO][SWEEPER_LOG] error preparing sweeper list url: %s", err)
@@ -72,7 +70,7 @@ func testSweepNetappkmsconfig(region string) error {
             return nil
         }
 
-        resourceList, ok := res["kmsconfigs"]
+        resourceList, ok := res["activeDirectories"]
         if !ok {
             log.Printf("[INFO][SWEEPER_LOG] Nothing found in response.")
             return nil
@@ -97,7 +95,7 @@ func testSweepNetappkmsconfig(region string) error {
                 continue
             }
 
-            deleteTemplate := "https://netapp.googleapis.com/v1/projects/{{project}}/locations/{{location}}/kmsConfigs/{{name}}"
+            deleteTemplate := "https://netapp.googleapis.com/v1/projects/{{project}}/locations/{{location}}/activeDirectories/{{name}}"
             deleteUrl, err := tpgresource.ReplaceVars(d, config, deleteTemplate)
             if err != nil {
                 log.Printf("[INFO][SWEEPER_LOG] error preparing delete url: %s", err)
@@ -128,4 +126,3 @@ func testSweepNetappkmsconfig(region string) error {
 	return nil
 }
 
-<% end -%>
