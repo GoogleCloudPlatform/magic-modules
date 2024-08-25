@@ -211,7 +211,7 @@ func ResourceComputeInstance() *schema.Resource {
 							Optional:     true,
 							ValidateFunc: validation.StringInSlice([]string{"SCSI", "NVME"}, false),
                                                         Computed:     true,
-							ForceNew:     true,
+							ForceNew:     false,
 							Description:  `The disk interface used for attaching this disk. One of SCSI or NVME.`,
 						},
 
@@ -648,7 +648,7 @@ func ResourceComputeInstance() *schema.Resource {
 							ValidateFunc: validation.StringInSlice([]string{"SCSI", "NVME"}, false),
 							Description:  `The disk interface used for attaching this disk. One of SCSI or NVME.`,
                                                         Computed:     true,
-                                                        ForceNew:     true,
+                                                        ForceNew:     false,
 						},
 					},
 				},
