@@ -51,6 +51,34 @@ func TestAccDataSourceGoogleCertificateManagerCertificates_basic(t *testing.T) {
 	})
 }
 
+func TestAccDataSourceGoogleCertificateManagerCertificates_regionBasic(t *testing.T) {
+	t.Parallel()
+
+	// Resource identifier used for content testing
+	region := envvar.GetTestRegionFromEnv()
+	id := fmt.Sprintf("projects/%s/locations/%s/certificates", envvar.GetTestProjectFromEnv(), region)
+	name := fmt.Sprintf("tf-test-certificate-%d", acctest.RandInt(t))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataSourceGoogleCertificateManagerCertificates_regionBasic(name, region),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestMatchResourceAttr("data.google_certificate_manager_certificates.certificates", "certificates.#", regexp.MustCompile("^[1-9]")),
+
+					resource.TestCheckResourceAttrSet("data.google_certificate_manager_certificates.certificates", "id"),
+					resource.TestCheckResourceAttr("data.google_certificate_manager_certificates.certificates", "id", id),
+
+					resource.TestCheckResourceAttrSet("data.google_certificate_manager_certificates.certificates", "region"),
+					resource.TestCheckResourceAttr("data.google_certificate_manager_certificates.certificates", "region", region),
+				),
+			},
+		},
+	})
+}
+
 func TestAccDataSourceGoogleCertificateManagerCertificates_managedCertificate(t *testing.T) {
 	t.Parallel()
 
@@ -58,7 +86,6 @@ func TestAccDataSourceGoogleCertificateManagerCertificates_managedCertificate(t 
 	region := "global"
 	id := fmt.Sprintf("projects/%s/locations/%s/certificates", envvar.GetTestProjectFromEnv(), region)
 	name := fmt.Sprintf("tf-test-certificate-%d", acctest.RandInt(t))
-	description := "My acceptance data source test certificates"
 	certificateName := fmt.Sprintf("projects/%s/locations/%s/certificates/%s", envvar.GetTestProjectFromEnv(), region, name)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -66,7 +93,7 @@ func TestAccDataSourceGoogleCertificateManagerCertificates_managedCertificate(t 
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceGoogleCertificateManagerCertificates_managedCertificateBasic(name, description),
+				Config: testAccDataSourceGoogleCertificateManagerCertificates_managedCertificateBasic(name),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestMatchResourceAttr("data.google_certificate_manager_certificates.certificates", "certificates.#", regexp.MustCompile("^[1-9]")),
 
@@ -78,9 +105,6 @@ func TestAccDataSourceGoogleCertificateManagerCertificates_managedCertificate(t 
 
 					resource.TestCheckResourceAttrSet("data.google_certificate_manager_certificates.certificates", "certificates.0.name"),
 					resource.TestCheckResourceAttr("data.google_certificate_manager_certificates.certificates", "certificates.0.name", certificateName),
-
-					resource.TestCheckResourceAttrSet("data.google_certificate_manager_certificates.certificates", "certificates.0.description"),
-					resource.TestCheckResourceAttr("data.google_certificate_manager_certificates.certificates", "certificates.0.description", description),
 
 					resource.TestCheckResourceAttrSet("data.google_certificate_manager_certificates.certificates", "certificates.0.scope"),
 					resource.TestCheckResourceAttr("data.google_certificate_manager_certificates.certificates", "certificates.0.scope", "EDGE_CACHE"),
@@ -109,14 +133,13 @@ func TestAccDataSourceGoogleCertificateManagerCertificates_managedCertificateDNS
 	region := "global"
 	id := fmt.Sprintf("projects/%s/locations/%s/certificates", envvar.GetTestProjectFromEnv(), region)
 	name := fmt.Sprintf("tf-test-certificate-%d", acctest.RandInt(t))
-	description := "My acceptance data source test certificates"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceGoogleCertificateManagerCertificates_managedCertificateDNSAuthorization(name, description),
+				Config: testAccDataSourceGoogleCertificateManagerCertificates_managedCertificateDNSAuthorization(name),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestMatchResourceAttr("data.google_certificate_manager_certificates.certificates", "certificates.#", regexp.MustCompile("^[1-9]")),
 
@@ -137,14 +160,13 @@ func TestAccDataSourceGoogleCertificateManagerCertificates_managedCertificateIss
 	region := "global"
 	id := fmt.Sprintf("projects/%s/locations/%s/certificates", envvar.GetTestProjectFromEnv(), region)
 	name := fmt.Sprintf("tf-test-certificate-%d", acctest.RandInt(t))
-	description := "My acceptance data source test certificates"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceGoogleCertificateManagerCertificates_managedCertificateIssuerConfig(name, description),
+				Config: testAccDataSourceGoogleCertificateManagerCertificates_managedCertificateIssuerConfig(name),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestMatchResourceAttr("data.google_certificate_manager_certificates.certificates", "certificates.#", regexp.MustCompile("^[1-9]")),
 
@@ -185,11 +207,34 @@ data "google_certificate_manager_certificates" "certificates" {
 `, certificateName, certificateDescription)
 }
 
-func testAccDataSourceGoogleCertificateManagerCertificates_managedCertificateBasic(certificateName, certificateDescription string) string {
+func testAccDataSourceGoogleCertificateManagerCertificates_regionBasic(certificateName, region string) string {
 	return fmt.Sprintf(`
 resource "google_certificate_manager_certificate" "default" {
   name        = "%s"
-  description = "%s"
+  location    = "%s"
+  self_managed {
+    pem_certificate = file("test-fixtures/cert.pem")
+    pem_private_key = file("test-fixtures/private-key.pem")
+  }
+
+  labels = {
+    "terraform" : true,
+    "acc-test" : true,
+  }
+}
+
+data "google_certificate_manager_certificates" "certificates" { 
+  filter     = "name:${google_certificate_manager_certificate.default.id}"
+  region     = "%s"
+  depends_on = [google_certificate_manager_certificate.default]
+}
+`, certificateName, region, region)
+}
+
+func testAccDataSourceGoogleCertificateManagerCertificates_managedCertificateBasic(certificateName string) string {
+	return fmt.Sprintf(`
+resource "google_certificate_manager_certificate" "default" {
+  name        = "%s"
   scope       = "EDGE_CACHE"
   managed {
     domains = [
@@ -202,14 +247,13 @@ data "google_certificate_manager_certificates" "certificates" {
   filter     = "name:${google_certificate_manager_certificate.default.id}"
   depends_on = [google_certificate_manager_certificate.default]
 }
-`, certificateName, certificateDescription)
+`, certificateName)
 }
 
-func testAccDataSourceGoogleCertificateManagerCertificates_managedCertificateDNSAuthorization(certificateName, certificateDescription string) string {
+func testAccDataSourceGoogleCertificateManagerCertificates_managedCertificateDNSAuthorization(certificateName string) string {
 	return fmt.Sprintf(`
 resource "google_certificate_manager_certificate" "default" {
   name        = "%s"
-  description = "%s"
   scope       = "EDGE_CACHE"
   managed {
     domains = [
@@ -230,14 +274,13 @@ data "google_certificate_manager_certificates" "certificates" {
   filter     = "name:${google_certificate_manager_certificate.default.id}"
   depends_on = [google_certificate_manager_certificate.default]
 }
-`, certificateName, certificateDescription, certificateName)
+`, certificateName, certificateName)
 }
 
-func testAccDataSourceGoogleCertificateManagerCertificates_managedCertificateIssuerConfig(id, certificateDescription string) string {
+func testAccDataSourceGoogleCertificateManagerCertificates_managedCertificateIssuerConfig(id string) string {
 	return fmt.Sprintf(`
 resource "google_certificate_manager_certificate" "default" {
   name        = "%s"
-  description = "%s"
   scope       = "EDGE_CACHE"
   managed {
     domains = [
@@ -312,5 +355,5 @@ data "google_certificate_manager_certificates" "certificates" {
   filter     = "name:${google_certificate_manager_certificate.default.id}"
   depends_on = [google_certificate_manager_certificate.default]
 }
-`, id, certificateDescription, id, id, id)
+`, id, id, id, id)
 }
