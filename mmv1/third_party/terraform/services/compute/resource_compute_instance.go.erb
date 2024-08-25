@@ -1684,8 +1684,11 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 				"source":      tpgresource.ConvertSelfLinkToV1(disk.Source),
 				"device_name": disk.DeviceName,
 				"mode":        disk.Mode,
-                                "interface":   disk.Interface,
 			}
+                        // Only read interface when boot_disk interface was configured.
+                        if _,ok := d.GetOk("boot_disk.0.interface"); ok {
+                                di["interface"] = disk.Interface
+                        }
 			if key := disk.DiskEncryptionKey; key != nil {
 				if inConfig {
 					rawKey := d.Get(fmt.Sprintf("attached_disk.%d.disk_encryption_key_raw", adIndex))
@@ -3051,8 +3054,10 @@ func flattenBootDisk(d *schema.ResourceData, disk *compute.AttachedDisk, config 
 		// disk_encryption_key_raw is not returned from the API, so copy it from what the user
 		// originally specified to avoid diffs.
 		"disk_encryption_key_raw": d.Get("boot_disk.0.disk_encryption_key_raw"),
-                "interface":  disk.Interface,
 	}
+        if _,ok := d.GetOk("boot_disk.0.interface"); ok {
+               result["interface"] = disk.Interface
+        }
 
 	diskDetails, err := getDisk(disk.Source, d, config)
 	if err != nil {
