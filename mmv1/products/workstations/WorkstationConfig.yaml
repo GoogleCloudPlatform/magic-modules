@@ -276,6 +276,8 @@ properties:
               Whether instances have no public IP address.
           - !ruby/object:Api::Type::Boolean
             name: 'disableSsh'
+            default_value: true
+            send_empty_value: true
             description: |
               Whether to disable SSH access to the VM.
           - !ruby/object:Api::Type::Boolean

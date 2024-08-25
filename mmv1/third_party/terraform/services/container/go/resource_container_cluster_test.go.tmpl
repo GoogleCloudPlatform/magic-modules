@@ -148,7 +148,7 @@ func TestAccContainerCluster_misc(t *testing.T) {
 				ResourceName:            "google_container_cluster.primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"remove_default_node_pool", "deletion_protection"},
+				ImportStateVerifyIgnore: []string{"remove_default_node_pool", "deletion_protection", "resource_labels", "terraform_labels"},
 			},
 			{
 				Config: testAccContainerCluster_misc_update(clusterName, networkName, subnetworkName),
@@ -157,7 +157,7 @@ func TestAccContainerCluster_misc(t *testing.T) {
 				ResourceName:            "google_container_cluster.primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"remove_default_node_pool", "deletion_protection"},
+				ImportStateVerifyIgnore: []string{"remove_default_node_pool", "deletion_protection", "resource_labels", "terraform_labels"},
 			},
 		},
 	})
@@ -8469,6 +8469,7 @@ resource "google_project" "host_project" {
   project_id      = "%s-host"
   org_id          = "%s"
   billing_account = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_service" "host_project" {
@@ -8485,6 +8486,7 @@ resource "google_project" "service_project" {
   project_id      = "%s-service"
   org_id          = "%s"
   billing_account = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_service" "service_project" {
@@ -10501,7 +10503,7 @@ data "google_container_engine_versions" "uscentral1a" {
 resource "google_container_cluster" "with_autopilot" {
   name = "%[3]s"
   location = "us-central1"
-  min_master_version = data.google_container_engine_versions.uscentral1a.release_channel_latest_version["STABLE"]
+  min_master_version = data.google_container_engine_versions.uscentral1a.release_channel_latest_version["REGULAR"]
   enable_autopilot = true
 
   deletion_protection = false
@@ -10644,7 +10646,7 @@ data "google_container_engine_versions" "uscentral1a" {
 resource "google_container_cluster" "with_autopilot" {
   name = "%[3]s"
   location = "us-central1"
-  min_master_version = data.google_container_engine_versions.uscentral1a.release_channel_latest_version["STABLE"]
+  min_master_version = data.google_container_engine_versions.uscentral1a.release_channel_latest_version["REGULAR"]
   enable_autopilot = true
 
   deletion_protection = false
@@ -10788,7 +10790,7 @@ data "google_container_engine_versions" "uscentral1a" {
 resource "google_container_cluster" "with_autopilot" {
   name = "%[3]s"
   location = "us-central1"
-  min_master_version = data.google_container_engine_versions.uscentral1a.release_channel_latest_version["STABLE"]
+  min_master_version = data.google_container_engine_versions.uscentral1a.release_channel_latest_version["REGULAR"]
   enable_autopilot = true
 
   deletion_protection = false
@@ -10972,6 +10974,11 @@ resource "google_container_cluster" "primary" {
   network    = "%s"
   subnetwork    = "%s"
 
+  node_config {
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/cloud-platform",
+    ]
+  }
   node_pool_defaults {
     node_config_defaults {
       containerd_config {

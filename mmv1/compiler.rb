@@ -105,7 +105,8 @@ raise 'Cannot use -p/--products and -a/--all simultaneously' \
   if products_to_generate && all_products
 raise 'Either -p/--products OR -a/--all must be present' \
   if products_to_generate.nil? && !all_products
-raise 'Option -o/--output is a required parameter' if output_path.nil?
+raise 'Option -o/--output is a required parameter' \
+  if output_path.nil? && !openapi_generate
 raise 'Option -e/--engine is a required parameter' if provider_name.nil?
 
 if openapi_generate

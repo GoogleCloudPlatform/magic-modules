@@ -100,7 +100,7 @@ var vcrCassetteUpdateCmd = &cobra.Command{
 	},
 }
 
-func execVCRCassetteUpdate(buildID, today string, rnr exec.ExecRunner, ctlr *source.Controller, vt *vcr.Tester) error {
+func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.Controller, vt *vcr.Tester) error {
 	if err := vt.FetchCassettes(provider.Beta, "main", ""); err != nil {
 		return fmt.Errorf("error fetching cassettes: %w", err)
 	}
@@ -199,15 +199,15 @@ func execVCRCassetteUpdate(buildID, today string, rnr exec.ExecRunner, ctlr *sou
 	return nil
 }
 
-func uploadLogsToGCS(src, dest string, rnr exec.ExecRunner) (string, error) {
+func uploadLogsToGCS(src, dest string, rnr ExecRunner) (string, error) {
 	return uploadToGCS(src, dest, []string{"-h", "Content-Type:text/plain", "-q", "cp", "-r"}, rnr)
 }
 
-func uploadCassettesToGCS(src, dest string, rnr exec.ExecRunner) (string, error) {
+func uploadCassettesToGCS(src, dest string, rnr ExecRunner) (string, error) {
 	return uploadToGCS(src, dest, []string{"-m", "-q", "cp"}, rnr)
 }
 
-func uploadToGCS(src, dest string, opts []string, rnr exec.ExecRunner) (string, error) {
+func uploadToGCS(src, dest string, opts []string, rnr ExecRunner) (string, error) {
 	fmt.Printf("uploading from %s to %s\n", src, dest)
 	args := append(opts, src, dest)
 	fmt.Println("gsutil", args)

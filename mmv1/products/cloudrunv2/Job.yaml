@@ -50,6 +50,19 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
 id_format: 'projects/{{project}}/locations/{{location}}/jobs/{{name}}'
 import_format: ['projects/{{project}}/locations/{{location}}/jobs/{{name}}']
 autogen_async: true
+virtual_fields:
+  - !ruby/object:Api::Type::Boolean
+    name: 'deletion_protection'
+    default_value: true
+    description: |
+      Whether Terraform will be prevented from destroying the job. Defaults to true.
+      When a`terraform destroy` or `terraform apply` would delete the job,
+      the command will fail if this field is not set to false in Terraform state.
+      When the field is set to true or unset in Terraform state, a `terraform apply`
+      or `terraform destroy` that would delete the job will fail.
+      When the field is set to false, deleting the job is allowed.
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_delete: 'templates/terraform/pre_delete/cloudrunv2_job_deletion_policy.go.erb'
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_job_basic'
@@ -59,11 +72,15 @@ examples:
       ])"
     vars:
       cloud_run_job_name: 'cloudrun-job'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_job_limits'
     primary_resource_id: 'default'
     vars:
       cloud_run_job_name: 'cloudrun-job'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_job_sql'
     primary_resource_id: 'default'
@@ -79,6 +96,8 @@ examples:
       deletion_protection: 'false'
     oics_vars_overrides:
       deletion_protection: 'false'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_job_vpcaccess'
     primary_resource_id: 'default'
@@ -90,6 +109,8 @@ examples:
       vpc_access_connector_name: 'run-vpc'
       vpc_compute_subnetwork_name: 'run-subnetwork'
       compute_network_name: 'run-network'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_job_directvpc'
     primary_resource_id: 'default'
@@ -97,6 +118,8 @@ examples:
       ])"
     vars:
       cloud_run_job_name: 'cloudrun-job'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_job_secret'
     primary_resource_id: 'default'
@@ -106,6 +129,8 @@ examples:
     vars:
       cloud_run_job_name: 'cloudrun-job'
       secret_id: 'secret'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_job_emptydir'
     min_version: 'beta'
@@ -114,6 +139,8 @@ examples:
       ])"
     vars:
       cloud_run_job_name: 'cloudrun-job'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_job_run_job'
     min_version: beta
@@ -122,6 +149,8 @@ examples:
       ])"
     vars:
       cloud_run_job_name: 'cloudrun-job'
+    ignore_read_extra:
+      - 'deletion_protection'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -322,12 +351,13 @@ properties:
                 - !ruby/object:Api::Type::Array
                   name: 'args'
                   description: |-
-                    Arguments to the entrypoint. The docker image's CMD is used if this is not provided. Variable references $(VAR_NAME) are expanded using the container's environment. If a variable cannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded, regardless of whether the variable exists or not. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell
+                    Arguments to the entrypoint. The docker image's CMD is used if this is not provided. Variable references are not supported in Cloud Run.
                   item_type: Api::Type::String
                 - !ruby/object:Api::Type::Array
                   name: 'env'
                   description: |-
                     List of environment variables to set in the container.
+                  is_set: true
                   item_type: !ruby/object:Api::Type::NestedObject
                     properties:
                       - !ruby/object:Api::Type::String
@@ -338,7 +368,7 @@ properties:
                       - !ruby/object:Api::Type::String
                         name: 'value'
                         description: |-
-                          Variable references $(VAR_NAME) are expanded using the previous defined environment variables in the container and any route environment variables. If a variable cannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded, regardless of whether the variable exists or not. Defaults to "", and the maximum length is 32768 bytes
+                          Literal value of the environment variable. Defaults to "" and the maximum allowed length is 32768 characters. Variable references are not supported in Cloud Run.
                         # exactly_one_of:
                         #   - template.0.template.0.containers.0.env.0.value
                         #   - template.0.template.0.containers.0.env.0.valueSource

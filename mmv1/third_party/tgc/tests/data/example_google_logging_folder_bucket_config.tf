@@ -14,6 +14,7 @@ provider "google" {
 resource "google_folder" "default" {
 	display_name = "some-folder-name"
 	parent = "organizations/{{.OrgID}}"
+	deletion_protection = false
 }
   
 resource "google_logging_folder_bucket_config" "basic" {
