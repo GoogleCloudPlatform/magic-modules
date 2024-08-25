@@ -165,22 +165,22 @@ func TestAccDataSourceGoogleCertificateManagerCertificates_managedCertificateIss
 func testAccDataSourceGoogleCertificateManagerCertificates_basic(certificateName, certificateDescription string) string {
 	return fmt.Sprintf(`
 resource "google_certificate_manager_certificate" "default" {
-	name        = "%s"
-	description = "%s"
-	self_managed {
-		pem_certificate = file("test-fixtures/cert.pem")
-		pem_private_key = file("test-fixtures/private-key.pem")
-	}
+  name        = "%s"
+  description = "%s"
+  self_managed {
+    pem_certificate = file("test-fixtures/cert.pem")
+    pem_private_key = file("test-fixtures/private-key.pem")
+  }
 
-	labels = {
-		"terraform" : true,
-		"acc-test"  : true,
-	}
+  labels = {
+    "terraform" : true,
+    "acc-test" : true,
+  }
 }
 
 data "google_certificate_manager_certificates" "certificates" {
-	filter = "name:${google_certificate_manager_certificate.default.id}"
-	depends_on = [google_certificate_manager_certificate.default]
+  filter     = "name:${google_certificate_manager_certificate.default.id}"
+  depends_on = [google_certificate_manager_certificate.default]
 }
 `, certificateName, certificateDescription)
 }
@@ -188,19 +188,19 @@ data "google_certificate_manager_certificates" "certificates" {
 func testAccDataSourceGoogleCertificateManagerCertificates_managedCertificateBasic(certificateName, certificateDescription string) string {
 	return fmt.Sprintf(`
 resource "google_certificate_manager_certificate" "default" {
-	name        = "%s"
-	description = "%s"
-	scope       = "EDGE_CACHE"
-	managed {
-		domains = [
-			"terraform.subdomain1.com"
-		]
-	}
+  name        = "%s"
+  description = "%s"
+  scope       = "EDGE_CACHE"
+  managed {
+    domains = [
+      "terraform.subdomain1.com"
+    ]
+  }
 }
 
 data "google_certificate_manager_certificates" "certificates" {
-	filter = "name:${google_certificate_manager_certificate.default.id}"
-	depends_on = [google_certificate_manager_certificate.default]
+  filter     = "name:${google_certificate_manager_certificate.default.id}"
+  depends_on = [google_certificate_manager_certificate.default]
 }
 `, certificateName, certificateDescription)
 }
@@ -208,27 +208,27 @@ data "google_certificate_manager_certificates" "certificates" {
 func testAccDataSourceGoogleCertificateManagerCertificates_managedCertificateDNSAuthorization(certificateName, certificateDescription string) string {
 	return fmt.Sprintf(`
 resource "google_certificate_manager_certificate" "default" {
-	name        = "%s"
-	description = "%s"
-	scope       = "EDGE_CACHE"
-	managed {
-		domains = [
-			google_certificate_manager_dns_authorization.default.domain,
-		]
-		dns_authorizations = [
-			google_certificate_manager_dns_authorization.default.id
-		]
-	}
+  name        = "%s"
+  description = "%s"
+  scope       = "EDGE_CACHE"
+  managed {
+    domains = [
+      google_certificate_manager_dns_authorization.default.domain,
+    ]
+    dns_authorizations = [
+      google_certificate_manager_dns_authorization.default.id
+    ]
+  }
 }
 
 resource "google_certificate_manager_dns_authorization" "default" {
-  name        = "%s"
-  domain      = "terraform.subdomain1.com"
+  name   = "%s"
+  domain = "terraform.subdomain1.com"
 }
 
 data "google_certificate_manager_certificates" "certificates" {
-	filter = "name:${google_certificate_manager_certificate.default.id}"
-	depends_on = [google_certificate_manager_certificate.default]
+  filter     = "name:${google_certificate_manager_certificate.default.id}"
+  depends_on = [google_certificate_manager_certificate.default]
 }
 `, certificateName, certificateDescription, certificateName)
 }
@@ -236,33 +236,33 @@ data "google_certificate_manager_certificates" "certificates" {
 func testAccDataSourceGoogleCertificateManagerCertificates_managedCertificateIssuerConfig(id, certificateDescription string) string {
 	return fmt.Sprintf(`
 resource "google_certificate_manager_certificate" "default" {
-	name        = "%s"
-	description = "%s"
-	scope       = "EDGE_CACHE"
-	managed {
-		domains = [
-			"terraform.subdomain1.com"
-		]
-		issuance_config = google_certificate_manager_certificate_issuance_config.issuanceconfig.id
-	}
+  name        = "%s"
+  description = "%s"
+  scope       = "EDGE_CACHE"
+  managed {
+    domains = [
+      "terraform.subdomain1.com"
+    ]
+    issuance_config = google_certificate_manager_certificate_issuance_config.issuanceconfig.id
+  }
 }
 
 
 # creating certificate_issuance_config to use it in the managed certificate
 resource "google_certificate_manager_certificate_issuance_config" "issuanceconfig" {
-  name    = "%s"
+  name        = "%s"
   description = "sample description for the certificate issuanceConfigs"
   certificate_authority_config {
     certificate_authority_service_config {
-        ca_pool = google_privateca_ca_pool.pool.id
+      ca_pool = google_privateca_ca_pool.pool.id
     }
   }
-  lifetime = "1814400s"
+  lifetime                   = "1814400s"
   rotation_window_percentage = 34
-  key_algorithm = "ECDSA_P256"
-  depends_on=[google_privateca_certificate_authority.ca_authority]
+  key_algorithm              = "ECDSA_P256"
+  depends_on                 = [google_privateca_certificate_authority.ca_authority]
 }
-  
+
 resource "google_privateca_ca_pool" "pool" {
   name     = "%s"
   location = "us-central1"
@@ -270,14 +270,14 @@ resource "google_privateca_ca_pool" "pool" {
 }
 
 resource "google_privateca_certificate_authority" "ca_authority" {
-  location = "us-central1"
-  pool = google_privateca_ca_pool.pool.name
+  location                 = "us-central1"
+  pool                     = google_privateca_ca_pool.pool.name
   certificate_authority_id = "%s"
   config {
     subject_config {
       subject {
         organization = "HashiCorp"
-        common_name = "my-certificate-authority"
+        common_name  = "my-certificate-authority"
       }
       subject_alt_name {
         dns_names = ["hashicorp.com"]
@@ -290,7 +290,7 @@ resource "google_privateca_certificate_authority" "ca_authority" {
       key_usage {
         base_key_usage {
           cert_sign = true
-          crl_sign = true
+          crl_sign  = true
         }
         extended_key_usage {
           server_auth = true
@@ -309,8 +309,8 @@ resource "google_privateca_certificate_authority" "ca_authority" {
 }
 
 data "google_certificate_manager_certificates" "certificates" {
-	filter = "name:${google_certificate_manager_certificate.default.id}"
-	depends_on = [google_certificate_manager_certificate.default]
+  filter     = "name:${google_certificate_manager_certificate.default.id}"
+  depends_on = [google_certificate_manager_certificate.default]
 }
 `, id, certificateDescription, id, id, id)
 }
