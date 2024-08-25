@@ -1776,6 +1776,7 @@ resource "google_compute_instance_from_template" "inst2" {
   source_instance_template = google_compute_instance_template.foobar6.self_link
 }
 `, templateDisk, image, template, confidentialInstanceType, instance, template2, confidentialInstanceType, instance2)
+}
 
 func TestAccComputeInstanceFromTemplateWithOverride_interface(t *testing.T) {
         t.Parallel()
