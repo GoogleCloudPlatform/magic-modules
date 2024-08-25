@@ -22,26 +22,13 @@ immutable: true
 description: |
   Dataproc Serverless Batches lets you run Spark workloads without requiring you to
   provision and manage your own Dataproc cluster.
+timeouts: !ruby/object:Api::Timeouts
+  insert_minutes: 10
+  update_minutes: 5
+  delete_minutes: 5
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
     base_url: '{{op_id}}'
-    wait_ms: 1000
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 10
-      update_minutes: 5
-      delete_minutes: 5
-  result: !ruby/object:Api::OpAsync::Result
-    path: 'response'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
-    path: 'error'
-    message: 'message'
 autogen_async: false
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
@@ -235,7 +222,6 @@ properties:
         name: 'properties'
         description: |
           A mapping of property names to values, which are used to configure workload execution.
-        default_from_api: true
       - !ruby/object:Api::Type::NestedObject
         name: 'repositoryConfig'
         description: |
@@ -290,16 +276,23 @@ properties:
           - !ruby/object:Api::Type::String
             name: 'networkUri'
             description: |
-              Network configuration for workload execution. 
+              Network configuration for workload execution.
+            exactly_one_of:
+              - network_uri
+              - subnetwork_uri
           - !ruby/object:Api::Type::String
             name: 'subnetworkUri'
             description: |
-              Network configuration for workload execution. 
+              Network configuration for workload execution.
+            exactly_one_of:
+              - network_uri
+              - subnetwork_uri
       - !ruby/object:Api::Type::NestedObject
         name: 'peripheralsConfig'
         description: |
           Peripherals configuration that workload has access to.
         default_from_api: true
+        allow_empty_object: true
           #custom_flatten: 'templates/terraform/custom_flatten/json_to_string_map.go.erb'
         properties:
           - !ruby/object:Api::Type::String
@@ -352,6 +345,11 @@ properties:
     name: 'pysparkBatch'
     description: |
       PySpark batch config.
+    exactly_one_of:
+      - pyspark_batch
+      - spark_batch
+      - spark_sql_batch
+      - spark_r_batch
     properties:
       - !ruby/object:Api::Type::String
         name: 'mainPythonFileUri'
@@ -389,6 +387,11 @@ properties:
     name: 'sparkBatch'
     description: |
       Spark batch config.
+    exactly_one_of:
+      - pyspark_batch
+      - spark_batch
+      - spark_sql_batch
+      - spark_r_batch
     properties:
       - !ruby/object:Api::Type::Array
         name: 'args'
@@ -425,6 +428,11 @@ properties:
     name: 'sparkRBatch'
     description: |
       SparkR batch config.
+    exactly_one_of:
+      - pyspark_batch
+      - spark_batch
+      - spark_sql_batch
+      - spark_r_batch
     properties:
       - !ruby/object:Api::Type::String
         name: 'mainRFileUri'
@@ -451,6 +459,11 @@ properties:
     name: 'sparkSqlBatch'
     description: |
       Spark SQL batch config.
+    exactly_one_of:
+      - pyspark_batch
+      - spark_batch
+      - spark_sql_batch
+      - spark_r_batch
     properties:
       - !ruby/object:Api::Type::String
         name: 'queryFileUri'
