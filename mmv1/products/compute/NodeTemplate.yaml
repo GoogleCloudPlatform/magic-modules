@@ -162,8 +162,6 @@ properties:
           description: |
             The number of the guest accelerator cards exposed to this
             node template.
-        # TODO(alexstephen): Change to ResourceRef once AcceleratorType is
-        # created.
         - !ruby/object:Api::Type::String
           name: 'acceleratorType'
           description: |
