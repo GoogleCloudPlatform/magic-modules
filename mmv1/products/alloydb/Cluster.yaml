@@ -577,19 +577,15 @@ properties:
         name: startTime
         description: |
           Start time of the trial cluster.
-        default_from_api: true
       - !ruby/object:Api::Type::String
         name: endTime
         description: |
           End time of the trial cluster.
-        default_from_api: true
       - !ruby/object:Api::Type::String
         name: upgradeTime
         description: |
           Upgrade time of the trial cluster to standard cluster.
-        default_from_api: true
       - !ruby/object:Api::Type::String
         name: graceEndTime
         description: |
           Grace end time of the trial cluster.
-        default_from_api: true
