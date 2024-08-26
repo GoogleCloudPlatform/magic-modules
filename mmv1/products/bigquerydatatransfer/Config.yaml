@@ -47,12 +47,21 @@ examples:
       display_name: 'my-query'
       dataset_id: 'my_dataset'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'bigquerydatatransfer_config_cmek'
+    skip_test: true
+    primary_resource_id: 'query_config_cmek'
+    vars:
+      dataset_id: 'example_dataset'
+      key_name: 'example-key'
+      keyring_name: 'example-keyring'
+  - !ruby/object:Provider::Terraform::Examples
     skip_test: true
     name: 'bigquerydatatransfer_config_salesforce'
     primary_resource_id: 'salesforce_config'
     vars:
       display_name: 'my-salesforce-config'
       dataset_id: 'my_dataset'
+
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -172,6 +181,16 @@ properties:
       reingests data for [today-10, today-1], rather than ingesting data for
       just [today-1]. Only valid if the data source supports the feature.
       Set the value to 0 to use the default value.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'encryptionConfiguration'
+    description: |
+      Represents the encryption configuration for a transfer.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'kmsKeyName'
+        required: true
+        description: |
+          The name of the KMS key used for encrypting BigQuery data.
   - !ruby/object:Api::Type::Boolean
     name: 'disabled'
     description: |
