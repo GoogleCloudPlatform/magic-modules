@@ -571,7 +571,7 @@ properties:
     name: 'trialMetadata'
     description: |
       Contains information and all metadata related to TRIAL clusters.
-    default_from_api: true
+    output: true
     properties:
       - !ruby/object:Api::Type::String
         name: startTime
