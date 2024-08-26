@@ -301,7 +301,8 @@ func TestAccBigqueryDataTransferConfig(t *testing.T) {
 		"booleanParam":           testAccBigqueryDataTransferConfig_copy_booleanParam,
 		"update_params":          testAccBigqueryDataTransferConfig_force_new_update_params,
 		"update_service_account": testAccBigqueryDataTransferConfig_scheduledQuery_update_service_account,
-		"salesforce":             testAccBigqueryDataTransferConfig_salesforce_basic,
+		// Multiple connector.authentication.* fields have been deprecated and return 400 errors
+		// "salesforce":             testAccBigqueryDataTransferConfig_salesforce_basic,
 	}
 
 	for name, tc := range testCases {
@@ -854,7 +855,7 @@ resource "google_bigquery_data_transfer_config" "salesforce_config" {
     "connector.authentication.username"           = ""
     "connector.authentication.password"           = ""
     "connector.authentication.securityToken"      = ""
-    "assets"                                      = "[asset-a, asset-b]"
+    "assets"                                      = "[\"asset-a\",\"asset-b\"]"
   }
 }
 `, randomSuffix, randomSuffix)

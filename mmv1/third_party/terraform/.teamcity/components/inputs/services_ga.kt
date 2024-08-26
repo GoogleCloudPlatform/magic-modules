@@ -301,11 +301,6 @@ var ServicesListGa = mapOf(
         "displayName" to "Dataprocmetastore",
         "path" to "./google/services/dataprocmetastore"
     ),
-    "datastore" to mapOf(
-        "name" to "datastore",
-        "displayName" to "Datastore",
-        "path" to "./google/services/datastore"
-    ),
     "datastream" to mapOf(
         "name" to "datastream",
         "displayName" to "Datastream",
@@ -615,6 +610,11 @@ var ServicesListGa = mapOf(
         "name" to "securitycenter",
         "displayName" to "Securitycenter",
         "path" to "./google/services/securitycenter"
+    ),
+    "securitycenterv2" to mapOf(
+        "name" to "securitycenterv2",
+        "displayName" to "securitycenterv2",
+        "path" to "./google/services/securitycenterv2"
     ),
     "securitycentermanagement" to mapOf(
         "name" to "securitycentermanagement",

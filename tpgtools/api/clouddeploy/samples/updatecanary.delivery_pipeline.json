@@ -24,7 +24,8 @@
                   "gatewayServiceMesh" : {
                     "httpRoute": "example-http-route",
                     "service": "example-service",
-                    "deployment": "example-deployment"
+                    "deployment": "example-deployment",
+                    "podSelectorLabel": "example.com/app-name"
                   }
                 }
               },
@@ -54,7 +55,8 @@
                   "gatewayServiceMesh" : {
                     "httpRoute": "example-http-route",
                     "service": "example-service",
-                    "deployment": "example-deployment"
+                    "deployment": "example-deployment",
+                    "podSelectorLabel": "example.com/app-name"
                   }
                 }
               },

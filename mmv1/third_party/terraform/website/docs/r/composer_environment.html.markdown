@@ -25,12 +25,11 @@ To get more information about Environments, see:
   * [Connect an environment to a VPC network](https://cloud.google.com/composer/docs/composer-3/connect-vpc-network)
 * [Apache Airflow Documentation](http://airflow.apache.org/)
 
-<Note>
+-> **Note**
   Cloud Composer 1 is in the post-maintenance mode. Google does 
   not release any further updates to Cloud Composer 1, including new versions 
   of Airflow, bugfixes, and security updates. We recommend using
   Cloud Composer 2 or Cloud Composer 3 instead.
-</Note>
 
 Several special considerations apply to managing Cloud Composer environments 
 with Terraform:
@@ -92,10 +91,9 @@ resource "google_composer_environment" "test" {
 }
 ```
 
-
 ### With GKE and Compute Resource Dependencies
 
-<Note>
+-> **Note**
   To use custom service accounts, you must give at least the
   `role/composer.worker` role to the service account of the Cloud Composer 
   environment. For more information, see the
@@ -103,7 +101,6 @@ resource "google_composer_environment" "test" {
   page in the Cloud Composer documentation.
   You might need to assign additional roles depending on specific workflows 
   that the Airflow DAGs will be running.
-<Note>
 
 #### GKE and Compute Resource Dependencies (Cloud Composer 3)
 
@@ -302,6 +299,69 @@ resource "google_project_iam_member" "composer-worker" {
 }
 ```
 
+### Cloud Composer 3 networking configuration
+
+In Cloud Composer 3, networking configuration is simplified compared to
+previous versions. You don't need to specify network ranges, and can attach
+custom VPC networks to your environment.
+
+-> **Note**
+  It's not possible to detach a VPC network using Terraform. Instead, you can
+  attach a different VPC network in its place, or detach the network using
+  other tools like Google Cloud CLI.
+
+Use Private IP networking:
+
+```hcl
+resource "google_composer_environment" "example" {
+  name = "example-environment"
+  region = "us-central1"
+
+  config {
+
+    enable_private_ip_environment = true
+
+    # ... other configuration parameters
+  }
+}
+```
+
+Attach a custom VPC network (Cloud Composer creates a new network attachment):
+
+```hcl
+resource "google_composer_environment" "example" {
+  name = "example-environment"
+  region = "us-central1"
+
+  config {
+
+    node_config {
+      network = "projects/example-project/global/networks/example-network"
+      subnetwork = "projects/example-project/regions/us-central1/subnetworks/example-subnetwork"
+    }
+
+    # ... other configuration parameters
+  }
+}
+```
+
+Attach a custom VPC network (use existing network attachment):
+
+```hcl
+resource "google_composer_environment" "example" {
+  name = "example-environment"
+  region = "us-central1"
+
+  config {
+
+    node_config {
+      composer_network_attachment = projects/example-project/regions/us-central1/networkAttachments/example-network-attachment
+    }
+
+    # ... other configuration parameters
+  }
+}
+```
 
 ### With Software (Airflow) Config
 
@@ -327,6 +387,7 @@ resource "google_composer_environment" "test" {
   }
 }
 ```
+
 ## Argument Reference - Cloud Composer 1
 
 The following arguments are supported:
@@ -818,6 +879,24 @@ The following arguments are supported:
   for high resilience and `STANDARD_RESILIENCE` for standard
   resilience.
 
+* `data_retention_config` -
+  (Optional, Cloud Composer 2.0.23 or newer only)
+  Configuration setting for airflow data rentention mechanism. Structure is
+  [documented below](#nested_data_retention_config_c2).
+
+<a name="nested_data_retention_config_c2"></a>The `data_retention_config` block supports:
+* `task_logs_retention_config` - 
+  (Optional)
+  The configuration setting for Task Logs. Structure is
+  [documented below](#nested_task_logs_retention_config_c2).
+
+<a name="nested_task_logs_retention_config_c2"></a>The `task_logs_retention_config` block supports:
+* `storage_mode` - 
+  (Optional)
+  The mode of storage for Airflow workers task logs. Values for storage mode are 
+  `CLOUD_LOGGING_ONLY` to only store logs in cloud logging and 
+  `CLOUD_LOGGING_AND_CLOUD_STORAGE` to store logs in cloud logging and cloud storage.
+
 * `master_authorized_networks_config` -
   (Optional)
   Configuration options for the master authorized networks feature. Enabled
@@ -843,24 +922,6 @@ The following arguments are supported:
 * `cidr_block` -
   (Required)
   `cidr_block` must be specified in CIDR notation.
-
-* `data_retention_config` -
-  (Optional, Cloud Composer 2.0.23 or newer only)
-  Configuration setting for airflow data rentention mechanism. Structure is
-  [documented below](#nested_data_retention_config_c2).
-
-<a name="nested_data_retention_config_c2"></a>The `data_retention_config` block supports:
-* `task_logs_retention_config` - 
-  (Optional)
-  The configuration setting for Task Logs. Structure is
-  [documented below](#nested_task_logs_retention_config_c2).
-
-<a name="nested_task_logs_retention_config_c2"></a>The `task_logs_retention_config` block supports:
-* `storage_mode` - 
-  (Optional)
-  The mode of storage for Airflow workers task logs. Values for storage mode are 
-  `CLOUD_LOGGING_ONLY` to only store logs in cloud logging and 
-  `CLOUD_LOGGING_AND_CLOUD_STORAGE` to store logs in cloud logging and cloud storage.
 
 
 <a name="nested_storage_config_c2"></a>The `storage_config` block supports:
@@ -1274,7 +1335,7 @@ The following arguments are supported:
   and `ENVIRONMENT_SIZE_LARGE`.
 
 * `data_retention_config` -
-  (Optional, Cloud Composer 2.0.23 or later only)
+  (Optional)
   Configuration setting for Airflow database retention mechanism. Structure is
   [documented below](#nested_data_retention_config_c3).
 

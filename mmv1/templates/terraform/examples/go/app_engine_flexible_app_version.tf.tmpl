@@ -3,6 +3,7 @@ resource "google_project" "my_project" {
   project_id = "{{index $.Vars "project"}}"
   org_id = "{{index $.TestEnvVars "org_id"}}"
   billing_account = "{{index $.TestEnvVars "billing_account"}}"
+  deletion_policy = "DELETE"
 }
 
 resource "google_app_engine_application" "app" {
@@ -46,6 +47,10 @@ resource "google_app_engine_flexible_app_version" "{{$.PrimaryResourceId}}" {
   project    = google_project_iam_member.gae_api.project
   service    = "default"
   runtime    = "nodejs"
+  flexible_runtime_settings {
+    operating_system = "ubuntu22"
+    runtime_version = "20"
+  }
 
   entrypoint {
     shell = "node ./app.js"

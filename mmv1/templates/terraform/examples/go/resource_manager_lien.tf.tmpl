@@ -8,4 +8,5 @@ resource "google_resource_manager_lien" "{{$.PrimaryResourceId}}" {
 resource "google_project" "project" {
   project_id = "{{index $.Vars "project_id"}}"
   name       = "A very important project!"
+  deletion_policy = "DELETE"
 }

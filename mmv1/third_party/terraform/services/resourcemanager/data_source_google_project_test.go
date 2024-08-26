@@ -28,6 +28,7 @@ func TestAccDataSourceGoogleProject_basic(t *testing.T) {
 							// Virtual fields
 							"auto_create_network": {},
 							"skip_delete":         {},
+							"deletion_policy":     {},
 						}),
 				),
 			},
@@ -41,6 +42,7 @@ resource "google_project" "project" {
   project_id = "%s"
   name       = "%s"
   org_id     = "%s"
+  deletion_policy = "DELETE"
   labels = {
     my-label = "my-label-value"
   }

@@ -189,10 +189,11 @@ func expandIpConfiguration(configured []interface{}) *sqladmin.IpConfiguration {
 
 	return &sqladmin.IpConfiguration{
 		Ipv4Enabled:        _ipConfiguration["ipv4_enabled"].(bool),
-		RequireSsl:         _ipConfiguration["require_ssl"].(bool),
 		PrivateNetwork:     _ipConfiguration["private_network"].(string),
 		AuthorizedNetworks: expandAuthorizedNetworks(_ipConfiguration["authorized_networks"].(*schema.Set).List()),
-		ForceSendFields:    []string{"Ipv4Enabled", "RequireSsl"},
+		ForceSendFields:    []string{"Ipv4Enabled"},
+		NullFields:         []string{"RequireSsl"},
+		SslMode:            _ipConfiguration["ssl_mode"].(string),
 	}
 }
 func expandAuthorizedNetworks(configured []interface{}) []*sqladmin.AclEntry {

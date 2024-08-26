@@ -32,9 +32,10 @@ func TestAccCloudIdentityGroup(t *testing.T) {
 		"membership_with_member_key":      testAccCloudIdentityGroupMembership_cloudIdentityGroupMembershipWithMemberKeyTest,
 		"membership_user_with_member_key": testAccCloudIdentityGroupMembership_cloudIdentityGroupMembershipUserWithMemberKeyTest,
 <% end -%>
-		"data_source_basic":            testAccDataSourceCloudIdentityGroups_basicTest,
-		"data_source_membership_basic": testAccDataSourceCloudIdentityGroupMemberships_basicTest,
-		"data_source_group_lookup":     testAccDataSourceCloudIdentityGroupLookup_basicTest,
+		"data_source_basic":                       testAccDataSourceCloudIdentityGroups_basicTest,
+		"data_source_membership_basic":            testAccDataSourceCloudIdentityGroupMemberships_basicTest,
+		"data_source_transitive_membership_basic": testAccDataSourceCloudIdentityGroupTransitiveMemberships_basicTest,
+		"data_source_group_lookup":                testAccDataSourceCloudIdentityGroupLookup_basicTest,
 	}
 
 	for name, tc := range testCases {

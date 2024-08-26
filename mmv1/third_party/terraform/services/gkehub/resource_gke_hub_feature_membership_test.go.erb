@@ -159,11 +159,13 @@ resource "google_gke_hub_feature_membership" "feature_member_1" {
     version = "1.18.2"
     config_sync {
       source_format = "hierarchy"
+      enabled       = true
       git {
         sync_repo   = "https://github.com/GoogleCloudPlatform/magic-modules"
         secret_type = "none"
       }
     }
+    management = "MANAGEMENT_AUTOMATIC"
   }
 }
 
@@ -1345,6 +1347,7 @@ resource "google_project" "project" {
   project_id      = "tf-test-gkehub%{random_suffix}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_service" "anthos" {
