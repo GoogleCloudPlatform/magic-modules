@@ -26,7 +26,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -50,26 +50,6 @@ parameters:
     description: 'A reference to the zone where the instance group resides.'
     required: true
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
-  - !ruby/object:Api::Type::Array
-    name: 'instances'
-    description: |
-      The list of instances associated with this InstanceGroup.
-      All instances must be created before being added to an InstanceGroup.
-      All instances not in this list will be removed from the InstanceGroup
-      and will not be deleted.
-      Only the full identifier of the instance will be returned.
-
-      !> **WARNING** If a user will be recreating instances under the same name
-      (eg. via `terraform taint`), please consider adding instances to an instance
-      group via the `instance_group_membership` resource, along side the
-      `update_triggered_by` lifecycle method with an instance's ID.
-    exclude: true
-    item_type: !ruby/object:Api::Type::ResourceRef
-      name: 'instance'
-      description: 'An instance being added to the InstanceGroup'
-      resource: 'Instance'
-      imports: 'selfLink'
-    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'

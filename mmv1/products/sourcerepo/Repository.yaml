@@ -100,8 +100,6 @@ properties:
             This service account needs to be in the same project as the PubsubConfig. When added,
             the caller needs to have iam.serviceAccounts.actAs permission on this service account.
             If unspecified, it defaults to the compute engine default service account.
-
           default_from_api: true
-    key_diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     key_expander: 'expandSourceRepoRepositoryPubsubConfigsTopic'
     set_hash_func: 'resourceSourceRepoRepositoryPubSubConfigsHash'

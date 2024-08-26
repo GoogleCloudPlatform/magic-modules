@@ -55,9 +55,9 @@ examples:
       dataset_name: 'example-dataset'
       fhir_store_name: 'example-fhir-store'
       pubsub_topic: 'fhir-notifications'
+    skip_docs: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'healthcare_fhir_store_notification_configs'
-    min_version: beta
     primary_resource_id: 'default'
     vars:
       dataset_name: 'example-dataset'
@@ -192,6 +192,8 @@ properties:
 
   - !ruby/object:Api::Type::NestedObject
     name: notificationConfig
+    deprecation_message: >-
+      `notification_config` is deprecated and will be removed in a future major release. Use `notification_configs` instead.
     required: false
     properties:
       - !ruby/object:Api::Type::String
@@ -300,7 +302,6 @@ properties:
     name: notificationConfigs
     description: |-
       A list of notifcation configs that configure the notification for every resource mutation in this FHIR store.
-    min_version: beta
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::String

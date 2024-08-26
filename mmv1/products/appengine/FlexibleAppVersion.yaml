@@ -36,7 +36,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'appengine#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -73,6 +73,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'app_engine_flexible_app_version'
     primary_resource_id: 'myapp_v1'
+    # https://github.com/hashicorp/terraform-provider-google/issues/19040
+    skip_test: true
     ignore_read_extra:
       - 'noop_on_destroy'
       - 'deployment.0.zip'
@@ -139,6 +141,14 @@ properties:
         description: |
           List of ports, or port pairs, to forward from the virtual machine to the application container.
         item_type: Api::Type::String
+      - !ruby/object:Api::Type::Enum
+        name: 'instanceIpMode'
+        description: |
+          Prevent instances from receiving an ephemeral external IP address.
+        min_version: beta
+        values:
+          - :EXTERNAL
+          - :INTERNAL
       - !ruby/object:Api::Type::String
         name: 'instanceTag'
         description: |
@@ -228,6 +238,18 @@ properties:
     name: 'runtimeChannel'
     description: |
       The channel of the runtime to use. Only available for some runtimes.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'flexibleRuntimeSettings'
+    description: Runtime settings for App Engine flexible environment.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'operatingSystem'
+        description: |
+          Operating System of the application runtime.
+      - !ruby/object:Api::Type::String
+        name: 'runtimeVersion'
+        description: |
+          The runtime version of an App Engine flexible application.
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'betaSettings'
     description: |

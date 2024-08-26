@@ -45,24 +45,22 @@ var requestReviewerCmd = &cobra.Command{
 			c. As appropriate, posts a welcome comment on the PR.
 	`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		prNumber := args[0]
 		fmt.Println("PR Number: ", prNumber)
 		githubToken, ok := os.LookupEnv("GITHUB_TOKEN")
 		if !ok {
-			fmt.Println("Did not provide GITHUB_TOKEN environment variable")
-			os.Exit(1)
+			return fmt.Errorf("did not provide GITHUB_TOKEN environment variable")
 		}
 		gh := github.NewClient(githubToken)
-		execRequestReviewer(prNumber, gh)
+		return execRequestReviewer(prNumber, gh)
 	},
 }
 
-func execRequestReviewer(prNumber string, gh GithubClient) {
+func execRequestReviewer(prNumber string, gh GithubClient) error {
 	pullRequest, err := gh.GetPullRequest(prNumber)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return err
 	}
 
 	author := pullRequest.User.Login
@@ -71,33 +69,32 @@ func execRequestReviewer(prNumber string, gh GithubClient) {
 
 		requestedReviewers, err := gh.GetPullRequestRequestedReviewers(prNumber)
 		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+			return err
 		}
 
 		previousReviewers, err := gh.GetPullRequestPreviousReviewers(prNumber)
 		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+			return err
 		}
 
 		reviewersToRequest, newPrimaryReviewer := github.ChooseCoreReviewers(requestedReviewers, previousReviewers)
 
-		err = gh.RequestPullRequestReviewers(prNumber, reviewersToRequest)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+		if len(reviewersToRequest) > 0 {
+			err = gh.RequestPullRequestReviewers(prNumber, reviewersToRequest)
+			if err != nil {
+				return err
+			}
 		}
 
 		if newPrimaryReviewer != "" {
 			comment := github.FormatReviewerComment(newPrimaryReviewer)
 			err = gh.PostComment(prNumber, comment)
 			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
+				return err
 			}
 		}
 	}
+	return nil
 }
 
 func init() {

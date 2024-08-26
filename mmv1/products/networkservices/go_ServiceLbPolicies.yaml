@@ -1,0 +1,134 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'ServiceLbPolicies'
+description: |
+  ServiceLbPolicy holds global load balancing and traffic distribution configuration that can be applied to a BackendService.
+min_version: 'beta'
+references:
+  guides:
+  api: 'https://cloud.google.com/service-mesh/docs/reference/network-services/rest/v1/projects.locations.serviceLbPolicies'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/serviceLbPolicies'
+self_link: 'projects/{{project}}/locations/{{location}}/serviceLbPolicies/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/serviceLbPolicies?serviceLbPolicyId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/serviceLbPolicies/{{name}}'
+timeouts:
+  insert_minutes: 30
+  update_minutes: 30
+  delete_minutes: 30
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+    timeouts:
+      insert_minutes: 30
+      update_minutes: 30
+      delete_minutes: 30
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'network_services_service_lb_policies_basic'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-lb-policy'
+  - name: 'network_services_service_lb_policies_advanced'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-lb-policy'
+      backend_name: 'my-lb-backend'
+parameters:
+  - name: 'name'
+    type: String
+    description: |
+      Name of the ServiceLbPolicy resource. It matches pattern `projects/{project}/locations/{location}/serviceLbPolicies/{service_lb_policy_name}`.
+    min_version: 'beta'
+    url_param_only: true
+    required: true
+  - name: 'location'
+    type: String
+    description: |
+      The location of the service lb policy.
+    min_version: 'beta'
+    url_param_only: true
+    required: true
+properties:
+  - name: 'createTime'
+    type: Time
+    description: |
+      Time the ServiceLbPolicy was created in UTC.
+    min_version: 'beta'
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      Time the ServiceLbPolicy was updated in UTC.
+    min_version: 'beta'
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: 'Set of label tags associated with the ServiceLbPolicy resource.'
+    min_version: 'beta'
+    immutable: false
+  - name: 'description'
+    type: String
+    description: |
+      A free-text description of the resource. Max length 1024 characters.
+    min_version: 'beta'
+  - name: 'loadBalancingAlgorithm'
+    type: Enum
+    description: |
+      The type of load balancing algorithm to be used. The default behavior is WATERFALL_BY_REGION.
+    min_version: 'beta'
+    enum_values:
+      - 'SPRAY_TO_REGION'
+      - 'SPRAY_TO_WORLD'
+      - 'WATERFALL_BY_REGION'
+      - 'WATERFALL_BY_ZONE'
+  - name: 'autoCapacityDrain'
+    type: NestedObject
+    description: |
+      Option to specify if an unhealthy MIG/NEG should be considered for global load balancing and traffic routing.
+    min_version: 'beta'
+    properties:
+      - name: 'enable'
+        type: Boolean
+        description:
+          Optional. If set to 'True', an unhealthy MIG/NEG will be set as drained. - An MIG/NEG is considered unhealthy if less than 25% of the instances/endpoints in the MIG/NEG are healthy. - This option will never result in draining more than 50% of the configured IGs/NEGs for the Backend Service.
+        min_version: 'beta'
+  - name: 'failoverConfig'
+    type: NestedObject
+    description: |
+      Option to specify health based failover behavior. This is not related to Network load balancer FailoverPolicy.
+    min_version: 'beta'
+    properties:
+      - name: 'failoverHealthThreshold'
+        type: Integer
+        description:
+          Optional. The percentage threshold that a load balancer will begin to send traffic to failover backends. If the percentage of endpoints in a MIG/NEG is smaller than this value, traffic would be sent to failover backends if possible. This field should be set to a value between 1 and 99. The default value is 50 for Global external HTTP(S) load balancer (classic) and Proxyless service mesh, and 70 for others.
+        min_version: 'beta'
+        required: true

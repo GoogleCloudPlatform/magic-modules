@@ -35,7 +35,7 @@ import_format: ['projects/{{project}}/iap_web/appengine-{{appId}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'iap_appengine'
-    pull_external: true
+    external_providers: ["random", "time"]
     primary_resource_id: 'app'
     primary_resource_name: 'context["project_id"]'
     test_env_vars:

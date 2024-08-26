@@ -113,7 +113,7 @@ func Camelize(term string, firstLetter string) string {
 
 	res := term
 	if firstLetter == "upper" {
-		res = regexp.MustCompile(`^[a-z\d]*/`).ReplaceAllStringFunc(res, func(match string) string {
+		res = regexp.MustCompile(`^[a-z\d]*`).ReplaceAllStringFunc(res, func(match string) string {
 			return strings.Title(match)
 		})
 	} else {
@@ -136,4 +136,36 @@ func Camelize(term string, firstLetter string) string {
 		return word
 	})
 	return res
+}
+
+/*
+Transforms a format string with field markers to a regex string with capture groups.
+For instance,
+
+	projects/{{project}}/global/networks/{{name}}
+
+is transformed to
+
+	projects/(?P<project>[^/]+)/global/networks/(?P<name>[^/]+)
+
+Values marked with % are URL-encoded, and will match any number of /'s.
+Note: ?P indicates a Python-compatible named capture group. Named groups
+aren't common in JS-based regex flavours, but are in Perl-based ones
+*/
+func Format2Regex(format string) string {
+	re := regexp.MustCompile(`\{\{%([[:word:]]+)\}\}`)
+	result := re.ReplaceAllStringFunc(format, func(match string) string {
+		// TODO: the trims may not be needed with more effecient regex
+		word := strings.TrimPrefix(match, "{{")
+		word = strings.TrimSuffix(word, "}}")
+		word = strings.ReplaceAll(word, "%", "")
+		return fmt.Sprintf("(?P<%s>.+)", word)
+	})
+	re = regexp.MustCompile(`\{\{([[:word:]]+)\}\}`)
+	result = re.ReplaceAllStringFunc(result, func(match string) string {
+		word := strings.TrimPrefix(match, "{{")
+		word = strings.TrimSuffix(word, "}}")
+		return fmt.Sprintf("(?P<%s>[^/]+)", word)
+	})
+	return result
 }

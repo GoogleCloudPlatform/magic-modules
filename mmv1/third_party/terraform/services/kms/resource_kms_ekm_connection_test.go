@@ -3,7 +3,7 @@ package kms_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
@@ -60,18 +60,8 @@ data "google_project" "vpc-project" {
 }
 data "google_project" "project" {
 }
-resource "google_project_iam_member" "add_sdviewer" {
-  project = data.google_project.vpc-project.number
-  role    = "roles/servicedirectory.viewer"
-  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-ekms.iam.gserviceaccount.com"
-}
-resource "google_project_iam_member" "add_pscAuthorizedService" {
-  project = data.google_project.vpc-project.number
-  role    = "roles/servicedirectory.pscAuthorizedService"
-  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-ekms.iam.gserviceaccount.com"
-}
 resource "google_kms_ekm_connection" "example-ekmconnection" {
-  name            	= "tf_test_ekmconnection_example%{random_suffix}"
+  name          = "tf_test_ekmconnection_example%{random_suffix}"
   location		= "us-central1"
   key_management_mode 	= "MANUAL"
   service_resolvers  	{
@@ -79,12 +69,62 @@ resource "google_kms_ekm_connection" "example-ekmconnection" {
       hostname 			 = data.google_secret_manager_secret_version.hostname.secret_data
       server_certificates        {
       		raw_der	= data.google_secret_manager_secret_version.raw_der.secret_data
-      	}
+      }
+  }
+}
+resource "google_kms_ekm_connection" "example-ekmconnection-iam" {
+  count = 2
+  name          = "tf_test_ekmconnection_example%{random_suffix}${count.index}"
+  location		= "us-central1"
+  key_management_mode 	= "MANUAL"
+  service_resolvers  	{
+      service_directory_service  = data.google_secret_manager_secret_version.servicedirectoryservice.secret_data
+      hostname 			 = data.google_secret_manager_secret_version.hostname.secret_data
+      server_certificates        {
+      		raw_der	= data.google_secret_manager_secret_version.raw_der.secret_data
+      }
+  }
+}
+
+resource "google_kms_ekm_connection_iam_member" "add_viewer" {
+  name = google_kms_ekm_connection.example-ekmconnection-iam[0].id
+  location     		= "us-central1"
+  role    = "roles/cloudkms.viewer"
+  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-ekms.iam.gserviceaccount.com"
+
+  condition {
+      title       = "expires_after_2029_12_31"
+      description = "Expiring at midnight of 2029-12-31"
+      expression  = "request.time < timestamp(\"2030-01-01T00:00:00Z\")"
     }
-  depends_on = [
-    	google_project_iam_member.add_pscAuthorizedService,
-   	google_project_iam_member.add_sdviewer
-   ]
+  }
+
+resource "google_kms_ekm_connection_iam_binding" "ekm_admin" {
+  name = google_kms_ekm_connection.example-ekmconnection-iam[1].id
+  location     		= "us-central1"
+  role = "roles/cloudkms.ekmConnectionsAdmin"
+  members  = ["serviceAccount:service-${data.google_project.project.number}@gcp-sa-ekms.iam.gserviceaccount.com"]
+
+  condition {
+      title       = "expires_after_2029_12_31"
+      description = "Expiring at midnight of 2029-12-31"
+      expression  = "request.time < timestamp(\"2030-01-01T00:00:00Z\")"
+    }
+  }
+
+data "google_iam_policy" "ekm_sa" {
+  binding {
+    role = "roles/cloudcontrolspartner.ekmServiceAgent"
+    members = [
+      "serviceAccount:service-${data.google_project.project.number}@gcp-sa-ekms.iam.gserviceaccount.com",
+    ]
+  }
+}
+
+resource "google_kms_ekm_connection_iam_policy" "policy" {
+  name = google_kms_ekm_connection.example-ekmconnection.id
+  policy_data = data.google_iam_policy.ekm_sa.policy_data
+  location     		= "us-central1"
 }
 `, context)
 }
@@ -108,16 +148,6 @@ data "google_secret_manager_secret_version" "servicedirectoryservice" {
   secret = "external-servicedirectoryservice"
   project = "315636579862"
 }
-resource "google_project_iam_member" "add_sdviewer_updateekmconnection" {
-  project = data.google_project.vpc-project.number
-  role    = "roles/servicedirectory.viewer"
-  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-ekms.iam.gserviceaccount.com"
-}
-resource "google_project_iam_member" "add_pscAuthorizedService_updateekmconnection" {
-  project = data.google_project.vpc-project.number
-  role    = "roles/servicedirectory.pscAuthorizedService"
-  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-ekms.iam.gserviceaccount.com"
-}
 resource "google_kms_ekm_connection" "example-ekmconnection" {
   name            	= "tf_test_ekmconnection_example%{random_suffix}"
   location     		= "us-central1"
@@ -128,12 +158,8 @@ resource "google_kms_ekm_connection" "example-ekmconnection" {
       hostname 			 = data.google_secret_manager_secret_version.hostname.secret_data
       server_certificates        {
       		raw_der	= data.google_secret_manager_secret_version.raw_der.secret_data
-      	}
+      }
   }
-  depends_on = [
-    	google_project_iam_member.add_pscAuthorizedService_updateekmconnection,
-   	google_project_iam_member.add_sdviewer_updateekmconnection
-   ]
 }
 `, context)
 }

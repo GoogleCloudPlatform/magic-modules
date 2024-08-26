@@ -6,8 +6,8 @@ import (
 	"path"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/services/healthcare"
@@ -123,7 +123,7 @@ func TestAccHealthcareHl7V2Store_basic(t *testing.T) {
 }
 
 
-<% unless version == 'ga' %>
+<% unless version == 'ga' -%>
 func TestAccHealthcareHl7V2Store_updateSchema(t *testing.T) {
 	t.Parallel()
 
@@ -203,7 +203,7 @@ resource "google_pubsub_topic" "topic" {
 `, hl7_v2StoreName, datasetName, pubsubTopic)
 }
 
-<% unless version == 'ga' %>
+<% unless version == 'ga' -%>
 func testGoogleHealthcareHl7V2Store_basicSchema(hl7_v2StoreName, datasetName string) string {
 	return fmt.Sprintf(`
 resource "google_healthcare_hl7_v2_store" "default" {

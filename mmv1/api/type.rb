@@ -545,6 +545,7 @@ module Api
     # Represents an array, and stores its items' type
     class Array < Composite
       attr_reader :item_type
+      attr_reader :item_validation # Adds a ValidateFunc to the item schema
       attr_reader :min_size
       attr_reader :max_size
 
@@ -564,6 +565,7 @@ module Api
 
         check :min_size, type: ::Integer
         check :max_size, type: ::Integer
+        check :item_validation, type: Provider::Terraform::Validation
       end
 
       def exclude_if_not_in_version!(version)
@@ -581,7 +583,9 @@ module Api
 
       def item_type_class
         return @item_type \
-          if @item_type.instance_of?(Class)
+          if @item_type.instance_of?(Class) \
+            || @item_type.is_a?(Api::Type::ResourceRef) \
+            || @item_type.is_a?(Api::Type::Enum)
 
         Object.const_get(@item_type)
       end
@@ -757,12 +761,6 @@ module Api
 
              # The "labels" field has type Array, so skip this resource
              !(product_name == 'DeploymentManager' && resource_name == 'Deployment') &&
-
-             # https://github.com/hashicorp/terraform-provider-google/issues/16219
-             !(product_name == 'Edgenetwork' && resource_name == 'Network') &&
-
-             # https://github.com/hashicorp/terraform-provider-google/issues/16219
-             !(product_name == 'Edgenetwork' && resource_name == 'Subnet') &&
 
              # "userLabels" is the resource labels field
              !(product_name == 'Monitoring' && resource_name == 'NotificationChannel') &&

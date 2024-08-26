@@ -36,6 +36,31 @@ async: !ruby/object:Api::OpAsync
     base_url: '{{op_id}}'
 id_format: 'projects/{{project}}/locations/{{location}}/volumes/{{name}}'
 import_format: ['projects/{{project}}/locations/{{location}}/volumes/{{name}}']
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'netapp_volume_basic'
+    primary_resource_id: 'test_volume'
+    vars:
+      volume_name: 'test-volume'
+      pool_name: 'test-pool'
+      network_name: 'test-network'
+    ignore_read_extra:
+      - "deletion_policy"
+    test_vars_overrides:
+      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_delete: templates/terraform/pre_delete/netapp_volume_force_delete.go.erb
+virtual_fields:
+  - !ruby/object:Api::Type::Enum
+    name: 'deletion_policy'
+    description: |
+      Policy to determine if the volume should be deleted forcefully.
+      Volumes may have nested snapshot resources. Deleting such a volume will fail.
+      Setting this parameter to FORCE will delete volumes including nested snapshots.
+    values:
+      - :DEFAULT
+      - :FORCE
+    default_value: :DEFAULT
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -51,18 +76,6 @@ parameters:
     required: true
     immutable: true
     url_param_only: true
-examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'netapp_volume_basic'
-    primary_resource_id: 'test_volume'
-    vars:
-      volume_name: 'test-volume'
-      pool_name: 'test-pool'
-      network_name: 'test-network'
-    ignore_read_extra:
-      - "deletion_policy"
-    test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
 properties:
   - !ruby/object:Api::Type::Enum
     name: 'state'
@@ -109,15 +122,10 @@ properties:
     description: |
       VPC network name with format: `projects/{{project}}/global/networks/{{network}}`. Inherited from storage pool.
     output: true
-  - !ruby/object:Api::Type::Enum
+  - !ruby/object:Api::Type::String
     name: 'serviceLevel'
     description: |
-      Service level of the volume. Inherited from storage pool.
-    values:
-      - :SERVICE_LEVEL_UNSPECIFIED
-      - :PREMIUM
-      - :EXTREME
-      - :STANDARD
+      Service level of the volume. Inherited from storage pool. Supported values are : PREMIUM, EXTERME, STANDARD, FLEX.
     output: true
   - !ruby/object:Api::Type::String
     name: 'capacityGib'
@@ -216,6 +224,7 @@ properties:
         - :SHOW_PREVIOUS_VERSIONS
         - :ACCESS_BASED_ENUMERATION
         - :CONTINUOUSLY_AVAILABLE
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'unixPermissions'
     description: |
@@ -229,11 +238,6 @@ properties:
     name: 'description'
     description: |
       An optional description of this resource.
-  # Use of snapReserve is deprecated. Here as a comment to express intention.
-  # - !ruby/object:Api::Type::Integer
-  #   name: 'snapReserve'
-  #   description: |
-  #     `snap_reserve` specifies percentage of volume storage reserved for snapshot storage. Default is 0 percent. Use is deprecated.
   - !ruby/object:Api::Type::Boolean
     name: 'snapshotDirectory'
     description: |
@@ -457,16 +461,38 @@ properties:
             description: |-
               Set the day or days of the month to make a snapshot (1-31). Accepts a comma separated number of days. Defaults to '1'.
             default_value: '1'
-virtual_fields:
-  - !ruby/object:Api::Type::Enum
-    name: 'deletion_policy'
+  - !ruby/object:Api::Type::NestedObject
+    name: 'backupConfig'
+    description: |-
+      Backup configuration for the volume.
+    update_mask_fields:
+      - 'backup_config.backup_policies'
+      - 'backup_config.backup_vault'
+      - 'backup_config.scheduled_backup_enabled'
+    properties:
+      - !ruby/object:Api::Type::Array
+        name: 'backupPolicies'
+        description: |-
+          Specify a single backup policy ID for scheduled backups. Format: `projects/{{projectId}}/locations/{{location}}/backupPolicies/{{backupPolicyName}}`
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::String
+        name: 'backupVault'
+        description: |-
+          ID of the backup vault to use. A backup vault is reqired to create manual or scheduled backups.
+          Format: `projects/{{projectId}}/locations/{{location}}/backupVaults/{{backupVaultName}}`
+      - !ruby/object:Api::Type::Boolean
+        name: 'scheduledBackupEnabled'
+        description: |-
+          When set to true, scheduled backup is enabled on the volume. Omit if no backup_policy is specified.
+  - !ruby/object:Api::Type::String
+    name: 'zone'
     description: |
-      Policy to determine if the volume should be deleted forcefully.
-      Volumes may have nested snapshot resources. Deleting such a volume will fail.
-      Setting this parameter to FORCE will delete volumes including nested snapshots.
-    values:
-      - :DEFAULT
-      - :FORCE
-    default_value: :DEFAULT
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  pre_delete: templates/terraform/pre_delete/netapp_volume_force_delete.go.erb
+      Specifies the active zone for regional volume.
+    output: true
+    min_version: beta
+  - !ruby/object:Api::Type::String
+    name: 'replicaZone'
+    description: |
+      Specifies the replica zone for regional volume.
+    output: true
+    min_version: beta

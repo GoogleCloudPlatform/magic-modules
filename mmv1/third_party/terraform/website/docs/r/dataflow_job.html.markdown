@@ -4,7 +4,7 @@ description: |-
   Creates a job in Dataflow according to a provided config file.
 ---
 
-# google\_dataflow\_job
+# google_dataflow_job
 
 Creates a job on Dataflow, which is an implementation of Apache Beam running on Google Compute Engine. For more information see
 the official documentation for
@@ -99,7 +99,9 @@ The following arguments are supported:
 
 - - -
 
-* `parameters` - (Optional) Key/Value pairs to be passed to the Dataflow job (as used in the template).
+* `parameters` - **Template specific** Key/Value pairs to be forwarded to the pipeline's options; keys are
+  case-sensitive based on the language on which the pipeline is coded, mostly Java.
+  **Note**: do not configure Dataflow options here in parameters.
 * `labels` - (Optional) User labels to be specified for the job. Keys and values should follow the restrictions
    specified in the [labeling restrictions](https://cloud.google.com/compute/docs/labeling-resources#restrictions) page.
    **Note**: This field is non-authoritative, and will only manage the labels present in your configuration. Please refer to the field `effective_labels` for all of the labels present on the resource.
@@ -114,7 +116,7 @@ The following arguments are supported:
 * `project` - (Optional) The project in which the resource belongs. If it is not provided, the provider project is used.
 * `zone` - (Optional) The zone in which the created job should run. If it is not provided, the provider zone is used.
 * `region` - (Optional) The region in which the created job should run.
-* `service_account_email` - (Optional) The Service Account email used to create the job.
+* `service_account_email` - (Optional) The Service Account email used to create the job. This should be just an email e.g. `myserviceaccount@myproject.iam.gserviceaccount.com`. Do not include any `serviceAccount:` or other prefix.
 * `network` - (Optional) The network to which VMs will be assigned. If it is not provided, "default" will be used.
 * `subnetwork` - (Optional) The subnetwork to which VMs will be assigned. Should be of the form "regions/REGION/subnetworks/SUBNETWORK". If the [subnetwork is located in a Shared VPC network](https://cloud.google.com/dataflow/docs/guides/specifying-networks#shared), you must use the complete URL. For example `"googleapis.com/compute/v1/projects/PROJECT_ID/regions/REGION/subnetworks/SUBNET_NAME"`
 * `machine_type` - (Optional) The machine type to use for the job.

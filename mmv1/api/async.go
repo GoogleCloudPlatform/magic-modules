@@ -35,9 +35,9 @@ type Async struct {
 	// Describes an operation, one of "OpAsync", "PollAsync"
 	Type string
 
-	OpAsync *OpAsync `yaml:",inline"`
+	OpAsync `yaml:",inline"`
 
-	PollAsync *PollAsync `yaml:",inline"`
+	PollAsync `yaml:",inline"`
 }
 
 // def validate
@@ -233,16 +233,18 @@ type PollAsync struct {
 	TargetOccurrences int `yaml:"target_occurrences"`
 }
 
-func (pa *PollAsync) UnmarshalYAML(n *yaml.Node) error {
-	pa.CheckResponseFuncAbsence = "transport_tpg.PollCheckForAbsence"
-	pa.TargetOccurrences = 1
-
-	type pollAsyncAlias PollAsync
-	aliasObj := (*pollAsyncAlias)(pa)
+func (a *Async) UnmarshalYAML(n *yaml.Node) error {
+	a.Actions = []string{"create", "delete", "update"}
+	type asyncAlias Async
+	aliasObj := (*asyncAlias)(a)
 
 	err := n.Decode(&aliasObj)
 	if err != nil {
 		return err
+	}
+
+	if a.Type == "PollAsync" && a.TargetOccurrences == 0 {
+		a.TargetOccurrences = 1
 	}
 
 	return nil

@@ -4,7 +4,7 @@ description: |-
   Get a VM instance template within GCE.
 ---
 
-# google\_compute\_instance\_template
+# google_compute_instance_template
 
 -> **Note**: Global instance templates can be used in any region. To lower the impact of outages outside your region and gain data residency within your region, use [google_compute_region_instance_template](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_region_instance_template).
 
@@ -41,7 +41,7 @@ The following arguments are supported:
 - `name` - (Optional) The name of the instance template. One of `name`, `filter` or `self_link_unique` must be provided.
 
 - `filter` - (Optional) A filter to retrieve the instance templates.
-    See [gcloud topic filters](https://cloud.google.com/sdk/gcloud/reference/topic/filters) for reference.
+    See [API filter parameter documentation](https://cloud.google.com/compute/docs/reference/rest/v1/instanceTemplates/list#body.QUERY_PARAMETERS.filter) for reference.
     If multiple instance templates match, either adjust the filter or specify `most_recent`.
 	One of `name`, `filter` or `self_link_unique` must be provided.
 

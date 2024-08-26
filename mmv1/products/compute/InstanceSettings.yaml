@@ -27,12 +27,11 @@ create_url: 'projects/{{project}}/zones/{{zone}}/instanceSettings?update_mask=*'
 update_verb: :PATCH
 update_url: 'projects/{{project}}/zones/{{zone}}/instanceSettings?update_mask=*'
 import_format: ['projects/{{project}}/zones/{{zone}}/instanceSettings']
-min_version: beta
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -48,7 +47,6 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
     name: 'instance_settings_basic'
     primary_resource_id: 'gce_instance_settings'
 custom_code: !ruby/object:Provider::Terraform::CustomCode

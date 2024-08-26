@@ -19,12 +19,15 @@ on:
       branch:
         description: 'The branch or sha of the provider execute against'
         required: true
+      pr-number:
+        description: 'The pull request number in magic-modules repository'
+        required: true
       sha:
         description: "The commit SHA in magic-modules repository where the status result will be posted"
         required: true
 
 concurrency:
-  group: test-tpg-${{ github.event.inputs.owner }}-${{ github.event.inputs.repo }}-${{ github.event.inputs.branch }}
+  group: test-tpg-${{ github.event.inputs.owner }}-${{ github.event.inputs.repo }}-${{ github.event.inputs.pr-number }}
   cancel-in-progress: true
 
 jobs:
@@ -60,7 +63,7 @@ jobs:
     - name: Check for Code Changes
       id: pull_request
       run: |
-        gofiles=$(git diff --name-only HEAD~1 | { grep -e "\.go$" -e "go.mod$" -e "go.sum$" || test $? = 1; })
+        gofiles=$(git diff --name-only HEAD~1 | { grep -e "\.go$" -e "test-fixtures" -e "go.mod$" -e "go.sum$" || test $? = 1; })
         if [ -z "$gofiles" ]; then
           echo "has_changes=false" >> $GITHUB_OUTPUT
         else

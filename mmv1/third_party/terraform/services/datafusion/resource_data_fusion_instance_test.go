@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -46,7 +46,7 @@ resource "google_data_fusion_instance" "foobar" {
   region = "us-central1"
   type   = "BASIC"
   # See supported versions here https://cloud.google.com/data-fusion/docs/support/version-support-policy
-  version = "6.7.0"
+  version = "6.9.1"
   # Mark for testing to avoid service networking connection usage that is not cleaned up
   options = {
   	prober_test_run = "true"
@@ -72,7 +72,7 @@ resource "google_data_fusion_instance" "foobar" {
     label1 = "value1"
     label2 = "value2"
   }
-  version = "6.8.0"
+  version = "6.9.2"
 
   accelerators {
     accelerator_type = "CCAI_INSIGHTS"
@@ -158,12 +158,12 @@ func TestAccDataFusionInstanceVersion_dataFusionInstanceUpdate(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"version":       "6.7.2",
+		"version":       "6.9.1",
 	}
 
 	contextUpdate := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"version":       "6.8.0",
+		"version":       "6.9.2",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

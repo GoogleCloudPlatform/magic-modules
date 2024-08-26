@@ -1,6 +1,6 @@
 ---
 title: "Add custom resource code"
-weight: 32
+weight: 39
 ---
 
 # Add custom resource code
@@ -32,9 +32,12 @@ Use `custom_code.constants` to inject top-level code in a resource file. This is
 
 - Constants
 - Regexes compiled at build time
-- Functions, such as diff suppress functions
+- Functions, such as [diff suppress functions]({{<ref "/develop/field-reference#diff_suppress_func" >}}),
+  [validation functions]({{<ref "/develop/field-reference#validation" >}}),
+  CustomizeDiff functions, and so on.
 - Methods
 
+Any custom functions added should have thorough [unit tests]({{< ref "/develop/test/test#add-unit-tests" >}}).
 
 ## Modify the API request or response
 
@@ -112,7 +115,7 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
 ```
 
 
-Use `custom_code.decoder` to inject code that modifies the data that will be sent in the API request. This is useful if the API expects the data to be in a significantly different structure than Terraform does - for example, if the API returns the entire object nested under a key, or uses a different name for a field in the response than in the request. The decoder will run _before_ any [`custom_flatten`]({{< ref "#custom_flatten" >}}) code.
+Use `custom_code.decoder` to inject code that modifies the data recieved from an API response. This is useful if the API returns data in a significantly different structure than what Terraform expects - for example, if the API returns the entire object nested under a key, or uses a different name for a field in the response than in the request. The decoder will run _before_ any [`custom_flatten`]({{< ref "#custom_flatten" >}}) code.
 
 The decoder code will be wrapped in a function like:
 
@@ -157,7 +160,7 @@ The parameters the function receives are:
 
 The function returns a final value that will be stored in Terraform state for the field, which will be compared with the user's configuration to determine if there is a diff.
 
-## Inject code before / after CRUD operations and Import
+## Inject code before / after CRUD operations and Import {#pre_post_injection}
 
 ```yaml
 custom_code: !ruby/object:Provider::Terraform::CustomCode

@@ -35,7 +35,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'appengine#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 20
@@ -350,6 +350,8 @@ properties:
     default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: 'automaticScaling'
+    # This flattener is entirely handwritten and must be updated with **any** new field or subfield
+    custom_flatten: 'templates/terraform/custom_flatten/appengine_standardappversion_automatic_scaling_handlenil.go.erb'
     description: |
       Automatic scaling is based on request rate, response latencies, and other application metrics.
     conflicts:

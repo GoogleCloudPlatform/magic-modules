@@ -115,6 +115,12 @@ properties:
       Name of the Compute Engine subnetwork in which instances associated with this cluster will be created.
       Must be part of the subnetwork specified for this cluster.
   - !ruby/object:Api::Type::String
+    name: "controlPlaneIp"
+    description: |
+      The private IP address of the control plane for this workstation cluster.
+      Workstation VMs need access to this IP address to work with the service, so make sure that your firewall rules allow egress from the workstation VMs to this address.
+    output: true
+  - !ruby/object:Api::Type::String
     name: "displayName"
     description: |
       Human-readable name for this resource.

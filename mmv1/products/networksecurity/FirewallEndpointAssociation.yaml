@@ -14,9 +14,8 @@
 --- !ruby/object:Api::Resource
 name: 'FirewallEndpointAssociation'
 base_url: '{{parent}}/locations/{{location}}/firewallEndpointAssociations'
-create_url: '{{parent}}/locations/{{location}}/firewallEndpointAssociations?firewallEndpointId={{name}}'
+create_url: '{{parent}}/locations/{{location}}/firewallEndpointAssociations?firewallEndpointAssociationId={{name}}'
 self_link: '{{parent}}/locations/{{location}}/firewallEndpointAssociations/{{name}}'
-min_version: beta
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -24,9 +23,16 @@ description: |
   the same zone. After you define this association, Cloud Firewall forwards the
   zonal workload traffic in your VPC network that requires layer 7 inspection to
   the attached firewall endpoint.
+docs: !ruby/object:Provider::Terraform::Docs
+  warning: |
+    If you are using User ADCs (Application Default Credentials) with this resource,
+    you must specify a `billing_project_id` and set `user_project_override` to true
+    in the provider configuration. Otherwise the ACM API will return a 403 error.
+    Your account must have the `serviceusage.services.use` permission on the
+    `billing_project_id` you defined.
 references:
   !ruby/object:Api::Resource::ReferenceLinks
-  api: 'https://cloud.google.com/firewall/docs/reference/network-security/rest/v1beta1/projects.locations.firewallEndpointAssociations#FirewallEndpointAssociation'
+  api: 'https://cloud.google.com/firewall/docs/reference/network-security/rest/v1/projects.locations.firewallEndpointAssociations#FirewallEndpointAssociation'
   guides:
     'Firewall endpoint overview': 'https://cloud.google.com/firewall/docs/about-firewall-endpoints'
     'Create and associate firewall endpoints': 'https://cloud.google.com/firewall/docs/configure-firewall-endpoints'
@@ -46,7 +52,6 @@ examples:
     # Handwritten test will take care of creates and updates.
     # Firewall endpoint association creation is subjet to firewall endpoint creation which is long and expensive.
     skip_test: true
-    min_version: beta
     vars:
       resource_name_prefix: 'my-firewall-endpoint'
     test_env_vars:
@@ -93,6 +98,14 @@ properties:
     name: 'labels'
     description: |
       A map of key/value label pairs to assign to the resource.
+  - !ruby/object:Api::Type::Boolean
+    name: 'disabled'
+    default_value: false
+    description: |
+      Whether the association is disabled. True indicates that traffic will not be intercepted.
+
+      ~> **Note:** The API will reject the request if this value is set to true when creating the resource,
+      otherwise on an update the association can be disabled.
   - !ruby/object:Api::Type::String
     name: 'selfLink'
     description: |

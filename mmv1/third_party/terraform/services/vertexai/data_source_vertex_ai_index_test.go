@@ -3,7 +3,7 @@ package vertexai_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -29,8 +29,9 @@ func TestAccDataSourceVertexAIIndex_basic(t *testing.T) {
 						"google_vertex_ai_index.index",
 						// The projects.locations.indexes.get doesn't return the following fields
 						map[string]struct{}{
-							"metadata.0.contents_delta_uri":    {},
-							"metadata.0.is_complete_overwrite": {},
+							"metadata.0.config.0.feature_norm_type": {},
+							"metadata.0.contents_delta_uri":         {},
+							"metadata.0.is_complete_overwrite":      {},
 						},
 					),
 				),

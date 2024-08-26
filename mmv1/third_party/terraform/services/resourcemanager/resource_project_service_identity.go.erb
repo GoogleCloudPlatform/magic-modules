@@ -47,6 +47,11 @@ func ResourceProjectServiceIdentity() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"member": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: `The Identity of the Google managed service account in the form 'serviceAccount:{email}'. This value is often used to refer to the service account in order to grant IAM permissions.`,
+			},
 		},
 		UseJSONNumber: true,
 	}
@@ -113,6 +118,9 @@ func resourceProjectServiceIdentityCreate(d *schema.ResourceData, meta interface
 		}
 		if err := d.Set("email", email); err != nil {
 			return fmt.Errorf("Error setting email: %s", err)
+		}
+		if err := d.Set("member", "serviceAccount:"+email); err != nil {
+			return fmt.Errorf("Error setting member: %s", err)
 		}
 	}
 	return nil

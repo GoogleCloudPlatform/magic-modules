@@ -4,7 +4,7 @@ description: |-
  Generate service identity for a service.
 ---
 
-# google\_project\_service\_identity
+# google_project_service_identity
 
 ~> **Warning:** These resources are in beta, and should be used with the terraform-provider-google-beta provider.
 See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
@@ -37,7 +37,7 @@ resource "google_project_service_identity" "hc_sa" {
 resource "google_project_iam_member" "hc_sa_bq_jobuser" {
   project = data.google_project.project.project_id
   role    = "roles/bigquery.jobUser"
-  member  = "serviceAccount:${google_project_service_identity.hc_sa.email}"
+  member  = google_project_service_identity.hc_sa.member
 }
 ```
 
@@ -59,6 +59,7 @@ The following arguments are supported:
 In addition to the arguments listed above, the following computed attributes are exported:
 
 * `email` - The email address of the Google managed service account.
+* `member` - The Identity of the Google managed service account in the form 'serviceAccount:{email}'. This value is often used to refer to the service account in order to grant IAM permissions.
 
 ## Import
 

@@ -18,6 +18,13 @@ docs: !ruby/object:Provider::Terraform::Docs
     Users can promote a secondary cluster to a primary cluster with the help of `cluster_type`.
     To promote, users have to set the `cluster_type` property as `PRIMARY` and remove the `secondary_config` field from cluster configuration.
     [See Example](https://github.com/hashicorp/terraform-provider-google/pull/16413).
+
+    Switchover is supported in terraform by refreshing the state of the terraform configurations.
+    The switchover operation still needs to be called outside of terraform.
+    After the switchover operation is completed successfully:
+      1. Refresh the state of the AlloyDB resources by running `terraform apply -refresh-only --auto-approve` .
+      2. Manually update the terraform configuration file(s) to match the actual state of the resources by modifying the `cluster_type` and `secondary_config` fields.
+      3. Verify the sync of terraform state by running `terraform plan` and ensure that the infrastructure matches the configuration and no changes are required.
 self_link: 'projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/clusters'
 create_url: 'projects/{{project}}/locations/{{location}}/clusters?clusterId={{cluster_id}}'
@@ -106,6 +113,17 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_create: templates/terraform/pre_create/alloydb_cluster.go.erb
   pre_update: templates/terraform/pre_update/alloydb_cluster.go.erb
   pre_delete: templates/terraform/pre_delete/alloydb_cluster.go.erb
+virtual_fields:
+  - !ruby/object:Api::Type::Enum
+    name: 'deletion_policy'
+    description: |
+      Policy to determine if the cluster should be deleted forcefully.
+      Deleting a cluster forcefully, deletes the cluster and all its associated instances within the cluster.
+      Deleting a Secondary cluster with a secondary instance REQUIRES setting deletion_policy = "FORCE" otherwise an error is returned. This is needed as there is no support to delete just the secondary instance, and the only way to delete secondary instance is to delete the associated secondary cluster forcefully which also deletes the secondary instance.
+    values:
+      - :DEFAULT
+      - :FORCE
+    default_value: :DEFAULT
 parameters:
   - !ruby/object:Api::Type::String
     name: 'clusterId'
@@ -203,19 +221,6 @@ properties:
             description: |
               Output only. Cloud KMS key versions that are being used to protect the database or the backup.
             output: true
-  - !ruby/object:Api::Type::String
-    name: 'network'
-    exactly_one_of:
-      - network
-      - network_config.0.network
-    default_from_api: true
-    deprecation_message: >-
-      `network` is deprecated and will be removed in a future major release. Instead, use `network_config` to define the network configuration.
-    description: |
-      The relative resource name of the VPC network on which the instance can be accessed. It is specified in the following form:
-
-      "projects/{projectNumber}/global/networks/{network_id}".
-    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
   - !ruby/object:Api::Type::NestedObject
     name: 'networkConfig'
     description: |
@@ -225,8 +230,8 @@ properties:
       - !ruby/object:Api::Type::String
         name: network
         exactly_one_of:
-          - network
           - network_config.0.network
+          - psc_config.0.psc_enabled
         description: |
           The resource link for the VPC network in which cluster resources are created and from which they are accessible via Private IP. The network must belong to the same project as the cluster.
           It is specified in the form: "projects/{projectNumber}/global/networks/{network_id}".
@@ -264,6 +269,13 @@ properties:
     default_from_api: true
     description: |
       The database engine major version. This is an optional field and it's populated at the Cluster creation time. This field cannot be changed after cluster creation.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'pscConfig'
+    description: 'Configuration for Private Service Connect (PSC) for the cluster.'
+    properties:
+      - !ruby/object:Api::Type::Boolean
+        name: 'pscEnabled'
+        description: 'Create an instance that allows connections from Private Service Connect endpoints to the instance.'
   - !ruby/object:Api::Type::NestedObject
     name: 'initialUser'
     description: |
@@ -497,14 +509,83 @@ properties:
         description: |
           Name of the primary cluster must be in the format
           'projects/{project}/locations/{location}/clusters/{cluster_id}'
-virtual_fields:
-  - !ruby/object:Api::Type::Enum
-    name: 'deletion_policy'
+  - !ruby/object:Api::Type::NestedObject
+    name: 'maintenanceUpdatePolicy'
     description: |
-      Policy to determine if the cluster should be deleted forcefully.
-      Deleting a cluster forcefully, deletes the cluster and all its associated instances within the cluster.
-      Deleting a Secondary cluster with a secondary instance REQUIRES setting deletion_policy = "FORCE" otherwise an error is returned. This is needed as there is no support to delete just the secondary instance, and the only way to delete secondary instance is to delete the associated secondary cluster forcefully which also deletes the secondary instance.
+      MaintenanceUpdatePolicy defines the policy for system updates.
+    properties:
+      - !ruby/object:Api::Type::Array
+        name: 'maintenanceWindows'
+        description: |
+          Preferred windows to perform maintenance. Currently limited to 1.
+        item_type: !ruby/object:Api::Type::NestedObject
+          name: 'maintenanceWindow'
+          description: |
+            specifies a preferred day and time for maintenance.
+          properties:
+            - !ruby/object:Api::Type::Enum
+              name: 'day'
+              required: true
+              description: |
+                Preferred day of the week for maintenance, e.g. MONDAY, TUESDAY, etc.
+              values:
+                - :MONDAY
+                - :TUESDAY
+                - :WEDNESDAY
+                - :THURSDAY
+                - :FRIDAY
+                - :SATURDAY
+                - :SUNDAY
+            - !ruby/object:Api::Type::NestedObject
+              name: 'startTime'
+              required: true
+              description: |
+                Preferred time to start the maintenance operation on the specified day. Maintenance will start within 1 hour of this time.
+              properties:
+                - !ruby/object:Api::Type::Integer
+                  name: hours
+                  required: true
+                  description: |
+                    Hours of day in 24 hour format. Should be from 0 to 23.
+                - !ruby/object:Api::Type::Integer
+                  name: minutes
+                  description: |
+                    Minutes of hour of day. Currently, only the value 0 is supported.
+                - !ruby/object:Api::Type::Integer
+                  name: seconds
+                  description: |
+                    Seconds of minutes of the time. Currently, only the value 0 is supported.
+                - !ruby/object:Api::Type::Integer
+                  name: nanos
+                  description: |
+                    Fractions of seconds in nanoseconds. Currently, only the value 0 is supported.
+  - !ruby/object:Api::Type::Enum
+    name: 'subscriptionType'
     values:
-      - :DEFAULT
-      - :FORCE
-    default_value: :DEFAULT
+      - :TRIAL
+      - :STANDARD
+    default_from_api: true
+    description: |
+      The subscrition type of cluster.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'trialMetadata'
+    description: |
+      Contains information and all metadata related to TRIAL clusters.
+    output: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: startTime
+        description: |
+          Start time of the trial cluster.
+      - !ruby/object:Api::Type::String
+        name: endTime
+        description: |
+          End time of the trial cluster.
+      - !ruby/object:Api::Type::String
+        name: upgradeTime
+        description: |
+          Upgrade time of the trial cluster to standard cluster.
+      - !ruby/object:Api::Type::String
+        name: graceEndTime
+        description: |
+          Grace end time of the trial cluster.

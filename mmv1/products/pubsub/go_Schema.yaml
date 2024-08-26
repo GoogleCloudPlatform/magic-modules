@@ -32,25 +32,25 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
-  type: "PollAsync"
+  type: 'PollAsync'
   check_response_func_existence: 'transport_tpg.PollCheckForExistence'
   check_response_func_absence: 'transport_tpg.PollCheckForAbsence'
   suppress_error: false
   target_occurrences: 10
+  actions: ['delete']
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'schema'
 custom_code:
-  update_encoder: 'templates/terraform/update_encoder/pubsub_schema.erb'
+  update_encoder: 'templates/terraform/update_encoder/go/pubsub_schema.tmpl'
 examples:
   - name: 'pubsub_schema_basic'
     primary_resource_id: 'example'
-    primary_resource_name: 'example'
+    primary_resource_name: 'fmt.Sprintf("tf-test-example-schema%s", context["random_suffix"])'
     vars:
       schema_name: 'example-schema'
   - name: 'pubsub_schema_protobuf'
     primary_resource_id: 'example'
-    primary_resource_name: 'example'
     vars:
       schema_name: 'example'
     test_env_vars:
@@ -58,28 +58,30 @@ examples:
 parameters:
   - name: 'name'
     type: String
-    description: "The ID to use for the schema, which will become the final component of the schema's resource name."
+    description:
+      The ID to use for the schema, which will become the final component of the
+      schema's resource name.
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-    custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.erb'
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/go/resource_from_self_link.go.tmpl'
 properties:
   - name: 'type'
     type: Enum
-    description: "The type of the schema definition"
-    default_value: TYPE_UNSPECIFIED
+    description: The type of the schema definition
+    default_value: "TYPE_UNSPECIFIED"
     enum_values:
       - 'TYPE_UNSPECIFIED'
       - 'PROTOCOL_BUFFER'
       - 'AVRO'
-      - ''
   - name: 'definition'
     type: String
-    description: "The definition of the schema.
-This should contain a string representing the full definition of the schema
-that is a valid schema definition of the type specified in type. Changes
-to the definition commit new [schema revisions](https://cloud.google.com/pubsub/docs/commit-schema-revision).
-A schema can only have up to 20 revisions, so updates that fail with an
-error indicating that the limit has been reached require manually
-[deleting old revisions](https://cloud.google.com/pubsub/docs/delete-schema-revision)."
+    description: |
+      The definition of the schema.
+      This should contain a string representing the full definition of the schema
+      that is a valid schema definition of the type specified in type. Changes
+      to the definition commit new [schema revisions](https://cloud.google.com/pubsub/docs/commit-schema-revision).
+      A schema can only have up to 20 revisions, so updates that fail with an
+      error indicating that the limit has been reached require manually
+      [deleting old revisions](https://cloud.google.com/pubsub/docs/delete-schema-revision).

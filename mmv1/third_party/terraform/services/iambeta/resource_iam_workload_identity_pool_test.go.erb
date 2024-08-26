@@ -1,13 +1,13 @@
 <% autogen_exception -%>
 package iambeta_test
 
-<% unless version == 'ga' %>
+<% unless version == 'ga' -%>
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccIAMBetaWorkloadIdentityPool_full(t *testing.T) {

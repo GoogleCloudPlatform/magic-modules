@@ -5,12 +5,12 @@ package apigee_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccApigeeEnvironment_apigeeEnvironmentTypeTestExampleUpdate(t *testing.T) {
+func TestAccApigeeEnvironment_apigeeEnvironmentPatchUpdateTestExampleUpdate(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
@@ -26,7 +26,7 @@ func TestAccApigeeEnvironment_apigeeEnvironmentTypeTestExampleUpdate(t *testing.
 		CheckDestroy: testAccCheckApigeeEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccApigeeEnvironment_apigeeEnvironmentTypeTestExample(context),
+				Config: testAccApigeeEnvironment_apigeeEnvironmentPatchUpdateTestExample(context),
 			},
 			{
 				ResourceName:            "google_apigee_environment.apigee_environment",
@@ -35,7 +35,7 @@ func TestAccApigeeEnvironment_apigeeEnvironmentTypeTestExampleUpdate(t *testing.
 				ImportStateVerifyIgnore: []string{"org_id"},
                         },
                         {
-                                Config: testAccApigeeEnvironment_apigeeEnvironmentTypeTestExampleUpdate(context),
+                                Config: testAccApigeeEnvironment_apigeeEnvironmentPatchUpdateTestExampleUpdate(context),
                         },
                         {
                                 ResourceName:            "google_apigee_environment.apigee_environment",
@@ -47,7 +47,7 @@ func TestAccApigeeEnvironment_apigeeEnvironmentTypeTestExampleUpdate(t *testing.
 	})
 }
 
-func testAccApigeeEnvironment_apigeeEnvironmentTypeTestExampleUpdate(context map[string]interface{}) string {
+func testAccApigeeEnvironment_apigeeEnvironmentPatchUpdateTestExampleUpdate(context map[string]interface{}) string {
         return acctest.Nprintf(`
 resource "google_project" "project" {
   provider = google-beta
@@ -56,6 +56,7 @@ resource "google_project" "project" {
   name            = "tf-test%{random_suffix}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_service" "apigee" {
@@ -137,15 +138,13 @@ resource "google_project_service_identity" "apigee_sa" {
   service = google_project_service.apigee.service
 }
 
-resource "google_kms_crypto_key_iam_binding" "apigee_sa_keyuser" {
+resource "google_kms_crypto_key_iam_member" "apigee_sa_keyuser" {
   provider = google-beta
 
   crypto_key_id = google_kms_crypto_key.apigee_key.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 
-  members = [
-    "serviceAccount:${google_project_service_identity.apigee_sa.email}",
-  ]
+  member = google_project_service_identity.apigee_sa.member
 }
 
 resource "google_apigee_organization" "apigee_org" {
@@ -160,7 +159,7 @@ resource "google_apigee_organization" "apigee_org" {
   depends_on = [
     google_service_networking_connection.apigee_vpc_connection,
     google_project_service.apigee,
-    google_kms_crypto_key_iam_binding.apigee_sa_keyuser,
+    google_kms_crypto_key_iam_member.apigee_sa_keyuser,
   ]
 }
 
@@ -172,6 +171,7 @@ resource "google_apigee_environment" "apigee_environment" {
   description  = "Apigee Environment"
   display_name = "tf-test%{random_suffix}"
   type         = "INTERMEDIATE"
+  forward_proxy_uri = "http://test:456"
 }
 `, context)
 }

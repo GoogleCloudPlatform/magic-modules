@@ -4,7 +4,7 @@ description: |-
   Manages creating a private VPC connection to a service provider.
 ---
 
-# google\_service\_networking\_connection
+# google_service_networking_connection
 
 Manages a private VPC connection with a GCP service provider. For more information see
 [the official documentation](https://cloud.google.com/vpc/docs/configure-private-services-access#creating-connection)
@@ -60,6 +60,8 @@ The following arguments are supported:
   is already established will not reallocate already provisioned service producer subnetworks.
 
 * `deletion_policy` - (Optional) The deletion policy for the service networking connection. Setting to ABANDON allows the resource to be abandoned rather than deleted. This will enable a successful terraform destroy when destroying CloudSQL instances. Use with care as it can lead to dangling resources.
+
+* `update_on_creation_fail` - (Optional) When set to true, enforce an update of the reserved peering ranges on the existing service networking connection in case of a new connection creation failure.
 
 ## Attributes Reference
 

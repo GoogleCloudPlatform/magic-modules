@@ -223,8 +223,9 @@ properties:
           - http_check.0.use_ssl
           - http_check.0.mask_headers
         description:
-          The authentication information. Optional when creating an HTTP check;
-          defaults to empty.
+          The authentication information using username and password.
+          Optional when creating an HTTP check; defaults to empty.
+          Do not use with other authentication fields.
         properties:
           - !ruby/object:Api::Type::String
             name: password
@@ -236,6 +237,18 @@ properties:
             name: username
             required: true
             description: The username to authenticate.
+      - !ruby/object:Api::Type::NestedObject
+        name: serviceAgentAuthentication
+        description: The authentication information using the Monitoring Service Agent.
+          Optional when creating an HTTPS check; defaults to empty.
+          Do not use with other authentication fields.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: type
+            description: The type of authentication to use.
+            values:
+              - :SERVICE_AGENT_AUTHENTICATION_TYPE_UNSPECIFIED
+              - :OIDC_TOKEN
       - !ruby/object:Api::Type::Integer
         name: port
         at_least_one_of:
@@ -425,7 +438,7 @@ properties:
       uptime checks:
       * `aws_ec2_instance`
       * `aws_elb_load_balancer`
-      * `gae_app
+      * `gae_app`
       * `gce_instance`
       * `k8s_service`
       * `servicedirectory_service`
@@ -449,6 +462,7 @@ properties:
         name: 'labels'
         immutable: true
         required: true
+        diff_suppress_func: resourceMonitoringUptimeCheckConfigMonitoredResourceLabelsDiffSuppress
         description:
           Values for all of the labels listed in the associated monitored
           resource descriptor. For example, Compute Engine VM instances use the

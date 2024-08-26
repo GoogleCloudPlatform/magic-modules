@@ -25,7 +25,6 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   parent_resource_attribute: 'table_id'
   fetch_iam_policy_verb: :POST
   allowed_iam_role: 'roles/bigquery.dataOwner'
-  iam_conditions_request_type: :REQUEST_BODY
   iam_policy_version: '1'
 id_format: '{{table_id}}'
 import_format:
@@ -322,6 +321,7 @@ properties:
           - :ORC
           - :PARQUET
           - :ICEBERG
+          - :DELTA_LAKE
       # TODO: Investigate if this is feasible as a ResourceRef
       # This is a very complicated ResourceRef (one-to-many, where the many are cross-product).
       - !ruby/object:Api::Type::Array
@@ -508,3 +508,34 @@ properties:
                     - :INTEGER
                     - :FLOAT
                     - :BOOLEAN
+  - !ruby/object:Api::Type::NestedObject
+    name: 'tableReplicationInfo'
+    description: |
+      Replication info of a table created using "AS REPLICA" DDL like:
+      `CREATE MATERIALIZED VIEW mv1 AS REPLICA OF src_mv`.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'sourceProjectId'
+        description: The ID of the source project.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'sourceDatasetId'
+        description: The ID of the source dataset.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'sourceTableId'
+        description: The ID of the source materialized view.
+        required: true
+      - !ruby/object:Api::Type::Integer
+        name: 'replicationIntervalMs'
+        description: |
+          The interval at which the source materialized view is polled for updates. The default is
+          300000.
+        default_value: 300000
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: 'resourceTags'
+    description: |
+      The tags attached to this table. Tag keys are globally unique. Tag key is expected to be
+      in the namespaced format, for example "123456789012/environment" where 123456789012 is the
+      ID of the parent organization or project resource for this tag key. Tag value is expected
+      to be the short name, for example "Production".

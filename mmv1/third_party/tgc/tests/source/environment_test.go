@@ -12,7 +12,6 @@ const (
 	defaultAncestry           = "organization/12345/folder/67890"
 	defaultBillingAccount     = "000AA0-A0B00A-AA00AA"
 	defaultCustId             = "A00ccc00a"
-	defaultFirestoreProject   = "firebar"
 	defaultFolder             = "67890"
 	defaultIdentityUser       = "foo"
 	defaultOrganization       = "12345"
@@ -67,12 +66,6 @@ func getTestCustIdFromEnv(t *testing.T) string {
 
 func getTestIdentityUserFromEnv(t *testing.T) string {
 	return defaultIdentityUser
-}
-
-// Firestore can't be enabled at the same time as Datastore, so we need a new
-// project to manage it until we can enable Firestore programmatically.
-func getTestFirestoreProjectFromEnv(t *testing.T) string {
-	return defaultFirestoreProject
 }
 
 func getTestOrgFromEnv(t *testing.T) string {

@@ -55,8 +55,9 @@ func SetDataSourceLabels(d *schema.ResourceData) error {
 	return nil
 }
 
-func SetLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
-	raw := d.Get("labels")
+// Sets the values of terraform_labels and effective_labels fields when labels field is in root level
+func setLabelsFields(labelsField string, d *schema.ResourceDiff, meta interface{}, skipAttribution bool) error {
+	raw := d.Get(labelsField)
 	if raw == nil {
 		return nil
 	}
@@ -71,7 +72,7 @@ func SetLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) 
 
 	// If "labels" field is computed, set "terraform_labels" and "effective_labels" to computed.
 	// https://github.com/hashicorp/terraform-provider-google/issues/16217
-	if !d.GetRawPlan().GetAttr("labels").IsWhollyKnown() {
+	if !d.GetRawPlan().GetAttr(labelsField).IsWhollyKnown() {
 		if err := d.SetNewComputed("terraform_labels"); err != nil {
 			return fmt.Errorf("error setting terraform_labels to computed: %w", err)
 		}
@@ -91,7 +92,7 @@ func SetLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) 
 	}
 
 	// Append optional label indicating the resource was provisioned using Terraform
-	if config.AddTerraformAttributionLabel {
+	if !skipAttribution && config.AddTerraformAttributionLabel {
 		if el, ok := d.Get("effective_labels").(map[string]any); ok {
 			_, hasExistingLabel := el[transport_tpg.AttributionKey]
 			if hasExistingLabel ||
@@ -131,9 +132,38 @@ func SetLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) 
 	return nil
 }
 
+func SetLabelsDiffWithoutAttributionLabel(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	return setLabelsFields("labels", d, meta, true)
+}
+
+// The CustomizeDiff func to set the values of terraform_labels and effective_labels fields
+// when labels field is at the root level and named "labels".
+func SetLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	return setLabelsFields("labels", d, meta, false)
+}
+
+// The CustomizeDiff func to set the values of terraform_labels and effective_labels fields
+// when labels field is at the root level and has a diffent name (e.g. resource_labels) than "labels"
+func SetDiffForLabelsWithCustomizedName(labelsField string) func(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	return func(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+		return setLabelsFields(labelsField, d, meta, false)
+	}
+}
+
 func SetMetadataLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	l := d.Get("metadata").([]interface{})
 	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+
+	// Fix the bug that the computed and nested "labels" field disappears from the terraform plan.
+	// https://github.com/hashicorp/terraform-provider-google/issues/17756
+	// The bug is introduced by SetNew on "metadata" field with the object including terraform_labels and effective_labels.
+	// "terraform_labels" and "effective_labels" cannot be set directly due to a bug that SetNew doesn't work on nested fields
+	// in terraform sdk.
+	// https://github.com/hashicorp/terraform-plugin-sdk/issues/459
+	values := d.GetRawPlan().GetAttr("metadata").AsValueSlice()
+	if len(values) > 0 && !values[0].GetAttr("labels").IsWhollyKnown() {
 		return nil
 	}
 

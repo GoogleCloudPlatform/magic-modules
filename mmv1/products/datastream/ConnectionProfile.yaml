@@ -14,7 +14,7 @@
 --- !ruby/object:Api::Resource
 name: 'ConnectionProfile'
 base_url: 'projects/{{project}}/locations/{{location}}/connectionProfiles'
-create_url: 'projects/{{project}}/locations/{{location}}/connectionProfiles?connectionProfileId={{connection_profile_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/connectionProfiles?connectionProfileId={{connection_profile_id}}&force={{create_without_validation}}'
 self_link: 'projects/{{project}}/locations/{{location}}/connectionProfiles/{{connection_profile_id}}'
 update_verb: :PATCH
 update_mask: true
@@ -37,7 +37,7 @@ examples:
       connection_profile_id: 'my-profile'
   - !ruby/object:Provider::Terraform::Examples
     name: 'datastream_connection_profile_postgresql_private_connection'
-    pull_external: true
+    external_providers: ["random", "time"]
     primary_resource_id: 'default'
     # Random provider
     skip_vcr: true
@@ -72,12 +72,34 @@ examples:
     oics_vars_overrides:
       deletion_protection: 'false'
     skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'datastream_connection_profile_sql_server'
+    primary_resource_id: 'default'
+    skip_test: true
+    vars:
+      database_name: 'db'
+      database_password: 'password'
+      database_user: 'user'
+      deletion_protection: 'true'
+      source_connection_profile_id: 'source-profile'
+      sql_server_name: 'sql-server'
+      sql_server_root_password: 'root-password'
+    test_vars_overrides:
+      deletion_protection: 'false'
 parameters:
   - !ruby/object:Api::Type::String
     name: connectionProfileId
     description: |-
       The connection profile identifier.
     required: true
+    immutable: true
+    url_param_only: true
+  - !ruby/object:Api::Type::Boolean
+    name: create_without_validation
+    description: |-
+      Create the connection profile without validating it.
+    required: false
+    default_value: false
     immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::String
@@ -107,6 +129,7 @@ properties:
       - mysql_profile
       - bigquery_profile
       - postgresql_profile
+      - sql_server_profile
     description: |
       Oracle database profile.
     properties:
@@ -148,6 +171,7 @@ properties:
       - mysql_profile
       - bigquery_profile
       - postgresql_profile
+      - sql_server_profile
     description: |
       Cloud Storage bucket profile.
     properties:
@@ -168,6 +192,7 @@ properties:
       - mysql_profile
       - bigquery_profile
       - postgresql_profile
+      - sql_server_profile
     description: |
       MySQL database profile.
     properties:
@@ -250,6 +275,7 @@ properties:
       - mysql_profile
       - bigquery_profile
       - postgresql_profile
+      - sql_server_profile
     description: |
       BigQuery warehouse profile.
     properties: []
@@ -261,6 +287,7 @@ properties:
       - mysql_profile
       - bigquery_profile
       - postgresql_profile
+      - sql_server_profile
     description: |
       PostgreSQL database profile.
     properties:
@@ -291,6 +318,45 @@ properties:
         required: true
         description: |
           Database for the PostgreSQL connection.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'sqlServerProfile'
+    exactly_one_of:
+      - oracle_profile
+      - gcs_profile
+      - mysql_profile
+      - bigquery_profile
+      - postgresql_profile
+      - sql_server_profile
+    description: |
+      SQL Server database profile.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'hostname'
+        required: true
+        description: |
+          Hostname for the SQL Server connection.
+      - !ruby/object:Api::Type::Integer
+        name: 'port'
+        default_value: 1433
+        description: |
+          Port for the SQL Server connection.
+      - !ruby/object:Api::Type::String
+        name: 'username'
+        required: true
+        description: |
+          Username for the SQL Server connection.
+      - !ruby/object:Api::Type::String
+        name: 'password'
+        required: true
+        description: |
+          Password for the SQL Server connection.
+        sensitive: true
+        custom_flatten: templates/terraform/custom_flatten/datastream_connection_profile_sql_server_profile_password.go.erb
+      - !ruby/object:Api::Type::String
+        name: 'database'
+        required: true
+        description: |
+          Database for the SQL Server connection.
   - !ruby/object:Api::Type::NestedObject
     name: 'forwardSshConnectivity'
     description: |

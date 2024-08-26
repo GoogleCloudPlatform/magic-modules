@@ -16,6 +16,18 @@ import (
 	"google.golang.org/api/dns/v1"
 )
 
+func lbTypeNoneDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// Extract the index from the key
+	var index int
+	_, err := fmt.Sscanf(k, "routing_policy.0.primary_backup.0.primary.0.internal_load_balancers.%d.load_balancer_type", &index)
+	if err != nil {
+		return false // Key doesn't match the expected format
+	}
+
+	// Check if the value is changing between "none" and "" (null)
+	return (old == "none" && new == "") || (old == "" && new == "none")
+}
+
 func rrdatasDnsDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	if k == "rrdatas.#" && (new == "0" || new == "") && old != new {
 		return false
@@ -167,7 +179,7 @@ func ResourceDnsRecordSet() *schema.Resource {
 						"primary_backup": {
 							Type:        schema.TypeList,
 							Optional:    true,
-							Description: "The configuration for a primary-backup policy with global to regional failover. Queries are responded to with the global primary targets, but if none of the primary targets are healthy, then we fallback to a regional failover policy.",
+							Description: "The configuration for a failover policy with global to regional failover. Queries are responded to with the global primary targets, but if none of the primary targets are healthy, then we fallback to a regional failover policy.",
 							MaxItems:    1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -261,10 +273,11 @@ var healthCheckedTargetSchema *schema.Resource = &schema.Resource{
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"load_balancer_type": {
-						Type:         schema.TypeString,
-						Required:     true,
-						Description:  `The type of load balancer. This value is case-sensitive. Possible values: ["regionalL4ilb", "regionalL7ilb", "globalL7ilb"]`,
-						ValidateFunc: validation.StringInSlice([]string{"regionalL4ilb", "regionalL7ilb", "globalL7ilb"}, false),
+						Type:             schema.TypeString,
+						Optional:         true,
+						DiffSuppressFunc: lbTypeNoneDiffSuppress,
+						Description:      `The type of load balancer. This value is case-sensitive. Possible values: ["regionalL4ilb", "regionalL7ilb", "globalL7ilb"]`,
+						ValidateFunc:     validation.StringInSlice([]string{"regionalL4ilb", "regionalL7ilb", "globalL7ilb"}, false),
 					},
 					"ip_address": {
 						Type:        schema.TypeString,
@@ -457,14 +470,17 @@ func resourceDnsRecordSetDelete(d *schema.ResourceData, meta interface{}) error 
 
 	zone := d.Get("managed_zone").(string)
 
-	// NS records must always have a value, so we short-circuit delete
-	// this allows terraform delete to work, but may have unexpected
-	// side-effects when deleting just that record set.
+	// NS and SOA records on the root zone must always have a value,
+	// so we short-circuit delete this allows terraform delete to work,
+	// but may have unexpected side-effects when deleting just that
+	// record set.
 	// Unfortunately, you can set NS records on subdomains, and those
 	// CAN and MUST be deleted, so we need to retrieve the managed zone,
 	// check if what we're looking at is a subdomain, and only not delete
 	// if it's not actually a subdomain
-	if d.Get("type").(string) == "NS" {
+	// This does not apply to SOA, as they can only be set on the root
+	// zone.
+	if d.Get("type").(string) == "NS" || d.Get("type").(string) == "SOA" {
 		mz, err := config.NewDnsClient(userAgent).ManagedZones.Get(project, zone).Do()
 		if err != nil {
 			return fmt.Errorf("Error retrieving managed zone %q from %q: %s", zone, project, err)
@@ -472,7 +488,7 @@ func resourceDnsRecordSetDelete(d *schema.ResourceData, meta interface{}) error 
 		domain := mz.DnsName
 
 		if domain == d.Get("name").(string) {
-			log.Println("[DEBUG] NS records can't be deleted due to API restrictions, so they're being left in place. See https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/dns_record_set for more information.")
+			log.Printf("[DEBUG] root-level %s records can't be deleted due to API restrictions, so they're being left in place. See https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/dns_record_set for more information.\n", d.Get("type").(string))
 			return nil
 		}
 	}

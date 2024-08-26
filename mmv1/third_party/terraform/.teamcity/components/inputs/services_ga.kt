@@ -301,11 +301,6 @@ var ServicesListGa = mapOf(
         "displayName" to "Dataprocmetastore",
         "path" to "./google/services/dataprocmetastore"
     ),
-    "datastore" to mapOf(
-        "name" to "datastore",
-        "displayName" to "Datastore",
-        "path" to "./google/services/datastore"
-    ),
     "datastream" to mapOf(
         "name" to "datastream",
         "displayName" to "Datastream",
@@ -481,6 +476,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Looker",
         "path" to "./google/services/looker"
     ),
+    "managedkafka" to mapOf(
+        "name" to "managedkafka",
+        "displayName" to "Managedkafka",
+        "path" to "./google/services/managedkafka"
+    ),
     "memcache" to mapOf(
         "name" to "memcache",
         "displayName" to "Memcache",
@@ -546,10 +546,20 @@ var ServicesListGa = mapOf(
         "displayName" to "Oslogin",
         "path" to "./google/services/oslogin"
     ),
+    "parallelstore" to mapOf(
+        "name" to "parallelstore",
+        "displayName" to "Parallelstore",
+        "path" to "./google/services/parallelstore"
+    ),
     "privateca" to mapOf(
         "name" to "privateca",
         "displayName" to "Privateca",
         "path" to "./google/services/privateca"
+    ),
+    "privilegedaccessmanager" to mapOf(
+        "name" to "privilegedaccessmanager",
+        "displayName" to "Privilegedaccessmanager",
+        "path" to "./google/services/privilegedaccessmanager"
     ),
     "publicca" to mapOf(
         "name" to "publicca",
@@ -601,6 +611,21 @@ var ServicesListGa = mapOf(
         "displayName" to "Securitycenter",
         "path" to "./google/services/securitycenter"
     ),
+    "securitycenterv2" to mapOf(
+        "name" to "securitycenterv2",
+        "displayName" to "securitycenterv2",
+        "path" to "./google/services/securitycenterv2"
+    ),
+    "securitycentermanagement" to mapOf(
+        "name" to "securitycentermanagement",
+        "displayName" to "Securitycentermanagement",
+        "path" to "./google/services/securitycentermanagement"
+    ),
+    "securitycenterv2" to mapOf(
+        "name" to "securitycenterv2",
+        "displayName" to "securitycenterv2",
+        "path" to "./google/services/securitycenterv2"
+    ),
     "securityposture" to mapOf(
         "name" to "securityposture",
         "displayName" to "Securityposture",
@@ -630,6 +655,11 @@ var ServicesListGa = mapOf(
         "name" to "serviceusage",
         "displayName" to "Serviceusage",
         "path" to "./google/services/serviceusage"
+    ),
+    "siteverification" to mapOf(
+        "name" to "siteverification",
+        "displayName" to "Siteverification",
+        "path" to "./google/services/siteverification"
     ),
     "sourcerepo" to mapOf(
         "name" to "sourcerepo",

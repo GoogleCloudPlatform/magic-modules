@@ -1,0 +1,192 @@
+{{/*# The license inside this block applies to this file.
+  # Copyright 2024 Google Inc.
+  # Licensed under the Apache License, Version 2.0 (the "License");
+  # you may not use this file except in compliance with the License.
+  # You may obtain a copy of the License at
+  #
+  #     http://www.apache.org/licenses/LICENSE-2.0
+  #
+  # Unless required by applicable law or agreed to in writing, software
+  # distributed under the License is distributed on an "AS IS" BASIS,
+  # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  # See the License for the specific language governing permissions and
+  # limitations under the License.
+*/}}
+{{- define "SchemaFields"}}
+{{- if .FlattenObject -}}
+	{{- range $prop := .ResourceMetadata.OrderProperties .Properties -}}
+    {{ template "SchemaFields" $prop }}
+	{{ end -}}
+{{- else -}}
+"{{underscore .Name -}}": {
+{{ if .IsSet -}}
+  Type: schema.TypeSet,
+  {{- else -}}
+  Type: {{ $.TFType .Type }},
+  {{- end }}
+{{ if .DefaultFromApi -}}
+	Computed: true,
+	Optional: true,
+{{ else if .Required -}}
+  Required: true,
+{{ else if .Output -}}
+  Computed: true,
+{{ else -}}
+  Optional: true,
+{{ end -}}
+{{ if .DeprecationMessage -}}
+  Deprecated: "{{ .DeprecationMessage }}",
+{{ end -}}
+{{ if .IsForceNew -}}
+  ForceNew: true,
+{{ end -}}
+{{ if and (not .Output) .Validation -}}
+	{{ if .Validation.Regex -}}
+  ValidateFunc: verify.ValidateRegexp(`{{ .Validation.Regex -}}`),
+	{{ else if .Validation.Function -}}
+  ValidateFunc: {{ .Validation.Function -}},
+	{{ end  -}}
+{{ end -}}
+{{ if and (eq .Type "Enum") (not .Output) -}}
+	ValidateFunc: verify.ValidateEnum([]string{ {{- .EnumValuesToString "\"" true -}} }),
+{{ end -}}
+{{ if .DiffSuppressFunc -}}
+  DiffSuppressFunc: {{ .DiffSuppressFunc }},
+{{ else if eq .Type "ResourceRef" -}}
+  DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
+{{ end -}}
+{{ if .StateFunc -}}
+	StateFunc: {{ .StateFunc }},
+{{ end -}}
+  Description: `{{ replace .GetDescription "`" "'" -1 -}}
+{{- if and (eq .Type "Array") (eq .ItemType.Type "Enum") (not .Output) (not .ItemType.SkipDocsValues) -}}
+  {{- if .ItemType.DefaultValue -}}
+Default value: {{ .ItemType.DefaultValue -}}
+  {{- end -}}
+{{- " "}}Possible values: [{{- .ItemType.EnumValuesToString "\"" false -}}]
+  {{- else if and (eq .Type "Enum") (not .Output) -}}
+    {{- if .DefaultValue -}}
+      {{- " "}}Default value: "{{ .DefaultValue -}}"
+    {{- end -}}
+    {{- " "}}Possible values: [{{- .EnumValuesToString "\"" false -}}]
+  {{- end -}}`,
+{{ if eq .Type "NestedObject" -}}
+  {{ if not .Output -}}
+  MaxItems: 1,
+  {{ end -}}
+  Elem: &schema.Resource{
+    Schema: map[string]*schema.Schema{
+      {{- range $prop := .ResourceMetadata.OrderProperties $.Properties }}
+      {{template "SchemaFields" $prop}}
+      {{- end }}
+    },
+  },
+{{ else if eq .Type "Array" -}}
+  {{ if .MinSize -}}
+      MinItems: {{ .MinSize }},
+  {{ end -}}
+  {{ if .MaxSize -}}
+      MaxItems: {{ .MaxSize }},
+  {{ end -}}
+  {{ if eq .ItemType.Type "NestedObject" -}}
+    {{ if .IsSet -}}
+      Elem: {{ .NamespaceProperty }}Schema(),
+    {{ else -}}
+      Elem: &schema.Resource{
+        Schema: map[string]*schema.Schema{
+            {{- range $prop := .ResourceMetadata.OrderProperties $.ItemType.Properties }}
+            {{template "SchemaFields" $prop}}
+            {{- end }}
+        },
+      },
+    {{ end -}}
+  {{ else if eq .ItemType.Type "String" -}}
+      Elem: &schema.Schema{
+        Type: schema.Type{{ .ItemTypeClass -}},
+        {{ template "ItemValidation" . -}}
+      },
+  {{ else if eq .ItemType.Type "Enum" -}}
+      Elem: &schema.Schema{
+        Type: schema.TypeString,
+        {{- if not .Output }}
+        ValidateFunc: verify.ValidateEnum([]string{ {{- .ItemType.EnumValuesToString "\"" false -}} }),
+        {{- end }}
+      },
+  {{ else -}}
+      Elem: &schema.Schema{
+    {{ if eq .ItemType.Type "ResourceRef" -}}
+        Type: schema.TypeString,
+        {{- if not .Output }}
+        DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
+        {{- end }}
+    {{ else -}}
+        Type: {{ .TFType .ItemType.Type }},
+    {{ end -}}
+    {{ template "ItemValidation" . -}}
+      },
+  {{ end -}}
+  {{ if .IsSet -}}
+    {{ if .SetHashFunc -}}
+    Set: {{ .SetHashFunc -}},
+    {{ else if or (eq .ItemType.Type "String") (eq .ItemType.Type "Enum") -}}
+    Set: schema.HashString,
+    {{ else -}}
+    // Default schema.HashSchema is used.
+    {{ end -}}
+  {{ end -}}
+{{ else if hasPrefix .Type "KeyValue" -}}{{- /* KeyValueLabels, KeyValueTerraformLabels, KeyValueEffectiveLabels, KeyValueAnnotations are types similar to KeyValuePairs*/ -}}
+  Elem: &schema.Schema{Type: schema.TypeString},
+{{ else if eq .Type "Map" -}}
+	Elem: &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"{{ .KeyName -}}": {
+				Type:     schema.TypeString,
+				Required: true,
+				{{ if .KeyDiffSuppressFunc -}}
+					DiffSuppressFunc: {{ .KeyDiffSuppressFunc }},
+				{{ end -}}
+				{{ if .IsForceNew -}}
+				ForceNew: true,
+				{{ end -}}
+			},
+      {{- range $prop := .ResourceMetadata.OrderProperties $.ValueType.Properties }}
+        {{template "SchemaFields" $prop}}
+      {{- end }}
+		},
+	},
+	{{ if .SetHashFunc -}}
+	Set: {{ .SetHashFunc -}},
+	{{ end -}}
+{{ end -}}
+{{ if .Sensitive -}}
+    Sensitive: true,
+{{ end -}}
+{{ if not (eq .DefaultValue nil ) -}}
+    Default: {{ .GoLiteral .DefaultValue -}},
+{{ end -}}
+{{ if or .Conflicting .Conflicts -}}
+    ConflictsWith: {{ .GoLiteral (.GetPropertySchemaPathList .Conflicting)  -}},
+{{ end -}}
+{{ if or .AtLeastOneOfList .AtLeastOneOf -}}
+    AtLeastOneOf: {{ .GoLiteral (.GetPropertySchemaPathList .AtLeastOneOfList) -}},
+{{ end -}}
+{{ if or .ExactlyOneOfList .ExactlyOneOf -}}
+    ExactlyOneOf: {{ .GoLiteral (.GetPropertySchemaPathList .ExactlyOneOfList) -}},
+{{ end -}}
+{{ if or .RequiredWithList .RequiredWith -}}
+    RequiredWith: {{ .GoLiteral (.GetPropertySchemaPathList .RequiredWithList) -}},
+{{ end -}}
+},
+{{- end -}}
+{{- end -}}
+{{- define "ItemValidation" -}}
+  {{ if not .Output -}}
+    {{ if .ItemValidation -}}
+      {{ if .ItemValidation.Regex -}}
+      ValidateFunc: verify.ValidateRegexp(`{{ .ItemValidation.Regex -}}`),
+      {{ else if .ItemValidation.Function -}}
+      ValidateFunc: {{ .ItemValidation.Function -}},
+      {{ end  -}}
+    {{ end -}}
+  {{- end }}
+{{- end -}}

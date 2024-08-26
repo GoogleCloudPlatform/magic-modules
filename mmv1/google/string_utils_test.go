@@ -22,7 +22,7 @@ func TestStringCamelize(t *testing.T) {
 		},
 		{
 			description: "Camelize string with uppercase first letter",
-			term:        "AuthorizedOrgsDesc",
+			term:        "authorizedOrgsDesc",
 			firstLetter: "upper",
 			expected:    "AuthorizedOrgsDesc",
 		},

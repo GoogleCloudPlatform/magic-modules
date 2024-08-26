@@ -1,0 +1,9 @@
+resource "google_project_access_approval_settings" "{{$.PrimaryResourceId}}" {
+  project_id          = "{{index $.TestEnvVars "project"}}"
+  notification_emails = ["testuser@example.com", "example.user@example.com"]
+
+  enrolled_services {
+  	cloud_product = "all"
+  	enrollment_level = "BLOCK_ALL"
+  }
+}

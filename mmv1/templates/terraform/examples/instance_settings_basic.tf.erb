@@ -1,7 +1,5 @@
-# [START instance_settings_basic]
 
 resource "google_compute_instance_settings" "<%= ctx[:primary_resource_id] %>" {
-  provider = google-beta
   zone = "us-east7-b"
   metadata {
     items = {
@@ -10,4 +8,3 @@ resource "google_compute_instance_settings" "<%= ctx[:primary_resource_id] %>" {
   }
 }
 
-# [END instance_settings_basic]

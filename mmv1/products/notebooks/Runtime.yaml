@@ -92,7 +92,7 @@ examples:
     vars:
       runtime_name: 'notebooks-runtime-script'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/notebooks_runtime.go
+  constants: templates/terraform/constants/notebooks_runtime.go.erb
   pre_update: templates/terraform/pre_update/notebooks_runtime.go.erb
 parameters:
   - !ruby/object:Api::Type::ResourceRef

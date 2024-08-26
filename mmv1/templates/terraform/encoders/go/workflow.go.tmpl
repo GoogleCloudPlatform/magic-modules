@@ -1,0 +1,14 @@
+var ResName string
+if v, ok := d.GetOk("name"); ok {
+	ResName = v.(string)
+} else if v, ok := d.GetOk("name_prefix"); ok {
+	ResName = id.PrefixedUniqueId(v.(string))
+} else {
+	ResName = id.UniqueId()
+}
+
+if err := d.Set("name", ResName); err != nil {
+	return nil, fmt.Errorf("Error setting name: %s", err)
+}
+
+return obj, nil

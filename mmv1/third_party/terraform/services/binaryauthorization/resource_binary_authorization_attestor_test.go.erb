@@ -6,7 +6,7 @@ import (
 	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/services/binaryauthorization"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestSignatureAlgorithmDiffSuppress(t *testing.T) {
@@ -127,7 +127,7 @@ func TestAccBinaryAuthorizationAttestor_update(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBinaryAuthorizationAttestorDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccBinaryAuthorizationAttestorBasic(name),
 			},
 			{
@@ -193,7 +193,7 @@ resource "google_binary_authorization_attestor" "attestor" {
     note_reference = google_container_analysis_note.note.name
     public_keys {
       ascii_armored_pgp_public_key = <<EOF
-<%- # load bearing - the erb compiler will interpret the %s as ruby otherwise -%>
+<%# load bearing - the erb compiler will interpret the %s as ruby otherwise -%>
 <%= "%s" %>
 EOF
 

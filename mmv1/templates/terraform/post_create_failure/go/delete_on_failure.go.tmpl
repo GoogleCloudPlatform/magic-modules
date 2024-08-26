@@ -1,0 +1,14 @@
+log.Printf("[WARN] Attempt to clean up {{$.Name}} if it still exists")
+var cleanErr error
+if cleanErr = resource{{$.ResourceName}}Read(d, meta); cleanErr == nil {
+	if d.Id() != "" {
+		log.Printf("[WARN] {{$.Name}} %q still exists, attempting to delete...", d.Id())
+		if cleanErr = resource{{$.ResourceName}}Delete(d, meta); cleanErr == nil {
+			log.Printf("[WARN] Invalid {{$.Name}} was successfully deleted")
+			d.SetId("")
+		}
+	}
+}
+if cleanErr != nil {
+	log.Printf("[WARN] Could not confirm cleanup of {{$.Name}} if created in error state: %v", cleanErr)
+}

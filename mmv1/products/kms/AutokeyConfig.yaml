@@ -1,0 +1,76 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'AutokeyConfig'
+base_url: 'folders/{{folder}}/autokeyConfig'
+self_link: 'folders/{{folder}}/autokeyConfig'
+# This is a singleton resource that is already created, so create
+# is really an update, and therefore should be PATCHed.
+create_url: 'folders/{{folder}}/autokeyConfig?updateMask=keyProject'
+create_verb: :PATCH
+update_url: 'folders/{{folder}}/autokeyConfig?updateMask=keyProject'
+update_verb: :PATCH
+delete_url: 'folders/{{folder}}/autokeyConfig?updateMask=keyProject'
+delete_verb: :PATCH
+# This resource is currently in public preview.
+description: |
+  `AutokeyConfig` is a singleton resource used to configure the auto-provisioning
+  flow of CryptoKeys for CMEK.
+
+
+  ~> **Note:** AutokeyConfigs cannot be deleted from Google Cloud Platform.
+  Destroying a Terraform-managed AutokeyConfig will remove it from state but
+  *will not delete the resource from the project.*
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Cloud KMS with Autokey': 'https://cloud.google.com/kms/docs/kms-with-autokey'
+  api: 'https://cloud.google.com/kms/docs/reference/rest/v1/AutokeyConfig'
+id_format: 'folders/{{folder}}/autokeyConfig'
+import_format: ['folders/{{folder}}/autokeyConfig']
+min_version: beta
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  test_check_destroy: templates/terraform/custom_check_destroy/kms_autokey_config.go.erb
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'kms_autokey_config_all'
+    # Need the time_sleep resource
+    # Currently failing
+    skip_vcr: true
+    external_providers: ["random", "time"]
+    primary_resource_id:
+      'example-autokeyconfig'
+    min_version: beta
+    vars:
+      folder_name:
+        'my-folder'
+      key_project_name:
+        'key-proj'
+    test_env_vars:
+      org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
+parameters:
+  - !ruby/object:Api::Type::String
+    name: 'folder'
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The folder for which to retrieve config.
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'keyProject'
+    description: |
+      The target key project for a given folder where KMS Autokey will provision a
+      CryptoKey for any new KeyHandle the Developer creates. Should have the form
+      `projects/<project_id_or_number>`.

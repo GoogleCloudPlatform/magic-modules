@@ -26,7 +26,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -50,7 +50,7 @@ examples:
     vars:
       prefixes_name: 'my-prefix'
     test_env_vars:
-      description: :PAP_DESCRIPTION
+      desc: :PAP_DESCRIPTION
 properties:
   - !ruby/object:Api::Type::String
     name: 'region'

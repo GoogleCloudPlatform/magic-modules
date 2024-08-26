@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -20,18 +20,18 @@ func TestAccDNSResponsePolicyRule_update(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckDNSResponsePolicyRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccDnsResponsePolicyRule_privateUpdate(responsePolicyRuleSuffix, "network-1"),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_dns_response_policy_rule.example-response-policy-rule",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			resource.TestStep{
+			{
 				Config: testAccDnsResponsePolicyRule_privateUpdate(responsePolicyRuleSuffix, "network-2"),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_dns_response_policy_rule.example-response-policy-rule",
 				ImportState:       true,
 				ImportStateVerify: true,

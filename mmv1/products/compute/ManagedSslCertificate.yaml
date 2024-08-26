@@ -33,7 +33,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 30
@@ -74,6 +74,8 @@ docs: !ruby/object:Provider::Terraform::Docs
     certificates may entail some downtime while the certificate provisions.
 
     In conclusion: Be extremely cautious.
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/compute_managed_ssl_certificate.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'managed_ssl_certificate_basic'
@@ -89,8 +91,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'managed_ssl_certificate_recreation'
     primary_resource_id: 'cert'
-    pull_external:
-      true
+    external_providers: ["random", "time"]
       # Random provider
     skip_vcr: true
 properties:
@@ -106,7 +107,6 @@ properties:
     api_name: 'id'
     description: 'The unique identifier for the resource.'
     output: true
-    default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
@@ -117,7 +117,6 @@ properties:
       first character must be a lowercase letter, and all following
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
-
 
       These are in the same namespace as the managed SSL certificates.
   - !ruby/object:Api::Type::NestedObject
@@ -133,7 +132,7 @@ properties:
           there can be up to 100 domains in this list.
         max_size: 100
         required: true
-        diff_suppress_func: 'tpgresource.AbsoluteDomainSuppress'
+        diff_suppress_func: 'AbsoluteDomainSuppress'
         item_type: Api::Type::String
   - !ruby/object:Api::Type::Enum
     name: 'type'

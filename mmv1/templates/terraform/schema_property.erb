@@ -26,9 +26,6 @@
 <% if property.default_from_api -%>
 	Computed: true,
 	Optional: true,
-	<% if property.schema_config_mode_attr -%>
-	ConfigMode: schema.SchemaConfigModeAttr,
-	<% end -%>
 <% elsif property.required -%>
   Required: true,
 <% elsif property.output -%>
@@ -42,19 +39,20 @@
 <% if force_new?(property, object) -%>
   ForceNew: true,
 <% end -%>
-<% unless property.validation.nil? || property.output -%>
-	<% if !property.validation.regex.nil? -%>
+<% if !property.output -%>
+  <% if !property.validation.nil? -%>
+    <% if !property.validation.regex.nil? -%>
   ValidateFunc: verify.ValidateRegexp(`<%= property.validation.regex -%>`),
-	<% elsif !property.validation.function.nil? -%>
-	ValidateFunc: <%= property.validation.function -%>,
-	<% end # property.validation.nil?  -%>
-<% end # property.validation.nil?  -%>
-<% if property.is_a?(Api::Type::Enum) && property.validation.nil? && !property.output -%>
-<%
-	enum_values = property.values
-	enum_values.push "" unless property.required
--%>
+    <% elsif !property.validation.function.nil? -%>
+  ValidateFunc: <%= property.validation.function -%>,
+    <% end # !property.validation.regex.nil?  -%>
+  <% elsif property.is_a?(Api::Type::Enum)  -%>
+    <%
+    	enum_values = property.values
+    	enum_values.push "" unless property.required
+    -%>
 	ValidateFunc: verify.ValidateEnum([]string{"<%= enum_values.join '","' -%>"}),
+  <% end -%>
 <% end -%>
 <% if !property.diff_suppress_func.nil? -%>
   DiffSuppressFunc: <%= property.diff_suppress_func %>,
@@ -111,20 +109,26 @@
         },
       },
     <% end -%>
-  <% elsif property.item_type.is_a?(String) # Basic type like Api::Type::String -%>
-      Elem: &schema.Schema{
-        Type: <%= tf_types[property.item_type_class] -%>,
-      },
-  <% elsif property.item_type.is_a?(Api::Type::Enum) -%>
-      Elem: &schema.Schema{
-        Type: <%= tf_types[property.item_type.class] -%>,
-        ValidateFunc: verify.ValidateEnum([]string{"<%= property.item_type.values.join '","' -%>"}),
-      },
   <% else # array of basic types -%>
       Elem: &schema.Schema{
+    <% if property.item_type.is_a?(String) # Basic type like Api::Type::String -%>
+        Type: <%= tf_types[property.item_type_class] -%>,
+    <% else -%>
         Type: <%= tf_types[property.item_type.class] -%>,
-    <% if property.item_type.is_a?(Api::Type::ResourceRef) -%>
+    <% end -%>
+    <% if !property.output -%>
+      <% if property.item_type.is_a?(Api::Type::ResourceRef) -%>
         DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
+      <% end -%>
+      <% if !property.item_validation.nil? -%>
+        <% if !property.item_validation.regex.nil? -%>
+        ValidateFunc: verify.ValidateRegexp(`<%= property.item_validation.regex -%>`),
+        <% elsif !property.item_validation.function.nil? -%>
+        ValidateFunc: <%= property.item_validation.function -%>,
+        <% end # !property.item_validation.regex.nil?  -%>
+      <% elsif property.item_type.is_a?(Api::Type::Enum)  -%>
+        ValidateFunc: verify.ValidateEnum([]string{"<%= property.item_type.values.join '","' -%>"}),
+      <% end -%>
     <% end -%>
       },
   <% end -%>
@@ -145,7 +149,7 @@
 			"<%= property.key_name -%>": {
 				Type:     schema.TypeString,
 				Required: true,
-				<% if !property.diff_suppress_func.nil? -%>
+				<% if !property.key_diff_suppress_func.nil? -%>
 					DiffSuppressFunc: <%= property.key_diff_suppress_func %>,
 				<% end -%>
 				<% if force_new?(property, object) -%>

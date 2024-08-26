@@ -10,8 +10,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"google.golang.org/api/logging/v2"
 )
 
@@ -335,8 +335,51 @@ func testAccCheckLoggingFolderSink(sink *logging.LogSink, n string) resource.Tes
 			return fmt.Errorf("mismatch on include_children: api has %v but client has %v", sink.IncludeChildren, includeChildren)
 		}
 
+		interceptChildren := false
+		if attributes["intercept_children"] != "" {
+			includeChildren, err = strconv.ParseBool(attributes["intercept_children"])
+			if err != nil {
+				return err
+			}
+		}
+		if sink.InterceptChildren != interceptChildren {
+			return fmt.Errorf("mismatch on intercept_children: api has %v but client has %v", sink.InterceptChildren, interceptChildren)
+		}
+
 		return nil
 	}
+}
+
+func TestAccLoggingFolderSink_updateInterceptChildren(t *testing.T) {
+	t.Parallel()
+
+	sinkName := "tf-test-sink-" + acctest.RandString(t, 10)
+	folderName := "intercepting-sink-folder"
+	folderParent := "organizations/" + envvar.GetTestOrgFromEnv(t)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckLoggingFolderSinkDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLoggingFolderSink_intercept_updated(sinkName, true, folderName, folderParent),
+			},
+			{
+				ResourceName:      "google_logging_folder_sink.intercept_update",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccLoggingFolderSink_intercept_updated(sinkName, false, folderName, folderParent),
+			},
+			{
+				ResourceName:      "google_logging_folder_sink.intercept_update",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
 }
 
 func testAccLoggingFolderSink_basic(sinkName, bucketName, folderName, folderParent string) string {
@@ -357,6 +400,7 @@ resource "google_storage_bucket" "log-bucket" {
 resource "google_folder" "my-folder" {
   display_name = "%s"
   parent       = "%s"
+  deletion_protection = false
 }
 `, sinkName, envvar.GetTestProjectFromEnv(), bucketName, folderName, folderParent)
 }
@@ -380,6 +424,7 @@ resource "google_storage_bucket" "log-bucket" {
 resource "google_folder" "my-folder" {
   display_name = "%s"
   parent       = "%s"
+  deletion_protection = false
 }
 `, sinkName, envvar.GetTestProjectFromEnv(), bucketName, folderName, folderParent)
 }
@@ -403,6 +448,7 @@ resource "google_storage_bucket" "log-bucket" {
 resource "google_folder" "my-folder" {
   display_name = "%s"
   parent       = "%s"
+  deletion_protection = false
 }
 `, sinkName, envvar.GetTestProjectFromEnv(), bucketName, folderName, folderParent)
 }
@@ -423,8 +469,9 @@ resource "google_storage_bucket" "log-bucket" {
 }
 
 resource "google_folder" "my-folder" {
-  display_name = "%s"
-    parent       = "%s"
+	display_name = "%s"
+	parent       = "%s"
+	deletion_protection = false
 }`, sinkName, bucketName, folderName, folderParent)
 }
 
@@ -446,6 +493,7 @@ resource "google_storage_bucket" "log-bucket" {
 resource "google_folder" "my-folder" {
   display_name = "%s"
   parent       = "%s"
+  deletion_protection = false
 }
 `, sinkName, envvar.GetTestProjectFromEnv(), bucketName, folderName, folderParent)
 }
@@ -476,6 +524,7 @@ resource "google_storage_bucket" "log-bucket" {
 resource "google_folder" "my-folder" {
   display_name = "%s"
   parent       = "%s"
+  deletion_protection = false
 }
 `, sinkName, envvar.GetTestProjectFromEnv(), bucketName, folderName, folderParent)
 }
@@ -502,6 +551,7 @@ resource "google_bigquery_dataset" "logging_sink" {
 resource "google_folder" "my-folder" {
   display_name = "%s"
   parent       = "%s"
+  deletion_protection = false
 }`, sinkName, envvar.GetTestProjectFromEnv(), envvar.GetTestProjectFromEnv(), bqDatasetID, folderName, folderParent)
 }
 
@@ -523,5 +573,25 @@ resource "google_bigquery_dataset" "logging_sink" {
 resource "google_folder" "my-folder" {
   display_name = "%s"
   parent       = "%s"
+  deletion_protection = false
 }`, sinkName, envvar.GetTestProjectFromEnv(), envvar.GetTestProjectFromEnv(), bqDatasetID, folderName, folderParent)
+}
+
+func testAccLoggingFolderSink_intercept_updated(sinkName string, intercept_children bool, folderName string, folderParent string) string {
+	return fmt.Sprintf(`
+resource "google_logging_folder_sink" "intercept_update" {
+  name             = "%s"
+  folder           = "${google_folder.intercept_folder.folder_id}"
+  destination      = "logging.googleapis.com/projects/%s"
+  filter           = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
+  include_children = true
+  intercept_children = %t
+}
+
+resource "google_folder" "intercept_folder" {
+  display_name = "%s"
+  parent       = "%s"
+  deletion_protection = false
+}
+`, sinkName, envvar.GetTestProjectFromEnv(), envvar.GetTestProjectFromEnv(), intercept_children, folderName, folderParent)
 }

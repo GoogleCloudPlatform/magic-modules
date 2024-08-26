@@ -1,0 +1,196 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'FeatureOnlineStore'
+description: Vertex AI Feature Online Store provides a centralized repository for serving ML features and embedding indexes at low latency. The Feature Online Store is a top-level container.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featureOnlineStores'
+docs:
+base_url: 'projects/{{project}}/locations/{{region}}/featureOnlineStores'
+self_link: 'projects/{{project}}/locations/{{region}}/featureOnlineStores/{{name}}'
+create_url: 'projects/{{project}}/locations/{{region}}/featureOnlineStores?featureOnlineStoreId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+  pre_delete: 'templates/terraform/pre_delete/go/vertex_ai_force_delete.go.tmpl'
+examples:
+  - name: 'vertex_ai_feature_online_store'
+    primary_resource_id: 'feature_online_store'
+    vars:
+      name: 'example_feature_online_store'
+    ignore_read_extra:
+      - 'force_destroy'
+  - name: 'vertex_ai_featureonlinestore_with_optimized'
+    primary_resource_id: 'featureonlinestore'
+    vars:
+      name: 'example_feature_online_store_optimized'
+    ignore_read_extra:
+      - 'force_destroy'
+  - name: 'vertex_ai_featureonlinestore_with_beta_fields_bigtable'
+    primary_resource_id: 'featureonlinestore'
+    min_version: 'beta'
+    vars:
+      name: 'example_feature_online_store_beta_bigtable'
+    ignore_read_extra:
+      - 'force_destroy'
+virtual_fields:
+  - name: 'force_destroy'
+    description:
+      If set to true, any FeatureViews and Features for this FeatureOnlineStore will also be deleted.
+    type: Boolean
+    default_value: false
+parameters:
+  - name: 'region'
+    type: String
+    description: The region of feature online store. eg us-central1
+    url_param_only: true
+    immutable: true
+    default_from_api: true
+properties:
+  - name: 'name'
+    type: String
+    description: The resource name of the Feature Online Store. This value may be up to 60 characters, and
+      valid characters are [a-z0-9_]. The first character cannot be a number.
+    url_param_only: true
+    required: true
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+  - name: 'createTime'
+    type: String
+    description: The timestamp of when the feature online store was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: The timestamp of when the feature online store was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+    output: true
+  - name: 'etag'
+    type: String
+    description: Used to perform consistent read-modify-write updates.
+    ignore_read: true
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: The labels with user-defined metadata to organize your feature online stores.
+    immutable: false
+  - name: 'state'
+    type: String
+    description: The state of the Feature Online Store. See the possible states in [this link](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featureOnlineStores#state).
+    output: true
+  - name: 'bigtable'
+    type: NestedObject
+    description: Settings for Cloud Bigtable instance that will be created to serve featureValues for all FeatureViews under this FeatureOnlineStore.
+    exactly_one_of:
+      - 'bigtable'
+      - 'optimized'
+    properties:
+      - name: 'autoScaling'
+        type: NestedObject
+        description: Autoscaling config applied to Bigtable Instance.
+        required: true
+        properties:
+          - name: 'minNodeCount'
+            type: Integer
+            description: The minimum number of nodes to scale down to. Must be greater than or equal to 1.
+            required: true
+          - name: 'maxNodeCount'
+            type: Integer
+            description: The maximum number of nodes to scale up to. Must be greater than or equal to minNodeCount, and less than or equal to 10 times of 'minNodeCount'.
+            required: true
+          - name: 'cpuUtilizationTarget'
+            type: Integer
+            description:
+              A percentage of the cluster's CPU capacity. Can be from 10% to 80%.
+              When a cluster's CPU utilization exceeds the target that you have set,
+              Bigtable immediately adds nodes to the cluster. When CPU utilization is substantially lower than the target, Bigtable removes nodes. If not set will default to 50%.
+            default_from_api: true
+  - name: 'optimized'
+    type: NestedObject
+    description:
+      Settings for the Optimized store that will be created to serve featureValues for all FeatureViews under this FeatureOnlineStore
+    send_empty_value: true
+    allow_empty_object: true
+    conflicts:
+      - embeddingManagement
+    exactly_one_of:
+      - 'bigtable'
+      - 'optimized'
+    properties:
+      []
+  - name: 'dedicatedServingEndpoint'
+    type: NestedObject
+    description: |
+       The dedicated serving endpoint for this FeatureOnlineStore, which is different from common vertex service endpoint. Only need to be set when you choose Optimized storage type or enable EmbeddingManagement. Will use public endpoint by default.
+    default_from_api: true
+    properties:
+      - name: 'publicEndpointDomainName'
+        type: String
+        description: |
+          Domain name to use for this FeatureOnlineStore
+        output: true
+      - name: 'serviceAttachment'
+        type: String
+        description: |
+          Name of the service attachment resource. Applicable only if private service connect is enabled and after FeatureViewSync is created.
+        output: true
+      - name: 'privateServiceConnectConfig'
+        type: NestedObject
+        description: |
+          Private service connect config.
+        properties:
+          - name: 'enablePrivateServiceConnect'
+            type: Boolean
+            description: |
+              If set to true, customers will use private service connection to send request. Otherwise, the connection will set to public endpoint.
+            required: true
+          - name: 'projectAllowlist'
+            type: Array
+            description: |
+              A list of Projects from which the forwarding rule will target the service attachment.
+            item_type:
+              type: String
+  - name: 'embeddingManagement'
+    type: NestedObject
+    description: |
+      The settings for embedding management in FeatureOnlineStore. Embedding management can only be set for BigTable. It is enabled by default for optimized storagetype.
+    min_version: 'beta'
+    default_from_api: true
+    conflicts:
+      - optimized
+    deprecation_message: '`embedding_management` is deprecated. This field is no longer needed anymore and embedding management is automatically enabled when specifying Optimized storage type'
+    properties:
+      - name: 'enabled'
+        type: Boolean
+        description: |
+          Enable embedding management.
+        immutable: true

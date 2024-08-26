@@ -43,6 +43,9 @@ service/apikeys:
 service/appengine:
   resources:
   - google_app_engine_.*
+service/apphub:
+  resources:
+  - google_apphub_.*
 service/artifactregistry:
   team: artifact-registry
   resources:
@@ -106,14 +109,22 @@ service/cloudkms:
   - google_kms_.*
 service/cloudresourcemanager-crm:
   resources:
+  - google_active_folder
   - google_folder
   - google_folder_iam_.*
   - google_folders
   - google_project
-  - google_project_iam_.*
+  - google_project_iam_audit_config
+  - google_project_iam_binding
+  - google_project_iam_member
+  - google_project_iam_member_remove
+  - google_project_iam_policy
   - google_projects
   - google_organization
-  - google_organization_iam_.*
+  - google_organization_iam_audit_config
+  - google_organization_iam_binding
+  - google_organization_iam_member
+  - google_organization_iam_policy
   - google_resource_manager_lien
 service/cloudresourcemanager-tags:
   resources:
@@ -235,7 +246,7 @@ service/compute-security-policy:
   resources:
   - google_compute_network_edge_security_service
   - google_compute_region_security_policy.*
-  - google_compute_security_policy
+  - google_compute_security_policy.*
 service/compute-sole-tenancy:
   resources:
   - google_compute_node_group
@@ -301,6 +312,7 @@ service/discoveryengine:
   resources:
   - google_discovery_engine_.*
 service/dlp:
+  team: googleapis-dlp
   resources:
   - google_data_loss_prevention_.*
 service/documentai:
@@ -338,7 +350,6 @@ service/firestore-controlplane:
   - google_firestore_database
 service/firestore-dataplane:
   resources:
-  - google_datastore_index
   - google_firestore_document
   - google_firestore_field
   - google_firestore_index
@@ -393,6 +404,9 @@ service/ids:
 service/integrationconnectors:
   resources:
   - google_integration_connectors_.*
+service/integrations:
+  resources:
+  - google_integrations_.*
 service/logging:
   resources:
   - google_logging_.*
@@ -402,6 +416,9 @@ service/looker-core:
 service/managedidentities:
   resources:
   - google_active_directory_.*
+service/managedkafka:
+  resources:
+  - google_managed_kafka_.*
 service/memcache:
   resources:
   - google_memcache_instance
@@ -431,7 +448,6 @@ service/monitoring-services:
   - google_monitoring_cluster_istio_service
   - google_monitoring_istio_canonical_service
   - google_monitoring_mesh_istio_service
-  - google_monitoring_istio_canonical_service
 service/monitoring-uptime:
   resources:
   - google_monitoring_uptime_.*
@@ -481,9 +497,6 @@ service/networkservices-traffic-director:
   - google_network_services_service_binding
   - google_network_services_tcp_route
   - google_network_services_tls_route
-  - google_network_security_authorization_policy
-  - google_network_security_client_tls_policy
-  - google_network_security_server_tls_policy
 service/notebooks:
   resources:
   - google_notebooks_.*
@@ -500,6 +513,9 @@ service/osconfig:
 service/oslogin:
   resources:
   - google_os_login_.*
+service/parallelstore:
+  resources:
+  - google_parallestore_.*
 service/policy-based-routing:
   resources:
   - google_network_connectivity_policy_based_route
@@ -512,6 +528,9 @@ service/private-service-connect-published-service:
 service/privateca:
   resources:
   - google_privateca_.*
+service/privilegedaccessmanager:
+  resources:
+  - google_privileged_access_manager_.*
 service/publicca:
   resources:
   - google_public_ca_external_account_key
@@ -532,11 +551,13 @@ service/redis-cluster:
 service/redis-instance:
   resources:
   - google_redis_instance
+service/regional-endpoints:
+  resources:
+  - google_network_connectivity_regional_endpoint
 service/run:
   team: cloud-run-control-plane
   resources:
   - google_cloud_run_.*
-  - google_cloud_run_v2_.*
 service/secretmanager:
   resources:
   - google_secret_manager_.*
@@ -561,6 +582,7 @@ service/serviceusage:
   - google_project_service
 service/serviceusage-quota:
   resources:
+  - google_cloud_quotas_.*
   - google_service_usage_consumer_quota_override
 service/sourcerepo:
   resources:
@@ -568,19 +590,21 @@ service/sourcerepo:
 service/spanner:
   resources:
   - google_spanner_.*
-service/sqladmin:
+service/sqladmin-cp:
   resources:
-  - google_sql_database
   - google_sql_database_instance
   - google_sql_database_instances
-  - google_sql_databases
   - google_sql_source_representation_instance
   - google_sql_tiers
-  - google_sql_user
 service/sqladmin-dp:
   resources:
   - google_sql_backup_run
   - google_sql_database_instance_latest_recovery_time
+service/sqladmin-infra:
+  resources:
+  - google_sql_user
+  - google_sql_database
+  - google_sql_databases
 service/sqladmin-security:
   resources:
   - google_sql_ca_certs

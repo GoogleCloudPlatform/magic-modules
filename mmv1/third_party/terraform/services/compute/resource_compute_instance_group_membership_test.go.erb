@@ -6,8 +6,8 @@ import (
 
   "github.com/hashicorp/terraform-provider-google/google/acctest"
   "github.com/hashicorp/terraform-provider-google/google/envvar"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+  "github.com/hashicorp/terraform-plugin-testing/helper/resource"
+  "github.com/hashicorp/terraform-plugin-testing/terraform"
   transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -189,7 +189,11 @@ func testAccCheckComputeInstanceGroupMembershipDestroyed(t *testing.T, instanceG
 func testAccComputeInstanceGroupMembershipListMembership(t *testing.T, instanceGroupId string) (map[string]struct{}, error) {
   config := acctest.GoogleProviderConfig(t)
 
-  url := fmt.Sprintf("https://www.googleapis.com/compute/<% if version == 'ga' %>v1<% else %>beta<% end %>/%s/listInstances", instanceGroupId)
+  <% if version == 'ga' -%>
+  url := fmt.Sprintf("https://www.googleapis.com/compute/v1/%s/listInstances", instanceGroupId)
+  <% else -%>
+  url := fmt.Sprintf("https://www.googleapis.com/compute/beta/%s/listInstances", instanceGroupId)
+  <% end -%>
   res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
     Config: config,
     Method: "POST",

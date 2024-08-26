@@ -3,7 +3,7 @@ package resourcemanager_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -23,6 +23,8 @@ func TestAccDataSourceGoogleClientConfig_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "region"),
 					resource.TestCheckResourceAttrSet(resourceName, "zone"),
 					resource.TestCheckResourceAttrSet(resourceName, "access_token"),
+					resource.TestCheckResourceAttr("data.google_client_config.current", "default_labels.%", "1"),
+					resource.TestCheckResourceAttr("data.google_client_config.current", "default_labels.default_key", "default_value"),
 				),
 			},
 		},
@@ -43,6 +45,8 @@ func TestAccDataSourceGoogleClientConfig_omitLocation(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(resourceName, "project"),
 					resource.TestCheckResourceAttrSet(resourceName, "access_token"),
+					resource.TestCheckResourceAttr("data.google_client_config.current", "default_labels.%", "1"),
+					resource.TestCheckResourceAttr("data.google_client_config.current", "default_labels.default_key", "default_value"),
 				),
 			},
 		},
@@ -50,5 +54,11 @@ func TestAccDataSourceGoogleClientConfig_omitLocation(t *testing.T) {
 }
 
 const testAccCheckGoogleClientConfig_basic = `
+provider "google" {
+  default_labels = {
+    default_key = "default_value"
+  }
+}
+
 data "google_client_config" "current" { }
 `

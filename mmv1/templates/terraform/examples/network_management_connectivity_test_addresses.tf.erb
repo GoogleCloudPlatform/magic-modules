@@ -1,4 +1,3 @@
-# [START networkmanagement_test_addresses]
 resource "google_network_management_connectivity_test" "<%= ctx[:primary_resource_id] %>" {
   name = "<%= ctx[:vars]['primary_resource_name'] %>"
   source {
@@ -43,4 +42,3 @@ resource "google_compute_address" "dest-addr" {
   address      = "10.0.43.43"
   region       = "us-central1"
 }
-# [END networkmanagement_test_addresses]

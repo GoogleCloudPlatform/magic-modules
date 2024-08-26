@@ -38,14 +38,29 @@ examples:
     test_env_vars:
       project_id: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
+    name: 'firebasehosting_version_path'
+    min_version: 'beta'
+    primary_resource_id: 'default'
+    vars:
+      site_id: site-id
+    test_env_vars:
+      project_id: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
     name: 'firebasehosting_version_cloud_run'
     min_version: 'beta'
     primary_resource_id: 'default'
     vars:
       site_id: site-id
       cloud_run_service_id: cloud-run-service-via-hosting
+      deletion_protection: 'true'
+    test_vars_overrides:
+      deletion_protection: 'false'
+    oics_vars_overrides:
+      deletion_protection: 'false'
     test_env_vars:
       project_id: :PROJECT_NAME
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'firebasehosting_version_cloud_functions'
     min_version: 'beta'
@@ -113,17 +128,27 @@ properties:
                 - glob
                 - regex
             - !ruby/object:Api::Type::String
+              name: path
+              description:
+                The URL path to rewrite the request to.
+              exactly_one_of:
+                - path
+                - function
+                - run
+            - !ruby/object:Api::Type::String
               name: function
               description:
                 The function to proxy requests to. Must match the exported
                 function name exactly.
               exactly_one_of:
+                - path
                 - function
                 - run
             - !ruby/object:Api::Type::NestedObject
               name: run
               description: The request will be forwarded to Cloud Run.
               exactly_one_of:
+                - path
                 - function
                 - run
               properties:
