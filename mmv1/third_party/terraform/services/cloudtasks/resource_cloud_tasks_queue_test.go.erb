@@ -304,6 +304,7 @@ resource "google_cloud_tasks_queue" "default" {
       query_override {
         query_params = "qparam1=123&qparam2=456"
       }
+      uri_override_enforce_mode = "IF_NOT_EXISTS"
     }
     header_overrides {
       header {
@@ -351,6 +352,7 @@ resource "google_cloud_tasks_queue" "default" {
       query_override {
         query_params = "qparam1=123&qparam2=456"
       }
+      uri_override_enforce_mode = "IF_NOT_EXISTS"
     }
     header_overrides {
       header {

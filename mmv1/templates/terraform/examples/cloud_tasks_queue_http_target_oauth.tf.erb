@@ -14,6 +14,7 @@ resource "google_cloud_tasks_queue" "<%= ctx[:primary_resource_id] %>" {
       query_override {
         query_params = "qparam1=123&qparam2=456"
       }
+      uri_override_enforce_mode = "IF_NOT_EXISTS"
     }
     header_overrides {
       header {
