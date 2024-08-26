@@ -337,6 +337,28 @@ func (t *Type) SetDefault(r *Resource) {
 	}
 }
 
+func (t *Type) Validate(rName string) {
+	if t.Output && t.Required {
+		log.Fatalf("Property %s cannot be output and required at the same time in resource %s.", t.Name, rName)
+	}
+
+	if t.DefaultFromApi && t.DefaultValue != nil {
+		log.Fatalf("'default_value' and 'default_from_api' cannot be both set in resource %s", rName)
+	}
+
+	switch {
+	case t.IsA("Array"):
+		t.ItemType.Validate(rName)
+	case t.IsA("Map"):
+		t.ValueType.Validate(rName)
+	case t.IsA("NestedObject"):
+		for _, p := range t.Properties {
+			p.Validate(rName)
+		}
+	default:
+	}
+}
+
 // super
 // check :description, type: ::String, required: true
 // check :exclude, type: :boolean, default: false, required: true

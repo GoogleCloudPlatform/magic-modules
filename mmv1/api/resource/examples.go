@@ -16,15 +16,16 @@ package resource
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"net/url"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 	"text/template"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/golang/glog"
-	"gopkg.in/yaml.v3"
 )
 
 // Generates configs to be shown as examples in docs and outputted as tests
@@ -163,11 +164,11 @@ type Examples struct {
 }
 
 // Set default value for fields
-func (e *Examples) UnmarshalYAML(n *yaml.Node) error {
+func (e *Examples) UnmarshalYAML(unmarshal func(any) error) error {
 	type exampleAlias Examples
 	aliasObj := (*exampleAlias)(e)
 
-	err := n.Decode(&aliasObj)
+	err := unmarshal(aliasObj)
 	if err != nil {
 		return err
 	}
@@ -178,6 +179,33 @@ func (e *Examples) UnmarshalYAML(n *yaml.Node) error {
 	e.SetHCLText()
 
 	return nil
+}
+
+func (e *Examples) Validate(rName string) {
+	if e.Name == "" {
+		log.Fatalf("Missing `name` for one example in resource %s", rName)
+	}
+	e.ValidateExternalProviders()
+}
+
+func (e *Examples) ValidateExternalProviders() {
+	// Official providers supported by HashiCorp
+	// https://registry.terraform.io/search/providers?namespace=hashicorp&tier=official
+	HASHICORP_PROVIDERS := []string{"aws", "random", "null", "template", "azurerm", "kubernetes", "local",
+		"external", "time", "vault", "archive", "tls", "helm", "azuread", "http", "cloudinit", "tfe", "dns",
+		"consul", "vsphere", "nomad", "awscc", "googleworkspace", "hcp", "boundary", "ad", "azurestack", "opc",
+		"oraclepaas", "hcs", "salesforce"}
+
+	var unallowedProviders []string
+	for _, p := range e.ExternalProviders {
+		if !slices.Contains(HASHICORP_PROVIDERS, p) {
+			unallowedProviders = append(unallowedProviders, p)
+		}
+	}
+
+	if len(unallowedProviders) > 0 {
+		log.Fatalf("Providers %#v are not allowed. Only providers published by HashiCorp are allowed.", unallowedProviders)
+	}
 }
 
 // Executes example templates for documentation and tests
@@ -356,9 +384,6 @@ func SubstituteTestPaths(config string) string {
 // check :config_path, type: String, default: "templates/terraform/examples///{name}.tf.erb"
 // check :skip_vcr, type: TrueClass
 // }
-
-// TODO
-// validate_external_providers
 
 // func (e *Examples) merge(other) {
 // result = self.class.new
