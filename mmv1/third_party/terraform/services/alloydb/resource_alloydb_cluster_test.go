@@ -120,7 +120,7 @@ resource "google_compute_network" "default" {
 `, context)
 }
 
-// The standard cluster creation should succeed with subscription type field set to Standard.
+// Standard cluster creation should succeed with subscription type field set to Standard.
 func TestAccAlloydbCluster_withSubscriptionTypeStandard(t *testing.T) {
 	t.Parallel()
 
