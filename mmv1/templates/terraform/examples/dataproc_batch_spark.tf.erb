@@ -2,14 +2,19 @@ resource "google_dataproc_batch" "<%= ctx[:primary_resource_id] %>" {
 
     batch_id      = "tf-test-batch%{random_suffix}"
     location      = "us-central1"
+    labels        = {"batch_test": "terraform"}
 
     runtime_config {
       properties    = { "spark.dynamicAllocation.enabled": "false", "spark.executor.instances": "2" }
+      container_image = "us-docker.pkg.dev/google.com/hadoop-cloud-dev/s8s-spark-test-images/s8s-spark-2.2:latest"
+      version = "2.2"
     }
 
     environment_config {
       execution_config {
         subnetwork_uri = "<%= ctx[:vars]['subnetwork_name'] %>"
+        ttl = "3600s"
+        network_tags = ["tag1"]
       }
     }
 
