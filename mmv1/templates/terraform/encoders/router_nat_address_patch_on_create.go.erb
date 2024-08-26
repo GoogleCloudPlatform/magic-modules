@@ -10,8 +10,6 @@ if err != nil {
 
 // Merge new with existing item if item was already created (with the router nat resource).
 if found != nil {
-	log.Printf("[WARNING] Existing RouterNatAddress object already found: %+v \n Update: %+v", found, obj)
-
 	// Merge new object into old.
 	for k, v := range obj {
 		found[k] = v
@@ -26,9 +24,10 @@ if found != nil {
 	return resPatch, nil
 }
 
-// Return list with the resource to create appended
+// Prevent creating a RouterNatAddress if no RouterNat has been found
+log.Printf("[WARNING] No RouterNat resource %+v found, preventing RouterNatAddress creation", obj)
 res := map[string]interface{}{
-	"nats": append(currItems, obj),
+	"nats": nil,
 }
 
 return res, nil

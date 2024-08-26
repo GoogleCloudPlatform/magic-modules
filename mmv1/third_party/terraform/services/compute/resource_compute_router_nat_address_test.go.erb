@@ -165,6 +165,14 @@ func TestAccComputeRouterNatAddress_withNatIpsAndDrainNatIps(t *testing.T) {
 				Config:      testAccComputeRouterNatAddressWithInvalidDrainMissingNatIp(routerName),
 				ExpectError: regexp.MustCompile("was not previously set in nat_ips"),
 			},
+			{
+				Config: testAccComputeRouterNatAddressWithAddressRemoved(routerName),
+			},
+			{
+				ResourceName:      "google_compute_router_nat.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -194,10 +202,10 @@ resource "google_compute_router" "foobar" {
 
 resource "google_compute_address" "foobar" {
   count = %s
-	name = "%s-address-${count.index}-${random_id.group-manager-suffix.hex}"
+  name = "%s-address-${count.index}-${random_id.group-manager-suffix.hex}"
   region = google_compute_subnetwork.foobar.region
 
-	lifecycle {
+  lifecycle {
     create_before_destroy = true
   }
 }
@@ -318,7 +326,7 @@ resource "google_compute_router_nat" "foobar" {
   region   = google_compute_router.foobar.region
 
   nat_ip_allocate_option = "MANUAL_ONLY"
-  initial_nat_ips = [google_compute_address.addr4.self_link]
+  nat_ips = [google_compute_address.addr4.self_link]
 
   source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
   subnetwork {
