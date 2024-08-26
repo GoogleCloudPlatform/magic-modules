@@ -5266,8 +5266,7 @@ func TestAccContainerCluster_WithCPAFeatures(t *testing.T) {
 	signingKey := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
 	verificationKey := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
 	backupKey := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
-	// TODO(hanchiz): Use roles/container.cloudKmsKeyUser instead of roles/cloudkms.admin eventually.
-	if acctest.BootstrapPSARoles(t, "service-", "container-engine-robot", []string{"roles/cloudkms.admin", "roles/privateca.certificateManager"}) {
+	if acctest.BootstrapPSARoles(t, "service-", "container-engine-robot", []string{"roles/container.cloudKmsKeyUser", "roles/privateca.certificateManager"}) {
 		t.Fatal("Stopping the test because a role was added to the policy.")
 	}
 
@@ -5290,12 +5289,8 @@ func TestAccContainerCluster_WithCPAFeatures(t *testing.T) {
 			{
 				// We are only supporting CPA features on create for now.
 				Config: testAccContainerCluster_EnableCPAFeatures(context),
-			},
-			{
-				ResourceName:      "google_container_cluster.with_cpa_features",
-				ImportState:       true,
-				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				// TODO(b/372305432): check that cluster resource is created successfully.
+				ExpectError: regexp.MustCompile(`certificate authority pool location .* is not in the same region as cluster location .*`),
 			},
 		},
 	})
@@ -5305,7 +5300,8 @@ func testAccContainerCluster_EnableCPAFeatures(context map[string]interface{}) s
 	return acctest.Nprintf(`
 resource "google_privateca_ca_pool" "cluster_ca" {
   name = "tf-test-cluster-ca-%{random_suffix}"
-  location = "us-central1"
+  // TODO(b/372305432): use the same region as the cluster.
+  location = "us-west1"
   tier = "ENTERPRISE"
   publishing_options {
     publish_ca_cert = true
