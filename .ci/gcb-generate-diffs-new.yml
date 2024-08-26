@@ -293,7 +293,7 @@ steps:
         - COMMIT_SHA=$COMMIT_SHA
 
 # Long timeout to enable waiting on VCR test
-timeout: 20000s
+timeout: 64800s
 options:
     machineType: 'N1_HIGHCPU_32'
 
