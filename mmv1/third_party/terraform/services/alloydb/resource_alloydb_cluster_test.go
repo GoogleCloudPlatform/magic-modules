@@ -75,7 +75,7 @@ resource "google_compute_network" "default" {
 `, context)
 }
 
-// The trial cluster creation should succeed with subscription type field set to Trial.
+// Trial cluster creation should succeed with subscription type field set to Trial.
 func TestAccAlloydbCluster_withSubscriptionTypeTrial(t *testing.T) {
 	t.Parallel()
 
