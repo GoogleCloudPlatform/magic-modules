@@ -1466,7 +1466,7 @@ func TestAccAlloydbCluster_standardClusterUpdate(t *testing.T) {
 	})
 }
 
-// Ensures cluster update succeeds with subscription type from trial to trial and trial to standard.
+// Ensures cluster update succeeds with subscription type from trial to standard and trial to trial results in no change in config.
 func TestAccAlloydbCluster_trialClusterUpdate(t *testing.T) {
 	t.Parallel()
 
