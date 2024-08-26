@@ -33,7 +33,7 @@ func TestAccDataSourceArtifactRegistryDockerImage(t *testing.T) {
 
 					// url safe docker name using a tag
 					checkTaggedDataSources(resourceName+"UrlTag", "latest"),
-					
+
 					// Data source using no tag or digest
 					resource.TestCheckResourceAttrSet(resourceName+"None", "repository_id"),
 					resource.TestCheckResourceAttrSet(resourceName+"None", "image_name"),
