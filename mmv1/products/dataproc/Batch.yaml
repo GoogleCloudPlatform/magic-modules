@@ -36,6 +36,8 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/dataproc-serverless/docs/reference/rest/v1/projects.locations.batches'
 import_format: ['projects/{{project}}/locations/{{location}}/batches/{{batch_id}}']
 id_format: projects/{{project}}/locations/{{location}}/batches/{{batch_id}}
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  decoder: templates/terraform/decoders/cloud_dataproc_batch.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataproc_batch_spark'
