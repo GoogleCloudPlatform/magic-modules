@@ -1555,9 +1555,14 @@ func TestAccContainerCluster_withInsecureKubeletReadonlyPortEnabledInNodeConfigU
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withInsecureKubeletReadonlyPortEnabledInNodeConfig(clusterName, networkName, subnetworkName, "TRUE"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						acctest.ExpectNoDelete(),
+					},
+				},
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.with_insecure_kubelet_readonly_port_enabled_in_node_config",
-						"node_pool_defaults.0.node_config_defaults.0.insecure_kubelet_readonly_port_enabled", "TRUE"),
+						"node_config.0.kubelet_config.0.insecure_kubelet_readonly_port_enabled", "TRUE"),
 				),
 			},
 			{
