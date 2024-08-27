@@ -20,8 +20,6 @@ func TestAccSecurityCenterV2FolderBigQueryExportConfig_basic(t *testing.T) {
 		"org_id":        orgID,
 		"random_suffix": randomSuffix,
 		"dataset_id":    dataset_id,
-		"dataset": fmt.Sprintf("projects/%s/datasets/%s",
-			envvar.GetTestProjectFromEnv(), dataset_id),
 		"big_query_export_id": "tf-test-export-" + randomSuffix,
 		"folder_name":         "tf-test-folder-name-" + randomSuffix,
 	}
@@ -91,7 +89,7 @@ resource "time_sleep" "wait_1_minute" {
 resource "google_scc_v2_folder_scc_big_query_exports" "default" {
   big_query_export_id    = "%{big_query_export_id}"
   folder 	   = google_folder.folder.folder_id
-  dataset      = "%{dataset}"
+  dataset      = google_bigquery_dataset.default.id
   location     = "global"
   description  = "Cloud Security Command Center Findings Big Query Export Config"
   filter       = "state=\"ACTIVE\" AND NOT mute=\"MUTED\""
@@ -141,7 +139,7 @@ resource "google_bigquery_dataset" "default" {
 resource "google_scc_v2_folder_scc_big_query_exports" "default" {
   big_query_export_id    = "%{big_query_export_id}"
   folder 	   = google_folder.folder.folder_id
-  dataset      = "%{dataset}"
+  dataset      = google_bigquery_dataset.default.id
   location     = "global"
   description  = "SCC Findings Big Query Export Update"
   filter       = "state=\"ACTIVE\" AND NOT mute=\"MUTED\""
