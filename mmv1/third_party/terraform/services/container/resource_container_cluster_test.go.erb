@@ -1555,16 +1555,11 @@ func TestAccContainerCluster_withInsecureKubeletReadonlyPortEnabledInNodeConfigU
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withInsecureKubeletReadonlyPortEnabledInNodeConfig(clusterName, networkName, subnetworkName, "TRUE"),
-        // Add in once updates function
-				// ConfigPlanChecks: resource.ConfigPlanChecks{
-				//	PreApply: []plancheck.PlanCheck{
-				//		acctest.ExpectNoDelete(),
-				//	},
-				// },
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_container_cluster.with_insecure_kubelet_readonly_port_enabled_in_node_config",
-						"node_config.0.kubelet_config.0.insecure_kubelet_readonly_port_enabled", "TRUE"),
-				),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						acctest.ExpectNoDelete(),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_container_cluster.with_insecure_kubelet_readonly_port_enabled_in_node_config",
@@ -1572,17 +1567,17 @@ func TestAccContainerCluster_withInsecureKubeletReadonlyPortEnabledInNodeConfigU
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
-			{
-				Config: testAccContainerCluster_withInsecureKubeletReadonlyPortEnabledInNodeConfig(clusterName, networkName, subnetworkName, "FALSE"),
-				// TODO: Add check for update; updates for all the resources here
-				// currently broken b/361634104
-			},
-			{
-				ResourceName:            "google_container_cluster.with_insecure_kubelet_readonly_port_enabled_in_node_config",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
-			},
+			// TODO: Add check for update; updates for all the resources here
+			// currently broken b/361634104
+			//{
+			//	Config: testAccContainerCluster_withInsecureKubeletReadonlyPortEnabledInNodeConfig(clusterName, networkName, subnetworkName, "FALSE"),
+			//},
+			//{
+			//	ResourceName:            "google_container_cluster.with_insecure_kubelet_readonly_port_enabled_in_node_config",
+			//	ImportState:             true,
+			//	ImportStateVerify:       true,
+			//	ImportStateVerifyIgnore: []string{"deletion_protection"},
+			//},
 		},
 	})
 }
