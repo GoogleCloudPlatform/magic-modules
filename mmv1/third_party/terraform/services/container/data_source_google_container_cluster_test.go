@@ -60,6 +60,7 @@ func TestAccContainerClusterDatasource_regional(t *testing.T) {
 							"enable_tpu":                   {},
 							"pod_security_policy_config.#": {},
 							"deletion_protection":          {},
+							"resource_labels.%":            {},
 						},
 					),
 				),
@@ -96,7 +97,9 @@ resource "google_container_cluster" "kubes" {
   deletion_protection = false
   network    = "%s"
   subnetwork    = "%s"
-
+  resource_labels = {
+    created-by = "terraform"
+  }
 }
 
 data "google_container_cluster" "kubes" {

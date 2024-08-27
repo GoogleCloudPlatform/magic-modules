@@ -1,7 +1,9 @@
 resource "google_alloydb_cluster" "primary" {
   cluster_id = "{{index $.Vars "alloydb_primary_cluster_name"}}"
   location   = "us-central1"
-  network    = data.google_compute_network.default.id
+  network_config {
+    network = data.google_compute_network.default.id
+  }
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -17,7 +19,9 @@ resource "google_alloydb_instance" "primary" {
 resource "google_alloydb_cluster" "{{$.PrimaryResourceId}}" {
   cluster_id   = "{{index $.Vars "alloydb_secondary_cluster_name"}}"
   location     = "us-east1"
-  network      = data.google_compute_network.default.id
+  network_config {
+    network = data.google_compute_network.default.id
+  }
   cluster_type = "SECONDARY"
 
   continuous_backup_config {
