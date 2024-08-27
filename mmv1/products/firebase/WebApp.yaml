@@ -86,16 +86,13 @@ examples:
       - project
       - deletion_policy
 virtual_fields:
-  - !ruby/object:Api::Type::Enum
+  - !ruby/object:Api::Type::String
     name: 'deletion_policy'
     description: |
       Set to `ABANDON` to allow the WebApp to be untracked from terraform state
       rather than deleted upon `terraform destroy`. This is useful becaue the WebApp may be
       serving traffic. Set to `DELETE` to delete the WebApp. Default to `DELETE`
-    default_value: :DELETE
-    values:
-      - :DELETE
-      - :ABANDON
+    default_value: DELETE
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_delete: templates/terraform/custom_delete/firebase_app_deletion_policy.erb
 properties:

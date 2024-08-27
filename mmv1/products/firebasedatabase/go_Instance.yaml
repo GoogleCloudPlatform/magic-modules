@@ -64,8 +64,9 @@ examples:
       org_id: 'ORG_ID'
 virtual_fields:
   - name: 'desired_state'
-    description: The intended database state.
-    type: Enum
+    description: |
+      The intended database state. Possible values: ACTIVE, DISABLED.
+    type: String
     default_value: "ACTIVE"
 parameters:
   - name: 'region'
