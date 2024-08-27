@@ -409,12 +409,6 @@ explicitly set this field to `DELETE` in your configuration and run `terraform a
 a `skip_delete` value of `true` to a `deletion_policy` value of `ABANDON` for equivalent
 behavior.
 
-### Tagging at creation is now supported with `tags` field
-
-The field `tags` has been added which can be used to apply resource manager tags at creation time.
-
-**`tags` is an immutable field and causes resource replacement for any mutations made to the field.**
-
 ### Resource: `google_datastore_index` is now removed
 
 `google_datastore_index` is removed in favor of `google_firestore_index`
