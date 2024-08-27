@@ -559,3 +559,33 @@ properties:
                   name: nanos
                   description: |
                     Fractions of seconds in nanoseconds. Currently, only the value 0 is supported.
+  - !ruby/object:Api::Type::Enum
+    name: 'subscriptionType'
+    values:
+      - :TRIAL
+      - :STANDARD
+    default_from_api: true
+    description: |
+      The subscrition type of cluster.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'trialMetadata'
+    description: |
+      Contains information and all metadata related to TRIAL clusters.
+    output: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: startTime
+        description: |
+          Start time of the trial cluster.
+      - !ruby/object:Api::Type::String
+        name: endTime
+        description: |
+          End time of the trial cluster.
+      - !ruby/object:Api::Type::String
+        name: upgradeTime
+        description: |
+          Upgrade time of the trial cluster to standard cluster.
+      - !ruby/object:Api::Type::String
+        name: graceEndTime
+        description: |
+          Grace end time of the trial cluster.
