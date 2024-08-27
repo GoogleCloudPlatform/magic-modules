@@ -1367,9 +1367,11 @@ func BootstrapSharedTestTagKey(t *testing.T, testId string) string {
 	return sharedTagKey
 }
 
+const sharedTagValuePrefix = "tf-bootstrap-tagvalue"
+
 func BootstrapSharedTestTagValue(t *testing.T, testId string, tagKey string) string {
 	org := envvar.GetTestOrgFromEnv(t)
-	sharedTagValue := fmt.Sprintf("%s-%s", sharedTagKeyPrefix, testId)
+	sharedTagValue := fmt.Sprintf("%s-%s", sharedTagValuePrefix, testId)
 	tagKeyName := fmt.Sprintf("%s/%s", org, tagKey)
 	tagValueName := fmt.Sprintf("%s/%s", tagKeyName, sharedTagValue)
 
