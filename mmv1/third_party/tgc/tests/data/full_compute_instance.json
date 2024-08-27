@@ -1,182 +1,182 @@
 [
-    {
-      "name": "//compute.googleapis.com/projects/{{.Provider.project}}/zones/us-central1-a/instances/test1",
-      "asset_type": "compute.googleapis.com/Instance",
-      "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
-      "resource": {
-        "version": "v1",
-        "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
-        "discovery_name": "Instance",
-        "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
-        "data": {
-          "canIpForward": true,
-          "shieldedInstanceConfig": {
-            "enableIntegrityMonitoring": true,
-            "enableSecureBoot": true,
-            "enableVtpm": true
+  {
+    "name": "//compute.googleapis.com/projects/{{.Provider.project}}/zones/us-central1-a/instances/test1",
+    "asset_type": "compute.googleapis.com/Instance",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "v1",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
+      "discovery_name": "Instance",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "canIpForward": true,
+        "shieldedInstanceConfig": {
+          "enableIntegrityMonitoring": true,
+          "enableSecureBoot": true,
+          "enableVtpm": true
+        },
+        "deletionProtection": true,
+        "description": "test-description",
+        "disks": [
+          {
+            "autoDelete": true,
+            "boot": true,
+            "deviceName": "test-device_name",
+            "diskEncryptionKey": {
+              "rawKey": "test-disk_encryption_key_raw"
+            },
+            "initializeParams": {
+              "diskSizeGb": "42",
+              "diskType": "projects/{{.Provider.project}}/zones/us-central1-a/diskTypes/pd-standard",
+              "sourceImage": "projects/debian-cloud/global/images/debian-11"
+            },
+            "mode": "READ_WRITE",
+            "source": "projects/{{.Provider.project}}/zones/us-central1-a/disks/test-source"
           },
-          "deletionProtection": true,
-          "description": "test-description",
-          "disks": [
-            {
-              "autoDelete": true,
-              "boot": true,
-              "deviceName": "test-device_name",
-              "diskEncryptionKey": {
-                "rawKey": "test-disk_encryption_key_raw"
-              },
-              "initializeParams": {
-                "diskSizeGb": "42",
-                "diskType": "projects/{{.Provider.project}}/zones/us-central1-a/diskTypes/pd-standard",
-                "sourceImage": "projects/debian-cloud/global/images/debian-11"
-              },
-              "mode": "READ_WRITE",
-              "source": "projects/{{.Provider.project}}/zones/us-central1-a/disks/test-source"
+          {
+            "autoDelete": true,
+            "initializeParams": {
+              "diskType": "projects/{{.Provider.project}}/zones/us-central1-a/diskTypes/local-ssd"
             },
-            {
-              "autoDelete": true,
-              "initializeParams": {
-                "diskType": "projects/{{.Provider.project}}/zones/us-central1-a/diskTypes/local-ssd"
-              },
-              "interface": "SCSI",
-              "type": "SCRATCH"
-            },
-            {
-              "autoDelete": true,
-              "initializeParams": {
-                "diskType": "projects/{{.Provider.project}}/zones/us-central1-a/diskTypes/local-ssd"
-              },
-              "interface": "SCSI",
-              "type": "SCRATCH"
-            },
-            {
-              "deviceName": "test-device_name",
-              "diskEncryptionKey": {
-                "kmsKeyName": "test-kms_key_self_link"
-              },
-              "mode": "READ_ONLY",
-              "source": "projects/{{.Provider.project}}/zones/us-central1-a/disks/test-source"
-            },
-            {
-              "mode": "READ_WRITE",
-              "source": "projects/{{.Provider.project}}/zones/us-central1-a/disks/test-source2"
-            }
-          ],
-          "guestAccelerators": [
-            {
-              "acceleratorCount": 42,
-              "acceleratorType": "projects/{{.Provider.project}}/zones/us-central1-a/acceleratorTypes/test-guest_accelerator-type1"
-            },
-            {
-              "acceleratorCount": 42,
-              "acceleratorType": "projects/{{.Provider.project}}/zones/us-central1-a/acceleratorTypes/test-guest_accelerator-type2"
-            }
-          ],
-          "hostname": "test-hostname",
-          "labels": {
-            "label_foo1": "label-bar1"
+            "interface": "SCSI",
+            "type": "SCRATCH"
           },
-          "machineType": "projects/{{.Provider.project}}/zones/us-central1-a/machineTypes/n1-standard-1",
-          "metadata": {
-            "items": [
+          {
+            "autoDelete": true,
+            "initializeParams": {
+              "diskType": "projects/{{.Provider.project}}/zones/us-central1-a/diskTypes/local-ssd"
+            },
+            "interface": "SCSI",
+            "type": "SCRATCH"
+          },
+          {
+            "deviceName": "test-device_name",
+            "diskEncryptionKey": {
+              "kmsKeyName": "test-kms_key_self_link"
+            },
+            "mode": "READ_ONLY",
+            "source": "projects/{{.Provider.project}}/zones/us-central1-a/disks/test-source"
+          },
+          {
+            "mode": "READ_WRITE",
+            "source": "projects/{{.Provider.project}}/zones/us-central1-a/disks/test-source2"
+          }
+        ],
+        "guestAccelerators": [
+          {
+            "acceleratorCount": 42,
+            "acceleratorType": "projects/{{.Provider.project}}/zones/us-central1-a/acceleratorTypes/test-guest_accelerator-type1"
+          },
+          {
+            "acceleratorCount": 42,
+            "acceleratorType": "projects/{{.Provider.project}}/zones/us-central1-a/acceleratorTypes/test-guest_accelerator-type2"
+          }
+        ],
+        "hostname": "test-hostname",
+        "labels": {
+          "goog-terraform-provisioned": "true",
+          "label_foo1": "label-bar1"
+        },
+        "machineType": "projects/{{.Provider.project}}/zones/us-central1-a/machineTypes/n1-standard-1",
+        "metadata": {
+          "items": [
+            {
+              "key": "metadata_foo1",
+              "value": "metadata-bar1"
+            }
+          ]
+        },
+        "minCpuPlatform": "test-min_cpu_platform",
+        "name": "test1",
+        "networkInterfaces": [
+          {
+            "accessConfigs": [
               {
-                "key": "metadata_foo1",
-                "value": "metadata-bar1"
-              }
-            ]
-          },
-          "minCpuPlatform": "test-min_cpu_platform",
-          "name": "test1",
-          "networkInterfaces": [
-            {
-              "accessConfigs": [
-                {
-                  "natIP": "192.168.0.42",
-                  "type": "ONE_TO_ONE_NAT"
-                },
-                {
-                  "networkTier": "STANDARD",
-                  "type": "ONE_TO_ONE_NAT"
-                },
-                {
-                  "publicPtrDomainName": "test-public_ptr_domain_name",
-                  "setPublicPtr": true,
-                  "type": "ONE_TO_ONE_NAT"
-                }
-              ],
-              "aliasIpRanges": [
-                {
-                  "ipCidrRange": "test-ip_cidr_range",
-                  "subnetworkRangeName": "test-subnetwork_range_name"
-                }
-              ],
-              "network": "projects/{{.Provider.project}}/global/networks/default",
-              "networkIP": "test-network_ip"
-            },
-            {
-              "subnetwork": "projects/test-subnetwork_project/regions/us-central1/subnetworks/test-subnetwork"
-            }
-          ],
-          "scheduling": {
-            "automaticRestart": true,
-            "onHostMaintenance": "test-on_host_maintenance",
-            "preemptible": true
-          },
-          "serviceAccounts": [
-            {
-              "email": "test-email",
-              "scopes": [
-                "https://www.googleapis.com/auth/cloud-platform"
-              ]
-            }
-          ],
-          "tags": {
-            "items": [
-              "bar",
-              "foo"
-            ]
-          },
-          "zone": "us-central1-a"
-        }
-      }
-    },
-    {
-      "name": "//compute.googleapis.com/projects/{{.Provider.project}}/zones/us-central1-a/instances/test2",
-      "asset_type": "compute.googleapis.com/Instance",
-      "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
-      "resource": {
-        "version": "v1",
-        "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
-        "discovery_name": "Instance",
-        "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
-        "data": {
-          "canIpForward": false,
-          "deletionProtection": false,
-          "disks": [
-            {
-              "autoDelete": true,
-              "boot": true,
-              "diskEncryptionKey": {
-                "kmsKeyName": "test-kms_key_self_link"
+                "natIP": "192.168.0.42",
+                "type": "ONE_TO_ONE_NAT"
               },
-              "mode": "READ_WRITE"
-            }
-          ],
-          "machineType": "projects/{{.Provider.project}}/zones/us-central1-a/machineTypes/n1-standard-1",
-          "metadata": {},
-          "name": "test2",
-          "networkInterfaces": [
-            {
-              "network": "projects/{{.Provider.project}}/global/networks/default"
-            }
-          ],
-          "scheduling": {
-            "automaticRestart": true
+              {
+                "networkTier": "STANDARD",
+                "type": "ONE_TO_ONE_NAT"
+              },
+              {
+                "publicPtrDomainName": "test-public_ptr_domain_name",
+                "setPublicPtr": true,
+                "type": "ONE_TO_ONE_NAT"
+              }
+            ],
+            "aliasIpRanges": [
+              {
+                "ipCidrRange": "test-ip_cidr_range",
+                "subnetworkRangeName": "test-subnetwork_range_name"
+              }
+            ],
+            "network": "projects/{{.Provider.project}}/global/networks/default",
+            "networkIP": "test-network_ip"
           },
-          "tags": {},
-          "zone": "us-central1-a"
-        }
+          {
+            "subnetwork": "projects/test-subnetwork_project/regions/us-central1/subnetworks/test-subnetwork"
+          }
+        ],
+        "scheduling": {
+          "automaticRestart": true,
+          "onHostMaintenance": "test-on_host_maintenance",
+          "preemptible": true
+        },
+        "serviceAccounts": [
+          {
+            "email": "test-email",
+            "scopes": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          }
+        ],
+        "tags": {
+          "items": [
+            "bar",
+            "foo"
+          ]
+        },
+        "zone": "us-central1-a"
       }
     }
-  ]
-  
+  },
+  {
+    "name": "//compute.googleapis.com/projects/{{.Provider.project}}/zones/us-central1-a/instances/test2",
+    "asset_type": "compute.googleapis.com/Instance",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "v1",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
+      "discovery_name": "Instance",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "canIpForward": false,
+        "deletionProtection": false,
+        "disks": [
+          {
+            "autoDelete": true,
+            "boot": true,
+            "diskEncryptionKey": {
+              "kmsKeyName": "test-kms_key_self_link"
+            },
+            "mode": "READ_WRITE"
+          }
+        ],
+        "machineType": "projects/{{.Provider.project}}/zones/us-central1-a/machineTypes/n1-standard-1",
+        "metadata": {},
+        "name": "test2",
+        "networkInterfaces": [
+          {
+            "network": "projects/{{.Provider.project}}/global/networks/default"
+          }
+        ],
+        "scheduling": {
+          "automaticRestart": true
+        },
+        "tags": {},
+        "zone": "us-central1-a"
+      }
+    }
+  }
+]
