@@ -31,6 +31,7 @@ resource "google_compute_region_network_firewall_policy_with_rules" "<%= ctx[:pr
   }
   rule {
       description    = "udp rule"
+      rule_name      = "test-rule"
       priority       = 2000
       enable_logging = false
       action         = "deny"
@@ -54,7 +55,7 @@ resource "google_compute_region_network_firewall_policy_with_rules" "<%= ctx[:pr
 
 resource "google_network_security_address_group" "address_group_1" {
   provider  = google-beta 
-  name        = "address-group-1"
+  name        = "<%= ctx[:vars]['address_group_name'] %>"
   parent      = "projects/${data.google_project.project.name}"
   description = "Regional address group"
   location    = "us-west2"
@@ -68,7 +69,7 @@ resource "google_tags_tag_key" "secure_tag_key_1" {
   description = "Tag key"
   parent      = "projects/${data.google_project.project.name}"
   purpose     = "GCE_FIREWALL"
-  short_name  = "tag-key"
+  short_name  = "<%= ctx[:vars]['tag_key_name'] %>"
   purpose_data = {
     network = "${data.google_project.project.name}/default"
   }
@@ -78,5 +79,5 @@ resource "google_tags_tag_value" "secure_tag_value_1" {
   provider   = google-beta 
   description = "Tag value"
   parent      = "tagKeys/${google_tags_tag_key.secure_tag_key_1.name}"
-  short_name  = "tag-value"
+  short_name  = "<%= ctx[:vars]['tag_value_name'] %>"
 }

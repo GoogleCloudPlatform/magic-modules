@@ -44,6 +44,11 @@ examples:
     primary_resource_id: 'region-network-firewall-policy-with-rules'
     vars:
       policy_name: 'tf-region-fw-policy-with-rules'
+      address_group_name: 'tf-address-group'
+      tag_key_name: 'tf-tag-key'
+      tag_value_name: 'tf-tag-value'
+    test_env_vars:
+      org_id: :ORG_ID
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/resource_compute_region_network_firewall_policy_with_rules.go.erb
   encoder: templates/terraform/encoders/resource_compute_region_network_firewall_policy_with_rules.go.erb
