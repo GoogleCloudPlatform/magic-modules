@@ -29,18 +29,11 @@ privateCloudPollRead := func(d *schema.ResourceData, meta interface{}) transport
             if err != nil {
                 return res, err
             }
-            // if resource exists but is marked for deletion
-            log.Printf("[DEBUG] Fetching state of the private cloud.")
-            v, ok := res["state"]
-            if ok && v.(string) == "DELETED" {
-                log.Printf("[DEBUG] The Private cloud has been successfully marked for delayed deletion.")
-                return nil, nil
-            }
             return res, nil
         }
     }
 
-err = transport_tpg.PollingWaitTime(privateCloudPollRead(d, meta), transport_tpg.PollCheckForAbsence, "Deleting <%= object.name -%>", d.Timeout(schema.TimeoutDelete), 10)
+err = transport_tpg.PollingWaitTime(privateCloudPollRead(d, meta), pollCheckForPrivateCloudAbsence, "Deleting <%= object.name -%>", d.Timeout(schema.TimeoutDelete), 10)
 if err != nil {
     return fmt.Errorf("Error waiting to delete PrivateCloud: %s", err)
 }
