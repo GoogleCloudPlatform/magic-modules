@@ -100,6 +100,7 @@ properties:
         description: Granted quota value.
       - !ruby/object:Api::Type::String
         name: 'traceId'
+        custom_expand: 'templates/terraform/custom_expand/cloudquotas_quota_preference_trace_id.go.erb'
         output: true
         description: |
           The trace id that the Google Cloud uses to provision the requested quota. This trace id may be used by the client to contact Cloud support to track the state of a quota preference request. The trace id is only produced for increase requests and is unique for each request. The quota decrease requests do not have a trace id.

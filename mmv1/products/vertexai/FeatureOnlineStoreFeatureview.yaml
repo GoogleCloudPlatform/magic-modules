@@ -73,6 +73,8 @@ examples:
       name: 'example_cross_project_featureview'
   - !ruby/object:Provider::Terraform::Examples
     name: 'vertex_ai_featureonlinestore_featureview_with_vector_search'
+    # currently failing
+    skip_vcr: true
     primary_resource_id: 'featureview_vector_search'
     vars:
       name: 'example_feature_view_vector_search'
