@@ -25,7 +25,7 @@ func TestAccSecurityCenterV2ProjectBigQueryExportConfig_basic(t *testing.T) {
 		"big_query_export_id": "tf-test-export-" + randomSuffix,
 		"name": fmt.Sprintf("projects/%s/locations/global/bigQueryExports/%s",
 			envvar.GetTestProjectFromEnv(), "tf-test-export-"+randomSuffix),
-		"project":  envvar.GetTestProjectFromEnv(),
+		"project": envvar.GetTestProjectFromEnv(),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
