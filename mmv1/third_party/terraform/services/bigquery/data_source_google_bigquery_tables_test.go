@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package bigquery_test
 
 import (
@@ -42,15 +45,16 @@ func testAccDataSourceGoogleBigqueryTables_basic(context map[string]interface{})
   }
 
   resource "google_bigquery_table" "test_table" {
-    dataset_id = google_bigquery_dataset.foo.dataset_id
-    table_id   = "test_table_1"
-    schema     = ` + "`" + `[
+    dataset_id        = google_bigquery_dataset.foo.dataset_id
+    table_id          = "test_table_1"
+    delete_protection = false
+    schema     = <<EOF
       {
         "name": "name",
         "type": "STRING",
         "mode": "NULLABLE"
       }
-    ]` + "`" + `
+    EOF
   }
 
   data "google_bigquery_tables" "example" {
