@@ -78,6 +78,20 @@ examples:
       subnetwork_name: 'acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-pyspark-test-network", "dataproc-pyspark-test-subnetwork")'
       prevent_destroy: 'false'
     skip_import_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dataproc_batch_sparkr'
+    primary_resource_id: 'example_batch_sparkr'
+    primary_resource_name:
+      'fmt.Sprintf("tf-test-spark-batch%s", context["random_suffix"])'
+    test_env_vars:
+      project_name: :PROJECT_NAME
+    vars:
+      subnetwork_name: 'default'
+      prevent_destroy: 'true'
+    test_vars_overrides:
+      subnetwork_name: 'acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-pyspark-test-network", "dataproc-pyspark-test-subnetwork")'
+      prevent_destroy: 'false'
+    skip_import_test: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   decoder: templates/terraform/decoders/cloud_dataproc_batch.go.erb
   constants: templates/terraform/constants/cloud_dataproc_batch.go.erb

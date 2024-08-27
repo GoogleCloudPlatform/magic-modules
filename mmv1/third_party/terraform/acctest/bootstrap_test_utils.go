@@ -915,11 +915,11 @@ func BootstrapSubnetForDataprocBatches(t *testing.T, subnetName string, networkN
 	subnetOptions := map[string]interface{}{
 		"privateIpGoogleAccess": true,
 	}
-        return BootstrapCustomSubnet(t, subnetName, networkName, subnetOptions)
+	return BootstrapCustomSubnet(t, subnetName, networkName, subnetOptions)
 }
 
 func BootstrapSubnet(t *testing.T, subnetName string, networkName string) string {
-        return BootstrapCustomSubnet(t, subnetName, networkName, make(map[string]interface{}))
+	return BootstrapCustomSubnet(t, subnetName, networkName, make(map[string]interface{}))
 }
 
 func BootstrapSubnetWithFirewallForDataprocBatches(t *testing.T, testId string, subnetName string) string {
@@ -961,8 +961,8 @@ func BootstrapCustomSubnet(t *testing.T, subnetName string, networkName string, 
 		subnetObj := defaultSubnetObj
 
 		if len(subnetOptions) != 0 {
-		        maps.Copy(defaultSubnetObj, subnetOptions)
-                }
+			maps.Copy(defaultSubnetObj, subnetOptions)
+		}
 
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
