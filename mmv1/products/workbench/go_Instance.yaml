@@ -108,7 +108,7 @@ virtual_fields:
   - name: 'desired_state'
     description: |
       Desired state of the Workbench Instance. Set this field to `ACTIVE` to start the Instance, and `STOPPED` to stop the Instance.
-    type: Enum
+    type: String
     default_value: "ACTIVE"
 parameters:
   - name: 'location'

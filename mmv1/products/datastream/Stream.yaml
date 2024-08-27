@@ -28,15 +28,12 @@ id_format: projects/{{project}}/locations/{{location}}/streams/{{stream_id}}
 import_format:
   ['projects/{{project}}/locations/{{location}}/streams/{{stream_id}}']
 virtual_fields:
-  - !ruby/object:Api::Type::Enum
+  - !ruby/object:Api::Type::String
     name: 'desired_state'
     description: |
       Desired state of the Stream. Set this field to `RUNNING` to start the stream, and `PAUSED` to pause the stream.
-    values:
-      - :NOT_STARTED
-      - :RUNNING
-      - :PAUSED
-    default_value: :NOT_STARTED
+      Possible values: NOT_STARTED, RUNNING, PAUSED. Default: NOT_STARTED
+    default_value: NOT_STARTED
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: 'templates/terraform/constants/datastream_stream.go.erb'
   post_create: 'templates/terraform/post_create/datastream_stream.go.erb'
