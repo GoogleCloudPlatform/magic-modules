@@ -1,0 +1,15 @@
+/*
+ * Dataproc Batch api apends subminor version to the provided
+ * version. We are suppressing this server generated subminor.
+ */
+func cloudDataprocBatchFieldsDiffSuppressFunc(old, new string) bool {
+        if old == "" || strings.HasPrefix(new, old) {
+          return true
+        }
+
+        return false
+}
+
+func cloudDataprocBatchFieldsDiffSuppress(_, old, new string, d *schema.ResourceData) bool {
+        return cloudDataprocBatchFieldsDiffSuppressFunc(old, new)
+}

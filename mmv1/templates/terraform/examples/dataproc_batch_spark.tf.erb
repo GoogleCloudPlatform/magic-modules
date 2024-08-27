@@ -6,8 +6,6 @@ resource "google_dataproc_batch" "<%= ctx[:primary_resource_id] %>" {
 
     runtime_config {
       properties    = { "spark.dynamicAllocation.enabled": "false", "spark.executor.instances": "2" }
-      container_image = "us-docker.pkg.dev/google.com/hadoop-cloud-dev/s8s-spark-test-images/s8s-spark-2.2:latest"
-      version = "2.2"
     }
 
     environment_config {

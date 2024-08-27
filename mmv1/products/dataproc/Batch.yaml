@@ -24,20 +24,17 @@ description: |
   provision and manage your own Dataproc cluster.
 timeouts: !ruby/object:Api::Timeouts
   insert_minutes: 10
-  update_minutes: 5
   delete_minutes: 5
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     base_url: '{{op_id}}'
-autogen_async: false
+autogen_async: true
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Dataproc Serverless Batches Intro': 'https://cloud.google.com/dataproc-serverless/docs/overview'
   api: 'https://cloud.google.com/dataproc-serverless/docs/reference/rest/v1/projects.locations.batches'
 import_format: ['projects/{{project}}/locations/{{location}}/batches/{{batch_id}}']
 id_format: projects/{{project}}/locations/{{location}}/batches/{{batch_id}}
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  decoder: templates/terraform/decoders/cloud_dataproc_batch.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataproc_batch_spark'
@@ -52,6 +49,7 @@ examples:
     test_vars_overrides:
       subnetwork_name: 'acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-spark-test-network", "dataproc-spark-test-subnetwork")'
       prevent_destroy: 'false'
+    skip_import_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataproc_batch_sparksql'
     primary_resource_id: 'example_batch_sparsql'
@@ -65,6 +63,7 @@ examples:
     test_vars_overrides:
       subnetwork_name: 'acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-sparksql-test-network", "dataproc-sparksql-test-subnetwork")'
       prevent_destroy: 'false'
+    skip_import_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataproc_batch_pyspark'
     primary_resource_id: 'example_batch_pyspark'
@@ -78,6 +77,10 @@ examples:
     test_vars_overrides:
       subnetwork_name: 'acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-pyspark-test-network", "dataproc-pyspark-test-subnetwork")'
       prevent_destroy: 'false'
+    skip_import_test: true
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  decoder: templates/terraform/decoders/cloud_dataproc_batch.go.erb
+  constants: templates/terraform/constants/cloud_dataproc_batch.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -216,6 +219,7 @@ properties:
         description: |
           Version of the batch runtime.
         default_from_api: true
+        diff_suppress_func: cloudDataprocBatchFieldsDiffSuppress
       - !ruby/object:Api::Type::String
         name: 'containerImage'
         description: |
@@ -224,6 +228,11 @@ properties:
         name: 'properties'
         description: |
           A mapping of property names to values, which are used to configure workload execution.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'effective_properties'
+        description: |
+          A mapping of property names to values, which are used to configure workload execution.
+        output: true
       - !ruby/object:Api::Type::NestedObject
         name: 'repositoryConfig'
         description: |
