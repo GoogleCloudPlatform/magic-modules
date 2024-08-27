@@ -27,6 +27,8 @@ create_url: projects/{{project}}/locations/{{location}}/backupPolicies?backupPol
 update_url: projects/{{project}}/locations/{{location}}/backupPolicies/{{name}}
 update_verb: :PATCH
 update_mask: true
+# Skipping the sweeper since we need to sweep multiple regions
+skip_sweeper: true
 delete_url: projects/{{project}}/locations/{{location}}/backupPolicies/{{name}}
 autogen_async: true
 async: !ruby/object:Api::OpAsync
