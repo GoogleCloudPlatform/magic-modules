@@ -15,7 +15,6 @@
 name: 'ClientTlsPolicy'
 base_url: 'projects/{{project}}/locations/{{location}}/clientTlsPolicies'
 create_url: 'projects/{{project}}/locations/{{location}}/clientTlsPolicies?clientTlsPolicyId={{name}}'
-min_version: beta
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -49,7 +48,6 @@ import_format:
   ['projects/{{project}}/locations/{{location}}/clientTlsPolicies/{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
     name: 'network_security_client_tls_policy_basic'
     # Currently failing
     skip_vcr: true
@@ -57,7 +55,6 @@ examples:
     vars:
       resource_name: 'my-client-tls-policy'
   - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
     name: 'network_security_client_tls_policy_advanced'
     # Currently failing
     skip_vcr: true
