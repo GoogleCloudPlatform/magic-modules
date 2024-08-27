@@ -47,18 +47,19 @@ func testAccDataSourceGoogleBigqueryTables_basic(context map[string]interface{})
   resource "google_bigquery_table" "test_table" {
     dataset_id        = google_bigquery_dataset.foo.dataset_id
     table_id          = "test_table_1"
-    delete_protection = false
+    deletion_protection = false
     schema     = <<EOF
+    [
       {
         "name": "name",
         "type": "STRING",
         "mode": "NULLABLE"
       }
+    ]
     EOF
   }
 
   data "google_bigquery_tables" "example" {
-    project_id = "your-gcp-project-id"
     dataset_id = google_bigquery_dataset.foo.dataset_id
   }
 `, context)
