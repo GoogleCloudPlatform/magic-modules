@@ -318,7 +318,6 @@ properties:
           Peripherals configuration that workload has access to.
         default_from_api: true
         allow_empty_object: true
-          #custom_flatten: 'templates/terraform/custom_flatten/json_to_string_map.go.erb'
         properties:
           - !ruby/object:Api::Type::String
             name: 'metastoreService'
@@ -335,7 +334,7 @@ properties:
                   Resource name of an existing Dataproc Cluster to act as a Spark History Server for the workload.
   - !ruby/object:Api::Type::String
     name: 'operation'
-    description:  |
+    description: |
       The resource name of the operation associated with this batch.
     output: true
   - !ruby/object:Api::Type::Array
@@ -503,4 +502,3 @@ properties:
         name: 'queryVariables'
         description: |
           Mapping of query variable names to values (equivalent to the Spark SQL command: SET name="value";).
-
