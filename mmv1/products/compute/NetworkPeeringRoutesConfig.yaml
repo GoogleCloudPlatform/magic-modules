@@ -118,7 +118,7 @@ properties:
       IPv4 special-use ranges are always exported to peers and
       are not controlled by this field.
     send_empty_value: true
-    required: true
+    default_from_api: true
   - !ruby/object:Api::Type::Boolean
     name: 'importSubnetRoutesWithPublicIp'
     description: |
@@ -126,4 +126,4 @@ properties:
       IPv4 special-use ranges are always imported from peers and
       are not controlled by this field.
     send_empty_value: true
-    required: true
+    default_from_api: true
