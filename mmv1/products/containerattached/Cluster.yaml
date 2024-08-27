@@ -75,13 +75,10 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_update: templates/terraform/pre_update/containerattached_update.go.erb
   pre_delete: templates/terraform/pre_delete/container_attached_deletion_policy.go.erb
 virtual_fields:
-  - !ruby/object:Api::Type::Enum
+  - !ruby/object:Api::Type::String
     name: 'deletion_policy'
-    description: 'Policy to determine what flags to send on delete.'
-    values:
-      - :DELETE
-      - :DELETE_IGNORE_ERRORS
-    default_value: :DELETE
+    description: 'Policy to determine what flags to send on delete. Possible values: DELETE, DELETE_IGNORE_ERRORS'
+    default_value: DELETE
 properties:
   - !ruby/object:Api::Type::String
     name: location

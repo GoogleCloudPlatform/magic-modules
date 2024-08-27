@@ -17,12 +17,8 @@ type: key
 versions:
 - ga
 resource: samples/android.key.json
-dependencies:
-- samples/basic.cloudresourcemanager.project.json
 updates:
 - resource: samples/android_update.key.json
-  dependencies:
-  - samples/basic.cloudresourcemanager.project.json
 variables:
 - name: app
   type: resource_name

@@ -100,7 +100,6 @@ properties:
       internally during updates.
     update_url: 'projects/{{project}}/global/addresses/{{name}}/setLabels'
     update_verb: :POST
-    min_version: beta
   - !ruby/object:Api::Type::Enum
     name: 'ipVersion'
     description: |

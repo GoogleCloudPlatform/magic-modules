@@ -181,3 +181,11 @@ properties:
               name: originalDestination
               description: |
                 If true, Router will use the destination IP and port of the original connection as the destination of the request.
+            - !ruby/object:Api::Type::String
+              name: idleTimeout
+              description: |
+                Specifies the idle timeout for the selected route. The idle timeout is defined as the period in which there are no bytes sent or received on either the upstream or downstream connection. If not set, the default idle timeout is 30 seconds. If set to 0s, the timeout will be disabled.
+
+                A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
+              validation: !ruby/object:Provider::Terraform::Validation
+                regex: '^(0|[1-9][0-9]*)(\.[0-9]{1,9})?s$'

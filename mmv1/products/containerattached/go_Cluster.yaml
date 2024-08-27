@@ -73,8 +73,8 @@ examples:
       - 'deletion_policy'
 virtual_fields:
   - name: 'deletion_policy'
-    description: 'Policy to determine what flags to send on delete.'
-    type: Enum
+    description: 'Policy to determine what flags to send on delete. Possible values: DELETE, DELETE_IGNORE_ERRORS'
+    type: String
     default_value: "DELETE"
 parameters:
 properties:

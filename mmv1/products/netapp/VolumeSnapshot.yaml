@@ -30,6 +30,8 @@ create_url: projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/
 update_url: projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/snapshots/{{name}}
 update_verb: :PATCH
 update_mask: true
+# Skipping the sweeper since we need to sweep multiple regions
+skip_sweeper: true
 autogen_async: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation

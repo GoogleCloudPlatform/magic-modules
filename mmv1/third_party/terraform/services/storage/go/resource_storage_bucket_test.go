@@ -133,7 +133,7 @@ func TestAccStorageBucket_AutoclassDiffSupress(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 			{
-				Config: testAccStorageBucket_basicWithAutoclass(bucketName,false),
+				Config: testAccStorageBucket_basicWithAutoclass(bucketName, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckStorageBucketExists(
 						t, "google_storage_bucket.bucket", bucketName, &bucket),
@@ -146,7 +146,7 @@ func TestAccStorageBucket_AutoclassDiffSupress(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 			{
-				Config: testAccStorageBucket_basicWithAutoclass(bucketName,true),
+				Config: testAccStorageBucket_basicWithAutoclass(bucketName, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckStorageBucketExists(
 						t, "google_storage_bucket.bucket", bucketName, &bucket),
@@ -346,7 +346,7 @@ func TestAccStorageBucket_dualLocation_rpo(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 			{
-				Config: testAccStorageBucket_dualLocation_rpo(bucketName,"ASYNC_TURBO"),
+				Config: testAccStorageBucket_dualLocation_rpo(bucketName, "ASYNC_TURBO"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"google_storage_bucket.bucket", "rpo", "ASYNC_TURBO"),
@@ -359,7 +359,7 @@ func TestAccStorageBucket_dualLocation_rpo(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 			{
-				Config: testAccStorageBucket_dualLocation_rpo(bucketName,"DEFAULT"),
+				Config: testAccStorageBucket_dualLocation_rpo(bucketName, "DEFAULT"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"google_storage_bucket.bucket", "rpo", "DEFAULT"),
@@ -399,7 +399,7 @@ func TestAccStorageBucket_multiLocation_rpo(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 			{
-				Config: testAccStorageBucket_multiLocation_rpo(bucketName,"DEFAULT"),
+				Config: testAccStorageBucket_multiLocation_rpo(bucketName, "DEFAULT"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"google_storage_bucket.bucket", "rpo", "DEFAULT"),
@@ -1513,7 +1513,7 @@ func TestAccStorageBucket_SoftDeletePolicy(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 			{
-				Config: testAccStorageBucket_SoftDeletePolicy(bucketName,7776000),
+				Config: testAccStorageBucket_SoftDeletePolicy(bucketName, 7776000),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckStorageBucketExists(
 						t, "google_storage_bucket.bucket", bucketName, &bucket),
@@ -1528,7 +1528,7 @@ func TestAccStorageBucket_SoftDeletePolicy(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 			{
-				Config: testAccStorageBucket_SoftDeletePolicy(bucketName,0),
+				Config: testAccStorageBucket_SoftDeletePolicy(bucketName, 0),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckStorageBucketExists(
 						t, "google_storage_bucket.bucket", bucketName, &bucket),
@@ -1804,7 +1804,7 @@ resource "google_storage_bucket" "bucket" {
 `, bucketName)
 }
 
-func testAccStorageBucket_dualLocation_rpo(bucketName string,rpo string) string {
+func testAccStorageBucket_dualLocation_rpo(bucketName string, rpo string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
   name          = "%s"
@@ -1815,10 +1815,10 @@ resource "google_storage_bucket" "bucket" {
   }
   rpo = "%s"
 }
-`, bucketName,rpo)
+`, bucketName, rpo)
 }
 
-func testAccStorageBucket_multiLocation_rpo(bucketName string,rpo string) string {
+func testAccStorageBucket_multiLocation_rpo(bucketName string, rpo string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
   name          = "%s"
@@ -1826,7 +1826,7 @@ resource "google_storage_bucket" "bucket" {
   force_destroy = true
   rpo = "%s"
 }
-`, bucketName,rpo)
+`, bucketName, rpo)
 }
 
 func testAccStorageBucket_customAttributes(bucketName string) string {
@@ -2447,6 +2447,7 @@ resource "google_project" "acceptance" {
   project_id      = "tf-test-%{random_suffix}"
   org_id          = "%{organization}"
   billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_service" "acceptance" {
@@ -2548,7 +2549,7 @@ resource "google_storage_bucket" "bucket" {
 }
 
 func testAccStorageBucket_SoftDeletePolicy(bucketName string, duration int) string {
-  return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
   name          = "%s"
   location      = "US"
