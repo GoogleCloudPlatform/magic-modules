@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/services/filestore"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func testResourceFilestoreInstanceStateDataV0() map[string]interface{} {
@@ -164,7 +165,7 @@ resource "google_filestore_instance" "instance" {
   networks {
     network           = "default"
     modes             = ["MODE_IPV4"]
-    reserved_ip_range = "172.19.31.0/29"
+    reserved_ip_range = "172.19.30.0/29"
   }
 }
 `, name)
@@ -185,8 +186,103 @@ resource "google_filestore_instance" "instance" {
   networks {
     network           = "default"
     modes             = ["MODE_IPV4"]
-    reserved_ip_range = "172.19.31.8/29"
+    reserved_ip_range = "172.19.31.0/29"
   }
 }
 `, name)
 }
+
+
+func TestAccFilestoreInstance_tags(t *testing.T) {
+	t.Skip()
+
+	t.Parallel()
+
+	instance := fmt.Sprintf("tf-test%s.org1.com", acctest.RandString(t, 5))
+	context := map[string]interface{}{
+		"instance": instance,
+		"resource_name": "instance",
+	}
+
+	resourceName := acctest.Nprintf("google_filestore_instance.%{resource_name}", context)
+	org := envvar.GetTestOrgFromEnv(t)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckFilestoreInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFileInstanceTags(context, map[string]string{org + "/env": "test"}),
+			},
+			{
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "zone"},
+			},
+			{
+				Config: testAccFileInstanceTags_allowDestroy(context, map[string]string{org + "/env": "test"}),
+			},
+		},
+	})
+}
+
+func testAccFileInstanceTags(context map[string]interface{}, tags map[string]string) string {
+
+	r := acctest.Nprintf(`
+	resource "google_filestore_instance" "%{resource_name}" {
+	  name = "tf-instance-%s"
+          zone = "us-central1-b"
+          tier = "BASIC_HDD"
+
+          file_shares {
+            capacity_gb = 1024
+            name        = "share1"
+          }
+
+          networks {
+            network           = "default"
+            modes             = ["MODE_IPV4"]
+            reserved_ip_range = "172.19.31.0/24"
+          }
+	  tags = {`, context)
+
+	l := ""
+	for key, value := range tags {
+		l += fmt.Sprintf("%q = %q\n", key, value)
+	}
+
+	l += fmt.Sprintf("}\n}")
+	return r + l
+}
+
+func testAccFileInstanceTags_allowDestroy(context map[string]interface{}, tags map[string]string) string {
+
+	r := acctest.Nprintf(`
+	resource "google_filestore_instance" "%{resource_name}" {
+	  name = "tf-instance-%s"
+          zone = "us-central1-b"
+          tier = "BASIC_HDD"
+
+          file_shares {
+            capacity_gb = 1024
+            name        = "share1"
+          }
+
+          networks {
+            network           = "default"
+            modes             = ["MODE_IPV4"]
+            reserved_ip_range = "172.19.31.0/24"
+          }
+	  tags = {`, context)
+
+	l := ""
+	for key, value := range tags {
+		l += fmt.Sprintf("%q = %q\n", key, value)
+	}
+
+	l += fmt.Sprintf("}\n}")
+	return r + l
+}
+

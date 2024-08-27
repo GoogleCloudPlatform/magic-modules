@@ -283,3 +283,11 @@ properties:
     description: |
       KMS key name used for data encryption.
     immutable: true
+  - name: 'tags'
+    type: KeyValuePairs
+    description: |
+      A map of resource manager tags_. Resource manager tag keys and values have the same definition
+      as resource manager tags. Keys must be in the format tagKeys/{tag_key_id}, and values are in
+      the format tagValues/456. The field is ignored (both PUT & PATCH) when empty.
+    immutable: true
+    ignore_read: true
