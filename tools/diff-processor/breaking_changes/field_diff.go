@@ -13,7 +13,7 @@ import (
 // regarding field attribute changes
 type FieldDiffRule struct {
 	Identifier string
-	Messages func(resource, field string, fieldDiff diff.FieldDiff) []string
+	Messages   func(resource, field string, fieldDiff diff.FieldDiff) []string
 }
 
 // FieldDiffRules is a list of FieldDiffRule
@@ -27,7 +27,6 @@ var FieldDiffRules = []FieldDiffRule{
 	FieldGrowingMin,
 	FieldShrinkingMax,
 	FieldRemovingDiffSuppress,
-	FieldAddingSubfieldToConfigModeAttr,
 }
 
 var FieldChangingType = FieldDiffRule{
@@ -194,35 +193,6 @@ func FieldRemovingDiffSuppressMessages(resource, field string, fieldDiff diff.Fi
 	tmpl := "Field `%s` lost its diff suppress function"
 	if fieldDiff.Old.DiffSuppressFunc != nil && fieldDiff.New.DiffSuppressFunc == nil {
 		return []string{fmt.Sprintf(tmpl, field)}
-	}
-	return nil
-}
-
-var FieldAddingSubfieldToConfigModeAttr = FieldDiffRule{
-	Identifier: "field-adding-subfield-to-config-mode-attr",
-	Messages:   FieldAddingSubfieldToConfigModeAttrMessages,
-}
-
-func FieldAddingSubfieldToConfigModeAttrMessages(resource, field string, fieldDiff diff.FieldDiff) []string {
-	if fieldDiff.Old == nil || fieldDiff.New == nil {
-		return nil
-	}
-	if fieldDiff.New.ConfigMode == schema.SchemaConfigModeAttr {
-		newObj, ok := fieldDiff.New.Elem.(*schema.Resource)
-		if !ok {
-			return nil
-		}
-		oldObj, ok := fieldDiff.Old.Elem.(*schema.Resource)
-		if !ok {
-			return nil
-		}
-		// TODO: Add resource to this message
-		tmpl := "Field `%s` gained a subfield `%s` when it has SchemaConfigModeAttr"
-		for subfield := range newObj.Schema {
-			if _, ok := oldObj.Schema[subfield]; !ok {
-				return []string{fmt.Sprintf(tmpl, field, subfield)}
-			}
-		}
 	}
 	return nil
 }
