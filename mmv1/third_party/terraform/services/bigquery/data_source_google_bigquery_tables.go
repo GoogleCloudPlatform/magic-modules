@@ -63,7 +63,7 @@ func DataSourceGoogleBigQueryTablesRead(d *schema.ResourceData, meta interface{}
       return fmt.Errorf("Error creating BigQuery service: %s", err)
   }
 
-  tables, err := bq.NewTablesService(bigquery_service).tablesService.List(project, dataset_id).Do()
+  tables, err := bq.NewTablesService(bigquery_service).List(project, dataset_id).Do()
 
   if err != nil { 
     return fmt.Errorf("Error listing tables: %s", err)
