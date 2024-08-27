@@ -49,6 +49,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     min_version: beta
     name: 'network_security_server_tls_policy_basic'
+    skip_vcr: true
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-server-tls-policy'

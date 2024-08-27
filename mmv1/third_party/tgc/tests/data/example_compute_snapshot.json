@@ -10,7 +10,8 @@
       "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
       "data": {
         "labels": {
-          "test-name": "test-value"
+          "test-name": "test-value",
+          "goog-terraform-provisioned": "true"
         },
         "name": "test-instance",
         "sourceDisk": "projects/{{.Provider.project}}/zones/us-central1-a/disks/debian-disk",

@@ -107,6 +107,11 @@ var (
 			startDate: newDate(2024, 8, 10, pdtLoc),
 			endDate:   newDate(2024, 8, 17, pdtLoc),
 		},
+		{
+			id:        "trodge",
+			startDate: newDate(2024, 8, 24, pdtLoc),
+			endDate:   newDate(2024, 9, 2, pdtLoc),
+		},
 	}
 )
 

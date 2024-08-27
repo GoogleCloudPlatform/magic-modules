@@ -26,6 +26,8 @@ create_verb: :POST
 update_url: projects/{{project}}/locations/{{location}}/activeDirectories/{{name}}
 update_verb: :PATCH
 update_mask: true
+# Skipping the sweeper since we need to sweep multiple regions
+skip_sweeper: true
 delete_url: projects/{{project}}/locations/{{location}}/activeDirectories/{{name}}
 delete_verb: :DELETE
 autogen_async: true
