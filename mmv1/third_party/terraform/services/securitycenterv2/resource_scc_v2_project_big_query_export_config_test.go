@@ -17,11 +17,9 @@ func TestAccSecurityCenterV2ProjectBigQueryExportConfig_basic(t *testing.T) {
 	orgID := envvar.GetTestOrgFromEnv(t)
 
 	context := map[string]interface{}{
-		"org_id":        orgID,
-		"random_suffix": randomSuffix,
-		"dataset_id":    dataset_id,
-		"dataset": fmt.Sprintf("projects/%s/datasets/%s",
-			envvar.GetTestProjectFromEnv(), dataset_id),
+		"org_id":              orgID,
+		"random_suffix":       randomSuffix,
+		"dataset_id":          dataset_id,
 		"big_query_export_id": "tf-test-export-" + randomSuffix,
 		"name": fmt.Sprintf("projects/%s/locations/global/bigQueryExports/%s",
 			envvar.GetTestProjectFromEnv(), "tf-test-export-"+randomSuffix),
@@ -84,17 +82,12 @@ resource "time_sleep" "wait_1_minute" {
 }
 
 resource "google_scc_v2_project_scc_big_query_exports" "default" {
-  name		   = "%{name}"
   big_query_export_id    = "%{big_query_export_id}"
   project      = "%{project}"
-  dataset      = "%{dataset}"
+  dataset      = google_bigquery_dataset.default.id
   location     = "global"
   description  = "Cloud Security Command Center Findings Big Query Export Config"
   filter       = "state=\"ACTIVE\" AND NOT mute=\"MUTED\""
-
-  lifecycle {
-	ignore_changes = [name]
-  }
 
   depends_on = [time_sleep.wait_1_minute]
 }
@@ -127,17 +120,13 @@ resource "google_bigquery_dataset" "default" {
 }
 
 resource "google_scc_v2_project_scc_big_query_exports" "default" {
-  name		   = "%{name}"
   big_query_export_id    = "%{big_query_export_id}"
   project      = "%{project}"
-  dataset      = "%{dataset}"
+  dataset      = google_bigquery_dataset.default.id
   location     = "global"
   description  = "SCC Findings Big Query Export Update"
   filter       = "state=\"ACTIVE\" AND NOT mute=\"MUTED\""
 
-  lifecycle {
-	ignore_changes = [name]
-  }
 }
 
 resource "time_sleep" "wait_for_cleanup" {

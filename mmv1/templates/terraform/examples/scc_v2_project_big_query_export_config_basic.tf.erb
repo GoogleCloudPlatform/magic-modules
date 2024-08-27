@@ -19,7 +19,7 @@ resource "google_scc_v2_project_scc_big_query_exports" "<%= ctx[:primary_resourc
   name         = "<%= ctx[:vars]['name'] %>"
   big_query_export_id    = "<%= ctx[:vars]['big_query_export_id'] %>"
   project      = "<%= ctx[:test_env_vars]['project'] %>"
-  dataset      = "<%= ctx[:vars]['dataset'] %>"
+  dataset      = google_bigquery_dataset.default.id
   location     = "global"
   description  = "Cloud Security Command Center Findings Big Query Export Config"
   filter       = "state=\"ACTIVE\" AND NOT mute=\"MUTED\""
