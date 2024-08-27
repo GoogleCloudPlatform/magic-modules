@@ -138,21 +138,9 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 			{{- range $prop := $.OrderProperties $.AllUserProperties }}
 {{template "SchemaFields" $prop -}}
 			{{- end }}
-{{- if $.VirtualFields -}}
-{{-   range $field := $.VirtualFields }}
-            "{{ $field.Name -}}": {
-                Type: {{ $field.TFType $field.Type -}},
-                Optional: true,
-{{-      if $field.Immutable }}
-                ForceNew: true,
-{{-     end}}
-{{-      if not (eq $field.DefaultValue nil) }}
-                Default:  {{ $field.GoLiteral $field.DefaultValue -}},
-{{-     end}}
-                Description: `{{ replace $field.GetDescription "`" "'" -1 -}}`,
-            },
-{{-   end}}
-{{- end}}
+            {{- range $prop := $.VirtualFields }}
+{{template "SchemaFields" $prop -}}
+            {{- end }}
 {{- if $.CustomCode.ExtraSchemaEntry }} 
     {{ $.CustomTemplate $.CustomCode.ExtraSchemaEntry false -}}
 {{- end}}

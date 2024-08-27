@@ -60,6 +60,9 @@ type Type struct {
 	// behavior.
 	Immutable bool
 
+	// Indicates that this field is client-side only (aka virtual.)
+	ClientSide bool `yaml:"client_side"`
+
 	// url_param_only will not send the field in the resource body and will
 	// not attempt to read the field from the API response.
 	// NOTE - this doesn't work for nested fields
@@ -1100,6 +1103,12 @@ func propertyWithImmutable(immutable bool) func(*Type) {
 	}
 }
 
+func propertyWithClientSide(clientSide bool) func(*Type) {
+	return func(p *Type) {
+		p.ClientSide = clientSide
+	}
+}
+
 func propertyWithIgnoreWrite(ignoreWrite bool) func(*Type) {
 	return func(p *Type) {
 		p.IgnoreWrite = ignoreWrite
@@ -1345,6 +1354,11 @@ func (t *Type) IsForceNew() bool {
 
 	if t.IsA("KeyValueTerraformLabels") && !t.ResourceMetadata.Updatable() && !t.ResourceMetadata.RootLabels() {
 		return true
+	}
+
+	// Client-side fields don't inherit immutability
+	if t.ClientSide {
+		return t.Immutable
 	}
 
 	parent := t.Parent()
