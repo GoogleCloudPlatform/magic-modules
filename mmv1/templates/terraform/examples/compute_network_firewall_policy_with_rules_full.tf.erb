@@ -48,12 +48,30 @@ resource "google_compute_network_firewall_policy_with_rules" "<%= ctx[:primary_r
         }
       }
       disabled = true
+   }
+
+    rule {
+         description    = "security profile group rule"
+         rule_name      = "tcp rule"
+         priority       = 3000
+         enable_logging = false
+         action         = "apply_security_profile_group"
+         direction      = "INGRESS"
+         match {
+           layer4_config {
+             ip_protocol = "tcp"
+           }
+           src_ip_ranges = ["0.0.0.0/0"]
+         }
+         target_service_accounts = ["test@google.com"]
+         security_profile_group = "//networksecurity.googleapis.com/${google_network_security_security_profile_group.security_profile_group_1.id}"
+         tls_inspect = true
     }
 }
 
 resource "google_network_security_address_group" "address_group_1" {
   provider    = google-beta
-  name        = "address-group-1"
+  name        = "<%= ctx[:vars]['address_group_name'] %>"
   parent      = "projects/${data.google_project.project.name}"
   description = "Global address group"
   location    = "global"
@@ -67,7 +85,7 @@ resource "google_tags_tag_key" "secure_tag_key_1" {
   description = "Tag key"
   parent      = "projects/${data.google_project.project.name}"
   purpose     = "GCE_FIREWALL"
-  short_name  = "tag-key"
+  short_name  = "<%= ctx[:vars]['tag_key_name'] %>"
   purpose_data = {
     network = "${data.google_project.project.name}/default"
   }
@@ -77,6 +95,22 @@ resource "google_tags_tag_value" "secure_tag_value_1" {
   provider    = google-beta
   description = "Tag value"
   parent      = "tagKeys/${google_tags_tag_key.secure_tag_key_1.name}"
-  short_name  = "tag-value"
+  short_name  = "<%= ctx[:vars]['tag_value_name'] %>"
+}
+
+resource "google_network_security_security_profile_group" "security_profile_group_1" {
+  provider                  = google-beta
+  name                      = "<%= ctx[:vars]['security_profile_group_name'] %>"
+  parent                    = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"
+  description               = "my description"
+  threat_prevention_profile = google_network_security_security_profile.security_profile_1.id
+}
+
+resource "google_network_security_security_profile" "security_profile_1" {
+  provider    = google-beta
+  name        = "<%= ctx[:vars]['security_profile_name'] %>"
+  type        = "THREAT_PREVENTION"
+  parent      = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"
+  location    = "global"
 }
 
