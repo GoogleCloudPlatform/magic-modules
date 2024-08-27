@@ -74,34 +74,67 @@ resource "google_compute_firewall_policy_with_rules" "firewall-policy-with-rules
     }
   }
   rule {
-      description    = "udp rule"
-      priority       = 2000
-      enable_logging = false
-      action         = "deny"
-      direction      = "INGRESS"
-      match {
-        layer4_config {
-          ip_protocol = "udp"
-        }
-        src_ip_ranges = ["0.0.0.0/0"]
-        src_fqdns = ["www.abc.com", "www.def.com"]
-        src_region_codes = ["US", "CA"]
-        src_threat_intelligences = ["iplist-known-malicious-ips", "iplist-public-clouds"]
-        src_address_groups = [google_network_security_address_group.address_group_1.id]
+    description    = "udp rule"
+    priority       = 2000
+    enable_logging = false
+    action         = "deny"
+    direction      = "INGRESS"
+    match {
+      layer4_config {
+        ip_protocol = "udp"
       }
-      disabled = true
+      src_ip_ranges = ["0.0.0.0/0"]
+      src_fqdns = ["www.abc.com", "www.def.com"]
+      src_region_codes = ["US", "CA"]
+      src_threat_intelligences = ["iplist-known-malicious-ips", "iplist-public-clouds"]
+      src_address_groups = [google_network_security_address_group.address_group_1.id]
     }
- }
+    disabled = true
+  }
+  rule {
+    description    = "security profile group rule"
+    rule_name      = "tcp rule"
+    priority       = 3000
+    enable_logging = false
+    action         = "apply_security_profile_group"
+    direction      = "INGRESS"
+    match {
+      layer4_config {
+        ip_protocol = "tcp"
+      }
+      src_ip_ranges = ["0.0.0.0/0"]
+    }
+    target_service_accounts = ["test@google.com"]
+    security_profile_group = "//networksecurity.googleapis.com/${google_network_security_security_profile_group.security_profile_group_1.id}"
+    tls_inspect = true
+  }
+}
 
 resource "google_network_security_address_group" "address_group_1" {
   provider    = google-beta
-  name        = "address-group-1"
+  name        = "tf-test-tf-address-group%{random_suffix}"
   parent      = "organizations/%{org_id}"
   description = "Global address group"
   location    = "global"
   items       = ["208.80.154.224/32"]
   type        = "IPV4"
   capacity    = 100
+}
+
+resource "google_network_security_security_profile_group" "security_profile_group_1" {
+  provider                  = google-beta
+  name                      = "tf-test-tf-security-profile-group%{random_suffix}"
+  parent                    = "organizations/%{org_id}"
+  description               = "my description"
+  threat_prevention_profile = google_network_security_security_profile.security_profile_1.id
+}
+
+resource "google_network_security_security_profile" "security_profile_1" {
+  provider    = google-beta
+  name        = "tf-test-tf-security-profile%{random_suffix}"
+  type        = "THREAT_PREVENTION"
+  parent      = "organizations/%{org_id}"
+  location    = "global"
 }
 `, context)
 }
@@ -120,6 +153,7 @@ resource "google_compute_firewall_policy_with_rules" "firewall-policy-with-rules
 
   rule {
     description    = "tcp rule - update"
+    rule_name      = "udp rule"
     priority       = 1000
     enable_logging = false
     action         = "deny"
@@ -157,13 +191,29 @@ resource "google_compute_firewall_policy_with_rules" "firewall-policy-with-rules
 
 resource "google_network_security_address_group" "address_group_1" {
   provider    = google-beta
-  name        = "address-group-1"
+  name        = "tf-test-tf-address-group%{random_suffix}"
   parent      = "organizations/%{org_id}"
   description = "Global address group"
   location    = "global"
   items       = ["208.80.154.224/32"]
   type        = "IPV4"
   capacity    = 100
+}
+
+resource "google_network_security_security_profile_group" "security_profile_group_1" {
+  provider                  = google-beta
+  name                      = "tf-test-tf-security-profile-group%{random_suffix}"
+  parent                    = "organizations/%{org_id}"
+  description               = "my description"
+  threat_prevention_profile = google_network_security_security_profile.security_profile_1.id
+}
+
+resource "google_network_security_security_profile" "security_profile_1" {
+  provider    = google-beta
+  name        = "tf-test-tf-security-profile%{random_suffix}"
+  type        = "THREAT_PREVENTION"
+  parent      = "organizations/%{org_id}"
+  location    = "global"
 }
 `, context)
 }

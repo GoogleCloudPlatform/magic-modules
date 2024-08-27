@@ -27,6 +27,9 @@ examples:
     primary_resource_id: 'firewall-policy-with-rules'
     vars:
       policy_name: 'tf-fw-org-policy-with-rules'
+      address_group_name: 'tf-address-group'
+      security_profile_group_name: 'tf-security-profile-group'
+      security_profile_name: 'tf-security-profile'
     test_env_vars:
       org_id: :ORG_ID
 custom_code: !ruby/object:Provider::Terraform::CustomCode
