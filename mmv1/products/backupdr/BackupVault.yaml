@@ -105,8 +105,8 @@ parameters:
     required: false
     url_param_only: true
     description: |
-       If set, allow update to extend the minimum enforced retention for backup vault. This overrides 
-        the restriction against conflicting retention periods. This conflict may occur when the 
+       If set, allow update to extend the minimum enforced retention for backup vault. This overrides
+        the restriction against conflicting retention periods. This conflict may occur when the
         expiration schedule defined by the associated backup plan is shorter than the minimum
         retention set by the backup vault.
   - !ruby/object:Api::Type::Boolean
@@ -115,9 +115,9 @@ parameters:
     required: false
     url_param_only: true
     description: |
-       If set, the following restrictions against deletion of the backup vault instance can be overridden: 
-          * deletion of a backup vault instance containing no backups, but still contains empty datasources. 
-          * deletion of a backup vault instance that is being referenced by an active backup plan. 
+       If set, the following restrictions against deletion of the backup vault instance can be overridden:
+          * deletion of a backup vault instance containing no backups, but still contains empty datasources.
+          * deletion of a backup vault instance that is being referenced by an active backup plan.
   - !ruby/object:Api::Type::Boolean
     name: 'allow_missing'
     default_value: false
