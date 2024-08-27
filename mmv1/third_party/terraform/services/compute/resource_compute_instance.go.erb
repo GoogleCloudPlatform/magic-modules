@@ -210,9 +210,9 @@ func ResourceComputeInstance() *schema.Resource {
 							Type:         schema.TypeString,
 							Optional:     true,
 							ValidateFunc: validation.StringInSlice([]string{"SCSI", "NVME"}, false),
-                                                        Computed:     true,
+                                                        Computed:     false,
 							ForceNew:     false,
-							Description:  `The disk interface used for attaching this disk. One of SCSI or NVME.`,
+							Description:  `The disk interface used for attaching this disk. One of SCSI or NVME. (This field is only used for specific cases, please don't specify this field without advice from Google.)`,
 						},
 
 						"kms_key_self_link": {
@@ -646,8 +646,8 @@ func ResourceComputeInstance() *schema.Resource {
 							Type:         schema.TypeString,
 							Optional:     true,
 							ValidateFunc: validation.StringInSlice([]string{"SCSI", "NVME"}, false),
-							Description:  `The disk interface used for attaching this disk. One of SCSI or NVME.`,
-                                                        Computed:     true,
+							Description:  `The disk interface used for attaching this disk. One of SCSI or NVME. (This field is only used for specific cases, please don't specify this field without advice from Google.)`,
+                                                        Computed:     false,
                                                         ForceNew:     false,
 						},
 					},
