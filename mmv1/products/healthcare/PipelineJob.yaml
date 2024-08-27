@@ -42,7 +42,6 @@ parameters:
     url_param_only: true
     description: |
       Healthcare Dataset under which the Pipeline Job is to run     
-
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -232,7 +231,7 @@ properties:
               - !ruby/object:Api::Type::String
                 name: mapping
                 description: |
-                  Describes the mapping configuration.
+                  Specifies the name of the mapping in the Data Mapper workspace.
                 required: true
               - !ruby/object:Api::Type::String
                 name: mappingVersionId
