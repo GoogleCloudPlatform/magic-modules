@@ -240,7 +240,8 @@ func TestAccProject_tags(t *testing.T) {
 
 	org := envvar.GetTestOrgFromEnv(t)
 	pid := fmt.Sprintf("%s-%d", TestPrefix, acctest.RandInt(t))
-	tagKeyShortName := "testKey" + pid
+	tagKey := acctest.BootstrapSharedTestTagKey(t, "crm-projects-tagkey")
+	tagValue := acctest.BootstrapSharedTestTagValue(t, "crm-projects-tagvalue", tagKey)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck: func() { acctest.AccTestPreCheck(t) },
 		ExternalProviders: map[string]resource.ExternalProvider{
@@ -249,7 +250,7 @@ func TestAccProject_tags(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProject_tags(pid, org, map[string]string{org + "/" + tagKeyShortName: "testValue"}),
+				Config: testAccProject_tags(pid, org, map[string]string{org + "/" + tagKey: tagValue}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleProjectExists("google_project.acceptance", pid),
 				),
@@ -260,6 +261,14 @@ func TestAccProject_tags(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"tags", "deletion_policy"}, // we don't read tags back
+			},
+			// Update tags tries to replace project but fails due to deletion policy
+			{
+				Config:      testAccProject_tags(pid, org, map[string]string{}),
+				ExpectError: regexp.MustCompile("deletion_policy"),
+			},
+			{
+				Config: testAccProject_tagsAllowDestroy(pid, org, map[string]string{org + "/" + tagKey: tagValue}),
 			},
 		},
 	})
@@ -582,44 +591,33 @@ resource "google_folder" "folder1" {
 }
 
 func testAccProject_tags(pid, org string, tags map[string]string) string {
-	create_tags := ""
-	for key, value := range tags {
-		key_name := strings.Split(key, "/")
-		key_short_name := key_name[len(key_name)-1]
-		create_tags += fmt.Sprintf(`
-resource "google_tags_tag_key" "key" {
-
-  parent = "organizations/%s"
-  short_name = "%s"
-  description = "For Terraform acceptance testing."
-}
-
-resource "google_tags_tag_value" "value" {
-
-  parent = "tagKeys/${google_tags_tag_key.key.name}"
-  short_name = "%s"
-  description = "For Terraform acceptance testing."
-}`, org, key_short_name, value)
-	}
-
 	r := fmt.Sprintf(`
-resource "time_sleep" "wait_30_seconds" {
-  depends_on = [google_tags_tag_value.value]
-  create_duration = "30s"
-}
 resource "google_project" "acceptance" {
-  depends_on = [time_sleep.wait_30_seconds]
   project_id = "%s"
   name       = "%s"
   org_id     = "%s"
-  deletion_policy = "DELETE"
   tags = {`, pid, pid, org)
 
 	l := ""
 	for key, value := range tags {
 		l += fmt.Sprintf("%q = %q\n", key, value)
 	}
+	l += fmt.Sprintf("}\n}")
+	return r + l
+}
+
+func testAccProject_tagsAllowDestroy(pid, org string, tags map[string]string) string {
+	r := fmt.Sprintf(`resource "google_project" "acceptance" {
+	 project_id = "%s"
+  name       = "%s"
+  org_id     = "%s"
+  deletion_policy = "DELETE"
+  tags = {`, pid, pid, org)
+	l := ""
+	for key, value := range tags {
+		l += fmt.Sprintf("%q = %q\n", key, value)
+	}
 
 	l += fmt.Sprintf("}\n}")
-	return create_tags + r + l
+	return r + l
 }
