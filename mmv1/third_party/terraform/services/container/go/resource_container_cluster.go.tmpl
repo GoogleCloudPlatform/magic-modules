@@ -159,7 +159,7 @@ func clusterSchemaNodePoolDefaults() *schema.Schema {
 						Schema: map[string]*schema.Schema{
 							"containerd_config": schemaContainerdConfig(),
 {{- if ne $.TargetVersionName "ga" }}
-							"gcfs_config": schemaGcfsConfig(false),
+							"gcfs_config": schemaGcfsConfig(),
 {{- end }}
 							"logging_variant": schemaLoggingVariant(),
 						},
