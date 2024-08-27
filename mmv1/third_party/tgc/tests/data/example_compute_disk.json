@@ -10,7 +10,8 @@
       "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
       "data": {
         "labels": {
-          "environment": "dev"
+          "environment": "dev",
+          "goog-terraform-provisioned": "true"
         },
         "name": "test-disk",
         "physicalBlockSizeBytes": 4096,
