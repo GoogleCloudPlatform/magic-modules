@@ -57,12 +57,15 @@
                     }
                 },
                 "labels": {
-                    "foo": "bar"
+                    "foo": "bar",
+                    "goog-terraform-provisioned": "true"
                 },
                 "projectId": "{{.Provider.project}}"
             }
         },
-        "ancestors": ["organizations/{{.OrgID}}"],
+        "ancestors": [
+            "organizations/{{.OrgID}}"
+        ],
         "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
     }
 ]

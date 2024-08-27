@@ -53,6 +53,7 @@
           }
         },
         "labels": {
+          "goog-terraform-provisioned": "true",
           "label_foo1": "label-bar1"
         },
         "lifecycle": {
