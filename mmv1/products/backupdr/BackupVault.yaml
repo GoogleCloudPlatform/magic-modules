@@ -1,6 +1,8 @@
 --- !ruby/object:Api::Resource
 base_url: projects/{{project}}/locations/{{location}}/backupVaults
 create_url: projects/{{project}}/locations/{{location}}/backupVaults?backupVaultId={{backup_vault_id}}
+update_url: projects/{{project}}/locations/{{location}}/backupVaults/{{backup_vault_id}}?force={{force_update}}
+delete_url: projects/{{project}}/locations/{{location}}/backupVaults/{{backup_vault_id}}?force={{force_delete}}&allowMissing={{allow_missing}}
 self_link: projects/{{project}}/locations/{{location}}/backupVaults/{{backup_vault_id}}
 id_format: projects/{{project}}/locations/{{location}}/backupVaults/{{backup_vault_id}}
 import_format:
@@ -97,6 +99,32 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
+  - !ruby/object:Api::Type::Boolean
+    name: 'force_update'
+    default_value: false
+    required: false
+    url_param_only: true
+    description: |
+       If set, allow update to extend the minimum enforced retention for backup vault. This overrides 
+        the restriction against conflicting retention periods. This conflict may occur when the 
+        expiration schedule defined by the associated backup plan is shorter than the minimum
+        retention set by the backup vault.
+  - !ruby/object:Api::Type::Boolean
+    name: 'force_delete'
+    default_value: false
+    required: false
+    url_param_only: true
+    description: |
+       If set, the following restrictions against deletion of the backup vault instance can be overridden: 
+          * deletion of a backup vault instance containing no backups, but still contains empty datasources. 
+          * deletion of a backup vault instance that is being referenced by an active backup plan. 
+  - !ruby/object:Api::Type::Boolean
+    name: 'allow_missing'
+    default_value: false
+    required: false
+    url_param_only: true
+    description: |
+       Allow idempotent deletion of backup vault. The request will still succeed in case the backup vault does not exist.
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: name
