@@ -1567,17 +1567,15 @@ func TestAccContainerCluster_withInsecureKubeletReadonlyPortEnabledInNodeConfigU
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
-			// TODO: Add check for update; updates for all the resources here
-			// currently broken b/361634104
-			//{
-			//	Config: testAccContainerCluster_withInsecureKubeletReadonlyPortEnabledInNodeConfig(clusterName, networkName, subnetworkName, "FALSE"),
-			//},
-			//{
-			//	ResourceName:            "google_container_cluster.with_insecure_kubelet_readonly_port_enabled_in_node_config",
-			//	ImportState:             true,
-			//	ImportStateVerify:       true,
-			//	ImportStateVerifyIgnore: []string{"deletion_protection"},
-			//},
+			{
+				Config: testAccContainerCluster_withInsecureKubeletReadonlyPortEnabledInNodeConfig(clusterName, networkName, subnetworkName, "FALSE"),
+			},
+			{
+				ResourceName:            "google_container_cluster.with_insecure_kubelet_readonly_port_enabled_in_node_config",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
 		},
 	})
 }
