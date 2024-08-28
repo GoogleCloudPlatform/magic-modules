@@ -51,7 +51,7 @@ func testAccFwProvider_credentials_validJsonFilePath(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config:             testAccFwProvider_credentialsInProviderBlock(context),
+				Config:             testAccFwProvider_credentialsInProviderBlock_provisionSdkResource(context),
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: true,
 			},
@@ -232,26 +232,47 @@ func testAccFwProvider_credentials_emptyStringValidation(t *testing.T) {
 	})
 }
 
+// testAccFwProvider_credentialsInProviderBlock_provisionSdkResource is used when we want to make a plan to test
+// the credentials JSON path is valid (ie file exists) but we want to avoid a test failure cause by trying to use
+// those credentials, as they're fake.
+func testAccFwProvider_credentialsInProviderBlock_provisionSdkResource(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+provider "google" {
+	credentials = "%{credentials}"
+}
+
+resource "google_service_account" "default" {
+  account_id   = "%{resource_name}"
+  display_name = "Testing, provisioned by testAccFwProvider_credentialsInProviderBlock_provisionSdkResource"
+}
+`, context)
+}
+
+// testAccFwProvider_credentialsInProviderBlock allows setting the credentials argument in a provider block.
+// This function uses data.google_client_config because it is implemented with the plugin-framework,
+// and it should be replaced with another plugin framework-implemented datasource or resource in future
 func testAccFwProvider_credentialsInProviderBlock(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 provider "google" {
 	credentials = "%{credentials}"
 }
 
-// We provision something in the test so that VCR works; need an API interaction
-resource "google_service_account" "default" {
-  account_id   = "%{resource_name}"
-  display_name = "Testing, provisioned by testAccFwProvider_credentialsInProviderBlock"
+data "google_client_config" "default" {}
+
+output "token" {
+  value = data.google_client_config.default.access_token
 }
 `, context)
 }
 
+// testAccFwProvider_credentialsInEnvsOnly allows testing when the credentials argument
+// is only supplied via ENVs
 func testAccFwProvider_credentialsInEnvsOnly(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-// We provision something in the test so that VCR works; need an API interaction
-resource "google_service_account" "default" {
-  account_id   = "%{resource_name}"
-  display_name = "Testing, provisioned by testAccFwProvider_credentialsInProviderBlock"
+data "google_client_config" "default" {}
+
+output "token" {
+  value = data.google_client_config.default.access_token
 }
 `, context)
 }
