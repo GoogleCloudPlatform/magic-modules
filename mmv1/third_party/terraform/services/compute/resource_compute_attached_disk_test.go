@@ -328,25 +328,43 @@ func TestAccComputeAttachedDisk_diskInterface(t *testing.T) {
 		CheckDestroy:             nil,
 		Steps: []resource.TestStep{
 			{
-				Config: testAttachedDiskResource(diskName, instanceName) + testAccComputeAttachedDisk_interface("SCSI"),
+				Config: testAttachedDiskResource(diskName, instanceName) + testAccComputeAttachedDisk_interface("testInterface", "SCSI"),
 			},
 			{
-				ResourceName:      "google_compute_attached_disk.test",
+				ResourceName:      "google_compute_attached_disk.testInterface",
 				ImportStateId:     importID,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+                                Config: testAttachedDiskResource(diskName, instanceName) + testAccComputeAttachedDisk_noInterface("testNoInterface"),
+                        },
+			{
+                                ResourceName:      "google_compute_attached_disk.testNoInterface",
+                                ImportStateId:     importID,
+                                ImportState:       true,
+                                ImportStateVerify: true,
+                        },
 		},
 	})
 
 }
 
-func testAccComputeAttachedDisk_interface(diskInterface string) string {
+func testAccComputeAttachedDisk_interface(resourceName, diskInterface string) string {
 	return fmt.Sprintf(`
-resource "google_compute_attached_disk" "test" {
+resource "google_compute_attached_disk" "%s" {
   disk     = google_compute_disk.test1.self_link
   instance = google_compute_instance.test.self_link
   interface = "%s"
 }
-`, diskInterface)
+`, resourceName, diskInterface)
+}
+
+func testAccComputeAttachedDisk_noInterface(resourceName string) string {
+        return fmt.Sprintf(`
+resource "google_compute_attached_disk" "%s" {
+  disk     = google_compute_disk.test1.self_link
+  instance = google_compute_instance.test.self_link
+}
+`, resourceName)
 }
