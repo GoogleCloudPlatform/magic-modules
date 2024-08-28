@@ -9,6 +9,7 @@ import (
 )
 
 func TestAccApigeeInstance_updateConsumerAcceptList(t *testing.T) {
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
