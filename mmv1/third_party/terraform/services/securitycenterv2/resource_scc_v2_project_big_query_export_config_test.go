@@ -92,10 +92,6 @@ resource "google_scc_v2_project_scc_big_query_exports" "default" {
   depends_on = [time_sleep.wait_1_minute]
 }
 
-resource "time_sleep" "wait_for_cleanup" {
-	create_duration = "3m"
-	depends_on = [google_scc_v2_project_scc_big_query_exports.default]
-}
 `, context)
 }
 
@@ -129,9 +125,5 @@ resource "google_scc_v2_project_scc_big_query_exports" "default" {
 
 }
 
-resource "time_sleep" "wait_for_cleanup" {
-	create_duration = "3m"
-	depends_on = [google_scc_v2_project_scc_big_query_exports.default]
-}
 `, context)
 }
