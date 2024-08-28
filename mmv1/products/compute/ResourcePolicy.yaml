@@ -48,6 +48,12 @@ examples:
     vars:
       name: 'gce-policy'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'resource_policy_hourly_format'
+    primary_resource_id: 'foo'
+    skip_docs: true
+    vars:
+      name: 'gce-policy'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'resource_policy_full'
     primary_resource_id: 'bar'
     vars:
