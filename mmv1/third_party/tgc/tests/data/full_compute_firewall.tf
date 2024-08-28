@@ -36,7 +36,7 @@ resource "google_compute_firewall" "full_list_default_1" {
   }
   allow {
     protocol = "tcp"
-    ports    = ["80", "8080", "1000-2000"]
+    ports    = [80, 8080, "1000-2000"]
   }
   description        = "test-description"
   destination_ranges = ["192.168.0.42/32", "192.168.0.43/32"]
@@ -58,7 +58,7 @@ resource "google_compute_firewall" "full_list_default_2" {
   }
   deny {
     protocol = "tcp"
-    ports    = ["80", "8080", "1000-2000"]
+    ports    = [80, 8080, "1000-2000"]
   }
   source_ranges           = ["192.168.0.44/32", "192.168.0.45/32"]
   source_service_accounts = ["test-source_service_account1", "test-source_service_account2"]
