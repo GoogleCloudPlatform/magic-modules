@@ -27,6 +27,16 @@ self_link: 'projects/{{project}}/locations/{{location}}/datasets/{{dataset}}/pip
 create_url: 'projects/{{project}}/locations/{{location}}/datasets/{{dataset}}/pipelineJobs?pipelineJobId={{name}}'
 update_verb: :PATCH
 update_mask: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'healthcare_pipeline_job'
+    primary_resource_id: 'default'
+    vars:
+      pipeline_job_name: 'example-pipeline-job'
+      data_mapper_mapping_name: 'example-mapping'
+      destination_fhir_store: 'fhir-store'
+      bq_dataset: 'example-dataset'
+      bucket_name: 'example-bucket-name'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
