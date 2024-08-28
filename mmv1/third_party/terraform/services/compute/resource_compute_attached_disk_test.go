@@ -337,13 +337,13 @@ func TestAccComputeAttachedDisk_diskInterface(t *testing.T) {
 				ImportStateVerify: false,
 			},
 			{
-                                Config: testAttachedDiskResource(diskName, instanceName) + testAccComputeAttachedDisk_noInterface("testNoInterface"),
+				Config: testAttachedDiskResource(diskName, instanceName) + testAccComputeAttachedDisk_noInterface("testNoInterface"),
 			},
 			{
-                                ResourceName:      "google_compute_attached_disk.testNoInterface",
-                                ImportStateId:     importID,
-                                ImportState:       true,
-                                ImportStateVerify: true,
+				ResourceName:      "google_compute_attached_disk.testNoInterface",
+				ImportStateId:     importID,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -361,7 +361,7 @@ resource "google_compute_attached_disk" "%s" {
 }
 
 func testAccComputeAttachedDisk_noInterface(resourceName string) string {
-        return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_compute_attached_disk" "%s" {
   disk     = google_compute_disk.test1.self_link
   instance = google_compute_instance.test.self_link
