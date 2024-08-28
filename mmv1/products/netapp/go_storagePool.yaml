@@ -66,6 +66,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
+skip_sweeper: true
 custom_code:
   pre_update: 'templates/terraform/pre_update/go/netapp_storagepool.go.tmpl'
 examples:

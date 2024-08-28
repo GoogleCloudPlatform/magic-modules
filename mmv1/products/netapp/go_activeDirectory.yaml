@@ -43,6 +43,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
+skip_sweeper: true
 custom_code:
 examples:
   - name: 'netapp_active_directory_full'
