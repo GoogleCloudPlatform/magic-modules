@@ -1,18 +1,21 @@
 resource "google_healthcare_pipeline_job" "default" {
-  name  = "<%= ctx[:vars]['pipeline_job_name'] %>",
-  disable_lineage = true,
+  name  = "<%= ctx[:vars]['pipeline_job_name'] %>"
+  location = "us-central1"
+  dataset = "<%= ctx[:vars]['dataset'] %>"
+  disable_lineage = true
   mapping_pipeline_job {
     mapping_config {
       data_mapper_config_source {
         gcs {
           uri_prefix = google_storage_bucket.bucket.name
-        },
+        }
         mapping = "<%= ctx[:vars]['data_mapper_mapping_name'] %>"
+        parameterKey = ""
       }
-    },
+    }
     bigquery_source {
       bigquery_dataset = google_bigquery_dataset.bq_dataset.dataset_id
-    },
+    }
     fhirStore_destination = "<%= ctx[:vars]['destination_fhir_store'] %>"
   }
 }

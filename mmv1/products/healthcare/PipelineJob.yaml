@@ -33,6 +33,7 @@ examples:
     primary_resource_id: 'default'
     vars:
       pipeline_job_name: 'example-pipeline-job'
+      dataset: 'example-dataset'
       data_mapper_mapping_name: 'example-mapping'
       destination_fhir_store: 'fhir-store'
       bq_dataset: 'example-dataset'
@@ -193,6 +194,23 @@ properties:
             name: description
             description: |
               Describes the cloud spanner data source.
+            required: false
+      - !ruby/object:Api::Type::NestedObject
+        name: bigquerySource
+        description: |
+          BigQuery data source.
+        required: false
+        properties:
+          - !ruby/object:Api::Type::String
+            name: bigqueryDataset
+            description: |
+              Required. The path to the BigQuery dataset in the format 
+              projects/{projectId}/datasets/{datasetId}.
+            required: true
+          - !ruby/object:Api::Type::String
+            name: description
+            description: |
+              Describes the bigquery data source.
             required: false
       - !ruby/object:Api::Type::String
         name: fhirStoreDestination
