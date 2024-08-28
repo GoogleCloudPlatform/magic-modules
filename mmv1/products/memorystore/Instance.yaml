@@ -22,9 +22,9 @@ examples:
     min_version: beta
     vars:
       instance_name: "ha-instance"
-      policy_name: "mypolicy"
-      subnet_name: "mysubnet"
-      network_name: "mynetwork"
+      policy_name: "my-policy"
+      subnet_name: "my-subnet"
+      network_name: "my-network"
       prevent_destroy: "true"
     test_vars_overrides:
       prevent_destroy: "false"

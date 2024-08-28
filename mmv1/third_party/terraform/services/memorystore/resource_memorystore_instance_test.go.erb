@@ -112,10 +112,10 @@ func TestAccMemorystoreInstance_updateRedisConfigs(t *testing.T) {
 					name:           name,
 					shardCount:     3,
 					zoneDistributionMode: "MULTI_ZONE",
-                    deletionProtectionEnabled: false,
 					engineConfigs: map[string]string{
 						"maxmemory-policy": "volatile-ttl",
-					}}),
+					},
+                    deletionProtectionEnabled: false}),
 			},
 			{
 				ResourceName:            "google_memorystore_instance.test",
@@ -128,11 +128,11 @@ func TestAccMemorystoreInstance_updateRedisConfigs(t *testing.T) {
 					name:           name,
 					shardCount:     3,
 					zoneDistributionMode: "MULTI_ZONE",
-                    deletionProtectionEnabled: false,
 					engineConfigs: map[string]string{
 						"maxmemory-policy":  "allkeys-lru",
 						"maxmemory-clients": "90%",
-					}}),
+					},
+                    deletionProtectionEnabled: false}),
 			},
 			{
 				ResourceName:            "google_memorystore_instance.test",
@@ -141,7 +141,15 @@ func TestAccMemorystoreInstance_updateRedisConfigs(t *testing.T) {
 			},
 			{
 				// remove all redis configs
-				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, shardCount: 3, zoneDistributionMode: "MULTI_ZONE", deletionProtectionEnabled: false}),
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{
+                    name: name, 
+                    shardCount: 3, 
+                    zoneDistributionMode: "MULTI_ZONE", 
+                	engineConfigs: map[string]string{
+						"maxmemory-policy":  "allkeys-lru",
+						"maxmemory-clients": "90%",
+					},
+                    deletionProtectionEnabled: false}),
 			},
 
 		},
@@ -186,6 +194,43 @@ func TestAccMemorystoreInstance_updateDeletionProtection(t *testing.T) {
 	})
 }
 
+// Validate that persistence config is updated for the cluster
+func TestAccMemorystoreInstance_updatePersistence(t *testing.T) {
+	t.Parallel()
+
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckMemorystoreInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// create instance with AOF enabled
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: true, nodeType: "REDIS_STANDARD_SMALL", zoneDistributionMode: "MULTI_ZONE", persistenceMode:"AOF", deletionProtectionEnabled: false}),
+			},
+			{
+				ResourceName:            "google_memorystore_instance.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+			},
+			{
+				// update persitence to RDB
+				Config: createOrUpdateRedisCluster(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: true, nodeType: "REDIS_STANDARD_SMALL", zoneDistributionMode: "MULTI_ZONE", persistenceMode:"RDB", deletionProtectionEnabled: false}),
+			},
+			{
+				ResourceName:            "google_memorystore_instance.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+			},
+			{
+				// clean up the resource
+				Config: createOrUpdateRedisCluster(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: false, nodeType: "REDIS_STANDARD_SMALL",zoneDistributionMode: "MULTI_ZONE", persistenceMode:"RDB", deletionProtectionEnabled: false}),
+			},
+		},
+	})
+}
+
 type InstanceParams struct {
 	name                 string
 	replicaCount   			 int
@@ -196,6 +241,7 @@ type InstanceParams struct {
 	zoneDistributionMode string
 	zone 								 string
     deletionProtectionEnabled bool
+    persistenceMode      string
 }
 
 func createOrUpdateMemorystoreInstance(params *InstanceParams) string {
@@ -220,6 +266,13 @@ func createOrUpdateMemorystoreInstance(params *InstanceParams) string {
 		}
 		`, params.zoneDistributionMode, params.zone)
 	}
+    persistenceBlock := ""
+    if params.persistenceMode == "RDB" {
+        persistenceBlock = "persistenceConfig = {mode: = \"RDB\"}"
+    }
+    if params.persistenceMode == "AOF" {
+        persistenceBlock = "persistenceConfig = {mode: \"AOF\"}"
+    }
 
 	return fmt.Sprintf(`
 resource "google_memorystore_instance" "test" {
@@ -229,7 +282,7 @@ resource "google_memorystore_instance" "test" {
 	shard_count = %d
 	node_type = "%s"
 	location         = "europe-west1"
-	desired_psc_auto_connections {
+	desired_psc_auto_connections  {
 			network = google_compute_network.producer_net.id
             project_id = data.google_project.project.project_id
 	}
@@ -273,7 +326,7 @@ resource "google_compute_network" "producer_net" {
 data "google_project" "project" {
   provider = google-beta
 }
-`, params.name, params.replicaCount, params.shardCount, params.nodeType, params.deletionProtectionEnabled, strBuilder.String(), zoneDistributionConfigBlock, lifecycleBlock, params.name, params.name, params.name)
+`, params.name, params.replicaCount, params.shardCount, params.nodeType, params.deletionProtectionEnabled, strBuilder.String(), zoneDistributionConfigBlock, persistenceBlock, lifecycleBlock, params.name, params.name, params.name)
 }
 
 <% end -%>
