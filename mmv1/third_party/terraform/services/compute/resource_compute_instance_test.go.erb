@@ -10308,6 +10308,8 @@ func TestAccComputeInstance_bootAndAttachedDisk_interface(t *testing.T) {
         diskName1 := fmt.Sprintf("tf-test-disk1-%s", acctest.RandString(t, 10))
         instanceName2 := fmt.Sprintf("tf-test-vm2-%s", acctest.RandString(t, 10))
         diskName2 := fmt.Sprintf("tf-test-disk2-%s", acctest.RandString(t, 10))
+        instanceName3 := fmt.Sprintf("tf-test-vm3-%s", acctest.RandString(t, 10))
+        diskName3 := fmt.Sprintf("tf-test-disk3-%s", acctest.RandString(t, 10))
         acctest.VcrTest(t, resource.TestCase{
                 PreCheck:                 func() { acctest.AccTestPreCheck(t) },
                 ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -10320,7 +10322,7 @@ func TestAccComputeInstance_bootAndAttachedDisk_interface(t *testing.T) {
                                         resource.TestCheckResourceAttr("google_compute_instance.foobar", "machine_type", "h3-standard-88"),
                                 ),
                         },
-                        //computeInstanceImportStep("us-central1-a", instanceName, []string{"desired_status","allow_stopping_for_update"}),
+                        //computeInstanceImportStep("us-central1-a", instanceName1, []string{"desired_status","allow_stopping_for_update"}),
                         {
                                 Config:    testAccComputeInstance_bootAndAttachedDisk_interface(instanceName2, diskName2, envvar.GetTestZoneFromEnv(), "n2-standard-8", "SCSI",  "SCSI", true),
                                 Check: resource.ComposeTestCheckFunc(
@@ -10329,7 +10331,15 @@ func TestAccComputeInstance_bootAndAttachedDisk_interface(t *testing.T) {
                                         resource.TestCheckResourceAttr("google_compute_instance.foobar", "machine_type", "n2-standard-8"),
                                 ),
                         },
-                        //computeInstanceImportStep("us-central1-a", instanceName, []string{"desired_status","allow_stopping_for_update"}),
+                        //computeInstanceImportStep("us-central1-a", instanceName2, []string{"desired_status","allow_stopping_for_update"}),
+                        {
+                                Config:    testAccComputeInstance_bootAndAttachedDisk_interface(instanceName3, diskName3, envvar.GetTestZoneFromEnv(), "h3-standard-88", "SCSI", "SCSI", true),
+                                Check: resource.ComposeTestCheckFunc(
+                                        resource.TestCheckResourceAttr("google_compute_instance.foobar", "boot_disk.0.interface", "NVME"),
+                                        resource.TestCheckResourceAttr("google_compute_instance.foobar", "attached_disk.0.interface", "NVME"),
+                                        resource.TestCheckResourceAttr("google_compute_instance.foobar", "machine_type", "h3-standard-88"),
+                                ),
+                        },
 
                 },
         })
