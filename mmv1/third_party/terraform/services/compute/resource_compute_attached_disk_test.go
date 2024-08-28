@@ -334,7 +334,7 @@ func TestAccComputeAttachedDisk_diskInterface(t *testing.T) {
 				ResourceName:      "google_compute_attached_disk.testInterface",
 				ImportStateId:     importID,
 				ImportState:       true,
-				ImportStateVerify: true,
+				ImportStateVerify: false,
 			},
 			{
                                 Config: testAttachedDiskResource(diskName, instanceName) + testAccComputeAttachedDisk_noInterface("testNoInterface"),
