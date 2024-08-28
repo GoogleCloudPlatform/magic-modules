@@ -124,9 +124,6 @@ func dataSourceGoogleComputeInstanceRead(d *schema.ResourceData, meta interface{
 				"device_name": disk.DeviceName,
 				"mode":        disk.Mode,
 			}
-                        if _,ok := d.GetOk("boot_disk.0.interface"); ok {
-                                di["interface"] = disk.Interface
-                        }
 			if key := disk.DiskEncryptionKey; key != nil {
 				di["disk_encryption_key_sha256"] = key.Sha256
 				di["kms_key_self_link"] = key.KmsKeyName

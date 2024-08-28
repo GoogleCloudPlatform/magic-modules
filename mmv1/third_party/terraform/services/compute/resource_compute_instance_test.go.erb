@@ -10315,37 +10315,26 @@ func TestAccComputeInstance_bootAndAttachedDisk_interface(t *testing.T) {
                 ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
                 Steps: []resource.TestStep{
                         {
-                                Config:    testAccComputeInstance_bootAndAttachedDisk_interface(instanceName1, diskName1, envvar.GetTestZoneFromEnv(), "h3-standard-88", "NVME", "NVME", false),
+                                Config:    testAccComputeInstance_bootAndAttachedDisk_interface(instanceName1, diskName1, envvar.GetTestZoneFromEnv(), "h3-standard-88", "NVME", false),
                                 Check: resource.ComposeTestCheckFunc(
                                         resource.TestCheckResourceAttr("google_compute_instance.foobar", "boot_disk.0.interface", "NVME"),
-                                        resource.TestCheckResourceAttr("google_compute_instance.foobar", "attached_disk.0.interface", "NVME"),
                                         resource.TestCheckResourceAttr("google_compute_instance.foobar", "machine_type", "h3-standard-88"),
                                 ),
                         },
                         //computeInstanceImportStep("us-central1-a", instanceName1, []string{"desired_status","allow_stopping_for_update"}),
                         {
-                                Config:    testAccComputeInstance_bootAndAttachedDisk_interface(instanceName2, diskName2, envvar.GetTestZoneFromEnv(), "n2-standard-8", "SCSI",  "SCSI", true),
+                                Config:    testAccComputeInstance_bootAndAttachedDisk_interface(instanceName2, diskName2, envvar.GetTestZoneFromEnv(), "n2-standard-8", "SCSI", true),
                                 Check: resource.ComposeTestCheckFunc(
                                         resource.TestCheckResourceAttr("google_compute_instance.foobar", "boot_disk.0.interface", "SCSI"),
-                                        resource.TestCheckResourceAttr("google_compute_instance.foobar", "attached_disk.0.interface", "SCSI"),
                                         resource.TestCheckResourceAttr("google_compute_instance.foobar", "machine_type", "n2-standard-8"),
                                 ),
                         },
                         //computeInstanceImportStep("us-central1-a", instanceName2, []string{"desired_status","allow_stopping_for_update"}),
-                        {
-                                Config:    testAccComputeInstance_bootAndAttachedDisk_interface(instanceName3, diskName3, envvar.GetTestZoneFromEnv(), "h3-standard-88", "SCSI", "SCSI", true),
-                                Check: resource.ComposeTestCheckFunc(
-                                        resource.TestCheckResourceAttr("google_compute_instance.foobar", "boot_disk.0.interface", "NVME"),
-                                        resource.TestCheckResourceAttr("google_compute_instance.foobar", "attached_disk.0.interface", "NVME"),
-                                        resource.TestCheckResourceAttr("google_compute_instance.foobar", "machine_type", "h3-standard-88"),
-                                ),
-                        },
-
                 },
         })
 }
 
-func testAccComputeInstance_bootAndAttachedDisk_interface(instanceName, diskName, zone, machineType, bootDiskInterface, attachedDiskInterface string, allowStoppingForUpdate bool) string {
+func testAccComputeInstance_bootAndAttachedDisk_interface(instanceName, diskName, zone, machineType, bootDiskInterface string, allowStoppingForUpdate bool) string {
         return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family    = "ubuntu-2204-lts"
@@ -10378,7 +10367,6 @@ resource "google_compute_instance" "foobar" {
 
   	attached_disk {
               source = google_compute_disk.foorbarattach.self_link
-              interface = "%s"
   	}
 	
 	network_interface {
@@ -10388,5 +10376,5 @@ resource "google_compute_instance" "foobar" {
         desired_status = "RUNNING"
 
 }
-`, diskName, instanceName, machineType, zone, bootDiskInterface, attachedDiskInterface, allowStoppingForUpdate)
+`, diskName, instanceName, machineType, zone, bootDiskInterface, allowStoppingForUpdate)
 }
