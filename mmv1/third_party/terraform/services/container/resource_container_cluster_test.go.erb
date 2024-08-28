@@ -490,7 +490,6 @@ func TestAccContainerCluster_withFQDNNetworkPolicy(t *testing.T) {
 }
 <% end -%>
 
-<% unless version == 'ga' -%>
 func TestAccContainerCluster_withAdditiveVPC(t *testing.T) {
 	t.Parallel()
 
@@ -513,7 +512,6 @@ func TestAccContainerCluster_withAdditiveVPC(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccContainerCluster_withMasterAuthConfig_NoCert(t *testing.T) {
 	t.Parallel()
@@ -701,7 +699,6 @@ resource "google_container_cluster" "cluster" {
 `, clusterName, clusterName)
 }
 
-<% unless version == 'ga' -%>
 func testAccContainerCluster_withAdditiveVPC(clusterName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "cluster" {
@@ -718,7 +715,6 @@ resource "google_container_cluster" "cluster" {
 }
 `, clusterName)
 }
-<% end -%>
 
 <% unless version == 'ga' -%>
 func testAccContainerCluster_withFQDNNetworkPolicy(clusterName string, enabled bool) string {
