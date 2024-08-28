@@ -10,6 +10,9 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
+// TestAccFwProvider_credentials is a series of acc tests asserting how the plugin-framework provider handles credentials arguments
+// It is PF specific because the HCL used uses a PF-implemented data source
+// It is a counterpart to TestAccSdkProvider_credentials
 func TestAccFwProvider_credentials(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
 		"credentials can be configured as a path to a credentials JSON file":                                       testAccFwProvider_credentials_validJsonFilePath,
