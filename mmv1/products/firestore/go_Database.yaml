@@ -141,7 +141,7 @@ virtual_fields:
       If the deletion policy is `DELETE`, the database will both be removed from Terraform state and deleted from Google Cloud upon destruction.
       The default value is `ABANDON`.
       See also `delete_protection`.
-    type: Enum
+    type: String
     default_value: "ABANDON"
 parameters:
 properties:

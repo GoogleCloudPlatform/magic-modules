@@ -26,6 +26,7 @@
       "data": {
         "name": "My Project",
         "labels": {
+          "goog-terraform-provisioned": "true",
           "project-label-key-a": "project-label-val-a"
         }
       }

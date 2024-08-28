@@ -31,6 +31,8 @@ create_url: projects/{{project}}/locations/{{location}}/kmsConfigs?kmsConfigId={
 update_url: projects/{{project}}/locations/{{location}}/kmsConfigs/{{name}}
 update_verb: :PATCH
 update_mask: true
+# Skipping the sweeper since we need to sweep multiple regions
+skip_sweeper: true
 autogen_async: true
 
 async: !ruby/object:Api::OpAsync

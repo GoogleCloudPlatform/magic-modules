@@ -66,7 +66,8 @@ virtual_fields:
       Policy to determine if the volume should be deleted forcefully.
       Volumes may have nested snapshot resources. Deleting such a volume will fail.
       Setting this parameter to FORCE will delete volumes including nested snapshots.
-    type: Enum
+      Possible values: DEFAULT, FORCE.
+    type: String
     default_value: "DEFAULT"
 parameters:
   - name: 'location'
