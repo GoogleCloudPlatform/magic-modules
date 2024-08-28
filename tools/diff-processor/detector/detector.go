@@ -1,10 +1,14 @@
 package detector
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
+	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/documentparser"
 	"github.com/GoogleCloudPlatform/magic-modules/tools/test-reader/reader"
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -31,6 +35,11 @@ type Field struct {
 	Changed bool
 	// Tested is true when a test has been found that includes the field.
 	Tested bool
+}
+
+type MissingDocField struct {
+	Field   string
+	Section string
 }
 
 // Detect missing tests for the given resource changes map in the given slice of tests.
@@ -151,4 +160,62 @@ func suggestedTest(resourceName string, untested []string) string {
 		}
 	}
 	return strings.ReplaceAll(string(f.Bytes()), `"VALUE"`, "# value needed")
+}
+
+func DetectMissingDocs(schemaDiff diff.SchemaDiff, repoPath string) (map[string][]MissingDocField, error) {
+	missingDocFields := make(map[string][]MissingDocField)
+	for resource, resourceDiff := range schemaDiff {
+		docFilePath := resourceToDocFile(resource, repoPath)
+		var argumentsInDoc, attributesInDoc map[string]bool
+
+		content, err := os.ReadFile(docFilePath)
+		if err != nil && !os.IsNotExist(err) {
+			return nil, fmt.Errorf("failed to read resource doc %s: %w", docFilePath, err)
+		}
+		if err == nil {
+			parser := documentparser.NewParser()
+			err = parser.Parse(content)
+			if err != nil {
+				return nil, fmt.Errorf("failed to pass document %s: %w", docFilePath, err)
+			}
+			argumentsInDoc = listToMap(parser.Arguments())
+			attributesInDoc = listToMap(parser.Attributes())
+		}
+
+		for field, fieldDiff := range resourceDiff.Fields {
+			if !isNewField(fieldDiff) {
+				continue
+			}
+			// presume all fields can be arguments
+			if !argumentsInDoc[field] {
+				missingDocFields[resource] = append(missingDocFields[resource], MissingDocField{Field: field, Section: "Arguments Reference"})
+			}
+			if isAttribute(fieldDiff) && !attributesInDoc[field] {
+				missingDocFields[resource] = append(missingDocFields[resource], MissingDocField{Field: field, Section: "Attributes Reference"})
+			}
+		}
+	}
+	return missingDocFields, nil
+}
+
+func isAttribute(fieldDiff diff.FieldDiff) bool {
+	// for compute_instance, some attributes are not only on top level
+	return fieldDiff.New.Computed && !fieldDiff.New.Optional
+}
+
+func isNewField(fieldDiff diff.FieldDiff) bool {
+	return fieldDiff.Old == nil && fieldDiff.New != nil
+}
+
+func resourceToDocFile(resource string, repoPath string) string {
+	fileBaseName := strings.TrimPrefix(resource, "google_") + ".html.markdown"
+	return filepath.Join(repoPath, "website", "docs", "r", fileBaseName)
+}
+
+func listToMap(items []string) map[string]bool {
+	m := make(map[string]bool)
+	for _, item := range items {
+		m[item] = true
+	}
+	return m
 }
