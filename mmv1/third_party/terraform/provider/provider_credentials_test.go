@@ -10,6 +10,9 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
+// TestAccSdkProvider_credentials is a series of acc tests asserting how the SDK provider handles credentials arguments
+// It is SDK specific because the HCL used provisions SDK-implemented resources
+// It is a counterpart to TestAccFwProvider_credentials
 func TestAccSdkProvider_credentials(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
 		"credentials can be configured as a path to a credentials JSON file":                                       testAccSdkProvider_credentials_validJsonFilePath,
