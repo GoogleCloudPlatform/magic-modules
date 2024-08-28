@@ -17,11 +17,25 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   decoder: templates/terraform/decoders/memorystore_instance.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "memorystore_instance_ha"
-    primary_resource_id: "instance-ha"
+    name: "memorystore_instance_basic"
+    primary_resource_id: "instance-basic"
     min_version: beta
     vars:
-      instance_name: "ha-instance"
+      instance_name: "basic-instance"
+      policy_name: "my-policy"
+      subnet_name: "my-subnet"
+      network_name: "my-network"
+      prevent_destroy: "true"
+    test_vars_overrides:
+      prevent_destroy: "false"
+    oics_vars_overrides:
+      prevent_destroy: "false"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "memorystore_instance_full"
+    primary_resource_id: "instance-full"
+    min_version: beta
+    vars:
+      instance_name: "full-instance"
       policy_name: "my-policy"
       subnet_name: "my-subnet"
       network_name: "my-network"

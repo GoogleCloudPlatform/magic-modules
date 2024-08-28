@@ -216,7 +216,7 @@ func TestAccMemorystoreInstance_updatePersistence(t *testing.T) {
 			},
 			{
 				// update persitence to RDB
-				Config: createOrUpdateRedisCluster(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: true, nodeType: "REDIS_STANDARD_SMALL", zoneDistributionMode: "MULTI_ZONE", persistenceMode:"RDB", deletionProtectionEnabled: false}),
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: true, nodeType: "REDIS_STANDARD_SMALL", zoneDistributionMode: "MULTI_ZONE", persistenceMode:"RDB", deletionProtectionEnabled: false}),
 			},
 			{
 				ResourceName:            "google_memorystore_instance.test",
@@ -225,7 +225,7 @@ func TestAccMemorystoreInstance_updatePersistence(t *testing.T) {
 			},
 			{
 				// clean up the resource
-				Config: createOrUpdateRedisCluster(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: false, nodeType: "REDIS_STANDARD_SMALL",zoneDistributionMode: "MULTI_ZONE", persistenceMode:"RDB", deletionProtectionEnabled: false}),
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: false, nodeType: "REDIS_STANDARD_SMALL",zoneDistributionMode: "MULTI_ZONE", persistenceMode:"RDB", deletionProtectionEnabled: false}),
 			},
 		},
 	})
@@ -290,6 +290,7 @@ resource "google_memorystore_instance" "test" {
 	engine_configs = {
 		%s
 	}
+  %s
   %s
 	depends_on = [
 			google_network_connectivity_service_connection_policy.default

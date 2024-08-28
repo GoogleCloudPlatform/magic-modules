@@ -7,7 +7,7 @@ resource "google_memorystore_instance" "<%= ctx[:primary_resource_id] %>" {
     project_id = data.google_project.project.project_id
   }
   location = "us-central1"
-  replica_count = 0
+  replica_count = 2
   node_type = "SHARED_CORE_NANO"
   transit_encryption_mode = "TRANSIT_ENCRYPTION_DISABLED"
   authorization_mode = "AUTH_DISABLED"
@@ -22,7 +22,7 @@ resource "google_memorystore_instance" "<%= ctx[:primary_resource_id] %>" {
   deletion_protection_enabled = false
   persistence_config {
     mode = "RDB"
-    rdb_config = {
+    rdb_config {
       rdb_snapshot_period = "ONE_HOUR"
       rdb_snapshot_start_time = "2024-10-02T15:01:23Z"
     }
