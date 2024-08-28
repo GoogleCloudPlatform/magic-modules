@@ -99,14 +99,11 @@ examples:
     test_env_vars:
       service_account: :SERVICE_ACCT
 virtual_fields:
-  - !ruby/object:Api::Type::Enum
+  - !ruby/object:Api::Type::String
     name: desired_state
     description: |
       Desired state of the Notebook Instance. Set this field to `ACTIVE` to start the Instance, and `STOPPED` to stop the Instance.
-    values:
-      - :ACTIVE
-      - :STOPPED
-    default_value: :ACTIVE
+    default_value: ACTIVE
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/notebooks_instance.go.erb
   update_encoder: templates/terraform/update_encoder/notebooks_instance.go.erb

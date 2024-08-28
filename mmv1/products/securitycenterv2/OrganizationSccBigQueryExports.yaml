@@ -42,7 +42,6 @@ examples:
     vars:
       big_query_export_id: 'my-export'
       dataset: 'my-dataset'
-      dataset_id: 'my_dataset_id'
       name: 'my-export'
     test_env_vars:
       org_id: :ORG_ID
