@@ -319,6 +319,42 @@ func TestAccRedisInstance_downgradeRedisVersion(t *testing.T) {
 	})
 }
 
+func TestAccRedisInstance_tags(t *testing.T) {
+	t.Skip()
+
+	t.Parallel()
+
+	instance := fmt.Sprintf("tf-test%s.org1.com", acctest.RandString(t, 5))
+	context := map[string]interface{}{
+		"instance": instance,
+		"resource_name": "instance",
+	}
+
+	resourceName := acctest.Nprintf("google_redis_instance.%{resource_name}", context)
+	org := envvar.GetTestOrgFromEnv(t)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckRedisInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRedisInstanceTags(context, map[string]string{org + "/env": "test"}),
+			},
+			{
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "zone"},
+			},
+			{
+				Config: testAccRedisInstanceTags_allowDestroy(context, map[string]string{org + "/env": "test"}),
+			},
+		},
+	})
+}
+
+
 func testAccRedisInstance_update(name string, preventDestroy bool) string {
 	lifecycleBlock := ""
 	if preventDestroy {
@@ -460,4 +496,62 @@ resource "google_redis_instance" "test" {
   redis_version = "REDIS_4_0"
 }
 `, name)
+}
+
+func testAccRedisInstanceTags(context map[string]interface{}, tags map[string]string) string {
+
+	r := acctest.Nprintf(`
+	resource "google_redis_instance" "%{resource_name}" {
+	  name = "tf-instance-%s"
+          zone = "us-central1-b"
+          tier = "BASIC_HDD"
+
+          file_shares {
+            capacity_gb = 1024
+            name        = "share1"
+          }
+
+          networks {
+            network           = "default"
+            modes             = ["MODE_IPV4"]
+            reserved_ip_range = "172.19.31.0/24"
+          }
+	  tags = {`, context)
+
+	l := ""
+	for key, value := range tags {
+		l += fmt.Sprintf("%q = %q\n", key, value)
+	}
+
+	l += fmt.Sprintf("}\n}")
+	return r + l
+}
+
+func testAccRedisInstanceTags_allowDestroy(context map[string]interface{}, tags map[string]string) string {
+
+	r := acctest.Nprintf(`
+	resource "google_redis_instance" "%{resource_name}" {
+	  name = "tf-instance-%s"
+          zone = "us-central1-b"
+          tier = "BASIC_HDD"
+
+          file_shares {
+            capacity_gb = 1024
+            name        = "share1"
+          }
+
+          networks {
+            network           = "default"
+            modes             = ["MODE_IPV4"]
+            reserved_ip_range = "172.19.31.0/24"
+          }
+	  tags = {`, context)
+
+	l := ""
+	for key, value := range tags {
+		l += fmt.Sprintf("%q = %q\n", key, value)
+	}
+
+	l += fmt.Sprintf("}\n}")
+	return r + l
 }
