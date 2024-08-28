@@ -3835,23 +3835,25 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 			log.Printf("[INFO] GKE cluster %s: image type has been updated to %s", d.Id(), it)
 		}
 
-		// Note: probably long term this should be handled broadly for all the
-		// items in kubelet_config in a simpler / DRYer way.
-		// See b/361634104
-		if d.HasChange("node_config.0.kubelet_config.0.insecure_kubelet_readonly_port_enabled") {
-			if v, ok := d.GetOk("node_config.0.kubelet_config.0.insecure_kubelet_readonly_port_enabled"); ok {
-				insecureKubeletReadonlyPortEnabled := v.(string)
-				defaultPool := "default-pool"
+		if d.HasChange("node_config.0.kubelet_config") {
 
-				timeout := d.Timeout(schema.TimeoutCreate)
+			defaultPool := "default-pool"
 
-				nodePoolInfo, err := extractNodePoolInformationFromCluster(d, config, clusterName)
-				if err != nil {
-					return err
-				}
+			timeout := d.Timeout(schema.TimeoutCreate)
 
-				// Acquire write-lock on nodepool.
-				npLockKey := nodePoolInfo.nodePoolLockKey(defaultPool)
+			nodePoolInfo, err := extractNodePoolInformationFromCluster(d, config, clusterName)
+			if err != nil {
+				return err
+			}
+
+			// Acquire write-lock on nodepool.
+			npLockKey := nodePoolInfo.nodePoolLockKey(defaultPool)
+
+			// Note: probably long term this should be handled broadly for all the
+			// items in kubelet_config in a simpler / DRYer way.
+			// See b/361634104
+			if d.HasChange("node_config.0.kubelet_config.0.insecure_kubelet_readonly_port_enabled") {
+				it := d.Get("node_config.0.kubelet_config.0.insecure_kubelet_readonly_port_enabled").(string)
 
 				// While we're getting the value from the drepcated field in
 				// node_config.kubelet_config, the actual setting that needs to be updated
@@ -3859,7 +3861,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 				req := &container.UpdateNodePoolRequest{
 					Name: defaultPool,
 					KubeletConfig: &container.NodeKubeletConfig{
-						InsecureKubeletReadonlyPortEnabled: expandInsecureKubeletReadonlyPortEnabled(insecureKubeletReadonlyPortEnabled),
+						InsecureKubeletReadonlyPortEnabled: expandInsecureKubeletReadonlyPortEnabled(it),
 						ForceSendFields:                    []string{"InsecureKubeletReadonlyPortEnabled"},
 					},
 				}
@@ -3875,19 +3877,16 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 					}
 
 					// Wait until it's updated
-					return ContainerOperationWait(config, op,
-						nodePoolInfo.project,
-						nodePoolInfo.location,
-						"updating GKE node pool insecure_kubelet_readonly_port_enabled", userAgent,
-						timeout)
+					return ContainerOperationWait(config, op, nodePoolInfo.project, nodePoolInfo.location,
+						"updating GKE node pool insecure_kubelet_readonly_port_enabled", userAgent, timeout)
 				}
 
 				if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
 					return err
 				}
 
-				log.Printf("[INFO] GKE cluster %s: default-pool setting for insecure_kubelet_readonly_port_enabled updated to %s", d.Id(), insecureKubeletReadonlyPortEnabled)
-			}
+				log.Printf("[INFO] GKE cluster %s: default-pool setting for insecure_kubelet_readonly_port_enabled updated to %s", d.Id(), it)
+      }
 		}
 	}
 
