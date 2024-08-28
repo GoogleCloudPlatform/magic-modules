@@ -84,7 +84,7 @@ resource "google_scc_notification_config" "custom_notification_config2" {
   pubsub_topic =  google_pubsub_topic.scc_notification.id
 
   streaming_config {
-    filter = " "
+    filter = ""
   }
 }
 `, context)
