@@ -101,9 +101,10 @@ var vcrCassetteUpdateCmd = &cobra.Command{
 }
 
 func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.Controller, vt *vcr.Tester) error {
-	if err := vt.FetchCassettes(provider.Beta, "main", ""); err != nil {
-		return fmt.Errorf("error fetching cassettes: %w", err)
-	}
+	// TODO: temp disable to trigger replaying test failure
+	// if err := vt.FetchCassettes(provider.Beta, "main", ""); err != nil {
+	// 	return fmt.Errorf("error fetching cassettes: %w", err)
+	// }
 
 	bucketPrefix := fmt.Sprintf("gs://vcr-nightly/beta/%s/%s", today, buildID)
 
@@ -125,7 +126,8 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 	vt.SetRepoPath(provider.Beta, providerRepo.Path)
 
 	fmt.Println("running tests in REPLAYING mode now")
-	replayingResult, replayingErr := vt.Run(vcr.Replaying, provider.Beta, nil)
+	// TODO: running only the compute service
+	replayingResult, replayingErr := vt.Run(vcr.Replaying, provider.Beta, []string{"./google-beta/services/compute"})
 
 	// upload replay build and test logs
 	buildLogPath := filepath.Join(rnr.GetCWD(), "testlogs", fmt.Sprintf("%s_test.log", vcr.Replaying.Lower()))
@@ -171,7 +173,8 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 		}
 		if len(recordingResult.PassedTests) > 0 {
 			cassettesPath := vt.CassettePath(provider.Beta)
-			if _, err := uploadCassettesToGCS(cassettesPath, "gs://ci-vcr-cassettes/beta/fixtures/", rnr); err != nil {
+			// TODO: use a temp folder to not mess up the nightly run
+			if _, err := uploadCassettesToGCS(cassettesPath+"/*", "gs://ci-vcr-cassettes/beta/temp-fixtures/", rnr); err != nil {
 				return fmt.Errorf("error uploading cassettes: %w", err)
 			}
 		} else {
