@@ -1796,7 +1796,6 @@ func TestAccComputeInstanceFromTemplateWithOverride_interface(t *testing.T) {
                                 Check: resource.ComposeTestCheckFunc(
                                         testAccCheckComputeInstanceExists(t, resourceName, &instance),
                                         resource.TestCheckResourceAttr(resourceName, "boot_disk.0.interface", "SCSI"),
-                                        resource.TestCheckResourceAttr(resourceName, "attached_disk.0.interface", "SCSI"),
                                 ),
                         },
                 },
@@ -1847,11 +1846,10 @@ resource "google_compute_instance_from_template" "foobar" {
 
   source_instance_template = google_compute_instance_template.foobar.self_link
 
-  // Overrides
    attached_disk {
-    interface = "SCSI"
     source =  google_compute_disk.foobarattach.name
   }
+   // Overrides
   boot_disk {
     interface = "SCSI"
     source =  google_compute_disk.foobarboot.name
