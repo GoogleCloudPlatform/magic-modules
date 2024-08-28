@@ -85,7 +85,7 @@ func schemaInsecureKubeletReadonlyPortEnabled() *schema.Schema {
 		Type:         schema.TypeString,
 		Optional:     true,
 		Computed:     true,
-		Description:  "Controls whether the kubelet read-only port is enabled. It is strongly recommended to set this to FALSE.",
+		Description:  "Controls whether the kubelet read-only port is enabled. It is strongly recommended to set this to `FALSE`. Possible values: `TRUE`, `FALSE`.",
 		ValidateFunc: validation.StringInSlice([]string{"FALSE","TRUE"}, false),
 	}
 }
