@@ -36,7 +36,7 @@ examples:
       dataset: 'example-dataset'
       data_mapper_mapping_name: 'example-mapping'
       destination_fhir_store: 'fhir-store'
-      bq_dataset: 'example-dataset'
+      bq_dataset: 'example_dataset'
       bucket_name: 'example-bucket-name'
 parameters:
   - !ruby/object:Api::Type::String
