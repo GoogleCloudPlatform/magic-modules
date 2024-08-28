@@ -261,6 +261,7 @@ data "google_client_config" "default" {}
 
 output "token" {
   value = data.google_client_config.default.access_token
+  sensitive = true
 }
 `, context)
 }
@@ -273,6 +274,7 @@ data "google_client_config" "default" {}
 
 output "token" {
   value = data.google_client_config.default.access_token
+  sensitive = true
 }
 `, context)
 }
