@@ -1,6 +1,7 @@
 package provider_test
 
 import (
+	"fmt"
 	"regexp"
 	"testing"
 
@@ -128,11 +129,11 @@ func testAccSdkProvider_credentials_precedenceOrderEnvironmentVariables(t *testi
 		GOOGLE_CLOUD_KEYFILE_JSON
 		GCLOUD_KEYFILE_JSON
 		GOOGLE_APPLICATION_CREDENTIALS
-		GOOGLE_USE_DEFAULT_CREDENTIALS
 	*/
 
 	goodCredentials := envvar.GetTestCredsFromEnv()
 	badCreds := acctest.GenerateFakeCredentialsJson("test")
+	badCredsPath := "./this/path/does/not/exist.json" // Doesn't exist
 
 	context := map[string]interface{}{
 		"resource_name": "tf-test-" + acctest.RandString(t, 10),
@@ -160,7 +161,7 @@ func testAccSdkProvider_credentials_precedenceOrderEnvironmentVariables(t *testi
 					// bad
 					t.Setenv("GOOGLE_CLOUD_KEYFILE_JSON", badCreds)
 					t.Setenv("GCLOUD_KEYFILE_JSON", badCreds)
-					t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", badCreds)
+					t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", badCredsPath) // needs to be a path
 				},
 				Config: testAccSdkProvider_credentialsInEnvsOnly(context),
 			},
@@ -173,8 +174,7 @@ func testAccSdkProvider_credentials_precedenceOrderEnvironmentVariables(t *testi
 					t.Setenv("GOOGLE_CLOUD_KEYFILE_JSON", goodCredentials) //used
 					// bad
 					t.Setenv("GCLOUD_KEYFILE_JSON", badCreds)
-					t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", badCreds)
-
+					t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", badCredsPath) // needs to be a path
 				},
 				Config: testAccSdkProvider_credentialsInEnvsOnly(context),
 			},
@@ -187,7 +187,7 @@ func testAccSdkProvider_credentials_precedenceOrderEnvironmentVariables(t *testi
 					// good
 					t.Setenv("GCLOUD_KEYFILE_JSON", goodCredentials) //used
 					// bad
-					t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", badCreds)
+					t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", badCredsPath) // needs to be a path
 				},
 				Config: testAccSdkProvider_credentialsInEnvsOnly(context),
 			},
@@ -198,10 +198,18 @@ func testAccSdkProvider_credentials_precedenceOrderEnvironmentVariables(t *testi
 					t.Setenv("GOOGLE_CREDENTIALS", "")
 					t.Setenv("GOOGLE_CLOUD_KEYFILE_JSON", "")
 					t.Setenv("GCLOUD_KEYFILE_JSON", "")
-					// good
-					t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", goodCredentials) //used
+					// bad
+					t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", badCredsPath) // used, needs to be a path
 				},
-				Config: testAccSdkProvider_credentialsInEnvsOnly(context),
+				ExpectError: regexp.MustCompile(fmt.Sprintf("%s: no such file", badCredsPath)), // Errors when tries to use GOOGLE_APPLICATION_CREDENTIALS
+				Config:      testAccSdkProvider_credentialsInEnvsOnly(context),
+			},
+			{
+				// Make last step have credentials to enable deleting the resource
+				PreConfig: func() {
+					t.Setenv("GOOGLE_CREDENTIALS", goodCredentials)
+				},
+				Config: "// Empty config, to force deletion of resources using credentials set above",
 			},
 		},
 	})

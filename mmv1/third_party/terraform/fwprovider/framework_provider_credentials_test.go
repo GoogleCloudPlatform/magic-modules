@@ -1,6 +1,7 @@
 package fwprovider_test
 
 import (
+	"fmt"
 	"regexp"
 	"testing"
 
@@ -128,11 +129,11 @@ func testAccFwProvider_credentials_precedenceOrderEnvironmentVariables(t *testin
 		GOOGLE_CLOUD_KEYFILE_JSON
 		GCLOUD_KEYFILE_JSON
 		GOOGLE_APPLICATION_CREDENTIALS
-		GOOGLE_USE_DEFAULT_CREDENTIALS
 	*/
 
 	goodCredentials := envvar.GetTestCredsFromEnv()
 	badCreds := acctest.GenerateFakeCredentialsJson("test")
+	badCredsPath := "./this/path/does/not/exist.json" // Doesn't exist
 
 	context := map[string]interface{}{
 		"resource_name": "tf-test-" + acctest.RandString(t, 10),
@@ -160,7 +161,7 @@ func testAccFwProvider_credentials_precedenceOrderEnvironmentVariables(t *testin
 					// bad
 					t.Setenv("GOOGLE_CLOUD_KEYFILE_JSON", badCreds)
 					t.Setenv("GCLOUD_KEYFILE_JSON", badCreds)
-					t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", badCreds)
+					t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", badCredsPath) // needs to be a path
 				},
 				Config: testAccFwProvider_credentialsInEnvsOnly(context),
 			},
@@ -173,8 +174,7 @@ func testAccFwProvider_credentials_precedenceOrderEnvironmentVariables(t *testin
 					t.Setenv("GOOGLE_CLOUD_KEYFILE_JSON", goodCredentials) //used
 					// bad
 					t.Setenv("GCLOUD_KEYFILE_JSON", badCreds)
-					t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", badCreds)
-
+					t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", badCredsPath) // needs to be a path
 				},
 				Config: testAccFwProvider_credentialsInEnvsOnly(context),
 			},
@@ -187,7 +187,7 @@ func testAccFwProvider_credentials_precedenceOrderEnvironmentVariables(t *testin
 					// good
 					t.Setenv("GCLOUD_KEYFILE_JSON", goodCredentials) //used
 					// bad
-					t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", badCreds)
+					t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", badCredsPath) // needs to be a path
 				},
 				Config: testAccFwProvider_credentialsInEnvsOnly(context),
 			},
@@ -198,10 +198,18 @@ func testAccFwProvider_credentials_precedenceOrderEnvironmentVariables(t *testin
 					t.Setenv("GOOGLE_CREDENTIALS", "")
 					t.Setenv("GOOGLE_CLOUD_KEYFILE_JSON", "")
 					t.Setenv("GCLOUD_KEYFILE_JSON", "")
-					// good
-					t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", goodCredentials) //used
+					// bad
+					t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", badCredsPath) // used, needs to be a path
 				},
-				Config: testAccFwProvider_credentialsInEnvsOnly(context),
+				ExpectError: regexp.MustCompile(fmt.Sprintf("%s: no such file", badCredsPath)), // Errors when tries to use GOOGLE_APPLICATION_CREDENTIALS
+				Config:      testAccFwProvider_credentialsInEnvsOnly_provisionSdkResource(context),
+			},
+			{
+				// Make last step have credentials to enable deleting the resource
+				PreConfig: func() {
+					t.Setenv("GOOGLE_CREDENTIALS", goodCredentials)
+				},
+				Config: "// Empty config, to force deletion of resources using credentials set above",
 			},
 		},
 	})
@@ -278,6 +286,17 @@ data "google_client_config" "default" {}
 output "token" {
   value = data.google_client_config.default.access_token
   sensitive = true
+}
+`, context)
+}
+
+// testAccFwProvider_credentialsInEnvsOnly_provisionSdkResource is a version of testAccFwProvider_credentialsInProviderBlock_provisionSdkResource
+// that allows testing when the credentials argument is only supplied via ENVs
+func testAccFwProvider_credentialsInEnvsOnly_provisionSdkResource(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_service_account" "default" {
+  account_id   = "%{resource_name}"
+  display_name = "Testing, provisioned by testAccFwProvider_credentialsInProviderBlock_provisionSdkResource"
 }
 `, context)
 }
