@@ -59,14 +59,7 @@ properties:
     output: true
   - !ruby/object:Api::Type::KeyValueLabels
     name: labels
-    output:
-    api_name:
     description: "Optional. Labels to represent user-provided metadata. "
-    min_version:
-    ignore_write:
-    update_verb:
-    update_url:
-    immutable:
   - !ruby/object:Api::Type::String
     name: state
     description:
@@ -190,14 +183,7 @@ properties:
     default_from_api: true
   - !ruby/object:Api::Type::KeyValuePairs
     name: engineConfigs
-    output:
-    api_name:
     description: "Optional. User-provided engine configurations for the instance. "
-    min_version:
-    ignore_write:
-    update_verb:
-    update_url:
-    immutable:
   - !ruby/object:Api::Type::NestedObject
     properties:
       - !ruby/object:Api::Type::Double
@@ -205,6 +191,7 @@ properties:
         description: "Output only. Memory size in GB of the node. "
         output: true
     name: nodeConfig
+    output: true
     description: "Represents configuration for nodes of the instance. "
   - !ruby/object:Api::Type::NestedObject
     properties:
@@ -213,12 +200,14 @@ properties:
         description:
           "Optional. Defines zone where all resources will be allocated with
           SINGLE_ZONE mode.\nIgnored for MULTI_ZONE mode. "
+        immutable: true
       - !ruby/object:Api::Type::String
         name: mode
         default_from_api: true
         description:
           "Optional. Current zone distribution mode. Defaults to MULTI_ZONE.
           \n Possible values:\n ZONE_DISTRIBUTION_MODE_UNSPECIFIED\nMULTI_ZONE\nSINGLE_ZONE"
+        immutable: true
     name: zoneDistributionConfig
     description: "Zone distribution configuration for allocation of instance resources. "
   - !ruby/object:Api::Type::Boolean
