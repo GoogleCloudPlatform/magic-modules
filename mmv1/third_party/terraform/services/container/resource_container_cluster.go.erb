@@ -113,7 +113,7 @@ var (
 
 	suppressDiffForAutopilot = schema.SchemaDiffSuppressFunc(func(k, oldValue, newValue string, d *schema.ResourceData) bool {
 		if v, _ := d.Get("enable_autopilot").(bool); v {
-			/ If there is an ID we can safely assume the cluster already exists and return true.
+			// If there is an ID we can safely assume the cluster already exists and return true.
 			// If there is no ID we don't need to supress any diffs and return false.
 			return d.Id() != ""
 		}
