@@ -10308,8 +10308,6 @@ func TestAccComputeInstance_bootAndAttachedDisk_interface(t *testing.T) {
         diskName1 := fmt.Sprintf("tf-test-disk1-%s", acctest.RandString(t, 10))
         instanceName2 := fmt.Sprintf("tf-test-vm2-%s", acctest.RandString(t, 10))
         diskName2 := fmt.Sprintf("tf-test-disk2-%s", acctest.RandString(t, 10))
-        instanceName3 := fmt.Sprintf("tf-test-vm3-%s", acctest.RandString(t, 10))
-        diskName3 := fmt.Sprintf("tf-test-disk3-%s", acctest.RandString(t, 10))
         acctest.VcrTest(t, resource.TestCase{
                 PreCheck:                 func() { acctest.AccTestPreCheck(t) },
                 ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
