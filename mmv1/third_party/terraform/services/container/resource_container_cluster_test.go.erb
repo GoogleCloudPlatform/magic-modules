@@ -6628,7 +6628,9 @@ resource "google_container_cluster" "with_insecure_kubelet_readonly_port_enabled
 
   node_config {
     kubelet_config {
-      cpu_manager_policy                     = "static"
+      # Must be set when kubelet_config is, but causes permadrift unless set to
+      # undocumented empty value
+      cpu_manager_policy                     = ""
       insecure_kubelet_readonly_port_enabled = "%s"
     }
   }
