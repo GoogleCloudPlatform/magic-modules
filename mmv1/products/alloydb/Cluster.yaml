@@ -114,16 +114,14 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_update: templates/terraform/pre_update/alloydb_cluster.go.erb
   pre_delete: templates/terraform/pre_delete/alloydb_cluster.go.erb
 virtual_fields:
-  - !ruby/object:Api::Type::Enum
+  - !ruby/object:Api::Type::String
     name: 'deletion_policy'
     description: |
       Policy to determine if the cluster should be deleted forcefully.
       Deleting a cluster forcefully, deletes the cluster and all its associated instances within the cluster.
       Deleting a Secondary cluster with a secondary instance REQUIRES setting deletion_policy = "FORCE" otherwise an error is returned. This is needed as there is no support to delete just the secondary instance, and the only way to delete secondary instance is to delete the associated secondary cluster forcefully which also deletes the secondary instance.
-    values:
-      - :DEFAULT
-      - :FORCE
-    default_value: :DEFAULT
+      Possible values: DEFAULT, FORCE
+    default_value: DEFAULT
 parameters:
   - !ruby/object:Api::Type::String
     name: 'clusterId'

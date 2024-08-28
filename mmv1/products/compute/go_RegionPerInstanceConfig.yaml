@@ -81,7 +81,7 @@ virtual_fields:
       * RESTART
       * REFRESH
       * NONE
-    type: Enum
+    type: String
     default_value: "NONE"
   - name: 'most_disruptive_allowed_action'
     description: |
@@ -91,7 +91,7 @@ virtual_fields:
       * RESTART
       * REFRESH
       * NONE
-    type: Enum
+    type: String
     default_value: "REPLACE"
   - name: 'remove_instance_on_destroy'
     description: |
