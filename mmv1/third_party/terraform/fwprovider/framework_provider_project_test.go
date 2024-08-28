@@ -14,6 +14,7 @@ func TestAccFwProvider_project(t *testing.T) {
 		"config takes precedence over environment variables":                           testAccFwProvider_project_configPrecedenceOverEnvironmentVariables,
 		"when project is unset in the config, environment variables are used":          testAccFwProvider_project_precedenceOrderEnvironmentVariables,
 		"when project is set to an empty string in the config the value isn't ignored": testAccFwProvider_project_emptyStringValidation,
+		"when project is unknown in the config, environment variables are used":        testAccFwProvider_project_unknownHandling,
 	}
 
 	for name, tc := range testCases {
@@ -167,6 +168,45 @@ func testAccFwProvider_project_emptyStringValidation(t *testing.T) {
 	})
 }
 
+func testAccFwProvider_project_unknownHandling(t *testing.T) {
+
+	project := envvar.GetTestProjectFromEnv()
+	context := map[string]interface{}{
+		"org_id":             envvar.GetTestOrgFromEnv(t),
+		"billing_account_id": envvar.GetTestBillingAccountFromEnv(t),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFwProvider_projectUnknownHandling(context),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					// Matches ENV instead of the project id output from google_project resource
+					resource.TestCheckResourceAttr("data.google_provider_config_plugin_framework.default", "project", project),
+				),
+			},
+			{
+				// Unset all ENVs for project
+				PreConfig: func() {
+					for _, v := range envvar.ProjectEnvVars {
+						t.Setenv(v, "")
+					}
+				},
+				Config: testAccFwProvider_projectUnknownHandling(context),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					// Matches project id output from google_project resource
+					resource.TestMatchResourceAttr("data.google_provider_config_plugin_framework.default", "project", regexp.MustCompile("tf-test-[0-9a-z]{16}")),
+				),
+			},
+		},
+	})
+}
+
 // testAccFwProvider_projectInProviderBlock allows setting the project argument in a provider block.
 func testAccFwProvider_projectInProviderBlock(context map[string]interface{}) string {
 	return acctest.Nprintf(`
@@ -184,4 +224,34 @@ func testAccFwProvider_projectInEnvsOnly() string {
 	return `
 data "google_provider_config_plugin_framework" "default" {}
 `
+}
+
+// testAccFwProvider_projectUnknownHandling is specifically for testing how an unknown value is used.
+func testAccFwProvider_projectUnknownHandling(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "random_id" "project_name" {
+  byte_length = 8
+}
+
+provider "google" {
+	alias = "alternate"
+}
+
+resource "google_project" "project" {
+  provider        = google.alternate
+  name            = "Test Acc Project"
+  project_id      = "tf-test-${random_id.project_name.hex}"
+  org_id          = "%{org_id}"
+  billing_account = "%{billing_account_id}"
+  deletion_policy = "DELETE"
+}
+
+// Note that this is the unaliased provider, and is used in the data source below
+provider "google" {
+	project = google_project.project.project_id
+}
+
+data "google_provider_config_plugin_framework" "default" {
+}
+`, context)
 }
