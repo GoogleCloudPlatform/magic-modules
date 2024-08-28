@@ -82,6 +82,13 @@ examples:
       client_id: 'my-client-id'
       client_secret: 'my-client-secret'
       custom_domain: 'my-custom-domain'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'looker_instance_psc'
+    primary_resource_id: 'looker-instance'
+    vars:
+      instance_name: 'my-instance'
+      client_id: 'my-client-id'
+      client_secret: 'my-client-secret'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'region'
