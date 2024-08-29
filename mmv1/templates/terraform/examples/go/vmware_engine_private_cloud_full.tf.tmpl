@@ -7,7 +7,6 @@ resource "google_vmwareengine_private_cloud" "{{$.PrimaryResourceId}}" {
     management_cidr       = "192.168.30.0/24"
     vmware_engine_network = google_vmwareengine_network.pc-nw.id
   }
-
   management_cluster {
     cluster_id = "{{index $.Vars "management_cluster_id"}}"
     node_type_configs {
@@ -16,6 +15,8 @@ resource "google_vmwareengine_private_cloud" "{{$.PrimaryResourceId}}" {
       custom_core_count = 32
     }
   }
+  deletion_delay_hours = 0
+  send_deletion_delay_hours_if_zero = true
 }
 
 resource "google_vmwareengine_network" "pc-nw" {

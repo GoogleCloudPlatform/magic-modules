@@ -66,7 +66,7 @@ properties:
     description: |
       The canonical name of this resource, with format
       `projects/{{project}}/locations/{{location}}/zones/{{zone}}/networks/{{network_id}}`
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     required: false
     description: |

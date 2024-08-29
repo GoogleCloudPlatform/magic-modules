@@ -11,7 +11,7 @@ resource "google_redis_cluster" "<%= ctx[:primary_resource_id] %>" {
   }
   maintenance_policy {
     weekly_maintenance_window {
-      day = "MONDAY"
+      day = ""
       start_time {
         hours = 1
         minutes = 0
@@ -20,13 +20,11 @@ resource "google_redis_cluster" "<%= ctx[:primary_resource_id] %>" {
       }
     }
   }
+  deletion_protection_enabled = <%= ctx[:vars]['deletion_protection_enabled'] == 'true' %>
   depends_on = [
     google_network_connectivity_service_connection_policy.default
   ]
 
-  lifecycle {
-    prevent_destroy = <%= ctx[:vars]['prevent_destroy'] %>
-  }
 }
 
 resource "google_network_connectivity_service_connection_policy" "default" {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -66,92 +66,93 @@ func TestAccComputeFirewallPolicyRule_update(t *testing.T) {
 }
 
 func TestAccComputeFirewallPolicyRule_multipleRules(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  context := map[string]interface{}{
-    "random_suffix": acctest.RandString(t, 10),
-    "org_name":      fmt.Sprintf("organizations/%s", envvar.GetTestOrgFromEnv(t)),
-  }
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"org_name":      fmt.Sprintf("organizations/%s", envvar.GetTestOrgFromEnv(t)),
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccComputeFirewallPolicyRule_multiple(context),
-      },
-      {
-        ResourceName:      "google_compute_firewall_policy_rule.fw_policy_rule1",
-        ImportState:       true,
-        ImportStateVerify: true,
-        // Referencing using ID causes import to fail
-        ImportStateVerifyIgnore: []string{"firewall_policy"},
-      },
-      {
-        ResourceName:      "google_compute_firewall_policy_rule.fw_policy_rule2",
-        ImportState:       true,
-        ImportStateVerify: true,
-        // Referencing using ID causes import to fail
-        ImportStateVerifyIgnore: []string{"firewall_policy"},
-      },
-      {
-        Config: testAccComputeFirewallPolicyRule_multipleAdd(context),
-      },
-      {
-        ResourceName:      "google_compute_firewall_policy_rule.fw_policy_rule3",
-        ImportState:       true,
-        ImportStateVerify: true,
-        // Referencing using ID causes import to fail
-        ImportStateVerifyIgnore: []string{"firewall_policy"},
-      },
-      {
-        Config: testAccComputeFirewallPolicyRule_multipleRemove(context),
-      },
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeFirewallPolicyRule_multiple(context),
+			},
+			{
+				ResourceName:      "google_compute_firewall_policy_rule.fw_policy_rule1",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// Referencing using ID causes import to fail
+				ImportStateVerifyIgnore: []string{"firewall_policy"},
+			},
+			{
+				ResourceName:      "google_compute_firewall_policy_rule.fw_policy_rule2",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// Referencing using ID causes import to fail
+				ImportStateVerifyIgnore: []string{"firewall_policy"},
+			},
+			{
+				Config: testAccComputeFirewallPolicyRule_multipleAdd(context),
+			},
+			{
+				ResourceName:      "google_compute_firewall_policy_rule.fw_policy_rule3",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// Referencing using ID causes import to fail
+				ImportStateVerifyIgnore: []string{"firewall_policy"},
+			},
+			{
+				Config: testAccComputeFirewallPolicyRule_multipleRemove(context),
+			},
+		},
+	})
 }
 
 func TestAccComputeFirewallPolicyRule_securityProfileGroup_update(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  context := map[string]interface{}{
-    "random_suffix": acctest.RandString(t, 10),
-    "org_name":      fmt.Sprintf("organizations/%s", envvar.GetTestOrgFromEnv(t)),
-  }
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"org_name":      fmt.Sprintf("organizations/%s", envvar.GetTestOrgFromEnv(t)),
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccComputeFirewallPolicyRule_securityProfileGroup_basic(context),
-      },
-      {
-        ResourceName:      "google_compute_firewall_policy_rule.fw_policy_rule1",
-        ImportState:       true,
-        ImportStateVerify: true,
-        // Referencing using ID causes import to fail
-        ImportStateVerifyIgnore: []string{"firewall_policy"},
-      },
-      {
-        Config: testAccComputeFirewallPolicyRule_securityProfileGroup_update(context),
-      },
-      {
-        ResourceName:      "google_compute_firewall_policy_rule.fw_policy_rule1",
-        ImportState:       true,
-        ImportStateVerify: true,
-        // Referencing using ID causes import to fail
-        ImportStateVerifyIgnore: []string{"firewall_policy", "target_resources"},
-      },
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeFirewallPolicyRule_securityProfileGroup_basic(context),
+			},
+			{
+				ResourceName:      "google_compute_firewall_policy_rule.fw_policy_rule1",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// Referencing using ID causes import to fail
+				ImportStateVerifyIgnore: []string{"firewall_policy"},
+			},
+			{
+				Config: testAccComputeFirewallPolicyRule_securityProfileGroup_update(context),
+			},
+			{
+				ResourceName:      "google_compute_firewall_policy_rule.fw_policy_rule1",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// Referencing using ID causes import to fail
+				ImportStateVerifyIgnore: []string{"firewall_policy", "target_resources"},
+			},
+		},
+	})
 }
 
 func testAccComputeFirewallPolicyRule_securityProfileGroup_basic(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_folder" "folder" {
   display_name = "tf-test-folder-%{random_suffix}"
   parent       = "%{org_name}"
+  deletion_protection = false
 }
 
 resource "google_network_security_security_profile" "security_profile" {
@@ -197,10 +198,11 @@ resource "google_compute_firewall_policy_rule" "fw_policy_rule1" {
 }
 
 func testAccComputeFirewallPolicyRule_securityProfileGroup_update(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_folder" "folder" {
   display_name = "tf-test-folder-%{random_suffix}"
   parent       = "%{org_name}"
+  deletion_protection = false
 }
 
 resource "google_network_security_security_profile" "security_profile" {
@@ -276,6 +278,7 @@ resource "google_compute_network" "network2" {
 resource "google_folder" "folder" {
   display_name = "tf-test-folder-%{random_suffix}"
   parent       = "%{org_name}"
+  deletion_protection = false
 }
 
 resource "google_compute_firewall_policy" "fw_policy" {
@@ -341,6 +344,7 @@ resource "google_compute_network" "network2" {
 resource "google_folder" "folder" {
   display_name = "tf-test-folder-%{random_suffix}"
   parent       = "%{org_name}"
+  deletion_protection = false
 }
 
 resource "google_compute_firewall_policy" "fw_policy" {
@@ -416,6 +420,7 @@ resource "google_compute_network" "network2" {
 resource "google_folder" "folder" {
   display_name = "tf-test-folder-%{random_suffix}"
   parent       = "%{org_name}"
+  deletion_protection = false
 }
 
 resource "google_compute_firewall_policy" "fw_policy" {
@@ -467,6 +472,7 @@ func testAccComputeFirewallPolicyRule_multiple(context map[string]interface{}) s
 resource "google_folder" "folder" {
   display_name = "tf-test-folder-%{random_suffix}"
   parent       = "%{org_name}"
+  deletion_protection = false
 }
 
 resource "google_compute_firewall_policy" "fw_policy" {
@@ -539,6 +545,7 @@ func testAccComputeFirewallPolicyRule_multipleAdd(context map[string]interface{}
 resource "google_folder" "folder" {
   display_name = "tf-test-folder-%{random_suffix}"
   parent       = "%{org_name}"
+  deletion_protection = false
 }
 
 resource "google_compute_firewall_policy" "fw_policy" {
@@ -632,6 +639,7 @@ func testAccComputeFirewallPolicyRule_multipleRemove(context map[string]interfac
 resource "google_folder" "folder" {
   display_name = "tf-test-folder-%{random_suffix}"
   parent       = "%{org_name}"
+  deletion_protection = false
 }
 
 resource "google_compute_firewall_policy" "fw_policy" {

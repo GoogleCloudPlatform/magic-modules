@@ -39,9 +39,6 @@ examples:
     test_env_vars:
       org_id: :ORG_ID
       org_domain: :ORG_DOMAIN
-docs: !ruby/object:Provider::Terraform::Docs
-  attributes: |
-    * `client_id`: The OAuth2 ID of the client.
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/iap_client.go.erb
   custom_import: templates/terraform/custom_import/iap_client.go.erb

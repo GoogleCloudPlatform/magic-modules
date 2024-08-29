@@ -32,7 +32,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -165,8 +165,6 @@ properties:
 
             See the [Backend Services Overview](https://cloud.google.com/load-balancing/docs/backend-service#balancing-mode)
             for an explanation of load balancing modes.
-
-            From version 6.0.0 default value will be UTILIZATION to match default GCP value.
         - !ruby/object:Api::Type::Double
           name: 'capacityScaler'
           send_empty_value: true
@@ -747,14 +745,16 @@ properties:
     description: Settings for enabling Cloud Identity Aware Proxy
     send_empty_value: true
     properties:
+      - !ruby/object:Api::Type::Boolean
+        name: 'enabled'
+        required: true
+        description: Whether the serving infrastructure will authenticate and authorize all incoming requests.
       - !ruby/object:Api::Type::String
         name: 'oauth2ClientId'
-        required: true
         description: |
           OAuth2 Client ID for IAP
       - !ruby/object:Api::Type::String
         name: 'oauth2ClientSecret'
-        required: true
         description: |
           OAuth2 Client Secret for IAP
         send_empty_value: true
@@ -964,9 +964,6 @@ properties:
       Settings controlling eviction of unhealthy hosts from the load balancing pool.
       Applicable backend service types can be a global backend service with the
       loadBalancingScheme set to INTERNAL_SELF_MANAGED or EXTERNAL_MANAGED.
-
-      From version 6.0.0 outlierDetection default terraform values will be removed to match default GCP value.
-      Default values are enforce by GCP without providing them.
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'baseEjectionTime'
@@ -1013,7 +1010,6 @@ properties:
           - outlier_detection.0.success_rate_minimum_hosts
           - outlier_detection.0.success_rate_request_volume
           - outlier_detection.0.success_rate_stdev_factor
-        default_value: 5
         description: |
           Number of errors before a host is ejected from the connection pool. When the
           backend host is accessed over HTTP, a 5xx return code qualifies as an error.
@@ -1032,7 +1028,6 @@ properties:
           - outlier_detection.0.success_rate_minimum_hosts
           - outlier_detection.0.success_rate_request_volume
           - outlier_detection.0.success_rate_stdev_factor
-        default_value: 5
         description: |
           The number of consecutive gateway failures (502, 503, 504 status or connection
           errors that are mapped to one of those status codes) before a consecutive
@@ -1051,7 +1046,6 @@ properties:
           - outlier_detection.0.success_rate_minimum_hosts
           - outlier_detection.0.success_rate_request_volume
           - outlier_detection.0.success_rate_stdev_factor
-        default_value: 100
         description: |
           The percentage chance that a host will be actually ejected when an outlier
           status is detected through consecutive 5xx. This setting can be used to disable
@@ -1070,7 +1064,6 @@ properties:
           - outlier_detection.0.success_rate_minimum_hosts
           - outlier_detection.0.success_rate_request_volume
           - outlier_detection.0.success_rate_stdev_factor
-        default_value: 0
         description: |
           The percentage chance that a host will be actually ejected when an outlier
           status is detected through consecutive gateway failures. This setting can be
@@ -1089,7 +1082,6 @@ properties:
           - outlier_detection.0.success_rate_minimum_hosts
           - outlier_detection.0.success_rate_request_volume
           - outlier_detection.0.success_rate_stdev_factor
-        default_value: 100
         description: |
           The percentage chance that a host will be actually ejected when an outlier
           status is detected through success rate statistics. This setting can be used to
@@ -1138,7 +1130,6 @@ properties:
           - outlier_detection.0.success_rate_minimum_hosts
           - outlier_detection.0.success_rate_request_volume
           - outlier_detection.0.success_rate_stdev_factor
-        default_value: 10
         description: |
           Maximum percentage of hosts in the load balancing pool for the backend service
           that can be ejected. Defaults to 10%.
@@ -1156,7 +1147,6 @@ properties:
           - outlier_detection.0.success_rate_minimum_hosts
           - outlier_detection.0.success_rate_request_volume
           - outlier_detection.0.success_rate_stdev_factor
-        default_value: 5
         description: |
           The number of hosts in a cluster that must have enough request volume to detect
           success rate outliers. If the number of hosts is less than this setting, outlier
@@ -1176,7 +1166,6 @@ properties:
           - outlier_detection.0.success_rate_minimum_hosts
           - outlier_detection.0.success_rate_request_volume
           - outlier_detection.0.success_rate_stdev_factor
-        default_value: 100
         description: |
           The minimum number of total requests that must be collected in one interval (as
           defined by the interval duration above) to include this host in success rate
@@ -1197,7 +1186,6 @@ properties:
           - outlier_detection.0.success_rate_minimum_hosts
           - outlier_detection.0.success_rate_request_volume
           - outlier_detection.0.success_rate_stdev_factor
-        default_value: 1900
         description: |
           This factor is used to determine the ejection threshold for success rate outlier
           ejection. The ejection threshold is the difference between the mean success
@@ -1251,22 +1239,47 @@ properties:
     properties:
       - !ruby/object:Api::Type::ResourceRef
         name: 'clientTlsPolicy'
-        resource: 'Region'  # TODO: 'Region' is incorrect and should be 'ClientTlsPolicy'
+        resource: 'ClientTlsPolicy'
         imports: 'name'
         description: |
           ClientTlsPolicy is a resource that specifies how a client should authenticate
           connections to backends of a service. This resource itself does not affect
           configuration unless it is attached to a backend service resource.
-        required: true
-        custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
       - !ruby/object:Api::Type::Array
         name: 'subjectAltNames'
         description: |
           A list of alternate names to verify the subject identity in the certificate.
           If specified, the client will verify that the server certificate's subject
           alt name matches one of the specified values.
-        required: true
         item_type: Api::Type::String
+      - !ruby/object:Api::Type::NestedObject
+        name: 'awsV4Authentication'
+        description: |
+          The configuration needed to generate a signature for access to private storage buckets that support AWS's Signature Version 4 for authentication.
+          Allowed only for INTERNET_IP_PORT and INTERNET_FQDN_PORT NEG backends.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'accessKeyId'
+            description: |
+              The identifier of an access key used for s3 bucket authentication.
+          - !ruby/object:Api::Type::String
+            name: 'accessKey'
+            ignore_read: true
+            sensitive: true
+            send_empty_value: true
+            description: |
+              The access key used for s3 bucket authentication.
+              Required for updating or creating a backend that uses AWS v4 signature authentication, but will not be returned as part of the configuration when queried with a REST API GET request.
+          - !ruby/object:Api::Type::String
+            name: 'accessKeyVersion'
+            description: |
+              The optional version identifier for the access key. You can use this to keep track of different iterations of your access key.
+          - !ruby/object:Api::Type::String
+            name: 'originRegion'
+            description: |
+              The name of the cloud region of your origin. This is a free-form field with the name of the region your cloud uses to host your origin.
+              For example, "us-east-1" for AWS or "us-ashburn-1" for OCI.
   - !ruby/object:Api::Type::Enum
     name: 'sessionAffinity'
     description: |

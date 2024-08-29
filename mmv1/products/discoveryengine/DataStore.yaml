@@ -24,7 +24,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 
 base_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores'
 self_link: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores?dataStoreId={{data_store_id}}&createAdvancedSiteSearch={{create_advanced_site_search}}'
+create_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores?dataStoreId={{data_store_id}}&createAdvancedSiteSearch={{create_advanced_site_search}}&skipDefaultSchemaCreation={{skip_default_schema_creation}}'
 update_verb: :PATCH
 update_mask: true
 delete_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}'
@@ -35,25 +35,9 @@ import_format:
 
 autogen_async: true
 async: !ruby/object:Api::OpAsync
+  actions: ['create', 'delete']
   operation: !ruby/object:Api::OpAsync::Operation
-    path: "name"
-    base_url: "{{op_id}}"
-    wait_ms: 1000
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 60
-      update_minutes: 60
-      delete_minutes: 60
-  result: !ruby/object:Api::OpAsync::Result
-    path: "response"
-  status: !ruby/object:Api::OpAsync::Status
-    path: "done"
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
-    path: "error"
-    message: "message"
+    base_url: '{{op_id}}'
 
 examples:
   - !ruby/object:Provider::Terraform::Examples
@@ -74,6 +58,14 @@ examples:
     name: "discoveryengine_datastore_document_processing_config_ocr"
     skip_docs: true
     primary_resource_id: 'document_processing_config_ocr'
+    primary_resource_name:
+      'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
+    vars:
+      data_store_id: "data-store-id"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "discoveryengine_datastore_document_processing_config_layout"
+    skip_docs: true
+    primary_resource_id: 'document_processing_config_layout'
     primary_resource_name:
       'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
     vars:
@@ -102,6 +94,18 @@ parameters:
       If true, an advanced data store for site search will be created. If the
       data store is not configured as site search (GENERIC vertical and
       PUBLIC_WEBSITE contentConfig), this flag will be ignored.
+  - !ruby/object:Api::Type::Boolean
+    name: 'skipDefaultSchemaCreation'
+    default_value: false
+    url_param_only: true
+    description: |
+      A boolean flag indicating whether to skip the default schema creation for
+      the data store. Only enable this flag if you are certain that the default
+      schema is incompatible with your use case.
+      If set to true, you must manually create a schema for the data store
+      before any documents can be ingested.
+      This flag cannot be specified if `data_store.starting_schema` is
+      specified.
 
 properties:
   - !ruby/object:Api::Type::String
@@ -125,6 +129,7 @@ properties:
     values:
       - :GENERIC
       - :MEDIA
+      - :HEALTHCARE_FHIR
     immutable: true
     required: true
   - !ruby/object:Api::Type::Array
@@ -139,6 +144,7 @@ properties:
         - :SOLUTION_TYPE_RECOMMENDATION
         - :SOLUTION_TYPE_SEARCH
         - :SOLUTION_TYPE_CHAT
+        - :SOLUTION_TYPE_GENERATIVE_CHAT
     immutable: true
   - !ruby/object:Api::Type::String
     name: 'defaultSchemaId'
@@ -169,6 +175,34 @@ properties:
           `projects/{project}/locations/{location}/collections/{collection_id}/dataStores/{data_store_id}/documentProcessingConfig`.
         output: true
         required: false
+
+      - !ruby/object:Api::Type::NestedObject
+        name: 'chunkingConfig'
+        description: |
+          Whether chunking mode is enabled.
+        required: false
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'layoutBasedChunkingConfig'
+            allow_empty_object: true
+            send_empty_value: true
+            description: |
+              Configuration for the layout based chunking.
+            required: false
+            properties:
+              - !ruby/object:Api::Type::Integer
+                name: 'chunkSize'
+                required: false
+                description: |
+                  The token size limit for each chunk.
+                  Supported values: 100-500 (inclusive). Default value: 500.
+              - !ruby/object:Api::Type::Boolean
+                name: 'includeAncestorHeadings'
+                required: false
+                description: |
+                  Whether to include appending different levels of headings to chunks from the middle of the document to prevent context loss.
+                  Default value: False.
+
       - !ruby/object:Api::Type::NestedObject
         name: 'defaultParsingConfig'
         description: |
@@ -184,6 +218,7 @@ properties:
             exactly_one_of:
               - default_parsing_config.0.digital_parsing_config
               - default_parsing_config.0.ocr_parsing_config
+              - default_parsing_config.0.layout_parsing_config
             description: |
               Configurations applied to digital parser.
             required: false
@@ -193,6 +228,7 @@ properties:
             exactly_one_of:
               - default_parsing_config.0.digital_parsing_config
               - default_parsing_config.0.ocr_parsing_config
+              - default_parsing_config.0.layout_parsing_config
             description: |
               Configurations applied to OCR parser. Currently it only applies to PDFs.
             required: false
@@ -202,6 +238,18 @@ properties:
                 required: false
                 description: |
                   If true, will use native text instead of OCR text on pages containing native text.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'layoutParsingConfig'
+            allow_empty_object: true
+            send_empty_value: true
+            exactly_one_of:
+              - default_parsing_config.0.digital_parsing_config
+              - default_parsing_config.0.ocr_parsing_config
+              - default_parsing_config.0.layout_parsing_config
+            description: |
+              Configurations applied to layout parser.
+            required: false
+            properties: []
 
       - !ruby/object:Api::Type::Map
         name: 'parsingConfigOverrides'
@@ -221,6 +269,7 @@ properties:
               exactly_one_of:
                 - default_parsing_config.0.digital_parsing_config
                 - default_parsing_config.0.ocr_parsing_config
+                - default_parsing_config.0.layout_parsing_config
               description: |
                 Configurations applied to digital parser.
               required: false
@@ -230,6 +279,7 @@ properties:
               exactly_one_of:
                 - default_parsing_config.0.digital_parsing_config
                 - default_parsing_config.0.ocr_parsing_config
+                - default_parsing_config.0.layout_parsing_config
               description: |
                 Configurations applied to OCR parser. Currently it only applies to PDFs.
               required: false
@@ -239,6 +289,18 @@ properties:
                   required: false
                   description: |
                     If true, will use native text instead of OCR text on pages containing native text.
+            - !ruby/object:Api::Type::NestedObject
+              name: 'layoutParsingConfig'
+              allow_empty_object: true
+              send_empty_value: true
+              exactly_one_of:
+                - default_parsing_config.0.digital_parsing_config
+                - default_parsing_config.0.ocr_parsing_config
+                - default_parsing_config.0.layout_parsing_config
+              description: |
+                Configurations applied to layout parser.
+              required: false
+              properties: []
 
   - !ruby/object:Api::Type::Time
     name: "createTime"

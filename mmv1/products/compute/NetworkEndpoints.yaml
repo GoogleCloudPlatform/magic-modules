@@ -46,7 +46,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -60,7 +60,7 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
-id_format: '{{project}}/{{zone}}/{{network_endpoint_group}}/endpoints'
+id_format: '{{project}}/{{zone}}/{{network_endpoint_group}}'
 import_format:
   - 'projects/{{project}}/zones/{{zone}}/networkEndpointGroups/{{network_endpoint_group}}'
 mutex: networkEndpoint/{{project}}/{{zone}}/{{network_endpoint_group}}

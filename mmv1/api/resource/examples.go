@@ -172,7 +172,9 @@ func (e *Examples) UnmarshalYAML(n *yaml.Node) error {
 		return err
 	}
 
-	e.ConfigPath = fmt.Sprintf("templates/terraform/examples/go/%s.tf.tmpl", e.Name)
+	if e.ConfigPath == "" {
+		e.ConfigPath = fmt.Sprintf("templates/terraform/examples/go/%s.tf.tmpl", e.Name)
+	}
 	e.SetHCLText()
 
 	return nil

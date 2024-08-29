@@ -55,13 +55,11 @@ examples:
     test_env_vars:
       org_id: :ORG_ID
 virtual_fields:
-  - !ruby/object:Api::Type::Enum
+  - !ruby/object:Api::Type::String
     name: desired_state
-    description: The intended database state.
-    values:
-      - :ACTIVE
-      - :DISABLED
-    default_value: :ACTIVE
+    description: |
+      The intended database state. Possible values: ACTIVE, DISABLED.
+    default_value: ACTIVE
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: 'templates/terraform/constants/firebase_database_instance.go.erb'
   decoder: templates/terraform/decoders/firebase_database_instance.go.erb
@@ -91,8 +89,8 @@ properties:
   - !ruby/object:Api::Type::String
     name: name
     description: |
-      The fully-qualified resource name of the Firebase Realtime Database, in the
-      format: projects/PROJECT_NUMBER/locations/REGION_IDENTIFIER/instances/INSTANCE_ID
+      The fully-qualified resource name of the Firebase Realtime Database, in
+      the format: projects/PROJECT_NUMBER/locations/REGION_IDENTIFIER/instances/INSTANCE_ID
       PROJECT_NUMBER: The Firebase project's [`ProjectNumber`](https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects#FirebaseProject.FIELDS.project_number)
       Learn more about using project identifiers in Google's [AIP 2510 standard](https://google.aip.dev/cloud/2510).
     output: true

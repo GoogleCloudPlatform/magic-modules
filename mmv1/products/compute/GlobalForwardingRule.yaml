@@ -17,6 +17,8 @@ kind: 'compute#forwardingRule'
 base_url: projects/{{project}}/global/forwardingRules
 immutable: true
 has_self_link: true
+# Has a separate endpoint for labels
+skip_attribution_label: true
 legacy_long_form_project: true
 collection_url_key: 'items'
 description: |
@@ -30,7 +32,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'

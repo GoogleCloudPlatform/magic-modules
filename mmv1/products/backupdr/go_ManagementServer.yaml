@@ -1,0 +1,131 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'ManagementServer'
+description: A Backup and DR Management Server (Also referred as Management Console)
+min_version: 'beta'
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/backup-disaster-recovery/docs'
+  api: 'https://cloud.google.com/backup-disaster-recovery/docs/deployment/deployment-plan'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/managementServers'
+self_link: 'projects/{{project}}/locations/{{location}}/managementServers/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/managementServers/?management_server_id={{name}}'
+delete_url: 'projects/{{project}}/locations/{{location}}/managementServers/{{name}}'
+immutable: true
+timeouts:
+  insert_minutes: 40
+  update_minutes: 20
+  delete_minutes: 40
+autogen_async: true
+async:
+  actions: ['create', 'delete']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'backup_dr_management_server'
+    primary_resource_id: 'ms-console'
+    min_version: 'beta'
+    vars:
+      network_name: 'vpc-network'
+      managementserver_name: 'ms-console'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+    skip_test: true
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The location for the management server (management console)
+    min_version: 'beta'
+    url_param_only: true
+    required: true
+  - name: 'name'
+    type: String
+    description: |-
+      The name of management server (management console)
+    min_version: 'beta'
+    url_param_only: true
+    required: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/go/shortname_to_url.go.tmpl'
+properties:
+  - name: 'type'
+    type: Enum
+    description: |
+      The type of management server (management console).
+    min_version: 'beta'
+    default_value: "BACKUP_RESTORE"
+    enum_values:
+      - 'BACKUP_RESTORE'
+  - name: 'networks'
+    type: Array
+    description: |
+      Network details to create management server (management console).
+    min_version: 'beta'
+    required: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'network'
+          type: String
+          description: |
+            Network with format `projects/{{project_id}}/global/networks/{{network_id}}`
+          min_version: 'beta'
+          required: true
+        - name: 'peeringMode'
+          type: Enum
+          description: |
+            Type of Network peeringMode
+          min_version: 'beta'
+          default_value: "PRIVATE_SERVICE_ACCESS"
+          enum_values:
+            - 'PRIVATE_SERVICE_ACCESS'
+  - name: 'oauth2ClientId'
+    type: String
+    description: |
+      The oauth2ClientId of management console.
+    min_version: 'beta'
+    output: true
+  - name: 'managementUri'
+    type: NestedObject
+    description: |-
+      The management console URI
+    min_version: 'beta'
+    output: true
+    properties:
+      - name: 'webUi'
+        type: String
+        description: |-
+          The management console webUi.
+        min_version: 'beta'
+        output: true
+      - name: 'api'
+        type: String
+        description: |-
+          The management console api endpoint.
+        min_version: 'beta'
+        output: true

@@ -17,6 +17,8 @@ kind: 'compute#forwardingRule'
 base_url: projects/{{project}}/regions/{{region}}/forwardingRules
 collection_url_key: 'items'
 has_self_link: true
+# Has a separate endpoint for labels
+skip_attribution_label: true
 description: |
   A ForwardingRule resource. A ForwardingRule resource specifies which pool
   of target virtual machines to forward a packet to if it matches the given
@@ -31,7 +33,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -215,6 +217,7 @@ examples:
       - "port_range"
       - "target"
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_create: templates/terraform/pre_create/compute_forwarding_rule.go.erb
   post_create: templates/terraform/post_create/labels.erb
   constants: 'templates/terraform/constants/compute_forwarding_rule.go.erb'
 custom_diff: [
@@ -254,6 +257,12 @@ properties:
 
       This can only be set to true for load balancers that have their
       `loadBalancingScheme` set to `INTERNAL`.
+  - !ruby/object:Api::Type::Integer
+    name: 'forwardingRuleId'
+    description: |
+      The unique identifier number for the resource. This identifier is defined by the server.
+    api_name: id
+    output: true
   - !ruby/object:Api::Type::String
     name: 'pscConnectionId'
     description: 'The PSC connection id of the PSC Forwarding Rule.'

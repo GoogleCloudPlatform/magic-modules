@@ -266,7 +266,7 @@ properties:
       - !ruby/object:Api::Type::Array
         name: knownExtensions
         description: Optional. A set of named X.509 extensions. Will be combined with additional_extensions to determine the full set of X.509 extensions.
-        item_type: Api::Type::Enum
+        item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: additionalExtensions
         description: Optional. A set of ObjectIds identifying custom X.509 extensions. Will be combined with known_extensions to determine the full set of X.509 extensions.

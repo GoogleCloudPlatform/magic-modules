@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -184,6 +184,7 @@ resource "google_project" "basic" {
   project_id = "tf-test-id%{random_suffix}"
   name       = "tf-test-id%{random_suffix}"
   org_id     = "%{org_id}"
+  deletion_policy = "DELETE"
 }
 
 
@@ -208,6 +209,7 @@ resource "google_org_policy_policy" "primary" {
 resource "google_folder" "basic" {
   parent       = "organizations/%{org_id}"
   display_name = "tf-test-folder%{random_suffix}"
+  deletion_protection = false
 }
 
 
@@ -245,6 +247,7 @@ resource "google_org_policy_policy" "primary" {
 resource "google_folder" "basic" {
   parent       = "organizations/%{org_id}"
   display_name = "tf-test-folder%{random_suffix}"
+  deletion_protection = false
 }
 
 
@@ -336,6 +339,7 @@ resource "google_project" "basic" {
   project_id = "tf-test-id%{random_suffix}"
   name       = "tf-test-id%{random_suffix}"
   org_id     = "%{org_id}"
+  deletion_policy = "DELETE"
 }
 
 
@@ -373,6 +377,7 @@ resource "google_project" "basic" {
   project_id = "tf-test-id%{random_suffix}"
   name       = "tf-test-id%{random_suffix}"
   org_id     = "%{org_id}"
+  deletion_policy = "DELETE"
 }
 
 
