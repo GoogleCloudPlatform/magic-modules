@@ -1762,7 +1762,7 @@ func TestAccComputeDisk_accessModeSpecified(t *testing.T) {
 }
 
 func testAccComputeDisk_accessModeSpecified(diskName, accessMode string) string {
-	return fmt.Sprintf(`
+        return fmt.Sprintf(`
 resource "google_compute_disk" "foobar" {
   name = "%s"
   type = "hyperdisk-ml"
