@@ -40,16 +40,17 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'region_network_firewall_policy_rule'
-    primary_resource_id: 'region_policy_rule'
+    primary_resource_id: 'primary'
     vars:
       tag_key: 'tagkey'
       network: 'network'
       fw_policy: 'policy'
+      address: 'address'
     test_env_vars:
-      project: :PROJECT_NAME
+      project_name: :PROJECT_NAME
       org_id: :ORG_ID
       region: :REGION
-      service_account: :SERVICE_ACCT
+      service_acct: :SERVICE_ACCT
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: 'templates/terraform/constants/compute_region_network_firewall_policy_rule_operation.go.erb'
   post_delete: 'templates/terraform/constants/compute_region_network_firewall_policy_rule_operation.go.erb'

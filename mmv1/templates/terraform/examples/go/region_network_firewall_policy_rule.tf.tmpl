@@ -1,6 +1,6 @@
 resource "google_network_security_address_group" "basic_regional_networksecurity_address_group" {
-  name        = "address-group"
-  parent      = "projects/{{index $.TestEnvVars "project"}}"
+  name        = "{{index $.Vars "address"}}"
+  parent      = "projects/{{index $.TestEnvVars "project_name"}}"
   description = "Sample regional networksecurity_address_group"
   location    = "{{index $.TestEnvVars "region"}}"
   items       = ["208.80.154.224/32"]
@@ -11,7 +11,7 @@ resource "google_network_security_address_group" "basic_regional_networksecurity
 resource "google_compute_region_network_firewall_policy" "basic_regional_network_firewall_policy" {
   name        = "{{index $.Vars "fw_policy"}}"
   description = "Sample regional network firewall policy"
-  project     = "{{index $.TestEnvVars "project"}}"
+  project     = "{{index $.TestEnvVars "project_name"}}"
   region      = "{{index $.TestEnvVars "region"}}"
 }
 
@@ -25,7 +25,7 @@ resource "google_compute_region_network_firewall_policy_rule" "{{$.PrimaryResour
   priority                = 1000
   region                  = "{{index $.TestEnvVars "region"}}"
   rule_name               = "test-rule"
-  target_service_accounts = ["{{index $.TestEnvVars "service_account"}}"]
+  target_service_accounts = ["{{index $.TestEnvVars "service_acct"}}"]
 
   match {
     src_ip_ranges = ["10.100.0.1/32"]
@@ -56,7 +56,7 @@ resource "google_tags_tag_key" "basic_key" {
   short_name  = "{{index $.Vars "tag_key"}}"
 
   purpose_data = {
-    network = "{{index $.TestEnvVars "project"}}/${google_compute_network.basic_network.name}"
+    network = "{{index $.TestEnvVars "project_name"}}/${google_compute_network.basic_network.name}"
   }
 }
 

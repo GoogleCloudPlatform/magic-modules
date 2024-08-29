@@ -1,6 +1,6 @@
 resource "google_network_security_address_group" "basic_regional_networksecurity_address_group" {
-  name        = "address-group"
-  parent      = "projects/<%= ctx[:test_env_vars]["project"] %>"
+  name        = "<%= ctx[:vars]['address'] %>"
+  parent      = "projects/<%= ctx[:test_env_vars]["project_name"] %>"
   description = "Sample regional networksecurity_address_group"
   location    = "<%= ctx[:test_env_vars]["region"] %>"
   items       = ["208.80.154.224/32"]
@@ -11,7 +11,7 @@ resource "google_network_security_address_group" "basic_regional_networksecurity
 resource "google_compute_region_network_firewall_policy" "basic_regional_network_firewall_policy" {
   name        = "<%= ctx[:vars]['fw_policy'] %>"
   description = "Sample regional network firewall policy"
-  project     = "<%= ctx[:test_env_vars]["project"] %>"
+  project     = "<%= ctx[:test_env_vars]["project_name"] %>"
   region      = "<%= ctx[:test_env_vars]["region"] %>"
 }
 
@@ -25,7 +25,7 @@ resource "google_compute_region_network_firewall_policy_rule" "<%= ctx[:primary_
   priority                = 1000
   region                  = "<%= ctx[:test_env_vars]["region"] %>"
   rule_name               = "test-rule"
-  target_service_accounts = ["<%= ctx[:test_env_vars]['service_account'] %>"]
+  target_service_accounts = ["<%= ctx[:test_env_vars]['service_acct'] %>"]
 
   match {
     src_ip_ranges = ["10.100.0.1/32"]
@@ -56,7 +56,7 @@ resource "google_tags_tag_key" "basic_key" {
   short_name  = "<%= ctx[:vars]['tag_key'] %>"
 
   purpose_data = {
-    network = "<%= ctx[:test_env_vars]["project"] %>/${google_compute_network.basic_network.name}"
+    network = "<%= ctx[:test_env_vars]["project_name"] %>/${google_compute_network.basic_network.name}"
   }
 }
 

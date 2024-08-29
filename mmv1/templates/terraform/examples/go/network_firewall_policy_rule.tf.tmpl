@@ -1,6 +1,6 @@
 resource "google_network_security_address_group" "basic_global_networksecurity_address_group" {
   name        = "{{index $.Vars "address"}}"
-  parent      = "projects/{{index $.TestEnvVars "project"}}"
+  parent      = "projects/{{index $.TestEnvVars "project_name"}}"
   description = "Sample global networksecurity_address_group"
   location    = "global"
   items       = ["208.80.154.224/32"]
@@ -11,7 +11,7 @@ resource "google_network_security_address_group" "basic_global_networksecurity_a
 resource "google_compute_network_firewall_policy" "basic_network_firewall_policy" {
   name        = "{{index $.Vars "fw_policy"}}"
   description = "Sample global network firewall policy"
-  project     = "{{index $.TestEnvVars "project"}}"
+  project     = "{{index $.TestEnvVars "project_name"}}"
 }
 
 resource "google_compute_network_firewall_policy_rule" "{{$.PrimaryResourceId}}" {
@@ -23,7 +23,7 @@ resource "google_compute_network_firewall_policy_rule" "{{$.PrimaryResourceId}}"
   firewall_policy         = google_compute_network_firewall_policy.basic_network_firewall_policy.id
   priority                = 1000
   rule_name               = "test-rule"
-  target_service_accounts = ["{{index $.TestEnvVars "service_account"}}"]
+  target_service_accounts = ["{{index $.TestEnvVars "service_acct"}}"]
 
   match {
     src_ip_ranges = ["10.100.0.1/32"]
@@ -53,7 +53,7 @@ resource "google_tags_tag_key" "basic_key" {
   purpose     = "GCE_FIREWALL"
   short_name  = "{{index $.Vars "tag_key"}}"
   purpose_data = {
-    network = "{{index $.TestEnvVars "project"}}/${google_compute_network.basic_network.name}"
+    network = "{{index $.TestEnvVars "project_name"}}/${google_compute_network.basic_network.name}"
   }
 }
 
