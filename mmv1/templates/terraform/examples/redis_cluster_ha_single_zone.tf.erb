@@ -13,8 +13,8 @@ resource "google_redis_cluster" "<%= ctx[:primary_resource_id] %>" {
     weekly_maintenance_window {
       day = "MONDAY"
       start_time {
-        hours = 0
-        minutes = 30
+        hours = 1
+        minutes = 0
         seconds = 0
         nanos = 0
       }
