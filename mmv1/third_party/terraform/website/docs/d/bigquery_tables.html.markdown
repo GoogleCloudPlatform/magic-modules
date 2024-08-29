@@ -7,7 +7,8 @@ description: |-
 # `google_bigquery_tables`
 
 Get a list of tables in a BigQuery dataset. For more information see
-the [official documentation](https://cloud.google.com/bigquery/docs).
+the [official documentation](https://cloud.google.com/bigquery/docs)
+and [API](https://cloud.google.com/bigquery/docs/reference/rest/v2/tables).
 
 ## Example Usage
 
@@ -29,5 +30,5 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-* `tables` - List of tables contained within the provided `dataset_id`
+* `tables` - Map of tables contained within the provided `dataset_id`.
 
