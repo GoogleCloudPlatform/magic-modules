@@ -141,7 +141,7 @@ func testAccSdkProvider_credentials_precedenceOrderEnvironmentVariables(t *testi
 
 	acctest.VcrTest(t, resource.TestCase{
 		// No PreCheck for checking ENVs
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		// ProtoV5ProviderFactories set on each step to ensure provider reconfigured each time
 		Steps: []resource.TestStep{
 			{
 				// Error as all ENVs set to 'bad' creds
@@ -150,8 +150,9 @@ func testAccSdkProvider_credentials_precedenceOrderEnvironmentVariables(t *testi
 						t.Setenv(v, badCreds)
 					}
 				},
-				Config:      testAccSdkProvider_credentialsInEnvsOnly(context),
-				ExpectError: regexp.MustCompile("private key should be a PEM or plain PKCS1 or PKCS8"),
+				Config:                   testAccSdkProvider_credentialsInEnvsOnly(context),
+				ExpectError:              regexp.MustCompile("private key should be a PEM or plain PKCS1 or PKCS8"),
+				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 			},
 			{
 				// GOOGLE_CREDENTIALS is used 1st if set
@@ -163,7 +164,8 @@ func testAccSdkProvider_credentials_precedenceOrderEnvironmentVariables(t *testi
 					t.Setenv("GCLOUD_KEYFILE_JSON", badCreds)
 					t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", badCredsPath) // needs to be a path
 				},
-				Config: testAccSdkProvider_credentialsInEnvsOnly(context),
+				Config:                   testAccSdkProvider_credentialsInEnvsOnly(context),
+				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 			},
 			{
 				// GOOGLE_CLOUD_KEYFILE_JSON is used 2nd
@@ -176,7 +178,8 @@ func testAccSdkProvider_credentials_precedenceOrderEnvironmentVariables(t *testi
 					t.Setenv("GCLOUD_KEYFILE_JSON", badCreds)
 					t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", badCredsPath) // needs to be a path
 				},
-				Config: testAccSdkProvider_credentialsInEnvsOnly(context),
+				Config:                   testAccSdkProvider_credentialsInEnvsOnly(context),
+				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 			},
 			{
 				// GOOGLE_CLOUD_KEYFILE_JSON is used 3rd
@@ -189,7 +192,8 @@ func testAccSdkProvider_credentials_precedenceOrderEnvironmentVariables(t *testi
 					// bad
 					t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", badCredsPath) // needs to be a path
 				},
-				Config: testAccSdkProvider_credentialsInEnvsOnly(context),
+				Config:                   testAccSdkProvider_credentialsInEnvsOnly(context),
+				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 			},
 			{
 				// GOOGLE_APPLICATION_CREDENTIALS is used 4th
@@ -201,15 +205,17 @@ func testAccSdkProvider_credentials_precedenceOrderEnvironmentVariables(t *testi
 					// bad
 					t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", badCredsPath) // used, needs to be a path
 				},
-				ExpectError: regexp.MustCompile(fmt.Sprintf("%s: no such file", badCredsPath)), // Errors when tries to use GOOGLE_APPLICATION_CREDENTIALS
-				Config:      testAccSdkProvider_credentialsInEnvsOnly(context),
+				ExpectError:              regexp.MustCompile(fmt.Sprintf("%s: no such file", badCredsPath)), // Errors when tries to use GOOGLE_APPLICATION_CREDENTIALS
+				Config:                   testAccSdkProvider_credentialsInEnvsOnly(context),
+				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 			},
 			{
 				// Make last step have credentials to enable deleting the resource
 				PreConfig: func() {
 					t.Setenv("GOOGLE_CREDENTIALS", goodCredentials)
 				},
-				Config: "// Empty config, to force deletion of resources using credentials set above",
+				Config:                   "// Empty config, to force deletion of resources using credentials set above",
+				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 			},
 		},
 	})
