@@ -42,6 +42,9 @@ final_api.yaml
 # Used by OiCS tutorial
 mmv1/build/*
 
+# Ignore vendored Ruby libs as well
+mmv1/vendor/
+
 # ignore node modules folders utilized by npm
 **/node_modules
 
