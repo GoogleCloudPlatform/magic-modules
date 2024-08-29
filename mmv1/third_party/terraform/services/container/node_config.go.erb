@@ -601,9 +601,9 @@ func schemaNodeConfig() *schema.Schema {
 						Schema: map[string]*schema.Schema{
 							"cpu_manager_policy": {
 								Type:         schema.TypeString,
-								Required:     true,
+								Optional:     true,
 								ValidateFunc: validation.StringInSlice([]string{"static", "none", ""}, false),
-								Description: `Control the CPU management policy on the node.`,
+								Description:  `Control the CPU management policy on the node.`,
 							},
 							"cpu_cfs_quota": {
 								Type:     schema.TypeBool,
@@ -1204,6 +1204,7 @@ func expandKubeletConfig(v interface{}) *container.NodeKubeletConfig {
 	kConfig := &container.NodeKubeletConfig{}
 	if cpuManagerPolicy, ok := cfg["cpu_manager_policy"]; ok {
 		kConfig.CpuManagerPolicy = cpuManagerPolicy.(string)
+		kConfig.ForceSendFields = append(kConfig.ForceSendFields, "CpuManagerPolicy")
 	}
 	if cpuCfsQuota, ok := cfg["cpu_cfs_quota"]; ok {
 		kConfig.CpuCfsQuota = cpuCfsQuota.(bool)
