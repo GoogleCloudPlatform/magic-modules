@@ -163,6 +163,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_mesh'
     min_version: 'beta'
+    external_providers: ['time']
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service-%s\", context[\"random_suffix\"])"
     vars:
