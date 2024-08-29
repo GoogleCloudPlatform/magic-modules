@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"time"
 
 	bq "google.golang.org/api/bigquery/v2"
 
@@ -26,11 +25,14 @@ func DataSourceGoogleBigQueryTables() *schema.Resource {
 			Optional:    true,
 			Description: "The ID of the project in which the dataset is located. If it is not provided, the provider project is used.",
 		},
-		"tables": {
-			Type:        schema.TypeList,
-			Computed:    true,
-			Elem:        &schema.Schema{Type: schema.TypeString},
-			Description: "A list of table names in the dataset.",
+    "tables": {
+			Type:         schema.TypeMap,
+			Computed:     true,
+			Elem: &schema.Schema{ 
+        Type:     schema.TypeString,
+        Optional: true,
+			},
+			Description: "A map of table names in the dataset.",
 		},
 	}
 
@@ -45,7 +47,7 @@ func DataSourceGoogleBigQueryTablesRead(d *schema.ResourceData, meta interface{}
 	ctx := context.Background()
 	config := meta.(*transport_tpg.Config)
 
-	dataset_id := d.Get("dataset_id").(string)
+	datasetID := d.Get("dataset_id").(string)
 
 	project, err := tpgresource.GetProject(d, config)
 
@@ -53,31 +55,48 @@ func DataSourceGoogleBigQueryTablesRead(d *schema.ResourceData, meta interface{}
 		return fmt.Errorf("Error fetching project: %s", err)
 	}
 
-	bigquery_service, err := bq.NewService(ctx)
+  bigqueryService, err := bq.NewService(ctx)
 
-	if err != nil {
+  if err != nil {
 		return fmt.Errorf("Error creating BigQuery service: %s", err)
 	}
 
-	tables, err := bq.NewTablesService(bigquery_service).List(project, dataset_id).Do()
+  tablesService := bq.NewTablesService(bigqueryService)
 
-	if err != nil {
-		return fmt.Errorf("Error listing tables: %s", err)
+	tableMap := make(map[string]interface{})
+
+	nextPageToken := ""
+	for {
+		listCall := tablesService.List(project, datasetID)
+		if nextPageToken != "" {
+			listCall.PageToken(nextPageToken)
+		}
+
+		tables, err := listCall.Do()
+		if err != nil {
+			return fmt.Errorf("Error listing tables: %s", err)
+		}
+
+		for _, table := range tables.Tables {
+			tableName := table.TableReference.TableId
+			log.Printf("[INFO] Found BigQuery table: %s", tableName)
+
+			tableMap[tableName] = nil
+		}
+
+		if tables.NextPageToken == "" {
+			break
+		}
+
+		nextPageToken = tables.NextPageToken
 	}
 
-	var table_names []interface{}
-	for _, table := range tables.Tables {
-		log.Printf("[INFO] Found BigQuery table: %s", table.TableReference.TableId)
-		table_name := table.TableReference.TableId
-		table_names = append(table_names, table_name)
-	}
-
-	if err := d.Set("tables", table_names); err != nil {
-		log.Printf("[ERROR] Failed to set 'tables' attribute: %s", err)
+	if err := d.Set("tables", tableMap); err != nil {
 		return fmt.Errorf("error setting 'tables' attribute: %w", err)
 	}
 
-	d.SetId(time.Now().UTC().String())
+  id := fmt.Sprintf("projects/%s/datasets/%s/tables", project, datasetID)
+  d.SetId(id)
 
 	return nil
 }
