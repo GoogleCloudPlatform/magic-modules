@@ -294,12 +294,6 @@ properties:
           Output only. The time when the policy was last updated.
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
-      - !ruby/object:Api::Type::String
-        name: 'description'
-        description: |
-          Optional. Description of what this policy is for.
-          Create/Update methods return INVALID_ARGUMENT if the
-          length is greater than 512.
       - !ruby/object:Api::Type::Array
         name: 'weeklyMaintenanceWindow'
         description: |
