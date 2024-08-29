@@ -15,6 +15,7 @@
                     "MY_CF_ENV": "my-cf-env"
                 },
                 "labels": {
+                    "goog-terraform-provisioned": "true",
                     "my-cf-label-value": "my-cf-label-value"
                 },
                 "location": "us-east1",
@@ -27,7 +28,9 @@
             }
         },
         "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
-        "ancestors": ["organizations/{{.OrgID}}"]
+        "ancestors": [
+            "organizations/{{.OrgID}}"
+        ]
     },
     {
         "name": "//vpcaccess.googleapis.com/projects/{{.Provider.project}}/locations/us-east1/connectors/vpc-con-cf",
@@ -40,12 +43,12 @@
             "data": {
                 "ipCidrRange": "10.8.0.0/28",
                 "machineType": "e2-micro",
-                "maxThroughput": 300,
-                "minThroughput": 200,
                 "network": "default"
             }
         },
         "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
-        "ancestors": ["organizations/{{.OrgID}}"]
+        "ancestors": [
+            "organizations/{{.OrgID}}"
+        ]
     }
 ]

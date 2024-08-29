@@ -44,6 +44,8 @@ examples:
       project: :PROJECT_NAME
 id_format: 'projects/{{project}}/locations/{{location}}/securitySettings/{{name}}'
 import_format: ['projects/{{project}}/locations/{{location}}/securitySettings/{{name}}']
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  post_create: templates/terraform/post_create/sleep.go.erb
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'

@@ -81,7 +81,7 @@ virtual_fields:
       * RESTART
       * REFRESH
       * NONE
-    type: Enum
+    type: String
     default_value: "NONE"
   - name: 'most_disruptive_allowed_action'
     description: |
@@ -91,7 +91,7 @@ virtual_fields:
       * RESTART
       * REFRESH
       * NONE
-    type: Enum
+    type: String
     default_value: "REPLACE"
   - name: 'remove_instance_on_destroy'
     description: |
@@ -191,6 +191,7 @@ properties:
         api_name: internalIPs
         key_name: 'interface_name'
         value_type:
+          name: internalIp
           type: NestedObject
           properties:
             - name: 'autoDelete'
@@ -220,6 +221,7 @@ properties:
         api_name: externalIPs
         key_name: 'interface_name'
         value_type:
+          name: externalIp
           type: NestedObject
           properties:
             - name: 'autoDelete'

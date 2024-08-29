@@ -1,0 +1,1328 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Trigger'
+description: |
+  Configuration for an automated build in response to source repository changes.
+references:
+  guides:
+    'Automating builds using build triggers': 'https://cloud.google.com/cloud-build/docs/running-builds/automate-builds'
+  api: 'https://cloud.google.com/cloud-build/docs/api/reference/rest/v1/projects.triggers'
+docs:
+  note: |
+    You can retrieve the email of the Cloud Build Service Account used in jobs by using the `google_project_service_identity` resource.
+  # import by default only works with old-style self links ending in a name
+id_format: 'projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/triggers'
+self_link: 'projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}'
+update_verb: 'PATCH'
+import_format:
+  - 'projects/{{project}}/triggers/{{trigger_id}}'
+  - 'projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  constants: 'templates/terraform/constants/go/cloudbuild_trigger.tmpl'
+  post_create: 'templates/terraform/post_create/go/cloudbuild_trigger_id.go.tmpl'
+  pre_read: 'templates/terraform/pre_read/go/cloudbuild_trigger.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/go/cloudbuild_trigger.go.tmpl'
+  post_import: 'templates/terraform/post_import/go/cloudbuild_trigger.go.tmpl'
+custom_diff:
+  - 'stepTimeoutCustomizeDiff'
+schema_version: 2
+state_upgraders: true
+examples:
+  - name: 'cloudbuild_trigger_filename'
+    primary_resource_id: 'filename-trigger'
+  - name: 'cloudbuild_trigger_build'
+    primary_resource_id: 'build-trigger'
+    vars:
+      cloudbuild_trigger_name: 'my-trigger'
+  - name: 'cloudbuild_trigger_service_account'
+    primary_resource_id: 'service-account-trigger'
+    vars:
+      sa_name: 'cloud-sa'
+  - name: 'cloudbuild_trigger_include_build_logs'
+    primary_resource_id: 'include-build-logs-trigger'
+    skip_test: true
+  - name: 'cloudbuild_trigger_pubsub_config'
+    primary_resource_id: 'pubsub-config-trigger'
+    vars:
+      pubsub_topic_name: 'my-topic'
+      cloudbuild_trigger_name: 'pubsub-trigger'
+  - name: 'cloudbuild_trigger_webhook_config'
+    primary_resource_id: 'webhook-config-trigger'
+    vars:
+      cloudbuild_trigger_name: 'webhook-trigger'
+      secret_id: 'webhook-trigger-secret-key'
+  - name: 'cloudbuild_trigger_manual'
+    primary_resource_id: 'manual-trigger'
+    vars:
+      cloudbuild_trigger_name: 'manual-trigger'
+  - name: 'cloudbuild_trigger_manual_github_enterprise'
+    primary_resource_id: 'manual-ghe-trigger'
+    skip_test: true
+  - name: 'cloudbuild_trigger_manual_bitbucket_server'
+    primary_resource_id: 'manual-bitbucket-trigger'
+  - name: 'cloudbuild_trigger_repo'
+    primary_resource_id: 'repo-trigger'
+    vars:
+      installation_id: '123123'
+      pat_secret: 'projects/my-project/secrets/github-pat-secret/versions/latest'
+      repo_uri: 'https://github.com/myuser/my-repo.git'
+      cloudbuildv2_connection_name: 'my-connection'
+      cloudbuildv2_repo_name: 'my-repo'
+    test_vars_overrides:
+      'installation_id': '31300675'
+      'pat_secret': '"projects/gcb-terraform-creds/secrets/github-pat/versions/latest"'
+      'repo_uri': '"https://github.com/gcb-repos-robot/tf-demo.git"'
+  - name: 'cloudbuild_trigger_bitbucket_server_push'
+    primary_resource_id: 'bbs-push-trigger'
+    vars:
+      cloudbuild_trigger_name: 'bbs-push-trigger'
+  - name: 'cloudbuild_trigger_bitbucket_server_pull_request'
+    primary_resource_id: 'bbs-pull-request-trigger'
+    vars:
+      cloudbuild_trigger_name: 'ghe-trigger'
+  - name: 'cloudbuild_trigger_github_enterprise'
+    primary_resource_id: 'ghe-trigger'
+    vars:
+      cloudbuild_trigger_name: 'ghe-trigger'
+    skip_test: true
+  - name: 'cloudbuild_trigger_allow_failure'
+    primary_resource_id: 'allow-failure-trigger'
+    vars:
+      cloudbuild_trigger_name: 'my-trigger'
+  - name: 'cloudbuild_trigger_allow_exit_codes'
+    primary_resource_id: 'allow-exit-codes-trigger'
+    vars:
+      cloudbuild_trigger_name: 'my-trigger'
+  - name: 'cloudbuild_trigger_pubsub_with_repo'
+    primary_resource_id: 'pubsub-with-repo-trigger'
+    vars:
+      installation_id: '123123'
+      pat_secret: 'projects/my-project/secrets/github-pat-secret/versions/latest'
+      repo_uri: 'https://github.com/myuser/my-repo.git'
+      cloudbuildv2_connection_name: 'my-connection'
+      cloudbuildv2_repo_name: 'my-repo'
+      pubsub_topic_name: 'my-topic'
+      cloudbuild_trigger_name: 'pubsub-with-repo-trigger'
+    test_vars_overrides:
+      'installation_id': '31300675'
+      'pat_secret': '"projects/gcb-terraform-creds/secrets/github-pat/versions/latest"'
+      'repo_uri': '"https://github.com/gcb-repos-robot/tf-demo.git"'
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The [Cloud Build location](https://cloud.google.com/build/docs/locations) for the trigger.
+      If not specified, "global" is used.
+    url_param_only: true
+    immutable: true
+    default_value: "global"
+properties:
+  - name: 'trigger_id'
+    type: String
+    description: |
+      The unique identifier for the trigger.
+    api_name: id
+    output: true
+  - name: 'name'
+    type: String
+    description: |
+      Name of the trigger. Must be unique within the project.
+    default_from_api: true
+  - name: 'description'
+    type: String
+    description: |
+      Human-readable description of the trigger.
+  - name: 'tags'
+    type: Array
+    description: |
+      Tags for annotation of a BuildTrigger
+    item_type:
+      type: String
+  - name: 'disabled'
+    type: Boolean
+    description: |
+      Whether the trigger is disabled or not. If true, the trigger will never result in a build.
+  - name: 'createTime'
+    type: Time
+    description: |
+      Time when the trigger was created.
+    output: true
+  - name: 'substitutions'
+    type: KeyValuePairs
+    description: |
+      Substitutions data for Build resource.
+  - name: 'serviceAccount'
+    type: String
+    description: |
+      The service account used for all user-controlled operations including
+      triggers.patch, triggers.run, builds.create, and builds.cancel.
+
+      If no service account is set, then the standard Cloud Build service account
+      ([PROJECT_NUM]@system.gserviceaccount.com) will be used instead.
+
+      Format: projects/{PROJECT_ID}/serviceAccounts/{ACCOUNT_ID_OR_EMAIL}
+  - name: 'includeBuildLogs'
+    type: Enum
+    description: |
+      Build logs will be sent back to GitHub as part of the checkrun
+      result.  Values can be INCLUDE_BUILD_LOGS_UNSPECIFIED or
+      INCLUDE_BUILD_LOGS_WITH_STATUS
+    enum_values:
+      - 'INCLUDE_BUILD_LOGS_UNSPECIFIED'
+      - 'INCLUDE_BUILD_LOGS_WITH_STATUS'
+  - name: 'filename'
+    type: String
+    description: |
+      Path, from the source root, to a file whose contents is used for the template.
+      Either a filename or build template must be provided. Set this only when using trigger_template or github.
+      When using Pub/Sub, Webhook or Manual set the file name using git_file_source instead.
+    exactly_one_of:
+      - 'filename'
+      - 'build'
+      - 'git_file_source'
+  - name: 'filter'
+    type: String
+    description: |
+      A Common Expression Language string. Used only with Pub/Sub and Webhook.
+  - name: 'gitFileSource'
+    type: NestedObject
+    description: |
+      The file source describing the local or remote Build template.
+    exactly_one_of:
+      - 'filename'
+      - 'git_file_source'
+      - 'build'
+    properties:
+      - name: 'path'
+        type: String
+        description: |
+          The path of the file, with the repo root as the root of the path.
+        required: true
+      - name: 'uri'
+        type: String
+        description: |
+          The URI of the repo (optional). If unspecified, the repo from which the trigger
+          invocation originated is assumed to be the repo from which to read the specified path.
+      - name: 'repository'
+        type: String
+        description: |
+          The fully qualified resource name of the Repo API repository. The fully qualified resource name of the Repo API repository.
+          If unspecified, the repo from which the trigger invocation originated is assumed to be the repo from which to read the specified path.
+      - name: 'repoType'
+        type: Enum
+        description: |
+          The type of the repo, since it may not be explicit from the repo field (e.g from a URL).
+          Values can be UNKNOWN, CLOUD_SOURCE_REPOSITORIES, GITHUB, BITBUCKET_SERVER
+        required: true
+        enum_values:
+          - 'UNKNOWN'
+          - 'CLOUD_SOURCE_REPOSITORIES'
+          - 'GITHUB'
+          - 'BITBUCKET_SERVER'
+      - name: 'revision'
+        type: String
+        description: |
+          The branch, tag, arbitrary ref, or SHA version of the repo to use when resolving the
+          filename (optional). This field respects the same syntax/resolution as described here: https://git-scm.com/docs/gitrevisions
+          If unspecified, the revision from which the trigger invocation originated is assumed to be the revision from which to read the specified path.
+      - name: 'githubEnterpriseConfig'
+        type: String
+        description: |
+          The full resource name of the github enterprise config.
+          Format: projects/{project}/locations/{location}/githubEnterpriseConfigs/{id}. projects/{project}/githubEnterpriseConfigs/{id}.
+      - name: 'bitbucketServerConfig'
+        type: String
+        description: |
+          The full resource name of the bitbucket server config.
+          Format: projects/{project}/locations/{location}/bitbucketServerConfigs/{id}.
+  - name: 'repositoryEventConfig'
+    type: NestedObject
+    description: |
+      The configuration of a trigger that creates a build whenever an event from Repo API is received.
+    at_least_one_of:
+      - 'trigger_template'
+      - 'github'
+      - 'bitbucket_server_trigger_config'
+      - 'pubsub_config'
+      - 'webhook_config'
+      - 'source_to_build'
+      - 'repository_event_config'
+    properties:
+      - name: 'repository'
+        type: String
+        description: |
+          The resource name of the Repo API resource.
+      - name: 'pullRequest'
+        type: NestedObject
+        description: |
+          Contains filter properties for matching Pull Requests.
+        exactly_one_of:
+          - 'pull_request'
+          - 'push'
+        properties:
+          - name: 'branch'
+            type: String
+            description: |
+              Regex of branches to match.
+
+              The syntax of the regular expressions accepted is the syntax accepted by
+              RE2 and described at https://github.com/google/re2/wiki/Syntax
+            exactly_one_of:
+              - 'branch'
+          - name: 'invertRegex'
+            type: Boolean
+            description: |
+              If true, branches that do NOT match the git_ref will trigger a build.
+          - name: 'commentControl'
+            type: Enum
+            description: |
+              Configure builds to run whether a repository owner or collaborator need to comment `/gcbrun`.
+            enum_values:
+              - 'COMMENTS_DISABLED'
+              - 'COMMENTS_ENABLED'
+              - 'COMMENTS_ENABLED_FOR_EXTERNAL_CONTRIBUTORS_ONLY'
+      - name: 'push'
+        type: NestedObject
+        description: |
+          Contains filter properties for matching git pushes.
+        exactly_one_of:
+          - 'pull_request'
+          - 'push'
+        properties:
+          - name: 'branch'
+            type: String
+            description: |
+              Regex of branches to match.
+
+              The syntax of the regular expressions accepted is the syntax accepted by
+              RE2 and described at https://github.com/google/re2/wiki/Syntax
+            exactly_one_of:
+              - 'branch'
+              - 'tag'
+          - name: 'tag'
+            type: String
+            description: |
+              Regex of tags to match.
+
+              The syntax of the regular expressions accepted is the syntax accepted by
+              RE2 and described at https://github.com/google/re2/wiki/Syntax
+            exactly_one_of:
+              - 'branch'
+              - 'tag'
+          - name: 'invertRegex'
+            type: Boolean
+            description: |
+              If true, only trigger a build if the revision regex does NOT match the git_ref regex.
+  - name: 'sourceToBuild'
+    type: NestedObject
+    description: |
+      The repo and ref of the repository from which to build.
+      This field is used only for those triggers that do not respond to SCM events.
+      Triggers that respond to such events build source at whatever commit caused the event.
+      This field is currently only used by Webhook, Pub/Sub, Manual, and Cron triggers.
+
+      One of `trigger_template`, `github`, `pubsub_config` `webhook_config` or `source_to_build` must be provided.
+    at_least_one_of:
+      - 'trigger_template'
+      - 'github'
+      - 'bitbucket_server_trigger_config'
+      - 'pubsub_config'
+      - 'webhook_config'
+      - 'source_to_build'
+      - 'repository_event_config'
+    properties:
+      - name: 'uri'
+        type: String
+        description: |
+          The URI of the repo.
+      - name: 'repository'
+        type: String
+        description: |
+          The qualified resource name of the Repo API repository.
+          Either uri or repository can be specified and is required.
+      - name: 'ref'
+        type: String
+        description: |
+          The branch or tag to use. Must start with "refs/" (required).
+        required: true
+      - name: 'repoType'
+        type: Enum
+        description: |
+          The type of the repo, since it may not be explicit from the repo field (e.g from a URL).
+          Values can be UNKNOWN, CLOUD_SOURCE_REPOSITORIES, GITHUB, BITBUCKET_SERVER
+        required: true
+        enum_values:
+          - 'UNKNOWN'
+          - 'CLOUD_SOURCE_REPOSITORIES'
+          - 'GITHUB'
+          - 'BITBUCKET_SERVER'
+      - name: 'githubEnterpriseConfig'
+        type: String
+        description: |
+          The full resource name of the github enterprise config.
+          Format: projects/{project}/locations/{location}/githubEnterpriseConfigs/{id}. projects/{project}/githubEnterpriseConfigs/{id}.
+      - name: 'bitbucketServerConfig'
+        type: String
+        description: |
+          The full resource name of the bitbucket server config.
+          Format: projects/{project}/locations/{location}/bitbucketServerConfigs/{id}.
+  - name: 'ignoredFiles'
+    type: Array
+    description: |
+      ignoredFiles and includedFiles are file glob matches using https://golang.org/pkg/path/filepath/#Match
+      extended with support for `**`.
+
+      If ignoredFiles and changed files are both empty, then they are not
+      used to determine whether or not to trigger a build.
+
+      If ignoredFiles is not empty, then we ignore any files that match any
+      of the ignored_file globs. If the change has no files that are outside
+      of the ignoredFiles globs, then we do not trigger a build.
+    item_type:
+      type: String
+  - name: 'includedFiles'
+    type: Array
+    description: |
+      ignoredFiles and includedFiles are file glob matches using https://golang.org/pkg/path/filepath/#Match
+      extended with support for `**`.
+
+      If any of the files altered in the commit pass the ignoredFiles filter
+      and includedFiles is empty, then as far as this filter is concerned, we
+      should trigger the build.
+
+      If any of the files altered in the commit pass the ignoredFiles filter
+      and includedFiles is not empty, then we make sure that at least one of
+      those files matches a includedFiles glob. If not, then we do not trigger
+      a build.
+    item_type:
+      type: String
+  - name: 'triggerTemplate'
+    type: NestedObject
+    description: |
+      Template describing the types of source changes to trigger a build.
+
+      Branch and tag names in trigger templates are interpreted as regular
+      expressions. Any branch or tag change that matches that regular
+      expression will trigger a build.
+
+      One of `trigger_template`, `github`, `pubsub_config`, `webhook_config` or `source_to_build` must be provided.
+    at_least_one_of:
+      - 'trigger_template'
+      - 'github'
+      - 'bitbucket_server_trigger_config'
+      - 'pubsub_config'
+      - 'webhook_config'
+      - 'source_to_build'
+      - 'repository_event_config'
+    properties:
+      - name: 'projectId'
+        type: String
+        description: |
+          ID of the project that owns the Cloud Source Repository. If
+          omitted, the project ID requesting the build is assumed.
+        default_from_api: true
+      - name: 'repoName'
+        type: String
+        description: |
+          Name of the Cloud Source Repository. If omitted, the name "default" is assumed.
+        default_value: "default"
+      - name: 'dir'
+        type: String
+        description: |
+          Directory, relative to the source root, in which to run the build.
+
+          This must be a relative path. If a step's dir is specified and
+          is an absolute path, this value is ignored for that step's
+          execution.
+
+      - name: 'invertRegex'
+        type: Boolean
+        description: |
+          Only trigger a build if the revision regex does NOT match the revision regex.
+      - name: 'branchName'
+        type: String
+        description: |
+          Name of the branch to build. Exactly one a of branch name, tag, or commit SHA must be provided.
+          This field is a regular expression.
+        exactly_one_of:
+          - 'trigger_template.0.branch_name'
+          - 'trigger_template.0.tag_name'
+          - 'trigger_template.0.commit_sha'
+      - name: 'tagName'
+        type: String
+        description: |
+          Name of the tag to build. Exactly one of a branch name, tag, or commit SHA must be provided.
+          This field is a regular expression.
+        exactly_one_of:
+          - 'trigger_template.0.branch_name'
+          - 'trigger_template.0.tag_name'
+          - 'trigger_template.0.commit_sha'
+      - name: 'commitSha'
+        type: String
+        description: |
+          Explicit commit SHA to build. Exactly one of a branch name, tag, or commit SHA must be provided.
+        exactly_one_of:
+          - 'trigger_template.0.branch_name'
+          - 'trigger_template.0.tag_name'
+          - 'trigger_template.0.commit_sha'
+  - name: 'github'
+    type: NestedObject
+    description: |
+      Describes the configuration of a trigger that creates a build whenever a GitHub event is received.
+
+      One of `trigger_template`, `github`, `pubsub_config` or `webhook_config` must be provided.
+    at_least_one_of:
+      - 'trigger_template'
+      - 'github'
+      - 'bitbucket_server_trigger_config'
+      - 'pubsub_config'
+      - 'webhook_config'
+      - 'source_to_build'
+      - 'repository_event_config'
+    properties:
+      - name: 'owner'
+        type: String
+        description: |
+          Owner of the repository. For example: The owner for
+          https://github.com/googlecloudplatform/cloud-builders is "googlecloudplatform".
+      - name: 'name'
+        type: String
+        description: |
+          Name of the repository. For example: The name for
+          https://github.com/googlecloudplatform/cloud-builders is "cloud-builders".
+      - name: 'pullRequest'
+        type: NestedObject
+        description: |
+          filter to match changes in pull requests. Specify only one of `pull_request` or `push`.
+        exactly_one_of:
+          - 'github.0.pull_request'
+          - 'github.0.push'
+        properties:
+          - name: 'branch'
+            type: String
+            description: |
+              Regex of branches to match.
+            required: true
+          - name: 'commentControl'
+            type: Enum
+            description: |
+              Whether to block builds on a "/gcbrun" comment from a repository owner or collaborator.
+            enum_values:
+              - 'COMMENTS_DISABLED'
+              - 'COMMENTS_ENABLED'
+              - 'COMMENTS_ENABLED_FOR_EXTERNAL_CONTRIBUTORS_ONLY'
+          - name: 'invertRegex'
+            type: Boolean
+            description: |
+              If true, branches that do NOT match the git_ref will trigger a build.
+      - name: 'push'
+        type: NestedObject
+        description: |
+          filter to match changes in refs, like branches or tags. Specify only one of `pull_request` or `push`.
+        exactly_one_of:
+          - 'github.0.pull_request'
+          - 'github.0.push'
+        properties:
+          - name: 'invertRegex'
+            type: Boolean
+            description: |
+              When true, only trigger a build if the revision regex does NOT match the git_ref regex.
+          - name: 'branch'
+            type: String
+            description: |
+              Regex of branches to match.  Specify only one of branch or tag.
+            exactly_one_of:
+              - 'github.0.push.0.branch'
+              - 'github.0.push.0.tag'
+          - name: 'tag'
+            type: String
+            description: |
+              Regex of tags to match.  Specify only one of branch or tag.
+            exactly_one_of:
+              - 'github.0.push.0.branch'
+              - 'github.0.push.0.tag'
+      - name: 'enterpriseConfigResourceName'
+        type: String
+        description: |
+          The resource name of the github enterprise config that should be applied to this installation.
+          For example: "projects/{$projectId}/locations/{$locationId}/githubEnterpriseConfigs/{$configId}"
+  - name: 'bitbucketServerTriggerConfig'
+    type: NestedObject
+    description: |
+      BitbucketServerTriggerConfig describes the configuration of a trigger that creates a build whenever a Bitbucket Server event is received.
+    at_least_one_of:
+      - 'trigger_template'
+      - 'github'
+      - 'bitbucket_server_trigger_config'
+      - 'pubsub_config'
+      - 'webhook_config'
+      - 'source_to_build'
+      - 'repository_event_config'
+    properties:
+      - name: 'repoSlug'
+        type: String
+        description: |
+          Slug of the repository. A repository slug is a URL-friendly version of a repository name, automatically generated by Bitbucket for use in the URL.
+          For example, if the repository name is 'test repo', in the URL it would become 'test-repo' as in https://mybitbucket.server/projects/TEST/repos/test-repo.
+        required: true
+      - name: 'projectKey'
+        type: String
+        description: |
+          Key of the project that the repo is in. For example: The key for https://mybitbucket.server/projects/TEST/repos/test-repo is "TEST".
+        required: true
+      - name: 'bitbucketServerConfigResource'
+        type: String
+        description: |
+          The Bitbucket server config resource that this trigger config maps to.
+        required: true
+      - name: 'pullRequest'
+        type: NestedObject
+        description: |
+          Filter to match changes in pull requests.
+        exactly_one_of:
+          - 'bitbucket_server_trigger_config.0.pull_request'
+          - 'bitbucket_server_trigger_config.0.push'
+        properties:
+          - name: 'branch'
+            type: String
+            description: |
+              Regex of branches to match.
+              The syntax of the regular expressions accepted is the syntax accepted by RE2 and described at https://github.com/google/re2/wiki/Syntax
+            required: true
+          - name: 'commentControl'
+            type: Enum
+            description: |
+              Configure builds to run whether a repository owner or collaborator need to comment /gcbrun.
+            enum_values:
+              - 'COMMENTS_DISABLED'
+              - 'COMMENTS_ENABLED'
+              - 'COMMENTS_ENABLED_FOR_EXTERNAL_CONTRIBUTORS_ONLY'
+          - name: 'invertRegex'
+            type: Boolean
+            description: |
+              If true, branches that do NOT match the git_ref will trigger a build.
+      - name: 'push'
+        type: NestedObject
+        description: |
+          Filter to match changes in refs like branches, tags.
+        exactly_one_of:
+          - 'bitbucket_server_trigger_config.0.pull_request'
+          - 'bitbucket_server_trigger_config.0.push'
+        properties:
+          - name: 'invertRegex'
+            type: Boolean
+            description: |
+              When true, only trigger a build if the revision regex does NOT match the gitRef regex.
+          - name: 'branch'
+            type: String
+            description: |
+              Regex of branches to match.  Specify only one of branch or tag.
+            exactly_one_of:
+              - 'bitbucket_server_trigger_config.0.push.0.branch'
+              - 'bitbucket_server_trigger_config.0.push.0.tag'
+          - name: 'tag'
+            type: String
+            description: |
+              Regex of tags to match.  Specify only one of branch or tag.
+            exactly_one_of:
+              - 'bitbucket_server_trigger_config.0.push.0.branch'
+              - 'bitbucket_server_trigger_config.0.push.0.tag'
+  - name: 'pubsubConfig'
+    type: NestedObject
+    description: |
+      PubsubConfig describes the configuration of a trigger that creates
+      a build whenever a Pub/Sub message is published.
+
+      One of `trigger_template`, `github`, `pubsub_config` `webhook_config` or `source_to_build` must be provided.
+    at_least_one_of:
+      - 'trigger_template'
+      - 'github'
+      - 'bitbucket_server_trigger_config'
+      - 'pubsub_config'
+      - 'webhook_config'
+      - 'source_to_build'
+      - 'repository_event_config'
+    properties:
+      - name: 'subscription'
+        type: String
+        description: |
+          Output only. Name of the subscription.
+        output: true
+      - name: 'topic'
+        type: String
+        description: |
+          The name of the topic from which this subscription is receiving messages.
+        required: true
+      - name: 'service_account_email'
+        type: String
+        description: |
+          Service account that will make the push request.
+      - name: 'state'
+        type: String
+        description: |
+          Potential issues with the underlying Pub/Sub subscription configuration.
+          Only populated on get requests.
+        output: true
+  - name: 'webhookConfig'
+    type: NestedObject
+    description: |
+      WebhookConfig describes the configuration of a trigger that creates
+      a build whenever a webhook is sent to a trigger's webhook URL.
+
+      One of `trigger_template`, `github`, `pubsub_config` `webhook_config` or `source_to_build` must be provided.
+    at_least_one_of:
+      - 'trigger_template'
+      - 'github'
+      - 'bitbucket_server_trigger_config'
+      - 'pubsub_config'
+      - 'webhook_config'
+      - 'source_to_build'
+      - 'repository_event_config'
+    properties:
+      - name: 'secret'
+        type: String
+        description: |
+          Resource name for the secret required as a URL parameter.
+        required: true
+      - name: 'state'
+        type: String
+        description: |
+          Potential issues with the underlying Pub/Sub subscription configuration.
+          Only populated on get requests.
+        output: true
+  - name: 'approvalConfig'
+    type: NestedObject
+    description: |
+      Configuration for manual approval to start a build invocation of this BuildTrigger.
+      Builds created by this trigger will require approval before they execute.
+      Any user with a Cloud Build Approver role for the project can approve a build.
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/cloudbuild_approval_required.go.tmpl'
+    properties:
+      - name: 'approvalRequired'
+        type: Boolean
+        description: |
+          Whether or not approval is needed. If this is set on a build, it will become pending when run,
+          and will need to be explicitly approved to start.
+        default_value: false
+  - name: 'build'
+    type: NestedObject
+    description: |
+      Contents of the build template. Either a filename or build template must be provided.
+    exactly_one_of:
+      - 'filename'
+      - 'build'
+      - 'git_file_source'
+    properties:
+      - name: 'source'
+        type: NestedObject
+        description: |
+          The location of the source files to build.
+
+          One of `storageSource` or `repoSource` must be provided.
+        properties:
+          - name: 'storageSource'
+            type: NestedObject
+            description: |
+              Location of the source in an archive file in Google Cloud Storage.
+            properties:
+              - name: 'bucket'
+                type: String
+                description: |
+                  Google Cloud Storage bucket containing the source.
+                required: true
+              - name: 'object'
+                type: String
+                description: |
+                  Google Cloud Storage object containing the source.
+                  This object must be a gzipped archive file (.tar.gz) containing source to build.
+                required: true
+              - name: 'generation'
+                type: String
+                description: |
+                  Google Cloud Storage generation for the object.
+                  If the generation is omitted, the latest generation will be used
+          - name: 'repoSource'
+            type: NestedObject
+            description: |
+              Location of the source in a Google Cloud Source Repository.
+            properties:
+              - name: 'projectId'
+                type: String
+                description: |
+                  ID of the project that owns the Cloud Source Repository.
+                  If omitted, the project ID requesting the build is assumed.
+              - name: 'repoName'
+                type: String
+                description: |
+                  Name of the Cloud Source Repository.
+                required: true
+              - name: 'dir'
+                type: String
+                description: |
+                  Directory, relative to the source root, in which to run the build.
+                  This must be a relative path. If a step's dir is specified and is an absolute path,
+                  this value is ignored for that step's execution.
+              - name: 'invertRegex'
+                type: Boolean
+                description: |
+                  Only trigger a build if the revision regex does NOT match the revision regex.
+              - name: 'substitutions'
+                type: KeyValuePairs
+                description: |
+                  Substitutions to use in a triggered build. Should only be used with triggers.run
+              - name: 'branchName'
+                type: String
+                description: |
+                  Regex matching branches to build. Exactly one a of branch name, tag, or commit SHA must be provided.
+                  The syntax of the regular expressions accepted is the syntax accepted by RE2 and
+                  described at https://github.com/google/re2/wiki/Syntax
+                exactly_one_of:
+                  - 'build.0.source.0.repo_source.0.branch_name'
+                  - 'build.0.source.0.repo_source.0.commit_sha'
+                  - 'build.0.source.0.repo_source.0.tag_name'
+              - name: 'tagName'
+                type: String
+                description: |
+                  Regex matching tags to build. Exactly one a of branch name, tag, or commit SHA must be provided.
+                  The syntax of the regular expressions accepted is the syntax accepted by RE2 and
+                  described at https://github.com/google/re2/wiki/Syntax
+                exactly_one_of:
+                  - 'build.0.source.0.repo_source.0.branch_name'
+                  - 'build.0.source.0.repo_source.0.commit_sha'
+                  - 'build.0.source.0.repo_source.0.tag_name'
+              - name: 'commitSha'
+                type: String
+                description: |
+                  Explicit commit SHA to build. Exactly one a of branch name, tag, or commit SHA must be provided.
+                exactly_one_of:
+                  - 'build.0.source.0.repo_source.0.branch_name'
+                  - 'build.0.source.0.repo_source.0.commit_sha'
+                  - 'build.0.source.0.repo_source.0.tag_name'
+      - name: 'tags'
+        type: Array
+        description: |
+          Tags for annotation of a Build. These are not docker tags.
+        item_type:
+          type: String
+      - name: 'images'
+        type: Array
+        description: |
+          A list of images to be pushed upon the successful completion of all build steps.
+          The images are pushed using the builder service account's credentials.
+          The digests of the pushed images will be stored in the Build resource's results field.
+          If any of the images fail to be pushed, the build status is marked FAILURE.
+        item_type:
+          type: String
+      - name: 'substitutions'
+        type: KeyValuePairs
+        description: |
+          Substitutions data for Build resource.
+      - name: 'queueTtl'
+        type: String
+        description: |
+          TTL in queue for this build. If provided and the build is enqueued longer than this value,
+          the build will expire and the build status will be EXPIRED.
+          The TTL starts ticking from createTime.
+          A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
+      - name: 'logsBucket'
+        type: String
+        description: |
+          Google Cloud Storage bucket where logs should be written.
+          Logs file names will be of the format ${logsBucket}/log-${build_id}.txt.
+      - name: 'timeout'
+        type: String
+        description: |
+          Amount of time that this build should be allowed to run, to second granularity.
+          If this amount of time elapses, work on the build will cease and the build status will be TIMEOUT.
+          This timeout must be equal to or greater than the sum of the timeouts for build steps within the build.
+          The expected format is the number of seconds followed by s.
+          Default time is ten minutes (600s).
+        default_value: "600s"
+      - name: 'secret'
+        type: Array
+        description: |
+          Secrets to decrypt using Cloud Key Management Service.
+        api_name: secrets
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'kmsKeyName'
+              type: String
+              description: |
+                Cloud KMS key name to use to decrypt these envs.
+              required: true
+            - name: 'secretEnv'
+              type: KeyValuePairs
+              description: |
+                Map of environment variable name to its encrypted value.
+                Secret environment variables must be unique across all of a build's secrets,
+                and must be used by at least one build step. Values can be at most 64 KB in size.
+                There can be at most 100 secret values across all of a build's secrets.
+      - name: 'availableSecrets'
+        type: NestedObject
+        description: |
+          Secrets and secret environment variables.
+        properties:
+          - name: 'secretManager'
+            type: Array
+            description: |
+              Pairs a secret environment variable with a SecretVersion in Secret Manager.
+            required: true
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'versionName'
+                  type: String
+                  description: |
+                    Resource name of the SecretVersion. In format: projects/*/secrets/*/versions/*
+                  required: true
+                - name: 'env'
+                  type: String
+                  description: |
+                    Environment variable name to associate with the secret. Secret environment
+                    variables must be unique across all of a build's secrets, and must be used
+                    by at least one build step.
+                  required: true
+      - name: 'step'
+        type: Array
+        description: |
+          The operations to be performed on the workspace.
+        api_name: steps
+        required: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'name'
+              type: String
+              description: |
+                The name of the container image that will run this particular build step.
+
+                If the image is available in the host's Docker daemon's cache, it will be
+                run directly. If not, the host will attempt to pull the image first, using
+                the builder service account's credentials if necessary.
+
+                The Docker daemon's cache will already have the latest versions of all of
+                the officially supported build steps (see https://github.com/GoogleCloudPlatform/cloud-builders
+                for images and examples).
+                The Docker daemon will also have cached many of the layers for some popular
+                images, like "ubuntu", "debian", but they will be refreshed at the time
+                you attempt to use them.
+
+                If you built an image in a previous build step, it will be stored in the
+                host's Docker daemon's cache and is available to use as the name for a
+                later build step.
+              required: true
+            - name: 'args'
+              type: Array
+              description: |
+                A list of arguments that will be presented to the step when it is started.
+
+                If the image used to run the step's container has an entrypoint, the args
+                are used as arguments to that entrypoint. If the image does not define an
+                entrypoint, the first element in args is used as the entrypoint, and the
+                remainder will be used as arguments.
+              item_type:
+                type: String
+            - name: 'env'
+              type: Array
+              description: |
+                A list of environment variable definitions to be used when
+                running a step.
+
+                The elements are of the form "KEY=VALUE" for the environment variable
+                "KEY" being given the value "VALUE".
+              item_type:
+                type: String
+            - name: 'id'
+              type: String
+              description: |
+                Unique identifier for this build step, used in `wait_for` to
+                reference this build step as a dependency.
+            - name: 'entrypoint'
+              type: String
+              description: |
+                Entrypoint to be used instead of the build step image's
+                default entrypoint.
+                If unset, the image's default entrypoint is used
+            - name: 'dir'
+              type: String
+              description: |
+                Working directory to use when running this step's container.
+
+                If this value is a relative path, it is relative to the build's working
+                directory. If this value is absolute, it may be outside the build's working
+                directory, in which case the contents of the path may not be persisted
+                across build step executions, unless a `volume` for that path is specified.
+
+                If the build specifies a `RepoSource` with `dir` and a step with a
+                `dir`,
+                which specifies an absolute path, the `RepoSource` `dir` is ignored
+                for the step's execution.
+            - name: 'secretEnv'
+              type: Array
+              description: |
+                A list of environment variables which are encrypted using
+                a Cloud Key
+                Management Service crypto key. These values must be specified in
+                the build's `Secret`.
+              item_type:
+                type: String
+            - name: 'timeout'
+              type: String
+              description: |
+                Time limit for executing this build step. If not defined,
+                the step has no
+                time limit and will be allowed to continue to run until either it
+                completes or the build itself times out.
+            - name: 'timing'
+              type: String
+              description: |
+                Output only. Stores timing information for executing this
+                build step.
+              immutable: false
+            - name: 'volumes'
+              type: Array
+              description: |
+                List of volumes to mount into the build step.
+
+                Each volume is created as an empty volume prior to execution of the
+                build step. Upon completion of the build, volumes and their contents
+                are discarded.
+
+                Using a named volume in only one step is not valid as it is
+                indicative of a build request with an incorrect configuration.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'name'
+                    type: String
+                    description: |
+                      Name of the volume to mount.
+
+                      Volume names must be unique per build step and must be valid names for
+                      Docker volumes. Each named volume must be used by at least two build steps.
+                    required: true
+                  - name: 'path'
+                    type: String
+                    description: |
+                      Path at which to mount the volume.
+
+                      Paths must be absolute and cannot conflict with other volume paths on
+                      the same build step or with certain reserved volume paths.
+                    required: true
+            - name: 'waitFor'
+              type: Array
+              description: |
+                The ID(s) of the step(s) that this build step depends on.
+
+                This build step will not start until all the build steps in `wait_for`
+                have completed successfully. If `wait_for` is empty, this build step
+                will start when all previous build steps in the `Build.Steps` list
+                have completed successfully.
+              item_type:
+                type: String
+            - name: 'script'
+              type: String
+              description: |
+                A shell script to be executed in the step.
+                When script is provided, the user cannot specify the entrypoint or args.
+            - name: 'allowFailure'
+              type: Boolean
+              description: |
+                Allow this build step to fail without failing the entire build.
+                If false, the entire build will fail if this step fails. Otherwise, the
+                build will succeed, but this step will still have a failure status.
+                Error information will be reported in the `failureDetail` field.
+
+                `allowExitCodes` takes precedence over this field.
+            - name: 'allowExitCodes'
+              type: Array
+              description: |
+                Allow this build step to fail without failing the entire build if and
+                only if the exit code is one of the specified codes.
+
+                If `allowFailure` is also specified, this field will take precedence.
+              item_type:
+                type: Integer
+      - name: 'artifacts'
+        type: NestedObject
+        description: |
+          Artifacts produced by the build that should be uploaded upon successful completion of all build steps.
+        properties:
+          - name: 'images'
+            type: Array
+            description: |
+              A list of images to be pushed upon the successful completion of all build steps.
+
+              The images will be pushed using the builder service account's credentials.
+
+              The digests of the pushed images will be stored in the Build resource's results field.
+
+              If any of the images fail to be pushed, the build is marked FAILURE.
+            item_type:
+              type: String
+          - name: 'objects'
+            type: NestedObject
+            description: |
+              A list of objects to be uploaded to Cloud Storage upon successful completion of all build steps.
+
+              Files in the workspace matching specified paths globs will be uploaded to the
+              Cloud Storage location using the builder service account's credentials.
+
+              The location and generation of the uploaded objects will be stored in the Build resource's results field.
+
+              If any objects fail to be pushed, the build is marked FAILURE.
+            properties:
+              - name: 'location'
+                type: String
+                description: |
+                  Cloud Storage bucket and optional object path, in the form "gs://bucket/path/to/somewhere/".
+
+                  Files in the workspace matching any path pattern will be uploaded to Cloud Storage with
+                  this location as a prefix.
+              - name: 'paths'
+                type: Array
+                description: |
+                  Path globs used to match files in the build's workspace.
+                item_type:
+                  type: String
+              - name: 'timing'
+                type: NestedObject
+                description: |
+                  Output only. Stores timing information for pushing all artifact objects.
+                output: true
+                properties:
+                  - name: 'startTime'
+                    type: String
+                    description: |
+                      Start of time span.
+
+                      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to
+                      nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+                  - name: 'endTime'
+                    type: String
+                    description: |
+                      End of time span.
+
+                      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to
+                      nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+          - name: 'mavenArtifacts'
+            type: Array
+            description: |
+              A Maven artifact to upload to Artifact Registry upon successful completion of all build steps.
+
+              The location and generation of the uploaded objects will be stored in the Build resource's results field.
+
+              If any objects fail to be pushed, the build is marked FAILURE.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'repository'
+                  type: String
+                  description: |
+                    Artifact Registry repository, in the form "https://$REGION-maven.pkg.dev/$PROJECT/$REPOSITORY"
+
+                    Artifact in the workspace specified by path will be uploaded to Artifact Registry with this location as a prefix.
+                - name: 'path'
+                  type: String
+                  description: |
+                    Path to an artifact in the build's workspace to be uploaded to Artifact Registry. This can be either an absolute path, e.g. /workspace/my-app/target/my-app-1.0.SNAPSHOT.jar or a relative path from /workspace, e.g. my-app/target/my-app-1.0.SNAPSHOT.jar.
+                - name: 'artifactId'
+                  type: String
+                  description: |
+                    Maven artifactId value used when uploading the artifact to Artifact Registry.
+                - name: 'groupId'
+                  type: String
+                  description: |
+                    Maven groupId value used when uploading the artifact to Artifact Registry.
+                - name: 'version'
+                  type: String
+                  description: |
+                    Maven version value used when uploading the artifact to Artifact Registry.
+          - name: 'pythonPackages'
+            type: Array
+            description: |
+              Python package to upload to Artifact Registry upon successful completion of all build steps. A package can encapsulate multiple objects to be uploaded to a single repository.
+
+              The location and generation of the uploaded objects will be stored in the Build resource's results field.
+
+              If any objects fail to be pushed, the build is marked FAILURE.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'repository'
+                  type: String
+                  description: |
+                    Artifact Registry repository, in the form "https://$REGION-python.pkg.dev/$PROJECT/$REPOSITORY"
+
+                    Files in the workspace matching any path pattern will be uploaded to Artifact Registry with this location as a prefix.
+                - name: 'paths'
+                  type: Array
+                  description: |
+                    Path globs used to match files in the build's workspace. For Python/ Twine, this is usually dist/*, and sometimes additionally an .asc file.
+                  item_type:
+                    type: String
+          - name: 'npmPackages'
+            type: Array
+            description: |
+              Npm package to upload to Artifact Registry upon successful completion of all build steps.
+
+              The location and generation of the uploaded objects will be stored in the Build resource's results field.
+
+              If any objects fail to be pushed, the build is marked FAILURE.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'repository'
+                  type: String
+                  description: |
+                    Artifact Registry repository, in the form "https://$REGION-npm.pkg.dev/$PROJECT/$REPOSITORY"
+
+                    Npm package in the workspace specified by path will be zipped and uploaded to Artifact Registry with this location as a prefix.
+                - name: 'packagePath'
+                  type: String
+                  description: |
+                    Path to the package.json. e.g. workspace/path/to/package
+      - name: 'options'
+        type: NestedObject
+        description: |
+          Special options for this build.
+        properties:
+          - name: 'sourceProvenanceHash'
+            type: Array
+            description: |
+              Requested hash for SourceProvenance.
+            item_type:
+              type: Enum
+              description: |
+                Specifies the hash algorithm, if any.
+              enum_values:
+                - 'NONE'
+                - 'SHA256'
+                - 'MD5'
+          - name: 'requestedVerifyOption'
+            type: Enum
+            description: |
+              Requested verifiability options.
+            enum_values:
+              - 'NOT_VERIFIED'
+              - 'VERIFIED'
+          - name: 'machineType'
+            type: String
+            description: |
+              Compute Engine machine type on which to run the build.
+          - name: 'diskSizeGb'
+            type: Integer
+            description: |
+              Requested disk size for the VM that runs the build. Note that this is NOT "disk free";
+              some of the space will be used by the operating system and build utilities.
+              Also note that this is the minimum disk size that will be allocated for the build --
+              the build may run with a larger disk than requested. At present, the maximum disk size
+              is 1000GB; builds that request more than the maximum are rejected with an error.
+          - name: 'substitutionOption'
+            type: Enum
+            description: |
+              Option to specify behavior when there is an error in the substitution checks.
+
+              NOTE this is always set to ALLOW_LOOSE for triggered builds and cannot be overridden
+              in the build configuration file.
+            enum_values:
+              - 'MUST_MATCH'
+              - 'ALLOW_LOOSE'
+          - name: 'dynamicSubstitutions'
+            type: Boolean
+            description: |
+              Option to specify whether or not to apply bash style string operations to the substitutions.
+
+              NOTE this is always enabled for triggered builds and cannot be overridden in the build configuration file.
+            send_empty_value: true
+          - name: 'logStreamingOption'
+            type: Enum
+            description: |
+              Option to define build log streaming behavior to Google Cloud Storage.
+            enum_values:
+              - 'STREAM_DEFAULT'
+              - 'STREAM_ON'
+              - 'STREAM_OFF'
+          - name: 'workerPool'
+            type: String
+            description: |
+              Option to specify a WorkerPool for the build. Format projects/{project}/workerPools/{workerPool}
+
+              This field is experimental.
+          - name: 'logging'
+            type: Enum
+            description: |
+              Option to specify the logging mode, which determines if and where build logs are stored.
+            enum_values:
+              - 'LOGGING_UNSPECIFIED'
+              - 'LEGACY'
+              - 'GCS_ONLY'
+              - 'STACKDRIVER_ONLY'
+              - 'CLOUD_LOGGING_ONLY'
+              - 'NONE'
+          - name: 'env'
+            type: Array
+            description: |
+              A list of global environment variable definitions that will exist for all build steps
+              in this build. If a variable is defined in both globally and in a build step,
+              the variable will use the build step value.
+
+              The elements are of the form "KEY=VALUE" for the environment variable "KEY" being given the value "VALUE".
+            item_type:
+              type: String
+          - name: 'secretEnv'
+            type: Array
+            description: |
+              A list of global environment variables, which are encrypted using a Cloud Key Management
+              Service crypto key. These values must be specified in the build's Secret. These variables
+              will be available to all build steps in this build.
+            item_type:
+              type: String
+          - name: 'volumes'
+            type: Array
+            description: |
+              Global list of volumes to mount for ALL build steps
+
+              Each volume is created as an empty volume prior to starting the build process.
+              Upon completion of the build, volumes and their contents are discarded. Global
+              volume names and paths cannot conflict with the volumes defined a build step.
+
+              Using a global volume in a build with only one step is not valid as it is indicative
+              of a build request with an incorrect configuration.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'name'
+                  type: String
+                  description: |
+                    Name of the volume to mount.
+
+                    Volume names must be unique per build step and must be valid names for Docker volumes.
+                    Each named volume must be used by at least two build steps.
+                - name: 'path'
+                  type: String
+                  description: |
+                    Path at which to mount the volume.
+
+                    Paths must be absolute and cannot conflict with other volume paths on the same
+                    build step or with certain reserved volume paths.

@@ -154,6 +154,12 @@ func listGCEnvironmentVariables() string {
 func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, projectId, commitSha string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller) error {
 	errors := map[string][]string{"Other": []string{}}
 
+	// TODO(ScottSuarez) - temporary fix to ensure the label is removed.
+	// Once we migrate to the new trigger there is an explicit task
+	// for this and this line can be removed.
+	gh.RemoveLabel(fmt.Sprint(prNumber), "awaiting-approval")
+	// ------------------------------------------------------------
+
 	pullRequest, err := gh.GetPullRequest(strconv.Itoa(prNumber))
 	if err != nil {
 		fmt.Printf("Error getting pull request: %v\n", err)
@@ -206,6 +212,21 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			fmt.Println("Failed to fetch old branch: ", err)
 			errors[repo.Title] = append(errors[repo.Title], "Failed to clone repo at old branch")
 			repo.Cloned = false
+			continue
+		}
+		if repo.Name == "terraform-provider-google-beta" || repo.Name == "terraform-provider-google" {
+			if err := ctlr.Checkout(repo, oldBranch); err != nil {
+				errors[repo.Title] = append(errors[repo.Title], fmt.Sprintf("Failed to checkout branch %s", oldBranch))
+				repo.Cloned = false
+				continue
+			}
+			rnr.PushDir(repo.Path)
+			if _, err := rnr.Run("make", []string{"build"}, nil); err != nil {
+				errors[repo.Title] = append(errors[repo.Title], fmt.Sprintf("Failed to build branch %s", oldBranch))
+				repo.Cloned = false
+			}
+			rnr.PopDir()
+			ctlr.Checkout(repo, newBranch)
 		}
 	}
 

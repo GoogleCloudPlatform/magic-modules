@@ -6,7 +6,7 @@ package firebaseappcheck_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -67,6 +67,7 @@ resource "google_project" "default" {
   project_id = "tf-test-appcheck%{random_suffix}"
   name       = "tf-test-appcheck%{random_suffix}"
   org_id     = "%{org_id}"
+  deletion_policy = "DELETE"
   labels     = {
     "firebase" = "enabled"
   }

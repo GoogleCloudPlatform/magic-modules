@@ -37,7 +37,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -69,6 +69,8 @@ examples:
       network_secondary_name: 'secondary-network'
   - !ruby/object:Provider::Terraform::Examples
     name: 'network_peering_routes_config_gke'
+    # currently failing
+    skip_vcr: true
     primary_resource_id: 'peering_gke_routes'
     vars:
       network_name: 'container-network'

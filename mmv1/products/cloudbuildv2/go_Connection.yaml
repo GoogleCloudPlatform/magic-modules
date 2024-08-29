@@ -1,0 +1,360 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Connection'
+description: |
+  A connection to a SCM like GitHub, GitHub Enterprise, Bitbucket Data Center/Cloud or GitLab.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/build/docs'
+  api: 'https://cloud.google.com/build/docs/api/reference/rest'
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/connections/{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/connections'
+self_link: 'projects/{{project}}/locations/{{location}}/connections/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/connections?connectionId={{name}}'
+update_verb: 'PATCH'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/connections/{{name}}'
+  - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+iam_policy:
+  skip_import_test: true
+  method_name_separator: ':'
+  allowed_iam_role: 'roles/cloudbuild.connectionViewer'
+  parent_resource_attribute: 'name'
+  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+custom_code:
+exclude_tgc: true
+legacy_long_form_project: true
+examples:
+  - name: 'cloudbuildv2_connection'
+    primary_resource_id: 'my-connection'
+    primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
+    vars:
+      connection_name: 'tf-test-connection'
+  - name: 'cloudbuildv2_connection_ghe'
+    skip_test: true
+  - name: 'cloudbuildv2_connection_github'
+    skip_test: true
+parameters:
+  - name: 'name'
+    type: String
+    description: Immutable. The resource name of the connection.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'location'
+    type: String
+    description: The location for the resource
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'createTime'
+    type: String
+    description: Output only. Server assigned timestamp for when the connection was created.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: Output only. Server assigned timestamp for when the connection was updated.
+    output: true
+  - name: 'githubConfig'
+    type: NestedObject
+    description: Configuration for connections to github.com.
+    conflicts:
+      - github_enterprise_config
+      - gitlab_config
+      - bitbucket_cloud_config
+      - bitbucket_data_center_config
+    properties:
+      - name: 'authorizerCredential'
+        type: NestedObject
+        description: OAuth credential of the account that authorized the Cloud Build GitHub App. It is recommended to use a robot account instead of a human user account. The OAuth token must be tied to the Cloud Build GitHub App.
+        properties:
+          - name: 'oauthTokenSecretVersion'
+            type: String
+            description: 'A SecretManager resource containing the OAuth token that authorizes the Cloud Build connection. Format: `projects/*/secrets/*/versions/*`.'
+            diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+          - name: 'username'
+            type: String
+            description: Output only. The username associated to this token.
+            output: true
+      - name: 'appInstallationId'
+        type: Integer
+        description: GitHub App installation id.
+  - name: 'githubEnterpriseConfig'
+    type: NestedObject
+    description: Configuration for connections to an instance of GitHub Enterprise.
+    conflicts:
+      - github_config
+      - gitlab_config
+      - bitbucket_cloud_config
+      - bitbucket_data_center_config
+    properties:
+      - name: 'hostUri'
+        type: String
+        description: Required. The URI of the GitHub Enterprise host this connection is for.
+        required: true
+      - name: 'appId'
+        type: Integer
+        description: Id of the GitHub App created from the manifest.
+      - name: 'appSlug'
+        type: String
+        description: The URL-friendly name of the GitHub App.
+      - name: 'privateKeySecretVersion'
+        type: String
+        description: SecretManager resource containing the private key of the GitHub App, formatted as `projects/*/secrets/*/versions/*`.
+        diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+      - name: 'webhookSecretSecretVersion'
+        type: String
+        description: SecretManager resource containing the webhook secret of the GitHub App, formatted as `projects/*/secrets/*/versions/*`.
+        diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+      - name: 'appInstallationId'
+        type: Integer
+        description: ID of the installation of the GitHub App.
+      - name: 'serviceDirectoryConfig'
+        type: NestedObject
+        description: Configuration for using Service Directory to privately connect to a GitHub Enterprise server. This should only be set if the GitHub Enterprise server is hosted on-premises and not reachable by public internet. If this field is left empty, calls to the GitHub Enterprise server will be made over the public internet.
+        properties:
+          - name: 'service'
+            type: String
+            description: 'Required. The Service Directory service name. Format: projects/{project}/locations/{location}/namespaces/{namespace}/services/{service}.'
+            required: true
+            diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+      - name: 'sslCa'
+        type: String
+        description: SSL certificate to use for requests to GitHub Enterprise.
+  - name: 'gitlabConfig'
+    type: NestedObject
+    description: Configuration for connections to gitlab.com or an instance of GitLab Enterprise.
+    conflicts:
+      - github_config
+      - github_enterprise_config
+      - bitbucket_cloud_config
+      - bitbucket_data_center_config
+    properties:
+      - name: 'hostUri'
+        type: String
+        description: The URI of the GitLab Enterprise host this connection is for. If not specified, the default value is https://gitlab.com.
+        default_from_api: true
+      - name: 'webhookSecretSecretVersion'
+        type: String
+        description: Required. Immutable. SecretManager resource containing the webhook secret of a GitLab Enterprise project, formatted as `projects/*/secrets/*/versions/*`.
+        required: true
+        immutable: true
+        diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+      - name: 'readAuthorizerCredential'
+        type: NestedObject
+        description: Required. A GitLab personal access token with the minimum `read_api` scope access.
+        required: true
+        properties:
+          - name: 'userTokenSecretVersion'
+            type: String
+            description: 'Required. A SecretManager resource containing the user token that authorizes the Cloud Build connection. Format: `projects/*/secrets/*/versions/*`.'
+            required: true
+            diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+          - name: 'username'
+            type: String
+            description: Output only. The username associated to this token.
+            output: true
+      - name: 'authorizerCredential'
+        type: NestedObject
+        description: Required. A GitLab personal access token with the `api` scope access.
+        required: true
+        properties:
+          - name: 'userTokenSecretVersion'
+            type: String
+            description: 'Required. A SecretManager resource containing the user token that authorizes the Cloud Build connection. Format: `projects/*/secrets/*/versions/*`.'
+            required: true
+            diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+          - name: 'username'
+            type: String
+            description: Output only. The username associated to this token.
+            output: true
+      - name: 'serviceDirectoryConfig'
+        type: NestedObject
+        description: Configuration for using Service Directory to privately connect to a GitLab Enterprise server. This should only be set if the GitLab Enterprise server is hosted on-premises and not reachable by public internet. If this field is left empty, calls to the GitLab Enterprise server will be made over the public internet.
+        properties:
+          - name: 'service'
+            type: String
+            description: 'Required. The Service Directory service name. Format: projects/{project}/locations/{location}/namespaces/{namespace}/services/{service}.'
+            required: true
+            diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+      - name: 'sslCa'
+        type: String
+        description: SSL certificate to use for requests to GitLab Enterprise.
+      - name: 'serverVersion'
+        type: String
+        description: Output only. Version of the GitLab Enterprise server running on the `host_uri`.
+        output: true
+  - name: 'bitbucketDataCenterConfig'
+    type: NestedObject
+    description: Configuration for connections to Bitbucket Data Center.
+    conflicts:
+      - github_config
+      - github_enterprise_config
+      - bitbucket_cloud_config
+      - gitlab_config
+    properties:
+      - name: 'hostUri'
+        type: String
+        description: The URI of the Bitbucket Data Center host this connection is for.
+        required: true
+      - name: 'webhookSecretSecretVersion'
+        type: String
+        description: Required. Immutable. SecretManager resource containing the webhook secret used to verify webhook events, formatted as `projects/*/secrets/*/versions/*`.
+        required: true
+        immutable: true
+        diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+      - name: 'readAuthorizerCredential'
+        type: NestedObject
+        description: Required. A http access token with the `REPO_READ` access.
+        required: true
+        properties:
+          - name: 'userTokenSecretVersion'
+            type: String
+            description: 'Required. A SecretManager resource containing the user token that authorizes the Cloud Build connection. Format: `projects/*/secrets/*/versions/*`.'
+            required: true
+            diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+          - name: 'username'
+            type: String
+            description: Output only. The username associated to this token.
+            output: true
+      - name: 'authorizerCredential'
+        type: NestedObject
+        description: Required. A http access token with the `REPO_ADMIN` scope access.
+        required: true
+        properties:
+          - name: 'userTokenSecretVersion'
+            type: String
+            description: 'Required. A SecretManager resource containing the user token that authorizes the Cloud Build connection. Format: `projects/*/secrets/*/versions/*`.'
+            required: true
+            diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+          - name: 'username'
+            type: String
+            description: Output only. The username associated to this token.
+            output: true
+      - name: 'serviceDirectoryConfig'
+        type: NestedObject
+        description: Configuration for using Service Directory to privately connect to a Bitbucket Data Center. This should only be set if the Bitbucket Data Center is hosted on-premises and not reachable by public internet. If this field is left empty, calls to the Bitbucket Data Center will be made over the public internet.
+        properties:
+          - name: 'service'
+            type: String
+            description: 'Required. The Service Directory service name. Format: projects/{project}/locations/{location}/namespaces/{namespace}/services/{service}.'
+            required: true
+            diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+      - name: 'sslCa'
+        type: String
+        description: SSL certificate to use for requests to the Bitbucket Data Center.
+      - name: 'serverVersion'
+        type: String
+        description: Output only. Version of the Bitbucket Data Center running on the `host_uri`.
+        output: true
+  - name: 'bitbucketCloudConfig'
+    type: NestedObject
+    description: Configuration for connections to Bitbucket Cloud.
+    conflicts:
+      - github_config
+      - github_enterprise_config
+      - gitlab_config
+      - bitbucket_data_center_config
+    properties:
+      - name: 'workspace'
+        type: String
+        description: The Bitbucket Cloud Workspace ID to be connected to Google Cloud Platform.
+        required: true
+      - name: 'webhookSecretSecretVersion'
+        type: String
+        description: Required. Immutable. SecretManager resource containing the webhook secret used to verify webhook events, formatted as `projects/*/secrets/*/versions/*`.
+        required: true
+        immutable: true
+        diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+      - name: 'readAuthorizerCredential'
+        type: NestedObject
+        description: Required. An access token with the `repository` access. It can be either a workspace, project or repository access token. It's recommended to use a system account to generate the credentials.
+        required: true
+        properties:
+          - name: 'userTokenSecretVersion'
+            type: String
+            description: 'Required. A SecretManager resource containing the user token that authorizes the Cloud Build connection. Format: `projects/*/secrets/*/versions/*`.'
+            required: true
+            diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+          - name: 'username'
+            type: String
+            description: Output only. The username associated to this token.
+            output: true
+      - name: 'authorizerCredential'
+        type: NestedObject
+        description: Required. An access token with the `webhook`, `repository`, `repository:admin` and `pullrequest` scope access. It can be either a workspace, project or repository access token. It's recommended to use a system account to generate these credentials.
+        required: true
+        properties:
+          - name: 'userTokenSecretVersion'
+            type: String
+            description: 'Required. A SecretManager resource containing the user token that authorizes the Cloud Build connection. Format: `projects/*/secrets/*/versions/*`.'
+            required: true
+            diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+          - name: 'username'
+            type: String
+            description: Output only. The username associated to this token.
+            output: true
+  - name: 'installationState'
+    type: NestedObject
+    description: Output only. Installation state of the Connection.
+    output: true
+    properties:
+      - name: 'stage'
+        type: Enum
+        description: Output only. Current step of the installation process.
+        output: true
+        enum_values:
+          - 'STAGE_UNSPECIFIED'
+          - 'PENDING_CREATE_APP'
+          - 'PENDING_USER_OAUTH'
+          - 'PENDING_INSTALL_APP'
+          - 'COMPLETE'
+      - name: 'message'
+        type: String
+        description: Output only. Message of what the user should do next to continue the installation. Empty string if the installation is already complete.
+        output: true
+      - name: 'actionUri'
+        type: String
+        description: Output only. Link to follow for next action. Empty string if the installation is already complete.
+        output: true
+  - name: 'disabled'
+    type: Boolean
+    description: If disabled is set to true, functionality is disabled for this connection. Repository based API methods and webhooks processing for repositories in this connection will be disabled.
+  - name: 'reconciling'
+    type: Boolean
+    description: Output only. Set to true when the connection is being set up or updated in the background.
+    output: true
+  - name: 'annotations'
+    type: KeyValueAnnotations
+    description: Allows clients to store small amounts of arbitrary data.
+  - name: 'etag'
+    type: Fingerprint
+    description: This checksum is computed by the server based on the value of other fields, and may be sent on update and delete requests to ensure the client has an up-to-date value before proceeding.
+    output: true

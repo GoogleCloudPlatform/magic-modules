@@ -194,6 +194,7 @@ properties:
         key_description: |
           The project ID.
         value_type:
+          name: projectConfig
           type: NestedObject
           properties:
             - name: 'projectId'

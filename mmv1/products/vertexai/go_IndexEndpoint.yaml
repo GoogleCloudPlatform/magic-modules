@@ -1,0 +1,145 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'IndexEndpoint'
+description: |-
+  An endpoint indexes are deployed into. An index endpoint can have multiple deployed indexes.
+references:
+  guides:
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.indexEndpoints/'
+docs:
+base_url: 'projects/{{project}}/locations/{{region}}/indexEndpoints'
+self_link: 'projects/{{project}}/locations/{{region}}/indexEndpoints/{{name}}'
+create_url: 'projects/{{project}}/locations/{{region}}/indexEndpoints'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'vertex_ai_index_endpoint'
+    primary_resource_id: 'index_endpoint'
+    vars:
+      address_name: 'address-name'
+      network_name: 'network-name'
+    skip_test: true
+  - name: 'vertex_ai_index_endpoint_test'
+    primary_resource_id: 'index_endpoint'
+    vars:
+      network_name: 'network-name'
+    test_vars_overrides:
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
+    skip_docs: true
+  - name: 'vertex_ai_index_endpoint_with_psc'
+    primary_resource_id: 'index_endpoint'
+  - name: 'vertex_ai_index_endpoint_with_false_psc'
+    primary_resource_id: 'index_endpoint'
+    skip_import_test: true
+    skip_docs: true
+  - name: 'vertex_ai_index_endpoint_with_public_endpoint'
+    primary_resource_id: 'index_endpoint'
+    test_vars_overrides:
+      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "vertex-ai-index-endpoint")'
+parameters:
+  - name: 'region'
+    type: String
+    description: The region of the index endpoint. eg us-central1
+    url_param_only: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: The resource name of the Index.
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+  - name: 'displayName'
+    type: String
+    description: The display name of the Index. The name can be up to 128 characters long and can consist of any UTF-8 characters.
+    required: true
+  - name: 'description'
+    type: String
+    description: The description of the Index.
+  - name: 'etag'
+    type: String
+    description: Used to perform consistent read-modify-write updates.
+    ignore_read: true
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: The labels with user-defined metadata to organize your Indexes.
+    immutable: false
+  - name: 'createTime'
+    type: String
+    description: The timestamp of when the Index was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: The timestamp of when the Index was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+    output: true
+  - name: 'network'
+    type: String
+    description: |-
+      The full name of the Google Compute Engine [network](https://cloud.google.com//compute/docs/networks-and-firewalls#networks) to which the index endpoint should be peered.
+      Private services access must already be configured for the network. If left unspecified, the index endpoint is not peered with any network.
+      [Format](https://cloud.google.com/compute/docs/reference/rest/v1/networks/insert): `projects/{project}/global/networks/{network}`.
+      Where `{project}` is a project number, as in `12345`, and `{network}` is network name.
+    immutable: true
+    conflicts:
+      - privateServiceConnectConfig
+  - name: 'privateServiceConnectConfig'
+    type: NestedObject
+    description: |-
+      Optional. Configuration for private service connect. `network` and `privateServiceConnectConfig` are mutually exclusive.
+    immutable: true
+    default_from_api: true
+    conflicts:
+      - network
+    custom_flatten: 'templates/terraform/custom_flatten/go/vertex_ai_index_endpoint_private_service_connect_config.go.tmpl'
+    properties:
+      - name: 'enablePrivateServiceConnect'
+        type: Boolean
+        description: If set to true, the IndexEndpoint is created without private service access.
+        required: true
+        immutable: true
+      - name: 'projectAllowlist'
+        type: Array
+        description: A list of Projects from which the forwarding rule will target the service attachment.
+        immutable: true
+        item_type:
+          type: String
+  - name: 'publicEndpointEnabled'
+    type: Boolean
+    description: If true, the deployed index will be accessible through public endpoint.
+    immutable: true
+    ignore_read: true
+  - name: 'publicEndpointDomainName'
+    type: String
+    description: If publicEndpointEnabled is true, this field will be populated with the domain name to use for this index endpoint.
+    output: true

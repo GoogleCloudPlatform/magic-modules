@@ -96,6 +96,24 @@ examples:
       global_address_name: 'private-ip-alloc'
       network_name: 'vpc-network'
     skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'database_migration_service_connection_profile_existing_mysql'
+    primary_resource_id: 'existing-mysql'
+    vars:
+      destination_csql: 'destination-csql'
+      destination_cp: 'destination-cp'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'database_migration_service_connection_profile_existing_postgres'
+    primary_resource_id: 'existing-psql'
+    vars:
+      destination_csql: 'destination-csql'
+      destination_cp: 'destination-cp'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'database_migration_service_connection_profile_existing_alloydb'
+    primary_resource_id: 'existing-alloydb'
+    vars:
+      destination_alloydb: 'destination-alloydb'
+      destination_cp: 'destination-cp'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'connectionProfileId'
@@ -184,25 +202,30 @@ properties:
     properties:
       - !ruby/object:Api::Type::String
         name: 'host'
-        required: true
+        required_with:
+          - 'mysql.0.port'
+          - 'mysql.0.username'
         description: |
-          Required. The IP or hostname of the source MySQL database.
+          The IP or hostname of the source MySQL database.
       - !ruby/object:Api::Type::Integer
         name: 'port'
-        required: true
+        required_with:
+          - 'mysql.0.host'
+          - 'mysql.0.username'
         description: |
-          Required. The network port of the source MySQL database.
+          The network port of the source MySQL database.
       - !ruby/object:Api::Type::String
         name: 'username'
-        required: true
+        required_with:
+          - 'mysql.0.host'
+          - 'mysql.0.port'
         description: |
-          Required. The username that Database Migration Service will use to connect to the database. The value is encrypted when stored in Database Migration Service.
+          The username that Database Migration Service will use to connect to the database. The value is encrypted when stored in Database Migration Service.
       - !ruby/object:Api::Type::String
         name: 'password'
-        required: true
         immutable: true
         description: |
-          Required. Input only. The password for the user that Database Migration Service will be using to connect to the database.
+          Input only. The password for the user that Database Migration Service will be using to connect to the database.
           This field is not returned on request, and the value is encrypted when stored in Database Migration Service.
         sensitive: true
         custom_flatten: templates/terraform/custom_flatten/database_migration_service_connection_profile_mysql_password.go.erb
@@ -266,25 +289,37 @@ properties:
     properties:
       - !ruby/object:Api::Type::String
         name: 'host'
-        required: true
+        required_with:
+          - 'postgresql.0.port'
+          - 'postgresql.0.username'
+          - 'postgresql.0.password'
         description: |
-          Required. The IP or hostname of the source MySQL database.
+          The IP or hostname of the source MySQL database.
       - !ruby/object:Api::Type::Integer
         name: 'port'
-        required: true
+        required_with:
+          - 'postgresql.0.host'
+          - 'postgresql.0.username'
+          - 'postgresql.0.password'
         description: |
-          Required. The network port of the source MySQL database.
+          The network port of the source MySQL database.
       - !ruby/object:Api::Type::String
         name: 'username'
-        required: true
+        required_with:
+          - 'postgresql.0.host'
+          - 'postgresql.0.port'
+          - 'postgresql.0.password'
         description: |
-          Required. The username that Database Migration Service will use to connect to the database. The value is encrypted when stored in Database Migration Service.
+          The username that Database Migration Service will use to connect to the database. The value is encrypted when stored in Database Migration Service.
       - !ruby/object:Api::Type::String
         name: 'password'
-        required: true
+        required_with:
+          - 'postgresql.0.host'
+          - 'postgresql.0.port'
+          - 'postgresql.0.username'
         immutable: true
         description: |
-          Required. Input only. The password for the user that Database Migration Service will be using to connect to the database.
+          Input only. The password for the user that Database Migration Service will be using to connect to the database.
           This field is not returned on request, and the value is encrypted when stored in Database Migration Service.
         sensitive: true
         custom_flatten: templates/terraform/custom_flatten/database_migration_service_connection_profile_postgresql_password.go.erb
@@ -339,6 +374,10 @@ properties:
         name: 'cloudSqlId'
         description: |
           If the source is a Cloud SQL database, use this field to provide the Cloud SQL instance ID of the source.
+      - !ruby/object:Api::Type::String
+        name: 'alloydbClusterId'
+        description: |
+          If the connected database is an AlloyDB instance, use this field to provide the AlloyDB cluster ID.
       - !ruby/object:Api::Type::Enum
         name: 'networkArchitecture'
         output: true

@@ -68,7 +68,7 @@ var {{ $.ResourceName }}IamSchema = map[string]*schema.Schema{
 }
 
 {{- if and $.IamPolicy $.IamPolicy.CustomDiffSuppress }}
-  {{- $.CustomTemplate $.IamPolicy.CustomDiffSuppress true }}
+  {{ $.CustomTemplate $.IamPolicy.CustomDiffSuppress true }}
 {{- end }}
 
 type {{ $.ResourceName }}IamUpdater struct {
@@ -256,12 +256,12 @@ func (u *{{ $.ResourceName }}IamUpdater) SetResourceIamPolicy(policy *cloudresou
 		return err
 	}
 
-{{- if and $.IamPolicy $.IamPolicy.IamPolicyVersion }}
+{{ if and $.IamPolicy $.IamPolicy.IamPolicyVersion -}}
         // This is an override of the existing version that might have been set in the resource_iam_member|policy|binding code
         json["version"] = {{ $.IamPolicy.IamPolicyVersion}}
-{{- end }}
+{{ end -}}
 
-{{ if and $.IamPolicy $.IamPolicy.WrappedPolicyObj }}
+{{ if and $.IamPolicy $.IamPolicy.WrappedPolicyObj -}}
 	obj := make(map[string]interface{})
 	obj["policy"] = json
 {{- else }}

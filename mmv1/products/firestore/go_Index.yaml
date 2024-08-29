@@ -1,0 +1,174 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Index'
+description: |
+  Cloud Firestore indexes enable simple and complex queries against documents in a database.
+   This resource manages composite indexes and not single field indexes.
+   Both Firestore Native and Datastore Mode indexes are supported.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/firestore/docs/query-data/indexing'
+  api: 'https://cloud.google.com/firestore/docs/reference/rest/v1/projects.databases.collectionGroups.indexes'
+docs:
+  warning: |
+    This resource creates a Firestore Index on a project that already has
+    a Firestore database. If you haven't already created it, you may
+    create a `google_firestore_database` resource and `location_id` set
+    to your chosen location. If you wish to use App Engine, you may
+    instead create a `google_app_engine_application` resource.
+    Your Firestore location will be the same as the App Engine location specified.
+base_url: 'projects/{{project}}/databases/{{database}}/collectionGroups/{{collection}}/indexes'
+self_link: '{{name}}'
+immutable: true
+import_format:
+  - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+  constants: 'templates/terraform/constants/go/firestore_index.go.tmpl'
+  encoder: 'templates/terraform/encoders/go/index.go.tmpl'
+  post_create: 'templates/terraform/post_create/go/index.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/go/index_self_link_as_name_set_project.go.tmpl'
+error_retry_predicates:
+
+  - 'transport_tpg.FirestoreIndex409Retry'
+examples:
+  - name: 'firestore_index_basic'
+    primary_resource_id: 'my-index'
+    vars:
+      database_id: 'database-id'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    external_providers: ["random", "time"]
+  - name: 'firestore_index_datastore_mode'
+    primary_resource_id: 'my-index'
+    vars:
+      database_id: 'database-id-dm'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+  - name: 'firestore_index_vector'
+    primary_resource_id: 'my-index'
+    vars:
+      database_id: 'database-id-vector'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+parameters:
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      A server defined name for this index. Format:
+      `projects/{{project}}/databases/{{database}}/collectionGroups/{{collection}}/indexes/{{server_generated_id}}`
+    output: true
+  - name: 'database'
+    type: String
+    description: |
+      The Firestore database id. Defaults to `"(default)"`.
+    ignore_read: true
+    default_value: "(default)"
+  - name: 'collection'
+    type: String
+    description: |
+      The collection being indexed.
+    required: true
+    ignore_read: true
+  - name: 'queryScope'
+    type: Enum
+    description: |
+      The scope at which a query is run.
+    default_value: "COLLECTION"
+    enum_values:
+      - 'COLLECTION'
+      - 'COLLECTION_GROUP'
+      - 'COLLECTION_RECURSIVE'
+  - name: 'apiScope'
+    type: Enum
+    description: |
+      The API scope at which a query is run.
+    custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
+    default_value: "ANY_API"
+    enum_values:
+      - 'ANY_API'
+      - 'DATASTORE_MODE_API'
+  - name: 'fields'
+    type: Array
+    description: |
+      The fields supported by this index. The last non-stored field entry is
+      always for the field path `__name__`. If, on creation, `__name__` was not
+      specified as the last field, it will be added automatically with the same
+      direction as that of the last field defined. If the final field in a
+      composite index is not directional, the `__name__` will be ordered
+      `"ASCENDING"` (unless explicitly specified otherwise).
+    required: true
+    diff_suppress_func: 'firestoreIFieldsDiffSuppress'
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'fieldPath'
+          type: String
+          description: |
+            Name of the field.
+        - name: 'order'
+          type: Enum
+          description: |
+            Indicates that this field supports ordering by the specified order or comparing using =, <, <=, >, >=.
+            Only one of `order`, `arrayConfig`, and `vectorConfig` can be specified.
+          enum_values:
+            - 'ASCENDING'
+            - 'DESCENDING'
+        - name: 'arrayConfig'
+          type: Enum
+          description: |
+            Indicates that this field supports operations on arrayValues. Only one of `order`, `arrayConfig`, and
+            `vectorConfig` can be specified.
+          enum_values:
+            - 'CONTAINS'
+        - name: 'vectorConfig'
+          type: NestedObject
+          description: |
+            Indicates that this field supports vector search operations. Only one of `order`, `arrayConfig`, and
+            `vectorConfig` can be specified. Vector Fields should come after the field path `__name__`.
+          properties:
+            - name: 'dimension'
+              type: Integer
+              description: |
+                The resulting index will only include vectors of this dimension, and can be used for vector search
+                with the same dimension.
+            - name: 'flat'
+              type: NestedObject
+              description: |
+                Indicates the vector index is a flat index.
+              send_empty_value: true
+              allow_empty_object: true
+              properties:
+                []
+    min_size: 2

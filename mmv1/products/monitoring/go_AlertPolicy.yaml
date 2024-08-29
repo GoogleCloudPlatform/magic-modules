@@ -1,0 +1,1046 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'AlertPolicy'
+description: |
+  A description of the conditions under which some aspect of your system is
+  considered to be "unhealthy" and the ways to notify people or services
+  about this state.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/monitoring/alerts/'
+  api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.alertPolicies'
+docs:
+id_format: '{{name}}'
+base_url: 'v3/projects/{{project}}/alertPolicies'
+self_link: 'v3/{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+mutex: 'alertPolicy/{{project}}'
+import_format:
+  - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  constants: 'templates/terraform/constants/go/monitoring_alert_policy.go.tmpl'
+  post_create: 'templates/terraform/post_create/go/set_computed_name.tmpl'
+  custom_import: 'templates/terraform/custom_import/go/self_link_as_name.tmpl'
+error_retry_predicates:
+
+  - 'transport_tpg.IsMonitoringConcurrentEditError'
+error_abort_predicates:
+
+  - 'transport_tpg.Is429QuotaError'
+examples:
+  - name: 'monitoring_alert_policy_basic'
+    primary_resource_id: 'alert_policy'
+    vars:
+      alert_policy_display_name: 'My Alert Policy'
+    skip_test: true
+  - name: 'monitoring_alert_policy_evaluation_missing_data'
+    primary_resource_id: 'alert_policy'
+    vars:
+      alert_policy_display_name: 'My Alert Policy'
+    skip_test: true
+  - name: 'monitoring_alert_policy_forecast_options'
+    primary_resource_id: 'alert_policy'
+    vars:
+      alert_policy_display_name: 'My Alert Policy'
+    skip_test: true
+  - name: 'monitoring_alert_policy_promql_condition'
+    primary_resource_id: 'alert_policy'
+    vars:
+      alert_policy_display_name: 'My Alert Policy'
+    skip_test: true
+parameters:
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The unique resource name for this policy.
+      Its syntax is: projects/[PROJECT_ID]/alertPolicies/[ALERT_POLICY_ID]
+    output: true
+  - name: 'displayName'
+    type: String
+    description: |
+      A short name or phrase used to identify the policy in
+      dashboards, notifications, and incidents. To avoid confusion, don't use
+      the same display name for multiple policies in the same project. The
+      name is limited to 512 Unicode characters.
+    required: true
+  - name: 'combiner'
+    type: Enum
+    description: |
+      How to combine the results of multiple conditions to
+      determine if an incident should be opened.
+    required: true
+    enum_values:
+      - 'AND'
+      - 'OR'
+      - 'AND_WITH_MATCHING_RESOURCE'
+  - name: 'creationRecord'
+    type: NestedObject
+    description: |
+      A read-only record of the creation of the alerting policy.
+      If provided in a call to create or update, this field will
+      be ignored.
+    output: true
+    properties:
+      - name: 'mutateTime'
+        type: String
+        description: |
+          When the change occurred.
+        output: true
+      - name: 'mutatedBy'
+        type: String
+        description: |
+          The email address of the user making the change.
+        output: true
+  - name: 'enabled'
+    type: Boolean
+    description: |
+      Whether or not the policy is enabled. The default is true.
+    send_empty_value: true
+    default_value: true
+  - name: 'conditions'
+    type: Array
+    description: |
+      A list of conditions for the policy. The conditions are combined by
+      AND or OR according to the combiner field. If the combined conditions
+      evaluate to true, then an incident is created. A policy can have from
+      one to six conditions.
+    required: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'conditionAbsent'
+          type: NestedObject
+          description: |
+            A condition that checks that a time series
+            continues to receive new data points.
+          properties:
+            - name: 'aggregations'
+              type: Array
+              description: |
+                Specifies the alignment of data points in
+                individual time series as well as how to
+                combine the retrieved time series together
+                (such as when aggregating multiple streams
+                on each resource to a single stream for each
+                resource or when aggregating streams across
+                all members of a group of resources).
+                Multiple aggregations are applied in the
+                order specified.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'perSeriesAligner'
+                    type: Enum
+                    description: |
+                      The approach to be used to align
+                      individual time series. Not all
+                      alignment functions may be applied
+                      to all time series, depending on
+                      the metric type and value type of
+                      the original time series.
+                      Alignment may change the metric
+                      type or the value type of the time
+                      series.Time series data must be
+                      aligned in order to perform cross-
+                      time series reduction. If
+                      crossSeriesReducer is specified,
+                      then perSeriesAligner must be
+                      specified and not equal ALIGN_NONE
+                      and alignmentPeriod must be
+                      specified; otherwise, an error is
+                      returned.
+                    enum_values:
+                      - 'ALIGN_NONE'
+                      - 'ALIGN_DELTA'
+                      - 'ALIGN_RATE'
+                      - 'ALIGN_INTERPOLATE'
+                      - 'ALIGN_NEXT_OLDER'
+                      - 'ALIGN_MIN'
+                      - 'ALIGN_MAX'
+                      - 'ALIGN_MEAN'
+                      - 'ALIGN_COUNT'
+                      - 'ALIGN_SUM'
+                      - 'ALIGN_STDDEV'
+                      - 'ALIGN_COUNT_TRUE'
+                      - 'ALIGN_COUNT_FALSE'
+                      - 'ALIGN_FRACTION_TRUE'
+                      - 'ALIGN_PERCENTILE_99'
+                      - 'ALIGN_PERCENTILE_95'
+                      - 'ALIGN_PERCENTILE_50'
+                      - 'ALIGN_PERCENTILE_05'
+                      - 'ALIGN_PERCENT_CHANGE'
+                  - name: 'groupByFields'
+                    type: Array
+                    description: |
+                      The set of fields to preserve when
+                      crossSeriesReducer is specified.
+                      The groupByFields determine how
+                      the time series are partitioned
+                      into subsets prior to applying the
+                      aggregation function. Each subset
+                      contains time series that have the
+                      same value for each of the
+                      grouping fields. Each individual
+                      time series is a member of exactly
+                      one subset. The crossSeriesReducer
+                      is applied to each subset of time
+                      series. It is not possible to
+                      reduce across different resource
+                      types, so this field implicitly
+                      contains resource.type. Fields not
+                      specified in groupByFields are
+                      aggregated away. If groupByFields
+                      is not specified and all the time
+                      series have the same resource
+                      type, then the time series are
+                      aggregated into a single output
+                      time series. If crossSeriesReducer
+                      is not defined, this field is
+                      ignored.
+                    item_type:
+                      type: String
+                  - name: 'alignmentPeriod'
+                    type: String
+                    description: |
+                      The alignment period for per-time
+                      series alignment. If present,
+                      alignmentPeriod must be at least
+                      60 seconds. After per-time series
+                      alignment, each time series will
+                      contain data points only on the
+                      period boundaries. If
+                      perSeriesAligner is not specified
+                      or equals ALIGN_NONE, then this
+                      field is ignored. If
+                      perSeriesAligner is specified and
+                      does not equal ALIGN_NONE, then
+                      this field must be defined;
+                      otherwise an error is returned.
+                  - name: 'crossSeriesReducer'
+                    type: Enum
+                    description: |
+                      The approach to be used to combine
+                      time series. Not all reducer
+                      functions may be applied to all
+                      time series, depending on the
+                      metric type and the value type of
+                      the original time series.
+                      Reduction may change the metric
+                      type of value type of the time
+                      series.Time series data must be
+                      aligned in order to perform cross-
+                      time series reduction. If
+                      crossSeriesReducer is specified,
+                      then perSeriesAligner must be
+                      specified and not equal ALIGN_NONE
+                      and alignmentPeriod must be
+                      specified; otherwise, an error is
+                      returned.
+                    diff_suppress_func: 'crossSeriesReducerDiffSuppress'
+                    enum_values:
+                      - 'REDUCE_NONE'
+                      - 'REDUCE_MEAN'
+                      - 'REDUCE_MIN'
+                      - 'REDUCE_MAX'
+                      - 'REDUCE_SUM'
+                      - 'REDUCE_STDDEV'
+                      - 'REDUCE_COUNT'
+                      - 'REDUCE_COUNT_TRUE'
+                      - 'REDUCE_COUNT_FALSE'
+                      - 'REDUCE_FRACTION_TRUE'
+                      - 'REDUCE_PERCENTILE_99'
+                      - 'REDUCE_PERCENTILE_95'
+                      - 'REDUCE_PERCENTILE_50'
+                      - 'REDUCE_PERCENTILE_05'
+            - name: 'trigger'
+              type: NestedObject
+              description: |
+                The number/percent of time series for which
+                the comparison must hold in order for the
+                condition to trigger. If unspecified, then
+                the condition will trigger if the comparison
+                is true for any of the time series that have
+                been identified by filter and aggregations.
+              properties:
+                - name: 'percent'
+                  type: Double
+                  description: |
+                    The percentage of time series that
+                    must fail the predicate for the
+                    condition to be triggered.
+                - name: 'count'
+                  type: Integer
+                  description: |
+                    The absolute number of time series
+                    that must fail the predicate for the
+                    condition to be triggered.
+            - name: 'duration'
+              type: String
+              description: |
+                The amount of time that a time series must
+                fail to report new data to be considered
+                failing. Currently, only values that are a
+                multiple of a minute--e.g. 60s, 120s, or 300s
+                --are supported.
+              required: true
+            - name: 'filter'
+              type: String
+              description: |
+                A filter that identifies which time series
+                should be compared with the threshold.The
+                filter is similar to the one that is
+                specified in the
+                MetricService.ListTimeSeries request (that
+                call is useful to verify the time series
+                that will be retrieved / processed) and must
+                specify the metric type and optionally may
+                contain restrictions on resource type,
+                resource labels, and metric labels. This
+                field may not exceed 2048 Unicode characters
+                in length.
+        - name: 'name'
+          type: String
+          description: |
+            The unique resource name for this condition.
+            Its syntax is:
+            projects/[PROJECT_ID]/alertPolicies/[POLICY_ID]/conditions/[CONDITION_ID]
+            [CONDITION_ID] is assigned by Stackdriver Monitoring when
+            the condition is created as part of a new or updated alerting
+            policy.
+          output: true
+        - name: 'conditionMonitoringQueryLanguage'
+          type: NestedObject
+          description: |
+            A Monitoring Query Language query that outputs a boolean stream
+          properties:
+            - name: 'query'
+              type: String
+              description: |
+                Monitoring Query Language query that outputs a boolean stream.
+              required: true
+            - name: 'duration'
+              type: String
+              description: |
+                The amount of time that a time series must
+                violate the threshold to be considered
+                failing. Currently, only values that are a
+                multiple of a minute--e.g., 0, 60, 120, or
+                300 seconds--are supported. If an invalid
+                value is given, an error will be returned.
+                When choosing a duration, it is useful to
+                keep in mind the frequency of the underlying
+                time series data (which may also be affected
+                by any alignments specified in the
+                aggregations field); a good duration is long
+                enough so that a single outlier does not
+                generate spurious alerts, but short enough
+                that unhealthy states are detected and
+                alerted on quickly.
+              required: true
+            - name: 'trigger'
+              type: NestedObject
+              description: |
+                The number/percent of time series for which
+                the comparison must hold in order for the
+                condition to trigger. If unspecified, then
+                the condition will trigger if the comparison
+                is true for any of the time series that have
+                been identified by filter and aggregations,
+                or by the ratio, if denominator_filter and
+                denominator_aggregations are specified.
+              properties:
+                - name: 'percent'
+                  type: Double
+                  description: |
+                    The percentage of time series that
+                    must fail the predicate for the
+                    condition to be triggered.
+                - name: 'count'
+                  type: Integer
+                  description: |
+                    The absolute number of time series
+                    that must fail the predicate for the
+                    condition to be triggered.
+            - name: 'evaluationMissingData'
+              type: Enum
+              description: |
+                A condition control that determines how
+                metric-threshold conditions are evaluated when
+                data stops arriving.
+              enum_values:
+                - 'EVALUATION_MISSING_DATA_INACTIVE'
+                - 'EVALUATION_MISSING_DATA_ACTIVE'
+                - 'EVALUATION_MISSING_DATA_NO_OP'
+        - name: 'conditionThreshold'
+          type: NestedObject
+          description: |
+            A condition that compares a time series against a
+            threshold.
+          properties:
+            - name: 'thresholdValue'
+              type: Double
+              description: |
+                A value against which to compare the time
+                series.
+            - name: 'denominatorFilter'
+              type: String
+              description: |
+                A filter that identifies a time series that
+                should be used as the denominator of a ratio
+                that will be compared with the threshold. If
+                a denominator_filter is specified, the time
+                series specified by the filter field will be
+                used as the numerator.The filter is similar
+                to the one that is specified in the
+                MetricService.ListTimeSeries request (that
+                call is useful to verify the time series
+                that will be retrieved / processed) and must
+                specify the metric type and optionally may
+                contain restrictions on resource type,
+                resource labels, and metric labels. This
+                field may not exceed 2048 Unicode characters
+                in length.
+            - name: 'denominatorAggregations'
+              type: Array
+              description: |
+                Specifies the alignment of data points in
+                individual time series selected by
+                denominatorFilter as well as how to combine
+                the retrieved time series together (such as
+                when aggregating multiple streams on each
+                resource to a single stream for each
+                resource or when aggregating streams across
+                all members of a group of resources).When
+                computing ratios, the aggregations and
+                denominator_aggregations fields must use the
+                same alignment period and produce time
+                series that have the same periodicity and
+                labels.This field is similar to the one in
+                the MetricService.ListTimeSeries request. It
+                is advisable to use the ListTimeSeries
+                method when debugging this field.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'perSeriesAligner'
+                    type: Enum
+                    description: |
+                      The approach to be used to align
+                      individual time series. Not all
+                      alignment functions may be applied
+                      to all time series, depending on
+                      the metric type and value type of
+                      the original time series.
+                      Alignment may change the metric
+                      type or the value type of the time
+                      series.Time series data must be
+                      aligned in order to perform cross-
+                      time series reduction. If
+                      crossSeriesReducer is specified,
+                      then perSeriesAligner must be
+                      specified and not equal ALIGN_NONE
+                      and alignmentPeriod must be
+                      specified; otherwise, an error is
+                      returned.
+                    enum_values:
+                      - 'ALIGN_NONE'
+                      - 'ALIGN_DELTA'
+                      - 'ALIGN_RATE'
+                      - 'ALIGN_INTERPOLATE'
+                      - 'ALIGN_NEXT_OLDER'
+                      - 'ALIGN_MIN'
+                      - 'ALIGN_MAX'
+                      - 'ALIGN_MEAN'
+                      - 'ALIGN_COUNT'
+                      - 'ALIGN_SUM'
+                      - 'ALIGN_STDDEV'
+                      - 'ALIGN_COUNT_TRUE'
+                      - 'ALIGN_COUNT_FALSE'
+                      - 'ALIGN_FRACTION_TRUE'
+                      - 'ALIGN_PERCENTILE_99'
+                      - 'ALIGN_PERCENTILE_95'
+                      - 'ALIGN_PERCENTILE_50'
+                      - 'ALIGN_PERCENTILE_05'
+                      - 'ALIGN_PERCENT_CHANGE'
+                  - name: 'groupByFields'
+                    type: Array
+                    description: |
+                      The set of fields to preserve when
+                      crossSeriesReducer is specified.
+                      The groupByFields determine how
+                      the time series are partitioned
+                      into subsets prior to applying the
+                      aggregation function. Each subset
+                      contains time series that have the
+                      same value for each of the
+                      grouping fields. Each individual
+                      time series is a member of exactly
+                      one subset. The crossSeriesReducer
+                      is applied to each subset of time
+                      series. It is not possible to
+                      reduce across different resource
+                      types, so this field implicitly
+                      contains resource.type. Fields not
+                      specified in groupByFields are
+                      aggregated away. If groupByFields
+                      is not specified and all the time
+                      series have the same resource
+                      type, then the time series are
+                      aggregated into a single output
+                      time series. If crossSeriesReducer
+                      is not defined, this field is
+                      ignored.
+                    item_type:
+                      type: String
+                  - name: 'alignmentPeriod'
+                    type: String
+                    description: |
+                      The alignment period for per-time
+                      series alignment. If present,
+                      alignmentPeriod must be at least
+                      60 seconds. After per-time series
+                      alignment, each time series will
+                      contain data points only on the
+                      period boundaries. If
+                      perSeriesAligner is not specified
+                      or equals ALIGN_NONE, then this
+                      field is ignored. If
+                      perSeriesAligner is specified and
+                      does not equal ALIGN_NONE, then
+                      this field must be defined;
+                      otherwise an error is returned.
+                  - name: 'crossSeriesReducer'
+                    type: Enum
+                    description: |
+                      The approach to be used to combine
+                      time series. Not all reducer
+                      functions may be applied to all
+                      time series, depending on the
+                      metric type and the value type of
+                      the original time series.
+                      Reduction may change the metric
+                      type of value type of the time
+                      series.Time series data must be
+                      aligned in order to perform cross-
+                      time series reduction. If
+                      crossSeriesReducer is specified,
+                      then perSeriesAligner must be
+                      specified and not equal ALIGN_NONE
+                      and alignmentPeriod must be
+                      specified; otherwise, an error is
+                      returned.
+                    diff_suppress_func: 'crossSeriesReducerDiffSuppress'
+                    enum_values:
+                      - 'REDUCE_NONE'
+                      - 'REDUCE_MEAN'
+                      - 'REDUCE_MIN'
+                      - 'REDUCE_MAX'
+                      - 'REDUCE_SUM'
+                      - 'REDUCE_STDDEV'
+                      - 'REDUCE_COUNT'
+                      - 'REDUCE_COUNT_TRUE'
+                      - 'REDUCE_COUNT_FALSE'
+                      - 'REDUCE_FRACTION_TRUE'
+                      - 'REDUCE_PERCENTILE_99'
+                      - 'REDUCE_PERCENTILE_95'
+                      - 'REDUCE_PERCENTILE_50'
+                      - 'REDUCE_PERCENTILE_05'
+            - name: 'duration'
+              type: String
+              description: |
+                The amount of time that a time series must
+                violate the threshold to be considered
+                failing. Currently, only values that are a
+                multiple of a minute--e.g., 0, 60, 120, or
+                300 seconds--are supported. If an invalid
+                value is given, an error will be returned.
+                When choosing a duration, it is useful to
+                keep in mind the frequency of the underlying
+                time series data (which may also be affected
+                by any alignments specified in the
+                aggregations field); a good duration is long
+                enough so that a single outlier does not
+                generate spurious alerts, but short enough
+                that unhealthy states are detected and
+                alerted on quickly.
+              required: true
+            - name: 'forecastOptions'
+              type: NestedObject
+              description: |
+                When this field is present, the `MetricThreshold`
+                condition forecasts whether the time series is
+                predicted to violate the threshold within the
+                `forecastHorizon`. When this field is not set, the
+                `MetricThreshold` tests the current value of the
+                timeseries against the threshold.
+              properties:
+                - name: 'forecastHorizon'
+                  type: String
+                  description: |
+                    The length of time into the future to forecast
+                    whether a timeseries will violate the threshold.
+                    If the predicted value is found to violate the
+                    threshold, and the violation is observed in all
+                    forecasts made for the Configured `duration`,
+                    then the timeseries is considered to be failing.
+                  required: true
+            - name: 'comparison'
+              type: Enum
+              description: |
+                The comparison to apply between the time
+                series (indicated by filter and aggregation)
+                and the threshold (indicated by
+                threshold_value). The comparison is applied
+                on each time series, with the time series on
+                the left-hand side and the threshold on the
+                right-hand side. Only COMPARISON_LT and
+                COMPARISON_GT are supported currently.
+              required: true
+              enum_values:
+                - 'COMPARISON_GT'
+                - 'COMPARISON_GE'
+                - 'COMPARISON_LT'
+                - 'COMPARISON_LE'
+                - 'COMPARISON_EQ'
+                - 'COMPARISON_NE'
+            - name: 'trigger'
+              type: NestedObject
+              description: |
+                The number/percent of time series for which
+                the comparison must hold in order for the
+                condition to trigger. If unspecified, then
+                the condition will trigger if the comparison
+                is true for any of the time series that have
+                been identified by filter and aggregations,
+                or by the ratio, if denominator_filter and
+                denominator_aggregations are specified.
+              properties:
+                - name: 'percent'
+                  type: Double
+                  description: |
+                    The percentage of time series that
+                    must fail the predicate for the
+                    condition to be triggered.
+                - name: 'count'
+                  type: Integer
+                  description: |
+                    The absolute number of time series
+                    that must fail the predicate for the
+                    condition to be triggered.
+            - name: 'aggregations'
+              type: Array
+              description: |
+                Specifies the alignment of data points in
+                individual time series as well as how to
+                combine the retrieved time series together
+                (such as when aggregating multiple streams
+                on each resource to a single stream for each
+                resource or when aggregating streams across
+                all members of a group of resources).
+                Multiple aggregations are applied in the
+                order specified.This field is similar to the
+                one in the MetricService.ListTimeSeries
+                request. It is advisable to use the
+                ListTimeSeries method when debugging this
+                field.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'perSeriesAligner'
+                    type: Enum
+                    description: |
+                      The approach to be used to align
+                      individual time series. Not all
+                      alignment functions may be applied
+                      to all time series, depending on
+                      the metric type and value type of
+                      the original time series.
+                      Alignment may change the metric
+                      type or the value type of the time
+                      series.Time series data must be
+                      aligned in order to perform cross-
+                      time series reduction. If
+                      crossSeriesReducer is specified,
+                      then perSeriesAligner must be
+                      specified and not equal ALIGN_NONE
+                      and alignmentPeriod must be
+                      specified; otherwise, an error is
+                      returned.
+                    enum_values:
+                      - 'ALIGN_NONE'
+                      - 'ALIGN_DELTA'
+                      - 'ALIGN_RATE'
+                      - 'ALIGN_INTERPOLATE'
+                      - 'ALIGN_NEXT_OLDER'
+                      - 'ALIGN_MIN'
+                      - 'ALIGN_MAX'
+                      - 'ALIGN_MEAN'
+                      - 'ALIGN_COUNT'
+                      - 'ALIGN_SUM'
+                      - 'ALIGN_STDDEV'
+                      - 'ALIGN_COUNT_TRUE'
+                      - 'ALIGN_COUNT_FALSE'
+                      - 'ALIGN_FRACTION_TRUE'
+                      - 'ALIGN_PERCENTILE_99'
+                      - 'ALIGN_PERCENTILE_95'
+                      - 'ALIGN_PERCENTILE_50'
+                      - 'ALIGN_PERCENTILE_05'
+                      - 'ALIGN_PERCENT_CHANGE'
+                  - name: 'groupByFields'
+                    type: Array
+                    description: |
+                      The set of fields to preserve when
+                      crossSeriesReducer is specified.
+                      The groupByFields determine how
+                      the time series are partitioned
+                      into subsets prior to applying the
+                      aggregation function. Each subset
+                      contains time series that have the
+                      same value for each of the
+                      grouping fields. Each individual
+                      time series is a member of exactly
+                      one subset. The crossSeriesReducer
+                      is applied to each subset of time
+                      series. It is not possible to
+                      reduce across different resource
+                      types, so this field implicitly
+                      contains resource.type. Fields not
+                      specified in groupByFields are
+                      aggregated away. If groupByFields
+                      is not specified and all the time
+                      series have the same resource
+                      type, then the time series are
+                      aggregated into a single output
+                      time series. If crossSeriesReducer
+                      is not defined, this field is
+                      ignored.
+                    item_type:
+                      type: String
+                  - name: 'alignmentPeriod'
+                    type: String
+                    description: |
+                      The alignment period for per-time
+                      series alignment. If present,
+                      alignmentPeriod must be at least
+                      60 seconds. After per-time series
+                      alignment, each time series will
+                      contain data points only on the
+                      period boundaries. If
+                      perSeriesAligner is not specified
+                      or equals ALIGN_NONE, then this
+                      field is ignored. If
+                      perSeriesAligner is specified and
+                      does not equal ALIGN_NONE, then
+                      this field must be defined;
+                      otherwise an error is returned.
+                  - name: 'crossSeriesReducer'
+                    type: Enum
+                    description: |
+                      The approach to be used to combine
+                      time series. Not all reducer
+                      functions may be applied to all
+                      time series, depending on the
+                      metric type and the value type of
+                      the original time series.
+                      Reduction may change the metric
+                      type of value type of the time
+                      series.Time series data must be
+                      aligned in order to perform cross-
+                      time series reduction. If
+                      crossSeriesReducer is specified,
+                      then perSeriesAligner must be
+                      specified and not equal ALIGN_NONE
+                      and alignmentPeriod must be
+                      specified; otherwise, an error is
+                      returned.
+                    diff_suppress_func: 'crossSeriesReducerDiffSuppress'
+                    enum_values:
+                      - 'REDUCE_NONE'
+                      - 'REDUCE_MEAN'
+                      - 'REDUCE_MIN'
+                      - 'REDUCE_MAX'
+                      - 'REDUCE_SUM'
+                      - 'REDUCE_STDDEV'
+                      - 'REDUCE_COUNT'
+                      - 'REDUCE_COUNT_TRUE'
+                      - 'REDUCE_COUNT_FALSE'
+                      - 'REDUCE_FRACTION_TRUE'
+                      - 'REDUCE_PERCENTILE_99'
+                      - 'REDUCE_PERCENTILE_95'
+                      - 'REDUCE_PERCENTILE_50'
+                      - 'REDUCE_PERCENTILE_05'
+            - name: 'filter'
+              type: String
+              description: |
+                A filter that identifies which time series
+                should be compared with the threshold.The
+                filter is similar to the one that is
+                specified in the
+                MetricService.ListTimeSeries request (that
+                call is useful to verify the time series
+                that will be retrieved / processed) and must
+                specify the metric type and optionally may
+                contain restrictions on resource type,
+                resource labels, and metric labels. This
+                field may not exceed 2048 Unicode characters
+                in length.
+            - name: 'evaluationMissingData'
+              type: Enum
+              description: |
+                A condition control that determines how
+                metric-threshold conditions are evaluated when
+                data stops arriving.
+              enum_values:
+                - 'EVALUATION_MISSING_DATA_INACTIVE'
+                - 'EVALUATION_MISSING_DATA_ACTIVE'
+                - 'EVALUATION_MISSING_DATA_NO_OP'
+        - name: 'displayName'
+          type: String
+          description: |
+            A short name or phrase used to identify the
+            condition in dashboards, notifications, and
+            incidents. To avoid confusion, don't use the same
+            display name for multiple conditions in the same
+            policy.
+          required: true
+        - name: 'conditionMatchedLog'
+          type: NestedObject
+          description: |
+            A condition that checks for log messages matching given constraints.
+            If set, no other conditions can be present.
+          properties:
+            - name: 'filter'
+              type: String
+              description: |
+                A logs-based filter.
+              required: true
+            - name: 'labelExtractors'
+              type: KeyValuePairs
+              description: |
+                A map from a label key to an extractor expression, which is used to
+                extract the value for this label key. Each entry in this map is
+                a specification for how data should be extracted from log entries that
+                match filter. Each combination of extracted values is treated as
+                a separate rule for the purposes of triggering notifications.
+                Label keys and corresponding values can be used in notifications
+                generated by this condition.
+        - name: 'conditionPrometheusQueryLanguage'
+          type: NestedObject
+          description: |
+            A condition type that allows alert policies to be defined using
+            Prometheus Query Language (PromQL).
+
+            The PrometheusQueryLanguageCondition message contains information
+            from a Prometheus alerting rule and its associated rule group.
+          properties:
+            - name: 'query'
+              type: String
+              description: |
+                The PromQL expression to evaluate. Every evaluation cycle this
+                expression is evaluated at the current time, and all resultant time
+                series become pending/firing alerts. This field must not be empty.
+              required: true
+            - name: 'duration'
+              type: String
+              description: |
+                Alerts are considered firing once their PromQL expression evaluated
+                to be "true" for this long. Alerts whose PromQL expression was not
+                evaluated to be "true" for long enough are considered pending. The
+                default value is zero. Must be zero or positive.
+            - name: 'evaluationInterval'
+              type: String
+              description: |
+                How often this rule should be evaluated. Must be a positive multiple
+                of 30 seconds or missing. The default value is 30 seconds. If this
+                PrometheusQueryLanguageCondition was generated from a Prometheus
+                alerting rule, then this value should be taken from the enclosing
+                rule group.
+            - name: 'labels'
+              type: KeyValuePairs
+              description: |
+                Labels to add to or overwrite in the PromQL query result. Label names
+                must be valid.
+
+                Label values can be templatized by using variables. The only available
+                variable names are the names of the labels in the PromQL result, including
+                "__name__" and "value". "labels" may be empty. This field is intended to be
+                used for organizing and identifying the AlertPolicy
+            - name: 'ruleGroup'
+              type: String
+              description: |
+                The rule group name of this alert in the corresponding Prometheus
+                configuration file.
+
+                Some external tools may require this field to be populated correctly
+                in order to refer to the original Prometheus configuration file.
+                The rule group name and the alert name are necessary to update the
+                relevant AlertPolicies in case the definition of the rule group changes
+                in the future. This field is optional.
+            - name: 'alertRule'
+              type: String
+              description: |
+                The alerting rule name of this alert in the corresponding Prometheus
+                configuration file.
+
+                Some external tools may require this field to be populated correctly
+                in order to refer to the original Prometheus configuration file.
+                The rule group name and the alert name are necessary to update the
+                relevant AlertPolicies in case the definition of the rule group changes
+                in the future.
+
+                This field is optional. If this field is not empty, then it must be a
+                valid Prometheus label name.
+  - name: 'notificationChannels'
+    type: Array
+    description: |
+      Identifies the notification channels to which notifications should be
+      sent when incidents are opened or closed or when new violations occur
+      on an already opened incident. Each element of this array corresponds
+      to the name field in each of the NotificationChannel objects that are
+      returned from the notificationChannels.list method. The syntax of the
+      entries in this field is
+      `projects/[PROJECT_ID]/notificationChannels/[CHANNEL_ID]`
+    item_type:
+      type: String
+  - name: 'alertStrategy'
+    type: NestedObject
+    description: |
+      Control over how this alert policy's notification channels are notified.
+    properties:
+      - name: 'notificationRateLimit'
+        type: NestedObject
+        description: |
+          Required for alert policies with a LogMatch condition.
+          This limit is not implemented for alert policies that are not log-based.
+        properties:
+          - name: 'period'
+            type: String
+            description: |
+              Not more than one notification per period.
+              A duration in seconds with up to nine fractional digits, terminated by 's'. Example "60.5s".
+      - name: 'autoClose'
+        type: String
+        description: |
+          If an alert policy that was active has no data for this long, any open incidents will close.
+      - name: 'notificationChannelStrategy'
+        type: Array
+        description: |
+          Control over how the notification channels in `notification_channels`
+          are notified when this alert fires, on a per-channel basis.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'notificationChannelNames'
+              type: Array
+              description: |
+                The notification channels that these settings apply to. Each of these
+                correspond to the name field in one of the NotificationChannel objects
+                referenced in the notification_channels field of this AlertPolicy. The format is
+                `projects/[PROJECT_ID_OR_NUMBER]/notificationChannels/[CHANNEL_ID]`
+              item_type:
+                type: String
+            - name: 'renotifyInterval'
+              type: String
+              description: |
+                The frequency at which to send reminder notifications for open incidents.
+  - name: 'userLabels'
+    type: KeyValuePairs
+    description: |
+      This field is intended to be used for organizing and identifying the AlertPolicy
+      objects.The field can contain up to 64 entries. Each key and value is limited
+      to 63 Unicode characters or 128 bytes, whichever is smaller. Labels and values
+      can contain only lowercase letters, numerals, underscores, and dashes. Keys
+      must begin with a letter.
+  - name: 'severity'
+    type: Enum
+    description: |
+      The severity of an alert policy indicates how important incidents generated
+      by that policy are. The severity level will be displayed on the Incident
+      detail page and in notifications.
+    enum_values:
+      - 'CRITICAL'
+      - 'ERROR'
+      - 'WARNING'
+  - name: 'documentation'
+    type: NestedObject
+    description: |
+      Documentation that is included with notifications and incidents related
+      to this policy. Best practice is for the documentation to include information
+      to help responders understand, mitigate, escalate, and correct the underlying
+      problems detected by the alerting policy. Notification channels that have
+      limited capacity might not show this documentation.
+    properties:
+      - name: 'content'
+        type: String
+        description: |
+          The text of the documentation, interpreted according to mimeType.
+          The content may not exceed 8,192 Unicode characters and may not
+          exceed more than 10,240 bytes when encoded in UTF-8 format,
+          whichever is smaller.
+        at_least_one_of:
+          - 'documentation.0.content'
+          - 'documentation.0.mime_type'
+          - 'documentation.0.subject'
+          - 'documentation.0.links'
+      - name: 'mimeType'
+        type: String
+        description: |
+          The format of the content field. Presently, only the value
+          "text/markdown" is supported.
+        at_least_one_of:
+          - 'documentation.0.content'
+          - 'documentation.0.mime_type'
+          - 'documentation.0.subject'
+          - 'documentation.0.links'
+        default_value: "text/markdown"
+      - name: 'subject'
+        type: String
+        description: |
+          The subject line of the notification. The subject line may not
+          exceed 10,240 bytes. In notifications generated by this policy the contents
+          of the subject line after variable expansion will be truncated to 255 bytes
+          or shorter at the latest UTF-8 character boundary.
+        at_least_one_of:
+          - 'documentation.0.content'
+          - 'documentation.0.mime_type'
+          - 'documentation.0.subject'
+          - 'documentation.0.links'
+      - name: 'links'
+        type: Array
+        description: |
+          Links to content such as playbooks, repositories, and other resources. This field can contain up to 3 entries.
+        at_least_one_of:
+          - 'documentation.0.content'
+          - 'documentation.0.mime_type'
+          - 'documentation.0.subject'
+          - 'documentation.0.links'
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'displayName'
+              type: String
+              description: |
+                A short display name for the link. The display name must not be empty or exceed 63 characters. Example: "playbook".
+            - name: 'url'
+              type: String
+              description: |
+                The url of a webpage. A url can be templatized by using variables in the path or the query parameters. The total length of a URL should not exceed 2083 characters before and after variable expansion. Example: "https://my_domain.com/playbook?name=${resource.name}".

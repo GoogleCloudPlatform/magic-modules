@@ -331,6 +331,9 @@ iam_policy:
 <%    unless object.iam_policy.self_link.nil? -%>
   self_link: '<%= object.iam_policy.self_link %>'
 <%    end -%>
+<%    unless object.iam_policy.custom_diff_suppress.nil? -%>
+  custom_diff_suppress: '<%= object.convert_go_file(object.iam_policy.custom_diff_suppress ) %>'
+<%    end -%>
 <%    unless object.iam_policy.import_format.nil? -%>
   import_format:
 <%      object.iam_policy.import_format.each do |iformat| -%>
@@ -406,6 +409,9 @@ custom_code:
 <%    unless object.custom_code.test_check_destroy.nil? -%>
   test_check_destroy: '<%= object.convert_go_file( object.custom_code.test_check_destroy )%>'
 <%    end -%>
+<%    unless object.custom_code.post_create_failure.nil? -%>
+  post_create_failure: '<%= object.convert_go_file( object.custom_code.post_create_failure )%>'
+<%    end -%>
 <%  end -%>
 <% 
 custom_diff = object.custom_diff.reject {
@@ -432,6 +438,10 @@ exclude_tgc: <%= object.exclude_tgc %>
 <%  end -%>
 <%  unless !object.skip_sweeper -%>
 skip_sweeper: <%= object.skip_sweeper %>
+<%  end -%>
+<%    if !object.sweeper.nil? && !object.sweeper.sweepable_identifier_field.nil? -%>
+sweeper:
+  sweepable_identifier_field: <%= object.sweeper.sweepable_identifier_field %>
 <%  end -%>
 <%  unless object.error_retry_predicates.nil? -%>
 error_retry_predicates:
@@ -480,7 +490,7 @@ examples:
 <%    object.examples.each do |example| -%>
   - name: '<%= example.name %>'
 <%      unless example.config_path == "templates/terraform/examples/#{example.name}.tf.erb" -%>
-    config_path: '<%= example.config_path %>'
+    config_path: '<%= object.convert_go_file(example.config_path) %>'
 <%      end -%>
 <%      unless example.primary_resource_id.nil? -%>
     primary_resource_id: '<%= example.primary_resource_id %>'
@@ -490,6 +500,9 @@ examples:
 <%      end -%>
 <%      unless example.min_version.nil? -%>
     min_version: '<%= example.min_version %>'
+<%      end -%>
+<%      unless example.region_override.nil? -%>
+    region_override: '<%= example.region_override %>'
 <%      end -%>
 <%      unless example.vars.nil? -%>
 <%      unless example.vars.empty? -%>

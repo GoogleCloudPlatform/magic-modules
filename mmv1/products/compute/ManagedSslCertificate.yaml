@@ -33,7 +33,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 30
@@ -107,7 +107,6 @@ properties:
     api_name: 'id'
     description: 'The unique identifier for the resource.'
     output: true
-    default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |

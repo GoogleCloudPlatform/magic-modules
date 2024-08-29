@@ -1,0 +1,207 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Config'
+description: |
+  Represents a data transfer configuration. A transfer configuration
+  contains all metadata needed to perform a data transfer.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/bigquery/docs/reference/datatransfer/rest/'
+  api: 'https://cloud.google.com/bigquery/docs/reference/datatransfer/rest/v1/projects.locations.transferConfigs/create'
+docs:
+id_format: '{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/transferConfigs?serviceAccountName={{service_account_name}}'
+self_link: '{{name}}'
+update_url: '{{name}}?serviceAccountName={{service_account_name}}'
+update_verb: 'PATCH'
+import_format:
+  - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  constants: 'templates/terraform/constants/go/bigquery_data_transfer.go.tmpl'
+  encoder: 'templates/terraform/encoders/go/bigquery_data_transfer.go.tmpl'
+  decoder: 'templates/terraform/decoders/go/bigquery_data_transfer.go.tmpl'
+  post_create: 'templates/terraform/post_create/go/set_computed_name.tmpl'
+  pre_update: 'templates/terraform/pre_update/go/bigquerydatatransfer_config.tmpl'
+  custom_import: 'templates/terraform/custom_import/go/bigquery_data_transfer_self_link_as_name_set_location.go.tmpl'
+custom_diff:
+  - 'sensitiveParamCustomizeDiff'
+  - 'paramsCustomizeDiff'
+error_retry_predicates:
+
+  - 'transport_tpg.IamMemberMissing'
+examples:
+  - name: 'bigquerydatatransfer_config_scheduled_query'
+    primary_resource_id: 'query_config'
+    vars:
+      display_name: 'my-query'
+      dataset_id: 'my_dataset'
+    skip_test: true
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The geographic location where the transfer config should reside.
+      Examples: US, EU, asia-northeast1. The default value is US.
+    url_param_only: true
+    immutable: true
+    ignore_read: true
+    default_value: "US"
+  - name: 'serviceAccountName'
+    type: String
+    description: |
+      Service account email. If this field is set, transfer config will
+      be created with this service account credentials. It requires that
+      requesting user calling this API has permissions to act as this service account.
+    url_param_only: true
+    default_value: ""
+properties:
+  - name: 'displayName'
+    type: String
+    description: |
+      The user specified display name for the transfer config.
+    required: true
+  - name: 'name'
+    type: String
+    description: |
+      The resource name of the transfer config. Transfer config names have the
+      form projects/{projectId}/locations/{location}/transferConfigs/{configId}
+      or projects/{projectId}/transferConfigs/{configId},
+      where configId is usually a uuid, but this is not required.
+      The name is ignored when creating a transfer config.
+    output: true
+  - name: 'destinationDatasetId'
+    type: String
+    description: |
+      The BigQuery target dataset id.
+  - name: 'dataSourceId'
+    type: String
+    description: |
+      The data source id. Cannot be changed once the transfer config is created.
+    required: true
+    immutable: true
+  - name: 'schedule'
+    type: String
+    description: |
+      Data transfer schedule. If the data source does not support a custom
+      schedule, this should be empty. If it is empty, the default value for
+      the data source will be used. The specified times are in UTC. Examples
+      of valid format: 1st,3rd monday of month 15:30, every wed,fri of jan,
+      jun 13:15, and first sunday of quarter 00:00. See more explanation
+      about the format here:
+      https://cloud.google.com/appengine/docs/flexible/python/scheduling-jobs-with-cron-yaml#the_schedule_format
+      NOTE: The minimum interval time between recurring transfers depends
+      on the data source; refer to the documentation for your data source.
+  - name: 'scheduleOptions'
+    type: NestedObject
+    description: |
+      Options customizing the data transfer schedule.
+    properties:
+      - name: 'disableAutoScheduling'
+        type: Boolean
+        description: |
+          If true, automatic scheduling of data transfer runs for this
+          configuration will be disabled. The runs can be started on ad-hoc
+          basis using transferConfigs.startManualRuns API. When automatic
+          scheduling is disabled, the TransferConfig.schedule field will
+          be ignored.
+        at_least_one_of:
+          - 'schedule_options.0.disable_auto_scheduling'
+          - 'schedule_options.0.start_time'
+          - 'schedule_options.0.end_time'
+      - name: 'startTime'
+        type: Time
+        description: |
+          Specifies time to start scheduling transfer runs. The first run will be
+          scheduled at or after the start time according to a recurrence pattern
+          defined in the schedule string. The start time can be changed at any
+          moment. The time when a data transfer can be triggered manually is not
+          limited by this option.
+        at_least_one_of:
+          - 'schedule_options.0.disable_auto_scheduling'
+          - 'schedule_options.0.start_time'
+          - 'schedule_options.0.end_time'
+      - name: 'endTime'
+        type: Time
+        description: |
+          Defines time to stop scheduling transfer runs. A transfer run cannot be
+          scheduled at or after the end time. The end time can be changed at any
+          moment. The time when a data transfer can be triggered manually is not
+          limited by this option.
+        at_least_one_of:
+          - 'schedule_options.0.disable_auto_scheduling'
+          - 'schedule_options.0.start_time'
+          - 'schedule_options.0.end_time'
+  - name: 'emailPreferences'
+    type: NestedObject
+    description: |
+      Email notifications will be sent according to these preferences to the
+      email address of the user who owns this transfer config.
+    properties:
+      - name: 'enableFailureEmail'
+        type: Boolean
+        description: |
+          If true, email notifications will be sent on transfer run failures.
+        required: true
+  - name: 'notificationPubsubTopic'
+    type: String
+    description: |
+      Pub/Sub topic where notifications will be sent after transfer runs
+      associated with this transfer config finish.
+  - name: 'dataRefreshWindowDays'
+    type: Integer
+    description: |
+      The number of days to look back to automatically refresh the data.
+      For example, if dataRefreshWindowDays = 10, then every day BigQuery
+      reingests data for [today-10, today-1], rather than ingesting data for
+      just [today-1]. Only valid if the data source supports the feature.
+      Set the value to 0 to use the default value.
+  - name: 'disabled'
+    type: Boolean
+    description: |
+      When set to true, no runs are scheduled for a given transfer.
+  - name: 'params'
+    type: KeyValuePairs
+    description: |
+      Parameters specific to each data source. For more information see the bq tab in the 'Setting up a data transfer'
+      section for each data source. For example the parameters for Cloud Storage transfers are listed here:
+      https://cloud.google.com/bigquery-transfer/docs/cloud-storage-transfer#bq
+
+      **NOTE** : If you are attempting to update a parameter that cannot be updated (due to api limitations) [please force recreation of the resource](https://www.terraform.io/cli/state/taint#forcing-re-creation-of-resources).
+    required: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/json_to_string_map.go.tmpl'
+  - name: 'sensitiveParams'
+    type: NestedObject
+    description: |
+      Different parameters are configured primarily using the the `params` field on this
+      resource. This block contains the parameters which contain secrets or passwords so that they can be marked
+      sensitive and hidden from plan output. The name of the field, eg: secret_access_key, will be the key
+      in the `params` map in the api request.
+
+      Credentials may not be specified in both locations and will cause an error. Changing from one location
+      to a different credential configuration in the config will require an apply to update state.
+    url_param_only: true
+    properties:
+      - name: 'secretAccessKey'
+        type: String
+        description: |
+          The Secret Access Key of the AWS account transferring data from.
+
+        required: true
+        sensitive: true

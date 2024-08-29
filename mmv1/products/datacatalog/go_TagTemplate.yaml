@@ -1,0 +1,172 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'TagTemplate'
+description: |
+  A tag template defines a tag, which can have one or more typed fields.
+  The template is used to create and attach the tag to GCP resources.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/data-catalog/docs'
+  api: 'https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.tagTemplates'
+docs:
+base_url: 'projects/{{project}}/locations/{{region}}/tagTemplates'
+self_link: '{{name}}'
+create_url: 'projects/{{project}}/locations/{{region}}/tagTemplates?tagTemplateId={{tag_template_id}}'
+update_verb: 'PATCH'
+delete_url: '{{name}}?force={{force_delete}}'
+import_format:
+  - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+iam_policy:
+  method_name_separator: ':'
+  fetch_iam_policy_verb: 'POST'
+  parent_resource_attribute: 'tag_template'
+  base_url: 'projects/{{project}}/locations/{{region}}/tagTemplates/{{tag_template}}'
+  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  import_format:
+    - 'projects/{{project}}/locations/{{region}}/tagTemplates/{{tag_template}}'
+    - '{{tag_template}}'
+custom_code:
+  constants: 'templates/terraform/constants/go/tagtemplate_fields.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/go/tagtemplate_fields.go.tmpl'
+  post_update: 'templates/terraform/post_update/go/tagtemplate_fields.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/go/data_catalog_tag_template.go.tmpl'
+skip_sweeper: true
+examples:
+  - name: 'data_catalog_tag_template_basic'
+    primary_resource_id: 'basic_tag_template'
+    primary_resource_name: 'fmt.Sprintf("tf_test_my_template%s", context["random_suffix"])'
+    vars:
+      tag_template_id: 'my_template'
+      force_delete: 'false'
+    test_vars_overrides:
+      'force_delete': 'true'
+parameters:
+  - name: 'region'
+    type: String
+    description: |
+      Template location region.
+    url_param_only: true
+    required: false
+    immutable: true
+    ignore_read: true
+    default_from_api: true
+  - name: 'tagTemplateId'
+    type: String
+    description: |
+      The id of the tag template to create.
+    url_param_only: true
+    required: true
+    immutable: true
+    validation:
+      regex: '^[a-z_][a-z0-9_]{0,63}$'
+  - name: 'forceDelete'
+    type: Boolean
+    description: |
+      This confirms the deletion of any possible tags using this template. Must be set to true in order to delete the tag template.
+    url_param_only: true
+    default_value: false
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The resource name of the tag template in URL format. Example: projects/{project_id}/locations/{location}/tagTemplates/{tagTemplateId}
+    output: true
+  - name: 'displayName'
+    type: String
+    description: |
+      The display name for this template.
+  - name: 'fields'
+    type: Map
+    description: |
+      Set of tag template field IDs and the settings for the field. This set is an exhaustive list of the allowed fields. This set must contain at least one field and at most 500 fields. The change of field_id will be resulting in re-creating of field. The change of primitive_type will be resulting in re-creating of field, however if the field is a required, you cannot update it.
+    required: true
+    key_name: 'field_id'
+    value_type:
+      name: field
+      type: NestedObject
+      properties:
+        - name: 'name'
+          type: String
+          description: |
+            The resource name of the tag template field in URL format. Example: projects/{project_id}/locations/{location}/tagTemplates/{tagTemplateId}/fields/{field}
+          output: true
+        - name: 'displayName'
+          type: String
+          description: |
+            The display name for this field.
+          default_from_api: true
+        - name: 'description'
+          type: String
+          description: |
+            A description for this field.
+          default_from_api: true
+        - name: 'type'
+          type: NestedObject
+          description: |
+            The type of value this tag field can contain.
+          required: true
+          properties:
+            - name: 'primitiveType'
+              type: Enum
+              description: |
+                Represents primitive types - string, bool etc.
+                 Exactly one of `primitive_type` or `enum_type` must be set
+              default_from_api: true
+              enum_values:
+                - 'DOUBLE'
+                - 'STRING'
+                - 'BOOL'
+                - 'TIMESTAMP'
+            - name: 'enumType'
+              type: NestedObject
+              description: |
+                Represents an enum type.
+                 Exactly one of `primitive_type` or `enum_type` must be set
+              properties:
+                - name: 'allowedValues'
+                  type: Array
+                  description: |
+                    The set of allowed values for this enum. The display names of the
+                    values must be case-insensitively unique within this set. Currently,
+                    enum values can only be added to the list of allowed values. Deletion
+                    and renaming of enum values are not supported.
+                    Can have up to 500 allowed values.
+                  is_set: true
+                  required: true
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: 'displayName'
+                        type: String
+                        description: |
+                          The display name of the enum value.
+                        required: true
+        - name: 'isRequired'
+          type: Boolean
+          description: |
+            Whether this is a required field. Defaults to false.
+          default_from_api: true
+        - name: 'order'
+          type: Integer
+          description: |
+            The order of this field with respect to other fields in this tag template.
+            A higher value indicates a more important field. The value can be negative.
+            Multiple fields can have the same order, and field orders within a tag do not have to be sequential.
+          default_from_api: true

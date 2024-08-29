@@ -38,7 +38,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -70,7 +70,7 @@ examples:
       igm_name: 'my-igm'
       disk_name: 'my-disk-name'
 virtual_fields:
-  - !ruby/object:Api::Type::Enum
+  - !ruby/object:Api::Type::String
     name: 'minimal_action'
     description: |
       The minimal action to perform on the instance during an update.
@@ -79,13 +79,8 @@ virtual_fields:
       * RESTART
       * REFRESH
       * NONE
-    values:
-      - :REPLACE
-      - :RESTART
-      - :REFRESH
-      - :NONE
-    default_value: :NONE
-  - !ruby/object:Api::Type::Enum
+    default_value: NONE
+  - !ruby/object:Api::Type::String
     name: 'most_disruptive_allowed_action'
     description: |
       The most disruptive action to perform on the instance during an update.
@@ -94,12 +89,7 @@ virtual_fields:
       * RESTART
       * REFRESH
       * NONE
-    values:
-      - :REPLACE
-      - :RESTART
-      - :REFRESH
-      - :NONE
-    default_value: :REPLACE
+    default_value: REPLACE
   - !ruby/object:Api::Type::Boolean
     name: 'remove_instance_on_destroy'
     conflicts:

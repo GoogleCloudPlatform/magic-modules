@@ -279,6 +279,13 @@ properties:
           - !ruby/object:Api::Type::String
             name: version
             description: 'Version of ACM installed'
+          - !ruby/object:Api::Type::Enum
+            name: management
+            description: 'Set this field to MANAGEMENT_AUTOMATIC to enable Config Sync auto-upgrades, and set this field to MANAGEMENT_MANUAL or MANAGEMENT_UNSPECIFIED to disable Config Sync auto-upgrades.'
+            values:
+              - :MANAGEMENT_UNSPECIFIED
+              - :MANAGEMENT_AUTOMATIC
+              - :MANAGEMENT_MANUAL
           - !ruby/object:Api::Type::NestedObject
             name: configSync
             description: 'ConfigSync configuration for the cluster'

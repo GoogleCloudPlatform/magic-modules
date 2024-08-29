@@ -5,7 +5,7 @@ resource "google_sql_database_instance" "mysql_instance" {
   settings {
     tier              = "db-f1-micro"
     ip_configuration {
-      require_ssl = "true"
+      ssl_mode = "TRUSTED_CLIENT_CERTIFICATE_REQUIRED"
     }
   }
   deletion_protection = "<%= ctx[:vars]['deletion_protection'] %>"
@@ -23,7 +23,7 @@ resource "google_sql_database_instance" "postgres_instance" {
   settings {
     tier              = "db-custom-2-7680"
     ip_configuration {
-      require_ssl = "true"
+      ssl_mode = "TRUSTED_CLIENT_CERTIFICATE_REQUIRED"
     }
   }
   deletion_protection = "<%= ctx[:vars]['deletion_protection'] %>"
@@ -42,7 +42,7 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
   settings {
     tier              = "db-custom-2-7680"
     ip_configuration {
-      require_ssl = "true"
+      ssl_mode = "ENCRYPTED_ONLY"
     }
   }
   deletion_protection = "<%= ctx[:vars]['deletion_protection'] %>"

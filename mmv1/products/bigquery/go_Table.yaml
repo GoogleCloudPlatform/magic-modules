@@ -101,7 +101,6 @@ properties:
     description: |
       The labels associated with this dataset. You can use these to
       organize and group your datasets
-    immutable: false
   - name: 'lastModifiedTime'
     type: Integer
     description: |
@@ -554,4 +553,3 @@ properties:
       in the namespaced format, for example "123456789012/environment" where 123456789012 is the
       ID of the parent organization or project resource for this tag key. Tag value is expected
       to be the short name, for example "Production".
-    min_version: 'beta'
