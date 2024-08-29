@@ -67,7 +67,7 @@ jobs:
     - name: Check for Code Changes
       id: pull_request
       run: |
-        gofiles=$(git diff --name-only HEAD~1 | { grep -e "\.go$" -e "go.mod$" -e "go.sum$" || test $? = 1; })
+        gofiles=$(git diff --name-only HEAD~1 | { grep -e "\.go$" -e "go.mod$" -e "go.sum$" -e "tfplan2cai/testdata/templates/" || test $? = 1; })
         if [ -z "$gofiles" ]; then
           echo "has_changes=false" >> $GITHUB_OUTPUT
         else
