@@ -8,7 +8,7 @@ id_format: projects/{{project}}/locations/{{location}}/backupVaults/{{backup_vau
 import_format:
   - projects/{{project}}/locations/{{location}}/backupVaults/{{backup_vault_id}}
 name: BackupVault
-description: Container to store and organize immutable backups.
+description: Container to store and organize immutable and indelible backups.
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
@@ -57,7 +57,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: state
     description: "Output only. The BackupVault resource instance state. \n Possible
-      values:\n STATE_UNSPECIFIED\nCREATING\nACTIVE\nDELETING\nERROR"
+      values:\n STATE_UNSPECIFIED\n CREATING\n ACTIVE\n DELETING\n ERROR"
     output: true
   - !ruby/object:Api::Type::String
     name: effectiveTime
@@ -94,15 +94,13 @@ parameters:
     immutable: true
   - !ruby/object:Api::Type::String
     name: backupVaultId
-    description: "Required. ID of the requesting object. If auto-generating ID server-side,
-      remove this field and backup_vault_id from the method_signature of Create RPC "
+    description: "Required. ID of the requesting object."
     url_param_only: true
     required: true
     immutable: true
   - !ruby/object:Api::Type::Boolean
     name: 'force_update'
     default_value: false
-    required: false
     url_param_only: true
     description: |
        If set, allow update to extend the minimum enforced retention for backup vault. This overrides
@@ -112,16 +110,14 @@ parameters:
   - !ruby/object:Api::Type::Boolean
     name: 'force_delete'
     default_value: false
-    required: false
     url_param_only: true
     description: |
        If set, the following restrictions against deletion of the backup vault instance can be overridden:
-          * deletion of a backup vault instance containing no backups, but still contains empty datasources.
+          * deletion of a backup vault instance containing no backups, but still containing empty datasources.
           * deletion of a backup vault instance that is being referenced by an active backup plan.
   - !ruby/object:Api::Type::Boolean
     name: 'allow_missing'
     default_value: false
-    required: false
     url_param_only: true
     description: |
        Allow idempotent deletion of backup vault. The request will still succeed in case the backup vault does not exist.
