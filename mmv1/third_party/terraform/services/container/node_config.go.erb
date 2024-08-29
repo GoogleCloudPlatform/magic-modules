@@ -120,41 +120,6 @@ func schemaGcfsConfig(forceNew bool) *schema.Schema {
         }
 }
 
-func schemaKubeletConfig() *schema.Schema {
-	return &schema.Schema{
-		Type:     schema.TypeList,
-		Optional: true,
-		MaxItems: 1,
-		Description: `Node kubelet configs.`,
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"cpu_manager_policy": {
-					Type:         schema.TypeString,
-					Required:     true,
-					ValidateFunc: validation.StringInSlice([]string{"static", "none", ""}, false),
-					Description: `Control the CPU management policy on the node.`,
-				},
-				"cpu_cfs_quota": {
-					Type:     schema.TypeBool,
-					Optional: true,
-					Description: `Enable CPU CFS quota enforcement for containers that specify CPU limits.`,
-				},
-				"cpu_cfs_quota_period": {
-					Type:     schema.TypeString,
-					Optional: true,
-					Description: `Set the CPU CFS quota period value 'cpu.cfs_period_us'.`,
-				},
-				"insecure_kubelet_readonly_port_enabled": schemaInsecureKubeletReadonlyPortEnabled(),
-				"pod_pids_limit": {
-					Type:        schema.TypeInt,
-					Optional:    true,
-					Description: `Controls the maximum number of processes allowed to run in a pod.`,
-				},
-			},
-		},
-	}
-}
-
 func schemaNodeConfig() *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeList,
@@ -621,7 +586,39 @@ func schemaNodeConfig() *schema.Schema {
 				},
 				// Note that AtLeastOneOf can't be set because this schema is reused by
 				// two different resources.
-				"kubelet_config": schemaKubeletConfig(),
+				"kubelet_config": {
+					Type:     schema.TypeList,
+					Optional: true,
+					MaxItems: 1,
+					Description: `Node kubelet configs.`,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"cpu_manager_policy": {
+								Type:         schema.TypeString,
+								Required:     true,
+								ValidateFunc: validation.StringInSlice([]string{"static", "none", ""}, false),
+								Description: `Control the CPU management policy on the node.`,
+							},
+							"cpu_cfs_quota": {
+								Type:     schema.TypeBool,
+								Optional: true,
+								Description: `Enable CPU CFS quota enforcement for containers that specify CPU limits.`,
+							},
+							"cpu_cfs_quota_period": {
+								Type:     schema.TypeString,
+								Optional: true,
+								Description: `Set the CPU CFS quota period value 'cpu.cfs_period_us'.`,
+							},
+							"insecure_kubelet_readonly_port_enabled": schemaInsecureKubeletReadonlyPortEnabled(),
+							"pod_pids_limit": {
+								Type:        schema.TypeInt,
+								Optional:    true,
+								Description: `Controls the maximum number of processes allowed to run in a pod.`,
+							},
+						},
+					},
+				},
+
 				"linux_node_config": {
 					Type:     schema.TypeList,
 					Optional: true,
@@ -779,6 +776,22 @@ func schemaNodeConfig() *schema.Schema {
 						ForceNew: true,
 						Description: `If enabled boot disks are configured with confidential mode.`,
 				},
+			},
+		},
+	}
+}
+
+// Separate since this currently only supports a single value -- a subset of
+// the overall NodeKubeletConfig
+func schemaNodePoolAutoConfigNodeKubeletConfig() *schema.Schema {
+  return &schema.Schema{
+		Type:        schema.TypeList,
+		Optional:    true,
+		MaxItems:    1,
+		Description: `Node kubelet configs.`,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"insecure_kubelet_readonly_port_enabled": schemaInsecureKubeletReadonlyPortEnabled(),
 			},
 		},
 	}
