@@ -1,6 +1,5 @@
 # Internal TCP/UDP load balancer with a managed instance group backend
 
-# [START cloudloadbalancing_int_tcp_udp_gce]
 # VPC
 resource "google_compute_network" "ilb_network" {
   name                    = "{{index $.Vars "ilb_network_name"}}"
@@ -177,4 +176,3 @@ resource "google_compute_instance" "vm_test" {
     }
   }
 }
-# [END cloudloadbalancing_int_tcp_udp_gce]

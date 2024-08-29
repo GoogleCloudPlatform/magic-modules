@@ -2,4 +2,4 @@
 {{- $ids := $.IamSelfLinkIdentifiers }}
 {{- range $i, $attribue := $.IamAttributes}}
   {{ $attribue }} = {{ $.IamParentSourceType }}.{{ $primaryResourceId }}.{{ (index $ids $i)}}
-{{- end -}}
+{{- end }}

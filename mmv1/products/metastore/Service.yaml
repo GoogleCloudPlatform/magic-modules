@@ -160,6 +160,7 @@ examples:
       metastore_service_name: 'test-service'
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataproc_metastore_service_autoscaling_no_limit_config'
+    min_version: beta
     primary_resource_id: 'test_resource'
     vars:
       metastore_service_name: 'test-service'

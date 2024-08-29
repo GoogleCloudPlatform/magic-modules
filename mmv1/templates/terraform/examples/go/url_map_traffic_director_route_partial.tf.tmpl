@@ -1,4 +1,3 @@
-# [START trafficdirector_url_map_traffic_director_route_partial]
 resource "google_compute_url_map" "{{$.PrimaryResourceId}}" {
   name        = "{{index $.Vars "url_map_name"}}"
   description = "a description"
@@ -53,4 +52,3 @@ resource "google_compute_health_check" "default" {
     port = 80
   }
 }
-# [END trafficdirector_url_map_traffic_director_route_partial]

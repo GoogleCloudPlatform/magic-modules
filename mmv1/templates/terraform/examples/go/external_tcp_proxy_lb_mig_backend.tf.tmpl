@@ -1,6 +1,5 @@
 # External TCP proxy load balancer with managed instance group backend
 
-# [START cloudloadbalancing_ext_tcp_proxy_lb]
 # VPC
 resource "google_compute_network" "default" {
   name                    = "{{index $.Vars "tcp_proxy_xlb_network"}}"
@@ -142,4 +141,3 @@ resource "google_compute_firewall" "default" {
   }
   target_tags = ["allow-health-check"]
 }
-# [END cloudloadbalancing_ext_tcp_proxy_lb]

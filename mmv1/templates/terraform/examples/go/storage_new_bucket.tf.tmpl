@@ -1,4 +1,3 @@
-# [START storage_create_new_bucket_tf]
 # Create new storage bucket in the US multi-region
 # with coldline storage
 resource "google_storage_bucket" "{{$.PrimaryResourceId}}" {
@@ -8,9 +7,7 @@ resource "google_storage_bucket" "{{$.PrimaryResourceId}}" {
 
   uniform_bucket_level_access = true
 }
-# [END storage_create_new_bucket_tf] 
 
-# [START storage_upload_object_tf]
 # Upload files
 # Discussion about using tf to upload a large number of objects
 # https://stackoverflow.com/questions/68455132/terraform-copy-multiple-files-to-bucket-at-the-same-time-bucket-creation
@@ -24,9 +21,7 @@ resource "google_storage_bucket_object" "default" {
   content_type = "text/plain"
   bucket       = google_storage_bucket.static.id
 }
-# [END storage_upload_object_tf]
 
-# [START storage_get_object_metadata_tf]
 # Get object metadata
 data "google_storage_bucket_object" "default" {
   name         = google_storage_bucket_object.default.name
@@ -36,9 +31,7 @@ data "google_storage_bucket_object" "default" {
 output "object_metadata" {
   value        = data.google_storage_bucket_object.default
 }
-# [END storage_get_object_metadata_tf]
 
-# [START storage_get_bucket_metadata_tf]
 # Get bucket metadata
 data "google_storage_bucket" "default" {
   name         = google_storage_bucket.static.id
@@ -47,5 +40,4 @@ data "google_storage_bucket" "default" {
 output "bucket_metadata" {
   value        = data.google_storage_bucket.default
 }
-# [END storage_get_bucket_metadata_tf]
 
