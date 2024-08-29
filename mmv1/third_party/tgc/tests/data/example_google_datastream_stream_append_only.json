@@ -103,6 +103,9 @@
             "data": {
                 "bigqueryProfile": null,
                 "displayName": "Source connection profile",
+                "labels": {
+                  "goog-terraform-provisioned": "true"
+                },
                 "mysqlProfile": {
                     "port": 3306,
                     "username": "my-user"
@@ -131,6 +134,9 @@
                     }
                 },
                 "displayName": "postgres to bigQuery",
+                "labels": {
+                  "goog-terraform-provisioned": "true"
+                },
                 "sourceConfig": {
                     "mysqlSourceConfig": {
                         "maxConcurrentBackfillTasks": 0,
