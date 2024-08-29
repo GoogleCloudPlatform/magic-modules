@@ -210,5 +210,3 @@ func configureTestBasePaths(c *transport_tpg.Config, url string) {
 		}
 	}
 }
-
-// add this line to trigger TGC tests
