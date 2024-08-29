@@ -22,8 +22,8 @@ func TestAccDataSourceGoogleBigqueryTables_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleBigqueryTables_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.google_bigquery_tables.example", "tables.#", "1"),
-					resource.TestCheckResourceAttr("data.google_bigquery_tables.example", "tables.0", "test_table_1"),
+					resource.TestCheckResourceAttr("data.google_bigquery_tables.example", "tables.%", "1"), 
+					resource.TestCheckResourceAttr("data.google_bigquery_tables.example", "tables.test_table", ""),
 				),
 			},
 		},
@@ -33,7 +33,7 @@ func TestAccDataSourceGoogleBigqueryTables_basic(t *testing.T) {
 func testAccDataSourceGoogleBigqueryTables_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
   
-  resource "google_bigquery_dataset" "foo" {
+  resource "google_bigquery_dataset" "test" {
     dataset_id                  = "tf_test_ds_%{random_suffix}"
     friendly_name               = "testing"
     description                 = "This is a test description"
@@ -41,9 +41,9 @@ func testAccDataSourceGoogleBigqueryTables_basic(context map[string]interface{})
     default_table_expiration_ms = 3600000
   }
 
-  resource "google_bigquery_table" "test_table" {
-    dataset_id        = google_bigquery_dataset.foo.dataset_id
-    table_id          = "test_table_1"
+  resource "google_bigquery_table" "test" {
+    dataset_id        = google_bigquery_dataset.test.dataset_id
+    table_id          = "test_table"
     deletion_protection = false
     schema     = <<EOF
     [
@@ -57,7 +57,9 @@ func testAccDataSourceGoogleBigqueryTables_basic(context map[string]interface{})
   }
 
   data "google_bigquery_tables" "example" {
-    dataset_id = google_bigquery_dataset.foo.dataset_id
+    dataset_id = google_bigquery_table.test.dataset_id
+    depends_on = [google_bigquery_table.test]
   }
 `, context)
 }
+
