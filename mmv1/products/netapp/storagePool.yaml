@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: 'storagePool'
+name: 'StoragePool'
 description: |
  Storage pools act as containers for volumes. All volumes in a storage pool share the following information:
  * Location

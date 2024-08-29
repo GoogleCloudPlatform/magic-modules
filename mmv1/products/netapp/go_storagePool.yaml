@@ -13,7 +13,7 @@
 
 # Warning: This is a temporary file, and should not be edited directly
 ---
-name: 'storagePool'
+name: 'StoragePool'
 description: |
  Storage pools act as containers for volumes. All volumes in a storage pool share the following information:
  * Location
@@ -66,9 +66,9 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-skip_sweeper: true
 custom_code:
   pre_update: 'templates/terraform/pre_update/go/netapp_storagepool.go.tmpl'
+skip_sweeper: true
 examples:
   - name: 'Storage_pool_create'
     primary_resource_id: 'test_pool'

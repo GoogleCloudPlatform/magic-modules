@@ -13,7 +13,7 @@
 
 # Warning: This is a temporary file, and should not be edited directly
 ---
-name: 'backupPolicy'
+name: 'BackupPolicy'
 description: |
   A backup policy is used to schedule backups at regular daily, weekly, or monthly intervals.
   Backup policies allow you to attach a backup schedule to a volume.
@@ -45,8 +45,8 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-skip_sweeper: true
 custom_code:
+skip_sweeper: true
 examples:
   - name: 'netapp_backup_policy_full'
     primary_resource_id: 'test_backup_policy_full'

@@ -13,7 +13,7 @@
 
 # Warning: This is a temporary file, and should not be edited directly
 ---
-name: 'backupVault'
+name: 'BackupVault'
 description: |
   A backup vault is the location where backups are stored. You can only create one backup vault per region.
   A vault can hold multiple backups for multiple volumes in that region.
@@ -44,8 +44,8 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-skip_sweeper: true
 custom_code:
+skip_sweeper: true
 examples:
   - name: 'netapp_backup_vault'
     primary_resource_id: 'test_backup_vault'

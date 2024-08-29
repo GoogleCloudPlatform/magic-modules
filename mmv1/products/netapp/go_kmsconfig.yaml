@@ -44,9 +44,9 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-skip_sweeper: true
 custom_code:
   post_create: 'templates/terraform/post_create/go/KMS_Verify.go.tmpl'
+skip_sweeper: true
 examples:
   - name: 'kmsConfig_create'
     primary_resource_id: 'kmsConfig'

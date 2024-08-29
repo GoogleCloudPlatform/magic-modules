@@ -13,7 +13,7 @@
 
 # Warning: This is a temporary file, and should not be edited directly
 ---
-name: 'backup'
+name: 'Backup'
 description: |
   NetApp Volumes supports volume backups, which are copies of your volumes
   stored independently from the volume. Backups are stored in backup vaults,
@@ -49,7 +49,6 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 autogen_async: true
-skip_sweeper: true
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
@@ -58,6 +57,7 @@ async:
   result:
     resource_inside_response: false
 custom_code:
+skip_sweeper: true
 examples:
   - name: 'netapp_backup'
     primary_resource_id: 'test_backup'
