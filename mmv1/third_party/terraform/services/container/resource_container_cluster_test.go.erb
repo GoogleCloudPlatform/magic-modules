@@ -11126,7 +11126,7 @@ func TestAccContainerCluster_withProviderDefaultLabels(t *testing.T) {
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "resource_labels.%", "1"),
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "resource_labels.created-by", "terraform"),
 
-					resource.TestCheckResourceAttr("google_container_cluster.primary", "terraform_labels.%", "2"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "terraform_labels.%", "3"),
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "terraform_labels.default_key1", "default_value1"),
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "terraform_labels.created-by", "terraform"),
 
