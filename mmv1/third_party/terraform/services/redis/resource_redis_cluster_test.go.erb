@@ -33,7 +33,7 @@ func TestAccRedisCluster_createClusterWithNodeType(t *testing.T) {
 			},
 			{
 				// clean up the resource
-				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: false, nodeType: "REDIS_STANDARD_SMALL", zoneDistributionMode: "MULTI_ZONE", maintenanceDay: "MONDAY", maintenanceHours: 0, maintenanceMinutes: 30, maintenanceSeconds: 0, maintenanceNanos: 0}),
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: false, nodeType: "REDIS_STANDARD_SMALL", zoneDistributionMode: "MULTI_ZONE",  maintenanceDay: "MONDAY", maintenanceHours: 0, maintenanceMinutes: 30, maintenanceSeconds: 0, maintenanceNanos: 0}),
 			},
 		},
 	})
