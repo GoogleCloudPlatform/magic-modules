@@ -50,7 +50,7 @@ resource "google_cloud_run_v2_job" "hello" {
   }
 
   labels = {
-    "key" = "value1"
+    "key" = "value"
   }
 
   annotations = {
