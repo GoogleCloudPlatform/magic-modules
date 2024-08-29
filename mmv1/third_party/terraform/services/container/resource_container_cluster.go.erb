@@ -6599,7 +6599,7 @@ func flattenNodePoolAutoConfig(c *container.NodePoolAutoConfig) []map[string]int
 
 	result := make(map[string]interface{})
 	if c.NodeKubeletConfig != nil {
-		result["node_kubelet_config"] = flattenKubeletConfig(c.NodeKubeletConfig)
+		result["node_kubelet_config"] = flattenNodePoolAutoConfigNodeKubeletConfig(c.NodeKubeletConfig)
 	}
 	if c.NetworkTags != nil {
 		result["network_tags"] = flattenNodePoolAutoConfigNetworkTags(c.NetworkTags)

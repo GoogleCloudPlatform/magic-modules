@@ -1768,6 +1768,16 @@ func flattenKubeletConfig(c *container.NodeKubeletConfig) []map[string]interface
 	return result
 }
 
+func flattenNodePoolAutoConfigNodeKubeletConfig(c *container.NodeKubeletConfig) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"insecure_kubelet_readonly_port_enabled": flattenInsecureKubeletReadonlyPortEnabled(c),
+		})
+	}
+	return result
+}
+
 func flattenLinuxNodeConfig(c *container.LinuxNodeConfig) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
