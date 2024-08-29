@@ -169,6 +169,8 @@ examples:
     vars:
       cloud_run_service_name: 'cloudrun-service'
       mesh_name: 'mesh'
+    ignore_read_extra:
+      - 'deletion_protection'
 
 parameters:
   - !ruby/object:Api::Type::String
