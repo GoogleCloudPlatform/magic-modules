@@ -58,7 +58,6 @@
                 },
                 "labels": {
                     "foo": "bar",
-                    "goog-terraform-provisioned": "true"
                 },
                 "projectId": "{{.Provider.project}}"
             }

@@ -9,6 +9,9 @@
          "parent":"//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
          "data":{
             "instanceType":"PRIMARY",
+            "labels": {
+              "goog-terraform-provisioned": "true"
+            },
             "machineConfig":{
                "cpuCount":2
             }

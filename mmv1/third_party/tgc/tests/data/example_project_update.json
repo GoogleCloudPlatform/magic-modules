@@ -26,7 +26,6 @@
       "parent": "//cloudresourcemanager.googleapis.com/organizations/12345",
       "data": {
         "labels": {
-          "goog-terraform-provisioned": "true",
           "project-label-key-a": "project-label-val-a"
         },
         "name": "My New Project",
