@@ -18,10 +18,11 @@ resource "google_redis_cluster" "<%= ctx[:primary_resource_id] %>" {
     mode = "MULTI_ZONE"
   }
   maintenance_policy {
+    description = "example description"
     weekly_maintenance_window {
       day = "MONDAY"
       start_time {
-        hours = 0
+        hours = 1
         minutes = 30
         seconds = 0
         nanos = 0
