@@ -86,6 +86,8 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: streamingConfig
     required: true
+    allow_empty_object: true
+    send_empty_value: true
     description: |
       The config for triggering streaming-based notifications.
     update_mask_fields:
@@ -94,6 +96,7 @@ properties:
       - !ruby/object:Api::Type::String
         name: filter
         required: true
+        send_empty_value: true
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.StringLenBetween(0,1024)'
         description: |

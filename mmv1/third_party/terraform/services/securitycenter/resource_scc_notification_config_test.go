@@ -43,7 +43,7 @@ func TestAccSecurityCenterNotificationConfig_updateStreamingConfigFilter(t *test
 				Config: testAccSecurityCenterNotificationConfig_emptyStreamingConfigFilter(context),
 			},
 			{
-				ResourceName:            "google_scc_notification_config.custom_notification_config2",
+				ResourceName:            "google_scc_notification_config.custom_notification_config",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"organization", "config_id"},
@@ -77,7 +77,7 @@ resource "google_pubsub_topic" "scc_notification" {
   name = "tf-test-my-topic%{random_suffix}"
 }
 
-resource "google_scc_notification_config" "custom_notification_config2" {
+resource "google_scc_notification_config" "custom_notification_config" {
   config_id    = "tf-test-my-config%{random_suffix}"
   organization = "%{org_id}"
   description  = "My custom Cloud Security Command Center Finding Notification Configuration"
