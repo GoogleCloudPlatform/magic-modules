@@ -5,7 +5,7 @@
     "complianceRegime": "EU_REGIONS_AND_SUPPORT",
     "billingAccount": "billingAccounts/{{billing_account}}",
     "partnerServicesBillingAccount": "billingAccounts/01BF3F-2C6DE5-30C607",
-    "partner": "SOVEREIGN_CONTROLS_BY_PSN",
+    "partner": "ASSURED_WORKLOADS_FOR_PARTNERS",
     "labels": {
         "label-one": "value-one"
     },
