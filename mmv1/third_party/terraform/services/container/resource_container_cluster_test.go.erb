@@ -10584,10 +10584,6 @@ func testAccContainerCluster_withAutopilotKubeletConfigUpdates(name, insecureKub
 
     node_pool_auto_config {
       node_kubelet_config {
-        # Needed to work around being required but not actually needed
-        cpu_manager_policy = ""
-
-        # Currently the only supported parameter here
         insecure_kubelet_readonly_port_enabled = "%s"
       }
     }
