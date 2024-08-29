@@ -15,6 +15,7 @@
 	config := meta.(*transport_tpg.Config)
 	if err := tpgresource.ParseImportId([]string{
 		"^projects/(?P<project>[^/]+)/global/firewallPolicies/(?P<firewall_policy>[^/]+)/rules/(?P<priority>[^/]+)$",
+		"^projects/(?P<project>[^/]+)/global/firewallPolicies/(?P<firewall_policy>[^/]+)/(?P<priority>[^/]+)$",
 		"^(?P<project>[^/]+)/(?P<firewall_policy>[^/]+)/(?P<priority>[^/]+)$",
 		"^(?P<firewall_policy>[^/]+)/(?P<priority>[^/]+)$",
 	}, d, config); err != nil {

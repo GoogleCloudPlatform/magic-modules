@@ -14,6 +14,7 @@
 -%>
 	config := meta.(*transport_tpg.Config)
 	if err := tpgresource.ParseImportId([]string{
+		"^projects/(?P<project>[^/]+)/regions/(?P<region>[^/]+)/firewallPolicies/(?P<firewall_policy>[^/]+)/rules/(?P<priority>[^/]+)$",
 		"^projects/(?P<project>[^/]+)/regions/(?P<region>[^/]+)/firewallPolicies/(?P<firewall_policy>[^/]+)/(?P<priority>[^/]+)$",
 		"^(?P<project>[^/]+)/(?P<region>[^/]+)/(?P<firewall_policy>[^/]+)/(?P<priority>[^/]+)$",
 		"^(?P<region>[^/]+)/(?P<firewall_policy>[^/]+)/(?P<priority>[^/]+)$",
