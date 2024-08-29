@@ -1243,7 +1243,7 @@ func ResourceDataprocCluster() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"kerberos_config": {
 										Type:        schema.TypeList,
-										Required:    true,
+										Optional:    true,
 										Description: "Kerberos related configuration",
 										MaxItems:    1,
 										Elem: &schema.Resource{
@@ -2883,8 +2883,10 @@ func flattenSecurityConfig(d *schema.ResourceData, sc *dataproc.SecurityConfig) 
 	if sc == nil {
 		return nil
 	}
-	data := map[string]interface{}{
-		"kerberos_config": flattenKerberosConfig(d, sc.KerberosConfig),
+	data := map[string]interface{}{}
+
+	if kfg := sc.KerberosConfig; kfg != nil {
+		data["kerberos_config"] = flattenKerberosConfig(d, kfg)
 	}
 
 	return []map[string]interface{}{data}

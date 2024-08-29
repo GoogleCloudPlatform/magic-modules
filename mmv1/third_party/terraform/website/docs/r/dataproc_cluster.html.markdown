@@ -709,7 +709,7 @@ cluster_config {
 }
 ```
 
-* `kerberos_config` (Required) Kerberos Configuration
+* `kerberos_config` (Optional) Kerberos Configuration
 
     * `cross_realm_trust_admin_server` - (Optional) The admin server (IP or hostname) for the
        remote trusted realm in a cross realm trust relationship.
