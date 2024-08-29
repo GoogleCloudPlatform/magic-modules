@@ -297,7 +297,6 @@ func createOrUpdateRedisCluster(params *ClusterParams) string {
 	if params.maintenanceDay != "" {
 		maintenancePolicyBlock = fmt.Sprintf(`
 		maintenance_policy {
-			description = "example description"
 			weekly_maintenance_window {
 				day = "%s"
 				start_time {
