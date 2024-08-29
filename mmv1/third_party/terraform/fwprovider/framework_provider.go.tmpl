@@ -63,6 +63,9 @@ func (p *FrameworkProvider) MetaSchema(_ context.Context, _ provider.MetaSchemaR
 }
 
 // Schema defines the provider-level schema for configuration data.
+// See: https://developer.hashicorp.com/terraform/plugin/framework/migrating/mux
+// "The schema and configuration handling must exactly match between all underlying providers of the mux server"
+// This schema matches the schema implemented with SDKv2 in google/provider/provider.go
 func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
     resp.Schema = schema.Schema{
         Attributes: map[string]schema.Attribute{
