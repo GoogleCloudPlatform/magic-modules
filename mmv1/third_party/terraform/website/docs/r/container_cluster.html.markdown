@@ -1085,7 +1085,7 @@ workload_identity_config {
 <a name="nested_node_pool_auto_config"></a>The `node_pool_auto_config` block supports:
 
 * `node_kubelet_config` - (Optional) Kubelet configuration. Currently, only `insecure_kubelet_readonly_port_enabled` is supported here.
-Structure is [documented below](#nested_kubelet_config).
+Structure is [documented below](#nested_node_kubelet_config).
 
 * `resource_manager_tags` - (Optional) A map of resource manager tag keys and values to be attached to the nodes for managing Compute Engine firewalls using Network Firewall Policies. Tags must be according to specifications found [here](https://cloud.google.com/vpc/docs/tags-firewalls-overview#specifications). A maximum of 5 tag key-value pairs can be specified. Existing tags will be replaced with new values. Tags must be in one of the following formats ([KEY]=[VALUE]) 1. `tagKeys/{tag_key_id}=tagValues/{tag_value_id}` 2. `{org_id}/{tag_key_name}={tag_value_name}` 3. `{project_id}/{tag_key_name}={tag_value_name}`.
 
@@ -1102,6 +1102,10 @@ node_pool_auto_config {
   }
 }
 ```
+
+<a name="nested_node_kubelet_config"></a>The `node_kubelet_config` block for `node_pool_auto_config` supports:
+
+* `insecure_kubelet_readonly_port_enabled` - (Optional) Controls whether the kubelet read-only port is enabled. It is strongly recommended to set this to `FALSE`. Possible values: `TRUE`, `FALSE`.
 
 <a name="nested_node_pool_defaults"></a>The `node_pool_defaults` block supports:
 * `node_config_defaults` (Optional) - Subset of NodeConfig message that has defaults.
