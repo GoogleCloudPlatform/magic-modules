@@ -83,7 +83,10 @@
             "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
             "data": {
                 "bigqueryProfile": {},
-                "displayName": "Connection profile"
+                "displayName": "Connection profile",
+                "labels": {
+                  "goog-terraform-provisioned": "true"
+                }
             }
         },
         "ancestors": ["organizations/{{.OrgID}}"],

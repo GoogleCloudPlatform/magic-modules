@@ -49,9 +49,6 @@
         "logConfig": {
           "enable": false
         },
-        "labels": {
-          "goog-terraform-provisioned": "true"
-        },
         "name": "my-subnet",
         "region": "projects/{{.Provider.project}}/global/regions/us-central1"
       }

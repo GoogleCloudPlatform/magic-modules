@@ -39,6 +39,9 @@
         "kind": "Service",
         "metadata": {
           "name": "tf-test-cloudrun-srv-beep",
+          "labels": {
+            "goog-terraform-provisioned": "true"
+          },
           "namespace": "{{.Provider.project}}"
         },
         "spec": {
