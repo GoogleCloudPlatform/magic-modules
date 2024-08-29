@@ -1,9 +1,7 @@
 data "google_project" "project" {
-  provider = google-beta
 }
 
 resource "google_network_security_server_tls_policy" "<%= ctx[:primary_resource_id] %>" {
-  provider = google-beta
   name     = "<%= ctx[:vars]['resource_name'] %>"
 
   description = "my description"
@@ -21,7 +19,6 @@ resource "google_network_security_server_tls_policy" "<%= ctx[:primary_resource_
 }
 
 resource "google_certificate_manager_trust_config" "default" {
-  provider    = google-beta
   name        = "<%= ctx[:vars]['trust_config_name'] %>"
   description = "sample trust config description"
   location    = "global"
