@@ -1,0 +1,30 @@
+<% autogen_exception -%>
+package dataproc_test
+
+import (
+        "testing"
+
+        "github.com/hashicorp/terraform-provider-google/google/services/dataproc"
+        "github.com/hashicorp/terraform-provider-google/google/tpgresource"
+)
+
+
+func TestCloudDataprocBatchRuntimeConfigVersionDiffSuppress(t *testing.T) {
+   cases := map[string]struct {
+      Old, New           string
+      ExpectDiffSuppress bool
+   }{
+      "empty_default_version": {
+         Old:                "",
+         New:                "2.2.100",
+         ExpectDiffSuppress: true,
+      },
+      // Additional cases excluded for brevity
+   }
+
+   for tn, tc := range cases {
+      if CloudDataprocBatchRuntimeConfigVersionDiffSuppress("dataproc_batch", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+         t.Errorf("bad: %s, %q => %q expect DiffSuppress to return %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
+      }
+   }
+}

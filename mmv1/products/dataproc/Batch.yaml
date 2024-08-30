@@ -107,7 +107,8 @@ parameters:
     url_param_only: true
     immutable: true
     description: |
-      The batch Id of the batch.
+      The ID to use for the batch, which will become the final component of the batch's resource name.
+      This value must be 4-63 characters. Valid characters are /[a-z][0-9]-/.
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -147,7 +148,7 @@ properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'approximateUsage'
         description: |
-          Approximate workload resource usage, calculated when the workload completes.
+          Approximate workload resource usage, calculated when the workload completes(see [Dataproc Serverless pricing](https://cloud.google.com/dataproc-serverless/pricing))
         output: true
         properties:
           - !ruby/object:Api::Type::String
@@ -160,10 +161,20 @@ properties:
             description: |
               Shuffle storage usage in (GB x seconds)
             output: true
+          - !ruby/object:Api::Type::String
+            name: 'milliAcceleratorSeconds'
+            description: |
+              Accelerator usage in (milliAccelerator x seconds)
+            output: true
+          - !ruby/object:Api::Type::String
+            name: 'acceleratorType'
+            description: |
+              Accelerator type being used, if any
+            output: true
       - !ruby/object:Api::Type::NestedObject
         name: 'currentUsage'
         description: |
-          Approximate workload resource usage, calculated when the workload completes.
+          Snapshot of current workload resource usage(see [Dataproc Serverless pricing](https://cloud.google.com/dataproc-serverless/pricing))
         output: true
         properties:
           - !ruby/object:Api::Type::String
@@ -179,7 +190,7 @@ properties:
           - !ruby/object:Api::Type::String
             name: 'milliDcuPremium'
             description: |
-              Milli (one-thousandth) Dataproc Compute Units (DCUs) charged at premium tier
+              Milli (one-thousandth) Dataproc Compute Units (DCUs) charged at premium tier.
             output: true
           - !ruby/object:Api::Type::String
             name: 'shuffleStorageGbPremium'
@@ -187,23 +198,25 @@ properties:
               Shuffle Storage in gigabytes (GB) charged at premium tier.
             output: true
           - !ruby/object:Api::Type::String
+            name: 'milliAccelerator'
+            description: |
+              Milli (one-thousandth) accelerator..
+            output: true
+          - !ruby/object:Api::Type::String
+            name: 'acceleratorType'
+            description: |
+              Accelerator type being used, if any.
+            output: true
+          - !ruby/object:Api::Type::String
             name: 'snapshotTime'
             description: |
               The timestamp of the usage snapshot.
             output: true
-  - !ruby/object:Api::Type::Enum
+  - !ruby/object:Api::Type::String
     name: 'state'
     description: |
-      The state of the batch.
+      The state of the batch. For possible values, see the [API documentation](https://cloud.google.com/dataproc-serverless/docs/reference/rest/v1/projects.locations.batches#State).
     output: true
-    values:
-      - :STATE_UNSPECIFIED
-      - :PENDING
-      - :RUNNING
-      - :CANCELLING
-      - :CANCELLED
-      - :SUCCEEDED
-      - :FAILED
   - !ruby/object:Api::Type::String
     name: 'stateMessage'
     output: true
@@ -233,7 +246,7 @@ properties:
         description: |
           Version of the batch runtime.
         default_from_api: true
-        diff_suppress_func: cloudDataprocBatchFieldsDiffSuppress
+        diff_suppress_func: cloudDataprocBatchRuntimeConfigVersionDiffSuppress
       - !ruby/object:Api::Type::String
         name: 'containerImage'
         description: |
@@ -344,20 +357,14 @@ properties:
     output: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
-        - !ruby/object:Api::Type::Enum
+        - !ruby/object:Api::Type::String
           name: 'state'
+          output: true
           description: |
-            The state of the batch at this point in history.
-          values:
-            - :STATE_UNSPECIFIED
-            - :PENDING
-            - :RUNNING
-            - :CANCELLING
-            - :CANCELLED
-            - :SUCCEEDED
-            - :FAILED
+            The state of the batch at this point in history. For possible values, see the [API documentation](https://cloud.google.com/dataproc-serverless/docs/reference/rest/v1/projects.locations.batches#State).
         - !ruby/object:Api::Type::String
           name: 'stateMessage'
+          output: true
           description: |
             Details about the state at this point in history.
         - !ruby/object:Api::Type::String

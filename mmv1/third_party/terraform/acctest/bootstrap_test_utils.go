@@ -915,11 +915,11 @@ func BootstrapSubnetForDataprocBatches(t *testing.T, subnetName string, networkN
 	subnetOptions := map[string]interface{}{
 		"privateIpGoogleAccess": true,
 	}
-	return BootstrapCustomSubnet(t, subnetName, networkName, subnetOptions)
+	return BootstrapSubnetWithOverrides(t, subnetName, networkName, subnetOptions)
 }
 
 func BootstrapSubnet(t *testing.T, subnetName string, networkName string) string {
-	return BootstrapCustomSubnet(t, subnetName, networkName, make(map[string]interface{}))
+	return BootstrapSubnetWithOverrides(t, subnetName, networkName, make(map[string]interface{}))
 }
 
 func BootstrapSubnetWithFirewallForDataprocBatches(t *testing.T, testId string, subnetName string) string {
@@ -929,7 +929,7 @@ func BootstrapSubnetWithFirewallForDataprocBatches(t *testing.T, testId string, 
 	return subnetworkName
 }
 
-func BootstrapCustomSubnet(t *testing.T, subnetName string, networkName string, subnetOptions map[string]interface{}) string {
+func BootstrapSubnetWithOverrides(t *testing.T, subnetName string, networkName string, subnetOptions map[string]interface{}) string {
 	projectID := envvar.GetTestProjectFromEnv()
 	region := envvar.GetTestRegionFromEnv()
 
@@ -958,8 +958,6 @@ func BootstrapCustomSubnet(t *testing.T, subnetName string, networkName string, 
 			"ipCidrRange": "10.77.0.0/20",
 		}
 
-		subnetObj := defaultSubnetObj
-
 		if len(subnetOptions) != 0 {
 			maps.Copy(defaultSubnetObj, subnetOptions)
 		}
@@ -970,7 +968,7 @@ func BootstrapCustomSubnet(t *testing.T, subnetName string, networkName string, 
 			Project:   projectID,
 			RawURL:    url,
 			UserAgent: config.UserAgent,
-			Body:      subnetObj,
+			Body:      defaultSubnetObj,
 			Timeout:   4 * time.Minute,
 		})
 
