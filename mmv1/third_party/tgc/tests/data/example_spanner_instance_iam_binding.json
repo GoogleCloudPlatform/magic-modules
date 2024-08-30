@@ -12,6 +12,9 @@
         "instance": {
           "config": "projects/{{.Provider.project}}/instanceConfigs/regional-us-central1",
           "displayName": "spanner-instance",
+          "labels": {
+            "goog-terraform-provisioned": "true"
+          },
           "nodeCount": 1
         },
         "instanceId": "spanner-instance"

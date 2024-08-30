@@ -10,7 +10,6 @@
       "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
       "data": {
         "labels": {
-          "goog-terraform-provisioned": "true",
           "test-name": "test-value"
         },
         "name": "projects/{{.Provider.project}}/instances/tf-instance"
