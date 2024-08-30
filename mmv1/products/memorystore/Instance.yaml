@@ -219,6 +219,7 @@ properties:
           \n Possible values:\n ZONE_DISTRIBUTION_MODE_UNSPECIFIED\nMULTI_ZONE\nSINGLE_ZONE"
     name: zoneDistributionConfig
     immutable: true
+    default_from_api: true
     description: "Zone distribution configuration for allocation of instance resources. "
   - !ruby/object:Api::Type::Boolean
     name: deletionProtectionEnabled
