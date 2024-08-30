@@ -168,7 +168,7 @@ examples:
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service-%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
-      mesh_name: 'mesh'
+      mesh_name: 'network-services-mesh'
     ignore_read_extra:
       - 'deletion_protection'
 
