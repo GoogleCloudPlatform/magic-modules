@@ -12,6 +12,9 @@
         "apiVersion": "domains.cloudrun.com/v1",
         "kind": "DomainMapping",
         "metadata": {
+          "labels": {
+            "goog-terraform-provisioned": "true"
+          },
           "name": "tf-test-domain-meep.gcp.tfacc.hashicorptest.com",
           "namespace": "{{.Provider.project}}"
         },
@@ -36,6 +39,9 @@
         "kind": "Service",
         "metadata": {
           "name": "tf-test-cloudrun-srv-beep",
+          "labels": {
+            "goog-terraform-provisioned": "true"
+          },
           "namespace": "{{.Provider.project}}"
         },
         "spec": {
