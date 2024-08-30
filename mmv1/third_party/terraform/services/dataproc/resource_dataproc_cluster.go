@@ -650,9 +650,9 @@ func ResourceDataprocCluster() *schema.Resource {
 									"internal_ip_only": {
 										Type:         schema.TypeBool,
 										Optional:     true,
+										Computed:     true,
 										AtLeastOneOf: gceClusterConfigKeys,
 										ForceNew:     true,
-										Default:      false,
 										Description:  `By default, clusters are not restricted to internal IP addresses, and will have ephemeral external IP addresses assigned to each instance. If set to true, all instances in the cluster will only have internal IP addresses. Note: Private Google Access (also known as privateIpGoogleAccess) must be enabled on the subnetwork that the cluster will be launched in.`,
 									},
 
