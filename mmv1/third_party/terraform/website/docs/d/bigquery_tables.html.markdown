@@ -30,5 +30,12 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-* `tables` - Map of tables contained within the provided `dataset_id`.
+The following attributes are exported:
+
+* `tables` - A list of all retrieved BigQuery tables. Structure is [defined below](#nested_tables).
+
+<a name="nested_tables"></a>The `tables` block supports:
+
+* `labels` - User-provided table labels, in key/value pairs.
+* `table_id` - The name of the table.
 
