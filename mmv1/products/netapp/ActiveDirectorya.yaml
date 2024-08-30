@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: 'activeDirectory'
+name: 'ActiveDirectory'
 description: |
   ActiveDirectory is the public representation of the active directory config.
 references: !ruby/object:Api::Resource::ReferenceLinks
