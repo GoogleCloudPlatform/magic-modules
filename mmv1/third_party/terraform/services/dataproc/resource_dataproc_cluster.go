@@ -2884,7 +2884,7 @@ func flattenSecurityConfig(d *schema.ResourceData, sc *dataproc.SecurityConfig) 
 		return nil
 	}
 	// API side change means that sc can be non-nil but contain only nils
-	if sc.IdentityConfig == nil && sc.KerberosConfig == nil {
+	if sc.KerberosConfig == nil {
 		return nil
 	}
 	data := map[string]interface{}{
