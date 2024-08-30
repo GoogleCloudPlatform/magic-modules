@@ -145,9 +145,13 @@ properties:
     default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     properties:
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::Enum
         name: mode
-        description: "Optional. Current persistence mode. \n Possible values:\n PERSISTENCE_MODE_UNSPECIFIED\nDISABLED\nRDB\nAOF"
+        description: "Optional. Current persistence mode. \n Possible values:\nDISABLED\nRDB\nAOF"
+        values:
+          - :DISABLED
+          - :RDB
+          - :AOF
         default_from_api: true
       - !ruby/object:Api::Type::NestedObject
         properties:
@@ -201,14 +205,20 @@ properties:
           "Optional. Defines zone where all resources will be allocated with
           SINGLE_ZONE mode.\nIgnored for MULTI_ZONE mode. "
         immutable: true
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::Enum
         name: mode
+        description: |
+          Immutable. The mode for zone distribution for Memorystore Redis cluster.
+          If not provided, MULTI_ZONE will be used as default
+        values:
+          - :MULTI_ZONE
+          - :SINGLE_ZONE
         default_from_api: true
         description:
           "Optional. Current zone distribution mode. Defaults to MULTI_ZONE.
           \n Possible values:\n ZONE_DISTRIBUTION_MODE_UNSPECIFIED\nMULTI_ZONE\nSINGLE_ZONE"
-        immutable: true
     name: zoneDistributionConfig
+    immutable: true
     description: "Zone distribution configuration for allocation of instance resources. "
   - !ruby/object:Api::Type::Boolean
     name: deletionProtectionEnabled

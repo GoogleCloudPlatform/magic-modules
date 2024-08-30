@@ -25,7 +25,7 @@ func TestAccMemorystoreInstance_updateReplicaCount(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// create instance with replica count 1
-				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 1, shardCount: 3, preventDestroy: false, zoneDistributionMode: "MULTI_ZONE", deletionProtectionEnabled: false}),
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 1, shardCount: 3, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE", deletionProtectionEnabled: false}),
 			},
 			{
 				ResourceName:            "google_memorystore_instance.test",
@@ -34,13 +34,18 @@ func TestAccMemorystoreInstance_updateReplicaCount(t *testing.T) {
 			},
 			{
 				// update replica count to 2
-				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 2, shardCount: 3, preventDestroy: false, zoneDistributionMode: "MULTI_ZONE", deletionProtectionEnabled: false}),
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 2, shardCount: 3, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE", deletionProtectionEnabled: false}),
 			},
 			{
 				ResourceName:            "google_memorystore_instance.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
 			},
+            {
+			    // clean up the resource
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 2, shardCount: 3, preventDestroy: false, zoneDistributionMode: "MULTI_ZONE", deletionProtectionEnabled:false}),
+			},
+
 		},
 	})
 }
@@ -177,6 +182,11 @@ func TestAccMemorystoreInstance_updateDeletionProtection(t *testing.T) {
 					deletionProtectionEnabled: false,
                 }),
             },
+            {
+				ResourceName:            "google_memorystore_instance.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+			},
 		},
 	})
 }
@@ -255,10 +265,10 @@ func createOrUpdateMemorystoreInstance(params *InstanceParams) string {
 	}
     persistenceBlock := ""
     if params.persistenceMode == "RDB" {
-        persistenceBlock = "persistenceConfig = {mode: = \"RDB\"}"
+        persistenceBlock = "persistence_config {mode = \"RDB\"}"
     }
     if params.persistenceMode == "AOF" {
-        persistenceBlock = "persistenceConfig = {mode: \"AOF\"}"
+        persistenceBlock = "persistence_config {mode = \"AOF\" aof_config { append_fsync = \"EVERYSEC\" } }"
     }
 
 	return fmt.Sprintf(`

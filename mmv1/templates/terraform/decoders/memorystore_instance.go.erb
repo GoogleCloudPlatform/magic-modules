@@ -1,16 +1,44 @@
-v := res["pscAutoConnections"]
-	l := v.([]interface{})
-	transformed := make([]interface{}, 0, len(l))
-	for _, raw := range l {
-		original := raw.(map[string]interface{})
-		if len(original) < 1 {
-			// Do not include empty json objects coming back from the api
-			continue
-		}
+// Retrieve pscAutoConnections from API response
+v, ok := res["pscAutoConnections"]
+if !ok {
+	return nil, fmt.Errorf("pscAutoConnections field not found in API response")
+}
+
+connections, ok := v.([]interface{})
+if !ok {
+	return nil, fmt.Errorf("pscAutoConnections is not an array")
+}
+
+transformed := make([]interface{}, 0, len(connections))
+uniqueConnections := make(map[string]bool) // Track unique project+network combos
+
+for _, raw := range connections {
+	connectionData, ok := raw.(map[string]interface{})
+	if !ok || len(connectionData) < 1 {
+		// Log the problematic connection data for debugging
+		log.Printf("[ERROR] Invalid or empty psc connection data: %v", raw)
+		continue // Skip this invalid connection and continue processing
+	}
+
+	projectID, ok := connectionData["projectId"].(string)
+	if !ok {
+		return nil, fmt.Errorf("invalid project ID in psc connection: %v", connectionData)
+	}
+
+	networkID, ok := connectionData["network"].(string)
+	if !ok {
+		return nil, fmt.Errorf("invalid network ID in psc connection: %v", connectionData)
+	}
+
+	uniqueKey := projectID + networkID
+	if !uniqueConnections[uniqueKey] { // Check for uniqueness
+		uniqueConnections[uniqueKey] = true
 		transformed = append(transformed, map[string]interface{}{
-			"project_id": original["projectId"],
-			"network":    original["network"],
+			"project_id": projectID,
+			"network":    networkID,
 		})
 	}
-	d.Set("desired_psc_auto_connections", transformed)
-	return res, nil
+}
+
+d.Set("desired_psc_auto_connections", transformed)
+return res, nil
