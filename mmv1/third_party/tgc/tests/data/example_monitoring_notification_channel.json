@@ -12,8 +12,7 @@
         "displayName": "monitoring notification channel",
         "enabled": true,
         "labels": {
-          "email_address": "foo@bar.com",
-          "goog-terraform-provisioned": "true"
+          "email_address": "foo@bar.com"
         },
         "type": "email"
       }
