@@ -84,7 +84,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: state
     description: |
-      The instance state. 
+      The instance state.
         Possible values:
         STATE_UNSPECIFIED
         CREATING
@@ -101,7 +101,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: updateTime
     description: |
-      The time when the instance was updated. 
+      The time when the instance was updated.
     output: true
   - !ruby/object:Api::Type::KeyValueLabels
     name: labels
@@ -144,7 +144,7 @@ properties:
     name: accessPoints
     item_type: Api::Type::String
     description: |
-      Output only. List of access_points. 
+      Output only. List of access_points.
       Contains a list of IPv4 addresses used for client side configuration.
     output: true
   - !ruby/object:Api::Type::String
@@ -159,7 +159,7 @@ properties:
       Immutable. Contains the id of the allocated IP address range
       associated with the private service access connection for example, \"test-default\"
       associated with IP range 10.0.0.0/29. If no range id is provided all ranges will
-      be considered. 
+      be considered.
     immutable: true
   - !ruby/object:Api::Type::String
     name: effectiveReservedIpRange
@@ -175,7 +175,7 @@ properties:
     description: |
       Stripe level for files.
       MIN better suited for small size files.
-      MAX higher throughput performance for larger files. 
+      MAX higher throughput performance for larger files.
         Possible values:
         FILE_STRIPE_LEVEL_UNSPECIFIED
         FILE_STRIPE_LEVEL_MIN
@@ -186,7 +186,7 @@ properties:
     description: |
       Stripe level for directories.
       MIN when directory has a small number of files.
-      MAX when directory has a large number of files. 
+      MAX when directory has a large number of files.
         Possible values:
         DIRECTORY_STRIPE_LEVEL_UNSPECIFIED
         DIRECTORY_STRIPE_LEVEL_MIN
