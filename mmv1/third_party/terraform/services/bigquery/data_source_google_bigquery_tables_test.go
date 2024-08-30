@@ -22,8 +22,10 @@ func TestAccDataSourceGoogleBigqueryTables_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleBigqueryTables_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.google_bigquery_tables.example", "tables.%", "1"),
-					resource.TestCheckResourceAttr("data.google_bigquery_tables.example", "tables.test_table", ""),
+					resource.TestCheckResourceAttr("data.google_bigquery_tables.example", "tables.#", "1"),
+					resource.TestCheckResourceAttr("data.google_bigquery_tables.example", "tables.0.table_id", "test_table"),
+					resource.TestCheckResourceAttr("data.google_bigquery_tables.example", "tables.0.labels.%", "1"),
+					resource.TestCheckResourceAttr("data.google_bigquery_tables.example", "tables.0.labels.goog-terraform-provisioned", "true"),
 				),
 			},
 		},
@@ -54,6 +56,10 @@ func testAccDataSourceGoogleBigqueryTables_basic(context map[string]interface{})
       }
     ]
     EOF
+    # Default label for a tf-provisioned table (referenced in the test suite):
+    # labels = {
+    #   goog-terraform-provisioned = "true"
+    # }
   }
 
   data "google_bigquery_tables" "example" {
