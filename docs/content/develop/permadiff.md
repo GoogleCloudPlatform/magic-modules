@@ -193,7 +193,6 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
 
 ```yaml
 examples:
- - !ruby/object:Provider::Terraform::Examples
    # example configuration
    ignore_read_extra:
      - "path.0.to.0.nested.0.field"
