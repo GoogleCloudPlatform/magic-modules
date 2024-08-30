@@ -16,9 +16,9 @@ func TestAccSecurityCenterV2FolderBigQueryExportConfig_basic(t *testing.T) {
 	orgID := envvar.GetTestOrgFromEnv(t)
 
 	context := map[string]interface{}{
-		"org_id":        orgID,
-		"random_suffix": randomSuffix,
-		"dataset_id":    dataset_id,
+		"org_id":              orgID,
+		"random_suffix":       randomSuffix,
+		"dataset_id":          dataset_id,
 		"big_query_export_id": "tf-test-export-" + randomSuffix,
 		"folder_name":         "tf-test-folder-name-" + randomSuffix,
 	}
