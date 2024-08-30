@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"net/url"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"text/template"
 
@@ -171,7 +172,9 @@ func (e *Examples) UnmarshalYAML(n *yaml.Node) error {
 		return err
 	}
 
-	e.ConfigPath = fmt.Sprintf("templates/terraform/examples/go/%s.tf.tmpl", e.Name)
+	if e.ConfigPath == "" {
+		e.ConfigPath = fmt.Sprintf("templates/terraform/examples/go/%s.tf.tmpl", e.Name)
+	}
 	e.SetHCLText()
 
 	return nil
@@ -179,8 +182,9 @@ func (e *Examples) UnmarshalYAML(n *yaml.Node) error {
 
 // Executes example templates for documentation and tests
 func (e *Examples) SetHCLText() {
-	docCopy := e
-	testCopy := e
+	originalVars := e.Vars
+	originalTestEnvVars := e.TestEnvVars
+	docTestEnvVars := make(map[string]string)
 	docs_defaults := map[string]string{
 		"PROJECT_NAME":        "my-project-name",
 		"CREDENTIALS":         "my/credentials/filename.json",
@@ -197,15 +201,25 @@ func (e *Examples) SetHCLText() {
 	}
 
 	// Apply doc defaults to test_env_vars from YAML
-	for key := range docCopy.TestEnvVars {
-		docCopy.TestEnvVars[key] = docs_defaults[docCopy.TestEnvVars[key]]
+	for key := range e.TestEnvVars {
+		docTestEnvVars[key] = docs_defaults[e.TestEnvVars[key]]
 	}
-	e.DocumentationHCLText = ExecuteTemplate(docCopy, docCopy.ConfigPath, true)
+	e.TestEnvVars = docTestEnvVars
+	e.DocumentationHCLText = ExecuteTemplate(e, e.ConfigPath, true)
+	e.DocumentationHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(e.DocumentationHCLText, "\n")
 
+	// Remove region tags
+	re1 := regexp.MustCompile(`# \[[a-zA-Z_ ]+\]\n`)
+	re2 := regexp.MustCompile(`\n# \[[a-zA-Z_ ]+\]`)
+	e.DocumentationHCLText = re1.ReplaceAllString(e.DocumentationHCLText, "")
+	e.DocumentationHCLText = re2.ReplaceAllString(e.DocumentationHCLText, "")
+
+	testVars := make(map[string]string)
+	testTestEnvVars := make(map[string]string)
 	// Override vars to inject test values into configs - will have
 	//   - "a-example-var-value%{random_suffix}""
 	//   - "%{my_var}" for overrides that have custom Golang values
-	for key, value := range testCopy.Vars {
+	for key, value := range originalVars {
 		var newVal string
 		if strings.Contains(value, "-") {
 			newVal = fmt.Sprintf("tf-test-%s", value)
@@ -219,20 +233,41 @@ func (e *Examples) SetHCLText() {
 		if len(newVal) > 54 {
 			newVal = newVal[:54]
 		}
-		testCopy.Vars[key] = fmt.Sprintf("%s%%{random_suffix}", newVal)
+		testVars[key] = fmt.Sprintf("%s%%{random_suffix}", newVal)
 	}
 
 	// Apply overrides from YAML
-	for key := range testCopy.TestVarsOverrides {
-		testCopy.Vars[key] = fmt.Sprintf("%%{%s}", key)
+	for key := range e.TestVarsOverrides {
+		testVars[key] = fmt.Sprintf("%%{%s}", key)
+	}
+	for key := range originalTestEnvVars {
+		testTestEnvVars[key] = fmt.Sprintf("%%{%s}", key)
 	}
 
-	e.TestHCLText = ExecuteTemplate(testCopy, testCopy.ConfigPath, true)
+	e.Vars = testVars
+	e.TestEnvVars = testTestEnvVars
+	e.TestHCLText = ExecuteTemplate(e, e.ConfigPath, true)
+	e.TestHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(e.TestHCLText, "\n")
+	// Remove region tags
+	e.TestHCLText = re1.ReplaceAllString(e.TestHCLText, "")
+	e.TestHCLText = re2.ReplaceAllString(e.TestHCLText, "")
+	e.TestHCLText = SubstituteTestPaths(e.TestHCLText)
+
+	// Reset the example
+	e.Vars = originalVars
+	e.TestEnvVars = originalTestEnvVars
 }
 
 func ExecuteTemplate(e any, templatePath string, appendNewline bool) string {
 	templates := []string{
 		templatePath,
+		"templates/terraform/expand_resource_ref.tmpl",
+		"templates/terraform/custom_flatten/go/bigquery_table_ref.go.tmpl",
+		"templates/terraform/flatten_property_method.go.tmpl",
+		"templates/terraform/expand_property_method.go.tmpl",
+		"templates/terraform/update_mask.go.tmpl",
+		"templates/terraform/nested_query.go.tmpl",
+		"templates/terraform/unordered_list_customize_diff.go.tmpl",
 	}
 	templateFileName := filepath.Base(templatePath)
 
@@ -287,27 +322,23 @@ func (e *Examples) ResourceType(terraformName string) string {
 	return terraformName
 }
 
-// rubocop:disable Layout/LineLength
-// func (e *Examples) substitute_test_paths(config) {
-// config.gsub!('../static/img/header-logo.png', 'test-fixtures/header-logo.png')
-// config.gsub!('path/to/private.key', 'test-fixtures/test.key')
-// config.gsub!('path/to/certificate.crt', 'test-fixtures/test.crt')
-// config.gsub!('path/to/index.zip', '%{zip_path}')
-// config.gsub!('verified-domain.com', 'tf-test-domain%{random_suffix}.gcp.tfacc.hashicorptest.com')
-// config.gsub!('path/to/id_rsa.pub', 'test-fixtures/ssh_rsa.pub')
-// config
-// }
+func SubstituteExamplePaths(config string) string {
+	config = strings.ReplaceAll(config, "../static/img/header-logo.png", "../static/header-logo.png")
+	config = strings.ReplaceAll(config, "path/to/private.key", "../static/ssl_cert/test.key")
+	config = strings.ReplaceAll(config, "path/to/id_rsa.pub", "../static/ssh_rsa.pub")
+	config = strings.ReplaceAll(config, "path/to/certificate.crt", "../static/ssl_cert/test.crt")
+	return config
+}
 
-// func (e *Examples) substitute_example_paths(config) {
-// config.gsub!('../static/img/header-logo.png', '../static/header-logo.png')
-// config.gsub!('path/to/private.key', '../static/ssl_cert/test.key')
-// config.gsub!('path/to/id_rsa.pub', '../static/ssh_rsa.pub')
-// config.gsub!('path/to/certificate.crt', '../static/ssl_cert/test.crt')
-// config
-// end
-// // rubocop:enable Layout/LineLength
-// // rubocop:enable Style/FormatStringToken
-// }
+func SubstituteTestPaths(config string) string {
+	config = strings.ReplaceAll(config, "../static/img/header-logo.png", "test-fixtures/header-logo.png")
+	config = strings.ReplaceAll(config, "path/to/private.key", "test-fixtures/test.key")
+	config = strings.ReplaceAll(config, "path/to/certificate.crt", "test-fixtures/test.crt")
+	config = strings.ReplaceAll(config, "path/to/index.zip", "%{zip_path}")
+	config = strings.ReplaceAll(config, "verified-domain.com", "tf-test-domain%{random_suffix}.gcp.tfacc.hashicorptest.com")
+	config = strings.ReplaceAll(config, "path/to/id_rsa.pub", "test-fixtures/ssh_rsa.pub")
+	return config
+}
 
 // func (e *Examples) validate() {
 // super

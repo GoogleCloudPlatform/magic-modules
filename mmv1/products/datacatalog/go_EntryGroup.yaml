@@ -1,0 +1,90 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'EntryGroup'
+description: |
+  An EntryGroup resource represents a logical grouping of zero or more Data Catalog Entry resources.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/data-catalog/docs'
+  api: 'https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.entryGroups'
+docs:
+base_url: 'projects/{{project}}/locations/{{region}}/entryGroups'
+self_link: '{{name}}'
+create_url: 'projects/{{project}}/locations/{{region}}/entryGroups?entryGroupId={{entry_group_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+iam_policy:
+  method_name_separator: ':'
+  fetch_iam_policy_verb: 'POST'
+  parent_resource_attribute: 'entry_group'
+  base_url: 'projects/{{project}}/locations/{{region}}/entryGroups/{{entry_group}}'
+  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  import_format:
+    - 'projects/{{project}}/locations/{{region}}/entryGroups/{{entry_group}}'
+    - '{{entry_group}}'
+custom_code:
+  custom_import: 'templates/terraform/custom_import/go/data_catalog_entry_group.go.tmpl'
+examples:
+  - name: 'data_catalog_entry_group_basic'
+    primary_resource_id: 'basic_entry_group'
+    primary_resource_name: 'fmt.Sprintf("tf_test_my_group%s", context["random_suffix"])'
+    vars:
+      entry_group_id: 'my_group'
+  - name: 'data_catalog_entry_group_full'
+    primary_resource_id: 'basic_entry_group'
+    primary_resource_name: 'fmt.Sprintf("tf_test_my_group%s", context["random_suffix"])'
+    vars:
+      entry_group_id: 'my_group'
+parameters:
+  - name: 'region'
+    type: String
+    description: |
+      EntryGroup location region.
+    url_param_only: true
+    required: false
+    immutable: true
+    ignore_read: true
+    default_from_api: true
+  - name: 'entryGroupId'
+    type: String
+    description: |
+      The id of the entry group to create. The id must begin with a letter or underscore,
+      contain only English letters, numbers and underscores, and be at most 64 characters.
+    url_param_only: true
+    required: true
+    immutable: true
+    validation:
+      regex: '^[A-z_][A-z0-9_]{0,63}$'
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The resource name of the entry group in URL format. Example: projects/{project}/locations/{location}/entryGroups/{entryGroupId}
+    output: true
+  - name: 'displayName'
+    type: String
+    description: |
+      A short name to identify the entry group, for example, "analytics data - jan 2011".
+  - name: 'description'
+    type: String
+    description: |
+      Entry group description, which can consist of several sentences or paragraphs that describe entry group contents.

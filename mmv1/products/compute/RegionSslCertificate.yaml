@@ -30,7 +30,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -47,7 +47,13 @@ async: !ruby/object:Api::OpAsync
 docs: !ruby/object:Provider::Terraform::Docs
   optional_properties: |
     * `name_prefix` - (Optional) Creates a unique name beginning with the
-     specified prefix. Conflicts with `name`.
+     specified prefix. Conflicts with `name`. Max length is 54 characters.
+     Prefixes with lengths longer than 37 characters will use a shortened
+     UUID that will be more prone to collisions.
+     Resulting name for a `name_prefix` <= 37 characters:
+     `name_prefix` + YYYYmmddHHSSssss + 8 digit incremental counter
+     Resulting name for a `name_prefix` 38 - 54 characters:
+     `name_prefix` + YYmmdd + 3 digit incremental counter
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'region_ssl_certificate_basic'
@@ -78,6 +84,7 @@ examples:
     ignore_read_extra:
       - 'name_prefix'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/compute_certificate.go.erb
   extra_schema_entry: templates/terraform/extra_schema_entry/ssl_certificate.erb
 parameters:
   - !ruby/object:Api::Type::ResourceRef
@@ -128,7 +135,6 @@ properties:
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
 
-
       These are in the same namespace as the managed SSL certificates.
     default_from_api: true
     custom_expand: 'templates/terraform/custom_expand/name_or_name_prefix.go.erb'
@@ -142,4 +148,4 @@ properties:
     sensitive: true
     ignore_read: true
     custom_flatten: 'templates/terraform/custom_flatten/sha256.erb'
-    diff_suppress_func: 'tpgresource.Sha256DiffSuppress'
+    diff_suppress_func: 'sha256DiffSuppress'

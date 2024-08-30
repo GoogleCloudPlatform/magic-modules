@@ -1,5 +1,4 @@
 resource "google_sql_database_instance" "instance" {
-    provider            = google-beta
     name                = "{{index $.Vars "sql_server_name"}}"
     database_version    = "SQLSERVER_2019_STANDARD"
     region              = "us-central1"
@@ -35,20 +34,17 @@ resource "google_sql_database_instance" "instance" {
 }
 
 resource "google_sql_database" "db" {
-    provider   = google-beta
     name       = "{{index $.Vars "database_name"}}"
     instance   = google_sql_database_instance.instance.name
 }
 
 resource "google_sql_user" "user" {
-    provider = google-beta
     name     = "{{index $.Vars "database_user"}}"
     instance = google_sql_database_instance.instance.name
     password = "{{index $.Vars "database_password"}}"
 }
 
 resource "google_datastream_connection_profile" "default" {
-    provider              = google-beta
     display_name          = "SQL Server Source"
     location              = "us-central1"
     connection_profile_id = "{{index $.Vars "source_connection_profile_id"}}"

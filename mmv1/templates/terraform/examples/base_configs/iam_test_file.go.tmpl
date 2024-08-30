@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath }}/envvar"
@@ -55,7 +55,7 @@ func TestAcc{{ $.ResourceName }}IamBindingGenerated(t *testing.T) {
 {{- if not $.IamPolicy.SkipImportTest }}
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_binding.foo",
-				ImportStateId:     fmt.Sprintf("{{ $.IamResourceUriFormat }} {{ $.IamPolicy.AllowedIamRole }}", {{ $.IamImportQualifiersForTest }}, {{ $example.PrimaryResourceName }}),
+				ImportStateId:     fmt.Sprintf("{{ $.IamImportFormat }} {{ $.IamPolicy.AllowedIamRole }}", {{ if ne $.IamImportQualifiersForTest "" }}{{ $.IamImportQualifiersForTest }}, {{ end }}{{ $example.PrimaryResourceName }}),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -67,7 +67,7 @@ func TestAcc{{ $.ResourceName }}IamBindingGenerated(t *testing.T) {
 {{- if not $.IamPolicy.SkipImportTest }}
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_binding.foo",
-				ImportStateId:     fmt.Sprintf("{{ $.IamResourceUriFormat }} {{ $.IamPolicy.AllowedIamRole }}", {{ $.IamImportQualifiersForTest }}, {{ $example.PrimaryResourceName }}),
+				ImportStateId:     fmt.Sprintf("{{ $.IamImportFormat }} {{ $.IamPolicy.AllowedIamRole }}", {{ if ne $.IamImportQualifiersForTest "" }}{{ $.IamImportQualifiersForTest }}, {{ end }}{{ $example.PrimaryResourceName }}),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -102,7 +102,7 @@ func TestAcc{{ $.ResourceName }}IamMemberGenerated(t *testing.T) {
 {{- if not $.IamPolicy.SkipImportTest }}
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_member.foo",
-				ImportStateId:     fmt.Sprintf("{{ $.IamResourceUriFormat }} {{ $.IamPolicy.AllowedIamRole }} user:admin@hashicorptest.com", {{ $.IamImportQualifiersForTest }}, {{ $example.PrimaryResourceName }}),
+				ImportStateId:     fmt.Sprintf("{{ $.IamImportFormat }} {{ $.IamPolicy.AllowedIamRole }} user:admin@hashicorptest.com", {{ if ne $.IamImportQualifiersForTest "" }}{{ $.IamImportQualifiersForTest }}, {{ end }}{{ $example.PrimaryResourceName }}),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -113,12 +113,10 @@ func TestAcc{{ $.ResourceName }}IamMemberGenerated(t *testing.T) {
 
 func TestAcc{{ $.ResourceName }}IamPolicyGenerated(t *testing.T) {
 	t.Parallel()
-
-{{- if $.IamPolicy.AdminIamRole }}
+{{ if $.IamPolicy.AdminIamRole }}
 	// This may skip test, so do it first
 	sa := envvar.GetTestServiceAccountFromEnv(t)
-{{-  end }}
-{{ template "IamContext" $ }}
+{{-  end }}{{ template "IamContext" $ }}
 {{- if $.IamPolicy.AdminIamRole }}
 	context["service_account"] = sa
 {{-  end }}
@@ -145,7 +143,7 @@ func TestAcc{{ $.ResourceName }}IamPolicyGenerated(t *testing.T) {
 {{- if not $.IamPolicy.SkipImportTest }}
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_policy.foo",
-				ImportStateId:     fmt.Sprintf("{{ $.IamResourceUriFormat }}", {{ $.IamImportQualifiersForTest }}, {{ $example.PrimaryResourceName }}),
+				ImportStateId:     fmt.Sprintf("{{ $.IamImportFormat }}", {{ if ne $.IamImportQualifiersForTest "" }}{{ $.IamImportQualifiersForTest }}, {{ end }}{{ $example.PrimaryResourceName }}),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -156,7 +154,7 @@ func TestAcc{{ $.ResourceName }}IamPolicyGenerated(t *testing.T) {
 {{- if not $.IamPolicy.SkipImportTest }}
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_policy.foo",
-				ImportStateId:     fmt.Sprintf("{{ $.IamResourceUriFormat }}", {{ $.IamImportQualifiersForTest }}, {{ $example.PrimaryResourceName }}),
+				ImportStateId:     fmt.Sprintf("{{ $.IamImportFormat }}", {{ if ne $.IamImportQualifiersForTest "" }}{{ $.IamImportQualifiersForTest }}, {{ end }}{{ $example.PrimaryResourceName }}),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -164,8 +162,7 @@ func TestAcc{{ $.ResourceName }}IamPolicyGenerated(t *testing.T) {
 		},
 	})
 }
-
-{{- if $.IamPolicy.IamConditionsRequestType }}
+{{ if $.IamPolicy.IamConditionsRequestType }}
 func TestAcc{{ $.ResourceName }}IamBindingGenerated_withCondition(t *testing.T) {
 	t.Parallel()
 {{ template "IamContext" $ }}
@@ -191,7 +188,7 @@ func TestAcc{{ $.ResourceName }}IamBindingGenerated_withCondition(t *testing.T) 
 {{- if not $.IamPolicy.SkipImportTest }}
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_binding.foo",
-				ImportStateId:     fmt.Sprintf("{{ $.IamResourceUriFormat }} {{ $.IamPolicy.AllowedIamRole }}", {{ $.IamImportQualifiersForTest }}, {{ $example.PrimaryResourceName }}, context["condition_title"]),
+				ImportStateId:     fmt.Sprintf("{{ $.IamImportFormat }} {{ $.IamPolicy.AllowedIamRole }} %s", {{ if ne $.IamImportQualifiersForTest "" }}{{ $.IamImportQualifiersForTest }}, {{ end }}{{ $example.PrimaryResourceName }}, context["condition_title"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -227,19 +224,19 @@ func TestAcc{{ $.ResourceName }}IamBindingGenerated_withAndWithoutCondition(t *t
 {{- if not $.IamPolicy.SkipImportTest }}
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_binding.foo",
-				ImportStateId:     fmt.Sprintf("{{ $.IamResourceUriFormat }} {{ $.IamPolicy.AllowedIamRole }}", {{ $.IamImportQualifiersForTest }}, {{ $example.PrimaryResourceName }}),
+				ImportStateId:     fmt.Sprintf("{{ $.IamImportFormat }} {{ $.IamPolicy.AllowedIamRole }}", {{ if ne $.IamImportQualifiersForTest "" }}{{ $.IamImportQualifiersForTest }}, {{ end }}{{ $example.PrimaryResourceName }}),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_binding.foo2",
-				ImportStateId:     fmt.Sprintf("{{ $.IamResourceUriFormat }} {{ $.IamPolicy.AllowedIamRole }}", {{ $.IamImportQualifiersForTest }}, {{ $example.PrimaryResourceName }}, context["condition_title"]),
+				ImportStateId:     fmt.Sprintf("{{ $.IamImportFormat }} {{ $.IamPolicy.AllowedIamRole }} %s", {{ if ne $.IamImportQualifiersForTest "" }}{{ $.IamImportQualifiersForTest }}, {{ end }}{{ $example.PrimaryResourceName }}, context["condition_title"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_binding.foo3",
-				ImportStateId:     fmt.Sprintf("{{ $.IamResourceUriFormat }} {{ $.IamPolicy.AllowedIamRole }}", {{ $.IamImportQualifiersForTest }}, {{ $example.PrimaryResourceName }}, context["condition_title_no_desc"]),
+				ImportStateId:     fmt.Sprintf("{{ $.IamImportFormat }} {{ $.IamPolicy.AllowedIamRole }} %s", {{ if ne $.IamImportQualifiersForTest "" }}{{ $.IamImportQualifiersForTest }}, {{ end }}{{ $example.PrimaryResourceName }}, context["condition_title_no_desc"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -250,6 +247,7 @@ func TestAcc{{ $.ResourceName }}IamBindingGenerated_withAndWithoutCondition(t *t
 
 func TestAcc{{ $.ResourceName }}IamMemberGenerated_withCondition(t *testing.T) {
 	t.Parallel()
+
 {{ template "IamContext" $ }}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -273,7 +271,7 @@ func TestAcc{{ $.ResourceName }}IamMemberGenerated_withCondition(t *testing.T) {
 {{- if not $.IamPolicy.SkipImportTest }}
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_member.foo",
-				ImportStateId:     fmt.Sprintf("{{ $.IamResourceUriFormat }} {{ $.IamPolicy.AllowedIamRole }}", {{ $.IamImportQualifiersForTest }}, {{ $example.PrimaryResourceName }}, context["condition_title"]),
+				ImportStateId:     fmt.Sprintf("{{ $.IamImportFormat }} {{ $.IamPolicy.AllowedIamRole }} user:admin@hashicorptest.com %s", {{ if ne $.IamImportQualifiersForTest "" }}{{ $.IamImportQualifiersForTest }}, {{ end }}{{ $example.PrimaryResourceName }}, context["condition_title"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -309,19 +307,19 @@ func TestAcc{{ $.ResourceName }}IamMemberGenerated_withAndWithoutCondition(t *te
 {{- if not $.IamPolicy.SkipImportTest }}
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_member.foo",
-				ImportStateId:     fmt.Sprintf("{{ $.IamResourceUriFormat }} {{ $.IamPolicy.AllowedIamRole }}", {{ $.IamImportQualifiersForTest }}, {{ $example.PrimaryResourceName }}),
+				ImportStateId:     fmt.Sprintf("{{ $.IamImportFormat }} {{ $.IamPolicy.AllowedIamRole }} user:admin@hashicorptest.com", {{ if ne $.IamImportQualifiersForTest "" }}{{ $.IamImportQualifiersForTest }}, {{ end }}{{ $example.PrimaryResourceName }}),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_member.foo2",
-				ImportStateId:     fmt.Sprintf("{{ $.IamResourceUriFormat }} {{ $.IamPolicy.AllowedIamRole }}", {{ $.IamImportQualifiersForTest }}, {{ $example.PrimaryResourceName }}, context["condition_title"]),
+				ImportStateId:     fmt.Sprintf("{{ $.IamImportFormat }} {{ $.IamPolicy.AllowedIamRole }} user:admin@hashicorptest.com %s", {{ if ne $.IamImportQualifiersForTest "" }}{{ $.IamImportQualifiersForTest }}, {{ end }}{{ $example.PrimaryResourceName }}, context["condition_title"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_member.foo3",
-				ImportStateId:     fmt.Sprintf("{{ $.IamResourceUriFormat }} {{ $.IamPolicy.AllowedIamRole }}", {{ $.IamImportQualifiersForTest }}, {{ $example.PrimaryResourceName }}, context["condition_title_no_desc"]),
+				ImportStateId:     fmt.Sprintf("{{ $.IamImportFormat }} {{ $.IamPolicy.AllowedIamRole }} user:admin@hashicorptest.com %s", {{ if ne $.IamImportQualifiersForTest "" }}{{ $.IamImportQualifiersForTest }}, {{ end }}{{ $example.PrimaryResourceName }}, context["condition_title_no_desc"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -332,8 +330,7 @@ func TestAcc{{ $.ResourceName }}IamMemberGenerated_withAndWithoutCondition(t *te
 
 func TestAcc{{ $.ResourceName }}IamPolicyGenerated_withCondition(t *testing.T) {
 	t.Parallel()
-
-{{- if $.IamPolicy.AdminIamRole }}
+{{ if $.IamPolicy.AdminIamRole }}
 	// This may skip test, so do it first
 	sa := envvar.GetTestServiceAccountFromEnv(t)
 {{-  end }}
@@ -341,8 +338,7 @@ func TestAcc{{ $.ResourceName }}IamPolicyGenerated_withCondition(t *testing.T) {
 {{- if $.IamPolicy.AdminIamRole }}
 	context["service_account"] = sa
 {{-  end }}
-
-{{- if $.IamPolicy.AdminIamRole }}
+{{ if not $.IamPolicy.AdminIamRole }}
 	// Test should have 2 bindings: one with a description and one without. Any < chars are converted to a unicode character by the API.
 	expectedPolicyData := acctest.Nprintf(`{"bindings":[{"condition":{"description":"%{condition_desc}","expression":"%{condition_expr}","title":"%{condition_title}"},"members":["user:admin@hashicorptest.com"],"role":"%{role}"},{"condition":{"expression":"%{condition_expr}","title":"%{condition_title}-no-description"},"members":["user:admin@hashicorptest.com"],"role":"%{role}"}]}`, context)
 {{-  else }}
@@ -378,7 +374,7 @@ func TestAcc{{ $.ResourceName }}IamPolicyGenerated_withCondition(t *testing.T) {
 {{- if not $.IamPolicy.SkipImportTest }}
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_policy.foo",
-				ImportStateId:     fmt.Sprintf("{{ $.IamResourceUriFormat }}", {{ $.IamImportQualifiersForTest }}, {{ $example.PrimaryResourceName }}),
+				ImportStateId:     fmt.Sprintf("{{ $.IamImportFormat }}", {{ if ne $.IamImportQualifiersForTest "" }}{{ $.IamImportQualifiersForTest }}, {{ end }}{{ $example.PrimaryResourceName }}),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -487,8 +483,7 @@ resource "{{ $.IamTerraformName }}_binding" "foo" {
 }
 `, context)
 }
-
-{{- if $.IamPolicy.IamConditionsRequestType }}
+{{ if $.IamPolicy.IamConditionsRequestType }}
 func testAcc{{ $.ResourceName }}IamBinding_withConditionGenerated(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 {{ $example.TestHCLText }}

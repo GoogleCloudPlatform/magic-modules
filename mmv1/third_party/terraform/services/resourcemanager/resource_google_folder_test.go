@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
@@ -42,9 +42,10 @@ func TestAccFolder_rename(t *testing.T) {
 					testAccCheckGoogleFolderDisplayName(&folder, newFolderDisplayName),
 				)},
 			{
-				ResourceName:      "google_folder.folder1",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_folder.folder1",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -153,6 +154,7 @@ func testAccFolder_basic(folder, parent string) string {
 resource "google_folder" "folder1" {
   display_name = "%s"
   parent       = "%s"
+  deletion_protection = false
 }
 `, folder, parent)
 }
@@ -162,11 +164,13 @@ func testAccFolder_move(folder1, folder2, parent string) string {
 resource "google_folder" "folder1" {
   display_name = "%s"
   parent       = google_folder.folder2.name
+  deletion_protection = false
 }
 
 resource "google_folder" "folder2" {
   display_name = "%s"
   parent       = "%s"
+  deletion_protection = false
 }
 `, folder1, folder2, parent)
 }

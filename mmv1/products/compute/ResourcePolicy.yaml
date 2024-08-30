@@ -15,8 +15,9 @@
 name: 'ResourcePolicy'
 kind: 'compute#resourcePolicy'
 base_url: projects/{{project}}/regions/{{region}}/resourcePolicies
-immutable: true
 has_self_link: true
+update_verb: :PATCH
+update_url: projects/{{project}}/regions/{{region}}/resourcePolicies/{{name}}
 collection_url_key: 'items'
 description: |
   A policy that can be attached to a resource to specify or schedule actions on that resource.
@@ -26,7 +27,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -44,6 +45,12 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'resource_policy_basic'
     primary_resource_id: 'foo'
+    vars:
+      name: 'gce-policy'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'resource_policy_hourly_format'
+    primary_resource_id: 'foo'
+    skip_docs: true
     vars:
       name: 'gce-policy'
   - !ruby/object:Provider::Terraform::Examples
@@ -77,6 +84,8 @@ examples:
     primary_resource_id: 'cgroup'
     vars:
       name: 'gce-policy'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/compute_resource_policy.go.erb
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: region
@@ -138,11 +147,11 @@ properties:
                 description: |
                   Time within the window to start the operations.
                   It must be in an hourly format "HH:MM",
-                  where HH : [00-23] and MM : [00] GMT.
-                  eg: 21:00
+                  where HH : [00-23] and MM : [00] GMT. eg: 21:00
                 required: true
                 validation: !ruby/object:Provider::Terraform::Validation
                   function: 'verify.ValidateHourlyOnly'
+                diff_suppress_func: 'HourlyFormatSuppressDiff'
           - !ruby/object:Api::Type::NestedObject
             name: 'dailySchedule'
             description: |
@@ -166,6 +175,7 @@ properties:
                 required: true
                 validation: !ruby/object:Provider::Terraform::Validation
                   function: 'verify.ValidateHourlyOnly'
+                diff_suppress_func: 'HourlyFormatSuppressDiff'
           - !ruby/object:Api::Type::NestedObject
             name: 'weeklySchedule'
             description: |

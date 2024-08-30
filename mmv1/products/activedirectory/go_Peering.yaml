@@ -15,8 +15,7 @@
 ---
 name: 'Peering'
 kind: 'activedirectory#peering'
-description: |
-  Creates a Peering for Managed AD instance.
+description: Creates a Peering for Managed AD instance.
 min_version: 'beta'
 references:
   guides:
@@ -63,7 +62,7 @@ examples:
 parameters:
   - name: 'peeringId'
     type: String
-    description: ""
+    description: ''
     min_version: 'beta'
     url_param_only: true
     required: true
@@ -71,34 +70,40 @@ parameters:
 properties:
   - name: 'name'
     type: String
-    description: "Unique name of the peering in this scope including projects and location using the form: projects/{projectId}/locations/global/peerings/{peeringId}."
+    description: |
+      Unique name of the peering in this scope including projects and location using the form: projects/{projectId}/locations/global/peerings/{peeringId}.
     min_version: 'beta'
     output: true
   - name: 'labels'
     type: KeyValueLabels
-    description: "Resource labels that can contain user-provided metadata"
+    description: 'Resource labels that can contain user-provided metadata'
     min_version: 'beta'
     immutable: false
   - name: 'authorizedNetwork'
     type: String
-    description: "The full names of the Google Compute Engine networks to which the instance is connected. Caller needs to make sure that CIDR subnets do not overlap between networks, else peering creation will fail."
+    description: |
+      The full names of the Google Compute Engine networks to which the instance is connected. Caller needs to make sure that CIDR subnets do not overlap between networks, else peering creation will fail.
     min_version: 'beta'
     required: true
     immutable: true
   - name: 'domainResource'
     type: String
-    description: "Full domain resource path for the Managed AD Domain involved in peering. The resource path should be in the form projects/{projectId}/locations/global/domains/{domainName}"
+    description: |
+      Full domain resource path for the Managed AD Domain involved in peering. The resource path should be in the form projects/{projectId}/locations/global/domains/{domainName}
     min_version: 'beta'
     required: true
     immutable: true
   - name: 'status'
     type: String
-    description: "The current state of this Peering."
+    description: |
+      The current state of this Peering.
     min_version: 'beta'
     url_param_only: true
     ignore_read: true
   - name: 'statusMessage'
     type: String
-    description: "Additional information about the current status of this peering, if available."
+    description: |
+      Additional information about the current status of this peering, if available.
+
     min_version: 'beta'
     ignore_read: true

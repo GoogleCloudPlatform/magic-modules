@@ -25,7 +25,10 @@ module OpenAPIGenerate
     end
 
     def run
-      Dir[@folder].each do |openapi_file|
+      openapi_dir = Dir[@folder]
+      raise "No OpenAPI files found in #{@folder}" if openapi_dir.empty?
+
+      openapi_dir.each do |openapi_file|
         write_yaml(openapi_file, @output)
       end
     end
@@ -287,10 +290,12 @@ module OpenAPIGenerate
     def write_yaml(spec_path, output)
       resource_paths = find_resources(spec_path)
       product_path = build_product(spec_path, output)
+      Google::LOGGER.info "Generated product '#{product_path}/product.yaml'"
       resource_paths.each do |path_array|
         resource = build_resource(spec_path, path_array[0], path_array[1])
         file_path = File.join(product_path, "#{resource.name}.yaml")
         File.write(file_path, resource.to_yaml)
+        Google::LOGGER.info "Generated resource '#{file_path}'"
       end
     end
   end

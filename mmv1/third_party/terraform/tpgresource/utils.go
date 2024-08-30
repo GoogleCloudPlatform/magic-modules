@@ -22,6 +22,7 @@ import (
 	"github.com/hashicorp/go-cty/cty"
 	fwDiags "github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/id"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"golang.org/x/exp/maps"
@@ -58,15 +59,14 @@ type TerraformResourceDiff interface {
 // Contains functions that don't really belong anywhere else.
 
 // GetRegionFromZone returns the region from a zone for Google cloud.
-// This is by removing the last two chars from the zone name to leave the region
-// If there aren't enough characters in the input string, an empty string is returned
+// This is by removing the characters after the last '-'.
 // e.g. southamerica-west1-a => southamerica-west1
 func GetRegionFromZone(zone string) string {
-	if zone != "" && len(zone) > 2 {
-		region := zone[:len(zone)-2]
-		return region
+	zoneParts := strings.Split(zone, "-")
+	if len(zoneParts) < 3 {
+		return ""
 	}
-	return ""
+	return strings.Join(zoneParts[:len(zoneParts)-1], "-")
 }
 
 // Infers the region based on the following (in order of priority):
@@ -878,4 +878,17 @@ func DefaultProviderZone(_ context.Context, diff *schema.ResourceDiff, meta inte
 	}
 
 	return nil
+}
+
+// id.UniqueId() returns a timestamp + incremental hash
+// This function truncates the timestamp to provide a prefix + 9 using
+// YYmmdd + last 3 digits of the incremental hash
+func ReducedPrefixedUniqueId(prefix string) string {
+	// uniqueID is timestamp + 8 digit counter (YYYYmmddHHMMSSssss + 12345678)
+	uniqueId := id.PrefixedUniqueId("")
+	// last three digits of the counter (678)
+	counter := uniqueId[len(uniqueId)-3:]
+	// YYmmdd of date
+	date := uniqueId[2:8]
+	return prefix + date + counter
 }

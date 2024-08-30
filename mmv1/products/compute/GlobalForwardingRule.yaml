@@ -17,6 +17,8 @@ kind: 'compute#forwardingRule'
 base_url: projects/{{project}}/global/forwardingRules
 immutable: true
 has_self_link: true
+# Has a separate endpoint for labels
+skip_attribution_label: true
 legacy_long_form_project: true
 collection_url_key: 'items'
 description: |
@@ -25,13 +27,12 @@ description: |
   balancing. Global forwarding rules can only be used for HTTP load
   balancing.
 
-  For more information, see
-  https://cloud.google.com/compute/docs/load-balancing/http/
+  For more information, see https://cloud.google.com/compute/docs/load-balancing/http/
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -238,7 +239,6 @@ properties:
       * When the `target` is a Private Service Connect Google APIs
       bundle, you must specify an `IPAddress`.
 
-
       Otherwise, you can optionally specify an IP address that references an
       existing static (reserved) IP address resource. When omitted, Google Cloud
       assigns an ephemeral IP address.
@@ -256,7 +256,6 @@ properties:
         * `global/addresses/address-name`
         * `address-name`
 
-
       The forwarding rule's `target`,
       and in most cases, also the `loadBalancingScheme`, determine the
       type of IP address that you can use. For detailed information, see
@@ -266,7 +265,7 @@ properties:
       When reading an `IPAddress`, the API always returns the IP
       address number.
     default_from_api: true
-    diff_suppress_func: 'tpgresource.InternalIpDiffSuppress'
+    diff_suppress_func: InternalIpDiffSuppress
   - !ruby/object:Api::Type::Enum
     name: 'IPProtocol'
     description: |
@@ -443,7 +442,7 @@ properties:
       cannot have overlapping `portRange`s.
 
       @pattern: \d+(?:-\d+)?
-    diff_suppress_func: 'tpgresource.PortRangeDiffSuppress'
+    diff_suppress_func: PortRangeDiffSuppress
     # This is a multi-resource resource reference (TargetHttp(s)Proxy,
     # TargetSslProxy, TargetTcpProxy, TargetVpnGateway, TargetPool,
     # TargetInstance)
@@ -478,7 +477,6 @@ properties:
       *  For Private Service Connect forwarding rules that forward traffic to Google APIs, provide the name of a supported Google API bundle:
         *  `vpc-sc` - [ APIs that support VPC Service Controls](https://cloud.google.com/vpc-service-controls/docs/supported-products).
         *  `all-apis` - [All supported Google APIs](https://cloud.google.com/vpc/docs/private-service-connect#supported-apis).
-
 
       For Private Service Connect forwarding rules that forward traffic to managed services, the target must be a service attachment.
     update_verb: :POST

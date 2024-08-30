@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Product
 name: BackupDR
-display_name: Backup and DR
+display_name: Backup and DR Service
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 versions:

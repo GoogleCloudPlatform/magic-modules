@@ -1,0 +1,72 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Processor'
+description: |
+  The first-class citizen for Document AI. Each processor defines how to extract structural information from a document.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/document-ai/docs/overview'
+  api: 'https://cloud.google.com/document-ai/docs/reference/rest/v1/projects.locations.processors'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/processors'
+immutable: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+examples:
+  - name: 'documentai_processor'
+    primary_resource_id: 'processor'
+    vars:
+      processor_name: 'test-processor'
+  - name: 'documentai_processor_eu'
+    primary_resource_id: 'processor'
+    vars:
+      processor_name: 'test-processor'
+    skip_docs: true
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The location of the resource.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The resource name of the processor.
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+  - name: 'type'
+    type: String
+    description: |
+      The type of processor. For possible types see the [official list](https://cloud.google.com/document-ai/docs/reference/rest/v1/projects.locations/fetchProcessorTypes#google.cloud.documentai.v1.DocumentProcessorService.FetchProcessorTypes)
+    required: true
+    immutable: true
+  - name: 'displayName'
+    type: String
+    description: |
+      The display name. Must be unique.
+    required: true
+    immutable: true
+  - name: 'kmsKeyName'
+    type: String
+    description: |
+      The KMS key used for encryption/decryption in CMEK scenarios. See https://cloud.google.com/security-key-management.
+    immutable: true

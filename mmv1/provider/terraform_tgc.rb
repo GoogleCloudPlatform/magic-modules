@@ -319,10 +319,26 @@ module Provider
                         'third_party/tgc/compute_target_pool.go'],
                        ['converters/google/resources/dataproc_cluster.go',
                         'third_party/tgc/dataproc_cluster.go'],
+                       ['converters/google/resources/composer_environment.go',
+                        'third_party/tgc/composer_environment.go'],
                        ['converters/google/resources/commitment.go',
                         'third_party/tgc/commitment.go'],
                        ['converters/google/resources/firebase_project.go',
-                        'third_party/tgc/firebase_project.go']
+                        'third_party/tgc/firebase_project.go'],
+                       ['converters/google/resources/appengine_application.go',
+                        'third_party/tgc/appengine_application.go'],
+                       ['converters/google/resources/apikeys_key.go',
+                        'third_party/tgc/apikeys_key.go'],
+                       ['converters/google/resources/logging_folder_bucket_config.go',
+                        'third_party/tgc/logging_folder_bucket_config.go'],
+                       ['converters/google/resources/logging_organization_bucket_config.go',
+                        'third_party/tgc/logging_organization_bucket_config.go'],
+                       ['converters/google/resources/logging_project_bucket_config.go',
+                        'third_party/tgc/logging_project_bucket_config.go'],
+                       ['converters/google/resources/logging_billing_account_bucket_config.go',
+                        'third_party/tgc/logging_billing_account_bucket_config.go'],
+                       ['converters/google/resources/appengine_standard_version.go',
+                        'third_party/tgc/appengine_standard_version.go']
                      ])
     end
 

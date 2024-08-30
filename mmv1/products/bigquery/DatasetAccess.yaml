@@ -125,6 +125,7 @@ properties:
       - view
       - dataset
       - routine
+    custom_expand: 'templates/terraform/custom_expand/string_to_lower_case.go.erb'
     diff_suppress_func: resourceBigQueryDatasetAccessIamMemberDiffSuppress
   - !ruby/object:Api::Type::String
     name: 'groupByEmail'
@@ -138,6 +139,7 @@ properties:
       - view
       - dataset
       - routine
+    custom_expand: 'templates/terraform/custom_expand/string_to_lower_case.go.erb'
     diff_suppress_func: resourceBigQueryDatasetAccessIamMemberDiffSuppress
   - !ruby/object:Api::Type::String
     name: 'domain'
@@ -158,17 +160,9 @@ properties:
     name: 'specialGroup'
     description: |
       A special group to grant access to. Possible values include:
-
-
       * `projectOwners`: Owners of the enclosing project.
-
-
       * `projectReaders`: Readers of the enclosing project.
-
-
       * `projectWriters`: Writers of the enclosing project.
-
-
       * `allAuthenticatedUsers`: All authenticated BigQuery users.
     exactly_one_of:
       - user_by_email

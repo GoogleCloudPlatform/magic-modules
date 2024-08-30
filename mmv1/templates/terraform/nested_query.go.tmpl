@@ -10,9 +10,8 @@ func flattenNested{{ $.ResourceName }}(d *schema.ResourceData, meta interface{},
     return nil, nil
   }
   res = v.(map[string]interface{})
-
 {{-   end }}
-{{- end }}
+{{ end }}
   v, ok = res["{{ $.LastNestedQueryKey }}"]
   if !ok || v == nil {
     return nil,nil
@@ -56,7 +55,7 @@ func resource{{ $.ResourceName }}FindNestedObjectInList(d *schema.ResourceData, 
     {{- if $.NestedQuery.IsListOfIds }}
     // List response only contains the ID - construct a response object.
     item := map[string]interface{}{
-      "{{ $.FirstIdentity.ApiName }}": itemRaw,
+      "{{ $.FirstIdentityProp.ApiName }}": itemRaw,
     }
     {{- else }}
     item := itemRaw.(map[string]interface{})
@@ -103,31 +102,13 @@ func resource{{ $.ResourceName }}PatchCreateEncoder(d *schema.ResourceData, meta
   // Return list with the resource to create appended
   {{- if $.NestedQuery.IsListOfIds }}
   res := map[string]interface{}{
-    "{{ $.LastNestedQueryKey }}": append(currItems, obj["{{ $.FirstIdentity.ApiName }}"]),
+    "{{ $.LastNestedQueryKey }}": append(currItems, obj["{{ $.FirstIdentityProp.ApiName }}"]),
   }
   {{- else }}
   res := map[string]interface{}{
     "{{ $.LastNestedQueryKey }}": append(currItems, obj),
   }
 {{- end }}
-  {{/*
-  Reconstruct the full nested object. For example, if nested_query.keys is:
-  - nested_item
-  - more_nested_item
-  Then the code above will build:
-  {
-    "more_nested_item": [...]
-  }
-  Add back the other keys so we get:
-  {
-    "nested_item": {
-      "more_nested_item": [...]
-    }
-  }
-  Note that this assumes that we can safely have "more_nested_item" be the only element
-  in the "nested_item" map, which only works if the patch request takes an update mask
-  (or if the rest of the map would have been empty anyway).
-  */}}
 {{- range $i, $k := $.NestedQuery.Keys }}
   {{- if ne $i 0 }}
   wrapped := map[string]interface{}{
@@ -204,9 +185,8 @@ func resource{{ $.ResourceName }}PatchDeleteEncoder(d *schema.ResourceData, meta
   res := map[string]interface{}{
     "{{ $.LastNestedQueryKey }}": updatedItems,
   }
-  {{/* see comments in PatchCreateEncoder for details */}}
   {{- range $i, $k := $.NestedQuery.Keys }}
-  {{- if ne $i 0 }}
+  {{- if ne $i (sub (len $.NestedQuery.Keys) 1) }}
   wrapped := map[string]interface{}{
     "{{ $k }}": res,
   }
@@ -219,7 +199,7 @@ func resource{{ $.ResourceName }}PatchDeleteEncoder(d *schema.ResourceData, meta
 
 // ListForPatch handles making API request to get parent resource and
 // extracting list of objects.
-{{/* This function is similar to flattenNested...() but
+{{- /* This function is similar to flattenNested...() but
   # 1) does an API request to read the parent resource from API (flatten
        takes in list from top-level Read() method, whereas this method
        is called in Create/Update/Delete)
@@ -228,7 +208,7 @@ func resource{{ $.ResourceName }}PatchDeleteEncoder(d *schema.ResourceData, meta
 */}}
 func resource{{ $.ResourceName }}ListForPatch(d *schema.ResourceData, meta interface{}) ([]interface{}, error) {
   config := meta.(*transport_tpg.Config)
-  url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}{{"}}$.SelfLinkUri{{"}}"}}")
+  url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}")
   if err != nil {
       return nil, err
   }
@@ -265,12 +245,14 @@ func resource{{ $.ResourceName }}ListForPatch(d *schema.ResourceData, meta inter
 
   var v interface{}
   var ok bool
-{{- range $k := $.NestedQuery.Keys }}
+{{- range $i, $k := $.NestedQuery.Keys }}
+  {{- if not (eq $i (sub (len $.NestedQuery.Keys) 1)) }}
   if v, ok = res["{{ $k }}"]; ok && v != nil {
     res = v.(map[string]interface{})
   } else {
     return nil, nil
   }
+  {{- end }}
 {{- end }}
 
   v, ok = res["{{ $.LastNestedQueryKey }}"]

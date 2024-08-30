@@ -1,0 +1,144 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Fleet'
+description: |
+  Fleet contains information about a group of clusters.
+references:
+  guides:
+    'Registering a Cluster to a Fleet': 'https://cloud.google.com/anthos/multicluster-management/connect/registering-a-cluster#register_cluster'
+  api: 'https://cloud.google.com/anthos/multicluster-management/reference/rest/v1/projects.locations.fleets'
+docs:
+id_format: 'projects/{{project}}/locations/global/fleets/default'
+base_url: 'projects/{{project}}/locations/global/fleets'
+self_link: 'projects/{{project}}/locations/global/fleets/default'
+create_url: 'projects/{{project}}/locations/global/fleets'
+update_url: 'projects/{{project}}/locations/global/fleets/default'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/global/fleets/default'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    kind: 'gkehub#operation'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error/errors'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'gkehub_fleet_basic'
+    primary_resource_id: 'default'
+    skip_test: true
+parameters:
+properties:
+  - name: 'displayName'
+    type: String
+    description: |
+      A user-assigned display name of the Fleet. When present, it must be between 4 to 30 characters.
+      Allowed characters are: lowercase and uppercase letters, numbers, hyphen, single-quote, double-quote, space, and exclamation point.
+  - name: 'createTime'
+    type: Time
+    description: |
+      The time the fleet was created, in RFC3339 text format.
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      The time the fleet was last updated, in RFC3339 text format.
+    output: true
+  - name: 'deleteTime'
+    type: Time
+    description: |
+      The time the fleet was deleted, in RFC3339 text format.
+    output: true
+  - name: 'uid'
+    type: String
+    description: |
+      Google-generated UUID for this resource. This is unique across all
+      Fleet resources. If a Fleet resource is deleted and another
+      resource with the same name is created, it gets a different uid.
+    output: true
+  - name: 'state'
+    type: NestedObject
+    description: The state of the fleet resource.
+    output: true
+    properties:
+      - name: 'code'
+        type: Enum
+        description: Describes the state of a Fleet resource.
+        output: true
+        enum_values:
+          - 'CODE_UNSPECIFIED'
+          - 'CREATING'
+          - 'READY'
+          - 'DELETING'
+          - 'UPDATING'
+  - name: 'defaultClusterConfig'
+    type: NestedObject
+    description: The default cluster configurations to apply across the fleet.
+    properties:
+      - name: 'binaryAuthorizationConfig'
+        type: NestedObject
+        description: Enable/Disable binary authorization features for the cluster.
+        properties:
+          - name: 'evaluationMode'
+            type: Enum
+            description: Mode of operation for binauthz policy evaluation.
+            enum_values:
+              - 'DISABLED'
+              - 'POLICY_BINDINGS'
+          - name: 'policyBindings'
+            type: Array
+            description: Binauthz policies that apply to this cluster.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'name'
+                  type: String
+                  description: |
+                    The relative resource name of the binauthz platform policy to audit. GKE
+                    platform policies have the following format:
+                    `projects/{project_number}/platforms/gke/policies/{policy_id}`.
+      - name: 'securityPostureConfig'
+        type: NestedObject
+        description: Enable/Disable Security Posture features for the cluster.
+        properties:
+          - name: 'mode'
+            type: Enum
+            description: Sets which mode to use for Security Posture features.
+            enum_values:
+              - 'DISABLED'
+              - 'BASIC'
+              - 'ENTERPRISE'
+          - name: 'vulnerabilityMode'
+            type: Enum
+            description: Sets which mode to use for vulnerability scanning.
+            enum_values:
+              - 'VULNERABILITY_DISABLED'
+              - 'VULNERABILITY_BASIC'
+              - 'VULNERABILITY_ENTERPRISE'

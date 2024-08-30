@@ -130,6 +130,17 @@ func diskConfigKeys(configName string) []string {
 	}
 }
 
+// Suppress diffs for values that are equivalent except for their use of the words "location"
+// compared to "region" or "zone"
+func LocationDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	return LocationDiffSuppressHelper(old, new) || LocationDiffSuppressHelper(new, old)
+}
+
+func LocationDiffSuppressHelper(a, b string) bool {
+	return strings.Replace(a, "/locations/", "/regions/", 1) == b ||
+		strings.Replace(a, "/locations/", "/zones/", 1) == b
+}
+
 func resourceDataprocLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	if strings.HasPrefix(k, resourceDataprocGoogleProvidedLabelPrefix) && new == "" {
 		return true
@@ -176,7 +187,8 @@ func ResourceDataprocCluster() *schema.Resource {
 
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
-			tpgresource.SetLabelsDiff,
+			// User labels are not supported in Dataproc Virtual Cluster
+			tpgresource.SetLabelsDiffWithoutAttributionLabel,
 		),
 
 		SchemaVersion: 1,
@@ -1430,7 +1442,7 @@ by Dataproc`,
 										Type:             schema.TypeString,
 										Required:         true,
 										Description:      `The autoscaling policy used by the cluster.`,
-										DiffSuppressFunc: tpgresource.LocationDiffSuppress,
+										DiffSuppressFunc: LocationDiffSuppress,
 									},
 								},
 							},

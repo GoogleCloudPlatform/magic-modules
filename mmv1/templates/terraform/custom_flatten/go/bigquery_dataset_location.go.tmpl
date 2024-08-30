@@ -1,4 +1,4 @@
-{{- /*
+{{/*
 	The license inside this block applies to this file
 	Copyright 2024 Google Inc.
 	Licensed under the Apache License, Version 2.0 (the "License");
@@ -9,7 +9,7 @@
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License.
-*/}}
+*/ -}}
 // Older Datasets in BigQuery have no Location set in the API response. This may be an issue when importing
 // datasets created before BigQuery was available in multiple zones. We can safely assume that these datasets
 // are in the US, as this was the default at the time.

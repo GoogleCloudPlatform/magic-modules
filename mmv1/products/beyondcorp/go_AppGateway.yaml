@@ -1,0 +1,138 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'AppGateway'
+description: "A BeyondCorp AppGateway resource represents a BeyondCorp protected
+  AppGateway to a remote application. It creates \nall the necessary GCP
+  components needed for creating a BeyondCorp protected AppGateway. Multiple
+  connectors can be \n\
+  authorised for a single AppGateway.\n"
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/beyondcorp-enterprise/docs/enable-app-connector'
+  api: 'https://cloud.google.com/beyondcorp/docs/reference/rest#rest-resource:-v1.projects.locations.appgateways'
+docs:
+base_url: 'projects/{{project}}/locations/{{region}}/appGateways'
+self_link: 'projects/{{project}}/locations/{{region}}/appGateways/{{name}}'
+create_url: 'projects/{{project}}/locations/{{region}}/appGateways?app_gateway_id={{name}}'
+immutable: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+    timeouts:
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+schema_version: 1
+state_upgraders: true
+examples:
+  - name: 'beyondcorp_app_gateway_basic'
+    primary_resource_id: 'app_gateway'
+    primary_resource_name: 'fmt.Sprintf("tf_test_my_app_gateway%s", context["random_suffix"])'
+    vars:
+      app_gateway_name: 'my-app-gateway'
+  - name: 'beyondcorp_app_gateway_full'
+    primary_resource_id: 'app_gateway'
+    primary_resource_name: 'fmt.Sprintf("tf_test_my_app_gateway%s", context["random_suffix"])'
+    vars:
+      app_gateway_name: 'my-app-gateway'
+      display_name: 'some display name'
+parameters:
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      ID of the AppGateway.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'region'
+    type: String
+    description: |
+      The region of the AppGateway.
+    url_param_only: true
+    immutable: true
+  - name: 'type'
+    type: Enum
+    description: |
+      The type of network connectivity used by the AppGateway.
+    default_value: "TYPE_UNSPECIFIED"
+    enum_values:
+      - 'TYPE_UNSPECIFIED'
+      - 'TCP_PROXY'
+  - name: 'hostType'
+    type: Enum
+    description: |
+      The type of hosting used by the AppGateway.
+    default_value: "HOST_TYPE_UNSPECIFIED"
+    enum_values:
+      - 'HOST_TYPE_UNSPECIFIED'
+      - 'GCP_REGIONAL_MIG'
+  - name: 'displayName'
+    type: String
+    description: |
+      An arbitrary user-provided name for the AppGateway.
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      Resource labels to represent user provided metadata.
+    immutable: false
+  - name: 'state'
+    type: Enum
+    description: |
+      Represents the different states of a AppGateway.
+    output: true
+    enum_values:
+      - 'STATE_UNSPECIFIED'
+      - 'CREATING'
+      - 'CREATED'
+      - 'UPDATING'
+      - 'DELETING'
+      - 'DOWN'
+  - name: 'uri'
+    type: String
+    description: |
+      Server-defined URI for this resource.
+    output: true
+  - name: 'allocatedConnections'
+    type: NestedObject
+    description: |
+      A list of connections allocated for the Gateway.
+    output: true
+    properties:
+      - name: 'pscUri'
+        type: String
+        description: |
+          The PSC uri of an allocated connection.
+      - name: 'ingressPort'
+        type: Integer
+        description: |
+          The ingress port of an allocated connection.

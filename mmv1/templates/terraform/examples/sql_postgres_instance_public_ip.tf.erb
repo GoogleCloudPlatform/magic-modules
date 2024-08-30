@@ -1,4 +1,3 @@
-# [START cloud_sql_postgres_instance_public_ip]  
 resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
   database_version = "POSTGRES_14"
   name             = "<%= ctx[:vars]['postgres_public_ip_instance_name'] %>"
@@ -19,4 +18,3 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
   }
   deletion_protection =  "<%= ctx[:vars]['deletion_protection'] %>"
 }
-# [END cloud_sql_postgres_instance_public_ip]

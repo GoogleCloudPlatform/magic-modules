@@ -7,4 +7,5 @@ resource "google_project" "basic" {
   project_id = "{{index $.Vars "monitored_project"}}"
   name       = "{{index $.Vars "monitored_project"}}-display"
   org_id     = "{{index $.TestEnvVars "org_id"}}"
+  deletion_policy = "DELETE"
 }

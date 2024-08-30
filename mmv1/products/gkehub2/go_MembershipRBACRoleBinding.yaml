@@ -1,0 +1,172 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'MembershipRBACRoleBinding'
+description: |
+  RBACRoleBinding represents a rbacrolebinding across the Fleet.
+min_version: 'beta'
+references:
+  guides:
+    'Registering a Cluster': 'https://cloud.google.com/anthos/multicluster-management/connect/registering-a-cluster#register_cluster'
+  api: 'https://cloud.google.com/anthos/fleet-management/docs/reference/rest/v1/projects.locations.memberships'
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}/rbacrolebindings/{{membership_rbac_role_binding_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}/rbacrolebindings'
+self_link: 'projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}/rbacrolebindings/{{membership_rbac_role_binding_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}/rbacrolebindings/?rbacrolebinding_id={{membership_rbac_role_binding_id}}'
+immutable: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}/rbacrolebindings/{{membership_rbac_role_binding_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    kind: 'gkehub#operation'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error/errors'
+    message: 'message'
+custom_code:
+skip_sweeper: true
+examples:
+  - name: 'gkehub_membership_rbac_role_binding_basic'
+    primary_resource_id: 'membership_rbac_role_binding'
+    primary_resource_name: 'fmt.Sprintf(\"tf-test-membership%s\", context[\"random_suffix\"]), fmt.Sprintf(\"tf-test-rbac-role-binding%s\", context[\"random_suffix\"])'
+    min_version: 'beta'
+    vars:
+      cluster_name: 'basic-cluster'
+      deletion_protection: 'true'
+      network_name: 'default'
+      subnetwork_name: 'default'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+      location: 'global'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+parameters:
+  - name: 'membership_id'
+    type: String
+    description: |
+      Id of the membership
+    min_version: 'beta'
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'location'
+    type: String
+    description: |
+      Location of the Membership
+    min_version: 'beta'
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'membershipRbacRoleBindingId'
+    type: String
+    description: |
+      The client-provided identifier of the RBAC Role Binding.
+    min_version: 'beta'
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'name'
+    type: String
+    description: |
+      The resource name for the RBAC Role Binding
+    min_version: 'beta'
+    output: true
+  - name: 'uid'
+    type: String
+    description: |
+      Google-generated UUID for this resource.
+    min_version: 'beta'
+    output: true
+  - name: 'createTime'
+    type: Time
+    description: |
+      Time the RBAC Role Binding was created in UTC.
+    min_version: 'beta'
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      Time the RBAC Role Binding was updated in UTC.
+    min_version: 'beta'
+    output: true
+  - name: 'deleteTime'
+    type: Time
+    description: |
+      Time the RBAC Role Binding was deleted in UTC.
+    min_version: 'beta'
+    output: true
+  - name: 'state'
+    type: NestedObject
+    description: |
+      State of the RBAC Role Binding resource.
+    min_version: 'beta'
+    output: true
+    properties:
+      - name: 'code'
+        type: Enum
+        description: |
+          Code describes the state of a RBAC Role Binding resource.
+        min_version: 'beta'
+        output: true
+        enum_values:
+          - 'CODE_UNSPECIFIED'
+          - 'CREATING'
+          - 'READY'
+          - 'DELETING'
+          - 'UPDATING'
+  - name: 'user'
+    type: String
+    description: |
+      Principal that is be authorized in the cluster (at least of one the oneof
+      is required). Updating one will unset the other automatically.
+      user is the name of the user as seen by the kubernetes cluster, example
+      "alice" or "alice@domain.tld"
+    min_version: 'beta'
+    required: true
+  - name: 'role'
+    type: NestedObject
+    description: |
+      Role to bind to the principal.
+    min_version: 'beta'
+    required: true
+    properties:
+      - name: 'predefinedRole'
+        type: Enum
+        description: |
+          PredefinedRole is an ENUM representation of the default Kubernetes Roles
+        min_version: 'beta'
+        required: true
+        enum_values:
+          - 'UNKNOWN'
+          - 'ADMIN'
+          - 'EDIT'
+          - 'VIEW'
+          - 'ANTHOS_SUPPORT'

@@ -26,9 +26,9 @@ import (
 {{- end }}
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 {{- if not $.Res.SkipDelete }}
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 {{- end }}
 
 	"{{ $.ImportPath }}/acctest"
@@ -36,7 +36,7 @@ import (
 	"{{ $.ImportPath  }}/tpgresource"
 	transport_tpg "{{ $.ImportPath  }}/transport"
 )
-{{ range $e := $.Res.Examples }}
+{{ range $e := $.Res.TestExamples }}
 func TestAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T) {
 	{{- if $e.SkipVcr }}
 	acctest.SkipIfVcr(t)
@@ -53,10 +53,10 @@ func TestAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-	{{- if not (and $e.MinVersion (not (eq $e.MinVersion "ga"))) }}
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-	{{- else }}
+	{{- if $.Res.VersionedProvider $e.MinVersion }}
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+	{{- else }}
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 	{{- end }}
 	{{- if $e.ExternalProviders }}
 		ExternalProviders: map[string]resource.ExternalProvider{
@@ -104,8 +104,8 @@ func testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t *testing.T) func(s *t
 			if strings.HasPrefix(name, "data.") {
 				continue
 			}
-	{{- if $.Res.CustomCode.TestCheckDestroy }}
-{{/*TODO Q2: Custom template for TestCheckDestroy */}}
+	{{ if $.Res.CustomCode.TestCheckDestroy }}
+	{{ $.Res.CustomTemplate $.Res.CustomCode.TestCheckDestroy false -}}
 	{{- else }}
 
 		config := acctest.GoogleProviderConfig(t)

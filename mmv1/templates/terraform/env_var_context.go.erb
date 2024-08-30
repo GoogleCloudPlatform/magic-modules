@@ -1,4 +1,5 @@
-<% example.test_env_vars&.each do |var_name, var_type| -%>
+<% unless example.test_env_vars.nil? -%>
+<% example.test_env_vars.sort.each do |var_name, var_type| -%>
 	<% if var_type == :ORG_ID  -%>
 		"<%= var_name -%>": envvar.GetTestOrgFromEnv(t),
 	<% elsif var_type == :ORG_DOMAIN  -%>
@@ -28,4 +29,5 @@
 	<% elsif var_type == :ZONE  -%>
 		"<%= var_name -%>": envvar.GetTestZoneFromEnv(),
 	<% end -%>
+<% end -%>
 <% end -%>

@@ -250,6 +250,9 @@ module Api
 
       # Add a deprecation message for a resource that's been deprecated in the API.
       attr_reader :deprecation_message
+
+      # Do not apply the default attribution label
+      attr_reader :skip_attribution_label
     end
 
     include Properties
@@ -318,6 +321,8 @@ module Api
             type: Array,
             default: []
 
+      @virtual_fields&.each { |field| field.client_side = true }
+
       check :custom_code, type: Provider::Terraform::CustomCode,
                           default: Provider::Terraform::CustomCode.new
       check :sweeper, type: Provider::Terraform::Sweeper, default: Provider::Terraform::Sweeper.new
@@ -342,6 +347,7 @@ module Api
       check :taint_resource_on_failed_create, type: :boolean, default: false
       check :skip_sweeper, type: :boolean, default: false
       check :deprecation_message, type: ::String
+      check :skip_attribution_label, type: :boolean, default: false
 
       validate_identity unless @identity.nil?
     end
@@ -396,7 +402,11 @@ module Api
     def convert_go_file(file)
       dir, base = File.split(file)
       base.slice! '.erb'
-      "#{dir}/go/#{base}.tmpl"
+      if dir.end_with?('terraform')
+        "#{dir}/#{base}.go.tmpl"
+      else
+        "#{dir}/go/#{base}.tmpl"
+      end
     end
 
     # All settable properties in the resource.
@@ -471,7 +481,11 @@ module Api
     def add_labels_fields(props, parent, labels)
       @custom_diff ||= []
       if parent.nil? || parent.flatten_object
-        @custom_diff.append('tpgresource.SetLabelsDiff')
+        if @skip_attribution_label
+          @custom_diff.append('tpgresource.SetLabelsDiffWithoutAttributionLabel')
+        else
+          @custom_diff.append('tpgresource.SetLabelsDiff')
+        end
       elsif parent.name == 'metadata'
         @custom_diff.append('tpgresource.SetMetadataLabelsDiff')
       end

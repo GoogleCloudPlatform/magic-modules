@@ -8,8 +8,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -378,6 +378,7 @@ resource "google_project" "project" {
 	project_id = "%{project_id}"
 	name       = "%{project_id}"
 	org_id     = "%{org_id}"
+	deletion_policy = "DELETE"
 }
 
 resource "google_tags_tag_key" "key" {

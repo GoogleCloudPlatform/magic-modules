@@ -15,8 +15,10 @@ provider "google" {
 resource "google_alloydb_cluster" "default" {
   cluster_id = "alloydb-cluster"
   location   = "us-central1"
-  network  = "default"
-
+  network_config {
+    network = "default"
+  }
+  
   initial_user {
     password = "alloydb-cluster"
   }

@@ -61,7 +61,9 @@ resource "google_privateca_certificate_authority" "default" {
   }
 }
 
-data "google_project" "project" {}
+data "google_project" "project" {
+  provider = google-beta
+}
 
 resource "google_privateca_ca_pool_iam_member" "tls_inspection_permission" {
   provider = google-beta

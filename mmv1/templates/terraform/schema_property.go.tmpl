@@ -15,8 +15,8 @@
 {{- define "SchemaFields"}}
 {{- if .FlattenObject -}}
 	{{- range $prop := .ResourceMetadata.OrderProperties .Properties -}}
-		{{- template "SchemaFields" $prop -}}
-	{{- end -}}
+    {{ template "SchemaFields" $prop }}
+	{{ end -}}
 {{- else -}}
 "{{underscore .Name -}}": {
 {{ if .IsSet -}}
@@ -27,9 +27,6 @@
 {{ if .DefaultFromApi -}}
 	Computed: true,
 	Optional: true,
-	{{ if .SchemaConfigModeAttr -}}
-	ConfigMode: schema.SchemaConfigModeAttr,
-	{{ end -}}
 {{ else if .Required -}}
   Required: true,
 {{ else if .Output -}}
@@ -40,10 +37,10 @@
 {{ if .DeprecationMessage -}}
   Deprecated: "{{ .DeprecationMessage }}",
 {{ end -}}
-{{ if .Immutable -}}
+{{ if .IsForceNew -}}
   ForceNew: true,
 {{ end -}}
-{{ if .Validation -}}
+{{ if and (not .Output) .Validation -}}
 	{{ if .Validation.Regex -}}
   ValidateFunc: verify.ValidateRegexp(`{{ .Validation.Regex -}}`),
 	{{ else if .Validation.Function -}}
@@ -66,7 +63,7 @@
   {{- if .ItemType.DefaultValue -}}
 Default value: {{ .ItemType.DefaultValue -}}
   {{- end -}}
-Possible values: [{{- .EnumValuesToString "\"" false -}}]
+{{- " "}}Possible values: [{{- .ItemType.EnumValuesToString "\"" false -}}]
   {{- else if and (eq .Type "Enum") (not .Output) -}}
     {{- if .DefaultValue -}}
       {{- " "}}Default value: "{{ .DefaultValue -}}"
@@ -106,18 +103,26 @@ Possible values: [{{- .EnumValuesToString "\"" false -}}]
   {{ else if eq .ItemType.Type "String" -}}
       Elem: &schema.Schema{
         Type: schema.Type{{ .ItemTypeClass -}},
+        {{ template "ItemValidation" . -}}
       },
   {{ else if eq .ItemType.Type "Enum" -}}
       Elem: &schema.Schema{
-        Type: schema.Type{{ .ItemTypeClass -}},
-        ValidateFunc: verify.ValidateEnum([]string{ {{- .ItemType.EnumValuesToString "\"" true -}} }),
+        Type: schema.TypeString,
+        {{- if not .Output }}
+        ValidateFunc: verify.ValidateEnum([]string{ {{- .ItemType.EnumValuesToString "\"" false -}} }),
+        {{- end }}
       },
   {{ else -}}
       Elem: &schema.Schema{
-        Type: schema.Type{{ .ItemTypeClass -}},
     {{ if eq .ItemType.Type "ResourceRef" -}}
+        Type: schema.TypeString,
+        {{- if not .Output }}
         DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
+        {{- end }}
+    {{ else -}}
+        Type: {{ .TFType .ItemType.Type }},
     {{ end -}}
+    {{ template "ItemValidation" . -}}
       },
   {{ end -}}
   {{ if .IsSet -}}
@@ -140,7 +145,7 @@ Possible values: [{{- .EnumValuesToString "\"" false -}}]
 				{{ if .KeyDiffSuppressFunc -}}
 					DiffSuppressFunc: {{ .KeyDiffSuppressFunc }},
 				{{ end -}}
-				{{ if .Immutable -}}
+				{{ if .IsForceNew -}}
 				ForceNew: true,
 				{{ end -}}
 			},
@@ -156,21 +161,32 @@ Possible values: [{{- .EnumValuesToString "\"" false -}}]
 {{ if .Sensitive -}}
     Sensitive: true,
 {{ end -}}
-{{ if .DefaultValue -}}
+{{ if not (eq .DefaultValue nil ) -}}
     Default: {{ .GoLiteral .DefaultValue -}},
 {{ end -}}
-{{ if .Conflicting -}}
-    ConflictsWith: {{ .GoLiteral .Conflicting  -}},
+{{ if or .Conflicting .Conflicts -}}
+    ConflictsWith: {{ .GoLiteral (.GetPropertySchemaPathList .Conflicting)  -}},
 {{ end -}}
-{{ if .AtLeastOneOfList -}}
-    AtLeastOneOf: {{ .GoLiteral .AtLeastOneOfList  -}},
+{{ if or .AtLeastOneOfList .AtLeastOneOf -}}
+    AtLeastOneOf: {{ .GoLiteral (.GetPropertySchemaPathList .AtLeastOneOfList) -}},
 {{ end -}}
-{{ if .ExactlyOneOfList -}}
-    ExactlyOneOf: {{ .GoLiteral .ExactlyOneOfList  -}},
+{{ if or .ExactlyOneOfList .ExactlyOneOf -}}
+    ExactlyOneOf: {{ .GoLiteral (.GetPropertySchemaPathList .ExactlyOneOfList) -}},
 {{ end -}}
-{{ if .RequiredWithList -}}
-    RequiredWith: {{ .GoLiteral .RequiredWithList  -}},
+{{ if or .RequiredWithList .RequiredWith -}}
+    RequiredWith: {{ .GoLiteral (.GetPropertySchemaPathList .RequiredWithList) -}},
 {{ end -}}
 },
 {{- end -}}
+{{- end -}}
+{{- define "ItemValidation" -}}
+  {{ if not .Output -}}
+    {{ if .ItemValidation -}}
+      {{ if .ItemValidation.Regex -}}
+      ValidateFunc: verify.ValidateRegexp(`{{ .ItemValidation.Regex -}}`),
+      {{ else if .ItemValidation.Function -}}
+      ValidateFunc: {{ .ItemValidation.Function -}},
+      {{ end  -}}
+    {{ end -}}
+  {{- end }}
 {{- end -}}

@@ -70,7 +70,7 @@ properties:
   - name: 'type'
     type: Enum
     description: The type of the schema definition
-    default_value: TYPE_UNSPECIFIED
+    default_value: "TYPE_UNSPECIFIED"
     enum_values:
       - 'TYPE_UNSPECIFIED'
       - 'PROTOCOL_BUFFER'

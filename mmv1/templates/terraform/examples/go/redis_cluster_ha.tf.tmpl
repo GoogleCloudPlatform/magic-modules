@@ -9,6 +9,9 @@ resource "google_redis_cluster" "{{$.PrimaryResourceId}}" {
   node_type = "REDIS_SHARED_CORE_NANO"
   transit_encryption_mode = "TRANSIT_ENCRYPTION_MODE_DISABLED"
   authorization_mode = "AUTH_MODE_DISABLED"
+  redis_configs = {
+    maxmemory-policy	= "volatile-ttl"
+  }
   zone_distribution_config {
     mode = "MULTI_ZONE"
   }

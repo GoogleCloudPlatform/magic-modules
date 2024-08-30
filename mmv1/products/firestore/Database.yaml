@@ -80,7 +80,6 @@ examples:
       - deletion_policy
   - !ruby/object:Provider::Terraform::Examples
     name: 'firestore_cmek_database'
-    min_version: beta
     primary_resource_id: 'database'
     vars:
       database_id: "cmek-database-id"
@@ -121,7 +120,6 @@ examples:
       - deletion_policy
   - !ruby/object:Provider::Terraform::Examples
     name: 'firestore_cmek_database_in_datastore_mode'
-    min_version: beta
     primary_resource_id: 'database'
     vars:
       database_id: "cmek-database-id"
@@ -137,7 +135,7 @@ examples:
       - etag
       - deletion_policy
 virtual_fields:
-  - !ruby/object:Api::Type::Enum
+  - !ruby/object:Api::Type::String
     name: 'deletion_policy'
     description: |
       Deletion behavior for this database.
@@ -145,10 +143,7 @@ virtual_fields:
       If the deletion policy is `DELETE`, the database will both be removed from Terraform state and deleted from Google Cloud upon destruction.
       The default value is `ABANDON`.
       See also `delete_protection`.
-    values:
-      - :ABANDON
-      - :DELETE
-    default_value: :ABANDON
+    default_value: ABANDON
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_delete: templates/terraform/pre_delete/firestore_database.go.erb
 properties:
@@ -270,7 +265,6 @@ properties:
     output: true
   - !ruby/object:Api::Type::NestedObject
     name: cmekConfig
-    min_version: beta
     immutable: true
     description: |
        The CMEK (Customer Managed Encryption Key) configuration for a Firestore

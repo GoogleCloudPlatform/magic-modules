@@ -22,7 +22,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Enable, disable, or change billing for a project': 'https://cloud.google.com/billing/docs/how-to/modify-project'
   api: 'https://cloud.google.com/billing/docs/reference/rest/v1/projects'
-id_format: 'projects/{{project}}/billingInfo'
+id_format: 'projects/{{project}}'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   decoder: templates/terraform/decoders/billing_project_info.go.erb
   encoder: templates/terraform/encoders/billing_project_info.go.erb

@@ -54,15 +54,28 @@ func expandAliasIpRanges(ranges []interface{}) []*compute.AliasIpRange {
 	return ipRanges
 }
 
-func flattenAliasIpRange(ranges []*compute.AliasIpRange) []map[string]interface{} {
-	rangesSchema := make([]map[string]interface{}, 0, len(ranges))
+func flattenAliasIpRange(d *schema.ResourceData, ranges []*compute.AliasIpRange, i int) []map[string]interface{} {
+	prefix := fmt.Sprintf("network_interface.%d", i)
+
+	configData := []map[string]interface{}{}
+	for _, item := range d.Get(prefix + ".alias_ip_range").([]interface{}) {
+		configData = append(configData, item.(map[string]interface{}))
+	}
+
+	apiData := make([]map[string]interface{}, 0, len(ranges))
 	for _, ipRange := range ranges {
-		rangesSchema = append(rangesSchema, map[string]interface{}{
+		apiData = append(apiData, map[string]interface{}{
 			"ip_cidr_range":         ipRange.IpCidrRange,
 			"subnetwork_range_name": ipRange.SubnetworkRangeName,
 		})
 	}
-	return rangesSchema
+
+	//permadiff fix
+	sorted, err := tpgresource.SortMapsByConfigOrder(configData, apiData, "ip_cidr_range")
+	if err != nil {
+		return apiData
+	}
+	return sorted
 }
 
 func expandScheduling(v interface{}) (*compute.Scheduling, error) {
@@ -134,7 +147,6 @@ func expandScheduling(v interface{}) (*compute.Scheduling, error) {
 		scheduling.InstanceTerminationAction = v.(string)
 		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "InstanceTerminationAction")
 	}
-<% unless version == 'ga' -%>
 	if v, ok := original["max_run_duration"]; ok {
 		transformedMaxRunDuration, err := expandComputeMaxRunDuration(v)
 		if err != nil {
@@ -142,9 +154,6 @@ func expandScheduling(v interface{}) (*compute.Scheduling, error) {
 		}
 		scheduling.MaxRunDuration = transformedMaxRunDuration
 		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "MaxRunDuration")
-	}
-	if v, ok := original["maintenance_interval"]; ok {
-		scheduling.MaintenanceInterval = v.(string)
 	}
 
 	if v, ok := original["on_instance_stop_action"]; ok {
@@ -154,6 +163,10 @@ func expandScheduling(v interface{}) (*compute.Scheduling, error) {
 		}
 		scheduling.OnInstanceStopAction = transformedOnInstanceStopAction
 		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "OnInstanceStopAction")
+	}
+<% unless version == 'ga' -%>
+	if v, ok := original["maintenance_interval"]; ok {
+		scheduling.MaintenanceInterval = v.(string)
 	}
 <% end -%>
 	if v, ok := original["local_ssd_recovery_timeout"]; ok {
@@ -167,7 +180,6 @@ func expandScheduling(v interface{}) (*compute.Scheduling, error) {
 	return scheduling, nil
 }
 
-<% unless version == 'ga' -%>
 func expandComputeMaxRunDuration(v interface{}) (*compute.Duration, error) {
 	l := v.([]interface{})
 	duration := compute.Duration{}
@@ -219,7 +231,6 @@ func expandComputeOnInstanceStopAction(v interface{}) (*compute.SchedulingOnInst
 
 	return &onInstanceStopAction, nil	
 }
-<% end -%>
 
 func expandComputeLocalSsdRecoveryTimeout(v interface{}) (*compute.Duration, error) {
 	l := v.([]interface{})
@@ -267,15 +278,17 @@ func flattenScheduling(resp *compute.Scheduling) []map[string]interface{} {
 		schedulingMap["automatic_restart"] = *resp.AutomaticRestart
 	}
 
-<% unless version == 'ga' -%>
 	if resp.MaxRunDuration != nil {
 		schedulingMap["max_run_duration"] = flattenComputeMaxRunDuration(resp.MaxRunDuration)
 	}
-	if resp.MaintenanceInterval != "" {
-		schedulingMap["maintenance_interval"] = resp.MaintenanceInterval
-	}
+
 	if resp.OnInstanceStopAction != nil {
 		schedulingMap["on_instance_stop_action"] = flattenOnInstanceStopAction(resp.OnInstanceStopAction)
+	}
+
+<% unless version == 'ga' -%>
+	if resp.MaintenanceInterval != "" {
+		schedulingMap["maintenance_interval"] = resp.MaintenanceInterval
 	}
 <% end -%>
 
@@ -296,7 +309,6 @@ func flattenScheduling(resp *compute.Scheduling) []map[string]interface{} {
 	return []map[string]interface{}{schedulingMap}
 }
 
-<% unless version == 'ga' -%>
 func flattenComputeMaxRunDuration(v *compute.Duration) []interface{} {
 	if v == nil {
 		return nil
@@ -315,7 +327,6 @@ func flattenOnInstanceStopAction(v *compute.SchedulingOnInstanceStopAction) []in
 	transformed["discard_local_ssd"] = v.DiscardLocalSsd
 	return []interface{}{transformed}
 }
-<% end -%>
 
 func flattenComputeLocalSsdRecoveryTimeout(v *compute.Duration) []interface{} {
 	if v == nil {
@@ -389,7 +400,7 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 			"subnetwork":          tpgresource.ConvertSelfLinkToV1(iface.Subnetwork),
 			"subnetwork_project":  subnet.Project,
 			"access_config":       ac,
-			"alias_ip_range":      flattenAliasIpRange(iface.AliasIpRanges),
+			"alias_ip_range":      flattenAliasIpRange(d, iface.AliasIpRanges, i),
 			"nic_type":            iface.NicType,
 			"stack_type":          iface.StackType,
 			"ipv6_access_config": flattenIpv6AccessConfigs(iface.Ipv6AccessConfigs),
@@ -613,9 +624,7 @@ func expandConfidentialInstanceConfig(d tpgresource.TerraformResourceData) *comp
 	prefix := "confidential_instance_config.0"
 	return &compute.ConfidentialInstanceConfig{
 		EnableConfidentialCompute: d.Get(prefix + ".enable_confidential_compute").(bool),
-		<% unless version == "ga" -%>
 		ConfidentialInstanceType: d.Get(prefix + ".confidential_instance_type").(string),
-		<% end -%>
 	}
 }
 
@@ -626,9 +635,7 @@ func flattenConfidentialInstanceConfig(ConfidentialInstanceConfig *compute.Confi
 
 	return []map[string]interface{}{{
 		"enable_confidential_compute": ConfidentialInstanceConfig.EnableConfidentialCompute,
-		<% unless version == "ga" -%>
 		"confidential_instance_type": ConfidentialInstanceConfig.ConfidentialInstanceType,
-		<% end -%>
 	}}
 }
 
@@ -692,53 +699,48 @@ func schedulingHasChangeRequiringReboot(d *schema.ResourceData) bool {
 	oScheduling := o.([]interface{})[0].(map[string]interface{})
 	newScheduling := n.([]interface{})[0].(map[string]interface{})
 
-<% unless version == 'ga' -%>
 	return hasNodeAffinitiesChanged(oScheduling, newScheduling) || hasMaxRunDurationChanged(oScheduling, newScheduling)
-<% else -%>
-	return hasNodeAffinitiesChanged(oScheduling, newScheduling)
-<% end -%>
 }
 
 // Terraform doesn't correctly calculate changes on schema.Set, so we do it manually
 // https://github.com/hashicorp/terraform-plugin-sdk/issues/98
 func schedulingHasChangeWithoutReboot(d *schema.ResourceData) bool {
-    if !d.HasChange("scheduling") {
-      // This doesn't work correctly, which is why this method exists
-      // But it is here for posterity
-      return false
-    }
-    o, n := d.GetChange("scheduling")
-    oScheduling := o.([]interface{})[0].(map[string]interface{})
-    newScheduling := n.([]interface{})[0].(map[string]interface{})
-  
-    if schedulingHasChangeRequiringReboot(d) {
-      return false
-    }
-  
-    if oScheduling["automatic_restart"] != newScheduling["automatic_restart"] {
-      return true
-    }
-  
-    if oScheduling["preemptible"] != newScheduling["preemptible"] {
-      return true
-    }
-  
-    if oScheduling["on_host_maintenance"] != newScheduling["on_host_maintenance"] {
-      return true
-    }
-  
-    if oScheduling["provisioning_model"] != newScheduling["provisioning_model"] {
-      return true
-    }
-  
-    if oScheduling["instance_termination_action"] != newScheduling["instance_termination_action"] {
-      return true
-    }
-  
-    return false
-  }
+	if !d.HasChange("scheduling") {
+		// This doesn't work correctly, which is why this method exists
+		// But it is here for posterity
+		return false
+	}
+	o, n := d.GetChange("scheduling")
+	oScheduling := o.([]interface{})[0].(map[string]interface{})
+	newScheduling := n.([]interface{})[0].(map[string]interface{})
 
-<% unless version == 'ga' -%>
+	if schedulingHasChangeRequiringReboot(d) {
+		return false
+	}
+
+	if oScheduling["automatic_restart"] != newScheduling["automatic_restart"] {
+		return true
+	}
+
+	if oScheduling["preemptible"] != newScheduling["preemptible"] {
+		return true
+	}
+
+	if oScheduling["on_host_maintenance"] != newScheduling["on_host_maintenance"] {
+		return true
+	}
+
+	if oScheduling["provisioning_model"] != newScheduling["provisioning_model"] {
+		return true
+	}
+
+	if oScheduling["instance_termination_action"] != newScheduling["instance_termination_action"] {
+			return true
+	}
+
+	return false
+}
+
 func hasMaxRunDurationChanged(oScheduling, nScheduling map[string]interface{}) bool {
 	oMrd := oScheduling["max_run_duration"].([]interface{})
 	nMrd := nScheduling["max_run_duration"].([]interface{})
@@ -762,7 +764,6 @@ func hasMaxRunDurationChanged(oScheduling, nScheduling map[string]interface{}) b
 
 	return false
 }
-<% end -%>
 
 func hasNodeAffinitiesChanged(oScheduling, newScheduling map[string]interface{}) bool {
 	oldNAs := oScheduling["node_affinities"].(*schema.Set).List()

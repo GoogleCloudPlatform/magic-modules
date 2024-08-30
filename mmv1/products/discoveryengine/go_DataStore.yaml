@@ -1,0 +1,242 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'DataStore'
+description: |
+  Data store is a collection of websites and documents used to find answers for
+  end-user's questions in Discovery Engine (a.k.a. Vertex AI Search and
+  Conversation).
+references:
+  guides:
+    'Create a search data store': 'https://cloud.google.com/generative-ai-app-builder/docs/create-data-store-es'
+  api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.collections.dataStores'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores'
+self_link: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores?dataStoreId={{data_store_id}}&createAdvancedSiteSearch={{create_advanced_site_search}}'
+update_verb: 'PATCH'
+update_mask: true
+delete_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}'
+timeouts:
+  insert_minutes: 60
+  update_minutes: 60
+  delete_minutes: 60
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+    timeouts:
+      insert_minutes: 60
+      update_minutes: 60
+      delete_minutes: 60
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'discoveryengine_datastore_basic'
+    primary_resource_id: 'basic'
+    primary_resource_name: 'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
+    vars:
+      data_store_id: 'data-store-id'
+  - name: 'discoveryengine_datastore_document_processing_config'
+    primary_resource_id: 'document_processing_config'
+    primary_resource_name: 'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
+    vars:
+      data_store_id: 'data-store-id'
+  - name: 'discoveryengine_datastore_document_processing_config_ocr'
+    primary_resource_id: 'document_processing_config_ocr'
+    primary_resource_name: 'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
+    vars:
+      data_store_id: 'data-store-id'
+    skip_docs: true
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The geographic location where the data store should reside. The value can
+      only be one of "global", "us" and "eu".
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'dataStoreId'
+    type: String
+    description: |
+      The unique id of the data store.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'createAdvancedSiteSearch'
+    type: Boolean
+    description: |
+      If true, an advanced data store for site search will be created. If the
+      data store is not configured as site search (GENERIC vertical and
+      PUBLIC_WEBSITE contentConfig), this flag will be ignored.
+
+    url_param_only: true
+    default_value: false
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The unique full resource name of the data store. Values are of the format
+      `projects/{project}/locations/{location}/collections/{collection_id}/dataStores/{data_store_id}`.
+      This field must be a UTF-8 encoded string with a length limit of 1024
+      characters.
+    output: true
+  - name: 'displayName'
+    type: String
+    description: |
+      The display name of the data store. This field must be a UTF-8 encoded
+      string with a length limit of 128 characters.
+    required: true
+  - name: 'industryVertical'
+    type: Enum
+    description: |
+      The industry vertical that the data store registers.
+    required: true
+    immutable: true
+    enum_values:
+      - 'GENERIC'
+      - 'MEDIA'
+  - name: 'solutionTypes'
+    type: Array
+    description: |
+      The solutions that the data store enrolls.
+    immutable: true
+    item_type:
+      type: Enum
+      description: |
+        The type of solution.
+      enum_values:
+        - 'SOLUTION_TYPE_RECOMMENDATION'
+        - 'SOLUTION_TYPE_SEARCH'
+        - 'SOLUTION_TYPE_CHAT'
+  - name: 'defaultSchemaId'
+    type: String
+    description: |
+      The id of the default Schema associated with this data store.
+    output: true
+  - name: 'contentConfig'
+    type: Enum
+    description: |
+      The content config of the data store.
+    required: true
+    immutable: true
+    enum_values:
+      - 'NO_CONTENT'
+      - 'CONTENT_REQUIRED'
+      - 'PUBLIC_WEBSITE'
+  - name: 'documentProcessingConfig'
+    type: NestedObject
+    description: |
+      Configuration for Document understanding and enrichment.
+    required: false
+    immutable: true
+    properties:
+      - name: 'name'
+        type: String
+        description: |
+          The full resource name of the Document Processing Config. Format:
+          `projects/{project}/locations/{location}/collections/{collection_id}/dataStores/{data_store_id}/documentProcessingConfig`.
+        required: false
+        output: true
+      - name: 'defaultParsingConfig'
+        type: NestedObject
+        description: |
+          Configurations for default Document parser. If not specified, this resource
+          will be configured to use a default DigitalParsingConfig, and the default parsing
+          config will be applied to all file types for Document parsing.
+        required: false
+        properties:
+          - name: 'digitalParsingConfig'
+            type: NestedObject
+            description: |
+              Configurations applied to digital parser.
+            required: false
+            send_empty_value: true
+            allow_empty_object: true
+            exactly_one_of:
+              - 'default_parsing_config.0.digital_parsing_config'
+              - 'default_parsing_config.0.ocr_parsing_config'
+            properties:
+              []
+          - name: 'ocrParsingConfig'
+            type: NestedObject
+            description: |
+              Configurations applied to OCR parser. Currently it only applies to PDFs.
+            required: false
+            exactly_one_of:
+              - 'default_parsing_config.0.digital_parsing_config'
+              - 'default_parsing_config.0.ocr_parsing_config'
+            properties:
+              - name: 'useNativeText'
+                type: Boolean
+                description: |
+                  If true, will use native text instead of OCR text on pages containing native text.
+
+                required: false
+      - name: 'parsingConfigOverrides'
+        type: Map
+        description: |
+          Map from file type to override the default parsing configuration based on the file type. Supported keys:
+            * `pdf`: Override parsing config for PDF files, either digital parsing, ocr parsing or layout parsing is supported.
+            * `html`: Override parsing config for HTML files, only digital parsing and or layout parsing are supported.
+            * `docx`: Override parsing config for DOCX files, only digital parsing and or layout parsing are supported.
+        key_name: 'file_type'
+        value_type:
+          type: NestedObject
+          properties:
+            - name: 'digitalParsingConfig'
+              type: NestedObject
+              description: |
+                Configurations applied to digital parser.
+              required: false
+              send_empty_value: true
+              allow_empty_object: true
+              exactly_one_of:
+                - 'default_parsing_config.0.digital_parsing_config'
+                - 'default_parsing_config.0.ocr_parsing_config'
+              properties:
+                []
+            - name: 'ocrParsingConfig'
+              type: NestedObject
+              description: |
+                Configurations applied to OCR parser. Currently it only applies to PDFs.
+              required: false
+              exactly_one_of:
+                - 'default_parsing_config.0.digital_parsing_config'
+                - 'default_parsing_config.0.ocr_parsing_config'
+              properties:
+                - name: 'useNativeText'
+                  type: Boolean
+                  description: |
+                    If true, will use native text instead of OCR text on pages containing native text.
+
+                  required: false
+  - name: 'createTime'
+    type: Time
+    description: |
+      Timestamp when the DataStore was created.
+    output: true

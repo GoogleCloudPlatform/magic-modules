@@ -28,15 +28,12 @@ id_format: projects/{{project}}/locations/{{location}}/streams/{{stream_id}}
 import_format:
   ['projects/{{project}}/locations/{{location}}/streams/{{stream_id}}']
 virtual_fields:
-  - !ruby/object:Api::Type::Enum
+  - !ruby/object:Api::Type::String
     name: 'desired_state'
     description: |
       Desired state of the Stream. Set this field to `RUNNING` to start the stream, and `PAUSED` to pause the stream.
-    values:
-      - :NOT_STARTED
-      - :RUNNING
-      - :PAUSED
-    default_value: :NOT_STARTED
+      Possible values: NOT_STARTED, RUNNING, PAUSED. Default: NOT_STARTED
+    default_value: NOT_STARTED
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: 'templates/terraform/constants/datastream_stream.go.erb'
   post_create: 'templates/terraform/post_create/datastream_stream.go.erb'
@@ -109,8 +106,24 @@ examples:
       destination_connection_profile_id: 'destination-profile'
   - !ruby/object:Provider::Terraform::Examples
     name: 'datastream_stream_sql_server'
-    min_version: beta
     primary_resource_id: 'default'
+    skip_test: true
+    vars:
+      database_name: 'db'
+      database_password: 'password'
+      database_user: 'user'
+      deletion_protection: 'true'
+      destination_connection_profile_id: 'destination-profile'
+      source_connection_profile_id: 'source-profile'
+      sql_server_name: 'sql-server'
+      sql_server_root_password: 'root-password'
+      stream_id: 'stream'
+    test_vars_overrides:
+      deletion_protection: 'false'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'datastream_stream_sql_server_change_tables'
+    primary_resource_id: 'default'
+    # Requires SQLServer Configuration
     skip_test: true
     vars:
       database_name: 'db'
@@ -157,6 +170,25 @@ examples:
       deletion_protection: 'false'
       bigquery_destination_table_kms_key_name:
         'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+    oics_vars_overrides:
+      deletion_protection: 'false'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'datastream_stream_bigquery_append_only'
+    external_providers: ["random", "time"]
+    primary_resource_id:
+      'default'
+      # Random provider
+    skip_vcr: true
+    vars:
+      stream_id: 'my-stream'
+      private_connection_id: 'my-connection'
+      network_name: 'my-network'
+      source_connection_profile_id: 'source-profile'
+      database_instance_name: 'my-instance'
+      deletion_protection: 'true'
+      destination_connection_profile_id: 'destination-profile'
+    test_vars_overrides:
+      deletion_protection: 'false'
     oics_vars_overrides:
       deletion_protection: 'false'
 parameters:
@@ -794,7 +826,6 @@ properties:
               function: 'validation.IntAtLeast(0)'
       - !ruby/object:Api::Type::NestedObject
         name: 'sqlServerSourceConfig'
-        min_version: beta
         allow_empty_object: true
         send_empty_value: true
         exactly_one_of:
@@ -985,6 +1016,24 @@ properties:
             default_from_api: true
             validation: !ruby/object:Provider::Terraform::Validation
               function: 'validation.IntAtLeast(0)'
+          - !ruby/object:Api::Type::NestedObject
+            name: 'transactionLogs'
+            allow_empty_object: true
+            send_empty_value: true
+            conflicts:
+              - source_config.0.sql_server_source_config.change_tables
+            description: |
+              CDC reader reads from transaction logs.
+            properties: []
+          - !ruby/object:Api::Type::NestedObject
+            name: 'changeTables'
+            allow_empty_object: true
+            send_empty_value: true
+            conflicts:
+              - source_config.0.sql_server_source_config.transaction_logs
+            description: |
+              CDC reader reads from change tables.
+            properties: []
   - !ruby/object:Api::Type::NestedObject
     name: 'destinationConfig'
     required: true
@@ -1059,7 +1108,7 @@ properties:
           - destination_config.0.gcs_destination_config
           - destination_config.0.bigquery_destination_config
         description: |
-          A configuration for how data should be loaded to Cloud Storage.
+          A configuration for how data should be loaded to Google BigQuery.
         properties:
           - !ruby/object:Api::Type::String
             name: 'dataFreshness'
@@ -1117,6 +1166,30 @@ properties:
                       table. The BigQuery Service Account associated with your project requires access to this
                       encryption key. i.e. projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{cryptoKey}.
                       See https://cloud.google.com/bigquery/docs/customer-managed-encryption for more information.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'merge'
+            send_empty_value: true
+            allow_empty_object: true
+            immutable: true
+            conflicts:
+              - destination_config.0.bigquery_destination_config.0.append_only
+            description: |
+              Merge mode defines that all changes to a table will be merged at the destination Google BigQuery
+              table. This is the default write mode. When selected, BigQuery reflects the way the data is stored
+              in the source database. With Merge mode, no historical record of the change events is kept.
+            properties: []
+          - !ruby/object:Api::Type::NestedObject
+            name: 'appendOnly'
+            send_empty_value: true
+            allow_empty_object: true
+            immutable: true
+            conflicts:
+              - destination_config.0.bigquery_destination_config.0.merge
+            description: |
+              AppendOnly mode defines that the stream of changes (INSERT, UPDATE-INSERT, UPDATE-DELETE and DELETE
+              events) to a source table will be written to the destination Google BigQuery table, retaining the
+              historical state of the data.
+            properties: []
   - !ruby/object:Api::Type::String
     name: 'state'
     description: The state of the stream.
@@ -1372,7 +1445,6 @@ properties:
                                 The ordinal position of the column in the table.
       - !ruby/object:Api::Type::NestedObject
         name: 'sqlServerExcludedObjects'
-        min_version: beta
         description: |
           SQL Server data source objects to avoid backfilling.
         properties:

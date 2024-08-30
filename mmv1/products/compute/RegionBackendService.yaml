@@ -28,7 +28,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -154,7 +154,7 @@ properties:
       properties:
         - !ruby/object:Api::Type::Enum
           name: 'balancingMode'
-          default_value: :CONNECTION
+          default_value: :UTILIZATION
           values:
             - :UTILIZATION
             - :RATE
@@ -164,8 +164,6 @@ properties:
 
             See the [Backend Services Overview](https://cloud.google.com/load-balancing/docs/backend-service#balancing-mode)
             for an explanation of load balancing modes.
-
-            From version 6.0.0 default value will be UTILIZATION to match default GCP value.
         - !ruby/object:Api::Type::Double
           name: 'capacityScaler'
           description: |
@@ -655,13 +653,11 @@ properties:
       - !ruby/object:Api::Type::Integer
         name: 'connection_draining_timeout_sec'
         api_name: drainingTimeoutSec
-        default_value: 0
+        default_value: 300
         send_empty_value: true
         description: |
           Time for which instance will be drained (not accept new
           connections, but still work to finish started).
-
-          From version 6.0.0 ConnectionDrainingTimeoutSec default value will be 300 to match default GCP value.
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
     description: |
@@ -758,14 +754,16 @@ properties:
     description: Settings for enabling Cloud Identity Aware Proxy
     send_empty_value: true
     properties:
+      - !ruby/object:Api::Type::Boolean
+        name: 'enabled'
+        required: true
+        description: Whether the serving infrastructure will authenticate and authorize all incoming requests.
       - !ruby/object:Api::Type::String
         name: 'oauth2ClientId'
-        required: true
         description: |
           OAuth2 Client ID for IAP
       - !ruby/object:Api::Type::String
         name: 'oauth2ClientSecret'
-        required: true
         description: |
           OAuth2 Client Secret for IAP
         send_empty_value: true
@@ -842,7 +840,6 @@ properties:
                            UNAVAILABLE_WEIGHT. Otherwise, Load Balancing remains
                            equal-weight.
 
-
       This field is applicable to either:
 
       * A regional backend service with the service_protocol set to HTTP, HTTPS, or HTTP2,
@@ -851,7 +848,6 @@ properties:
       * A regional backend service with loadBalancingScheme set to EXTERNAL (External Network
         Load Balancing). Only MAGLEV and WEIGHTED_MAGLEV values are possible for External
         Network Load Balancing. The default is MAGLEV.
-
 
       If session_affinity is not NONE, and this field is not set to MAGLEV, WEIGHTED_MAGLEV,
       or RING_HASH, session affinity settings will not take effect.
@@ -877,9 +873,6 @@ properties:
       Settings controlling eviction of unhealthy hosts from the load balancing pool.
       This field is applicable only when the `load_balancing_scheme` is set
       to INTERNAL_MANAGED and the `protocol` is set to HTTP, HTTPS, or HTTP2.
-
-      From version 6.0.0 outlierDetection default terraform values will be removed to match default GCP value.
-      Default values are enforce by GCP without providing them.
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'baseEjectionTime'
@@ -914,7 +907,6 @@ properties:
               `nanos` field. Must be from 0 to 999,999,999 inclusive.
       - !ruby/object:Api::Type::Integer
         name: 'consecutiveErrors'
-        default_value: 5
         at_least_one_of:
           - outlier_detection.0.base_ejection_time
           - outlier_detection.0.consecutive_errors
@@ -933,7 +925,6 @@ properties:
           Defaults to 5.
       - !ruby/object:Api::Type::Integer
         name: 'consecutiveGatewayFailure'
-        default_value: 5
         at_least_one_of:
           - outlier_detection.0.base_ejection_time
           - outlier_detection.0.consecutive_errors
@@ -952,7 +943,6 @@ properties:
           gateway failure ejection occurs. Defaults to 5.
       - !ruby/object:Api::Type::Integer
         name: 'enforcingConsecutiveErrors'
-        default_value: 100
         at_least_one_of:
           - outlier_detection.0.base_ejection_time
           - outlier_detection.0.consecutive_errors
@@ -971,7 +961,6 @@ properties:
           ejection or to ramp it up slowly. Defaults to 100.
       - !ruby/object:Api::Type::Integer
         name: 'enforcingConsecutiveGatewayFailure'
-        default_value: 0
         at_least_one_of:
           - outlier_detection.0.base_ejection_time
           - outlier_detection.0.consecutive_errors
@@ -990,7 +979,6 @@ properties:
           used to disable ejection or to ramp it up slowly. Defaults to 0.
       - !ruby/object:Api::Type::Integer
         name: 'enforcingSuccessRate'
-        default_value: 100
         at_least_one_of:
           - outlier_detection.0.base_ejection_time
           - outlier_detection.0.consecutive_errors
@@ -1039,7 +1027,6 @@ properties:
               `nanos` field. Must be from 0 to 999,999,999 inclusive.
       - !ruby/object:Api::Type::Integer
         name: 'maxEjectionPercent'
-        default_value: 10
         at_least_one_of:
           - outlier_detection.0.base_ejection_time
           - outlier_detection.0.consecutive_errors
@@ -1057,7 +1044,6 @@ properties:
           that can be ejected. Defaults to 10%.
       - !ruby/object:Api::Type::Integer
         name: 'successRateMinimumHosts'
-        default_value: 5
         at_least_one_of:
           - outlier_detection.0.base_ejection_time
           - outlier_detection.0.consecutive_errors
@@ -1077,7 +1063,6 @@ properties:
           cluster. Defaults to 5.
       - !ruby/object:Api::Type::Integer
         name: 'successRateRequestVolume'
-        default_value: 100
         at_least_one_of:
           - outlier_detection.0.base_ejection_time
           - outlier_detection.0.consecutive_errors
@@ -1098,7 +1083,6 @@ properties:
           to 100.
       - !ruby/object:Api::Type::Integer
         name: 'successRateStdevFactor'
-        default_value: 1900
         at_least_one_of:
           - outlier_detection.0.base_ejection_time
           - outlier_detection.0.consecutive_errors

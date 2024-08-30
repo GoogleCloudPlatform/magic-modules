@@ -17,6 +17,8 @@ kind: 'compute#forwardingRule'
 base_url: projects/{{project}}/regions/{{region}}/forwardingRules
 collection_url_key: 'items'
 has_self_link: true
+# Has a separate endpoint for labels
+skip_attribution_label: true
 description: |
   A ForwardingRule resource. A ForwardingRule resource specifies which pool
   of target virtual machines to forward a packet to if it matches the given
@@ -31,7 +33,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -215,6 +217,7 @@ examples:
       - "port_range"
       - "target"
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_create: templates/terraform/pre_create/compute_forwarding_rule.go.erb
   post_create: templates/terraform/post_create/labels.erb
   constants: 'templates/terraform/constants/compute_forwarding_rule.go.erb'
 custom_diff: [
@@ -254,6 +257,12 @@ properties:
 
       This can only be set to true for load balancers that have their
       `loadBalancingScheme` set to `INTERNAL`.
+  - !ruby/object:Api::Type::Integer
+    name: 'forwardingRuleId'
+    description: |
+      The unique identifier number for the resource. This identifier is defined by the server.
+    api_name: id
+    output: true
   - !ruby/object:Api::Type::String
     name: 'pscConnectionId'
     description: 'The PSC connection id of the PSC Forwarding Rule.'
@@ -286,7 +295,6 @@ properties:
       * When the `target` is a Private Service Connect Google APIs
       bundle, you must specify an `IPAddress`.
 
-
       Otherwise, you can optionally specify an IP address that references an
       existing static (reserved) IP address resource. When omitted, Google Cloud
       assigns an ephemeral IP address.
@@ -304,7 +312,6 @@ properties:
         * `global/addresses/address-name`
         * `address-name`
 
-
       The forwarding rule's `target` or `backendService`,
       and in most cases, also the `loadBalancingScheme`, determine the
       type of IP address that you can use. For detailed information, see
@@ -314,7 +321,7 @@ properties:
       When reading an `IPAddress`, the API always returns the IP
       address number.
     default_from_api: true
-    diff_suppress_func: 'tpgresource.InternalIpDiffSuppress'
+    diff_suppress_func: InternalIpDiffSuppress
   - !ruby/object:Api::Type::Enum
     name: 'IPProtocol'
     description: |
@@ -432,7 +439,7 @@ properties:
       cannot have overlapping `portRange`s.
 
       @pattern: \d+(?:-\d+)?
-    diff_suppress_func: 'tpgresource.PortRangeDiffSuppress'
+    diff_suppress_func: PortRangeDiffSuppress
     default_from_api: true
   - !ruby/object:Api::Type::Array
     name: 'ports'
@@ -494,12 +501,18 @@ properties:
         *  `vpc-sc` - [ APIs that support VPC Service Controls](https://cloud.google.com/vpc-service-controls/docs/supported-products).
         *  `all-apis` - [All supported Google APIs](https://cloud.google.com/vpc/docs/private-service-connect#supported-apis).
 
-
       For Private Service Connect forwarding rules that forward traffic to managed services, the target must be a service attachment.
     update_verb: :POST
     update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setTarget'
     diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
     custom_expand: 'templates/terraform/custom_expand/self_link_from_name.erb'
+  - !ruby/object:Api::Type::Fingerprint
+    name: 'labelFingerprint'
+    description: |
+      The fingerprint used for optimistic locking of this resource.  Used
+      internally during updates.
+    update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setLabels'
+    update_verb: :POST
   - !ruby/object:Api::Type::Boolean
     name: 'allowGlobalAccess'
     description: |
@@ -521,13 +534,6 @@ properties:
       Labels to apply to this forwarding rule.  A list of key->value pairs.
     update_verb: :POST
     update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setLabels'
-  - !ruby/object:Api::Type::Fingerprint
-    name: 'labelFingerprint'
-    description: |
-      The fingerprint used for optimistic locking of this resource.  Used
-      internally during updates.
-    update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setLabels'
-    update_verb: :POST
   - !ruby/object:Api::Type::Boolean
     name: 'allPorts'
     description: |

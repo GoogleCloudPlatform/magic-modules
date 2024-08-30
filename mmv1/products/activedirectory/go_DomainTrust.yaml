@@ -15,8 +15,7 @@
 ---
 name: 'DomainTrust'
 kind: 'activedirectory#trust'
-description: |
-  Adds a trust between Active Directory domains
+description: Adds a trust between Active Directory domains
 references:
   guides:
     'Active Directory Trust': 'https://cloud.google.com/managed-microsoft-ad/docs/create-one-way-trust'
@@ -68,19 +67,22 @@ examples:
 parameters:
   - name: 'domain'
     type: String
-    description: "The fully qualified domain name. e.g. mydomain.myorganization.com, with the restrictions,
-https://cloud.google.com/managed-microsoft-ad/reference/rest/v1/projects.locations.global.domains."
+    description: |
+      The fully qualified domain name. e.g. mydomain.myorganization.com, with the restrictions
+      of https://cloud.google.com/managed-microsoft-ad/reference/rest/v1/projects.locations.global.domains.
     url_param_only: true
     required: true
     immutable: true
 properties:
   - name: 'targetDomainName'
     type: String
-    description: "The fully qualified target domain name which will be in trust with the current domain."
+    description:
+      'The fully qualified target domain name which will be in trust with the
+      current domain.'
     required: true
   - name: 'trustType'
     type: Enum
-    description: "The type of trust represented by the trust resource."
+    description: 'The type of trust represented by the trust resource.'
     required: true
     immutable: true
     enum_values:
@@ -88,7 +90,9 @@ properties:
       - 'EXTERNAL'
   - name: 'trustDirection'
     type: Enum
-    description: "The trust direction, which decides if the current domain is trusted, trusting, or both."
+    description:
+      'The trust direction, which decides if the current domain is trusted,
+      trusting, or both.'
     required: true
     immutable: true
     enum_values:
@@ -97,18 +101,21 @@ properties:
       - 'BIDIRECTIONAL'
   - name: 'selectiveAuthentication'
     type: Boolean
-    description: "Whether the trusted side has forest/domain wide access or selective access to an approved set of resources."
+    description: |
+      Whether the trusted side has forest/domain wide access or selective access to an approved set of resources.
     immutable: true
   - name: 'targetDnsIpAddresses'
     type: Array
-    description: "The target DNS server IP addresses which can resolve the remote domain involved in the trust."
+    description: |
+      The target DNS server IP addresses which can resolve the remote domain involved in the trust.
     is_set: true
     required: true
     item_type:
       type: String
   - name: 'trustHandshakeSecret'
     type: String
-    description: "The trust secret used for the handshake with the target domain. This will not be stored."
+    description: |
+      The trust secret used for the handshake with the target domain. This will not be stored.
     required: true
     immutable: true
     ignore_read: true

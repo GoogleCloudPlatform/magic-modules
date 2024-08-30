@@ -73,6 +73,13 @@ examples:
     vars:
       workstation_cluster_name: 'workstation-cluster'
       workstation_config_name: 'workstation-config'
+      key_short_name: 'keyname'
+      value_short_name: 'valuename'
+      org_id: '123456789'
+    test_vars_overrides:
+      key_short_name: '"tf-test-key-" + acctest.RandString(t, 10)'
+      value_short_name: '"tf-test-value-" + acctest.RandString(t, 10)'
+      org_id: 'envvar.GetTestOrgFromEnv(t)'
   - !ruby/object:Provider::Terraform::Examples
     name: 'workstation_config_container'
     min_version: beta
@@ -222,6 +229,7 @@ properties:
       - 'host.gceInstance.accelerators'
       - 'host.gceInstance.boostConfigs'
       - 'host.gceInstance.disableSsh'
+      - 'host.gceInstance.vmTags'
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'gceInstance'
@@ -268,6 +276,8 @@ properties:
               Whether instances have no public IP address.
           - !ruby/object:Api::Type::Boolean
             name: 'disableSsh'
+            default_value: true
+            send_empty_value: true
             description: |
               Whether to disable SSH access to the VM.
           - !ruby/object:Api::Type::Boolean
@@ -376,6 +386,14 @@ properties:
                         description: |
                           Number of accelerator cards exposed to the instance.
                         required: true
+          - !ruby/object:Api::Type::KeyValuePairs
+            name: 'vmTags'
+            description: |
+              Resource manager tags to be bound to the VM instances backing the Workstations.
+              Tag keys and values have the same definition as
+              https://cloud.google.com/resource-manager/docs/tags/tags-overview
+              Keys must be in the format `tagKeys/{tag_key_id}`, and
+              values are in the format `tagValues/456`.
   - !ruby/object:Api::Type::Array
     name: 'persistentDirectories'
     description: |
