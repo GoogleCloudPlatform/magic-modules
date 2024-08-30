@@ -3,7 +3,6 @@ package bigquery
 import (
 	"context"
 	"fmt"
-	"log"
 
 	bq "google.golang.org/api/bigquery/v2"
 
@@ -25,12 +24,12 @@ func DataSourceGoogleBigQueryTables() *schema.Resource {
 			Optional:    true,
 			Description: "The ID of the project in which the dataset is located. If it is not provided, the provider project is used.",
 		},
-    "tables": {
-			Type:         schema.TypeMap,
-			Computed:     true,
-			Elem: &schema.Schema{ 
-        Type:     schema.TypeString,
-        Optional: true,
+		"tables": {
+			Type:     schema.TypeMap,
+			Computed: true,
+			Elem: &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			Description: "A map of table names in the dataset.",
 		},
@@ -55,13 +54,13 @@ func DataSourceGoogleBigQueryTablesRead(d *schema.ResourceData, meta interface{}
 		return fmt.Errorf("Error fetching project: %s", err)
 	}
 
-  bigqueryService, err := bq.NewService(ctx)
+	bigqueryService, err := bq.NewService(ctx)
 
-  if err != nil {
+	if err != nil {
 		return fmt.Errorf("Error creating BigQuery service: %s", err)
 	}
 
-  tablesService := bq.NewTablesService(bigqueryService)
+	tablesService := bq.NewTablesService(bigqueryService)
 
 	tableMap := make(map[string]interface{})
 
@@ -79,8 +78,6 @@ func DataSourceGoogleBigQueryTablesRead(d *schema.ResourceData, meta interface{}
 
 		for _, table := range tables.Tables {
 			tableName := table.TableReference.TableId
-			log.Printf("[INFO] Found BigQuery table: %s", tableName)
-
 			tableMap[tableName] = nil
 		}
 
@@ -95,8 +92,8 @@ func DataSourceGoogleBigQueryTablesRead(d *schema.ResourceData, meta interface{}
 		return fmt.Errorf("error setting 'tables' attribute: %w", err)
 	}
 
-  id := fmt.Sprintf("projects/%s/datasets/%s/tables", project, datasetID)
-  d.SetId(id)
+	id := fmt.Sprintf("projects/%s/datasets/%s/tables", project, datasetID)
+	d.SetId(id)
 
 	return nil
 }

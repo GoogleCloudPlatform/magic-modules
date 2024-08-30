@@ -22,7 +22,7 @@ func TestAccDataSourceGoogleBigqueryTables_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleBigqueryTables_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.google_bigquery_tables.example", "tables.%", "1"), 
+					resource.TestCheckResourceAttr("data.google_bigquery_tables.example", "tables.%", "1"),
 					resource.TestCheckResourceAttr("data.google_bigquery_tables.example", "tables.test_table", ""),
 				),
 			},
@@ -62,4 +62,3 @@ func testAccDataSourceGoogleBigqueryTables_basic(context map[string]interface{})
   }
 `, context)
 }
-
