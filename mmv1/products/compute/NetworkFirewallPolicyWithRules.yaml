@@ -57,7 +57,6 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   decoder: templates/terraform/decoders/resource_compute_network_firewall_policy_with_rules.go.erb
   update_encoder: templates/terraform/update_encoder/resource_compute_network_firewall_policy_with_rules.go.erb
   post_create: templates/terraform/post_create/resource_compute_network_firewall_policy_with_rules.go.erb
-
 properties:
   - !ruby/object:Api::Type::String
     name: creationTimestamp
