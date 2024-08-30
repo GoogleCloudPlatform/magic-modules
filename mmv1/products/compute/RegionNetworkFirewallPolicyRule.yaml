@@ -23,7 +23,6 @@ update_url: '{{firewall_policy}}/patchRule?priority={{priority}}'
 delete_verb: :POST
 delete_url: '{{firewall_policy}}/removeRule?priority={{priority}}'
 import_format: [
-  'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/rules/{{priority}}',
   'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/{{priority}}',
   '{{project}}/{{region}}/{{firewall_policy}}/{{priority}}',
   '{{region}}/{{firewall_policy}}/{{priority}}',

@@ -15,7 +15,7 @@
 name: 'NetworkFirewallPolicyRule'
 kind: 'compute#firewallPolicyRule'
 base_url: '{{firewall_policy}}'
-id_format: '{{firewall_policy}}/{{priority}}'
+id_format: '{{firewall_policy}}/rules/{{priority}}'
 self_link: '{{firewall_policy}}/getRule?priority={{priority}}'
 create_url: '{{firewall_policy}}/addRule'
 update_verb: :POST
@@ -23,7 +23,6 @@ update_url: '{{firewall_policy}}/patchRule?priority={{priority}}'
 delete_verb: :POST
 delete_url: '{{firewall_policy}}/removeRule?priority={{priority}}'
 import_format: [
-  'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/{{priority}}',
   'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/rules/{{priority}}',
   '{{project}}/{{firewall_policy}}/{{priority}}',
   '{{firewall_policy}}/{{priority}}'

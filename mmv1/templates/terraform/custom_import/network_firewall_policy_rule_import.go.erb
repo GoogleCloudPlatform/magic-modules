@@ -15,7 +15,6 @@
 	config := meta.(*transport_tpg.Config)
 	if err := tpgresource.ParseImportId([]string{
 		"^projects/(?P<project>[^/]+)/global/firewallPolicies/(?P<firewall_policy>[^/]+)/rules/(?P<priority>[^/]+)$",
-		"^projects/(?P<project>[^/]+)/global/firewallPolicies/(?P<firewall_policy>[^/]+)/(?P<priority>[^/]+)$",
 		"^(?P<project>[^/]+)/(?P<firewall_policy>[^/]+)/(?P<priority>[^/]+)$",
 		"^(?P<firewall_policy>[^/]+)/(?P<priority>[^/]+)$",
 	}, d, config); err != nil {
@@ -28,7 +27,7 @@
     }
     
     // Replace import id for the resource id
-    id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/{{priority}}")
+    id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/rules/{{priority}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
