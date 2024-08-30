@@ -73,7 +73,7 @@ func testSweepNetappStoragePool(region string) error {
 		resourceList, ok := res["storagePools"]
 		if !ok {
 			log.Printf("[INFO][SWEEPER_LOG] Nothing found in response.")
-			return nil
+			continue
 		}
 
 		rl := resourceList.([]interface{})
