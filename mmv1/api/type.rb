@@ -49,6 +49,9 @@ module Api
       # behavior.
       attr_accessor :immutable
 
+      # Indicates that this field is client-side only (aka virtual.)
+      attr_accessor :client_side
+
       # url_param_only will not send the field in the resource body and will
       # not attempt to read the field from the API response.
       # NOTE - this doesn't work for nested fields
@@ -228,6 +231,7 @@ module Api
       check :url_param_only, type: :boolean
       check :read_query_params, type: ::String
       check :immutable, type: :boolean
+      check :client_side, type: :boolean
 
       raise 'Property cannot be output and required at the same time.' \
         if @output && @required

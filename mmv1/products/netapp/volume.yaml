@@ -51,16 +51,14 @@ examples:
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_delete: templates/terraform/pre_delete/netapp_volume_force_delete.go.erb
 virtual_fields:
-  - !ruby/object:Api::Type::Enum
+  - !ruby/object:Api::Type::String
     name: 'deletion_policy'
     description: |
       Policy to determine if the volume should be deleted forcefully.
       Volumes may have nested snapshot resources. Deleting such a volume will fail.
       Setting this parameter to FORCE will delete volumes including nested snapshots.
-    values:
-      - :DEFAULT
-      - :FORCE
-    default_value: :DEFAULT
+      Possible values: DEFAULT, FORCE.
+    default_value: DEFAULT
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'

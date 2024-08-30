@@ -15,6 +15,7 @@
           "ttl": "300000.5s"
         },
         "labels": {
+          "goog-terraform-provisioned": "true",
           "test-label2": "test-value2"
         },
         "messageRetentionDuration": "1200s",
@@ -40,6 +41,7 @@
         "deadLetterPolicy": null,
         "expirationPolicy": null,
         "labels": {
+          "goog-terraform-provisioned": "true",
           "test-label1": "test-value1"
         },
         "messageRetentionDuration": "604800s",
