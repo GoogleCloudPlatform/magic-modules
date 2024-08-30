@@ -3,11 +3,12 @@ package resourcemanager_test
 import (
 	"fmt"
 	"regexp"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func projectIamBindingImportStep(resourceName, pid, role string) resource.TestStep {
@@ -266,7 +267,7 @@ func TestAccProjectIamBinding_invalidMembers(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProjectAssociateBindingBasic(pid, org, role, "admin@hashicorptest.com"),
+				Config:      testAccProjectAssociateBindingBasic(pid, org, role, "admin@hashicorptest.com"),
 				ExpectError: regexp.MustCompile("invalid value for members\\.0 \\(IAM members must have one of the values outlined here: https://cloud.google.com/billing/docs/reference/rest/v1/Policy#Binding\\)"),
 			},
 			{
@@ -282,6 +283,7 @@ resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
   org_id     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_iam_binding" "acceptance" {
@@ -298,6 +300,7 @@ resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
   org_id     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_iam_binding" "acceptance" {
@@ -320,6 +323,7 @@ resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
   org_id     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_iam_binding" "acceptance" {
@@ -336,6 +340,7 @@ resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
   org_id     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_iam_binding" "acceptance" {
@@ -352,6 +357,7 @@ resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
   org_id     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_iam_binding" "acceptance" {
@@ -368,6 +374,7 @@ resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
   org_id     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_iam_binding" "acceptance" {

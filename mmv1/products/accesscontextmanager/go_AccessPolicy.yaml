@@ -44,6 +44,7 @@ timeouts:
   delete_minutes: 20
 autogen_async: true
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
@@ -60,6 +61,7 @@ iam_policy:
   fetch_iam_policy_verb: 'POST'
   allowed_iam_role: 'roles/accesscontextmanager.policyAdmin'
   parent_resource_attribute: 'name'
+  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
   import_format:
     - 'accessPolicies/{{name}}'
     - '{{name}}'

@@ -16,15 +16,21 @@ on:
         description: 'The Base Repository to pull from'
         required: false
         default: 'terraform-google-conversion'
-      branch:
+      tpgb-branch:
+        description: 'The branch or sha of the tpgb execute against'
+        required: true
+      tgc-branch:
         description: 'The branch or sha of the tgc execute against'
+        required: true
+      pr-number:
+        description: 'The pull request number in magic-modules repository'
         required: true
       sha:
         description: "The commit SHA in magic-modules repository where the status result will be posted"
         required: true
 
 concurrency:
-  group: test-tgc-${{ github.event.inputs.owner }}-${{ github.event.inputs.repo }}-${{ github.event.inputs.branch }}
+  group: test-tgc-${{ github.event.inputs.owner }}-${{ github.event.inputs.repo }}-${{ github.event.inputs.pr-number }}
   cancel-in-progress: true
 
 jobs:
@@ -56,12 +62,12 @@ jobs:
       uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
       with:
         repository: ${{ github.event.inputs.owner }}/${{ github.event.inputs.repo }}
-        ref: ${{ github.event.inputs.branch }}
+        ref: ${{ github.event.inputs.tgc-branch }}
         fetch-depth: 2
     - name: Check for Code Changes
       id: pull_request
       run: |
-        gofiles=$(git diff --name-only HEAD~1 | { grep -e "\.go$" -e "go.mod$" -e "go.sum$" || test $? = 1; })
+        gofiles=$(git diff --name-only HEAD~1 | { grep -e "\.go$" -e "go.mod$" -e "go.sum$" -e "tfplan2cai/testdata/" || test $? = 1; })
         if [ -z "$gofiles" ]; then
           echo "has_changes=false" >> $GITHUB_OUTPUT
         else
@@ -75,7 +81,7 @@ jobs:
     - name: Build Terraform Google Conversion
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |
-        go mod edit -replace github.com/hashicorp/terraform-provider-google-beta=github.com/${{ github.event.inputs.owner }}/terraform-provider-google-beta@${{ github.event.inputs.branch }}
+        go mod edit -replace github.com/hashicorp/terraform-provider-google-beta=github.com/${{ github.event.inputs.owner }}/terraform-provider-google-beta@${{ github.event.inputs.tpgb-branch }}
         go mod tidy
         make build
     - name: Run Unit Tests

@@ -1,0 +1,154 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'VpnConnection'
+description: "A VPN connection"
+references:
+  guides:
+    'Google Distributed Cloud Edge': 'https://cloud.google.com/distributed-cloud/edge/latest/docs'
+  api: 'https://cloud.google.com/distributed-cloud/edge/latest/docs/reference/container/rest/v1/projects.locations.vpnConnections'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/vpnConnections'
+self_link: 'projects/{{project}}/locations/{{location}}/vpnConnections/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/vpnConnections?vpnConnectionId={{name}}'
+timeouts:
+  insert_minutes: 30
+  update_minutes: 30
+  delete_minutes: 30
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+    timeouts:
+      insert_minutes: 30
+      update_minutes: 30
+      delete_minutes: 30
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'edgecontainer_vpn_connection'
+    primary_resource_id: 'default'
+    skip_test: true
+parameters:
+  - name: 'name'
+    type: String
+    description: |
+      The resource name of VPN connection
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'location'
+    type: String
+    description: |
+      Google Cloud Platform location.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'createTime'
+    type: Time
+    description: |
+      The time when the VPN connection was created.
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      The time when the VPN connection was last updated.
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: "Labels associated with this resource."
+    immutable: true
+  - name: 'natGatewayIp'
+    type: String
+    description: |
+      NAT gateway IP, or WAN IP address. If a customer has multiple NAT IPs, the customer needs to configure NAT such that only one external IP maps to the GMEC Anthos cluster.
+      This is empty if NAT is not used.
+    immutable: true
+  - name: 'cluster'
+    type: String
+    description: |
+      The canonical Cluster name to connect to. It is in the form of projects/{project}/locations/{location}/clusters/{cluster}.
+    required: true
+    immutable: true
+  - name: 'vpc'
+    type: String
+    description: |
+      The network ID of VPC to connect to.
+    immutable: true
+  - name: 'vpcProject'
+    type: NestedObject
+    description: Project detail of the VPC network. Required if VPC is in a different project than the cluster project.
+    properties:
+      - name: 'projectId'
+        type: String
+        description: |
+          The project of the VPC to connect to. If not specified, it is the same as the cluster project.
+        immutable: true
+  - name: 'enableHighAvailability'
+    type: Boolean
+    description: |
+      Whether this VPN connection has HA enabled on cluster side. If enabled, when creating VPN connection we will attempt to use 2 ANG floating IPs.
+    immutable: true
+    default_from_api: true
+  - name: 'router'
+    type: String
+    description: |
+      The VPN connection Cloud Router name.
+  - name: 'details'
+    type: NestedObject
+    output: true
+    properties:
+      - name: 'state'
+        type: String
+        description: |
+          The current connection state.
+        output: true
+      - name: 'error'
+        type: String
+        description: |
+          The error message. This is only populated when state=ERROR.
+        output: true
+      - name: 'cloudRouter'
+        type: NestedObject
+        description: |
+          The Cloud Router info.
+        output: true
+        properties:
+          - name: 'name'
+            type: String
+            description: |
+              The associated Cloud Router name.
+            output: true
+      - name: 'cloudVpns'
+        type: NestedObject
+        description: |
+          Each connection has multiple Cloud VPN gateways.
+        output: true
+        properties:
+          - name: 'gateway'
+            type: String
+            description: |
+              The created Cloud VPN gateway name.
+            output: true

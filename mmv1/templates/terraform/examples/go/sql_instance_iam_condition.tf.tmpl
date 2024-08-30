@@ -10,7 +10,7 @@ data "google_iam_policy" "sql_iam_policy" {
   binding {
     role = "roles/cloudsql.client"
     members = [
-      "serviceAccount:${google_project_service_identity.gcp_sa_cloud_sql.email}",
+      google_project_service_identity.gcp_sa_cloud_sql.member,
     ]
     condition {
       expression  = "resource.name == 'google_sql_database_instance.default.id' && resource.service == 'sqladmin.googleapis.com'"

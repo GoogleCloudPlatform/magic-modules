@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -29,7 +29,9 @@ func TestAccAccessContextManager(t *testing.T) {
 		"access_levels":				testAccAccessContextManagerAccessLevels_basicTest,
 		"access_level_condition":			testAccAccessContextManagerAccessLevelCondition_basicTest,
 		"service_perimeter_egress_policy":		testAccAccessContextManagerServicePerimeterEgressPolicy_basicTest,
+		"service_perimeter_dry_run_egress_policy":		testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_basicTest,
 		"service_perimeter_ingress_policy":		testAccAccessContextManagerServicePerimeterIngressPolicy_basicTest,
+		"service_perimeter_dry_run_ingress_policy":		testAccAccessContextManagerServicePerimeterDryRunIngressPolicy_basicTest,
 		"service_perimeters":				testAccAccessContextManagerServicePerimeters_basicTest,
 		"gcp_user_access_binding":			testAccAccessContextManagerGcpUserAccessBinding_basicTest,
 		"authorized_orgs_desc":				testAccAccessContextManagerAuthorizedOrgsDesc_basicTest,

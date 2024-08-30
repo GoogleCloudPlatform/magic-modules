@@ -119,6 +119,10 @@ properties:
     output: true
     description: 'The email of the service account for this function.'
   - !ruby/object:Api::Type::String
+    name: 'buildServiceAccount'
+    default_from_api: true
+    description: 'The fully-qualified name of the service account to be used for the build step of deploying this function'
+  - !ruby/object:Api::Type::String
     name: 'updateTime'
     output: true
     description: 'The last update timestamp of a Cloud Function'

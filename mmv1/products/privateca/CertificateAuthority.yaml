@@ -140,14 +140,11 @@ virtual_fields:
       When the field is set to true or unset in Terraform state, a `terraform apply`
       or `terraform destroy` that would delete the CertificateAuthority will fail.
       When the field is set to false, deleting the CertificateAuthority is allowed.
-  - !ruby/object:Api::Type::Enum
+  - !ruby/object:Api::Type::String
     name: 'desired_state'
     description: |
       Desired state of the CertificateAuthority. Set this field to `STAGED` to create a `STAGED` root CA.
-    values:
-      - :ENABLED
-      - :DISABLED
-      - :STAGED
+      Possible values: ENABLED, DISABLED, STAGED.
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: 'templates/terraform/constants/privateca_certificate_authority.go.erb'
   decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.erb

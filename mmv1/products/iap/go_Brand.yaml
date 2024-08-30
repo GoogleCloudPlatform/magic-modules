@@ -1,0 +1,93 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Brand'
+description: |
+  OAuth brand data. Only "Organization Internal" brands can be created
+  programmatically via API. To convert it into an external brands
+  please use the GCP Console.
+
+
+  ~> **Note:** Brands can only be created once for a Google Cloud
+  project and the underlying Google API doesn't not support DELETE or PATCH methods.
+  Destroying a Terraform-managed Brand will remove it from state
+  but *will not delete it from Google Cloud.*
+references:
+  guides:
+    'Setting up IAP Brand': 'https://cloud.google.com/iap/docs/tutorial-gce#set_up_iap'
+  api: 'https://cloud.google.com/iap/docs/reference/rest/v1/projects.brands'
+docs:
+id_format: '{{name}}'
+base_url: 'projects/{{project}}/brands'
+self_link: '{{name}}'
+skip_delete: true
+immutable: true
+import_format:
+  - 'projects/{{project_number}}/brands/{{brand_id}}'
+  - 'projects/{{project_id}}/brands/{{brand_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  type: 'PollAsync'
+  check_response_func_existence: 'transport_tpg.PollCheckForExistence'
+  check_response_func_absence: 'transport_tpg.PollCheckForAbsence'
+  suppress_error: false
+  target_occurrences: 5
+  actions: ['create']
+identity:
+  - name
+custom_code:
+  post_create: 'templates/terraform/post_create/go/set_computed_name.tmpl'
+  custom_import: 'templates/terraform/custom_import/go/iap_brand.go.tmpl'
+examples:
+  - name: 'iap_brand'
+    primary_resource_id: 'project_brand'
+    vars:
+      project_id: 'my-project'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      org_domain: 'ORG_DOMAIN'
+    skip_test: true
+parameters:
+  - name: 'name'
+    type: String
+    description: |
+      Output only. Identifier of the brand, in the format `projects/{project_number}/brands/{brand_id}`
+      NOTE: The name can also be expressed as `projects/{project_id}/brands/{brand_id}`, e.g. when importing.
+      NOTE: The brand identification corresponds to the project number as only one
+      brand can be created per project.
+    output: true
+properties:
+  - name: 'supportEmail'
+    type: String
+    description: |
+      Support email displayed on the OAuth consent screen. Can be either a
+      user or group email. When a user email is specified, the caller must
+      be the user with the associated email address. When a group email is
+      specified, the caller can be either a user or a service account which
+      is an owner of the specified group in Cloud Identity.
+    required: true
+  - name: 'applicationTitle'
+    type: String
+    description: |
+      Application name displayed on OAuth consent screen.
+    required: true
+  - name: 'orgInternalOnly'
+    type: Boolean
+    description: |
+      Whether the brand is only intended for usage inside the GSuite organization only.
+    output: true

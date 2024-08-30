@@ -1,0 +1,180 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'RepositoryWorkflowConfig'
+description: |-
+  A resource represents a Dataform workflow configuration
+min_version: 'beta'
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/dataform/docs/workflow-configurations'
+  api: 'https://cloud.google.com/dataform/reference/rest/v1beta1/projects.locations.repositories.workflowConfigs'
+docs:
+id_format: 'projects/{{project}}/locations/{{region}}/repositories/{{repository}}/workflowConfigs/{{name}}'
+base_url: 'projects/{{project}}/locations/{{region}}/repositories/{{repository}}/workflowConfigs'
+create_url: 'projects/{{project}}/locations/{{region}}/repositories/{{repository}}/workflowConfigs?workflowConfigId={{name}}'
+update_verb: 'PATCH'
+import_format:
+  - 'projects/{{project}}/locations/{{region}}/repositories/{{repository}}/workflowConfigs/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+examples:
+  - name: 'dataform_repository_workflow_config'
+    primary_resource_id: 'workflow'
+    min_version: 'beta'
+    vars:
+      workflow_name: 'my_workflow'
+      release_name: 'my_release'
+      service_account_name: 'dataform-sa'
+      git_repository_name: 'my/repository'
+      dataform_repository_name: 'dataform_repository'
+      data: 'secret-data'
+      secret_name: 'my_secret'
+parameters:
+  - name: 'region'
+    type: String
+    description: 'A reference to the region'
+    min_version: 'beta'
+    url_param_only: true
+    immutable: true
+  - name: 'repository'
+    type: String
+    description: 'A reference to the Dataform repository'
+    min_version: 'beta'
+    url_param_only: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: The workflow's name.
+    min_version: 'beta'
+    required: true
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+  - name: 'releaseConfig'
+    type: String
+    description:
+      The name of the release config whose releaseCompilationResult should be executed.
+      Must be in the format projects/*/locations/*/repositories/*/releaseConfigs/*.
+    min_version: 'beta'
+    required: true
+  - name: 'invocationConfig'
+    type: NestedObject
+    description:
+      Optional. If left unset, a default InvocationConfig will be used.
+    min_version: 'beta'
+    properties:
+      - name: 'includedTargets'
+        type: Array
+        description: Optional. The set of action identifiers to include.
+        min_version: 'beta'
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'database'
+              type: String
+              description: The action's database (Google Cloud project ID).
+              min_version: 'beta'
+            - name: 'schema'
+              type: String
+              description:
+                The action's schema (BigQuery dataset ID), within database.
+              min_version: 'beta'
+            - name: 'name'
+              type: String
+              description:
+                The action's name, within database and schema.
+              min_version: 'beta'
+      - name: 'includedTags'
+        type: Array
+        description: Optional. The set of tags to include.
+        min_version: 'beta'
+        item_type:
+          type: String
+      - name: 'transitiveDependenciesIncluded'
+        type: Boolean
+        description: Optional. When set to true, transitive dependencies of included actions will be executed.
+        min_version: 'beta'
+      - name: 'transitiveDependentsIncluded'
+        type: Boolean
+        description: Optional. When set to true, transitive dependents of included actions will be executed.
+        min_version: 'beta'
+      - name: 'fullyRefreshIncrementalTablesEnabled'
+        type: Boolean
+        description: Optional. When set to true, any incremental tables will be fully refreshed.
+        min_version: 'beta'
+      - name: 'serviceAccount'
+        type: String
+        description: Optional. The service account to run workflow invocations under.
+        min_version: 'beta'
+  - name: 'cronSchedule'
+    type: String
+    description:
+      Optional. Optional schedule (in cron format) for automatic creation of compilation results.
+    min_version: 'beta'
+  - name: 'timeZone'
+    type: String
+    description:
+      Optional. Specifies the time zone to be used when interpreting cronSchedule.
+      Must be a time zone name from the time zone database (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
+      If left unspecified, the default is UTC.
+    min_version: 'beta'
+  - name: 'recentScheduledExecutionRecords'
+    type: Array
+    description:
+      Records of the 10 most recent scheduled execution attempts,
+      ordered in in descending order of executionTime.
+      Updated whenever automatic creation of a workflow invocation is triggered by cronSchedule.
+    min_version: 'beta'
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'executionTime'
+          type: String
+          description: The timestamp of this workflow attempt.
+          min_version: 'beta'
+          output: true
+        - name: 'workflowInvocation'
+          type: String
+          description:
+            The name of the created workflow invocation, if one was successfully created.
+            In the format projects/*/locations/*/repositories/*/workflowInvocations/*.
+          min_version: 'beta'
+          output: true
+        - name: 'errorStatus'
+          type: NestedObject
+          description:
+            The error status encountered upon this attempt to create the workflow invocation,
+            if the attempt was unsuccessful.
+          min_version: 'beta'
+          output: true
+          properties:
+            - name: 'code'
+              type: Integer
+              description: The status code, which should be an enum value of google.rpc.Code.
+              min_version: 'beta'
+              output: true
+            - name: 'message'
+              type: String
+              description:
+                A developer-facing error message, which should be in English.
+                Any user-facing error message should be localized and sent in
+                the google.rpc.Status.details field, or localized by the client.
+              min_version: 'beta'
+              output: true

@@ -1,0 +1,220 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'BlockchainNodes'
+description: |
+  A representation of a blockchain node.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/blockchain-node-engine'
+  api: 'https://cloud.google.com/blockchain-node-engine/docs/reference/rest/v1/projects.locations.blockchainNodes'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/blockchainNodes'
+self_link: 'projects/{{project}}/locations/{{location}}/blockchainNodes/{{blockchain_node_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/blockchainNodes?blockchain_node_id={{blockchain_node_id}}'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/blockchainNodes/{{blockchain_node_id}}'
+timeouts:
+  insert_minutes: 45
+  update_minutes: 20
+  delete_minutes: 35
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'blockchain_nodes_basic'
+    primary_resource_id: 'default_node'
+    vars:
+      blockchain_node_id: 'blockchain_basic_node'
+  - name: 'blockchain_nodes_geth_details'
+    primary_resource_id: 'default_node_geth'
+    vars:
+      blockchain_node_id: 'blockchain_geth_node'
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      Location of Blockchain Node being created.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'blockchainNodeId'
+    type: String
+    description: |
+      ID of the requesting object.
+    url_param_only: true
+    required: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The fully qualified name of the blockchain node. e.g. projects/my-project/locations/us-central1/blockchainNodes/my-node.
+    output: true
+  - name: 'createTime'
+    type: String
+    description: |
+      The timestamp at which the blockchain node was first created.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: |
+      The timestamp at which the blockchain node was last updated.
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      User-provided key-value pairs
+    immutable: false
+  - name: 'connectionInfo'
+    type: NestedObject
+    description: |
+      The connection information through which to interact with a blockchain node.
+    output: true
+    properties:
+      - name: 'serviceAttachment'
+        type: String
+        description: |
+          A service attachment that exposes a node, and has the following format: projects/{project}/regions/{region}/serviceAttachments/{service_attachment_name}
+        output: true
+      - name: 'endpointInfo'
+        type: NestedObject
+        description: |
+          The endpoint information through which to interact with a blockchain node.
+        output: true
+        properties:
+          - name: 'jsonRpcApiEndpoint'
+            type: String
+            description: |
+              The assigned URL for the node JSON-RPC API endpoint.
+            output: true
+          - name: 'websocketsApiEndpoint'
+            type: String
+            description: |
+              The assigned URL for the node WebSockets API endpoint.
+            output: true
+  - name: 'ethereumDetails'
+    type: NestedObject
+    description: |
+      User-provided key-value pairs
+    properties:
+      - name: 'validatorConfig'
+        type: NestedObject
+        description: |
+          Configuration for validator-related parameters on the beacon client, and for any managed validator client.
+        properties:
+          - name: 'mevRelayUrls'
+            type: Array
+            description: |
+              URLs for MEV-relay services to use for block building. When set, a managed MEV-boost service is configured on the beacon client.
+            item_type:
+              type: String
+      - name: 'gethDetails'
+        type: NestedObject
+        description: |
+          User-provided key-value pairs
+        properties:
+          - name: 'garbageCollectionMode'
+            type: Enum
+            description: |
+              Blockchain garbage collection modes. Only applicable when NodeType is FULL or ARCHIVE.
+            immutable: true
+            enum_values:
+              - 'FULL'
+              - 'ARCHIVE'
+      - name: 'additionalEndpoints'
+        type: NestedObject
+        description: |
+          User-provided key-value pairs
+        output: true
+        properties:
+          - name: 'beaconApiEndpoint'
+            type: String
+            description: |
+              The assigned URL for the node's Beacon API endpoint.
+            output: true
+          - name: 'beaconPrometheusMetricsApiEndpoint'
+            type: String
+            description: |
+              The assigned URL for the node's Beacon Prometheus metrics endpoint.
+            output: true
+          - name: 'executionClientPrometheusMetricsApiEndpoint'
+            type: String
+            description: |
+              The assigned URL for the node's execution client's Prometheus metrics endpoint.
+            output: true
+      - name: 'network'
+        type: Enum
+        description: |
+          The Ethereum environment being accessed.
+        immutable: true
+        enum_values:
+          - 'MAINNET'
+          - 'TESTNET_GOERLI_PRATER'
+          - 'TESTNET_SEPOLIA'
+      - name: 'nodeType'
+        type: Enum
+        description: |
+          The type of Ethereum node.
+        immutable: true
+        enum_values:
+          - 'LIGHT'
+          - 'FULL'
+          - 'ARCHIVE'
+      - name: 'executionClient'
+        type: Enum
+        description: |
+          The execution client
+        immutable: true
+        enum_values:
+          - 'EXECUTION_CLIENT_UNSPECIFIED'
+          - 'GETH'
+          - 'ERIGON'
+      - name: 'consensusClient'
+        type: Enum
+        description: |
+          The consensus client
+        immutable: true
+        enum_values:
+          - 'CONSENSUS_CLIENT_UNSPECIFIED'
+          - 'LIGHTHOUSE'
+      - name: 'apiEnableAdmin'
+        type: Boolean
+        description: |
+          Enables JSON-RPC access to functions in the admin namespace. Defaults to false.
+        immutable: true
+      - name: 'apiEnableDebug'
+        type: Boolean
+        description: |
+          Enables JSON-RPC access to functions in the debug namespace. Defaults to false.
+        immutable: true
+  - name: 'blockchainType'
+    type: Enum
+    description: |
+      User-provided key-value pairs
+    immutable: true
+    enum_values:
+      - 'ETHEREUM'

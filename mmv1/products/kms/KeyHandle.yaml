@@ -37,6 +37,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'kms_key_handle_basic'
     # Need the time_sleep resource
+    # Currently failing
+    skip_vcr: true
     external_providers: ["random", "time"]
     primary_resource_id:
       'example-keyhandle'
@@ -84,6 +86,6 @@ properties:
     name: 'resourceTypeSelector'
     description: |
       Selector of the resource type where we want to protect resources.
-      For example, `storage.googleapis.com/Bucket OR compute.googleapis.com/*`
+      For example, `storage.googleapis.com/Bucket`.
     required: true
     immutable: true

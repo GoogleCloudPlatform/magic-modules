@@ -1,0 +1,210 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'CloudFunction'
+legacy_name: 'google_cloudfunctions_function'
+description: |
+  A Cloud Function that contains user computation executed in response to an event.
+exclude_resource: true
+docs:
+id_format: 'projects/{{project}}/locations/{{region}}/functions/{{cloud_function}}'
+base_url: 'projects/{{project}}/locations/{{region}}/functions'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{region}}/functions/{{cloud_function}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+collection_url_key: 'functions'
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_attribute: 'cloud_function'
+  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+custom_code:
+examples:
+  - name: 'cloudfunctions_cloud_function'
+    primary_resource_id: 'function'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-function%s", context["random_suffix"])'
+    vars:
+      function_name: 'my-function'
+      bucket_name: 'cloudfunctions-function-example-bucket'
+      zip_path: 'path/to/index.zip'
+    test_vars_overrides:
+      'zip_path': 'acctest.CreateZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)'
+parameters:
+  - name: 'region'
+    type: String
+    description: The location of this cloud function.
+    # This is not a real API field.
+    # This is a more user-centric way for users to specify
+    # that they want to use a HTTP Trigger rather than
+    # send httpsTrigger with an empty dictionary.
+    required: true
+  - name: 'trigger_http'
+    type: Boolean
+    description: 'Use HTTP to trigger this function'
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      A user-defined name of the function. Function names must
+      be unique globally and match pattern `projects/*/locations/*/functions/*`.
+    required: true
+  - name: 'description'
+    type: String
+    description: 'User-provided description of a function.'
+  - name: 'status'
+    type: Enum
+    description: |
+      Status of the function deployment.
+    output: true
+    enum_values:
+      - 'CLOUD_FUNCTION_STATUS_UNSPECIFIED'
+      - 'ACTOVE'
+      - 'OFFLINE'
+      - 'DEPLOY_IN_PROGRESS'
+      - 'DELETE_IN_PROGRESS'
+      - 'UNKNOWN'
+  - name: 'entryPoint'
+    type: String
+    description: |
+      The name of the function (as defined in source code) that will be executed.
+      Defaults to the resource name suffix, if not specified. For backward
+      compatibility, if function with given name is not found, then the system
+      will try to use function named "function". For Node.js this is name of a
+      function exported by the module specified in source_location.
+  - name: 'runtime'
+    type: String
+    description: |
+      The runtime in which the function is going to run. If empty,
+      defaults to Node.js 6.
+  - name: 'timeout'
+    type: String
+    description: |
+      The function execution timeout. Execution is considered failed and can
+      be terminated if the function is not completed at the end of the timeout
+      period. Defaults to 60 seconds.
+  - name: 'availableMemoryMb'
+    type: Integer
+    description: 'The amount of memory in MB available for a function.'
+  - name: 'serviceAccountEmail'
+    type: String
+    description: 'The email of the service account for this function.'
+    output: true
+  - name: 'buildServiceAccount'
+    type: String
+    description: 'The fully-qualified name of the service account to be used for the build step of deploying this function'
+    default_from_api: true
+  - name: 'updateTime'
+    type: String
+    description: 'The last update timestamp of a Cloud Function'
+    output: true
+  - name: 'versionId'
+    type: String
+    description: |
+      The version identifier of the Cloud Function. Each deployment attempt
+      results in a new version of a function being created.
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      A set of key/value label pairs associated with this Cloud Function.
+    immutable: false
+  - name: 'environmentVariables'
+    type: KeyValuePairs
+    description: |
+      Environment variables that shall be available during function execution.
+  - name: 'sourceArchiveUrl'
+    type: String
+    description: |
+      The Google Cloud Storage URL, starting with gs://, pointing to the zip
+      archive which contains the function.
+    exactly_one_of:
+      - 'source_repository'
+      - 'source_archive_url'
+      - 'source_upload_url'
+  - name: 'sourceUploadUrl'
+    type: String
+    description: |
+      The Google Cloud Storage signed URL used for source uploading.
+    exactly_one_of:
+      - 'source_repository'
+      - 'source_archive_url'
+      - 'source_upload_url'
+  - name: 'sourceRepository'
+    type: NestedObject
+    description: |
+      The source repository where a function is hosted.
+    exactly_one_of:
+      - 'source_repository'
+      - 'source_archive_url'
+      - 'source_upload_url'
+    properties:
+      - name: 'url'
+        type: String
+        description: |
+          The URL pointing to the hosted repository where the function is defined
+        required: true
+      - name: 'deployedUrl'
+        type: String
+        description: |
+          The URL pointing to the hosted repository where the function were defined
+          at the time of deployment.
+        output: true
+  - name: 'httpsTrigger'
+    type: NestedObject
+    description: |
+      An HTTPS endpoint type of source that can be triggered via URL.
+    properties:
+      - name: 'url'
+        type: String
+        description: 'The deployed url for the function.'
+        output: true
+  - name: 'eventTrigger'
+    type: NestedObject
+    description: |
+      An HTTPS endpoint type of source that can be triggered via URL.
+    properties:
+      - name: 'eventType'
+        type: String
+        description: |
+          The type of event to observe. For example:
+          `providers/cloud.storage/eventTypes/object.change` and
+          `providers/cloud.pubsub/eventTypes/topic.publish`.
+        required: true
+      - name: 'resource'
+        type: String
+        description: |
+          The resource(s) from which to observe events,
+          for example, `projects/_/buckets/myBucket.`
+        required: true
+      - name: 'service'
+        type: String
+        description: |
+          The hostname of the service that should be observed.

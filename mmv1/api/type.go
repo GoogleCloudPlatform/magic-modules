@@ -60,6 +60,9 @@ type Type struct {
 	// behavior.
 	Immutable bool
 
+	// Indicates that this field is client-side only (aka virtual.)
+	ClientSide bool `yaml:"client_side"`
+
 	// url_param_only will not send the field in the resource body and will
 	// not attempt to read the field from the API response.
 	// NOTE - this doesn't work for nested fields
@@ -299,7 +302,9 @@ func (t *Type) SetDefault(r *Resource) {
 		t.ItemType.ParentMetadata = t
 		t.ItemType.SetDefault(r)
 	case t.IsA("Map"):
-		t.KeyExpander = "tpgresource.ExpandString"
+		if t.KeyExpander == "" {
+			t.KeyExpander = "tpgresource.ExpandString"
+		}
 		t.ValueType.ParentName = t.Name
 		t.ValueType.ParentMetadata = t
 		t.ValueType.SetDefault(r)
@@ -449,7 +454,11 @@ func (t *Type) GetPrefix() string {
 			if t.ParentMetadata != nil && (t.ParentMetadata.IsA("Array") || t.ParentMetadata.IsA("Map")) {
 				t.Prefix = t.ParentMetadata.GetPrefix()
 			} else {
-				t.Prefix = fmt.Sprintf("%s%s", t.ParentMetadata.GetPrefix(), t.ParentMetadata.TitlelizeProperty())
+				if t.ParentMetadata != nil && t.ParentMetadata.ParentMetadata != nil && t.ParentMetadata.ParentMetadata.IsA("Map") {
+					t.Prefix = fmt.Sprintf("%s%s", t.ParentMetadata.GetPrefix(), t.ParentMetadata.ParentMetadata.TitlelizeProperty())
+				} else {
+					t.Prefix = fmt.Sprintf("%s%s", t.ParentMetadata.GetPrefix(), t.ParentMetadata.TitlelizeProperty())
+				}
 			}
 		}
 	}
@@ -1094,6 +1103,12 @@ func propertyWithImmutable(immutable bool) func(*Type) {
 	}
 }
 
+func propertyWithClientSide(clientSide bool) func(*Type) {
+	return func(p *Type) {
+		p.ClientSide = clientSide
+	}
+}
+
 func propertyWithIgnoreWrite(ignoreWrite bool) func(*Type) {
 	return func(p *Type) {
 		p.IgnoreWrite = ignoreWrite
@@ -1339,6 +1354,11 @@ func (t *Type) IsForceNew() bool {
 
 	if t.IsA("KeyValueTerraformLabels") && !t.ResourceMetadata.Updatable() && !t.ResourceMetadata.RootLabels() {
 		return true
+	}
+
+	// Client-side fields don't inherit immutability
+	if t.ClientSide {
+		return t.Immutable
 	}
 
 	parent := t.Parent()

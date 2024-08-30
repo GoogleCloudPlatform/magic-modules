@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -70,6 +70,7 @@ resource "google_project" "acceptance" {
   project_id      = local.project_id
   org_id          = local.organization
   billing_account = local.billing_account
+  deletion_policy = "DELETE"
 }
 
 resource "google_storage_bucket" "one" {

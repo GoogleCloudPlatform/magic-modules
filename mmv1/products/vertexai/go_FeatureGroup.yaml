@@ -1,0 +1,107 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'FeatureGroup'
+description: Vertex AI Feature Group.
+references:
+  guides:
+    'Creating a Feature Group': 'https://cloud.google.com/vertex-ai/docs/featurestore/latest/create-featuregroup'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featureGroups'
+docs:
+base_url: 'projects/{{project}}/locations/{{region}}/featureGroups'
+self_link: 'projects/{{project}}/locations/{{region}}/featureGroups/{{name}}'
+create_url: 'projects/{{project}}/locations/{{region}}/featureGroups?featureGroupId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'vertex_ai_feature_group'
+    primary_resource_id: 'feature_group'
+    vars:
+      job_id: 'job_load'
+      feature_group_name: 'example_feature_group'
+    ignore_read_extra:
+      - 'description'
+parameters:
+  - name: 'region'
+    type: String
+    description: The region of feature group. eg us-central1
+    url_param_only: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: The resource name of the Feature Group.
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+  - name: 'createTime'
+    type: String
+    description: The timestamp of when the FeatureGroup was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: The timestamp of when the FeatureGroup was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+    output: true
+  - name: 'etag'
+    type: String
+    description: Used to perform consistent read-modify-write updates.
+    ignore_read: true
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: The labels with user-defined metadata to organize your FeatureGroup.
+    immutable: false
+  - name: 'description'
+    type: String
+    description: The description of the FeatureGroup.
+    # When API starts returning description, this line should be removed.
+    custom_flatten: 'templates/terraform/custom_flatten/go/vertex_ai_feature_group_ignore_description.go.tmpl'
+  - name: 'bigQuery'
+    type: NestedObject
+    description: Indicates that features for this group come from BigQuery Table/View. By default treats the source as a sparse time series source, which is required to have an entityId and a feature_timestamp column in the source.
+    update_mask_fields:
+      - 'bigQuery.entityIdColumns'
+    properties:
+      - name: 'bigQuerySource'
+        type: NestedObject
+        description: The BigQuery source URI that points to either a BigQuery Table or View.
+        required: true
+        immutable: true
+        properties:
+          - name: 'inputUri'
+            type: String
+            description: 'BigQuery URI to a table, up to 2000 characters long. For example: `bq://projectId.bqDatasetId.bqTableId.`'
+            required: true
+      - name: 'entityIdColumns'
+        type: Array
+        description: Columns to construct entityId / row keys. If not provided defaults to entityId.
+        item_type:
+          type: String

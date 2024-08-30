@@ -41,7 +41,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -122,6 +122,21 @@ examples:
     min_version: beta
     vars:
       health_check_name: 'tcp-health-check'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'compute_health_check_http_source_regions'
+    primary_resource_id: 'http-health-check-with-source-regions'
+    vars:
+      health_check_name: 'http-health-check'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'compute_health_check_https_source_regions'
+    primary_resource_id: 'https-health-check-with-source-regions'
+    vars:
+      health_check_name: 'https-health-check'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'compute_health_check_tcp_source_regions'
+    primary_resource_id: 'tcp-health-check-with-source-regions'
+    vars:
+      health_check_name: 'tcp-health-check'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/health_check_type.erb
   constants: templates/terraform/constants/health_check.erb
@@ -175,7 +190,6 @@ properties:
     item_type: Api::Type::String
     min_size: 3
     max_size: 3
-    min_version: beta
     description: |
       The list of cloud regions from which health checks are performed. If
       any regions are specified, then exactly 3 regions should be specified.

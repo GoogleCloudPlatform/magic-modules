@@ -12,7 +12,7 @@ resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
     }
 
     service_accounts {
-      email = "<%= ctx[:test_env_vars]["service_account"] %>"
+      email = "<%= ctx[:test_env_vars]['service_account'] %>"
     }
 
     metadata = {
@@ -20,8 +20,6 @@ resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
     }
 
   }
-
-  instance_owners  = [ "<%= ctx[:test_env_vars]["service_account"] %>"]
 
   labels = {
     k = "val"

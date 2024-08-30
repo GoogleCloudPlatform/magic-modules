@@ -393,7 +393,6 @@ var schemaNodePool = map[string]*schema.Schema{
 					ValidateFunc: verify.ValidateIpCidrRange,
 					Description:  `The IP address range for pod IPs in this node pool. Only applicable if create_pod_range is true. Set to blank to have a range chosen with the default size. Set to /netmask (e.g. /14) to have a range chosen with a specific netmask. Set to a CIDR notation (e.g. 10.96.0.0/14) to pick a specific range to use.`,
 				},
-{{- if ne $.TargetVersionName "ga" }}
 				"additional_node_network_configs": {
 					Type:         schema.TypeList,
 					Optional:     true,
@@ -445,7 +444,6 @@ var schemaNodePool = map[string]*schema.Schema{
 						},
 					},
 				},
-{{- end }}
 				"pod_cidr_overprovision_config": {
 					Type:     schema.TypeList,
 					Optional: true,
@@ -1226,10 +1224,8 @@ func flattenNodeNetworkConfig(c *container.NodeNetworkConfig, d *schema.Resource
 			"enable_private_nodes":            c.EnablePrivateNodes,
 			"pod_cidr_overprovision_config":   flattenPodCidrOverprovisionConfig(c.PodCidrOverprovisionConfig),
 			"network_performance_config":      flattenNodeNetworkPerformanceConfig(c.NetworkPerformanceConfig),
-{{- if ne $.TargetVersionName "ga" }}
 			"additional_node_network_configs": flattenAdditionalNodeNetworkConfig(c.AdditionalNodeNetworkConfigs),
 			"additional_pod_network_configs":  flattenAdditionalPodNetworkConfig(c.AdditionalPodNetworkConfigs),
-{{- end }}
 		})
 	}
 	return result
@@ -1245,7 +1241,6 @@ func flattenNodeNetworkPerformanceConfig(c *container.NetworkPerformanceConfig) 
 	return result
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func flattenAdditionalNodeNetworkConfig(c []*container.AdditionalNodeNetworkConfig) []map[string]interface{} {
 	if c == nil {
 		return nil
@@ -1276,7 +1271,6 @@ func flattenAdditionalPodNetworkConfig(c []*container.AdditionalPodNetworkConfig
 	}
 	return result
 }
-{{- end }}
 
 func expandNodeNetworkConfig(v interface{}) *container.NodeNetworkConfig {
 	networkNodeConfigs := v.([]interface{})
@@ -1306,7 +1300,6 @@ func expandNodeNetworkConfig(v interface{}) *container.NodeNetworkConfig {
 		nnc.ForceSendFields = []string{"EnablePrivateNodes"}
 	}
 
-{{ if ne $.TargetVersionName `ga` -}}
 	if v, ok := networkNodeConfig["additional_node_network_configs"]; ok && len(v.([]interface{})) > 0 {
 		node_network_configs := v.([]interface{})
 		nodeNetworkConfigs := make([]*container.AdditionalNodeNetworkConfig, 0, len(node_network_configs))
@@ -1337,7 +1330,6 @@ func expandNodeNetworkConfig(v interface{}) *container.NodeNetworkConfig {
 		}
 		nnc.AdditionalPodNetworkConfigs = podNetworkConfigs
 	}
-{{- end }}
 
 	nnc.PodCidrOverprovisionConfig = expandPodCidrOverprovisionConfig(networkNodeConfig["pod_cidr_overprovision_config"])
 

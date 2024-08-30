@@ -3,11 +3,12 @@ package resourcemanager_test
 import (
 	"fmt"
 	"regexp"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func projectIamMemberImportStep(resourceName, pid, role, member string) resource.TestStep {
@@ -182,7 +183,7 @@ func TestAccProjectIamMember_invalidMembers(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProjectAssociateMemberBasic(pid, org, role, "admin@hashicorptest.com"),
+				Config:      testAccProjectAssociateMemberBasic(pid, org, role, "admin@hashicorptest.com"),
 				ExpectError: regexp.MustCompile("invalid value for member \\(IAM members must have one of the values outlined here: https://cloud.google.com/billing/docs/reference/rest/v1/Policy#Binding\\)"),
 			},
 			{
@@ -198,6 +199,7 @@ resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
   org_id     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_iam_member" "acceptance" {
@@ -214,6 +216,7 @@ resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
   org_id     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_iam_member" "acceptance" {
@@ -236,6 +239,7 @@ resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
   org_id     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_iam_member" "acceptance" {

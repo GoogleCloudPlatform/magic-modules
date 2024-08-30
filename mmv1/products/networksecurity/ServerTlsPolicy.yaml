@@ -15,7 +15,6 @@
 name: 'ServerTlsPolicy'
 base_url: 'projects/{{project}}/locations/{{location}}/serverTlsPolicies'
 create_url: 'projects/{{project}}/locations/{{location}}/serverTlsPolicies?serverTlsPolicyId={{name}}'
-min_version: beta
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -47,25 +46,21 @@ import_format:
   ['projects/{{project}}/locations/{{location}}/serverTlsPolicies/{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
     name: 'network_security_server_tls_policy_basic'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-server-tls-policy'
   - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
     name: 'network_security_server_tls_policy_advanced'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-server-tls-policy'
   - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
     name: 'network_security_server_tls_policy_server_cert'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-server-tls-policy'
   - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
     name: 'network_security_server_tls_policy_mtls'
     primary_resource_id: 'default'
     vars:
@@ -150,6 +145,7 @@ properties:
     properties:
       - !ruby/object:Api::Type::Enum
         name: 'clientValidationMode'
+        immutable: true
         description: |
           When the client presents an invalid certificate or no certificate to the load balancer, the clientValidationMode specifies how the client connection is handled.
           Required if the policy is to be used with the external HTTPS load balancing. For Traffic Director it must be empty.
@@ -159,6 +155,7 @@ properties:
           - :REJECT_INVALID
       - !ruby/object:Api::Type::String
         name: 'clientValidationTrustConfig'
+        immutable: true
         description: |
           Reference to the TrustConfig from certificatemanager.googleapis.com namespace.
           If specified, the chain validation will be performed against certificates configured in the given TrustConfig.
