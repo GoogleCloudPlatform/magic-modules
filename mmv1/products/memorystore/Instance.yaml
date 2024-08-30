@@ -207,9 +207,6 @@ properties:
         immutable: true
       - !ruby/object:Api::Type::Enum
         name: mode
-        description: |
-          Immutable. The mode for zone distribution for Memorystore Redis cluster.
-          If not provided, MULTI_ZONE will be used as default
         values:
           - :MULTI_ZONE
           - :SINGLE_ZONE
