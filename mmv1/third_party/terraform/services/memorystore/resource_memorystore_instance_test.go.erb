@@ -204,7 +204,7 @@ func TestAccMemorystoreInstance_updatePersistence(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// create instance with AOF enabled
-				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: true, nodeType: "REDIS_STANDARD_SMALL", zoneDistributionMode: "MULTI_ZONE", persistenceMode:"AOF", deletionProtectionEnabled: false}),
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE", persistenceMode:"AOF", deletionProtectionEnabled: false}),
 			},
 			{
 				ResourceName:            "google_memorystore_instance.test",
@@ -213,7 +213,7 @@ func TestAccMemorystoreInstance_updatePersistence(t *testing.T) {
 			},
 			{
 				// update persitence to RDB
-				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: true, nodeType: "REDIS_STANDARD_SMALL", zoneDistributionMode: "MULTI_ZONE", persistenceMode:"RDB", deletionProtectionEnabled: false}),
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE", persistenceMode:"RDB", deletionProtectionEnabled: false}),
 			},
 			{
 				ResourceName:            "google_memorystore_instance.test",
@@ -222,7 +222,7 @@ func TestAccMemorystoreInstance_updatePersistence(t *testing.T) {
 			},
 			{
 				// clean up the resource
-				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: false, nodeType: "REDIS_STANDARD_SMALL",zoneDistributionMode: "MULTI_ZONE", persistenceMode:"RDB", deletionProtectionEnabled: false}),
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: false, zoneDistributionMode: "MULTI_ZONE", persistenceMode:"RDB", deletionProtectionEnabled: false}),
 			},
 		},
 	})
@@ -268,9 +268,14 @@ func createOrUpdateMemorystoreInstance(params *InstanceParams) string {
         persistenceBlock = "persistence_config {mode = \"RDB\"}"
     }
     if params.persistenceMode == "AOF" {
-        persistenceBlock = "persistence_config {mode = \"AOF\" aof_config { append_fsync = \"EVERYSEC\" } }"
-    }
-
+		persistenceBlock = `
+        persistence_config {
+            mode = "AOF"
+            aof_config {
+                append_fsync = "EVERY_SEC"
+            }
+        }`
+	}
 	return fmt.Sprintf(`
 resource "google_memorystore_instance" "test" {
 	provider = google-beta

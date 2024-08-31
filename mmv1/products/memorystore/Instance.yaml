@@ -12,6 +12,10 @@ update_verb: :PATCH
 update_mask: true
 autogen_async: true
 min_version: beta
+timeouts: !ruby/object:Api::Timeouts
+  insert_minutes: 60
+  update_minutes: 120
+  delete_minutes: 30
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/memorystore_instance.go.erb
   decoder: templates/terraform/decoders/memorystore_instance.go.erb
@@ -178,7 +182,9 @@ properties:
             default_from_api: true
         name: aofConfig
         description: "Configuration for AOF based persistence. "
+        default_from_api: true
     name: persistenceConfig
+    default_from_api: true
     description: "Represents persistence configuration for a instance. "
   - !ruby/object:Api::Type::String
     name: engineVersion
