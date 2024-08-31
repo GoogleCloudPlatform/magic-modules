@@ -1,5 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package fwprovider
 
 import (
@@ -204,7 +202,7 @@ func (d *GoogleProviderConfigPluginFrameworkDataSource) Read(ctx context.Context
 
 	// Copy all values from the provider config into this data source
 
-	// TODO(SarahFrench) - credentials
+	data.Credentials = d.providerConfig.Credentials
 	// TODO(SarahFrench) - access_token
 	// TODO(SarahFrench) - impersonate_service_account
 	// TODO(SarahFrench) - impersonate_service_account_delegates
