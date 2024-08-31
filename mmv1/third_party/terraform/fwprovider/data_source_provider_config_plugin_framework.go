@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-provider-google/google/fwmodels"
 	"github.com/hashicorp/terraform-provider-google/google/fwresource"
@@ -218,6 +219,12 @@ func (d *GoogleProviderConfigPluginFrameworkDataSource) Read(ctx context.Context
 	data.DefaultLabels = d.providerConfig.DefaultLabels
 	// TODO(SarahFrench) - add_terraform_attribution_label
 	// TODO(SarahFrench) - terraform_attribution_label_addition_strategy
+
+	// Warn users against using this data source
+	resp.Diagnostics.Append(diag.NewWarningDiagnostic(
+		"Data source google_provider_config_plugin_framework should not be used",
+		"Data source google_provider_config_plugin_framework is intended to be used only in acceptance tests for the provider. Instead, please use the google_client_config data source to access provider configuration details, or open a GitHub issue requesting new features in that datasource. Please go to: https://github.com/hashicorp/terraform-provider-google/issues/new/choose",
+	))
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

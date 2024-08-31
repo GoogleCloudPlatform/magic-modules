@@ -10,7 +10,8 @@ import (
 
 func DataSourceGoogleProviderConfigSdk() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceClientConfigRead,
+		DeprecationMessage: "Data source google_provider_config_sdk is intended to be used only in acceptance tests for the provider. Instead, please use the google_client_config data source to access provider configuration details, or open a GitHub issue requesting new features in that datasource. Please go to: https://github.com/hashicorp/terraform-provider-google/issues/new/choose",
+		Read:               dataSourceClientConfigRead,
 		Schema: map[string]*schema.Schema{
 			// Start of user inputs
 			"access_token": {
