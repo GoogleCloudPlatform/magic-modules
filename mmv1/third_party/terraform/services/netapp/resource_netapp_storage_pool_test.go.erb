@@ -187,6 +187,7 @@ resource "google_netapp_storage_pool" "test_pool" {
   network = data.google_compute_network.default.id
   zone = "us-east1-c"
   replica_zone = "us-east1-b"
+  allow_auto_tiering = true
 }
 
 resource "time_sleep" "wait_5_minutes" {
