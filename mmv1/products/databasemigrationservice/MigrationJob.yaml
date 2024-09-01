@@ -232,8 +232,9 @@ properties:
   exactly_one_of:
   - reverse_ssh_connectivity
   - vpc_peering_connectivity
-  properties:
-  # Empty message.
+  allow_empty_object: true
+  send_empty_value: true
+  properties: []
 - !ruby/object:Api::Type::NestedObject
   name: 'reverse_ssh_connectivity'
   description: |
