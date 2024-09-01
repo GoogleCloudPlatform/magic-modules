@@ -79,7 +79,7 @@ resource "google_database_migration_service_migration_job" "<%= ctx[:primary_res
   labels = {
     foo = "bar"
   }
-  static_ip_connectivity = {
+  static_ip_connectivity {
   }
   source             = "projects/${data.google_project.project.project_id}/locations/us-central1/connectionProfiles/<%= ctx[:vars]["source_cp"] %>"
   destination             = "projects/${data.google_project.project.project_id}/locations/us-central1/connectionProfiles/<%= ctx[:vars]["destination_cp"] %>"

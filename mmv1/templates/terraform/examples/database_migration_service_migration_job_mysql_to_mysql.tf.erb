@@ -83,10 +83,10 @@ resource "google_database_migration_service_migration_job" "<%= ctx[:primary_res
   labels = {
     foo = "bar"
   }
-  performance_config = {
+  performance_config {
     dump_parallel_level = "MAX"
   }
-  vpc_peering_connectivity = {
+  vpc_peering_connectivity {
     vpc = google_compute_network.default.id
   }
   dump_type = "LOGICAL"
