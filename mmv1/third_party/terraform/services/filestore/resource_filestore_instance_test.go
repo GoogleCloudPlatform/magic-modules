@@ -194,7 +194,7 @@ resource "google_filestore_instance" "instance" {
 func TestAccFilestoreInstance_deletionProtection_update(t *testing.T) {
 	t.Parallel()
 
-	name := fmt.Sprintf("tf-instance-test-%d", acctest.RandInt(t))
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	location := "us-central1-a"
 	tier := "ZONAL"
 
