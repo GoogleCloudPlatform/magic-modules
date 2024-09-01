@@ -72,6 +72,10 @@ resource "google_database_migration_service_connection_profile" "destination_cp"
   depends_on = [google_sql_database_instance.destination_csql]
 }
 
+resource "google_compute_network" "default" {
+  name = "<%= ctx[:vars]['destination_csql'] %>"
+}
+
 resource "google_database_migration_service_migration_job" "<%= ctx[:primary_resource_id] %>" {
   location              = "us-central1"
   migration_job_id = "<%= ctx[:vars]["migration_id"] %>"
@@ -79,6 +83,13 @@ resource "google_database_migration_service_migration_job" "<%= ctx[:primary_res
   labels = {
     foo = "bar"
   }
+  performance_config = {
+    dump_parallel_level = "MAX"
+  }
+  vpc_peering_connectivity = {
+    vpc = google_compute_network.default.id
+  }
+  dump_type = "LOGICAL"
   source             = "projects/${data.google_project.project.project_id}/locations/us-central1/connectionProfiles/<%= ctx[:vars]["source_cp"] %>"
   destination             = "projects/${data.google_project.project.project_id}/locations/us-central1/connectionProfiles/<%= ctx[:vars]["destination_cp"] %>"
   type            = "CONTINUOUS"
