@@ -42,49 +42,49 @@ async: !ruby/object:Api::OpAsync
     path: 'done'
     complete: true
     allowed:
-    - true
-    - false
+      - true
+      - false
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
 autogen_async: true
 examples:
-- !ruby/object:Provider::Terraform::Examples
-  name: 'database_migration_service_migration_job_mysql_to_mysql'
-  primary_resource_id: 'mysqltomysql'
-  vars:
-    migration_id: 'my-migrationid'
-    source_csql: 'source-csql'
-    source_sqldb_cert: 'cert'
-    source_sqldb_user: 'username'
-    source_sqldb_pass: 'password'
-    source_cp: 'source-cp'
-    destination_csql: 'destination-csql'
-    destination_cp: 'destination-cp'
-- !ruby/object:Provider::Terraform::Examples
-  name: 'database_migration_service_migration_job_postgres_to_postgres'
-  primary_resource_id: 'psqltopsql'
-  vars:
-    migration_id: 'my-migrationid'
-    source_csql: 'source-csql'
-    source_sqldb_cert: 'cert'
-    source_sqldb_user: 'username'
-    source_sqldb_pass: 'password'
-    source_cp: 'source-cp'
-    destination_csql: 'destination-csql'
-    destination_cp: 'destination-cp'
-- !ruby/object:Provider::Terraform::Examples
-  name: 'database_migration_service_migration_job_postgres_to_alloydb'
-  primary_resource_id: 'psqltoalloydb'
-  vars:
-    migration_id: 'my-migrationid'
-    source_csql: 'source-csql'
-    source_sqldb_cert: 'cert'
-    source_sqldb_user: 'username'
-    source_sqldb_pass: 'password'
-    source_cp: 'source-cp'
-    destination_alloydb: 'destination-alloydb'
-    destination_cp: 'destination-cp'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'database_migration_service_migration_job_mysql_to_mysql'
+    primary_resource_id: 'mysqltomysql'
+    vars:
+      migration_id: 'my-migrationid'
+      source_csql: 'source-csql'
+      source_sqldb_cert: 'cert'
+      source_sqldb_user: 'username'
+      source_sqldb_pass: 'password'
+      source_cp: 'source-cp'
+      destination_csql: 'destination-csql'
+      destination_cp: 'destination-cp'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'database_migration_service_migration_job_postgres_to_postgres'
+    primary_resource_id: 'psqltopsql'
+    vars:
+      migration_id: 'my-migrationid'
+      source_csql: 'source-csql'
+      source_sqldb_cert: 'cert'
+      source_sqldb_user: 'username'
+      source_sqldb_pass: 'password'
+      source_cp: 'source-cp'
+      destination_csql: 'destination-csql'
+      destination_cp: 'destination-cp'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'database_migration_service_migration_job_postgres_to_alloydb'
+    primary_resource_id: 'psqltoalloydb'
+    vars:
+      migration_id: 'my-migrationid'
+      source_csql: 'source-csql'
+      source_sqldb_cert: 'cert'
+      source_sqldb_user: 'username'
+      source_sqldb_pass: 'password'
+      source_cp: 'source-cp'
+      destination_alloydb: 'destination-alloydb'
+      destination_cp: 'destination-cp'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'migrationJobId'
@@ -274,4 +274,3 @@ properties:
         name: 'vpc'
         description: |
           The name of the VPC network to peer with the Cloud SQL private network.
-     
