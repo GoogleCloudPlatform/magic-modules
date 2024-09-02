@@ -63,9 +63,12 @@ func testAccSdkProvider_billing_project_precedenceOrderEnvironmentVariables(t *t
 	/*
 		These are all the ENVs for billing_project
 		GOOGLE_BILLING_PROJECT
+
+		GOOGLE_CLOUD_QUOTA_PROJECT - NOT used by provider, but is in client libraries we use
 	*/
 
 	GOOGLE_BILLING_PROJECT := "GOOGLE_BILLING_PROJECT"
+	GOOGLE_CLOUD_QUOTA_PROJECT := "GOOGLE_CLOUD_QUOTA_PROJECT"
 
 	context := map[string]interface{}{}
 
@@ -77,10 +80,22 @@ func testAccSdkProvider_billing_project_precedenceOrderEnvironmentVariables(t *t
 				// GOOGLE_BILLING_PROJECT is used if set
 				PreConfig: func() {
 					t.Setenv("GOOGLE_BILLING_PROJECT", GOOGLE_BILLING_PROJECT) //used
+					t.Setenv("GOOGLE_CLOUD_QUOTA_PROJECT", GOOGLE_CLOUD_QUOTA_PROJECT)
 				},
 				Config: testAccSdkProvider_billing_projectInEnvsOnly(context),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("data.google_provider_config_plugin_framework.default", "billing_project", GOOGLE_BILLING_PROJECT),
+				),
+			},
+			{
+				// GOOGLE_CLOUD_QUOTA_PROJECT is NOT used here
+				PreConfig: func() {
+					t.Setenv("GOOGLE_BILLING_PROJECT", "")
+					t.Setenv("GOOGLE_CLOUD_QUOTA_PROJECT", GOOGLE_CLOUD_QUOTA_PROJECT) // NOT used
+				},
+				Config: testAccSdkProvider_billing_projectInEnvsOnly(context),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckNoResourceAttr("data.google_provider_config_plugin_framework.default", "billing_project"),
 				),
 			},
 		},
