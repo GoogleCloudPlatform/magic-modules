@@ -21,6 +21,7 @@ resource "google_pubsub_subscription" "<%= ctx[:primary_resource_id] %>" {
 
     max_bytes = 1000
     max_duration = "300s"
+    max_messages = 1000
   }
   depends_on = [
     google_storage_bucket.<%= ctx[:primary_resource_id] %>,
