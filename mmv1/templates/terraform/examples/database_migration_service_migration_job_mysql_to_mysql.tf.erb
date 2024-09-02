@@ -90,6 +90,12 @@ resource "google_database_migration_service_migration_job" "<%= ctx[:primary_res
     vpc = google_compute_network.default.id
   }
   dump_type = "LOGICAL"
+  dump_flags {
+    dump_flags {
+      name = "max-allowed-packet"
+      value = "1073741824"
+    }
+  }
   source             = "projects/${data.google_project.project.project_id}/locations/us-central1/connectionProfiles/<%= ctx[:vars]["source_cp"] %>"
   destination             = "projects/${data.google_project.project.project_id}/locations/us-central1/connectionProfiles/<%= ctx[:vars]["destination_cp"] %>"
   type            = "CONTINUOUS"

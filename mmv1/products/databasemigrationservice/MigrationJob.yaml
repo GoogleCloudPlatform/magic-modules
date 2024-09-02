@@ -180,12 +180,12 @@ properties:
     description: |
       The name of the destination connection profile resource in the form of projects/{project}/locations/{location}/connectionProfiles/{destinationConnectionProfile}.
   - !ruby/object:Api::Type::NestedObject
-    name: 'dump_flags'
+    name: 'dumpFlags'
     description: |
       The initial dump flags.
     properties:
       - !ruby/object:Api::Type::Array
-        name: 'dump_flags'
+        name: 'dumpFlags'
         description: |
           A list of dump flags
         item_type: !ruby/object:Api::Type::NestedObject
@@ -199,12 +199,12 @@ properties:
               description: |
                 The vale of the flag
   - !ruby/object:Api::Type::NestedObject
-    name: 'performance_config'
+    name: 'performanceConfig'
     description: |
       Data dump parallelism settings used by the migration.
     properties:
       - !ruby/object:Api::Type::Enum
-        name: 'dump_parallel_level'
+        name: 'dumpParallelLevel'
         description: |
           Initial dump parallelism level.
         values:
@@ -212,13 +212,13 @@ properties:
           - :OPTIMAL
           - :MAX
   - !ruby/object:Api::Type::String
-    name: 'dump_path'
+    name: 'dumpPath'
     description: |
       The path to the dump file in Google Cloud Storage,
       in the format: (gs://[BUCKET_NAME]/[OBJECT_NAME]).
       This field and the "dump_flags" field are mutually exclusive.
   - !ruby/object:Api::Type::Enum
-    name: 'dump_type'
+    name: 'dumpType'
     description: |
       The type of the data dump. Supported for MySQL to CloudSQL for MySQL
       migrations only.
@@ -226,30 +226,30 @@ properties:
       - :LOGICAL
       - :PHYSICAL
   - !ruby/object:Api::Type::NestedObject
-    name: 'static_ip_connectivity'
+    name: 'staticIpConnectivity'
     description: |
       static ip connectivity data (default, no additional details needed).
     exactly_one_of:
-      - reverse_ssh_connectivity
-      - vpc_peering_connectivity
+      - reverseSshConnectivity
+      - vpcPeeringConnectivity
     allow_empty_object: true
     send_empty_value: true
     properties: []
   - !ruby/object:Api::Type::NestedObject
-    name: 'reverse_ssh_connectivity'
+    name: 'reverseSshConnectivity'
     description: |
       The details of the VPC network that the source database is located in.
     exactly_one_of:
-      - static_ip_connectivity
-      - vpc_peering_connectivity
+      - staticIpConnectivity
+      - vpcPeeringConnectivity
     properties:
       - !ruby/object:Api::Type::String
-        name: 'vm_ip'
+        name: 'vmIp'
         description: |
           The IP of the virtual machine (Compute Engine) used as the bastion server
           for the SSH tunnel.
       - !ruby/object:Api::Type::Integer
-        name: 'vm_port'
+        name: 'vmPort'
         description: |
           The forwarding port of the virtual machine (Compute Engine) used as the
           bastion server for the SSH tunnel.
@@ -263,12 +263,12 @@ properties:
         description: |
           The name of the VPC to peer with the Cloud SQL private network.
   - !ruby/object:Api::Type::NestedObject
-    name: 'vpc_peering_connectivity'
+    name: 'vpcPeeringConnectivity'
     description: |
       The details of the VPC network that the source database is located in.
     exactly_one_of:
-      - static_ip_connectivity
-      - reverse_ssh_connectivity
+      - staticIpConnectivity
+      - reverseSshConnectivity
     properties:
       - !ruby/object:Api::Type::String
         name: 'vpc'
