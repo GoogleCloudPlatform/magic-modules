@@ -1,6 +1,7 @@
 package provider_test
 
 import (
+	"fmt"
 	"regexp"
 	"testing"
 
@@ -140,8 +141,13 @@ func testAccSdkProvider_project_precedenceOrderEnvironmentVariables(t *testing.T
 					t.Setenv("CLOUDSDK_CORE_PROJECT", "CLOUDSDK_CORE_PROJECT")
 				},
 				Config: testAccSdkProvider_projectInEnvsOnly(),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.google_provider_config_sdk.default", "project", "CLOUDSDK_CORE_PROJECT"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					// When not explicitly waiting for the unknown value to resolve the project could be the ENV or could be from the provisioned project
+					// In practice it might be that this data source would be refreshed during an apply (?)
+					resource.TestMatchResourceAttr("data.google_provider_config_sdk.default", "project", regexp.MustCompile(fmt.Sprintf("(tf-test-[0-9a-z]{16}|%s)", project))),
+
+					// When explicitly made to wait, returns the provisioned project's id
+					resource.TestMatchResourceAttr("data.google_provider_config_sdk.wait", "project", regexp.MustCompile("tf-test-[0-9a-z]{16}")),
 				),
 			},
 		},
