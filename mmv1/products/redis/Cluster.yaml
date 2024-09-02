@@ -308,6 +308,7 @@ properties:
               description: |
                 Required. The day of week that maintenance updates occur.
 
+                - DAY_OF_WEEK_UNSPECIFIED: The day of the week is unspecified.
                 - MONDAY: Monday
                 - TUESDAY: Tuesday
                 - WEDNESDAY: Wednesday
@@ -316,6 +317,7 @@ properties:
                 - SATURDAY: Saturday
                 - SUNDAY: Sunday
               values:
+                - :DAY_OF_WEEK_UNSPECIFIED
                 - :MONDAY
                 - :TUESDAY
                 - :WEDNESDAY
