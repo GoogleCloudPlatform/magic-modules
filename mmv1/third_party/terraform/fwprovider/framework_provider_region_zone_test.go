@@ -11,7 +11,7 @@ import (
 
 // TestAccFwProvider_region is a series of acc tests asserting how the plugin-framework provider handles credentials arguments
 // It is PF specific because the HCL used uses a PF-implemented data source
-// It is a counterpart to TestAccFwProvider_region
+// It is a counterpart to TestAccSdkProvider_region
 func TestAccFwProvider_region(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
 		"config takes precedence over environment variables":                          testAccFwProvider_region_configPrecedenceOverEnvironmentVariables,
@@ -34,7 +34,7 @@ func TestAccFwProvider_region(t *testing.T) {
 
 // TestAccFwProvider_zone is a series of acc tests asserting how the plugin-framework provider handles credentials arguments
 // It is PF specific because the HCL used uses a PF-implemented data source
-// It is a counterpart to TestAccFwProvider_zone
+// It is a counterpart to TestAccSdkProvider_zone
 func TestAccFwProvider_zone(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
 		"config takes precedence over environment variables":                        testAccFwProvider_zone_configPrecedenceOverEnvironmentVariables,
