@@ -20,6 +20,8 @@ doc for more information.
 
 ~> It is recommended to use the `constraints/compute.skipDefaultNetworkCreation` [constraint](/docs/providers/google/r/google_organization_policy.html) to remove the default network instead of setting `auto_create_network` to false, when possible.
 
+~> It may take a while for the attached tag bindings to be deleted after the project is scheduled to be deleted. 
+
 To get more information about projects, see:
 
 * [API documentation](https://cloud.google.com/resource-manager/reference/rest/v1/projects)
@@ -48,6 +50,17 @@ resource "google_project" "my_project-in-a-folder" {
 resource "google_folder" "department1" {
   display_name = "Department 1"
   parent       = "organizations/1234567"
+}
+```
+
+To create a project with a tag
+
+```hcl
+resource "google_project" "my_project" {
+  name       = "My Project"
+  project_id = "your-project-id"
+  org_id     = "1234567"
+  tags = {"1234567/env":"staging"}
 }
 ```
 
