@@ -29,7 +29,6 @@
           "diskType": "pd-standard",
           "imageType": "test-image_type",
           "labels": {
-            "goog-terraform-provisioned": "true",
             "test-label-key": "test-label-value"
           },
           "localSsdCount": 42,
