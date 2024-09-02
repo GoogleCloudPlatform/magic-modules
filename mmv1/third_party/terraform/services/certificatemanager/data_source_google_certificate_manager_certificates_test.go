@@ -14,6 +14,30 @@ func TestAccDataSourceGoogleCertificateManagerCertificates_basic(t *testing.T) {
 	t.Parallel()
 
 	// Resource identifier used for content testing
+	name := fmt.Sprintf("tf-test-certificate-%d", acctest.RandInt(t))
+	description := "My acceptance data source test certificates"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataSourceGoogleCertificateManagerCertificates_basic(name, description),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestMatchResourceAttr("data.google_certificate_manager_certificates.certificates", "certificates.#", regexp.MustCompile("^[1-9]")),
+
+					resource.TestCheckResourceAttrSet("data.google_certificate_manager_certificates.certificates", "region"),
+					resource.TestCheckResourceAttr("data.google_certificate_manager_certificates.certificates", "region", "global"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccDataSourceGoogleCertificateManagerCertificates_full(t *testing.T) {
+	t.Parallel()
+
+	// Resource identifier used for content testing
 	region := "global"
 	id := fmt.Sprintf("projects/%s/locations/%s/certificates", envvar.GetTestProjectFromEnv(), region)
 	name := fmt.Sprintf("tf-test-certificate-%d", acctest.RandInt(t))
@@ -25,7 +49,7 @@ func TestAccDataSourceGoogleCertificateManagerCertificates_basic(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceGoogleCertificateManagerCertificates_basic(name, description),
+				Config: testAccDataSourceGoogleCertificateManagerCertificates_full(name, description),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestMatchResourceAttr("data.google_certificate_manager_certificates.certificates", "certificates.#", regexp.MustCompile("^[1-9]")),
 
@@ -185,6 +209,28 @@ func TestAccDataSourceGoogleCertificateManagerCertificates_managedCertificateIss
 }
 
 func testAccDataSourceGoogleCertificateManagerCertificates_basic(certificateName, certificateDescription string) string {
+	return fmt.Sprintf(`
+resource "google_certificate_manager_certificate" "default" {
+  name        = "%s"
+  description = "%s"
+  self_managed {
+    pem_certificate = file("test-fixtures/cert.pem")
+    pem_private_key = file("test-fixtures/private-key.pem")
+  }
+
+  labels = {
+    "terraform" : true,
+    "acc-test" : true,
+  }
+}
+
+data "google_certificate_manager_certificates" "certificates" {
+  depends_on = [google_certificate_manager_certificate.default]
+}
+`, certificateName, certificateDescription)
+}
+
+func testAccDataSourceGoogleCertificateManagerCertificates_full(certificateName, certificateDescription string) string {
 	return fmt.Sprintf(`
 resource "google_certificate_manager_certificate" "default" {
   name        = "%s"
