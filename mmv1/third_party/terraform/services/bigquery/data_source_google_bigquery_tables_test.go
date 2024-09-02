@@ -1,6 +1,7 @@
 package bigquery_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -23,7 +24,7 @@ func TestAccDataSourceGoogleBigqueryTables_basic(t *testing.T) {
 				Config: testAccDataSourceGoogleBigqueryTables_basic(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.google_bigquery_tables.example", "tables.#", "1"),
-					resource.TestCheckResourceAttr("data.google_bigquery_tables.example", "tables.0.table_id", "test_table"),
+					resource.TestCheckResourceAttr("data.google_bigquery_tables.example", "tables.0.table_id", fmt.Sprintf("tf_test_table_%s", context["random_suffix"])),
 					resource.TestCheckResourceAttr("data.google_bigquery_tables.example", "tables.0.labels.%", "1"),
 					resource.TestCheckResourceAttr("data.google_bigquery_tables.example", "tables.0.labels.goog-terraform-provisioned", "true"),
 				),
@@ -45,7 +46,7 @@ func testAccDataSourceGoogleBigqueryTables_basic(context map[string]interface{})
 
   resource "google_bigquery_table" "test" {
     dataset_id        = google_bigquery_dataset.test.dataset_id
-    table_id          = "test_table"
+    table_id          = "tf_test_table_%{random_suffix}"
     deletion_protection = false
     schema     = <<EOF
     [
