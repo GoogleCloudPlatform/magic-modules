@@ -57,10 +57,6 @@ func testAccDataSourceGoogleBigqueryTables_basic(context map[string]interface{})
       }
     ]
     EOF
-    # Default label for a tf-provisioned table (referenced in the test suite):
-    # labels = {
-    #   goog-terraform-provisioned = "true"
-    # }
   }
 
   data "google_bigquery_tables" "example" {
