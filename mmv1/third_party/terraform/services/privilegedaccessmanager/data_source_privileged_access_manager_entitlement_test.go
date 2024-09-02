@@ -27,6 +27,7 @@ func TestAccDataSourceGooglePrivilegedAccessManagerEntitlement_basic(t *testing.
 			},
 		},
 	})
+}
 
 func TestAccDataSourceGooglePrivilegedAccessManagerEntitlement_optionalProject(t *testing.T) {
 	t.Parallel()
