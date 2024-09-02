@@ -195,7 +195,7 @@ properties:
               description: |
                 The name of the flag
             - !ruby/object:Api::Type::String
-              name: 'vale'
+              name: 'value'
               description: |
                 The vale of the flag
   - !ruby/object:Api::Type::NestedObject
