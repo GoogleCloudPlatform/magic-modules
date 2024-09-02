@@ -39,13 +39,13 @@ parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'dataset'
     description: |
-      Identifies the dataset addressed by this request. Must be in the format 
+      Identifies the dataset addressed by this request. Must be in the format
       'projects/{project}/locations/{location}/datasets/{dataset}'
     required: true
     immutable: true
     resource: 'Dataset'
     imports: 'selfLink'
-    url_param_only: true          
+    url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -57,13 +57,13 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'settings'
     description: |
-      Settings associated with this workspace.    
+      Settings associated with this workspace.
     required: true
     properties:
       - !ruby/object:Api::Type::Array
         name: 'dataProjectIds'
         description: |
-          Project IDs for data projects hosted in a workspace.    
+          Project IDs for data projects hosted in a workspace.
         required: true
         item_type: Api::Type::String
   - !ruby/object:Api::Type::KeyValueLabels
