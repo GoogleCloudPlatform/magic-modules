@@ -1078,6 +1078,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 							Type:         schema.TypeString,
 							Required:     true,
 							ForceNew:     true,
+							DiffSuppressFunc: tpgresource.CompareResourceNames,
 							Description: `Optional. Name of an existing Cloud Storage bucket to be used by the environment.`,
 						},
 					},
