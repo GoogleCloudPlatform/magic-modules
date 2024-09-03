@@ -68,13 +68,14 @@ provider "google" {
 }
 
 data "google_site_verification_token" "token" {
-  alias               = "scoped"
+  provider            = google.scoped
   type                = "INET_DOMAIN"
   identifier          = "%{domain}"
   verification_method = "DNS_TXT"
 }
 
 resource "google_dns_record_set" "example" {
+  provider     = google.scoped
   managed_zone = "%{managed_zone}"
   name         = "%{dns_name}"
   type         = "TXT"
@@ -83,7 +84,7 @@ resource "google_dns_record_set" "example" {
 }
 
 resource "google_site_verification_web_resource" "example" {
-  alias = "scoped"
+  provider = google.scoped
   site {
     type       = data.google_site_verification_token.token.type
     identifier = data.google_site_verification_token.token.identifier
@@ -98,7 +99,7 @@ resource "google_site_verification_web_resource" "example" {
 func testAccSiteVerificationWebResource_siteverificationRemoveDomain(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 provider "google" {
-  alias                 = "scoped"
+  provider               = google.scoped
   user_project_override = true
   scopes = [
     "https://www.googleapis.com/auth/siteverification",
@@ -108,15 +109,15 @@ provider "google" {
 }
 
 data "google_site_verification_token" "token" {
-  alias               = "scoped"
+  provider            = google.scoped
   type                = "INET_DOMAIN"
   identifier          = "%{domain}"
   verification_method = "DNS_TXT"
 }
 
 resource "google_site_verification_web_resource" "example" {
+  provider = google.scoped
   site {
-  alias = "scoped"
     type       = data.google_site_verification_token.token.type
     identifier = data.google_site_verification_token.token.identifier
   }
@@ -207,6 +208,7 @@ provider "google" {
 }
 
 resource "google_storage_bucket" "bucket" {
+  provider = google.scoped
   name     = "%{bucket}"
   location = "US"
 }
@@ -219,16 +221,18 @@ data "google_site_verification_token" "token" {
 }
 
 resource "google_storage_bucket_object" "object" {
-  name    = "${data.google_site_verification_token.token.token}"
-  content = "google-site-verification: ${data.google_site_verification_token.token.token}"
-  bucket  = google_storage_bucket.bucket.name
+  provider = google.scoped
+  name     = "${data.google_site_verification_token.token.token}"
+  content  = "google-site-verification: ${data.google_site_verification_token.token.token}"
+  bucket   = google_storage_bucket.bucket.name
 }
 
 resource "google_storage_object_access_control" "public_rule" {
-  bucket = google_storage_bucket.bucket.name
-  object = google_storage_bucket_object.object.name
-  role   = "READER"
-  entity = "allUsers"
+  provider = google.scoped
+  bucket   = google_storage_bucket.bucket.name
+  object   = google_storage_bucket_object.object.name
+  role     = "READER"
+  entity   = "allUsers"
 }
 
 resource "google_site_verification_web_resource" "example" {
