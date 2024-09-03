@@ -303,4 +303,3 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: Optional. Labels with user-defined metadata.
-    immutable: false

@@ -50,7 +50,7 @@ resource "google_apphub_service" "<%= ctx[:primary_resource_id] %>" {
   service_id = google_compute_forwarding_rule.forwarding_rule.name
   discovered_service = data.google_apphub_discovered_service.catalog-service.name
   display_name = "<%= ctx[:vars]['display_name'] %>"
-  description = "<%= ctx[:vars]['description'] %>"
+  description = "<%= ctx[:vars]['desc'] %>"
   attributes {
     environment {
       type = "STAGING"

@@ -35,7 +35,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 1000
@@ -56,6 +56,10 @@ examples:
     primary_resource_id: 'template'
     vars:
       template_name: 'soletenant-with-licenses'
+  - name: 'node_template_accelerators'
+    primary_resource_id: 'template'
+    vars:
+      template_name: 'soletenant-with-accelerators'
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -146,6 +150,24 @@ properties:
         enum_values:
           - 'RESTART_NODE_ON_ANY_SERVER'
           - 'RESTART_NODE_ON_MINIMAL_SERVERS'
+  - name: 'accelerators'
+    type: Array
+    description: |
+      List of the type and count of accelerator cards attached to the
+      node template
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'acceleratorCount'
+          type: Integer
+          description: |
+            The number of the guest accelerator cards exposed to this
+            node template.
+        - name: 'acceleratorType'
+          type: String
+          description: |
+            Full or partial URL of the accelerator type resource to expose
+            to this node template.
   - name: 'cpuOvercommitType'
     type: Enum
     description: |

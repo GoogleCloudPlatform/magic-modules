@@ -43,7 +43,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'appengine#operation'
     path: 'name'
     wait_ms: 1000
@@ -289,6 +289,7 @@ properties:
         key_description: |
           name of file
         value_type:
+          name: files
           type: NestedObject
           properties:
             - name: 'sha1Sum'

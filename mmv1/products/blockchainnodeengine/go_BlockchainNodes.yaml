@@ -88,7 +88,6 @@ properties:
     type: KeyValueLabels
     description: |
       User-provided key-value pairs
-    immutable: false
   - name: 'connectionInfo'
     type: NestedObject
     description: |

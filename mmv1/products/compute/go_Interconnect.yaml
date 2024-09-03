@@ -34,7 +34,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 10000
@@ -379,16 +379,18 @@ properties:
   - name: 'requestedFeatures'
     type: Array
     description: |
-      interconnects.list of features requested for this Interconnect connection. Options: MACSEC (
+      interconnects.list of features requested for this Interconnect connection. Options: IF_MACSEC (
       If specified then the connection is created on MACsec capable hardware ports. If not
       specified, the default value is false, which allocates non-MACsec capable ports first if
-      available).
+      available). Note that MACSEC is still technically allowed for compatibility reasons, but it
+      does not work with the API, and will be removed in an upcoming major version.
     item_type:
       type: Enum
       description: |
         interconnects.list of features requested for this Interconnect connection
       enum_values:
         - 'MACSEC'
+        - 'IF_MACSEC'
   - name: 'availableFeatures'
     type: Array
     description: |
@@ -398,8 +400,4 @@ properties:
       ports and MACsec isn't supported and enabling MACsec fails).
     output: true
     item_type:
-      type: Enum
-      description: |
-        interconnects.list of features available for this Interconnect connection,
-      enum_values:
-        - 'MACSEC'
+      type: String

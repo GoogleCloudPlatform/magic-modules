@@ -129,4 +129,3 @@ properties:
     type: KeyValueLabels
     description: |
       Labels for this Scope.
-    immutable: false

@@ -50,7 +50,7 @@ examples:
     vars:
       data_exchange_id: 'my_data_exchange'
       listing_id: 'my_listing'
-      description: 'example data exchange'
+      desc: 'example data exchange'
   - name: 'bigquery_analyticshub_listing_restricted'
     primary_resource_id: 'listing'
     primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"]), fmt.Sprintf("tf_test_my_listing%s", context["random_suffix"])'
@@ -58,7 +58,15 @@ examples:
     vars:
       data_exchange_id: 'my_data_exchange'
       listing_id: 'my_listing'
-      description: 'example data exchange'
+      desc: 'example data exchange'
+  - name: 'bigquery_analyticshub_listing_dcr'
+    primary_resource_id: 'listing'
+    primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"]), fmt.Sprintf("tf_test_my_listing%s", context["random_suffix"])'
+    region_override: 'US'
+    vars:
+      data_exchange_id: 'dcr_data_exchange'
+      listing_id: 'dcr_listing'
+      desc: 'example dcr data exchange'
 parameters:
 properties:
   - name: 'name'
@@ -146,6 +154,7 @@ properties:
     type: NestedObject
     description: Shared dataset i.e. BigQuery dataset source.
     required: true
+    immutable: true
     properties:
       - name: 'dataset'
         type: String
@@ -153,7 +162,21 @@ properties:
           Resource name of the dataset source for this listing. e.g.
           projects/myproject/datasets/123
         required: true
+        immutable: true
         diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+      - name: 'selectedResources'
+        type: Array
+        description: Resource in this dataset that is selectively shared. This field is required for data clean room exchanges.
+        immutable: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'table'
+              type: String
+              description: |
+                Format: For table: projects/{projectId}/datasets/{datasetId}/tables/{tableId} Example:"projects/test_project/datasets/test_dataset/tables/test_table"
+              immutable: true
+              diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
   - name: 'restrictedExportConfig'
     type: NestedObject
     description: If set, restricted export configuration will be propagated and enforced on the linked dataset.
@@ -162,6 +185,11 @@ properties:
         type: Boolean
         description:
           If true, enable restricted export.
+      - name: 'restrictDirectTableAccess'
+        type: Boolean
+        description:
+          If true, restrict direct table access(read api/tabledata.list) on linked table.
+        output: true
       - name: 'restrictQueryResult'
         type: Boolean
         description:
