@@ -174,6 +174,7 @@ properties:
             default_from_api: true
         name: rdbConfig
         description: "Configuration for RDB based persistence. "
+        default_from_api: true
       - !ruby/object:Api::Type::NestedObject
         properties:
           - !ruby/object:Api::Type::String

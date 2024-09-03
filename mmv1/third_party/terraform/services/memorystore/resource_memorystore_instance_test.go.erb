@@ -265,7 +265,7 @@ func createOrUpdateMemorystoreInstance(params *InstanceParams) string {
 	}
     persistenceBlock := ""
     if params.persistenceMode == "RDB" {
-        persistenceBlock = "persistence_config {mode = \"RDB\"}"
+        persistenceBlock = "persistence_config {mode = \"RDB\" }"
     }
     if params.persistenceMode == "AOF" {
 		persistenceBlock = `
