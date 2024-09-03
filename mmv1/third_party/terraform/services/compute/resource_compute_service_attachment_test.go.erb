@@ -64,7 +64,7 @@ func TestAccComputeServiceAttachment_serviceAttachmentConnectedEndpointsOutput(t
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckComputeServiceAttachmentDestroyProducer(t),
 		Steps: []resource.TestStep{
-      {
+			{
 				Config: testAccComputeServiceAttachment_serviceAttachmentBasicExampleConnectedEndpointsOutput(context, true),
 			},
 			{
@@ -76,10 +76,10 @@ func TestAccComputeServiceAttachment_serviceAttachmentConnectedEndpointsOutput(t
 			{
 				Config: testAccComputeServiceAttachment_serviceAttachmentBasicExampleConnectedEndpointsOutput(context, false),
 				Check: resource.ComposeTestCheckFunc(
-          resource.TestCheckResourceAttrSet(
+					resource.TestCheckResourceAttrSet(
 						"google_compute_service_attachment.psc_ilb_service_attachment", "connected_endpoints.0.endpoint"),
-          resource.TestCheckResourceAttrSet(
-            "google_compute_service_attachment.psc_ilb_service_attachment", "connected_endpoints.0.status"),
+					resource.TestCheckResourceAttrSet(
+						"google_compute_service_attachment.psc_ilb_service_attachment", "connected_endpoints.0.status"),
 					resource.TestCheckResourceAttrSet(
 						"google_compute_service_attachment.psc_ilb_service_attachment", "connected_endpoints.0.consumer_network"),
 					resource.TestCheckResourceAttrSet(
@@ -341,7 +341,7 @@ resource "google_compute_forwarding_rule" "psc_ilb_target_service" {
   load_balancing_scheme = "INTERNAL"
   backend_service       = google_compute_region_backend_service.producer_service_backend.id
   all_ports             = true
-	allow_global_access   = true
+  allow_global_access   = true
   network               = google_compute_network.psc_ilb_network.name
   subnetwork            = google_compute_subnetwork.psc_ilb_producer_subnetwork.name
 }
