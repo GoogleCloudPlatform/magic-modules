@@ -839,12 +839,7 @@ func (r Resource) ClientNamePascal() string {
 }
 
 func (r Resource) PackageName() string {
-	clientName := r.ProductMetadata.ClientName
-	if clientName == "" {
-		clientName = r.ProductMetadata.Name
-	}
-
-	return strings.ToLower(clientName)
+	return strings.ToLower(r.ProductMetadata.Name)
 }
 
 // In order of preference, use TF override,
