@@ -486,6 +486,8 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `instance_termination_action` - (Optional) Describe the type of termination action for VM. Can be `STOP` or `DELETE`.  Read more on [here](https://cloud.google.com/compute/docs/instances/create-use-spot)
 
+* `availability_domain` - (Optional) Specifies the availability domain (AD), which this instance should be scheduled on. The AD belongs to the spread placement policy that has been assigned to the instance. Specify a value from 1 to max count of availability domains in your spread placement policy.
+
 * `max_run_duration` -  (Optional) The duration of the instance. Instance will run and be terminated after then, the termination action could be defined in `instance_termination_action`. Structure is [documented below](#nested_max_run_duration).
 
 
