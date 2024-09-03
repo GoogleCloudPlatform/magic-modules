@@ -1083,7 +1083,7 @@ func TestAccDataprocCluster_withSecurityConfig_withoutKerberosConfig(t *testing.
 			{
 				Config: testAccDataprocCluster_withSecurityConfig_withoutKerberosConfig(rnd, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.kerb", &cluster),
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.nokerb", &cluster),
 				),
 			},
 		},
