@@ -709,7 +709,7 @@ func (t Type) Deprecated() bool {
 }
 
 func (t *Type) GetDescription() string {
-	return strings.TrimRight(t.Description, "\n")
+	return strings.TrimSpace(strings.TrimRight(t.Description, "\n"))
 }
 
 // // private
