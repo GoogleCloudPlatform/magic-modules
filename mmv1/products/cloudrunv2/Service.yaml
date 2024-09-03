@@ -160,6 +160,18 @@ examples:
     ignore_read_extra:
       - 'deletion_protection'
 
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudrunv2_service_mesh'
+    min_version: 'beta'
+    external_providers: ['time']
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service-%s\", context[\"random_suffix\"])"
+    vars:
+      cloud_run_service_name: 'cloudrun-service'
+      mesh_name: 'network-services-mesh'
+    ignore_read_extra:
+      - 'deletion_protection'
+
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -877,6 +889,16 @@ properties:
         name: 'sessionAffinity'
         description: |-
           Enables session affinity. For more information, go to https://cloud.google.com/run/docs/configuring/session-affinity
+      - !ruby/object:Api::Type::NestedObject
+        name: 'serviceMesh'
+        min_version: beta
+        description: |-
+          Enables Cloud Service Mesh for this Revision.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'mesh'
+            description: |-
+              The Mesh resource name. For more information see https://cloud.google.com/service-mesh/docs/reference/network-services/rest/v1/projects.locations.meshes#resource:-mesh.
   - !ruby/object:Api::Type::Array
     name: 'traffic'
     description: |-
