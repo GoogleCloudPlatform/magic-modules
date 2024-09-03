@@ -353,7 +353,7 @@ For `key_name` and `key_description`, provide a domain-appropriate name and desc
    - "Flatteners" convert API response data to Terraform resource data.
    - For top level fields, add a flattener. Call `d.Set()` on the flattened API response value to store it in Terraform state.
    - For other fields, add logic to the parent field's flattener to convert the value from the API response to the Terraform state value. Use a nested flattener for complex logic.
-4. If any of the added Go code (including any imports) is beta-only, change the file suffix to `.go.erb` and wrap the beta-only code in a version guard: `{{- if ne $.TargetVersionName "ga" -}}...{{- else }}...{{- end }}`.
+4. If any of the added Go code (including any imports) is beta-only, change the file suffix to `.go.tmpl` and wrap the beta-only code in a version guard: `{{- if ne $.TargetVersionName "ga" -}}...{{- else }}...{{- end }}`.
    - Add a new guard rather than adding the field to an existing guard; it is easier to read.
 {{< /tab >}}
 {{< /tabs >}}

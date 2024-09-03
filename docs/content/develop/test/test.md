@@ -38,7 +38,7 @@ A create test is a test that creates the target resource and immediately destroy
 
 {{< tabs "create" >}}
 {{< tab "MMv1" >}}
-1. Using an editor of your choice, create a `*.tf.erb` file in [`mmv1/templates/terraform/examples/`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/templates/terraform/examples). The name of the file should include the service name, resource name, and a descriptor. For example, `compute_subnetwork_basic.tf.erb`.
+1. Using an editor of your choice, create a `*.tf.tmpl` file in [`mmv1/templates/terraform/examples/`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/templates/terraform/examples). The name of the file should include the service name, resource name, and a descriptor. For example, `compute_subnetwork_basic.tf.tmpl`.
 2. Write the Terraform configuration for your test. This should include all of the required dependencies. For example, `google_compute_subnetwork` has a dependency on `google_compute_network`:
    ```tf
    resource "google_compute_subnetwork" "primary" {
@@ -72,7 +72,7 @@ A create test is a test that creates the target resource and immediately destroy
      auto_create_subnetworks = false
    }
    ```
-5. Modify the relevant `RESOURCE_NAME.yaml` file under [magic-modules/mmv1/products](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/products) to include an [`examples`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/resource/examples.go) block with your test. The `name` must match the name of your `*.tf.erb` file. For example:
+5. Modify the relevant `RESOURCE_NAME.yaml` file under [magic-modules/mmv1/products](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/products) to include an [`examples`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/resource/examples.go) block with your test. The `name` must match the name of your `*.tf.tmpl` file. For example:
    ```yaml
    examples:
      - name: "compute_subnetwork_basic"
@@ -211,7 +211,7 @@ An update test is a test that creates the target resource and then makes updates
    - Modify the new template function so that updatable fields are changed or removed. This may require additions to the `context` map in the test function.
    - Remove the comments at the top of the file.
    - If beta-only fields are being tested, do the following:
-     - Change the file suffix to `.go.erb`
+     - Change the file suffix to `.go.tmpl`
      - Wrap each beta-only test in a separate version guard: `{{- if ne $.TargetVersionName "ga" -}}...{{- else }}...{{- end }}`
      - In each beta-only test, ensure that the TestCase sets `ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t)`
      - In each beta-only test, ensure that all Terraform resources in all configs have `provider = google-beta` set

@@ -99,7 +99,7 @@ Nested fields currently
 [do not support `ignore_read`](https://github.com/hashicorp/terraform-provider-google/issues/12410)
 but can replicate the behavior by implementing a
 [`custom_flatten`]({{< ref "/develop/custom-code#custom_flatten" >}})
-that always ignores the value returned by the API. [Example](https://github.com/GoogleCloudPlatform/magic-modules/blob/5923d4cb878396a04bed9beaf22a8478e8b1e6a5/mmv1/templates/terraform/custom_flatten/source_representation_instance_configuration_password.go.erb).
+that always ignores the value returned by the API. [Example](https://github.com/GoogleCloudPlatform/magic-modules/blob/5923d4cb878396a04bed9beaf22a8478e8b1e6a5/mmv1/templates/terraform/custom_flatten/go/source_representation_instance_configuration_password.go.tmpl).
 Any fields using a custom flatten also need to be added to `ignore_read_extra`
 for any examples where the field is set.
 
@@ -297,9 +297,8 @@ url_param_only: true
 
 ## `Enum` properties
 
-### `values`
-Enum only. Sets allowed values as ruby "literal constants" (prefixed with a
-colon). If the allowed values change frequently, use a String field instead
+### `enum_values`
+Enum only. If the allowed values change frequently, use a String field instead
 to allow better forwards-compatibility, and link to API documentation
 stating the current allowed values in the String field's description. Do not
 include UNSPECIFIED values in this list.

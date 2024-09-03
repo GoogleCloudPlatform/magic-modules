@@ -86,7 +86,7 @@ Use a flattener to store the default value in state if the response has an empty
 Use the standard `default_if_empty` flattener.
 
 ```yaml
-custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
+custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
 ```
 {{< /tab >}}
 {{< tab "Handwritten" >}}

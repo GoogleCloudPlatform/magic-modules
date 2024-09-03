@@ -15,7 +15,7 @@ custom_code:
   custom_delete: templates/terraform/custom_delete/go/resource_name_custom_delete.go.tmpl
 ```
 
-By convention, the template files are stored in a directory matching the type of custom code, and the name of the file includes the resource (and, if relevant, field) impacted by the custom code. Like handwritten resource and test code, custom code is written as ruby templates which render go code.
+By convention, the template files are stored in a directory matching the type of custom code, and the name of the file includes the resource (and, if relevant, field) impacted by the custom code. Like handwritten resource and test code, custom code is written as go templates which render go code.
 
 When in doubt about the behavior of custom code, write the custom code, [generate the providers]({{< ref "/get-started/generate-providers" >}}), and inspect what changed in the providers using `git diff`.
 

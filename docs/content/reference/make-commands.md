@@ -17,26 +17,21 @@ Generates the code for the downstream `google` and `google-beta` providers.
 Examples:
 
 ```bash
-make provider VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google"
-make provider VERSION=beta OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta"
+go run . --version ga --output $GOPATH/src/github.com/hashicorp/terraform-provider-google
+go run . --version beta --output $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta 
 
 # Only generate a specific product (plus all common files)
-make provider VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google" PRODUCT=pubsub
-
-# Only generate only a specific resources for a product
-make provider VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google" PRODUCT=pubsub RESOURCE=Topic
+go run . --version ga --product pubsub --output $GOPATH/src/github.com/hashicorp/terraform-provider-google
 
 # Only generate common files, including all third_party code
-make provider VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google" PRODUCT=doesnotexist
+go run . --version ga --product doesnotexist --output $GOPATH/src/github.com/hashicorp/terraform-provider-google
 ```
 
 #### Arguments
 
-- `OUTPUT_PATH`: Required. The location you are generating provider code into.
-- `VERSION`: Required. The version of the provider you are building into. Valid values are `ga` and `beta`.
-- `PRODUCT`: Limits generations to the specified folder within `mmv1/products` or `tpgtools/api`. Handwritten files from `mmv1/third_party/terraform` are always generated into the downstream regardless of this setting, so you can provide a non-existant product name to generate only handwritten code. Required if `RESOURCE` is specified.
-- `RESOURCE`: Limits generation to the specified resource within a particular product. For `mmv1` resources, matches the resource's `name` field (set in its configuration file).For `tpgtools` resources, matches the terraform resource name.
-- `ENGINE`: Modifies `make provider` to only generate code using the specified engine. Valid values are `mmv1` or `tpgtools`. (Providing `tpgtools` will still generate any prerequisite mmv1 files required for tpgtools.)
+- `output`: Required. The location you are generating provider code into.
+- `version`: Required. The version of the provider you are building into. Valid values are `ga` and `beta`.
+- `product`: Limits generations to the specified folder within `mmv1/products` or `tpgtools/api`. Handwritten files from `mmv1/third_party/terraform` are always generated into the downstream regardless of this setting, so you can provide a non-existant product name to generate only handwritten code.
 
 #### Cleaning up old files
 
