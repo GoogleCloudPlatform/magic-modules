@@ -104,7 +104,7 @@ func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPat
 		t.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
 
 		if generateCode {
-			log.Printf("Generating %s tests", object.Name)
+			// log.Printf("Generating %s tests", object.Name)
 			t.GenerateResourceTests(object, *templateData, outputFolder)
 			t.GenerateResourceSweeper(object, *templateData, outputFolder)
 		}
