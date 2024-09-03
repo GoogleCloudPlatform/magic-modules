@@ -1,9 +1,9 @@
 --- !ruby/object:Api::Product
 versions:
-- !ruby/object:Api::Product::Version
-  base_url: https://developerconnect.googleapis.com/v1/
-  name: beta
+  - !ruby/object:Api::Product::Version
+    base_url: https://developerconnect.googleapis.com/v1/
+    name: beta
 name: DeveloperConnect
 display_name: Developer Connect
 scopes:
-- https://www.googleapis.com/auth/cloud-platform
+  - https://www.googleapis.com/auth/cloud-platform
