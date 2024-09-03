@@ -95,7 +95,7 @@ properties:
     name: 'owners'
     description: |
       The email addresses of all direct, verified owners of this exact property. Indirect owners —
-      for example verified owners of the containing domain—are not included in this list.    
+      for example verified owners of the containing domain—are not included in this list.
     immutable: true
     output: true
     item_type: Api::Type::String
