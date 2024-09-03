@@ -97,8 +97,6 @@ properties:
         name: filter
         required: true
         send_empty_value: true
-        validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validation.StringLenBetween(0,1024)'
         description: |
           Expression that defines the filter to apply across create/update
           events of assets or findings as specified by the event type. The
