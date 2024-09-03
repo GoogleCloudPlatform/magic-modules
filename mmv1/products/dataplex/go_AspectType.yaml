@@ -116,7 +116,6 @@ properties:
     type: KeyValueLabels
     description: |
       User-defined labels for the AspectType.
-    immutable: false
   - name: 'metadataTemplate'
     type: String
     description: |
