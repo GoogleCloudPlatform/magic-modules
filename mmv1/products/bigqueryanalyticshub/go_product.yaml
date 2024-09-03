@@ -17,7 +17,7 @@ name: 'BigqueryAnalyticsHub'
 display_name: 'Bigquery Analytics Hub'
 versions:
   - name: 'beta'
-    base_url: 'https://analyticshub.googleapis.com/v1beta1/'
+    base_url: 'https://analyticshub.googleapis.com/v1/'
   - name: 'ga'
     base_url: 'https://analyticshub.googleapis.com/v1/'
 scopes:

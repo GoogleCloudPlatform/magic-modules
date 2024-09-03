@@ -56,7 +56,7 @@ examples:
     vars:
       application_id: 'example-application'
       display_name: 'Application Full'
-      description: 'Application for testing'
+      desc: 'Application for testing'
       business_name: 'Alice'
       business_email: 'alice@google.com'
       developer_name: 'Bob'

@@ -376,6 +376,7 @@ properties:
                   Google Cloud Storage generation for the object. If the generation
                   is omitted, the latest generation will be used.
                 default_from_api: true
+                custom_flatten: 'templates/terraform/custom_flatten/go/cloudfunctions2_function_source_generation.go.tmpl'
           - name: 'repoSource'
             type: NestedObject
             description:
@@ -709,7 +710,6 @@ properties:
     type: KeyValueLabels
     description: |
       A set of key/value label pairs associated with this Cloud Function.
-    immutable: false
   - name: 'kmsKeyName'
     type: String
     description: |

@@ -16,7 +16,6 @@
 name: 'ServerTlsPolicy'
 description: |
   ClientTlsPolicy is a resource that specifies how a client should authenticate connections to backends of a service. This resource itself does not affect configuration unless it is attached to a backend service resource.
-min_version: 'beta'
 references:
   guides:
   api: 'https://cloud.google.com/traffic-director/docs/reference/network-security/rest/v1beta1/projects.locations.serverTlsPolicies'
@@ -53,22 +52,18 @@ custom_code:
 examples:
   - name: 'network_security_server_tls_policy_basic'
     primary_resource_id: 'default'
-    min_version: 'beta'
     vars:
       resource_name: 'my-server-tls-policy'
   - name: 'network_security_server_tls_policy_advanced'
     primary_resource_id: 'default'
-    min_version: 'beta'
     vars:
       resource_name: 'my-server-tls-policy'
   - name: 'network_security_server_tls_policy_server_cert'
     primary_resource_id: 'default'
-    min_version: 'beta'
     vars:
       resource_name: 'my-server-tls-policy'
   - name: 'network_security_server_tls_policy_mtls'
     primary_resource_id: 'default'
-    min_version: 'beta'
     vars:
       resource_name: 'my-server-tls-policy'
       trust_config_name: 'my-trust-config'
@@ -77,7 +72,6 @@ parameters:
     type: String
     description: |
       Name of the ServerTlsPolicy resource.
-    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
@@ -86,7 +80,6 @@ parameters:
     description: |
       The location of the server tls policy.
       The default value is `global`.
-    min_version: 'beta'
     url_param_only: true
     default_value: "global"
 properties:
@@ -94,42 +87,34 @@ properties:
     type: Time
     description: |
       Time the ServerTlsPolicy was created in UTC.
-    min_version: 'beta'
     output: true
   - name: 'updateTime'
     type: Time
     description: |
       Time the ServerTlsPolicy was updated in UTC.
-    min_version: 'beta'
     output: true
   - name: 'labels'
     type: KeyValueLabels
     description: Set of label tags associated with the ServerTlsPolicy resource.
-    min_version: 'beta'
-    immutable: false
   - name: 'description'
     type: String
     description: |
       A free-text description of the resource. Max length 1024 characters.
-    min_version: 'beta'
   - name: 'allowOpen'
     type: Boolean
     description: |
       This field applies only for Traffic Director policies. It is must be set to false for external HTTPS load balancer policies.
       Determines if server allows plaintext connections. If set to true, server allows plain text connections. By default, it is set to false. This setting is not exclusive of other encryption modes. For example, if allowOpen and mtlsPolicy are set, server allows both plain text and mTLS connections. See documentation of other encryption modes to confirm compatibility.
       Consider using it if you wish to upgrade in place your deployment to TLS while having mixed TLS and non-TLS traffic reaching port :80.
-    min_version: 'beta'
   - name: 'serverCertificate'
     type: NestedObject
     description: |
       Defines a mechanism to provision client identity (public and private keys) for peer to peer authentication. The presence of this dictates mTLS.
-    min_version: 'beta'
     properties:
       - name: 'grpcEndpoint'
         type: NestedObject
         description: |
           gRPC specific configuration to access the gRPC server to obtain the cert and private key.
-        min_version: 'beta'
         exactly_one_of:
           - 'grpc_endpoint'
           - 'certificate_provider_instance'
@@ -138,14 +123,12 @@ properties:
             type: String
             description: |
               The target URI of the gRPC endpoint. Only UDS path is supported, and should start with "unix:".
-            min_version: 'beta'
             required: true
       - name: 'certificateProviderInstance'
         type: NestedObject
         description: |
           Optional if policy is to be used with Traffic Director. For external HTTPS load balancer must be empty.
           Defines a mechanism to provision server identity (public and private keys). Cannot be combined with allowOpen as a permissive mode that allows both plain text and TLS is not supported.
-        min_version: 'beta'
         exactly_one_of:
           - 'grpc_endpoint'
           - 'certificate_provider_instance'
@@ -154,21 +137,18 @@ properties:
             type: String
             description: |
               Plugin instance name, used to locate and load CertificateProvider instance configuration. Set to "google_cloud_private_spiffe" to use Certificate Authority Service certificate provider instance.
-            min_version: 'beta'
             required: true
   - name: 'mtlsPolicy'
     type: NestedObject
     description: |
       This field is required if the policy is used with external HTTPS load balancers. This field can be empty for Traffic Director.
       Defines a mechanism to provision peer validation certificates for peer to peer authentication (Mutual TLS - mTLS). If not specified, client certificate will not be requested. The connection is treated as TLS and not mTLS. If allowOpen and mtlsPolicy are set, server allows both plain text and mTLS connections.
-    min_version: 'beta'
     properties:
       - name: 'clientValidationMode'
         type: Enum
         description: |
           When the client presents an invalid certificate or no certificate to the load balancer, the clientValidationMode specifies how the client connection is handled.
           Required if the policy is to be used with the external HTTPS load balancing. For Traffic Director it must be empty.
-        min_version: 'beta'
         immutable: true
         enum_values:
           - 'CLIENT_VALIDATION_MODE_UNSPECIFIED'
@@ -180,14 +160,12 @@ properties:
           Reference to the TrustConfig from certificatemanager.googleapis.com namespace.
           If specified, the chain validation will be performed against certificates configured in the given TrustConfig.
           Allowed only if the policy is to be used with external HTTPS load balancers.
-        min_version: 'beta'
         immutable: true
       - name: 'clientValidationCa'
         type: Array
         description: |
           Required if the policy is to be used with Traffic Director. For external HTTPS load balancers it must be empty.
           Defines the mechanism to obtain the Certificate Authority certificate to validate the client certificate.
-        min_version: 'beta'
         item_type:
           type: NestedObject
           properties:
@@ -195,7 +173,6 @@ properties:
               type: NestedObject
               description: |
                 gRPC specific configuration to access the gRPC server to obtain the cert and private key.
-              min_version: 'beta'
               exactly_one_of:
                 - 'grpc_endpoint'
                 - 'certificate_provider_instance'
@@ -204,14 +181,12 @@ properties:
                   type: String
                   description: |
                     The target URI of the gRPC endpoint. Only UDS path is supported, and should start with "unix:".
-                  min_version: 'beta'
                   required: true
             - name: 'certificateProviderInstance'
               type: NestedObject
               description: |
                 Optional if policy is to be used with Traffic Director. For external HTTPS load balancer must be empty.
                 Defines a mechanism to provision server identity (public and private keys). Cannot be combined with allowOpen as a permissive mode that allows both plain text and TLS is not supported.
-              min_version: 'beta'
               exactly_one_of:
                 - 'grpc_endpoint'
                 - 'certificate_provider_instance'
@@ -220,5 +195,4 @@ properties:
                   type: String
                   description: |
                     Plugin instance name, used to locate and load CertificateProvider instance configuration. Set to "google_cloud_private_spiffe" to use Certificate Authority Service certificate provider instance.
-                  min_version: 'beta'
                   required: true

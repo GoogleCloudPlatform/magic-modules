@@ -248,6 +248,9 @@ type Resource struct {
 
 	StateUpgraders bool `yaml:"state_upgraders"`
 
+	// Do not apply the default attribution label
+	SkipAttributionLabel bool `yaml:"skip_attribution_label"`
+
 	// This block inserts the named function and its attribute into the
 	// resource schema -- the code for the migrate_state function must
 	// be included in the resource constants or come from tpgresource
@@ -545,7 +548,11 @@ func (r *Resource) AddLabelsRelatedFields(props []*Type, parent *Type) []*Type {
 // def add_labels_fields(props, parent, labels)
 func (r *Resource) addLabelsFields(props []*Type, parent *Type, labels *Type) []*Type {
 	if parent == nil || parent.FlattenObject {
-		r.CustomDiff = append(r.CustomDiff, "tpgresource.SetLabelsDiff")
+		if r.SkipAttributionLabel {
+			r.CustomDiff = append(r.CustomDiff, "tpgresource.SetLabelsDiffWithoutAttributionLabel")
+		} else {
+			r.CustomDiff = append(r.CustomDiff, "tpgresource.SetLabelsDiff")
+		}
 	} else if parent.Name == "metadata" {
 		r.CustomDiff = append(r.CustomDiff, "tpgresource.SetMetadataLabelsDiff")
 	}
@@ -832,12 +839,7 @@ func (r Resource) ClientNamePascal() string {
 }
 
 func (r Resource) PackageName() string {
-	clientName := r.ProductMetadata.ClientName
-	if clientName == "" {
-		clientName = r.ProductMetadata.Name
-	}
-
-	return strings.ToLower(clientName)
+	return strings.ToLower(r.ProductMetadata.Name)
 }
 
 // In order of preference, use TF override,

@@ -48,7 +48,7 @@ examples:
     region_override: 'US'
     vars:
       data_exchange_id: 'my_data_exchange'
-      description: 'example data exchange'
+      desc: 'example data exchange'
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_analyticshub_data_exchange_dcr'
     primary_resource_id: 'data_exchange'
@@ -58,7 +58,7 @@ examples:
     region_override: 'US'
     vars:
       data_exchange_id: 'dcr_data_exchange'
-      description: 'example dcr data exchange'
+      desc: 'example dcr data exchange'
 properties:
   - !ruby/object:Api::Type::String
     name: name

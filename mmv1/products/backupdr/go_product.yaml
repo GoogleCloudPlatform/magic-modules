@@ -14,7 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'BackupDR'
-display_name: 'Backup and DR'
+display_name: 'Backup and DR Service'
 versions:
   - name: 'beta'
     base_url: 'https://backupdr.googleapis.com/v1/'

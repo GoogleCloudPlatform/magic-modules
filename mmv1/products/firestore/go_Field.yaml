@@ -99,6 +99,7 @@ properties:
     description: |
       The Firestore database id. Defaults to `"(default)"`.
     url_param_only: true
+    immutable: true
     default_value: "(default)"
   - name: 'collection'
     type: String
@@ -106,12 +107,14 @@ properties:
       The id of the collection group to configure.
     url_param_only: true
     required: true
+    immutable: true
   - name: 'field'
     type: String
     description: |
       The id of the field to configure.
     url_param_only: true
     required: true
+    immutable: true
   - name: 'name'
     type: String
     description: |

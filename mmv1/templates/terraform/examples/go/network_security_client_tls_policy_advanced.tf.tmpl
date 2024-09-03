@@ -1,5 +1,4 @@
 resource "google_network_security_client_tls_policy" "{{$.PrimaryResourceId}}" {
-  provider               = google-beta
   name                   = "{{index $.Vars "resource_name"}}"
   labels                 = {
     foo = "bar"
@@ -13,11 +12,6 @@ resource "google_network_security_client_tls_policy" "{{$.PrimaryResourceId}}" {
   server_validation_ca {
     grpc_endpoint {
       target_uri = "unix:mypath"
-    }
-  }
-  server_validation_ca {
-    grpc_endpoint {
-      target_uri = "unix:mypath1"
     }
   }
 }

@@ -26,7 +26,6 @@ import (
 	"text/template"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
-	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/golang/glog"
 )
@@ -35,7 +34,7 @@ type TemplateData struct {
 	//     include Compile::Core
 
 	OutputFolder string
-	Version      product.Version
+	VersionName  string
 
 	TerraformResourceDirectory string
 	TerraformProviderModule    string
@@ -50,13 +49,13 @@ var GA_VERSION = "ga"
 var BETA_VERSION = "beta"
 var ALPHA_VERSION = "alpha"
 
-func NewTemplateData(outputFolder string, version product.Version) *TemplateData {
-	td := TemplateData{OutputFolder: outputFolder, Version: version}
+func NewTemplateData(outputFolder string, versionName string) *TemplateData {
+	td := TemplateData{OutputFolder: outputFolder, VersionName: versionName}
 
-	if version.Name == GA_VERSION {
+	if versionName == GA_VERSION {
 		td.TerraformResourceDirectory = "google"
 		td.TerraformProviderModule = "github.com/hashicorp/terraform-provider-google"
-	} else if version.Name == ALPHA_VERSION {
+	} else if versionName == ALPHA_VERSION {
 		td.TerraformResourceDirectory = "google-private"
 		td.TerraformProviderModule = "internal/terraform-next"
 	} else {
@@ -293,9 +292,9 @@ func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, g
 //    end
 
 func (td *TemplateData) ImportPath() string {
-	if td.Version.Name == GA_VERSION {
+	if td.VersionName == GA_VERSION {
 		return "github.com/hashicorp/terraform-provider-google/google"
-	} else if td.Version.Name == ALPHA_VERSION {
+	} else if td.VersionName == ALPHA_VERSION {
 		return "internal/terraform-next/google-private"
 	}
 	return "github.com/hashicorp/terraform-provider-google-beta/google-beta"
