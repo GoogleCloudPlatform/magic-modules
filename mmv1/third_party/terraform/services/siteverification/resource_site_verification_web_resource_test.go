@@ -57,7 +57,18 @@ func TestAccSiteVerificationWebResource_siteverificationDomain(t *testing.T) {
 
 func testAccSiteVerificationWebResource_siteverificationDomain(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+provider "google" {
+  alias                 = "scoped"
+  user_project_override = true
+  scopes = [
+    "https://www.googleapis.com/auth/siteverification",
+    "https://www.googleapis.com/auth/cloud-platform",
+    "https://www.googleapis.com/auth/userinfo.email",
+  ]
+}
+
 data "google_site_verification_token" "token" {
+  alias               = "scoped"
   type                = "INET_DOMAIN"
   identifier          = "%{domain}"
   verification_method = "DNS_TXT"
@@ -72,11 +83,12 @@ resource "google_dns_record_set" "example" {
 }
 
 resource "google_site_verification_web_resource" "example" {
+  alias = "scoped"
   site {
     type       = data.google_site_verification_token.token.type
     identifier = data.google_site_verification_token.token.identifier
   }
-  verification_method =  data.google_site_verification_token.token.verification_method
+  verification_method = data.google_site_verification_token.token.verification_method
 
   depends_on = [google_dns_record_set.example]
 }
@@ -85,7 +97,18 @@ resource "google_site_verification_web_resource" "example" {
 
 func testAccSiteVerificationWebResource_siteverificationRemoveDomain(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+provider "google" {
+  alias                 = "scoped"
+  user_project_override = true
+  scopes = [
+    "https://www.googleapis.com/auth/siteverification",
+    "https://www.googleapis.com/auth/cloud-platform",
+    "https://www.googleapis.com/auth/userinfo.email",
+  ]
+}
+
 data "google_site_verification_token" "token" {
+  alias               = "scoped"
   type                = "INET_DOMAIN"
   identifier          = "%{domain}"
   verification_method = "DNS_TXT"
@@ -93,10 +116,11 @@ data "google_site_verification_token" "token" {
 
 resource "google_site_verification_web_resource" "example" {
   site {
+  alias = "scoped"
     type       = data.google_site_verification_token.token.type
     identifier = data.google_site_verification_token.token.identifier
   }
-  verification_method =  data.google_site_verification_token.token.verification_method
+  verification_method = data.google_site_verification_token.token.verification_method
 }
 `, context)
 }
@@ -172,21 +196,32 @@ func TestAccSiteVerificationWebResource_siteverificationBucket(t *testing.T) {
 
 func testAccSiteVerificationWebResource_siteverificationBucket(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+provider "google" {
+  alias                 = "scoped"
+  user_project_override = true
+  scopes = [
+    "https://www.googleapis.com/auth/siteverification",
+    "https://www.googleapis.com/auth/cloud-platform",
+    "https://www.googleapis.com/auth/userinfo.email",
+  ]
+}
+
 resource "google_storage_bucket" "bucket" {
   name     = "%{bucket}"
   location = "US"
 }
 
 data "google_site_verification_token" "token" {
+  provider            = google.scoped
   type                = "SITE"
   identifier          = "https://${google_storage_bucket.bucket.name}.storage.googleapis.com/"
   verification_method = "FILE"
 }
 
 resource "google_storage_bucket_object" "object" {
-  name   = "${data.google_site_verification_token.token.token}"
+  name    = "${data.google_site_verification_token.token.token}"
   content = "google-site-verification: ${data.google_site_verification_token.token.token}"
-  bucket = google_storage_bucket.bucket.name
+  bucket  = google_storage_bucket.bucket.name
 }
 
 resource "google_storage_object_access_control" "public_rule" {
@@ -197,29 +232,42 @@ resource "google_storage_object_access_control" "public_rule" {
 }
 
 resource "google_site_verification_web_resource" "example" {
+  provider = google.scoped
   site {
     type       = data.google_site_verification_token.token.type
     identifier = data.google_site_verification_token.token.identifier
   }
-  verification_method =  data.google_site_verification_token.token.verification_method
+  verification_method = data.google_site_verification_token.token.verification_method
 }
 `, context)
 }
 
 func testAccSiteVerificationWebResource_siteverificationRemoveBucket(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+provider "google" {
+  alias                 = "scoped"
+  user_project_override = true
+  scopes = [
+    "https://www.googleapis.com/auth/siteverification",
+    "https://www.googleapis.com/auth/cloud-platform",
+    "https://www.googleapis.com/auth/userinfo.email",
+  ]
+}
+
 data "google_site_verification_token" "token" {
+  provider            = google.scoped
   type                = "SITE"
   identifier          = "https://%{bucket}.storage.googleapis.com/"
   verification_method = "FILE"
 }
 
 resource "google_site_verification_web_resource" "example" {
+  provider = google.scoped
   site {
     type       = data.google_site_verification_token.token.type
     identifier = data.google_site_verification_token.token.identifier
   }
-  verification_method =  data.google_site_verification_token.token.verification_method
+  verification_method = data.google_site_verification_token.token.verification_method
 }
 `, context)
 }
