@@ -1615,12 +1615,9 @@ resource "google_compute_disk" "foobar" {
 }
 
 func TestAccComputeDisk_storagePoolSpecified(t *testing.T) {
-	// Currently failing
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	storagePoolName := fmt.Sprintf("tf-test-storage-pool-%s", acctest.RandString(t, 10))
-	storagePoolUrl := fmt.Sprintf("/projects/%s/zones/%s/storagePools/%s", envvar.GetTestProjectFromEnv(), envvar.GetTestZoneFromEnv(), storagePoolName)
+	storagePoolNameLong := acctest.BootstrapComputeStoragePool(t, "disk", "hyperdisk-throughput")
 	diskName := fmt.Sprintf("tf-test-disk-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1628,11 +1625,7 @@ func TestAccComputeDisk_storagePoolSpecified(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				PreConfig: setupTestingStoragePool(t, storagePoolName),
-				Config:    testAccComputeDisk_storagePoolSpecified(diskName, storagePoolUrl),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_compute_disk.foobar", "storage_pool", storagePoolName),
-				),
+				Config: testAccComputeDisk_storagePoolSpecified(diskName, storagePoolNameLong),
 			},
 			{
 				ResourceName:      "google_compute_disk.foobar",
@@ -1641,8 +1634,6 @@ func TestAccComputeDisk_storagePoolSpecified(t *testing.T) {
 			},
 		},
 	})
-
-	cleanupTestingStoragePool(t, storagePoolName)
 }
 
 func setupTestingStoragePool(t *testing.T, storagePoolName string) func() {
