@@ -244,7 +244,12 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 			return fmt.Errorf("error posting comment: %w", err)
 		}
 
-		recordingResult, recordingErr := vt.RunParallel(vcr.Recording, provider.Beta, testDirs, replayingResult.FailedTests)
+		recordingResult, recordingErr := vt.RunParallel(vcr.RunOptions{
+			Mode:     vcr.Recording,
+			Version:  provider.Beta,
+			TestDirs: testDirs,
+			Tests:    replayingResult.FailedTests,
+		})
 		if recordingErr != nil {
 			testState = "failure"
 		} else {
@@ -268,7 +273,12 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		replayingAfterRecordingResult := vcr.Result{}
 		var replayingAfterRecordingErr error
 		if len(recordingResult.PassedTests) > 0 {
-			replayingAfterRecordingResult, replayingAfterRecordingErr = vt.RunParallel(vcr.Replaying, provider.Beta, testDirs, recordingResult.PassedTests)
+			replayingAfterRecordingResult, replayingAfterRecordingErr = vt.RunParallel(vcr.RunOptions{
+				Mode:     vcr.Replaying,
+				Version:  provider.Beta,
+				TestDirs: testDirs,
+				Tests:    recordingResult.PassedTests,
+			})
 			if replayingAfterRecordingErr != nil {
 				testState = "failure"
 			}
@@ -393,15 +403,22 @@ func runReplaying(runFullVCR bool, services map[string]struct{}, vt *vcr.Tester)
 	var testDirs []string
 	var replayingErr error
 	if runFullVCR {
-		fmt.Println("runReplaying: full VCR tests")
-		result, replayingErr = vt.Run(vcr.Replaying, provider.Beta, nil)
+		fmt.Println("run full VCR tests")
+		result, replayingErr = vt.Run(vcr.RunOptions{
+			Mode:    vcr.Replaying,
+			Version: provider.Beta,
+		})
 	} else if len(services) > 0 {
 		fmt.Printf("runReplaying: %d specific services: %v\n", len(services), services)
 		for service := range services {
 			servicePath := "./" + filepath.Join("google-beta", "services", service)
 			testDirs = append(testDirs, servicePath)
 			fmt.Println("run VCR tests in ", service)
-			serviceResult, serviceReplayingErr := vt.Run(vcr.Replaying, provider.Beta, []string{servicePath})
+			serviceResult, serviceReplayingErr := vt.Run(vcr.RunOptions{
+				Mode:     vcr.Replaying,
+				Version:  provider.Beta,
+				TestDirs: []string{servicePath},
+			})
 			if serviceReplayingErr != nil {
 				replayingErr = serviceReplayingErr
 			}
