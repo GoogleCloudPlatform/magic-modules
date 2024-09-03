@@ -3,7 +3,8 @@ package privilegedaccessmanager_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -17,7 +18,7 @@ func TestAccDataSourceGooglePrivilegedAccessManagerEntitlement_basic(t *testing.
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckPrivilegedAccessManagerEntitlemetDestroyProducer(t),
+		CheckDestroy:             testAccCheckPrivilegedAccessManagerEntitlementDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGooglePrivilegedAccessManagerEntitlement_basic(context),
@@ -39,7 +40,7 @@ func TestAccDataSourceGooglePrivilegedAccessManagerEntitlement_optionalProject(t
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckPrivilegedAccessManagerEntitlemetDestroyProducer(t),
+		CheckDestroy:             testAccCheckPrivilegedAccessManagerEntitlementDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGooglePrivilegedAccessManagerEntitlement_optionalProject(context),
