@@ -14,6 +14,7 @@ package api
 
 import (
 	"fmt"
+	"log"
 	"maps"
 	"regexp"
 	"sort"
@@ -23,7 +24,6 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"golang.org/x/exp/slices"
-	"gopkg.in/yaml.v3"
 )
 
 type Resource struct {
@@ -311,7 +311,7 @@ type Resource struct {
 	ImportPath string
 }
 
-func (r *Resource) UnmarshalYAML(n *yaml.Node) error {
+func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {
 	r.CreateVerb = "POST"
 	r.ReadVerb = "GET"
 	r.DeleteVerb = "DELETE"
@@ -320,7 +320,7 @@ func (r *Resource) UnmarshalYAML(n *yaml.Node) error {
 	type resourceAlias Resource
 	aliasObj := (*resourceAlias)(r)
 
-	err := n.Decode(&aliasObj)
+	err := unmarshal(aliasObj)
 	if err != nil {
 		return err
 	}
@@ -330,6 +330,9 @@ func (r *Resource) UnmarshalYAML(n *yaml.Node) error {
 	}
 	if r.CollectionUrlKey == "" {
 		r.CollectionUrlKey = google.Camelize(google.Plural(r.Name), "lower")
+	}
+	if r.IdFormat == "" {
+		r.IdFormat = r.SelfLinkUri()
 	}
 
 	if len(r.VirtualFields) > 0 {
@@ -341,19 +344,76 @@ func (r *Resource) UnmarshalYAML(n *yaml.Node) error {
 	return nil
 }
 
-// TODO: rewrite functions
-func (r *Resource) Validate() {
-	// TODO Q1 Rewrite super
-	// super
-}
-
 func (r *Resource) SetDefault(product *Product) {
 	r.ProductMetadata = product
 	for _, property := range r.AllProperties() {
 		property.SetDefault(r)
 	}
-	if r.IdFormat == "" {
-		r.IdFormat = r.SelfLinkUri()
+}
+
+func (r *Resource) Validate() {
+	if r.NestedQuery != nil && r.NestedQuery.IsListOfIds && len(r.Identity) != 1 {
+		log.Fatalf("`is_list_of_ids: true` implies resource has exactly one `identity` property")
+	}
+
+	// Ensures we have all properties defined
+	for _, i := range r.Identity {
+		hasIdentify := slices.ContainsFunc(r.AllUserProperties(), func(p *Type) bool {
+			return p.Name == i
+		})
+		if !hasIdentify {
+			log.Fatalf("Missing property/parameter for identity %s", i)
+		}
+	}
+
+	if r.Description == "" {
+		log.Fatalf("Missing `description` for resource %s", r.Name)
+	}
+
+	if !r.Exclude {
+		if len(r.Properties) == 0 {
+			log.Fatalf("Missing `properties` for resource %s", r.Name)
+		}
+	}
+
+	allowed := []string{"POST", "PUT", "PATCH"}
+	if !slices.Contains(allowed, r.CreateVerb) {
+		log.Fatalf("Value on `create_verb` should be one of %#v", allowed)
+	}
+
+	allowed = []string{"GET", "POST"}
+	if !slices.Contains(allowed, r.ReadVerb) {
+		log.Fatalf("Value on `read_verb` should be one of %#v", allowed)
+	}
+
+	allowed = []string{"POST", "PUT", "PATCH", "DELETE"}
+	if !slices.Contains(allowed, r.DeleteVerb) {
+		log.Fatalf("Value on `delete_verb` should be one of %#v", allowed)
+	}
+
+	allowed = []string{"POST", "PUT", "PATCH"}
+	if !slices.Contains(allowed, r.UpdateVerb) {
+		log.Fatalf("Value on `update_verb` should be one of %#v", allowed)
+	}
+
+	for _, property := range r.AllProperties() {
+		property.Validate(r.Name)
+	}
+
+	if r.IamPolicy != nil {
+		r.IamPolicy.Validate(r.Name)
+	}
+
+	if r.NestedQuery != nil {
+		r.NestedQuery.Validate(r.Name)
+	}
+
+	for _, example := range r.Examples {
+		example.Validate(r.Name)
+	}
+
+	if r.Async != nil {
+		r.Async.Validate()
 	}
 }
 
