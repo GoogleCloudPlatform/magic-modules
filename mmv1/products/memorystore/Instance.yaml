@@ -48,6 +48,20 @@ examples:
       prevent_destroy: "false"
     oics_vars_overrides:
       prevent_destroy: "false"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "memorystore_instance_persistence_aof"
+    primary_resource_id: "instance-persistence-aof"
+    min_version: beta
+    vars:
+      instance_name: "aof-instance"
+      policy_name: "my-policy"
+      subnet_name: "my-subnet"
+      network_name: "my-network"
+      prevent_destroy: "true"
+    test_vars_overrides:
+      prevent_destroy: "false"
+    oics_vars_overrides:
+      prevent_destroy: "false"
 properties:
   - !ruby/object:Api::Type::String
     name: name

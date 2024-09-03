@@ -263,18 +263,13 @@ func createOrUpdateMemorystoreInstance(params *InstanceParams) string {
 		}
 		`, params.zoneDistributionMode, params.zone)
 	}
-    persistenceBlock := ""
-    if params.persistenceMode == "RDB" {
-        persistenceBlock = "persistence_config {mode = \"RDB\" }"
-    }
-    if params.persistenceMode == "AOF" {
-		persistenceBlock = `
-        persistence_config {
-            mode = "AOF"
-            aof_config {
-                append_fsync = "EVERY_SEC"
-            }
-        }`
+	persistenceBlock := ``
+	if params.persistenceMode != "" {
+		persistenceBlock = fmt.Sprintf(`
+		persistence_config {
+			mode = "%s"
+		}
+		`, params.persistenceMode)
 	}
 	return fmt.Sprintf(`
 resource "google_memorystore_instance" "test" {
