@@ -150,6 +150,34 @@ func TestAccFilestoreInstance_reservedIpRange_update(t *testing.T) {
 	})
 }
 
+func TestAccFilestoreInstance_tags(t *testing.T) {
+	t.Parallel()
+
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	tagKey := acctest.BootstrapSharedTestTagKey(t, "metastore-federations-tagkey")
+	tagValue := acctest.BootstrapSharedTestTagValue(t, "metastore-federations-tagvalue", tagKey)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckFilestoreInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFileInstanceTags(name, map[string]string{org + "/" + tagKey: tagValue}),
+			},
+			{
+				ResourceName:            "google_filestore_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"tags"},
+			},
+			{
+				Config: testAccFileInstanceTags_allowDestroy(name, map[string]string{org + "/" + tagKey: tagValue}),
+			},
+		},
+	})
+}
+
 func testAccFilestoreInstance_reservedIpRange_update(name string) string {
 	return fmt.Sprintf(`
 resource "google_filestore_instance" "instance" {
@@ -192,45 +220,9 @@ resource "google_filestore_instance" "instance" {
 `, name)
 }
 
-
-func TestAccFilestoreInstance_tags(t *testing.T) {
-	t.Skip()
-
-	t.Parallel()
-
-	instance := fmt.Sprintf("tf-test%s.org1.com", acctest.RandString(t, 5))
-	context := map[string]interface{}{
-		"instance": instance,
-		"resource_name": "instance",
-	}
-
-	resourceName := acctest.Nprintf("google_filestore_instance.%{resource_name}", context)
-	org := envvar.GetTestOrgFromEnv(t)
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckFilestoreInstanceDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccFileInstanceTags(context, map[string]string{org + "/env": "test"}),
-			},
-			{
-				ResourceName:            resourceName,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "zone"},
-			},
-			{
-				Config: testAccFileInstanceTags_allowDestroy(context, map[string]string{org + "/env": "test"}),
-			},
-		},
-	})
-}
-
 func testAccFileInstanceTags(context map[string]interface{}, tags map[string]string) string {
 
-	r := acctest.Nprintf(`
+	r := fmt.Sprintf(`
 	resource "google_filestore_instance" "%{resource_name}" {
 	  name = "tf-instance-%s"
           zone = "us-central1-b"
@@ -259,7 +251,7 @@ func testAccFileInstanceTags(context map[string]interface{}, tags map[string]str
 
 func testAccFileInstanceTags_allowDestroy(context map[string]interface{}, tags map[string]string) string {
 
-	r := acctest.Nprintf(`
+	r := fmt.Sprintf(`
 	resource "google_filestore_instance" "%{resource_name}" {
 	  name = "tf-instance-%s"
           zone = "us-central1-b"
