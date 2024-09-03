@@ -64,7 +64,7 @@ virtual_fields:
       When the field is set to false, deleting the domain is allowed.
 custom_code:
   custom_import: 'templates/terraform/custom_import/go/self_link_as_name.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/go/active_directory_domain.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/go/active_directory_domain.go.tmpl'
 error_abort_predicates:
 
   - 'transport_tpg.Is429QuotaError'

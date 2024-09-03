@@ -62,7 +62,9 @@
                 "projectId": "{{.Provider.project}}"
             }
         },
-        "ancestors": ["organizations/{{.OrgID}}"],
+        "ancestors": [
+            "organizations/{{.OrgID}}"
+        ],
         "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
     }
 ]

@@ -31,7 +31,8 @@
             "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
             "data": {
                 "labels": {
-                    "env": "test"
+                    "env": "test",
+                    "goog-terraform-provisioned": "true"
                 }
             }
         },

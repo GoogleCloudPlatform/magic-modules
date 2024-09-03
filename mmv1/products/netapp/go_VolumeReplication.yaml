@@ -204,12 +204,12 @@ properties:
       - name: 'transferBytes'
         type: String
         description: |
-          Number of bytes transferred so far in current transfer.
+          Cumulative bytes transferred so far for the replication relationship.
         output: true
       - name: 'totalTransferDuration'
         type: String
         description: |
-          Total time taken so far during current transfer.
+          Cumulative time taken across all transfers for the replication relationship.
         output: true
       - name: 'lastTransferBytes'
         type: String
