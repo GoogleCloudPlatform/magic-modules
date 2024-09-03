@@ -354,27 +354,6 @@ func resourceDnsRecordSetCreate(d *schema.ResourceData, meta interface{}) error 
 		Additions: []*dns.ResourceRecordSet{rset},
 	}
 
-	// The terraform provider is authoritative, so what we do here is check if
-	// any records that we are trying to create already exist and make sure we
-	// delete them, before adding in the changes requested.  Normally this would
-	// result in an AlreadyExistsError.
-	log.Printf("[DEBUG] DNS record list request for %q", zone)
-	res, err := config.NewDnsClient(userAgent).ResourceRecordSets.List(project, zone).Do()
-	if err != nil {
-		return fmt.Errorf("Error retrieving record sets for %q: %s", zone, err)
-	}
-	var deletions []*dns.ResourceRecordSet
-
-	for _, record := range res.Rrsets {
-		if record.Type != rType || record.Name != name {
-			continue
-		}
-		deletions = append(deletions, record)
-	}
-	if len(deletions) > 0 {
-		chg.Deletions = deletions
-	}
-
 	log.Printf("[DEBUG] DNS Record create request: %#v", chg)
 	chg, err = config.NewDnsClient(userAgent).Changes.Create(project, zone, chg).Do()
 	if err != nil {
