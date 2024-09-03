@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: 'backupPolicy'
+name: 'BackupPolicy'
 description: |
   A backup policy is used to schedule backups at regular daily, weekly, or monthly intervals.
   Backup policies allow you to attach a backup schedule to a volume.
