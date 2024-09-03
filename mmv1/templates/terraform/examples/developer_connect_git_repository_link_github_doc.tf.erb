@@ -38,7 +38,7 @@ resource "google_developer_connect_connection" "my-connection" {
   }
 }
 
-resource "google_developer_connect_repository" "my-repository" {
+resource "google_developer_connect_git_repository_link" "my-repository" {
   location = "us-central1"
   git_repository_link_id = "my-repo"
   parent_connection = google_developer_connect_connection.my-connection.connection_id
