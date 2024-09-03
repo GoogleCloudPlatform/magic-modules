@@ -246,7 +246,7 @@ properties:
         description: |
           Version of the batch runtime.
         default_from_api: true
-        diff_suppress_func: cloudDataprocBatchRuntimeConfigVersionDiffSuppress
+        diff_suppress_func: CloudDataprocBatchRuntimeConfigVersionDiffSuppress
       - !ruby/object:Api::Type::String
         name: 'containerImage'
         description: |

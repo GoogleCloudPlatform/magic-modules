@@ -11,5 +11,5 @@ func CloudDataprocBatchRuntimeConfigVersionDiffSuppressFunc(old, new string) boo
 }
 
 func CloudDataprocBatchRuntimeConfigVersionDiffSuppress(_, old, new string, d *schema.ResourceData) bool {
-        return cloudDataprocBatchFieldsDiffSuppressFunc(old, new)
+        return CloudDataprocBatchRuntimeConfigVersionDiffSuppressFunc(old, new)
 }
