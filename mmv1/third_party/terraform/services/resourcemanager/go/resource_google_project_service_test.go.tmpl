@@ -37,21 +37,21 @@ func TestAccProjectService_basic(t *testing.T) {
 				ResourceName:            "google_project_service.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				{{- if ne $.TargetVersionName "ga" }}
-				ImportStateVerifyIgnore: []string{"disable_on_destroy", "check_if_service_has_usage_on_destroy"},
-				{{- else }}
-				ImportStateVerifyIgnore: []string{"disable_on_destroy"},
-				{{- end }}
+			  {{- if ne $.TargetVersionName "ga" }}
+			  ImportStateVerifyIgnore: []string{"disable_on_destroy", "check_if_service_has_usage_on_destroy"},
+			  {{- else }}
+			  ImportStateVerifyIgnore: []string{"disable_on_destroy"},
+			  {{- end }}
 			},
 			{
 				ResourceName:            "google_project_service.test2",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				{{- if ne $.TargetVersionName "ga" }}
-				ImportStateVerifyIgnore: []string{"disable_on_destroy", "project", "check_if_service_has_usage_on_destroy"},
-				{{- else }}
-				ImportStateVerifyIgnore: []string{"disable_on_destroy", "project"},
-				{{- end }}
+			  {{- if ne $.TargetVersionName "ga" }}
+			  ImportStateVerifyIgnore: []string{"disable_on_destroy", "project", "check_if_service_has_usage_on_destroy"},
+			  {{- else }}
+			  ImportStateVerifyIgnore: []string{"disable_on_destroy", "project"},
+			  {{- end }}
 			},
 			// Use a separate TestStep rather than a CheckDestroy because we need the project to still exist.
 			{
@@ -99,11 +99,11 @@ func TestAccProjectService_disableDependentServices(t *testing.T) {
 				ResourceName:            "google_project_service.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				{{- if ne $.TargetVersionName "ga" }}
-				ImportStateVerifyIgnore: []string{"disable_on_destroy", "check_if_service_has_usage_on_destroy"},
-				{{- else }}
-				ImportStateVerifyIgnore: []string{"disable_on_destroy"},
-				{{- end }}
+			  {{- if ne $.TargetVersionName "ga" }}
+			  ImportStateVerifyIgnore: []string{"disable_on_destroy", "check_if_service_has_usage_on_destroy"},
+			  {{- else }}
+			  ImportStateVerifyIgnore: []string{"disable_on_destroy"},
+			  {{- end }}
 			},
 			{
 				Config:      testAccProjectService_dependencyRemoved(services, pid, org, billingId),
@@ -116,11 +116,11 @@ func TestAccProjectService_disableDependentServices(t *testing.T) {
 				ResourceName:            "google_project_service.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				{{- if ne $.TargetVersionName "ga" }}
-				ImportStateVerifyIgnore: []string{"disable_on_destroy", "check_if_service_has_usage_on_destroy"},
-				{{- else }}
-				ImportStateVerifyIgnore: []string{"disable_on_destroy"},
-				{{- end }}
+			  {{- if ne $.TargetVersionName "ga" }}
+			  ImportStateVerifyIgnore: []string{"disable_on_destroy", "check_if_service_has_usage_on_destroy"},
+			  {{- else }}
+			  ImportStateVerifyIgnore: []string{"disable_on_destroy"},
+			  {{- end }}
 			},
 			{
 				Config:             testAccProjectService_dependencyRemoved(services, pid, org, billingId),
@@ -387,6 +387,7 @@ resource "google_project_service" "test" {
 func testAccProjectService_checkUsage(service string, pid, org string, checkIfServiceHasUsage string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
+  provider = google-beta
   project_id = "%s"
   name       = "%s"
   org_id     = "%s"
@@ -394,6 +395,7 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_project_service" "test" {
+  provider = google-beta
   project = google_project.acceptance.project_id
   service = "%s"
 

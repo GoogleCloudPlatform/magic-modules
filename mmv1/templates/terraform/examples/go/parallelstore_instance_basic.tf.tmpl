@@ -20,8 +20,6 @@ resource "google_compute_network" "network" {
   provider = google-beta
 }
 
-
-
 # Create an IP address
 resource "google_compute_global_address" "private_ip_alloc" {
   name          = "{{index $.Vars "address_name"}}"

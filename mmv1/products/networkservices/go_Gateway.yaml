@@ -133,7 +133,6 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: Set of label tags associated with the Gateway resource.
-    immutable: false
   - name: 'description'
     type: String
     description: |

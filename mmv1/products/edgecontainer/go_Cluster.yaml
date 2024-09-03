@@ -57,10 +57,12 @@ examples:
     primary_resource_id: 'default'
     vars:
       edgecontainer_cluster_name: 'basic-cluster'
+    skip_vcr: true
   - name: 'edgecontainer_cluster_with_maintenance_window'
     primary_resource_id: 'default'
     vars:
       edgecontainer_cluster_name: 'cluster-with-maintenance'
+    skip_vcr: true
   - name: 'edgecontainer_local_control_plane_cluster'
     primary_resource_id: 'default'
     vars:

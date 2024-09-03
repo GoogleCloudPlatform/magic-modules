@@ -153,4 +153,3 @@ properties:
     type: KeyValueLabels
     description: |
       Labels for this ScopeRBACRoleBinding.
-    immutable: false

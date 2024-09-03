@@ -51,9 +51,10 @@ async:
     path: 'error'
     message: 'message'
   include_project: true
-skip_sweeper: true
 custom_code:
+skip_sweeper: true
 error_retry_predicates:
+
   - 'transport_tpg.ExternalIpServiceNotActive'
 examples:
   - name: 'vmware_engine_external_address_basic'

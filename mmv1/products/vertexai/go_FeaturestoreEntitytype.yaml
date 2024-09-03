@@ -128,7 +128,6 @@ properties:
     type: KeyValueLabels
     description: |
       A set of key/value label pairs to assign to this EntityType.
-    immutable: false
   - name: 'monitoringConfig'
     type: NestedObject
     description: |
