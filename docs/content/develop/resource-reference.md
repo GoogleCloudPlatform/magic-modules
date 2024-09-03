@@ -9,7 +9,7 @@ aliases:
 # MMv1 resource reference
 
 This page documents commonly-used properties for resources. For a full list of
-available properties, see [resource.rb ↗](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/resource.rb).
+available properties, see [resource.go ↗](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/resource.go).
 
 ## Basic
 

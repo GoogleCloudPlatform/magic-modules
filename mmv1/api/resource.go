@@ -37,8 +37,14 @@ type Resource struct {
 	// documentation.
 	Description string
 
-	// [Required] (Api::Resource::ReferenceLinks) Reference links provided in
-	// downstream documentation.
+	// [Required] Reference links provided in
+	// downstream documentation. Expected to follow the format as follows:
+	//
+	//	references:
+	//  	guides:
+    //			'Guide name': 'official_documentation_url'
+  	//		api: 'rest_api_reference_url/version'
+	//
 	References resource.ReferenceLinks
 
 	// [Required] The GCP "relative URI" of a resource, relative to the product
@@ -179,6 +185,13 @@ type Resource struct {
 	// Leading a token with `%`
 	// i.e. {{%parent}}/resource/{{resource}}
 	// will allow that token to hold multiple /'s.
+	//
+	// Expected to be formatted as follows:
+	//
+	//	import_format:
+	//		- example_import_one
+    //		- example_import_two
+	//
 	ImportFormat []string `yaml:"import_format"`
 
 	CustomCode resource.CustomCode `yaml:"custom_code"`
@@ -197,22 +210,6 @@ type Resource struct {
 	// Examples in documentation. Backed by generated tests, and have
 	// corresponding OiCS walkthroughs.
 	Examples []resource.Examples
-
-	// Virtual fields are Terraform-only fields that control Terraform's
-	// behaviour. They don't map to underlying API fields (although they
-	// may map to parameters), and will require custom code to be added to
-	// control them.
-	//
-	// Virtual fields are similar to url_param_only fields in that they create
-	// a schema entry which is not read from or submitted to the API. However
-	// virtual fields are meant to provide toggles for Terraform-specific behavior in a resource
-	// (eg: delete_contents_on_destroy) whereas url_param_only fields _should_
-	// be used for url construction.
-	//
-	// Both are resource level fields and do not make sense, and are also not
-	// supported, for nested fields. Nested fields that shouldn't be included
-	// in API payloads are better handled with custom expand/encoder logic.
-	VirtualFields []*Type `yaml:"virtual_fields"`
 
 	// If true, generates product operation handling logic.
 	AutogenAsync bool `yaml:"autogen_async"`
@@ -299,9 +296,28 @@ type Resource struct {
 
 	Async *Async
 
-	Properties []*Type
+	// The three groups of []*Type fields are expected to be strictly ordered within a yaml file
+	// in the sequence of Virtual Fields -> Parameters -> Properties
+
+	// Virtual fields are Terraform-only fields that control Terraform's
+	// behaviour. They don't map to underlying API fields (although they
+	// may map to parameters), and will require custom code to be added to
+	// control them.
+	//
+	// Virtual fields are similar to url_param_only fields in that they create
+	// a schema entry which is not read from or submitted to the API. However
+	// virtual fields are meant to provide toggles for Terraform-specific behavior in a resource
+	// (eg: delete_contents_on_destroy) whereas url_param_only fields _should_
+	// be used for url construction.
+	//
+	// Both are resource level fields and do not make sense, and are also not
+	// supported, for nested fields. Nested fields that shouldn't be included
+	// in API payloads are better handled with custom expand/encoder logic.
+	VirtualFields []*Type `yaml:"virtual_fields"`
 
 	Parameters []*Type
+
+	Properties []*Type
 
 	ProductMetadata *Product
 

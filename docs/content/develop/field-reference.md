@@ -8,7 +8,7 @@ aliases:
 # MMv1 field reference
 
 This page documents commonly-used properties for fields. For a full list of
-available properties, see [type.rb ↗](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/type.rb).
+available properties, see [type.go ↗](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/type.go).
 
 ## Shared properties
 
