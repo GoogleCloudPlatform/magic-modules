@@ -32,6 +32,7 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+skip_sweeper: true
 custom_code:
   encoder: 'templates/terraform/encoders/go/wrap_object.go.tmpl'
   update_encoder: 'templates/terraform/encoders/go/wrap_object.go.tmpl'

@@ -47,7 +47,7 @@ async:
     message: 'message'
 collection_url_key: 'items'
 custom_code:
-  pre_create: templates/terraform/pre_create/compute_forwarding_rule.go.tmpl
+  pre_create: 'templates/terraform/pre_create/go/compute_forwarding_rule.go.tmpl'
   constants: 'templates/terraform/constants/go/compute_forwarding_rule.go.tmpl'
   post_create: 'templates/terraform/post_create/go/labels.tmpl'
 custom_diff:
