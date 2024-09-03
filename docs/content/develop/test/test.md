@@ -75,8 +75,7 @@ A create test is a test that creates the target resource and immediately destroy
 5. Modify the relevant `RESOURCE_NAME.yaml` file under [magic-modules/mmv1/products](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/products) to include an [`examples`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/provider/terraform/examples.rb) block with your test. The `name` must match the name of your `*.tf.erb` file. For example:
    ```yaml
    examples:
-     - !ruby/object:Provider::Terraform::Examples
-       name: "compute_subnetwork_basic"
+     - name: "compute_subnetwork_basic"
        primary_resource_id: "example"
        vars:
          subnetwork_name: "example-subnet"
