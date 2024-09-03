@@ -40,11 +40,3 @@ func NewTimeouts() *Timeouts {
 		DeleteMinutes: DEFAULT_DELETE_TIMEOUT_MINUTES,
 	}
 }
-
-// def validate
-//   super
-
-//   check :insert_minutes, type: Integer, default: DEFAULT_INSERT_TIMEOUT_MINUTES
-//   check :update_minutes, type: Integer, default: DEFAULT_UPDATE_TIMEOUT_MINUTES
-//   check :delete_minutes, type: Integer, default: DEFAULT_DELETE_TIMEOUT_MINUTES
-// end

@@ -16,8 +16,7 @@ package api
 import (
 	"log"
 	"strings"
-
-	"gopkg.in/yaml.v3"
+	"unicode"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
@@ -68,12 +67,11 @@ type Product struct {
 	ClientName string `yaml:"client_name"`
 }
 
-func (p *Product) UnmarshalYAML(n *yaml.Node) error {
+func (p *Product) UnmarshalYAML(unmarshal func(any) error) error {
 	type productAlias Product
 	aliasObj := (*productAlias)(p)
 
-	err := n.Decode(&aliasObj)
-	if err != nil {
+	if err := unmarshal(aliasObj); err != nil {
 		return err
 	}
 
@@ -84,31 +82,32 @@ func (p *Product) UnmarshalYAML(n *yaml.Node) error {
 }
 
 func (p *Product) Validate() {
-	// TODO Q2 Rewrite super
-	//     super
+	// product names must start with a capital
+	for i, ch := range p.Name {
+		if !unicode.IsUpper(ch) {
+			log.Fatalf("product name `%s` must start with a capital letter.", p.Name)
+		}
+		if i == 0 {
+			break
+		}
+	}
+
+	if len(p.Scopes) == 0 {
+		log.Fatalf("Missing `scopes` for product %s", p.Name)
+	}
+
+	if p.Versions == nil {
+		log.Fatalf("Missing `versions` for product %s", p.Name)
+	}
+
+	for _, v := range p.Versions {
+		v.Validate(p.Name)
+	}
+
+	if p.Async != nil {
+		p.Async.Validate()
+	}
 }
-
-// def validate
-//     super
-//     set_variables @objects, :__product
-
-//     // name comes from Named, and product names must start with a capital
-//     caps = ('A'..'Z').to_a
-//     unless caps.include? @name[0]
-//       raise "product name `//{@name}` must start with a capital letter."
-//     end
-
-//     check :display_name, type: String
-//     check :objects, type: Array, item_type: Api::Resource
-//     check :scopes, type: Array, item_type: String, required: true
-//     check :operation_retry, type: String
-
-//     check :async, type: Api::Async
-//     check :legacy_name, type: String
-//     check :client_name, type: String
-
-//     check :versions, type: Array, item_type: Api::Product::Version, required: true
-//   end
 
 // ====================
 // Custom Setters
