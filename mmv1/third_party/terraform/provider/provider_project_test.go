@@ -69,6 +69,8 @@ func testAccSdkProvider_project_precedenceOrderEnvironmentVariables(t *testing.T
 		CLOUDSDK_CORE_PROJECT
 	*/
 
+	project := envvar.GetTestProjectFromEnv()
+
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
