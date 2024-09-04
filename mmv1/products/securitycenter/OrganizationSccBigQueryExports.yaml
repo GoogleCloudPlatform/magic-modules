@@ -44,7 +44,6 @@ examples:
     test_env_vars:
       org_id: :ORG_ID
       project: :PROJECT_NAME
-
 parameters:
   - !ruby/object:Api::Type::String
     name: organization
@@ -122,7 +121,7 @@ properties:
       The supported operators are:
 
       * = for all value types.
-      * >, <, >=, <= for integer values.
+      * \>, <, >=, <= for integer values.
       * :, meaning substring matching, for strings.
 
       The supported value types are:

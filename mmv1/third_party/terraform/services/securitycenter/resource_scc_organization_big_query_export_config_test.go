@@ -120,6 +120,5 @@ resource "google_scc_organization_scc_big_query_exports" "default" {
   description  = "SCC Findings Big Query Export Update"
   filter       = "state=\"ACTIVE\" AND NOT mute=\"MUTED\""
 }
-
 `, context)
 }
