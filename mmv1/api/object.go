@@ -34,11 +34,18 @@ type NamedObject struct {
 // }
 
 // func (n *Named) deep_merge(arr1, arr2) {
+// if arr1.nil?
+//   return arr2
+// end
+// if arr2.nil?
+//   return arr1
+// end
+
 // // Scopes is an array of standard strings. In which case return the
 // // version in the overrides. This allows scopes to be removed rather
 // // than allowing for a merge of the two arrays
 // if string_array?(arr1)
-//   return arr2.nil? ? arr1 : arr2
+//   return arr2
 // end
 
 // // Merge any elements that exist in both
