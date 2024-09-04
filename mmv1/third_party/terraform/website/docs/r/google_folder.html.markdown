@@ -20,6 +20,8 @@ resource must have `roles/resourcemanager.folderCreator`. See the
 [Access Control for Folders Using IAM](https://cloud.google.com/resource-manager/docs/access-control-folders)
 doc for more information.
 
+~> It may take a while for the attached tag bindings to be deleted after the folder is scheduled to be deleted. 
+
 ## Example Usage
 
 ```hcl
@@ -33,6 +35,13 @@ resource "google_folder" "department1" {
 resource "google_folder" "team-abc" {
   display_name = "Team ABC"
   parent       = google_folder.department1.name
+}
+
+# Folder with a tag
+resource "google_folder" "department1" {
+  display_name = "Department 1"
+  parent       = "organizations/1234567"
+  tags = {"1234567/env":"staging"}
 }
 ```
 

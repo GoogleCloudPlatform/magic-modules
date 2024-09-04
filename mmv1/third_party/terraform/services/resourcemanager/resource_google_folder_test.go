@@ -96,13 +96,15 @@ func TestAccFolder_tags(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 	parent := "organizations/" + org
 	folderDisplayName := "tf-test-" + acctest.RandString(t, 10)
+	tagKey := acctest.BootstrapSharedTestTagKey(t, "crm-folder-tagkey")
+	tagValue := acctest.BootstrapSharedTestTagValue(t, "crm-folder-tagvalue", tagKey)
 	folder_tags := resourceManagerV3.Folder{}
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFolder_tags(folderDisplayName, parent, map[string]string{org + "/env": "test"}),
+				Config: testAccFolder_tags(folderDisplayName, parent, map[string]string{org + "/" + tagKey: tagValue}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleFolderExists(t, "google_folder.folder_tags", &folder_tags),
 				),
