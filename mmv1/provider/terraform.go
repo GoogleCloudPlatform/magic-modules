@@ -898,7 +898,7 @@ func (t *Terraform) generateResourcesForVersion(products []*api.Product) {
 				t.IAMResourceCount += 3
 
 				if !(iamPolicy.MinVersion != "" && iamPolicy.MinVersion < t.TargetVersionName) {
-					iamClassName = fmt.Sprintf("%s.Resource%s", service, object.ResourceName())
+					iamClassName = fmt.Sprintf("%s.%s", service, object.ResourceName())
 				}
 			}
 
