@@ -1,9 +1,9 @@
 resource "google_compute_region_target_https_proxy" "<%= ctx[:primary_resource_id] %>" {
   region                      = "us-central1"
   name                        = "<%= ctx[:vars]['region_target_https_proxy_name'] %>"
-  http_keep_alive_timeout_sec = 610
+  http_keep_alive_timeout_sec = 600
   url_map                     = google_compute_region_url_map.default.id
-  ssl_certificates            = [google_compute_ssl_certificate.default.id]
+  ssl_certificates            = [google_compute_region_ssl_certificate.default.id]
 }
 
 resource "google_compute_region_ssl_certificate" "default" {
