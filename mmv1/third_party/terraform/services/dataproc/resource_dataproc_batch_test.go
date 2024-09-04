@@ -3,9 +3,6 @@ package dataproc_test
 
 import (
         "testing"
-
-        "github.com/hashicorp/terraform-provider-google/google/services/dataproc"
-        "github.com/hashicorp/terraform-provider-google/google/tpgresource"
 )
 
 
