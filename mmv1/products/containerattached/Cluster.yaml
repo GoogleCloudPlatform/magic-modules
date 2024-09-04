@@ -362,11 +362,11 @@ properties:
     name: securityPostureConfig
     description: |
       Enable/Disable Security Posture API features for the cluster.
-    allow_empty_object: true
     default_from_api: true
     properties:
       - !ruby/object:Api::Type::Enum
         name: vulnerabilityMode
+        required: true
         description: |
           Sets the mode of the Kubernetes security posture API's workload vulnerability scanning.
         values:
