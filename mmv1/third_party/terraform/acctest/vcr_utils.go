@@ -463,6 +463,11 @@ func configureApiClient(ctx context.Context, p *fwprovider.FrameworkProvider, di
 // GetSDKProvider gets the SDK provider with an overwritten configure function to be called by MuxedProviders
 func GetSDKProvider(testName string) *schema.Provider {
 	prov := tpgprovider.Provider()
+
+	// Append a test-specific data source to the list of data sources on the provider
+	// This makes the data source(s) usable only in the context of acctests, and isn't available to users
+	prov.DataSourcesMap["google_provider_config_sdk"] = tpgprovider.DataSourceGoogleProviderConfigSdk()
+
 	if IsVcrEnabled() {
 		old := prov.ConfigureContextFunc
 		prov.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
