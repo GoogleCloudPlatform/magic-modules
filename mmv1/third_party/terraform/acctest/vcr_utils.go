@@ -31,6 +31,8 @@ import (
 	"github.com/dnaeon/go-vcr/recorder"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
+
 	fwDiags "github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -434,6 +436,14 @@ func (p *frameworkTestProvider) Configure(ctx context.Context, req provider.Conf
 	} else {
 		tflog.Debug(ctx, "VCR_PATH or VCR_MODE not set, skipping VCR")
 	}
+}
+
+// DataSources overrides the provider's DataSources function so that we can append test-specific data sources to the list of data sources on the provider.
+// This makes the data source(s) usable only in the context of acctests, and isn't available to users
+func (p *frameworkTestProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
+	ds := p.FrameworkProvider.DataSources(ctx)
+	ds = append(ds, fwprovider.NewGoogleProviderConfigPluginFrameworkDataSource) // google_provider_config_plugin_framework
+	return ds
 }
 
 func configureApiClient(ctx context.Context, p *fwprovider.FrameworkProvider, diags *fwDiags.Diagnostics) {

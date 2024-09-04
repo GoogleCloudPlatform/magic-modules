@@ -270,8 +270,6 @@ func (p *FrameworkProvider) Configure(ctx context.Context, req provider.Configur
 // DataSources defines the data sources implemented in the provider.
 func (p *FrameworkProvider) DataSources(_ context.Context) []func() datasource.DataSource {
     return []func() datasource.DataSource{
-        NewGoogleProviderConfigPluginFrameworkDataSource, // google_provider_config_plugin_framework
-
         resourcemanager.NewGoogleClientConfigDataSource,
         resourcemanager.NewGoogleClientOpenIDUserinfoDataSource,
         <% unless version == 'ga' -%>
