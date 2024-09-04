@@ -116,13 +116,13 @@ func TestAccFolder_tags(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"tags", "deletion_protection"}, // we don't read tags back
 			},
-			// Update tags tries to replace project but fails due to deletion protection
+			// Update tags tries to replace the folder but fails due to deletion protection
 			{
-				Config:      testAccFolder_tags(folderDisplayName, org, map[string]string{org + "/env": "staging"}),
+				Config:      testAccFolder_tags(folderDisplayName, org, map[string]string{}),
 				ExpectError: regexp.MustCompile("deletion_protection"),
 			},
 			{
-				Config: testAccFolder_tagsAllowDestroy(folderDisplayName, parent, map[string]string{org + "/env": "test"}),
+				Config: testAccFolder_tagsAllowDestroy(folderDisplayName, parent, map[string]string{org + "/" + tagKey: tagValue}),
 			},
 		},
 	})
