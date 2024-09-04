@@ -1,7 +1,5 @@
 package pubsub
 
-// Force a test run.
-
 import (
 	"fmt"
 
