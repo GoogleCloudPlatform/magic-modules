@@ -403,7 +403,7 @@ func runReplaying(runFullVCR bool, services map[string]struct{}, vt *vcr.Tester)
 	var testDirs []string
 	var replayingErr error
 	if runFullVCR {
-		fmt.Println("run full VCR tests")
+		fmt.Println("runReplaying: full VCR tests")
 		result, replayingErr = vt.Run(vcr.RunOptions{
 			Mode:    vcr.Replaying,
 			Version: provider.Beta,
