@@ -248,23 +248,23 @@ func (vt *Tester) Run(mode Mode, version provider.Version, testDirs []string) (*
 func (vt *Tester) RunParallel(mode Mode, version provider.Version, testDirs, tests []string) (*Result, error) {
 	logPath, err := vt.getLogPath(mode, version)
 	if err != nil {
-		return nil, err
+		return &Result{}, err
 	}
 	if err := vt.rnr.Mkdir(filepath.Join(vt.baseDir, "testlogs", mode.Lower()+"_build")); err != nil {
-		return nil, err
+		return &Result{}, err
 	}
 	repoPath, ok := vt.repoPaths[version]
 	if !ok {
-		return nil, fmt.Errorf("no repo cloned for version %s in %v", version, vt.repoPaths)
+		return &Result{}, fmt.Errorf("no repo cloned for version %s in %v", version, vt.repoPaths)
 	}
 	if err := vt.rnr.PushDir(repoPath); err != nil {
-		return nil, err
+		return &Result{}, err
 	}
 	if len(testDirs) == 0 {
 		var err error
 		testDirs, err = vt.googleTestDirectory()
 		if err != nil {
-			return nil, err
+			return &Result{}, err
 		}
 	}
 
@@ -273,14 +273,14 @@ func (vt *Tester) RunParallel(mode Mode, version provider.Version, testDirs, tes
 	case Replaying:
 		cassettePath, ok = vt.cassettePaths[version]
 		if !ok {
-			return nil, fmt.Errorf("cassettes not fetched for version %s", version)
+			return &Result{}, fmt.Errorf("cassettes not fetched for version %s", version)
 		}
 	case Recording:
 		if err := vt.rnr.RemoveAll(cassettePath); err != nil {
-			return nil, fmt.Errorf("error removing cassettes: %v", err)
+			return &Result{}, fmt.Errorf("error removing cassettes: %v", err)
 		}
 		if err := vt.rnr.Mkdir(cassettePath); err != nil {
-			return nil, fmt.Errorf("error creating cassette dir: %v", err)
+			return &Result{}, fmt.Errorf("error creating cassette dir: %v", err)
 		}
 		vt.cassettePaths[version] = cassettePath
 	}
@@ -304,7 +304,7 @@ func (vt *Tester) RunParallel(mode Mode, version provider.Version, testDirs, tes
 
 	// Leave repo directory.
 	if err := vt.rnr.PopDir(); err != nil {
-		return nil, err
+		return &Result{}, err
 	}
 	var output string
 	for otpt := range outputs {
@@ -312,7 +312,7 @@ func (vt *Tester) RunParallel(mode Mode, version provider.Version, testDirs, tes
 	}
 	logFileName := filepath.Join(vt.baseDir, "testlogs", fmt.Sprintf("%s_test.log", mode.Lower()))
 	if err := vt.rnr.WriteFile(logFileName, output); err != nil {
-		return nil, err
+		return &Result{}, err
 	}
 	var testErr error
 	for err := range errs {
