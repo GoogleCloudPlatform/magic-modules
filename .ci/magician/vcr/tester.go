@@ -145,21 +145,21 @@ func (vt *Tester) LogPath(mode Mode, version provider.Version) string {
 func (vt *Tester) Run(mode Mode, version provider.Version, testDirs []string) (*Result, error) {
 	logPath, err := vt.getLogPath(mode, version)
 	if err != nil {
-		return nil, err
+		return &Result{}, err
 	}
 
 	repoPath, ok := vt.repoPaths[version]
 	if !ok {
-		return nil, fmt.Errorf("no repo cloned for version %s in %v", version, vt.repoPaths)
+		return &Result{}, fmt.Errorf("no repo cloned for version %s in %v", version, vt.repoPaths)
 	}
 	if err := vt.rnr.PushDir(repoPath); err != nil {
-		return nil, err
+		return &Result{}, err
 	}
 	if len(testDirs) == 0 {
 		var err error
 		testDirs, err = vt.googleTestDirectory()
 		if err != nil {
-			return nil, err
+			return &Result{}, err
 		}
 	}
 
@@ -168,14 +168,14 @@ func (vt *Tester) Run(mode Mode, version provider.Version, testDirs []string) (*
 	case Replaying:
 		cassettePath, ok = vt.cassettePaths[version]
 		if !ok {
-			return nil, fmt.Errorf("cassettes not fetched for version %s", version)
+			return &Result{}, fmt.Errorf("cassettes not fetched for version %s", version)
 		}
 	case Recording:
 		if err := vt.rnr.RemoveAll(cassettePath); err != nil {
-			return nil, fmt.Errorf("error removing cassettes: %v", err)
+			return &Result{}, fmt.Errorf("error removing cassettes: %v", err)
 		}
 		if err := vt.rnr.Mkdir(cassettePath); err != nil {
-			return nil, fmt.Errorf("error creating cassette dir: %v", err)
+			return &Result{}, fmt.Errorf("error creating cassette dir: %v", err)
 		}
 		vt.cassettePaths[version] = cassettePath
 	}
@@ -228,7 +228,7 @@ func (vt *Tester) Run(mode Mode, version provider.Version, testDirs []string) (*
 	}
 	// Leave repo directory.
 	if err := vt.rnr.PopDir(); err != nil {
-		return nil, err
+		return &Result{}, err
 	}
 
 	logFileName := filepath.Join(vt.baseDir, "testlogs", fmt.Sprintf("%s_test.log", mode.Lower()))
@@ -240,7 +240,7 @@ func (vt *Tester) Run(mode Mode, version provider.Version, testDirs []string) (*
 	}
 	allOutput += output
 	if err := vt.rnr.WriteFile(logFileName, allOutput); err != nil {
-		return nil, fmt.Errorf("error writing log: %v, test output: %v", err, allOutput)
+		return &Result{}, fmt.Errorf("error writing log: %v, test output: %v", err, allOutput)
 	}
 	return collectResult(output), testErr
 }
