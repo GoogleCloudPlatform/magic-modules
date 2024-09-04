@@ -1,21 +1,5 @@
 ---
 steps:
-    - name: 'gcr.io/cloud-builders/gcloud'
-      id: "Stop Other Ongoing Build"
-      entrypoint: 'bash'
-      args:
-      - -c
-      - |
-        on_going_build=($(gcloud builds list --ongoing --format='value[separator=","](id,substitutions.REVISION_ID)' --filter="substitutions.TRIGGER_NAME:$TRIGGER_NAME substitutions._PR_NUMBER:$_PR_NUMBER" | xargs))
-        for (( i=0; i<${#on_going_build[@]}; i++ )); do
-          IFS="," read -r -a fields <<< "${on_going_build[i]}"
-          if [ "$i" -gt "0" ] && [ "${fields[1]}" != $COMMIT_SHA ]; then # skip current
-            echo "Cancelling build ${fields[0]}"
-
-            gcloud builds cancel ${fields[0]}
-          fi
-        done
-
     # The GCB / GH integration uses a shallow clone of the repo. We need to convert
     # that to a full clone in order to work with it properly.
     # https://cloud.google.com/source-repositories/docs/integrating-with-cloud-build#unshallowing_clones
@@ -235,7 +219,7 @@ steps:
         - $COMMIT_SHA
         - $BUILD_ID
         - $PROJECT_ID
-        - "18"  # Build step
+        - "19"  # Build step
         - terraform-google-conversion
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
