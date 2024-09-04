@@ -46,13 +46,13 @@ var (
 )
 
 type vcrCassetteUpdateReplayingResult struct {
-	ReplayingResult    *vcr.Result
+	ReplayingResult    vcr.Result
 	ReplayingErr       error
 	AllReplayingPassed bool
 }
 
 type vcrCassetteUpdateRecordingResult struct {
-	RecordingResult    *vcr.Result
+	RecordingResult    vcr.Result
 	HasTerminatedTests bool
 	RecordingErr       error
 	AllRecordingPassed bool
