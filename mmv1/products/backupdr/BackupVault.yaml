@@ -1,3 +1,16 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 --- !ruby/object:Api::Resource
 base_url: projects/{{project}}/locations/{{location}}/backupVaults
 create_url: projects/{{project}}/locations/{{location}}/backupVaults?backupVaultId={{backup_vault_id}}
@@ -10,6 +23,26 @@ import_format:
 name: BackupVault
 description: Container to store and organize immutable and indelible backups.
 autogen_async: true
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: name
+    base_url: "{{op_id}}"
+    wait_ms: 1000
+    timeouts:
+  result: !ruby/object:Api::OpAsync::Result
+    path: response
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: done
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: error
+    message: message
+update_verb: :PATCH
+update_mask: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     min_version: beta
@@ -19,6 +52,42 @@ examples:
       backup_vault_id: 'backup-vault-test'
     test_env_vars:
       project: :PROJECT_NAME
+parameters:
+  - !ruby/object:Api::Type::String
+    name: location
+    description: "The GCP location for the backup vault. "
+    url_param_only: true
+    required: true
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: backupVaultId
+    description: "Required. ID of the requesting object."
+    url_param_only: true
+    required: true
+    immutable: true
+  - !ruby/object:Api::Type::Boolean
+    name: 'force_update'
+    default_value: false
+    url_param_only: true
+    description: |
+       If set, allow update to extend the minimum enforced retention for backup vault. This overrides
+        the restriction against conflicting retention periods. This conflict may occur when the
+        expiration schedule defined by the associated backup plan is shorter than the minimum
+        retention set by the backup vault.
+  - !ruby/object:Api::Type::Boolean
+    name: 'force_delete'
+    default_value: false
+    url_param_only: true
+    description: |
+       If set, the following restrictions against deletion of the backup vault instance can be overridden:
+          * deletion of a backup vault instance containing no backups, but still containing empty datasources.
+          * deletion of a backup vault instance that is being referenced by an active backup plan.
+  - !ruby/object:Api::Type::Boolean
+    name: 'allow_missing'
+    default_value: false
+    url_param_only: true
+    description: |
+       Allow idempotent deletion of backup vault. The request will still succeed in case the backup vault does not exist.
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -56,8 +125,8 @@ properties:
       simultaneous updates from overwiting each other. "
   - !ruby/object:Api::Type::String
     name: state
-    description: "Output only. The BackupVault resource instance state. \n Possible
-      values:\n STATE_UNSPECIFIED\n CREATING\n ACTIVE\n DELETING\n ERROR"
+    description: "Output only. The BackupVault resource instance state. \n
+      Possible values:\n STATE_UNSPECIFIED\n CREATING\n ACTIVE\n DELETING\n ERROR"
     output: true
   - !ruby/object:Api::Type::String
     name: effectiveTime
@@ -85,59 +154,3 @@ properties:
     name: annotations
     description: "Optional. User annotations. See https://google.aip.dev/128#annotations\nStores
       small amounts of arbitrary data. "
-parameters:
-  - !ruby/object:Api::Type::String
-    name: location
-    description: "The GCP location for the backup vault. "
-    url_param_only: true
-    required: true
-    immutable: true
-  - !ruby/object:Api::Type::String
-    name: backupVaultId
-    description: "Required. ID of the requesting object."
-    url_param_only: true
-    required: true
-    immutable: true
-  - !ruby/object:Api::Type::Boolean
-    name: 'force_update'
-    default_value: false
-    url_param_only: true
-    description: |
-       If set, allow update to extend the minimum enforced retention for backup vault. This overrides
-        the restriction against conflicting retention periods. This conflict may occur when the
-        expiration schedule defined by the associated backup plan is shorter than the minimum
-        retention set by the backup vault.
-  - !ruby/object:Api::Type::Boolean
-    name: 'force_delete'
-    default_value: false
-    url_param_only: true
-    description: |
-       If set, the following restrictions against deletion of the backup vault instance can be overridden:
-          * deletion of a backup vault instance containing no backups, but still containing empty datasources.
-          * deletion of a backup vault instance that is being referenced by an active backup plan.
-  - !ruby/object:Api::Type::Boolean
-    name: 'allow_missing'
-    default_value: false
-    url_param_only: true
-    description: |
-       Allow idempotent deletion of backup vault. The request will still succeed in case the backup vault does not exist.
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: name
-    base_url: "{{op_id}}"
-    wait_ms: 1000
-    timeouts:
-  result: !ruby/object:Api::OpAsync::Result
-    path: response
-    resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: done
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
-    path: error
-    message: message
-update_verb: :PATCH
-update_mask: true

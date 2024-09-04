@@ -212,6 +212,10 @@ properties:
         description: |
           The maximum bytes that can be written to a Cloud Storage file before a new file is created. Min 1 KB, max 10 GiB.
           The maxBytes limit may be exceeded in cases where messages are larger than the limit.
+      - !ruby/object:Api::Type::Integer
+        name: 'maxMessages'
+        description: |
+          The maximum messages that can be written to a Cloud Storage file before a new file is created. Min 1000 messages.
       - !ruby/object:Api::Type::Enum
         name: 'state'
         description: |
@@ -230,6 +234,10 @@ properties:
             name: 'writeMetadata'
             description: |
               When true, write the subscription name, messageId, publishTime, attributes, and orderingKey as additional fields in the output.
+          - !ruby/object:Api::Type::Boolean
+            name: 'useTopicSchema'
+            description: |
+              When true, the output Cloud Storage file will be serialized using the topic schema, if it exists.
       - !ruby/object:Api::Type::String
         name: 'serviceAccountEmail'
         description: |

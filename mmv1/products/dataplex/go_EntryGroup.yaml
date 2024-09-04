@@ -116,7 +116,6 @@ properties:
     type: KeyValueLabels
     description: |
       User-defined labels for the EntryGroup.
-    immutable: false
   - name: 'transferStatus'
     type: Enum
     description: |

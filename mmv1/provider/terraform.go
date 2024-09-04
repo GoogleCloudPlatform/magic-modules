@@ -97,14 +97,14 @@ func (t *Terraform) GenerateObjects(outputFolder string, generateCode, generateD
 }
 
 func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPath string, generateCode, generateDocs bool) {
-	templateData := NewTemplateData(outputFolder, t.Version)
+	templateData := NewTemplateData(outputFolder, t.TargetVersionName)
 
 	if !object.IsExcluded() {
 		log.Printf("Generating %s resource", object.Name)
 		t.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
 
 		if generateCode {
-			log.Printf("Generating %s tests", object.Name)
+			// log.Printf("Generating %s tests", object.Name)
 			t.GenerateResourceTests(object, *templateData, outputFolder)
 			t.GenerateResourceSweeper(object, *templateData, outputFolder)
 		}
@@ -143,7 +143,7 @@ func (t *Terraform) GenerateResourceTests(object api.Resource, templateData Temp
 	eligibleExample := false
 	for _, example := range object.Examples {
 		if !example.SkipTest {
-			if object.ProductMetadata.VersionObjOrClosest(t.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) > 0 {
+			if object.ProductMetadata.VersionObjOrClosest(t.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) >= 0 {
 				eligibleExample = true
 				break
 			}
@@ -190,7 +190,7 @@ func (t *Terraform) GenerateOperation(outputFolder string) {
 		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 	}
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_operation.go", google.Underscore(t.Product.Name)))
-	templateData := NewTemplateData(outputFolder, t.Version)
+	templateData := NewTemplateData(outputFolder, t.TargetVersionName)
 	templateData.GenerateOperationFile(targetFilePath, *asyncObjects[0])
 }
 
@@ -392,7 +392,7 @@ func (t Terraform) CopyFileList(outputFolder string, files map[string]string) {
 func (t Terraform) CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string) {
 	t.generateResourcesForVersion(products)
 	files := t.getCommonCompileFiles(t.TargetVersionName)
-	templateData := NewTemplateData(outputFolder, t.Version)
+	templateData := NewTemplateData(outputFolder, t.TargetVersionName)
 	t.CompileFileList(outputFolder, files, *templateData, products)
 }
 

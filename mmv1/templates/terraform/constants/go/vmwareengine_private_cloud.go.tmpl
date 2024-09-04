@@ -31,3 +31,49 @@ func isMultiNodePrivateCloud(d *schema.ResourceData) bool {
     }
     return false
 }
+
+func isPrivateCloudInDeletedState(config *transport_tpg.Config, d *schema.ResourceData, billingProject string, userAgent string) (bool, error) {
+    baseurl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}")
+    if err != nil {
+        return false, err
+    }
+    res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+        Config: config,
+        Method: "GET",
+        Project: billingProject,
+        RawURL: baseurl,
+        UserAgent: userAgent,
+    })
+    if err != nil {
+        if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 404 {
+			log.Printf("[DEBUG] No existing private cloud found")
+			return false, nil
+		} 
+        return false, err
+    }
+    // if resource exists but is marked for deletion
+    v, ok := res["state"]
+    if ok && v.(string) == "DELETED" {
+        log.Printf("[DEBUG] The Private cloud exists and is marked for deletion.")
+        return true, nil
+    }
+    return false, nil
+}
+
+// Check if private cloud is absent or if it exists in a deleted state.
+func pollCheckForPrivateCloudAbsence(resp map[string]interface{}, respErr error) transport_tpg.PollResult {
+    if respErr != nil {
+        if transport_tpg.IsGoogleApiErrorWithCode(respErr, 404) {
+            return transport_tpg.SuccessPollResult()
+        }
+        return transport_tpg.ErrorPollResult(respErr)
+    }
+    // if resource exists but is marked for deletion
+    log.Printf("[DEBUG] Fetching state of the private cloud.")
+    v, ok := resp["state"]
+    if ok && v.(string) == "DELETED" {
+        log.Printf("[DEBUG] The Private cloud has been successfully marked for delayed deletion.")
+        return transport_tpg.SuccessPollResult()
+    }
+    return transport_tpg.PendingStatusPollResult("found")
+}

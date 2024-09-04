@@ -19,6 +19,7 @@ resource "google_tpu_node" "{{$.PrimaryResourceId}}" {
   different network names, ever. This caused our tests to start failing, so just
   use the default network in order to still demonstrate using as many fields as
   possible on the resource. */ -}}
+
   network = google_service_networking_connection.private_service_connection.network
 
   labels = {

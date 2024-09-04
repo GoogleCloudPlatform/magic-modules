@@ -48,6 +48,7 @@ async:
     message: 'message'
   include_project: true
 custom_code:
+skip_sweeper: true
 examples:
   - name: 'vmware_engine_external_access_rule_basic'
     primary_resource_id: 'vmw-engine-external-access-rule'

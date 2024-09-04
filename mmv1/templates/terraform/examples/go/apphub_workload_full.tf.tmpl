@@ -49,7 +49,7 @@ resource "google_apphub_workload" "{{$.PrimaryResourceId}}" {
   workload_id = google_compute_region_instance_group_manager.mig.name
   discovered_workload = data.google_apphub_discovered_workload.catalog-workload.name
   display_name = "{{index $.Vars "display_name"}}"
-  description = "{{index $.Vars "description"}}"
+  description = "{{index $.Vars "desc"}}"
   attributes {
     environment {
       type = "STAGING"

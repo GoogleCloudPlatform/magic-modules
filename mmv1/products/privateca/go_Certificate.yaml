@@ -672,7 +672,6 @@ properties:
     type: KeyValueLabels
     description: |
       Labels with user-defined metadata to apply to this resource.
-    immutable: false
   - name: 'pemCsr'
     type: String
     description: |

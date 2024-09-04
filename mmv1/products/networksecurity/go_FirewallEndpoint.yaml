@@ -88,7 +88,6 @@ properties:
     type: KeyValueLabels
     description: |
       A map of key/value label pairs to assign to the resource.
-    immutable: false
   - name: 'selfLink'
     type: String
     description: |
