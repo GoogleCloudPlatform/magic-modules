@@ -56,7 +56,7 @@ var ttvEnvironmentVariables = [...]string{
 }
 
 type analytics struct {
-	ReplayingResult  *vcr.Result
+	ReplayingResult  vcr.Result
 	RunFullVCR       bool
 	AffectedServices []string
 }
@@ -67,7 +67,7 @@ type nonExercisedTests struct {
 }
 
 type withReplayFailedTests struct {
-	ReplayingResult *vcr.Result
+	ReplayingResult vcr.Result
 }
 
 type withoutReplayFailedTests struct {
@@ -77,8 +77,8 @@ type withoutReplayFailedTests struct {
 }
 
 type recordReplay struct {
-	RecordingResult               *vcr.Result
-	ReplayingAfterRecordingResult *vcr.Result
+	RecordingResult               vcr.Result
+	ReplayingAfterRecordingResult vcr.Result
 	HasTerminatedTests            bool
 	RecordingErr                  error
 	AllRecordingPassed            bool
@@ -265,7 +265,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 			return nil
 		}
 
-		var replayingAfterRecordingResult *vcr.Result
+		replayingAfterRecordingResult := vcr.Result{}
 		var replayingAfterRecordingErr error
 		if len(recordingResult.PassedTests) > 0 {
 			replayingAfterRecordingResult, replayingAfterRecordingErr = vt.RunParallel(vcr.Replaying, provider.Beta, testDirs, recordingResult.PassedTests)
@@ -323,7 +323,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 
 var addedTestsRegexp = regexp.MustCompile(`(?m)^\+func (Test\w+)\(t \*testing.T\) {`)
 
-func notRunTests(gaDiff, betaDiff string, result *vcr.Result) ([]string, []string) {
+func notRunTests(gaDiff, betaDiff string, result vcr.Result) ([]string, []string) {
 	fmt.Println("Checking for new acceptance tests that were not run")
 	addedGaTests := addedTestsRegexp.FindAllStringSubmatch(gaDiff, -1)
 	addedBetaTests := addedTestsRegexp.FindAllStringSubmatch(betaDiff, -1)
@@ -388,8 +388,8 @@ func modifiedPackages(changedFiles []string) (map[string]struct{}, bool) {
 	return services, runFullVCR
 }
 
-func runReplaying(runFullVCR bool, services map[string]struct{}, vt *vcr.Tester) (*vcr.Result, []string, error) {
-	var result *vcr.Result
+func runReplaying(runFullVCR bool, services map[string]struct{}, vt *vcr.Tester) (vcr.Result, []string, error) {
+	result := vcr.Result{}
 	var testDirs []string
 	var replayingErr error
 	if runFullVCR {
@@ -397,7 +397,6 @@ func runReplaying(runFullVCR bool, services map[string]struct{}, vt *vcr.Tester)
 		result, replayingErr = vt.Run(vcr.Replaying, provider.Beta, nil)
 	} else if len(services) > 0 {
 		fmt.Printf("runReplaying: %d specific services: %v\n", len(services), services)
-		result = &vcr.Result{}
 		for service := range services {
 			servicePath := "./" + filepath.Join("google-beta", "services", service)
 			testDirs = append(testDirs, servicePath)
@@ -413,13 +412,12 @@ func runReplaying(runFullVCR bool, services map[string]struct{}, vt *vcr.Tester)
 		}
 	} else {
 		fmt.Println("runReplaying: no impacted services")
-		result = &vcr.Result{}
 	}
 
 	return result, testDirs, replayingErr
 }
 
-func handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha string, result *vcr.Result, mode vcr.Mode, gh GithubClient) (bool, error) {
+func handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha string, result vcr.Result, mode vcr.Mode, gh GithubClient) (bool, error) {
 	if len(result.Panics) > 0 {
 		comment := fmt.Sprintf(`$\textcolor{red}{\textsf{The provider crashed while running the VCR tests in %s mode}}$
 $\textcolor{red}{\textsf{Please fix it to complete your PR}}$

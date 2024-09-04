@@ -142,24 +142,24 @@ func (vt *Tester) LogPath(mode Mode, version provider.Version) string {
 
 // Run the vcr tests in the given mode and provider version and return the result.
 // This will overwrite any existing logs for the given mode and version.
-func (vt *Tester) Run(mode Mode, version provider.Version, testDirs []string) (*Result, error) {
+func (vt *Tester) Run(mode Mode, version provider.Version, testDirs []string) (Result, error) {
 	logPath, err := vt.getLogPath(mode, version)
 	if err != nil {
-		return &Result{}, err
+		return Result{}, err
 	}
 
 	repoPath, ok := vt.repoPaths[version]
 	if !ok {
-		return &Result{}, fmt.Errorf("no repo cloned for version %s in %v", version, vt.repoPaths)
+		return Result{}, fmt.Errorf("no repo cloned for version %s in %v", version, vt.repoPaths)
 	}
 	if err := vt.rnr.PushDir(repoPath); err != nil {
-		return &Result{}, err
+		return Result{}, err
 	}
 	if len(testDirs) == 0 {
 		var err error
 		testDirs, err = vt.googleTestDirectory()
 		if err != nil {
-			return &Result{}, err
+			return Result{}, err
 		}
 	}
 
@@ -168,14 +168,14 @@ func (vt *Tester) Run(mode Mode, version provider.Version, testDirs []string) (*
 	case Replaying:
 		cassettePath, ok = vt.cassettePaths[version]
 		if !ok {
-			return &Result{}, fmt.Errorf("cassettes not fetched for version %s", version)
+			return Result{}, fmt.Errorf("cassettes not fetched for version %s", version)
 		}
 	case Recording:
 		if err := vt.rnr.RemoveAll(cassettePath); err != nil {
-			return &Result{}, fmt.Errorf("error removing cassettes: %v", err)
+			return Result{}, fmt.Errorf("error removing cassettes: %v", err)
 		}
 		if err := vt.rnr.Mkdir(cassettePath); err != nil {
-			return &Result{}, fmt.Errorf("error creating cassette dir: %v", err)
+			return Result{}, fmt.Errorf("error creating cassette dir: %v", err)
 		}
 		vt.cassettePaths[version] = cassettePath
 	}
@@ -228,7 +228,7 @@ func (vt *Tester) Run(mode Mode, version provider.Version, testDirs []string) (*
 	}
 	// Leave repo directory.
 	if err := vt.rnr.PopDir(); err != nil {
-		return &Result{}, err
+		return Result{}, err
 	}
 
 	logFileName := filepath.Join(vt.baseDir, "testlogs", fmt.Sprintf("%s_test.log", mode.Lower()))
@@ -240,31 +240,31 @@ func (vt *Tester) Run(mode Mode, version provider.Version, testDirs []string) (*
 	}
 	allOutput += output
 	if err := vt.rnr.WriteFile(logFileName, allOutput); err != nil {
-		return &Result{}, fmt.Errorf("error writing log: %v, test output: %v", err, allOutput)
+		return Result{}, fmt.Errorf("error writing log: %v, test output: %v", err, allOutput)
 	}
 	return collectResult(output), testErr
 }
 
-func (vt *Tester) RunParallel(mode Mode, version provider.Version, testDirs, tests []string) (*Result, error) {
+func (vt *Tester) RunParallel(mode Mode, version provider.Version, testDirs, tests []string) (Result, error) {
 	logPath, err := vt.getLogPath(mode, version)
 	if err != nil {
-		return &Result{}, err
+		return Result{}, err
 	}
 	if err := vt.rnr.Mkdir(filepath.Join(vt.baseDir, "testlogs", mode.Lower()+"_build")); err != nil {
-		return &Result{}, err
+		return Result{}, err
 	}
 	repoPath, ok := vt.repoPaths[version]
 	if !ok {
-		return &Result{}, fmt.Errorf("no repo cloned for version %s in %v", version, vt.repoPaths)
+		return Result{}, fmt.Errorf("no repo cloned for version %s in %v", version, vt.repoPaths)
 	}
 	if err := vt.rnr.PushDir(repoPath); err != nil {
-		return &Result{}, err
+		return Result{}, err
 	}
 	if len(testDirs) == 0 {
 		var err error
 		testDirs, err = vt.googleTestDirectory()
 		if err != nil {
-			return &Result{}, err
+			return Result{}, err
 		}
 	}
 
@@ -273,14 +273,14 @@ func (vt *Tester) RunParallel(mode Mode, version provider.Version, testDirs, tes
 	case Replaying:
 		cassettePath, ok = vt.cassettePaths[version]
 		if !ok {
-			return &Result{}, fmt.Errorf("cassettes not fetched for version %s", version)
+			return Result{}, fmt.Errorf("cassettes not fetched for version %s", version)
 		}
 	case Recording:
 		if err := vt.rnr.RemoveAll(cassettePath); err != nil {
-			return &Result{}, fmt.Errorf("error removing cassettes: %v", err)
+			return Result{}, fmt.Errorf("error removing cassettes: %v", err)
 		}
 		if err := vt.rnr.Mkdir(cassettePath); err != nil {
-			return &Result{}, fmt.Errorf("error creating cassette dir: %v", err)
+			return Result{}, fmt.Errorf("error creating cassette dir: %v", err)
 		}
 		vt.cassettePaths[version] = cassettePath
 	}
@@ -304,7 +304,7 @@ func (vt *Tester) RunParallel(mode Mode, version provider.Version, testDirs, tes
 
 	// Leave repo directory.
 	if err := vt.rnr.PopDir(); err != nil {
-		return &Result{}, err
+		return Result{}, err
 	}
 	var output string
 	for otpt := range outputs {
@@ -312,7 +312,7 @@ func (vt *Tester) RunParallel(mode Mode, version provider.Version, testDirs, tes
 	}
 	logFileName := filepath.Join(vt.baseDir, "testlogs", fmt.Sprintf("%s_test.log", mode.Lower()))
 	if err := vt.rnr.WriteFile(logFileName, output); err != nil {
-		return &Result{}, err
+		return Result{}, err
 	}
 	var testErr error
 	for err := range errs {
@@ -483,7 +483,7 @@ func (vt *Tester) printLogs(logPath string) {
 	})
 }
 
-func collectResult(output string) *Result {
+func collectResult(output string) Result {
 	matches := testResultsExpression.FindAllStringSubmatch(output, -1)
 	resultSets := make(map[string]map[string]struct{}, 4)
 	for _, submatches := range matches {
@@ -505,7 +505,7 @@ func collectResult(output string) *Result {
 		}
 		sort.Strings(results[kind])
 	}
-	return &Result{
+	return Result{
 		FailedTests:  results["FAIL"],
 		PassedTests:  results["PASS"],
 		SkippedTests: results["SKIP"],
