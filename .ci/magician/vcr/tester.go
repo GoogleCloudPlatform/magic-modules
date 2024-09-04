@@ -68,6 +68,41 @@ var testResultsExpression = regexp.MustCompile(`(?m:^--- (PASS|FAIL|SKIP): (Test
 
 var testPanicExpression = regexp.MustCompile(`^panic: .*`)
 
+var safeToLog = map[string]bool{
+	"ACCTEST_PARALLELISM":                        true,
+	"COMMIT_SHA":                                 true,
+	"GITHUB_TOKEN_CLASSIC":                       false,
+	"GOCACHE":                                    true,
+	"GOOGLE_APPLICATION_CREDENTIALS":             false,
+	"GOOGLE_BILLING_ACCOUNT":                     false,
+	"GOOGLE_CREDENTIALS":                         false,
+	"GOOGLE_CUST_ID":                             true,
+	"GOOGLE_IDENTITY_USER":                       true,
+	"GOOGLE_MASTER_BILLING_ACCOUNT":              true,
+	"GOOGLE_ORG":                                 true,
+	"GOOGLE_ORG_2":                               true,
+	"GOOGLE_ORG_DOMAIN":                          true,
+	"GOOGLE_PROJECT":                             true,
+	"GOOGLE_PROJECT_NUMBER":                      true,
+	"GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION": true,
+	"GOOGLE_REGION":                              true,
+	"GOOGLE_SERVICE_ACCOUNT":                     true,
+	"GOOGLE_TEST_DIRECTORY":                      true,
+	"GOOGLE_ZONE":                                true,
+	"GOPATH":                                     true,
+	"HOME":                                       true,
+	"PATH":                                       true,
+	"SA_KEY":                                     true,
+	"TF_ACC":                                     true,
+	"TF_LOG":                                     true,
+	"TF_LOG_PATH_MASK":                           true,
+	"TF_LOG_SDK_FRAMEWORK":                       true,
+	"TF_SCHEMA_PANIC_ON_ERROR":                   true,
+	"USER":                                       true,
+	"VCR_MODE":                                   true,
+	"VCR_PATH":                                   true,
+} // true if shown, false if hidden
+
 // Create a new tester in the current working directory and write the service account key file.
 func NewTester(env map[string]string, logBucket, cassetteBucket string, rnr ExecRunner) (*Tester, error) {
 	var saKeyPath string
@@ -225,7 +260,7 @@ func (vt *Tester) Run(opt RunOptions) (Result, error) {
 	}
 	var printedEnv string
 	for ev, val := range env {
-		if ev == "SA_KEY" || ev == "GOOGLE_CREDENTIALS" || strings.HasPrefix(ev, "GITHUB_TOKEN") {
+		if !safeToLog[ev] {
 			val = "{hidden}"
 		}
 		printedEnv += fmt.Sprintf("%s=%s\n", ev, val)
