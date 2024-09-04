@@ -117,7 +117,6 @@ resource "google_scc_project_scc_big_query_exports" "default" {
   dataset      = google_bigquery_dataset.default.id
   description  = "SCC Findings Big Query Export Update"
   filter       = "state=\"ACTIVE\" AND NOT mute=\"MUTED\""
-
 }
 
 `, context)

@@ -47,7 +47,6 @@ examples:
       project: :PROJECT_NAME
     ignore_read_extra:
       - 'project'
-
 parameters:
   - !ruby/object:Api::Type::String
     name: bigQueryExportId
@@ -117,7 +116,7 @@ properties:
       The supported operators are:
 
       * = for all value types.
-      * >, <, >=, <= for integer values.
+      * \>, <, >=, <= for integer values.
       * :, meaning substring matching, for strings.
 
       The supported value types are:
