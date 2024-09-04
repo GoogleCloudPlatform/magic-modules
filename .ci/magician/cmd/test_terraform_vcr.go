@@ -393,9 +393,10 @@ func runReplaying(runFullVCR bool, services map[string]struct{}, vt *vcr.Tester)
 	var testDirs []string
 	var replayingErr error
 	if runFullVCR {
-		fmt.Println("run full VCR tests")
+		fmt.Println("runReplaying: full VCR tests")
 		result, replayingErr = vt.Run(vcr.Replaying, provider.Beta, nil)
 	} else if len(services) > 0 {
+		fmt.Printf("runReplaying: %d specific services: %v\n", len(services), services)
 		result = &vcr.Result{}
 		for service := range services {
 			servicePath := "./" + filepath.Join("google-beta", "services", service)
@@ -410,6 +411,9 @@ func runReplaying(runFullVCR bool, services map[string]struct{}, vt *vcr.Tester)
 			result.FailedTests = append(result.FailedTests, serviceResult.FailedTests...)
 			result.Panics = append(result.Panics, serviceResult.Panics...)
 		}
+	} else {
+		fmt.Println("runReplaying: no impacted services")
+		result = &vcr.Result{}
 	}
 
 	return result, testDirs, replayingErr
