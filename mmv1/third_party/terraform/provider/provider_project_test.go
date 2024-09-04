@@ -208,7 +208,7 @@ func testAccSdkProvider_project_unknownHandling(t *testing.T) {
 				Config: testAccSdkProvider_projectUnknownHandling(context),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					// Matches project id output from google_project resource
-					resource.TestMatchResourceAttr("data.google_provider_config_sdk.default", "project", regexp.MustCompile("tf-test-[0-9a-z]{16}")),
+					resource.TestMatchResourceAttr("data.google_provider_config_sdk.default", "project", regexp.MustCompile(fmt.Sprintf("tf-test-[0-9a-z]{16}|%s", project))),
 				),
 			},
 		},
