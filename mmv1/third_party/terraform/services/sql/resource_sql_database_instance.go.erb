@@ -478,15 +478,6 @@ is set to true. Defaults to ZONAL.`,
 										AtLeastOneOf: ipConfigurationKeys,
 										Description:  `Whether this Cloud SQL instance should be assigned a public IPV4 address. At least ipv4_enabled must be enabled or a private_network must be configured.`,
 									},
-<<<<<<< HEAD
-									"require_ssl": {
-										Type:         schema.TypeBool,
-										Optional:     true,
-										AtLeastOneOf: ipConfigurationKeys,
-										Description:  `Whether SSL connections over IP are enforced or not. To change this field, also set the corresponding value in ssl_mode if it has been set too.`,
-									},
-=======
->>>>>>> 40b53825878a3eaaf56d8dbcc49835c69723a31a
 									"private_network": {
 										Type:             schema.TypeString,
 										Optional:         true,
@@ -535,9 +526,6 @@ is set to true. Defaults to ZONAL.`,
 										Optional:     true,
 										Computed:     true,
 										ValidateFunc: validation.StringInSlice([]string{"ALLOW_UNENCRYPTED_AND_ENCRYPTED", "ENCRYPTED_ONLY", "TRUSTED_CLIENT_CERTIFICATE_REQUIRED"}, false),
-<<<<<<< HEAD
-										Description:  `Specify how SSL connection should be enforced in DB connections. This field provides more SSL enforcment options compared to require_ssl. To change this field, also set the correspoding value in require_ssl.`,
-=======
 										Description:  `Specify how SSL connection should be enforced in DB connections.`,
 										AtLeastOneOf: ipConfigurationKeys,
 									},
@@ -547,7 +535,6 @@ is set to true. Defaults to ZONAL.`,
                                                                                 Computed:     true,
                                                                                 ValidateFunc: validation.StringInSlice([]string{"CA_MODE_UNSPECIFIED", "GOOGLE_MANAGED_INTERNAL_CA", "GOOGLE_MANAGED_CAS_CA"}, false),
                                                                                 Description:  `Specify how the server certificate's Certificate Authority is hosted.`,
->>>>>>> 40b53825878a3eaaf56d8dbcc49835c69723a31a
 										AtLeastOneOf: ipConfigurationKeys,
 									},
 								},
@@ -2381,11 +2368,8 @@ func flattenIpConfiguration(ipConfiguration *sqladmin.IpConfiguration, d *schema
 		"private_network":                               ipConfiguration.PrivateNetwork,
 		"allocated_ip_range":                            ipConfiguration.AllocatedIpRange,
 		"enable_private_path_for_google_cloud_services": ipConfiguration.EnablePrivatePathForGoogleCloudServices,
-<<<<<<< HEAD
-=======
 		"ssl_mode":                                      ipConfiguration.SslMode,
 		"server_ca_mode":                                ipConfiguration.ServerCaMode,
->>>>>>> 40b53825878a3eaaf56d8dbcc49835c69723a31a
 	}
 
 	if ipConfiguration.AuthorizedNetworks != nil {
