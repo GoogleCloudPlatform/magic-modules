@@ -25,6 +25,7 @@ import (
 	"path"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"strings"
 	"time"
 
@@ -198,7 +199,7 @@ func (t *Terraform) GenerateOperation(outputFolder string) {
 // IAM policies separately from the resource itself
 // def generate_iam_policy(pwd, data, generate_code, generate_docs)
 func (t *Terraform) GenerateIamPolicy(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
-	if generateCode && object.IamPolicy != nil && (object.IamPolicy.MinVersion == "" || object.IamPolicy.MinVersion >= t.TargetVersionName) {
+	if generateCode && object.IamPolicy != nil && (object.IamPolicy.MinVersion == "" || slices.Index(product.ORDER, object.IamPolicy.MinVersion) <= slices.Index(product.ORDER, t.TargetVersionName)) {
 		productName := t.Product.ApiName
 		targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
 		if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
@@ -993,10 +994,10 @@ func (t Terraform) SupportedProviderVersions() []string {
 		if i == 0 {
 			continue
 		}
-		supported = append(supported, v)
-		if v == t.TargetVersionName {
+		if i > slices.Index(product.ORDER, t.TargetVersionName) {
 			break
 		}
+		supported = append(supported, v)
 	}
 	return supported
 }

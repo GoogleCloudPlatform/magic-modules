@@ -1999,7 +1999,7 @@ func TestAccContainerCluster_withWorkloadMetadataConfig(t *testing.T) {
 	})
 }
 
-{{ if or (ne $.TargetVersionName ``) (eq $.TargetVersionName `ga`) }}
+{{ if not (or (eq $.TargetVersionName ``) (eq $.TargetVersionName `ga`)) }}
 func TestAccContainerCluster_withSandboxConfig(t *testing.T) {
 	t.Parallel()
 
@@ -7098,7 +7098,7 @@ resource "google_container_cluster" "with_workload_metadata_config" {
 `, clusterName, networkName, subnetworkName)
 }
 
-{{ if or (ne $.TargetVersionName ``) (eq $.TargetVersionName `ga`) }}
+{{ if not (or (eq $.TargetVersionName ``) (eq $.TargetVersionName `ga`)) }}
 func testAccContainerCluster_withSandboxConfig(clusterName, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
@@ -8816,7 +8816,7 @@ resource "google_container_cluster" "with_workload_identity_config" {
 }
 
 
-{{ if or (ne $.TargetVersionName ``) (eq $.TargetVersionName `ga`) }}
+{{ if not (or (eq $.TargetVersionName ``) (eq $.TargetVersionName `ga`)) }}
 func testAccContainerCluster_sharedVpc(org, billingId, projectName, name string, suffix string) string {
 	return fmt.Sprintf(`
 resource "google_project" "host_project" {
