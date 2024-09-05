@@ -222,7 +222,7 @@ type Resource struct {
 	ExcludeTgc bool `yaml:"exclude_tgc"`
 
 	// If true, skip sweeper generation for this resource
-	SkipSweeper bool `yaml:"skip_sweeper"`
+	ExcludeSweeper bool `yaml:"exclude_sweeper"`
 
 	// Override sweeper settings
 	Sweeper resource.Sweeper
@@ -260,7 +260,7 @@ type Resource struct {
 
 	// Set to true for resources that are unable to be deleted, such as KMS keyrings or project
 	// level resources such as firebase project
-	SkipDelete bool `yaml:"skip_delete"`
+	ExcludeDelete bool `yaml:"exclude_delete"`
 
 	// Set to true for resources that are unable to be read from the API, such as
 	// public ca external account keys
