@@ -82,7 +82,7 @@ properties:
     name: state
     description:
       "Output only. Current state of the instance. \n Possible values:\n
-      STATE_UNSPECIFIED\nCREATING\nACTIVE\nUPDATING\nDELETING"
+      CREATING\nACTIVE\nUPDATING\nDELETING"
     output: true
   - !ruby/object:Api::Type::NestedObject
     properties:
@@ -100,8 +100,10 @@ properties:
             output: true
         name: updateInfo
         description: "Represents information about instance with state UPDATING. "
+        output: true
     name: stateInfo
     description: "Additional information about the state of the instance. "
+    output: true
   - !ruby/object:Api::Type::String
     name: uid
     description: "Output only. System assigned, unique identifier for the instance. "
@@ -116,14 +118,14 @@ properties:
     name: authorizationMode
     description:
       "Optional. Immutable. Authorization mode of the instance. \n Possible
-      values:\n AUTHORIZATION_MODE_UNSPECIFIED\nAUTH_DISABLED\nIAM_AUTH"
+      values:\n AUTH_DISABLED\nIAM_AUTH"
     immutable: true
     default_from_api: true
   - !ruby/object:Api::Type::String
     name: transitEncryptionMode
     description:
       "Optional. Immutable. In-transit encryption mode of the instance. \n
-      Possible values:\n TRANSIT_ENCRYPTION_MODE_UNSPECIFIED\nTRANSIT_ENCRYPTION_DISABLED\nSERVER_AUTHENTICATION"
+      Possible values:\n TRANSIT_ENCRYPTION_DISABLED\nSERVER_AUTHENTICATION"
     immutable: true
     default_from_api: true
   - !ruby/object:Api::Type::Integer
@@ -158,7 +160,7 @@ properties:
     name: nodeType
     description:
       "Optional. Immutable. Machine type for individual nodes of the instance.
-      \n Possible values:\n NODE_TYPE_UNSPECIFIED\nSHARED_CORE_NANO\nHIGHMEM_MEDIUM\nHIGHMEM_XLARGE\nSTANDARD_SMALL"
+      \n Possible values:\n SHARED_CORE_NANO\nHIGHMEM_MEDIUM\nHIGHMEM_XLARGE\nSTANDARD_SMALL"
     immutable: true
     default_from_api: true
   - !ruby/object:Api::Type::NestedObject
@@ -178,7 +180,7 @@ properties:
             default_from_api: true
             description:
               "Optional. Period between RDB snapshots. \n Possible values:\n
-              SNAPSHOT_PERIOD_UNSPECIFIED\nONE_HOUR\nSIX_HOURS\nTWELVE_HOURS\nTWENTY_FOUR_HOURS"
+              ONE_HOUR\nSIX_HOURS\nTWELVE_HOURS\nTWENTY_FOUR_HOURS"
           - !ruby/object:Api::Type::String
             name: rdbSnapshotStartTime
             description:
@@ -193,7 +195,7 @@ properties:
         properties:
           - !ruby/object:Api::Type::String
             name: appendFsync
-            description: "Optional. The fsync mode. \n Possible values:\n APPEND_FSYNC_UNSPECIFIED\nNEVER\nEVERY_SEC\nALWAYS"
+            description: "Optional. The fsync mode. \n Possible values:\n NEVER\nEVERY_SEC\nALWAYS"
             default_from_api: true
         name: aofConfig
         description: "Configuration for AOF based persistence. "
@@ -234,7 +236,7 @@ properties:
         default_from_api: true
         description:
           "Optional. Current zone distribution mode. Defaults to MULTI_ZONE.
-          \n Possible values:\n ZONE_DISTRIBUTION_MODE_UNSPECIFIED\nMULTI_ZONE\nSINGLE_ZONE"
+          \n Possible values:\n MULTI_ZONE\nSINGLE_ZONE"
     name: zoneDistributionConfig
     immutable: true
     default_from_api: true

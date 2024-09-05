@@ -15,9 +15,7 @@ uniqueConnections := make(map[string]bool) // Track unique project+network combo
 for _, raw := range connections {
 	connectionData, ok := raw.(map[string]interface{})
 	if !ok || len(connectionData) < 1 {
-		// Log the problematic connection data for debugging
-		log.Printf("[ERROR] Invalid or empty psc connection data: %v", raw)
-		continue // Skip this invalid connection and continue processing
+		return nil, fmt.Errorf("Invalid or empty psc connection data: %v", raw)
 	}
 
 	projectID, ok := connectionData["projectId"].(string)
