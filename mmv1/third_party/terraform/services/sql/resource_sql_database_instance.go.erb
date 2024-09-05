@@ -176,7 +176,10 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
 			customdiff.ForceNewIfChange("settings.0.disk_size", compute.IsDiskShrinkage),
-			customdiff.ForceNewIfChange("master_instance_name", isMasterInstanceNameSet),
+			customdiff.ForceNewIf("master_instance_name", func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) bool{
+				// If we set master but this is not the new master of a switchover, require replacement and warn user.
+				return !isSwitchoverFromOldPrimarySide(d)
+			}),
 			customdiff.IfValueChange("instance_type", isReplicaPromoteRequested, checkPromoteConfigurationsAndUpdateDiff),
 			privateNetworkCustomizeDiff,
 			pitrSupportDbCustomizeDiff,
@@ -836,7 +839,7 @@ is set to true. Defaults to ZONAL.`,
 						"cascadable_replica": {
 							Type: schema.TypeBool,
 							Optional: true,
-							ForceNew: true,
+							ForceNew: false,
 							AtLeastOneOf: replicaConfigurationKeys, 
 							Description: `Specifies if a SQL Server replica is a cascadable replica. A cascadable replica is a SQL Server cross region replica that supports replica(s) under it.`,
 						},
@@ -2637,9 +2640,8 @@ func isSwitchoverRequested(ctx context.Context, d *schema.ResourceData) bool {
 		return false
 	}
 	dbVersion, _ := d.GetChange("database_version")
-	tflog.Warn(ctx, fmt.Sprintf("asdf isswtichoverrequested dbversion is %q", dbVersion))
 	if !strings.HasPrefix(dbVersion.(string), "SQLSERVER") {
-		tflog.Warn(ctx, fmt.Sprintf("switchover is not supported for %q", dbVersion))
+		tflog.Warn(ctx, fmt.Sprintf("Switchover is only supported for SQL Server %q", dbVersion))
 		return false
 	}
 	return true
@@ -2648,12 +2650,49 @@ func isSwitchoverRequested(ctx context.Context, d *schema.ResourceData) bool {
 func isReplicaPromoteRequested(_ context.Context, oldInstanceType interface{}, newInstanceType interface{}, _ interface{}) bool {
 	oldInstanceType = oldInstanceType.(string)
 	newInstanceType = newInstanceType.(string)
-	log.Printf("asdf in isreplicapromoterequested")
 	if newInstanceType == "CLOUD_SQL_INSTANCE" && oldInstanceType == "READ_REPLICA_INSTANCE" {
 		return true
 	}
 
 	return false
+}
+
+// Check if this resource change is the manual update done on old primary after a switchover. If true, no replacement is needed.
+func isSwitchoverFromOldPrimarySide(d *schema.ResourceDiff) bool {
+	oldInstanceType, newInstanceType := d.GetChange("instance_type")
+	oldReplicaNames, newReplicaNames := d.GetChange("replica_names")
+    _, newMasterInstanceName := d.GetChange("master_instance_name")
+	_, newReplicaConfiguration := d.GetChange("replica_configuration")
+	if len(newReplicaConfiguration.([]interface{})) != 1 || newReplicaConfiguration.([]interface{})[0] == nil{
+		return false;
+	}
+	replicaConfiguration := newReplicaConfiguration.([]interface{})[0].(map[string]interface{})
+	cascadableReplica, cascadableReplicaFieldExists := replicaConfiguration["cascadable_replica"]
+
+	log.Printf("asdf oldReplicaNames=%v, newReplicaNames=%v", oldReplicaNames.([]interface{}), newReplicaNames.([]interface{}))
+	log.Printf("asdf newMasterInstanceName %v", newMasterInstanceName)
+
+	if newMasterInstanceName != nil {
+		log.Printf("asdf 1")
+	}
+	if oldInstanceType.(string) == "CLOUD_SQL_INSTANCE" && newInstanceType.(string) == "READ_REPLICA_INSTANCE" {
+		log.Printf("asdf 2")
+	}
+	if slices.Contains(oldReplicaNames.([]interface{}), newMasterInstanceName) {
+		log.Printf("asdf 3")
+	}
+	if !slices.Contains(newReplicaNames.([]interface{}), newMasterInstanceName) {
+		log.Printf("asdf 4")
+	}
+	if cascadableReplicaFieldExists && cascadableReplica.(bool) {
+		log.Printf("asdf 5")
+	}
+
+	return newMasterInstanceName != nil &&
+	oldInstanceType.(string) == "CLOUD_SQL_INSTANCE" && newInstanceType.(string) == "READ_REPLICA_INSTANCE" &&
+	slices.Contains(oldReplicaNames.([]interface{}), newMasterInstanceName) &&
+	!slices.Contains(newReplicaNames.([]interface{}), newMasterInstanceName) &&
+	cascadableReplicaFieldExists && cascadableReplica.(bool) 
 }
 
 func checkPromoteConfigurations(ctx context.Context, d *schema.ResourceData) error {
