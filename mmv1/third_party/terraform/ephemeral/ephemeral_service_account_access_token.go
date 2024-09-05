@@ -3,10 +3,8 @@ package ephemeral
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral/schema"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -21,25 +19,37 @@ func (p *googleEphemeralServiceAccountAccessToken) Metadata(ctx context.Context,
 }
 
 type ephemeralServiceAccountAccessTokenModel struct {
-	Length types.Int64  `tfsdk:"length"`
-	Result types.String `tfsdk:"result"`
+	TargetServiceAccount types.Int64  `tfsdk:"target_service_account"`
+	AccessToken          types.String `tfsdk:"access_token"`
+	Scopes               types.Set    `tfsdk:"scopes"`
+	Delegates            types.Set    `tfsdk:"delegates"`
+	Lifetime             types.String `tfsdk:"lifetime"`
 }
 
 func (p *googleEphemeralServiceAccountAccessToken) Schema(ctx context.Context, req ephemeral.SchemaRequest, resp *ephemeral.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Generates a test string",
 		Attributes: map[string]schema.Attribute{
-			"length": schema.Int64Attribute{
-				Description: "The amount of test in string desired. The minimum value for length is 1.",
-				Required:    true,
-				Validators: []validator.Int64{
-					int64validator.AtLeast(1),
-				},
+			"target_service_account": schema.StringAttribute{
+				Required: true,
+				// ValidateFunc: verify.ValidateRegexp("(" + strings.Join(verify.PossibleServiceAccountNames, "|") + ")"),
 			},
-			"result": schema.StringAttribute{
-				Description: "The generated test string.",
-				Computed:    true,
-				Sensitive:   true,
+			"access_token": schema.StringAttribute{
+				Sensitive: true,
+				Computed:  true,
+			},
+			"lifetime": schema.StringAttribute{
+				Optional: true,
+				// ValidateFunc: verify.ValidateDuration(), // duration <=3600s; TODO: support validateDuration(min,max)
+				// Default:      "3600s",
+			},
+			"scopes": schema.SetAttribute{
+				Required:    true,
+				ElementType: types.StringType,
+				// ValidateFunc is not yet supported on lists or sets.
+			},
+			"delegates": schema.SetAttribute{
+				Optional:    true,
+				ElementType: types.StringType,
 			},
 		},
 	}
