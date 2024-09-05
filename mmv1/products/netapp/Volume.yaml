@@ -494,3 +494,12 @@ properties:
       Specifies the replica zone for regional volume.
     output: true
     min_version: beta
+  - !ruby/object:Api::Type::Boolean
+    name: 'largeCapacity'
+    description: |
+      Optional. Flag indicating if the volume will be a large capacity volume or a regular volume.
+  - !ruby/object:Api::Type::Boolean
+    name: 'multipleEndpoints'
+    description: |
+      Optional. Flag indicating if the volume will have an IP address per node for volumes supporting multiple IP endpoints.
+      Only the volume with largeCapacity will be allowed to have multiple endpoints.
