@@ -482,7 +482,7 @@ func TestAccContainerNodePool_withWorkloadIdentityConfig(t *testing.T) {
 	})
 }
 
-{{ if or (ne $.TargetVersionName ``) (eq $.TargetVersionName `ga`) }}
+{{ if not (or (eq $.TargetVersionName ``) (eq $.TargetVersionName `ga`)) }}
 func TestAccContainerNodePool_withSandboxConfig(t *testing.T) {
 	t.Parallel()
 
@@ -835,7 +835,7 @@ resource "google_container_node_pool" "with_enable_private_nodes" {
 `, network, cluster, np, flag)
 }
 
-{{ if or (ne $.TargetVersionName ``) (eq $.TargetVersionName `ga`) }}
+{{ if not (or (eq $.TargetVersionName ``) (eq $.TargetVersionName `ga`)) }}
 func TestAccContainerNodePool_withBootDiskKmsKey(t *testing.T) {
 	// Uses generated time-based rotation time
 	acctest.SkipIfVcr(t)
@@ -3078,7 +3078,7 @@ resource "google_container_node_pool" "with_workload_metadata_config" {
 `, projectID, cluster, networkName, subnetworkName, np)
 }
 
-{{ if or (ne $.TargetVersionName ``) (eq $.TargetVersionName `ga`) }}
+{{ if not (or (eq $.TargetVersionName ``) (eq $.TargetVersionName `ga`)) }}
 func testAccContainerNodePool_withSandboxConfig(cluster, np, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
@@ -3505,7 +3505,7 @@ resource "google_container_node_pool" "with_multi_nic" {
 `, network, network, network, network, network, network, cluster, np)
 }
 
-{{ if or (ne $.TargetVersionName ``) (eq $.TargetVersionName `ga`) }}
+{{ if not (or (eq $.TargetVersionName ``) (eq $.TargetVersionName `ga`)) }}
 func testAccContainerNodePool_withBootDiskKmsKey(cluster, np, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {

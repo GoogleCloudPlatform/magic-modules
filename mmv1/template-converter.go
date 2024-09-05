@@ -224,14 +224,14 @@ func replace(data []byte) []byte {
 	if err != nil {
 		log.Fatalf("Cannot compile the regular expression: %v", err)
 	}
-	data = r.ReplaceAll(data, []byte("\n\n$1{{ if or (ne $.TargetVersionName ``) (eq $.TargetVersionName `ga`) }}"))
+	data = r.ReplaceAll(data, []byte("\n\n$1{{ if not (or (eq $.TargetVersionName ``) (eq $.TargetVersionName `ga`)) }}"))
 
 	// Replace <% unless version.nil? || version == ['|"]ga['|"] -%>
 	r, err = regexp.Compile(`<% unless version\.nil\? \|\| version == ['|"]ga['|"] -%>`)
 	if err != nil {
 		log.Fatalf("Cannot compile the regular expression: %v", err)
 	}
-	data = r.ReplaceAll(data, []byte(`{{- if or (ne $.TargetVersionName "") (eq $.TargetVersionName "ga") }}`))
+	data = r.ReplaceAll(data, []byte(`{{- if not (or (eq $.TargetVersionName "") (eq $.TargetVersionName "ga")) }}`))
 
 	// Replace <% if version.nil? || version == ['|"]ga['|"] -%>
 	r, err = regexp.Compile(`<% if version\.nil\? \|\| version == ['|"]ga['|"] -%>`)

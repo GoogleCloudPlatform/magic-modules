@@ -706,7 +706,7 @@ resource "google_compute_region_backend_service" "lipsum" {
   backend {
     group    = google_compute_instance_group_manager.foobar.instance_group
     balancing_mode = "CONNECTION"
-{{- if or (ne $.TargetVersionName "") (eq $.TargetVersionName "ga") }}
+{{- if not (or (eq $.TargetVersionName "") (eq $.TargetVersionName "ga")) }}
     failover = true
   }
 
@@ -776,7 +776,7 @@ resource "google_compute_region_backend_service" "lipsum" {
   backend {
     group = google_compute_instance_group_manager.foobar.instance_group
     balancing_mode = "CONNECTION"
-{{- if or (ne $.TargetVersionName "") (eq $.TargetVersionName "ga") }}
+{{- if not (or (eq $.TargetVersionName "") (eq $.TargetVersionName "ga")) }}
     failover = true
   }
 
