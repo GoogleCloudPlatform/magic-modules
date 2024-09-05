@@ -44,7 +44,7 @@ func TestAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T
 	t.Parallel()
 
 	context := map[string]interface{}{
-	{{- template "EnvVarContext" $e }}
+	{{- template "EnvVarContext" dict "TestEnvVars" $e.TestEnvVars "HasNewLine" false}}
 	{{- range $varKey, $varVal := $e.TestVarsOverrides }}
 		"{{$varKey}}": {{$varVal}},
 	{{- end }}
