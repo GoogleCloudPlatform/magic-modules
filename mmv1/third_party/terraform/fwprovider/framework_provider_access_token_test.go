@@ -10,8 +10,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-// TestAccFwProvider_access_token is a series of acc tests asserting how the SDK provider handles access_token arguments
-// It is SDK specific because the HCL used provisions SDK-implemented resources
+// TestAccFwProvider_access_token is a series of acc tests asserting how the plugin-framework provider handles access_token arguments
+// It is plugin-framework specific because the HCL used provisions plugin-framework-implemented resources
 // It is a counterpart to TestAccSdkProvider_access_token
 func TestAccFwProvider_access_token(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
