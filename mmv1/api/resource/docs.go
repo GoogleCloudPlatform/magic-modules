@@ -41,12 +41,3 @@ type Docs struct {
 	// attr_reader :
 	Attributes string
 }
-
-// def validate
-//   super
-//   check :warning, type: String
-//   check :note, type: String
-//   check :required_properties, type: String
-//   check :optional_properties, type: String
-//   check :attributes, type: String
-// end

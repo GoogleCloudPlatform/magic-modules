@@ -15,7 +15,6 @@
 name: 'ServerTlsPolicy'
 base_url: 'projects/{{project}}/locations/{{location}}/serverTlsPolicies'
 create_url: 'projects/{{project}}/locations/{{location}}/serverTlsPolicies?serverTlsPolicyId={{name}}'
-min_version: beta
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -47,26 +46,21 @@ import_format:
   ['projects/{{project}}/locations/{{location}}/serverTlsPolicies/{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
     name: 'network_security_server_tls_policy_basic'
-    skip_vcr: true
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-server-tls-policy'
   - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
     name: 'network_security_server_tls_policy_advanced'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-server-tls-policy'
   - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
     name: 'network_security_server_tls_policy_server_cert'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-server-tls-policy'
   - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
     name: 'network_security_server_tls_policy_mtls'
     primary_resource_id: 'default'
     vars:

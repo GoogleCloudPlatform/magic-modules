@@ -74,7 +74,6 @@
         ],
         "hostname": "test-hostname",
         "labels": {
-          "goog-terraform-provisioned": "true",
           "label_foo1": "label-bar1"
         },
         "machineType": "projects/{{.Provider.project}}/zones/us-central1-a/machineTypes/n1-standard-1",

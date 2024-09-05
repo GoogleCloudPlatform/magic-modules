@@ -33,7 +33,7 @@ references:
     'Official Documentation': 'https://cloud.google.com/load-balancing/docs/negs/'
   api: 'https://cloud.google.com/compute/docs/reference/rest/beta/networkEndpointGroups'
 docs:
-id_format: '{{project}}/{{zone}}/{{network_endpoint_group}}/endpoints'
+id_format: '{{project}}/{{zone}}/{{network_endpoint_group}}'
 base_url: 'projects/{{project}}/zones/{{zone}}/networkEndpointGroups/{{network_endpoint_group}}'
 self_link: 'projects/{{project}}/zones/{{zone}}/networkEndpointGroups/{{network_endpoint_group}}/listNetworkEndpoints'
 create_url: 'projects/{{project}}/zones/{{zone}}/networkEndpointGroups/{{network_endpoint_group}}/attachNetworkEndpoints'
@@ -53,7 +53,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 1000

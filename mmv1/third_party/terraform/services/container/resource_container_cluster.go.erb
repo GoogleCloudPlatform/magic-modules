@@ -160,8 +160,9 @@ func clusterSchemaNodePoolDefaults() *schema.Schema {
 						Schema: map[string]*schema.Schema{
 							"containerd_config": schemaContainerdConfig(),
 <% unless version == 'ga' -%>
-							"gcfs_config": schemaGcfsConfig(false),
+							"gcfs_config": schemaGcfsConfig(),
 <% end -%>
+							"insecure_kubelet_readonly_port_enabled": schemaInsecureKubeletReadonlyPortEnabled(),
 							"logging_variant": schemaLoggingVariant(),
 						},
 					},
@@ -1504,6 +1505,7 @@ func ResourceContainerCluster() *schema.Resource {
 				Description: `Node pool configs that apply to all auto-provisioned node pools in autopilot clusters and node auto-provisioning enabled clusters.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"node_kubelet_config": schemaNodePoolAutoConfigNodeKubeletConfig(),
 						"network_tags": {
 							Type:        schema.TypeList,
 							Optional:    true,
@@ -2131,13 +2133,11 @@ func ResourceContainerCluster() *schema.Resource {
 				Description: `Configuration for Cloud DNS for Kubernetes Engine.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						<% unless version == 'ga' -%>
 						"additive_vpc_scope_dns_domain": {
 							Type:         schema.TypeString,
 							Description:  `Enable additive VPC scope DNS in a GKE cluster.`,
 							Optional:     true,
 						},
-						<% end -%>
 						"cluster_dns": {
 							Type:         schema.TypeString,
 							Default:      "PROVIDER_UNSPECIFIED",
@@ -3829,6 +3829,60 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 			log.Printf("[INFO] GKE cluster %s: image type has been updated to %s", d.Id(), it)
 		}
+
+		if d.HasChange("node_config.0.kubelet_config") {
+
+			defaultPool := "default-pool"
+
+			timeout := d.Timeout(schema.TimeoutCreate)
+
+			nodePoolInfo, err := extractNodePoolInformationFromCluster(d, config, clusterName)
+			if err != nil {
+				return err
+			}
+
+			// Acquire write-lock on nodepool.
+			npLockKey := nodePoolInfo.nodePoolLockKey(defaultPool)
+
+			// Note: probably long term this should be handled broadly for all the
+			// items in kubelet_config in a simpler / DRYer way.
+			// See b/361634104
+			if d.HasChange("node_config.0.kubelet_config.0.insecure_kubelet_readonly_port_enabled") {
+				it := d.Get("node_config.0.kubelet_config.0.insecure_kubelet_readonly_port_enabled").(string)
+
+				// While we're getting the value from the drepcated field in
+				// node_config.kubelet_config, the actual setting that needs to be updated
+				// is on the default nodepool.
+				req := &container.UpdateNodePoolRequest{
+					Name: defaultPool,
+					KubeletConfig: &container.NodeKubeletConfig{
+						InsecureKubeletReadonlyPortEnabled: expandInsecureKubeletReadonlyPortEnabled(it),
+						ForceSendFields:                    []string{"InsecureKubeletReadonlyPortEnabled"},
+					},
+				}
+
+				updateF := func() error {
+					clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(defaultPool), req)
+					if config.UserProjectOverride {
+						clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
+					}
+					op, err := clusterNodePoolsUpdateCall.Do()
+					if err != nil {
+						return err
+					}
+
+					// Wait until it's updated
+					return ContainerOperationWait(config, op, nodePoolInfo.project, nodePoolInfo.location,
+						"updating GKE node pool insecure_kubelet_readonly_port_enabled", userAgent, timeout)
+				}
+
+				if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
+					return err
+				}
+
+				log.Printf("[INFO] GKE cluster %s: default-pool setting for insecure_kubelet_readonly_port_enabled updated to %s", d.Id(), it)
+      }
+		}
 	}
 
 	if d.HasChange("notification_config") {
@@ -4253,6 +4307,28 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 	}
 
+	if d.HasChange("node_pool_defaults") && d.HasChange("node_pool_defaults.0.node_config_defaults.0.insecure_kubelet_readonly_port_enabled") {
+		if v, ok := d.GetOk("node_pool_defaults.0.node_config_defaults.0.insecure_kubelet_readonly_port_enabled"); ok {
+			insecureKubeletReadonlyPortEnabled := v.(string)
+			req := &container.UpdateClusterRequest{
+				Update: &container.ClusterUpdate{
+					DesiredNodeKubeletConfig: &container.NodeKubeletConfig{
+						InsecureKubeletReadonlyPortEnabled: expandInsecureKubeletReadonlyPortEnabled(insecureKubeletReadonlyPortEnabled),
+						ForceSendFields:                    []string{"InsecureKubeletReadonlyPortEnabled"},
+					},
+				},
+			}
+
+			updateF := updateFunc(req, "updating GKE cluster desired node pool insecure kubelet readonly port configuration defaults.")
+			// Call update serially.
+			if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+				return err
+			}
+
+			log.Printf("[INFO] GKE cluster %s node pool insecure_kubelet_readonly_port_enabled default has been updated", d.Id())
+		}
+	}
+
 	if d.HasChange("node_pool_defaults") && d.HasChange("node_pool_defaults.0.node_config_defaults.0.logging_variant") {
 		if v, ok := d.GetOk("node_pool_defaults.0.node_config_defaults.0.logging_variant"); ok {
 			loggingVariant := v.(string)
@@ -4326,6 +4402,24 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 			}
 			log.Printf("[INFO] GKE cluster %s containerd config has been updated to %#v", d.Id(), req.Update.DesiredContainerdConfig)
 		}
+	}
+
+	if d.HasChange("node_pool_auto_config.0.node_kubelet_config") {
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredNodePoolAutoConfigKubeletConfig: expandKubeletConfig(
+					d.Get("node_pool_auto_config.0.node_kubelet_config"),
+				),
+			},
+		}
+
+		updateF := updateFunc(req, "updating GKE cluster node pool auto config node_kubelet_config parameters")
+		// Call update serially.
+		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s node pool auto config node_kubelet_config parameters have been updated", d.Id())
 	}
 
 	if d.HasChange("node_pool_auto_config.0.network_tags.0.tags") {
@@ -5488,9 +5582,7 @@ func expandDnsConfig(configured interface{}) *container.DNSConfig {
 
 	config := l[0].(map[string]interface{})
 	return &container.DNSConfig{
-<% unless version == 'ga' -%>
 		AdditiveVpcScopeDnsDomain: 	config["additive_vpc_scope_dns_domain"].(string),
-<% end -%>
 		ClusterDns:       			config["cluster_dns"].(string),
 		ClusterDnsScope:  			config["cluster_dns_scope"].(string),
 		ClusterDnsDomain: 			config["cluster_dns_domain"].(string),
@@ -5663,6 +5755,10 @@ func expandNodePoolAutoConfig(configured interface{}) *container.NodePoolAutoCon
 
 	npac := &container.NodePoolAutoConfig{}
 	config := l[0].(map[string]interface{})
+
+	if v, ok := config["node_kubelet_config"]; ok {
+		npac.NodeKubeletConfig = expandKubeletConfig(v)
+	}
 
 	if v, ok := config["network_tags"]; ok && len(v.([]interface{})) > 0 {
 		npac.NetworkTags = expandNodePoolAutoConfigNetworkTags(v)
@@ -6390,9 +6486,7 @@ func flattenDnsConfig(c *container.DNSConfig) []map[string]interface{} {
 	}
 	return []map[string]interface{}{
 		{
-<% unless version == 'ga' -%>
 			"additive_vpc_scope_dns_domain": 	c.AdditiveVpcScopeDnsDomain,
-<% end -%>
 			"cluster_dns":        				c.ClusterDns,
 			"cluster_dns_scope":  				c.ClusterDnsScope,
 			"cluster_dns_domain": 				c.ClusterDnsDomain,
@@ -6504,6 +6598,9 @@ func flattenNodePoolAutoConfig(c *container.NodePoolAutoConfig) []map[string]int
 	}
 
 	result := make(map[string]interface{})
+	if c.NodeKubeletConfig != nil {
+		result["node_kubelet_config"] = flattenNodePoolAutoConfigNodeKubeletConfig(c.NodeKubeletConfig)
+	}
 	if c.NetworkTags != nil {
 		result["network_tags"] = flattenNodePoolAutoConfigNetworkTags(c.NetworkTags)
 	}

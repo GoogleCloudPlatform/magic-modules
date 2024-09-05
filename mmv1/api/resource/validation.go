@@ -20,10 +20,3 @@ type Validation struct {
 	Regex    string
 	Function string
 }
-
-// def validate
-// super
-
-// check :regex, type: String
-// check :function, type: String
-// end

@@ -64,6 +64,7 @@ examples:
       name: 'example_feature_online_store_beta_bigtable'
     ignore_read_extra:
       - 'force_destroy'
+    skip_vcr: true
 virtual_fields:
   - name: 'force_destroy'
     description:
@@ -102,7 +103,6 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: The labels with user-defined metadata to organize your feature online stores.
-    immutable: false
   - name: 'state'
     type: String
     description: The state of the Feature Online Store. See the possible states in [this link](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featureOnlineStores#state).

@@ -194,6 +194,12 @@ properties:
         min_version: ga
         immutable: true
         item_type: Api::Type::String
+      - !ruby/object:Api::Type::Array
+        name: includeExportRanges
+        description: IP ranges allowed to be included from peering.
+        min_version: ga
+        immutable: true
+        item_type: Api::Type::String
   - !ruby/object:Api::Type::String
     name: uniqueId
     description: Output only. The Google-generated UUID for the spoke. This value is unique across all spoke resources. If a spoke is deleted and another with the same name is created, the new spoke is assigned a different unique_id.

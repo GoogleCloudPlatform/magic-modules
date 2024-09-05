@@ -99,6 +99,36 @@ var (
 	}
 )
 
+// This checks if the project provided in subnetwork's self_link matches
+// the project provided in subnetwork_project not to produce a confusing plan diff.
+func validateSubnetworkProject(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	// separate func to allow unit testing
+	return ValidateSubnetworkProjectFunc(d)
+}
+
+func ValidateSubnetworkProjectFunc(d tpgresource.TerraformResourceDiff) error {
+	oldCount, newCount := d.GetChange("network_interface.#")
+	if oldCount.(int) != newCount.(int) {
+		return nil
+	}
+	for i := 0; i < newCount.(int); i++ {
+		prefix := fmt.Sprintf("network_interface.%d", i)
+		subnetworkProject := d.Get(prefix + ".subnetwork_project")
+		subnetwork := d.Get(prefix + ".subnetwork")
+
+		_, err := tpgresource.GetRelativePath(subnetwork.(string))
+		if err != nil {
+			log.Printf("[DEBUG] Subnetwork %q is not a selflink", subnetwork)
+			return nil
+		}
+
+		if tpgresource.GetProjectFromRegionalSelfLink(subnetwork.(string)) != subnetworkProject.(string) {
+			return fmt.Errorf("project in subnetwork's self_link %q must match subnetwork_project %q", subnetwork, subnetworkProject)
+		}
+	}
+	return nil
+}
+
 // network_interface.[d].network_ip can only change when subnet/network
 // is also changing. Validate that if network_ip is changing this scenario
 // holds up to par.
@@ -204,6 +234,13 @@ func ResourceComputeInstance() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: `The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied encryption key that protects this resource.`,
+						},
+
+						"interface": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validation.StringInSlice([]string{"SCSI", "NVME"}, false),
+							Description:  `The disk interface used for attaching this disk. One of SCSI or NVME. (This field is shared with attached_disk and only used for specific cases, please don't specify this field without advice from Google.)`,
 						},
 
 						"kms_key_self_link": {
@@ -1217,6 +1254,7 @@ be from 0 to 999,999,999 inclusive.`,
 				suppressEmptyGuestAcceleratorDiff,
 			),
 			desiredStatusDiff,
+			validateSubnetworkProject,
 			forceNewIfNetworkIPNotUpdatable,
 			tpgresource.SetLabelsDiff,
 		),
@@ -1684,6 +1722,7 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 					di["disk_encryption_key_sha256"] = key.Sha256
 				}
 			}
+			
 			// We want the disks to remain in the order we set in the config, so if a disk
 			// is present in the config, make sure it's at the correct index. Otherwise, append it.
 			if inConfig {
@@ -2723,6 +2762,10 @@ func expandAttachedDisk(diskConfig map[string]interface{}, d *schema.ResourceDat
 		disk.DeviceName = v.(string)
 	}
 
+        if v, ok := d.GetOk("boot_disk.0.interface"); ok && v != "" {
+          disk.Interface = v.(string)
+        }
+
 	keyValue, keyOk := diskConfig["disk_encryption_key_raw"]
 	if keyOk {
 		if keyValue != "" {
@@ -2924,6 +2967,10 @@ func expandBootDisk(d *schema.ResourceData, config *transport_tpg.Config, projec
 		disk.DeviceName = v.(string)
 	}
 
+	if v, ok := d.GetOk("boot_disk.0.interface"); ok {
+		disk.Interface = v.(string)
+	}
+
 	if v, ok := d.GetOk("boot_disk.0.disk_encryption_key_raw"); ok {
 		if v != "" {
 			disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{
@@ -3024,6 +3071,9 @@ func flattenBootDisk(d *schema.ResourceData, disk *compute.AttachedDisk, config 
 		// originally specified to avoid diffs.
 		"disk_encryption_key_raw": d.Get("boot_disk.0.disk_encryption_key_raw"),
 	}
+        if _,ok := d.GetOk("boot_disk.0.interface"); ok {
+               result["interface"] = disk.Interface
+        }
 
 	diskDetails, err := getDisk(disk.Source, d, config)
 	if err != nil {
