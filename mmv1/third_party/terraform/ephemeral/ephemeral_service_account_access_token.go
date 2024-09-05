@@ -10,22 +10,22 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-func GoogleEphemeralServiceAccountToken() ephemeral.EphemeralResource {
-	return &googleEphemeralServiceAccountToken{}
+func GoogleEphemeralServiceAccountAccessToken() ephemeral.EphemeralResource {
+	return &googleEphemeralServiceAccountAccessToken{}
 }
 
-type googleEphemeralServiceAccountToken struct{}
+type googleEphemeralServiceAccountAccessToken struct{}
 
-func (p *googleEphemeralServiceAccountToken) Metadata(ctx context.Context, req ephemeral.MetadataRequest, resp *ephemeral.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_service_account_access_token"
+func (p *googleEphemeralServiceAccountAccessToken) Metadata(ctx context.Context, req ephemeral.MetadataRequest, resp *ephemeral.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_service_account_access_access_token"
 }
 
-type ephemeralServiceAccountTokenModel struct {
+type ephemeralServiceAccountAccessTokenModel struct {
 	Length types.Int64  `tfsdk:"length"`
 	Result types.String `tfsdk:"result"`
 }
 
-func (p *googleEphemeralServiceAccountToken) Schema(ctx context.Context, req ephemeral.SchemaRequest, resp *ephemeral.SchemaResponse) {
+func (p *googleEphemeralServiceAccountAccessToken) Schema(ctx context.Context, req ephemeral.SchemaRequest, resp *ephemeral.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description: "Generates a test string",
 		Attributes: map[string]schema.Attribute{
@@ -45,8 +45,8 @@ func (p *googleEphemeralServiceAccountToken) Schema(ctx context.Context, req eph
 	}
 }
 
-func (p *googleEphemeralServiceAccountToken) Open(ctx context.Context, req ephemeral.OpenRequest, resp *ephemeral.OpenResponse) {
-	var data ephemeralServiceAccountTokenModel
+func (p *googleEphemeralServiceAccountAccessToken) Open(ctx context.Context, req ephemeral.OpenRequest, resp *ephemeral.OpenResponse) {
+	var data ephemeralServiceAccountAccessTokenModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
