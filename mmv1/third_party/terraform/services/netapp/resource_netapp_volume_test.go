@@ -699,5 +699,5 @@ resource "google_netapp_volume" "test_volume" {
 data "google_compute_network" "default" {
     name = "%{network_name}"
 }
-	  `, context)
+`, context)
 }
