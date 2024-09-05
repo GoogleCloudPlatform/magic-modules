@@ -101,7 +101,7 @@ var vcrCassetteUpdateCmd = &cobra.Command{
 }
 
 func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.Controller, vt *vcr.Tester) error {
-	// TODO: temp disable to trigger replaying test failure
+	// TODO: temporary disable fetch cassettes to cause replay failure
 	// if err := vt.FetchCassettes(provider.Beta, "main", ""); err != nil {
 	// 	return fmt.Errorf("error fetching cassettes: %w", err)
 	// }
@@ -126,8 +126,7 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 	vt.SetRepoPath(provider.Beta, providerRepo.Path)
 
 	fmt.Println("running tests in REPLAYING mode now")
-	// TODO: running only the compute service
-	replayingResult, replayingErr := vt.Run(vcr.Replaying, provider.Beta, []string{"github.com/hashicorp/terraform-provider-google-beta/google-beta/services/compute"})
+	replayingResult, replayingErr := vt.Run(vcr.Replaying, provider.Beta, nil)
 
 	testLogPath := vt.LogPath(vcr.Replaying, provider.Beta)
 	if _, err := uploadLogsToGCS(filepath.Join(testLogPath, "*"), bucketPrefix+"/logs/build-log/", rnr); err != nil {
