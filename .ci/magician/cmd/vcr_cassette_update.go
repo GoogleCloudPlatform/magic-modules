@@ -129,15 +129,15 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 	// TODO: running only the compute service
 	replayingResult, replayingErr := vt.Run(vcr.Replaying, provider.Beta, []string{"github.com/hashicorp/terraform-provider-google-beta/google-beta/services/compute"})
 
+	testLogPath := vt.LogPath(vcr.Replaying, provider.Beta)
+	if _, err := uploadLogsToGCS(filepath.Join(testLogPath, "*"), bucketPrefix+"/logs/build-log/", rnr); err != nil {
+		return fmt.Errorf("error uploading replaying build log: %w", err)
+	}
+
 	// upload replay build and test logs
 	buildLogPath := filepath.Join(rnr.GetCWD(), "testlogs", fmt.Sprintf("%s_test.log", vcr.Replaying.Lower()))
 	if _, err := uploadLogsToGCS(buildLogPath, bucketPrefix+"/logs/replaying/", rnr); err != nil {
 		return fmt.Errorf("error uploading replaying test log: %w", err)
-	}
-
-	testLogPath := vt.LogPath(vcr.Replaying, provider.Beta)
-	if _, err := uploadLogsToGCS(filepath.Join(testLogPath, "*"), bucketPrefix+"/logs/build-log/", rnr); err != nil {
-		return fmt.Errorf("error uploading replaying build log: %w", err)
 	}
 
 	replayingData := vcrCassetteUpdateReplayingResult{
