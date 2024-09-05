@@ -349,6 +349,9 @@ func (r *Resource) SetDefault(product *Product) {
 	for _, property := range r.AllProperties() {
 		property.SetDefault(r)
 	}
+	if r.IamPolicy != nil && r.IamPolicy.MinVersion == "" {
+		r.IamPolicy.MinVersion = r.MinVersion
+	}
 }
 
 func (r *Resource) Validate() {
@@ -428,6 +431,12 @@ func (r *Resource) Validate() {
 // def all_properties
 func (r Resource) AllProperties() []*Type {
 	return google.Concat(r.Properties, r.Parameters)
+}
+
+func (r Resource) AllPropertiesInVersion() []*Type {
+	return google.Reject(google.Concat(r.Properties, r.Parameters), func(p *Type) bool {
+		return p.Exclude
+	})
 }
 
 // def properties_with_excluded
@@ -960,7 +969,7 @@ func (r Resource) Updatable() bool {
 	if !r.Immutable {
 		return true
 	}
-	for _, p := range r.AllProperties() {
+	for _, p := range r.AllPropertiesInVersion() {
 		if p.UpdateUrl != "" {
 			return true
 		}
