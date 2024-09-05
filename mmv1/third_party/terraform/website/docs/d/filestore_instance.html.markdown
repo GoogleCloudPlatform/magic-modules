@@ -35,8 +35,7 @@ To create an instance with a tag
 resource "filestore_instnace" "my_instance" {
   name       = "My instance"
   instance_id = "your-instance-id"
-  org_id     = "1234567"
-  tags = {"1234567/env":"staging"}
+  tags = {"tagKeys/281478409127147" : "tagValues/281479442205542"}
 }
 ```
 
