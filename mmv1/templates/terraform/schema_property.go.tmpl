@@ -14,7 +14,7 @@
 */}}
 {{- define "SchemaFields"}}
 {{- if .FlattenObject -}}
-	{{- range $prop := .ResourceMetadata.OrderProperties .Properties -}}
+	{{- range $prop := .ResourceMetadata.OrderProperties .UserProperties -}}
     {{ template "SchemaFields" $prop }}
 	{{ end -}}
 {{- else -}}
@@ -76,7 +76,7 @@ Default value: {{ .ItemType.DefaultValue -}}
   {{ end -}}
   Elem: &schema.Resource{
     Schema: map[string]*schema.Schema{
-      {{- range $prop := .ResourceMetadata.OrderProperties $.Properties }}
+      {{- range $prop := .ResourceMetadata.OrderProperties $.UserProperties }}
       {{template "SchemaFields" $prop}}
       {{- end }}
     },
@@ -94,7 +94,7 @@ Default value: {{ .ItemType.DefaultValue -}}
     {{ else -}}
       Elem: &schema.Resource{
         Schema: map[string]*schema.Schema{
-            {{- range $prop := .ResourceMetadata.OrderProperties $.ItemType.Properties }}
+            {{- range $prop := .ResourceMetadata.OrderProperties $.ItemType.UserProperties }}
             {{template "SchemaFields" $prop}}
             {{- end }}
         },
@@ -149,7 +149,7 @@ Default value: {{ .ItemType.DefaultValue -}}
 				ForceNew: true,
 				{{ end -}}
 			},
-      {{- range $prop := .ResourceMetadata.OrderProperties $.ValueType.Properties }}
+      {{- range $prop := .ResourceMetadata.OrderProperties $.ValueType.UserProperties }}
         {{template "SchemaFields" $prop}}
       {{- end }}
 		},
