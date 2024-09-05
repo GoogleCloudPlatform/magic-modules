@@ -1,7 +1,8 @@
 package provider
 
 import (
-	"crypto/sha256"
+	"crypto/sha1"
+	"encoding/base64"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -154,10 +155,10 @@ func dataSourceClientConfigRead(d *schema.ResourceData, meta interface{}) error 
 
 	// Id is a hash of the total transport.Config struct
 	configString := []byte(fmt.Sprintf("%#v", config))
-	h := sha256.New()
-	h.Write([]byte(configString))
-	id := h.Sum(nil)
-	d.SetId(string(id))
+	hasher := sha1.New()
+	hasher.Write(configString)
+	sha := base64.URLEncoding.EncodeToString(hasher.Sum(nil))
+	d.SetId(string(sha))
 
 	return nil
 }
