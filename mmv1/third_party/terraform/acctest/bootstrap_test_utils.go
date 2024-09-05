@@ -1113,7 +1113,7 @@ func BootstrapComputeStoragePool(t *testing.T, storagePoolName, storagePoolType 
 	projectID := envvar.GetTestProjectFromEnv()
 	zone := envvar.GetTestZoneFromEnv()
 
-	storagePoolName = SharedStoragePoolPrefix + storagePoolName
+	storagePoolName = SharedStoragePoolPrefix + storagePoolType + "-" + storagePoolName
 
 	config := BootstrapConfig(t)
 	if config == nil {

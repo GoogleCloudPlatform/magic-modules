@@ -10204,7 +10204,7 @@ func TestAccComputeInstance_bootDisk_storagePoolSpecified(t *testing.T) {
 	t.Parallel()
 
 	instanceName := fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10))
-	storagePoolNameLong := acctest.BootstrapComputeStoragePool(t, "hyperdisk-balanced", "hyperdisk-balanced")
+	storagePoolNameLong := acctest.BootstrapComputeStoragePool(t, "basic-1", "hyperdisk-balanced")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
