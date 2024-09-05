@@ -20,7 +20,7 @@ import (
 
 var wg sync.WaitGroup
 
-// TODO Q2: additional flags
+// TODO rewrite: additional flags
 
 // Example usage: --output $GOPATH/src/github.com/terraform-providers/terraform-provider-google-beta
 var outputPath = flag.String("output", "", "path to output generated files to")
@@ -86,7 +86,7 @@ func main() {
 		dir := filepath.Dir(filePath)
 		allProductFiles = append(allProductFiles, fmt.Sprintf("products/%s", filepath.Base(dir)))
 	}
-	// TODO Q2: override directory
+	// TODO rewrite: override directory
 
 	if allProducts {
 		productsToGenerate = allProductFiles
@@ -140,7 +140,7 @@ func main() {
 	if generateCode {
 		providerToGenerate.CompileCommonFiles(*outputPath, productsForVersion, "")
 
-		// TODO Q2: product overrides
+		// TODO rewrite: product overrides
 	}
 }
 
@@ -151,13 +151,13 @@ func GenerateProduct(productChannel chan string, providerToGenerate *provider.Te
 
 	productYamlPath := path.Join(productName, "go_product.yaml")
 
-	// TODO Q2: uncomment the error check that if the product.yaml exists for each product
+	// TODO rewrite: uncomment the error check that if the product.yaml exists for each product
 	// after Go-converted product.yaml files are complete for all products
 	// if _, err := os.Stat(productYamlPath); errors.Is(err, os.ErrNotExist) {
 	// 	log.Fatalf("%s does not contain a product.yaml file", productName)
 	// }
 
-	// TODO Q2: product overrides
+	// TODO rewrite: product overrides
 
 	if _, err := os.Stat(productYamlPath); err == nil {
 		var resources []*api.Resource = make([]*api.Resource, 0)
@@ -194,7 +194,7 @@ func GenerateProduct(productChannel chan string, providerToGenerate *provider.Te
 			resources = append(resources, resource)
 		}
 
-		// TODO Q2: override resources
+		// TODO rewrite: override resources
 
 		// Sort resources by name
 		sort.Slice(resources, func(i, j int) bool {
@@ -204,7 +204,7 @@ func GenerateProduct(productChannel chan string, providerToGenerate *provider.Te
 		productApi.Objects = resources
 		productApi.Validate()
 
-		// TODO Q2: set other providers via flag
+		// TODO rewrite: set other providers via flag
 		providerToGenerate = provider.NewTerraform(productApi, *version, startTime)
 
 		*productsForVersion = append(*productsForVersion, productApi)

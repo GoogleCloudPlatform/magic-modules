@@ -15,7 +15,6 @@ package resource
 
 // Support for schema ValidateFunc functionality.
 type Validation struct {
-	//Google::YamlValidator
 	// Ensures the value matches this regex
 	Regex    string
 	Function string
