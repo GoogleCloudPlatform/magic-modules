@@ -74,7 +74,5 @@ availableSecrets:
   secretManager:
     - versionName: projects/673497134629/secrets/github-magician-token-generate-diffs-magic-modules/versions/latest
       env: GITHUB_TOKEN_MAGIC_MODULES
-    - versionName: projects/673497134629/secrets/ci-trigger-generate-diffs/versions/latest
-      env: GENERATE_DIFFS_TRIGGER
     - versionName: projects/673497134629/secrets/ci-trigger-downstream-generation-and-test/versions/latest
       env: DOWNSTREAM_GENERATION_AND_TEST_TRIGGER
