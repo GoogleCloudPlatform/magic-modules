@@ -1,7 +1,3 @@
-resource "random_id" "group-manager-suffix" {
-  byte_length = 4
-}
-
 resource "google_compute_network" "net" {
   name = "<%= ctx[:vars]['network_name'] %>"
 }
@@ -21,7 +17,7 @@ resource "google_compute_router" "router" {
 
 resource "google_compute_address" "address" {
   count  = 3
-  name   = "<%= ctx[:vars]['address_name'] %>-${count.index}-${random_id.group-manager-suffix.hex}"
+  name   = "<%= ctx[:vars]['address_name'] %>-${count.index}"
   region = google_compute_subnetwork.subnet.region
 
   lifecycle {

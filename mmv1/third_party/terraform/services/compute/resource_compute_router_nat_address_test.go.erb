@@ -54,9 +54,6 @@ func TestAccComputeRouterNatAddress_withAddressCountDecrease(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
-		},
 		CheckDestroy:             testAccCheckComputeRouterNatAddressDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -179,10 +176,6 @@ func TestAccComputeRouterNatAddress_withNatIpsAndDrainNatIps(t *testing.T) {
 
 func testAccComputeRouterNatAddress_withAddressCount(routerName, routerCount string) string {
 	return fmt.Sprintf(`
-resource "random_id" "group-manager-suffix" {
-  byte_length = 4
-}
-
 resource "google_compute_network" "foobar" {
   name = "%s-net"
 }
@@ -202,7 +195,7 @@ resource "google_compute_router" "foobar" {
 
 resource "google_compute_address" "foobar" {
   count = %s
-  name = "%s-address-${count.index}-${random_id.group-manager-suffix.hex}"
+  name = "%s-address-${count.index}"
   region = google_compute_subnetwork.foobar.region
 
   lifecycle {

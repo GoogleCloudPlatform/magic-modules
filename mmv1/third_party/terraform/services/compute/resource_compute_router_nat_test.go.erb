@@ -709,9 +709,6 @@ func TestAccComputeRouterNat_withAddressCountDecrease(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
-		},
 		CheckDestroy:             testAccCheckComputeRouterNatDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1977,10 +1974,6 @@ resource "google_compute_router_nat" "foobar" {
 
 func testAccComputeRouterNat_withAddressCountDecrease(routerName, routerCount string) string {
 	return fmt.Sprintf(`
-resource "random_id" "group-manager-suffix" {
-  byte_length = 4
-}
-
 resource "google_compute_network" "foobar" {
   name = "%s-net"
 }
@@ -2000,7 +1993,7 @@ resource "google_compute_router" "foobar" {
 
 resource "google_compute_address" "foobar" {
   count = %s
-	name = "%s-address-${count.index}-${random_id.group-manager-suffix.hex}"
+	name = "%s-address-${count.index}"
 
 	lifecycle {
     create_before_destroy = true
