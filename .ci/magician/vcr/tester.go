@@ -50,10 +50,10 @@ type logKey struct {
 type Tester struct {
 	env            map[string]string           // shared environment variables for running tests
 	rnr            ExecRunner                  // for running commands and manipulating files
-	logBucket      string                      // GCS bucket name to store logs
-	cassetteBucket string                      // GCS bucket name to store cassettes
 	baseDir        string                      // the directory in which this tester was created
 	saKeyPath      string                      // where sa_key.json is relative to baseDir
+	logBucket      string                      // gcs bucket to store logs
+	cassetteBucket string                      // gcs bucket to store cassettes
 	cassettePaths  map[provider.Version]string // where cassettes are relative to baseDir by version
 	logPaths       map[logKey]string           // where logs are relative to baseDir by version and mode
 	repoPaths      map[provider.Version]string // relative paths of already cloned repos by version
@@ -115,10 +115,10 @@ func NewTester(env map[string]string, logBucket, cassetteBucket string, rnr Exec
 	return &Tester{
 		env:            env,
 		rnr:            rnr,
-		logBucket:      logBucket,
-		cassetteBucket: cassetteBucket,
 		baseDir:        rnr.GetCWD(),
 		saKeyPath:      saKeyPath,
+		logBucket:      logBucket,
+		cassetteBucket: cassetteBucket,
 		cassettePaths:  make(map[provider.Version]string, provider.NumVersions),
 		logPaths:       make(map[logKey]string, provider.NumVersions*numModes),
 		repoPaths:      make(map[provider.Version]string, provider.NumVersions),
@@ -153,7 +153,7 @@ func (vt *Tester) FetchCassettes(version provider.Version, baseBranch, head stri
 		}
 	}
 	if head != "" {
-		bucketPath := fmt.Sprintf("gs://ci-vcr-cassettes/%srefs/heads/%s/fixtures/*", version.BucketPath(), head)
+		bucketPath := fmt.Sprintf("gs://%s/%srefs/heads/%s/fixtures/*", vt.cassetteBucket, version.BucketPath(), head)
 		if err := vt.fetchBucketPath(bucketPath, cassettePath); err != nil {
 			fetchError = fmt.Errorf("error fetching bucket path %s: %v", bucketPath, err)
 		}
@@ -439,9 +439,8 @@ func (vt *Tester) getLogPath(mode Mode, version provider.Version) (string, error
 	return logPath, nil
 }
 
-// UploadLogsOptions defines options for uploading logs.
 type UploadLogsOptions struct {
-	PRNumber       string
+	Head           string
 	BuildID        string
 	Parallel       bool
 	AfterRecording bool
@@ -449,11 +448,10 @@ type UploadLogsOptions struct {
 	Version        provider.Version
 }
 
-// UploadLogs uploads logs to Google Cloud Storage.
 func (vt *Tester) UploadLogs(opts UploadLogsOptions) error {
 	bucketPath := fmt.Sprintf("gs://%s/%s/", vt.logBucket, opts.Version)
-	if opts.PRNumber != "" {
-		bucketPath += fmt.Sprintf("refs/heads/auto-pr-%s/", opts.PRNumber)
+	if opts.Head != "" {
+		bucketPath += fmt.Sprintf("refs/heads/%s/", opts.Head)
 	}
 	if opts.BuildID != "" {
 		bucketPath += fmt.Sprintf("artifacts/%s/", opts.BuildID)
@@ -514,7 +512,7 @@ func (vt *Tester) UploadLogs(opts UploadLogsOptions) error {
 	return nil
 }
 
-func (vt *Tester) UploadCassettes(prNumber string, version provider.Version) error {
+func (vt *Tester) UploadCassettes(head string, version provider.Version) error {
 	cassettePath, ok := vt.cassettePaths[version]
 	if !ok {
 		return fmt.Errorf("no cassettes found for version %s", version)
@@ -524,7 +522,7 @@ func (vt *Tester) UploadCassettes(prNumber string, version provider.Version) err
 		"-q",
 		"cp",
 		filepath.Join(cassettePath, "*"),
-		fmt.Sprintf("gs://%s/%s/refs/heads/auto-pr-%s/fixtures/", vt.cassetteBucket, version, prNumber),
+		fmt.Sprintf("gs://%s/%s/refs/heads/%s/fixtures/", vt.cassetteBucket, version, head),
 	}
 	fmt.Println("Uploading cassettes:\n", "gsutil", strings.Join(args, " "))
 	if _, err := vt.rnr.Run("gsutil", args, nil); err != nil {

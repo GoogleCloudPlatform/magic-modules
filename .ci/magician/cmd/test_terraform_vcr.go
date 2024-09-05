@@ -201,10 +201,12 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 	}
 
 	if err := vt.UploadLogs(vcr.UploadLogsOptions{
-		PRNumber: prNumber,
-		BuildID:  buildID,
-		Mode:     vcr.Replaying,
-		Version:  provider.Beta,
+		Head:           head,
+		BuildID:        buildID,
+		AfterRecording: false,
+		Parallel:       false,
+		Mode:           vcr.Replaying,
+		Version:        provider.Beta,
 	}); err != nil {
 		return fmt.Errorf("error uploading replaying logs: %w", err)
 	}
@@ -271,11 +273,12 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		}
 
 		if err := vt.UploadLogs(vcr.UploadLogsOptions{
-			PRNumber: prNumber,
-			BuildID:  buildID,
-			Parallel: true,
-			Mode:     vcr.Recording,
-			Version:  provider.Beta,
+			Head:           head,
+			BuildID:        buildID,
+			AfterRecording: true,
+			Parallel:       false,
+			Mode:           vcr.Recording,
+			Version:        provider.Beta,
 		}); err != nil {
 			return fmt.Errorf("error uploading recording logs: %w", err)
 		}
@@ -300,10 +303,10 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 			}
 
 			if err := vt.UploadLogs(vcr.UploadLogsOptions{
-				PRNumber:       prNumber,
+				Head:           head,
 				BuildID:        buildID,
-				Parallel:       true,
 				AfterRecording: true,
+				Parallel:       true,
 				Mode:           vcr.Replaying,
 				Version:        provider.Beta,
 			}); err != nil {
