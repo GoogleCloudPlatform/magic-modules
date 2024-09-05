@@ -97,6 +97,8 @@ properties:
     description: |
       The config for triggering streaming-based notifications.
     required: true
+    send_empty_value: true
+    allow_empty_object: true
     update_mask_fields:
       - 'streamingConfig.filter'
     properties:
@@ -129,3 +131,4 @@ properties:
           [Filtering notifications](https://cloud.google.com/security-command-center/docs/how-to-api-filter-notifications)
           for information on how to write a filter.
         required: true
+        send_empty_value: true

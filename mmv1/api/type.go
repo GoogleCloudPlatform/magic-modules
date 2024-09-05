@@ -1422,7 +1422,7 @@ func (t *Type) GetPropertySchemaPath(schemaPath string) string {
 		}
 
 		if index == -1 {
-			continue
+			return ""
 		}
 
 		prop := nestedProps[index]
