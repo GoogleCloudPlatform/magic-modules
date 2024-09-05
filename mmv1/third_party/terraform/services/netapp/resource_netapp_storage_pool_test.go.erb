@@ -260,4 +260,28 @@ data "google_compute_network" "default" {
 `, context)
 }
 
+func testAccNetappstoragePool_FlexRegionalStoragePoolCreateExample_autoTieredPool(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_netapp_storage_pool" "test_pool" {
+  provider = google-beta
+  name = "tf-test-pool%{random_suffix}"
+  location = "us-central1"
+  service_level = "PREMIUM"
+  capacity_gib = "4096"
+  network = data.google_compute_network.default.id
+  allow_auto_tiering = true
+}
+
+resource "time_sleep" "wait_5_minutes" {
+    depends_on = [google_netapp_storage_pool.test_pool]
+    destroy_duration = "5m"
+}
+
+data "google_compute_network" "default" {
+    provider = google-beta
+    name = "%{network_name}"
+}
+`, context)
+}
+
 <% end -%>
