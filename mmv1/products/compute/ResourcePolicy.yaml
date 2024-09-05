@@ -48,6 +48,12 @@ examples:
     vars:
       name: 'gce-policy'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'resource_policy_hourly_format'
+    primary_resource_id: 'foo'
+    skip_docs: true
+    vars:
+      name: 'gce-policy'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'resource_policy_full'
     primary_resource_id: 'bar'
     vars:
@@ -78,6 +84,8 @@ examples:
     primary_resource_id: 'cgroup'
     vars:
       name: 'gce-policy'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/compute_resource_policy.go.erb
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: region
@@ -143,6 +151,7 @@ properties:
                 required: true
                 validation: !ruby/object:Provider::Terraform::Validation
                   function: 'verify.ValidateHourlyOnly'
+                diff_suppress_func: 'HourlyFormatSuppressDiff'
           - !ruby/object:Api::Type::NestedObject
             name: 'dailySchedule'
             description: |
@@ -166,6 +175,7 @@ properties:
                 required: true
                 validation: !ruby/object:Provider::Terraform::Validation
                   function: 'verify.ValidateHourlyOnly'
+                diff_suppress_func: 'HourlyFormatSuppressDiff'
           - !ruby/object:Api::Type::NestedObject
             name: 'weeklySchedule'
             description: |

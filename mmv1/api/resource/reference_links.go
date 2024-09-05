@@ -13,14 +13,8 @@
 
 package resource
 
-import (
-	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-)
-
 // Represents a list of documentation links.
 type ReferenceLinks struct {
-	google.YamlValidator
-
 	// guides containing
 	// name: The title of the link
 	// value: The URL to navigate on click
@@ -33,7 +27,3 @@ type ReferenceLinks struct {
 	//attr_reader
 	Api string
 }
-
-// func (l *ReferenceLinks) validate() {
-
-// }

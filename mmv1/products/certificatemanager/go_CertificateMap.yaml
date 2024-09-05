@@ -81,7 +81,6 @@ properties:
     type: KeyValueLabels
     description: |
       Set of labels associated with a Certificate Map resource.
-    immutable: false
   - name: 'gclbTargets'
     type: Array
     description: |

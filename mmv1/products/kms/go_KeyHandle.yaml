@@ -60,6 +60,7 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     external_providers: ["random", "time"]
+    skip_vcr: true
 parameters:
   - name: 'location'
     type: String
@@ -89,7 +90,7 @@ properties:
     type: String
     description: |
       Selector of the resource type where we want to protect resources.
-      For example, `storage.googleapis.com/Bucket OR compute.googleapis.com/*`
+      For example, `storage.googleapis.com/Bucket`.
     min_version: 'beta'
     required: true
     immutable: true

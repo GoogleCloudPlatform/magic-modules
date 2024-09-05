@@ -62,7 +62,8 @@ aliases:
     make testacc TEST=./google/services/container TESTARGS='-run=TestAccContainerNodePool'
     ```
 
-
+> [!NOTE]
+> Acceptance tests create actual infrastructure which can incur costs. Acceptance tests may not clean up after themselves if interrupted, so you may want to check for stray resources and / or billing charges.
 
 1. Optional: Save verbose test output (including API requests and responses) to a file for analysis.
 
@@ -89,14 +90,13 @@ aliases:
     make lint
     ```
 
-
 1. Run acceptance tests for only modified resources. (Full test runs can take over 9 hours.) See [Go's documentation](https://pkg.go.dev/cmd/go#hdr-Testing_flags) for more information about `-run` and other flags.
 
     ```bash
     make testacc TEST=./google-beta/services/container TESTARGS='-run=TestAccContainerNodePool'
     ```
-
-
+> [!NOTE]
+> Acceptance tests create actual infrastructure which can incur costs. Acceptance tests may not clean up after themselves if interrupted, so you may want to check for stray resources and / or billing charges.
 
 1. Optional: Save verbose test output to a file for analysis.
 
@@ -238,7 +238,6 @@ Configure Terraform to use locally-built binaries for `google` and `google-beta`
 
 ### Run manual tests
 
-
 1. [Generate the provider(s) you want to test]({{< ref "/get-started/generate-providers" >}})
 2. Build the provider(s) you want to test
 
@@ -290,7 +289,6 @@ Configure Terraform to use locally-built binaries for `google` and `google-beta`
 To stop using developer overrides, stop setting `TF_CLI_CONFIG_FILE` in the commands you are executing.
 
 Terraform will resume its normal behaviour of pulling published provider versions from the public Registry. Any version constraints in your Terraform configuration will come back into effect. Also, you may need to run `terraform init` to download the required version of the provider into your project directory if you haven't already.
-
 
 ## What's next?
 - [Create a pull request]({{< ref "/contribute/create-pr" >}})

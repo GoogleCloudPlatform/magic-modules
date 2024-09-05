@@ -46,13 +46,13 @@ var (
 )
 
 type vcrCassetteUpdateReplayingResult struct {
-	ReplayingResult    *vcr.Result
+	ReplayingResult    vcr.Result
 	ReplayingErr       error
 	AllReplayingPassed bool
 }
 
 type vcrCassetteUpdateRecordingResult struct {
-	RecordingResult    *vcr.Result
+	RecordingResult    vcr.Result
 	HasTerminatedTests bool
 	RecordingErr       error
 	AllRecordingPassed bool
@@ -125,7 +125,10 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 	vt.SetRepoPath(provider.Beta, providerRepo.Path)
 
 	fmt.Println("running tests in REPLAYING mode now")
-	replayingResult, replayingErr := vt.Run(vcr.Replaying, provider.Beta, nil)
+	replayingResult, replayingErr := vt.Run(vcr.RunOptions{
+		Mode:    vcr.Replaying,
+		Version: provider.Beta,
+	})
 
 	// upload replay build and test logs
 	buildLogPath := filepath.Join(rnr.GetCWD(), "testlogs", fmt.Sprintf("%s_test.log", vcr.Replaying.Lower()))
@@ -156,7 +159,11 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 	if len(replayingResult.FailedTests) != 0 {
 		fmt.Println("running tests in RECORDING mode now")
 
-		recordingResult, recordingErr := vt.RunParallel(vcr.Recording, provider.Beta, nil, replayingResult.FailedTests)
+		recordingResult, recordingErr := vt.RunParallel(vcr.RunOptions{
+			Mode:    vcr.Recording,
+			Version: provider.Beta,
+			Tests:   replayingResult.FailedTests,
+		})
 
 		// upload build and test logs first to preserve debugging logs in case
 		// uploading cassettes failed because recording not work

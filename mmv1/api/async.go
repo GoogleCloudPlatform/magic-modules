@@ -14,11 +14,11 @@
 package api
 
 import (
+	"log"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"golang.org/x/exp/slices"
-	"gopkg.in/yaml.v3"
 )
 
 // Base class from which other Async classes can inherit.
@@ -39,13 +39,6 @@ type Async struct {
 
 	PollAsync `yaml:",inline"`
 }
-
-// def validate
-//   super
-
-//   check :operation, type: Operation
-//   check :actions, default: %w[create delete update], type: ::Array, item_type: ::String
-// end
 
 // def allow?(method)
 func (a Async) Allow(method string) bool {
@@ -80,11 +73,6 @@ func NewAsync() *Async {
 	return oa
 }
 
-// def validate
-//   super
-//   check :resource_inside_response, type: :boolean, default: false
-// end
-
 // Represents an asynchronous operation definition
 type OpAsync struct {
 	Result OpAsyncResult
@@ -104,17 +92,6 @@ type OpAsync struct {
 //   @result = result
 //   @status = status
 //   @error = error
-// end
-
-// def validate
-//   super
-
-//   check :operation, type: Operation, required: true
-//   check :result, type: Result, default: Result.new
-//   check :status, type: Status
-//   check :error, type: Error
-//   check :actions, default: %w[create delete update], type: ::Array, item_type: ::String
-//   check :include_project, type: :boolean, default: false
 // end
 
 type OpAsyncOperation struct {
@@ -156,12 +133,6 @@ type OpAsyncResult struct {
 //   @resource_inside_response = resource_inside_response
 // end
 
-// def validate
-//   super
-
-//   check :path, type: String
-// end
-
 // Provides information to parse the result response to check operation
 // status
 type OpAsyncStatus struct {
@@ -181,12 +152,6 @@ type OpAsyncStatus struct {
 //   @allowed = allowed
 // end
 
-// def validate
-//   super
-//   check :path, type: String
-//   check :allowed, type: Array, item_type: [::String, :boolean]
-// end
-
 // Provides information on how to retrieve errors of the executed operations
 type OpAsyncError struct {
 	google.YamlValidator
@@ -200,12 +165,6 @@ type OpAsyncError struct {
 //   super()
 //   @path = path
 //   @message = message
-// end
-
-// def validate
-//   super
-//   check :path, type: String
-//   check :message, type: String
 // end
 
 // Async implementation for polling in Terraform
@@ -233,12 +192,12 @@ type PollAsync struct {
 	TargetOccurrences int `yaml:"target_occurrences"`
 }
 
-func (a *Async) UnmarshalYAML(n *yaml.Node) error {
+func (a *Async) UnmarshalYAML(unmarshal func(any) error) error {
 	a.Actions = []string{"create", "delete", "update"}
 	type asyncAlias Async
 	aliasObj := (*asyncAlias)(a)
 
-	err := n.Decode(&aliasObj)
+	err := unmarshal(aliasObj)
 	if err != nil {
 		return err
 	}
@@ -250,16 +209,14 @@ func (a *Async) UnmarshalYAML(n *yaml.Node) error {
 	return nil
 }
 
-// 	return nil
-// }
-
-//   def validate
-// 	super
-
-// 	check :check_response_func_existence, type: String, required: true
-// 	check :check_response_func_absence, type: String,
-// 										default: 'transport_tpg.PollCheckForAbsence'
-// 	check :custom_poll_read, type: String
-// 	check :suppress_error, type: :boolean, default: false
-// 	check :target_occurrences, type: Integer, default: 1
-//   end
+func (a *Async) Validate() {
+	if a.Type == "OpAsync" {
+		if a.Operation == nil {
+			log.Fatalf("Missing `Operation` for OpAsync")
+		} else {
+			if a.Operation.BaseUrl != "" && a.Operation.FullUrl != "" {
+				log.Fatalf("`base_url` and `full_url` cannot be set at the same time in OpAsync operation.")
+			}
+		}
+	}
+}

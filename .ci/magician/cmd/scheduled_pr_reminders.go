@@ -189,7 +189,7 @@ func execScheduledPrReminders(gh *github.Client) error {
 					},
 				)
 				if err != nil {
-					return fmt.Errorf("Error posting comment to PR %d: %w", *pr.Number, err)
+					return fmt.Errorf("error posting comment to PR %d: %w", *pr.Number, err)
 				}
 			}
 		}
@@ -208,7 +208,7 @@ func execScheduledPrReminders(gh *github.Client) error {
 					},
 				)
 				if err != nil {
-					return fmt.Errorf("Error closing PR %d: %w", *pr.Number, err)
+					return fmt.Errorf("error closing PR %d: %w", *pr.Number, err)
 				}
 			}
 		}

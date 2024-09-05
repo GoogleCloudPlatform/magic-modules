@@ -11,7 +11,8 @@
             "data": {
                 "fleetDefaultMemberConfig": null,
                 "labels": {
-                    "foo": "bar"
+                    "foo": "bar",
+                    "goog-terraform-provisioned": "true"
                 }
             }
         },

@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: 'backup'
+name: 'Backup'
 description: |
   NetApp Volumes supports volume backups, which are copies of your volumes
   stored independently from the volume. Backups are stored in backup vaults,

@@ -105,7 +105,6 @@ properties:
     type: KeyValueLabels
     description: |
       A set of key/value label pairs to assign to the feature.
-    immutable: false
   - name: 'description'
     type: String
     description: Description of the feature.

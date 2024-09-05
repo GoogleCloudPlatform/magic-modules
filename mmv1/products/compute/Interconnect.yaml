@@ -372,16 +372,18 @@ properties:
   - !ruby/object:Api::Type::Array
     name: 'requestedFeatures'
     description: |
-      interconnects.list of features requested for this Interconnect connection. Options: MACSEC (
+      interconnects.list of features requested for this Interconnect connection. Options: IF_MACSEC (
       If specified then the connection is created on MACsec capable hardware ports. If not
       specified, the default value is false, which allocates non-MACsec capable ports first if
-      available).
+      available). Note that MACSEC is still technically allowed for compatibility reasons, but it
+      does not work with the API, and will be removed in an upcoming major version.
     item_type: !ruby/object:Api::Type::Enum
       name: 'requestedFeatures'
       description: |
         interconnects.list of features requested for this Interconnect connection
       values:
         - :MACSEC
+        - :IF_MACSEC
   - !ruby/object:Api::Type::Array
     name: 'availableFeatures'
     description: |
@@ -390,9 +392,4 @@ properties:
       ports. If not present then the Interconnect connection is provisioned on non-MACsec capable
       ports and MACsec isn't supported and enabling MACsec fails).
     output: true
-    item_type: !ruby/object:Api::Type::Enum
-      name: 'availableFeatures'
-      description: |
-        interconnects.list of features available for this Interconnect connection,
-      values:
-        - :MACSEC
+    item_type: Api::Type::String
