@@ -42,8 +42,9 @@ resource "google_alloydb_cluster" "restored_from_backup" {
 resource "google_alloydb_cluster" "restored_via_pitr" {
   cluster_id             = "{{index $.Vars "alloydb_pitr_restored_cluster_name"}}"
   location               = "us-central1"
-  network                = data.google_compute_network.default.id
-
+  network_config {
+    network = data.google_compute_network.default.id
+  }
   restore_continuous_backup_source {
     cluster = google_alloydb_cluster.{{$.PrimaryResourceId}}.name
     point_in_time = "2023-08-03T19:19:00.094Z"

@@ -137,7 +137,8 @@ virtual_fields:
   - name: 'desired_state'
     description: |
       Desired state of the CertificateAuthority. Set this field to `STAGED` to create a `STAGED` root CA.
-    type: Enum
+      Possible values: ENABLED, DISABLED, STAGED.
+    type: String
 parameters:
 properties:
   - name: 'pem_ca_certificate'
@@ -782,4 +783,3 @@ properties:
 
       An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass":
       "1.3kg", "count": "3" }.
-    immutable: false

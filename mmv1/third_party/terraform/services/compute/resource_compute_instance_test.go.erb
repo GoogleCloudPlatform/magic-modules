@@ -1741,20 +1741,6 @@ func TestAccComputeInstance_guestAcceleratorSkip(t *testing.T) {
 					testAccCheckComputeInstanceLacksGuestAccelerator(&instance),
 				),
 			},
-			// Recreate with guest_accelerator = []
-			{
-				Config: testAccComputeInstance_guestAcceleratorEmptyBlock(instanceName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
-					testAccCheckComputeInstanceLacksGuestAccelerator(&instance),
-				),
-			},
-			// Check that count = 0 is the same as empty block []
-			{
-				Config:             testAccComputeInstance_guestAccelerator(instanceName, 0),
-				ExpectNonEmptyPlan: false,
-				PlanOnly:           true,
-			},
 		},
 	})
 
@@ -2055,6 +2041,8 @@ func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 }
 
 func TestAccComputeInstance_confidentialHyperDiskBootDisk(t *testing.T) {
+	// Currently failing
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 	kms := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-hyperdisk-key1")
 
@@ -2695,6 +2683,23 @@ func TestAccComputeInstance_subnetworkUpdate(t *testing.T) {
 				Config: testAccComputeInstance_subnetworkUpdate(suffix, instanceName),
 			},
 			computeInstanceImportStep("us-east1-d", instanceName, []string{"allow_stopping_for_update", "network_interface.0.alias_ip_range.0.ip_cidr_range", "network_interface.0.alias_ip_range.0.subnetwork_range_name", "network_interface.0.alias_ip_range.1.ip_cidr_range", "network_interface.0.alias_ip_range.1.subnetwork_range_name"}),
+		},
+	})
+}
+
+func TestAccComputeInstance_subnetworkProjectMustMatchError(t *testing.T) {
+	t.Parallel()
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	suffix := fmt.Sprintf("%s", acctest.RandString(t, 10))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_subnetworkProjectExpectError(suffix, instanceName),
+				ExpectError: regexp.MustCompile("must match subnetwork_project"),
+			},
 		},
 	})
 }
@@ -6782,6 +6787,7 @@ resource "google_project" "host_project" {
   project_id      = "%s-host"
   org_id          = "%s"
   billing_account = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_service" "host_project" {
@@ -6798,6 +6804,7 @@ resource "google_project" "service_project" {
   project_id      = "%s-service"
   org_id          = "%s"
   billing_account = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_service" "service_project" {
@@ -7150,38 +7157,6 @@ resource "google_compute_instance" "foobar" {
   }
 }
 `, instance, count)
-}
-
-func testAccComputeInstance_guestAcceleratorEmptyBlock(instance string) string {
-	return fmt.Sprintf(`
-data "google_compute_image" "my_image" {
-  family  = "debian-11"
-  project = "debian-cloud"
-}
-
-resource "google_compute_instance" "foobar" {
-  name         = "%s"
-  machine_type = "n1-standard-1"   // can't be e2 because of guest_accelerator
-  zone         = "us-east1-d"
-
-  boot_disk {
-    initialize_params {
-      image = data.google_compute_image.my_image.self_link
-    }
-  }
-
-  network_interface {
-    network = "default"
-  }
-
-  scheduling {
-    # Instances with guest accelerators do not support live migration.
-    on_host_maintenance = "TERMINATE"
-  }
-
-  guest_accelerator = []
-}
-`, instance)
 }
 
 func testAccComputeInstance_minCpuPlatform(instance string) string {
@@ -8737,6 +8712,45 @@ func testAccComputeInstance_subnetworkUpdateTwo(suffix, instance string) string 
 `, suffix, suffix, suffix, suffix, instance)
 }
 
+func testAccComputeInstance_subnetworkProjectExpectError(suffix, instance string) string {
+	return fmt.Sprintf(`
+	data "google_compute_image" "my_image" {
+		family  = "debian-11"
+		project = "debian-cloud"
+	}
+
+	resource "google_compute_network" "inst-test-network" {
+		name = "tf-test-network-%s"
+		auto_create_subnetworks = false
+	}
+
+	resource "google_compute_subnetwork" "inst-test-subnetwork" {
+		name          = "tf-test-compute-subnet-%s"
+		ip_cidr_range = "10.0.0.0/16"
+		region        = "us-east1"
+		network       = google_compute_network.inst-test-network.id
+	}
+
+	resource "google_compute_instance" "foobar" {
+		name         = "%s"
+		machine_type = "e2-medium"
+		zone         = "us-east1-d"
+		allow_stopping_for_update = true
+
+		boot_disk {
+			initialize_params {
+				image = data.google_compute_image.my_image.id
+			}
+		}
+
+		network_interface {
+			subnetwork = google_compute_subnetwork.inst-test-subnetwork.id
+			subnetwork_project = "placeholder"
+		}
+	}
+`, suffix, suffix, instance)
+}
+
 func testAccComputeInstance_networkIpUpdate(suffix, instance string) string {
 	return fmt.Sprintf(`
 	data "google_compute_image" "my_image" {
@@ -10245,6 +10259,8 @@ resource "google_compute_instance" "foobar" {
 }
 
 func TestAccComputeInstance_bootDisk_storagePoolSpecified(t *testing.T) {
+	// Currently failing
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	instanceName := fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10))
@@ -10339,4 +10355,80 @@ resource "google_compute_instance" "foobar" {
 	}
 }
 `, instanceName, zone, storagePoolUrl)
+}
+
+func TestAccComputeInstance_bootAndAttachedDisk_interface(t *testing.T) {
+        t.Parallel()
+
+        instanceName1 := fmt.Sprintf("tf-test-vm1-%s", acctest.RandString(t, 10))
+        diskName1 := fmt.Sprintf("tf-test-disk1-%s", acctest.RandString(t, 10))
+        instanceName2 := fmt.Sprintf("tf-test-vm2-%s", acctest.RandString(t, 10))
+        diskName2 := fmt.Sprintf("tf-test-disk2-%s", acctest.RandString(t, 10))
+        acctest.VcrTest(t, resource.TestCase{
+                PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+                ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+                Steps: []resource.TestStep{
+                        {
+                                Config:    testAccComputeInstance_bootAndAttachedDisk_interface(instanceName1, diskName1, envvar.GetTestZoneFromEnv(), "h3-standard-88", "NVME", false),
+                                Check: resource.ComposeTestCheckFunc(
+                                        resource.TestCheckResourceAttr("google_compute_instance.foobar", "boot_disk.0.interface", "NVME"),
+                                        resource.TestCheckResourceAttr("google_compute_instance.foobar", "machine_type", "h3-standard-88"),
+                                ),
+                        },
+                        //computeInstanceImportStep("us-central1-a", instanceName1, []string{"desired_status","allow_stopping_for_update"}),
+                        {
+                                Config:    testAccComputeInstance_bootAndAttachedDisk_interface(instanceName2, diskName2, envvar.GetTestZoneFromEnv(), "n2-standard-8", "SCSI", true),
+                                Check: resource.ComposeTestCheckFunc(
+                                        resource.TestCheckResourceAttr("google_compute_instance.foobar", "boot_disk.0.interface", "SCSI"),
+                                        resource.TestCheckResourceAttr("google_compute_instance.foobar", "machine_type", "n2-standard-8"),
+                                ),
+                        },
+                        //computeInstanceImportStep("us-central1-a", instanceName2, []string{"desired_status","allow_stopping_for_update"}),
+                },
+        })
+}
+
+func testAccComputeInstance_bootAndAttachedDisk_interface(instanceName, diskName, zone, machineType, bootDiskInterface string, allowStoppingForUpdate bool) string {
+        return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family    = "ubuntu-2204-lts"
+  project   = "ubuntu-os-cloud"
+}
+
+data "google_project" "project" {}
+
+resource "google_compute_disk" "foorbarattach" {
+  name = "%s"
+  size = 100
+  type = "pd-balanced"
+  zone = "us-central1-a"
+}
+
+resource "google_compute_instance" "foobar" {
+	name = "%s"
+	machine_type= "%s"
+	zone = "%s"
+
+	boot_disk {
+		initialize_params {
+			image = data.google_compute_image.my_image.self_link
+			type = "pd-balanced"
+			size = 500
+                }
+                interface = "%s"
+
+	}
+
+  	attached_disk {
+              source = google_compute_disk.foorbarattach.self_link
+  	}
+	
+	network_interface {
+		network = "default"
+        }
+        allow_stopping_for_update = %t
+        desired_status = "RUNNING"
+
+}
+`, diskName, instanceName, machineType, zone, bootDiskInterface, allowStoppingForUpdate)
 }

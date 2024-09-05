@@ -75,14 +75,14 @@ func TestModifiedPackagesFromDiffs(t *testing.T) {
 func TestNotRunTests(t *testing.T) {
 	cases := map[string]struct {
 		gaDiff, betaDiff string
-		result           *vcr.Result
+		result           vcr.Result
 		wantNotRunBeta   []string
 		wantNotRunGa     []string
 	}{
 		"no diff": {
 			gaDiff:   "",
 			betaDiff: "",
-			result: &vcr.Result{
+			result: vcr.Result{
 				PassedTests: []string{"TestAccOne"},
 				FailedTests: []string{"TestAccTwo"},
 			},
@@ -92,7 +92,7 @@ func TestNotRunTests(t *testing.T) {
 		"no added tests": {
 			gaDiff:   "+// some change",
 			betaDiff: "+// some change",
-			result: &vcr.Result{
+			result: vcr.Result{
 				PassedTests: []string{"TestAccOne"},
 				FailedTests: []string{"TestAccTwo"},
 			},
@@ -102,7 +102,7 @@ func TestNotRunTests(t *testing.T) {
 		"test added and passed": {
 			gaDiff:   "+func TestAccTwo(t *testing.T) {",
 			betaDiff: "+func TestAccTwo(t *testing.T) {",
-			result: &vcr.Result{
+			result: vcr.Result{
 				PassedTests: []string{"TestAccTwo"},
 				FailedTests: []string{},
 			},
@@ -114,7 +114,7 @@ func TestNotRunTests(t *testing.T) {
 +func TestAccThree(t *testing.T) {`,
 			betaDiff: `+func TestAccTwo(t *testing.T) {
 +func TestAccThree(t *testing.T) {`,
-			result: &vcr.Result{
+			result: vcr.Result{
 				PassedTests: []string{"TestAccTwo", "TestAccThree"},
 				FailedTests: []string{},
 			},
@@ -124,7 +124,7 @@ func TestNotRunTests(t *testing.T) {
 		"test added and failed": {
 			gaDiff:   "+func TestAccTwo(t *testing.T) {",
 			betaDiff: "+func TestAccTwo(t *testing.T) {",
-			result: &vcr.Result{
+			result: vcr.Result{
 				PassedTests: []string{},
 				FailedTests: []string{"TestAccTwo"},
 			},
@@ -134,7 +134,7 @@ func TestNotRunTests(t *testing.T) {
 		"tests removed and run": {
 			gaDiff:   "-func TestAccOne(t *testing.T) {",
 			betaDiff: "-func TestAccTwo(t *testing.T) {",
-			result: &vcr.Result{
+			result: vcr.Result{
 				PassedTests: []string{"TestAccOne"},
 				FailedTests: []string{"TestAccTwo"},
 			},
@@ -144,7 +144,7 @@ func TestNotRunTests(t *testing.T) {
 		"test added and not run": {
 			gaDiff:   "+func TestAccThree(t *testing.T) {",
 			betaDiff: "+func TestAccFour(t *testing.T) {",
-			result: &vcr.Result{
+			result: vcr.Result{
 				PassedTests: []string{"TestAccOne"},
 				FailedTests: []string{"TestAccTwo"},
 			},
@@ -156,7 +156,7 @@ func TestNotRunTests(t *testing.T) {
 +func TestAccThree(t *testing.T) {`,
 			betaDiff: `+func TestAccTwo(t *testing.T) {
 +func TestAccThree(t *testing.T) {`,
-			result: &vcr.Result{
+			result: vcr.Result{
 				PassedTests: []string{"TestAccOne"},
 				FailedTests: []string{"TestAccFour"},
 			},
@@ -166,7 +166,7 @@ func TestNotRunTests(t *testing.T) {
 		"tests removed and not run": {
 			gaDiff:   "-func TestAccThree(t *testing.T) {",
 			betaDiff: "-func TestAccFour(t *testing.T) {",
-			result: &vcr.Result{
+			result: vcr.Result{
 				PassedTests: []string{"TestAccOne"},
 				FailedTests: []string{"TestAccTwo"},
 			},
@@ -176,7 +176,7 @@ func TestNotRunTests(t *testing.T) {
 		"tests added but commented out": {
 			gaDiff:   "+//func TestAccThree(t *testing.T) {",
 			betaDiff: "+//func TestAccFour(t *testing.T) {",
-			result: &vcr.Result{
+			result: vcr.Result{
 				PassedTests: []string{"TestAccOne"},
 				FailedTests: []string{"TestAccTwo"},
 			},
@@ -189,7 +189,7 @@ func TestNotRunTests(t *testing.T) {
 +func TestAccCloudRunService_cloudRunServiceMulticontainerExample(t *testing.T) {`,
 			betaDiff: `diff --git a/google-beta/services/alloydb/resource_alloydb_backup_generated_test.go b/google-beta/services/alloydb/resource_alloydb_backup_generated_test.go
 +func TestAccAlloydbBackup_alloydbBackupFullTestNewExample(t *testing.T) {`,
-			result: &vcr.Result{
+			result: vcr.Result{
 				PassedTests: []string{},
 				FailedTests: []string{},
 			},
@@ -199,7 +199,7 @@ func TestNotRunTests(t *testing.T) {
 		"always count GA-only added tests": {
 			gaDiff:   "+func TestAccOne(t *testing.T) {",
 			betaDiff: "",
-			result: &vcr.Result{
+			result: vcr.Result{
 				PassedTests: []string{"TestAccOne"},
 				FailedTests: []string{"TestAccTwo"},
 			},
@@ -226,7 +226,7 @@ func TestAnalyticsComment(t *testing.T) {
 		{
 			name: "run full vcr is false and no affected services",
 			data: analytics{
-				ReplayingResult: &vcr.Result{
+				ReplayingResult: vcr.Result{
 					PassedTests:  []string{"a", "b", "c"},
 					SkippedTests: []string{"d", "e"},
 					FailedTests:  []string{"f"},
@@ -257,7 +257,7 @@ func TestAnalyticsComment(t *testing.T) {
 		{
 			name: "run full vcr is false and has affected services",
 			data: analytics{
-				ReplayingResult: &vcr.Result{
+				ReplayingResult: vcr.Result{
 					PassedTests:  []string{"a", "b", "c"},
 					SkippedTests: []string{"d", "e"},
 					FailedTests:  []string{"f"},
@@ -292,7 +292,7 @@ func TestAnalyticsComment(t *testing.T) {
 		{
 			name: "run full vcr is true",
 			data: analytics{
-				ReplayingResult: &vcr.Result{
+				ReplayingResult: vcr.Result{
 					PassedTests:  []string{"a", "b", "c"},
 					SkippedTests: []string{"d", "e"},
 					FailedTests:  []string{"f"},
@@ -427,7 +427,7 @@ func TestWithReplayFailedTests(t *testing.T) {
 		{
 			name: "with failed tests",
 			data: withReplayFailedTests{
-				ReplayingResult: &vcr.Result{
+				ReplayingResult: vcr.Result{
 					FailedTests: []string{"a", "b"},
 				},
 			},
@@ -525,11 +525,11 @@ func TestRecordReplay(t *testing.T) {
 		{
 			name: "ReplayingAfterRecordingResult has failed tests",
 			data: recordReplay{
-				RecordingResult: &vcr.Result{
+				RecordingResult: vcr.Result{
 					PassedTests: []string{"a", "b", "c"},
 					FailedTests: []string{"d", "e"},
 				},
-				ReplayingAfterRecordingResult: &vcr.Result{
+				ReplayingAfterRecordingResult: vcr.Result{
 					PassedTests: []string{"a"},
 					FailedTests: []string{"b", "c"},
 				},
@@ -572,10 +572,10 @@ func TestRecordReplay(t *testing.T) {
 		{
 			name: "ReplayingAfterRecordingResult does not have failed tests",
 			data: recordReplay{
-				RecordingResult: &vcr.Result{
+				RecordingResult: vcr.Result{
 					PassedTests: []string{"a", "b", "c"},
 				},
-				ReplayingAfterRecordingResult: &vcr.Result{
+				ReplayingAfterRecordingResult: vcr.Result{
 					PassedTests: []string{"a", "b", "c"},
 				},
 				AllRecordingPassed: true,

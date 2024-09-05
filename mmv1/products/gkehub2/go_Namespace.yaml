@@ -138,4 +138,3 @@ properties:
     type: KeyValueLabels
     description: |
       Labels for this Namespace.
-    immutable: false

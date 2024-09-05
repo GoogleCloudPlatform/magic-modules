@@ -120,7 +120,7 @@ properties:
             either an integer or a range. If not specified, this rule
             applies to connections through any port.
 
-            Example inputs include: ["22"], ["80","443"], and
+            Example inputs include: [22], [80, 443], and
             ["12345-12349"].
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -160,7 +160,7 @@ properties:
             either an integer or a range. If not specified, this rule
             applies to connections through any port.
 
-            Example inputs include: ["22"], ["80","443"], and
+            Example inputs include: [22], [80, 443], and
             ["12345-12349"].
   - !ruby/object:Api::Type::String
     name: 'description'

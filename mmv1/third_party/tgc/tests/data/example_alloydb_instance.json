@@ -9,6 +9,9 @@
          "parent":"//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
          "data":{
             "instanceType":"PRIMARY",
+            "labels": {
+              "goog-terraform-provisioned": "true"
+            },
             "machineConfig":{
                "cpuCount":2
             }
@@ -32,7 +35,12 @@
             "initialUser":{
                "password":"alloydb-cluster"
             },
-            "network":"default"
+            "labels": {
+               "goog-terraform-provisioned": "true"
+             },
+            "networkConfig": {
+               "network":"default"
+            }
          }
       },
      "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",

@@ -120,7 +120,7 @@ func TestAccComputeInstanceFromMachineImageWithOverride_localSsdRecoveryTimeout(
 	var expectedLocalSsdRecoveryTimeout = compute.Duration{}
 	expectedLocalSsdRecoveryTimeout.Nanos = 0
 	expectedLocalSsdRecoveryTimeout.Seconds = 7200
-	
+
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
@@ -224,6 +224,69 @@ func TestAccComputeInstanceFromMachineImage_diffProject(t *testing.T) {
 	})
 }
 
+func TestAccComputeInstanceFromMachineImage_confidentialInstanceConfigMain(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceFromMachineImageDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceFromMachineImage_ConfidentialInstanceConfigEnable(fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)), fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance_from_machine_image.foobar1", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar1", "machine_type", "n2d-standard-2"),
+					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar1", "scheduling.0.on_host_maintenance", "TERMINATE"),
+					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance, true, ""),
+				),
+			},
+			{
+				Config: testAccComputeInstanceFromMachineImage_ConfidentialInstanceConfigEnableSev(fmt.Sprintf("tf-test-sev0-%s", acctest.RandString(t, 10)), fmt.Sprintf("tf-test-sev0-generated-%s", acctest.RandString(t, 10)), "SEV"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance_from_machine_image.foobar2", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar2", "machine_type", "n2d-standard-2"),
+					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar2", "scheduling.0.on_host_maintenance", "TERMINATE"),
+					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance, true, "SEV"),
+				),
+			},
+			{
+				Config: testAccComputeInstanceFromMachineImage_ConfidentialInstanceConfigNoEnableSev(fmt.Sprintf("tf-test-sev1-%s", acctest.RandString(t, 10)), fmt.Sprintf("tf-test-sev1-generated-%s", acctest.RandString(t, 10)), "SEV"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance_from_machine_image.foobar3", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar3", "min_cpu_platform", "AMD Milan"),
+					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar3", "scheduling.0.on_host_maintenance", "TERMINATE"),
+					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance, false, "SEV"),
+				),
+			},
+			{
+				Config: testAccComputeInstanceFromMachineImage_ConfidentialInstanceConfigSevSnp(fmt.Sprintf("tf-test-sev-snp-%s", acctest.RandString(t, 10)), fmt.Sprintf("tf-test-sev-snp-generated-%s", acctest.RandString(t, 10)), "SEV_SNP"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance_from_machine_image.foobar4", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar4", "min_cpu_platform", "AMD Milan"),
+					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar4", "scheduling.0.on_host_maintenance", "TERMINATE"),
+					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance, false, "SEV_SNP"),
+				),
+			},
+			{{- if ne $.TargetVersionName "ga" }}
+			{
+				Config: testAccComputeInstanceFromMachineImage_ConfidentialInstanceConfigTdx(fmt.Sprintf("tf-test-tdx-%s", acctest.RandString(t, 10)), fmt.Sprintf("tf-test-tdx-generated-%s", acctest.RandString(t, 10)), "TDX"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance_from_machine_image.foobar5", &instance),
+					// Check that fields were set based on the template
+					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar5", "machine_type", "c3-standard-4"),
+					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar5", "scheduling.0.on_host_maintenance", "TERMINATE"),
+					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance, false, "TDX"),
+				),
+
+			},
+			{{- end }}
+		},
+	})
+}
+
 func testAccCheckComputeInstanceFromMachineImageDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
@@ -297,6 +360,298 @@ resource "google_compute_instance_from_machine_image" "foobar" {
 }
 `, instance, instance, newInstance)
 }
+
+func testAccComputeInstanceFromMachineImage_ConfidentialInstanceConfigEnable(instance string, newInstance string) string {
+	return fmt.Sprintf(`
+resource "google_compute_instance" "vm1" {
+  provider     = google-beta
+
+  boot_disk {
+    initialize_params {
+      image = "ubuntu-os-cloud/ubuntu-2004-lts"
+    }
+  }
+
+  name         = "%s"
+  machine_type = "n2d-standard-2"
+
+  network_interface {
+    network = "default"
+  }
+
+  metadata = {
+    foo = "bar"
+  }
+
+  confidential_instance_config {
+    enable_confidential_compute = true
+  }
+
+  scheduling {
+    on_host_maintenance = "TERMINATE"
+  }
+}
+
+resource "google_compute_machine_image" "foobar1" {
+  provider        = google-beta
+  name            = "%s"
+  source_instance = google_compute_instance.vm1.self_link
+}
+
+resource "google_compute_instance_from_machine_image" "foobar1" {
+  provider = google-beta
+  name = "%s"
+  zone = "us-central1-a"
+
+  source_machine_image = google_compute_machine_image.foobar1.self_link
+
+  labels = {
+    my_key = "my_value"
+  }
+  confidential_instance_config {
+    enable_confidential_compute = true
+  }
+  scheduling {
+    on_host_maintenance = "TERMINATE"
+  }
+}
+`, instance, instance, newInstance)
+}
+
+func testAccComputeInstanceFromMachineImage_ConfidentialInstanceConfigEnableSev(instance string, newInstance string, confidentialInstanceType string) string {
+	return fmt.Sprintf(`
+resource "google_compute_instance" "vm2" {
+  provider     = google-beta
+
+  boot_disk {
+    initialize_params {
+      image = "ubuntu-os-cloud/ubuntu-2004-lts"
+    }
+  }
+
+  name         = "%s"
+  machine_type = "n2d-standard-2"
+
+  network_interface {
+    network = "default"
+  }
+
+  metadata = {
+    foo = "bar"
+  }
+
+  confidential_instance_config {
+    enable_confidential_compute     = true
+    confidential_instance_type      = %q
+  }
+
+  scheduling {
+    on_host_maintenance = "TERMINATE"
+  }
+}
+
+resource "google_compute_machine_image" "foobar2" {
+  provider        = google-beta
+  name            = "%s"
+  source_instance = google_compute_instance.vm2.self_link
+}
+
+resource "google_compute_instance_from_machine_image" "foobar2" {
+  provider = google-beta
+  name = "%s"
+  zone = "us-central1-a"
+
+  source_machine_image = google_compute_machine_image.foobar2.self_link
+
+  labels = {
+    my_key = "my_value"
+  }
+  confidential_instance_config {
+    enable_confidential_compute     = true
+    confidential_instance_type      = %q
+  }
+}
+`, instance, confidentialInstanceType, instance, newInstance, confidentialInstanceType)
+}
+
+func testAccComputeInstanceFromMachineImage_ConfidentialInstanceConfigNoEnableSev(instance string, newInstance string, confidentialInstanceType string) string {
+	return fmt.Sprintf(`
+resource "google_compute_instance" "vm3" {
+  provider     = google-beta
+
+  boot_disk {
+    initialize_params {
+      image = "ubuntu-os-cloud/ubuntu-2004-lts"
+    }
+  }
+
+  name         = "%s"
+  machine_type = "n2d-standard-2"
+
+  network_interface {
+    network = "default"
+  }
+
+  metadata = {
+    foo = "bar"
+  }
+
+  min_cpu_platform = "AMD Milan"
+
+  confidential_instance_config {
+    enable_confidential_compute     = false
+    confidential_instance_type      = %q
+  }
+}
+
+resource "google_compute_machine_image" "foobar3" {
+  provider        = google-beta
+  name            = "%s"
+  source_instance = google_compute_instance.vm3.self_link
+}
+
+resource "google_compute_instance_from_machine_image" "foobar3" {
+  provider = google-beta
+  name = "%s"
+  zone = "us-central1-a"
+
+  source_machine_image = google_compute_machine_image.foobar3.self_link
+
+  labels = {
+    my_key = "my_value"
+  }
+
+  confidential_instance_config {
+    enable_confidential_compute     = false
+    confidential_instance_type      = %q
+  }
+
+  scheduling {
+    on_host_maintenance = "TERMINATE"
+  }
+}
+`, instance, confidentialInstanceType, instance, newInstance, confidentialInstanceType)
+}
+
+func testAccComputeInstanceFromMachineImage_ConfidentialInstanceConfigSevSnp(instance string, newInstance string, confidentialInstanceType string) string {
+	return fmt.Sprintf(`
+resource "google_compute_instance" "vm4" {
+  provider     = google-beta
+
+  boot_disk {
+    initialize_params {
+      image = "ubuntu-os-cloud/ubuntu-2004-lts"
+    }
+  }
+
+  name         = "%s"
+  machine_type = "n2d-standard-2"
+
+  network_interface {
+    network = "default"
+  }
+
+  metadata = {
+    foo = "bar"
+  }
+
+  min_cpu_platform = "AMD Milan"
+
+  confidential_instance_config {
+    enable_confidential_compute     = false
+    confidential_instance_type      = %q
+  }
+
+  scheduling {
+    on_host_maintenance = "TERMINATE"
+  }
+}
+
+resource "google_compute_machine_image" "foobar4" {
+  provider        = google-beta
+  name            = "%s"
+  source_instance = google_compute_instance.vm4.self_link
+}
+
+resource "google_compute_instance_from_machine_image" "foobar4" {
+  provider = google-beta
+  name = "%s"
+  zone = "us-central1-a"
+
+  source_machine_image = google_compute_machine_image.foobar4.self_link
+
+  labels = {
+    my_key = "my_value"
+  }
+  confidential_instance_config {
+    enable_confidential_compute     = false
+    confidential_instance_type      = %q
+  }
+  scheduling {
+    on_host_maintenance = "TERMINATE"
+  }
+}
+`, instance, confidentialInstanceType, instance, newInstance, confidentialInstanceType)
+}
+
+{{ if ne $.TargetVersionName `ga` -}}
+func testAccComputeInstanceFromMachineImage_ConfidentialInstanceConfigTdx(instance string, newInstance string, confidentialInstanceType string) string {
+	return fmt.Sprintf(`
+resource "google_compute_instance" "vm5" {
+  provider     = google-beta
+
+  boot_disk {
+    initialize_params {
+      image = "tdx-guest-images/ubuntu-2204-jammy-v20240701"
+    }
+  }
+
+  name         = "%s"
+  machine_type = "c3-standard-4"
+
+  network_interface {
+    network = "default"
+  }
+
+  metadata = {
+    foo = "bar"
+  }
+
+  confidential_instance_config {
+    confidential_instance_type = %q
+  }
+
+  scheduling {
+    on_host_maintenance = "TERMINATE"
+  }
+}
+
+resource "google_compute_machine_image" "foobar5" {
+  provider        = google-beta
+  name            = "%s"
+  source_instance = google_compute_instance.vm5.self_link
+}
+
+resource "google_compute_instance_from_machine_image" "foobar5" {
+  provider = google-beta
+  name = "%s"
+  zone = "us-central1-a"
+
+  source_machine_image = google_compute_machine_image.foobar5.self_link
+
+  labels = {
+    my_key = "my_value"
+  }
+  confidential_instance_config {
+    confidential_instance_type  = %q
+  }
+  scheduling {
+    on_host_maintenance = "TERMINATE"
+  }
+}
+`, instance, confidentialInstanceType, instance, newInstance, confidentialInstanceType)
+}
+{{- end }}
 
 {{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeInstanceFromMachineImage_maxRunDuration(instance, newInstance string) string {
@@ -501,7 +856,7 @@ resource "google_compute_instance" "vm" {
   }
 
   partner_metadata = {
-  	"test.compute.googleapis.com" = jsonencode({ 
+  	"test.compute.googleapis.com" = jsonencode({
   		entries = {
   			key = "value"
   		}
@@ -530,7 +885,7 @@ resource "google_compute_instance_from_machine_image" "foobar" {
   }
 
   partner_metadata = {
-  	"test.compute.googleapis.com" = jsonencode({ 
+  	"test.compute.googleapis.com" = jsonencode({
   		entries = {
   			key1 = "value1"
   			key2 = 2
@@ -598,6 +953,7 @@ resource "google_project" "project" {
 	name            = "%s"
 	org_id          = "%s"
 	billing_account = "%s"
+	deletion_policy = "DELETE"
 }
 
 resource "google_project_service" "service" {

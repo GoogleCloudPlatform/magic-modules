@@ -581,12 +581,20 @@ func TestAccDataflowFlexTemplateJob_enableStreamingEngine(t *testing.T) {
 		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-                Config:      testAccDataflowFlexTemplateJob_enableStreamingEngine_param(job, bucket, topic),
-                ExpectError: regexp.MustCompile("must not include Dataflow options"),
+				Config: testAccDataflowFlexTemplateJob_enableStreamingEngine_param(job, bucket, topic),
+				Check: resource.ComposeTestCheckFunc(
+					// Is set
+					resource.TestCheckResourceAttr("google_dataflow_flex_template_job.flex_job", "parameters.enableStreamingEngine", "true"),
+					// Is not set
+					resource.TestCheckNoResourceAttr("google_dataflow_flex_template_job.flex_job", "enable_streaming_engine"),
+				),
 			},
 			{
 				Config: testAccDataflowFlexTemplateJob_enableStreamingEngine_field(job, bucket, topic),
 				Check: resource.ComposeTestCheckFunc(
+					// Now is unset
+					resource.TestCheckNoResourceAttr("google_dataflow_flex_template_job.flex_job", "parameters.enableStreamingEngine"),
+					// Now is set
 					resource.TestCheckResourceAttr("google_dataflow_flex_template_job.flex_job", "enable_streaming_engine", "true"),
 				),
 			},
@@ -1341,7 +1349,7 @@ resource "google_dataflow_flex_template_job" "flex_job_kms" {
   kms_key_name		= "%s"
 
 }
-`, topicName, bucket, crypto_key, job)
+`, topicName, bucket, job, crypto_key)
 }
 
 func testAccDataflowFlexTemplateJob_additionalExperiments(job, bucket, topicName string, experiments []string) string {

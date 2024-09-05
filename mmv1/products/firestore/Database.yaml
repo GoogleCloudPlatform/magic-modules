@@ -135,7 +135,7 @@ examples:
       - etag
       - deletion_policy
 virtual_fields:
-  - !ruby/object:Api::Type::Enum
+  - !ruby/object:Api::Type::String
     name: 'deletion_policy'
     description: |
       Deletion behavior for this database.
@@ -143,10 +143,7 @@ virtual_fields:
       If the deletion policy is `DELETE`, the database will both be removed from Terraform state and deleted from Google Cloud upon destruction.
       The default value is `ABANDON`.
       See also `delete_protection`.
-    values:
-      - :ABANDON
-      - :DELETE
-    default_value: :ABANDON
+    default_value: ABANDON
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_delete: templates/terraform/pre_delete/firestore_database.go.erb
 properties:

@@ -59,8 +59,13 @@ examples:
     vars:
       site_id: 'site-id'
       cloud_run_service_id: 'cloud-run-service-via-hosting'
+      deletion_protection: 'true'
     test_env_vars:
       project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'firebasehosting_version_cloud_functions'
     primary_resource_id: 'default'
     min_version: 'beta'
