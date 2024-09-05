@@ -95,7 +95,6 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: Set of labels associated with the Registration.
-    immutable: false
   - name: 'domainNotices'
     type: Array
     description: The list of domain notices that you acknowledge. Possible value is HSTS_PRELOADED

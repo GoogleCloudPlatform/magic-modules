@@ -592,6 +592,7 @@ resource "google_project" "project1" {
 	name            = "tf-test-%{random_suffix_1}"
 	org_id          = "%{org}"
 	billing_account = "%{project_billing_acct}"
+	deletion_policy = "DELETE"
 }
 
 resource "google_project" "project2" {
@@ -599,6 +600,7 @@ resource "google_project" "project2" {
 	name            = "tf-test-%{random_suffix_2}"
 	org_id          = "%{org}"
 	billing_account = "%{project_billing_acct}"
+	deletion_policy = "DELETE"
 }
 
 resource "google_billing_budget" "budget" {
@@ -636,6 +638,7 @@ resource "google_project" "project1" {
 	name            = "tf-test-%{random_suffix_1}"
 	org_id          = "%{org}"
 	billing_account = "%{project_billing_acct}"
+	deletion_policy = "DELETE"
 }
 
 resource "google_project" "project2" {
@@ -643,6 +646,7 @@ resource "google_project" "project2" {
 	name            = "tf-test-%{random_suffix_2}"
 	org_id          = "%{org}"
 	billing_account = "%{project_billing_acct}"
+	deletion_policy = "DELETE"
 }
 
 resource "google_billing_budget" "budget" {

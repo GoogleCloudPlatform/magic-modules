@@ -23,7 +23,7 @@ func TestFormatVCRCassettesUpdateReplaying(t *testing.T) {
 			name: "replay error",
 			data: vcrCassetteUpdateReplayingResult{
 				ReplayingErr: fmt.Errorf("some error"),
-				ReplayingResult: &vcr.Result{
+				ReplayingResult: vcr.Result{
 					PassedTests:  []string{"a", "b"},
 					FailedTests:  []string{"c", "d"},
 					SkippedTests: []string{"e"},
@@ -55,7 +55,7 @@ func TestFormatVCRCassettesUpdateReplaying(t *testing.T) {
 		{
 			name: "replay success",
 			data: vcrCassetteUpdateReplayingResult{
-				ReplayingResult: &vcr.Result{
+				ReplayingResult: vcr.Result{
 					PassedTests:  []string{"a", "b"},
 					SkippedTests: []string{"e"},
 				},
@@ -82,7 +82,7 @@ func TestFormatVCRCassettesUpdateReplaying(t *testing.T) {
 		{
 			name: "replay failure without error",
 			data: vcrCassetteUpdateReplayingResult{
-				ReplayingResult: &vcr.Result{
+				ReplayingResult: vcr.Result{
 					PassedTests:  []string{"a", "b"},
 					FailedTests:  []string{"c", "d"},
 					SkippedTests: []string{"e"},
@@ -111,7 +111,7 @@ func TestFormatVCRCassettesUpdateReplaying(t *testing.T) {
 		{
 			name: "replay panic",
 			data: vcrCassetteUpdateReplayingResult{
-				ReplayingResult: &vcr.Result{
+				ReplayingResult: vcr.Result{
 					PassedTests:  []string{"a", "b"},
 					FailedTests:  []string{"c", "d"},
 					SkippedTests: []string{"e"},
@@ -150,7 +150,7 @@ func TestFormatVCRCassettesUpdateRecording(t *testing.T) {
 			name: "record error",
 			data: vcrCassetteUpdateRecordingResult{
 				RecordingErr: fmt.Errorf("some error"),
-				RecordingResult: &vcr.Result{
+				RecordingResult: vcr.Result{
 					PassedTests: []string{"a", "b"},
 					FailedTests: []string{"c", "d"},
 				},
@@ -181,7 +181,7 @@ func TestFormatVCRCassettesUpdateRecording(t *testing.T) {
 		{
 			name: "record success",
 			data: vcrCassetteUpdateRecordingResult{
-				RecordingResult: &vcr.Result{
+				RecordingResult: vcr.Result{
 					PassedTests: []string{"a", "b"},
 				},
 				AllRecordingPassed: true,
@@ -209,7 +209,7 @@ func TestFormatVCRCassettesUpdateRecording(t *testing.T) {
 		{
 			name: "record failed without error",
 			data: vcrCassetteUpdateRecordingResult{
-				RecordingResult: &vcr.Result{
+				RecordingResult: vcr.Result{
 					PassedTests: []string{"a", "b"},
 					FailedTests: []string{"c", "d"},
 				},
@@ -235,7 +235,7 @@ func TestFormatVCRCassettesUpdateRecording(t *testing.T) {
 		{
 			name: "record panic",
 			data: vcrCassetteUpdateRecordingResult{
-				RecordingResult: &vcr.Result{
+				RecordingResult: vcr.Result{
 					PassedTests: []string{"a", "b"},
 					FailedTests: []string{"c", "d"},
 					Panics:      []string{"e"},
@@ -254,7 +254,7 @@ func TestFormatVCRCassettesUpdateRecording(t *testing.T) {
 		{
 			name: "has terminated test",
 			data: vcrCassetteUpdateRecordingResult{
-				RecordingResult: &vcr.Result{
+				RecordingResult: vcr.Result{
 					PassedTests: []string{"a", "b"},
 				},
 				HasTerminatedTests: true,

@@ -60,6 +60,9 @@ type Type struct {
 	// behavior.
 	Immutable bool
 
+	// Indicates that this field is client-side only (aka virtual.)
+	ClientSide bool `yaml:"client_side"`
+
 	// url_param_only will not send the field in the resource body and will
 	// not attempt to read the field from the API response.
 	// NOTE - this doesn't work for nested fields
@@ -331,6 +334,28 @@ func (t *Type) SetDefault(r *Resource) {
 
 	if t.ApiName == "" {
 		t.ApiName = t.Name
+	}
+}
+
+func (t *Type) Validate(rName string) {
+	if t.Output && t.Required {
+		log.Fatalf("Property %s cannot be output and required at the same time in resource %s.", t.Name, rName)
+	}
+
+	if t.DefaultFromApi && t.DefaultValue != nil {
+		log.Fatalf("'default_value' and 'default_from_api' cannot be both set in resource %s", rName)
+	}
+
+	switch {
+	case t.IsA("Array"):
+		t.ItemType.Validate(rName)
+	case t.IsA("Map"):
+		t.ValueType.Validate(rName)
+	case t.IsA("NestedObject"):
+		for _, p := range t.Properties {
+			p.Validate(rName)
+		}
+	default:
 	}
 }
 
@@ -706,7 +731,7 @@ func (t Type) Deprecated() bool {
 }
 
 func (t *Type) GetDescription() string {
-	return strings.TrimRight(t.Description, "\n")
+	return strings.TrimSpace(strings.TrimRight(t.Description, "\n"))
 }
 
 // // private
@@ -1100,6 +1125,12 @@ func propertyWithImmutable(immutable bool) func(*Type) {
 	}
 }
 
+func propertyWithClientSide(clientSide bool) func(*Type) {
+	return func(p *Type) {
+		p.ClientSide = clientSide
+	}
+}
+
 func propertyWithIgnoreWrite(ignoreWrite bool) func(*Type) {
 	return func(p *Type) {
 		p.IgnoreWrite = ignoreWrite
@@ -1347,6 +1378,11 @@ func (t *Type) IsForceNew() bool {
 		return true
 	}
 
+	// Client-side fields don't inherit immutability
+	if t.ClientSide {
+		return t.Immutable
+	}
+
 	parent := t.Parent()
 	return (!t.Output || t.IsA("KeyValueEffectiveLabels")) &&
 		(t.Immutable ||
@@ -1386,7 +1422,7 @@ func (t *Type) GetPropertySchemaPath(schemaPath string) string {
 		}
 
 		if index == -1 {
-			continue
+			return ""
 		}
 
 		prop := nestedProps[index]

@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -30,6 +31,8 @@ import (
 	"github.com/dnaeon/go-vcr/recorder"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
+
 	fwDiags "github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -142,11 +145,27 @@ func vcrFileName(name string) string {
 // VcrTest is a wrapper for resource.Test to swap out providers for VCR providers and handle VCR specific things
 // Can be called when VCR is not enabled, and it will behave as normal
 func VcrTest(t *testing.T, c resource.TestCase) {
+	t.Helper()
+
 	if IsVcrEnabled() {
 		defer closeRecorder(t)
 	} else if isReleaseDiffEnabled() {
 		c = initializeReleaseDiffTest(c, t.Name())
 	}
+
+	// terraform_labels is a computed field to which "goog-terraform-provisioned": "true" is always
+	// added by the provider. ImportStateVerify "checks for strict equality and does not respect
+	// DiffSuppressFunc or CustomizeDiff" so any test using ImportStateVerify must ignore
+	// terraform_labels.
+	var steps []resource.TestStep
+	for _, s := range c.Steps {
+		if s.ImportStateVerify && !slices.Contains(s.ImportStateVerifyIgnore, "terraform_labels") {
+			s.ImportStateVerifyIgnore = append(s.ImportStateVerifyIgnore, "terraform_labels")
+		}
+		steps = append(steps, s)
+	}
+	c.Steps = steps
+
 	resource.Test(t, c)
 }
 
@@ -419,6 +438,14 @@ func (p *frameworkTestProvider) Configure(ctx context.Context, req provider.Conf
 	}
 }
 
+// DataSources overrides the provider's DataSources function so that we can append test-specific data sources to the list of data sources on the provider.
+// This makes the data source(s) usable only in the context of acctests, and isn't available to users
+func (p *frameworkTestProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
+	ds := p.FrameworkProvider.DataSources(ctx)
+	ds = append(ds, fwprovider.NewGoogleProviderConfigPluginFrameworkDataSource) // google_provider_config_plugin_framework
+	return ds
+}
+
 func configureApiClient(ctx context.Context, p *fwprovider.FrameworkProvider, diags *fwDiags.Diagnostics) {
 	var data fwmodels.ProviderModel
 	var d fwDiags.Diagnostics
@@ -436,6 +463,11 @@ func configureApiClient(ctx context.Context, p *fwprovider.FrameworkProvider, di
 // GetSDKProvider gets the SDK provider with an overwritten configure function to be called by MuxedProviders
 func GetSDKProvider(testName string) *schema.Provider {
 	prov := tpgprovider.Provider()
+
+	// Append a test-specific data source to the list of data sources on the provider
+	// This makes the data source(s) usable only in the context of acctests, and isn't available to users
+	prov.DataSourcesMap["google_provider_config_sdk"] = tpgprovider.DataSourceGoogleProviderConfigSdk()
+
 	if IsVcrEnabled() {
 		old := prov.ConfigureContextFunc
 		prov.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {

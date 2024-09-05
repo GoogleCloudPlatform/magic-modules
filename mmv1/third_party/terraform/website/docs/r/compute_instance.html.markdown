@@ -62,6 +62,57 @@ resource "google_compute_instance" "default" {
 }
 ```
 
+## Example usage - Confidential Computing
+
+Example with [Confidential Mode](https://cloud.google.com/confidential-computing/confidential-vm/docs/confidential-vm-overview) activated.
+
+```tf
+resource "google_service_account" "default" {
+  account_id   = "my-custom-sa"
+  display_name = "Custom SA for VM Instance"
+}
+
+resource "google_compute_instance" "confidential_instance" {
+  name             = "my-confidential-instance"
+  zone             = "us-central1-a"
+  machine_type     = "n2d-standard-2"
+  min_cpu_platform = "AMD Milan"
+
+  confidential_instance_config {
+    enable_confidential_compute = true
+    confidential_instance_type  = "SEV"
+  }
+
+  boot_disk {
+    initialize_params {
+      image = "ubuntu-os-cloud/ubuntu-2004-lts"
+      labels = {
+        my_label = "value"
+      }
+    }
+  }
+
+  // Local SSD disk
+  scratch_disk {
+    interface = "NVME"
+  }
+
+  network_interface {
+    network = "default"
+
+    access_config {
+      // Ephemeral public IP
+    }
+  }
+
+  service_account {
+    # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
+    email  = google_service_account.default.email
+    scopes = ["cloud-platform"]
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -321,7 +372,7 @@ is desired, you will need to modify your state file manually using
 
 
 *  `subnetwork_project` - (Optional) The project in which the subnetwork belongs.
-   If the `subnetwork` is a self_link, this field is ignored in favor of the project
+   If the `subnetwork` is a self_link, this field is set to the project
    defined in the subnetwork self_link. If the `subnetwork` is a name and this
    field is not provided, the provider project is used.
 
@@ -549,7 +600,7 @@ exported:
 * `ipv6_access_type` - One of EXTERNAL, INTERNAL to indicate whether the IP can be accessed from the Internet.
 This field is always inherited from its subnetwork.
 
-* `current_status` - The current status of the instance. This could be one of the following values: PROVISIONING, STAGING, RUNNING, STOPPING, SUSPENDING, SUSPENDED, REPAIRING, and TERMINATED. For more information about the status of the instance, see [Instance life cycle](https://cloud.google.com/compute/docs/instances/instance-life-cycle).`,
+* `current_status` - The current status of the instance. This could be one of the following values: PROVISIONING, STAGING, RUNNING, STOPPING, SUSPENDING, SUSPENDED, REPAIRING, and TERMINATED. For more information about the status of the instance, see [Instance life cycle](https://cloud.google.com/compute/docs/instances/instance-life-cycle).
 
 * `network_interface.0.network_ip` - The internal ip address of the instance, either manually or dynamically assigned.
 

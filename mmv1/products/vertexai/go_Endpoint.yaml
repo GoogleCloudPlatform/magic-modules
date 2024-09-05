@@ -373,7 +373,6 @@ properties:
       can only contain lowercase letters, numeric characters, underscores and
       dashes. International characters are allowed. See https://goo.gl/xmQnxf
       for more information and examples of labels.
-    immutable: false
   - name: 'createTime'
     type: String
     description: Output only. Timestamp when this Endpoint was created.

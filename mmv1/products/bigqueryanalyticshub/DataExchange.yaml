@@ -48,7 +48,17 @@ examples:
     region_override: 'US'
     vars:
       data_exchange_id: 'my_data_exchange'
-      description: 'example data exchange'
+      desc: 'example data exchange'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'bigquery_analyticshub_data_exchange_dcr'
+    primary_resource_id: 'data_exchange'
+    primary_resource_name: "fmt.Sprintf(\"tf_test_my_data_exchange%s\",
+      context[\"\
+      random_suffix\"])"
+    region_override: 'US'
+    vars:
+      data_exchange_id: 'dcr_data_exchange'
+      desc: 'example dcr data exchange'
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -96,3 +106,33 @@ properties:
     name: icon
     description: |-
       Base64 encoded image representing the data exchange.
+  - !ruby/object:Api::Type::NestedObject
+    name: sharingEnvironmentConfig
+    default_from_api: true
+    immutable: true
+    description: |
+      Configurable data sharing environment option for a data exchange.
+      This field is required for data clean room exchanges.
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: 'defaultExchangeConfig'
+        immutable: true
+        allow_empty_object: true
+        send_empty_value: true
+        exactly_one_of:
+          - sharing_environment_config.0.default_exchange_config
+          - sharing_environment_config.0.dcr_exchange_config
+        description: |
+          Default Analytics Hub data exchange, used for secured data sharing.
+        properties: []
+      - !ruby/object:Api::Type::NestedObject
+        name: 'dcrExchangeConfig'
+        immutable: true
+        allow_empty_object: true
+        send_empty_value: true
+        exactly_one_of:
+          - sharing_environment_config.0.default_exchange_config
+          - sharing_environment_config.0.dcr_exchange_config
+        description: |
+          Data Clean Room (DCR), used for privacy-safe and secured data sharing.
+        properties: []

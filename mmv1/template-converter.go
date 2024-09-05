@@ -224,14 +224,14 @@ func replace(data []byte) []byte {
 	if err != nil {
 		log.Fatalf("Cannot compile the regular expression: %v", err)
 	}
-	data = r.ReplaceAll(data, []byte("\n\n$1{{ if or (ne $.TargetVersionName ``) (eq $.TargetVersionName `ga`) }}"))
+	data = r.ReplaceAll(data, []byte("\n\n$1{{ if not (or (eq $.TargetVersionName ``) (eq $.TargetVersionName `ga`)) }}"))
 
 	// Replace <% unless version.nil? || version == ['|"]ga['|"] -%>
 	r, err = regexp.Compile(`<% unless version\.nil\? \|\| version == ['|"]ga['|"] -%>`)
 	if err != nil {
 		log.Fatalf("Cannot compile the regular expression: %v", err)
 	}
-	data = r.ReplaceAll(data, []byte(`{{- if or (ne $.TargetVersionName "") (eq $.TargetVersionName "ga") }}`))
+	data = r.ReplaceAll(data, []byte(`{{- if not (or (eq $.TargetVersionName "") (eq $.TargetVersionName "ga")) }}`))
 
 	// Replace <% if version.nil? || version == ['|"]ga['|"] -%>
 	r, err = regexp.Compile(`<% if version\.nil\? \|\| version == ['|"]ga['|"] -%>`)
@@ -701,15 +701,6 @@ func checkExceptionList(filePath string) bool {
 		"iam/example_config_body/privateca",
 		"iam/example_config_body/vertex_ai",
 		"iam/example_config_body/app_engine_",
-
-		// TODO: remove the following files from the exception list after all of the services are migrated to Go
-		// It will generate diffs when partial services are migrated.
-		"provider/provider_mmv1_resources.go.erb",
-		"provider/provider.go.erb",
-		"fwmodels/provider_model.go.erb",
-		"fwprovider/framework_provider.go.erb",
-		"fwtransport/framework_config.go.erb",
-		"sweeper/gcp_sweeper_test.go.erb",
 		"transport/config.go.erb",
 	}
 

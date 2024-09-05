@@ -89,7 +89,6 @@ properties:
     type: KeyValueLabels
     description: Text labels used for extra metadata and/or filtering
     min_version: 'beta'
-    immutable: false
   - name: 'expireTime'
     type: Time
     description: |

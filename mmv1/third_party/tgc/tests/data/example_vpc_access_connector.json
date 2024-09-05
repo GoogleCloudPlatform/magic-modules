@@ -10,8 +10,8 @@
       "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
       "data": {
         "ipCidrRange": "10.8.0.0/28",
-        "maxThroughput": 300,
-        "minThroughput": 200,
+        "minInstances": 2,
+        "maxInstances": 3,
         "network": "default",
         "machineType": "e2-micro"
       }

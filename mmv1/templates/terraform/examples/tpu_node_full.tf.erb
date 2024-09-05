@@ -23,6 +23,7 @@ resource "google_tpu_node" "<%= ctx[:primary_resource_id] %>" {
   use the default network in order to still demonstrate using as many fields as
   possible on the resource.
 -%>
+
   network = google_service_networking_connection.private_service_connection.network
 
   labels = {

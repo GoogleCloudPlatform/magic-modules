@@ -116,7 +116,6 @@ properties:
     type: KeyValueLabels
     description: |
       User-defined labels for the EntryType.
-    immutable: false
   - name: 'typeAliases'
     type: Array
     description: |

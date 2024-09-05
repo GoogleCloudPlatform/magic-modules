@@ -20,6 +20,9 @@ resource "google_data_loss_prevention_discovery_config" "{{$.PrimaryResourceId}}
                     types = ["TABLE_MODIFIED_TIMESTAMP"]
                     frequency = "UPDATE_FREQUENCY_DAILY"
                 }
+                inspect_template_modified_cadence {
+                    frequency = "UPDATE_FREQUENCY_DAILY"
+                }
             }
         }
     }

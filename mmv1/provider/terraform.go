@@ -25,6 +25,7 @@ import (
 	"path"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"strings"
 	"time"
 
@@ -97,14 +98,14 @@ func (t *Terraform) GenerateObjects(outputFolder string, generateCode, generateD
 }
 
 func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPath string, generateCode, generateDocs bool) {
-	templateData := NewTemplateData(outputFolder, t.Version)
+	templateData := NewTemplateData(outputFolder, t.TargetVersionName)
 
 	if !object.IsExcluded() {
 		log.Printf("Generating %s resource", object.Name)
 		t.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
 
 		if generateCode {
-			log.Printf("Generating %s tests", object.Name)
+			// log.Printf("Generating %s tests", object.Name)
 			t.GenerateResourceTests(object, *templateData, outputFolder)
 			t.GenerateResourceSweeper(object, *templateData, outputFolder)
 		}
@@ -143,7 +144,7 @@ func (t *Terraform) GenerateResourceTests(object api.Resource, templateData Temp
 	eligibleExample := false
 	for _, example := range object.Examples {
 		if !example.SkipTest {
-			if object.ProductMetadata.VersionObjOrClosest(t.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) > 0 {
+			if object.ProductMetadata.VersionObjOrClosest(t.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) >= 0 {
 				eligibleExample = true
 				break
 			}
@@ -190,7 +191,7 @@ func (t *Terraform) GenerateOperation(outputFolder string) {
 		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 	}
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_operation.go", google.Underscore(t.Product.Name)))
-	templateData := NewTemplateData(outputFolder, t.Version)
+	templateData := NewTemplateData(outputFolder, t.TargetVersionName)
 	templateData.GenerateOperationFile(targetFilePath, *asyncObjects[0])
 }
 
@@ -198,7 +199,7 @@ func (t *Terraform) GenerateOperation(outputFolder string) {
 // IAM policies separately from the resource itself
 // def generate_iam_policy(pwd, data, generate_code, generate_docs)
 func (t *Terraform) GenerateIamPolicy(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
-	if generateCode && object.IamPolicy != nil && (object.IamPolicy.MinVersion == "" || object.IamPolicy.MinVersion >= t.TargetVersionName) {
+	if generateCode && object.IamPolicy != nil && (object.IamPolicy.MinVersion == "" || slices.Index(product.ORDER, object.IamPolicy.MinVersion) <= slices.Index(product.ORDER, t.TargetVersionName)) {
 		productName := t.Product.ApiName
 		targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
 		if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
@@ -392,7 +393,7 @@ func (t Terraform) CopyFileList(outputFolder string, files map[string]string) {
 func (t Terraform) CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string) {
 	t.generateResourcesForVersion(products)
 	files := t.getCommonCompileFiles(t.TargetVersionName)
-	templateData := NewTemplateData(outputFolder, t.Version)
+	templateData := NewTemplateData(outputFolder, t.TargetVersionName)
 	t.CompileFileList(outputFolder, files, *templateData, products)
 }
 
@@ -898,7 +899,7 @@ func (t *Terraform) generateResourcesForVersion(products []*api.Product) {
 				t.IAMResourceCount += 3
 
 				if !(iamPolicy.MinVersion != "" && iamPolicy.MinVersion < t.TargetVersionName) {
-					iamClassName = fmt.Sprintf("%s.Resource%s", service, object.ResourceName())
+					iamClassName = fmt.Sprintf("%s.%s", service, object.ResourceName())
 				}
 			}
 
@@ -993,10 +994,10 @@ func (t Terraform) SupportedProviderVersions() []string {
 		if i == 0 {
 			continue
 		}
-		supported = append(supported, v)
-		if v == t.TargetVersionName {
+		if i > slices.Index(product.ORDER, t.TargetVersionName) {
 			break
 		}
+		supported = append(supported, v)
 	}
 	return supported
 }

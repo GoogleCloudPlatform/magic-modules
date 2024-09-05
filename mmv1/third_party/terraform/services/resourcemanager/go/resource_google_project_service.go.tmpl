@@ -1,21 +1,24 @@
 package resourcemanager
 
 import (
-	"fmt"
-	"log"
-	"strings"
-	"time"
+    "fmt"
+    "log"
+    "strings"
+    "time"
+	{{- if ne $.TargetVersionName "ga" }}
+    "regexp"
+	{{- end }}
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	tpgserviceusage "github.com/hashicorp/terraform-provider-google/google/services/serviceusage"
-	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-	"github.com/hashicorp/terraform-provider-google/google/verify"
+    tpgserviceusage "github.com/hashicorp/terraform-provider-google/google/services/serviceusage"
+    "github.com/hashicorp/terraform-provider-google/google/tpgresource"
+    transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+    "github.com/hashicorp/terraform-provider-google/google/verify"
 
-	"google.golang.org/api/googleapi"
-	"google.golang.org/api/serviceusage/v1"
+    "google.golang.org/api/googleapi"
+    "google.golang.org/api/serviceusage/v1"
 )
 
 // These services can only be enabled as a side-effect of enabling other services,
@@ -331,6 +334,11 @@ func disableServiceUsageProjectService(service, project string, d *schema.Resour
 		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.ServiceUsageServiceBeingActivated},
 	})
 	if err != nil {
+		{{- if ne $.TargetVersionName "ga" }}
+		if res, _ := regexp.MatchString("COMMON_SU_SERVICE_HAS_USAGE", err.Error()); res {
+		return fmt.Errorf("Error disabling service %q for project %q: %v", service, project, strings.Replace(err.Error(), "check_if_service_has_usage=SKIP", "check_if_service_has_usage_on_destroy=false", -1))
+		 }
+		{{- end }}
 		return fmt.Errorf("Error disabling service %q for project %q: %v", service, project, err)
 	}
 	return nil

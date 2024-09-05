@@ -28,15 +28,12 @@ id_format: projects/{{project}}/locations/{{location}}/streams/{{stream_id}}
 import_format:
   ['projects/{{project}}/locations/{{location}}/streams/{{stream_id}}']
 virtual_fields:
-  - !ruby/object:Api::Type::Enum
+  - !ruby/object:Api::Type::String
     name: 'desired_state'
     description: |
       Desired state of the Stream. Set this field to `RUNNING` to start the stream, and `PAUSED` to pause the stream.
-    values:
-      - :NOT_STARTED
-      - :RUNNING
-      - :PAUSED
-    default_value: :NOT_STARTED
+      Possible values: NOT_STARTED, RUNNING, PAUSED. Default: NOT_STARTED
+    default_value: NOT_STARTED
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: 'templates/terraform/constants/datastream_stream.go.erb'
   post_create: 'templates/terraform/post_create/datastream_stream.go.erb'
@@ -110,6 +107,23 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'datastream_stream_sql_server'
     primary_resource_id: 'default'
+    skip_test: true
+    vars:
+      database_name: 'db'
+      database_password: 'password'
+      database_user: 'user'
+      deletion_protection: 'true'
+      destination_connection_profile_id: 'destination-profile'
+      source_connection_profile_id: 'source-profile'
+      sql_server_name: 'sql-server'
+      sql_server_root_password: 'root-password'
+      stream_id: 'stream'
+    test_vars_overrides:
+      deletion_protection: 'false'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'datastream_stream_sql_server_change_tables'
+    primary_resource_id: 'default'
+    # Requires SQLServer Configuration
     skip_test: true
     vars:
       database_name: 'db'
@@ -1002,6 +1016,20 @@ properties:
             default_from_api: true
             validation: !ruby/object:Provider::Terraform::Validation
               function: 'validation.IntAtLeast(0)'
+          - !ruby/object:Api::Type::NestedObject
+            name: 'transactionLogs'
+            allow_empty_object: true
+            send_empty_value: true
+            description: |
+              CDC reader reads from transaction logs.
+            properties: []
+          - !ruby/object:Api::Type::NestedObject
+            name: 'changeTables'
+            allow_empty_object: true
+            send_empty_value: true
+            description: |
+              CDC reader reads from change tables.
+            properties: []
   - !ruby/object:Api::Type::NestedObject
     name: 'destinationConfig'
     required: true

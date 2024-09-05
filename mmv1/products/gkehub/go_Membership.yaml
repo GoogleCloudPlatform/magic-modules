@@ -135,7 +135,6 @@ properties:
     type: KeyValueLabels
     description: |
       Labels to apply to this membership.
-    immutable: false
   - name: 'endpoint'
     type: NestedObject
     description: |
