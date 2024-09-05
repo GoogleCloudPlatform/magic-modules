@@ -701,15 +701,6 @@ func checkExceptionList(filePath string) bool {
 		"iam/example_config_body/privateca",
 		"iam/example_config_body/vertex_ai",
 		"iam/example_config_body/app_engine_",
-
-		// TODO: remove the following files from the exception list after all of the services are migrated to Go
-		// It will generate diffs when partial services are migrated.
-		"provider/provider_mmv1_resources.go.erb",
-		"provider/provider.go.erb",
-		"fwmodels/provider_model.go.erb",
-		"fwprovider/framework_provider.go.erb",
-		"fwtransport/framework_config.go.erb",
-		"sweeper/gcp_sweeper_test.go.erb",
 		"transport/config.go.erb",
 	}
 
