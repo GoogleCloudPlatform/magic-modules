@@ -85,7 +85,7 @@ func DataSourceGoogleBigQueryTablesRead(d *schema.ResourceData, meta interface{}
 			return fmt.Errorf("Error retrieving tables: %s", err)
 		}
 
-		pageTables := flattenDatasourceGoogleBigQueryTablesList(res["tables"])
+		pageTables := flattenDataSourceGoogleBigQueryTablesList(res["tables"])
 		tables = append(tables, pageTables...)
 
 		pToken, ok := res["nextPageToken"]
@@ -106,29 +106,29 @@ func DataSourceGoogleBigQueryTablesRead(d *schema.ResourceData, meta interface{}
 	return nil
 }
 
-func flattenDatasourceGoogleBigQueryTablesList(v interface{}) []map[string]interface{} {
+func flattenDataSourceGoogleBigQueryTablesList(res interface{}) []map[string]interface{} {
 
-	if v == nil {
+	if res == nil {
 		return make([]map[string]interface{}, 0)
 	}
 
-	ls := v.([]interface{})
+	ls := res.([]interface{})
 
 	tables := make([]map[string]interface{}, 0, len(ls))
 
 	for _, raw := range ls {
-		o := raw.(map[string]interface{})
+		output := raw.(map[string]interface{})
 
 		var mLabels map[string]interface{}
 		var mTableName string
 
-		if oLabels, ok := o["labels"].(map[string]interface{}); ok {
+		if oLabels, ok := output["labels"].(map[string]interface{}); ok {
 			mLabels = oLabels
 		} else {
 			mLabels = make(map[string]interface{}) // Initialize as an empty map if labels are missing
 		}
 
-		if oTableReference, ok := o["tableReference"].(map[string]interface{}); ok {
+		if oTableReference, ok := output["tableReference"].(map[string]interface{}); ok {
 			if tableID, ok := oTableReference["tableId"].(string); ok {
 				mTableName = tableID
 			}

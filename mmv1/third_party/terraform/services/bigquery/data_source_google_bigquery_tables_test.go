@@ -61,7 +61,6 @@ func testAccDataSourceGoogleBigqueryTables_basic(context map[string]interface{})
 
   data "google_bigquery_tables" "example" {
     dataset_id = google_bigquery_table.test.dataset_id
-    depends_on = [google_bigquery_table.test]
   }
 `, context)
 }
