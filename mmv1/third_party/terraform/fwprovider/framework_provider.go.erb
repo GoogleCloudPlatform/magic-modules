@@ -7,6 +7,7 @@ import (
     "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
     "github.com/hashicorp/terraform-plugin-framework/datasource"
     "github.com/hashicorp/terraform-plugin-framework/function"
+    "github.com/hashicorp/terraform-plugin-framework/ephemeral"
     "github.com/hashicorp/terraform-plugin-framework/path"
     "github.com/hashicorp/terraform-plugin-framework/provider"
     "github.com/hashicorp/terraform-plugin-framework/provider/metaschema"
@@ -15,6 +16,7 @@ import (
     "github.com/hashicorp/terraform-plugin-framework/schema/validator"
     "github.com/hashicorp/terraform-plugin-framework/types"
 
+    eph "github.com/hashicorp/terraform-provider-google/google/ephemeral"
     "github.com/hashicorp/terraform-provider-google/google/functions"
     "github.com/hashicorp/terraform-provider-google/google/fwmodels"
     "github.com/hashicorp/terraform-provider-google/google/fwtransport"
@@ -294,5 +296,12 @@ func (p *FrameworkProvider) Functions(_ context.Context) []func() function.Funct
 		functions.NewRegionFromIdFunction,
 		functions.NewRegionFromZoneFunction,
 		functions.NewZoneFromIdFunction,
+	}
+}
+
+// EphemeralResources defines the resources that are of ephemral type implemented in the provider.
+func (p *FrameworkProvider) EphemeralResources(_ context.Context) []func() ephemeral.EphemeralResource {
+	return []func() ephemeral.EphemeralResource{
+		eph.NewTestEphemeral,
 	}
 }
