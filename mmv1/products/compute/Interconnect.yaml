@@ -145,7 +145,6 @@ properties:
       Customer name, to put in the Letter of Authorization as the party authorized to request a
       crossconnect.
     immutable: true
-    required: true
   - !ruby/object:Api::Type::Enum
     name: 'operationalStatus'
     description: |
