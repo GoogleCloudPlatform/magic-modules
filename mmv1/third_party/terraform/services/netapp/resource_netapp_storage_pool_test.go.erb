@@ -139,7 +139,7 @@ resource "google_netapp_storage_pool" "test_pool" {
 }
 
 
-func testAccNetappstoragePool_sStoragePoolCreateExample_autoTieredPool(context map[string]interface{}) string {
+func testAccNetappStoragePool_storagePoolCreateExample_autoTieredPool(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_network" "peering_network" {
   name = "tf-test-network%{random_suffix}"
