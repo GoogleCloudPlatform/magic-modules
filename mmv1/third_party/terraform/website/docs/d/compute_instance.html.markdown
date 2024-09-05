@@ -131,7 +131,7 @@ The following arguments are supported:
 
 * `labels` - A set of key/value label pairs assigned to the disk.
 
-* `resource_policies` - A self_link of a resource policy attached to the disk
+* `resource_policies` - A list of self_links to resource policies attached to the selected `boot_disk`
 
 <a name="nested_scratch_disk"></a>The `scratch_disk` block supports:
 
