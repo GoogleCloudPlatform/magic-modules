@@ -14,6 +14,8 @@
 package product
 
 import (
+	"log"
+
 	"golang.org/x/exp/slices"
 )
 
@@ -40,12 +42,14 @@ type Version struct {
 	Name string
 }
 
-// def validate
-//   super
-//   check :cai_base_url, type: String, required: false
-//   check :base_url, type: String, required: true
-//   check :name, type: String, allowed: ORDER, required: true
-// end
+func (v *Version) Validate(pName string) {
+	if v.Name == "" {
+		log.Fatalf("Missing `name` in `version` for product %s", pName)
+	}
+	if v.BaseUrl == "" {
+		log.Fatalf("Missing `base_url` in `version` for product %s", pName)
+	}
+}
 
 // def to_s
 //   "//{name}: //{base_url}"

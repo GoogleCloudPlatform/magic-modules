@@ -19,9 +19,3 @@ type Sweeper struct {
 	// eligibility for deletion for generated resources
 	SweepableIdentifierField string `yaml:"sweepable_identifier_field"`
 }
-
-// def validate
-//   super
-
-//   check :sweepable_identifier_field, type: String
-// end

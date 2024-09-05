@@ -70,6 +70,7 @@ examples:
     min_version: 'beta'
     vars:
       name: 'example_feature_view_vector_search'
+    skip_vcr: true
 parameters:
   - name: 'featureOnlineStore'
     type: String
@@ -106,7 +107,6 @@ properties:
     type: KeyValueLabels
     description: |
       A set of key/value label pairs to assign to this FeatureView.
-    immutable: false
   - name: 'syncConfig'
     type: NestedObject
     description: |

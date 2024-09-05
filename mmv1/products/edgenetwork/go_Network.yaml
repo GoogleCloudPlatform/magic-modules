@@ -86,7 +86,7 @@ properties:
       `projects/{{project}}/locations/{{location}}/zones/{{zone}}/networks/{{network_id}}`
     output: true
   - name: 'labels'
-    type: KeyValuePairs
+    type: KeyValueLabels
     description: |
       Labels associated with this resource.
     required: false

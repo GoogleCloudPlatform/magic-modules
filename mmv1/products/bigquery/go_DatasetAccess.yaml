@@ -130,6 +130,7 @@ properties:
       - 'dataset'
       - 'routine'
     diff_suppress_func: 'resourceBigQueryDatasetAccessIamMemberDiffSuppress'
+    custom_expand: 'templates/terraform/custom_expand/go/string_to_lower_case.go.tmpl'
   - name: 'groupByEmail'
     type: String
     description: An email address of a Google Group to grant access to.
@@ -143,6 +144,7 @@ properties:
       - 'dataset'
       - 'routine'
     diff_suppress_func: 'resourceBigQueryDatasetAccessIamMemberDiffSuppress'
+    custom_expand: 'templates/terraform/custom_expand/go/string_to_lower_case.go.tmpl'
   - name: 'domain'
     type: String
     description: |

@@ -46,7 +46,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 1000
@@ -116,6 +116,18 @@ examples:
     min_version: 'beta'
     vars:
       health_check_name: 'tcp-health-check'
+  - name: 'compute_health_check_http_source_regions'
+    primary_resource_id: 'http-health-check-with-source-regions'
+    vars:
+      health_check_name: 'http-health-check'
+  - name: 'compute_health_check_https_source_regions'
+    primary_resource_id: 'https-health-check-with-source-regions'
+    vars:
+      health_check_name: 'https-health-check'
+  - name: 'compute_health_check_tcp_source_regions'
+    primary_resource_id: 'tcp-health-check-with-source-regions'
+    vars:
+      health_check_name: 'tcp-health-check'
 parameters:
 properties:
   - name: 'checkIntervalSec'
@@ -179,7 +191,6 @@ properties:
 
       * The health check cannot be used with BackendService nor with managed
       instance group auto-healing.
-    min_version: 'beta'
     item_type:
       type: String
     min_size: 3

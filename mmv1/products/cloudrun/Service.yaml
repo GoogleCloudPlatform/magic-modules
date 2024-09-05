@@ -851,7 +851,6 @@ properties:
                       name: csi
                       description: |-
                         A filesystem specified by the Container Storage Interface (CSI).
-                      min_version: beta
                       properties:
                         - !ruby/object:Api::Type::String
                           name: 'driver'
@@ -859,8 +858,7 @@ properties:
                           description: |-
                             Unique name representing the type of file system to be created. Cloud Run supports the following values:
                               * gcsfuse.run.googleapis.com: Mount a Google Cloud Storage bucket using GCSFuse. This driver requires the
-                                run.googleapis.com/execution-environment annotation to be set to "gen2" and
-                                run.googleapis.com/launch-stage set to "BETA" or "ALPHA".
+                                run.googleapis.com/execution-environment annotation to be unset or set to "gen2"
                         - !ruby/object:Api::Type::Boolean
                           name: 'readOnly'
                           default_from_api: true
@@ -876,9 +874,7 @@ properties:
                       name: nfs
                       description: |-
                         A filesystem backed by a Network File System share. This filesystem requires the
-                        run.googleapis.com/execution-environment annotation to be set to "gen2" and
-                        run.googleapis.com/launch-stage set to "BETA" or "ALPHA".
-                      min_version: beta
+                        run.googleapis.com/execution-environment annotation to be unset or set to "gen2"
                       properties:
                         - !ruby/object:Api::Type::String
                           name: server

@@ -81,7 +81,7 @@ if do_change {
 
 	// If user specified to wait for mirror operations, wait to reach target state
 	if d.Get("wait_for_mirror").(bool) == true {
-		err = NetAppVolumeReplicationWaitForMirror(d, meta, targetState)
+		err = NetappVolumeReplicationWaitForMirror(d, meta, targetState)
 		if err != nil {
 			return fmt.Errorf("Error waiting for volume replication to reach mirror_state==%s: %s", targetState, err)
 		}
