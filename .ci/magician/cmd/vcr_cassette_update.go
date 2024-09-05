@@ -127,7 +127,7 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 
 	fmt.Println("running tests in REPLAYING mode now")
 	// TODO: running only the compute service
-	replayingResult, replayingErr := vt.Run(vcr.Replaying, provider.Beta, []string{"./google-beta/services/compute"})
+	replayingResult, replayingErr := vt.Run(vcr.Replaying, provider.Beta, []string{"github.com/hashicorp/terraform-provider-google-beta/google-beta/services/compute"})
 
 	// upload replay build and test logs
 	buildLogPath := filepath.Join(rnr.GetCWD(), "testlogs", fmt.Sprintf("%s_test.log", vcr.Replaying.Lower()))
