@@ -28,7 +28,7 @@ references:
 docs:
 base_url: 'projects/{{project}}/regions/{{region}}/commitments'
 has_self_link: true
-skip_delete: true
+exclude_delete: true
 immutable: true
 timeouts:
   insert_minutes: 20

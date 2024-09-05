@@ -28,7 +28,7 @@ create_url: '{{parent}}/locations/global/quotaPreferences?quotaPreferenceId={{na
 update_url: '{{parent}}/locations/global/quotaPreferences/{{name}}?ignoreSafetyChecks={{ignore_safety_checks}}'
 update_verb: 'PATCH'
 update_mask: true
-skip_delete: true
+exclude_delete: true
 import_format:
   - '{{%parent}}/locations/global/quotaPreferences/{{name}}'
 timeouts:

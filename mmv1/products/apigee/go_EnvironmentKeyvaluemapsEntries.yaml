@@ -36,7 +36,7 @@ timeouts:
 autogen_async: true
 custom_code:
   custom_import: 'templates/terraform/custom_import/go/apigee_environment_keyvaluemaps_entries.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'apigee_environment_keyvaluemaps_entries_basic'
     primary_resource_id: 'apigee_environment_keyvaluemaps_entries'
