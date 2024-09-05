@@ -62,7 +62,7 @@ steps:
     entrypoint: "/workspace/.ci/scripts/go-plus/magician/exec.sh"
     id: contributor-membership-checker
     secretEnv:
-      ["GITHUB_TOKEN_MAGIC_MODULES", "GENERATE_DIFFS_TRIGGER", "DOWNSTREAM_GENERATION_AND_TEST_TRIGGER"]
+      ["GITHUB_TOKEN_MAGIC_MODULES", "DOWNSTREAM_GENERATION_AND_TEST_TRIGGER"]
     timeout: 8000s
     args:
       - "membership-checker"
