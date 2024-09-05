@@ -8,7 +8,7 @@ description: |-
 
 Get info about a Google Cloud Filestore instance.
 
-~> It may take a while for the attached tag bindings to be deleted after the project is scheduled to be deleted.
+~> It may take a while for the attached tag bindings to be deleted after the instance is scheduled to be deleted.
 
 ## Example Usage
 
@@ -29,12 +29,12 @@ output "instance_file_share_name" {
   value = data.google_filestore_instance.my_instance.file_shares.name
 }
 ```
-To create a project with a tag
+To create an instance with a tag
 
 ```hcl
-resource "google_filestore_instnace" "my_instance" {
-  name       = "My Project"
-  project_id = "your-project-id"
+resource "filestore_instnace" "my_instance" {
+  name       = "My instance"
+  instance_id = "your-instance-id"
   org_id     = "1234567"
   tags = {"1234567/env":"staging"}
 }
