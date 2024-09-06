@@ -1,3 +1,15 @@
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 --- !ruby/object:Api::Resource
 base_url: projects/{{project}}/locations/{{location}}/connections
 create_url: projects/{{project}}/locations/{{location}}/connections?connectionId={{connection_id}}
@@ -25,126 +37,6 @@ min_version: "beta"
 update_verb: :PATCH
 update_mask: true
 autogen_async: true
-properties:
-  - !ruby/object:Api::Type::NestedObject
-    properties:
-      - !ruby/object:Api::Type::String
-        name: githubApp
-        description:
-          "Required. Immutable. The GitHub Application that was installed to
-          the GitHub user or\norganization. \n Possible values:\n GIT_HUB_APP_UNSPECIFIED\nDEVELOPER_CONNECT\nFIREBASE"
-        required: true
-        immutable: true
-      - !ruby/object:Api::Type::NestedObject
-        properties:
-          - !ruby/object:Api::Type::String
-            name: oauthTokenSecretVersion
-            description:
-              "Required. A SecretManager resource containing the OAuth token
-              that authorizes\nthe connection. Format: `projects/*/secrets/*/versions/*`. "
-            required: true
-          - !ruby/object:Api::Type::String
-            name: username
-            description: "Output only. The username associated with this token. "
-            output: true
-        name: authorizerCredential
-        description:
-          "Represents an OAuth token of the account that authorized the Connection,\nand
-          associated metadata. "
-      - !ruby/object:Api::Type::String
-        name: appInstallationId
-        description: "Optional. GitHub App installation id. "
-      - !ruby/object:Api::Type::String
-        name: installationUri
-        description:
-          "Output only. The URI to navigate to in order to manage the installation
-          associated\nwith this GitHubConfig. "
-        output: true
-    name: githubConfig
-    description: "Configuration for connections to github.com. "
-  - !ruby/object:Api::Type::String
-    name: name
-    description: "Identifier. The resource name of the connection, in the format\n`projects/{project}/locations/{location}/connections/{connection_id}`. "
-    output: true
-  - !ruby/object:Api::Type::String
-    name: createTime
-    description: "Output only. [Output only] Create timestamp "
-    output: true
-  - !ruby/object:Api::Type::String
-    name: updateTime
-    description: "Output only. [Output only] Update timestamp "
-    output: true
-  - !ruby/object:Api::Type::String
-    name: deleteTime
-    description: "Output only. [Output only] Delete timestamp "
-    output: true
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: labels
-    output:
-    api_name:
-    description: "Optional. Labels as key value pairs "
-    min_version:
-    ignore_write:
-    update_verb:
-    update_url:
-    immutable:
-  - !ruby/object:Api::Type::NestedObject
-    properties:
-      - !ruby/object:Api::Type::String
-        name: stage
-        description:
-          "Output only. Current step of the installation process. \n Possible
-          values:\n STAGE_UNSPECIFIED\nPENDING_CREATE_APP\nPENDING_USER_OAUTH\nPENDING_INSTALL_APP\nCOMPLETE"
-        output: true
-      - !ruby/object:Api::Type::String
-        name: message
-        description:
-          "Output only. Message of what the user should do next to continue
-          the installation.\nEmpty string if the installation is already complete. "
-        output: true
-      - !ruby/object:Api::Type::String
-        name: actionUri
-        description:
-          "Output only. Link to follow for next action. Empty string if the
-          installation is already\ncomplete. "
-        output: true
-    name: installationState
-    description:
-      "Describes stage and necessary actions to be taken by the\nuser to
-      complete the installation. Used for GitHub and GitHub Enterprise\nbased connections. "
-    output: true
-  - !ruby/object:Api::Type::Boolean
-    name: disabled
-    description:
-      "Optional. If disabled is set to true, functionality is disabled for
-      this connection.\nRepository based API methods and webhooks processing for repositories
-      in\nthis connection will be disabled. "
-  - !ruby/object:Api::Type::Boolean
-    name: reconciling
-    description:
-      "Output only. Set to true when the connection is being set up or updated
-      in the\nbackground. "
-    output: true
-  - !ruby/object:Api::Type::KeyValueAnnotations
-    name: annotations
-    output:
-    api_name:
-    description: "Optional. Allows clients to store small amounts of arbitrary data. "
-    min_version:
-    ignore_write:
-    update_verb:
-    update_url:
-    immutable:
-  - !ruby/object:Api::Type::String
-    name: etag
-    description:
-      "Optional. This checksum is computed by the server based on the value
-      of other\nfields, and may be sent on update and delete requests to ensure the\nclient
-      has an up-to-date value before proceeding. "
-  - !ruby/object:Api::Type::String
-    name: uid
-    description: "Output only. A system-assigned unique identifier for a the GitRepositoryLink. "
-    output: true
 parameters:
   - !ruby/object:Api::Type::String
     name: location
@@ -181,3 +73,107 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: error
     message: message
+properties:
+  - !ruby/object:Api::Type::NestedObject
+    name: githubConfig
+    description: "Configuration for connections to github.com. "
+    properties:
+      - !ruby/object:Api::Type::String
+        name: githubApp
+        description:
+          "Required. Immutable. The GitHub Application that was installed to
+          the GitHub user or\norganization. \n Possible values:\n GIT_HUB_APP_UNSPECIFIED\nDEVELOPER_CONNECT\nFIREBASE"
+        required: true
+        immutable: true
+      - !ruby/object:Api::Type::NestedObject
+        name: authorizerCredential
+        description:
+          "Represents an OAuth token of the account that authorized the Connection,\nand
+          associated metadata. "
+        properties:
+          - !ruby/object:Api::Type::String
+            name: oauthTokenSecretVersion
+            description:
+              "Required. A SecretManager resource containing the OAuth token
+              that authorizes\nthe connection. Format: `projects/*/secrets/*/versions/*`. "
+            required: true
+          - !ruby/object:Api::Type::String
+            name: username
+            description: "Output only. The username associated with this token. "
+            output: true
+      - !ruby/object:Api::Type::String
+        name: appInstallationId
+        description: "Optional. GitHub App installation id. "
+      - !ruby/object:Api::Type::String
+        name: installationUri
+        description:
+          "Output only. The URI to navigate to in order to manage the installation
+          associated\nwith this GitHubConfig. "
+        output: true
+  - !ruby/object:Api::Type::String
+    name: name
+    description: "Identifier. The resource name of the connection, in the format\n`projects/{project}/locations/{location}/connections/{connection_id}`. "
+    output: true
+  - !ruby/object:Api::Type::String
+    name: createTime
+    description: "Output only. [Output only] Create timestamp "
+    output: true
+  - !ruby/object:Api::Type::String
+    name: updateTime
+    description: "Output only. [Output only] Update timestamp "
+    output: true
+  - !ruby/object:Api::Type::String
+    name: deleteTime
+    description: "Output only. [Output only] Delete timestamp "
+    output: true
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: labels
+    description: "Optional. Labels as key value pairs "
+  - !ruby/object:Api::Type::NestedObject
+    name: installationState
+    description:
+      "Describes stage and necessary actions to be taken by the\nuser to
+      complete the installation. Used for GitHub and GitHub Enterprise\nbased connections. "
+    output: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: stage
+        description:
+          "Output only. Current step of the installation process. \n Possible
+          values:\n STAGE_UNSPECIFIED\nPENDING_CREATE_APP\nPENDING_USER_OAUTH\nPENDING_INSTALL_APP\nCOMPLETE"
+        output: true
+      - !ruby/object:Api::Type::String
+        name: message
+        description:
+          "Output only. Message of what the user should do next to continue
+          the installation.\nEmpty string if the installation is already complete. "
+      - !ruby/object:Api::Type::String
+        name: actionUri
+        description:
+          "Output only. Link to follow for next action. Empty string if the
+          installation is already\ncomplete. "
+  - !ruby/object:Api::Type::Boolean
+    name: disabled
+    description:
+      "Optional. If disabled is set to true, functionality is disabled for
+      this connection.\nRepository based API methods and webhooks processing for repositories
+      in\nthis connection will be disabled. "
+  - !ruby/object:Api::Type::Boolean
+    name: reconciling
+    description:
+      "Output only. Set to true when the connection is being set up or updated
+      in the\nbackground. "
+    output: true
+  - !ruby/object:Api::Type::KeyValueAnnotations
+    name: annotations
+    description: "Optional. Allows clients to store small amounts of arbitrary data. "
+  - !ruby/object:Api::Type::String
+    name: etag
+    description:
+      "Optional. This checksum is computed by the server based on the value
+      of other\nfields, and may be sent on update and delete requests to ensure the\nclient
+      has an up-to-date value before proceeding. "
+  - !ruby/object:Api::Type::String
+    name: uid
+    description: "Output only. A system-assigned unique identifier for a the GitRepositoryLink. "
+    output: true
