@@ -510,7 +510,7 @@ func formatTestsAnalytics(data analytics) (string, error) {
 }
 
 func formatNonExercisedTests(data nonExercisedTests) (string, error) {
-	return formatComment("recording_mode_results.tmpl", nonExercisedTestsTmplText, data)
+	return formatComment("non_exercised_tests.tmpl", nonExercisedTestsTmplText, data)
 }
 
 func formatWithReplayFailedTests(data withReplayFailedTests) (string, error) {
