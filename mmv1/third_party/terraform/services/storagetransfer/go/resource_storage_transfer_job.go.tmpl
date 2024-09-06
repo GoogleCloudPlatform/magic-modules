@@ -393,6 +393,7 @@ func transferOptionsSchema() *schema.Schema {
 					ValidateFunc: validation.StringInSlice([]string{"DIFFERENT", "NEVER", "ALWAYS"}, false),
 					Description:  `When to overwrite objects that already exist in the sink. If not set, overwrite behavior is determined by overwriteObjectsAlreadyExistingInSink.`,
 				},
+				"metadata_options": metadataOptionsSchema(),
 			},
 		},
 		Description: `Characteristics of how to treat files from datasource and sink during job. If the option delete_objects_unique_in_sink is true, object conditions based on objects' last_modification_time are ignored and do not exclude objects in a data source or a data sink.`,
@@ -595,6 +596,63 @@ func azureBlobStorageDataSchema() *schema.Resource {
 			{{- end }}
 		},
 	}
+}
+
+func metadataOptionsSchema() *schema.Schema {
+    return &schema.Schema{
+        Type:     schema.TypeList,
+        Optional: true,
+        MaxItems: 1,
+        Elem: &schema.Resource{
+            Schema: map[string]*schema.Schema{
+                "symlink": {
+                    Type:         schema.TypeString,
+                    Optional:     true,
+                    ValidateFunc: validation.StringInSlice([]string{"SYMLINK_UNSPECIFIED","SYMLINK_SKIP","SYMLINK_PRESERVE"}, false),
+                },
+                "mode": {
+                    Type:         schema.TypeString,
+                    Optional:     true,
+                    ValidateFunc: validation.StringInSlice([]string{"MODE_UNSPECIFIED","MODE_SKIP","MODE_PRESERVE"}, false),
+                },
+                "gid": {
+                    Type:         schema.TypeString,
+                    Optional:     true,
+                    ValidateFunc: validation.StringInSlice([]string{"GID_UNSPECIFIED","GID_SKIP","GID_NUMBER"}, false),
+                },
+                "uid": {
+                    Type:         schema.TypeString,
+                    Optional:     true,
+                    ValidateFunc: validation.StringInSlice([]string{"UID_UNSPECIFIED","UID_SKIP","UID_NUMBER"}, false),
+                },
+                "acl": {
+                    Type:         schema.TypeString,
+                    Optional:     true,
+                    ValidateFunc: validation.StringInSlice([]string{"ACL_UNSPECIFIED","ACL_DESTINATION_BUCKET_DEFAULT","ACL_PRESERVE"}, false),
+                },
+                "storage_class": {
+                    Type:         schema.TypeString,
+                    Optional:     true,
+                    ValidateFunc: validation.StringInSlice([]string{"STORAGE_CLASS_UNSPECIFIED","STORAGE_CLASS_DESTINATION_BUCKET_DEFAULT","STORAGE_CLASS_PRESERVE","STORAGE_CLASS_STANDARD","STORAGE_CLASS_NEARLINE","STORAGE_CLASS_COLDLINE","STORAGE_CLASS_ARCHIVE"}, false),
+                },
+                "temporary_hold": {
+                    Type:         schema.TypeString,
+                    Optional:     true,
+                    ValidateFunc: validation.StringInSlice([]string{"TEMPORARY_HOLD_UNSPECIFIED","TEMPORARY_HOLD_SKIP","TEMPORARY_HOLD_PRESERVE"}, false),
+                },
+                "kms_key": {
+                    Type:         schema.TypeString,
+                    Optional:     true,
+                    ValidateFunc: validation.StringInSlice([]string{"KMS_KEY_UNSPECIFIED","KMS_KEY_DESTINATION_BUCKET_DEFAULT","KMS_KEY_PRESERVE"}, false),
+                },
+                "time_created": {
+                    Type:         schema.TypeString,
+                    Optional:     true,
+                    ValidateFunc: validation.StringInSlice([]string{"TIME_CREATED_UNSPECIFIED","TIME_CREATED_SKIP","TIME_CREATED_PRESERVE_AS_CUSTOM_TIME"}, false),
+                },
+            },
+        },
+    }
 }
 
 func diffSuppressEmptyStartTimeOfDay(k, old, new string, d *schema.ResourceData) bool {
@@ -1200,6 +1258,7 @@ func expandTransferOptions(options []interface{}) *storagetransfer.TransferOptio
 		DeleteObjectsUniqueInSink:             option["delete_objects_unique_in_sink"].(bool),
 		OverwriteObjectsAlreadyExistingInSink: option["overwrite_objects_already_existing_in_sink"].(bool),
 		OverwriteWhen:                         option["overwrite_when"].(string),
+		MetadataOptions:                       expandMetadataOptions(option["metadata_options"].([]interface{})),
 	}
 }
 
@@ -1209,6 +1268,7 @@ func flattenTransferOption(option *storagetransfer.TransferOptions) []map[string
 		"delete_objects_unique_in_sink":              option.DeleteObjectsUniqueInSink,
 		"overwrite_objects_already_existing_in_sink": option.OverwriteObjectsAlreadyExistingInSink,
 		"overwrite_when":                             option.OverwriteWhen,
+		"metadata_options":                           flattenMetadataOptions(option.MetadataOptions),
 	}
 
 	return []map[string]interface{}{data}
@@ -1270,6 +1330,46 @@ func flattenTransferSpec(transferSpec *storagetransfer.TransferSpec, d *schema.R
 	}
 
 	return []map[string]interface{}{data}
+}
+
+func expandMetadataOptions(metadataOptions []interface{}) *storagetransfer.MetadataOptions {
+    if len(metadataOptions) == 0 || metadataOptions[0] == nil {
+        return nil
+    }
+
+    metadataOption := metadataOptions[0].(map[string]interface{})
+    return &storagetransfer.MetadataOptions{
+        Symlink:        metadataOption["symlink"].(string),
+        Mode:           metadataOption["mode"].(string),
+        Gid:            metadataOption["gid"].(string),
+        Uid:            metadataOption["uid"].(string),
+        Acl:            metadataOption["acl"].(string),
+        StorageClass:   metadataOption["storageClass"].(string),
+        TemporaryHold:  metadataOption["temporaryHold"].(string),
+        KmsKey:         metadataOption["kmsKey"].(string),
+        TimeCreated:    metadataOption["timeCreated"].(string),
+    }
+}
+
+// Define flattenMetadataOptions function
+func flattenMetadataOptions(metadataOptions *storagetransfer.MetadataOptions) []map[string]interface{} {
+    if metadataOptions == nil {
+        return nil
+    }
+
+    data := map[string]interface{}{
+        "symlink":        metadataOptions.Symlink,
+        "mode":           metadataOptions.Mode,
+        "gid":            metadataOptions.Gid,
+        "uid":            metadataOptions.Uid,
+        "acl":            metadataOptions.Acl,
+        "storageClass":   metadataOptions.StorageClass,
+        "temporaryHold":  metadataOptions.TemporaryHold,
+        "kmsKey":         metadataOptions.KmsKey,
+        "timeCreated":    metadataOptions.TimeCreated,
+    }
+
+    return []map[string]interface{}{data}
 }
 
 func usingPosix(transferSpec *storagetransfer.TransferSpec) bool {
