@@ -49,6 +49,5 @@ resource "apigee_datacollector" "<%= ctx[:primary_resource_id] %>_test" {
     name        = "dc_example"
     description = "Example Data Collector"
     type        = "STRING"
-  }"
-  org        = google_apigee_organization.org.name
+    org        = google_apigee_organization.org.name
 }
