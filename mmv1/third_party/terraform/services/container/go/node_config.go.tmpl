@@ -824,14 +824,13 @@ func expandNodeConfigDefaults(configured interface{}) *container.NodeConfigDefau
 			},
 		}
 	}
-{{- if ne $.TargetVersionName "ga" }}
 	if v, ok := config["gcfs_config"]; ok && len(v.([]interface{})) > 0 {
 		gcfsConfig := v.([]interface{})[0].(map[string]interface{})
 		nodeConfigDefaults.GcfsConfig = &container.GcfsConfig{
 			Enabled: gcfsConfig["enabled"].(bool),
 		}
 	}
-{{- end }}
+
 	return nodeConfigDefaults
 }
 

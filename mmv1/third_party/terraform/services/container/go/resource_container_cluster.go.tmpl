@@ -158,9 +158,7 @@ func clusterSchemaNodePoolDefaults() *schema.Schema {
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"containerd_config": schemaContainerdConfig(),
-{{- if ne $.TargetVersionName "ga" }}
 							"gcfs_config": schemaGcfsConfig(),
-{{- end }}
 							"insecure_kubelet_readonly_port_enabled": schemaInsecureKubeletReadonlyPortEnabled(),
 							"logging_variant": schemaLoggingVariant(),
 						},
@@ -4351,7 +4349,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 	}
 
-{{ if ne $.TargetVersionName `ga` -}}
 	if d.HasChange("node_pool_defaults") && d.HasChange("node_pool_defaults.0.node_config_defaults.0.gcfs_config") {
 		if v, ok := d.GetOk("node_pool_defaults.0.node_config_defaults.0.gcfs_config"); ok {
 			gcfsConfig := v.([]interface{})[0].(map[string]interface{})
@@ -4372,7 +4369,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 			log.Printf("[INFO] GKE cluster %s default gcfs config has been updated", d.Id())
 		}
 	}
-{{- end }}
 
 	if d.HasChange("security_posture_config") {
 		req := &container.UpdateClusterRequest{
