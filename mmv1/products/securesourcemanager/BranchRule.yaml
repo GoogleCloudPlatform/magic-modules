@@ -49,91 +49,91 @@ parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
     description: |
-      'The location for the BranchRule.'
+      The location for the BranchRule.
     required: true
     url_param_only: true
   - !ruby/object:Api::Type::String
     name: 'repository_id'
     description: |
-      'The ID of the repository for the BranchRule.'
+      The ID of the repository for the BranchRule.
     required: true
     url_param_only: true
   - !ruby/object:Api::Type::String
     name: 'branch_rule_id'
     description: |
-      'The ID for the BranchRule.'
+      The ID for the BranchRule.
     required: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
-      'The resource name for the BranchRule. The name should be of the format:
-      projects/{project}/locations/{location}/repositories/{repository}/branchRules/{branch_rule}.'
+      The resource name for the BranchRule. The name should be of the format:
+      projects/{project}/locations/{location}/repositories/{repository}/branchRules/{branch_rule}.
     output: true
   - !ruby/object:Api::Type::String
     name: 'uid'
     description: |
-      'Unique identifier of the BranchRule.'
+      Unique identifier of the BranchRule.
     output: true
   - !ruby/object:Api::Type::Time
     name: 'createTime'
     description: |
-      'Time the BranchRule was created in UTC.'
+      Time the BranchRule was created in UTC.
     output: true
   - !ruby/object:Api::Type::Time
     name: 'updateTime'
     description: |
-      'Time the BranchRule was updated in UTC.'
+      Time the BranchRule was updated in UTC.
     output: true
   - !ruby/object:Api::Type::Map
     name: 'annotations'
     description: |
-      'User annotations. These attributes can only be set and used by the user.'
+      User annotations. These attributes can only be set and used by the user.
     key_type: Api::Type::String
     value_type: Api::Type::String
   - !ruby/object:Api::Type::String
     name: 'etag'
     description: |
-      'This checksum is computed by the server based on the value of other fields, and may be sent on update and delete requests to ensure the client has an up-to-date value before proceeding.'
+      This checksum is computed by the server based on the value of other fields, and may be sent on update and delete requests to ensure the client has an up-to-date value before proceeding.
   - !ruby/object:Api::Type::String
     name: 'includePattern'
     description: |
-      'The pattern of the branch that can match to this BranchRule. Specified as regex. Use .* for all branches.'
+      The pattern of the branch that can match to this BranchRule. Specified as regex. Use .* for all branches.
   - !ruby/object:Api::Type::NestedObject
     name: 'requiredStatusChecks'
     description: |
-      'List of required status checks before merging to the branch.'
+      List of required status checks before merging to the branch.
     properties:
       - !ruby/object:Api::Type::String
         name: 'context'
         description: |
-          'The context of the check.'
+          The context of the check.
   - !ruby/object:Api::Type::Boolean
     name: 'disabled'
     description: |
-      'Determines if the branch rule is disabled or not.'
+      Determines if the branch rule is disabled or not.
   - !ruby/object:Api::Type::Boolean
     name: 'requirePullRequest'
     description: |
-      'Determines if the branch rule requires a pull request or not.'
+      Determines if the branch rule requires a pull request or not.
   - !ruby/object:Api::Type::Integer
     name: 'minimumReviewsCount'
     description: |
-      'The minimum number of reviews required for the branch rule to be matched.'
+      The minimum number of reviews required for the branch rule to be matched.
   - !ruby/object:Api::Type::Integer
     name: 'minimumApprovalsCount'
     description: |
-      'The minimum number of approvals required for the branch rule to be matched.'
+      The minimum number of approvals required for the branch rule to be matched.
   - !ruby/object:Api::Type::Boolean
     name: 'requireCommentsResolved'
     description: |
-      'Determines if require comments resolved before merging to the branch.'
+      Determines if require comments resolved before merging to the branch.
   - !ruby/object:Api::Type::Boolean
     name: 'allowStaleReviews'
     description: |
-      'Determines if allow stale reviews or approvals before merging to the branch.'
+      Determines if allow stale reviews or approvals before merging to the branch.
   - !ruby/object:Api::Type::Boolean
     name: 'requireLinearHistory'
     description: |
-      'Determines if require linear history before merging to the branch.'
+      Determines if require linear history before merging to the branch.
