@@ -21,7 +21,7 @@ description: |
   ~> **Note:** In order to use Cloud SCC resources, your organization must be enrolled
   in [SCC Standard/Premium](https://cloud.google.com/security-command-center/docs/quickstart-security-command-center).
   Without doing so, you may run into errors during resource creation.
-deprecation_message: `google_scc_v2_organization_scc_big_query_exports` is deprecated and will be removed in a future major release. Use `google_scc_v2_organization_scc_big_query_export` instead.
+deprecation_message: "`google_scc_v2_organization_scc_big_query_exports` is deprecated and will be removed in a future major release. Use `google_scc_v2_organization_scc_big_query_export` instead."
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/security-command-center/docs/how-to-analyze-findings-in-big-query'
