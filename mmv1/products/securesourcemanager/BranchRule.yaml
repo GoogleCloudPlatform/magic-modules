@@ -94,12 +94,6 @@ properties:
     description: |
       Time the BranchRule was updated in UTC.
     output: true
-  - !ruby/object:Api::Type::Map
-    name: 'annotations'
-    description: |
-      User annotations. These attributes can only be set and used by the user.
-    key_type: Api::Type::String
-    value_type: Api::Type::String
   - !ruby/object:Api::Type::String
     name: 'etag'
     description: |
