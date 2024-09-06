@@ -14,6 +14,8 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
+<% unless version == 'ga' -%>
+
 func TestAccSecurityCenterManagement(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
 		"orgSecurity":     testAccSecurityCenterManagementOrganizationSecurityHealthAnalyticsCustomModule,
