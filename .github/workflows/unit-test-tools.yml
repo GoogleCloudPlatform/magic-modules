@@ -1,0 +1,126 @@
+name: unit-test-tools
+
+permissions: read-all
+
+on:
+  pull_request:
+    paths:
+      - 'tools/**'
+      - '.github/workflows/unit-test-tools.yml'
+
+jobs:
+  diff-processor:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+
+      - name: Set up Go
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+        with:
+          go-version: '^1.21.0'
+
+      - name: Build diff-processor with TPG
+        run: |
+          cd tools/diff-processor
+          make clone OWNER_REPO=hashicorp/terraform-provider-google DEPTH=1
+          make build OLD_REF=main NEW_REF=main
+
+      - name: Test diff-processor with TPG
+        run: |
+          cd tools/diff-processor
+          go test -v ./...
+        env:
+          SERVICES_DIR: tools/diff-processor/new/google/services
+
+      - name: Build diff-processor with TPGB
+        run: |
+          cd tools/diff-processor
+          make clone OWNER_REPO=hashicorp/terraform-provider-google-beta DEPTH=1
+          make build OLD_REF=main NEW_REF=main
+
+      - name: Test diff-processor with TPGB
+        run: |
+          cd tools/diff-processor
+          go test -v ./...
+        env:
+          SERVICES_DIR: tools/diff-processor/new/google/services
+
+  go-changelog:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+
+      - name: Set up Go
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+        with:
+          go-version: '^1.21.0'
+
+      - name: Build go-changelog
+        run: |
+          cd tools/go-changelog/cmd/changelog-pr-body-check
+          go build
+
+      - name: Test go-changelog
+        run: |
+          cd tools/go-changelog
+          go test -v ./...
+
+  issue-labeler:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+
+      - name: Set up Go
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+        with:
+          go-version: '^1.21.0'
+
+      - name: Build issue-labeler
+        run: |
+          cd tools/issue-labeler
+          go build
+
+      - name: Test issue-labeler
+        run: |
+          cd tools/issue-labeler
+          go test -v ./...
+
+  template-check:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+
+      - name: Set up Go
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+        with:
+          go-version: '^1.21.0'
+
+      - name: Build template-check
+        run: |
+          cd tools/template-check
+          go build
+
+      - name: Test template-check
+        run: |
+          cd tools/template-check
+          go test -v ./...
+
+  test-reader:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+
+      - name: Set up Go
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+        with:
+          go-version: '^1.21.0'
+
+      - name: Build test-reader
+        run: |
+          cd tools/test-reader
+          go build
+
+      - name: Test test-reader
+        run: |
+          cd tools/test-reader
+          go test -v ./...

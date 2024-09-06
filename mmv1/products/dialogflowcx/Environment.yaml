@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Resource
 name: 'Environment'
-base_url: "{{parent}}/environments"
+base_url: '{{parent}}/environments'
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -25,6 +25,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/dialogflow/cx/docs'
   api: 'https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.environments'
 async: !ruby/object:Api::OpAsync
+  actions: ['create', 'update']
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
     full_url: 'https://{{location}}-dialogflow.googleapis.com/v3/{{op_id}}'
@@ -32,7 +33,6 @@ async: !ruby/object:Api::OpAsync
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 60
       update_minutes: 60
-      delete_minutes: 60
   result: !ruby/object:Api::OpAsync::Result
     path: 'response'
     resource_inside_response: true
@@ -45,7 +45,6 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
-exclude_resource: true
 timeouts: !ruby/object:Api::Timeouts
   insert_minutes: 40
   update_minutes: 40
@@ -55,15 +54,23 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_update: templates/terraform/pre_create/dialogflow_set_location.go.erb
   pre_delete: templates/terraform/pre_create/dialogflow_set_location.go.erb
   pre_read: templates/terraform/pre_create/dialogflow_set_location.go.erb
+custom_diff:
+  - 'tpgresource.DefaultProviderProject'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "dialogflowcx_environment_full"
-    primary_resource_id: "development"
+    name: 'dialogflowcx_environment_full'
+    primary_resource_id: 'development'
     vars:
-      agent_name: "dialogflowcx-agent"
+      agent_name: 'dialogflowcx-agent'
+  - !ruby/object:Provider::Terraform::Examples
+    skip_docs: true
+    name: 'dialogflowcx_environment_regional'
+    primary_resource_id: 'development'
+    vars:
+      agent_name: 'issue-12880'
 skip_sweeper: true
-id_format: "{{parent}}/environments/{{name}}"
-import_format: ["{{parent}}/environments/{{name}}"]
+id_format: '{{parent}}/environments/{{name}}'
+import_format: ['{{parent}}/environments/{{name}}']
 parameters:
   - !ruby/object:Api::Type::String
     name: parent
@@ -107,6 +114,7 @@ properties:
   - !ruby/object:Api::Type::Time
     name: 'updateTime'
     output: true
-    description: 'Update time of this environment. A timestamp in RFC3339 UTC "Zulu"
-      format, with nanosecond resolution and up to nine fractional digits. Examples:
-      "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".'
+    description:
+      'Update time of this environment. A timestamp in RFC3339 UTC "Zulu"
+      format, with nanosecond resolution and up to nine fractional digits.
+      Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".'

@@ -30,8 +30,8 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/gcip_tenant.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "identity_platform_tenant_basic"
-    primary_resource_id: "tenant"
+    name: 'identity_platform_tenant_basic'
+    primary_resource_id: 'tenant'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'

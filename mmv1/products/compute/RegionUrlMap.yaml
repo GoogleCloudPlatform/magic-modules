@@ -24,7 +24,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -40,96 +40,105 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_url_map_basic"
-    primary_resource_id: "regionurlmap"
+    name: 'region_url_map_basic'
+    primary_resource_id: 'regionurlmap'
     vars:
-      region_url_map_name: "regionurlmap"
-      login_region_backend_service_name: "login"
-      home_region_backend_service_name: "home"
-      region_health_check_name: "health-check"
+      region_url_map_name: 'regionurlmap'
+      login_region_backend_service_name: 'login'
+      home_region_backend_service_name: 'home'
+      region_health_check_name: 'health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_url_map_default_route_action"
-    primary_resource_id: "regionurlmap"
+    name: 'region_url_map_default_route_action'
+    primary_resource_id: 'regionurlmap'
     vars:
-      region_url_map_name: "regionurlmap"
-      login_region_backend_service_name: "login"
-      home_region_backend_service_name: "home"
-      region_health_check_name: "health-check"
+      region_url_map_name: 'regionurlmap'
+      login_region_backend_service_name: 'login'
+      home_region_backend_service_name: 'home'
+      region_health_check_name: 'health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_url_map_l7_ilb_path"
-    primary_resource_id: "regionurlmap"
+    name: 'region_url_map_l7_ilb_path'
+    primary_resource_id: 'regionurlmap'
     vars:
-      region_url_map_name: "regionurlmap"
-      home_region_backend_service_name: "home"
-      region_health_check_name: "health-check"
+      region_url_map_name: 'regionurlmap'
+      home_region_backend_service_name: 'home'
+      region_health_check_name: 'health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_url_map_l7_ilb_path_partial"
-    primary_resource_id: "regionurlmap"
+    name: 'region_url_map_l7_ilb_path_partial'
+    primary_resource_id: 'regionurlmap'
     vars:
-      region_url_map_name: "regionurlmap"
-      home_region_backend_service_name: "home"
-      region_health_check_name: "health-check"
+      region_url_map_name: 'regionurlmap'
+      home_region_backend_service_name: 'home'
+      region_health_check_name: 'health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_url_map_l7_ilb_route"
-    primary_resource_id: "regionurlmap"
+    name: 'region_url_map_l7_ilb_route'
+    primary_resource_id: 'regionurlmap'
     vars:
-      region_url_map_name: "regionurlmap"
-      home_region_backend_service_name: "home"
-      region_health_check_name: "health-check"
+      region_url_map_name: 'regionurlmap'
+      home_region_backend_service_name: 'home'
+      region_health_check_name: 'health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_url_map_l7_ilb_route_partial"
-    primary_resource_id: "regionurlmap"
+    name: 'region_url_map_l7_ilb_route_partial'
+    primary_resource_id: 'regionurlmap'
     vars:
-      region_url_map_name: "regionurlmap"
-      home_region_backend_service_name: "home"
-      region_health_check_name: "health-check"
+      region_url_map_name: 'regionurlmap'
+      home_region_backend_service_name: 'home'
+      region_health_check_name: 'health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "int_https_lb_https_redirect"
-    primary_resource_id: "redirect"
+    name: 'int_https_lb_https_redirect'
+    primary_resource_id: 'redirect'
     skip_test: true
     vars:
-      l7_ilb_network: "l7-ilb-network"
-      l7_ilb_proxy_subnet: "l7-ilb-proxy-subnet"
-      l7_ilb_subnet: "l7-ilb-subnet"
-      l7_ilb_ip: "l7-ilb-ip"
-      l7_ilb_forwarding_rule: "l7-ilb-forwarding-rule"
-      l7_ilb_target_https_proxy: "l7-ilb-target-https-proxy"
-      l7_ilb_regional_url_map: "l7-ilb-regional-url-map"
-      l7_ilb_backend_service: "l7-ilb-backend-service"
-      l7_ilb_mig_template: "l7-ilb-mig-template"
-      l7_ilb_hc: "l7-ilb-hc"
-      l7_ilb_mig1: "l7-ilb-mig1"
-      l7_ilb_fw_allow_hc: "l7-ilb-fw-allow-hc"
-      l7_ilb_fw_allow_ilb_to_backends: "l7-ilb-fw-allow-ilb-to-backends"
-      l7_ilb_test_vm: "l7-ilb-test-vm"
-      l7_ilb_redirect: "l7-ilb-redirect"
-      l7_ilb_target_http_proxy: "l7-ilb-target-http-proxy"
-      l7_ilb_redirect_url_map: "l7-ilb-redirect-url-map"
+      l7_ilb_network: 'l7-ilb-network'
+      l7_ilb_proxy_subnet: 'l7-ilb-proxy-subnet'
+      l7_ilb_subnet: 'l7-ilb-subnet'
+      l7_ilb_ip: 'l7-ilb-ip'
+      l7_ilb_forwarding_rule: 'l7-ilb-forwarding-rule'
+      l7_ilb_target_https_proxy: 'l7-ilb-target-https-proxy'
+      l7_ilb_regional_url_map: 'l7-ilb-regional-url-map'
+      l7_ilb_backend_service: 'l7-ilb-backend-service'
+      l7_ilb_mig_template: 'l7-ilb-mig-template'
+      l7_ilb_hc: 'l7-ilb-hc'
+      l7_ilb_mig1: 'l7-ilb-mig1'
+      l7_ilb_fw_allow_hc: 'l7-ilb-fw-allow-hc'
+      l7_ilb_fw_allow_ilb_to_backends: 'l7-ilb-fw-allow-ilb-to-backends'
+      l7_ilb_test_vm: 'l7-ilb-test-vm'
+      l7_ilb_redirect: 'l7-ilb-redirect'
+      l7_ilb_target_http_proxy: 'l7-ilb-target-http-proxy'
+      l7_ilb_redirect_url_map: 'l7-ilb-redirect-url-map'
     min_version: beta
     ignore_read_extra:
-      - "target"
-      - "ip_address"
+      - 'target'
+      - 'ip_address'
   - !ruby/object:Provider::Terraform::Examples
-    name: "regional_external_http_load_balancer"
-    primary_resource_type: "google_compute_region_url_map"
-    primary_resource_id: "default"
+    name: 'regional_external_http_load_balancer'
+    primary_resource_type: 'google_compute_region_url_map'
+    primary_resource_id: 'default'
     vars:
-      lb_network: "lb-network"
-      backend_subnet: "backend-subnet"
-      proxy_only_subnet: "proxy-only-subnet"
-      fw_allow_health_check: "fw-allow-health-check"
-      fw_allow_proxies: "fw-allow-proxies"
-      l7_xlb_backend_template: "l7-xlb-backend-template"
-      l7_xlb_backend_example: "l7-xlb-backend-example"
-      address_name: "address-name"
-      l7_xlb_basic_check: "l7-xlb-basic-check"
-      l7_xlb_backend_service: "l7-xlb-backend-service"
-      regional_l7_xlb_map: "regional-l7-xlb-map"
-      l7_xlb_proxy: "l7-xlb-proxy"
-      l7_xlb_forwarding_rule: "l7-xlb-forwarding-rule"
+      lb_network: 'lb-network'
+      backend_subnet: 'backend-subnet'
+      proxy_only_subnet: 'proxy-only-subnet'
+      fw_allow_health_check: 'fw-allow-health-check'
+      fw_allow_proxies: 'fw-allow-proxies'
+      l7_xlb_backend_template: 'l7-xlb-backend-template'
+      l7_xlb_backend_example: 'l7-xlb-backend-example'
+      address_name: 'address-name'
+      l7_xlb_basic_check: 'l7-xlb-basic-check'
+      l7_xlb_backend_service: 'l7-xlb-backend-service'
+      regional_l7_xlb_map: 'regional-l7-xlb-map'
+      l7_xlb_proxy: 'l7-xlb-proxy'
+      l7_xlb_forwarding_rule: 'l7-xlb-forwarding-rule'
     skip_docs: true
-    skip_test: true     # Similar to other samples
+    skip_test: true  # Similar to other samples
     min_version: beta
+  - !ruby/object:Provider::Terraform::Examples
+    name: "region_url_map_path_template_match"
+    primary_resource_id: "urlmap"
+    vars:
+      url_map_name: "urlmap"
+      home_backend_service_name: "home-service"
+      cart_backend_service_name: "cart-service"
+      user_backend_service_name: "user-service"
+      health_check_name: "health-check"
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
@@ -141,6 +150,7 @@ parameters:
     required: false
     default_from_api: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -162,6 +172,7 @@ properties:
       weightedBackendServices. Conversely, if routeAction specifies any
       weightedBackendServices, service must not be specified.  Only one of defaultService,
       defaultUrlRedirect or defaultRouteAction.weightedBackendService must be set.
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
@@ -169,7 +180,7 @@ properties:
       you create the resource.
   # 'fingerprint' used internally for object consistency.
   - !ruby/object:Api::Type::Array
-    name: "host_rule"
+    name: 'host_rule'
     api_name: 'hostRules'
     is_set: true
     description: 'The list of HostRules to use against the URL.'
@@ -219,7 +230,7 @@ properties:
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
   - !ruby/object:Api::Type::Array
-    name: "path_matcher"
+    name: 'path_matcher'
     api_name: 'pathMatchers'
     description: 'The list of named PathMatchers to use against the URL.'
     item_type: !ruby/object:Api::Type::NestedObject
@@ -238,6 +249,7 @@ properties:
             A reference to a RegionBackendService resource. This will be used if
             none of the pathRules defined by this PathMatcher is matched by
             the URL's path portion.
+          custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
         - !ruby/object:Api::Type::String
           name: 'description'
           description: 'An optional description of this resource.'
@@ -288,6 +300,7 @@ properties:
                   contain any weightedBackendService s. Conversely, if routeAction specifies any
                   weightedBackendServices, service must not be specified. Only one of urlRedirect,
                   service or routeAction.weightedBackendService must be set.
+                custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
               - !ruby/object:Api::Type::NestedObject
                 name: 'headerAction'
                 description: |
@@ -554,6 +567,18 @@ properties:
                         and anchor supplied with the original URL. For regular expression grammar please
                         see en.cppreference.com/w/cpp/regex/ecmascript  Only one of prefixMatch,
                         fullPathMatch or regexMatch must be specified.
+                    - !ruby/object:Api::Type::String
+                      name: 'pathTemplateMatch'
+                      description: |
+                        For satisfying the matchRule condition, the path of the request
+                        must match the wildcard pattern specified in pathTemplateMatch
+                        after removing any query parameters and anchor that may be part
+                        of the original URL.
+
+                        pathTemplateMatch must be between 1 and 255 characters
+                        (inclusive).  The pattern specified by pathTemplateMatch may
+                        have at most 5 wildcard operators and at most 5 variable
+                        captures in total.
               - !ruby/object:Api::Type::NestedObject
                 name: 'routeAction'
                 description: |
@@ -688,6 +713,7 @@ properties:
                         imports: 'selfLink'
                         description: |
                           The RegionBackendService resource being mirrored to.
+                        custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
                   - !ruby/object:Api::Type::NestedObject
                     name: 'retryPolicy'
                     description: |
@@ -723,7 +749,7 @@ properties:
 
                           * 5xx: Loadbalancer will attempt a retry if the backend service responds with
                             any 5xx response code, or if the backend service does not respond at all,
-                            example: disconnects, reset, read timeout, connection failure, and refused
+                            for example: disconnects, reset, read timeout, connection failure, and refused
                             streams.
                           * gateway-error: Similar to 5xx, but only applies to response codes
                             502, 503 or 504.
@@ -779,6 +805,23 @@ properties:
                           Prior to forwarding the request to the selected backend service, the matching
                           portion of the request's path is replaced by pathPrefixRewrite. The value must
                           be between 1 and 1024 characters.
+                      - !ruby/object:Api::Type::String
+                        name: 'pathTemplateRewrite'
+                        description: |
+                          Prior to forwarding the request to the selected origin, if the
+                          request matched a pathTemplateMatch, the matching portion of the
+                          request's path is replaced re-written using the pattern specified
+                          by pathTemplateRewrite.
+
+                          pathTemplateRewrite must be between 1 and 255 characters
+                          (inclusive), must start with a '/', and must only use variables
+                          captured by the route's pathTemplate matchers.
+
+                          pathTemplateRewrite may only be used when all of a route's
+                          MatchRules specify pathTemplate.
+
+                          Only one of pathPrefixRewrite and pathTemplateRewrite may be
+                          specified.
                   - !ruby/object:Api::Type::Array
                     name: 'weightedBackendServices'
                     description: |
@@ -801,6 +844,7 @@ properties:
                             The default RegionBackendService resource. Before
                             forwarding the request to backendService, the loadbalancer applies any relevant
                             headerActions specified as part of this backendServiceWeight.
+                          custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
                         - !ruby/object:Api::Type::NestedObject
                           name: 'headerAction'
                           description: |
@@ -970,6 +1014,7 @@ properties:
                   contain any weightedBackendService s. Conversely, if routeAction specifies any
                   weightedBackendServices, service must not be specified. Only one of urlRedirect,
                   service or routeAction.weightedBackendService must be set.
+                custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
               - !ruby/object:Api::Type::Array
                 name: 'paths'
                 required: true
@@ -1117,6 +1162,7 @@ properties:
                         imports: 'selfLink'
                         description: |
                           The RegionBackendService resource being mirrored to.
+                        custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
                   - !ruby/object:Api::Type::NestedObject
                     name: 'retryPolicy'
                     description: |
@@ -1151,7 +1197,7 @@ properties:
 
                           - 5xx: Loadbalancer will attempt a retry if the backend service responds with
                           any 5xx response code, or if the backend service does not respond at all,
-                          example: disconnects, reset, read timeout, connection failure, and refused
+                          for example: disconnects, reset, read timeout, connection failure, and refused
                           streams.
                           - gateway-error: Similar to 5xx, but only applies to response codes
                           502, 503 or 504.
@@ -1229,6 +1275,7 @@ properties:
                             The default RegionBackendService resource. Before
                             forwarding the request to backendService, the loadbalancer applies any relevant
                             headerActions specified as part of this backendServiceWeight.
+                          custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
                         - !ruby/object:Api::Type::NestedObject
                           name: 'headerAction'
                           description: |
@@ -1449,7 +1496,7 @@ properties:
                 retained.
                  This field is required to ensure an empty block is not set. The normal default value is false.
   - !ruby/object:Api::Type::Array
-    name: "test"
+    name: 'test'
     api_name: tests
     description: |
       The list of expected URL mappings. Requests to update this UrlMap will
@@ -1472,8 +1519,10 @@ properties:
           required: true
           resource: 'RegionBackendService'
           imports: 'selfLink'
-          description: A reference to expected RegionBackendService resource the given
-            URL should be mapped to.
+          description:
+            A reference to expected RegionBackendService resource the given URL
+            should be mapped to.
+          custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::NestedObject
     name: 'defaultUrlRedirect'
     exactly_one_of:
@@ -1541,7 +1590,7 @@ properties:
           - :TEMPORARY_REDIRECT
       - !ruby/object:Api::Type::Boolean
         name: 'stripQuery'
-        description:  |
+        description: |
           If set to true, any accompanying query portion of the original URL is removed prior
           to redirecting the request. If set to false, the query portion of the original URL is
           retained.
@@ -1582,6 +1631,7 @@ properties:
               imports: 'selfLink'
               description: |
                 The full or partial URL to the default BackendService resource. Before forwarding the request to backendService, the load balancer applies any relevant headerActions specified as part of this backendServiceWeight.
+              custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
             - !ruby/object:Api::Type::Integer
               name: 'weight'
               description: |
@@ -1807,6 +1857,7 @@ properties:
               The full or partial URL to the RegionBackendService resource being mirrored to.
               The backend service configured for a mirroring policy must reference backends that are of the same type as the original backend service matched in the URL map.
               Serverless NEG backends are not currently supported as a mirrored backend service.
+            custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
       - !ruby/object:Api::Type::NestedObject
         name: 'corsPolicy'
         description: |

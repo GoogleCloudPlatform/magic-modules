@@ -95,6 +95,11 @@ type Property struct {
 	// the field being unset and being set to false.
 	EnumBool bool
 
+	// Whether this field is only used as a url parameter
+	Parameter bool
+	// Whether this field has long form behavior in the DCL
+	HasLongForm bool
+
 	// An IdentityGetter is a function to retrieve the value of an "identity" field
 	// from state. Identity fields will sometimes allow retrieval from multiple
 	// fields or from the user's environment variables.
@@ -106,6 +111,10 @@ type Property struct {
 
 	// Sub-properties of nested objects or arrays with nested objects
 	Properties []Property
+
+	// If this is a complex map type, this string represents the name of the
+	// field that the key to the map can be set with
+	ComplexMapKeyName string
 
 	// Reference to the parent resource.
 	// note: "Properties" will not be available.
@@ -198,11 +207,22 @@ func (p Property) ObjectType() string {
 }
 
 func (p Property) IsArray() bool {
-	return (p.Type.String() == SchemaTypeList || p.Type.String() == SchemaTypeSet) && !p.Type.IsObject()
+	return (p.Type.String() == SchemaTypeList || p.Type.String() == SchemaTypeSet) && !p.Type.IsObject() && !p.IsComplexMap()
 }
 
 func (t Type) IsSet() bool {
 	return t.String() == SchemaTypeSet
+}
+
+// Complex map is for maps of string --> object that are supported in DCL but
+// not in Terraform. We handle this by adding a field in the Terraform schema
+// for the key in the map. This must be added via a COMPLEX_MAP_KEY_NAME
+// override
+func (t Type) IsComplexMap() bool {
+	if t.typ.AdditionalProperties != nil {
+		return t.typ.AdditionalProperties.Type != "string"
+	}
+	return false
 }
 
 // ShouldGenerateNestedSchema returns true if an object's nested schema function should be generated.
@@ -222,7 +242,7 @@ func (p Property) DefaultStateGetter() string {
 }
 
 func (p Property) ChangeStateGetter() string {
-	return buildGetter(p, fmt.Sprintf("oldValue(d.GetChange(%q))", p.Name()))
+	return buildGetter(p, fmt.Sprintf("tpgdclresource.OldValue(d.GetChange(%q))", p.Name()))
 }
 
 // Builds a Getter for constructing a shallow
@@ -256,7 +276,7 @@ func buildGetter(p Property, rawGetter string) string {
 			return fmt.Sprintf("%s.%sEnumRef(%s.(string))", p.resource.Package(), p.ObjectType(), rawGetter)
 		}
 		if p.EnumBool {
-			return fmt.Sprintf("expandEnumBool(%s.(string))", rawGetter)
+			return fmt.Sprintf("tpgdclresource.ExpandEnumBool(%s.(string))", rawGetter)
 		}
 		if p.Computed {
 			return fmt.Sprintf("dcl.StringOrNil(%s.(string))", rawGetter)
@@ -273,17 +293,20 @@ func buildGetter(p Property, rawGetter string) string {
 		}
 		return fmt.Sprintf("dcl.Int64(int64(%s.(int)))", rawGetter)
 	case SchemaTypeMap:
-		return fmt.Sprintf("checkStringMap(%s)", rawGetter)
+		return fmt.Sprintf("tpgresource.CheckStringMap(%s)", rawGetter)
 	case SchemaTypeList, SchemaTypeSet:
 		if p.Type.IsEnumArray() {
 			return fmt.Sprintf("expand%s%sArray(%s)", p.resource.PathType(), p.PackagePath(), rawGetter)
 		}
+		if p.Type.IsComplexMap() {
+			return fmt.Sprintf("expand%s%sMap(%s)", p.resource.PathType(), p.PackagePath(), rawGetter)
+		}
 		if p.Type.typ.Items != nil && p.Type.typ.Items.Type == "string" {
-			return fmt.Sprintf("expandStringArray(%s)", rawGetter)
+			return fmt.Sprintf("tpgdclresource.ExpandStringArray(%s)", rawGetter)
 		}
 
 		if p.Type.typ.Items != nil && p.Type.typ.Items.Type == "integer" {
-			return fmt.Sprintf("expandIntegerArray(%s)", rawGetter)
+			return fmt.Sprintf("tpgdclresource.ExpandIntegerArray(%s)", rawGetter)
 		}
 
 		if p.Type.typ.Items != nil && len(p.Properties) > 0 {
@@ -311,8 +334,15 @@ func (p Property) DefaultStateSetter() string {
 	case SchemaTypeFloat:
 		fallthrough
 	case SchemaTypeMap:
+		if p.IsResourceLabels() || p.IsResourceAnnotations() {
+			return fmt.Sprintf("d.Set(%q, flatten%s%s(res.%s, d))", p.Name(), p.resource.PathType(), p.PackagePath(), p.PackageName)
+		}
+
 		return fmt.Sprintf("d.Set(%q, res.%s)", p.Name(), p.PackageName)
 	case SchemaTypeList, SchemaTypeSet:
+		if p.IsComplexMap() {
+			return fmt.Sprintf("d.Set(%q, flatten%s%sMap(res.%s))", p.Name(), p.resource.PathType(), p.PackagePath(), p.PackageName)
+		}
 		if p.typ.Items != nil && ((p.typ.Items.Type == "string" && len(p.typ.Items.Enum) == 0) || p.typ.Items.Type == "integer") {
 			return fmt.Sprintf("d.Set(%q, res.%s)", p.Name(), p.PackageName)
 		}
@@ -354,12 +384,15 @@ func (p Property) flattenGetterWithParent(parent string) string {
 		fallthrough
 	case SchemaTypeMap:
 		if p.EnumBool {
-			return fmt.Sprintf("flattenEnumBool(%s.%s)", parent, p.PackageName)
+			return fmt.Sprintf("tpgdclresource.FlattenEnumBool(%s.%s)", parent, p.PackageName)
 		}
 		return fmt.Sprintf("%s.%s", parent, p.PackageName)
 	case SchemaTypeList, SchemaTypeSet:
 		if p.Type.IsEnumArray() {
 			return fmt.Sprintf("flatten%s%sArray(obj.%s)", p.resource.PathType(), p.PackagePath(), p.PackageName)
+		}
+		if p.Type.IsComplexMap() {
+			return fmt.Sprintf("flatten%s%sMap(%s.%s)", p.resource.PathType(), p.PackagePath(), parent, p.PackageName)
 		}
 		if p.Type.typ.Items != nil && p.Type.typ.Items.Type == "integer" {
 			return fmt.Sprintf("%s.%s", parent, p.PackageName)
@@ -372,7 +405,6 @@ func (p Property) flattenGetterWithParent(parent string) string {
 			return fmt.Sprintf("flatten%s%sArray(%s.%s)", p.resource.PathType(), p.PackagePath(), parent, p.PackageName)
 		}
 	}
-
 	if p.typ.Type == "object" {
 		return fmt.Sprintf("flatten%s%s(%s.%s)", p.resource.PathType(), p.PackagePath(), parent, p.PackageName)
 	}
@@ -396,7 +428,7 @@ func (p Property) DefaultDiffSuppress() *string {
 	case SchemaTypeString:
 		// Field is reference to another resource
 		if _, ok := p.typ.Extension["x-dcl-references"]; ok {
-			dsf := "compareSelfLinkOrResourceName"
+			dsf := "tpgresource.CompareSelfLinkOrResourceName"
 			return &dsf
 		}
 	}
@@ -438,6 +470,18 @@ func (p Property) Objects() (props []Property) {
 	}
 
 	return props
+}
+
+func (p Property) IsResourceLabels() bool {
+	return p.Name() == "labels" && p.parent == nil
+}
+
+func (p Property) IsResourceAnnotations() bool {
+	return p.Name() == "annotations" && p.parent == nil
+}
+
+func (p Property) ShouldShowUpInSamples() bool {
+	return (p.Settable && p.Name() != "effective_labels" && p.Name() != "effective_annotations") || p.IsResourceLabels() || p.IsResourceAnnotations()
 }
 
 // collapsedProperties returns the input list of properties with nested objects collapsed if needed.
@@ -579,6 +623,9 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			}
 		}
 
+		p.Parameter, _ = v.Extension["x-dcl-parameter"].(bool)
+		p.HasLongForm, _ = v.Extension["x-dcl-has-long-form"].(bool)
+
 		// Handle object properties
 		if len(v.Properties) > 0 {
 			props, err := createPropertiesFromSchema(v, typeFetcher, overrides, resource, &p, location)
@@ -629,11 +676,43 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 				i := Type{typ: v.Items}
 				e := fmt.Sprintf("&schema.Schema{Type: schema.%s}", i.String())
 				if _, ok := v.Extension["x-dcl-references"]; ok {
-					e = fmt.Sprintf("&schema.Schema{Type: schema.%s, DiffSuppressFunc: compareSelfLinkOrResourceName, }", i.String())
+					e = fmt.Sprintf("&schema.Schema{Type: schema.%s, DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName, }", i.String())
 				}
 				p.Elem = &e
 				p.ElemIsBasicType = true
 			}
+		}
+		// Complex maps are represented as TypeSet but don't have v.Items set.
+		// Use AdditionalProperties instead, and add an additional `name` field
+		// that represents the key in the map
+		if p.Type.IsComplexMap() {
+			props, err := createPropertiesFromSchema(p.Type.typ.AdditionalProperties, typeFetcher, overrides, resource, &p, location)
+			if err != nil {
+				return nil, err
+			}
+			cm := ComplexMapKeyDetails{}
+			cmOk, err := overrides.PropertyOverrideWithDetails(ComplexMapKey, p, &cm, location)
+			if err != nil {
+				return nil, fmt.Errorf("failed to decode complex map key name details")
+			}
+			if !cmOk {
+				return nil, fmt.Errorf("failed to find complex map key name for map named: %s", p.Name())
+			}
+			keyProp := Property{
+				title:       cm.KeyName,
+				Type:        Type{&openapi.Schema{Type: "string"}},
+				resource:    resource,
+				parent:      &p,
+				Required:    true,
+				Description: "The name for the key in the map for which this object is mapped to in the API",
+			}
+			props = append([]Property{keyProp}, props...)
+
+			p.Properties = props
+			e := fmt.Sprintf("%s%sSchema()", resource.PathType(), p.PackagePath())
+			p.Elem = &e
+			p.ElemIsBasicType = false
+			p.ComplexMapKeyName = cm.KeyName
 		}
 
 		if !p.Computed {
@@ -697,7 +776,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 				if p.customName != "" {
 					propertyName = p.customName
 				}
-				ig := fmt.Sprintf("get%s(d, config)", renderSnakeAsTitle(miscellaneousNameSnakeCase(propertyName)))
+				ig := fmt.Sprintf("tpgresource.Get%s(d, config)", renderSnakeAsTitle(miscellaneousNameSnakeCase(propertyName)))
 				if cigOk {
 					ig = fmt.Sprintf("%s(d, config)", cig.Function)
 				}
@@ -763,7 +842,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			p.ValidateFunc = &vf.Function
 		}
 
-		if p.Type.String() == SchemaTypeSet {
+		if p.Type.IsSet() {
 			shf := SetHashFuncDetails{}
 			shfOk, err := overrides.PropertyOverrideWithDetails(SetHashFunc, p, &shf, location)
 			if err != nil {
@@ -837,9 +916,9 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			} else {
 				parent = "obj"
 			}
-			enumBoolSS := fmt.Sprintf("d.Set(%q, flattenEnumBool(%s.%s))", p.Name(), parent, p.PackageName)
+			enumBoolSS := fmt.Sprintf("d.Set(%q, tpgdclresource.FlattenEnumBool(%s.%s))", p.Name(), parent, p.PackageName)
 			p.StateSetter = &enumBoolSS
-			enumBoolSG := fmt.Sprintf("expandEnumBool(d.Get(%q))", p.Name())
+			enumBoolSG := fmt.Sprintf("tpgdclresource.ExpandEnumBool(d.Get(%q))", p.Name())
 			p.StateGetter = &enumBoolSG
 		}
 
@@ -878,6 +957,22 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			resource.ReusedTypes = resource.RegisterReusedType(p)
 		}
 
+		// Add the "effective_labels" property when the current property is top level "labels" or
+		// add the "effective_annotations" property when the current property is top level "annotations"
+
+		if p.IsResourceLabels() || p.IsResourceAnnotations() {
+			p.Description = fmt.Sprintf("%s\n\n%s", p.Description, get_labels_field_note(p.title))
+			p.Settable = false
+			p.StateGetter = nil
+
+			props = append(props, build_effective_labels_field(p, resource, parent))
+
+			if p.IsResourceLabels() {
+				props = append(props, build_terraform_labels_field(p, resource, parent))
+				p.ForceNew = false
+			}
+		}
+
 		props = append(props, p)
 	}
 
@@ -900,4 +995,49 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 	sort.SliceStable(props, propComparator(props))
 
 	return props, nil
+}
+
+func build_effective_labels_field(p Property, resource *Resource, parent *Property) Property {
+	title := fmt.Sprintf("effective_%s", p.title)
+	description := fmt.Sprintf("All of %s (key/value pairs) present on the resource in GCP, including the %s configured through Terraform, other clients and services.", p.title, p.title)
+	stateSetter := fmt.Sprintf("d.Set(%q, res.%s)", title, p.PackageName)
+
+	effectiveLabels := Property{
+		title:       title,
+		Type:        p.Type,
+		Description: description,
+		resource:    resource,
+		parent:      parent,
+		Optional:    false,
+		Computed:    true,
+		ForceNew:    p.ForceNew, // Add ForceNew property if labels field has it
+		PackageName: p.PackageName,
+		Settable:    true,
+		StateSetter: &stateSetter,
+	}
+
+	stateGetter := effectiveLabels.DefaultStateGetter()
+	effectiveLabels.StateGetter = &stateGetter
+	return effectiveLabels
+}
+
+func build_terraform_labels_field(p Property, resource *Resource, parent *Property) Property {
+	title := fmt.Sprintf("terraform_%s", p.title)
+	description := fmt.Sprintf("The combination of %s configured directly on the resource and default %s configured on the provider.", p.title, p.title)
+	stateSetter := fmt.Sprintf("d.Set(%q, flatten%sTerraform%s(res.%s, d))", title, p.resource.PathType(), p.PackagePath(), p.PackageName)
+
+	return Property{
+		title:       title,
+		Type:        p.Type,
+		Description: description,
+		resource:    resource,
+		parent:      parent,
+		Computed:    true,
+		PackageName: p.PackageName,
+		StateSetter: &stateSetter,
+	}
+}
+
+func get_labels_field_note(title string) string {
+	return fmt.Sprintf("**Note**: This field is non-authoritative, and will only manage the %s present in your configuration.\nPlease refer to the field `effective_%s` for all of the %s present on the resource.", title, title, title)
 }

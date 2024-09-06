@@ -13,11 +13,11 @@
 	# limitations under the License.
 -%>
 // Note is required, even for PATCH
-noteNameProp, err := expandContainerAnalysisOccurrenceNoteName(d.Get("note_name"), d, meta.(*Config))
+noteNameProp, err := expandContainerAnalysisOccurrenceNoteName(d.Get("note_name"), d, meta.(*transport_tpg.Config))
 if err != nil {
 	return nil, err
-} else if v, ok := d.GetOkExists("note_name"); !isEmptyValue(reflect.ValueOf(noteNameProp)) && (ok || !reflect.DeepEqual(v, noteNameProp)) {
+} else if v, ok := d.GetOkExists("note_name"); !tpgresource.IsEmptyValue(reflect.ValueOf(noteNameProp)) && (ok || !reflect.DeepEqual(v, noteNameProp)) {
 	obj["noteName"] = noteNameProp
 }
 
-return resource<%= resource_name -%>Encoder(d, meta, obj)
+return resource<%= object.resource_name -%>Encoder(d, meta, obj)

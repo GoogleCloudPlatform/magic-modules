@@ -1,0 +1,22 @@
+resource "google_firebaserules_release" "primary" {
+  name         = "cloud.firestore/{{database}}"
+  ruleset_name = "projects/{{project}}/rulesets/${google_firebaserules_ruleset.firestore.name}"
+  project      = "{{project}}"
+
+  lifecycle {
+    replace_triggered_by = [
+      google_firebaserules_ruleset.firestore
+    ]
+  }
+}
+
+resource "google_firebaserules_ruleset" "firestore" {
+  source {
+    files {
+      content = "service cloud.firestore {match /databases/{database}/documents { match /{document=**} { allow read, write: if false; } } }"
+      name    = "firestore.rules"
+    }
+  }
+
+  project = "{{project}}"
+}

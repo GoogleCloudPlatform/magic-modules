@@ -19,8 +19,10 @@
                            pwd: pwd)) -%>
 <% else -%>
 <% if tf_types.include?(property.class) -%>
-func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) interface{} {
-<% if property.is_a?(Api::Type::NestedObject) -%>
+func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+<% if property.ignore_read -%>
+  return d.Get("<%= property.terraform_lineage -%>")
+<% elsif property.is_a?(Api::Type::NestedObject) -%>
   if v == nil {
     return nil
   }
@@ -94,10 +96,23 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
     })
   }
   return transformed
+<% elsif (property.is_a?(Api::Type::KeyValueLabels)) || (property.is_a?(Api::Type::KeyValueAnnotations)) || (property.is_a?(Api::Type::KeyValueTerraformLabels)) -%>
+  if v == nil {
+    return v
+  }
+
+  transformed := make(map[string]interface{})
+  if l, ok := d.GetOkExists("<%= property.terraform_lineage -%>"); ok {
+    for k := range l.(map[string]interface{}) {
+      transformed[k] = v.(map[string]interface{})[k]
+    }
+  }
+
+  return transformed
 <% elsif property.is_a?(Api::Type::Integer) -%>
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
-		if intVal, err := StringToFixed64(strVal); err == nil {
+		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
 			return intVal
 		}
 	}
@@ -113,12 +128,12 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
   if v == nil {
     return v
   }
-  return convertAndMapStringArr(v.([]interface{}), ConvertSelfLinkToV1)
+  return tpgresource.ConvertAndMapStringArr(v.([]interface{}), tpgresource.ConvertSelfLinkToV1)
 <% elsif property.is_a?(Api::Type::ResourceRef) -%>
   if v == nil {
     return v
   }
-  return ConvertSelfLinkToV1(v.(string))
+  return tpgresource.ConvertSelfLinkToV1(v.(string))
 <% elsif property.is_set # item_type won't be NestedObject -%>
   if v == nil {
     return v

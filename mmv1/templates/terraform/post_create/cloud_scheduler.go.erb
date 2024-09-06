@@ -6,14 +6,22 @@ if paused, pausedOk := d.GetOk("paused"); pausedOk && paused.(bool) {
 }
 
 linkTmpl := fmt.Sprintf("{{CloudSchedulerBasePath}}projects/{{project}}/locations/{{region}}/jobs/{{name}}:%s", endpoint)
-url, err = replaceVars(d, config, linkTmpl)
+url, err = tpgresource.ReplaceVars(d, config, linkTmpl)
 if err != nil {
 	return err
 }
 
 emptyReqBody := make(map[string]interface{})
 
-_, err = SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, emptyReqBody, d.Timeout(schema.TimeoutUpdate))
+_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config: config,
+	Method: "POST",
+	Project: billingProject,
+	RawURL: url,
+	UserAgent: userAgent,
+	Body: emptyReqBody,
+	Timeout: d.Timeout(schema.TimeoutUpdate),
+})
 if err != nil {
 	return fmt.Errorf("Error setting Cloud Scheduler Job status: %s", err)
 }

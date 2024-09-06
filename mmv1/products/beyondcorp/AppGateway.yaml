@@ -13,9 +13,10 @@
 
 --- !ruby/object:Api::Resource
 name: 'AppGateway'
-description: "A BeyondCorp AppGateway resource represents a BeyondCorp protected AppGateway\
-  \ to a remote application. It creates \nall the necessary GCP components needed\
-  \ for creating a BeyondCorp protected AppGateway. Multiple connectors can be \n\
+description: "A BeyondCorp AppGateway resource represents a BeyondCorp protected
+  AppGateway to a remote application. It creates \nall the necessary GCP
+  components needed for creating a BeyondCorp protected AppGateway. Multiple
+  connectors can be \n\
   authorised for a single AppGateway.\n"
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
@@ -26,6 +27,8 @@ self_link: projects/{{project}}/locations/{{region}}/appGateways/{{name}}
 create_url: projects/{{project}}/locations/{{region}}/appGateways?app_gateway_id={{name}}
 # This resources is not updatable
 immutable: true
+schema_version: 1
+state_upgraders: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
@@ -49,20 +52,20 @@ async: !ruby/object:Api::OpAsync
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "beyondcorp_app_gateway_basic"
-    primary_resource_id: "app_gateway"
-    primary_resource_name: "fmt.Sprintf(\"tf_test_my_app_gateway%s\", context[\"random_suffix\"\
-      ])"
+    name: 'beyondcorp_app_gateway_basic'
+    primary_resource_id: 'app_gateway'
+    primary_resource_name:
+      'fmt.Sprintf("tf_test_my_app_gateway%s", context["random_suffix"])'
     vars:
-      app_gateway_name: "my-app-gateway"
+      app_gateway_name: 'my-app-gateway'
   - !ruby/object:Provider::Terraform::Examples
-    name: "beyondcorp_app_gateway_full"
-    primary_resource_id: "app_gateway"
-    primary_resource_name: "fmt.Sprintf(\"tf_test_my_app_gateway%s\", context[\"random_suffix\"\
-      ])"
+    name: 'beyondcorp_app_gateway_full'
+    primary_resource_id: 'app_gateway'
+    primary_resource_name:
+      'fmt.Sprintf("tf_test_my_app_gateway%s", context["random_suffix"])'
     vars:
-      app_gateway_name: "my-app-gateway"
-      display_name: "some display name"
+      app_gateway_name: 'my-app-gateway'
+      display_name: 'some display name'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -97,7 +100,7 @@ properties:
     name: 'displayName'
     description: |
       An arbitrary user-provided name for the AppGateway.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Resource labels to represent user provided metadata.

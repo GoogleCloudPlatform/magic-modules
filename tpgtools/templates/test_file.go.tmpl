@@ -11,6 +11,9 @@
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License. */}}
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 // ----------------------------------------------------------------------------
 //
 //     ***     AUTO GENERATED CODE    ***    Type: DCL     ***
@@ -26,7 +29,7 @@
 //
 // ----------------------------------------------------------------------------
 
-package google
+package {{$.Package}}_test
 
 import (
 	"context"
@@ -39,8 +42,12 @@ import (
 {{ end -}}
 	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
 	{{$.Package}} "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/{{$.DCLPackage}}"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 {{- range $s := $.TestSamples }}
@@ -51,15 +58,15 @@ func TestAcc{{$.PathType}}_{{$s.TestSlug}}(t *testing.T) {
 		{{- range $contextkey, $contextvalue := $s.ExpandContext }}
 		  "{{$contextkey}}" : {{$contextvalue}},
 		{{- end }}
-			"random_suffix": RandString(t, 10),
+			"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 	{{ if $s.HasGAEquivalent -}}
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 	{{- else }}
-		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 	{{- end }}
 	{{ if true -}}
 		CheckDestroy: testAccCheck{{$.PathType}}DestroyProducer(t),
@@ -98,7 +105,7 @@ func TestAcc{{$.PathType}}_{{$s.TestSlug}}(t *testing.T) {
 {{- range $s := $.TestSamples -}}
 {{ range $se := $s.EnumerateWithUpdateSamples }}
 func testAcc{{$.PathType}}_{{$se.TestSlug}}(context map[string]interface{}) string {
-	return Nprintf(`
+	return acctest.Nprintf(`
 {{ $se.GenerateHCL false }}
 `, context)
 }
@@ -115,7 +122,7 @@ func testAccCheck{{$.PathType}}DestroyProducer(t *testing.T) func(s *terraform.S
 				continue
 			}
 
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
 			billingProject := ""
 			if config.BillingProject != "" {
@@ -130,7 +137,7 @@ func testAccCheck{{$.PathType}}DestroyProducer(t *testing.T) func(s *terraform.S
 				{{- end }}
 			}
 
-			client := NewDCL{{$.TitleCasePackageName}}Client(config, config.UserAgent, billingProject, 0)
+			client := transport_tpg.NewDCL{{$.TitleCasePackageName}}Client(config, config.UserAgent, billingProject, 0)
 			_, err := client.Get{{$.DCLTitle}}(context.Background(), obj)
 			if err == nil {
 				return fmt.Errorf("{{$.TerraformName}} still exists %v", obj)

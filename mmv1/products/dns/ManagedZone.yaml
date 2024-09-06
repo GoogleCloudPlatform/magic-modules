@@ -21,12 +21,15 @@ description: |
   responsibility. A ManagedZone is a resource that represents a DNS zone
   hosted by the Cloud DNS service.
 iam_policy: !ruby/object:Api::Resource::IamPolicy
-  exclude: false
   method_name_separator: ':'
   fetch_iam_policy_verb: :POST
   parent_resource_attribute: 'managed_zone'
   set_iam_policy_verb: :POST
-  import_format: ["projects/{{project}}/managedZones/{{managed_zone}}", "{{project}}/{{managed_zone}}"]
+  import_format:
+    [
+      'projects/{{project}}/managedZones/{{managed_zone}}',
+      '{{project}}/{{managed_zone}}',
+    ]
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Managing Zones': 'https://cloud.google.com/dns/zones/'
@@ -34,70 +37,92 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 id_format: 'projects/{{project}}/managedZones/{{name}}'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "dns_managed_zone_quickstart"
-    primary_resource_id: "default"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-example-zone-googlecloudexample%s\"\
+    name: 'dns_managed_zone_quickstart'
+    primary_resource_id: 'default'
+    primary_resource_name:
+      "fmt.Sprintf(\"tf-test-example-zone-googlecloudexample%s\"\
       , context[\"random_suffix\"])"
     skip_docs: true
     vars:
-      dns_compute_instance: "dns-compute-instance"
-      allow_http_traffic: "allow-http-traffic"
-      example_zone_googlecloudexample: "example-zone-googlecloudexample"
+      dns_compute_instance: 'dns-compute-instance'
+      allow_http_traffic: 'allow-http-traffic'
+      example_zone_googlecloudexample: 'example-zone-googlecloudexample'
+      dns_name: "googlecloudexample.net."
+    test_vars_overrides:
+      dns_name: '"m-z.gcp.tfacc.hashicorptest.com."'
     ignore_read_extra:
-      - "force_destroy"
+      - 'force_destroy'
   - !ruby/object:Provider::Terraform::Examples
-    name: "dns_record_set_basic"
-    primary_resource_id: "parent-zone"
+    name: 'dns_record_set_basic'
+    primary_resource_id: 'parent-zone'
     skip_docs: true
     vars:
-      sample_zone: "sample-zone"
+      sample_zone: 'sample-zone'
   - !ruby/object:Provider::Terraform::Examples
-    name: "dns_managed_zone_basic"
-    primary_resource_id: "example-zone"
-    pull_external: true
-        # Randomness from random provider
+    name: 'dns_managed_zone_basic'
+    primary_resource_id: 'example-zone'
+    external_providers: ["random", "time"]
+      # Randomness from random provider
     skip_vcr: true
   - !ruby/object:Provider::Terraform::Examples
-    name: "dns_managed_zone_private"
-    primary_resource_id: "private-zone"
+    name: 'dns_managed_zone_private'
+    primary_resource_id: 'private-zone'
     vars:
-      zone_name: "private-zone"
-      network_1_name: "network-1"
-      network_2_name: "network-2"
+      zone_name: 'private-zone'
+      network_1_name: 'network-1'
+      network_2_name: 'network-2'
   - !ruby/object:Provider::Terraform::Examples
-    name: "dns_managed_zone_private_forwarding"
-    primary_resource_id: "private-zone"
+    name: 'dns_managed_zone_private_multiproject'
+    skip_docs: true
+    primary_resource_id: 'private-zone'
+    vars:
+      zone_name: 'private-zone'
+      network_1_name: 'network-1'
+      network_2_name: 'network-2'
+      project_1_name: 'project-1'
+      project_2_name: 'project-2'
+    test_env_vars:
+      org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dns_managed_zone_private_forwarding'
+    primary_resource_id: 'private-zone'
     skip_test: true
     vars:
-      zone_name: "private-zone"
-      network_1_name: "network-1"
-      network_2_name: "network-2"
+      zone_name: 'private-zone'
+      network_1_name: 'network-1'
+      network_2_name: 'network-2'
   - !ruby/object:Provider::Terraform::Examples
-    name: "dns_managed_zone_private_gke"
-    primary_resource_id: "private-zone-gke"
+    name: 'dns_managed_zone_private_gke'
+    primary_resource_id: 'private-zone-gke'
     vars:
-      zone_name: "private-zone"
-      network_1_name: "network-1"
-      cluster_1_name: "cluster-1"
+      zone_name: 'private-zone'
+      network_1_name: 'network-1'
+      cluster_1_name: 'cluster-1'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      deletion_protection: 'false'
+    oics_vars_overrides:
+      deletion_protection: 'false'
   - !ruby/object:Provider::Terraform::Examples
-    name: "dns_managed_zone_private_peering"
-    primary_resource_id: "peering-zone"
+    name: 'dns_managed_zone_private_peering'
+    primary_resource_id: 'peering-zone'
     vars:
-      zone_name: "peering-zone"
-      network_source_name: "network-source"
-      network_target_name: "network-target"
+      zone_name: 'peering-zone'
+      network_source_name: 'network-source'
+      network_target_name: 'network-target'
   - !ruby/object:Provider::Terraform::Examples
-    name: "dns_managed_zone_service_directory"
+    name: 'dns_managed_zone_service_directory'
     min_version: 'beta'
-    primary_resource_id: "sd-zone"
+    primary_resource_id: 'sd-zone'
     vars:
-      zone_name: "peering-zone"
-      network_name: "network"
+      zone_name: 'peering-zone'
+      network_name: 'network'
   - !ruby/object:Provider::Terraform::Examples
-    name: "dns_managed_zone_cloud_logging"
-    primary_resource_id: "cloud-logging-enabled-zone"
+    name: 'dns_managed_zone_cloud_logging'
+    primary_resource_id: 'cloud-logging-enabled-zone'
     vars:
-      zone_name: "cloud-logging-enabled-zone"
+      zone_name: 'cloud-logging-enabled-zone'
 virtual_fields:
   - !ruby/object:Api::Type::Boolean
     name: 'force_destroy'
@@ -145,8 +170,8 @@ properties:
           Specifies the mechanism used to provide authenticated denial-of-existence responses.
           non_existence can only be updated when the state is `off`.
         values:
-          - "nsec"
-          - "nsec3"
+          - 'nsec'
+          - 'nsec3'
         default_from_api: true
       - !ruby/object:Api::Type::Enum
         name: 'state'
@@ -157,9 +182,9 @@ properties:
           - dnssec_config.0.default_key_specs
         description: Specifies whether DNSSEC is enabled, and what mode it is in
         values:
-          - "off"
-          - "on"
-          - "transfer"
+          - 'off'
+          - 'on'
+          - 'transfer'
       - !ruby/object:Api::Type::Array
         name: 'defaultKeySpecs'
         at_least_one_of:
@@ -177,14 +202,14 @@ properties:
           properties:
             - !ruby/object:Api::Type::Enum
               name: 'algorithm'
-              description: String mnemonic specifying the DNSSEC algorithm of this
-                key
+              description:
+                String mnemonic specifying the DNSSEC algorithm of this key
               values:
-                - "ecdsap256sha256"
-                - "ecdsap384sha384"
-                - "rsasha1"
-                - "rsasha256"
-                - "rsasha512"
+                - 'ecdsap256sha256'
+                - 'ecdsap384sha384'
+                - 'rsasha1'
+                - 'rsasha256'
+                - 'rsasha512'
             - !ruby/object:Api::Type::Integer
               name: 'keyLength'
               description: Length of the keys in bits
@@ -198,8 +223,8 @@ properties:
                 not have the Secure Entry Point flag set and will be used
                 to sign all other types of resource record sets.
               values:
-                - "keySigning"
-                - "zoneSigning"
+                - 'keySigning'
+                - 'zoneSigning'
             - !ruby/object:Api::Type::String
               name: 'kind'
               description: 'Identifies what kind of resource this is'
@@ -223,21 +248,13 @@ properties:
       defined by the server
     item_type: Api::Type::String
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'nameServerSet'
-    description: |
-      Optionally specifies the NameServerSet for this ManagedZone. A
-      NameServerSet is a set of DNS name servers that all host the same
-      ManagedZones. Most users will leave this field unset.
-    immutable: true
-    exclude: true
   - !ruby/object:Api::Type::Time
     name: 'creationTime'
     description: |
       The time that this resource was created on the server.
       This is in RFC3339 text format.
     output: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       A set of key/value label pairs to assign to this ManagedZone.
@@ -251,27 +268,30 @@ properties:
       - :private
       - :public
     default_value: :public
-    diff_suppress_func: 'caseDiffSuppress'
+    diff_suppress_func: 'tpgresource.CaseDiffSuppress'
     custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
   - !ruby/object:Api::Type::NestedObject
     name: 'privateVisibilityConfig'
+    at_least_one_of:
+      - gke_clusters
+      - networks
     description: |
       For privately visible zones, the set of Virtual Private Cloud
-      resources that the zone is visible from.
+      resources that the zone is visible from. At least one of `gke_clusters` or `networks` must be specified.
     send_empty_value: true
     custom_expand: 'templates/terraform/custom_expand/dns_managed_zone_private_visibility_config.go.erb'
     properties:
       - !ruby/object:Api::Type::Array
         name: 'gkeClusters'
-        description: 'The list of Google Kubernetes Engine clusters that can see this
-          zone.'
+        description:
+          'The list of Google Kubernetes Engine clusters that can see this zone.'
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String
               name: 'gkeClusterName'
               description: |
-                The resource name of the cluster to bind this ManagedZone to.  
-                This should be specified in the format like  
+                The resource name of the cluster to bind this ManagedZone to.
+                This should be specified in the format like
                 `projects/*/locations/*/clusters/*`
               required: true
       - !ruby/object:Api::Type::Array
@@ -282,7 +302,6 @@ properties:
           add another `networks` block while keeping the old block, Terraform will see an incorrect diff
           and apply an incorrect update to the resource. If you encounter this issue, remove all `networks`
           blocks in an update and then apply another update adding all of them back simultaneously.
-        required: true
         is_set: true
         set_hash_func: |-
           func(v interface{}) int {
@@ -291,11 +310,11 @@ properties:
             }
             raw := v.(map[string]interface{})
             if url, ok := raw["network_url"]; ok {
-              return selfLinkNameHash(url)
+              return tpgresource.SelfLinkRelativePathHash(url)
             }
             var buf bytes.Buffer
             schema.SerializeResourceForHash(&buf, raw, dnsManagedZonePrivateVisibilityConfigNetworksSchema())
-            return hashcode(buf.String())
+            return tpgresource.Hashcode(buf.String())
           }
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
@@ -308,7 +327,7 @@ properties:
                 This should be formatted like `projects/{project}/global/networks/{network}` or
                 `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
               required: true
-              diff_suppress_func: 'compareSelfLinkOrResourceName'
+              diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::NestedObject
     name: 'forwardingConfig'
     description: |
@@ -328,11 +347,11 @@ properties:
           func(v interface{}) int {
             raw := v.(map[string]interface{})
             if address, ok := raw["ipv4_address"]; ok {
-              hashcode(address.(string))
+              tpgresource.Hashcode(address.(string))
             }
             var buf bytes.Buffer
             schema.SerializeResourceForHash(&buf, raw, dnsManagedZoneForwardingConfigTargetNameServersSchema())
-            return hashcode(buf.String())
+            return tpgresource.Hashcode(buf.String())
           }
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
@@ -370,7 +389,7 @@ properties:
               This should be formatted like `projects/{project}/global/networks/{network}` or
               `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
             custom_expand: templates/terraform/custom_expand/network_full_url.erb
-            diff_suppress_func: 'compareSelfLinkOrResourceName'
+            diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::Boolean
     name: 'reverseLookup'
     api_name: reverseLookupConfig
@@ -386,8 +405,9 @@ properties:
     min_version: beta
     immutable: true
     name: 'serviceDirectoryConfig'
-    description: The presence of this field indicates that this zone is backed by
-      Service Directory. The value of this field contains information related to the
+    description:
+      The presence of this field indicates that this zone is backed by Service
+      Directory. The value of this field contains information related to the
       namespace associated with the zone.
     properties:
       - !ruby/object:Api::Type::NestedObject
@@ -414,5 +434,6 @@ properties:
       - !ruby/object:Api::Type::Boolean
         name: 'enableLogging'
         required: true
-        description: 'If set, enable query logging for this ManagedZone. False by
-          default, making logging opt-in.'
+        description:
+          'If set, enable query logging for this ManagedZone. False by default,
+          making logging opt-in.'

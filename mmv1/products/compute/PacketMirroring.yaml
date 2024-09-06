@@ -28,7 +28,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -44,23 +44,23 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "compute_packet_mirroring_full"
-    primary_resource_id: "foobar"
+    name: 'compute_packet_mirroring_full'
+    primary_resource_id: 'foobar'
     vars:
-      instance_name: "my-instance"
-      subnetwork_name: "my-subnetwork"
-      service_name: "my-service"
-      hc_name: "my-healthcheck"
-      mirroring_name: "my-mirroring"
-      ilb_rule_name: "my-ilb"
-      network_name: "my-network"
+      instance_name: 'my-instance'
+      subnetwork_name: 'my-subnetwork'
+      service_name: 'my-service'
+      hc_name: 'my-healthcheck'
+      mirroring_name: 'my-mirroring'
+      ilb_rule_name: 'my-ilb'
+      network_name: 'my-network'
 properties:
   - !ruby/object:Api::Type::String
     name: name
     description: The name of the packet mirroring rule
     required: true
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateGCEName'
+      function: 'verify.ValidateGCEName'
   - !ruby/object:Api::Type::String
     name: description
     description: A human-readable description of the rule.
@@ -83,11 +83,13 @@ properties:
     properties:
       - !ruby/object:Api::Type::ResourceRef
         name: url
-        description: The full self_link URL of the network where this rule is active.
+        description:
+          The full self_link URL of the network where this rule is active.
         resource: 'Network'
         imports: 'selfLink'
         required: true
         immutable: true
+        custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
     required: true
   - !ruby/object:Api::Type::Integer
     name: priority
@@ -112,24 +114,22 @@ properties:
         resource: 'ForwardingRule'
         imports: 'selfLink'
         description: The URL of the forwarding rule.
+        custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::NestedObject
     name: filter
     description: |
-        A filter for mirrored traffic.  If unset, all traffic is mirrored.
+      A filter for mirrored traffic.  If unset, all traffic is mirrored.
     properties:
       - !ruby/object:Api::Type::Array
         name: ipProtocols
         api_name: 'IPProtocols'
-        description: |
-            Protocols that apply as a filter on mirrored traffic.
-        item_type: Api::Type::String
-        name: ipProtocols
         description: Possible IP protocols including tcp, udp, icmp and esp
+        item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: cidrRanges
         description: |
-            IP CIDR ranges that apply as a filter on the source (ingress) or
-            destination (egress) IP in the IP header. Only IPv4 is supported.
+          IP CIDR ranges that apply as a filter on the source (ingress) or
+          destination (egress) IP in the IP header. Only IPv4 is supported.
         item_type: Api::Type::String
       - !ruby/object:Api::Type::Enum
         name: direction
@@ -143,34 +143,37 @@ properties:
     name: mirroredResources
     required: true
     description: |
-        A means of specifying which resources to mirror.
+      A means of specifying which resources to mirror.
     properties:
       - !ruby/object:Api::Type::Array
         name: subnetworks
         at_least_one_of:
-            - mirrored_resources.0.subnetworks
-            - mirrored_resources.0.instances
-            - mirrored_resources.0.tags
+          - mirrored_resources.0.subnetworks
+          - mirrored_resources.0.instances
+          - mirrored_resources.0.tags
         description: |
-            All instances in one of these subnetworks will be mirrored.
+          All instances in one of these subnetworks will be mirrored.
         item_type: !ruby/object:Api::Type::NestedObject
           name: subnetworks
-          description: The subnetworks that should be mirrored.  Specify at most 5.
+          description:
+            The subnetworks that should be mirrored.  Specify at most 5.
           properties:
             - !ruby/object:Api::Type::ResourceRef
               name: url
               resource: 'Subnetwork'
               imports: 'selfLink'
-              description: The URL of the subnetwork where this rule should be active.
+              description:
+                The URL of the subnetwork where this rule should be active.
               required: true
+              custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
       - !ruby/object:Api::Type::Array
         name: instances
         description: |
-            All the listed instances will be mirrored.  Specify at most 50.
+          All the listed instances will be mirrored.  Specify at most 50.
         at_least_one_of:
-            - mirrored_resources.0.subnetworks
-            - mirrored_resources.0.instances
-            - mirrored_resources.0.tags
+          - mirrored_resources.0.subnetworks
+          - mirrored_resources.0.instances
+          - mirrored_resources.0.tags
         item_type: !ruby/object:Api::Type::NestedObject
           name: instances
           description: The instances that should be mirrored.
@@ -179,15 +182,16 @@ properties:
               name: url
               resource: 'Instance'
               imports: 'selfLink'
-              description: The URL of the instances where this rule should be active.
+              description:
+                The URL of the instances where this rule should be active.
               required: true
+              custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
       - !ruby/object:Api::Type::Array
         name: tags
         at_least_one_of:
-            - mirrored_resources.0.subnetworks
-            - mirrored_resources.0.instances
-            - mirrored_resources.0.tags
+          - mirrored_resources.0.subnetworks
+          - mirrored_resources.0.instances
+          - mirrored_resources.0.tags
         description: |
-            All instances with these tags will be mirrored.
+          All instances with these tags will be mirrored.
         item_type: Api::Type::String
-

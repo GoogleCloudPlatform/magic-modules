@@ -4,7 +4,9 @@ description: |-
   Manages a VM instance template resource within GCE.
 ---
 
-# google\_compute\_instance\_template
+# google_compute_instance_template
+
+-> **Note**: Global instance templates can be used in any region. To lower the impact of outages outside your region and gain data residency within your region, use [google_compute_region_instance_template](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_region_instance_template).
 
 Manages a VM instance template resource within GCE. For more information see
 [the official documentation](https://cloud.google.com/compute/docs/instance-templates)
@@ -222,6 +224,47 @@ With this setup Terraform generates a unique name for your Instance
 Template and can then update the Instance Group manager without conflict before
 destroying the previous Instance Template.
 
+## Example usage - Confidential Computing
+
+Example with [Confidential Mode](https://cloud.google.com/confidential-computing/confidential-vm/docs/confidential-vm-overview) activated.
+
+```tf
+resource "google_service_account" "default" {
+  account_id   = "my-custom-sa"
+  display_name = "Custom SA for VM Instance"
+}
+
+resource "google_compute_instance_template" "confidential_instance_template" {
+  name             = "my-confidential-instance-template"
+  region           = "us-central1"
+  machine_type     = "n2d-standard-2"
+  min_cpu_platform = "AMD Milan"
+
+  confidential_instance_config {
+    enable_confidential_compute = true
+    confidential_instance_type  = "SEV"
+  }
+
+  disk {
+    source_image = "ubuntu-os-cloud/ubuntu-2004-lts"
+  }
+
+  network_interface {
+    network = "default"
+
+    access_config {
+      // Ephemeral public IP
+    }
+  }
+
+  service_account {
+    # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
+    email  = google_service_account.default.email
+    scopes = ["cloud-platform"]
+  }
+}
+```
+
 ## Deploying the Latest Image
 
 A common way to use instance templates and managed instance groups is to deploy the
@@ -286,14 +329,21 @@ The following arguments are supported:
 
 * `machine_type` - (Required) The machine type to create.
 
-    To create a machine with a [custom type][custom-vm-types] (such as extended memory), format the value like `custom-VCPUS-MEM_IN_MB` like `custom-6-20480` for 6 vCPU and 20GB of RAM.
+    To create a machine with a [custom type](https://cloud.google.com/dataproc/docs/concepts/compute/custom-machine-types) (such as extended memory), format the value like `custom-VCPUS-MEM_IN_MB` like `custom-6-20480` for 6 vCPU and 20GB of RAM.
 
 - - -
 * `name` - (Optional) The name of the instance template. If you leave
   this blank, Terraform will auto-generate a unique name.
 
 * `name_prefix` - (Optional) Creates a unique name beginning with the specified
-  prefix. Conflicts with `name`.
+  prefix. Conflicts with `name`. Max length is 54 characters.
+  Prefixes with lengths longer than 37 characters will use a shortened
+  UUID that will be more prone to collisions.
+
+  Resulting name for a `name_prefix` <= 37 characters:
+  `name_prefix` + YYYYmmddHHSSssss + 8 digit incremental counter
+  Resulting name for a `name_prefix` 38 - 54 characters:
+  `name_prefix` + YYmmdd + 3 digit incremental counter
 
 * `can_ip_forward` - (Optional) Whether to allow sending and receiving of
     packets with non-matching source or destination IPs. This defaults to false.
@@ -305,6 +355,15 @@ The following arguments are supported:
 
 * `labels` - (Optional) A set of key/value label pairs to assign to instances
     created from this template.
+
+    **Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
+    Please refer to the field 'effective_labels' for all of the labels present on the resource.
+
+* `terraform_labels` -
+  The combination of labels configured directly on the resource and default labels configured on the provider.
+
+* `effective_labels` -
+  All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.
 
 * `metadata` - (Optional) Metadata key/value pairs to make available from
     within instances created from this template.
@@ -318,8 +377,7 @@ The following arguments are supported:
     this template. This can be specified multiple times for multiple networks.
     Structure is [documented below](#nested_network_interface).
 
-* `network_performance_config` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)
-    Configures network performance settings for the instance created from the
+* `network_performance_config` (Optional, Configures network performance settings for the instance created from the
     template. Structure is [documented below](#nested_network_performance_config). **Note**: [`machine_type`](#machine_type)
     must be a [supported type](https://cloud.google.com/compute/docs/networking/configure-vm-with-high-bandwidth-configuration),
     the [`image`](#image) used must include the [`GVNIC`](https://cloud.google.com/compute/docs/networking/using-gvnic#create-instance-gvnic-image)
@@ -340,6 +398,8 @@ The following arguments are supported:
 
 * `reservation_affinity` - (Optional) Specifies the reservations that this instance can consume from.
     Structure is [documented below](#nested_reservation_affinity).
+
+* `resource_manager_tags` - (Optional) A set of key/value resource manager tag pairs to bind to the instances. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456.
 
 * `scheduling` - (Optional) The scheduling strategy to use. More details about
     this configuration option are [detailed below](#nested_scheduling).
@@ -363,6 +423,8 @@ The following arguments are supported:
 
 * `advanced_machine_features` (Optional) - Configure Nested Virtualisation and Simultaneous Hyper Threading on this VM. Structure is [documented below](#nested_advanced_machine_features)
 
+* `partner_metadata` - (optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) key/value pair represents partner metadata assigned to instance template where key represent a defined namespace and value is a json string represent the entries associted with the namespace.
+
 <a name="nested_disk"></a>The `disk` block supports:
 
 * `auto_delete` - (Optional) Whether or not the disk should be auto-deleted.
@@ -376,6 +438,13 @@ The following arguments are supported:
 
 * `disk_name` - (Optional) Name of the disk. When not provided, this defaults
     to the name of the instance.
+
+* `provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk. This
+    sets the number of I/O operations per second that the disk can handle.
+    Values must be between 10,000 and 120,000. For more details, see the
+    [Extreme persistent disk documentation](https://cloud.google.com/compute/docs/disks/extreme-persistent-disk).
+
+* `resource_manager_tags` - (Optional) A set of key/value resource manager tag pairs to bind to this disk. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456.
 
 * `source_image` - (Optional) The image from which to
     initialize this disk. This can be one of: the image's `self_link`,
@@ -415,7 +484,7 @@ The following arguments are supported:
 ~> **Note:** Either `source`, `source_image`, or `source_snapshot` is **required** in a disk block unless the disk type is `local-ssd`. Check the API [docs](https://cloud.google.com/compute/docs/reference/rest/v1/instanceTemplates/insert) for details.
 
 * `disk_type` - (Optional) The GCE disk type. Such as `"pd-ssd"`, `"local-ssd"`,
-    `"pd-balanced"` or `"pd-standard"`.
+    `"pd-balanced"` or `"pd-standard"`, `"hyperdisk-balanced"`, `"hyperdisk-throughput"` or `"hyperdisk-extreme"`.
 
 * `disk_size_gb` - (Optional) The size of the image in gigabytes. If not
     specified, it will inherit the size of its base image. For SCRATCH disks,
@@ -471,6 +540,8 @@ The following arguments are supported:
     to. The subnetwork must exist in the same `region` this instance will be
     created in. Either `network` or `subnetwork` must be provided.
 
+* `network_attachment` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The URL of the network attachment that this interface should connect to in the following format: projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}.
+
 * `subnetwork_project` - (Optional) The ID of the project in which the subnetwork belongs.
     If it is not provided, the provider project is used.
 
@@ -503,7 +574,7 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 * `nat_ip` - (Optional) The IP address that will be 1:1 mapped to the instance's
     network ip. If not given, one will be generated.
 
-* `network_tier` - (Optional) The [networking tier][network-tier] used for configuring
+* `network_tier` - (Optional) The [networking tier](https://cloud.google.com/network-tiers/docs/overview) used for configuring
     this instance template. This field can take the following values: PREMIUM,
     STANDARD or FIXED_STANDARD. If this field is not specified, it is assumed to be PREMIUM.
 
@@ -535,8 +606,10 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
     The [service accounts documentation](https://cloud.google.com/compute/docs/access/service-accounts#accesscopesiam)
     explains that access scopes are the legacy method of specifying permissions for your instance.
-    If you are following best practices and using IAM roles to grant permissions to service accounts,
-    then you can define this field as an empty list.
+    To follow best practices you should create a dedicated service account with the minimum permissions the VM requires.
+    To use a dedicated service account this field should be configured as a list containing the `cloud-platform` scope.
+    See [Authenticate workloads using service accounts best practices](https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances#best_practices)
+    and [Best practices for using service accounts](https://cloud.google.com/iam/docs/best-practices-service-accounts#single-purpose).
 
 <a name="nested_scheduling"></a>The `scheduling` block supports:
 
@@ -556,16 +629,22 @@ specified, then this instance will have no external IPv6 Internet access. Struct
    groups will use as host systems. Read more on sole-tenant node creation
    [here](https://cloud.google.com/compute/docs/nodes/create-nodes).
    Structure [documented below](#nested_node_affinities).
-   
-* `provisioning_model` - (Optional) Describe the type of preemptible VM. This field accepts the value `STANDARD` or `SPOT`. If the value is `STANDARD`, there will be no discount. If this   is set to `SPOT`, 
-    `preemptible` should be `true` and `auto_restart` should be
+
+* `provisioning_model` - (Optional) Describe the type of preemptible VM. This field accepts the value `STANDARD` or `SPOT`. If the value is `STANDARD`, there will be no discount. If this   is set to `SPOT`,
+    `preemptible` should be `true` and `automatic_restart` should be
     `false`. For more info about
     `SPOT`, read [here](https://cloud.google.com/compute/docs/instances/spot)
-    
-* `instance_termination_action` - (Optional) Describe the type of termination action for `SPOT` VM. Can be `STOP` or `DELETE`.  Read more on [here](https://cloud.google.com/compute/docs/instances/create-use-spot) 
 
-* `max_run_duration` -  (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) The duration of the instance. Instance will run and be terminated after then, the termination action could be defined in `instance_termination_action`. Only support `DELETE` `instance_termination_action` at this point. Structure is [documented below](#nested_max_run_duration).
-<a name="nested_max_run_duration"></a>The `max_run_duration` block supports:
+* `instance_termination_action` - (Optional) Describe the type of termination action for `SPOT` VM. Can be `STOP` or `DELETE`.  Read more on [here](https://cloud.google.com/compute/docs/instances/create-use-spot)
+
+* `max_run_duration` -  (Optional) The duration of the instance. Instance will run and be terminated after then, the termination action could be defined in `instance_termination_action`. Structure is [documented below](#nested_max_run_duration).
+
+* `on_instance_stop_action` - (Optional) Specifies the action to be performed when the instance is terminated using `max_run_duration` and `STOP` `instance_termination_action`. Only support `true` `discard_local_ssd` at this point. Structure is [documented below](#nested_on_instance_stop_action).
+
+* `maintenance_interval` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Specifies the frequency of planned maintenance events. The accepted values are: `PERIODIC`.
+
+* `local_ssd_recovery_timeout` -  (Optional) (https://terraform.io/docs/providers/google/guides/provider_versions.html) Specifies the maximum amount of time a Local Ssd Vm should wait while recovery of the Local Ssd state is attempted. Its value should be in between 0 and 168 hours with hour granularity and the default value being 1 hour. Structure is [documented below](#nested_local_ssd_recovery_timeout).
+<a name="nested_local_ssd_recovery_timeout"></a>The `local_ssd_recovery_timeout` block supports:
 
 * `nanos` - (Optional) Span of time that's a fraction of a second at nanosecond
     resolution. Durations less than one second are represented with a 0
@@ -576,7 +655,21 @@ specified, then this instance will have no external IPv6 Internet access. Struct
    315,576,000,000 inclusive. Note: these bounds are computed from: 60
    sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years.
 
-* `maintenance_interval` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Specifies the frequency of planned maintenance events. The accepted values are: `PERIODIC`. 
+<a name="nested_max_run_duration"></a>The `max_run_duration` block supports:
+
+* `nanos` - (Optional) Span of time that's a fraction of a second at nanosecond
+	resolution. Durations less than one second are represented with a 0
+	`seconds` field and a positive `nanos` field. Must be from 0 to
+	 999,999,999 inclusive.
+
+* `seconds` - (Required) Span of time at a resolution of a second. Must be from 0 to
+   315,576,000,000 inclusive. Note: these bounds are computed from: 60
+   sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years.
+
+<a name="nested_on_instance_stop_action"></a>The `on_instance_stop_action` block supports:
+
+* `discard_local_ssd` - (Optional) Whether to discard local SSDs attached to the VM while terminating using `max_run_duration`. Only supports `true` at this point.
+
 <a name="nested_guest_accelerator"></a>The `guest_accelerator` block supports:
 
 * `type` (Required) - The accelerator type resource to expose to this instance. E.g. `nvidia-tesla-k80`.
@@ -615,7 +708,9 @@ The `specific_reservation` block supports:
 
 <a name="nested_confidential_instance_config"></a>The `confidential_instance_config` block supports:
 
-* `enable_confidential_compute` (Optional) Defines whether the instance should have confidential compute enabled. [`on_host_maintenance`](#on_host_maintenance) has to be set to TERMINATE or this will fail to create the VM.
+* `enable_confidential_compute` (Optional) Defines whether the instance should have confidential compute enabled with AMD SEV. If enabled, [`on_host_maintenance`](#on_host_maintenance) can be set to MIGRATE if [`min_cpu_platform`](#min_cpu_platform) is set to `"AMD Milan"`. Otherwise, [`on_host_maintenance`](#on_host_maintenance) has to be set to TERMINATE or this will fail to create the VM.
+
+* `confidential_instance_type` (Optional) Defines the confidential computing technology the instance uses. SEV is an AMD feature. TDX is an Intel feature. One of the following values is required: `SEV`, `SEV_SNP`, `TDX`. [`on_host_maintenance`](#on_host_maintenance) can be set to MIGRATE if [`confidential_instance_type`](#confidential_instance_type) is set to `SEV` and [`min_cpu_platform`](#min_cpu_platform) is set to `"AMD Milan"`. Otherwise, [`on_host_maintenance`](#on_host_maintenance) has to be set to TERMINATE or this will fail to create the VM. If `SEV_SNP`, currently [`min_cpu_platform`](#min_cpu_platform) has to be set to `"AMD Milan"` or this will fail to create the VM. TDX is only available in beta.
 
 <a name="nested_network_performance_config"></a>The `network_performance_config` block supports:
 
@@ -660,11 +755,23 @@ This resource provides the following
 
 Instance templates can be imported using any of these accepted formats:
 
+* `projects/{{project}}/global/instanceTemplates/{{name}}`
+* `{{project}}/{{name}}`
+* `{{name}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import instance templates using one of the formats above. For example:
+
+```tf
+import {
+  id = "projects/{{project}}/global/instanceTemplates/{{name}}"
+  to = google_compute_instance_template.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), instance templates can be imported using one of the formats above. For example:
+
 ```
 $ terraform import google_compute_instance_template.default projects/{{project}}/global/instanceTemplates/{{name}}
 $ terraform import google_compute_instance_template.default {{project}}/{{name}}
 $ terraform import google_compute_instance_template.default {{name}}
 ```
-
-[custom-vm-types]: https://cloud.google.com/dataproc/docs/concepts/compute/custom-machine-types
-[network-tier]: https://cloud.google.com/network-tiers/docs/overview

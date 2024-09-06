@@ -1,0 +1,54 @@
+[
+  {
+    "name": "//run.googleapis.com/projects/{{.Provider.project}}/locations/us-central1/services/cloudrun-to-get-cai",
+    "asset_type": "run.googleapis.com/Service",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "v1",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/run/v1/rest",
+      "discovery_name": "Service",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "apiVersion": "serving.knative.dev/v1",
+        "kind": "Service",
+        "metadata": {
+          "annotations": {
+            "generated-by": "magic-modules"
+          },
+          "labels": {
+            "goog-terraform-provisioned": "true"
+          },
+          "name": "cloudrun-to-get-cai",
+          "namespace": "{{.Provider.project}}"
+        },
+        "spec": {
+          "template": {
+            "spec": {
+              "containerConcurrency": 10,
+              "containers": [
+                {
+                  "args": [
+                    "arrgs"
+                  ],
+                  "image": "gcr.io/cloudrun/hello",
+                  "ports": [
+                    {
+                      "containerPort": 8080
+                    }
+                  ]
+                }
+              ],
+              "timeoutSeconds": 600
+            }
+          },
+          "traffic": [
+            {
+              "latestRevision": true,
+              "percent": 100
+            }
+          ]
+        }
+      }
+    }
+  }
+]

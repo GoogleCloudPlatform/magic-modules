@@ -39,7 +39,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -59,22 +59,27 @@ docs: !ruby/object:Provider::Terraform::Docs
     If logging is enabled, logs will be exported to Stackdriver. Deprecated in favor of `log_config`
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "firewall_basic"
-    primary_resource_id: "default"
+    name: 'firewall_basic'
+    primary_resource_id: 'default'
     vars:
-      firewall_name: "test-firewall"
-      network_name: "test-network"
+      firewall_name: 'test-firewall'
+      network_name: 'test-network'
   - !ruby/object:Provider::Terraform::Examples
-    name: "firewall_with_target_tags"
-    primary_resource_id: "rules"
+    name: 'firewall_with_target_tags'
+    primary_resource_id: 'rules'
     vars:
-      firewall_name: "my-firewall-rule"
+      firewall_name: 'my-firewall-rule'
     test_env_vars:
       project: :PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/firewall.erb
-  resource_definition: templates/terraform/resource_definition/firewall.erb
   extra_schema_entry: templates/terraform/extra_schema_entry/firewall.erb
+custom_diff: [
+  'resourceComputeFirewallEnableLoggingCustomizeDiff',
+  'resourceComputeFirewallSourceFieldsCustomizeDiff',
+]
+migrate_state: 'resourceComputeFirewallMigrateState'
+schema_version: 1
 properties:
   # TODO(nelsonjr): [nice to have] Make the format here simpler to use, in
   # the form of # 22/tcp, [12345-23456]/tcp. It requires a conversion
@@ -105,7 +110,7 @@ properties:
             icmp, esp, ah, sctp, ipip, all), or the IP protocol number.
           api_name: 'IPProtocol'
           required: true
-          diff_suppress_func: 'compareCaseInsensitive'
+          diff_suppress_func: 'tpgresource.CaseDiffSuppress'
         - !ruby/object:Api::Type::Array
           item_type: Api::Type::String
           name: 'ports'
@@ -115,7 +120,7 @@ properties:
             either an integer or a range. If not specified, this rule
             applies to connections through any port.
 
-            Example inputs include: ["22"], ["80","443"], and
+            Example inputs include: [22], [80, 443], and
             ["12345-12349"].
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -144,7 +149,7 @@ properties:
             one of the following well known protocol strings (tcp, udp,
             icmp, esp, ah, sctp, ipip, all), or the IP protocol number.
           api_name: 'IPProtocol'
-          diff_suppress_func: 'compareCaseInsensitive'
+          diff_suppress_func: 'tpgresource.CaseDiffSuppress'
           required: true
         - !ruby/object:Api::Type::Array
           item_type: Api::Type::String
@@ -155,13 +160,14 @@ properties:
             either an integer or a range. If not specified, this rule
             applies to connections through any port.
 
-            Example inputs include: ["22"], ["80","443"], and
+            Example inputs include: [22], [80, 443], and
             ["12345-12349"].
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
+    send_empty_value: true
   - !ruby/object:Api::Type::Array
     name: 'destinationRanges'
     description: |
@@ -175,9 +181,7 @@ properties:
     name: 'direction'
     description: |
       Direction of traffic to which this firewall applies; default is
-      INGRESS. Note: For INGRESS traffic, it is NOT supported to specify
-      destinationRanges; For EGRESS traffic, it is NOT supported to specify
-      `source_ranges` OR `source_tags`. For INGRESS traffic, one of `source_ranges`,
+      INGRESS. Note: For INGRESS traffic, one of `source_ranges`,
       `source_tags` or `source_service_accounts` is required.
     values:
       - :INGRESS
@@ -202,13 +206,6 @@ properties:
     custom_flatten: 'templates/terraform/custom_flatten/firewall_log_config.go.erb'
     diff_suppress_func: 'diffSuppressEnableLogging'
     properties:
-      - !ruby/object:Api::Type::Boolean
-        name: 'enable'
-        description: |
-          This field denotes whether to enable logging for a particular
-          firewall rule. If logging is enabled, logs will be exported to
-          Stackdriver.
-        exclude: true
       - !ruby/object:Api::Type::Enum
         name: 'metadata'
         description: |
@@ -217,11 +214,6 @@ properties:
           - :EXCLUDE_ALL_METADATA
           - :INCLUDE_ALL_METADATA
         required: true
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'The unique identifier for the resource.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
@@ -235,7 +227,7 @@ properties:
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateGCEName'
+      function: 'verify.ValidateGCEName'
   - !ruby/object:Api::Type::ResourceRef
     name: 'network'
     resource: 'Network'
@@ -243,6 +235,7 @@ properties:
     required: true
     description: |
       The name or self_link of the network to attach this firewall to.
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Integer
     name: 'priority'
     description: |

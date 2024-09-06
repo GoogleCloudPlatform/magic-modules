@@ -26,7 +26,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -114,6 +114,26 @@ examples:
     ignore_read_extra:
       - "metadata"
       - "metadata_startup_script"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "url_map_path_template_match"
+    primary_resource_id: "urlmap"
+    vars:
+      url_map_name: "urlmap"
+      cart_backend_service_name: "cart-service"
+      user_backend_service_name: "user-service"
+      http_health_check_name: "health-check"
+      backend_bucket_name: "static-asset-backend-bucket"
+      storage_bucket_name: "static-asset-bucket"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "url_map_custom_error_response_policy"
+    primary_resource_id: "urlmap"
+    min_version: beta
+    vars:
+      url_map_name: "urlmap"
+      backend_service_name: "login"
+      http_health_check_name: "health-check"
+      storage_bucket_name: "static-asset-bucket"
+      error_backend_bucket_name: "error-backend-bucket"
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -295,6 +315,66 @@ properties:
             An optional description of this resource. Provide this property when you create
             the resource.
         - !ruby/object:Api::Type::NestedObject
+          name: 'defaultCustomErrorResponsePolicy'
+          min_version: beta
+          description: |
+            defaultCustomErrorResponsePolicy specifies how the Load Balancer returns error responses when BackendServiceor BackendBucket responds with an error.
+
+            This policy takes effect at the PathMatcher level and applies only when no policy has been defined for the error code at lower levels like RouteRule and PathRule within this PathMatcher. If an error code does not have a policy defined in defaultCustomErrorResponsePolicy, then a policy defined for the error code in UrlMap.defaultCustomErrorResponsePolicy takes effect.
+
+            For example, consider a UrlMap with the following configuration:
+
+            UrlMap.defaultCustomErrorResponsePolicy is configured with policies for 5xx and 4xx errors
+            A RouteRule for /coming_soon/ is configured for the error code 404.
+            If the request is for www.myotherdomain.com and a 404 is encountered, the policy under UrlMap.defaultCustomErrorResponsePolicy takes effect. If a 404 response is encountered for the request www.example.com/current_events/, the pathMatcher's policy takes effect. If however, the request for www.example.com/coming_soon/ encounters a 404, the policy in RouteRule.customErrorResponsePolicy takes effect. If any of the requests in this example encounter a 500 error code, the policy at UrlMap.defaultCustomErrorResponsePolicy takes effect.
+
+            When used in conjunction with pathMatcher.defaultRouteAction.retryPolicy, retries take precedence. Only once all retries are exhausted, the defaultCustomErrorResponsePolicy is applied. While attempting a retry, if load balancer is successful in reaching the service, the defaultCustomErrorResponsePolicy is ignored and the response from the service is returned to the client.
+
+            defaultCustomErrorResponsePolicy is supported only for global external Application Load Balancers.
+          properties:
+            - !ruby/object:Api::Type::Array
+              name: 'errorResponseRule'
+              api_name: errorResponseRules
+              description: |
+                Specifies rules for returning error responses.
+                In a given policy, if you specify rules for both a range of error codes as well as rules for specific error codes then rules with specific error codes have a higher priority.
+                For example, assume that you configure a rule for 401 (Un-authorized) code, and another for all 4 series error codes (4XX).
+                If the backend service returns a 401, then the rule for 401 will be applied. However if the backend service returns a 403, the rule for 4xx takes effect.
+              item_type: !ruby/object:Api::Type::NestedObject
+                properties:
+                  - !ruby/object:Api::Type::Array
+                    name: 'matchResponseCodes'
+                    description: |
+                      Valid values include:
+                      - A number between 400 and 599: For example 401 or 503, in which case the load balancer applies the policy if the error code exactly matches this value.
+                      - 5xx: Load Balancer will apply the policy if the backend service responds with any response code in the range of 500 to 599.
+                      - 4xx: Load Balancer will apply the policy if the backend service responds with any response code in the range of 400 to 499.
+                      Values must be unique within matchResponseCodes and across all errorResponseRules of CustomErrorResponsePolicy.
+                    item_type: Api::Type::String
+                  - !ruby/object:Api::Type::String
+                    name: 'path'
+                    description: |
+                      The full path to a file within backendBucket . For example: /errors/defaultError.html
+                      path must start with a leading slash. path cannot have trailing slashes.
+                      If the file is not available in backendBucket or the load balancer cannot reach the BackendBucket, a simple Not Found Error is returned to the client.
+                      The value must be from 1 to 1024 characters
+                  - !ruby/object:Api::Type::Integer
+                    name: 'overrideResponseCode'
+                    description: |
+                      The HTTP status code returned with the response containing the custom error content.
+                      If overrideResponseCode is not supplied, the same response code returned by the original backend bucket or backend service is returned to the client.
+            - !ruby/object:Api::Type::ResourceRef
+              name: 'errorService'
+              resource: 'BackendBucket'
+              imports: 'selfLink'
+              description: |
+                The full or partial URL to the BackendBucket resource that contains the custom error content. Examples are:
+                https://www.googleapis.com/compute/v1/projects/project/global/backendBuckets/myBackendBucket
+                compute/v1/projects/project/global/backendBuckets/myBackendBucket
+                global/backendBuckets/myBackendBucket
+                If errorService is not specified at lower levels like pathMatcher, pathRule and routeRule, an errorService specified at a higher level in the UrlMap will be used. If UrlMap.defaultCustomErrorResponsePolicy contains one or more errorResponseRules[], it must specify errorService.
+                If load balancer cannot reach the backendBucket, a simple Not Found Error will be returned, with the original response code (or overrideResponseCode if configured).
+        - !ruby/object:Api::Type::NestedObject
           name: 'headerAction'
           description: |
             Specifies changes to request and response headers that need to take effect for
@@ -393,6 +473,64 @@ properties:
                   \* is allowed is at the end following a /. The string fed to the path matcher
                   does not include any text after the first ? or #, and those chars are not
                   allowed here.
+              - !ruby/object:Api::Type::NestedObject
+                name: 'customErrorResponsePolicy'
+                min_version: beta
+                description: |
+                  customErrorResponsePolicy specifies how the Load Balancer returns error responses when BackendServiceor BackendBucket responds with an error.
+                  If a policy for an error code is not configured for the PathRule, a policy for the error code configured in pathMatcher.defaultCustomErrorResponsePolicy is applied. If one is not specified in pathMatcher.defaultCustomErrorResponsePolicy, the policy configured in UrlMap.defaultCustomErrorResponsePolicy takes effect.
+                  For example, consider a UrlMap with the following configuration:
+                  UrlMap.defaultCustomErrorResponsePolicy are configured with policies for 5xx and 4xx errors
+                  A PathRule for /coming_soon/ is configured for the error code 404.
+                  If the request is for www.myotherdomain.com and a 404 is encountered, the policy under UrlMap.defaultCustomErrorResponsePolicy takes effect. If a 404 response is encountered for the request www.example.com/current_events/, the pathMatcher's policy takes effect. If however, the request for www.example.com/coming_soon/ encounters a 404, the policy in PathRule.customErrorResponsePolicy takes effect. If any of the requests in this example encounter a 500 error code, the policy at UrlMap.defaultCustomErrorResponsePolicy takes effect.
+                  customErrorResponsePolicy is supported only for global external Application Load Balancers.
+                properties:
+                  - !ruby/object:Api::Type::Array
+                    name: 'errorResponseRule'
+                    api_name: errorResponseRules
+                    description: |
+                      Specifies rules for returning error responses.
+                      In a given policy, if you specify rules for both a range of error codes as well as rules for specific error codes then rules with specific error codes have a higher priority.
+                      For example, assume that you configure a rule for 401 (Un-authorized) code, and another for all 4 series error codes (4XX).
+                      If the backend service returns a 401, then the rule for 401 will be applied. However if the backend service returns a 403, the rule for 4xx takes effect.
+                    item_type: !ruby/object:Api::Type::NestedObject
+                      properties:
+                        - !ruby/object:Api::Type::Array
+                          name: 'matchResponseCodes'
+                          description: |
+                            Valid values include:
+
+                            - A number between 400 and 599: For example 401 or 503, in which case the load balancer applies the policy if the error code exactly matches this value.
+                            - 5xx: Load Balancer will apply the policy if the backend service responds with any response code in the range of 500 to 599.
+                            - 4xx: Load Balancer will apply the policy if the backend service responds with any response code in the range of 400 to 499.
+
+                            Values must be unique within matchResponseCodes and across all errorResponseRules of CustomErrorResponsePolicy.
+                          item_type: Api::Type::String
+                        - !ruby/object:Api::Type::String
+                          name: 'path'
+                          description: |
+                            The full path to a file within backendBucket . For example: /errors/defaultError.html
+                            path must start with a leading slash. path cannot have trailing slashes.
+                            If the file is not available in backendBucket or the load balancer cannot reach the BackendBucket, a simple Not Found Error is returned to the client.
+                            The value must be from 1 to 1024 characters
+                        - !ruby/object:Api::Type::Integer
+                          name: 'overrideResponseCode'
+                          description: |
+                            The HTTP status code returned with the response containing the custom error content.
+                            If overrideResponseCode is not supplied, the same response code returned by the original backend bucket or backend service is returned to the client.
+                  - !ruby/object:Api::Type::ResourceRef
+                    name: "errorService"
+                    resource: "BackendBucket"
+                    imports: 'selfLink'
+                    description: |
+                      The full or partial URL to the BackendBucket resource that contains the custom error content. Examples are:
+
+                      https://www.googleapis.com/compute/v1/projects/project/global/backendBuckets/myBackendBucket
+                      compute/v1/projects/project/global/backendBuckets/myBackendBucket
+                      global/backendBuckets/myBackendBucket
+
+                      If errorService is not specified at lower levels like pathMatcher, pathRule and routeRule, an errorService specified at a higher level in the UrlMap will be used. If UrlMap.defaultCustomErrorResponsePolicy contains one or more errorResponseRules[], it must specify errorService.
+                      If load balancer cannot reach the backendBucket, a simple Not Found Error will be returned, with the original response code (or overrideResponseCode if configured).
               - !ruby/object:Api::Type::NestedObject
                 name: 'routeAction'
                 description: |
@@ -565,7 +703,7 @@ properties:
 
                           * 5xx: Loadbalancer will attempt a retry if the backend service responds with
                           any 5xx response code, or if the backend service does not respond at all,
-                          example: disconnects, reset, read timeout, connection failure, and refused
+                          for example: disconnects, reset, read timeout, connection failure, and refused
                           streams.
                           * gateway-error: Similar to 5xx, but only applies to response codes
                           502, 503 or 504.
@@ -1093,6 +1231,18 @@ properties:
                         and anchor supplied with the original URL. For regular expression grammar please
                         see en.cppreference.com/w/cpp/regex/ecmascript  Only one of prefixMatch,
                         fullPathMatch or regexMatch must be specified.
+                    - !ruby/object:Api::Type::String
+                      name: pathTemplateMatch
+                      description: |
+                        For satisfying the matchRule condition, the path of the request
+                        must match the wildcard pattern specified in pathTemplateMatch
+                        after removing any query parameters and anchor that may be part
+                        of the original URL.
+
+                        pathTemplateMatch must be between 1 and 255 characters
+                        (inclusive).  The pattern specified by pathTemplateMatch may
+                        have at most 5 wildcard operators and at most 5 variable
+                        captures in total.
               - !ruby/object:Api::Type::NestedObject
                 name: 'routeAction'
                 description: |
@@ -1265,7 +1415,7 @@ properties:
 
                           * 5xx: Loadbalancer will attempt a retry if the backend service responds with
                             any 5xx response code, or if the backend service does not respond at all,
-                            example: disconnects, reset, read timeout, connection failure, and refused
+                            for example: disconnects, reset, read timeout, connection failure, and refused
                             streams.
                           * gateway-error: Similar to 5xx, but only applies to response codes
                             502, 503 or 504.
@@ -1321,6 +1471,23 @@ properties:
                           Prior to forwarding the request to the selected backend service, the matching
                           portion of the request's path is replaced by pathPrefixRewrite. The value must
                           be between 1 and 1024 characters.
+                      - !ruby/object:Api::Type::String
+                        name: 'pathTemplateRewrite'
+                        description: |
+                          Prior to forwarding the request to the selected origin, if the
+                          request matched a pathTemplateMatch, the matching portion of the
+                          request's path is replaced re-written using the pattern specified
+                          by pathTemplateRewrite.
+
+                          pathTemplateRewrite must be between 1 and 255 characters
+                          (inclusive), must start with a '/', and must only use variables
+                          captured by the route's pathTemplate matchers.
+
+                          pathTemplateRewrite may only be used when all of a route's
+                          MatchRules specify pathTemplate.
+
+                          Only one of pathPrefixRewrite and pathTemplateRewrite may be
+                          specified.
                   - !ruby/object:Api::Type::Array
                     name: 'weightedBackendServices'
                     description: |
@@ -1876,6 +2043,68 @@ properties:
                         The value must be between 0.0 and 100.0 inclusive.
                       validation: !ruby/object:Provider::Terraform::Validation
                         function: 'validation.FloatBetween(0, 100)'
+  - !ruby/object:Api::Type::NestedObject
+    name: 'defaultCustomErrorResponsePolicy'
+    min_version: beta
+    description: |
+      defaultCustomErrorResponsePolicy specifies how the Load Balancer returns error responses when BackendServiceor BackendBucket responds with an error.
+
+      This policy takes effect at the PathMatcher level and applies only when no policy has been defined for the error code at lower levels like RouteRule and PathRule within this PathMatcher. If an error code does not have a policy defined in defaultCustomErrorResponsePolicy, then a policy defined for the error code in UrlMap.defaultCustomErrorResponsePolicy takes effect.
+
+      For example, consider a UrlMap with the following configuration:
+
+      UrlMap.defaultCustomErrorResponsePolicy is configured with policies for 5xx and 4xx errors
+      A RouteRule for /coming_soon/ is configured for the error code 404.
+      If the request is for www.myotherdomain.com and a 404 is encountered, the policy under UrlMap.defaultCustomErrorResponsePolicy takes effect. If a 404 response is encountered for the request www.example.com/current_events/, the pathMatcher's policy takes effect. If however, the request for www.example.com/coming_soon/ encounters a 404, the policy in RouteRule.customErrorResponsePolicy takes effect. If any of the requests in this example encounter a 500 error code, the policy at UrlMap.defaultCustomErrorResponsePolicy takes effect.
+
+      When used in conjunction with pathMatcher.defaultRouteAction.retryPolicy, retries take precedence. Only once all retries are exhausted, the defaultCustomErrorResponsePolicy is applied. While attempting a retry, if load balancer is successful in reaching the service, the defaultCustomErrorResponsePolicy is ignored and the response from the service is returned to the client.
+
+      defaultCustomErrorResponsePolicy is supported only for global external Application Load Balancers.
+    properties:
+      - !ruby/object:Api::Type::Array
+        name: 'errorResponseRule'
+        api_name: errorResponseRules
+        description: |
+          Specifies rules for returning error responses.
+          In a given policy, if you specify rules for both a range of error codes as well as rules for specific error codes then rules with specific error codes have a higher priority.
+          For example, assume that you configure a rule for 401 (Un-authorized) code, and another for all 4 series error codes (4XX).
+          If the backend service returns a 401, then the rule for 401 will be applied. However if the backend service returns a 403, the rule for 4xx takes effect.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Array
+              name: 'matchResponseCodes'
+              description: |
+                Valid values include:
+                - A number between 400 and 599: For example 401 or 503, in which case the load balancer applies the policy if the error code exactly matches this value.
+                - 5xx: Load Balancer will apply the policy if the backend service responds with any response code in the range of 500 to 599.
+                - 4xx: Load Balancer will apply the policy if the backend service responds with any response code in the range of 400 to 499.
+                Values must be unique within matchResponseCodes and across all errorResponseRules of CustomErrorResponsePolicy.
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::String
+              name: 'path'
+              description: |
+                The full path to a file within backendBucket. For example: /errors/defaultError.html
+                path must start with a leading slash. path cannot have trailing slashes.
+                If the file is not available in backendBucket or the load balancer cannot reach the BackendBucket, a simple Not Found Error is returned to the client.
+                The value must be from 1 to 1024 characters.
+            - !ruby/object:Api::Type::Integer
+              name: 'overrideResponseCode'
+              description: |
+                The HTTP status code returned with the response containing the custom error content.
+                If overrideResponseCode is not supplied, the same response code returned by the original backend bucket or backend service is returned to the client.
+      - !ruby/object:Api::Type::ResourceRef
+        name: "errorService"
+        resource: "BackendBucket"
+        imports: 'selfLink'
+        description: |
+          The full or partial URL to the BackendBucket resource that contains the custom error content. Examples are:
+
+          https://www.googleapis.com/compute/v1/projects/project/global/backendBuckets/myBackendBucket
+          compute/v1/projects/project/global/backendBuckets/myBackendBucket
+          global/backendBuckets/myBackendBucket
+
+          If errorService is not specified at lower levels like pathMatcher, pathRule and routeRule, an errorService specified at a higher level in the UrlMap will be used. If UrlMap.defaultCustomErrorResponsePolicy contains one or more errorResponseRules[], it must specify errorService.
+          If load balancer cannot reach the backendBucket, a simple Not Found Error will be returned, with the original response code (or overrideResponseCode if configured).
   - !ruby/object:Api::Type::Array
     name: "test"
     api_name: tests
@@ -1974,7 +2203,7 @@ properties:
       - !ruby/object:Api::Type::Boolean
         name: 'stripQuery'
         required: true
-        description:  |
+        description: |
           If set to true, any accompanying query portion of the original URL is removed prior
           to redirecting the request. If set to false, the query portion of the original URL is
           retained. The default is set to false.
@@ -2025,7 +2254,6 @@ properties:
                 The full or partial URL to the default BackendService resource. Before forwarding the
                 request to backendService, the loadbalancer applies any relevant headerActions
                 specified as part of this backendServiceWeight.
-              custom_expand: 'templates/terraform/custom_expand/reference_to_backend.erb'
             - !ruby/object:Api::Type::Integer
               name: 'weight'
               description: |
@@ -2149,7 +2377,6 @@ properties:
           - default_route_action.0.request_mirror_policy
           - default_route_action.0.cors_policy
           - default_route_action.0.fault_injection_policy
-        default_from_api: true
         properties:
           - !ruby/object:Api::Type::String
             name: 'seconds'
@@ -2266,7 +2493,6 @@ properties:
             description: |
               The full or partial URL to the BackendService resource being mirrored to.
             required: true
-            custom_expand: 'templates/terraform/custom_expand/reference_to_backend.erb'
       - !ruby/object:Api::Type::NestedObject
         name: 'corsPolicy'
         description: |

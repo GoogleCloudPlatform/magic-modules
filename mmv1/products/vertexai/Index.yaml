@@ -42,34 +42,34 @@ description: |-
   A representation of a collection of database items organized in a way that allows for approximate nearest neighbor (a.k.a ANN) algorithms search.
 autogen_async: false
 timeouts: !ruby/object:Api::Timeouts
-  insert_minutes: 60
-  update_minutes: 60
-  delete_minutes: 60
+  insert_minutes: 180
+  update_minutes: 180
+  delete_minutes: 180
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "vertex_ai_index"
-    primary_resource_id: "index"
+    name: 'vertex_ai_index'
+    primary_resource_id: 'index'
     vars:
-      display_name: "test-index"
-      bucket_name: "vertex-ai-index-test"
+      display_name: 'test-index'
+      bucket_name: 'vertex-ai-index-test'
     test_env_vars:
       project: :PROJECT_NAME
     ignore_read_extra:
       - metadata.0.contents_delta_uri
       - metadata.0.is_complete_overwrite
   - !ruby/object:Provider::Terraform::Examples
-    name: "vertex_ai_index_streaming"
-    primary_resource_id: "index"
+    name: 'vertex_ai_index_streaming'
+    primary_resource_id: 'index'
     vars:
-      display_name: "test-index"
-      bucket_name: "vertex-ai-index-test"
+      display_name: 'test-index'
+      bucket_name: 'vertex-ai-index-test'
     test_env_vars:
       project: :PROJECT_NAME
     ignore_read_extra:
       - metadata.0.contents_delta_uri
       - metadata.0.is_complete_overwrite
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  pre_update: templates/terraform/pre_update/vertex_ai_index.go.erb
+  custom_update: templates/terraform/custom_update/vertex_ai_index.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: region
@@ -84,21 +84,23 @@ properties:
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String
     name: 'displayName'
-    description: The display name of the Index. The name can be up to 128 characters
-      long and can consist of any UTF-8 characters.
+    description:
+      The display name of the Index. The name can be up to 128 characters long
+      and can consist of any UTF-8 characters.
     required: true
   - !ruby/object:Api::Type::String
     name: 'description'
     description: The description of the Index.
   # Please take a look at the following links for the original definition:
-    # https://cloud.google.com/vertex-ai/docs/matching-engine/create-manage-index#create_index-drest
-    # https://cloud.google.com/vertex-ai/docs/matching-engine/configuring-indexes
+  # https://cloud.google.com/vertex-ai/docs/matching-engine/create-manage-index#create_index-drest
+  # https://cloud.google.com/vertex-ai/docs/matching-engine/configuring-indexes
   - !ruby/object:Api::Type::NestedObject
     name: 'metadata'
     description: An additional information about the Index
     properties:
       - !ruby/object:Api::Type::String
         name: 'contentsDeltaUri'
+        required: true
         description: |-
           Allows inserting, updating  or deleting the contents of the Matching Engine Index.
           The string must be a valid Cloud Storage directory path. If this
@@ -131,6 +133,16 @@ properties:
               approximate search algorithm are reordered via a more expensive distance computation.
               Required if tree-AH algorithm is used.
           - !ruby/object:Api::Type::String
+            name: 'shardSize'
+            description: |-
+              Index data is split into equal parts to be processed. These are called "shards".
+              The shard size must be specified when creating an index. The value must be one of the followings:
+              * SHARD_SIZE_SMALL: Small (2GB)
+              * SHARD_SIZE_MEDIUM: Medium (20GB)
+              * SHARD_SIZE_LARGE: Large (50GB)
+            immutable: true
+            default_from_api: true
+          - !ruby/object:Api::Type::String
             name: 'distanceMeasureType'
             description: |-
               The distance measure used in nearest neighbor search. The value must be one of the followings:
@@ -138,18 +150,20 @@ properties:
               * L1_DISTANCE: Manhattan (L_1) Distance
               * COSINE_DISTANCE: Cosine Distance. Defined as 1 - cosine similarity.
               * DOT_PRODUCT_DISTANCE: Dot Product Distance. Defined as a negative of the dot product
-            default_value: "DOT_PRODUCT_DISTANCE"
+            default_value: 'DOT_PRODUCT_DISTANCE'
           - !ruby/object:Api::Type::String
             name: 'featureNormType'
             description: |-
-              Type of normalization to be carried out on each vector. The value must be one of the followings: 
+              Type of normalization to be carried out on each vector. The value must be one of the followings:
               * UNIT_L2_NORM: Unit L2 normalization type
               * NONE: No normalization type is specified.
-            default_value: "NONE"
+            default_value: 'NONE'
+            ignore_read: true
           - !ruby/object:Api::Type::NestedObject
             name: 'algorithmConfig'
-            description: The configuration with regard to the algorithms used for
-              efficient search.
+            description:
+              The configuration with regard to the algorithms used for efficient
+              search.
             properties:
               - !ruby/object:Api::Type::NestedObject
                 name: 'treeAhConfig'
@@ -162,8 +176,9 @@ properties:
                 properties:
                   - !ruby/object:Api::Type::Integer
                     name: 'leafNodeEmbeddingCount'
-                    description: Number of embeddings on each leaf node. The default
-                      value is 1000 if not set.
+                    description:
+                      Number of embeddings on each leaf node. The default value
+                      is 1000 if not set.
                     default_value: 1000
                   - !ruby/object:Api::Type::Integer
                     name: 'leafNodesToSearchPercent'
@@ -190,8 +205,9 @@ properties:
   - !ruby/object:Api::Type::Array
     name: 'deployedIndexes'
     output: true
-    description: The pointers to DeployedIndexes created from this Index. An Index
-      can be only deleted if all its DeployedIndexes had been undeployed first.
+    description:
+      The pointers to DeployedIndexes created from this Index. An Index can be
+      only deleted if all its DeployedIndexes had been undeployed first.
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::String
@@ -207,18 +223,20 @@ properties:
     description: Used to perform consistent read-modify-write updates.
     output: true
     ignore_read: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: The labels with user-defined metadata to organize your Indexes.
   - !ruby/object:Api::Type::String
     name: 'createTime'
     output: true
-    description: The timestamp of when the Index was created in RFC3339 UTC "Zulu"
-      format, with nanosecond resolution and up to nine fractional digits.
+    description:
+      The timestamp of when the Index was created in RFC3339 UTC "Zulu" format,
+      with nanosecond resolution and up to nine fractional digits.
   - !ruby/object:Api::Type::String
     name: 'updateTime'
     output: true
-    description: The timestamp of when the Index was last updated in RFC3339 UTC "Zulu"
+    description:
+      The timestamp of when the Index was last updated in RFC3339 UTC "Zulu"
       format, with nanosecond resolution and up to nine fractional digits.
   - !ruby/object:Api::Type::NestedObject
     name: 'indexStats'
@@ -241,4 +259,3 @@ properties:
       The update method to use with this Index. The value must be the followings. If not set, BATCH_UPDATE will be used by default.
       * BATCH_UPDATE: user can call indexes.patch with files on Cloud Storage of datapoints to update.
       * STREAM_UPDATE: user can call indexes.upsertDatapoints/DeleteDatapoints to update the Index and the updates will be applied in corresponding DeployedIndexes in nearly real-time.
-

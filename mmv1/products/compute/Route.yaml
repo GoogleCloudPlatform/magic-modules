@@ -50,7 +50,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -65,36 +65,37 @@ async: !ruby/object:Api::OpAsync
     path: 'error/errors'
     message: 'message'
 mutex: 'projects/{{project}}/global/networks/{{network}}/peerings'
-error_retry_predicates: ["isPeeringOperationInProgress"]
+error_retry_predicates: ['transport_tpg.IsPeeringOperationInProgress']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "route_basic"
-    primary_resource_id: "default"
+    name: 'route_basic'
+    primary_resource_id: 'default'
     vars:
-      route_name: "network-route"
-      network_name: "compute-network"
+      route_name: 'network-route'
+      network_name: 'compute-network'
   - !ruby/object:Provider::Terraform::Examples
-    name: "route_ilb"
-    primary_resource_id: "route-ilb"
+    name: 'route_ilb'
+    primary_resource_id: 'route-ilb'
     vars:
-      network_name: "compute-network"
-      subnet_name: "compute-subnet"
-      forwarding_rule_name: "compute-forwarding-rule"
-      health_check_name: "proxy-health-check"
-      backend_name: "compute-backend"
-      route_name: "route-ilb"
+      network_name: 'compute-network'
+      subnet_name: 'compute-subnet'
+      forwarding_rule_name: 'compute-forwarding-rule'
+      health_check_name: 'proxy-health-check'
+      backend_name: 'compute-backend'
+      route_name: 'route-ilb'
   - !ruby/object:Provider::Terraform::Examples
-    name: "route_ilb_vip"
-    primary_resource_id: "route-ilb"
+    name: 'route_ilb_vip'
+    primary_resource_id: 'route-ilb'
     min_version: beta
     vars:
-      producer_name: "producer"
-      consumer_name: "consumer"
-      forwarding_rule_name: "compute-forwarding-rule"
-      health_check_name: "proxy-health-check"
-      backend_name: "compute-backend"
-      route_name: "route-ilb"
+      producer_name: 'producer'
+      consumer_name: 'consumer'
+      forwarding_rule_name: 'compute-forwarding-rule'
+      health_check_name: 'proxy-health-check'
+      backend_name: 'compute-backend'
+      route_name: 'route-ilb'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/compute_route.go.erb
   decoder: templates/terraform/decoders/route.erb
   extra_schema_entry: templates/terraform/extra_schema_entry/route.erb
 docs: !ruby/object:Provider::Terraform::Docs
@@ -135,7 +136,8 @@ properties:
     description: 'The network that this route applies to.'
     immutable: true
     required: true
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Integer
     name: 'priority'
     description: |
@@ -173,7 +175,7 @@ properties:
       * `projects/project/global/gateways/default-internet-gateway`
       * `global/gateways/default-internet-gateway`
       * The string `default-internet-gateway`.
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     custom_expand: templates/terraform/custom_expand/route_gateway.erb
   - !ruby/object:Api::Type::ResourceRef
     name: 'nextHopInstance'
@@ -219,6 +221,7 @@ properties:
       - next_hop_ilb
     description: |
       URL to a VpnTunnel that should handle matching packets.
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::String
     name: 'nextHopNetwork'
     output: true
@@ -250,4 +253,4 @@ properties:
       - next_hop_ip
       - next_hop_vpn_tunnel
       - next_hop_ilb
-    diff_suppress_func: 'compareIpAddressOrSelfLinkOrResourceName'
+    diff_suppress_func: 'CompareIpAddressOrSelfLinkOrResourceName'

@@ -21,7 +21,3 @@ versions:
 scopes:
   # All access is needed to create projects.
   - https://www.googleapis.com/auth/cloud-platform
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Cloud Resource Manager API
-    url: https://console.cloud.google.com/apis/library/cloudresourcemanager.googleapis.com/

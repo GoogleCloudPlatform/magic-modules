@@ -173,6 +173,14 @@ type Resource struct {
 	Reference *Link
 	// Guides point to non-rest useful context for the resource.
 	Guides []Link
+
+	// The current schema version
+	SchemaVersion int
+	// The schema versions from 0 to the current schema version
+	SchemaVersions []int
+
+	// Whether to generate long form versions of resource sample tests
+	GenerateLongFormTests bool
 }
 
 type Link struct {
@@ -286,6 +294,16 @@ func (r Resource) Updatable() bool {
 	return false
 }
 
+// The resource has other mutable fields, besides "labels" and "terraform_labels" fields
+func (r Resource) HasMutableNonLabelsFields() bool {
+	for _, p := range r.SchemaProperties() {
+		if !p.IsResourceLabels() && p.Name() != "terraform_labels" && !p.ForceNew && !(!p.Optional && p.Computed) {
+			return true
+		}
+	}
+	return false
+}
+
 // Objects are properties with sub-properties
 func (r Resource) Objects() (props []Property) {
 	for _, v := range r.Properties {
@@ -375,10 +393,30 @@ func (r Resource) SweeperFunctionArgs() string {
 func (r Resource) IDFunction() string {
 	for _, p := range r.Properties {
 		if p.forwardSlashAllowed {
-			return "replaceVars"
+			return "tpgresource.ReplaceVars"
 		}
 	}
-	return "replaceVarsForId"
+	return "tpgresource.ReplaceVarsForId"
+}
+
+// Check if the resource has the lables field for the resource
+func (r Resource) HasLabels() bool {
+	for _, p := range r.Properties {
+		if p.IsResourceLabels() {
+			return true
+		}
+	}
+	return false
+}
+
+// Check if the resource has the annotations field for the resource
+func (r Resource) HasAnnotations() bool {
+	for _, p := range r.Properties {
+		if p.IsResourceAnnotations() {
+			return true
+		}
+	}
+	return false
 }
 
 // ResourceInput is a Resource along with additional generation metadata.
@@ -566,6 +604,14 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 		res.CustomizeDiff = cdiff.Functions
 	}
 
+	if res.HasLabels() {
+		res.CustomizeDiff = append(res.CustomizeDiff, "tpgresource.SetLabelsDiff")
+	}
+
+	if res.HasAnnotations() {
+		res.CustomizeDiff = append(res.CustomizeDiff, "tpgresource.SetAnnotationsDiff")
+	}
+
 	// ListFields
 	if parameters, ok := typeFetcher.doc.Paths["list"]; ok {
 		for _, param := range parameters.Parameters {
@@ -654,6 +700,24 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 		res.TerraformProductName = &scpn
 	}
 
+	// Resource Override: StateUpgrade
+	stateUpgrade := StateUpgradeDetails{}
+	stateUpgradeOk, err := overrides.ResourceOverrideWithDetails(StateUpgrade, &stateUpgrade, location)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to decode state upgrade details: %v", err)
+	}
+	if stateUpgradeOk {
+		res.SchemaVersion = stateUpgrade.SchemaVersion
+		res.SchemaVersions = make([]int, res.SchemaVersion)
+		for i := range res.SchemaVersions {
+			res.SchemaVersions[i] = i
+		}
+	}
+
+	if overrides.ResourceOverride(GenerateLongFormTests, location) {
+		res.GenerateLongFormTests = true
+	}
+
 	res.Samples = res.loadSamples()
 
 	return &res, nil
@@ -698,19 +762,19 @@ func (r Resource) getSamples(docs bool) []Sample {
 		if len(r.Samples[0].DocHideConditional) > 0 {
 			for _, dochidec := range r.Samples[0].DocHideConditional {
 				if r.location == dochidec.Location {
-					hideList = append (hideList, dochidec.Name)
+					hideList = append(hideList, dochidec.Name)
 				}
 			}
 		}
 	} else {
 		hideList = r.Samples[0].Testhide
-                if len(r.Samples[0].TestHideConditional) > 0 {
-                        for _, testhidec := range r.Samples[0].TestHideConditional {
-                                if r.location == testhidec.Location {
-                                        hideList = append (hideList, testhidec.Name)
-                                }
-                        }
-                }
+		if len(r.Samples[0].TestHideConditional) > 0 {
+			for _, testhidec := range r.Samples[0].TestHideConditional {
+				if r.location == testhidec.Location {
+					hideList = append(hideList, testhidec.Name)
+				}
+			}
+		}
 	}
 	for _, sample := range r.Samples {
 		shouldhide := false
@@ -810,6 +874,18 @@ func (r *Resource) loadHandWrittenSamples() []Sample {
 			sample.Name = &sampleName
 		}
 		sample.TestSlug = RenderedString(snakeToTitleCase(miscellaneousNameSnakeCase(sampleName)).titlecase() + "HandWritten")
+
+		// The "labels" and "annotations" fields in the state are decided by the configuration.
+		// During importing, as the configuration is unavailableafter, the "labels" and "annotations" fields in the state will be empty.
+		// So add the "labels" and the "annotations" fields to the ImportStateVerifyIgnore list.
+		if r.HasLabels() {
+			sample.IgnoreRead = append(sample.IgnoreRead, "labels", "terraform_labels")
+		}
+
+		if r.HasAnnotations() {
+			sample.IgnoreRead = append(sample.IgnoreRead, "annotations")
+		}
+
 		samples = append(samples, sample)
 	}
 
@@ -820,7 +896,7 @@ func (r *Resource) loadDCLSamples() []Sample {
 	sampleAccessoryFolder := r.getSampleAccessoryFolder()
 	packagePath := r.productMetadata.PackagePath
 	version := r.versionMetadata.V
-        resourceType := r.DCLTitle()
+	resourceType := r.DCLTitle()
 	sampleFriendlyMetaPath := path.Join(string(sampleAccessoryFolder), "meta.yaml")
 	samples := []Sample{}
 
@@ -896,7 +972,35 @@ func (r *Resource) loadDCLSamples() []Sample {
 		}
 		sample.DependencyList = dependencies
 		sample.TestSlug = RenderedString(sampleNameToTitleCase(*sample.Name).titlecase())
+
+		// The "labels" and "annotations" fields in the state are decided by the configuration.
+		// During importing, as the configuration is unavailable, the "labels" and "annotations" fields in the state will be empty.
+		// So add the "labels" and the "annotations" fields to the ImportStateVerifyIgnore list.
+		if r.HasLabels() {
+			sample.IgnoreRead = append(sample.IgnoreRead, "labels", "terraform_labels")
+		}
+
+		if r.HasAnnotations() {
+			sample.IgnoreRead = append(sample.IgnoreRead, "annotations")
+		}
+
+		if r.GenerateLongFormTests {
+			longFormSample := sample
+			longFormSample.LongForm = true
+			var longFormDependencies []Dependency
+			mainResourceLongForm := longFormSample.generateSampleDependencyWithName(primaryResource, "primary")
+			longFormDependencies = append(longFormDependencies, mainResourceLongForm)
+			for _, dFileName := range longFormSample.DependencyFileNames {
+				longFormDependency := sample.generateSampleDependency(dFileName)
+				longFormDependencies = append(longFormDependencies, longFormDependency)
+			}
+			longFormSample.DependencyList = longFormDependencies
+			longFormSample.TestSlug += "LongForm"
+			samples = append(samples, longFormSample)
+		}
+
 		samples = append(samples, sample)
+
 	}
 
 	return samples

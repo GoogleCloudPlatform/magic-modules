@@ -41,7 +41,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -57,75 +57,92 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "health_check_tcp"
-    primary_resource_id: "tcp-health-check"
+    name: 'health_check_tcp'
+    primary_resource_id: 'tcp-health-check'
     vars:
-      health_check_name: "tcp-health-check"
+      health_check_name: 'tcp-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "health_check_tcp_full"
-    primary_resource_id: "tcp-health-check"
+    name: 'health_check_tcp_full'
+    primary_resource_id: 'tcp-health-check'
     vars:
-      health_check_name: "tcp-health-check"
+      health_check_name: 'tcp-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "health_check_ssl"
-    primary_resource_id: "ssl-health-check"
+    name: 'health_check_ssl'
+    primary_resource_id: 'ssl-health-check'
     vars:
-      health_check_name: "ssl-health-check"
+      health_check_name: 'ssl-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "health_check_ssl_full"
-    primary_resource_id: "ssl-health-check"
+    name: 'health_check_ssl_full'
+    primary_resource_id: 'ssl-health-check'
     vars:
-      health_check_name: "ssl-health-check"
+      health_check_name: 'ssl-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "health_check_http"
-    primary_resource_id: "http-health-check"
+    name: 'health_check_http'
+    primary_resource_id: 'http-health-check'
     vars:
-      health_check_name: "http-health-check"
+      health_check_name: 'http-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "health_check_http_full"
-    primary_resource_id: "http-health-check"
+    name: 'health_check_http_full'
+    primary_resource_id: 'http-health-check'
     vars:
-      health_check_name: "http-health-check"
+      health_check_name: 'http-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "health_check_https"
-    primary_resource_id: "https-health-check"
+    name: 'health_check_https'
+    primary_resource_id: 'https-health-check'
     vars:
-      health_check_name: "https-health-check"
+      health_check_name: 'https-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "health_check_https_full"
-    primary_resource_id: "https-health-check"
+    name: 'health_check_https_full'
+    primary_resource_id: 'https-health-check'
     vars:
-      health_check_name: "https-health-check"
+      health_check_name: 'https-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "health_check_http2"
-    primary_resource_id: "http2-health-check"
+    name: 'health_check_http2'
+    primary_resource_id: 'http2-health-check'
     vars:
-      health_check_name: "http2-health-check"
+      health_check_name: 'http2-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "health_check_http2_full"
-    primary_resource_id: "http2-health-check"
+    name: 'health_check_http2_full'
+    primary_resource_id: 'http2-health-check'
     vars:
-      health_check_name: "http2-health-check"
+      health_check_name: 'http2-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "health_check_grpc"
-    primary_resource_id: "grpc-health-check"
+    name: 'health_check_grpc'
+    primary_resource_id: 'grpc-health-check'
     vars:
-      health_check_name: "grpc-health-check"
+      health_check_name: 'grpc-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "health_check_grpc_full"
-    primary_resource_id: "grpc-health-check"
+    name: 'health_check_grpc_full'
+    primary_resource_id: 'grpc-health-check'
     vars:
-      health_check_name: "grpc-health-check"
+      health_check_name: 'grpc-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "health_check_with_logging"
-    primary_resource_id: "health-check-with-logging"
+    name: 'health_check_with_logging'
+    primary_resource_id: 'health-check-with-logging'
     min_version: beta
     vars:
-      health_check_name: "tcp-health-check"
+      health_check_name: 'tcp-health-check'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'compute_health_check_http_source_regions'
+    primary_resource_id: 'http-health-check-with-source-regions'
+    vars:
+      health_check_name: 'http-health-check'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'compute_health_check_https_source_regions'
+    primary_resource_id: 'https-health-check-with-source-regions'
+    vars:
+      health_check_name: 'https-health-check'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'compute_health_check_tcp_source_regions'
+    primary_resource_id: 'tcp-health-check-with-source-regions'
+    vars:
+      health_check_name: 'tcp-health-check'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/health_check_type.erb
   constants: templates/terraform/constants/health_check.erb
-  resource_definition: templates/terraform/resource_definition/health_check.erb
+custom_diff: [
+  'healthCheckCustomizeDiff',
+]
 properties:
   - !ruby/object:Api::Type::Integer
     name: 'checkIntervalSec'
@@ -149,13 +166,6 @@ properties:
       A so-far unhealthy instance will be marked healthy after this many
       consecutive successes. The default value is 2.
     default_value: 2
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: |
-      The unique identifier for the resource. This identifier is defined by
-      the server.
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
@@ -175,6 +185,29 @@ properties:
       The default value is 5 seconds.  It is invalid for timeoutSec to have
       greater value than checkIntervalSec.
     default_value: 5
+  - !ruby/object:Api::Type::Array
+    name: 'sourceRegions'
+    item_type: Api::Type::String
+    min_size: 3
+    max_size: 3
+    description: |
+      The list of cloud regions from which health checks are performed. If
+      any regions are specified, then exactly 3 regions should be specified.
+      The region names must be valid names of Google Cloud regions. This can
+      only be set for global health check. If this list is non-empty, then
+      there are restrictions on what other health check fields are supported
+      and what other resources can use this health check:
+
+      * SSL, HTTP2, and GRPC protocols are not supported.
+
+      * The TCP request field is not supported.
+
+      * The proxyHeader field for HTTP, HTTPS, and TCP is not supported.
+
+      * The checkIntervalSec field must be at least 30.
+
+      * The health check cannot be used with BackendService nor with managed
+      instance group auto-healing.
   - !ruby/object:Api::Type::Integer
     name: 'unhealthyThreshold'
     description: |
@@ -230,7 +263,7 @@ properties:
         description: |
           The request path of the HTTP health check request.
           The default value is /.
-        default_value: "/"
+        default_value: '/'
       - !ruby/object:Api::Type::String
         name: 'response'
         at_least_one_of:
@@ -355,7 +388,7 @@ properties:
         description: |
           The request path of the HTTPS health check request.
           The default value is /.
-        default_value: "/"
+        default_value: '/'
       - !ruby/object:Api::Type::String
         name: 'response'
         at_least_one_of:
@@ -692,7 +725,7 @@ properties:
         description: |
           The request path of the HTTP2 health check request.
           The default value is /.
-        default_value: "/"
+        default_value: '/'
       - !ruby/object:Api::Type::String
         name: 'response'
         at_least_one_of:

@@ -12,19 +12,22 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-func storedInfoTypeCustomizeDiffFunc(diff TerraformResourceDiff) error {
+// This customizeDiff allows updating the dictionary, regex, and large_custom_dictionary fields, but
+// it recreates the resource if changing between these fields. e.g., updating the regex field should
+// be allowed, while changing from regex to dictionary should trigger the recreation of the resource.
+func storedInfoTypeCustomizeDiffFunc(diff tpgresource.TerraformResourceDiff) error {
 	oldDict, newDict := diff.GetChange("dictionary")
 	oldRegex, newRegex := diff.GetChange("regex")
 	oldLargeCD, newLargeCD := diff.GetChange("large_custom_dictionary")
-	if !isEmptyValue(reflect.ValueOf(oldDict)) && isEmptyValue(reflect.ValueOf(newDict)) {
+	if !tpgresource.IsEmptyValue(reflect.ValueOf(oldDict)) && tpgresource.IsEmptyValue(reflect.ValueOf(newDict)) {
 		diff.ForceNew("dictionary")
 		return nil
 	}
-	if !isEmptyValue(reflect.ValueOf(oldRegex)) && isEmptyValue(reflect.ValueOf(newRegex)) {
+	if !tpgresource.IsEmptyValue(reflect.ValueOf(oldRegex)) && tpgresource.IsEmptyValue(reflect.ValueOf(newRegex)) {
 		diff.ForceNew("regex")
 		return nil
 	}
-	if !isEmptyValue(reflect.ValueOf(oldLargeCD)) && isEmptyValue(reflect.ValueOf(newLargeCD)) {
+	if !tpgresource.IsEmptyValue(reflect.ValueOf(oldLargeCD)) && tpgresource.IsEmptyValue(reflect.ValueOf(newLargeCD)) {
 		diff.ForceNew("large_custom_dictionary")
 		return nil
 	}

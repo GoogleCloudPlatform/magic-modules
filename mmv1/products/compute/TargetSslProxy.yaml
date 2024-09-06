@@ -30,7 +30,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -46,13 +46,13 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "target_ssl_proxy_basic"
-    primary_resource_id: "default"
+    name: 'target_ssl_proxy_basic'
+    primary_resource_id: 'default'
     vars:
-      target_ssl_proxy_name: "test-proxy"
-      ssl_certificate_name: "default-cert"
-      backend_service_name: "backend-service"
-      health_check_name: "health-check"
+      target_ssl_proxy_name: 'test-proxy'
+      ssl_certificate_name: 'default-cert'
+      backend_service_name: 'backend-service'
+      health_check_name: 'health-check'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -100,6 +100,7 @@ properties:
     required: true
     update_verb: :POST
     update_url: 'projects/{{project}}/global/targetSslProxies/{{name}}/setBackendService'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Array
     name: 'sslCertificates'
     description: |
@@ -116,6 +117,7 @@ properties:
       resource: 'SslCertificate'
       imports: 'selfLink'
       description: 'The SSL certificates used by this TargetSslProxy'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::String
     name: 'certificateMap'
     description: |
@@ -137,3 +139,4 @@ properties:
       resource will not have any SSL policy configured.
     update_verb: :POST
     update_url: 'projects/{{project}}/global/targetSslProxies/{{name}}/setSslPolicy'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'

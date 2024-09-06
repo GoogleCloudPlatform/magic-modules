@@ -15,12 +15,11 @@ require 'uri'
 require 'api/object'
 require 'compile/core'
 require 'google/golang_utils'
-require 'provider/abstract_core'
 
 module Provider
-  class Terraform < Provider::AbstractCore
+  class Terraform
     # Inserts custom code into terraform resources.
-    class CustomCode < Api::Object
+    class CustomCode < Google::YamlValidator
       # Collection of fields allowed in the CustomCode section for
       # Terraform.
 
@@ -35,12 +34,7 @@ module Provider
       # resource's Resource.Schema map.  They should be formatted as
       # entries in the map, e.g. `"foo": &schema.Schema{ ... },`.
       attr_reader :extra_schema_entry
-      # Resource definition code is inserted below everything else
-      # in the resource's Resource {...} definition.  This may be useful
-      # for things like a MigrateState / SchemaVersion pair.
-      # This is likely to be used rarely and may be removed if all its
-      # use cases are covered in other ways.
-      attr_reader :resource_definition
+
       # ====================
       # Encoders & Decoders
       # ====================
@@ -102,6 +96,10 @@ module Provider
       # Just like the encoder, it is only used if object.input is
       # false.
       attr_reader :post_update
+      # This code replaces the entire contents of the Update call. It
+      # should be used for resources that don't have normal update
+      # semantics that cannot be supported well by other MM features.
+      attr_reader :custom_update
       # This code is run just before the Delete call happens.  It's
       # useful to prepare an object for deletion, e.g. by detaching
       # a disk before deleting it.
@@ -129,7 +127,6 @@ module Provider
         super
 
         check :extra_schema_entry, type: String
-        check :resource_definition, type: String
         check :encoder, type: String
         check :update_encoder, type: String
         check :decoder, type: String
@@ -140,6 +137,7 @@ module Provider
         check :pre_read, type: String
         check :pre_update, type: String
         check :post_update, type: String
+        check :custom_update, type: String
         check :pre_delete, type: String
         check :custom_import, type: String
         check :post_import, type: String

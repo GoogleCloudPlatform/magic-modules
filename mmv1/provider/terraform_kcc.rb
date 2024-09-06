@@ -17,17 +17,66 @@ require 'provider/terraform/import'
 module Provider
   # Magic Modules Provider for KCC ServiceMappings and TF samples.
   class TerraformKCC < Provider::Terraform
-    def generate(output_folder, types, _product_path, _dump_yaml, generate_code, generate_docs)
+    PRODUCT_NAME_MAP = { Alloydb: 'AlloyDB',
+                         ApiGateway: 'APIGateway',
+                         Beyondcorp: 'BeyondCorp',
+                         BigqueryAnalyticsHub: 'BigQueryAnalyticsHub',
+                         BigqueryConnection: 'BigQueryConnection',
+                         BigqueryDatapolicy: 'BigQueryDataPolicy',
+                         BigqueryDataTransfer: 'BigQueryDataTransfer',
+                         BigqueryReservation: 'BigQueryReservation',
+                         CloudIds: 'CloudIDS',
+                         CloudIot: 'CloudIOT',
+                         Cloudfunctions2: 'CloudFunctions2',
+                         Pubsub: 'PubSub' }.freeze
+    OBJECT_NAME_MAP = { Api: 'API',
+                        Dns: 'DNS',
+                        Dicom: 'DICOM',
+                        Entitytype: 'EntityType',
+                        Fhir: 'FHIR',
+                        Gcp: 'GCP',
+                        Hl7: 'HL7',
+                        Hmac: 'HMAC',
+                        Idp: 'IDP',
+                        Nat: 'NAT',
+                        Saml: 'SAML',
+                        Ssl: 'SSL',
+                        Url: 'URL' }.freeze
+
+    def generating_hashicorp_repo?
+      # This code is not used when generating TPG/TPGB
+      false
+    end
+
+    def generate(output_folder, types, product_path, _dump_yaml, generate_code, generate_docs, \
+                 go_yaml)
       @base_url = @version.base_url
-      generate_objects(output_folder, types, generate_code, generate_docs)
+      generate_objects(output_folder, types, generate_code, generate_docs, product_path, \
+                       go_yaml)
       compile_product_files(output_folder)
+    end
+
+    def product_name(product_name)
+      product_name = product_name.upcase_first
+      PRODUCT_NAME_MAP.inject(product_name.dup) do |name, (old_value, new_value)|
+        name.gsub(old_value.to_s, new_value)
+      end
+    end
+
+    def object_name(object_name)
+      object_name = object_name.upcase_first
+      OBJECT_NAME_MAP.inject(object_name.dup) do |name, (old_value, new_value)|
+        name.gsub(old_value.to_s, new_value)
+      end
     end
 
     # Create a directory of sample per test case.
     # Filter out samples that have no test and that don't match the current
     # product version.
     def generate_resource(pwd, data, _generate_code, _generate_docs)
-      kind = data.product.name + data.name
+      product_name = product_name(data.product.name)
+      object_name = object_name(data.name)
+      kind = product_name + object_name
       # skip_test examples and examples with test_env_vars should also be
       # included. Whether and how to convert them into KCC examples will be
       # handled separately.
@@ -35,7 +84,7 @@ module Provider
                      .reject { |e| @version < @api.version_obj_or_closest(e.min_version) }
 
       examples.each do |example|
-        folder_name = "#{data.product.name}-#{kind}-#{example.name}"
+        folder_name = "#{product_name}-#{kind}-#{example.name}"
         folder_name += '-skipped' if example.skip_test
         target_folder = File.join('samples', folder_name)
 
@@ -78,6 +127,25 @@ module Provider
 
     def copy_common_files(output_folder, generate_code, generate_docs) end
 
+    # Most resources' idTemplate is their longest import ID format, i.e.
+    # the first item in the result of import_id_formats_from_resource().
+    # However, this method can't properly generate the import ID when the
+    # resource doesn't support import. E.g. the result for type
+    # google_kms_secret_ciphertext is '{{crypto_key}}/{{name}}', while 'name'
+    # is not even a valid field in google_kms_secret_ciphertext.
+    # As a result, we need to do some guessing based on using the id_format
+    # metadata sometimes.
+    def guess_id_template(object)
+      id_template = import_id_formats_from_resource(object)[0].gsub('%', '')
+      id_template = object.id_format if object.exclude_import && !object.id_format.nil?
+      field_names = id_template.to_s.scan(/(?<=\{\{)\w+(?=\}\})/)
+      field_names.each do |field_name|
+        field_name_in_snake_case = field_name.underscore
+        id_template = id_template.gsub("{{#{field_name}}}", "{{#{field_name_in_snake_case}}}")
+      end
+      id_template
+    end
+
     # Generate the metadata mapping name based on the last import format. It's
     # usually the field name in the placeholder in the last section of the last
     # import format.
@@ -87,14 +155,32 @@ module Provider
     def guess_metadata_mapping_name(object)
       # Split the last import format by '/' and take the last part. Then use
       # the regex to verify if it is a value field in the format of {{value}}.
-      last_import_part = import_id_formats_from_resource(object)[-1]
+      id_format = import_id_formats_from_resource(object)[-1]
+      # When the resource doesn't support import, the import ID formats
+      # generated by import_id_formats_from_resource can contain non-existent
+      # field names. In this case, id_format might be a better format to use to
+      # guess the field name that maps to the metadata name.
+      id_format = object.id_format if object.exclude_import && !object.id_format.nil?
+      last_import_part = id_format
                          .gsub('%', '')
                          .split('/')[-1]
                          .scan(/{{[[:word:]]+}}/)
       # If it is a value field, the length of last_import_part will be 1;
       # otherwise it'll be 0.
       # Remove '{{' and '}}' and only return the field name.
-      last_import_part.first.gsub('{{', '').gsub('}}', '') if last_import_part.length == 1
+      if last_import_part.length == 1
+        field_name = last_import_part.first.gsub('{{', '').gsub('}}', '').underscore
+      end
+
+      return nil if field_name.nil?
+
+      if !object.all_user_properties.map(&:name).include?(field_name) &&
+         !object.parameters.map(&:name).include?(field_name.camelize(:lower)) &&
+         object.exclude_import && !object.id_format.nil?
+        raise 'metadata mapping field name does not exist'
+      end
+
+      field_name
     end
 
     def server_generated_name?(name, object)

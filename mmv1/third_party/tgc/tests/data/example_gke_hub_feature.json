@@ -1,0 +1,21 @@
+[
+    {
+        "name": "//gkehub.googleapis.com/projects/{{.Provider.project}}/locations/global/features/multiclusterservicediscovery",
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+        "asset_type": "gkehub.googleapis.com/Feature",
+        "resource": {
+            "version": "v1beta",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/gkehub/v1beta/rest",
+            "discovery_name": "Feature",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "fleetDefaultMemberConfig": null,
+                "labels": {
+                    "foo": "bar",
+                    "goog-terraform-provisioned": "true"
+                }
+            }
+        },
+        "ancestors": ["organizations/{{.OrgID}}"]
+    }
+]

@@ -43,23 +43,27 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 autogen_async: true
 import_format:
-  - "projects/{{project}}/locations/{{location}}/bitbucketServerConfigs/{{config_id}}"
+  - 'projects/{{project}}/locations/{{location}}/bitbucketServerConfigs/{{config_id}}'
 id_format: 'projects/{{project}}/locations/{{location}}/bitbucketServerConfigs/{{config_id}}'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloudbuild_bitbucket_server_config"
-    primary_resource_id: "bbs-config"
+    name: 'cloudbuild_bitbucket_server_config'
+    primary_resource_id: 'bbs-config'
+    vars:
+      config_id: 'bbs-config'
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloudbuild_bitbucket_server_config_repositories"
-    primary_resource_id: "bbs-config-with-repos"
+    name: 'cloudbuild_bitbucket_server_config_repositories'
+    primary_resource_id: 'bbs-config-with-repos'
+    vars:
+      config_id: 'bbs-config'
     skip_test: true
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloudbuild_bitbucket_server_config_peered_network"
-    primary_resource_id: "bbs-config-with-peered-network"
+    name: 'cloudbuild_bitbucket_server_config_peered_network'
+    primary_resource_id: 'bbs-config-with-peered-network'
     vars:
-      network_name: "vpc-network"
-    test_vars_overrides:
-      network_name: 'BootstrapSharedTestNetwork(t, "peered-network")'
+      config_id: 'bbs-config'
+      network_name: 'vpc-network'
+      global_address_name: 'private-ip-alloc'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/cloudbuild_bitbucketserver_config.go.erb
   post_create: templates/terraform/post_create/cloudbuild_bitbucketserver_config.go.erb
@@ -152,9 +156,9 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'peeredNetwork'
     description: |
-      The network to be used when reaching out to the Bitbucket Server instance. The VPC network must be enabled for private service connection. 
-      This should be set if the Bitbucket Server instance is hosted on-premises and not reachable by public internet. If this field is left empty, 
-      no network peering will occur and calls to the Bitbucket Server instance will be made over the public internet. Must be in the format 
+      The network to be used when reaching out to the Bitbucket Server instance. The VPC network must be enabled for private service connection.
+      This should be set if the Bitbucket Server instance is hosted on-premises and not reachable by public internet. If this field is left empty,
+      no network peering will occur and calls to the Bitbucket Server instance will be made over the public internet. Must be in the format
       projects/{project}/global/networks/{network}, where {project} is a project number or id and {network} is the name of a VPC network in the project.
   - !ruby/object:Api::Type::String
     name: 'sslCa'

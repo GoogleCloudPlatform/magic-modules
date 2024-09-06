@@ -1,5 +1,6 @@
 #!/bin/bash
 # Performs basic checks for tools required by Magic Modules.
+# This must be in bash because no other tools are guaranteed to be present.
 
 set -e
 exitcode=0
@@ -32,23 +33,12 @@ count_in_path() {
     found=$(which -a "${1}" | uniq | wc -l)
 }
 
-
-count_in_path "rbenv"
-if [ $found -eq 0 ]; then
+count_in_path ruby
+if [ $found -eq 0 ] || ! ruby -e "exit Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('3.1.0')"; then
     exitcode=1
-    warn "yel" "   rbenv not found. See https://github.com/rbenv/rbenv for information on installing it."
+    warn "yel" "   ruby version needs to be at least 3.1.0. See https://github.com/rbenv/rbenv for information on installing it."
 else
     warn "grn" "   found!"
-    echo "Checking ruby version..."
-    rbenv version
-
-    count_in_path "bundler"
-    if [ $found -eq 0 ]; then
-        exitcode=1
-        warn "yel" "   bundler not found. Run 'gem install bundler' to install it it."
-    else
-        warn "grn" "   found!"
-    fi
 fi
 
 count_in_path "go"
@@ -56,7 +46,19 @@ if [ $found -eq 0 ]; then
     exitcode=1
     warn "yel" "   go not found. See https://golang.org/doc/install for information on installing it."
 else
-    warn "grn" "   found!"
+    version=($(go version))
+    version=${version[2]}
+    if [[ "$version" < "go1.21.0" ]]; then
+        exitcode=1
+        warn "yel" "   $version is installed, but go 1.21 or later is required. See https://golang.org/doc/install for information on installing it."
+    fi
+    if [[ -z "${GOPATH}" ]]; then
+        exitcode=1
+        warn "yel" "   GOPATH is not set. Add 'export GOPATH=\$HOME/go' to your terminal's startup script and restart your terminal."
+    fi
+    if [ $exitcode -eq 0 ]; then
+        warn "grn" "   found!"
+    fi
 fi
 
 count_in_path "goimports"
@@ -72,6 +74,15 @@ if [ $found -eq 0 ]; then
     exitcode=1
     warn "yel" "   git not found. See https://git-scm.com/book/en/v2/Getting-Started-Installing-Git"
     warn "yel" "   for information on installing it."
+else
+    warn "grn" "   found!"
+fi
+
+count_in_path "terraform"
+if [ $found -eq 0 ]; then
+    exitcode=1
+    warn "yel" "   terraform not found. See https://learn.hashicorp.com/tutorials/terraform/install-cli"
+    warn "yel" "   for information on installing it. Version 1.1.8 or later recommended."
 else
     warn "grn" "   found!"
 fi

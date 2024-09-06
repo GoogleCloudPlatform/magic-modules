@@ -14,8 +14,8 @@
 --- !ruby/object:Api::Resource
 name: 'SSHPublicKey'
 kind: user#sshPublicKeys
-base_url: "users/{{user}}/sshPublicKeys/{{fingerprint}}"
-create_url: "users/{{user}}:importSshPublicKey"
+base_url: 'users/{{user}}/sshPublicKeys/{{fingerprint}}'
+create_url: 'users/{{user}}:importSshPublicKey'
 create_verb: :POST
 update_verb: :PATCH
 description: |
@@ -25,12 +25,14 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/compute/docs/oslogin'
   api: 'https://cloud.google.com/compute/docs/oslogin/rest/v1/users.sshPublicKeys'
 update_mask: true
-id_format: "users/{{user}}/sshPublicKeys/{{fingerprint}}"
-import_format: ["users/{{user}}/sshPublicKeys/{{fingerprint}}"]
+# Skip sweeper since due to URL containing user ID
+skip_sweeper: true
+id_format: 'users/{{user}}/sshPublicKeys/{{fingerprint}}'
+import_format: ['users/{{user}}/sshPublicKeys/{{fingerprint}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "os_login_ssh_key_basic"
-    primary_resource_id: "cache"
+    name: 'os_login_ssh_key_basic'
+    primary_resource_id: 'cache'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_create: templates/terraform/pre_create/os_login_ssh_public_key.go.erb
   post_create: templates/terraform/post_create/sshkeyfingerprint.go.erb
@@ -65,4 +67,3 @@ properties:
     description: |
       The SHA-256 fingerprint of the SSH public key.
     output: true
-

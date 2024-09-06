@@ -1,11 +1,11 @@
-config := meta.(*Config)
+config := meta.(*transport_tpg.Config)
 
-project, err := getProject(d, config)
+project, err := tpgresource.GetProject(d, config)
 if err != nil {
  	return nil, err
 }
 
-userAgent, err := generateUserAgentString(d, config.UserAgent)
+userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 if err != nil {
 	return nil, err
 }
@@ -34,15 +34,13 @@ if v, ok := d.GetOk("type"); ok {
 
 	obj["type"] = diskType.RelativeLink()
 }
-<%
-else
-  raise 'disk.erb included in non-disk type #{object.name}'
-end
--%>
+<% else -%>
+  raise 'disk.erb included in non-disk type <%= object.name -%>'
+<% end -%>
 
 if v, ok := d.GetOk("image"); ok {
 	log.Printf("[DEBUG] Resolving image name: %s", v.(string))
-	imageUrl, err := resolveImage(config, project, v.(string), userAgent)
+	imageUrl, err := ResolveImage(config, project, v.(string), userAgent)
 	if err != nil {
 		return nil, fmt.Errorf(
 			"Error resolving image name '%s': %s",

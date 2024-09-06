@@ -6,7 +6,7 @@ resource "google_logging_project_bucket_config" "<%= ctx[:primary_resource_id] %
 }
 
 resource "google_logging_log_view" "<%= ctx[:primary_resource_id] %>" {
-  name        = "tf-test-view%{random_suffix}"
+  name        = "<%= ctx[:vars]['log_view_name'] %>"
   bucket      = google_logging_project_bucket_config.<%= ctx[:primary_resource_id] %>.id
   description = "A logging view configured with Terraform"
   filter      = "SOURCE(\"projects/myproject\") AND resource.type = \"gce_instance\" AND LOG_ID(\"stdout\")"

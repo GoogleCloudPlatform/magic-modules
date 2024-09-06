@@ -28,7 +28,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -44,22 +44,22 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "network_basic"
-    primary_resource_id: "vpc_network"
+    name: 'network_basic'
+    primary_resource_id: 'vpc_network'
     vars:
-      network_name: "vpc-network"
+      network_name: 'vpc-network'
   - !ruby/object:Provider::Terraform::Examples
-    name: "network_custom_mtu"
-    primary_resource_id: "vpc_network"
+    name: 'network_custom_mtu'
+    primary_resource_id: 'vpc_network'
     vars:
-      network_name: "vpc-network"
+      network_name: 'vpc-network'
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
-    name: "network_custom_firewall_enforcement_order"
-    primary_resource_id: "vpc_network"
+    name: 'network_custom_firewall_enforcement_order'
+    primary_resource_id: 'vpc_network'
     vars:
-      network_name: "vpc-network"
+      network_name: 'vpc-network'
     test_env_vars:
       project: :PROJECT_NAME
 virtual_fields:
@@ -70,6 +70,9 @@ virtual_fields:
       If set to `true`, default routes (`0.0.0.0/0`) will be deleted
       immediately after network creation. Defaults to `false`.
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  decoder: templates/terraform/decoders/compute_network.go.erb
+  encoder: templates/terraform/encoders/compute_network.go.erb
+  update_encoder: templates/terraform/update_encoder/compute_network.go.erb
   post_create: templates/terraform/post_create/compute_network_delete_default_route.erb
 properties:
   - !ruby/object:Api::Type::String
@@ -86,11 +89,6 @@ properties:
     description: |
       The gateway address for default routing out of the network. This value
       is selected by GCP.
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'The unique identifier for the resource.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
@@ -104,16 +102,12 @@ properties:
     immutable: true
     required: true
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateGCEName'
-    # TODO: Change subnetworks to ResourceRef
-  - !ruby/object:Api::Type::Array
-    name: 'subnetworks'
+      function: 'verify.ValidateGCEName'
+  - !ruby/object:Api::Type::String
+    name: 'numericId'
     description: |
-      Server-defined fully-qualified URLs for all subnetworks in this
-      network.
+      The unique identifier for the resource. This identifier is defined by the server.
     output: true
-    exclude: true
-    item_type: Api::Type::String
   - !ruby/object:Api::Type::Boolean
     name: 'autoCreateSubnetworks'
     description: |
@@ -127,11 +121,6 @@ properties:
     default_value: true
     send_empty_value: true
     conflicts: []
-  - !ruby/object:Api::Type::Time
-    name: 'creationTimestamp'
-    description: 'Creation timestamp in RFC3339 text format.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::NestedObject
     name: 'routingConfig'
     update_verb: :PATCH
@@ -157,76 +146,38 @@ properties:
         update_verb: :PATCH
         update_url: projects/{{project}}/global/networks/{{name}}
         default_from_api: true
-  - !ruby/object:Api::Type::Array
-    name: 'peerings'
-    # This is only used in InSpec, handled via fine-grained in Terraform
-    exclude: true
-    output: true
-    description: |
-      Peerings for a network
-    item_type: !ruby/object:Api::Type::NestedObject
-      name: subnetworks
-      description: The subnetworks that should be mirrored.
-      properties:
-        - !ruby/object:Api::Type::String
-          name: 'name'
-          description: |
-            Name of the peering.
-        - !ruby/object:Api::Type::String
-          name: 'state'
-          description: |
-            State of the peering.
-        - !ruby/object:Api::Type::String
-          name: 'stateDetails'
-          description: |
-            Details about the current state of the peering.
-        - !ruby/object:Api::Type::String
-          name: 'network'
-          description: |
-            URL of the peer network
-        - !ruby/object:Api::Type::Boolean
-          name: 'exportCustomRoutes'
-          description: |
-            Whether to export the custom routes to the peer network.
-        - !ruby/object:Api::Type::Boolean
-          name: 'importCustomRoutes'
-          description: |
-            Whether to import the custom routes to the peer network.
-        - !ruby/object:Api::Type::Integer
-          name: 'peerMtu'
-          description: |
-            Maximum Transmission Unit in bytes.
   - !ruby/object:Api::Type::Integer
     name: 'mtu'
     description: |
-      Maximum Transmission Unit in bytes. The default value is 1460 bytes. 
+      Maximum Transmission Unit in bytes. The default value is 1460 bytes.
       The minimum value for this field is 1300 and the maximum value is 8896 bytes (jumbo frames).
       Note that packets larger than 1500 bytes (standard Ethernet) can be subject to TCP-MSS clamping or dropped
-      with an ICMP `Fragmentation-Needed` message if the packets are routed to the Internet or other VPCs 
+      with an ICMP `Fragmentation-Needed` message if the packets are routed to the Internet or other VPCs
       with varying MTUs.
     immutable: true
     default_from_api: true
   - !ruby/object:Api::Type::Boolean
     name: 'enableUlaInternalIpv6'
     description: |
-      Enable ULA internal ipv6 on this network. Enabling this feature will assign 
+      Enable ULA internal ipv6 on this network. Enabling this feature will assign
       a /48 from google defined ULA prefix fd20::/20.
     immutable: true
   - !ruby/object:Api::Type::String
     name: 'internalIpv6Range'
     description: |
-      When enabling ula internal ipv6, caller optionally can specify the /48 range 
-      they want from the google defined ULA prefix fd20::/20. The input must be a 
-      valid /48 ULA IPv6 address and must be within the fd20::/20. Operation will 
-      fail if the speficied /48 is already in used by another resource. 
+      When enabling ula internal ipv6, caller optionally can specify the /48 range
+      they want from the google defined ULA prefix fd20::/20. The input must be a
+      valid /48 ULA IPv6 address and must be within the fd20::/20. Operation will
+      fail if the speficied /48 is already in used by another resource.
       If the field is not speficied, then a /48 range will be randomly allocated from fd20::/20 and returned via this field.
     immutable: true
     default_from_api: true
   - !ruby/object:Api::Type::Enum
     name: 'networkFirewallPolicyEnforcementOrder'
+    update_verb: :PATCH
+    update_url: projects/{{project}}/global/networks/{{name}}
     description: |
-      Set the order that Firewall Rules and Firewall Policies are evaluated. Needs to be either 'AFTER_CLASSIC_FIREWALL' or 'BEFORE_CLASSIC_FIREWALL' Default 'AFTER_CLASSIC_FIREWALL'
-    immutable: true
+      Set the order that Firewall Rules and Firewall Policies are evaluated.
     values:
       - :BEFORE_CLASSIC_FIREWALL
       - :AFTER_CLASSIC_FIREWALL

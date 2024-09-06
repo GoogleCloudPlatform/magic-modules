@@ -14,36 +14,54 @@
 --- !ruby/object:Api::Resource
 name: 'Config'
 base_url: projects/{{project}}/locations/{{location}}/transferConfigs?serviceAccountName={{service_account_name}}
-self_link: "{{name}}"
-# see comment at service_account_name, PATCHing service_account_name also required update_mask entry
-# update_url: "{{name}}?serviceAccountName={{service_account_name}}"
+self_link: '{{name}}'
+update_url: "{{name}}?serviceAccountName={{service_account_name}}"
 update_verb: :PATCH
-update_mask: true
 description: |
   Represents a data transfer configuration. A transfer configuration
   contains all metadata needed to perform a data transfer.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    "Official Documentation": "https://cloud.google.com/bigquery/docs/reference/datatransfer/rest/"
-  api: "https://cloud.google.com/bigquery/docs/reference/datatransfer/rest/v1/projects.locations.transferConfigs/create"
-import_format: ["{{name}}"]
-id_format: "{{name}}"
-error_retry_predicates: ["iamMemberMissing"]
+    'Official Documentation': 'https://cloud.google.com/bigquery/docs/reference/datatransfer/rest/'
+  api: 'https://cloud.google.com/bigquery/docs/reference/datatransfer/rest/v1/projects.locations.transferConfigs/create'
+import_format: ['{{name}}']
+id_format: '{{name}}'
+error_retry_predicates: ['transport_tpg.IamMemberMissing']
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  resource_definition: templates/terraform/resource_definition/bigquery_data_transfer.go.erb
   constants: templates/terraform/constants/bigquery_data_transfer.go.erb
   decoder: templates/terraform/decoders/bigquery_data_transfer.go.erb
   encoder: templates/terraform/encoders/bigquery_data_transfer.go.erb
-  custom_import: templates/terraform/custom_import/self_link_as_name.erb
+  custom_import: templates/terraform/custom_import/bigquery_data_transfer_self_link_as_name_set_location.go.erb
   post_create: templates/terraform/post_create/set_computed_name.erb
+  pre_update: templates/terraform/pre_update/bigquerydatatransfer_config.erb
+custom_diff: [
+  'sensitiveParamCustomizeDiff',
+  'paramsCustomizeDiff',
+]
 examples:
   - !ruby/object:Provider::Terraform::Examples
     skip_test: true
-    name: "bigquerydatatransfer_config_scheduled_query"
-    primary_resource_id: "query_config"
+    name: 'bigquerydatatransfer_config_scheduled_query'
+    primary_resource_id: 'query_config'
     vars:
-      display_name: "my-query"
-      dataset_id: "my_dataset"
+      display_name: 'my-query'
+      dataset_id: 'my_dataset'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'bigquerydatatransfer_config_cmek'
+    skip_test: true
+    primary_resource_id: 'query_config_cmek'
+    vars:
+      dataset_id: 'example_dataset'
+      key_name: 'example-key'
+      keyring_name: 'example-keyring'
+  - !ruby/object:Provider::Terraform::Examples
+    skip_test: true
+    name: 'bigquerydatatransfer_config_salesforce'
+    primary_resource_id: 'salesforce_config'
+    vars:
+      display_name: 'my-salesforce-config'
+      dataset_id: 'my_dataset'
+
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -57,10 +75,6 @@ parameters:
   - !ruby/object:Api::Type::String
     name: 'serviceAccountName'
     url_param_only: true
-    # The API would support PATCHing the service account, but setting the
-    # update_mask accordingly for a url_param_only is currently not
-    # supported in magic-modules
-    immutable: true
     default_value: ''
     description: |
       Service account email. If this field is set, transfer config will
@@ -77,8 +91,9 @@ properties:
     output: true
     description: |
       The resource name of the transfer config. Transfer config names have the
-      form projects/{projectId}/locations/{location}/transferConfigs/{configId}.
-      Where configId is usually a uuid, but this is not required.
+      form projects/{projectId}/locations/{location}/transferConfigs/{configId}
+      or projects/{projectId}/transferConfigs/{configId},
+      where configId is usually a uuid, but this is not required.
       The name is ignored when creating a transfer config.
   - !ruby/object:Api::Type::String
     name: 'destinationDatasetId'
@@ -100,7 +115,8 @@ properties:
       jun 13:15, and first sunday of quarter 00:00. See more explanation
       about the format here:
       https://cloud.google.com/appengine/docs/flexible/python/scheduling-jobs-with-cron-yaml#the_schedule_format
-      NOTE: the granularity should be at least 8 hours, or less frequent.
+      NOTE: The minimum interval time between recurring transfers depends
+      on the data source; refer to the documentation for your data source.
   - !ruby/object:Api::Type::NestedObject
     name: 'scheduleOptions'
     description: |
@@ -165,6 +181,16 @@ properties:
       reingests data for [today-10, today-1], rather than ingesting data for
       just [today-1]. Only valid if the data source supports the feature.
       Set the value to 0 to use the default value.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'encryptionConfiguration'
+    description: |
+      Represents the encryption configuration for a transfer.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'kmsKeyName'
+        required: true
+        description: |
+          The name of the KMS key used for encrypting BigQuery data.
   - !ruby/object:Api::Type::Boolean
     name: 'disabled'
     description: |
@@ -181,8 +207,6 @@ properties:
     custom_flatten: templates/terraform/custom_flatten/json_to_string_map.go.erb
   - !ruby/object:Api::Type::NestedObject
     name: sensitiveParams
-    # This is a helper object for Terraform only
-    exclude: false
     url_param_only: true
     description: |
       Different parameters are configured primarily using the the `params` field on this

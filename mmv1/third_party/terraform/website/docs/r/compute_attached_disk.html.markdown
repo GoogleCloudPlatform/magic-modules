@@ -4,7 +4,7 @@ description: |-
   Resource that allows attaching existing persistent disks to compute instances.
 ---
 
-# google\_compute\_attached\_disk
+# google_compute_attached_disk
 
 Persistent disks can be attached to a compute instance using [the `attached_disk`
 section within the compute instance configuration](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance#attached_disk).
@@ -118,6 +118,22 @@ This resource provides the following
 ## Import
 
 Attached Disk can be imported the following ways:
+
+* `projects/{{project}}/zones/{{zone}}/instances/{{instance.name}}/{{disk.name}}`
+* `{{project}}/{{zone}}/{{instance.name}}/{{disk.name}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import Attached Disk using one of the formats above. For example:
+
+```tf
+import {
+  id = "projects/{{project}}/zones/{{zone}}/instances/{{instance.name}}/{{disk.name}}"
+  to = google_compute_attached_disk.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), Attached Disk can be imported using one of the formats above. For example:
+
+
 
 ```
 $ terraform import google_compute_attached_disk.default projects/{{project}}/zones/{{zone}}/instances/{{instance.name}}/{{disk.name}}

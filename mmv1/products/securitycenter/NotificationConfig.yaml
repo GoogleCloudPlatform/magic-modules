@@ -32,11 +32,11 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v1/organizations.notificationConfigs'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "scc_notification_config_basic"
-    primary_resource_id: "custom_notification_config"
+    name: 'scc_notification_config_basic'
+    primary_resource_id: 'custom_notification_config'
     vars:
-      topic_name: "my-topic"
-      config_id: "my-config"
+      topic_name: 'my-topic'
+      config_id: 'my-config'
     test_env_vars:
       org_id: :ORG_ID
 custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -86,14 +86,17 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: streamingConfig
     required: true
+    allow_empty_object: true
+    send_empty_value: true
     description: |
       The config for triggering streaming-based notifications.
     update_mask_fields:
-      - "streamingConfig.filter"
+      - 'streamingConfig.filter'
     properties:
       - !ruby/object:Api::Type::String
         name: filter
         required: true
+        send_empty_value: true
         description: |
           Expression that defines the filter to apply across create/update
           events of assets or findings as specified by the event type. The

@@ -36,7 +36,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -52,21 +52,22 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "reservation_basic"
-    primary_resource_id: "gce_reservation"
+    name: 'reservation_basic'
+    primary_resource_id: 'gce_reservation'
     vars:
-      reservation_name: "gce-reservation"
+      reservation_name: 'gce-reservation'
   - !ruby/object:Provider::Terraform::Examples
-    name: "shared_reservation_basic"
-    primary_resource_id: "gce_reservation"
+    name: 'shared_reservation_basic'
+    primary_resource_id: 'gce_reservation'
     test_env_vars:
       project: :PROJECT_NAME
       org_id: :ORG_ID
       billing_account: :BILLING_ACCT
     vars:
-      reservation_name: "gce-shared-reservation"
-    skip_docs: true
-        # Resource creation race
+      reservation_name: 'gce-shared-reservation'
+    skip_docs:
+      true
+      # Resource creation race
     skip_vcr: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   update_encoder: templates/terraform/update_encoder/reservation.go.erb
@@ -80,6 +81,7 @@ parameters:
       The zone where the reservation is made.
     required: true
     immutable: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -91,12 +93,6 @@ properties:
     immutable: true
     description: |
       An optional description of this resource.
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    output: true
-    description: |
-      The unique identifier for the resource.
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
@@ -145,6 +141,7 @@ properties:
         description: |
           Type of sharing for this shared-reservation
         default_from_api: true
+        immutable: true
       - !ruby/object:Api::Type::Map
         name: 'projectMap'
         description: |

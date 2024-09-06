@@ -19,7 +19,7 @@ Three different resources help you manage your IAM policy for a Spanner instance
 
 ~> **Note:** `google_spanner_instance_iam_binding` resources **can be** used in conjunction with `google_spanner_instance_iam_member` resources **only if** they do not grant privilege to the same role.
 
-## google\_spanner\_instance\_iam\_policy
+## google_spanner_instance_iam_policy
 
 ```hcl
 data "google_iam_policy" "admin" {
@@ -38,7 +38,7 @@ resource "google_spanner_instance_iam_policy" "instance" {
 }
 ```
 
-## google\_spanner\_instance\_iam\_binding
+## google_spanner_instance_iam_binding
 
 ```hcl
 resource "google_spanner_instance_iam_binding" "instance" {
@@ -51,7 +51,7 @@ resource "google_spanner_instance_iam_binding" "instance" {
 }
 ```
 
-## google\_spanner\_instance\_iam\_member
+## google_spanner_instance_iam_member
 
 ```hcl
 resource "google_spanner_instance_iam_member" "instance" {
@@ -95,28 +95,69 @@ exported:
 
 ## Import
 
-For all import syntaxes, the "resource in question" can take any of the following forms:
-
-* {{project}}/{{name}}
-* {{name}} (project is taken from provider project)
-
-IAM member imports use space-delimited identifiers; the resource in question, the role, and the account, e.g.
-
-```
-$ terraform import google_spanner_instance_iam_member.instance "project-name/instance-name roles/viewer user:foo@example.com"
-```
-
-IAM binding imports use space-delimited identifiers; the resource in question and the role, e.g.
-
-```
-$ terraform import google_spanner_instance_iam_binding.instance "project-name/instance-name roles/viewer"
-```
-
-IAM policy imports use the identifier of the resource in question, e.g.
-
-```
-$ terraform import google_spanner_instance_iam_policy.instance project-name/instance-name
-```
-
 -> **Custom Roles**: If you're importing a IAM resource with a custom role, make sure to use the
  full name of the custom role, e.g. `[projects/my-project|organizations/my-org]/roles/my-custom-role`.
+
+### Importing IAM members
+
+IAM member imports use space-delimited identifiers that contains the `instance`, `role`, and `member`. For example:
+
+* `"{{project}}/{{instance}} roles/viewer user:foo@example.com"`
+
+An [`import` block](https://developer.hashicorp.com/terraform/language/import) (Terraform v1.5.0 and later) can be used to import IAM members:
+
+```tf
+import {
+  id = "{{project}}/{{instance}} roles/viewer user:foo@example.com"
+  to = google_spanner_instance_iam_member.default
+}
+```
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can also be used:
+
+```
+$ terraform import google_spanner_instance_iam_member.default "{{project}}/{{instance}} roles/viewer user:foo@example.com"
+```
+
+### Importing IAM bindings
+
+IAM binding imports use space-delimited identifiers that contain the resource's `instance` and `role`. For example:
+
+* `"{{project}}/{{instance}} roles/viewer"`
+
+An [`import` block](https://developer.hashicorp.com/terraform/language/import) (Terraform v1.5.0 and later) can be used to import IAM bindings:
+
+```tf
+import {
+  id = "{{project}}/{{instance}} roles/viewer"
+  to = google_spanner_instance_iam_binding.default
+}
+```
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can also be used:
+
+```
+$ terraform import google_spanner_instance_iam_binding.default "{{project}}/{{instance}} roles/viewer"
+```
+
+### Importing IAM policies
+
+IAM policy imports use the identifier of the Spanner Instances resource . For example:
+
+* `{{project}}/{{instance}}`
+
+
+An [`import` block](https://developer.hashicorp.com/terraform/language/import) (Terraform v1.5.0 and later) can be used to import IAM policies:
+
+```tf
+import {
+  id = {{project}}/{{instance}}
+  to = google_spanner_instance_iam_policy.default
+}
+```
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can also be used:
+
+```
+$ terraform import google_spanner_instance_iam_policy.default {{project}}/{{instance}}
+```

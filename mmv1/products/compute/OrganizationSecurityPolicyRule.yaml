@@ -27,20 +27,21 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Creating firewall rules': 'https://cloud.google.com/vpc/docs/using-firewall-policies#create-rules'
   api: 'https://cloud.google.com/compute/docs/reference/rest/beta/organizationSecurityPolicies/addRule'
-id_format: "{{policy_id}}/priority/{{priority}}"
-import_format: ["{{%policy_id}}/priority/{{priority}}"]
+id_format: '{{policy_id}}/priority/{{priority}}'
+import_format: ['{{%policy_id}}/priority/{{priority}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "organization_security_policy_rule_basic"
-    primary_resource_id: "policy"
+    name: 'organization_security_policy_rule_basic'
+    primary_resource_id: 'policy'
     min_version: 'beta'
     test_env_vars:
       org_id: :ORG_ID
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/org_security_policy_rule.go.erb
   post_delete: templates/terraform/post_create/org_security_policy_rule.go.erb
-  post_update: templates/terraform/post_create/org_security_policy_rule.go.erb
-      # TODO: Remove once b/154369201 is closed.
+  post_update:
+    templates/terraform/post_create/org_security_policy_rule.go.erb
+    # TODO: Remove once b/154369201 is closed.
   test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
 parameters:
   - !ruby/object:Api::Type::String
@@ -65,8 +66,9 @@ properties:
     immutable: true
   - !ruby/object:Api::Type::NestedObject
     name: 'match'
-    description: A match condition that incoming traffic is evaluated against. If
-      it evaluates to true, the corresponding 'action' is enforced.
+    description:
+      A match condition that incoming traffic is evaluated against. If it
+      evaluates to true, the corresponding 'action' is enforced.
     required: true
     properties:
       - !ruby/object:Api::Type::String

@@ -14,7 +14,7 @@
 --- !ruby/object:Api::Resource
 name: Taxonomy
 base_url: projects/{{project}}/locations/{{region}}/taxonomies
-self_link: "{{name}}"
+self_link: '{{name}}'
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -23,23 +23,29 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': https://cloud.google.com/data-catalog/docs
   api: https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.taxonomies
+sweeper: !ruby/object:Provider::Terraform::Sweeper
+  sweepable_identifier_field: 'displayName'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   skip_import_test: true
   method_name_separator: ':'
   fetch_iam_policy_verb: :POST
   parent_resource_attribute: 'taxonomy'
-  import_format: ["projects/{{project}}/locations/{{region}}/taxonomies/{{taxonomy}}",
-    "{{taxonomy}}"]
-  base_url: "projects/{{project}}/locations/{{region}}/taxonomies/{{taxonomy}}"
-import_format: ["{{name}}"]
+  import_format:
+    [
+      'projects/{{project}}/locations/{{region}}/taxonomies/{{taxonomy}}',
+      '{{taxonomy}}',
+    ]
+  base_url: 'projects/{{project}}/locations/{{region}}/taxonomies/{{taxonomy}}'
+import_format: ['{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "data_catalog_taxonomy_basic"
-    primary_resource_id: "basic_taxonomy"
-    primary_resource_name: "fmt.Sprintf(\"tf_test_my_taxonomy%s\", context[\"random_suffix\"\
+    name: 'data_catalog_taxonomy_basic'
+    primary_resource_id: 'basic_taxonomy'
+    primary_resource_name: "fmt.Sprintf(\"tf_test_my_taxonomy%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
-      display_name: "my_taxonomy"
+      display_name: 'my_taxonomy'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/data_catalog_taxonomy.go.erb
 parameters:
@@ -53,32 +59,33 @@ parameters:
     default_from_api: true
 properties:
   - !ruby/object:Api::Type::String
-    name: "name"
+    name: 'name'
     description: |
       Resource name of this taxonomy, whose format is:
       "projects/{project}/locations/{region}/taxonomies/{taxonomy}".
     output: true
   - !ruby/object:Api::Type::String
-    name: "displayName"
+    name: 'displayName'
     description: |
       User defined name of this taxonomy.
+      The taxonomy display name must be unique within an organization.
       It must: contain only unicode letters, numbers, underscores, dashes
       and spaces; not start or end with spaces; and be at most 200 bytes
       long when encoded in UTF-8.
     required: true
   - !ruby/object:Api::Type::String
-    name: "description"
+    name: 'description'
     description: |
       Description of this taxonomy. It must: contain only unicode characters,
       tabs, newlines, carriage returns and page breaks; and be at most 2000 bytes
       long when encoded in UTF-8. If not set, defaults to an empty description.
   - !ruby/object:Api::Type::Array
-    name: "activatedPolicyTypes"
+    name: 'activatedPolicyTypes'
     description: |
       A list of policy types that are activated for this taxonomy. If not set,
       defaults to an empty list.
-    item_type: !ruby/object:Api::Type::Enum
-                                            # TOOD: should this be enum or string
+    item_type:
+      !ruby/object:Api::Type::Enum  # TOOD: should this be enum or string
       name: 'policyType'
       description: 'Defines policy types where policy tag can be used for'
       values:

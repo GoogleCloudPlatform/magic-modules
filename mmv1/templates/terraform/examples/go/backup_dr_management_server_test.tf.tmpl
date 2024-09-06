@@ -1,0 +1,15 @@
+data "google_compute_network" "default" {
+  provider = google-beta
+  name = "{{index $.Vars "network_name"}}"
+}
+
+resource "google_backup_dr_management_server" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  location = "us-central1"
+  name     = "{{index $.Vars "managementserver_name"}}"
+  type     = "BACKUP_RESTORE" 
+  networks {
+    network      = data.google_compute_network.default.id
+    peering_mode = "PRIVATE_SERVICE_ACCESS"
+  }
+}

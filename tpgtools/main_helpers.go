@@ -75,7 +75,13 @@ func sprintResource(v interface{}) string {
 }
 
 func formatSource(source *bytes.Buffer) ([]byte, error) {
-	output, err := format.Source(source.Bytes())
+	sourceByte := source.Bytes()
+	// Replace import path based on version (beta/alpha)
+	if terraformResourceDirectory != "google" {
+		sourceByte = bytes.Replace(sourceByte, []byte("github.com/hashicorp/terraform-provider-google/google"), []byte(terraformProviderModule+"/"+terraformResourceDirectory), -1)
+	}
+
+	output, err := format.Source(sourceByte)
 	if err != nil {
 		return []byte(source.String()), err
 	}

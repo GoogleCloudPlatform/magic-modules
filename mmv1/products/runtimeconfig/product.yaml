@@ -21,7 +21,3 @@ versions:
     base_url: https://runtimeconfig.googleapis.com/v1beta1/
 scopes:
   - https://www.googleapis.com/auth/cloudruntimeconfig
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Cloud Resource Manager API
-    url: https://console.cloud.google.com/apis/library/cloudresourcemanager.googleapis.com/

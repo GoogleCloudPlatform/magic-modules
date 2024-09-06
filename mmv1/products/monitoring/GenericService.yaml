@@ -15,29 +15,30 @@
 name: GenericService
 base_url: v3/projects/{{project}}/services
 create_url: v3/projects/{{project}}/services?serviceId={{service_id}}
-self_link: "v3/projects/{{project}}/services/{{service_id}}"
+self_link: 'v3/projects/{{project}}/services/{{service_id}}'
 update_verb: :PATCH
 update_mask: true
 description: |
   A Service is a discrete, autonomous, and network-accessible unit,
-  designed to solve an individual concern (Wikipedia). In Cloud Monitoring,
+  designed to solve an individual concern. In Cloud Monitoring,
   a Service acts as the root resource under which operational aspects of
   the service are accessible
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Service Monitoring': 'https://cloud.google.com/monitoring/service-monitoring'
     'Monitoring API Documentation': 'https://cloud.google.com/monitoring/api/v3/'
+    'Service-orientation on Wikipedia': 'https://en.wikipedia.org/wiki/Service-orientation'
   api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/v3/services'
 legacy_name: 'google_monitoring_service'
-id_format: "projects/{{project}}/services/{{service_id}}"
-import_format: ["projects/{{project}}/services/{{service_id}}"]
-error_retry_predicates: ["isMonitoringConcurrentEditError"]
+id_format: 'projects/{{project}}/services/{{service_id}}'
+import_format: ['projects/{{project}}/services/{{service_id}}']
+error_retry_predicates: ['transport_tpg.IsMonitoringConcurrentEditError']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "monitoring_service_example"
-    primary_resource_id: "my_service"
+    name: 'monitoring_service_example'
+    primary_resource_id: 'my_service'
     vars:
-      service_id: "my-service"
+      service_id: 'my-service'
 
 parameters:
   - !ruby/object:Api::Type::String
@@ -73,7 +74,7 @@ properties:
     name: telemetry
     description: |
       Configuration for how to query telemetry on a Service.
-  # Non custom service have non-editable telemetry
+    # Non custom service have non-editable telemetry
     output: true
     properties:
       - !ruby/object:Api::Type::String
@@ -88,19 +89,17 @@ properties:
       A well-known service type, defined by its service type and service labels.
       Valid values of service types and services labels are described at
       https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/api/api-structures#basic-svc-w-basic-sli
-  # BasicService info can be set on creation but is then immutable.
+    # BasicService info can be set on creation but is then immutable.
     immutable: true
     properties:
       - !ruby/object:Api::Type::String
         name: serviceType
         description: |
-          The type of service that this basic service defines, e.g. 
+          The type of service that this basic service defines, e.g.
           APP_ENGINE service type
       - !ruby/object:Api::Type::KeyValuePairs
         name: serviceLabels
         immutable: true
         description: |
-          Labels that specify the resource that emits the monitoring data 
+          Labels that specify the resource that emits the monitoring data
           which is used for SLO reporting of this `Service`.
-
-

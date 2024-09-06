@@ -1,4 +1,4 @@
-func <%= resource_name -%>DiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+func <%= object.resource_name -%>DiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 	newParts := strings.Split(new, "appengine-")
 
 	if len(newParts) == 1 {

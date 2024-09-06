@@ -1,0 +1,22 @@
+[
+  {
+    "name": "//compute.googleapis.com/projects/{{.Provider.project}}/global/forwardingRules/test-global-rule",
+    "asset_type": "compute.googleapis.com/GlobalForwardingRule",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "beta",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+      "discovery_name": "GlobalForwardingRule",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "IPProtocol": "TCP",
+        "ipVersion": "IPV4",
+        "loadBalancingScheme": "INTERNAL_SELF_MANAGED",
+        "name": "test-global-rule",
+        "portRange": "80",
+        "target": "target-id",
+        "noAutomateDnsZone": false
+      }
+    }
+  }
+]

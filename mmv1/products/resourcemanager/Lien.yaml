@@ -25,18 +25,19 @@ nested_query: !ruby/object:Api::Resource::NestedQuery
     - liens
 identity:
   - name
-description: A Lien represents an encumbrance on the actions that can be performed
-  on a resource.
+description:
+  A Lien represents an encumbrance on the actions that can be performed on a
+  resource.
 immutable: true
-id_format: "{{name}}"
-import_format: ["{{parent}}/{{name}}"]
+id_format: '{{name}}'
+import_format: ['{{parent}}/{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "resource_manager_lien"
+    name: 'resource_manager_lien'
     skip_test: true
-    primary_resource_id: "lien"
+    primary_resource_id: 'lien'
     vars:
-      project_id: "staging-project"
+      project_id: 'staging-project'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/lien.erb
   post_import: templates/terraform/post_import/lien_import.erb

@@ -1,9 +1,0 @@
-<build>
-    <buildType id="GoogleCloudBeta_ProviderGoogleCloudBetaMmUpstreamVcr"/>
-    <properties>
-      <property name="TEST_PATTERN" value="{{FAILED_TESTS}}"/>
-      <property name="BRANCH_NAME" value="refs/heads/auto-pr-{{PR_NUMBER}}"/>
-      <property name="env.VCR_MODE" value="RECORDING"/>
-    </properties>
-    <comment><text>Magician triggered PR in recording mode {{PR_NUMBER}}</text></comment>
-</build>

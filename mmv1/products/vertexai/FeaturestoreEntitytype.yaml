@@ -53,38 +53,41 @@ async: !ruby/object:Api::OpAsync
   include_project: true
 description: |-
   An entity type is a type of object in a system that needs to be modeled and have stored information about. For example, driver is an entity type, and driver0 is an instance of an entity type driver.
-import_format: ["{{%featurestore}}/entityTypes/{{name}}"]
+import_format: ['{{%featurestore}}/entityTypes/{{name}}']
 autogen_async: false
 skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "vertex_ai_featurestore_entitytype"
-    primary_resource_id: "entity"
-    primary_resource_name: "fmt.Sprintf(\"projects/%s/locations/%s/featurestores/%s\"\
-      , GetTestProjectFromEnv(), GetTestRegionFromEnv(), fmt.Sprintf(\"terraform%s\"\
-      , context[\"random_suffix\"])), fmt.Sprintf(\"terraform%s\", context[\"random_suffix\"\
+    name: 'vertex_ai_featurestore_entitytype'
+    primary_resource_id: 'entity'
+    primary_resource_name:
+      "fmt.Sprintf(\"projects/%s/locations/%s/featurestores/%s\"\
+      , envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(),
+      fmt.Sprintf(\"terraform%s\"\
+      , context[\"random_suffix\"])), fmt.Sprintf(\"terraform%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
-      name: "terraform"
-      project: "vertex-ai"
-      kms_key_name: "kms-name"
+      name: 'terraform'
+      project: 'vertex-ai'
+      kms_key_name: 'kms-name'
     test_env_vars:
       org_id: :ORG_ID
       billing_account: :BILLING_ACCT
     test_vars_overrides:
-      kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
   - !ruby/object:Provider::Terraform::Examples
-    name: "vertex_ai_featurestore_entitytype_with_beta_fields"
-    primary_resource_id: "entity"
+    name: 'vertex_ai_featurestore_entitytype_with_beta_fields'
+    primary_resource_id: 'entity'
     vars:
-      name: "terraform2"
-      project: "vertex-ai"
-      kms_key_name: "kms-name"
+      name: 'terraform2'
+      project: 'vertex-ai'
+      kms_key_name: 'kms-name'
     test_env_vars:
       org_id: :ORG_ID
       billing_account: :BILLING_ACCT
     test_vars_overrides:
-      kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     min_version: beta
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_create: templates/terraform/constants/vertex_ai_featurestore_entitytype.go.erb
@@ -95,18 +98,20 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
 parameters:
   - !ruby/object:Api::Type::String
     name: featurestore
-    description: The name of the Featurestore to use, in the format projects/{project}/locations/{location}/featurestores/{featurestore}.
+    description:
+      The name of the Featurestore to use, in the format
+      projects/{project}/locations/{location}/featurestores/{featurestore}.
     url_param_only: true
     immutable: true
     required: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
-    description: The name of the EntityType. This value may be up to 60 characters,
-      and valid characters are [a-z0-9_]. The first character cannot be a number.
+    description:
+      The name of the EntityType. This value may be up to 60 characters, and
+      valid characters are [a-z0-9_]. The first character cannot be a number.
     immutable: true
     url_param_only: true
-    pattern: '{featurestore}}/entityTypes/{{name}}'
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String
     name: 'description'
@@ -126,7 +131,7 @@ properties:
     output: true
     description: |
       The timestamp of when the featurestore was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       A set of key/value label pairs to assign to this EntityType.
@@ -150,8 +155,8 @@ properties:
           - !ruby/object:Api::Type::String
             name: 'monitoringInterval'
             min_version: beta
-            deprecation_message: This field is unavailable in the GA provider and
-              will be removed from the beta provider in a future release.
+            deprecation_message: >-
+              `monitoring_interval` is deprecated and will be removed in a future release.
             description: |
               Configuration of the snapshot analysis based monitoring pipeline running interval. The value is rolled up to full day.
 

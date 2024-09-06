@@ -20,32 +20,32 @@ description: |
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   parent_resource_attribute: 'attestor'
   method_name_separator: ':'
-  exclude: false
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/binary-authorization/'
   api: 'https://cloud.google.com/binary-authorization/docs/reference/rest/'
-import_format: ["projects/{{project}}/attestors/{{name}}"]
+import_format: ['projects/{{project}}/attestors/{{name}}']
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: 'templates/terraform/constants/binaryauthorization_attestor.go'
+  constants: 'templates/terraform/constants/binaryauthorization_attestor.go.erb'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "binary_authorization_attestor_basic"
-    primary_resource_id: "attestor"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-test-attestor%s\", context[\"random_suffix\"\
+    name: 'binary_authorization_attestor_basic'
+    primary_resource_id: 'attestor'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-test-attestor%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
-      attestor_name: "test-attestor"
-      note_name: "test-attestor-note"
+      attestor_name: 'test-attestor'
+      note_name: 'test-attestor-note'
   - !ruby/object:Provider::Terraform::Examples
-    name: "binary_authorization_attestor_kms"
-    primary_resource_id: "attestor"
+    name: 'binary_authorization_attestor_kms'
+    primary_resource_id: 'attestor'
     skip_test: true
     vars:
-      attestor_name: "test-attestor"
-      note_name: "test-attestor-note"
-      key_name: "test-attestor-key"
-      keyring_name: "test-attestor-key-ring"
+      attestor_name: 'test-attestor'
+      note_name: 'test-attestor-note'
+      key_name: 'test-attestor-key'
+      keyring_name: 'test-attestor-key-ring'
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -80,7 +80,7 @@ properties:
         required: true
         immutable: true
         custom_expand: 'templates/terraform/custom_expand/container_analysis_note.erb'
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
       - !ruby/object:Api::Type::Array
         name: publicKeys
         description: |
@@ -144,7 +144,7 @@ properties:
                     match the structure and any object identifiers encoded in
                     publicKeyPem (i.e. this algorithm must match that of the
                     public key).
-                  diff_suppress_func: 'compareSignatureAlgorithm'
+                  diff_suppress_func: 'CompareSignatureAlgorithm'
       - !ruby/object:Api::Type::String
         name: delegationServiceAccountEmail
         description: |

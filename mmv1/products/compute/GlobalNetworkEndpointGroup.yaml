@@ -33,7 +33,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -49,21 +49,16 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "global_network_endpoint_group"
-    primary_resource_id: "neg"
+    name: 'global_network_endpoint_group'
+    primary_resource_id: 'neg'
     vars:
-      neg_name: "my-lb-neg"
+      neg_name: 'my-lb-neg'
   - !ruby/object:Provider::Terraform::Examples
-    name: "global_network_endpoint_group_ip_address"
-    primary_resource_id: "neg"
+    name: 'global_network_endpoint_group_ip_address'
+    primary_resource_id: 'neg'
     vars:
-      neg_name: "my-lb-neg"
+      neg_name: 'my-lb-neg'
 properties:
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'The unique identifier for the resource.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
@@ -76,7 +71,7 @@ properties:
       character, which cannot be a dash.
     required: true
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateGCEName'
+      function: 'verify.ValidateGCEName'
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |

@@ -42,7 +42,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -60,22 +60,44 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_delete: templates/terraform/pre_delete/detach_disk.erb
   encoder: templates/terraform/encoders/disk.erb
   decoder: templates/terraform/decoders/disk.erb
-  resource_definition: templates/terraform/resource_definition/disk.erb
+custom_diff: [
+  'customdiff.ForceNewIfChange("size", IsDiskShrinkage)',
+  'hyperDiskIopsUpdateDiffSupress',
+]
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_disk_basic"
-    primary_resource_id: "regiondisk"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-my-region-disk%s\", context[\"random_suffix\"\
+    name: 'region_disk_basic'
+    primary_resource_id: 'regiondisk'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-region-disk%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
-      region_disk_name: "my-region-disk"
-      disk_name: "my-disk"
-      snapshot_name: "my-snapshot"
+      region_disk_name: 'my-region-disk'
+      disk_name: 'my-disk'
+      snapshot_name: 'my-snapshot'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'region_disk_async'
+    primary_resource_id: 'primary'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-region-disk%s\",
+      context[\"random_suffix\"\
+      ])"
+    vars:
+      region_disk_name: 'primary-region-disk'
+      secondary_region_disk_name: 'secondary-region-disk'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'region_disk_features'
+    primary_resource_id: 'regiondisk'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-region-disk%s\",
+      context[\"random_suffix\"\
+      ])"
+    vars:
+      region_disk_name: 'my-region-features-disk'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: '/'
   fetch_iam_policy_verb: :GET
   parent_resource_attribute: 'name'
-  import_format: ["projects/{{project}}/regions/{{region}}/disks/{{name}}", "{{name}}"]
+  import_format:
+    ['projects/{{project}}/regions/{{region}}/disks/{{name}}', '{{name}}']
   base_url: projects/{{project}}/regions/{{region}}/disks/{{name}}
 parameters:
   - !ruby/object:Api::Type::ResourceRef
@@ -86,6 +108,7 @@ parameters:
     required: false
     default_from_api: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::NestedObject
     name: 'diskEncryptionKey'
     description: |
@@ -134,6 +157,7 @@ parameters:
       * `projects/project/global/snapshots/snapshot`
       * `global/snapshots/snapshot`
       * `snapshot`
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::NestedObject
     name: 'sourceSnapshotEncryptionKey'
     description: |
@@ -177,7 +201,6 @@ properties:
       internally during updates.
     update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}/setLabels'
     update_verb: :POST
-    exclude: false
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
     description: 'Creation timestamp in RFC3339 text format.'
@@ -187,11 +210,6 @@ properties:
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'The unique identifier for the resource.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::Time
     name: 'lastAttachTimestamp'
     description: 'Last attach timestamp in RFC3339 text format.'
@@ -200,17 +218,12 @@ properties:
     name: 'lastDetachTimestamp'
     description: 'Last detach timestamp in RFC3339 text format.'
     output: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Labels to apply to this disk.  A list of key->value pairs.
     update_verb: :POST
     update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}/setLabels'
-  - !ruby/object:Api::Type::Array
-    name: 'licenses'
-    description: 'Any applicable publicly visible licenses.'
-    exclude: true
-    item_type: Api::Type::String
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
@@ -248,6 +261,7 @@ properties:
       resource: 'Instance'
       imports: 'selfLink'
       description: 'A reference to a user of this disk'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
     output: true
   - !ruby/object:Api::Type::Integer
     name: 'physicalBlockSizeBytes'
@@ -270,6 +284,7 @@ properties:
       imports: 'selfLink'
       description: |
         A reference to a zone where the disk should be replicated to.
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::ResourceRef
     name: 'type'
     resource: 'RegionDiskType'
@@ -279,6 +294,7 @@ properties:
       create the disk. Provide this when creating the disk.
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
     default_value: 'pd-standard'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::String
     name: 'interface'
     min_version: 'beta'
@@ -286,12 +302,13 @@ properties:
     # and prevent sending or reading in API requests
     url_param_only: true
     default_value: 'SCSI'
-    deprecation_message: This field is no longer in use, disk interfaces will be automatically
-      determined on attachment. To resolve this issue, remove this field from your
-      config.
+    deprecation_message: >-
+      `interface` is deprecated and will be removed in a future major release.
+      This field is no longer used and can be safely removed from your configurations;
+      disk interfaces are automatically determined on attachment.
     description: |
       Specifies the disk interface to use for attaching this disk, which is either SCSI or NVME. The default is SCSI.
-    diff_suppress_func: 'alwaysDiffSuppress'
+    diff_suppress_func: AlwaysDiffSuppress
   - !ruby/object:Api::Type::String
     name: 'sourceDisk'
     description: |
@@ -312,3 +329,49 @@ properties:
       be used to determine whether the image was taken from the current
       or a previous instance of a given disk name.
     output: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'asyncPrimaryDisk'
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'disk'
+        description: |
+          Primary disk for asynchronous disk replication.
+        required: true
+    diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+  - !ruby/object:Api::Type::Array
+    name: 'guestOsFeatures'
+    description: |
+      A list of features to enable on the guest operating system.
+      Applicable only for bootable disks.
+    default_from_api: true
+    is_set: true
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::Enum
+          name: 'type'
+          required: true
+          description: |
+            The type of supported feature. Read [Enabling guest operating system features](https://cloud.google.com/compute/docs/images/create-delete-deprecate-private-images#guest-os-features) to see a list of available options.
+          values:
+            - :MULTI_IP_SUBNET
+            - :SECURE_BOOT
+            - :SEV_CAPABLE
+            - :UEFI_COMPATIBLE
+            - :VIRTIO_SCSI_MULTIQUEUE
+            - :WINDOWS
+            - :GVNIC
+            - :SEV_LIVE_MIGRATABLE
+            - :SEV_SNP_CAPABLE
+            - :SUSPEND_RESUME_COMPATIBLE
+            - :TDX_CAPABLE
+  - !ruby/object:Api::Type::Array
+    name: 'licenses'
+    description: Any applicable license URI.
+    default_from_api: true
+    immutable: true
+    item_type: !ruby/object:Api::Type::ResourceRef
+      name: 'license'
+      description: 'An applicable license URI'
+      resource: 'License'
+      imports: 'selfLink'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'

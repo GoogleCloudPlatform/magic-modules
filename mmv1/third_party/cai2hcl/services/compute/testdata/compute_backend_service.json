@@ -1,0 +1,65 @@
+[
+    {
+      "name": "//compute.googleapis.com/projects/myproj/global/backendServices/bs-1",
+      "asset_type": "compute.googleapis.com/BackendService",
+      "ancestry_path": "organizations/123/folders/456/project/myproj",
+      "resource": {
+        "version": "v1",
+        "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
+        "discovery_name": "BackendService",
+        "parent": "//cloudresourcemanager.googleapis.com/projects/myproj",
+        "data": {
+          "description": "bs-1 description",
+          "sessionAffinity": "NONE",
+          "loadBalancingScheme": "EXTERNAL_MANAGED",
+          "healthChecks": [
+            "projects/cn-fe-playground/global/healthChecks/alicjab-health-check"
+          ],
+          "enableCDN": false,
+          "name": "bs-1",
+          "connectionDraining": {
+            "drainingTimeoutSec": 300
+          },
+          "cdnPolicy": {
+            "cacheMode": "CACHE_ALL_STATIC",
+            "maxTtl": 86400,
+            "cacheKeyPolicy": {
+              "includeProtocol": true,
+              "includeHost": true,
+              "includeQueryString": true
+            },
+            "signedUrlCacheMaxAgeSec": "0",
+            "serveWhileStale": 0,
+            "negativeCaching": false,
+            "requestCoalescing": true,
+            "defaultTtl": 3600,
+            "clientTtl": 3600
+          },
+          "logConfig": {
+            "enable": false,
+            "optionalMode": "EXCLUDE_ALL_OPTIONAL"
+          },
+          "backends": [
+            {
+              "capacityScaler": 1,
+              "group": "projects/cn-fe-playground/zones/us-central1-a/instanceGroups/alicjab-instance-group-1",
+              "balancingMode": "UTILIZATION",
+              "maxUtilization": 0.8
+            }
+          ],
+          "port": 80,
+          "portName": "http",
+          "timeoutSec": 30,
+          "localityLbPolicy": "ROUND_ROBIN",
+          "fingerprint": "m1r6cXyt2rI=",
+          "kind": "compute#backendService",
+          "selfLink": "projects/cn-fe-playground/global/backendServices/bs-1",
+          "creationTimestamp": "2023-06-09T04:35:59.474-07:00",
+          "selfLinkWithId": "https://www.googleapis.com/compute/alpha/projects/cn-fe-playground/global/backendServices/5968217477391233136",
+          "affinityCookieTtlSec": 0,
+          "protocol": "HTTP",
+          "securityPolicy": "projects/cn-fe-playground/global/securityPolicies/example-policy"
+        }
+      }
+    }
+  ]

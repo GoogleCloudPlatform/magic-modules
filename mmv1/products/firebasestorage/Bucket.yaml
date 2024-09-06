@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: "Bucket"
+name: 'Bucket'
 min_version: beta
 base_url: projects/{{project}}/buckets
 self_link: projects/{{project}}/buckets/{{bucket_id}}
@@ -22,17 +22,18 @@ delete_verb: :POST
 description: |
   An association between a Firebase project and a Google Cloud Storage bucket.
   This association enables integration of Cloud Storage buckets with Firebase such as Firebase SDKS, Authentication, and Security Rules.
-immutable: true # Does not support update operation. There is nothing to update.
+immutable: true  # Does not support update operation. There is nothing to update.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    "Official Documentation": "https://firebase.google.com/docs/storage/"
-  api: "https://firebase.google.com/docs/reference/rest/storage/rest/v1beta/projects.buckets"
-import_format: ['projects/{{project}}/buckets/{{bucket_id}}', '{{project}}/{{bucket_id}}']
+    'Official Documentation': 'https://firebase.google.com/docs/storage/'
+  api: 'https://firebase.google.com/docs/reference/rest/storage/rest/v1beta/projects.buckets'
+import_format:
+  ['projects/{{project}}/buckets/{{bucket_id}}', '{{project}}/{{bucket_id}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "firebasestorage_bucket_basic"
-    min_version: "beta"
-    primary_resource_id: "default"
+    name: 'firebasestorage_bucket_basic'
+    min_version: 'beta'
+    primary_resource_id: 'default'
     vars:
       bucket_id: test_bucket
     test_env_vars:
@@ -40,14 +41,14 @@ examples:
 parameters:
   - !ruby/object:Api::Type::String
     name: bucket_id
-    description: Required. Immutable. The ID of the underlying Google Cloud Storage
-      bucket
+    description:
+      Required. Immutable. The ID of the underlying Google Cloud Storage bucket
     immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
     name: name
-    pattern: projects/{{project}}/buckets/{{bucket_id}}
-    description: Resource name of the bucket in the format projects/PROJECT_IDENTIFIER/buckets/BUCKET_ID
+    description:
+      Resource name of the bucket in the format
+      projects/PROJECT_IDENTIFIER/buckets/BUCKET_ID
     output: true
-

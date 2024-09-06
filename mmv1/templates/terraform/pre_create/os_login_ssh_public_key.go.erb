@@ -12,10 +12,10 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-// Don't use `getProject()` because we only want to set the project in the URL
+// Don't use `GetProject()` because we only want to set the project in the URL
 // if the user set it explicitly on the resource.
 if p, ok := d.GetOk("project"); ok {
-	url, err = addQueryParams(url, map[string]string{"projectId": p.(string)})
+	url, err = transport_tpg.AddQueryParams(url, map[string]string{"projectId": p.(string)})
 	if err != nil {
 		return err
 	}

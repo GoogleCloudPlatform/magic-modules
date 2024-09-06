@@ -20,8 +20,8 @@ min_version: beta
 update_verb: :PATCH
 update_mask: true
 description: |
-  Mesh represents a logical configuration grouping for workload to workload communication within a 
-  service mesh. Routes that point to mesh dictate how requests are routed within this logical 
+  Mesh represents a logical configuration grouping for workload to workload communication within a
+  service mesh. Routes that point to mesh dictate how requests are routed within this logical
   mesh boundary.
 references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1beta1/projects.locations.meshes'
@@ -83,7 +83,7 @@ properties:
     description: |
       Time the Mesh was updated in UTC.
     output: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: Set of label tags associated with the Mesh resource.
   - !ruby/object:Api::Type::String
@@ -93,9 +93,8 @@ properties:
   - !ruby/object:Api::Type::Integer
     name: 'interceptionPort'
     description: |
-      Optional. If set to a valid TCP port (1-65535), instructs the SIDECAR proxy to listen on the 
-      specified port of localhost (127.0.0.1) address. The SIDECAR proxy will expect all traffic to 
-      be redirected to this port regardless of its actual ip:port destination. If unset, a port 
-      '15001' is used as the interception port. This will is applicable only for sidecar proxy 
+      Optional. If set to a valid TCP port (1-65535), instructs the SIDECAR proxy to listen on the
+      specified port of localhost (127.0.0.1) address. The SIDECAR proxy will expect all traffic to
+      be redirected to this port regardless of its actual ip:port destination. If unset, a port
+      '15001' is used as the interception port. This will is applicable only for sidecar proxy
       deployments.
-

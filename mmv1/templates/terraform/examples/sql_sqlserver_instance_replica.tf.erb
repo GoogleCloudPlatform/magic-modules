@@ -1,4 +1,3 @@
-# [START cloud_sql_sqlserver_instance_primary]
 resource "google_sql_database_instance" "primary" {
   name             = "<%= ctx[:vars]['sqlserver_primary_instance_name'] %>"
   region           = "europe-west4"
@@ -12,9 +11,7 @@ resource "google_sql_database_instance" "primary" {
   }
   deletion_protection = "<%= ctx[:vars]['deletion_protection'] %>"
 }
-# [END cloud_sql_sqlserver_instance_primary]
 
-# [START cloud_sql_sqlserver_instance_replica]
 resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
   name                 = "<%= ctx[:vars]['sqlserver_replica_instance_name'] %>"
   master_instance_name = google_sql_database_instance.primary.name
@@ -32,4 +29,3 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
   }
   deletion_protection = "<%= ctx[:vars]['deletion_protection'] %>"
 }
-# [END cloud_sql_sqlserver_instance_replica]

@@ -1,7 +1,7 @@
-config := meta.(*Config)
+config := meta.(*transport_tpg.Config)
 
 // current import_formats cannot import fields with forward slashes in their value
-if err := parseImportId([]string{"(?P<name>.+)"}, d, config); err != nil {
+if err := tpgresource.ParseImportId([]string{"(?P<name>.+)"}, d, config); err != nil {
 	return nil, err
 }
 
@@ -33,7 +33,7 @@ if len(nameParts) == 4 {
 }
 
 // Replace import id for the resource id
-id, err := replaceVars(d, config, "{{org_id}}/envgroups/{{name}}")
+id, err := tpgresource.ReplaceVars(d, config, "{{org_id}}/envgroups/{{name}}")
 if err != nil {
 	return nil, fmt.Errorf("Error constructing id: %s", err)
 }

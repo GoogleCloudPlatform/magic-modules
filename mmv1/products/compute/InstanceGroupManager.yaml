@@ -17,6 +17,8 @@ kind: 'compute#instanceGroupManager'
 base_url: projects/{{project}}/zones/{{zone}}/instanceGroupManagers
 collection_url_key: 'items'
 has_self_link: true
+# Used as a resource reference
+exclude: true
 description: |
   Creates a managed instance group using the information that you specify in
   the request. After the group is created, it schedules an action to create
@@ -30,7 +32,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -44,7 +46,6 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
-exclude: true
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'zone'
@@ -52,6 +53,7 @@ parameters:
     imports: 'name'
     description: 'The zone the managed instance group resides.'
     required: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: 'baseInstanceName'
@@ -153,6 +155,7 @@ properties:
     imports: 'selfLink'
     description: 'The instance group being managed'
     output: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::ResourceRef
     name: 'instanceTemplate'
     resource: 'InstanceTemplate'
@@ -163,6 +166,7 @@ properties:
       managed instance group.
     required: true
   # kind is internal transport detail
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
@@ -172,7 +176,8 @@ properties:
   # TODO(nelsonjr): Make namedPorts a NameValue(name[string], port[integer])
   - !ruby/object:Api::Type::Array
     name: 'namedPorts'
-    description: Named ports configured for the Instance Groups complementary to this
+    description:
+      Named ports configured for the Instance Groups complementary to this
       Instance Group Manager.
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
@@ -183,7 +188,8 @@ properties:
             long, and comply with RFC1035.
         - !ruby/object:Api::Type::Integer
           name: 'port'
-          description: The port number, which can be a value between 1 and 65535.
+          description:
+            The port number, which can be a value between 1 and 65535.
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
     resource: 'Region'
@@ -192,6 +198,7 @@ properties:
       The region this managed instance group resides
       (for regional resources).
     output: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Array
     name: 'targetPools'
     description: |
@@ -203,6 +210,7 @@ properties:
       description: 'The targetPool to receive managed instances.'
       resource: 'TargetPool'
       imports: 'selfLink'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Integer
     name: 'targetSize'
     description: |

@@ -14,6 +14,7 @@
 --- !ruby/object:Api::Product
 name: GKEHub
 display_name: GKEHub
+legacy_name: gke_hub
 versions:
   - !ruby/object:Api::Product::Version
     name: beta
@@ -23,7 +24,3 @@ versions:
     base_url: https://gkehub.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: GKEHub API
-    url: https://console.cloud.google.com/apis/library/gkehub.googleapis.com

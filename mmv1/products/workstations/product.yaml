@@ -11,17 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
-!ruby/object:Api::Product
+--- !ruby/object:Api::Product
 name: Workstations
-display_name: Workstations
+display_name: Cloud Workstations
 versions:
   - !ruby/object:Api::Product::Version
     name: beta
     base_url: https://workstations.googleapis.com/v1beta/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Workstations API
-    url: https://console.cloud.google.com/apis/library/workstations.googleapis.com

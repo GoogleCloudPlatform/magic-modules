@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the "License");
+# Licensed under the Apache License, Version 2.0 (the License);
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -12,14 +12,38 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: 'CertificateTemplate'
+name: CertificateTemplate
 base_url: projects/{{project}}/locations/{{location}}/certificateTemplates
+create_url: projects/{{project}}/locations/{{location}}/certificateTemplates?certificateTemplateId={{name}}
 self_link: projects/{{project}}/locations/{{location}}/certificateTemplates/{{name}}
-# This resource is only used to generate IAM resources. They do not correspond to real
-# GCP resources, and should not be used to generate anything other than IAM support.
-exclude_resource: true
+update_verb: :PATCH
+update_mask: true
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/certificate-authority-service'
+    'Understanding Certificate Templates': 'https://cloud.google.com/certificate-authority-service/docs/certificate-template'
+    'Common configurations and Certificate Profiles': 'https://cloud.google.com/certificate-authority-service/docs/certificate-profile'
+  api: 'https://cloud.google.com/certificate-authority-service/docs/reference/rest'
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
 description: |
-  Only used to generate IAM resources
+  Certificate Authority Service provides reusable and parameterized templates that you can use for common certificate issuance scenarios. A certificate template represents a relatively static and well-defined certificate issuance schema within an organization. A certificate template can essentially become a full-fledged vertical certificate issuance framework.
+legacy_long_form_project: true
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   allowed_iam_role: 'roles/privateca.templateUser'
   method_name_separator: ':'
@@ -28,15 +52,247 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   iam_conditions_request_type: :QUERY_PARAM_NESTED
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "privateca_template_basic"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-my-template%s\", context[\"random_suffix\"\
+    name: 'privateca_template_basic'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-template%s\",
+      context[\"random_suffix\"\
       ])"
-    primary_resource_id: "default"
+    primary_resource_id: 'default'
     vars:
-      name: "my-template"
+      name: 'my-template'
 properties:
   - !ruby/object:Api::Type::String
-    name: 'name'
-    description: Dummy property.
+    name: name
+    description: The resource name for this CertificateTemplate in the format `projects/*/locations/*/certificateTemplates/*`.
     required: true
-
+    immutable: true
+    url_param_only: true
+  - !ruby/object:Api::Type::String
+    name: location
+    description: The location for the resource
+    url_param_only: true
+    required: true
+    immutable: true
+  - !ruby/object:Api::Type::NestedObject
+    name: predefinedValues
+    description: Optional. A set of X.509 values that will be applied to all issued certificates that use this template. If the certificate request includes conflicting values for the same properties, they will be overwritten by the values defined here. If the issuing CaPool's IssuancePolicy defines conflicting baseline_values for the same properties, the certificate issuance request will fail.
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: keyUsage
+        description: Optional. Indicates the intended use for keys that correspond to a certificate.
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: baseKeyUsage
+            description: Describes high-level ways in which a key may be used.
+            diff_suppress_func: 'tpgresource.EmptyOrUnsetBlockDiffSuppress'
+            properties:
+              - !ruby/object:Api::Type::Boolean
+                name: digitalSignature
+                description: The key may be used for digital signatures.
+                send_empty_value: true
+                diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
+              - !ruby/object:Api::Type::Boolean
+                name: contentCommitment
+                description: The key may be used for cryptographic commitments. Note that this may also be referred to as "non-repudiation".
+                send_empty_value: true
+                diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
+              - !ruby/object:Api::Type::Boolean
+                name: keyEncipherment
+                description: The key may be used to encipher other keys.
+                send_empty_value: true
+                diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
+              - !ruby/object:Api::Type::Boolean
+                name: dataEncipherment
+                description: The key may be used to encipher data.
+                send_empty_value: true
+                diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
+              - !ruby/object:Api::Type::Boolean
+                name: keyAgreement
+                description: The key may be used in a key agreement protocol.
+                send_empty_value: true
+                diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
+              - !ruby/object:Api::Type::Boolean
+                name: certSign
+                description: The key may be used to sign certificates.
+                send_empty_value: true
+                diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
+              - !ruby/object:Api::Type::Boolean
+                name: crlSign
+                description: The key may be used sign certificate revocation lists.
+                send_empty_value: true
+                diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
+              - !ruby/object:Api::Type::Boolean
+                name: encipherOnly
+                description: The key may be used to encipher only.
+                send_empty_value: true
+                diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
+              - !ruby/object:Api::Type::Boolean
+                name: decipherOnly
+                description: The key may be used to decipher only.
+                send_empty_value: true
+                diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
+          - !ruby/object:Api::Type::NestedObject
+            name: extendedKeyUsage
+            description: Detailed scenarios in which a key may be used.
+            diff_suppress_func: 'tpgresource.EmptyOrUnsetBlockDiffSuppress'
+            properties:
+              - !ruby/object:Api::Type::Boolean
+                name: serverAuth
+                description: Corresponds to OID 1.3.6.1.5.5.7.3.1. Officially described as "TLS WWW server authentication", though regularly used for non-WWW TLS.
+                send_empty_value: true
+                diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
+              - !ruby/object:Api::Type::Boolean
+                name: clientAuth
+                description: Corresponds to OID 1.3.6.1.5.5.7.3.2. Officially described as "TLS WWW client authentication", though regularly used for non-WWW TLS.
+                send_empty_value: true
+                diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
+              - !ruby/object:Api::Type::Boolean
+                name: codeSigning
+                description: Corresponds to OID 1.3.6.1.5.5.7.3.3. Officially described as "Signing of downloadable executable code client authentication".
+                send_empty_value: true
+                diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
+              - !ruby/object:Api::Type::Boolean
+                name: emailProtection
+                description: Corresponds to OID 1.3.6.1.5.5.7.3.4. Officially described as "Email protection".
+                send_empty_value: true
+                diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
+              - !ruby/object:Api::Type::Boolean
+                name: timeStamping
+                description: Corresponds to OID 1.3.6.1.5.5.7.3.8. Officially described as "Binding the hash of an object to a time".
+                send_empty_value: true
+                diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
+              - !ruby/object:Api::Type::Boolean
+                name: ocspSigning
+                description: Corresponds to OID 1.3.6.1.5.5.7.3.9. Officially described as "Signing OCSP responses".
+                send_empty_value: true
+                diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
+          - !ruby/object:Api::Type::Array
+            name: unknownExtendedKeyUsages
+            description: Used to describe extended key usages that are not listed in the KeyUsage.ExtendedKeyUsageOptions message.
+            item_type: !ruby/object:Api::Type::NestedObject
+              name: unknownExtendedKeyUsage
+              description: Used to describe extended key usages that are not listed in the KeyUsage.ExtendedKeyUsageOptions message.
+              properties:
+                - !ruby/object:Api::Type::Array
+                  name: objectIdPath
+                  description: Required. The parts of an OID path. The most significant parts of the path come first.
+                  required: true
+                  item_type: Api::Type::Integer
+      - !ruby/object:Api::Type::NestedObject
+        name: caOptions
+        description: Optional. Describes options in this X509Parameters that are relevant in a CA certificate.
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: isCa
+            description: Optional. Refers to the "CA" X.509 extension, which is a boolean value. When this value is missing, the extension will be omitted from the CA certificate.
+            send_empty_value: true
+          - !ruby/object:Api::Type::Integer
+            name: maxIssuerPathLength
+            description: Optional. Refers to the path length restriction X.509 extension. For a CA certificate, this value describes the depth of subordinate CA certificates that are allowed. If this value is less than 0, the request will fail. If this value is missing, the max path length will be omitted from the CA certificate.
+      - !ruby/object:Api::Type::Array
+        name: policyIds
+        description: Optional. Describes the X.509 certificate policy object identifiers, per https://tools.ietf.org/html/rfc5280#section-4.2.1.4.
+        item_type: !ruby/object:Api::Type::NestedObject
+          name: policyId
+          description: Optional. Describes the X.509 certificate policy object identifiers, per https://tools.ietf.org/html/rfc5280#section-4.2.1.4.
+          properties:
+            - !ruby/object:Api::Type::Array
+              name: objectIdPath
+              description: Required. The parts of an OID path. The most significant parts of the path come first.
+              required: true
+              item_type: Api::Type::Integer
+      - !ruby/object:Api::Type::Array
+        name: aiaOcspServers
+        description: Optional. Describes Online Certificate Status Protocol (OCSP) endpoint addresses that appear in the "Authority Information Access" extension in the certificate.
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::Array
+        name: additionalExtensions
+        description: Optional. Describes custom X.509 extensions.
+        item_type: !ruby/object:Api::Type::NestedObject
+          name: additionalExtension
+          description: Optional. Describes custom X.509 extensions.
+          properties:
+            - !ruby/object:Api::Type::NestedObject
+              name: objectId
+              description: Required. The OID for this X.509 extension.
+              required: true
+              properties:
+                - !ruby/object:Api::Type::Array
+                  name: objectIdPath
+                  description: Required. The parts of an OID path. The most significant parts of the path come first.
+                  required: true
+                  item_type: Api::Type::Integer
+            - !ruby/object:Api::Type::Boolean
+              name: critical
+              description: Optional. Indicates whether or not this extension is critical (i.e., if the client does not know how to handle this extension, the client should consider this to be an error).
+              send_empty_value: true
+            - !ruby/object:Api::Type::String
+              name: value
+              description: Required. The value of this X.509 extension.
+              required: true
+  - !ruby/object:Api::Type::NestedObject
+    name: identityConstraints
+    description: Optional. Describes constraints on identities that may be appear in Certificates issued using this template. If this is omitted, then this template will not add restrictions on a certificate's identity.
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: celExpression
+        description: Optional. A CEL expression that may be used to validate the resolved X.509 Subject and/or Subject Alternative Name before a certificate is signed. To see the full allowed syntax and some examples, see https://cloud.google.com/certificate-authority-service/docs/using-cel
+        properties:
+          - !ruby/object:Api::Type::String
+            name: expression
+            description: Textual representation of an expression in Common Expression Language syntax.
+          - !ruby/object:Api::Type::String
+            name: title
+            description: Optional. Title for the expression, i.e. a short string describing its purpose. This can be used e.g. in UIs which allow to enter the expression.
+          - !ruby/object:Api::Type::String
+            name: description
+            description: Optional. Description of the expression. This is a longer text which describes the expression, e.g. when hovered over it in a UI.
+          - !ruby/object:Api::Type::String
+            name: location
+            description: Optional. String indicating the location of the expression for error reporting, e.g. a file name and a position in the file.
+      - !ruby/object:Api::Type::Boolean
+        name: allowSubjectPassthrough
+        description: Required. If this is true, the Subject field may be copied from a certificate request into the signed certificate. Otherwise, the requested Subject will be discarded.
+        required: true
+        send_empty_value: true
+      - !ruby/object:Api::Type::Boolean
+        name: allowSubjectAltNamesPassthrough
+        description: Required. If this is true, the SubjectAltNames extension may be copied from a certificate request into the signed certificate. Otherwise, the requested SubjectAltNames will be discarded.
+        required: true
+        send_empty_value: true
+  - !ruby/object:Api::Type::NestedObject
+    name: passthroughExtensions
+    description: Optional. Describes the set of X.509 extensions that may appear in a Certificate issued using this CertificateTemplate. If a certificate request sets extensions that don't appear in the passthrough_extensions, those extensions will be dropped. If the issuing CaPool's IssuancePolicy defines baseline_values that don't appear here, the certificate issuance request will fail. If this is omitted, then this template will not add restrictions on a certificate's X.509 extensions. These constraints do not apply to X.509 extensions set in this CertificateTemplate's predefined_values.
+    properties:
+      - !ruby/object:Api::Type::Array
+        name: knownExtensions
+        description: Optional. A set of named X.509 extensions. Will be combined with additional_extensions to determine the full set of X.509 extensions.
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::Array
+        name: additionalExtensions
+        description: Optional. A set of ObjectIds identifying custom X.509 extensions. Will be combined with known_extensions to determine the full set of X.509 extensions.
+        item_type: !ruby/object:Api::Type::NestedObject
+          name: additionalExtension
+          description: Optional. A set of ObjectIds identifying custom X.509 extensions. Will be combined with known_extensions to determine the full set of X.509 extensions.
+          properties:
+            - !ruby/object:Api::Type::Array
+              name: objectIdPath
+              description: Required. The parts of an OID path. The most significant parts of the path come first.
+              required: true
+              item_type: Api::Type::Integer
+  - !ruby/object:Api::Type::String
+    name: maximumLifetime
+    description: Optional. The maximum lifetime allowed for all issued certificates that use this template. If the issuing CaPool's IssuancePolicy specifies a maximum lifetime the minimum of the two durations will be the maximum lifetime for issued. Note that if the issuing CertificateAuthority expires before a Certificate's requested maximum_lifetime, the effective lifetime will be explicitly truncated to match it.
+  - !ruby/object:Api::Type::String
+    name: description
+    description: Optional. A human-readable description of scenarios this template is intended for.
+  - !ruby/object:Api::Type::String
+    name: createTime
+    description: Output only. The time at which this CertificateTemplate was created.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: updateTime
+    description: Output only. The time at which this CertificateTemplate was updated.
+    output: true
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: labels
+    description: Optional. Labels with user-defined metadata.

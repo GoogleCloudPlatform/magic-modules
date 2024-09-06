@@ -15,7 +15,7 @@
 // suppress changes on sample_rate if log_config is set to disabled.
 func suppressWhenDisabled(k, old, new string, d *schema.ResourceData) bool {
 	_, n := d.GetChange("log_config.0.enable")
-	if isEmptyValue(reflect.ValueOf(n)) {
+	if tpgresource.IsEmptyValue(reflect.ValueOf(n)) {
 		return true
 	}
 	return false
@@ -45,7 +45,7 @@ func resourceGoogleComputeBackendServiceBackendHash(v interface{}) int {
 	m := v.(map[string]interface{})
 	log.Printf("[DEBUG] hashing %v", m)
 
-	if group, err := getRelativePath(m["group"].(string)); err != nil {
+	if group, err := tpgresource.GetRelativePath(m["group"].(string)); err != nil {
 		log.Printf("[WARN] Error on retrieving relative path of instance group: %s", err)
 		buf.WriteString(fmt.Sprintf("%s-", m["group"].(string)))
 	} else {
@@ -155,6 +155,6 @@ func resourceGoogleComputeBackendServiceBackendHash(v interface{}) int {
         buf.WriteString(fmt.Sprintf("%v-", v.(bool)))
     }
 
-	log.Printf("[DEBUG] computed hash value of %v from %v", hashcode(buf.String()), buf.String())
-	return hashcode(buf.String())
+	log.Printf("[DEBUG] computed hash value of %v from %v", tpgresource.Hashcode(buf.String()), buf.String())
+	return tpgresource.Hashcode(buf.String())
 }

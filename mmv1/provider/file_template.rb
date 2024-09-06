@@ -56,6 +56,7 @@ module Provider
       end
 
       ctx.local_variable_set('pwd', pwd)
+      ctx.local_variable_set('hc_downstream', provider.generating_hashicorp_repo?)
 
       # check if the parent folder exists, and make it if not
       parent_path = File.dirname(path)
@@ -122,10 +123,6 @@ module Provider
   class ProductFileTemplate < Provider::FileTemplate
     # The name of the resource
     attr_accessor :name
-    # The provider-specific configuration.
-    attr_accessor :config
-    # The namespace of the product.
-    attr_accessor :product_ns
     # The resource itself.
     attr_accessor :object
     # The entire API object.
@@ -133,10 +130,9 @@ module Provider
 
     class << self
       # Construct a new ProductFileTemplate based on a resource object
-      def file_for_resource(output_folder, object, version, config, env)
+      def file_for_resource(output_folder, object, version, env)
         file_template = new(output_folder, object.name, object.__product, version, env)
         file_template.object = object
-        file_template.config = config
         file_template
       end
     end
@@ -146,7 +142,6 @@ module Provider
 
       @name = name
       @product = product
-      @product_ns = product.name
       @output_folder = output_folder
       @version = version
       @env = env

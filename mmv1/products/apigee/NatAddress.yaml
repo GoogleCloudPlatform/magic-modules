@@ -12,81 +12,86 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-  name: 'NatAddress'
-  base_url: '{{instance_id}}/natAddresses'
-  create_url: '{{instance_id}}/natAddresses'
-  delete_url: '{{instance_id}}/natAddresses/{{name}}'
-  self_link: '{{instance_id}}/natAddresses/{{name}}'
-  async: !ruby/object:Api::OpAsync
-    operation: !ruby/object:Api::OpAsync::Operation
-      path: 'name'
-      base_url: '{{op_id}}'
-      wait_ms: 1000
-    result: !ruby/object:Api::OpAsync::Result
-      path: 'response'
-      resource_inside_response: true
-    status: !ruby/object:Api::OpAsync::Status
-      path: 'done'
-      complete: true
-      allowed:
-        - true
-        - false
-    error: !ruby/object:Api::OpAsync::Error
-      path: 'error'
-      message: 'message'
-  immutable: true
-  description: |
-    Apigee NAT (network address translation) address. A NAT address is a static external IP address used for Internet egress traffic. This is not avaible for Apigee hybrid.
-    Apigee NAT addresses are not automatically activated because they might require explicit allow entries on the target systems first. See https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.natAddresses/activate
-  references: !ruby/object:Api::Resource::ReferenceLinks
-    guides:
-      'Provisioning NAT IPs': 'https://cloud.google.com/apigee/docs/api-platform/security/nat-provisioning'
-    api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.natAddresses'
-  
-  autogen_async: true
-  import_format: ["{{instance_id}}/natAddresses/{{name}}", "{{instance_id}}/{{name}}"]
-  skip_sweeper: true
-  examples:
-    - !ruby/object:Provider::Terraform::Examples
-      name: "apigee_nat_address_basic"
-      skip_test: true
-        # This is a more verbose version of the above that creates all
-        # the resources needed for the acceptance test.
-    - !ruby/object:Provider::Terraform::Examples
-      name: "apigee_nat_address_basic_test"
-      primary_resource_id: "apigee_nat_address"
-      test_env_vars:
-        org_id: :ORG_ID
-        billing_account: :BILLING_ACCT
-      skip_docs: true
-        # Resource creation race
-      skip_vcr: true
-  timeouts: !ruby/object:Api::Timeouts
-    insert_minutes: 30
-    delete_minutes: 30
-  custom_code: !ruby/object:Provider::Terraform::CustomCode
-    custom_import: templates/terraform/custom_import/apigee_nat_address.go.erb
-  parameters:
-    - !ruby/object:Api::Type::String
-      name: 'instanceId'
-      description: |
-        The Apigee instance associated with the Apigee environment,
-        in the format `organizations/{{org_name}}/instances/{{instance_name}}`.
-      required: true
-      url_param_only: true
-  properties:
-    - !ruby/object:Api::Type::String
-      name: 'name'
-      description: |
-        Resource ID of the NAT address.
-      required: true
-    - !ruby/object:Api::Type::String
-      name: 'ipAddress'
-      description: |
-        The allocated NAT IP address.
-      output: true
-    - !ruby/object:Api::Type::String
-      name: 'state'
-      description: |
-        State of the NAT IP address.
-      output: true
+name: 'NatAddress'
+base_url: '{{instance_id}}/natAddresses'
+create_url: '{{instance_id}}/natAddresses'
+delete_url: '{{instance_id}}/natAddresses/{{name}}'
+self_link: '{{instance_id}}/natAddresses/{{name}}'
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
+immutable: true
+description: |
+  Apigee NAT (network address translation) address. A NAT address is a static external IP address used for Internet egress traffic. This is not avaible for Apigee hybrid.
+  Apigee NAT addresses are not automatically activated because they might require explicit allow entries on the target systems first. See https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.natAddresses/activate
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Provisioning NAT IPs': 'https://cloud.google.com/apigee/docs/api-platform/security/nat-provisioning'
+  api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.natAddresses'
+
+autogen_async: true
+import_format:
+  ['{{instance_id}}/natAddresses/{{name}}', '{{instance_id}}/{{name}}']
+skip_sweeper: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'apigee_nat_address_basic'
+    vars:
+      nat_address_name: 'my-nat-address'
+    skip_test:
+      true
+      # This is a more verbose version of the above that creates all
+      # the resources needed for the acceptance test.
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'apigee_nat_address_basic_test'
+    primary_resource_id: 'apigee_nat_address'
+    test_env_vars:
+      org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
+    skip_docs:
+      true
+      # Resource creation race
+    skip_vcr: true
+timeouts: !ruby/object:Api::Timeouts
+  insert_minutes: 30
+  delete_minutes: 30
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_import: templates/terraform/custom_import/apigee_nat_address.go.erb
+parameters:
+  - !ruby/object:Api::Type::String
+    name: 'instanceId'
+    description: |
+      The Apigee instance associated with the Apigee environment,
+      in the format `organizations/{{org_name}}/instances/{{instance_name}}`.
+    required: true
+    url_param_only: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: |
+      Resource ID of the NAT address.
+    required: true
+  - !ruby/object:Api::Type::String
+    name: 'ipAddress'
+    description: |
+      The allocated NAT IP address.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'state'
+    description: |
+      State of the NAT IP address.
+    output: true

@@ -33,7 +33,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -49,71 +49,73 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   min_version: beta
-  exclude: false
   parent_resource_attribute: 'name'
-  import_format: ["projects/{{project}}/global/backendBuckets/{{name}}", "{{name}}"]
+  import_format:
+    ['projects/{{project}}/global/backendBuckets/{{name}}', '{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_bucket_basic"
-    primary_resource_id: "image_backend"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-image-backend-bucket%s\", context[\"\
+    name: 'backend_bucket_basic'
+    primary_resource_id: 'image_backend'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-image-backend-bucket%s\",
+      context[\"\
       random_suffix\"])"
     vars:
-      backend_bucket_name: "image-backend-bucket"
-      bucket_name: "image-store-bucket"
+      backend_bucket_name: 'image-backend-bucket'
+      bucket_name: 'image-store-bucket'
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_bucket_full"
-    primary_resource_id: "image_backend_full"
+    name: 'backend_bucket_full'
+    primary_resource_id: 'image_backend_full'
     skip_docs: true
     vars:
-      backend_bucket_name: "image-backend-bucket-full"
-      bucket_name: "image-store-bucket-full"
+      backend_bucket_name: 'image-backend-bucket-full'
+      bucket_name: 'image-store-bucket-full'
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_bucket_security_policy"
-    primary_resource_id: "image_backend"
+    name: 'backend_bucket_security_policy'
+    primary_resource_id: 'image_backend'
     vars:
-      backend_bucket_name: "image-backend-bucket"
-      bucket_name: "image-store-bucket"
+      backend_bucket_name: 'image-backend-bucket'
+      bucket_name: 'image-store-bucket'
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_bucket_query_string_whitelist"
-    primary_resource_id: "image_backend"
+    name: 'backend_bucket_query_string_whitelist'
+    primary_resource_id: 'image_backend'
     vars:
-      backend_bucket_name: "image-backend-bucket"
+      backend_bucket_name: 'image-backend-bucket'
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_bucket_include_http_headers"
-    primary_resource_id: "image_backend"
+    name: 'backend_bucket_include_http_headers'
+    primary_resource_id: 'image_backend'
     vars:
-      backend_bucket_name: "image-backend-bucket"
+      backend_bucket_name: 'image-backend-bucket'
   - !ruby/object:Provider::Terraform::Examples
-    name: "external_cdn_lb_with_backend_bucket"
-    primary_resource_type: "google_compute_backend_bucket"
-    primary_resource_id: "default"
+    name: 'external_cdn_lb_with_backend_bucket'
+    primary_resource_type: 'google_compute_backend_bucket'
+    primary_resource_id: 'default'
     vars:
-      my_bucket: "my-bucket"
-      index_page: "index-page"
-      404_page: "404-page"
-      test_object: "test-object"
-      example_ip: "example-ip"
-      http_lb_forwarding_rule: "http-lb-forwarding-rule"
-      http_lb_proxy: "http-lb-proxy"
-      http_lb: "http-lb"
-      cat_backend_bucket: "cat-backend-bucket"
+      my_bucket: 'my-bucket'
+      index_page: 'index-page'
+      404_page: '404-page'
+      test_object: 'test-object'
+      example_ip: 'example-ip'
+      http_lb_forwarding_rule: 'http-lb-forwarding-rule'
+      http_lb_proxy: 'http-lb-proxy'
+      http_lb: 'http-lb'
+      cat_backend_bucket: 'cat-backend-bucket'
     skip_docs: true
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_bucket_bypass_cache"
-    primary_resource_id: "image_backend"
+    name: 'backend_bucket_bypass_cache'
+    primary_resource_id: 'image_backend'
     skip_docs: true
     vars:
-      backend_bucket_name: "image-backend-bucket"
-      bucket_name: "image-store-bucket"
+      backend_bucket_name: 'image-backend-bucket'
+      bucket_name: 'image-store-bucket'
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_bucket_coalescing"
-    primary_resource_id: "image_backend"
+    name: 'backend_bucket_coalescing'
+    primary_resource_id: 'image_backend'
     skip_docs: true
     vars:
-      backend_bucket_name: "image-backend-bucket"
-      bucket_name: "image-store-bucket"
+      backend_bucket_name: 'image-backend-bucket'
+      bucket_name: 'image-store-bucket'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  encoder: 'templates/terraform/encoders/compute_backend_bucket.go.erb'
   post_create: 'templates/terraform/post_create/compute_backend_bucket_security_policy.go.erb'
   post_update: 'templates/terraform/post_create/compute_backend_bucket_security_policy.go.erb'
 properties:
@@ -248,7 +250,7 @@ properties:
     name: 'edgeSecurityPolicy'
     description: |
       The security policy associated with this backend bucket.
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::Array
     name: 'customResponseHeaders'
     description: |
@@ -266,11 +268,6 @@ properties:
   - !ruby/object:Api::Type::Boolean
     name: 'enableCdn'
     description: 'If true, enable Cloud CDN for this BackendBucket.'
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'Unique identifier for the resource.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |

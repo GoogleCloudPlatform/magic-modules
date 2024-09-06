@@ -11,12 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
-!ruby/object:Api::Resource
-name: "Metric"
+--- !ruby/object:Api::Resource
+name: 'Metric'
 base_url: projects/{{project}}/metrics
 # The % in self_link indicates that the name value should be URL-encoded.
-self_link: "projects/{{project}}/metrics/{{%name}}"
+self_link: 'projects/{{project}}/metrics/{{%name}}'
 update_verb: :PUT
 description: |
   Logs-based metric can also be used to extract values from logs and create a a distribution
@@ -24,39 +23,39 @@ description: |
   an optional histogram of the values as specified by the bucket options.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    "Official Documentation": "https://cloud.google.com/logging/docs/apis"
-  api: "https://cloud.google.com/logging/docs/reference/v2/rest/v2/projects.metrics/create"
-id_format: "{{name}}"
-import_format: ["{{name}}", "{{project}} {{name}}"]
+    'Official Documentation': 'https://cloud.google.com/logging/docs/apis'
+  api: 'https://cloud.google.com/logging/docs/reference/v2/rest/v2/projects.metrics/create'
+id_format: '{{name}}'
+import_format: ['{{name}}', '{{project}} {{name}}']
 mutex: customMetric/{{project}}
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "logging_metric_basic"
-    primary_resource_id: "logging_metric"
+    name: 'logging_metric_basic'
+    primary_resource_id: 'logging_metric'
     vars:
-      logging_metric_name: "my-(custom)/metric"
+      logging_metric_name: 'my-(custom)/metric'
   - !ruby/object:Provider::Terraform::Examples
-    name: "logging_metric_counter_basic"
-    primary_resource_id: "logging_metric"
+    name: 'logging_metric_counter_basic'
+    primary_resource_id: 'logging_metric'
     vars:
-      logging_metric_name: "my-(custom)/metric"
+      logging_metric_name: 'my-(custom)/metric'
   - !ruby/object:Provider::Terraform::Examples
-    name: "logging_metric_counter_labels"
-    primary_resource_id: "logging_metric"
+    name: 'logging_metric_counter_labels'
+    primary_resource_id: 'logging_metric'
     vars:
-      logging_metric_name: "my-(custom)/metric"
+      logging_metric_name: 'my-(custom)/metric'
   - !ruby/object:Provider::Terraform::Examples
-    name: "logging_metric_logging_bucket"
-    primary_resource_id: "logging_metric"
+    name: 'logging_metric_logging_bucket'
+    primary_resource_id: 'logging_metric'
     vars:
-      logging_metric_name: "my-(custom)/metric"
+      logging_metric_name: 'my-(custom)/metric'
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
-    name: "logging_metric_disabled"
-    primary_resource_id: "logging_metric"
+    name: 'logging_metric_disabled'
+    primary_resource_id: 'logging_metric'
     vars:
-      logging_metric_name: "my-(custom)/metric"
+      logging_metric_name: 'my-(custom)/metric'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/self_link_as_name.erb
   post_create: templates/terraform/post_create/set_computed_name.erb
@@ -106,7 +105,7 @@ properties:
           The unit in which the metric value is reported. It is only applicable if the valueType is
           `INT64`, `DOUBLE`, or `DISTRIBUTION`. The supported units are a subset of
           [The Unified Code for Units of Measure](http://unitsofmeasure.org/ucum.html) standard
-        default_value: "1"
+        default_value: '1'
       - !ruby/object:Api::Type::Enum
         name: valueType
         description: |
@@ -133,7 +132,7 @@ properties:
           - :CUMULATIVE
         required: true
       - !ruby/object:Api::Type::Array
-        name: labels
+        name: 'labels'
         description: |
           The set of labels that can be used to describe a specific instance of this metric type. For
           example, the appengine.googleapis.com/http/server/response_latencies metric type has a label
@@ -165,20 +164,13 @@ properties:
               required: false
               default_value: :STRING
               immutable: true
-              custom_flatten: "templates/terraform/custom_flatten/default_if_empty.erb"
+              custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
       - !ruby/object:Api::Type::String
         name: displayName
         description: |
-          A concise name for the metric, which can be displayed in user interfaces. Use sentence case 
-          without an ending period, for example "Request count". This field is optional but it is 
+          A concise name for the metric, which can be displayed in user interfaces. Use sentence case
+          without an ending period, for example "Request count". This field is optional but it is
           recommended to be set for any metrics associated with user-visible concepts, such as Quota.
-      - !ruby/object:Api::Type::String
-        name: type
-        output: true
-        description: |
-          The metric type, including its DNS name prefix. The type is not URL-encoded.
-          All user-defined metric types have the DNS name `custom.googleapis.com` or `external.googleapis.com`.
-        exclude: true
   - !ruby/object:Api::Type::KeyValuePairs
     name: labelExtractors
     description: |
@@ -214,28 +206,19 @@ properties:
         properties:
           - !ruby/object:Api::Type::Integer
             name: numFiniteBuckets
-            at_least_one_of:
-              - bucket_options.0.linear_buckets.0.num_finite_buckets
-              - bucket_options.0.linear_buckets.0.width
-              - bucket_options.0.linear_buckets.0.offset
             description: |
               Must be greater than 0.
+            required: true
           - !ruby/object:Api::Type::Double
             name: width
-            at_least_one_of:
-              - bucket_options.0.linear_buckets.0.num_finite_buckets
-              - bucket_options.0.linear_buckets.0.width
-              - bucket_options.0.linear_buckets.0.offset
             description: |
               Must be greater than 0.
+            required: true
           - !ruby/object:Api::Type::Double
             name: offset
-            at_least_one_of:
-              - bucket_options.0.linear_buckets.0.num_finite_buckets
-              - bucket_options.0.linear_buckets.0.width
-              - bucket_options.0.linear_buckets.0.offset
             description: |
               Lower bound of the first bucket.
+            required: true
       - !ruby/object:Api::Type::NestedObject
         name: exponentialBuckets
         at_least_one_of:
@@ -248,28 +231,19 @@ properties:
         properties:
           - !ruby/object:Api::Type::Integer
             name: numFiniteBuckets
-            at_least_one_of:
-              - bucket_options.0.exponential_buckets.0.num_finite_buckets
-              - bucket_options.0.exponential_buckets.0.growth_factor
-              - bucket_options.0.exponential_buckets.0.scale
             description: |
               Must be greater than 0.
+            required: true
           - !ruby/object:Api::Type::Double
             name: growthFactor
-            at_least_one_of:
-              - bucket_options.0.exponential_buckets.0.num_finite_buckets
-              - bucket_options.0.exponential_buckets.0.growth_factor
-              - bucket_options.0.exponential_buckets.0.scale
             description: |
               Must be greater than 1.
+            required: true
           - !ruby/object:Api::Type::Double
             name: scale
-            at_least_one_of:
-              - bucket_options.0.exponential_buckets.0.num_finite_buckets
-              - bucket_options.0.exponential_buckets.0.growth_factor
-              - bucket_options.0.exponential_buckets.0.scale
             description: |
               Must be greater than 0.
+            required: true
       - !ruby/object:Api::Type::NestedObject
         name: explicitBuckets
         at_least_one_of:

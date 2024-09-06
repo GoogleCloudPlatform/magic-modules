@@ -13,8 +13,8 @@
 
 --- !ruby/object:Api::Resource
 name: 'AutoscalingPolicy'
-base_url: "projects/{{project}}/locations/{{location}}/autoscalingPolicies"
-self_link: "projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{policy_id}}"
+base_url: 'projects/{{project}}/locations/{{location}}/autoscalingPolicies'
+self_link: 'projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{policy_id}}'
 collection_url_key: 'policies'
 description: |
   Describes an autoscaling policy for Dataproc cluster autoscaler.
@@ -22,24 +22,31 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
   parent_resource_attribute: 'policy_id'
   fetch_iam_policy_verb: :POST
-  import_format: ["projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{policy_id}}",
-    "{{policy_id}}"]
-id_format: "projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{policy_id}}"
-import_format: ["projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{policy_id}}"]
+  import_format:
+    [
+      'projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{policy_id}}',
+      '{{policy_id}}',
+    ]
+id_format: 'projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{policy_id}}'
+import_format:
+  [
+    'projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{policy_id}}',
+  ]
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "dataproc_autoscaling_policy_basic"
+    name: 'dataproc_autoscaling_policy_basic'
     skip_docs: true
-    primary_resource_id: "basic"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-dataproc-policy%s\", context[\"\
+    primary_resource_id: 'basic'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-dataproc-policy%s\",
+      context[\"\
       random_suffix\"])"
     vars:
-      name: "dataproc-policy"
+      name: 'dataproc-policy'
   - !ruby/object:Provider::Terraform::Examples
-    name: "dataproc_autoscaling_policy"
-    primary_resource_id: "asp"
+    name: 'dataproc_autoscaling_policy'
+    primary_resource_id: 'asp'
     vars:
-      name: "dataproc-policy"
+      name: 'dataproc-policy'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -150,7 +157,7 @@ properties:
     properties:
       - !ruby/object:Api::Type::String
         name: 'cooldownPeriod'
-        default_value: "120s"
+        default_value: '120s'
         description: |
           Duration between scaling events. A scaling period starts after the
           update operation from the previous event has completed.

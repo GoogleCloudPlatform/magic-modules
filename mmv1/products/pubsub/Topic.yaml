@@ -29,48 +29,54 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
 docs: !ruby/object:Provider::Terraform::Docs
   note: |
-    You can retrieve the email of the Google Managed Pub/Sub Service Account used for forwarding 
+    You can retrieve the email of the Google Managed Pub/Sub Service Account used for forwarding
     by using the `google_project_service_identity` resource.
-   # PubSub resources don't have operations but are negatively cached
-    # and eventually consistent.
-    # Because some users check whether the PubSub resource exists prior
-    # to applying a new resource, we need to add this PollAsync to GET the
-    # resource until it exists and the negative cached result goes away.
-    # Context: hashicorp/terraform-provider-google#4993
+  # PubSub resources don't have operations but are negatively cached
+  # and eventually consistent.
+  # Because some users check whether the PubSub resource exists prior
+  # to applying a new resource, we need to add this PollAsync to GET the
+  # resource until it exists and the negative cached result goes away.
+  # Context: hashicorp/terraform-provider-google#4993
 async: !ruby/object:Provider::Terraform::PollAsync
-  check_response_func_existence: PollCheckForExistence
+  check_response_func_existence: transport_tpg.PollCheckForExistence
   actions: ['create']
   suppress_error: true
-error_retry_predicates: ["pubsubTopicProjectNotReady"]
+error_retry_predicates: ['transport_tpg.PubsubTopicProjectNotReady']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "pubsub_topic_basic"
-    primary_resource_id: "example"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-example-topic%s\", context[\"random_suffix\"\
+    name: 'pubsub_topic_basic'
+    primary_resource_id: 'example'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-example-topic%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
-      topic_name: "example-topic"
+      topic_name: 'example-topic'
   - !ruby/object:Provider::Terraform::Examples
-    name: "pubsub_topic_cmek"
-    primary_resource_id: "example"
+    name: 'pubsub_topic_cmek'
+    primary_resource_id: 'example'
     skip_test: true
     vars:
-      topic_name: "example-topic"
-      key_name: "example-key"
-      keyring_name: "example-keyring"
+      topic_name: 'example-topic'
+      key_name: 'example-key'
+      keyring_name: 'example-keyring'
   - !ruby/object:Provider::Terraform::Examples
-    name: "pubsub_topic_geo_restricted"
-    primary_resource_id: "example"
+    name: 'pubsub_topic_geo_restricted'
+    primary_resource_id: 'example'
     vars:
-      topic_name: "example-topic"
+      topic_name: 'example-topic'
   - !ruby/object:Provider::Terraform::Examples
-    name: "pubsub_topic_schema_settings"
-    primary_resource_id: "example"
+    name: 'pubsub_topic_schema_settings'
+    primary_resource_id: 'example'
     vars:
-      topic_name: "example-topic"
-      schema_name: "example"
+      topic_name: 'example-topic'
+      schema_name: 'example'
     test_env_vars:
       project_name: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'pubsub_topic_ingestion_kinesis'
+    primary_resource_id: 'example'
+    vars:
+      topic_name: 'example-topic'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/no_send_name.go.erb
   update_encoder: templates/terraform/update_encoder/pubsub_topic.erb
@@ -80,8 +86,7 @@ properties:
     required: true
     description: 'Name of the topic.'
     immutable: true
-    pattern: 'projects/{{project}}/topics/{{name}}'
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String
@@ -92,7 +97,7 @@ properties:
       (`service-{{PROJECT_NUMBER}}@gcp-sa-pubsub.iam.gserviceaccount.com`) must have
       `roles/cloudkms.cryptoKeyEncrypterDecrypter` to use this feature.
       The expected format is `projects/*/locations/*/keyRings/*/cryptoKeys/*`
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       A set of key/value label pairs to assign to this Topic.
@@ -119,7 +124,6 @@ properties:
     name: 'schemaSettings'
     description: |
       Settings for validating messages published against a schema.
-    default_from_api: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'schema'
@@ -129,11 +133,9 @@ properties:
           The value of this field will be _deleted-schema_
           if the schema has been deleted.
         required: true
-        immutable: true
       - !ruby/object:Api::Type::Enum
         name: 'encoding'
         description: The encoding of messages validated against schema.
-        immutable: true
         default_value: :ENCODING_UNSPECIFIED
         values:
           - :ENCODING_UNSPECIFIED
@@ -148,4 +150,42 @@ properties:
       For instance, it allows any attached subscription to seek to a timestamp
       that is up to messageRetentionDuration in the past. If this field is not
       set, message retention is controlled by settings on individual subscriptions.
-      Cannot be more than 31 days or less than 10 minutes.
+      The rotation period has the format of a decimal number, followed by the
+      letter `s` (seconds). Cannot be more than 31 days or less than 10 minutes.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'ingestionDataSourceSettings'
+    description: |
+      Settings for ingestion from a data source into this topic.
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: 'awsKinesis'
+        description: |
+          Settings for ingestion from Amazon Kinesis Data Streams.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'streamArn'
+            description: |
+              The Kinesis stream ARN to ingest data from.
+            required: true
+          - !ruby/object:Api::Type::String
+            name: 'consumerArn'
+            description: |
+              The Kinesis consumer ARN to used for ingestion in
+              Enhanced Fan-Out mode. The consumer must be already
+              created and ready to be used.
+            required: true
+          - !ruby/object:Api::Type::String
+            name: 'awsRoleArn'
+            description: |
+              AWS role ARN to be used for Federated Identity authentication with
+              Kinesis. Check the Pub/Sub docs for how to set up this role and the
+              required permissions that need to be attached to it.
+            required: true
+          - !ruby/object:Api::Type::String
+            name: 'gcpServiceAccount'
+            description: |
+              The GCP service account to be used for Federated Identity authentication
+              with Kinesis (via a `AssumeRoleWithWebIdentity` call for the provided
+              role). The `awsRoleArn` must be set up with `accounts.google.com:sub`
+              equals to this service account number.
+            required: true

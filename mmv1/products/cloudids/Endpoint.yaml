@@ -24,14 +24,16 @@ description: |
 references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/intrusion-detection-system/docs/configuring-ids'
 id_format: 'projects/{{project}}/locations/{{location}}/endpoints/{{name}}'
-import_format: ["projects/{{project}}/locations/{{location}}/endpoints/{{name}}"]
+import_format:
+  ['projects/{{project}}/locations/{{location}}/endpoints/{{name}}']
 autogen_async: true
 skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloudids_endpoint"
-    primary_resource_id: "example-endpoint"
-        #Skip_test set to true since the example is identical to what's in the _test.go file.
+    name: 'cloudids_endpoint'
+    primary_resource_id:
+      'example-endpoint'
+    # skip_test set to true since the example is identical to what's in the _test.go file.
     skip_test: true
 parameters:
   - !ruby/object:Api::Type::String
@@ -99,4 +101,3 @@ properties:
     description: |
       Configuration for threat IDs excluded from generating alerts. Limit: 99 IDs.
     item_type: Api::Type::String
-

@@ -1,25 +1,78 @@
 ---
 steps:
-    - name: 'gcr.io/graphite-docker-images/membership-checker'
-      id: contributor-membership-checker
-      secretEnv: ["GITHUB_TOKEN", "GENERATE_DIFFS_TRIGGER", "RAKE_TESTS_TRIGGER", "COMMUNITY_CHECKER_TRIGGER"]
-      timeout: 8000s
-      args:
-          - "auto_run"
-          - $_PR_NUMBER
-          - $COMMIT_SHA
-          - $BRANCH_NAME
-          - $_HEAD_REPO_URL
-          - $_HEAD_BRANCH
-          - $_BASE_BRANCH
+  # The GCB / GH integration uses a shallow clone of the repo. We need to convert
+  # that to a full clone in order to work with it properly.
+  # https://cloud.google.com/source-repositories/docs/integrating-with-cloud-build#unshallowing_clones
+  - name: "gcr.io/cloud-builders/git"
+    args:
+      - fetch
+      - --unshallow
 
+  # Configure git
+  - name: "gcr.io/cloud-builders/git"
+    args:
+      - config
+      - --global
+      - user.email
+      - magic-modules+differ@google.com
+  - name: "gcr.io/cloud-builders/git"
+    args:
+      - config
+      - --global
+      - user.name
+      - "Modular Magician Diff Process"
+
+  # Display commit log for clarity
+  - name: "gcr.io/cloud-builders/git"
+    args:
+      - log
+      - "--oneline"
+      - "-n 10"
+
+  # Find common ancestor commit and apply diff for the .ci folder.
+  - name: "gcr.io/cloud-builders/git"
+    id: findMergeBase
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        git fetch origin main
+        if [ "$_BASE_BRANCH" != "main" ]; then
+          echo "Checking out .ci/ folder from main"
+          git checkout origin/main -- .ci/
+        else
+          base_commit=$(git merge-base origin/main HEAD)
+          echo "Common ancestor commit: $base_commit"
+          git diff $base_commit origin/main -- .ci/
+          git diff $base_commit origin/main -- .ci/ > /workspace/ci.diff
+          git apply ./ci.diff --allow-empty
+        fi
+        if [ "$_BASE_BRANCH" != "main" ]; then
+          echo "Checking out tools/ folder from main"
+          git checkout origin/main -- tools/
+        else
+          base_commit=$(git merge-base origin/main HEAD)
+          echo "Common ancestor commit: $base_commit"
+          git diff $base_commit origin/main -- tools/
+          git diff $base_commit origin/main -- tools/ > /workspace/tools.diff
+          git apply ./tools.diff --allow-empty
+        fi
+
+  - name: "gcr.io/graphite-docker-images/go-plus"
+    entrypoint: "/workspace/.ci/scripts/go-plus/magician/exec.sh"
+    id: contributor-membership-checker
+    secretEnv:
+      ["GITHUB_TOKEN_MAGIC_MODULES", "DOWNSTREAM_GENERATION_AND_TEST_TRIGGER"]
+    timeout: 8000s
+    args:
+      - "membership-checker"
+      - $_PR_NUMBER
+      - $COMMIT_SHA
+
+logsBucket: 'gs://cloudbuild-membership-checker-logs'
 availableSecrets:
   secretManager:
-    - versionName: projects/673497134629/secrets/github-magician-token/versions/latest
-      env: GITHUB_TOKEN
-    - versionName: projects/673497134629/secrets/ci-trigger-generate-diffs/versions/latest
-      env: GENERATE_DIFFS_TRIGGER
-    - versionName: projects/673497134629/secrets/ci-trigger-rake-test/versions/latest
-      env: RAKE_TESTS_TRIGGER
-    - versionName: projects/673497134629/secrets/ci-trigger-community-checker/versions/latest
-      env: COMMUNITY_CHECKER_TRIGGER
+    - versionName: projects/673497134629/secrets/github-magician-token-generate-diffs-magic-modules/versions/latest
+      env: GITHUB_TOKEN_MAGIC_MODULES
+    - versionName: projects/673497134629/secrets/ci-trigger-downstream-generation-and-test/versions/latest
+      env: DOWNSTREAM_GENERATION_AND_TEST_TRIGGER

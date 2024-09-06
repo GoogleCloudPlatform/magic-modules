@@ -31,61 +31,62 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': https://cloud.google.com/data-catalog/docs
   api: https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.entryGroups.tags
-import_format: ["{{name}}"]
-id_format: "{{name}}"
+import_format: ['{{name}}']
+id_format: '{{name}}'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "data_catalog_entry_tag_basic"
-    primary_resource_id: "basic_tag"
+    name: 'data_catalog_entry_tag_basic'
+    primary_resource_id: 'basic_tag'
     vars:
-      entry_group_id: "my_entry_group"
-      entry_id: "my_entry"
-      tag_template_id: "my_template"
-      force_delete: "false"
+      entry_group_id: 'my_entry_group'
+      entry_id: 'my_entry'
+      tag_template_id: 'my_template'
+      force_delete: 'false'
     test_vars_overrides:
-      force_delete: "true"
+      force_delete: 'true'
     oics_vars_overrides:
-      force_delete: "true"
+      force_delete: 'true'
   - !ruby/object:Provider::Terraform::Examples
-    name: "data_catalog_entry_group_tag"
-    primary_resource_id: "entry_group_tag"
+    name: 'data_catalog_entry_group_tag'
+    primary_resource_id: 'entry_group_tag'
     vars:
-      entry_group_id: "my_entry_group"
-      first_entry: "first_entry"
-      second_entry: "second_entry"
-      tag_template_id: "my_template"
-      force_delete: "false"
+      entry_group_id: 'my_entry_group'
+      first_entry: 'first_entry'
+      second_entry: 'second_entry'
+      tag_template_id: 'my_template'
+      force_delete: 'false'
     test_vars_overrides:
-      force_delete: "true"
+      force_delete: 'true'
     oics_vars_overrides:
-      force_delete: "true"
+      force_delete: 'true'
   - !ruby/object:Provider::Terraform::Examples
-    name: "data_catalog_entry_tag_full"
-        # Multiple fine-grained resources
+    name:
+      'data_catalog_entry_tag_full'
+      # Multiple fine-grained resources
     skip_vcr: true
-    primary_resource_id: "basic_tag"
+    primary_resource_id: 'basic_tag'
     vars:
-      entry_group_id: "my_entry_group"
-      entry_id: "my_entry"
-      tag_template_id: "my_template"
-      force_delete: "false"
+      entry_group_id: 'my_entry_group'
+      entry_id: 'my_entry'
+      tag_template_id: 'my_template'
+      force_delete: 'false'
     test_vars_overrides:
-      force_delete: "true"
+      force_delete: 'true'
     oics_vars_overrides:
-      force_delete: "true"
+      force_delete: 'true'
   - !ruby/object:Provider::Terraform::Examples
-    name: "data_catalog_entry_tag_false"
-    primary_resource_id: "basic_tag"
+    name: 'data_catalog_entry_tag_false'
+    primary_resource_id: 'basic_tag'
     vars:
-      entry_group_id: "my_entry_group"
-      entry_id: "my_entry"
-      tag_template_id: "my_template"
-      force_delete: "false"
+      entry_group_id: 'my_entry_group'
+      entry_id: 'my_entry'
+      tag_template_id: 'my_template'
+      force_delete: 'false'
     test_vars_overrides:
-      force_delete: "true"
+      force_delete: 'true'
     oics_vars_overrides:
-      force_delete: "true"
-    skip_docs: true      # omitting doc as it is almost identical to the case of data_catalog_entry_tag_basic
+      force_delete: 'true'
+    skip_docs: true  # omitting doc as it is almost identical to the case of data_catalog_entry_tag_basic
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/data_catalog_tag.go.erb
   encoder: templates/terraform/encoders/data_catalog_tag.go.erb

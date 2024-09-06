@@ -26,8 +26,9 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'agent_pool_basic'
-    primary_resource_id: 'example'
-        # Skip generating this test as the example is covered in resource_storage_transfer_agent_pool_test.go
+    primary_resource_id:
+      'example'
+      # Skip generating this test as the example is covered in resource_storage_transfer_agent_pool_test.go
     skip_test: true
     vars:
       agent-pool-name: 'agent-pool-example'
@@ -75,6 +76,7 @@ properties:
     properties:
       - !ruby/object:Api::Type::String
         name: 'limitMbps'
-        description: 'Bandwidth rate in megabytes per second, distributed across all
-          the agents in the pool.'
+        description:
+          'Bandwidth rate in megabytes per second, distributed across all the
+          agents in the pool.'
         required: true

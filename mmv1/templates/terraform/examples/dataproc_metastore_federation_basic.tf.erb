@@ -1,7 +1,6 @@
 resource "google_dataproc_metastore_federation" "<%= ctx[:primary_resource_id] %>" {
-  provider      = google-beta
   location      = "us-central1"
-  federation_id = "<%= ctx[:vars]['metastore_federation_name'] %>"
+  federation_id = "<%= ctx[:vars]['federation_id'] %>"
   version       = "3.1.2"
 
   backend_metastores {
@@ -12,8 +11,7 @@ resource "google_dataproc_metastore_federation" "<%= ctx[:primary_resource_id] %
 }
 
 resource "google_dataproc_metastore_service" "<%= ctx[:primary_resource_id] %>" {
-  provider   = google-beta
-  service_id = "<%= ctx[:vars]['metastore_federation_name'] %>"
+  service_id = "<%= ctx[:vars]['service_id'] %>"
   location   = "us-central1"
   tier       = "DEVELOPER"
 

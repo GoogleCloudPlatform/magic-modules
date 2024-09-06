@@ -1,0 +1,149 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'SearchEngine'
+description: |
+  Vertex AI Search and Conversation can be used to create a search engine or a chat application by connecting it with a datastore
+references:
+  guides:
+    'Create a Search Engine': 'https://cloud.google.com/generative-ai-app-builder/docs/create-engine-es'
+  api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.collections.engines'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}'
+self_link: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines?engineId={{engine_id}}'
+update_verb: 'PATCH'
+update_mask: true
+delete_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+custom_code:
+  encoder: 'templates/terraform/encoders/go/discovery_engine_search_engine_hardcode_solution_type.go.tmpl'
+examples:
+  - name: 'discoveryengine_searchengine_basic'
+    primary_resource_id: 'basic'
+    vars:
+      engine_id: 'example-engine-id'
+      data_store_id: 'example-datastore-id'
+parameters:
+  - name: 'engineId'
+    type: String
+    description: |
+      Unique ID to use for Search Engine App.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'collectionId'
+    type: String
+    description: |
+      The collection ID.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'location'
+    type: String
+    description: |
+      Location.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The unique full resource name of the search engine. Values are of the format
+      `projects/{project}/locations/{location}/collections/{collection_id}/engines/{engine_id}`.
+      This field must be a UTF-8 encoded string with a length limit of 1024
+      characters.
+    output: true
+  - name: 'industryVertical'
+    type: Enum
+    description: |
+      The industry vertical that the engine registers. The restriction of the Engine industry vertical is based on DataStore: If unspecified, default to GENERIC. Vertical on Engine has to match vertical of the DataStore liniked to the engine.
+    immutable: true
+    default_value: "GENERIC"
+    enum_values:
+      - 'GENERIC'
+      - 'MEDIA'
+  - name: 'displayName'
+    type: String
+    description: |
+      Required. The display name of the engine. Should be human readable. UTF-8 encoded string with limit of 1024 characters.
+    required: true
+  - name: 'dataStoreIds'
+    type: Array
+    description: |
+      The data stores associated with this engine. For SOLUTION_TYPE_SEARCH type of engines, they can only associate with at most one data store.
+    required: true
+    immutable: true
+    item_type:
+      type: String
+  - name: 'createTime'
+    type: Time
+    description: |
+      Timestamp the Engine was created at.
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      Timestamp the Engine was last updated.
+    output: true
+  - name: 'searchEngineConfig'
+    type: NestedObject
+    description: |
+      Configurations for a Search Engine.
+    required: true
+    properties:
+      - name: 'searchTier'
+        type: Enum
+        description: |
+          The search feature tier of this engine. Defaults to SearchTier.SEARCH_TIER_STANDARD if not specified.
+        default_value: "SEARCH_TIER_STANDARD"
+        enum_values:
+          - 'SEARCH_TIER_STANDARD'
+          - 'SEARCH_TIER_ENTERPRISE'
+      - name: 'searchAddOns'
+        type: Array
+        description: |
+          The add-on that this search engine enables.
+        item_type:
+          type: Enum
+          description: |
+            The add-on that this search engine enables.
+          enum_values:
+            - 'SEARCH_ADD_ON_LLM'
+  - name: 'commonConfig'
+    type: NestedObject
+    description: |
+      Common config spec that specifies the metadata of the engine.
+    immutable: true
+    properties:
+      - name: 'companyName'
+        type: String
+        description: |
+          The name of the company, business or entity that is associated with the engine. Setting this may help improve LLM related features.cd
+        immutable: true

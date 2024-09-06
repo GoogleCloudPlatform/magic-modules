@@ -1,0 +1,59 @@
+# Copyright 2018 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'IngressPolicy'
+create_url: '{{ingress_policy_name}}'
+base_url: ''
+self_link: '{{ingress_policy_name}}'
+create_verb: :PATCH
+delete_verb: :PATCH
+immutable: true
+update_mask: true
+identity:
+  - resource
+nested_query: !ruby/object:Api::Resource::NestedQuery
+  modify_by_patch: true
+  is_list_of_ids: true
+  keys:
+    - status
+    - resources
+references: !ruby/object:Api::Resource::ReferenceLinks
+  api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.servicePerimeters#ingresspolicy'
+description: |
+  This resource has been deprecated, please refer to ServicePerimeterIngressPolicy.
+autogen_async: true
+exclude_tgc: true
+# Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter/IngressPolicy
+skip_sweeper: true
+id_format: '{{ingress_policy_name}}/{{resource}}'
+import_format: ['{{ingress_policy_name}}/{{resource}}']
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_import: templates/terraform/custom_import/access_context_manager_service_perimeter_ingress_policy.go.erb
+parameters:
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'ingressPolicyName'
+    resource: 'ServicePerimeter'
+    imports: 'name'
+    description: |
+      The name of the Service Perimeter to add this resource to.
+    required: true
+    immutable: true
+    url_param_only: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'resource'
+    description: |
+      A GCP resource that is inside of the service perimeter.
+    required: true
+    immutable: true

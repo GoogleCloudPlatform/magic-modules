@@ -1,2 +1,25 @@
+# GKE MultiCloud uses a different set of locations than GCE, and our default
+# sweeper logic assumes that resources are in us-central1.
+- type: NO_SWEEPER
 - type: EXCLUDE
   field: monitoring_config
+- type: CUSTOMIZE_DIFF
+  details:
+    functions: 
+    - tpgresource.DefaultProviderProject
+- type: DIFF_SUPPRESS_FUNC
+  field: control_plane.root_volume.volume_type
+  details:
+    diffsuppressfunc: tpgresource.CaseDiffSuppress
+- type: DIFF_SUPPRESS_FUNC
+  field: control_plane.main_volume.volume_type
+  details:
+    diffsuppressfunc: tpgresource.CaseDiffSuppress
+- type: DIFF_SUPPRESS_FUNC
+  field: logging_config.component_config.enable_components
+  details:
+    diffsuppressfunc: tpgresource.CaseDiffSuppress
+- type: DIFF_SUPPRESS_FUNC
+  field: control_plane.instance_placement.tenancy
+  details:
+    diffsuppressfunc: tpgresource.CaseDiffSuppress

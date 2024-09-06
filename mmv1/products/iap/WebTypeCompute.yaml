@@ -20,23 +20,22 @@ self_link: 'projects/{{project}}/iap_web/compute'
 exclude_resource: true
 description: |
   Only used to generate IAM resources
-exclude_validator: true
+exclude_tgc: true
 iam_policy: !ruby/object:Api::Resource::IamPolicy
-  exclude: false
   method_name_separator: ':'
   parent_resource_type: 'google_project_service'
   parent_resource_attribute: 'project'
   fetch_iam_policy_verb: :POST
   allowed_iam_role: 'roles/iap.httpsResourceAccessor'
   iam_conditions_request_type: :REQUEST_BODY
-id_format: "projects/{{project}}/iap_web/compute"
-import_format: ["projects/{{project}}/iap_web/compute"]
+id_format: 'projects/{{project}}/iap_web/compute'
+import_format: ['projects/{{project}}/iap_web/compute']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "iap_project"
-    pull_external: true
-    primary_resource_id: "project_service"
-    primary_resource_name: "fmt.Sprintf(\"tf-test%s\", context[\"random_suffix\"])"
+    name: 'iap_project'
+    external_providers: ["random", "time"]
+    primary_resource_id: 'project_service'
+    primary_resource_name: 'fmt.Sprintf("tf-test%s", context["random_suffix"])'
     test_env_vars:
       org_id: :ORG_ID
 properties:

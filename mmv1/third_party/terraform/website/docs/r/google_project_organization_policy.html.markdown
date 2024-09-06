@@ -4,7 +4,7 @@ description: |-
  Allows management of Organization policies for a Google Project.
 ---
 
-# google\_project\_organization\_policy
+# google_project_organization_policy
 
 Allows management of Organization Policies for a Google Cloud Project.
 
@@ -137,8 +137,23 @@ exported:
 
 Project organization policies can be imported using any of the follow formats:
 
+* `projects/{{project_id}}:constraints/{{constraint}}`
+* `{{project_id}}:constraints/{{constraint}}`
+* `{{project_id}}:{{constraint}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import project organization policies using one of the formats above. For example:
+
+```tf
+import {
+  id = "projects/{{project_id}}:constraints/{{constraint}}"
+  to = google_project_organization_policy.default
+}
 ```
-$ terraform import google_project_organization_policy.policy projects/test-project:constraints/serviceuser.services
-$ terraform import google_project_organization_policy.policy test-project:constraints/serviceuser.services
-$ terraform import google_project_organization_policy.policy test-project:serviceuser.services
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), project organization policies can be imported using one of the formats above. For example:
+
+```
+$ terraform import google_project_organization_policy.default projects/{{project_id}}:constraints/{{constraint}}
+$ terraform import google_project_organization_policy.default {{project_id}}:constraints/{{constraint}}
+$ terraform import google_project_organization_policy.default {{project_id}}:{{constraint}}
 ```

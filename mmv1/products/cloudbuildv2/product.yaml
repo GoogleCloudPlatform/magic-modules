@@ -16,11 +16,7 @@ name: Cloudbuildv2
 display_name: Cloud Build v2
 versions:
   - !ruby/object:Api::Product::Version
-    name: beta
+    name: ga
     base_url: https://cloudbuild.googleapis.com/v2/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Cloud Build API
-    url: https://console.cloud.google.com/apis/library/cloudbuild.googleapis.com/

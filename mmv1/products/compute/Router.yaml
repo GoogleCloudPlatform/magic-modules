@@ -31,7 +31,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -48,20 +48,26 @@ async: !ruby/object:Api::OpAsync
 mutex: router/{{region}}/{{name}}
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "router_basic"
-    primary_resource_id: "foobar"
+    name: 'router_basic'
+    primary_resource_id: 'foobar'
     vars:
-      router_name: "my-router"
-      network_name: "my-network"
+      router_name: 'my-router'
+      network_name: 'my-network'
+    ignore_read_extra:
+      - advertisedIpRanges
   - !ruby/object:Provider::Terraform::Examples
-    name: "compute_router_encrypted_interconnect"
-    primary_resource_id: "encrypted-interconnect-router"
+    name: 'compute_router_encrypted_interconnect'
+    primary_resource_id: 'encrypted-interconnect-router'
     vars:
-      router_name: "test-router"
-      network_name: "test-network"
+      router_name: 'test-router'
+      network_name: 'test-network'
+    ignore_read_extra:
+      - advertisedIpRanges
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/router.go.erb
-  resource_definition: templates/terraform/resource_definition/router.go.erb
+custom_diff: [
+  'resourceComputeRouterCustomDiff',
+]
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: region
@@ -72,12 +78,8 @@ parameters:
     required: false
     default_from_api: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'The unique identifier for the resource.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
     description: 'Creation timestamp in RFC3339 text format.'
@@ -94,7 +96,7 @@ properties:
     immutable: true
     required: true
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateGCEName'
+      function: 'verify.ValidateGCEName'
   - !ruby/object:Api::Type::String
     name: description
     description: |
@@ -115,6 +117,7 @@ properties:
   # these fields to the Terraform resource (and then within that, decide
   # whether to deprecate router_interface and router_peer or leave them
   # alone).
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::NestedObject
     name: bgp
     description: |
@@ -130,7 +133,7 @@ properties:
           will have the same local ASN.
         required: true
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateRFC6996Asn'
+          function: 'verify.ValidateRFC6996Asn'
       - !ruby/object:Api::Type::Enum
         name: advertiseMode
         description: |
@@ -149,7 +152,7 @@ properties:
           blank to advertise no custom groups.
 
           This enum field has the one valid value: ALL_SUBNETS
-        item_type: Api::Type::String # TODO(#324): enum?
+        item_type: Api::Type::String  # TODO(#324): enum?
         send_empty_value: true
       - !ruby/object:Api::Type::Array
         name: advertisedIpRanges
@@ -160,6 +163,7 @@ properties:
           ranges will be advertised in addition to any specified groups.
           Leave this field blank to advertise no custom IP ranges.
         send_empty_value: true
+        custom_flatten: 'templates/terraform/custom_flatten/compute_router_range.go.erb'
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String
@@ -188,6 +192,15 @@ properties:
           between the two peers. If set, this value must be between 20 and 60.
           The default is 20.
         default_value: 20
+      - !ruby/object:Api::Type::String
+        name: identifierRange
+        default_from_api: true
+        description: |
+          Explicitly specifies a range of valid BGP Identifiers for this Router.
+          It is provided as a link-local IPv4 range (from 169.254.0.0/16), of
+          size at least /30, even if the BGP sessions are over IPv6. It must
+          not overlap with any IPv4 BGP session ranges. Other vendors commonly
+          call this router ID.
   - !ruby/object:Api::Type::Boolean
     name: encryptedInterconnectRouter
     immutable: true

@@ -21,13 +21,13 @@ description: |
   A reservation is a mechanism used to guarantee BigQuery slots to users.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    "Introduction to Reservations": "https://cloud.google.com/bigquery/docs/reservations-intro"
-  api: "https://cloud.google.com/bigquery/docs/reference/reservations/rest/v1/projects.locations.reservations/create"
+    'Introduction to Reservations': 'https://cloud.google.com/bigquery/docs/reservations-intro'
+  api: 'https://cloud.google.com/bigquery/docs/reference/reservations/rest/v1/projects.locations.reservations/create'
 skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_reservation_basic"
-    primary_resource_id: "reservation"
+    name: 'bigquery_reservation_basic'
+    primary_resource_id: 'reservation'
     vars:
       name: 'my-reservation'
 parameters:
@@ -65,14 +65,10 @@ properties:
     default_value: 0
     description: |
       Maximum number of queries that are allowed to run concurrently in this reservation. This is a soft limit due to asynchronous nature of the system and various optimizations for small queries. Default value is 0 which means that concurrency will be automatically set based on the reservation size.
-  - !ruby/object:Api::Type::Boolean
-    name: 'multiRegionAuxiliary'
-    description: |
-      Applicable only for reservations located within one of the BigQuery multi-regions (US or EU).
-      If set to true, this reservation is placed in the organization's secondary region which is designated for disaster recovery purposes. If false, this reservation is placed in the organization's default region.
   - !ruby/object:Api::Type::String
     name: 'edition'
     immutable: true
+    default_from_api: true
     description: |
       The edition type. Valid values are STANDARD, ENTERPRISE, ENTERPRISE_PLUS
   - !ruby/object:Api::Type::NestedObject

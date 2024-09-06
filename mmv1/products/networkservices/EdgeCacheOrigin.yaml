@@ -20,15 +20,17 @@ update_verb: :PATCH
 update_mask: true
 description: |
   EdgeCacheOrigin represents a HTTP-reachable backend for an EdgeCacheService.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  api: 'https://cloud.google.com/media-cdn/docs/reference/rest/v1/projects.locations.edgeCacheOrigins'
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
     base_url: '{{op_id}}'
     wait_ms: 1000
     timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 60
-      update_minutes: 60
-      delete_minutes: 60
+      insert_minutes: 120
+      update_minutes: 120
+      delete_minutes: 120
   result: !ruby/object:Api::OpAsync::Result
     path: 'response'
   status: !ruby/object:Api::OpAsync::Status
@@ -41,31 +43,32 @@ async: !ruby/object:Api::OpAsync
     path: 'error'
     message: 'message'
 autogen_async: true
-import_format: ["projects/{{project}}/locations/global/edgeCacheOrigins/{{name}}"]
+import_format:
+  ['projects/{{project}}/locations/global/edgeCacheOrigins/{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "network_services_edge_cache_origin_basic"
-    primary_resource_id: "default"
+    name: 'network_services_edge_cache_origin_basic'
+    primary_resource_id: 'default'
     vars:
-      resource_name: "my-origin"
+      resource_name: 'my-origin'
     ignore_read_extra:
-      - "timeout"
+      - 'timeout'
   - !ruby/object:Provider::Terraform::Examples
-    name: "network_services_edge_cache_origin_advanced"
-    primary_resource_id: "default"
+    name: 'network_services_edge_cache_origin_advanced'
+    primary_resource_id: 'default'
     vars:
-      resource_name: "my-origin"
-      resource_name_2: "my-fallback"
+      resource_name: 'my-origin'
+      resource_name_2: 'my-fallback'
     ignore_read_extra:
-      - "timeout"
+      - 'timeout'
   - !ruby/object:Provider::Terraform::Examples
-    name: "network_services_edge_cache_origin_v4auth"
-    primary_resource_id: "default"
+    name: 'network_services_edge_cache_origin_v4auth'
+    primary_resource_id: 'default'
     vars:
-      resource_name: "my-origin"
-      secret_name: "secret-name"
+      resource_name: 'my-origin'
+      secret_name: 'secret-name'
     ignore_read_extra:
-      - "timeout"
+      - 'timeout'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -81,7 +84,7 @@ properties:
     name: 'description'
     description: |
       A human-readable description of the resource.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: 'Set of label tags associated with the EdgeCache resource.'
   - !ruby/object:Api::Type::String
@@ -95,7 +98,7 @@ properties:
       When providing an FQDN (hostname), it must be publicly resolvable (e.g. via Google public DNS) and IP addresses must be publicly routable.  It must not contain a protocol (e.g., https://) and it must not contain any slashes.
       If a Cloud Storage bucket is provided, it must be in the canonical "gs://bucketname" format. Other forms, such as "storage.googleapis.com", will be rejected.
   - !ruby/object:Api::Type::Enum
-    name: 'protocol' # default http2 from api
+    name: 'protocol'  # default http2 from api
     description: |
       The protocol to use to connect to the configured origin. Defaults to HTTP2, and it is strongly recommended that users use HTTP2 for both security & performance.
 
@@ -106,7 +109,7 @@ properties:
       - :HTTP
     default_from_api: true
   - !ruby/object:Api::Type::Integer
-    name: 'port' # default from api
+    name: 'port'  # default from api
     description: |
       The port to connect to the origin on.
       Defaults to port 443 for HTTP2 and HTTPS protocols, and port 80 for HTTP.
@@ -136,9 +139,9 @@ properties:
 
       The value of timeout.maxAttemptsTimeout dictates the timeout across all origins.
       A reference to a Topic resource.
-    diff_suppress_func: 'compareResourceNames'
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
   - !ruby/object:Api::Type::Array
-    name: 'retryConditions' # default CONNECT_FAILURE from api
+    name: 'retryConditions'  # default CONNECT_FAILURE from api
     description: |
       Specifies one or more retry conditions for the configured origin.
 
@@ -175,7 +178,7 @@ properties:
     name: 'timeout'
     description: |
       The connection and HTTP timeout configuration for this origin.
-    custom_flatten: "templates/terraform/custom_flatten/network_services_timeout_mirror.go.erb"
+    custom_flatten: 'templates/terraform/custom_flatten/network_services_timeout_mirror.go.erb'
     properties:
       - !ruby/object:Api::Type::String
         name: 'connectTimeout'

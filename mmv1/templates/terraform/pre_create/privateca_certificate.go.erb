@@ -14,7 +14,7 @@
 -%>
 // Only include linked certificate authority if the user specified it
 if p, ok := d.GetOk("certificate_authority"); ok {
-	url, err = addQueryParams(url, map[string]string{"issuingCertificateAuthorityId": p.(string)})
+	url, err = transport_tpg.AddQueryParams(url, map[string]string{"issuingCertificateAuthorityId": p.(string)})
 	if err != nil {
 		return err
 	}

@@ -19,21 +19,21 @@ require 'google/string_utils'
 
 module Api
   # An object available in the product
-  class Resource < Api::Object::Named
+  class Resource < Api::NamedObject
     # The list of properties (attr_reader) that can be overridden in
     # <provider>.yaml.
     module Properties
-      include Api::Object::Named::Properties
+      include Api::NamedObject::Properties
 
       # [Required] A description of the resource that's surfaced in provider
       # documentation.
-      attr_reader :description
+      attr_accessor :description
       # [Required] (Api::Resource::ReferenceLinks) Reference links provided in
       # downstream documentation.
       attr_reader :references
       # [Required] The GCP "relative URI" of a resource, relative to the product
       # base URL. It can often be inferred from the `create` path.
-      attr_reader :base_url
+      attr_accessor :base_url
 
       # ====================
       # Common Configuration
@@ -44,10 +44,10 @@ module Api
       # [Optional] If set to true, don't generate the resource.
       attr_reader :exclude
       # [Optional] If set to true, the resource is not able to be updated.
-      attr_reader :immutable
+      attr_accessor :immutable
       # [Optional] If set to true, this resource uses an update mask to perform
       # updates. This is typical of newer GCP APIs.
-      attr_reader :update_mask
+      attr_accessor :update_mask
       # [Optional] If set to true, the object has a `self_link` field. This is
       # typical of older GCP APIs.
       attr_reader :has_self_link
@@ -63,23 +63,23 @@ module Api
       # [Optional] The "identity" URL of the resource. Defaults to:
       # * base_url when the create_verb is :POST
       # * self_link when the create_verb is :PUT  or :PATCH
-      attr_reader :self_link
+      attr_accessor :self_link
       # [Optional] The URL used to creating the resource. Defaults to:
       # * collection url when the create_verb is :POST
       # * self_link when the create_verb is :PUT or :PATCH
-      attr_reader :create_url
+      attr_accessor :create_url
       # [Optional] The URL used to delete the resource. Defaults to the self
       # link.
-      attr_reader :delete_url
+      attr_accessor :delete_url
       # [Optional] The URL used to update the resource. Defaults to the self
       # link.
-      attr_reader :update_url
+      attr_accessor :update_url
       # [Optional] The HTTP verb used during create. Defaults to :POST.
       attr_reader :create_verb
       # [Optional] The HTTP verb used during read. Defaults to :GET.
       attr_reader :read_verb
       # [Optional] The HTTP verb used during update. Defaults to :PUT.
-      attr_reader :update_verb
+      attr_accessor :update_verb
       # [Optional] The HTTP verb used during delete. Defaults to :DELETE.
       attr_reader :delete_verb
       # [Optional] Additional Query Parameters to append to GET. Defaults to ""
@@ -146,10 +146,21 @@ module Api
 
       # The Terraform resource id format used when calling #setId(...).
       # For instance, `{{name}}` means the id will be the resource name.
-      attr_reader :id_format
-      attr_reader :import_format
+      attr_accessor :id_format
+      # Override attribute used to handwrite the formats for generating regex strings
+      # that match templated values to a self_link when importing, only necessary when
+      # a resource is not adequately covered by the standard provider generated options.
+      # Leading a token with `%`
+      # i.e. {{%parent}}/resource/{{resource}}
+      # will allow that token to hold multiple /'s.
+      attr_accessor :import_format
       attr_reader :custom_code
       attr_reader :docs
+
+      # This block inserts entries into the customdiff.All() block in the
+      # resource schema -- the code for these custom diff functions must
+      # be included in the resource constants or come from tpgresource
+      attr_reader :custom_diff
 
       # Lock name for a mutex to prevent concurrent API calls for a given
       # resource.
@@ -165,32 +176,67 @@ module Api
 
       # TODO(alexstephen): Deprecate once all resources using autogen async.
       # If true, generates product operation handling logic.
-      attr_reader :autogen_async
+      attr_accessor :autogen_async
 
       # If true, resource is not importable
       attr_reader :exclude_import
 
       # If true, exclude resource from Terraform Validator
       # (i.e. terraform-provider-conversion)
-      attr_reader :exclude_validator
+      attr_reader :exclude_tgc
 
       # If true, skip sweeper generation for this resource
       attr_reader :skip_sweeper
+
+      # Override sweeper settings
+      attr_reader :sweeper
 
       attr_reader :timeouts
 
       # An array of function names that determine whether an error is retryable.
       attr_reader :error_retry_predicates
 
+      # An array of function names that determine whether an error is not retryable.
+      attr_reader :error_abort_predicates
+
+      # Optional attributes for declaring a resource's current version and generating
+      # state_upgrader code to the output .go file from files stored at
+      # mmv1/templates/terraform/state_migrations/
+      # used for maintaining state stability with resources first provisioned on older api versions.
       attr_reader :schema_version
+      # From this schema version on, state_upgrader code is generated for the resource.
+      # When unset, state_upgrade_base_schema_version defauts to 0.
+      # Normally, it is not needed to be set.
+      attr_reader :state_upgrade_base_schema_version
+      attr_reader :state_upgraders
+      # This block inserts the named function and its attribute into the
+      # resource schema -- the code for the migrate_state function must
+      # be included in the resource constants or come from tpgresource
+      # included for backwards compatibility as an older state migration method
+      # and should not be used for new resources.
+      attr_reader :migrate_state
 
       # Set to true for resources that are unable to be deleted, such as KMS keyrings or project
       # level resources such as firebase project
       attr_reader :skip_delete
 
+      # Set to true for resources that are unable to be read from the API, such as
+      # public ca external account keys
+      attr_reader :skip_read
+
+      # Set to true for resources that wish to disable automatic generation of default provider
+      # value customdiff functions
+      attr_reader :skip_default_cdiff
+
       # This enables resources that get their project via a reference to a different resource
       # instead of a project field to use User Project Overrides
       attr_reader :supports_indirect_user_project_override
+
+      # If true, the resource's project field can be specified as either the short form project
+      # id or the long form projects/project-id. The extra projects/ string will be removed from
+      # urls and ids. This should only be used for resources that previously supported long form
+      # project ids for backwards compatibility.
+      attr_reader :legacy_long_form_project
 
       # Function to transform a read error so that handleNotFound recognises
       # it as a 404. This should be added as a handwritten fn that takes in
@@ -201,6 +247,12 @@ module Api
       # these resources will be deleted and recreated on the next apply call. This pattern
       # is preferred over deleting the resource directly in post_create_failure hooks.
       attr_reader :taint_resource_on_failed_create
+
+      # Add a deprecation message for a resource that's been deprecated in the API.
+      attr_reader :deprecation_message
+
+      # Do not apply the default attribution label
+      attr_reader :skip_attribution_label
     end
 
     include Properties
@@ -269,27 +321,39 @@ module Api
             type: Array,
             default: []
 
+      @virtual_fields&.each { |field| field.client_side = true }
+
       check :custom_code, type: Provider::Terraform::CustomCode,
                           default: Provider::Terraform::CustomCode.new
+      check :sweeper, type: Provider::Terraform::Sweeper, default: Provider::Terraform::Sweeper.new
       check :docs, type: Provider::Terraform::Docs, default: Provider::Terraform::Docs.new
       check :import_format, type: Array, item_type: String, default: []
       check :autogen_async, type: :boolean, default: false
       check :exclude_import, type: :boolean, default: false
-
+      check :custom_diff, type: Array, item_type: String, default: []
       check :timeouts, type: Api::Timeouts
       check :error_retry_predicates, type: Array, item_type: String
+      check :error_abort_predicates, type: Array, item_type: String
       check :schema_version, type: Integer
+      check :state_upgrade_base_schema_version, type: Integer, default: 0
+      check :state_upgraders, type: :boolean, default: false
+      check :migrate_state, type: String
       check :skip_delete, type: :boolean, default: false
+      check :skip_read, type: :boolean, default: false
+      check :skip_default_cdiff, type: :boolean, default: false
       check :supports_indirect_user_project_override, type: :boolean, default: false
+      check :legacy_long_form_project, type: :boolean, default: false
       check :read_error_transform, type: String
       check :taint_resource_on_failed_create, type: :boolean, default: false
       check :skip_sweeper, type: :boolean, default: false
+      check :deprecation_message, type: ::String
+      check :skip_attribution_label, type: :boolean, default: false
 
       validate_identity unless @identity.nil?
     end
 
     # ====================
-    # Custom Getters
+    # Custom Getters and Setters
     # ====================
 
     # Returns all properties and parameters including the ones that are
@@ -298,13 +362,21 @@ module Api
       ((@properties || []) + (@parameters || []))
     end
 
+    def properties_with_excluded
+      @properties || []
+    end
+
     def properties
       (@properties || []).reject(&:exclude)
     end
 
+    attr_writer :properties
+
     def parameters
       (@parameters || []).reject(&:exclude)
     end
+
+    attr_writer :parameters
 
     # Return the user-facing properties in client tools; this ends up meaning
     # both properties and parameters but without any that are excluded due to
@@ -327,18 +399,28 @@ module Api
       nested
     end
 
-    # Returns all resourcerefs at any depth
-    def all_resourcerefs
-      resourcerefs_for_properties(all_user_properties, self)
+    def convert_go_file(file)
+      dir, base = File.split(file)
+      base.slice! '.erb'
+      if dir.end_with?('terraform')
+        "#{dir}/#{base}.go.tmpl"
+      else
+        "#{dir}/go/#{base}.tmpl"
+      end
     end
 
     # All settable properties in the resource.
     # Fingerprints aren't *really" settable properties, but they behave like one.
     # At Create, they have no value but they can just be read in anyways, and after a Read
-    # they will need ot be set in every Update.
+    # they will need to be set in every Update.
     def settable_properties
-      all_user_properties.reject { |v| v.output && !v.is_a?(Api::Type::Fingerprint) }
-                         .reject(&:url_param_only)
+      props = all_user_properties.reject do |v|
+        v.output && !v.is_a?(Api::Type::Fingerprint) && !v.is_a?(Api::Type::KeyValueEffectiveLabels)
+      end
+      props = props.reject(&:url_param_only)
+      props.reject do |v|
+        v.is_a?(Api::Type::KeyValueLabels) || v.is_a?(Api::Type::KeyValueAnnotations)
+      end
     end
 
     # Properties that will be returned in the API body
@@ -358,6 +440,10 @@ module Api
       end
     end
 
+    def sensitive_props
+      all_nested_properties(root_properties).select(&:sensitive)
+    end
+
     # Return the product-level async object, or the resource-specific one
     # if one exists.
     def async
@@ -365,6 +451,8 @@ module Api
 
       @async
     end
+
+    attr_writer :async
 
     # Return the resource-specific identity properties, or a best guess of the
     # `name` value for the resource.
@@ -377,16 +465,138 @@ module Api
       end
     end
 
-    def kind?
-      !@kind.nil?
+    def add_labels_related_fields(props, parent)
+      props.each do |p|
+        if p.is_a? Api::Type::KeyValueLabels
+          add_labels_fields(props, parent, p)
+        elsif p.is_a? Api::Type::KeyValueAnnotations
+          add_annotations_fields(props, parent, p)
+        elsif (p.is_a? Api::Type::NestedObject) && !p.all_properties.nil?
+          p.properties = add_labels_related_fields(p.all_properties, p)
+        end
+      end
+      props
     end
 
-    def encoder?
-      !@transport&.encoder.nil?
+    def add_labels_fields(props, parent, labels)
+      @custom_diff ||= []
+      if parent.nil? || parent.flatten_object
+        if @skip_attribution_label
+          @custom_diff.append('tpgresource.SetLabelsDiffWithoutAttributionLabel')
+        else
+          @custom_diff.append('tpgresource.SetLabelsDiff')
+        end
+      elsif parent.name == 'metadata'
+        @custom_diff.append('tpgresource.SetMetadataLabelsDiff')
+      end
+
+      props << build_terraform_labels_field('labels', parent, labels)
+      props << build_effective_labels_field('labels', labels)
+
+      # The effective_labels field is used to write to API, instead of the labels field.
+      labels.ignore_write = true
+      labels.description = "#{labels.description}\n\n#{get_labels_field_note(labels.name)}"
+      return unless parent.nil?
+
+      labels.immutable = false
     end
 
-    def decoder?
-      !@transport&.decoder.nil?
+    def add_annotations_fields(props, parent, annotations)
+      # The effective_annotations field is used to write to API,
+      # instead of the annotations field.
+      annotations.ignore_write = true
+      note = get_labels_field_note(annotations.name)
+      annotations.description = "#{annotations.description}\n\n#{note}"
+
+      @custom_diff ||= []
+      if parent.nil?
+        @custom_diff.append('tpgresource.SetAnnotationsDiff')
+      elsif parent.name == 'metadata'
+        @custom_diff.append('tpgresource.SetMetadataAnnotationsDiff')
+      end
+
+      props << build_effective_labels_field('annotations', annotations)
+    end
+
+    def build_effective_labels_field(name, labels)
+      description = "All of #{name} (key/value pairs)\
+ present on the resource in GCP, including the #{name} configured through Terraform,\
+ other clients and services."
+
+      Api::Type::KeyValueEffectiveLabels.new(
+        name: "effective#{name.capitalize}",
+        output: true,
+        api_name: name,
+        description:,
+        min_version: labels.field_min_version,
+        update_verb: labels.update_verb,
+        update_url: labels.update_url,
+        immutable: labels.immutable
+      )
+    end
+
+    def build_terraform_labels_field(name, parent, labels)
+      description = "The combination of #{name} configured directly on the resource
+ and default #{name} configured on the provider."
+
+      immutable = if parent.nil?
+                    false
+                  else
+                    labels.immutable
+                  end
+
+      Api::Type::KeyValueTerraformLabels.new(
+        name: "terraform#{name.capitalize}",
+        output: true,
+        api_name: name,
+        description:,
+        min_version: labels.field_min_version,
+        ignore_write: true,
+        update_url: labels.update_url,
+        immutable:
+      )
+    end
+
+    # Check if the resource has root "labels" field
+    def root_labels?
+      root_properties.each do |p|
+        return true if p.is_a? Api::Type::KeyValueLabels
+      end
+      false
+    end
+
+    # Return labels fields that should be added to ImportStateVerifyIgnore
+    def ignore_read_labels_fields(props)
+      fields = []
+      props.each do |p|
+        if (p.is_a? Api::Type::KeyValueLabels) ||
+           (p.is_a? Api::Type::KeyValueTerraformLabels) ||
+           (p.is_a? Api::Type::KeyValueAnnotations)
+          fields << p.terraform_lineage
+        elsif (p.is_a? Api::Type::NestedObject) && !p.all_properties.nil?
+          fields.concat(ignore_read_labels_fields(p.all_properties))
+        end
+      end
+      fields
+    end
+
+    # Return ignore_read fields that should be added to ImportStateVerifyIgnore
+    def ignore_read_fields(props)
+      fields = []
+      props.each do |p|
+        if p.ignore_read && !p.url_param_only && !p.is_a?(Api::Type::ResourceRef)
+          fields << p.terraform_lineage
+        elsif (p.is_a? Api::Type::NestedObject) && !p.all_properties.nil?
+          fields.concat(ignore_read_fields(p.all_properties))
+        end
+      end
+      fields
+    end
+
+    def get_labels_field_note(title)
+      "**Note**: This field is non-authoritative, and will only manage the #{title} present " \
+"in your configuration.
+Please refer to the field `effective_#{title}` for all of the #{title} present on the resource."
     end
 
     # ====================
@@ -450,20 +660,6 @@ module Api
       @base_url
     end
 
-    def async_operation_url
-      [@__product.base_url, async_operation_uri].flatten.join
-    end
-
-    def async_operation_uri
-      raise 'Not an async resource' if async.nil?
-
-      async.operation.base_url
-    end
-
-    def full_create_url
-      [@__product.base_url, create_uri].flatten.join
-    end
-
     def create_uri
       if @create_url.nil?
         if @create_verb.nil? || @create_verb == :POST
@@ -476,16 +672,58 @@ module Api
       end
     end
 
-    def full_delete_url
-      [@__product.base_url, delete_uri].flatten.join
-    end
-
     def delete_uri
       if @delete_url.nil?
         self_link_uri
       else
         @delete_url
       end
+    end
+
+    def resource_name
+      __product.name + name
+    end
+
+    # Filter the properties to keep only the ones don't have custom update
+    # method and group them by update url & verb.
+    def properties_without_custom_update(properties)
+      properties.select do |p|
+        p.update_url.nil? || p.update_verb.nil? || p.update_verb == :NOOP
+      end
+    end
+
+    def update_body_properties
+      update_prop = properties_without_custom_update(settable_properties)
+      update_prop = update_prop.reject(&:immutable) if update_verb == :PATCH
+      update_prop
+    end
+
+    # Handwritten TF Operation objects will be shaped like accessContextManager
+    # while the Google Go Client will have a name like accesscontextmanager
+    def client_name_pascal
+      client_name = __product.client_name || __product.name
+      client_name.camelize(:upper)
+    end
+
+    # In order of preference, use TF override,
+    # general defined timeouts, or default Timeouts
+    def timeouts
+      timeouts_filtered = @timeouts
+      timeouts_filtered ||= async&.operation&.timeouts
+      timeouts_filtered ||= Api::Timeouts.new
+      timeouts_filtered
+    end
+
+    def project?
+      base_url.include?('{{project}}') || create_url&.include?('{{project}}')
+    end
+
+    def region?
+      base_url.include?('{{region}}') && parameters.any? { |p| p.name == 'region' && p.ignore_read }
+    end
+
+    def zone?
+      base_url.include?('{{zone}}') && parameters.any? { |p| p.name == 'zone' && p.ignore_read }
     end
 
     def merge(other)
@@ -547,42 +785,6 @@ module Api
         raise "Missing property/parameter for identity #{i}" \
           if all_user_properties.select { |p| p.name == i }.empty?
       end
-    end
-
-    # Given an array of properties, return all ResourceRefs contained within
-    # Requires:
-    #   props- a list of props
-    #   original_object - the original object containing props. This is to
-    #                     avoid self-referencing objects.
-    def resourcerefs_for_properties(props, original_obj)
-      rrefs = []
-      props.each do |p|
-        # We need to recurse on ResourceRefs to get all levels
-        # We do not want to recurse on resourcerefs of type self to avoid
-        # infinite loop.
-        if p.is_a? Api::Type::ResourceRef
-          # We want to avoid a circular reference
-          # This reference may be the next reference or have some number of refs
-          # in between it.
-          next if p.resource_ref == original_obj
-          next if p.resource_ref == p.__resource
-
-          rrefs << p
-          rrefs.concat(resourcerefs_for_properties(p.resource_ref
-                                                    .required_properties,
-                                                   original_obj))
-        elsif !p.nested_properties.nil?
-          rrefs.concat(resourcerefs_for_properties(p.nested_properties, original_obj))
-        elsif p.is_a? Api::Type::Array
-          if p.item_type.is_a? Api::Type::ResourceRef
-            rrefs << p.item_type
-            rrefs.concat(resourcerefs_for_properties(p.item_type.resource_ref
-                                                      .required_properties,
-                                                     original_obj))
-          end
-        end
-      end
-      rrefs.uniq
     end
   end
 end

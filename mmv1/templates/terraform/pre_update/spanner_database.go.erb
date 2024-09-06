@@ -13,10 +13,13 @@
 	# limitations under the License.
 -%>
 
-if len(obj["statements"].([]string)) == 0 {
-	// Return early to avoid making an API call that errors,
-	// due to containing no DDL SQL statements
-	return resourceSpannerDatabaseRead(d, meta)
+if obj["statements"] != nil {
+	if len(obj["statements"].([]string)) == 0 {
+		// Return early to avoid making an API call that errors,
+		// due to containing no DDL SQL statements
+		d.Partial(false)
+		return resourceSpannerDatabaseRead(d, meta)
+	}
 }
 
 if resourceSpannerDBVirtualUpdate(d, ResourceSpannerDatabase().Schema) {

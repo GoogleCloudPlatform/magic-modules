@@ -31,7 +31,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -51,21 +51,27 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   iam_conditions_request_type: :QUERY_PARAM
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "machine_image_basic"
-    primary_resource_id: "image"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-my-image%s\", context[\"random_suffix\"])"
+    name: 'machine_image_basic'
+    primary_resource_id: 'image'
+    primary_resource_name:
+      'fmt.Sprintf("tf-test-my-image%s", context["random_suffix"])'
     vars:
-      vm_name: "my-vm"
-      image_name: "my-image"
+      vm_name: 'my-vm'
+      image_name: 'my-image'
   - !ruby/object:Provider::Terraform::Examples
-    name: "compute_machine_image_kms"
-    primary_resource_id: "image"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-my-image%s\", context[\"random_suffix\"])"
+    name: 'compute_machine_image_kms'
+    primary_resource_id: 'image'
+    primary_resource_name:
+      'fmt.Sprintf("tf-test-my-image%s", context["random_suffix"])'
     vars:
-      vm_name: "my-vm"
-      image_name: "my-image"
-      key_name: "key"
-      keyring_name: "keyring"
+      vm_name: 'my-vm'
+      image_name: 'my-image'
+      key_name: 'key'
+      keyring_name: 'keyring'
+    test_vars_overrides:
+      policyChanged:
+        'acctest.BootstrapPSARole(t, "service-", "compute-system",
+        "roles/cloudkms.cryptoKeyEncrypterDecrypter")'
 
 properties:
   - !ruby/object:Api::Type::String
@@ -77,11 +83,13 @@ properties:
     description: 'A text description of the resource.'
   - !ruby/object:Api::Type::ResourceRef
     name: sourceInstance
-    description: 'The source instance used to create the machine image. You can provide
+    description:
+      'The source instance used to create the machine image. You can provide
       this as a partial or full URL to the resource.'
     resource: 'Instance'
     imports: 'selfLink'
     required: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Array
     name: 'storageLocations'
     description: |
@@ -117,7 +125,7 @@ properties:
         name: 'kmsKeyName'
         description: |
           The name of the encryption key that is stored in Google Cloud KMS.
-        diff_suppress_func: compareCryptoKeyVersions
+        diff_suppress_func: tpgresource.CompareCryptoKeyVersions
       - !ruby/object:Api::Type::String
         name: 'kmsKeyServiceAccount'
         description: |

@@ -1,0 +1,77 @@
+[
+    {
+        "name": "//compute.googleapis.com/projects/{{.Provider.project}}/zones/us-central1-a/instances/my-compute-instance",
+        "asset_type": "compute.googleapis.com/Instance",
+        "resource": {
+            "version": "v1",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
+            "discovery_name": "Instance",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "advancedMachineFeatures": {
+                    "enableNestedVirtualization": true
+                },
+                "canIpForward": false,
+                "deletionProtection": false,
+                "disks": [
+                    {
+                        "autoDelete": true,
+                        "boot": true,
+                        "initializeParams": {
+                            "sourceImage": "projects/debian-cloud/global/images/debian-8-jessie-v20170523"
+                        },
+                        "mode": "READ_WRITE"
+                    },
+                    {
+                        "autoDelete": true,
+                        "initializeParams": {
+                            "diskType": "projects/{{.Provider.project}}/zones/us-central1-a/diskTypes/local-ssd"
+                        },
+                        "interface": "SCSI",
+                        "type": "SCRATCH"
+                    }
+                ],
+                "machineType": "projects/{{.Provider.project}}/zones/us-central1-a/machineTypes/n1-standard-1",
+                "metadata": {
+                    "items": [
+                        {
+                            "key": "startup-script",
+                            "value": "echo hi \u003e /test.txt"
+                        }
+                    ]
+                },
+                "name": "my-compute-instance",
+                "networkInterfaces": [
+                    {
+                        "accessConfigs": [
+                            {
+                                "type": "ONE_TO_ONE_NAT"
+                            }
+                        ],
+                        "network": "projects/{{.Provider.project}}/global/networks/default"
+                    }
+                ],
+                "scheduling": {
+                    "automaticRestart": true
+                },
+                "serviceAccounts": [
+                    {
+                        "email": "default",
+                        "scopes": [
+                            "https://www.googleapis.com/auth/cloud-platform"
+                        ]
+                    }
+                ],
+                "tags": {
+                    "items": [
+                        "bar",
+                        "foo"
+                    ]
+                },
+                "zone": "us-central1-a"
+            }
+        },
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+        "ancestors": ["organizations/{{.OrgID}}"]
+    }
+]

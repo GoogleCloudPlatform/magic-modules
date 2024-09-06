@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Resource
 name: 'EntityType'
-base_url: "{{parent}}/entityTypes"
+base_url: '{{parent}}/entityTypes'
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -34,13 +34,13 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_read: templates/terraform/pre_create/dialogflow_set_location.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "dialogflowcx_entity_type_full"
-    primary_resource_id: "basic_entity_type"
+    name: 'dialogflowcx_entity_type_full'
+    primary_resource_id: 'basic_entity_type'
     vars:
-      agent_name: "dialogflowcx-agent"
+      agent_name: 'dialogflowcx-agent'
 skip_sweeper: true
-id_format: "{{parent}}/entityTypes/{{name}}"
-import_format: ["{{parent}}/entityTypes/{{name}}"]
+id_format: '{{parent}}/entityTypes/{{name}}'
+import_format: ['{{parent}}/entityTypes/{{name}}']
 parameters:
   - !ruby/object:Api::Type::String
     name: parent

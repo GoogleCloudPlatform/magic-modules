@@ -20,7 +20,3 @@ versions:
     base_url: https://cloudtasks.googleapis.com/v2/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Cloud Tasks
-    url: https://console.cloud.google.com/apis/library/cloudtasks.googleapis.com/

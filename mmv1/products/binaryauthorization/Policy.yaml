@@ -23,26 +23,26 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/binary-authorization/docs/reference/rest/'
 create_verb: :PUT
 delete_verb: :PUT
-id_format: "projects/{{project}}"
-import_format: ["projects/{{project}}"]
+id_format: 'projects/{{project}}'
+import_format: ['projects/{{project}}']
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: 'templates/terraform/constants/binaryauthorization_policy.erb'
   pre_delete: 'templates/terraform/pre_delete/restore_default_binaryauthorization_policy.erb'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "binary_authorization_policy_basic"
-    primary_resource_id: "policy"
+    name: 'binary_authorization_policy_basic'
+    primary_resource_id: 'policy'
     skip_test: true
     vars:
-      attestor_name: "test-attestor"
-      note_name: "test-attestor-note"
+      attestor_name: 'test-attestor'
+      note_name: 'test-attestor-note'
   - !ruby/object:Provider::Terraform::Examples
-    name: "binary_authorization_policy_global_evaluation"
-    primary_resource_id: "policy"
+    name: 'binary_authorization_policy_global_evaluation'
+    primary_resource_id: 'policy'
     skip_test: true
     vars:
-      attestor_name: "test-attestor"
-      note_name: "test-attestor-note"
+      attestor_name: 'test-attestor'
+      note_name: 'test-attestor-note'
 properties:
   - !ruby/object:Api::Type::String
     name: description
@@ -87,6 +87,31 @@ properties:
       A location is either a compute zone (e.g. `us-central1-a`) or a region
       (e.g. `us-central1`).
     key_name: cluster
+    is_set: true
+    set_hash_func: |-
+      func(v interface{}) int {
+        // require_attestations_by is a set of strings that can have the format
+        // projects/{project}/attestors/{attestor} or {attestor}. We diffsuppress
+        // and hash that set on the name, but now we need to make sure that the
+        // overall hash here respects that so changing the attestor format doesn't
+        // change the hash code of cluster_admission_rules.
+        raw := v.(map[string]interface{})
+
+        // modifying raw actually modifies the values passed to the provider.
+        // Use a copy to avoid that.
+        copy := make((map[string]interface{}))
+        for key, value := range raw {
+          copy[key] = value
+        }
+        at := copy["require_attestations_by"].(*schema.Set)
+        if at != nil {
+          t := tpgresource.ConvertAndMapStringArr(at.List(), tpgresource.GetResourceNameFromSelfLink)
+          copy["require_attestations_by"] = schema.NewSet(tpgresource.SelfLinkNameHash, tpgresource.ConvertStringArrToInterface(t))
+        }
+        var buf bytes.Buffer
+        schema.SerializeResourceForHash(&buf, copy, ResourceBinaryAuthorizationPolicy().Schema["cluster_admission_rules"].Elem.(*schema.Resource))
+        return tpgresource.Hashcode(buf.String())
+      }
     value_type: !ruby/object:Api::Type::NestedObject
       name: clusterAdmissionRule
       properties:
@@ -111,9 +136,9 @@ properties:
             Note: this field must be non-empty when the evaluation_mode field
             specifies REQUIRE_ATTESTATION, otherwise it must be empty.
           is_set: true
-          set_hash_func: selfLinkNameHash
+          set_hash_func: tpgresource.SelfLinkNameHash
           custom_expand: 'templates/terraform/custom_expand/binaryauthorization_attestors.erb'
-          diff_suppress_func: 'compareSelfLinkOrResourceName'
+          diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
           item_type: Api::Type::String
         - !ruby/object:Api::Type::Enum
           name: enforcementMode
@@ -123,31 +148,6 @@ properties:
           values:
             - :ENFORCED_BLOCK_AND_AUDIT_LOG
             - :DRYRUN_AUDIT_LOG_ONLY
-    is_set: true
-    set_hash_func: |-
-      func(v interface{}) int {
-        // require_attestations_by is a set of strings that can have the format
-        // projects/{project}/attestors/{attestor} or {attestor}. We diffsuppress
-        // and hash that set on the name, but now we need to make sure that the
-        // overall hash here respects that so changing the attestor format doesn't
-        // change the hash code of cluster_admission_rules.
-        raw := v.(map[string]interface{})
-
-        // modifying raw actually modifies the values passed to the provider.
-        // Use a copy to avoid that.
-        copy := make((map[string]interface{}))
-        for key, value := range raw {
-          copy[key] = value
-        }
-        at := copy["require_attestations_by"].(*schema.Set)
-        if at != nil {
-          t := convertAndMapStringArr(at.List(), GetResourceNameFromSelfLink)
-          copy["require_attestations_by"] = schema.NewSet(selfLinkNameHash, convertStringArrToInterface(t))
-        }
-        var buf bytes.Buffer
-        schema.SerializeResourceForHash(&buf, copy, ResourceBinaryAuthorizationPolicy().Schema["cluster_admission_rules"].Elem.(*schema.Resource))
-        return hashcode(buf.String())
-      }
   - !ruby/object:Api::Type::NestedObject
     name: defaultAdmissionRule
     description: |
@@ -176,9 +176,9 @@ properties:
           Note: this field must be non-empty when the evaluation_mode field
           specifies REQUIRE_ATTESTATION, otherwise it must be empty.
         is_set: true
-        set_hash_func: selfLinkNameHash
+        set_hash_func: tpgresource.SelfLinkNameHash
         custom_expand: 'templates/terraform/custom_expand/binaryauthorization_attestors.erb'
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
         item_type: Api::Type::String
       - !ruby/object:Api::Type::Enum
         name: enforcementMode
@@ -188,4 +188,3 @@ properties:
         values:
           - :ENFORCED_BLOCK_AND_AUDIT_LOG
           - :DRYRUN_AUDIT_LOG_ONLY
-

@@ -32,7 +32,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -48,32 +48,33 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "autoscaler_single_instance"
-    primary_resource_id: "default"
+    name: 'autoscaler_single_instance'
+    primary_resource_id: 'default'
     min_version: 'beta'
     vars:
-      autoscaler_name: "my-autoscaler"
-      instance_template_name: "my-instance-template"
-      target_pool_name: "my-target-pool"
-      igm_name: "my-igm"
-          # Add test_vars_overrides and oics_vars_overrides to fix the failing test,
-          # which is caused by upgradting terraform-plugin-sdk to 2.24.0.
-      provider_name: "google-beta"
-      provider_alias: ""
+      autoscaler_name: 'my-autoscaler'
+      instance_template_name: 'my-instance-template'
+      target_pool_name: 'my-target-pool'
+      igm_name:
+        'my-igm'
+        # Add test_vars_overrides and oics_vars_overrides to fix the failing test,
+        # which is caused by upgradting terraform-plugin-sdk to 2.24.0.
+      provider_name: 'google-beta'
+      provider_alias: ''
     test_vars_overrides:
       provider_name: '"google-beta.us-central1"'
       provider_alias: '"alias  = \"us-central1\""'
     oics_vars_overrides:
-      provider_name: "google-beta"
-      provider_alias: ""
+      provider_name: 'google-beta'
+      provider_alias: ''
   - !ruby/object:Provider::Terraform::Examples
-    name: "autoscaler_basic"
-    primary_resource_id: "foobar"
+    name: 'autoscaler_basic'
+    primary_resource_id: 'foobar'
     vars:
-      autoscaler_name: "my-autoscaler"
-      instance_template_name: "my-instance-template"
-      target_pool_name: "my-target-pool"
-      igm_name: "my-igm"
+      autoscaler_name: 'my-autoscaler'
+      instance_template_name: 'my-instance-template'
+      target_pool_name: 'my-target-pool'
+      igm_name: 'my-igm'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'zone'
@@ -83,13 +84,10 @@ parameters:
       URL of the zone where the instance group resides.
     required: false
     immutable: true
+    ignore_read: true
     default_from_api: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'Unique identifier for the resource.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
     description: 'Creation timestamp in RFC3339 text format.'
@@ -105,7 +103,7 @@ properties:
     required: true
     immutable: true
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateGCEName'
+      function: 'verify.ValidateGCEName'
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
@@ -139,6 +137,7 @@ properties:
           to. This is required when creating or updating an autoscaler. The
           maximum number of replicas should not be lower than minimal number
           of replicas.
+        send_empty_value: true
         required: true
       - !ruby/object:Api::Type::Integer
         name: 'cooldownPeriod'
@@ -155,15 +154,11 @@ properties:
           instance may take to initialize. To do this, create an instance
           and time the startup process.
         default_value: 60
-      - !ruby/object:Api::Type::Enum
+      - !ruby/object:Api::Type::String
         name: 'mode'
-        default_value: :ON
+        default_value: 'ON'
         description: |
           Defines operating mode for this policy.
-        values:
-          - :OFF
-          - :ONLY_UP
-          - :ON
       - !ruby/object:Api::Type::NestedObject
         name: 'scaleDownControl'
         min_version: beta
@@ -370,6 +365,7 @@ properties:
                 TimeSeries are returned upon the query execution, the autoscaler
                 will sum their respective values to obtain its scaling value.
               min_version: beta
+              default_value: 'resource.type = gce_instance'
       - !ruby/object:Api::Type::NestedObject
         name: 'loadBalancingUtilization'
         description: |

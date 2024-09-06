@@ -32,7 +32,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -48,13 +48,13 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_autoscaler_basic"
-    primary_resource_id: "foobar"
+    name: 'region_autoscaler_basic'
+    primary_resource_id: 'foobar'
     vars:
-      region_autoscaler_name: "my-region-autoscaler"
-      instance_template_name: "my-instance-template"
-      target_pool_name: "my-target-pool"
-      rigm_name: "my-region-igm"
+      region_autoscaler_name: 'my-region-autoscaler'
+      instance_template_name: 'my-instance-template'
+      target_pool_name: 'my-target-pool'
+      rigm_name: 'my-region-igm'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
@@ -65,12 +65,9 @@ parameters:
     required: false
     immutable: true
     default_from_api: true
+    ignore_read: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'Unique identifier for the resource.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
     description: 'Creation timestamp in RFC3339 text format.'
@@ -86,7 +83,7 @@ properties:
     required: true
     immutable: true
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateGCEName'
+      function: 'verify.ValidateGCEName'
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
@@ -120,6 +117,7 @@ properties:
           to. This is required when creating or updating an autoscaler. The
           maximum number of replicas should not be lower than minimal number
           of replicas.
+        send_empty_value: true
         required: true
       - !ruby/object:Api::Type::Integer
         name: 'cooldownPeriod'
@@ -136,15 +134,11 @@ properties:
           instance may take to initialize. To do this, create an instance
           and time the startup process.
         default_value: 60
-      - !ruby/object:Api::Type::Enum
+      - !ruby/object:Api::Type::String
         name: 'mode'
-        default_value: :ON
+        default_value: 'ON'
         description: |
           Defines operating mode for this policy.
-        values:
-          - :OFF
-          - :ONLY_UP
-          - :ON
       - !ruby/object:Api::Type::NestedObject
         name: 'scaleDownControl'
         min_version: beta
@@ -272,7 +266,6 @@ properties:
               required: true
             - !ruby/object:Api::Type::Double
               name: 'singleInstanceAssignment'
-              min_version: beta
               description: |
                 If scaling is based on a per-group metric value that represents the
                 total amount of work to be done or resource usage, set this value to
@@ -348,7 +341,6 @@ properties:
                 (if you are using gce_instance resource type). If multiple
                 TimeSeries are returned upon the query execution, the autoscaler
                 will sum their respective values to obtain its scaling value.
-              min_version: beta
       - !ruby/object:Api::Type::NestedObject
         name: 'loadBalancingUtilization'
         description: |
@@ -410,4 +402,4 @@ properties:
     description: |
       URL of the managed instance group that this autoscaler will scale.
     required: true
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'

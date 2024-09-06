@@ -13,9 +13,9 @@
 
 --- !ruby/object:Api::Resource
 name: OrganizationFeed
-base_url: "organizations/{{org_id}}/feeds"
-create_url: "organizations/{{org_id}}/feeds?feedId={{feed_id}}"
-self_link: "{{name}}"
+base_url: 'organizations/{{org_id}}/feeds'
+create_url: 'organizations/{{org_id}}/feeds?feedId={{feed_id}}'
+self_link: '{{name}}'
 update_verb: :PATCH
 update_mask: true
 collection_url_key: 'feeds'
@@ -33,10 +33,10 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/cloud_asset_feed.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloud_asset_organization_feed"
-    primary_resource_id: "organization_feed"
+    name: 'cloud_asset_organization_feed'
+    primary_resource_id: 'organization_feed'
     vars:
-      feed_id: "network-updates"
+      feed_id: 'network-updates'
     test_env_vars:
       project: :PROJECT_NAME
       org_id: :ORG_ID
@@ -56,7 +56,7 @@ properties:
     url_param_only: true
     description: |
       The project whose identity will be used when sending messages to the
-      destination pubsub topic. It also specifies the project for API 
+      destination pubsub topic. It also specifies the project for API
       enablement check, quota, and billing.
   - !ruby/object:Api::Type::String
     name: name
@@ -74,7 +74,7 @@ properties:
     name: assetNames
     item_type: Api::Type::String
     description: |
-      A list of the full names of the assets to receive updates. You must specify either or both of 
+      A list of the full names of the assets to receive updates. You must specify either or both of
       assetNames and assetTypes. Only asset updates matching specified assetNames and assetTypes are
       exported to the feed. For example: //compute.googleapis.com/projects/my_project_123/zones/zone1/instances/instance1.
       See https://cloud.google.com/apis/design/resourceNames#fullResourceName for more info.
@@ -96,6 +96,7 @@ properties:
       - :RESOURCE
       - :IAM_POLICY
       - :ORG_POLICY
+      - :OS_INVENTORY
       - :ACCESS_POLICY
   - !ruby/object:Api::Type::NestedObject
     name: feedOutputConfig
@@ -141,6 +142,5 @@ properties:
       - !ruby/object:Api::Type::String
         name: location
         description: |
-          String indicating the location of the expression for error reporting, e.g. a file 
+          String indicating the location of the expression for error reporting, e.g. a file
           name and a position in the file.
-

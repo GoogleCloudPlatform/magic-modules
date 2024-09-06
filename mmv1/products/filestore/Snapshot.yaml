@@ -25,22 +25,21 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/filestore/docs/snapshots'
     'Creating Snapshots': 'https://cloud.google.com/filestore/docs/create-snapshots'
   api: 'https://cloud.google.com/filestore/docs/reference/rest/v1/projects.locations.instances.snapshots'
-mutex: "filestore/{{project}}"
-error_retry_predicates: ["isNotFilestoreQuotaError"]
+mutex: 'filestore/{{project}}'
+error_abort_predicates: ['transport_tpg.Is429QuotaError']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "filestore_snapshot_basic"
-    primary_resource_id: "snapshot"
+    name: 'filestore_snapshot_basic'
+    primary_resource_id: 'snapshot'
     vars:
-      snapshot_name: "test-snapshot"
-      instance_name: "test-instance-for-snapshot"
+      snapshot_name: 'test-snapshot'
+      instance_name: 'test-instance-for-snapshot'
   - !ruby/object:Provider::Terraform::Examples
-    name: "filestore_snapshot_full"
-    primary_resource_id: "snapshot"
+    name: 'filestore_snapshot_full'
+    primary_resource_id: 'snapshot'
     vars:
-      snapshot_name: "test-snapshot"
-      instance_name: "test-instance-for-snapshot"
-
+      snapshot_name: 'test-snapshot'
+      instance_name: 'test-instance-for-snapshot'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -71,7 +70,6 @@ properties:
     required: true
     immutable: true
     url_param_only: true
-    pattern: projects/{{project}}/locations/{{location}}/instances/{{instance}}/snapshots/{{name}}
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
@@ -90,7 +88,7 @@ properties:
     description: |
       The time when the snapshot was created in RFC3339 text format.
     output: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Resource labels to represent user-provided metadata.

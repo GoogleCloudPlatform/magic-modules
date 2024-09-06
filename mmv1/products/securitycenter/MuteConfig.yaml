@@ -27,13 +27,15 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v1/organizations.muteConfigs'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "scc_mute_config"
-    primary_resource_id: "default"
+    name: 'scc_mute_config'
+    primary_resource_id: 'default'
     vars:
-      mute_config_id: "my-config"
+      mute_config_id: 'my-config'
     test_env_vars:
       org_id: :ORG_ID
-import_format: ["{{name}}"]
+# Skipping sweeper since this is a child resource
+skip_sweeper: true
+import_format: ['{{name}}']
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/scc_mute_config.go.erb
 parameters:
@@ -94,4 +96,3 @@ properties:
       field is set by the server and will be ignored if provided on
       config creation or update.
     output: true
-

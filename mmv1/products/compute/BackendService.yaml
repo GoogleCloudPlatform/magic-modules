@@ -32,7 +32,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -48,62 +48,74 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_service_basic"
-    primary_resource_id: "default"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-backend-service%s\", context[\"\
+    name: 'backend_service_basic'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-backend-service%s\",
+      context[\"\
       random_suffix\"])"
     vars:
-      backend_service_name: "backend-service"
-      http_health_check_name: "health-check"
+      backend_service_name: 'backend-service'
+      http_health_check_name: 'health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_service_cache_simple"
-    primary_resource_id: "default"
+    name: 'backend_service_external_iap'
+    primary_resource_id: 'default'
     vars:
-      backend_service_name: "backend-service"
-      http_health_check_name: "health-check"
+      backend_service_name: 'tf-test-backend-service-external'
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_service_cache_include_http_headers"
-    primary_resource_id: "default"
+    name: 'backend_service_cache_simple'
+    primary_resource_id: 'default'
     vars:
-      backend_service_name: "backend-service"
+      backend_service_name: 'backend-service'
+      http_health_check_name: 'health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_service_cache_include_named_cookies"
-    primary_resource_id: "default"
+    name: 'backend_service_cache_include_http_headers'
+    primary_resource_id: 'default'
     vars:
-      backend_service_name: "backend-service"
+      backend_service_name: 'backend-service'
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_service_cache"
-    primary_resource_id: "default"
+    name: 'backend_service_cache_include_named_cookies'
+    primary_resource_id: 'default'
     vars:
-      backend_service_name: "backend-service"
-      http_health_check_name: "health-check"
+      backend_service_name: 'backend-service'
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_service_traffic_director_round_robin"
+    name: 'backend_service_cache'
+    primary_resource_id: 'default'
+    vars:
+      backend_service_name: 'backend-service'
+      http_health_check_name: 'health-check'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'backend_service_cache_bypass_cache_on_request_headers'
+    primary_resource_id: 'default'
+    vars:
+      backend_service_name: 'backend-service'
+      http_health_check_name: 'health-check'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'backend_service_traffic_director_round_robin'
     min_version: beta
-    primary_resource_id: "default"
+    primary_resource_id: 'default'
     vars:
-      backend_service_name: "backend-service"
-      health_check_name: "health-check"
+      backend_service_name: 'backend-service'
+      health_check_name: 'health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_service_traffic_director_ring_hash"
+    name: 'backend_service_traffic_director_ring_hash'
     min_version: beta
-    primary_resource_id: "default"
+    primary_resource_id: 'default'
     vars:
-      backend_service_name: "backend-service"
-      health_check_name: "health-check"
+      backend_service_name: 'backend-service'
+      health_check_name: 'health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_service_network_endpoint"
+    name: 'backend_service_network_endpoint'
     min_version: beta
-    primary_resource_id: "default"
+    primary_resource_id: 'default'
     vars:
-      backend_service_name: "backend-service"
-      neg_name: "network-endpoint"
+      backend_service_name: 'backend-service'
+      neg_name: 'network-endpoint'
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_service_external_managed"
-    primary_resource_id: "default"
+    name: 'backend_service_external_managed'
+    primary_resource_id: 'default'
     vars:
-      backend_service_name: "backend-service"
-      health_check_name: "health-check"
+      backend_service_name: 'backend-service'
+      health_check_name: 'health-check'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: '/'
   fetch_iam_policy_verb: :GET
@@ -117,7 +129,7 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   decoder: 'templates/terraform/decoders/backend_service.go.erb'
   post_create: 'templates/terraform/post_create/compute_backend_service_security_policy.go.erb'
   post_update: 'templates/terraform/post_create/compute_backend_service_security_policy.go.erb'
-  resource_definition: 'templates/terraform/resource_definition/backend_service.go.erb'
+schema_version: 1
 properties:
   - !ruby/object:Api::Type::Integer
     name: 'affinityCookieTtlSec'
@@ -192,7 +204,7 @@ properties:
             partial URL.
           required: true
           custom_flatten: templates/terraform/custom_flatten/guard_self_link.go.erb
-          diff_suppress_func: 'compareSelfLinkRelativePaths'
+          diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
         - !ruby/object:Api::Type::Integer
           name: 'maxConnections'
           default_from_api: true
@@ -646,6 +658,18 @@ properties:
         description: |
           Serve existing content from the cache (if available) when revalidating content with the origin, or when an error is encountered when refreshing the cache.
         default_from_api: true
+      - !ruby/object:Api::Type::Array
+        name: 'bypassCacheOnRequestHeaders'
+        description: |
+          Bypass the cache when the specified request headers are matched - e.g. Pragma or Authorization headers. Up to 5 headers can be specified.
+          The cache is bypassed for all cdnPolicy.cacheMode settings.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'headerName'
+              required: true
+              description: |
+                The header field name to match on when bypassing cache. Values are case-insensitive.
   - !ruby/object:Api::Type::NestedObject
     name: 'connectionDraining'
     description: |
@@ -706,14 +730,15 @@ properties:
 
       For internal load balancing, a URL to a HealthCheck resource must be specified instead.
     is_set: true
-    set_hash_func: 'selfLinkRelativePathHash'
+    set_hash_func: 'tpgresource.SelfLinkRelativePathHash'
     custom_flatten: templates/terraform/custom_flatten/guard_self_link_array.go.erb
     item_type: Api::Type::String
   - !ruby/object:Api::Type::Integer
     name: 'generated_id'
     api_name: 'id'
-    description: 'The unique identifier for the resource. This identifier is defined
-      by the server.'
+    description:
+      'The unique identifier for the resource. This identifier is defined by the
+      server.'
     output: true
   - !ruby/object:Api::Type::NestedObject
     name: 'iap'
@@ -722,22 +747,19 @@ properties:
     properties:
       - !ruby/object:Api::Type::Boolean
         name: 'enabled'
-        description: Enables IAP.
-        exclude: true
+        required: true
+        description: Whether the serving infrastructure will authenticate and authorize all incoming requests.
       - !ruby/object:Api::Type::String
         name: 'oauth2ClientId'
-        required: true
         description: |
           OAuth2 Client ID for IAP
       - !ruby/object:Api::Type::String
         name: 'oauth2ClientSecret'
-        required: true
         description: |
           OAuth2 Client Secret for IAP
         send_empty_value: true
         ignore_read: true
         sensitive: true
-        custom_flatten: templates/terraform/custom_flatten/compute_backend_service_iap_oauth2_client_secret.go.erb
       - !ruby/object:Api::Type::String
         name: 'oauth2ClientSecretSha256'
         output: true
@@ -759,6 +781,7 @@ properties:
     values:
       - :EXTERNAL
       - :INTERNAL_SELF_MANAGED
+      - :INTERNAL_MANAGED
       - :EXTERNAL_MANAGED
   - !ruby/object:Api::Type::Enum
     name: 'localityLbPolicy'
@@ -811,7 +834,6 @@ properties:
                            UNAVAILABLE_WEIGHT. Otherwise, Load Balancing remains
                            equal-weight.
 
-
       This field is applicable to either:
 
       * A regional backend service with the service_protocol set to HTTP, HTTPS, or HTTP2,
@@ -820,7 +842,6 @@ properties:
       * A regional backend service with loadBalancingScheme set to EXTERNAL (External Network
         Load Balancing). Only MAGLEV and WEIGHTED_MAGLEV values are possible for External
         Network Load Balancing. The default is MAGLEV.
-
 
       If session_affinity is not NONE, and this field is not set to MAGLEV, WEIGHTED_MAGLEV,
       or RING_HASH, session affinity settings will not take effect.
@@ -924,7 +945,7 @@ properties:
               name: 'data'
               description: |
                 An optional, arbitrary JSON object with configuration data, understood
-                by a locally installed custom policy implementation.          
+                by a locally installed custom policy implementation.
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
@@ -941,8 +962,8 @@ properties:
     name: 'outlierDetection'
     description: |
       Settings controlling eviction of unhealthy hosts from the load balancing pool.
-      This field is applicable only when the load_balancing_scheme is set
-      to INTERNAL_SELF_MANAGED.
+      Applicable backend service types can be a global backend service with the
+      loadBalancingScheme set to INTERNAL_SELF_MANAGED or EXTERNAL_MANAGED.
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'baseEjectionTime'
@@ -989,7 +1010,6 @@ properties:
           - outlier_detection.0.success_rate_minimum_hosts
           - outlier_detection.0.success_rate_request_volume
           - outlier_detection.0.success_rate_stdev_factor
-        default_value: 5
         description: |
           Number of errors before a host is ejected from the connection pool. When the
           backend host is accessed over HTTP, a 5xx return code qualifies as an error.
@@ -1008,7 +1028,6 @@ properties:
           - outlier_detection.0.success_rate_minimum_hosts
           - outlier_detection.0.success_rate_request_volume
           - outlier_detection.0.success_rate_stdev_factor
-        default_value: 5
         description: |
           The number of consecutive gateway failures (502, 503, 504 status or connection
           errors that are mapped to one of those status codes) before a consecutive
@@ -1027,7 +1046,6 @@ properties:
           - outlier_detection.0.success_rate_minimum_hosts
           - outlier_detection.0.success_rate_request_volume
           - outlier_detection.0.success_rate_stdev_factor
-        default_value: 100
         description: |
           The percentage chance that a host will be actually ejected when an outlier
           status is detected through consecutive 5xx. This setting can be used to disable
@@ -1046,7 +1064,6 @@ properties:
           - outlier_detection.0.success_rate_minimum_hosts
           - outlier_detection.0.success_rate_request_volume
           - outlier_detection.0.success_rate_stdev_factor
-        default_value: 0
         description: |
           The percentage chance that a host will be actually ejected when an outlier
           status is detected through consecutive gateway failures. This setting can be
@@ -1065,7 +1082,6 @@ properties:
           - outlier_detection.0.success_rate_minimum_hosts
           - outlier_detection.0.success_rate_request_volume
           - outlier_detection.0.success_rate_stdev_factor
-        default_value: 100
         description: |
           The percentage chance that a host will be actually ejected when an outlier
           status is detected through success rate statistics. This setting can be used to
@@ -1114,7 +1130,6 @@ properties:
           - outlier_detection.0.success_rate_minimum_hosts
           - outlier_detection.0.success_rate_request_volume
           - outlier_detection.0.success_rate_stdev_factor
-        default_value: 10
         description: |
           Maximum percentage of hosts in the load balancing pool for the backend service
           that can be ejected. Defaults to 10%.
@@ -1132,7 +1147,6 @@ properties:
           - outlier_detection.0.success_rate_minimum_hosts
           - outlier_detection.0.success_rate_request_volume
           - outlier_detection.0.success_rate_stdev_factor
-        default_value: 5
         description: |
           The number of hosts in a cluster that must have enough request volume to detect
           success rate outliers. If the number of hosts is less than this setting, outlier
@@ -1152,7 +1166,6 @@ properties:
           - outlier_detection.0.success_rate_minimum_hosts
           - outlier_detection.0.success_rate_request_volume
           - outlier_detection.0.success_rate_stdev_factor
-        default_value: 100
         description: |
           The minimum number of total requests that must be collected in one interval (as
           defined by the interval duration above) to include this host in success rate
@@ -1173,7 +1186,6 @@ properties:
           - outlier_detection.0.success_rate_minimum_hosts
           - outlier_detection.0.success_rate_request_volume
           - outlier_detection.0.success_rate_stdev_factor
-        default_value: 1900
         description: |
           This factor is used to determine the ejection threshold for success rate outlier
           ejection. The ejection threshold is the difference between the mean success
@@ -1194,7 +1206,9 @@ properties:
     description: |
       The protocol this BackendService uses to communicate with backends.
       The default is HTTP. **NOTE**: HTTP2 is only valid for beta HTTP/2 load balancer
-      types and may result in errors if used with the GA API.
+      types and may result in errors if used with the GA API. **NOTE**: With protocol “UNSPECIFIED”,
+      the backend service can be used by Layer 4 Internal Load Balancing or Network Load Balancing
+      with TCP/UDP/L3_DEFAULT Forwarding Rule protocol.
     values:
       - :HTTP
       - :HTTPS
@@ -1202,18 +1216,19 @@ properties:
       - :TCP
       - :SSL
       - :GRPC
-  # TODO: make a ResourceRef to Security Policy
+      - :UNSPECIFIED
+    # TODO: make a ResourceRef to Security Policy
     default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'securityPolicy'
     description: |
       The security policy associated with this backend service.
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::String
     name: 'edgeSecurityPolicy'
     description: |
       The resource URL for the edge security policy associated with this backend service.
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::NestedObject
     name: 'securitySettings'
     description: |
@@ -1224,21 +1239,47 @@ properties:
     properties:
       - !ruby/object:Api::Type::ResourceRef
         name: 'clientTlsPolicy'
-        resource: 'Region' # TODO: 'Region' is incorrect and should be 'ClientTlsPolicy'
+        resource: 'ClientTlsPolicy'
         imports: 'name'
         description: |
           ClientTlsPolicy is a resource that specifies how a client should authenticate
           connections to backends of a service. This resource itself does not affect
           configuration unless it is attached to a backend service resource.
-        required: true
+        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
       - !ruby/object:Api::Type::Array
         name: 'subjectAltNames'
         description: |
           A list of alternate names to verify the subject identity in the certificate.
           If specified, the client will verify that the server certificate's subject
           alt name matches one of the specified values.
-        required: true
         item_type: Api::Type::String
+      - !ruby/object:Api::Type::NestedObject
+        name: 'awsV4Authentication'
+        description: |
+          The configuration needed to generate a signature for access to private storage buckets that support AWS's Signature Version 4 for authentication.
+          Allowed only for INTERNET_IP_PORT and INTERNET_FQDN_PORT NEG backends.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'accessKeyId'
+            description: |
+              The identifier of an access key used for s3 bucket authentication.
+          - !ruby/object:Api::Type::String
+            name: 'accessKey'
+            ignore_read: true
+            sensitive: true
+            send_empty_value: true
+            description: |
+              The access key used for s3 bucket authentication.
+              Required for updating or creating a backend that uses AWS v4 signature authentication, but will not be returned as part of the configuration when queried with a REST API GET request.
+          - !ruby/object:Api::Type::String
+            name: 'accessKeyVersion'
+            description: |
+              The optional version identifier for the access key. You can use this to keep track of different iterations of your access key.
+          - !ruby/object:Api::Type::String
+            name: 'originRegion'
+            description: |
+              The name of the cloud region of your origin. This is a free-form field with the name of the region your cloud uses to host your origin.
+              For example, "us-east-1" for AWS or "us-ashburn-1" for OCI.
   - !ruby/object:Api::Type::Enum
     name: 'sessionAffinity'
     description: |
@@ -1256,8 +1297,10 @@ properties:
   - !ruby/object:Api::Type::Integer
     name: 'timeoutSec'
     description: |
-      How many seconds to wait for the backend before considering it a
-      failed request. Default is 30 seconds. Valid range is [1, 86400].
+      The backend service timeout has a different meaning depending on the type of load balancer.
+      For more information see, [Backend service settings](https://cloud.google.com/compute/docs/reference/rest/v1/backendServices).
+      The default is 30 seconds.
+      The full range of timeout values allowed goes from 1 through 2,147,483,647 seconds.
     default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: 'logConfig'
@@ -1284,4 +1327,10 @@ properties:
           the field must be in [0, 1]. This configures the sampling rate of requests to the load balancer
           where 1.0 means all logged requests are reported and 0.0 means no logged requests are reported.
           The default value is 1.0.
+        default_value: 1.0
         diff_suppress_func: 'suppressWhenDisabled'
+  - !ruby/object:Api::Type::String
+    name: 'serviceLbPolicy'
+    description: |
+      URL to networkservices.ServiceLbPolicy resource.
+      Can only be set if load balancing scheme is EXTERNAL, EXTERNAL_MANAGED, INTERNAL_MANAGED or INTERNAL_SELF_MANAGED and the scope is global.

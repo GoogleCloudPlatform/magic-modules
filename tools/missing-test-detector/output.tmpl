@@ -1,9 +1,0 @@
-## Missing test report
-Your PR includes resource fields which are not covered by any test.
-{{ range $resourceName, $missingTestInfo := . }}
-Resource: `{{ $resourceName }}` ({{ len $missingTestInfo.Tests }} total tests)
-{{- if $missingTestInfo.UntestedFields }}
-Untested fields: {{ join (backTickAll $missingTestInfo.UntestedFields) ", " }}
-{{ end }}
-Please add acceptance tests which include these fields.
-{{- end }}

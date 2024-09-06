@@ -1,6 +1,6 @@
 
 resource "google_secret_manager_secret" "webhook_trigger_secret_key" {
-  secret_id = "webhook_trigger-secret-key-1"
+  secret_id = "<%= ctx[:vars]['secret_id'] %>"
 
   replication {
     user_managed {
@@ -36,7 +36,7 @@ resource "google_secret_manager_secret_iam_policy" "policy" {
 
 
 resource "google_cloudbuild_trigger" "<%= ctx[:primary_resource_id] %>" {
-  name        = "webhook-trigger"
+  name        = "<%= ctx[:vars]['cloudbuild_trigger_name'] %>"
   description = "acceptance test example webhook build trigger"
  
  webhook_config {

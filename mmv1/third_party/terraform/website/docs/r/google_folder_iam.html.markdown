@@ -21,7 +21,7 @@ Four different resources help you manage your IAM policy for a folder. Each of t
 ~> **Note:** The underlying API method `projects.setIamPolicy` has constraints which are documented [here](https://cloud.google.com/resource-manager/reference/rest/v1/projects/setIamPolicy). In addition to these constraints, 
    IAM Conditions cannot be used with Basic Roles such as Owner. Violating these constraints will result in the API returning a 400 error code so please review these if you encounter errors with this resource.
 
-## google\_folder\_iam\_policy
+## google_folder_iam_policy
 
 !> **Be careful!** You can accidentally lock yourself out of your folder
    using this resource. Deleting a `google_folder_iam_policy` removes access
@@ -73,7 +73,7 @@ data "google_iam_policy" "admin" {
 }
 ```
 
-## google\_folder\_iam\_binding
+## google_folder_iam_binding
 
 ```hcl
 resource "google_folder_iam_binding" "folder" {
@@ -105,7 +105,7 @@ resource "google_folder_iam_binding" "folder" {
 }
 ```
 
-## google\_folder\_iam\_member
+## google_folder_iam_member
 
 ```hcl
 resource "google_folder_iam_member" "folder" {
@@ -131,7 +131,7 @@ resource "google_folder_iam_member" "folder" {
 }
 ```
 
-## google\_folder\_iam\_audit\_config
+## google_folder_iam_audit_config
 
 ```hcl
 resource "google_folder_iam_audit_config" "folder" {
@@ -153,14 +153,14 @@ resource "google_folder_iam_audit_config" "folder" {
 
 The following arguments are supported:
 
-* `member/members` - (Required except for google\_folder\_iam\_audit\_config) Identities that will be granted the privilege in `role`.
+* `member/members` - (Required except for google_folder_iam_audit_config) Identities that will be granted the privilege in `role`.
   Each entry can have one of the following values:
   * **user:{emailid}**: An email address that represents a specific Google account. For example, alice@gmail.com or joe@example.com.
   * **serviceAccount:{emailid}**: An email address that represents a service account. For example, my-other-app@appspot.gserviceaccount.com.
   * **group:{emailid}**: An email address that represents a Google group. For example, admins@example.com.
   * **domain:{domain}**: A G Suite domain (primary, instead of alias) name that represents all the users of that domain. For example, google.com or example.com.
 
-* `role` - (Required except for google\_folder\_iam\_audit\_config) The role that should be applied. Only one
+* `role` - (Required except for google_folder_iam_audit_config) The role that should be applied. Only one
     `google_folder_iam_binding` can be used per role. Note that custom roles must be of the format
     `organizations/{{org_id}}/roles/{{role_id}}`.
 
@@ -175,9 +175,9 @@ The following arguments are supported:
 
 * `folder` - (Required) The resource name of the folder the policy is attached to. Its format is folders/{folder_id}.
 
-* `service` - (Required only by google\_folder\_iam\_audit\_config) Service which will be enabled for audit logging.  The special value `allServices` covers all services.  Note that if there are google\_folder\_iam\_audit\_config resources covering both `allServices` and a specific service then the union of the two AuditConfigs is used for that service: the `log_types` specified in each `audit_log_config` are enabled, and the `exempted_members` in each `audit_log_config` are exempted.
+* `service` - (Required only by google_folder_iam_audit_config) Service which will be enabled for audit logging.  The special value `allServices` covers all services.  Note that if there are google_folder_iam_audit_config resources covering both `allServices` and a specific service then the union of the two AuditConfigs is used for that service: the `log_types` specified in each `audit_log_config` are enabled, and the `exempted_members` in each `audit_log_config` are exempted.
 
-* `audit_log_config` - (Required only by google\_folder\_iam\_audit\_config) The configuration for logging of each type of permission.  This can be specified multiple times.  Structure is [documented below](#nested_audit_log_config).
+* `audit_log_config` - (Required only by google_folder_iam_audit_config) The configuration for logging of each type of permission.  This can be specified multiple times.  Structure is [documented below](#nested_audit_log_config).
 
 * `condition` - (Optional) An [IAM Condition](https://cloud.google.com/iam/docs/conditions-overview) for a given binding.
   Structure is [documented below](#nested_condition).
@@ -212,33 +212,95 @@ exported:
 
 ## Import
 
-IAM member imports use space-delimited identifiers; the resource in question, the role, and the account.  This member resource can be imported using the `folder`, role, and member e.g.
-
-```
-$ terraform import google_folder_iam_member.my_folder "folder roles/viewer user:foo@example.com"
-```
-
-IAM binding imports use space-delimited identifiers; the resource in question and the role.  This binding resource can be imported using the `folder` and role, e.g.
-
-```
-terraform import google_folder_iam_binding.my_folder "folder roles/viewer"
-```
-
-IAM policy imports use the identifier of the resource in question.  This policy resource can be imported using the `folder`.
-
-```
-$ terraform import google_folder_iam_policy.my_folder folder
-```
-
-IAM audit config imports use the identifier of the resource in question and the service, e.g.
-
-```
-terraform import google_folder_iam_audit_config.my_folder "folder foo.googleapis.com"
-```
-
 -> **Custom Roles**: If you're importing a IAM resource with a custom role, make sure to use the
  full name of the custom role, e.g. `organizations/{{org_id}}/roles/{{role_id}}`.
  
 -> **Conditional IAM Bindings**: If you're importing a IAM binding with a condition block, make sure
  to include the title of condition, e.g. `terraform import google_folder_iam_binding.my_folder "folder roles/{{role_id}} condition-title"`
  
+
+### Importing IAM members
+
+IAM member imports use space-delimited identifiers that contain the resource's `folder_id`, `role`, and `member` e.g.
+
+* `"folders/{{folder_id}} roles/viewer user:foo@example.com"`
+
+An [`import` block](https://developer.hashicorp.com/terraform/language/import) (Terraform v1.5.0 and later) can be used to import IAM members:
+
+```tf
+import {
+  id = "folders/{{folder_id}} roles/viewer user:foo@example.com"
+  to = google_folder_iam_member.default
+}
+```
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can also be used:
+
+```
+$ terraform import google_folder_iam_member.default "folder roles/viewer user:foo@example.com"
+```
+
+### Importing IAM bindings
+
+IAM binding imports use space-delimited identifiers that contain the resource's `folder_id` and `role`, e.g.
+
+* `"folders/{{folder_id}} roles/viewer"`
+
+An [`import` block](https://developer.hashicorp.com/terraform/language/import) (Terraform v1.5.0 and later) can be used to import IAM bindings:
+
+```tf
+import {
+  id = "folders/{{folder_id}} roles/viewer"
+  to = google_folder_iam_binding.default
+}
+```
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can also be used:
+
+```
+$ terraform import google_folder_iam_binding.default "folder roles/viewer"
+```
+
+### Importing IAM policies
+
+IAM policy imports use the identifier of the Folder only. For example:
+
+* `folders/{{folder_id}}`
+
+An [`import` block](https://developer.hashicorp.com/terraform/language/import) (Terraform v1.5.0 and later) can be used to import IAM policies:
+
+```tf
+import {
+  id = "folders/{{folder_id}}"
+  to = google_folder_iam_policy.default
+}
+```
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can also be used:
+
+```
+$ terraform import google_folder_iam_policy.default folders/{{folder_id}}
+```
+
+
+### Importing Audit Configs
+
+An audit config can be imported into a `google_folder_iam_audit_config` resource using the resource's `folder_id` and the `service`, e.g:
+
+* `"folder/{{folder_id}} foo.googleapis.com"`
+
+
+An [`import` block](https://developer.hashicorp.com/terraform/language/import) (Terraform v1.5.0 and later) can be used to import audit configs:
+
+```tf
+import {
+  id = "folder/{{folder_id}} foo.googleapis.com"
+  to = google_folder_iam_audit_config.default
+}
+```
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can also be used:
+
+```
+terraform import google_folder_iam_audit_config.default "folder/{{folder_id}} foo.googleapis.com"
+```

@@ -1,6 +1,5 @@
 # Internal HTTPS load balancer with HTTP-to-HTTPS redirect
 
-# [START cloudloadbalancing_int_https_with_redirect]
 
 # VPC network
 resource "google_compute_network" "default" {
@@ -13,7 +12,7 @@ resource "google_compute_subnetwork" "proxy_subnet" {
   name          = "<%= ctx[:vars]['l7_ilb_proxy_subnet'] %>"
   ip_cidr_range = "10.0.0.0/24"
   region        = "europe-west1"
-  purpose       = "INTERNAL_HTTPS_LOAD_BALANCER"
+  purpose       = "REGIONAL_MANAGED_PROXY"
   role          = "ACTIVE"
   network       = google_compute_network.default.id
 }
@@ -43,7 +42,7 @@ resource "google_compute_forwarding_rule" "default" {
   region                = "europe-west1"
   depends_on            = [google_compute_subnetwork.proxy_subnet]
   ip_protocol           = "TCP"
-  ip_address            = google_compute_address.default.id
+  ip_address            = google_compute_address.default.address
   load_balancing_scheme = "INTERNAL_MANAGED"
   port_range            = "443"
   target                = google_compute_region_target_https_proxy.default.id
@@ -138,7 +137,7 @@ resource "google_compute_instance_template" "default" {
     }
   }
   disk {
-    source_image = "debian-cloud/debian-10"
+    source_image = "debian-cloud/debian-12"
     auto_delete  = true
     boot         = true
   }
@@ -231,7 +230,7 @@ resource "google_compute_instance" "default" {
   }
   boot_disk {
     initialize_params {
-      image = "debian-cloud/debian-10"
+      image = "debian-cloud/debian-12"
     }
   }
 }
@@ -243,7 +242,7 @@ resource "google_compute_forwarding_rule" "redirect" {
   name                  = "<%= ctx[:vars]['l7_ilb_redirect'] %>"
   region                = "europe-west1"
   ip_protocol           = "TCP"
-  ip_address            = google_compute_address.default.id # Same as HTTPS load balancer
+  ip_address            = google_compute_address.default.address # Same as HTTPS load balancer
   load_balancing_scheme = "INTERNAL_MANAGED"
   port_range            = "80"
   target                = google_compute_region_target_http_proxy.default.id
@@ -283,4 +282,3 @@ resource "google_compute_region_url_map" "<%= ctx[:primary_resource_id] %>" {
     }
   }
 }
-# [END cloudloadbalancing_int_https_with_redirect]

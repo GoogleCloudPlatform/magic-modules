@@ -1,0 +1,166 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'WorkforcePool'
+description: |
+  Represents a collection of external workforces. Provides namespaces for
+  federated users that can be referenced in IAM policies.
+references:
+  guides:
+    'Manage pools': 'https://cloud.google.com/iam/docs/manage-workforce-identity-pools-providers#manage_pools'
+  api: 'https://cloud.google.com/iam/docs/reference/rest/v1/locations.workforcePools'
+docs:
+  note: |
+    Ask your Google Cloud account team to request access to workforce identity federation for
+    your billing/quota project. The account team notifies you when the project is granted access.
+base_url: 'locations/{{location}}/workforcePools'
+self_link: 'locations/{{location}}/workforcePools/{{workforce_pool_id}}'
+create_url: 'locations/{{location}}/workforcePools?workforcePoolId={{workforce_pool_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'locations/{{location}}/workforcePools/{{workforce_pool_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'targetLink'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+  constants: 'templates/terraform/constants/go/iam_workforce_pool.go.tmpl'
+  decoder: 'templates/terraform/decoders/go/treat_deleted_state_as_gone.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/go/iam_workforce_pool.go.tmpl'
+examples:
+  - name: 'iam_workforce_pool_basic'
+    primary_resource_id: 'example'
+    vars:
+      workforce_pool_id: 'example-pool'
+    test_env_vars:
+      org_id: 'ORG_ID'
+  - name: 'iam_workforce_pool_full'
+    primary_resource_id: 'example'
+    vars:
+      workforce_pool_id: 'example-pool'
+    test_env_vars:
+      org_id: 'ORG_ID'
+parameters:
+properties:
+  - name: 'location'
+    type: String
+    description: The location for the resource.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'workforcePoolId'
+    type: String
+    description: |
+      The name of the pool. The ID must be a globally unique string of 6 to 63 lowercase letters,
+      digits, or hyphens. It must start with a letter, and cannot have a trailing hyphen.
+      The prefix `gcp-` is reserved for use by Google, and may not be specified.
+    url_param_only: true
+    required: true
+    immutable: true
+    validation:
+      function: 'ValidateWorkforcePoolId'
+  - name: 'name'
+    type: String
+    description: |
+      Output only. The resource name of the pool.
+      Format: `locations/{location}/workforcePools/{workforcePoolId}`
+    output: true
+  - name: 'parent'
+    type: String
+    description: |
+      Immutable. The resource name of the parent. Format: `organizations/{org-id}`.
+    required: true
+    immutable: true
+  - name: 'displayName'
+    type: String
+    description:
+      A user-specified display name of the pool in Google Cloud Console. Cannot
+      exceed 32 characters.
+  - name: 'description'
+    type: String
+    description:
+      A user-specified description of the pool. Cannot exceed 256 characters.
+  - name: 'state'
+    type: Enum
+    description: |
+      Output only. The state of the pool.
+       * STATE_UNSPECIFIED: State unspecified.
+       * ACTIVE: The pool is active, and may be used in Google Cloud policies.
+       * DELETED: The pool is soft-deleted. Soft-deleted pools are permanently deleted
+         after approximately 30 days. You can restore a soft-deleted pool using
+         [workforcePools.undelete](https://cloud.google.com/iam/docs/reference/rest/v1/locations.workforcePools/undelete#google.iam.admin.v1.WorkforcePools.UndeleteWorkforcePool).
+         You cannot reuse the ID of a soft-deleted pool until it is permanently deleted.
+         While a pool is deleted, you cannot use it to exchange tokens, or use
+         existing tokens to access resources. If the pool is undeleted, existing
+         tokens grant access again.
+    output: true
+    enum_values:
+      - 'STATE_UNSPECIFIED'
+      - 'ACTIVE'
+      - 'DELETED'
+  - name: 'disabled'
+    type: Boolean
+    description: |
+      Whether the pool is disabled. You cannot use a disabled pool to exchange tokens,
+      or use existing tokens to access resources. If the pool is re-enabled, existing tokens grant access again.
+  - name: 'sessionDuration'
+    type: String
+    description: |
+      Duration that the Google Cloud access tokens, console sign-in sessions,
+      and `gcloud` sign-in sessions from this pool are valid.
+      Must be greater than 15 minutes (900s) and less than 12 hours (43200s).
+      If `sessionDuration` is not configured, minted credentials have a default duration of one hour (3600s).
+      A duration in seconds with up to nine fractional digits, ending with '`s`'. Example: "`3.5s`".
+    default_value: "3600s"
+  - name: 'accessRestrictions'
+    type: NestedObject
+    description: |
+      Configure access restrictions on the workforce pool users. This is an optional field. If specified web
+      sign-in can be restricted to given set of services or programmatic sign-in can be disabled for pool users.
+    immutable: true
+    properties:
+      - name: 'allowedServices'
+        type: Array
+        description: |
+          Services allowed for web sign-in with the workforce pool.
+          If not set by default there are no restrictions.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'domain'
+              type: String
+              description: |
+                Domain name of the service.
+                Example: console.cloud.google
+      - name: 'disableProgrammaticSignin'
+        type: Boolean
+        description: |
+          Disable programmatic sign-in by disabling token issue via the Security Token API endpoint.
+          See [Security Token Service API](https://cloud.google.com/iam/docs/reference/sts/rest).

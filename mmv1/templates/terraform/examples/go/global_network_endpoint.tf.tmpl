@@ -1,0 +1,11 @@
+resource "google_compute_global_network_endpoint" "{{$.PrimaryResourceId}}" {
+  global_network_endpoint_group = google_compute_global_network_endpoint_group.neg.name
+  fqdn       = "www.example.com"
+  port       = 90
+}
+
+resource "google_compute_global_network_endpoint_group" "neg" {
+  name                  = "{{index $.Vars "neg_name"}}"
+  default_port          = "90"
+  network_endpoint_type = "INTERNET_FQDN_PORT"
+}

@@ -12,51 +12,67 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: "Version"
+name: 'Version'
 min_version: beta
 base_url: sites/{{site_id}}/versions
 self_link: sites/{{site_id}}/versions/{{version_id}}
 create_url: sites/{{site_id}}/versions
-immutable: true # not updatable
+immutable: true  # not updatable
 description: |
   A `Version` is a configuration which determine how a site is displayed. Static files are not supported at the moment.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    "Official Documentation": "https://firebase.google.com/docs/hosting"
-  api: "https://firebase.google.com/docs/reference/hosting/rest/v1beta1/sites.versions"
-import_format: ['sites/{{site_id}}/versions/{{version_id}}', '{{site_id}}/{{version_id}}']
+    'Official Documentation': 'https://firebase.google.com/docs/hosting'
+  api: 'https://firebase.google.com/docs/reference/hosting/rest/v1beta1/sites.versions'
+import_format:
+  ['sites/{{site_id}}/versions/{{version_id}}', '{{site_id}}/{{version_id}}']
 skip_delete: true
 skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "firebasehosting_version_redirect"
-    min_version: "beta"
-    primary_resource_id: "default"
+    name: 'firebasehosting_version_redirect'
+    min_version: 'beta'
+    primary_resource_id: 'default'
     vars:
       site_id: site-id
     test_env_vars:
       project_id: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
-    name: "firebasehosting_version_cloud_run"
-    min_version: "beta"
-    primary_resource_id: "default"
+    name: 'firebasehosting_version_path'
+    min_version: 'beta'
+    primary_resource_id: 'default'
+    vars:
+      site_id: site-id
+    test_env_vars:
+      project_id: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'firebasehosting_version_cloud_run'
+    min_version: 'beta'
+    primary_resource_id: 'default'
     vars:
       site_id: site-id
       cloud_run_service_id: cloud-run-service-via-hosting
+      deletion_protection: 'true'
+    test_vars_overrides:
+      deletion_protection: 'false'
+    oics_vars_overrides:
+      deletion_protection: 'false'
     test_env_vars:
       project_id: :PROJECT_NAME
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
-    name: "firebasehosting_version_cloud_functions"
-    min_version: "beta"
-    primary_resource_id: "default"
+    name: 'firebasehosting_version_cloud_functions'
+    min_version: 'beta'
+    primary_resource_id: 'default'
     vars:
       site_id: site-id
       cloud_function_id: cloud-function-via-hosting
-      zip_path: "function-source.zip"
+      zip_path: 'function-source.zip'
     test_env_vars:
       project_id: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: "\"./test-fixtures/cloudfunctions2/function-source.zip\""
+      zip_path: '"./test-fixtures/function-source.zip"'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   decoder: templates/terraform/decoders/firebasehosting_version.go.erb
   post_create: templates/terraform/post_create/firebasehosting_version_immediate_finalize.erb
@@ -82,8 +98,9 @@ properties:
     ignore_read: true
   - !ruby/object:Api::Type::NestedObject
     name: config
-    description: The configuration for the behavior of the site. This configuration
-      exists in the `firebase.json` file.
+    description:
+      The configuration for the behavior of the site. This configuration exists
+      in the `firebase.json` file.
     properties:
       - !ruby/object:Api::Type::Array
         name: rewrites
@@ -97,29 +114,41 @@ properties:
           properties:
             - !ruby/object:Api::Type::String
               name: glob
-              description: The user-supplied glob to match against the request URL
-                path.
+              description:
+                The user-supplied glob to match against the request URL path.
               exactly_one_of:
                 - glob
                 - regex
             - !ruby/object:Api::Type::String
               name: regex
-              description: The user-supplied RE2 regular expression to match against
-                the request URL path.
+              description:
+                The user-supplied RE2 regular expression to match against the
+                request URL path.
               exactly_one_of:
                 - glob
                 - regex
             - !ruby/object:Api::Type::String
+              name: path
+              description:
+                The URL path to rewrite the request to.
+              exactly_one_of:
+                - path
+                - function
+                - run
+            - !ruby/object:Api::Type::String
               name: function
-              description: The function to proxy requests to. Must match the exported
+              description:
+                The function to proxy requests to. Must match the exported
                 function name exactly.
               exactly_one_of:
+                - path
                 - function
                 - run
             - !ruby/object:Api::Type::NestedObject
               name: run
               description: The request will be forwarded to Cloud Run.
               exactly_one_of:
+                - path
                 - function
                 - run
               properties:
@@ -129,8 +158,9 @@ properties:
                   required: true
                 - !ruby/object:Api::Type::String
                   name: region
-                  description: Optional. User-provided region where the Cloud Run
-                    service is hosted. Defaults to `us-central1` if not supplied.
+                  description:
+                    Optional. User-provided region where the Cloud Run service
+                    is hosted. Defaults to `us-central1` if not supplied.
       - !ruby/object:Api::Type::Array
         name: redirects
         description: |
@@ -143,23 +173,25 @@ properties:
           properties:
             - !ruby/object:Api::Type::String
               name: glob
-              description: The user-supplied glob to match against the request URL
-                path.
+              description:
+                The user-supplied glob to match against the request URL path.
               exactly_one_of:
                 - glob
                 - regex
             - !ruby/object:Api::Type::String
               name: regex
-              description: The user-supplied RE2 regular expression to match against
-                the request URL path.
+              description:
+                The user-supplied RE2 regular expression to match against the
+                request URL path.
               exactly_one_of:
                 - glob
                 - regex
             - !ruby/object:Api::Type::Integer
               name: statusCode
               required: true
-              description: The status HTTP code to return in the response. It must
-                be a valid 3xx status code.
+              description:
+                The status HTTP code to return in the response. It must be a
+                valid 3xx status code.
             - !ruby/object:Api::Type::String
               name: location
               required: true
@@ -175,4 +207,3 @@ properties:
                   location = "https://example.com/foo/:capture"
                 }
                 ```
-

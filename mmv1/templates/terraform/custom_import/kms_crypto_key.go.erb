@@ -1,12 +1,12 @@
 
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
-	cryptoKeyId, err := parseKmsCryptoKeyId(d.Id(), config)
+	cryptoKeyId, err := ParseKmsCryptoKeyId(d.Id(), config)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := d.Set("key_ring", cryptoKeyId.KeyRingId.keyRingId()); err != nil {
+	if err := d.Set("key_ring", cryptoKeyId.KeyRingId.KeyRingId()); err != nil {
 		return nil, fmt.Errorf("Error setting key_ring: %s", err)
 	}
 	if err := d.Set("name", cryptoKeyId.Name); err != nil {
@@ -17,7 +17,7 @@
 		return nil, fmt.Errorf("Error setting skip_initial_version_creation: %s", err)
 	}
 
-	id, err := replaceVars(d, config, "<%= id_format(object) -%>")
+	id, err := tpgresource.ReplaceVars(d, config, "<%= id_format(object) -%>")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}

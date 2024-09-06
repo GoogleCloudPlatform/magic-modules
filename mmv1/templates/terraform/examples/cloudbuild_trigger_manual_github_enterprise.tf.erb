@@ -1,5 +1,5 @@
 resource "google_cloudbuild_trigger" "<%= ctx[:primary_resource_id] %>" {
-  name        = "terraform-manual-ghe-trigger"
+  name        = "<%= ctx[:vars]['cloudbuild_trigger_name'] %>"
 
   source_to_build {
     uri       = "https://hashicorp/terraform-provider-google-beta"

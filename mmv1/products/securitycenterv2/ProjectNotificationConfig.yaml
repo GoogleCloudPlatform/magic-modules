@@ -1,0 +1,129 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'ProjectNotificationConfig'
+base_url: projects/{{project}}/locations/{{location}}/notificationConfigs
+self_link: '{{name}}'
+create_url: projects/{{project}}/locations/{{location}}/notificationConfigs?configId={{config_id}}
+update_verb: :PATCH
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/notificationConfigs/{{config_id}}'
+description: |
+  A Cloud Security Command Center (Cloud SCC) notification configs. A
+  notification config is a Cloud SCC resource that contains the
+  configuration to send notifications for create/update events of
+  findings, assets and etc.
+  ~> **Note:** In order to use Cloud SCC resources, your organization must be enrolled
+  in [SCC Standard/Premium](https://cloud.google.com/security-command-center/docs/quickstart-security-command-center).
+  Without doing so, you may run into errors during resource creation.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/security-command-center/docs'
+  api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v2/projects.locations.notificationConfigs'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'scc_v2_project_notification_config_basic'
+    primary_resource_id: 'custom_notification_config'
+    vars:
+      topic_name: 'my-topic'
+      config_id: 'my-config'
+    test_env_vars:
+      project: :PROJECT_NAME
+    ignore_read_extra:
+      - 'location'
+      - 'project'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_import: templates/terraform/custom_import/self_link_as_name_set_project.go.erb
+  post_create: templates/terraform/post_create/set_computed_name.erb
+parameters:
+  - !ruby/object:Api::Type::String
+    name: configId
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      This must be unique within the project.
+  - !ruby/object:Api::Type::String
+    name: 'location'
+    immutable: true
+    required: false
+    url_param_only: true
+    default_value: 'global'
+    description: |
+      Location ID of the parent organization. Only global is supported at the moment.
+properties:
+  - !ruby/object:Api::Type::String
+    name: name
+    output: true
+    description: |
+      The resource name of this notification config, in the format
+      `projects/{{projectId}}/locations/{{location}}/notificationConfigs/{{config_id}}`.
+  - !ruby/object:Api::Type::String
+    name: description
+    description: |
+      The description of the notification config (max of 1024 characters).
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'validation.StringLenBetween(0, 1024)'
+  - !ruby/object:Api::Type::String
+    name: pubsubTopic
+    description: |
+      The Pub/Sub topic to send notifications to. Its format is
+      "projects/[project_id]/topics/[topic]".
+  - !ruby/object:Api::Type::String
+    name: serviceAccount
+    output: true
+    description: |
+      The service account that needs "pubsub.topics.publish" permission to
+      publish to the Pub/Sub topic.
+  - !ruby/object:Api::Type::NestedObject
+    name: streamingConfig
+    required: true
+    allow_empty_object: true
+    send_empty_value: true
+    description: |
+      The config for triggering streaming-based notifications.
+    update_mask_fields:
+      - 'streamingConfig.filter'
+    properties:
+      - !ruby/object:Api::Type::String
+        name: filter
+        required: true
+        send_empty_value: true
+        description: |
+          Expression that defines the filter to apply across create/update
+          events of assets or findings as specified by the event type. The
+          expression is a list of zero or more restrictions combined via
+          logical operators AND and OR. Parentheses are supported, and OR
+          has higher precedence than AND.
+
+          Restrictions have the form <field> <operator> <value> and may have
+          a - character in front of them to indicate negation. The fields
+          map to those defined in the corresponding resource.
+
+          The supported operators are:
+
+          * = for all value types.
+          * >, <, >=, <= for integer values.
+          * :, meaning substring matching, for strings.
+
+          The supported value types are:
+
+          * string literals in quotes.
+          * integer literals without quotes.
+          * boolean literals true and false without quotes.
+
+          See
+          [Filtering notifications](https://cloud.google.com/security-command-center/docs/how-to-api-filter-notifications)
+          for information on how to write a filter.

@@ -13,9 +13,9 @@
 
 --- !ruby/object:Api::Resource
 name: 'PatchDeployment'
-base_url: "projects/{{project}}/patchDeployments"
-create_url: "projects/{{project}}/patchDeployments?patchDeploymentId={{patch_deployment_id}}"
-self_link: "{{name}}"
+base_url: 'projects/{{project}}/patchDeployments'
+create_url: 'projects/{{project}}/patchDeployments?patchDeploymentId={{patch_deployment_id}}'
+self_link: '{{name}}'
 description: |
   Patch deployments are configurations that individual patch jobs use to complete a patch.
   These configurations include instance filter, package repository settings, and a schedule.
@@ -24,34 +24,34 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/compute/docs/os-patch-management'
   api: 'https://cloud.google.com/compute/docs/osconfig/rest'
 immutable: true
-id_format: "{{name}}"
+id_format: '{{name}}'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "os_config_patch_deployment_basic"
-    primary_resource_id: "patch"
+    name: 'os_config_patch_deployment_basic'
+    primary_resource_id: 'patch'
     vars:
-      patch_deployment_id: "patch-deploy"
+      patch_deployment_id: 'patch-deploy'
   - !ruby/object:Provider::Terraform::Examples
-    name: "os_config_patch_deployment_daily"
-    primary_resource_id: "patch"
+    name: 'os_config_patch_deployment_daily'
+    primary_resource_id: 'patch'
     vars:
-      patch_deployment_id: "patch-deploy"
+      patch_deployment_id: 'patch-deploy'
   - !ruby/object:Provider::Terraform::Examples
-    name: "os_config_patch_deployment_daily_midnight"
-    primary_resource_id: "patch"
+    name: 'os_config_patch_deployment_daily_midnight'
+    primary_resource_id: 'patch'
     vars:
-      patch_deployment_id: "patch-deploy"
+      patch_deployment_id: 'patch-deploy'
   - !ruby/object:Provider::Terraform::Examples
-    name: "os_config_patch_deployment_instance"
-    primary_resource_id: "patch"
+    name: 'os_config_patch_deployment_instance'
+    primary_resource_id: 'patch'
     vars:
-      instance_name: "patch-deploy-inst"
-      patch_deployment_id: "patch-deploy"
+      instance_name: 'patch-deploy-inst'
+      patch_deployment_id: 'patch-deploy'
   - !ruby/object:Provider::Terraform::Examples
-    name: "os_config_patch_deployment_full"
-    primary_resource_id: "patch"
+    name: 'os_config_patch_deployment_full'
+    primary_resource_id: 'patch'
     vars:
-      patch_deployment_id: "patch-deploy"
+      patch_deployment_id: 'patch-deploy'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/set_computed_name.erb
   encoder: templates/terraform/encoders/os_config_patch_deployment.go.erb
@@ -396,9 +396,11 @@ properties:
         properties:
           - !ruby/object:Api::Type::Array
             name: 'classifications'
-            exactly_one_of:
+            at_least_one_of:
               - patch_config.0.windows_update.0.classifications
               - patch_config.0.windows_update.0.excludes
+              - patch_config.0.windows_update.0.exclusive_patches
+            conflicts:
               - patch_config.0.windows_update.0.exclusive_patches
             description: |
               Only apply updates of these windows update classifications. If empty, all updates are applied.
@@ -417,19 +419,24 @@ properties:
                 - :UPDATE
           - !ruby/object:Api::Type::Array
             name: 'excludes'
-            exactly_one_of:
+            at_least_one_of:
               - patch_config.0.windows_update.0.classifications
               - patch_config.0.windows_update.0.excludes
+              - patch_config.0.windows_update.0.exclusive_patches
+            conflicts:
               - patch_config.0.windows_update.0.exclusive_patches
             description: |
               List of KBs to exclude from update.
             item_type: Api::Type::String
           - !ruby/object:Api::Type::Array
             name: 'exclusivePatches'
-            exactly_one_of:
+            at_least_one_of:
               - patch_config.0.windows_update.0.classifications
               - patch_config.0.windows_update.0.excludes
               - patch_config.0.windows_update.0.exclusive_patches
+            conflicts:
+              - patch_config.0.windows_update.0.classifications
+              - patch_config.0.windows_update.0.excludes
             description: |
               An exclusive list of kbs to be updated. These are the only patches that will be updated.
               This field must not be used with other patch configurations.
@@ -790,15 +797,6 @@ properties:
               Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
             validation: !ruby/object:Provider::Terraform::Validation
               function: 'validation.IntBetween(0,999999999)'
-      - !ruby/object:Api::Type::Enum
-        name: 'frequency'
-        required: true
-        description: |
-          The frequency unit of this recurring schedule.
-        values:
-          - :WEEKLY
-          - :MONTHLY
-        exclude: true
       - !ruby/object:Api::Type::String
         name: 'lastExecuteTime'
         output: true
@@ -862,6 +860,12 @@ properties:
                   - :FRIDAY
                   - :SATURDAY
                   - :SUNDAY
+              - !ruby/object:Api::Type::Integer
+                name: 'dayOffset'
+                description: |
+                  Represents the number of days before or after the given week day of month that the patch deployment is scheduled for.
+                validation: !ruby/object:Provider::Terraform::Validation
+                  function: 'validation.IntBetween(-30,30)'
           - !ruby/object:Api::Type::Integer
             name: 'monthDay'
             exactly_one_of:

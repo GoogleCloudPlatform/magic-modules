@@ -41,7 +41,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -57,41 +57,42 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "address_basic"
-    primary_resource_id: "ip_address"
+    name: 'address_basic'
+    primary_resource_id: 'ip_address'
     vars:
-      address_name: "my-address"
+      address_name: 'my-address'
   - !ruby/object:Provider::Terraform::Examples
-    name: "address_with_subnetwork"
-    primary_resource_id: "internal_with_subnet_and_address"
+    name: 'address_with_subnetwork'
+    primary_resource_id: 'internal_with_subnet_and_address'
     vars:
-      address_name: "my-internal-address"
-      network_name: "my-network"
-      subnetwork_name: "my-subnet"
+      address_name: 'my-internal-address'
+      network_name: 'my-network'
+      subnetwork_name: 'my-subnet'
   - !ruby/object:Provider::Terraform::Examples
-    name: "address_with_gce_endpoint"
-    primary_resource_id: "internal_with_gce_endpoint"
+    name: 'address_with_gce_endpoint'
+    primary_resource_id: 'internal_with_gce_endpoint'
     vars:
-      address_name: "my-internal-address-"
+      address_name: 'my-internal-address-'
   - !ruby/object:Provider::Terraform::Examples
-    name: "address_with_shared_loadbalancer_vip"
-    primary_resource_id: "internal_with_shared_loadbalancer_vip"
+    name: 'address_with_shared_loadbalancer_vip'
+    primary_resource_id: 'internal_with_shared_loadbalancer_vip'
     vars:
-      address_name: "my-internal-address"
-    skip_docs: true      # It is almost identical to internal_with_gce_endpoint
-      # TODO(rileykarson): Remove this example when instance is supported
+      address_name: 'my-internal-address'
+    skip_docs:
+      true  # It is almost identical to internal_with_gce_endpoint
+  # TODO(rileykarson): Remove this example when instance is supported
   - !ruby/object:Provider::Terraform::Examples
-    name: "instance_with_ip"
-    primary_resource_id: "static"
+    name: 'instance_with_ip'
+    primary_resource_id: 'static'
     vars:
-      address_name: "ipv4-address"
-      instance_name: "vm-instance"
+      address_name: 'ipv4-address'
+      instance_name: 'vm-instance'
   - !ruby/object:Provider::Terraform::Examples
-    name: "compute_address_ipsec_interconnect"
-    primary_resource_id: "ipsec-interconnect-address"
+    name: 'compute_address_ipsec_interconnect'
+    primary_resource_id: 'ipsec-interconnect-address'
     vars:
-      address_name: "test-address"
-      network_name: "test-network"
+      address_name: 'test-address'
+      network_name: 'test-network'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/labels.erb
 parameters:
@@ -105,13 +106,13 @@ parameters:
     required: false
     default_from_api: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: 'address'
     description: |
-      The static external IP address represented by this resource. Only
-      IPv4 is supported. An address may only be specified for INTERNAL
-      address types. The IP address must be inside the specified subnetwork,
+      The static external IP address represented by this resource.
+      The IP address must be inside the specified subnetwork,
       if any. Set by the API if undefined.
     default_from_api: true
   - !ruby/object:Api::Type::Enum
@@ -131,11 +132,6 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'description'
     description: 'An optional description of this resource.'
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'The unique identifier for the resource.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
@@ -169,7 +165,6 @@ properties:
       configure Private Service Connect. Only global internal addresses can use
       this purpose.
 
-
       This should only be set when using an Internal address.
     default_from_api: true
   - !ruby/object:Api::Type::Enum
@@ -181,8 +176,6 @@ properties:
     values:
       - :PREMIUM
       - :STANDARD
-  # TODO(alexstephen): Add in status with exclude attribute. What does this
-  # mean?
     default_from_api: true
   - !ruby/object:Api::Type::ResourceRef
     name: 'subnetwork'
@@ -194,18 +187,18 @@ properties:
       This field can only be used with INTERNAL type with
       GCE_ENDPOINT/DNS_RESOLVER purposes.
     default_from_api: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Array
     name: 'users'
     description: 'The URLs of the resources that are using this address.'
     item_type: Api::Type::String
     output: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Labels to apply to this address.  A list of key->value pairs.
     update_verb: :POST
     update_url: 'projects/{{project}}/regions/{{region}}/addresses/{{name}}/setLabels'
-    min_version: beta
   - !ruby/object:Api::Type::Fingerprint
     name: 'labelFingerprint'
     description: |
@@ -213,21 +206,6 @@ properties:
       internally during updates.
     update_url: 'projects/{{project}}/regions/{{region}}/addresses/{{name}}/setLabels'
     update_verb: :POST
-    min_version: beta
-    exclude: false
-  - !ruby/object:Api::Type::Enum
-    name: 'status'
-    output: true
-    description: |
-      The status of the address, which can be one of RESERVING, RESERVED, or IN_USE.
-      An address that is RESERVING is currently in the process of being reserved.
-      A RESERVED address is currently reserved and available to use. An IN_USE address
-      is currently being used by another resource and is not available.
-    values:
-      - :RESERVING
-      - :RESERVED
-      - :IN_USE
-    exclude: true
   - !ruby/object:Api::Type::ResourceRef
     name: 'network'
     resource: 'Network'
@@ -236,7 +214,26 @@ properties:
       The URL of the network in which to reserve the address. This field
       can only be used with INTERNAL type with the VPC_PEERING and
       IPSEC_INTERCONNECT purposes.
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Integer
     name: prefixLength
     description: |
       The prefix length if the resource represents an IP range.
+    default_from_api: true
+  - !ruby/object:Api::Type::Enum
+    name: 'ipVersion'
+    description: |
+      The IP Version that will be used by this address. The default value is `IPV4`.
+    values:
+      - :IPV4
+      - :IPV6
+    diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("IPV4")'
+  - !ruby/object:Api::Type::Enum
+    name: 'ipv6EndpointType'
+    description: |
+      The endpoint type of this address, which should be VM or NETLB. This is
+      used for deciding which type of endpoint this address can be used after
+      the external IPv6 address reservation.
+    values:
+      - :VM
+      - :NETLB

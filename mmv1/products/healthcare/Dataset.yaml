@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Resource
 name: 'Dataset'
-kind: "healthcare#dataset"
+kind: 'healthcare#dataset'
 base_url: 'projects/{{project}}/locations/{{location}}/datasets?datasetId={{name}}'
 self_link: 'projects/{{project}}/locations/{{location}}/datasets/{{name}}'
 update_verb: :PATCH
@@ -24,17 +24,26 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Creating a dataset': 'https://cloud.google.com/healthcare/docs/how-tos/datasets'
   api: 'https://cloud.google.com/healthcare/docs/reference/rest/v1/projects.locations.datasets'
-id_format: "projects/{{project}}/locations/{{location}}/datasets/{{name}}"
-import_format: ["projects/{{project}}/locations/{{location}}/datasets/{{name}}"]
-error_retry_predicates: ["healthcareDatasetNotInitialized"]
+id_format: 'projects/{{project}}/locations/{{location}}/datasets/{{name}}'
+import_format: ['projects/{{project}}/locations/{{location}}/datasets/{{name}}']
+error_retry_predicates: ['transport_tpg.HealthcareDatasetNotInitialized']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "healthcare_dataset_basic"
-    primary_resource_id: "default"
+    name: 'healthcare_dataset_basic'
+    primary_resource_id: 'default'
     vars:
-      dataset_name: "example-dataset"
-      location: "us-central1"
-      time_zone: "America/New_York"
+      dataset_name: 'example-dataset'
+      location: 'us-central1'
+      time_zone: 'America/New_York'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'healthcare_dataset_cmek'
+    primary_resource_id: 'default'
+    vars:
+      dataset_name: 'example-dataset'
+      location: 'us-central1'
+      time_zone: 'America/New_York'
+      key_name: 'example-key'
+      keyring_name: 'example-keyring'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   decoder: templates/terraform/decoders/long_name_to_self_link.go.erb
 parameters:
@@ -53,24 +62,31 @@ properties:
     required: true
     immutable: true
   - !ruby/object:Api::Type::String
-    name: "timeZone"
+    name: 'timeZone'
     description: |
       The default timezone used by this dataset. Must be a either a valid IANA time zone name such as
       "America/New_York" or empty, which defaults to UTC. This is used for parsing times in resources
       (e.g., HL7 messages) where no explicit timezone is specified.
     required: false
     default_from_api: true
-  - !ruby/object:Api::Type::Time
-    name: 'creationTime'
-    description: |
-      The time that this resource was created on the server.
-      This is in RFC3339 text format.
-    required: false
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'selfLink'
     description: |
       The fully qualified name of this dataset
     output: true
     ignore_read: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'encryptionSpec'
+    required: false
+    immutable: true
+    default_from_api: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'kmsKeyName'
+        description: |
+          KMS encryption key that is used to secure this dataset and its sub-resources. The key used for
+          encryption and the dataset must be in the same location. If empty, the default Google encryption
+          key will be used to secure this dataset. The format is
+          projects/{projectId}/locations/{locationId}/keyRings/{keyRingId}/cryptoKeys/{keyId}.
+        required: false
+        immutable: true

@@ -28,20 +28,17 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/iap/docs/reference/rest/v1/projects.brands.identityAwareProxyClients'
 id_format: '{{brand}}/identityAwareProxyClients/{{client_id}}'
 import_format: ['{{brand}}/identityAwareProxyClients/{{client_id}}']
-error_retry_predicates: ["iapClient409Operation"]
+error_retry_predicates: ['transport_tpg.IapClient409Operation']
 skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "iap_client"
-    primary_resource_id: "project_client"
+    name: 'iap_client'
+    primary_resource_id: 'project_client'
     vars:
-      project_id: 'brand-proj-'
+      project_id: 'my-project'
     test_env_vars:
       org_id: :ORG_ID
       org_domain: :ORG_DOMAIN
-docs: !ruby/object:Provider::Terraform::Docs
-  attributes: |
-    * `client_id`: The OAuth2 ID of the client.
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/iap_client.go.erb
   custom_import: templates/terraform/custom_import/iap_client.go.erb
@@ -58,7 +55,7 @@ parameters:
     description: |
       Identifier of the brand to which this client
       is attached to. The format is
-      `projects/{project_number}/brands/{brand_id}/identityAwareProxyClients/{client_id}`.
+      `projects/{project_number}/brands/{brand_id}`.
     immutable: true
     required: true
     url_param_only: true
@@ -74,4 +71,3 @@ properties:
     description: |
       Human-friendly name given to the OAuth client.
     required: true
-

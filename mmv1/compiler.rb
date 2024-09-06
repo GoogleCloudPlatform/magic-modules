@@ -21,19 +21,22 @@ Dir.chdir(File.dirname(__FILE__))
 # generation.
 ENV['TZ'] = 'UTC'
 
-require 'active_support/inflector'
 require 'api/compiler'
+require 'openapi_generate/parser'
 require 'google/logger'
 require 'optparse'
+require 'parallel'
 require 'pathname'
 require 'provider/terraform'
 require 'provider/terraform_kcc'
 require 'provider/terraform_oics'
-require 'provider/terraform_validator'
+require 'provider/terraform_tgc'
+require 'provider/terraform_tgc_cai2hcl'
 
 products_to_generate = nil
 all_products = false
 yaml_dump = false
+go_yaml = false
 generate_code = true
 generate_docs = true
 output_path = nil
@@ -42,6 +45,7 @@ force_provider = nil
 types_to_generate = []
 version = 'ga'
 override_dir = nil
+openapi_generate = false
 
 ARGV << '-h' if ARGV.empty?
 Google::LOGGER.level = Logger::INFO
@@ -88,6 +92,12 @@ OptionParser.new do |opt|
   opt.on('-g', '--no-docs', 'Do not generate documentation') do
     generate_docs = false
   end
+  opt.on('--openapi-generate', 'Generate MMv1 YAML from openapi directory (Experimental)') do
+    openapi_generate = true
+  end
+  opt.on('--go-yaml', 'Generate MMv1 Go YAML from Ruby YAML') do
+    go_yaml = true
+  end
 end.parse!
 # rubocop:enable Metrics/BlockLength
 
@@ -95,23 +105,33 @@ raise 'Cannot use -p/--products and -a/--all simultaneously' \
   if products_to_generate && all_products
 raise 'Either -p/--products OR -a/--all must be present' \
   if products_to_generate.nil? && !all_products
-raise 'Option -o/--output is a required parameter' if output_path.nil?
+raise 'Option -o/--output is a required parameter' \
+  if output_path.nil? && !openapi_generate
 raise 'Option -e/--engine is a required parameter' if provider_name.nil?
 
-all_product_files = []
-Dir['products/**/api.yaml'].each do |file_path|
-  all_product_files.push(File.dirname(file_path))
+if openapi_generate
+  # Test write OpenAPI --> YAML
+  # This writes to a fake demo product currently. In the future this should
+  # produce the entire product folder including product.yaml for a single OpenAPI spec
+  OpenAPIGenerate::Parser.new('openapi_generate/openapi/*', 'products').run
+  return
 end
+
+all_product_files = []
 Dir['products/**/product.yaml'].each do |file_path|
   all_product_files.push(File.dirname(file_path))
 end
 
 if override_dir
   Google::LOGGER.info "Using override directory '#{override_dir}'"
-  Dir["#{override_dir}/products/**/api.yaml"].each do |file_path|
-    product = File.dirname(Pathname.new(file_path).relative_path_from(override_dir))
-    all_product_files.push(product) unless all_product_files.include? product
+
+  # Normalize override dir to a path that is relative to the magic-modules directory
+  # This is needed for templates that concatenate pwd + override dir + path
+  if Pathname.new(override_dir).absolute?
+    override_dir = Pathname.new(override_dir).relative_path_from(__dir__).to_s
+    Google::LOGGER.info "Override directory normalized to relative path '#{override_dir}'"
   end
+
   Dir["#{override_dir}/products/**/product.yaml"].each do |file_path|
     product = File.dirname(Pathname.new(file_path).relative_path_from(override_dir))
     all_product_files.push(product) unless all_product_files.include? product
@@ -119,7 +139,7 @@ if override_dir
 end
 
 products_to_generate = all_product_files if all_products
-raise 'No api.yaml or product.yaml files found.' if products_to_generate.empty?
+raise 'No product.yaml file found.' if products_to_generate.empty?
 
 start_time = Time.now
 Google::LOGGER.info "Generating MM output to '#{output_path}'"
@@ -127,41 +147,21 @@ Google::LOGGER.info "Using #{version} version"
 
 allowed_classes = Google::YamlValidator.allowed_classes
 
-# products_for_version entries are a hash of product definitions (:definitions)
-# and provider config (:overrides) for the product
-products_for_version = []
-provider = nil
+# Building compute takes a long time and can't be parallelized within the product
+# so lets build it first
+all_product_files = all_product_files.sort_by { |product| product == 'products/compute' ? 0 : 1 }
+
 # rubocop:disable Metrics/BlockLength
-all_product_files.each do |product_name|
+products_for_version = Parallel.map(all_product_files, in_processes: 8) do |product_name|
   product_override_path = ''
   product_override_path = File.join(override_dir, product_name, 'product.yaml') if override_dir
   product_yaml_path = File.join(product_name, 'product.yaml')
 
-  api_override_path = ''
-  api_override_path = File.join(override_dir, product_name, 'api.yaml') if override_dir
-  api_yaml_path = File.join(product_name, 'api.yaml')
-
-  provider_override_path = ''
-  provider_override_path = File.join(override_dir, product_name, "#{provider_name}.yaml") \
-    if override_dir
-  provider_yaml_path = File.join(product_name, "#{provider_name}.yaml")
-
-  unless File.exist?(product_yaml_path) || File.exist?(product_override_path) \
-    || File.exist?(api_yaml_path) || File.exist?(api_override_path)
-    raise "#{product_name} does not contain an api.yaml or product.yaml file"
+  unless File.exist?(product_yaml_path) || File.exist?(product_override_path)
+    raise "#{product_name} does not contain a product.yaml file"
   end
 
-  if File.exist?(api_override_path)
-    result = if File.exist?(api_yaml_path)
-               YAML.load_file(api_yaml_path, permitted_classes: allowed_classes) \
-                   .merge(YAML.load_file(api_override_path, permitted_classes: allowed_classes))
-             else
-               YAML.load_file(api_override_path, permitted_classes: allowed_classes)
-             end
-    product_yaml = result.to_yaml
-  elsif File.exist?(api_yaml_path)
-    product_yaml = File.read(api_yaml_path)
-  elsif File.exist?(product_override_path)
+  if File.exist?(product_override_path)
     result = if File.exist?(product_yaml_path)
                YAML.load_file(product_yaml_path, permitted_classes: allowed_classes) \
                    .merge(YAML.load_file(product_override_path, permitted_classes: allowed_classes))
@@ -171,14 +171,6 @@ all_product_files.each do |product_name|
     product_yaml = result.to_yaml
   elsif File.exist?(product_yaml_path)
     product_yaml = File.read(product_yaml_path)
-  end
-
-  unless File.exist?(provider_yaml_path) || File.exist?(provider_override_path)
-    unless File.exist?(product_yaml_path) || File.exist?(product_override_path)
-      Google::LOGGER.info "#{product_name}: Skipped as no #{provider_name}.yaml file exists"
-      next
-    end
-    provider_yaml_path = 'templates/terraform.yaml'
   end
 
   raise "Output path '#{output_path}' does not exist or is not a directory" \
@@ -198,8 +190,8 @@ all_product_files.each do |product_name|
     resources = []
     Dir["#{product_name}/*"].each do |file_path|
       next if File.basename(file_path) == 'product.yaml' \
-       || File.basename(file_path) == 'terraform.yaml' \
-       || File.extname(file_path) != '.yaml'
+       || File.extname(file_path) != '.yaml' \
+       || File.basename(file_path).include?('go_')
 
       if override_dir
         # Skip if resource will be merged in the override loop
@@ -208,16 +200,22 @@ all_product_files.each do |product_name|
       end
       res_yaml = File.read(file_path)
       resource = Api::Compiler.new(res_yaml).run
+      resource.properties = resource.add_labels_related_fields(
+        resource.properties_with_excluded, nil
+      )
       resource.validate
       resources.push(resource)
+    rescue StandardError => e
+      Google::LOGGER.error "Failed to compile #{file_path}: #{e}"
+      raise e
     end
 
     if override_dir
       ovr_prod_dir = File.join(override_dir, product_name)
       Dir["#{ovr_prod_dir}/*"].each do |override_path|
         next if File.basename(override_path) == 'product.yaml' \
-        || File.basename(override_path) == 'terraform.yaml' \
-        || File.extname(override_path) != '.yaml'
+        || File.extname(override_path) != '.yaml' \
+        || File.basename(override_path).include?('go_')
 
         file_path = File.join(product_name, File.basename(override_path))
         res_yaml = if File.exist?(file_path)
@@ -234,32 +232,31 @@ all_product_files.each do |product_name|
           res_yaml = res_yaml.gsub('{{override_path}}', override_dir)
         end
         resource = Api::Compiler.new(res_yaml).run
+        resource.properties = resource.add_labels_related_fields(
+          resource.properties_with_excluded, nil
+        )
         resource.validate
         resources.push(resource)
+      rescue StandardError => e
+        Google::LOGGER.error "Failed to compile using override #{override_path}: #{e}"
+        raise e
       end
     end
+    resources = resources.sort_by(&:name)
     product_api.set_variable(resources, 'objects')
   end
 
-  if File.exist?(provider_yaml_path)
-    product_api, provider_config, = \
-      Provider::Config.parse(provider_yaml_path, product_api, version)
-  end
-  # Load any dynamic overrides passed in with -r
-  if File.exist?(provider_override_path)
-    product_api, provider_config, = \
-      Provider::Config.parse(provider_override_path, product_api, version, override_dir)
-  end
-
-  Google::LOGGER.info "#{product_name}: Compiling provider config"
-  pp provider_config if ENV['COMPILER_DEBUG']
+  product_api&.validate
 
   if force_provider.nil?
-    provider = provider_config.provider.new(provider_config, product_api, version, start_time)
+    provider = \
+      Provider::Terraform.new(product_api, version, start_time)
   else
     override_providers = {
       'oics' => Provider::TerraformOiCS,
-      'validator' => Provider::TerraformValidator,
+      'validator' => Provider::TerraformGoogleConversion,
+      'tgc' => Provider::TerraformGoogleConversion,
+      'tgc_cai2hcl' => Provider::CaiToTerraformConversion,
       'kcc' => Provider::TerraformKCC
     }
 
@@ -270,15 +267,12 @@ all_product_files.each do |product_name|
     end
 
     provider = \
-      override_providers[force_provider].new(provider_config, product_api, version, start_time)
+      override_providers[force_provider].new(product_api, version, start_time)
   end
-
-  # provider_config is mutated by instantiating a provider
-  products_for_version.push(definitions: product_api, overrides: provider_config)
 
   unless products_to_generate.include?(product_name)
     Google::LOGGER.info "#{product_name}: Not specified, skipping generation"
-    next
+    next { definitions: product_api, provider: provider } # rubocop:disable Style/HashSyntax
   end
 
   Google::LOGGER.info \
@@ -289,20 +283,30 @@ all_product_files.each do |product_name|
     product_name,
     yaml_dump,
     generate_code,
-    generate_docs
+    generate_docs,
+    go_yaml
   )
+
+  # we need to preserve a single provider instance to use outside of this loop.
+  { definitions: product_api, provider: provider } # rubocop:disable Style/HashSyntax
 end
+
+# remove any nil values
+products_for_version = products_for_version.compact.sort_by { |p| p[:definitions].name.downcase }
 
 # In order to only copy/compile files once per provider this must be called outside
 # of the products loop. This will get called with the provider from the final iteration
 # of the loop
+final_product = products_for_version.last
+provider = final_product[:provider]
+
 provider&.copy_common_files(output_path, generate_code, generate_docs)
 Google::LOGGER.info "Compiling common files for #{provider_name}"
 common_compile_file = "provider/#{provider_name}/common~compile.yaml"
 if generate_code
   provider&.compile_common_files(
     output_path,
-    products_for_version.sort_by { |p| p[:definitions].name.downcase },
+    products_for_version,
     common_compile_file
   )
 
@@ -311,7 +315,7 @@ if generate_code
     common_compile_file = "#{override_dir}/common~compile.yaml"
     provider&.compile_common_files(
       output_path,
-      products_for_version.sort_by { |p| p[:definitions].name.downcase },
+      products_for_version,
       common_compile_file,
       override_dir
     )

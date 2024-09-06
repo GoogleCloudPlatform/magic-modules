@@ -1,0 +1,305 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'DocumentSchema'
+base_url: 'projects/{{project_number}}/locations/{{location}}/documentSchemas'
+self_link: '{{name}}'
+delete_url: '{{name}}'
+immutable: true
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/document-warehouse/docs/manage-document-schemas'
+  api: 'https://cloud.google.com/document-warehouse/docs/reference/rest/v1/projects.locations.documentSchemas'
+description: |
+  A document schema is used to define document structure.
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_import: templates/terraform/custom_import/document_ai_warehouse_document_schema.go.erb
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    # docs only, testing is done in an update test
+    skip_test: true
+    name: "document_ai_warehouse_document_schema_text"
+    primary_resource_id: "example_text"
+parameters:
+  - !ruby/object:Api::Type::String
+    name: 'project_number'
+    url_param_only: true
+    required: true
+    immutable: true
+    description: |
+      The unique identifier of the project.
+  - !ruby/object:Api::Type::String
+    name: 'location'
+    url_param_only: true
+    immutable: true
+    required: true
+    description: |
+      The location of the resource.
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    output: true
+    description: |
+      The resource name of the document schema.
+  - !ruby/object:Api::Type::String
+    name: 'displayName'
+    required: true
+    description: |
+      Name of the schema given by the user.
+  - !ruby/object:Api::Type::Boolean
+    name: 'documentIsFolder'
+    description: |
+      Tells whether the document is a folder or a typical document.
+  - !ruby/object:Api::Type::Array
+    name: 'propertyDefinitions'
+    description: |
+      Defines the metadata for a schema property.
+    required: true
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'name'
+          required: true
+          description: |
+            The name of the metadata property.
+        - !ruby/object:Api::Type::String
+          name: 'displayName'
+          description: |
+            The display-name for the property, used for front-end.
+        - !ruby/object:Api::Type::Boolean
+          name: 'isRepeatable'
+          description: |
+            Whether the property can have multiple values.
+        - !ruby/object:Api::Type::Boolean
+          name: 'isFilterable'
+          description: |
+            Whether the property can be filtered. If this is a sub-property, all the parent properties must be marked filterable.
+        - !ruby/object:Api::Type::Boolean
+          name: 'isSearchable'
+          description: |
+            Indicates that the property should be included in a global search.
+        - !ruby/object:Api::Type::Boolean
+          name: 'isMetadata'
+          description: |
+            Whether the property is user supplied metadata.
+        - !ruby/object:Api::Type::Boolean
+          name: 'isRequired'
+          description: |
+            Whether the property is mandatory.
+        - !ruby/object:Api::Type::Enum
+          name: 'retrievalImportance'
+          description: |
+            Stores the retrieval importance.
+          values:
+            - :HIGHEST
+            - :HIGHER
+            - :HIGH
+            - :MEDIUM
+            - :LOW
+            - :LOWEST
+        - !ruby/object:Api::Type::Array
+          name: 'schemaSources'
+          description: |
+            The schema source information.
+          item_type: !ruby/object:Api::Type::NestedObject
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'name'
+                description: |
+                  The schema name in the source.
+              - !ruby/object:Api::Type::String
+                name: 'processorType'
+                description: |
+                  The Doc AI processor type name.
+        # select any one of the property types (integer, float, text, property, enum, dateTime, map, timestamp)
+        - !ruby/object:Api::Type::NestedObject
+          name: 'integerTypeOptions'
+          description: |
+            Integer property.
+          send_empty_value: true
+          allow_empty_object: true
+          properties: []
+        - !ruby/object:Api::Type::NestedObject
+          name: 'floatTypeOptions'
+          description: |
+            Float property.
+          send_empty_value: true
+          allow_empty_object: true
+          properties: []
+        - !ruby/object:Api::Type::NestedObject
+          name: 'textTypeOptions'
+          description: |
+            Text/string property.
+          send_empty_value: true
+          allow_empty_object: true
+          properties: []
+        - !ruby/object:Api::Type::NestedObject
+          name: 'propertyTypeOptions'
+          description: |
+            Nested structured data property.
+          properties:
+            - !ruby/object:Api::Type::Array
+              name: 'propertyDefinitions'
+              description: |
+                Defines the metadata for a schema property.
+              required: true
+              item_type: !ruby/object:Api::Type::NestedObject
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: 'name'
+                    required: true
+                    description: |
+                      The name of the metadata property.
+                  - !ruby/object:Api::Type::String
+                    name: 'displayName'
+                    description: |
+                      The display-name for the property, used for front-end.
+                  - !ruby/object:Api::Type::Boolean
+                    name: 'isRepeatable'
+                    description: |
+                      Whether the property can have multiple values.
+                  - !ruby/object:Api::Type::Boolean
+                    name: 'isFilterable'
+                    description: |
+                      Whether the property can be filtered. If this is a sub-property, all the parent properties must be marked filterable.
+                  - !ruby/object:Api::Type::Boolean
+                    name: 'isSearchable'
+                    description: |
+                      Indicates that the property should be included in a global search.
+                  - !ruby/object:Api::Type::Boolean
+                    name: 'isMetadata'
+                    description: |
+                      Whether the property is user supplied metadata.
+                  - !ruby/object:Api::Type::Boolean
+                    name: 'isRequired'
+                    description: |
+                      Whether the property is mandatory.
+                  - !ruby/object:Api::Type::Enum
+                    name: 'retrievalImportance'
+                    description: |
+                      Stores the retrieval importance.
+                    values:
+                      - :HIGHEST
+                      - :HIGHER
+                      - :HIGH
+                      - :MEDIUM
+                      - :LOW
+                      - :LOWEST
+                  - !ruby/object:Api::Type::Array
+                    name: 'schemaSources'
+                    description: |
+                      The schema source information.
+                    item_type: !ruby/object:Api::Type::NestedObject
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: 'name'
+                          description: |
+                            The schema name in the source.
+                        - !ruby/object:Api::Type::String
+                          name: 'processorType'
+                          description: |
+                            The Doc AI processor type name.
+                  - !ruby/object:Api::Type::NestedObject
+                    name: 'integerTypeOptions'
+                    description: |
+                      Integer property.
+                    send_empty_value: true
+                    allow_empty_object: true
+                    properties: []
+                  - !ruby/object:Api::Type::NestedObject
+                    name: 'floatTypeOptions'
+                    description: |
+                      Float property.
+                    send_empty_value: true
+                    allow_empty_object: true
+                    properties: []
+                  - !ruby/object:Api::Type::NestedObject
+                    name: 'textTypeOptions'
+                    description: |
+                      Text property.
+                    send_empty_value: true
+                    allow_empty_object: true
+                    properties: []
+                  - !ruby/object:Api::Type::NestedObject
+                    name: 'enumTypeOptions'
+                    description: |
+                      Enum/categorical property.
+                    properties:
+                      - !ruby/object:Api::Type::Array
+                        name: 'possibleValues'
+                        required: true
+                        description: |
+                          List of possible enum values.
+                        item_type: Api::Type::String
+                      - !ruby/object:Api::Type::Boolean
+                        name: 'validationCheckDisabled'
+                        description: |
+                          Make sure the enum property value provided in the document is in the possile value list during document creation. The validation check runs by default.
+                  - !ruby/object:Api::Type::NestedObject
+                    name: 'dateTimeTypeOptions'
+                    description: |
+                      Date time property. Not supported by CMEK compliant deployment.
+                    send_empty_value: true
+                    allow_empty_object: true
+                    properties: []
+                  - !ruby/object:Api::Type::NestedObject
+                    name: 'mapTypeOptions'
+                    description: |
+                      Map property.
+                    send_empty_value: true
+                    allow_empty_object: true
+                    properties: []
+                  - !ruby/object:Api::Type::NestedObject
+                    name: 'timestampTypeOptions'
+                    description: |
+                      Timestamp property. Not supported by CMEK compliant deployment.
+                    send_empty_value: true
+                    allow_empty_object: true
+                    properties: []
+        - !ruby/object:Api::Type::NestedObject
+          name: 'enumTypeOptions'
+          description: |
+            Enum/categorical property.
+          properties:
+            - !ruby/object:Api::Type::Array
+              name: 'possibleValues'
+              required: true
+              description: |
+                List of possible enum values.
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::Boolean
+              name: 'validationCheckDisabled'
+              description: |
+                Make sure the enum property value provided in the document is in the possile value list during document creation. The validation check runs by default.
+        - !ruby/object:Api::Type::NestedObject
+          name: 'dateTimeTypeOptions'
+          description: |
+            Date time property. Not supported by CMEK compliant deployment.
+          send_empty_value: true
+          allow_empty_object: true
+          properties: []
+        - !ruby/object:Api::Type::NestedObject
+          name: 'mapTypeOptions'
+          description: |
+            Map property.
+          send_empty_value: true
+          allow_empty_object: true
+          properties: []
+        - !ruby/object:Api::Type::NestedObject
+          name: 'timestampTypeOptions'
+          description: |
+            Timestamp property. Not supported by CMEK compliant deployment.
+          send_empty_value: true
+          allow_empty_object: true
+          properties: []

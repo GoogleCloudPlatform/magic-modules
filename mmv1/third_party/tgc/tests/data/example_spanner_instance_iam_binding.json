@@ -1,0 +1,34 @@
+[
+  {
+    "name": "//spanner.googleapis.com/projects/{{.Provider.project}}/instances/spanner-instance",
+    "asset_type": "spanner.googleapis.com/Instance",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "v1",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/spanner/v1/rest",
+      "discovery_name": "Instance",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "instance": {
+          "config": "projects/{{.Provider.project}}/instanceConfigs/regional-us-central1",
+          "displayName": "spanner-instance",
+          "labels": {
+            "goog-terraform-provisioned": "true"
+          },
+          "nodeCount": 1
+        },
+        "instanceId": "spanner-instance"
+      }
+    },
+    "iam_policy": {
+      "bindings": [
+        {
+          "role": "roles/compute.networkUser",
+          "members": [
+            "user:jane@example.com"
+          ]
+        }
+      ]
+    }
+  }
+]

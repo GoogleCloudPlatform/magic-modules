@@ -12,10 +12,10 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: Entry
+name: "Entry"
 base_url: '{{entry_group}}/entries'
 create_url: '{{entry_group}}/entries?entryId={{entry_id}}'
-self_link: "{{name}}"
+self_link: '{{name}}'
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -29,27 +29,27 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': https://cloud.google.com/data-catalog/docs
   api: https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.entryGroups.entries
-import_format: ["{{name}}"]
+import_format: ['{{name}}']
 supports_indirect_user_project_override: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "data_catalog_entry_basic"
-    primary_resource_id: "basic_entry"
+    name: 'data_catalog_entry_basic'
+    primary_resource_id: 'basic_entry'
     vars:
-      entry_id: "my_entry"
-      entry_group_id: "my_group"
+      entry_id: 'my_entry'
+      entry_group_id: 'my_group'
   - !ruby/object:Provider::Terraform::Examples
-    name: "data_catalog_entry_fileset"
-    primary_resource_id: "basic_entry"
+    name: 'data_catalog_entry_fileset'
+    primary_resource_id: 'basic_entry'
     vars:
-      entry_id: "my_entry"
-      entry_group_id: "my_group"
+      entry_id: 'my_entry'
+      entry_group_id: 'my_group'
   - !ruby/object:Provider::Terraform::Examples
-    name: "data_catalog_entry_full"
-    primary_resource_id: "basic_entry"
+    name: 'data_catalog_entry_full'
+    primary_resource_id: 'basic_entry'
     vars:
-      entry_id: "my_entry"
-      entry_group_id: "my_group"
+      entry_id: 'my_entry'
+      entry_group_id: 'my_group'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/data_catalog_entry.go.erb
 parameters:
@@ -105,7 +105,8 @@ properties:
       for what fields this schema can contain.
     custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
     custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
-    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
+    state_func:
+      'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
       return s }'
     validation: !ruby/object:Provider::Terraform::Validation
       function: 'validation.StringIsJSON'

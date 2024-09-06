@@ -16,17 +16,17 @@ require 'google/string_utils'
 
 module Api
   # An object available in the product
-  class Resource < Api::Object::Named
+  class Resource < Api::NamedObject
     # Information about the IAM policy for this resource
     # Several GCP resources have IAM policies that are scoped to
     # and accessed via their parent resource
     # See: https://cloud.google.com/iam/docs/overview
-    class IamPolicy < Api::Object
+    class IamPolicy < Google::YamlValidator
       # boolean of if this binding should be generated
       attr_reader :exclude
 
       # boolean of if this binding should be generated
-      attr_reader :exclude_validator
+      attr_reader :exclude_tgc
 
       # Boolean of if tests for IAM resources should exclude import test steps
       # Used to handle situations where typical generated IAM tests cannot import
@@ -77,7 +77,7 @@ module Api
       attr_reader :test_project_name
 
       # Resource name may need a custom diff suppress function. Default is to use
-      # compareSelfLinkOrResourceName
+      # CompareSelfLinkOrResourceName
       attr_reader :custom_diff_suppress
 
       # Some resources (IAP) use fields named differently from the parent resource.
@@ -118,7 +118,7 @@ module Api
         super
 
         check :exclude, type: :boolean, default: false
-        check :exclude_validator, type: :boolean, default: false
+        check :exclude_tgc, type: :boolean, default: false
         check :skip_import_test, type: :boolean, default: false
         check :method_name_separator, type: String, default: '/'
         check :parent_resource_type, type: String
@@ -138,7 +138,7 @@ module Api
         check :import_format, type: Array, item_type: String
         check(
           :example_config_body,
-          type: String, default: 'templates/terraform/iam/iam_attributes.tf.erb'
+          type: String, default: 'templates/terraform/iam/iam_attributes.go.erb'
         )
         check :iam_policy_version, type: String
         check :min_version, type: String

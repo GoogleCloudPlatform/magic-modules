@@ -22,7 +22,7 @@ func resourceNameSetFromSelfLinkSet(v interface{}) *schema.Set {
 		if v == nil {
 			continue
 		}
-		ls = append(ls, GetResourceNameFromSelfLink(v.(string)))
+		ls = append(ls, tpgresource.GetResourceNameFromSelfLink(v.(string)))
 	}
 	return schema.NewSet(schema.HashString, ls)
 }
@@ -86,7 +86,7 @@ func computeRouterNatSubnetworkHash(v interface{}) int {
 		}
 	}
 	
-	return schema.HashString(NameFromSelfLinkStateFunc(name)) + sourceIpRangesHash + secondaryIpRangeHash
+	return schema.HashString(tpgresource.NameFromSelfLinkStateFunc(name)) + sourceIpRangesHash + secondaryIpRangeHash
 }
 
 func computeRouterNatIPsHash(v interface{}) int {
@@ -95,8 +95,14 @@ func computeRouterNatIPsHash(v interface{}) int {
 	if len(newParts) == 1 {
 		return schema.HashString(newParts[0])
 	}
-	return schema.HashString(GetResourceNameFromSelfLink(val))
+	return schema.HashString(tpgresource.GetResourceNameFromSelfLink(val))
 }
+
+<% unless version == 'ga' -%>
+func computeRouterNatRulesSubnetHash(v interface{}) int {
+	return computeRouterNatIPsHash(v)
+}
+<% end -%>
 
 func computeRouterNatRulesHash(v interface{}) int {
 	obj := v.(map[string]interface{})
@@ -112,6 +118,12 @@ func computeRouterNatRulesHash(v interface{}) int {
 
 	sourceNatActiveIpHash := 0
 	sourceNatDrainIpHash := 0
+	<% unless version == 'ga' -%>
+	sourceNatActiveRangeHash := 0
+	sourceNatDrainRangeHash := 0
+	<% end -%>
+	routerNatRulesHash := 0
+
 	if obj["action"] != nil {
 		actions := obj["action"].([]interface{})
 		if len(actions) != 0 && actions[0] != nil {
@@ -134,8 +146,32 @@ func computeRouterNatRulesHash(v interface{}) int {
 					sourceNatDrainIpHash += schema.HashString(sourceNatDrainIpStr)
 				}
 			}
+
+			<% unless version == 'ga' -%>
+			sourceNatActiveRanges := action["source_nat_active_ranges"]
+			if sourceNatActiveRanges != nil {
+				sourceNatActiveRangesSet := sourceNatActiveRanges.(*schema.Set)
+				for _, sourceNatActiveRange := range sourceNatActiveRangesSet.List() {
+					sourceNatActiveRangeStr := fmt.Sprintf("source_nat_active_ranges-%d", computeRouterNatRulesSubnetHash(sourceNatActiveRange.(string)))
+					sourceNatActiveRangeHash += schema.HashString(sourceNatActiveRangeStr)
+				}
+			}
+
+			sourceNatDrainRanges := action["source_nat_drain_ranges"]
+			if sourceNatDrainRanges != nil {
+				sourceNatDrainRangesSet := sourceNatDrainRanges.(*schema.Set)
+				for _, sourceNatDrainRange := range sourceNatDrainRangesSet.List() {
+					sourceNatDrainRangeStr := fmt.Sprintf("source_nat_drain_ranges-%d", computeRouterNatRulesSubnetHash(sourceNatDrainRange.(string)))
+					sourceNatDrainRangeHash += schema.HashString(sourceNatDrainRangeStr)
+				}
+			}
+			<% end -%>
 		}
 	}
 
-	return ruleNumber + descriptionHash + schema.HashString(match) + sourceNatActiveIpHash + sourceNatDrainIpHash
+	routerNatRulesHash = ruleNumber + descriptionHash + schema.HashString(match) + sourceNatActiveIpHash + sourceNatDrainIpHash
+	<% unless version == 'ga' -%>
+	routerNatRulesHash += sourceNatActiveRangeHash + sourceNatDrainRangeHash
+	<% end -%>
+	return routerNatRulesHash
 }

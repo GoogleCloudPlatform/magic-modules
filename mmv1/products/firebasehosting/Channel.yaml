@@ -20,7 +20,7 @@ create_url: sites/{{site_id}}/channels?channelId={{channel_id}}
 update_verb: :PATCH
 update_mask: true
 description: |
-  A `Channel` represents a stream of releases for a site. All sites have a default 
+  A `Channel` represents a stream of releases for a site. All sites have a default
   `live` channel that serves content to the Firebase-provided subdomains and any
   connected custom domains.
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -30,18 +30,18 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 import_format: ['sites/{{site_id}}/channels/{{channel_id}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "firebasehosting_channel_basic"
-    min_version: "beta"
-    primary_resource_id: "default"
+    name: 'firebasehosting_channel_basic'
+    min_version: 'beta'
+    primary_resource_id: 'default'
     vars:
       site_id: site-with-channel
       channel_id: channel-basic
     test_env_vars:
       project_id: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
-    name: "firebasehosting_channel_full"
-    min_version: "beta"
-    primary_resource_id: "full"
+    name: 'firebasehosting_channel_full'
+    min_version: 'beta'
+    primary_resource_id: 'full'
     vars:
       site_id: site-with-channel
       channel_id: channel-full
@@ -65,7 +65,6 @@ parameters:
 properties:
   - !ruby/object:Api::Type::String
     name: name
-    pattern: sites/{{site_id}}/channels/{{channel_id}}
     description: |
       The fully-qualified resource name for the channel, in the format:
       sites/SITE_ID/channels/CHANNEL_ID
@@ -76,8 +75,8 @@ properties:
       The number of previous releases to retain on the channel for rollback or other
       purposes. Must be a number between 1-100. Defaults to 10 for new channels.
     default_from_api: true
-  - !ruby/object:Api::Type::KeyValuePairs
-    name: labels
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
     description: Text labels used for extra metadata and/or filtering
   - !ruby/object:Api::Type::Time
     name: expireTime

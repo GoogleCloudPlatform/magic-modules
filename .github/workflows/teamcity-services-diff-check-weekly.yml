@@ -1,0 +1,47 @@
+name: TeamCity Services Weekly Diff Check
+permissions: read-all
+
+on:
+  # Enable ad hoc checks
+  workflow_dispatch:
+  
+  # Scheduled checks to catch edge cases
+  schedule:
+    # Every Monday and Tuesday morning
+    - cron:  '0 4 * * 1-2'
+
+jobs:
+  teamcity-services-diff-check:
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      runs-on: ubuntu-22.04
+      steps:
+        - name: Checkout Repository
+          uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+        - name: TeamCity Google Provider Generate
+          uses: ./.github/actions/build-downstream
+          with:
+            repo: 'terraform-provider-google'
+            token: '$GITHUB_TOKEN'
+        # The path where GA/Beta providers are generated is grabbed from the OUTPUT_PATH that's set in build_downstream.yaml
+        # export OUTPUT_PATH=$GOPATH/src/github.com/$UPSTREAM_OWNER/$GH_REPO
+        # OUTPUT_PATH changes after each generate (GA/beta)
+        - name: Set GOOGLE_REPO_PATH to path where GA provider was generated
+          run: echo "GOOGLE_REPO_PATH=${{ env.OUTPUT_PATH}}" >> $GITHUB_ENV
+        - name: TeamCity Google Beta Provider Generate
+          uses: ./.github/actions/build-downstream
+          with:
+            repo: 'terraform-provider-google-beta'
+            token: '$GITHUB_TOKEN'
+        - name: Set GOOGLE_BETA_REPO_PATH to path where beta provider was generated
+          run: echo "GOOGLE_BETA_REPO_PATH=${{ env.OUTPUT_PATH}}" >> $GITHUB_ENV
+        - name: Check that new services have been added to the TeamCity configuration code
+          run: |
+              # Create lists of service packages in providers
+              ls ${{env.GOOGLE_REPO_PATH}}/google/services > tools/teamcity-diff-check/services_ga.txt
+              ls ${{env.GOOGLE_BETA_REPO_PATH}}/google-beta/services > tools/teamcity-diff-check/services_beta.txt
+    
+              # Run tool to compare service packages in the providers vs those listed in TeamCity config files
+              cd tools/teamcity-diff-check
+              go run main.go -service_file=services_ga
+              go run main.go -service_file=services_beta

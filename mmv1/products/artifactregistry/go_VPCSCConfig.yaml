@@ -1,0 +1,77 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'VPCSCConfig'
+description: |-
+  The Artifact Registry VPC SC config that applies to a Project.
+min_version: 'beta'
+references:
+  guides:
+  api: 'https://cloud.google.com/artifact-registry/docs/reference/rest/v1/VPCSCConfig'
+docs:
+  note: |-
+    VPC SC configs are automatically created for a given location. Creating a
+    resource of this type will acquire and update the resource that already
+    exists at the location. Deleting this resource will remove the config from
+    your Terraform state but leave the resource as is.
+base_url: 'projects/{{project}}/locations/{{location}}/vpcscConfig'
+self_link: 'projects/{{project}}/locations/{{location}}/vpcscConfig'
+create_url: 'projects/{{project}}/locations/{{location}}/vpcscConfig'
+create_verb: 'PATCH'
+update_verb: 'PATCH'
+skip_delete: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+custom_code:
+  encoder: 'templates/terraform/encoders/go/location_from_region.go.tmpl'
+examples:
+  - name: 'artifact_registry_vpcsc_config'
+    primary_resource_id: 'my-config'
+    skip_test: true
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The name of the location this config is located in.
+    min_version: 'beta'
+    url_param_only: true
+    required: false
+    immutable: true
+    default_from_api: true
+  - name: 'name'
+    type: String
+    description: |-
+      The name of the project's VPC SC Config.
+      Always of the form: projects/{project}/location/{location}/vpcscConfig
+    min_version: 'beta'
+    output: true
+properties:
+  - name: 'vpcscPolicy'
+    type: Enum
+    description: |-
+      The VPC SC policy for project and location.
+    min_version: 'beta'
+    enum_values:
+      - 'DENY'
+      - 'ALLOW'

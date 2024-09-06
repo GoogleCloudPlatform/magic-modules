@@ -1,4 +1,3 @@
-# [START cloud_sql_mysql_instance_require_ssl]
 resource "google_sql_database_instance" "mysql_instance" {
   name             = "<%= ctx[:vars]['mysql_instance'] %>"
   region           = "asia-northeast1"
@@ -6,21 +5,17 @@ resource "google_sql_database_instance" "mysql_instance" {
   settings {
     tier              = "db-f1-micro"
     ip_configuration {
-      require_ssl = "true"
+      ssl_mode = "TRUSTED_CLIENT_CERTIFICATE_REQUIRED"
     }
   }
   deletion_protection = "<%= ctx[:vars]['deletion_protection'] %>"
 }
-# [END cloud_sql_mysql_instance_require_ssl]
 
-# [START cloud_sql_mysql_instance_ssl_cert]
 resource "google_sql_ssl_cert" "mysql_client_cert" {
   common_name = "mysql_common_name"
   instance    = google_sql_database_instance.mysql_instance.name
 }
-# [END cloud_sql_mysql_instance_ssl_cert]
 
-# [START cloud_sql_postgres_instance_require_ssl]
 resource "google_sql_database_instance" "postgres_instance" {
   name             = "<%= ctx[:vars]['postgres_instance'] %>"
   region           = "asia-northeast1"
@@ -28,21 +23,17 @@ resource "google_sql_database_instance" "postgres_instance" {
   settings {
     tier              = "db-custom-2-7680"
     ip_configuration {
-      require_ssl = "true"
+      ssl_mode = "TRUSTED_CLIENT_CERTIFICATE_REQUIRED"
     }
   }
   deletion_protection = "<%= ctx[:vars]['deletion_protection'] %>"
 }
-# [END cloud_sql_postgres_instance_require_ssl]
 
-# [START cloud_sql_postgres_instance_ssl_cert]
 resource "google_sql_ssl_cert" "postgres_client_cert" {
   common_name = "postgres_common_name"
   instance    = google_sql_database_instance.postgres_instance.name
 }
-# [END cloud_sql_postgres_instance_ssl_cert]
 
-# [START cloud_sql_sqlserver_instance_require_ssl]
 resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
   name             = "<%= ctx[:vars]['sqlserver_instance'] %>"
   region           = "asia-northeast1"
@@ -51,9 +42,8 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
   settings {
     tier              = "db-custom-2-7680"
     ip_configuration {
-      require_ssl = "true"
+      ssl_mode = "ENCRYPTED_ONLY"
     }
   }
   deletion_protection = "<%= ctx[:vars]['deletion_protection'] %>"
 }
-# [END cloud_sql_sqlserver_instance_require_ssl]

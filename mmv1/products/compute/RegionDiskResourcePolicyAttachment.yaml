@@ -35,7 +35,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -51,14 +51,14 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_disk_resource_policy_attachment_basic"
-    primary_resource_id: "attachment"
+    name: 'region_disk_resource_policy_attachment_basic'
+    primary_resource_id: 'attachment'
     vars:
-      base_disk_name: "my-base-disk"
-      snapshot_name: "my-snapshot"
-      disk_name: "my-disk"
-      policy_name: "my-resource-policy"
-id_format: "{{project}}/{{region}}/{{disk}}/{{name}}"
+      base_disk_name: 'my-base-disk'
+      snapshot_name: 'my-snapshot'
+      disk_name: 'my-disk'
+      policy_name: 'my-resource-policy'
+id_format: '{{project}}/{{region}}/{{disk}}/{{name}}'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/compute_region_disk_resource_policies_attachment.go.erb
   decoder: templates/terraform/decoders/compute_disk_resource_policies_attachment.go.erb

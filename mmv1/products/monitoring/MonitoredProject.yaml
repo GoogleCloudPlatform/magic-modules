@@ -1,0 +1,72 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the License);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: MonitoredProject
+base_url: v1/locations/global/metricsScopes
+create_url: v1/locations/global/metricsScopes/{{metrics_scope}}/projects
+delete_url: v1/{{name}}
+self_link: v1/locations/global/metricsScopes/{{metrics_scope}}
+id_format: locations/global/metricsScopes/{{metrics_scope}}/projects/{{name}}
+schema_version: 1
+state_upgraders: true
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/monitoring/settings/manage-api'
+  api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/v1/locations.global.metricsScopes.projects'
+description: "A [project being monitored](https://cloud.google.com/monitoring/settings/multiple-projects#create-multi) by a Metrics Scope."
+immutable: true
+error_retry_predicates: ['transport_tpg.IsMonitoringPermissionError']
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_import: templates/terraform/custom_import/monitoring_monitored_project.go.erb
+  encoder: templates/terraform/encoders/monitoring_monitored_project.go.erb
+  decoder: templates/terraform/decoders/monitoring_monitored_project.go.erb
+  pre_read: templates/terraform/pre_read/monitoring_monitored_project.go.erb
+  test_check_destroy: templates/terraform/custom_check_destroy/monitoring_monitored_project.go.erb
+  constants: templates/terraform/constants/monitoring_monitored_project.go.erb
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'monitoring_monitored_project_basic'
+    primary_resource_id: 'primary'
+    vars:
+      monitored_project: 'm-id'
+    test_env_vars:
+      org_id: :ORG_ID
+      project_id: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'monitoring_monitored_project_long_form'
+    primary_resource_id: 'primary'
+    vars:
+      monitored_project: 'm-id'
+    test_env_vars:
+      org_id: :ORG_ID
+      project_id: :PROJECT_NAME
+    skip_docs: true
+parameters:
+  - !ruby/object:Api::Type::String
+    name: metricsScope
+    description: 'Required. The resource name of the existing Metrics Scope that will monitor this project. Example: locations/global/metricsScopes/{SCOPING_PROJECT_ID_OR_NUMBER}'
+    url_param_only: true
+    required: true
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
+    ignore_read: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: name
+    description: 'Immutable. The resource name of the `MonitoredProject`. On input, the resource name includes the scoping project ID and monitored project ID. On output, it contains the equivalent project numbers. Example: `locations/global/metricsScopes/{SCOPING_PROJECT_ID_OR_NUMBER}/projects/{MONITORED_PROJECT_ID_OR_NUMBER}`'
+    required: true
+    diff_suppress_func: 'resourceMonitoringMonitoredProjectNameDiffSuppress'
+  - !ruby/object:Api::Type::String
+    name: createTime
+    description: Output only. The time when this `MonitoredProject` was created.
+    output: true

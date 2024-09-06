@@ -22,6 +22,7 @@ description: |
   Represents a Region resource. A region is a specific geographical
   location where you can run your resources. Each region has one or more
   zones
+# Used as a resource reference
 exclude: true
 properties:
   - !ruby/object:Api::Type::Time
@@ -102,8 +103,9 @@ properties:
           output: true
         - !ruby/object:Api::Type::String
           name: 'owner'
-          description: 'Owning resource. This is the resource on which this quota
-            is applied.'
+          description:
+            'Owning resource. This is the resource on which this quota is
+            applied.'
           output: true
   - !ruby/object:Api::Type::Enum
     name: 'status'

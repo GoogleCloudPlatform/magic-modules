@@ -47,150 +47,294 @@ async: !ruby/object:Api::OpAsync
     path: 'error'
     message: 'message'
 id_format: 'projects/{{project}}/locations/{{location}}/functions/{{name}}'
-import_format: ["projects/{{project}}/locations/{{location}}/functions/{{name}}"]
+import_format:
+  ['projects/{{project}}/locations/{{location}}/functions/{{name}}']
+taint_resource_on_failed_create: true
 autogen_async: true
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: 'templates/terraform/constants/cloudfunctions2_function.go.erb'
+  encoder: 'templates/terraform/encoders/cloudfunctions2_runtime_update_policy.go.erb'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloudfunctions2_basic"
-    primary_resource_id: "function"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-function-v2%s\", context[\"random_suffix\"\
+    name: 'cloudfunctions2_basic'
+    primary_resource_id: 'function'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-function-v2%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
-      function: "function-v2"
-      bucket_name: "gcf-source"
-      zip_path: "function-source.zip"
+      function: 'function-v2'
+      bucket_name: 'gcf-source'
+      zip_path: 'function-source.zip'
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: "\"./test-fixtures/cloudfunctions2/function-source.zip\""
-      location: "\"us-central1\""
+      location:
+        '"us-central1"'
+      zip_path: '"./test-fixtures/function-source.zip"'
         # ignore these fields during import step
     ignore_read_extra:
-      - "build_config.0.source.0.storage_source.0.object"
-      - "build_config.0.source.0.storage_source.0.bucket"
+      - 'build_config.0.source.0.storage_source.0.object'
+      - 'build_config.0.source.0.storage_source.0.bucket'
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloudfunctions2_full"
-    primary_resource_id: "function"
+    name: 'cloudfunctions2_full'
+    primary_resource_id: 'function'
     vars:
-      bucket_name: "gcf-source"
-      service_account: "gcf-sa"
-      topic: "functions2-topic"
-      function: "gcf-function"
-      zip_path: "function-source.zip"
+      bucket_name: 'gcf-source'
+      service_account: 'gcf-sa'
+      topic: 'functions2-topic'
+      function: 'gcf-function'
+      zip_path: 'function-source.zip'
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: "\"./test-fixtures/cloudfunctions2/function-source-pubsub.zip\""
-      primary_resource_id: "\"terraform-test\""
-      location: "\"us-central1\""
+      zip_path: '"./test-fixtures/function-source-pubsub.zip"'
+      primary_resource_id: '"terraform-test"'
+      location:
+        '"us-central1"'
         # ignore these fields during import step
     ignore_read_extra:
-      - "build_config.0.source.0.storage_source.0.object"
-      - "build_config.0.source.0.storage_source.0.bucket"
+      - 'build_config.0.source.0.storage_source.0.object'
+      - 'build_config.0.source.0.storage_source.0.bucket'
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloudfunctions2_basic_gcs"
-    primary_resource_id: "function"
+    name: 'cloudfunctions2_scheduler_auth'
+    primary_resource_id: 'function'
     vars:
-      bucket_name_source: "gcf-source-bucket"
-      bucket_name_trigger: "gcf-trigger-bucket"
-      service_account: "gcf-sa"
-      function_name: "gcf-function"
-      zip_path: "function-source.zip"
+      bucket_name: 'gcf-source'
+      service_account: 'gcf-sa'
+      function: 'gcf-function'
+      zip_path: 'function-source.zip'
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: "\"./test-fixtures/cloudfunctions2/function-source-eventarc-gcs.zip\""
-      primary_resource_id: "\"terraform-test\""
-      policyChanged: "BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\", \"roles/cloudkms.cryptoKeyEncrypterDecrypter\"\
+      primary_resource_id: '"terraform-test"'
+      location:
+        '"us-central1"'
+      zip_path: '"./test-fixtures/function-source.zip"'
+        # ignore these fields during import step
+    ignore_read_extra:
+      - 'build_config.0.source.0.storage_source.0.object'
+      - 'build_config.0.source.0.storage_source.0.bucket'
+    skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudfunctions2_basic_gcs'
+    primary_resource_id: 'function'
+    vars:
+      bucket_name_source: 'gcf-source-bucket'
+      bucket_name_trigger: 'gcf-trigger-bucket'
+      service_account: 'gcf-sa'
+      function_name: 'gcf-function'
+      zip_path: 'function-source.zip'
+    test_env_vars:
+      project: :PROJECT_NAME
+    test_vars_overrides:
+      zip_path: '"./test-fixtures/function-source-eventarc-gcs.zip"'
+      primary_resource_id: '"terraform-test"'
+      policyChanged:
+        "acctest.BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
+        \"roles/cloudkms.cryptoKeyEncrypterDecrypter\"\
         )"
         # ignore these fields during import step
     ignore_read_extra:
-      - "build_config.0.source.0.storage_source.0.object"
-      - "build_config.0.source.0.storage_source.0.bucket"
+      - 'build_config.0.source.0.storage_source.0.object'
+      - 'build_config.0.source.0.storage_source.0.bucket'
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloudfunctions2_basic_auditlogs"
-    primary_resource_id: "function"
+    name: 'cloudfunctions2_basic_auditlogs'
+    primary_resource_id: 'function'
     vars:
-      bucket_name_source: "gcf-source-bucket"
-      bucket_name_auditlogs: "gcf-auditlog-bucket"
-      service_account: "gcf-sa"
-      function_name: "gcf-function"
-      zip_path: "function-source.zip"
+      bucket_name_source: 'gcf-source-bucket'
+      bucket_name_auditlogs: 'gcf-auditlog-bucket'
+      service_account: 'gcf-sa'
+      function_name: 'gcf-function'
+      zip_path: 'function-source.zip'
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: "\"./test-fixtures/cloudfunctions2/function-source-eventarc-gcs.zip\""
-      primary_resource_id: "\"terraform-test\""
-      policyChanged: "BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\", \"roles/cloudkms.cryptoKeyEncrypterDecrypter\"\
+      zip_path: '"./test-fixtures/function-source-eventarc-gcs.zip"'
+      primary_resource_id: '"terraform-test"'
+      policyChanged:
+        "acctest.BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
+        \"roles/cloudkms.cryptoKeyEncrypterDecrypter\"\
         )"
         # ignore these fields during import step
     ignore_read_extra:
-      - "build_config.0.source.0.storage_source.0.object"
-      - "build_config.0.source.0.storage_source.0.bucket"
+      - 'build_config.0.source.0.storage_source.0.object'
+      - 'build_config.0.source.0.storage_source.0.bucket'
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloudfunctions2_secret_env"
-    primary_resource_id: "function"
+    name: 'cloudfunctions2_basic_builder'
+    primary_resource_id: 'function'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-function-v2%s\",
+      context[\"random_suffix\"\
+      ])"
     vars:
-      function: "function-secret"
-      bucket_name: "gcf-source"
-      zip_path: "function-source.zip"
-      secret: "secret"
+      function: 'function-v2'
+      bucket_name: 'gcf-source'
+      zip_path: 'function-source.zip'
+      service_account: 'gcf-sa'
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: "\"./test-fixtures/cloudfunctions2/function-source.zip\""
-      location: "\"us-central1\""
-      policyChanged: "BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\", \"roles/cloudkms.cryptoKeyEncrypterDecrypter\"\
+      location:
+        '"us-central1"'
+      zip_path: '"./test-fixtures/function-source.zip"'
+        # ignore these fields during import step
+    ignore_read_extra:
+      - 'build_config.0.source.0.storage_source.0.object'
+      - 'build_config.0.source.0.storage_source.0.bucket'
+    external_providers: ["random", "time"]
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudfunctions2_secret_env'
+    primary_resource_id: 'function'
+    vars:
+      function: 'function-secret'
+      bucket_name: 'gcf-source'
+      zip_path: 'function-source.zip'
+      secret: 'secret'
+    test_env_vars:
+      project: :PROJECT_NAME
+    test_vars_overrides:
+      location: '"us-central1"'
+      zip_path: '"./test-fixtures/function-source.zip"'
+      policyChanged:
+        "acctest.BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
+        \"roles/cloudkms.cryptoKeyEncrypterDecrypter\"\
         )"
         # ignore these fields during import step
     ignore_read_extra:
-      - "build_config.0.source.0.storage_source.0.object"
-      - "build_config.0.source.0.storage_source.0.bucket"
+      - 'build_config.0.source.0.storage_source.0.object'
+      - 'build_config.0.source.0.storage_source.0.bucket'
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloudfunctions2_secret_volume"
-    primary_resource_id: "function"
+    name: 'cloudfunctions2_secret_volume'
+    primary_resource_id: 'function'
     vars:
-      function: "function-secret"
-      bucket_name: "gcf-source"
-      zip_path: "function-source.zip"
-      secret: "secret"
+      function: 'function-secret'
+      bucket_name: 'gcf-source'
+      zip_path: 'function-source.zip'
+      secret: 'secret'
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: "\"./test-fixtures/cloudfunctions2/function-source.zip\""
-      location: "\"us-central1\""
-      policyChanged: "BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\", \"roles/cloudkms.cryptoKeyEncrypterDecrypter\"\
+      location: '"us-central1"'
+      zip_path: '"./test-fixtures/function-source.zip"'
+      policyChanged:
+        "acctest.BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
+        \"roles/cloudkms.cryptoKeyEncrypterDecrypter\"\
         )"
         # ignore these fields during import step
     ignore_read_extra:
-      - "build_config.0.source.0.storage_source.0.object"
-      - "build_config.0.source.0.storage_source.0.bucket"
+      - 'build_config.0.source.0.storage_source.0.object'
+      - 'build_config.0.source.0.storage_source.0.bucket'
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloudfunctions2_private_workerpool"
-    primary_resource_id: "function"
+    name: 'cloudfunctions2_private_workerpool'
+    primary_resource_id: 'function'
     vars:
-      function: "function-workerpool"
-      bucket_name: "gcf-source"
-      zip_path: "function-source.zip"
-      pool: "workerpool"
+      function: 'function-workerpool'
+      bucket_name: 'gcf-source'
+      zip_path: 'function-source.zip'
+      pool: 'workerpool'
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: "\"./test-fixtures/cloudfunctions2/function-source.zip\""
-      location: "\"us-central1\""
+      location:
+        '"us-central1"'
+      zip_path: '"./test-fixtures/function-source.zip"'
         # ignore these fields during import step
     ignore_read_extra:
-      - "build_config.0.source.0.storage_source.0.object"
-      - "build_config.0.source.0.storage_source.0.bucket"
+      - 'build_config.0.source.0.storage_source.0.object'
+      - 'build_config.0.source.0.storage_source.0.bucket'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudfunctions2_cmek'
+    skip_docs: true # the example file is written in a repetitive way to help acc tests, so exclude
+    skip_vcr: true
+    primary_resource_id: 'function'
+    min_version: beta
+    vars:
+      function: 'function-cmek'
+      bucket_name: 'gcf-source'
+      zip_path: 'function-source.zip'
+      kms_service_name: 'cloudkms.googleapis.com'
+      cmek-repo: 'cmek-repo'
+      unencoded-ar-repo: 'ar-repo'
+      kms_key_name: 'cmek-key'
+    test_env_vars:
+      project: :PROJECT_NAME
+    test_vars_overrides:
+      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      location:
+        '"us-central1"'
+      zip_path: '"./test-fixtures/function-source.zip"'
+    # ignore these fields during import step
+    ignore_read_extra:
+      - 'build_config.0.source.0.storage_source.0.object'
+      - 'build_config.0.source.0.storage_source.0.bucket'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudfunctions2_cmek_docs'
+    skip_test: true # this example file will cause IAM conflicts between tests if used to make a test
+    primary_resource_id: 'function'
+    min_version: beta
+    vars:
+      function: 'function-cmek'
+      bucket_name: 'gcf-source'
+      zip_path: 'function-source.zip'
+      kms_service_name: 'cloudkms.googleapis.com'
+      cmek-repo: 'cmek-repo'
+      unencoded-ar-repo: 'ar-repo'
+      kms_key_name: 'cmek-key'
+      project: 'my-project-name'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudfunctions2_abiu'
+    primary_resource_id: 'function'
+    min_version: beta
+    vars:
+      bucket_name: 'gcf-source'
+      service_account: 'gcf-sa'
+      topic: 'functions2-topic'
+      function: 'gcf-function'
+      zip_path: 'function-source.zip'
+    test_env_vars:
+      project: :PROJECT_NAME
+    test_vars_overrides:
+      zip_path: '"./test-fixtures/function-source-pubsub.zip"'
+      primary_resource_id: '"terraform-test"'
+      location:
+        '"europe-west6"'
+        # ignore these fields during import step
+    ignore_read_extra:
+      - 'build_config.0.source.0.storage_source.0.object'
+      - 'build_config.0.source.0.storage_source.0.bucket'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudfunctions2_abiu_on_deploy'
+    primary_resource_id: 'function'
+    min_version: beta
+    vars:
+      bucket_name: 'gcf-source'
+      service_account: 'gcf-sa'
+      topic: 'functions2-topic'
+      function: 'gcf-function'
+      zip_path: 'function-source.zip'
+    test_env_vars:
+      project: :PROJECT_NAME
+    test_vars_overrides:
+      zip_path: '"./test-fixtures/function-source-pubsub.zip"'
+      primary_resource_id: '"terraform-test"'
+      location:
+        '"europe-west6"'
+        # ignore these fields during import step
+    ignore_read_extra:
+      - 'build_config.0.source.0.storage_source.0.object'
+      - 'build_config.0.source.0.storage_source.0.bucket'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   parent_resource_attribute: 'cloud_function'
   method_name_separator: ':'
-  import_format: ["projects/{{project}}/locations/{{location}}/functions/{{cloud_function}}",
-    "{{cloud_function}}"]
+  import_format:
+    [
+      'projects/{{project}}/locations/{{location}}/functions/{{cloud_function}}',
+      '{{cloud_function}}',
+    ]
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
     immutable: true
+    required: true
     url_param_only: true
     description: The location of this cloud function.
 properties:
@@ -201,7 +345,6 @@ properties:
     description: |
       A user-defined name of the function. Function names must
       be unique globally and match pattern `projects/*/locations/*/functions/*`.
-    pattern: projects/{{project}}/locations/{{location}}/functions/{{name}}
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
     custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
   - !ruby/object:Api::Type::String
@@ -215,6 +358,10 @@ properties:
       - :ENVIRONMENT_UNSPECIFIED
       - :GEN_1
       - :GEN_2
+  - !ruby/object:Api::Type::String
+    name: 'url'
+    output: true
+    description: 'Output only. The deployed url for the function.'
   - !ruby/object:Api::Type::Enum
     name: 'state'
     output: true
@@ -257,8 +404,9 @@ properties:
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: 'storageSource'
-            description: 'If provided, get the source from this location in Google
-              Cloud Storage.'
+            description:
+              'If provided, get the source from this location in Google Cloud
+              Storage.'
             exactly_one_of:
               - storage_source
               - repo_source
@@ -269,17 +417,21 @@ properties:
                 custom_flatten: 'templates/terraform/custom_flatten/cloudfunctions2_function_source_bucket.go.erb'
               - !ruby/object:Api::Type::String
                 name: 'object'
-                description: 'Google Cloud Storage object containing the source.'
+                description:
+                  'Google Cloud Storage object containing the source.'
                 custom_flatten: 'templates/terraform/custom_flatten/cloudfunctions2_function_source_object.go.erb'
               - !ruby/object:Api::Type::Integer
                 name: 'generation'
+                default_from_api: true
+                custom_flatten: 'templates/terraform/custom_flatten/cloudfunctions2_function_source_generation.go.erb'
                 description: |
-                  Google Cloud Storage generation for the object. If the generation 
+                  Google Cloud Storage generation for the object. If the generation
                   is omitted, the latest generation will be used.
           - !ruby/object:Api::Type::NestedObject
             name: 'repoSource'
-            description: 'If provided, get the source from this location in a Cloud
-              Source Repository.'
+            description:
+              'If provided, get the source from this location in a Cloud Source
+              Repository.'
             exactly_one_of:
               - storage_source
               - repo_source
@@ -288,7 +440,7 @@ properties:
                 name: 'projectId'
                 immutable: true
                 description: |
-                  ID of the project that owns the Cloud Source Repository. If omitted, the 
+                  ID of the project that owns the Cloud Source Repository. If omitted, the
                   project ID requesting the build is assumed.
               - !ruby/object:Api::Type::String
                 name: 'repoName'
@@ -321,12 +473,13 @@ properties:
               - !ruby/object:Api::Type::Boolean
                 name: 'invertRegex'
                 description: |
-                  Only trigger a build if the revision regex does 
+                  Only trigger a build if the revision regex does
                   NOT match the revision regex.
       - !ruby/object:Api::Type::String
         name: 'workerPool'
-        description: 'Name of the Cloud Build Custom Worker Pool that should be used
-          to build the function.'
+        description:
+          'Name of the Cloud Build Custom Worker Pool that should be used to
+          build the function.'
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'environmentVariables'
         description: |
@@ -336,6 +489,38 @@ properties:
         name: 'dockerRepository'
         description: |
           User managed repository created in Artifact Registry optionally with a customer managed encryption key.
+        default_from_api: true
+      - !ruby/object:Api::Type::String
+        name: 'serviceAccount'
+        description: 'The fully-qualified name of the service account to be used for building the container.'
+        default_from_api: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'automaticUpdatePolicy'
+        description: |
+          Security patches are applied automatically to the runtime without requiring
+          the function to be redeployed.
+        exactly_one_of:
+          - automatic_update_policy
+          - on_deploy_update_policy
+        send_empty_value: true
+        allow_empty_object: true
+        default_from_api: true
+        properties: []
+      - !ruby/object:Api::Type::NestedObject
+        name: 'onDeployUpdatePolicy'
+        description: |
+          Security patches are only applied when a function is redeployed.
+        exactly_one_of:
+          - automatic_update_policy
+          - on_deploy_update_policy
+        send_empty_value: true
+        allow_empty_object: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'runtimeVersion'
+            output: true
+            description: |
+              The runtime version which was used during latest function deployment.
   - !ruby/object:Api::Type::NestedObject
     name: 'serviceConfig'
     description: 'Describes the Service being deployed.'
@@ -351,31 +536,39 @@ properties:
           The function execution timeout. Execution is considered failed and
           can be terminated if the function is not completed at the end of the
           timeout period. Defaults to 60 seconds.
+        default_from_api: true
       - !ruby/object:Api::Type::String
         name: 'availableMemory'
         description: |
           The amount of memory available for a function.
           Defaults to 256M. Supported units are k, M, G, Mi, Gi. If no unit is
           supplied the value is interpreted as bytes.
+        default_from_api: true
       - !ruby/object:Api::Type::Integer
         name: 'maxInstanceRequestConcurrency'
-        description: 'Sets the maximum number of concurrent requests that each instance
-          can receive. Defaults to 1.'
+        description:
+          'Sets the maximum number of concurrent requests that each instance can
+          receive. Defaults to 1.'
         default_from_api: true
       - !ruby/object:Api::Type::String
         name: 'availableCpu'
-        description: 'The number of CPUs used in a single container instance. Default
-          value is calculated from available memory.'
+        description:
+          'The number of CPUs used in a single container instance. Default value
+          is calculated from available memory.'
         default_from_api: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'environmentVariables'
-        description: 'Environment variables that shall be available during function
+        description:
+          'Environment variables that shall be available during function
           execution.'
+        default_from_api: true
+        diff_suppress_func: 'environmentVariablesDiffSuppress'
       - !ruby/object:Api::Type::Integer
         name: 'maxInstanceCount'
         description: |
           The limit on the maximum number of function instances that may coexist at a
           given time.
+        default_from_api: true
       - !ruby/object:Api::Type::Integer
         name: 'minInstanceCount'
         description: |
@@ -383,8 +576,9 @@ properties:
           given time.
       - !ruby/object:Api::Type::String
         name: 'vpcConnector'
-        description: 'The Serverless VPC Access connector that this cloud function
-          can connect to.'
+        description:
+          'The Serverless VPC Access connector that this cloud function can
+          connect to.'
       - !ruby/object:Api::Type::Enum
         name: 'vpcConnectorEgressSettings'
         description: 'Available egress settings.'
@@ -394,7 +588,8 @@ properties:
           - :ALL_TRAFFIC
       - !ruby/object:Api::Type::Enum
         name: 'ingressSettings'
-        description: 'Available ingress settings. Defaults to "ALLOW_ALL" if unspecified.'
+        description:
+          'Available ingress settings. Defaults to "ALLOW_ALL" if unspecified.'
         values:
           - :ALLOW_ALL
           - :ALLOW_INTERNAL_ONLY
@@ -414,8 +609,9 @@ properties:
         default_from_api: true
       - !ruby/object:Api::Type::Boolean
         name: 'allTrafficOnLatestRevision'
-        description: 'Whether 100% of traffic is routed to the latest revision. Defaults
-          to true.'
+        description:
+          'Whether 100% of traffic is routed to the latest revision. Defaults to
+          true.'
         default_value: true
       - !ruby/object:Api::Type::Array
         name: 'secretEnvironmentVariables'
@@ -464,8 +660,9 @@ properties:
               required: true
             - !ruby/object:Api::Type::Array
               name: 'versions'
-              description: List of secret versions to mount for this secret. If empty,
-                the latest version of the secret will be made available in a file
+              description:
+                List of secret versions to mount for this secret. If empty, the
+                latest version of the secret will be made available in a file
                 named after the secret under the mount point.'
               default_from_api: true
               item_type: !ruby/object:Api::Type::NestedObject
@@ -497,6 +694,7 @@ properties:
           events originating in this region. It can be the same
           region as the function, a different region or multi-region, or the global
           region. If not provided, defaults to the same region as the function.
+        default_from_api: true
       - !ruby/object:Api::Type::String
         name: 'eventType'
         description: 'Required. The type of event to observe.'
@@ -535,7 +733,10 @@ properties:
         default_from_api: true
       - !ruby/object:Api::Type::String
         name: 'serviceAccountEmail'
-        description: 'The email of the service account for this function.'
+        description: |
+          Optional. The email of the trigger's service account. The service account
+          must have permission to invoke Cloud Run services. If empty, defaults to the
+          Compute Engine default service account: {project_number}-compute@developer.gserviceaccount.com.
         default_from_api: true
       - !ruby/object:Api::Type::Enum
         name: 'retryPolicy'
@@ -550,8 +751,12 @@ properties:
     name: 'updateTime'
     output: true
     description: 'The last update timestamp of a Cloud Function.'
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       A set of key/value label pairs associated with this Cloud Function.
-
+  - !ruby/object:Api::Type::String
+    name: 'kmsKeyName'
+    description: |
+      Resource name of a KMS crypto key (managed by the user) used to encrypt/decrypt function resources.
+      It must match the pattern projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}.

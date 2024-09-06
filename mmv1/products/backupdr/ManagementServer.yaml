@@ -1,0 +1,106 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'ManagementServer'
+min_version: beta
+base_url: projects/{{project}}/locations/{{location}}/managementServers
+create_url: projects/{{project}}/locations/{{location}}/managementServers/?management_server_id={{name}}
+self_link: projects/{{project}}/locations/{{location}}/managementServers/{{name}}
+create_verb: :POST
+immutable: true
+delete_url: projects/{{project}}/locations/{{location}}/managementServers/{{name}}
+description: A Backup and DR Management Server (Also referred as Management Console)
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/backup-disaster-recovery/docs'
+  api: 'https://cloud.google.com/backup-disaster-recovery/docs/deployment/deployment-plan'
+autogen_async: true
+timeouts: !ruby/object:Api::Timeouts
+  insert_minutes: 40
+  delete_minutes: 40
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    min_version: beta
+    name: 'backup_dr_management_server'
+    primary_resource_id: 'ms-console'
+    vars:
+      network_name: 'vpc-network'
+      managementserver_name: 'ms-console'
+    test_env_vars:
+      project: :PROJECT_NAME
+    skip_test: true
+parameters:
+  - !ruby/object:Api::Type::String
+    name: 'location'
+    required: true
+    url_param_only: true
+    description: |
+      The location for the management server (management console)
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    required: true
+    url_param_only: true
+    description: |-
+      The name of management server (management console)
+    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+properties:
+  - !ruby/object:Api::Type::Enum
+    name: 'type'
+    values:
+      - :BACKUP_RESTORE
+    default_value: :BACKUP_RESTORE
+    description: |
+      The type of management server (management console).
+  - !ruby/object:Api::Type::Array
+    name: 'networks'
+    description: |
+      Network details to create management server (management console).
+    required: true
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'network'
+          description: |
+            Network with format `projects/{{project_id}}/global/networks/{{network_id}}`
+          required: true
+        - !ruby/object:Api::Type::Enum
+          name: 'peeringMode'
+          description: |
+            Type of Network peeringMode
+          values:
+            - :PRIVATE_SERVICE_ACCESS
+          default_value: :PRIVATE_SERVICE_ACCESS
+  ## outputs
+  - !ruby/object:Api::Type::String
+    name: 'oauth2ClientId'
+    description: |
+      The oauth2ClientId of management console.
+    output: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'managementUri'
+    description: |-
+      The management console URI
+    output: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'webUi'
+        description: |-
+          The management console webUi.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'api'
+        description: |-
+          The management console api endpoint.
+        output: true

@@ -4,7 +4,7 @@ description: |-
   Manages a VM instance resource within GCE.
 ---
 
-# google\_compute\_instance
+# google_compute_instance
 
 Manages a VM instance resource within GCE. For more information see
 [the official documentation](https://cloud.google.com/compute/docs/instances)
@@ -15,13 +15,13 @@ and
 
 ```hcl
 resource "google_service_account" "default" {
-  account_id   = "service_account_id"
-  display_name = "Service Account"
+  account_id   = "my-custom-sa"
+  display_name = "Custom SA for VM Instance"
 }
 
 resource "google_compute_instance" "default" {
-  name         = "test"
-  machine_type = "e2-medium"
+  name         = "my-instance"
+  machine_type = "n2-standard-2"
   zone         = "us-central1-a"
 
   tags = ["foo", "bar"]
@@ -37,7 +37,7 @@ resource "google_compute_instance" "default" {
 
   // Local SSD disk
   scratch_disk {
-    interface = "SCSI"
+    interface = "NVME"
   }
 
   network_interface {
@@ -62,6 +62,57 @@ resource "google_compute_instance" "default" {
 }
 ```
 
+## Example usage - Confidential Computing
+
+Example with [Confidential Mode](https://cloud.google.com/confidential-computing/confidential-vm/docs/confidential-vm-overview) activated.
+
+```tf
+resource "google_service_account" "default" {
+  account_id   = "my-custom-sa"
+  display_name = "Custom SA for VM Instance"
+}
+
+resource "google_compute_instance" "confidential_instance" {
+  name             = "my-confidential-instance"
+  zone             = "us-central1-a"
+  machine_type     = "n2d-standard-2"
+  min_cpu_platform = "AMD Milan"
+
+  confidential_instance_config {
+    enable_confidential_compute = true
+    confidential_instance_type  = "SEV"
+  }
+
+  boot_disk {
+    initialize_params {
+      image = "ubuntu-os-cloud/ubuntu-2004-lts"
+      labels = {
+        my_label = "value"
+      }
+    }
+  }
+
+  // Local SSD disk
+  scratch_disk {
+    interface = "NVME"
+  }
+
+  network_interface {
+    network = "default"
+
+    access_config {
+      // Ephemeral public IP
+    }
+  }
+
+  service_account {
+    # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
+    email  = google_service_account.default.email
+    scopes = ["cloud-platform"]
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -73,9 +124,9 @@ The following arguments are supported:
 
     **Note:** If you want to update this value (resize the VM) after initial creation, you must set [`allow_stopping_for_update`](#allow_stopping_for_update) to `true`.
 
-    [Custom machine types][custom-vm-types] can be formatted as `custom-NUMBER_OF_CPUS-AMOUNT_OF_MEMORY_MB`, e.g. `custom-6-20480` for 6 vCPU and 20GB of RAM.
+    [Custom machine types](https://cloud.google.com/dataproc/docs/concepts/compute/custom-machine-types) can be formatted as `custom-NUMBER_OF_CPUS-AMOUNT_OF_MEMORY_MB`, e.g. `custom-6-20480` for 6 vCPU and 20GB of RAM.
 
-    There is a limit of 6.5 GB per CPU unless you add [extended memory][extended-custom-vm-type]. You must do this explicitly by adding the suffix `-ext`, e.g. `custom-2-15360-ext` for 2 vCPU and 15 GB of memory.
+    There is a limit of 6.5 GB per CPU unless you add [extended memory](https://cloud.google.com/compute/docs/instances/creating-instance-with-custom-machine-type#extendedmemory). You must do this explicitly by adding the suffix `-ext`, e.g. `custom-2-15360-ext` for 2 vCPU and 15 GB of memory.
 
 * `name` - (Required) A unique name for the resource, required by GCE.
     Changing this forces a new resource to be created.
@@ -117,11 +168,19 @@ The following arguments are supported:
     For more details about this behavior, see [this section](https://www.terraform.io/docs/configuration/attr-as-blocks.html#defining-a-fixed-object-collection-value).
 
 * `labels` - (Optional) A map of key/value label pairs to assign to the instance.
+    **Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
+	Please refer to the field 'effective_labels' for all of the labels present on the resource.
+
+* `terraform_labels` -
+  The combination of labels configured directly on the resource and default labels configured on the provider.
+
+* `effective_labels` -
+  All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.
 
 * `metadata` - (Optional) Metadata key/value pairs to make available from
     within the instance. Ssh keys attached in the Cloud Console will be removed.
-    Add them to your config in order to keep them attached to your instance. A
-    list of default metadata values (e.g. ssh-keys) can be found [here](https://cloud.google.com/compute/docs/metadata/default-metadata-values)
+    Add them to your config in order to keep them attached to your instance.
+    A list of predefined metadata keys (e.g. ssh-keys) can be found [here](https://cloud.google.com/compute/docs/metadata/predefined-metadata-keys)
 
 -> Depending on the OS you choose for your instance, some metadata keys have
    special functionality.  Most linux-based images will run the content of
@@ -148,6 +207,8 @@ is desired, you will need to modify your state file manually using
 `Intel Haswell` or `Intel Skylake`. See the complete list [here](https://cloud.google.com/compute/docs/instances/specify-min-cpu-platform).
     **Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true or your instance must have a `desired_status` of `TERMINATED` in order to update this field.
 
+* `params` - (Optional) Additional instance parameters.
+.
 * `project` - (Optional) The ID of the project in which the resource belongs. If it
     is not provided, the provider project is used.
 
@@ -185,6 +246,8 @@ is desired, you will need to modify your state file manually using
     the [`image`](#image) used must include the [`GVNIC`](https://cloud.google.com/compute/docs/networking/using-gvnic#create-instance-gvnic-image)
     in `guest-os-features`, and `network_interface.0.nic-type` must be `GVNIC`
     in order for this setting to take effect.
+
+* `partner_metadata` - (optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) key/value pair represents partner metadata assigned to instance where key represent a defined namespace and value is a json string represent the entries associted with the namespace.
 
 ---
 
@@ -234,8 +297,36 @@ is desired, you will need to modify your state file manually using
     For instance, the image `centos-6-v20180104` includes its family name `centos-6`.
     These images can be referred by family name here.
 
-* `labels` - (Optional) A set of key/value label pairs assigned to the disk. This  
+* `labels` - (Optional) A set of key/value label pairs assigned to the disk. This
     field is only applicable for persistent disks.
+
+* `resource_manager_tags` - (Optional) A tag is a key-value pair that can be attached to a Google Cloud resource. You can use tags to conditionally allow or deny policies based on whether a resource has a specific tag. This value is not returned by the API. In Terraform, this value cannot be updated and changing it will recreate the resource.
+
+* `resource_policies` - (Optional) A list of self_links of resource policies to attach to the instance's boot disk. Modifying this list will cause the instance to recreate. Currently a max of 1 resource policy is supported.
+
+* `provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk.
+    This sets the number of I/O operations per second that the disk can handle.
+    For more details,see the [Hyperdisk documentation](https://cloud.google.com/compute/docs/disks/hyperdisks).
+    Note: Updating currently is only supported for hyperdisk skus via disk update
+    api/gcloud without the need to delete and recreate the disk, hyperdisk allows
+    for an update of IOPS every 4 hours. To update your hyperdisk more frequently,
+    you'll need to manually delete and recreate it.
+
+* `provisioned_throughput` - (Optional) Indicates how much throughput to provision for the disk.
+    This sets the number of throughput mb per second that the disk can handle.
+    For more details,see the [Hyperdisk documentation](https://cloud.google.com/compute/docs/disks/hyperdisks).
+    Note: Updating currently is only supported for hyperdisk skus via disk update
+    api/gcloud without the need to delete and recreate the disk, hyperdisk allows
+    for an update of throughput every 4 hours. To update your hyperdisk more
+    frequently, you'll need to manually delete and recreate it.
+
+* `enable_confidential_compute` - (Optional) Whether this disk is using confidential compute mode.
+    Note: Only supported on hyperdisk skus, disk_encryption_key is required when setting to true.
+
+* `storage_pool` - (Optional) The URL of the storage pool in which the new disk is created.
+    For example:
+    * https://www.googleapis.com/compute/v1/projects/{project}/zones/{zone}/storagePools/{storagePool}
+    * /projects/{project}/zones/{zone}/storagePools/{storagePool}
 
 <a name="nested_scratch_disk"></a>The `scratch_disk` block supports:
 
@@ -281,8 +372,9 @@ is desired, you will need to modify your state file manually using
     network is in auto subnet mode, specifying the subnetwork is optional. If the network is
     in custom subnet mode, specifying the subnetwork is required.
 
+
 *  `subnetwork_project` - (Optional) The project in which the subnetwork belongs.
-   If the `subnetwork` is a self_link, this field is ignored in favor of the project
+   If the `subnetwork` is a self_link, this field is set to the project
    defined in the subnetwork self_link. If the `subnetwork` is a name and this
    field is not provided, the provider project is used.
 
@@ -302,6 +394,8 @@ is desired, you will need to modify your state file manually using
 
 * `nic_type` - (Optional) The type of vNIC to be used on this interface. Possible values: GVNIC, VIRTIO_NET.
 
+* `network_attachment` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) The URL of the network attachment that this interface should connect to in the following format: `projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}`.
+
 * `stack_type` - (Optional) The stack type for this network interface to identify whether the IPv6 feature is enabled or not. Values are IPV4_IPV6 or IPV4_ONLY. If not specified, IPV4_ONLY will be used.
 
 * `ipv6_access_config` - (Optional) An array of IPv6 access configurations for this interface.
@@ -310,6 +404,7 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `queue_count` - (Optional) The networking queue count that's specified by users for the network interface. Both Rx and Tx queues will be set to this number. It will be empty if not specified.
 
+* `security_policy` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) A full or partial URL to a security policy to add to this instance. If this field is set to an empty string it will remove the associated security policy.
 
 <a name="nested_access_config"></a>The `access_config` block supports:
 
@@ -321,17 +416,27 @@ specified, then this instance will have no external IPv6 Internet access. Struct
     See [the docs](https://cloud.google.com/compute/docs/instances/create-ptr-record) for how
     to become verified as a domain owner.
 
-* `network_tier` - (Optional) The [networking tier][network-tier] used for configuring this instance.
+* `network_tier` - (Optional) The [networking tier](https://cloud.google.com/network-tiers/docs/overview) used for configuring this instance.
     This field can take the following values: PREMIUM, FIXED_STANDARD or STANDARD. If this field is
     not specified, it is assumed to be PREMIUM.
 
 <a name="nested_ipv6_access_config"></a>The `ipv6_access_config` block supports:
 
-* `public_ptr_domain_name` - (Optional) The domain name to be used when creating DNSv6
-    records for the external IPv6 ranges..
+* `external_ipv6` - (Optional) The first IPv6 address of the external IPv6 range associated
+    with this instance, prefix length is stored in externalIpv6PrefixLength in ipv6AccessConfig.
+    To use a static external IP address, it must be unused and in the same region as the instance's zone.
+    If not specified, Google Cloud will automatically assign an external IPv6 address from the instance's subnetwork.
+
+* `external_ipv6_prefix_length` - (Optional) The prefix length of the external IPv6 range.
+
+* `name` - (Optional) The name of this access configuration. In ipv6AccessConfigs, the recommended name
+    is "External IPv6".
 
 * `network_tier` - (Optional) The service-level to be provided for IPv6 traffic when the
     subnet has an external subnet. Only PREMIUM or STANDARD tier is valid for IPv6.
+
+* `public_ptr_domain_name` - (Optional) The domain name to be used when creating DNSv6
+    records for the external IPv6 ranges..
 
 <a name="nested_alias_ip_range"></a>The `alias_ip_range` block supports:
 
@@ -346,8 +451,7 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 <a name="nested_service_account"></a>The `service_account` block supports:
 
-* `email` - (Optional) The service account e-mail address. If not given, the
-    default Google Compute Engine service account is used.
+* `email` - (Optional) The service account e-mail address.
     **Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true or your instance must have a `desired_status` of `TERMINATED` in order to update this field.
 
 * `scopes` - (Required) A list of service scopes. Both OAuth2 URLs and gcloud
@@ -377,14 +481,33 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `min_node_cpus` - (Optional) The minimum number of virtual CPUs this instance will consume when running on a sole-tenant node.
 
-* `provisioning_model` - (Optional) Describe the type of preemptible VM. This field accepts the value `STANDARD` or `SPOT`. If the value is `STANDARD`, there will be no discount. If this   is set to `SPOT`, 
-    `preemptible` should be `true` and `auto_restart` should be
+* `provisioning_model` - (Optional) Describe the type of preemptible VM. This field accepts the value `STANDARD` or `SPOT`. If the value is `STANDARD`, there will be no discount. If this   is set to `SPOT`,
+    `preemptible` should be `true` and `automatic_restart` should be
     `false`. For more info about
     `SPOT`, read [here](https://cloud.google.com/compute/docs/instances/spot)
-    
-* `instance_termination_action` - (Optional) Describe the type of termination action for VM. Can be `STOP` or `DELETE`.  Read more on [here](https://cloud.google.com/compute/docs/instances/create-use-spot) 
 
-* `max_run_duration` -  (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) The duration of the instance. Instance will run and be terminated after then, the termination action could be defined in `instance_termination_action`. Only support `DELETE` `instance_termination_action` at this point. Structure is [documented below](#nested_max_run_duration).
+* `instance_termination_action` - (Optional) Describe the type of termination action for VM. Can be `STOP` or `DELETE`.  Read more on [here](https://cloud.google.com/compute/docs/instances/create-use-spot)
+
+* `max_run_duration` -  (Optional) The duration of the instance. Instance will run and be terminated after then, the termination action could be defined in `instance_termination_action`. Structure is [documented below](#nested_max_run_duration).
+
+
+* `on_instance_stop_action` - (Optional) Specifies the action to be performed when the instance is terminated using `max_run_duration` and `STOP` `instance_termination_action`. Only support `true` `discard_local_ssd` at this point. Structure is [documented below](#nested_on_instance_stop_action).
+
+
+* `maintenance_interval` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Specifies the frequency of planned maintenance events. The accepted values are: `PERIODIC`.
+
+* `local_ssd_recovery_timeout` -  (Optional) (https://terraform.io/docs/providers/google/guides/provider_versions.html) Specifies the maximum amount of time a Local Ssd Vm should wait while recovery of the Local Ssd state is attempted. Its value should be in between 0 and 168 hours with hour granularity and the default value being 1 hour. Structure is [documented below](#nested_local_ssd_recovery_timeout).
+<a name="nested_local_ssd_recovery_timeout"></a>The `local_ssd_recovery_timeout` block supports:
+
+* `nanos` - (Optional) Span of time that's a fraction of a second at nanosecond
+    resolution. Durations less than one second are represented with a 0
+    `seconds` field and a positive `nanos` field. Must be from 0 to
+     999,999,999 inclusive.
+
+* `seconds` - (Required) Span of time at a resolution of a second. Must be from 0 to
+   315,576,000,000 inclusive. Note: these bounds are computed from: 60
+   sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years.
+
 <a name="nested_max_run_duration"></a>The `max_run_duration` block supports:
 
 * `nanos` - (Optional) Span of time that's a fraction of a second at nanosecond
@@ -396,7 +519,10 @@ specified, then this instance will have no external IPv6 Internet access. Struct
    315,576,000,000 inclusive. Note: these bounds are computed from: 60
    sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years.
 
-* `maintenance_interval` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Specifies the frequency of planned maintenance events. The accepted values are: `PERIODIC`.
+<a name="nested_on_instance_stop_action"></a>The `on_instance_stop_action` block supports:
+
+* `discard_local_ssd` - (Optional) Whether to discard local SSDs attached to the VM while terminating using `max_run_duration`. Only supports `true` at this point.
+
 <a name="nested_guest_accelerator"></a>The `guest_accelerator` block supports:
 
 * `type` (Required) - The accelerator type resource to expose to this instance. E.g. `nvidia-tesla-k80`.
@@ -412,6 +538,10 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `values` (Required) - The values for the node affinity label.
 
+<a name="nested_params"></a>The `params` block supports:
+
+* `resource_manager_tags` (Optional) - A tag is a key-value pair that can be attached to a Google Cloud resource. You can use tags to conditionally allow or deny policies based on whether a resource has a specific tag. This value is not returned by the API. In Terraform, this value cannot be updated and changing it will recreate the resource.
+
 <a name="nested_shielded_instance_config"></a>The `shielded_instance_config` block supports:
 
 * `enable_secure_boot` (Optional) -- Verify the digital signature of all boot components, and halt the boot process if signature verification fails. Defaults to false.
@@ -425,7 +555,9 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 <a name="nested_confidential_instance_config"></a>The `confidential_instance_config` block supports:
 
-* `enable_confidential_compute` (Optional) Defines whether the instance should have confidential compute enabled. [`on_host_maintenance`](#on_host_maintenance) has to be set to TERMINATE or this will fail to create the VM.
+* `enable_confidential_compute` (Optional) Defines whether the instance should have confidential compute enabled with AMD SEV. If enabled, [`on_host_maintenance`](#on_host_maintenance) can be set to MIGRATE if [`min_cpu_platform`](#min_cpu_platform) is set to `"AMD Milan"`. Otherwise, [`on_host_maintenance`](#on_host_maintenance) has to be set to TERMINATE or this will fail to create the VM.
+
+* `confidential_instance_type` (Optional) Defines the confidential computing technology the instance uses. SEV is an AMD feature. TDX is an Intel feature. One of the following values is required: `SEV`, `SEV_SNP`, `TDX`. [`on_host_maintenance`](#on_host_maintenance) can be set to MIGRATE if [`confidential_instance_type`](#confidential_instance_type) is set to `SEV` and [`min_cpu_platform`](#min_cpu_platform) is set to `"AMD Milan"`. Otherwise, [`on_host_maintenance`](#on_host_maintenance) has to be set to TERMINATE or this will fail to create the VM. If `SEV_SNP`, currently [`min_cpu_platform`](#min_cpu_platform) has to be set to `"AMD Milan"` or this will fail to create the VM. TDX is only available in beta.
 
 <a name="nested_advanced_machine_features"></a>The `advanced_machine_features` block supports:
 
@@ -470,15 +602,11 @@ exported:
 * `ipv6_access_type` - One of EXTERNAL, INTERNAL to indicate whether the IP can be accessed from the Internet.
 This field is always inherited from its subnetwork.
 
+* `current_status` - The current status of the instance. This could be one of the following values: PROVISIONING, STAGING, RUNNING, STOPPING, SUSPENDING, SUSPENDED, REPAIRING, and TERMINATED. For more information about the status of the instance, see [Instance life cycle](https://cloud.google.com/compute/docs/instances/instance-life-cycle).
+
 * `network_interface.0.network_ip` - The internal ip address of the instance, either manually or dynamically assigned.
 
 * `network_interface.0.access_config.0.nat_ip` - If the instance has an access config, either the given external ip (in the `nat_ip` field) or the ephemeral (generated) ip (if you didn't provide one).
-
-* `network_interface.0.ipv6_access_config.0.external_ipv6` - The first IPv6 address of the external IPv6 range
-associated with this instance, prefix length is stored in externalIpv6PrefixLength in ipv6AccessConfig.
-The field is output only, an IPv6 address from a subnetwork associated with the instance will be allocated dynamically.
-
-* `network_interface.0.ipv6_access_config.0.external_ipv6_prefix_length` - The prefix length of the external IPv6 range.
 
 * `attached_disk.0.disk_encryption_key_sha256` - The [RFC 4648 base64](https://tools.ietf.org/html/rfc4648#section-4)
     encoded SHA-256 hash of the [customer-supplied encryption key]
@@ -510,12 +638,23 @@ This resource provides the following
 
 Instances can be imported using any of these accepted formats:
 
+* `projects/{{project}}/zones/{{zone}}/instances/{{name}}`
+* `{{project}}/{{zone}}/{{name}}`
+* `{{name}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import instances using one of the formats above. For example:
+
+```tf
+import {
+  id = "projects/{{project}}/zones/{{zone}}/instances/{{name}}"
+  to = google_compute_instance.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), instances can be imported using one of the formats above. For example:
+
 ```
 $ terraform import google_compute_instance.default projects/{{project}}/zones/{{zone}}/instances/{{name}}
 $ terraform import google_compute_instance.default {{project}}/{{zone}}/{{name}}
 $ terraform import google_compute_instance.default {{name}}
 ```
-
-[custom-vm-types]: https://cloud.google.com/dataproc/docs/concepts/compute/custom-machine-types
-[network-tier]: https://cloud.google.com/network-tiers/docs/overview
-[extended-custom-vm-type]: https://cloud.google.com/compute/docs/instances/creating-instance-with-custom-machine-type#extendedmemory

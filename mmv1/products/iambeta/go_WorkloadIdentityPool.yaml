@@ -1,0 +1,110 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'WorkloadIdentityPool'
+description: |
+  Represents a collection of external workload identities. You can define IAM policies to
+  grant these identities access to Google Cloud resources.
+references:
+  guides:
+    'Managing workload identity pools': 'https://cloud.google.com/iam/docs/manage-workload-identity-pools-providers#pools'
+  api: 'https://cloud.google.com/iam/docs/reference/rest/v1/projects.locations.workloadIdentityPools'
+docs:
+base_url: 'projects/{{project}}/locations/global/workloadIdentityPools'
+self_link: 'projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}'
+create_url: 'projects/{{project}}/locations/global/workloadIdentityPools?workloadIdentityPoolId={{workload_identity_pool_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'targetLink'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+  constants: 'templates/terraform/constants/go/iam_workload_identity_pool.go.tmpl'
+  decoder: 'templates/terraform/decoders/go/treat_deleted_state_as_gone.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/go/iam_workload_identity_pool.go.tmpl'
+examples:
+  - name: 'iam_workload_identity_pool_basic'
+    primary_resource_id: 'example'
+    vars:
+      workload_identity_pool_id: 'example-pool'
+  - name: 'iam_workload_identity_pool_full'
+    primary_resource_id: 'example'
+    vars:
+      workload_identity_pool_id: 'example-pool'
+parameters:
+properties:
+  - name: 'workloadIdentityPoolId'
+    type: String
+    description: |
+      The ID to use for the pool, which becomes the final component of the resource name. This
+      value should be 4-32 characters, and may contain the characters [a-z0-9-]. The prefix
+      `gcp-` is reserved for use by Google, and may not be specified.
+    url_param_only: true
+    required: true
+    immutable: true
+    validation:
+      function: 'ValidateWorkloadIdentityPoolId'
+  - name: 'state'
+    type: Enum
+    description: |
+      The state of the pool.
+      * STATE_UNSPECIFIED: State unspecified.
+      * ACTIVE: The pool is active, and may be used in Google Cloud policies.
+      * DELETED: The pool is soft-deleted. Soft-deleted pools are permanently deleted after
+        approximately 30 days. You can restore a soft-deleted pool using
+        UndeleteWorkloadIdentityPool. You cannot reuse the ID of a soft-deleted pool until it is
+        permanently deleted. While a pool is deleted, you cannot use it to exchange tokens, or
+        use existing tokens to access resources. If the pool is undeleted, existing tokens grant
+        access again.
+    output: true
+    enum_values:
+      - 'STATE_UNSPECIFIED'
+      - 'ACTIVE'
+      - 'DELETED'
+  - name: 'displayName'
+    type: String
+    description: A display name for the pool. Cannot exceed 32 characters.
+  - name: 'description'
+    type: String
+    description: A description of the pool. Cannot exceed 256 characters.
+  - name: 'name'
+    type: String
+    description: |
+      The resource name of the pool as
+      `projects/{project_number}/locations/global/workloadIdentityPools/{workload_identity_pool_id}`.
+    output: true
+  - name: 'disabled'
+    type: Boolean
+    description: |
+      Whether the pool is disabled. You cannot use a disabled pool to exchange tokens, or use
+      existing tokens to access resources. If the pool is re-enabled, existing tokens grant
+      access again.

@@ -16,7 +16,6 @@ name: 'CustomConstraint'
 self_link: '{{parent}}/customConstraints/{{name}}'
 base_url: '{{parent}}/customConstraints'
 update_verb: :PATCH
-min_version: beta
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/resource-manager/docs/organization-policy/creating-managing-custom-constraints'
@@ -25,20 +24,26 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 description: |
   Custom constraints are created by administrators to provide more granular and customizable control over the specific fields that are restricted by your organization policies.
 id_format: '{{parent}}/customConstraints/{{name}}'
-import_format: ["{{%parent}}/customConstraints/{{name}}"]
+import_format: ['{{%parent}}/customConstraints/{{name}}']
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   update_encoder: 'templates/terraform/update_encoder/org_policy_custom_constraint.go.erb'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
-    name: "org_policy_custom_constraint_basic"
-    primary_resource_id: "constraint"
+    name: 'org_policy_custom_constraint_basic'
+    primary_resource_id: 'constraint'
+    vars:
+      policy_name: 'custom.disableGkeAutoUpgrade'
+    test_vars_overrides:
+      policy_name: '"custom.tfTestDisableGkeAutoUpgrade" + acctest.RandString(t, 10)'
     test_env_vars:
       org_id: :ORG_ID
   - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
-    name: "org_policy_custom_constraint_full"
-    primary_resource_id: "constraint"
+    name: 'org_policy_custom_constraint_full'
+    primary_resource_id: 'constraint'
+    vars:
+      policy_name: 'custom.disableGkeAutoUpgrade'
+    test_vars_overrides:
+      policy_name: '"custom.tfTestDisableGkeAutoUpgrade" + acctest.RandString(t, 10)'
     test_env_vars:
       org_id: :ORG_TARGET
 parameters:
@@ -99,4 +104,3 @@ properties:
     output: true
     description: |
       Output only. The timestamp representing when the constraint was last updated.
-

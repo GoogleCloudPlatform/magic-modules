@@ -14,14 +14,10 @@
 --- !ruby/object:Api::Product
 name: Billing
 # Strictly speaking it should be Billing Budget but setting it to Cloud Billing will put in the same doc section as billing accounts.
-display_name: Cloud Billing 
+display_name: Cloud Billing
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://billingbudgets.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Billing Budget
-    url: https://console.cloud.google.com/apis/library/billingbudgets.googleapis.com/

@@ -20,47 +20,53 @@ collection_url_key: 'items'
 description: |
   Represents a SQL database inside the Cloud SQL instance, hosted in
   Google's cloud.
-mutex: "google-sql-database-instance-{{project}}-{{instance}}"
-read_error_transform: "transformSQLDatabaseReadError"
-import_format: ["projects/{{project}}/instances/{{instance}}/databases/{{name}}",
-  "{{project}}/{{instance}}/{{name}}", "instances/{{instance}}/databases/{{name}}",
-  "{{instance}}/{{name}}", "{{name}}"]
+mutex: 'google-sql-database-instance-{{project}}-{{instance}}'
+read_error_transform: 'transformSQLDatabaseReadError'
+import_format:
+  [
+    'projects/{{project}}/instances/{{instance}}/databases/{{name}}',
+    '{{project}}/{{instance}}/{{name}}',
+    'instances/{{instance}}/databases/{{name}}',
+    '{{instance}}/{{name}}',
+    '{{name}}',
+  ]
+# Sweeper skipped as this resource has customized deletion.
 skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "sql_database_basic"
-    primary_resource_id: "database"
+    name: 'sql_database_basic'
+    primary_resource_id: 'database'
     vars:
-      database_name: "my-database"
-      database_instance_name: "my-database-instance"
-      deletion_protection: "true"
+      database_name: 'my-database'
+      database_instance_name: 'my-database-instance'
+      deletion_protection: 'true'
     test_vars_overrides:
-      deletion_protection: "false"
+      deletion_protection: 'false'
     oics_vars_overrides:
-      deletion_protection: "false"
+      deletion_protection: 'false'
   - !ruby/object:Provider::Terraform::Examples
-    name: "sql_database_deletion_policy"
-    primary_resource_id: "database_deletion_policy"
+    name: 'sql_database_deletion_policy'
+    primary_resource_id: 'database_deletion_policy'
     ignore_read_extra:
-      - "deletion_policy"
+      - 'deletion_policy'
     vars:
-      database_name: "my-database"
-      database_instance_name: "my-database-instance"
-      deletion_protection: "true"
+      database_name: 'my-database'
+      database_instance_name: 'my-database-instance'
+      deletion_protection: 'true'
     test_vars_overrides:
-      deletion_protection: "false"
+      deletion_protection: 'false'
     oics_vars_overrides:
-      deletion_protection: "false"
+      deletion_protection: 'false'
 virtual_fields:
-      # TODO: make this an enum in a future major version. If using this field as a reference, look at PerInstanceConfig's minimal_action field for enum configuration.
+  # TODO: make this an enum in a future major version. If using this field as a reference, look at PerInstanceConfig's minimal_action field for enum configuration.
   - !ruby/object:Api::Type::String
     name: 'deletion_policy'
     description: |
-      The deletion policy for the database. Setting ABANDON allows the resource 
-      to be abandoned rather than deleted. This is useful for Postgres, where databases cannot be 
-      deleted from the API if there are users other than cloudsqlsuperuser with access. Possible 
+      The deletion policy for the database. Setting ABANDON allows the resource
+      to be abandoned rather than deleted. This is useful for Postgres, where databases cannot be
+      deleted from the API if there are users other than cloudsqlsuperuser with access. Possible
       values are: "ABANDON", "DELETE". Defaults to "DELETE".
-    default_value: "DELETE"
+    default_value: 'DELETE'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_delete: templates/terraform/pre_delete/sql_database_deletion_policy.erb
 parameters:
@@ -81,7 +87,7 @@ properties:
       for more details and supported values. Postgres databases only support
       a value of `UTF8` at creation time.
     default_from_api: true
-    diff_suppress_func: 'caseDiffSuppress'
+    diff_suppress_func: 'tpgresource.CaseDiffSuppress'
   - !ruby/object:Api::Type::String
     name: 'collation'
     description: |

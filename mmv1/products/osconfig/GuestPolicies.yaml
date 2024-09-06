@@ -13,10 +13,10 @@
 
 --- !ruby/object:Api::Resource
 name: 'GuestPolicies'
-base_url: "projects/{{project}}/guestPolicies"
-create_url: "projects/{{project}}/guestPolicies?guestPolicyId={{guest_policy_id}}"
+base_url: 'projects/{{project}}/guestPolicies'
+create_url: 'projects/{{project}}/guestPolicies?guestPolicyId={{guest_policy_id}}'
 update_verb: :PATCH
-self_link: "projects/{{project}}/guestPolicies/{{guest_policy_id}}"
+self_link: 'projects/{{project}}/guestPolicies/{{guest_policy_id}}'
 min_version: beta
 identity:
   - guestPolicyId
@@ -30,27 +30,27 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/compute/docs/osconfig/rest'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "os_config_guest_policies_basic"
-    primary_resource_id: "guest_policies"
+    name: 'os_config_guest_policies_basic'
+    primary_resource_id: 'guest_policies'
     vars:
-      instance_name: "guest-policy-inst"
-      guest_policy_id: "guest-policy"
+      instance_name: 'guest-policy-inst'
+      guest_policy_id: 'guest-policy'
     ignore_read_extra:
-      - "project"     # project number is returned in rest response
+      - 'project'  # project number is returned in rest response
   - !ruby/object:Provider::Terraform::Examples
-    name: "os_config_guest_policies_packages"
-    primary_resource_id: "guest_policies"
+    name: 'os_config_guest_policies_packages'
+    primary_resource_id: 'guest_policies'
     vars:
-      guest_policy_id: "guest-policy"
+      guest_policy_id: 'guest-policy'
     ignore_read_extra:
-      - "project"     # project number is returned in rest response
+      - 'project'  # project number is returned in rest response
   - !ruby/object:Provider::Terraform::Examples
-    name: "os_config_guest_policies_recipes"
-    primary_resource_id: "guest_policies"
+    name: 'os_config_guest_policies_recipes'
+    primary_resource_id: 'guest_policies'
     vars:
-      guest_policy_id: "guest-policy"
+      guest_policy_id: 'guest-policy'
     ignore_read_extra:
-      - "project"     # project number is returned in rest response
+      - 'project'  # project number is returned in rest response
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/set_computed_name.erb
 

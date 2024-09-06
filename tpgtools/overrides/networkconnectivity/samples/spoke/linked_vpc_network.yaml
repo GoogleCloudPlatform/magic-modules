@@ -1,0 +1,13 @@
+updates:
+  - resource: linked_vpc_network.tf.tmpl
+variables:
+  - name: "project"
+    type: "project"
+  - name: "region"
+    type: "region"
+  - name: "name"
+    type: "resource_name"
+  - name: "hub"
+    type: "resource_name"
+  - name: "network"
+    type: "resource_name"

@@ -28,7 +28,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -44,60 +44,66 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_backend_service_basic"
-    primary_resource_id: "default"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-region-service%s\", context[\"random_suffix\"\
+    name: 'region_backend_service_basic'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-region-service%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
-      region_backend_service_name: "region-service"
-      health_check_name: "rbs-health-check"
+      region_backend_service_name: 'region-service'
+      health_check_name: 'rbs-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_backend_service_cache"
-    primary_resource_id: "default"
+    name: 'region_backend_service_external_iap'
+    primary_resource_id: 'default'
     vars:
-      region_backend_service_name: "region-service"
-      health_check_name: "rbs-health-check"
+      region_backend_service_name: 'tf-test-region-service-external'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'region_backend_service_cache'
+    primary_resource_id: 'default'
+    vars:
+      region_backend_service_name: 'region-service'
+      health_check_name: 'rbs-health-check'
     min_version: beta
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_backend_service_ilb_round_robin"
-    primary_resource_id: "default"
+    name: 'region_backend_service_ilb_round_robin'
+    primary_resource_id: 'default'
     vars:
-      region_backend_service_name: "region-service"
-      health_check_name: "rbs-health-check"
+      region_backend_service_name: 'region-service'
+      health_check_name: 'rbs-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_backend_service_external"
-    primary_resource_id: "default"
+    name: 'region_backend_service_external'
+    primary_resource_id: 'default'
     vars:
-      region_backend_service_name: "region-service"
-      health_check_name: "rbs-health-check"
+      region_backend_service_name: 'region-service'
+      health_check_name: 'rbs-health-check'
     min_version: beta
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_backend_service_external_weighted"
-    primary_resource_id: "default"
+    name: 'region_backend_service_external_weighted'
+    primary_resource_id: 'default'
     vars:
-      region_backend_service_name: "region-service"
-      health_check_name: "rbs-health-check"
+      region_backend_service_name: 'region-service'
+      health_check_name: 'rbs-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_backend_service_ilb_ring_hash"
-    primary_resource_id: "default"
+    name: 'region_backend_service_ilb_ring_hash'
+    primary_resource_id: 'default'
     vars:
-      region_backend_service_name: "region-service"
-      health_check_name: "rbs-health-check"
+      region_backend_service_name: 'region-service'
+      health_check_name: 'rbs-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_backend_service_balancing_mode"
-    primary_resource_id: "default"
+    name: 'region_backend_service_balancing_mode'
+    primary_resource_id: 'default'
     vars:
-      region_backend_service_name: "region-service"
-      rigm_name: "rbs-rigm"
-      region_health_check_name: "rbs-health-check"
-      network_name: "rbs-net"
+      region_backend_service_name: 'region-service'
+      rigm_name: 'rbs-rigm'
+      region_health_check_name: 'rbs-health-check'
+      network_name: 'rbs-net'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_backend_service_connection_tracking"
+    name: 'region_backend_service_connection_tracking'
     min_version: 'beta'
-    primary_resource_id: "default"
+    primary_resource_id: 'default'
     vars:
-      region_backend_service_name: "region-service"
-      health_check_name: "rbs-health-check"
+      region_backend_service_name: 'region-service'
+      health_check_name: 'rbs-health-check'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: '/'
   fetch_iam_policy_verb: :GET
@@ -109,7 +115,12 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/region_backend_service.go.erb
   encoder: templates/terraform/encoders/region_backend_service.go.erb
   decoder: templates/terraform/decoders/region_backend_service.go.erb
-  resource_definition: 'templates/terraform/resource_definition/region_backend_service.go.erb'
+  post_create: 'templates/terraform/post_create/compute_region_backend_service_security_policy.go.erb'
+custom_diff: [
+  'customDiffRegionBackendService',
+]
+migrate_state: 'tpgresource.MigrateStateNoop'
+schema_version: 1
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
@@ -121,6 +132,7 @@ parameters:
     required: false
     default_from_api: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::Integer
     name: 'affinityCookieTtlSec'
@@ -142,7 +154,7 @@ properties:
       properties:
         - !ruby/object:Api::Type::Enum
           name: 'balancingMode'
-          default_value: :CONNECTION
+          default_value: :UTILIZATION
           values:
             - :UTILIZATION
             - :RATE
@@ -180,7 +192,7 @@ properties:
         - !ruby/object:Api::Type::String
           name: 'group'
           required: true
-          diff_suppress_func: 'compareSelfLinkRelativePaths'
+          diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
           custom_flatten: templates/terraform/custom_flatten/guard_self_link.go.erb
           description: |
             The fully-qualified URL of an Instance Group or Network Endpoint
@@ -641,7 +653,7 @@ properties:
       - !ruby/object:Api::Type::Integer
         name: 'connection_draining_timeout_sec'
         api_name: drainingTimeoutSec
-        default_value: 0
+        default_value: 300
         send_empty_value: true
         description: |
           Time for which instance will be drained (not accept new
@@ -727,14 +739,16 @@ properties:
       A health check must be specified unless the backend service uses an internet
       or serverless NEG as a backend.
     is_set: true
-    set_hash_func: 'selfLinkRelativePathHash'
+    set_hash_func: 'tpgresource.SelfLinkRelativePathHash'
     custom_flatten: templates/terraform/custom_flatten/guard_self_link_array.go.erb
     item_type: Api::Type::String
   - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'The unique identifier for the resource.'
+    name: 'generated_id'
+    api_name: 'id'
+    description:
+      'The unique identifier for the resource. This identifier is defined by the
+      server.'
     output: true
-    exclude: true
   - !ruby/object:Api::Type::NestedObject
     name: 'iap'
     description: Settings for enabling Cloud Identity Aware Proxy
@@ -742,22 +756,19 @@ properties:
     properties:
       - !ruby/object:Api::Type::Boolean
         name: 'enabled'
-        description: Enables IAP.
-        exclude: true
+        required: true
+        description: Whether the serving infrastructure will authenticate and authorize all incoming requests.
       - !ruby/object:Api::Type::String
         name: 'oauth2ClientId'
-        required: true
         description: |
           OAuth2 Client ID for IAP
       - !ruby/object:Api::Type::String
         name: 'oauth2ClientSecret'
-        required: true
         description: |
           OAuth2 Client Secret for IAP
         send_empty_value: true
         ignore_read: true
         sensitive: true
-        custom_flatten: templates/terraform/custom_flatten/compute_backend_service_iap_oauth2_client_secret.go.erb
       - !ruby/object:Api::Type::String
         name: 'oauth2ClientSecretSha256'
         output: true
@@ -829,7 +840,6 @@ properties:
                            UNAVAILABLE_WEIGHT. Otherwise, Load Balancing remains
                            equal-weight.
 
-
       This field is applicable to either:
 
       * A regional backend service with the service_protocol set to HTTP, HTTPS, or HTTP2,
@@ -838,7 +848,6 @@ properties:
       * A regional backend service with loadBalancingScheme set to EXTERNAL (External Network
         Load Balancing). Only MAGLEV and WEIGHTED_MAGLEV values are possible for External
         Network Load Balancing. The default is MAGLEV.
-
 
       If session_affinity is not NONE, and this field is not set to MAGLEV, WEIGHTED_MAGLEV,
       or RING_HASH, session affinity settings will not take effect.
@@ -898,7 +907,6 @@ properties:
               `nanos` field. Must be from 0 to 999,999,999 inclusive.
       - !ruby/object:Api::Type::Integer
         name: 'consecutiveErrors'
-        default_value: 5
         at_least_one_of:
           - outlier_detection.0.base_ejection_time
           - outlier_detection.0.consecutive_errors
@@ -917,7 +925,6 @@ properties:
           Defaults to 5.
       - !ruby/object:Api::Type::Integer
         name: 'consecutiveGatewayFailure'
-        default_value: 5
         at_least_one_of:
           - outlier_detection.0.base_ejection_time
           - outlier_detection.0.consecutive_errors
@@ -936,7 +943,6 @@ properties:
           gateway failure ejection occurs. Defaults to 5.
       - !ruby/object:Api::Type::Integer
         name: 'enforcingConsecutiveErrors'
-        default_value: 100
         at_least_one_of:
           - outlier_detection.0.base_ejection_time
           - outlier_detection.0.consecutive_errors
@@ -955,7 +961,6 @@ properties:
           ejection or to ramp it up slowly. Defaults to 100.
       - !ruby/object:Api::Type::Integer
         name: 'enforcingConsecutiveGatewayFailure'
-        default_value: 0
         at_least_one_of:
           - outlier_detection.0.base_ejection_time
           - outlier_detection.0.consecutive_errors
@@ -974,7 +979,6 @@ properties:
           used to disable ejection or to ramp it up slowly. Defaults to 0.
       - !ruby/object:Api::Type::Integer
         name: 'enforcingSuccessRate'
-        default_value: 100
         at_least_one_of:
           - outlier_detection.0.base_ejection_time
           - outlier_detection.0.consecutive_errors
@@ -1023,7 +1027,6 @@ properties:
               `nanos` field. Must be from 0 to 999,999,999 inclusive.
       - !ruby/object:Api::Type::Integer
         name: 'maxEjectionPercent'
-        default_value: 10
         at_least_one_of:
           - outlier_detection.0.base_ejection_time
           - outlier_detection.0.consecutive_errors
@@ -1041,7 +1044,6 @@ properties:
           that can be ejected. Defaults to 10%.
       - !ruby/object:Api::Type::Integer
         name: 'successRateMinimumHosts'
-        default_value: 5
         at_least_one_of:
           - outlier_detection.0.base_ejection_time
           - outlier_detection.0.consecutive_errors
@@ -1061,7 +1063,6 @@ properties:
           cluster. Defaults to 5.
       - !ruby/object:Api::Type::Integer
         name: 'successRateRequestVolume'
-        default_value: 100
         at_least_one_of:
           - outlier_detection.0.base_ejection_time
           - outlier_detection.0.consecutive_errors
@@ -1082,7 +1083,6 @@ properties:
           to 100.
       - !ruby/object:Api::Type::Integer
         name: 'successRateStdevFactor'
-        default_value: 1900
         at_least_one_of:
           - outlier_detection.0.base_ejection_time
           - outlier_detection.0.consecutive_errors
@@ -1132,6 +1132,14 @@ properties:
       - :GRPC
       - :UNSPECIFIED
     default_from_api: true
+  - !ruby/object:Api::Type::String
+    name: 'securityPolicy'
+    min_version: beta
+    description: |
+      The security policy associated with this backend service.
+    update_verb: :POST
+    update_url: 'projects/{{project}}/regions/{{region}}/backendServices/{{name}}/setSecurityPolicy'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::Enum
     name: 'sessionAffinity'
     description: |
@@ -1202,11 +1210,16 @@ properties:
           - :DEFAULT_FOR_PROTOCOL
           - :NEVER_PERSIST
           - :ALWAYS_PERSIST
+      - !ruby/object:Api::Type::Boolean
+        name: enableStrongAffinity
+        description: Enable Strong Session Affinity for Network Load Balancing. This option is not available publicly.
   - !ruby/object:Api::Type::Integer
     name: 'timeoutSec'
     description: |
-      How many seconds to wait for the backend before considering it a
-      failed request. Default is 30 seconds. Valid range is [1, 86400].
+      The backend service timeout has a different meaning depending on the type of load balancer.
+      For more information see, [Backend service settings](https://cloud.google.com/compute/docs/reference/rest/v1/backendServices).
+      The default is 30 seconds.
+      The full range of timeout values allowed goes from 1 through 2,147,483,647 seconds.
     default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: 'logConfig'
@@ -1233,6 +1246,7 @@ properties:
           the field must be in [0, 1]. This configures the sampling rate of requests to the load balancer
           where 1.0 means all logged requests are reported and 0.0 means no logged requests are reported.
           The default value is 1.0.
+        default_value: 1.0
         diff_suppress_func: 'suppressWhenDisabled'
   - !ruby/object:Api::Type::ResourceRef
     resource: 'Network'
@@ -1241,6 +1255,7 @@ properties:
     description: |
       The URL of the network to which this backend service belongs.
       This field can only be specified when the load balancing scheme is set to INTERNAL.
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::NestedObject
     name: 'subsetting'
     min_version: beta
