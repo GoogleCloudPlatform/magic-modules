@@ -11,9 +11,7 @@ func TestTypeMinVersionObj(t *testing.T) {
 	t.Parallel()
 
 	p := Product{
-		NamedObject: NamedObject{
-			Name: "test",
-		},
+		Name: "test",
 		Versions: []*product.Version{
 			&product.Version{
 				Name:    "beta",
@@ -38,14 +36,10 @@ func TestTypeMinVersionObj(t *testing.T) {
 		{
 			description: "type minVersion is empty and resource minVersion is empty",
 			obj: Type{
-				NamedObject: NamedObject{
-					Name: "test",
-				},
+				Name:       "test",
 				MinVersion: "",
 				ResourceMetadata: &Resource{
-					NamedObject: NamedObject{
-						Name: "test",
-					},
+					Name:            "test",
 					MinVersion:      "",
 					ProductMetadata: &p,
 				},
@@ -55,14 +49,10 @@ func TestTypeMinVersionObj(t *testing.T) {
 		{
 			description: "type minVersion is empty and resource minVersion is beta",
 			obj: Type{
-				NamedObject: NamedObject{
-					Name: "test",
-				},
+				Name:       "test",
 				MinVersion: "",
 				ResourceMetadata: &Resource{
-					NamedObject: NamedObject{
-						Name: "test",
-					},
+					Name:            "test",
 					MinVersion:      "beta",
 					ProductMetadata: &p,
 				},
@@ -72,14 +62,10 @@ func TestTypeMinVersionObj(t *testing.T) {
 		{
 			description: "type minVersion is not empty",
 			obj: Type{
-				NamedObject: NamedObject{
-					Name: "test",
-				},
+				Name:       "test",
 				MinVersion: "beta",
 				ResourceMetadata: &Resource{
-					NamedObject: NamedObject{
-						Name: "test",
-					},
+					Name:            "test",
 					MinVersion:      "",
 					ProductMetadata: &p,
 				},
@@ -107,9 +93,7 @@ func TestTypeExcludeIfNotInVersion(t *testing.T) {
 	t.Parallel()
 
 	p := Product{
-		NamedObject: NamedObject{
-			Name: "test",
-		},
+		Name: "test",
 		Versions: []*product.Version{
 			&product.Version{
 				Name:    "beta",
@@ -135,15 +119,11 @@ func TestTypeExcludeIfNotInVersion(t *testing.T) {
 		{
 			description: "type has Exclude true",
 			obj: Type{
-				NamedObject: NamedObject{
-					Name: "test",
-				},
+				Name:       "test",
 				Exclude:    true,
 				MinVersion: "",
 				ResourceMetadata: &Resource{
-					NamedObject: NamedObject{
-						Name: "test",
-					},
+					Name:            "test",
 					MinVersion:      "",
 					ProductMetadata: &p,
 				},
@@ -156,16 +136,12 @@ func TestTypeExcludeIfNotInVersion(t *testing.T) {
 		{
 			description: "type has Exclude false and not empty ExactVersion",
 			obj: Type{
-				NamedObject: NamedObject{
-					Name: "test",
-				},
+				Name:         "test",
 				MinVersion:   "",
 				Exclude:      false,
 				ExactVersion: "beta",
 				ResourceMetadata: &Resource{
-					NamedObject: NamedObject{
-						Name: "test",
-					},
+					Name:            "test",
 					MinVersion:      "beta",
 					ProductMetadata: &p,
 				},
@@ -178,16 +154,12 @@ func TestTypeExcludeIfNotInVersion(t *testing.T) {
 		{
 			description: "type has Exclude false and empty ExactVersion",
 			obj: Type{
-				NamedObject: NamedObject{
-					Name: "test",
-				},
+				Name:         "test",
 				MinVersion:   "beta",
 				Exclude:      false,
 				ExactVersion: "",
 				ResourceMetadata: &Resource{
-					NamedObject: NamedObject{
-						Name: "test",
-					},
+					Name:            "test",
 					MinVersion:      "",
 					ProductMetadata: &p,
 				},
