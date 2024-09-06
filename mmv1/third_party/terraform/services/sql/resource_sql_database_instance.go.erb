@@ -116,6 +116,7 @@ var (
 		"settings.0.ip_configuration.0.enable_private_path_for_google_cloud_services",
 		"settings.0.ip_configuration.0.psc_config",
 		"settings.0.ip_configuration.0.ssl_mode",
+		"settings.0.ip_configuration.0.server_ca_mode",
 	}
 
 	maintenanceWindowKeys = []string{
@@ -442,6 +443,11 @@ is set to true. Defaults to ZONAL.`,
 							Optional:    true,
 							Description: `Enables Vertex AI Integration.`,
 						},
+						"enable_dataplex_integration": {
+							Type:             schema.TypeBool,
+							Optional:         true,
+							Description:      `Enables Dataplex Integration.`,
+						},
 						"disk_size": {
 							Type:     schema.TypeInt,
 							Optional: true,
@@ -613,6 +619,7 @@ is set to true. Defaults to ZONAL.`,
 						"insights_config": {
 							Type:     schema.TypeList,
 							Optional: true,
+							Computed: true,
 							MaxItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -701,7 +708,7 @@ is set to true. Defaults to ZONAL.`,
 							Optional:     true,
 							Computed:     true,
 							ValidateFunc: validation.StringInSlice([]string{"NOT_REQUIRED", "REQUIRED"}, false),
-							Description:  `Specifies if connections must use Cloud SQL connectors.`,
+							Description:  `Enables the enforcement of Cloud SQL Auth Proxy or Cloud SQL connectors for all the connections. If enabled, all the direct connections are rejected.`,
 						},
 						"deletion_protection_enabled": {
 							Type:        schema.TypeBool,
@@ -1134,7 +1141,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	if v, ok := d.GetOk("name"); ok {
 		name = v.(string)
 	} else {
-		name =id.UniqueId()
+		name = id.UniqueId()
 	}
 
 	if err := d.Set("name", name); err != nil {
@@ -1354,7 +1361,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion
 		Tier:                      _settings["tier"].(string),
 		Edition:                   _settings["edition"].(string),
 		AdvancedMachineFeatures:   expandSqlServerAdvancedMachineFeatures(_settings["advanced_machine_features"].([]interface{})),
-		ForceSendFields:           []string{"StorageAutoResize", "EnableGoogleMlIntegration"},
+		ForceSendFields:           []string{"StorageAutoResize", "EnableGoogleMlIntegration", "EnableDataplexIntegration"},
 		ActivationPolicy:          _settings["activation_policy"].(string),
 		ActiveDirectoryConfig:     expandActiveDirectoryConfig(_settings["active_directory_config"].([]interface{})),
 		DenyMaintenancePeriods:    expandDenyMaintenancePeriod(_settings["deny_maintenance_period"].([]interface{})),
@@ -1368,6 +1375,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion
 		PricingPlan:               _settings["pricing_plan"].(string),
 		DeletionProtectionEnabled: _settings["deletion_protection_enabled"].(bool),
 		EnableGoogleMlIntegration: _settings["enable_google_ml_integration"].(bool),
+		EnableDataplexIntegration: _settings["enable_dataplex_integration"].(bool),
 		UserLabels:                tpgresource.ConvertStringMap(_settings["user_labels"].(map[string]interface{})),
 		BackupConfiguration:       expandBackupConfiguration(_settings["backup_configuration"].([]interface{})),
 		DatabaseFlags:             expandDatabaseFlags(_settings["database_flags"].(*schema.Set).List()),
@@ -1484,6 +1492,7 @@ func expandIpConfiguration(configured []interface{}, databaseVersion string) *sq
 		NullFields:                              nullFields,
 		PscConfig:                               expandPscConfig(_ipConfiguration["psc_config"].(*schema.Set).List()),
 		SslMode:                                 _ipConfiguration["ssl_mode"].(string),
+		ServerCaMode:                            _ipConfiguration["server_ca_mode"].(string),
 	}
 }
 
@@ -2239,6 +2248,8 @@ func flattenSettings(settings *sqladmin.Settings, d *schema.ResourceData) []map[
 	data["disk_autoresize_limit"] = settings.StorageAutoResizeLimit
 
 	data["enable_google_ml_integration"] = settings.EnableGoogleMlIntegration
+	data["enable_dataplex_integration"] = settings.EnableDataplexIntegration
+
 
 	if settings.UserLabels != nil {
 		data["user_labels"] = settings.UserLabels
@@ -2648,6 +2659,7 @@ func isSwitchoverRequested(ctx context.Context, d *schema.ResourceData) bool {
 func isReplicaPromoteRequested(_ context.Context, oldInstanceType interface{}, newInstanceType interface{}, _ interface{}) bool {
 	oldInstanceType = oldInstanceType.(string)
 	newInstanceType = newInstanceType.(string)
+
 	if newInstanceType == "CLOUD_SQL_INSTANCE" && oldInstanceType == "READ_REPLICA_INSTANCE" {
 		return true
 	}
