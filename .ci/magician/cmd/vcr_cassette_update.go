@@ -90,7 +90,7 @@ var vcrCassetteUpdateCmd = &cobra.Command{
 		}
 		ctlr := source.NewController(env["GOPATH"], "hashicorp", env["GITHUB_TOKEN_CLASSIC"], rnr)
 
-		vt, err := vcr.NewTester(env, "ci-vcr-logs", "ci-vcr-cassettes", rnr)
+		vt, err := vcr.NewTester(env, "", "ci-vcr-cassettes", rnr)
 		if err != nil {
 			return fmt.Errorf("error creating VCR tester: %w", err)
 		}

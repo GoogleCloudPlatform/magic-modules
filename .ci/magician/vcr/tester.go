@@ -138,30 +138,26 @@ func (vt *Tester) FetchCassettes(version provider.Version, baseBranch, head stri
 	}
 	cassettePath := filepath.Join(vt.baseDir, "cassettes", version.String())
 	vt.rnr.Mkdir(cassettePath)
-	fetchErrors := make([]error, 0, 3)
 	if baseBranch != "FEATURE-BRANCH-major-release-6.0.0" {
 		// pull main cassettes (major release uses branch specific casssettes as primary ones)
-		bucketPath := fmt.Sprintf("gs://%s/%sfixtures/*", vt.cassetteBucket, version.BucketPath())
+		bucketPath := fmt.Sprintf("gs://ci-vcr-cassettes/%sfixtures/*", version.BucketPath())
 		if err := vt.fetchBucketPath(bucketPath, cassettePath); err != nil {
-			fetchErrors = append(fetchErrors, fmt.Errorf("error fetching bucket path %s: %v", bucketPath, err))
+			fmt.Println("Error fetching cassettes: ", err)
 		}
 	}
 	if baseBranch != "main" {
-		bucketPath := fmt.Sprintf("gs://%s/%srefs/branches/%s/fixtures/*", vt.cassetteBucket, version.BucketPath(), baseBranch)
+		bucketPath := fmt.Sprintf("gs://ci-vcr-cassettes/%srefs/branches/%s/fixtures/*", version.BucketPath(), baseBranch)
 		if err := vt.fetchBucketPath(bucketPath, cassettePath); err != nil {
-			fetchErrors = append(fetchErrors, fmt.Errorf("error fetching bucket path %s: %v", bucketPath, err))
+			fmt.Println("Error fetching cassettes: ", err)
 		}
 	}
 	if head != "" {
-		bucketPath := fmt.Sprintf("gs://%s/%srefs/heads/%s/fixtures/*", vt.cassetteBucket, version.BucketPath(), head)
+		bucketPath := fmt.Sprintf("gs://ci-vcr-cassettes/%srefs/heads/%s/fixtures/*", version.BucketPath(), head)
 		if err := vt.fetchBucketPath(bucketPath, cassettePath); err != nil {
-			fetchErrors = append(fetchErrors, fmt.Errorf("error fetching bucket path %s: %v", bucketPath, err))
+			fmt.Println("Error fetching cassettes: ", err)
 		}
 	}
 	vt.cassettePaths[version] = cassettePath
-	if len(fetchErrors) > 0 {
-		return fmt.Errorf("errors fetching cassettes: %v", fetchErrors)
-	}
 	return nil
 }
 
