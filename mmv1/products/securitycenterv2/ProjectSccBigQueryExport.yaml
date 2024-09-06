@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: 'ProjectSccBigQueryExports'
+name: 'ProjectSccBigQueryExport'
 base_url: projects/{{project}}/locations/{{location}}/bigQueryExports
 self_link: projects/{{project}}/locations/{{location}}/bigQueryExports/{{big_query_export_id}}
 create_url: projects/{{project}}/locations/{{location}}/bigQueryExports?bigQueryExportId={{big_query_export_id}}

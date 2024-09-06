@@ -13,7 +13,7 @@
 
 # Warning: This is a temporary file, and should not be edited directly
 ---
-name: 'FolderSccBigQueryExports'
+name: 'OrganizationSccBigQueryExport'
 description: |
   A Cloud Security Command Center (Cloud SCC) Big Query Export Config.
   It represents exporting Security Command Center data, including assets, findings, and security marks
@@ -24,39 +24,38 @@ description: |
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/security-command-center/docs/how-to-analyze-findings-in-big-query'
-  api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v2/folders.locations.bigQueryExports'
+  api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v2/organizations.locations.bigQueryExports'
 docs:
-base_url: 'folders/{{folder}}/locations/{{location}}/bigQueryExports'
-self_link: 'folders/{{folder}}/locations/{{location}}/bigQueryExports/{{big_query_export_id}}'
-create_url: 'folders/{{folder}}/locations/{{location}}/bigQueryExports?bigQueryExportId={{big_query_export_id}}'
+base_url: 'organizations/{{organization}}/locations/{{location}}/bigQueryExports'
+self_link: 'organizations/{{organization}}/locations/{{location}}/bigQueryExports/{{big_query_export_id}}'
+create_url: 'organizations/{{organization}}/locations/{{location}}/bigQueryExports?bigQueryExportId={{big_query_export_id}}'
 update_verb: 'PATCH'
 update_mask: true
 import_format:
-  - 'folders/{{folder}}/locations/{{location}}/bigQueryExports/{{big_query_export_id}}'
+  - 'organizations/{{organization}}/locations/{{location}}/bigQueryExports/{{big_query_export_id}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 custom_code:
+  post_import: 'templates/terraform/post_import/go/scc_v2_organization_big_query_export_config.go.tmpl'
 examples:
-  - name: 'scc_v2_folder_big_query_export_config_basic'
+  - name: 'scc_v2_organization_big_query_export_config_basic'
     primary_resource_id: 'custom_big_query_export_config'
     vars:
       big_query_export_id: 'my-export'
       dataset: 'my-dataset'
-      dataset_id: 'my_dataset_id'
       name: 'my-export'
-      folder_display_name: 'folder-name'
     test_env_vars:
       org_id: 'ORG_ID'
       project: 'PROJECT_NAME'
     external_providers: ["random", "time"]
     skip_test: true
 parameters:
-  - name: 'folder'
+  - name: 'organization'
     type: String
     description: |
-      The folder where Cloud Security Command Center Big Query Export
+      The organization whose Cloud Security Command Center the Big Query Export
       Config lives in.
     url_param_only: true
     required: true
@@ -64,16 +63,14 @@ parameters:
   - name: 'bigQueryExportId'
     type: String
     description: |
-      This must be unique within the organization.  It must consist of only lowercase letters,
-      numbers, and hyphens, must start with a letter, must end with either a letter or a number,
-      and must be 63 characters or less.
+      This must be unique within the organization.
     url_param_only: true
     required: true
     immutable: true
   - name: 'location'
     type: String
     description: |
-      The BigQuery export configuration is stored in this location. If not provided, Use global as default.
+      location Id is provided by organization. If not provided, Use global as default.
     url_param_only: true
     immutable: true
     default_value: "global"
@@ -82,9 +79,8 @@ properties:
     type: String
     description: |
       The resource name of this export, in the format
-      `folders/{{folder}}/locations/{{location}}/bigQueryExports/{{big_query_export_id}}`.
+      `organizations/{{organization}}/locations/{{location}}/bigQueryExports/{{big_query_export_id}}`.
       This field is provided in responses, and is ignored when provided in create requests.
-    output: true
   - name: 'description'
     type: String
     description: |
