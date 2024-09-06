@@ -35,7 +35,7 @@ func TestAccSecurityCenterV2FolderBigQueryExportConfig_basic(t *testing.T) {
 				Config: testAccSecurityCenterV2FolderBigQueryExportConfig_basic(context),
 			},
 			{
-				ResourceName:            "google_scc_v2_folder_scc_big_query_exports.default",
+				ResourceName:            "google_scc_v2_folder_scc_big_query_export.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"update_time"},
@@ -44,7 +44,7 @@ func TestAccSecurityCenterV2FolderBigQueryExportConfig_basic(t *testing.T) {
 				Config: testAccSecurityCenterV2FolderBigQueryExportConfig_update(context),
 			},
 			{
-				ResourceName:            "google_scc_v2_folder_scc_big_query_exports.default",
+				ResourceName:            "google_scc_v2_folder_scc_big_query_export.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"update_time"},
@@ -85,7 +85,7 @@ resource "time_sleep" "wait_1_minute" {
 	create_duration = "3m"
 }
 
-resource "google_scc_v2_folder_scc_big_query_exports" "default" {
+resource "google_scc_v2_folder_scc_big_query_export" "default" {
   big_query_export_id    = "%{big_query_export_id}"
   folder 	   = google_folder.folder.folder_id
   dataset      = google_bigquery_dataset.default.id
@@ -103,7 +103,7 @@ resource "google_scc_v2_folder_scc_big_query_exports" "default" {
 
 resource "time_sleep" "wait_for_cleanup" {
 	create_duration = "3m"
-	depends_on = [google_scc_v2_folder_scc_big_query_exports.default]
+	depends_on = [google_scc_v2_folder_scc_big_query_export.default]
 }
 `, context)
 }
@@ -135,7 +135,7 @@ resource "google_bigquery_dataset" "default" {
   }
 }
 
-resource "google_scc_v2_folder_scc_big_query_exports" "default" {
+resource "google_scc_v2_folder_scc_big_query_export" "default" {
   big_query_export_id    = "%{big_query_export_id}"
   folder 	   = google_folder.folder.folder_id
   dataset      = google_bigquery_dataset.default.id
@@ -151,7 +151,7 @@ resource "google_scc_v2_folder_scc_big_query_exports" "default" {
 
 resource "time_sleep" "wait_for_cleanup" {
 	create_duration = "3m"
-	depends_on = [google_scc_v2_folder_scc_big_query_exports.default]
+	depends_on = [google_scc_v2_folder_scc_big_query_export.default]
 }
 `, context)
 }
