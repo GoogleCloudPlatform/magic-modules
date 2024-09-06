@@ -35,10 +35,6 @@ virtual_fields:
       `NOT_STARTED` to create the stream without starting and `PAUSED` to pause
       the stream from a `RUNNING` state.
       Possible values: NOT_STARTED, RUNNING, PAUSED. Default: NOT_STARTED
-    values:
-      - :NOT_STARTED
-      - :RUNNING
-      - :PAUSED
     default_value: :NOT_STARTED
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: 'templates/terraform/constants/datastream_stream.go.erb'
