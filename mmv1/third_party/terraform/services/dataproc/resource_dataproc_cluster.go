@@ -2883,10 +2883,6 @@ func flattenSecurityConfig(d *schema.ResourceData, sc *dataproc.SecurityConfig) 
 	if sc == nil {
 		return nil
 	}
-	// API side change means that sc can be non-nil but contain only nils
-	if sc.KerberosConfig == nil {
-		return nil
-	}
 	data := map[string]interface{}{
 		"kerberos_config": flattenKerberosConfig(d, sc.KerberosConfig),
 	}
@@ -2895,6 +2891,9 @@ func flattenSecurityConfig(d *schema.ResourceData, sc *dataproc.SecurityConfig) 
 }
 
 func flattenKerberosConfig(d *schema.ResourceData, kfg *dataproc.KerberosConfig) []map[string]interface{} {
+	if kfg == nil {
+		return nil
+	}
 	data := map[string]interface{}{
 		"enable_kerberos":                       kfg.EnableKerberos,
 		"root_principal_password_uri":           kfg.RootPrincipalPasswordUri,
