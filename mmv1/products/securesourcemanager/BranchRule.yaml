@@ -1,0 +1,139 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'BranchRule'
+base_url: 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/branchRules'
+self_link: 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/branchRules/{{branch_rule_id}}'
+immutable: true
+description: 'BranchRule is the protection rule to enforce pre-defined rules on designated branches within a repository.'
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/secure-source-manager/docs/overview'
+create_url: 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/branchRules?branch_rule_id={{branch_rule_id}}'
+update_verb: :PATCH
+update_mask: true
+import_format: ['projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/branchRules/{{branch_rule_id}}', '{{branch_rule_id}}']
+autogen_async: true
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  parent_resource_attribute: 'repository_id'
+  method_name_separator: ':'
+  allowed_iam_role: 'roles/securesourcemanager.repoAdmin'
+  import_format: ['projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}', '{{repository_id}}']
+parameters:
+  - !ruby/object:Api::Type::String
+    name: 'location'
+    description: |
+      'The location for the BranchRule.'
+    required: true
+    url_param_only: true
+  - !ruby/object:Api::Type::String
+    name: 'repository_id'
+    description: |
+      'The ID of the repository for the BranchRule.'
+    required: true
+    url_param_only: true
+  - !ruby/object:Api::Type::String
+    name: 'branch_rule_id'
+    description: |
+      'The ID for the BranchRule.'
+    required: true
+    url_param_only: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: |
+      'The resource name for the BranchRule. The name should be of the format:
+      projects/{project}/locations/{location}/repositories/{repository}/branchRules/{branch_rule}.'
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'uid'
+    description: |
+      'Unique identifier of the BranchRule.'
+    output: true
+  - !ruby/object:Api::Type::Time
+    name: 'createTime'
+    description: |
+      'Time the BranchRule was created in UTC.'
+    output: true
+  - !ruby/object:Api::Type::Time
+    name: 'updateTime'
+    description: |
+      'Time the BranchRule was updated in UTC.'
+    output: true
+  - !ruby/object:Api::Type::Map
+    name: 'annotations'
+    description: |
+      'User annotations. These attributes can only be set and used by the user.'
+    key_type: Api::Type::String
+    value_type: Api::Type::String
+  - !ruby/object:Api::Type::String
+    name: 'etag'
+    description: |
+      'This checksum is computed by the server based on the value of other fields, and may be sent on update and delete requests to ensure the client has an up-to-date value before proceeding.'
+  - !ruby/object:Api::Type::String
+    name: 'includePattern'
+    description: |
+      'The pattern of the branch that can match to this BranchRule. Specified as regex. Use .* for all branches.'
+  - !ruby/object:Api::Type::NestedObject
+    name: 'requiredStatusChecks'
+    description: |
+      'List of required status checks before merging to the branch.'
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'context'
+        description: |
+          'The context of the check.'
+  - !ruby/object:Api::Type::Boolean
+    name: 'disabled'
+    description: |
+      'Determines if the branch rule is disabled or not.'
+  - !ruby/object:Api::Type::Boolean
+    name: 'requirePullRequest'
+    description: |
+      'Determines if the branch rule requires a pull request or not.'
+  - !ruby/object:Api::Type::Integer
+    name: 'minimumReviewsCount'
+    description: |
+      'The minimum number of reviews required for the branch rule to be matched.'
+  - !ruby/object:Api::Type::Integer
+    name: 'minimumApprovalsCount'
+    description: |
+      'The minimum number of approvals required for the branch rule to be matched.'
+  - !ruby/object:Api::Type::Boolean
+    name: 'requireCommentsResolved'
+    description: |
+      'Determines if require comments resolved before merging to the branch.'
+  - !ruby/object:Api::Type::Boolean
+    name: 'allowStaleReviews'
+    description: |
+      'Determines if allow stale reviews or approvals before merging to the branch.'
+  - !ruby/object:Api::Type::Boolean
+    name: 'requireLinearHistory'
+    description: |
+      'Determines if require linear history before merging to the branch.'
