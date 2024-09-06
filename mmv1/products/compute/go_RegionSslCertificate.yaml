@@ -26,7 +26,13 @@ references:
 docs:
   optional_properties: |
     * `name_prefix` - (Optional) Creates a unique name beginning with the
-     specified prefix. Conflicts with `name`.
+     specified prefix. Conflicts with `name`. Max length is 54 characters.
+     Prefixes with lengths longer than 37 characters will use a shortened
+     UUID that will be more prone to collisions.
+     Resulting name for a `name_prefix` <= 37 characters:
+     `name_prefix` + YYYYmmddHHSSssss + 8 digit incremental counter
+     Resulting name for a `name_prefix` 38 - 54 characters:
+     `name_prefix` + YYmmdd + 3 digit incremental counter
 base_url: 'projects/{{project}}/regions/{{region}}/sslCertificates'
 has_self_link: true
 immutable: true
@@ -38,7 +44,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 1000

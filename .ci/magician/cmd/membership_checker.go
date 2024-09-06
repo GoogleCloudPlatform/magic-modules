@@ -74,7 +74,7 @@ func execMembershipChecker(prNumber, commitSha string, gh GithubClient, cb Cloud
 	// 1. auto approve community-checker run for trusted users
 	// 2. add awaiting-approval label to external contributor PRs
 	if trusted {
-		err = cb.ApproveCommunityChecker(prNumber, commitSha)
+		err = cb.ApproveDownstreamGenAndTest(prNumber, commitSha)
 		if err != nil {
 			return err
 		}

@@ -1,4 +1,4 @@
-{{/* TODO: if hc_downstream */ -}}
+{{/* TODO rewrite: if hc_downstream */ -}}
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 
@@ -94,7 +94,7 @@ func create{{ $.ProductMetadata.Name }}Waiter(config *transport_tpg.Config, op m
     Might as well just nolint it so we can pass the linter checks.
 */}}
 
-// nolint: deadcode,unused {{/* TODO: remove the comment */}}
+// nolint: deadcode,unused {{/* TODO rewrite: remove the comment */}}
 func {{ camelize $.ProductMetadata.Name "upper" }}OperationWaitTimeWithResponse(config *transport_tpg.Config, op map[string]interface{}, response *map[string]interface{},{{- if $.IncludeProjectForOperation }} project,{{- end }} activity, userAgent string, timeout time.Duration) error {
   w, err := create{{ $.ProductMetadata.Name }}Waiter(config, op, {{- if $.IncludeProjectForOperation }} project, {{ end }} activity, userAgent)
   if err != nil {

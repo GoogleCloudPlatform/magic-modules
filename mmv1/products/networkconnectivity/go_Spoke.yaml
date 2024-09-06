@@ -189,6 +189,12 @@ properties:
         immutable: true
         item_type:
           type: String
+      - name: 'includeExportRanges'
+        type: Array
+        description: IP ranges allowed to be included from peering.
+        immutable: true
+        item_type:
+          type: String
   - name: 'uniqueId'
     type: String
     description: Output only. The Google-generated UUID for the spoke. This value is unique across all spoke resources. If a spoke is deleted and another with the same name is created, the new spoke is assigned a different unique_id.

@@ -91,7 +91,6 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: 'Set of label tags associated with the trust config.'
-    immutable: false
   - name: 'description'
     type: String
     description: |

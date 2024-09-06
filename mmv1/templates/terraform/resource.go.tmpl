@@ -420,9 +420,6 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{if and ($.GetAsync) ($.GetAsync.IsA "PollAsync")}}
 func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interface{}) transport_tpg.PollReadFunc {
     return func() (map[string]interface{}, error) {
-{{if $.GetAsync.CustomPollRead -}}
-//TODO custom poll read
-{{    else -}}
         config := meta.(*transport_tpg.Config)
 
 
@@ -504,7 +501,6 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
         }
 {{ end }}
         return res, nil
-{{    end  -}}
     }
 }
 {{  end }}

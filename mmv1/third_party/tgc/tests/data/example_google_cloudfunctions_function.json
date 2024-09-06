@@ -15,7 +15,6 @@
                     "MY_CF_ENV": "my-cf-env"
                 },
                 "labels": {
-                    "goog-terraform-provisioned": "true",
                     "my-cf-label-value": "my-cf-label-value"
                 },
                 "location": "us-east1",

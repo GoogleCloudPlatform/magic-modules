@@ -104,7 +104,6 @@ properties:
     type: KeyValueLabels
     description: |
       Resource labels to represent user provided metadata.
-    immutable: false
   - name: 'state'
     type: Enum
     description: |
