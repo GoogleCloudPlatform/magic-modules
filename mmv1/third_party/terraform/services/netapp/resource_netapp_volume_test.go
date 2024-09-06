@@ -150,7 +150,6 @@ resource "google_netapp_storage_pool" "default" {
     service_level = "PREMIUM"
     capacity_gib = "2048"
     network = data.google_compute_network.default.id
-    allow_auto_tiering = true
 }
     
 resource "google_netapp_storage_pool" "default2" {
@@ -221,10 +220,6 @@ resource "google_netapp_volume" "test_volume" {
         weekly_schedule {
             snapshots_to_keep = 2
         }
-    }
-    tiering_policy {
-        cooling_threshold_days = 20
-        tier_action = "ENABLED"
     }
 }
 
