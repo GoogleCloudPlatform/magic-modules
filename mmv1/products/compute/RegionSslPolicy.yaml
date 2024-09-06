@@ -18,19 +18,18 @@ base_url: projects/{{project}}/regions/{{region}}/sslPolicies
 collection_url_key: 'items'
 update_verb: :PATCH
 has_self_link: true
-min_version: beta
 description: |
   Represents a Regional SSL policy. SSL policies give you the ability to control the
   features of SSL that your SSL proxy or HTTPS load balancer negotiates.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Using SSL Policies': 'https://cloud.google.com/compute/docs/load-balancing/ssl-policies'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionSslPolicies'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionSslPolicies'
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -46,16 +45,20 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: 'templates/terraform/constants/region_ssl_policy.erb'
-  resource_definition: 'templates/terraform/resource_definition/region_ssl_policy.erb'
+custom_diff: [
+  'regionSslPolicyCustomizeDiff',
+]
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
     resource: 'Region'
     imports: 'name'
-    required: true
+    default_from_api: true
     immutable: true
     description: |
       The region where the regional SSL policy resides.
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -65,11 +68,6 @@ properties:
     name: 'description'
     description: 'An optional description of this resource.'
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: 'id'
-    description: 'The unique identifier for the resource.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
@@ -135,20 +133,3 @@ properties:
       Fingerprint of this resource. A hash of the contents stored in this
       object. This field is used in optimistic locking.
     output: true
-  - !ruby/object:Api::Type::Array
-    name: 'warnings'
-    description: |
-      If potential misconfigurations are detected for this SSL policy, this
-      field will be populated with warning messages.
-    output: true
-    exclude: true
-    item_type: !ruby/object:Api::Type::NestedObject
-      properties:
-        - !ruby/object:Api::Type::String
-          name: 'code'
-          description: 'A warning code, if applicable.'
-          output: true
-        - !ruby/object:Api::Type::String
-          name: 'message'
-          description: 'A human-readable description of the warning code.'
-          output: true

@@ -26,9 +26,9 @@ async: !ruby/object:Api::OpAsync
     base_url: '{{op_id}}'
     wait_ms: 1000
     timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 30
-      update_minutes: 30
-      delete_minutes: 30
+      insert_minutes: 60
+      update_minutes: 60
+      delete_minutes: 60
   result: !ruby/object:Api::OpAsync::Result
     path: 'response'
   status: !ruby/object:Api::OpAsync::Status
@@ -44,31 +44,32 @@ docs: !ruby/object:Provider::Terraform::Docs
   warning: |
     These resources require allow-listing to use, and are not openly available to all Cloud customers. Engage with your Cloud account team to discuss how to onboard.
 autogen_async: true
-import_format: ["projects/{{project}}/locations/global/edgeCacheServices/{{name}}"]
+import_format:
+  ['projects/{{project}}/locations/global/edgeCacheServices/{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "network_services_edge_cache_service_basic"
-    primary_resource_id: "instance"
+    name: 'network_services_edge_cache_service_basic'
+    primary_resource_id: 'instance'
     vars:
-      bucket_name: "my-bucket"
-      origin_name: "my-origin"
-      service_name: "my-service"
+      bucket_name: 'my-bucket'
+      origin_name: 'my-origin'
+      service_name: 'my-service'
   - !ruby/object:Provider::Terraform::Examples
-    name: "network_services_edge_cache_service_advanced"
-    primary_resource_id: "instance"
+    name: 'network_services_edge_cache_service_advanced'
+    primary_resource_id: 'instance'
     vars:
-      bucket_name: "my-bucket"
-      origin_name: "my-origin"
-      origin_google: "origin-google"
-      service_name: "my-service"
+      bucket_name: 'my-bucket'
+      origin_name: 'my-origin'
+      origin_google: 'origin-google'
+      service_name: 'my-service'
   - !ruby/object:Provider::Terraform::Examples
-    name: "network_services_edge_cache_service_dual_token"
-    primary_resource_id: "instance"
+    name: 'network_services_edge_cache_service_dual_token'
+    primary_resource_id: 'instance'
     vars:
-      secret_name: "secret-name"
-      keyset_name: "keyset-name"
-      origin_name: "my-origin"
-      service_name: "my-service"
+      secret_name: 'secret-name'
+      keyset_name: 'keyset-name'
+      origin_name: 'my-origin'
+      service_name: 'my-service'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -84,16 +85,16 @@ properties:
     name: 'description'
     description: |
       A human-readable description of the resource.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: 'Set of label tags associated with the EdgeCache resource.'
   - !ruby/object:Api::Type::Boolean
-    name: disableQuic # default from api
+    name: disableQuic  # default from api
     description: |
       HTTP/3 (IETF QUIC) and Google QUIC are enabled by default.
     default_from_api: true
   - !ruby/object:Api::Type::Boolean
-    name: disableHttp2 # default from api
+    name: disableHttp2  # default from api
     description: |
       Disables HTTP/2.
 
@@ -101,7 +102,7 @@ properties:
 
       Some legacy HTTP clients may have issues with HTTP/2 connections due to broken HTTP/2 implementations. Setting this to true will prevent HTTP/2 from being advertised and negotiated.
   - !ruby/object:Api::Type::Boolean
-    name: requireTls # default from api
+    name: requireTls  # default from api
     description: |
       Require TLS (HTTPS) for all clients connecting to this service.
 
@@ -141,12 +142,12 @@ properties:
       Defines how requests are routed, modified, cached and/or which origin content is filled from.
     properties:
       - !ruby/object:Api::Type::Array
-        name: "host_rule"
+        name: 'host_rule'
         api_name: 'hostRules'
         description: |
           The list of hostRules to match against. These rules define which hostnames the EdgeCacheService will match against, and which route configurations apply.
         min_size: 1
-        max_size: 5
+        max_size: 10
         required: true
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
@@ -185,7 +186,7 @@ properties:
               description: |
                 The name of the pathMatcher associated with this hostRule.
       - !ruby/object:Api::Type::Array
-        name: "path_matcher"
+        name: 'path_matcher'
         api_name: 'pathMatchers'
         description: |
           The list of pathMatchers referenced via name by hostRules. PathMatcher is used to match the path portion of the URL when a HostRule matches the URL's host portion.
@@ -209,7 +210,7 @@ properties:
               description: |
                 The routeRules to match against. routeRules support advanced routing behaviour, and can match on paths, headers and query parameters, as well as status codes and HTTP methods.
               min_size: 1
-              max_size: 64
+              max_size: 200
               required: true
               item_type: !ruby/object:Api::Type::NestedObject
                 properties:
@@ -239,7 +240,7 @@ properties:
                     item_type: !ruby/object:Api::Type::NestedObject
                       properties:
                         - !ruby/object:Api::Type::Boolean
-                          name: ignoreCase # default from api
+                          name: ignoreCase  # default from api
                           description: |
                             Specifies that prefixMatch and fullPathMatch matches are case sensitive.
                           default_from_api: true
@@ -274,7 +275,7 @@ properties:
                                 description: |
                                   The value of the header must end with the contents of suffixMatch.
                               - !ruby/object:Api::Type::Boolean
-                                name: invertMatch # default from api
+                                name: invertMatch  # default from api
                                 description: |
                                   If set to false (default), the headerMatch is considered a match if the match criteria above are met.
                                   If set to true, the headerMatch is considered a match if the match criteria above are NOT met.
@@ -335,7 +336,7 @@ properties:
                         description: |
                           Describes a header to add.
                         min_size: 1
-                        max_size: 5
+                        max_size: 25
                         item_type: !ruby/object:Api::Type::NestedObject
                           properties:
                             - !ruby/object:Api::Type::String
@@ -349,7 +350,7 @@ properties:
                               description: |
                                 The value of the header to add.
                             - !ruby/object:Api::Type::Boolean
-                              name: replace # default from api
+                              name: replace  # default from api
                               description: |
                                 Whether to replace all existing headers with the same name.
                               default_from_api: true
@@ -361,7 +362,7 @@ properties:
 
                           Response headers are only sent to the client, and do not have an effect on the cache serving the response.
                         min_size: 1
-                        max_size: 5
+                        max_size: 25
                         item_type: !ruby/object:Api::Type::NestedObject
                           properties:
                             - !ruby/object:Api::Type::String
@@ -375,7 +376,7 @@ properties:
                               description: |
                                 The value of the header to add.
                             - !ruby/object:Api::Type::Boolean
-                              name: replace # default from api
+                              name: replace  # default from api
                               description: |
                                 Whether to replace all existing headers with the same name.
                               default_from_api: true
@@ -385,7 +386,7 @@ properties:
                         description: |
                           A list of header names for headers that need to be removed from the request prior to forwarding the request to the origin.
                         min_size: 1
-                        max_size: 10
+                        max_size: 25
                         item_type: !ruby/object:Api::Type::NestedObject
                           properties:
                             - !ruby/object:Api::Type::String
@@ -399,7 +400,7 @@ properties:
                         description: |
                           A list of header names for headers that need to be removed from the request prior to forwarding the request to the origin.
                         min_size: 1
-                        max_size: 10
+                        max_size: 25
                         item_type: !ruby/object:Api::Type::NestedObject
                           properties:
                             - !ruby/object:Api::Type::String
@@ -420,7 +421,7 @@ properties:
                           The policy to use for defining caching and signed request behaviour for requests that match this route.
                         properties:
                           - !ruby/object:Api::Type::Enum
-                            name: 'cacheMode' # default from api
+                            name: 'cacheMode'  # default from api
                             description: |
                               Cache modes allow users to control the behaviour of the cache, what content it should cache automatically, whether to respect origin headers, or whether to unconditionally cache all responses.
 
@@ -445,7 +446,7 @@ properties:
                               When the cache mode is set to "USE_ORIGIN_HEADERS" or "BYPASS_CACHE", you must omit this field.
                               A duration in seconds terminated by 's'. Example: "3s".
                           - !ruby/object:Api::Type::String
-                            name: 'defaultTtl' # defalt from api
+                            name: 'defaultTtl'  # defalt from api
                             description: |
                               Specifies the default TTL for cached content served by this origin for responses that do not have an existing valid TTL (max-age or s-max-age).
 
@@ -464,7 +465,7 @@ properties:
                               A duration in seconds terminated by 's'. Example: "3s".
                             default_from_api: true
                           - !ruby/object:Api::Type::String
-                            name: 'maxTtl' # defalt from api
+                            name: 'maxTtl'  # defalt from api
                             description: |
                               Specifies the maximum allowed TTL for cached content served by this origin.
 
@@ -487,7 +488,7 @@ properties:
                               Defines the request parameters that contribute to the cache key.
                             properties:
                               - !ruby/object:Api::Type::Boolean
-                                name: includeProtocol # default from api
+                                name: includeProtocol  # default from api
                                 description: |
                                   If true, http and https requests will be cached separately.
                                 default_from_api: true
@@ -502,7 +503,7 @@ properties:
                                   excludeQueryParameters is set, the entire query string will be
                                   included.
                               - !ruby/object:Api::Type::Boolean
-                                name: excludeHost # default from api
+                                name: excludeHost  # default from api
                                 default_from_api: true
                                 description: |
                                   If true, requests to different hosts will be cached separately.
@@ -514,7 +515,7 @@ properties:
                                   Names of query string parameters to include in cache keys. All other parameters will be excluded.
 
                                   Either specify includedQueryParameters or excludedQueryParameters, not both. '&' and '=' will be percent encoded and not treated as delimiters.
-                                max_size: 10
+                                max_size: 20
                                 item_type: Api::Type::String
                               - !ruby/object:Api::Type::Array
                                 name: excludedQueryParameters
@@ -522,7 +523,7 @@ properties:
                                   Names of query string parameters to exclude from cache keys. All other parameters will be included.
 
                                   Either specify includedQueryParameters or excludedQueryParameters, not both. '&' and '=' will be percent encoded and not treated as delimiters.
-                                max_size: 10
+                                max_size: 20
                                 item_type: Api::Type::String
                               - !ruby/object:Api::Type::Array
                                 name: includedHeaderNames
@@ -573,7 +574,7 @@ properties:
 
                               Note that when specifying an explicit negativeCachingPolicy, you should take care to specify a cache TTL for all response codes that you wish to cache. The CDNPolicy will not apply any default negative caching when a policy exists.
                           - !ruby/object:Api::Type::Enum
-                            name: 'signedRequestMode' # default from api
+                            name: 'signedRequestMode'  # default from api
                             default_from_api: true
                             description: |
                               Whether to enforce signed requests. The default value is DISABLED, which means all content is public, and does not authorize access.
@@ -586,7 +587,7 @@ properties:
                               - :REQUIRE_SIGNATURES
                               - :REQUIRE_TOKENS
                           - !ruby/object:Api::Type::String
-                            name: 'signedRequestKeyset' # resource ref, EdgeCacheKeyset?
+                            name: 'signedRequestKeyset'  # resource ref, EdgeCacheKeyset?
                             default_from_api: true
                             description: |
                               The EdgeCacheKeyset containing the set of public keys used to validate signed requests at the edge.
@@ -780,13 +781,13 @@ properties:
                             name: allowHeaders
                             description: |
                               Specifies the content for the Access-Control-Allow-Headers response header.
-                            max_size: 5
+                            max_size: 25
                             item_type: Api::Type::String
                           - !ruby/object:Api::Type::Array
                             name: exposeHeaders
                             description: |
                               Specifies the content for the Access-Control-Allow-Headers response header.
-                            max_size: 5
+                            max_size: 25
                             item_type: Api::Type::String
                           - !ruby/object:Api::Type::Boolean
                             name: 'disabled'
@@ -798,7 +799,7 @@ properties:
                       The Origin resource that requests to this route should fetch from when a matching response is not in cache. Origins can be defined as short names ("my-origin") or fully-qualified resource URLs - e.g. "networkservices.googleapis.com/projects/my-project/global/edgecacheorigins/my-origin"
 
                       Only one of origin or urlRedirect can be set.
-                    diff_suppress_func: 'compareSelfLinkOrResourceName'
+                    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
                   - !ruby/object:Api::Type::NestedObject
                     name: urlRedirect
                     description: |
@@ -823,7 +824,7 @@ properties:
 
                           prefixRedirect cannot be supplied together with pathRedirect. Supply one alone or neither. If neither is supplied, the path of the original request will be used for the redirect.
                       - !ruby/object:Api::Type::Enum
-                        name: 'redirectResponseCode' # default from api
+                        name: 'redirectResponseCode'  # default from api
                         default_from_api: true
                         description: |
                           The HTTP Status code to use for this RedirectAction.
@@ -842,14 +843,14 @@ properties:
                           - :TEMPORARY_REDIRECT
                           - :PERMANENT_REDIRECT
                       - !ruby/object:Api::Type::Boolean
-                        name: 'httpsRedirect' # default from api
+                        name: 'httpsRedirect'  # default from api
                         default_from_api: true
                         description: |
                           If set to true, the URL scheme in the redirected request is set to https. If set to false, the URL scheme of the redirected request will remain the same as that of the request.
 
                           This can only be set if there is at least one (1) edgeSslCertificate set on the service.
                       - !ruby/object:Api::Type::Boolean
-                        name: 'stripQuery' # default from api
+                        name: 'stripQuery'  # default from api
                         default_from_api: true
                         description: |
                           If set to true, any accompanying query portion of the original URL is removed prior to redirecting the request. If set to false, the query portion of the original URL is retained.
@@ -859,7 +860,7 @@ properties:
       Specifies the logging options for the traffic served by this service. If logging is enabled, logs will be exported to Cloud Logging.
     properties:
       - !ruby/object:Api::Type::Boolean
-        name: 'enable' #default from api
+        name: 'enable'  # default from api
         required: true
         description: |
           Specifies whether to enable logging for traffic served by this service.
@@ -874,4 +875,3 @@ properties:
     name: 'edgeSecurityPolicy'
     description: |
       Resource URL that points at the Cloud Armor edge security policy that is applied on each request against the EdgeCacheService.
-

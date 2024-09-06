@@ -25,49 +25,71 @@ description: |
   App profile is a configuration object describing how Cloud Bigtable should treat traffic from a particular end user application.
 references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/bigtable/docs/reference/admin/rest/v2/projects.instances.appProfiles'
-id_format: "projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}"
-import_format: ["projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}"]
+id_format: 'projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}'
+import_format:
+  ['projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}']
 skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigtable_app_profile_anycluster"
-    primary_resource_id: "ap"
+    name: 'bigtable_app_profile_anycluster'
+    primary_resource_id: 'ap'
     vars:
-      instance_name: "bt-instance"
-      app_profile_name: "bt-profile"
-      deletion_protection: "true"
+      instance_name: 'bt-instance'
+      app_profile_name: 'bt-profile'
+      deletion_protection: 'true'
     test_vars_overrides:
-      deletion_protection: "false"
+      deletion_protection: 'false'
     oics_vars_overrides:
-      deletion_protection: "false"
+      deletion_protection: 'false'
     ignore_read_extra:
-      - "ignore_warnings"
+      - 'ignore_warnings'
+    # bigtable instance does not use the shared HTTP client, this test creates an instance
+    skip_vcr: true
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigtable_app_profile_singlecluster"
-    primary_resource_id: "ap"
+    name: 'bigtable_app_profile_singlecluster'
+    primary_resource_id: 'ap'
     vars:
-      instance_name: "bt-instance"
-      app_profile_name: "bt-profile"
-      deletion_protection: "true"
+      instance_name: 'bt-instance'
+      app_profile_name: 'bt-profile'
+      deletion_protection: 'true'
     test_vars_overrides:
-      deletion_protection: "false"
+      deletion_protection: 'false'
     oics_vars_overrides:
-      deletion_protection: "false"
+      deletion_protection: 'false'
     ignore_read_extra:
-      - "ignore_warnings"
+      - 'ignore_warnings'
+    # bigtable instance does not use the shared HTTP client, this test creates an instance
+    skip_vcr: true
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigtable_app_profile_multicluster"
-    primary_resource_id: "ap"
+    name: 'bigtable_app_profile_multicluster'
+    primary_resource_id: 'ap'
     vars:
-      instance_name: "bt-instance"
-      app_profile_name: "bt-profile"
-      deletion_protection: "true"
+      instance_name: 'bt-instance'
+      app_profile_name: 'bt-profile'
+      deletion_protection: 'true'
     test_vars_overrides:
-      deletion_protection: "false"
+      deletion_protection: 'false'
     oics_vars_overrides:
-      deletion_protection: "false"
+      deletion_protection: 'false'
     ignore_read_extra:
-      - "ignore_warnings"
+      - 'ignore_warnings'
+    # bigtable instance does not use the shared HTTP client, this test creates an instance
+    skip_vcr: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'bigtable_app_profile_priority'
+    primary_resource_id: 'ap'
+    vars:
+      instance_name: 'bt-instance'
+      app_profile_name: 'bt-profile'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      deletion_protection: 'false'
+    oics_vars_overrides:
+      deletion_protection: 'false'
+    ignore_read_extra:
+      - 'ignore_warnings'
+    # bigtable instance does not use the shared HTTP client, this test creates an instance
+    skip_vcr: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/bigtable_app_profile.go.erb
   extra_schema_entry: templates/terraform/extra_schema_entry/bigtable_app_profile.go.erb
@@ -76,7 +98,9 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
 parameters:
   - !ruby/object:Api::Type::String
     name: 'appProfileId'
-    description: 'The unique name of the app profile in the form `[_a-zA-Z0-9][-_.a-zA-Z0-9]*`.'
+    description:
+      'The unique name of the app profile in the form
+      `[_a-zA-Z0-9][-_.a-zA-Z0-9]*`.'
     required: true
     immutable: true
     url_param_only: true
@@ -85,17 +109,19 @@ parameters:
     description: 'The name of the instance to create the app profile within.'
     immutable: true
     url_param_only: true
-    diff_suppress_func: compareResourceNames
+    diff_suppress_func: tpgresource.CompareResourceNames
   - !ruby/object:Api::Type::Boolean
     name: 'ignoreWarnings'
-    description: 'If true, ignore safety checks when deleting/updating the app profile.'
+    description:
+      'If true, ignore safety checks when deleting/updating the app profile.'
     default_value: false
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
-    description: 'The unique name of the requested app profile. Values are of the
-      form `projects/<project>/instances/<instance>/appProfiles/<appProfileId>`.'
+    description:
+      'The unique name of the requested app profile. Values are of the form
+      `projects/<project>/instances/<instance>/appProfiles/<appProfileId>`.'
     output: true
   - !ruby/object:Api::Type::String
     name: 'description'
@@ -130,4 +156,34 @@ properties:
         description: |
           If true, CheckAndMutateRow and ReadModifyWriteRow requests are allowed by this app profile.
           It is unsafe to send these requests to the same table/row/column in multiple clusters.
-
+  - !ruby/object:Api::Type::NestedObject
+    name: 'standardIsolation'
+    default_from_api: true
+    description: |
+      The standard options used for isolating this app profile's traffic from other use cases.
+    conflicts:
+      - data_boost_isolation_read_only
+    properties:
+      - !ruby/object:Api::Type::Enum
+        name: 'priority'
+        required: true
+        description: |
+          The priority of requests sent using this app profile.
+        values:
+          - :PRIORITY_LOW
+          - :PRIORITY_MEDIUM
+          - :PRIORITY_HIGH
+  - !ruby/object:Api::Type::NestedObject
+    name: 'dataBoostIsolationReadOnly'
+    description: |
+      Specifies that this app profile is intended for read-only usage via the Data Boost feature.
+    conflicts:
+      - standard_isolation
+    properties:
+      - !ruby/object:Api::Type::Enum
+        name: 'computeBillingOwner'
+        required: true
+        description: |
+          The Compute Billing Owner for this Data Boost App Profile.
+        values:
+          - :HOST_PAYS

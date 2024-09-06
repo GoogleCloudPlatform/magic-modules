@@ -1,0 +1,35 @@
+[
+  {
+    "name": "//file.googleapis.com/projects/{{.Provider.project}}/locations/us-central1-b/instances/test-instance",
+    "asset_type": "file.googleapis.com/Instance",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "v1beta1",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/file/v1beta1/rest",
+      "discovery_name": "Instance",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "fileShares": [
+          {
+            "capacityGb": 2660,
+            "name": "share1"
+          }
+        ],
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
+        "networks": [
+          {
+            "connectMode": "DIRECT_PEERING",
+            "modes": [
+              "MODE_IPV4"
+            ],
+            "network": "default"
+          }
+        ],
+        "protocol": "NFS_V3",
+        "tier": "BASIC_SSD"
+      }
+    }
+  }
+]

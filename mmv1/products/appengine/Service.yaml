@@ -12,28 +12,28 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-  name: 'Service'
-  description: |
-    A Service resource is a logical component of an application that can share state and communicate in a secure fashion with other services.
-    For example, an application that handles customer requests might include separate services to handle tasks such as backend data analysis or API requests from mobile devices.
-    Each service has a collection of versions that define a specific set of code used to implement the functionality of that service.
-  base_url: 'apps/{{project}}/services'
-  self_link: 'apps/{{project}}/services/{{id}}'
-  references: !ruby/object:Api::Resource::ReferenceLinks
-    guides:
-      'Official Documentation': 'https://cloud.google.com/appengine/docs/admin-api/deploying-overview'
-    api: 'https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps.services'
-  exclude: true
-  properties:
-    - !ruby/object:Api::Type::String
-      name: 'name'
-      output: true
-      description: |
-        Full path to the Service resource in the API. Example apps/myapp/services/default.
-        This field is used in responses only. Any value specified here in a request is ignored.
-    - !ruby/object:Api::Type::String
-      name: 'id'
-      output: true
-      description: |
-        Relative name of the service within the application. Example default.
-  
+name: 'Service'
+description: |
+  A Service resource is a logical component of an application that can share state and communicate in a secure fashion with other services.
+  For example, an application that handles customer requests might include separate services to handle tasks such as backend data analysis or API requests from mobile devices.
+  Each service has a collection of versions that define a specific set of code used to implement the functionality of that service.
+base_url: 'apps/{{project}}/services'
+self_link: 'apps/{{project}}/services/{{id}}'
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/appengine/docs/admin-api/deploying-overview'
+  api: 'https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps.services'
+# Used as a resource reference
+exclude: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    output: true
+    description: |
+      Full path to the Service resource in the API. Example apps/myapp/services/default.
+      This field is used in responses only. Any value specified here in a request is ignored.
+  - !ruby/object:Api::Type::String
+    name: 'id'
+    output: true
+    description: |
+      Relative name of the service within the application. Example default.

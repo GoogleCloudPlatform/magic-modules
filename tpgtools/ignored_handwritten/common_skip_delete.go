@@ -5,10 +5,11 @@ import (
 	"log"
 
 	dns "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/dns"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 // Skip delete for DNS record set if the record is for the primary NS record
-func rrefSkipDelete(c *Config, recordSet *dns.ResourceRecordSet) (bool, error) {
+func rrefSkipDelete(c *transport_tpg.Config, recordSet *dns.ResourceRecordSet) (bool, error) {
 	if *recordSet.DnsType != "NS" {
 		// Only skip for NS records in some circumstances
 		return false, nil

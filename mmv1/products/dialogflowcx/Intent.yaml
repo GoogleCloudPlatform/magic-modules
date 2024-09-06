@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Resource
 name: 'Intent'
-base_url: "{{parent}}/intents"
+base_url: '{{parent}}/intents'
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -27,19 +27,48 @@ timeouts: !ruby/object:Api::Timeouts
   update_minutes: 40
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/dialogflowcx_intent.go.erb
-  pre_create: templates/terraform/pre_create/dialogflow_set_location.go.erb
+  pre_create: templates/terraform/pre_create/dialogflowcx_set_location_skip_default_obj.go.erb
   pre_update: templates/terraform/pre_create/dialogflow_set_location.go.erb
-  pre_delete: templates/terraform/pre_create/dialogflow_set_location.go.erb
+  pre_delete: templates/terraform/pre_delete/dialogflowcx_set_location_skip_default_obj.go.erb
   pre_read: templates/terraform/pre_create/dialogflow_set_location.go.erb
+virtual_fields:
+  - !ruby/object:Api::Type::Boolean
+    name: is_default_welcome_intent
+    immutable: true
+    description: |
+      Marks this as the [Default Welcome Intent](https://cloud.google.com/dialogflow/cx/docs/concept/intent#welcome) for an agent. When you create an agent, a Default Welcome Intent is created automatically.
+      The Default Welcome Intent cannot be deleted; deleting the `google_dialogflow_cx_intent` resource does nothing to the underlying GCP resources.
+
+      ~> Avoid having multiple `google_dialogflow_cx_intent` resources linked to the same agent with `is_default_welcome_intent = true` because they will compete to control a single Default Welcome Intent resource in GCP.
+  - !ruby/object:Api::Type::Boolean
+    name: is_default_negative_intent
+    immutable: true
+    description: |
+      Marks this as the [Default Negative Intent](https://cloud.google.com/dialogflow/cx/docs/concept/intent#negative) for an agent. When you create an agent, a Default Negative Intent is created automatically.
+      The Default Negative Intent cannot be deleted; deleting the `google_dialogflow_cx_intent` resource does nothing to the underlying GCP resources.
+
+      ~> Avoid having multiple `google_dialogflow_cx_intent` resources linked to the same agent with `is_default_negative_intent = true` because they will compete to control a single Default Negative Intent resource in GCP.
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "dialogflowcx_intent_full"
-    primary_resource_id: "basic_intent"
+    name: 'dialogflowcx_intent_full'
+    primary_resource_id: 'basic_intent'
     vars:
-      agent_name: "dialogflowcx-agent"
+      agent_name: 'dialogflowcx-agent'
+  - !ruby/object:Provider::Terraform::Examples
+    skip_docs: true
+    name: 'dialogflowcx_intent_default_negative_intent'
+    primary_resource_id: 'default_negative_intent'
+    vars:
+      agent_name: 'dialogflowcx-agent'
+  - !ruby/object:Provider::Terraform::Examples
+    skip_docs: true
+    name: 'dialogflowcx_intent_default_welcome_intent'
+    primary_resource_id: 'default_welcome_intent'
+    vars:
+      agent_name: 'dialogflowcx-agent'
 skip_sweeper: true
-id_format: "{{parent}}/intents/{{name}}"
-import_format: ["{{parent}}/intents/{{name}}"]
+id_format: '{{parent}}/intents/{{name}}'
+import_format: ['{{parent}}/intents/{{name}}']
 parameters:
   - !ruby/object:Api::Type::String
     name: parent
@@ -144,7 +173,8 @@ properties:
     description: |
       Indicates whether this is a fallback intent. Currently only default fallback intent is allowed in the agent, which is added upon agent creation.
       Adding training phrases to fallback intent is useful in the case of requests that are mistakenly matched, since training phrases assigned to fallback intents act as negative examples that triggers no-match event.
-  - !ruby/object:Api::Type::KeyValuePairs
+      To manage the fallback intent, set `is_default_negative_intent = true`
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       The key/value metadata to label an intent. Labels can contain lowercase letters, digits and the symbols '-' and '_'. International characters are allowed, including letters from unicase alphabets. Keys must start with a letter. Keys and values can be no longer than 63 characters and no more than 128 bytes.

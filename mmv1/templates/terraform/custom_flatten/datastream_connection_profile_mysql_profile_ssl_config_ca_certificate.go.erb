@@ -13,6 +13,6 @@
 	# limitations under the License.
 -%>
 <%# Workaround for https://github.com/hashicorp/terraform-provider-google/issues/12410 %>
-func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return d.Get("mysql_profile.0.ssl_config.0.ca_certificate")
 }

@@ -23,42 +23,55 @@ description: |
   A Certificate corresponds to a signed X.509 certificate issued by a Certificate.
 
 
-  ~> **Note:** The Certificate Authority that is referenced by this resource **must** be 
+  ~> **Note:** The Certificate Authority that is referenced by this resource **must** be
   `tier = "ENTERPRISE"`
 autogen_async: true
 skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "privateca_certificate_config"
-    primary_resource_id: "default"
+    name: 'privateca_certificate_config'
+    primary_resource_id: 'default'
+    skip_docs: true
     vars:
-      ca_pool_id: "my-pool"
-      certificate_name: "my-certificate"
+      ca_pool_id: 'my-pool'
+      certificate_name: 'my-certificate'
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
-    name: "privateca_certificate_with_template"
-    primary_resource_id: "default"
+    name: 'privateca_certificate_generated_key'
+    primary_resource_id: 'default'
+    skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'privateca_certificate_with_template'
+    primary_resource_id: 'default'
     vars:
-      ca_pool_id: "my-pool"
-      certificate_name: "my-certificate"
-      certificate_template_name: "my-certificate-template"
+      ca_pool_id: 'my-pool'
+      certificate_name: 'my-certificate'
+      certificate_template_name: 'my-certificate-template'
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
-    name: "privateca_certificate_csr"
-    primary_resource_id: "default"
+    name: 'privateca_certificate_csr'
+    primary_resource_id: 'default'
     vars:
-      certificate_name: "my-certificate"
-      ca_pool_id: "my-pool"
+      certificate_name: 'my-certificate'
+      ca_pool_id: 'my-pool'
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
-    name: "privateca_certificate_no_authority"
-    primary_resource_id: "default"
+    name: 'privateca_certificate_no_authority'
+    primary_resource_id: 'default'
     vars:
-      certificate_name: "my-certificate"
-      ca_pool_id: "my-pool"
+      certificate_name: 'my-certificate'
+      ca_pool_id: 'my-pool'
+    test_env_vars:
+      project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'privateca_certificate_custom_ski'
+    primary_resource_id: 'default'
+    vars:
+      certificate_name: 'my-certificate'
+      ca_pool_id: 'my-pool'
     test_env_vars:
       project: :PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -111,7 +124,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'revocationDetails'
     description: |
-      Output only. Details regarding the revocation of this Certificate. This Certificate is 
+      Output only. Details regarding the revocation of this Certificate. This Certificate is
       considered revoked if and only if this field is present.
     output: true
     properties:
@@ -121,15 +134,15 @@ properties:
         description: |
           Indicates why a Certificate was revoked.
         values:
-          - "REVOCATION_REASON_UNSPECIFIED"
-          - "KEY_COMPROMISE"
-          - "CERTIFICATE_AUTHORITY_COMPROMISE"
-          - "AFFILIATION_CHANGED"
-          - "SUPERSEDED"
-          - "CESSATION_OF_OPERATION"
-          - "CERTIFICATE_HOLD"
-          - "PRIVILEGE_WITHDRAWN"
-          - "ATTRIBUTE_AUTHORITY_COMPROMISE"
+          - 'REVOCATION_REASON_UNSPECIFIED'
+          - 'KEY_COMPROMISE'
+          - 'CERTIFICATE_AUTHORITY_COMPROMISE'
+          - 'AFFILIATION_CHANGED'
+          - 'SUPERSEDED'
+          - 'CESSATION_OF_OPERATION'
+          - 'CERTIFICATE_HOLD'
+          - 'PRIVILEGE_WITHDRAWN'
+          - 'ATTRIBUTE_AUTHORITY_COMPROMISE'
       - !ruby/object:Api::Type::String
         name: 'revocationTime'
         output: true
@@ -341,7 +354,7 @@ properties:
               - !ruby/object:Api::Type::Boolean
                 name: 'isCa'
                 description: |
-                  When true, the "CA" in Basic Constraints extension will be set to true. 
+                  When true, the "CA" in Basic Constraints extension will be set to true.
                 output: true
               - !ruby/object:Api::Type::Integer
                 name: 'maxIssuerPathLength'
@@ -463,7 +476,8 @@ properties:
             properties:
               - !ruby/object:Api::Type::Boolean
                 name: 'critical'
-                description: Indicates whether or not the name constraints are marked
+                description:
+                  Indicates whether or not the name constraints are marked
                   critical.
                 output: true
               - !ruby/object:Api::Type::Array
@@ -539,131 +553,6 @@ properties:
                 output: true
                 item_type: Api::Type::String
       - !ruby/object:Api::Type::NestedObject
-        name: 'configValues'
-        deprecation_message: Deprecated in favor of `x509_description`.
-        output: true
-        description: |
-          Describes some of the technical fields in a certificate.
-        properties:
-          - !ruby/object:Api::Type::NestedObject
-            name: 'keyUsage'
-            output: true
-            description: |
-              Indicates the intended use for keys that correspond to a certificate.
-            properties:
-              - !ruby/object:Api::Type::NestedObject
-                name: 'baseKeyUsage'
-                output: true
-                description: |
-                  Describes high-level ways in which a key may be used.
-                properties:
-                  - !ruby/object:Api::Type::NestedObject
-                    name: 'keyUsageOptions'
-                    output: true
-                    description: |
-                      Describes high-level ways in which a key may be used.
-                    properties:
-                      - !ruby/object:Api::Type::Boolean
-                        name: 'digitalSignature'
-                        output: true
-                        description: |
-                          The key may be used for digital signatures.
-                      - !ruby/object:Api::Type::Boolean
-                        name: 'contentCommitment'
-                        output: true
-                        description: |
-                          The key may be used for cryptographic commitments. Note that this may also be referred to as "non-repudiation".
-                      - !ruby/object:Api::Type::Boolean
-                        name: 'keyEncipherment'
-                        output: true
-                        description: |
-                          The key may be used to encipher other keys.
-                      - !ruby/object:Api::Type::Boolean
-                        name: 'dataEncipherment'
-                        output: true
-                        description: |
-                          The key may be used to encipher data.
-                      - !ruby/object:Api::Type::Boolean
-                        name: 'keyAgreement'
-                        output: true
-                        description: |
-                          The key may be used in a key agreement protocol.
-                      - !ruby/object:Api::Type::Boolean
-                        name: 'certSign'
-                        output: true
-                        description: |
-                          The key may be used to sign certificates.
-                      - !ruby/object:Api::Type::Boolean
-                        name: 'crlSign'
-                        output: true
-                        description: |
-                          The key may be used sign certificate revocation lists.
-                      - !ruby/object:Api::Type::Boolean
-                        name: 'encipherOnly'
-                        output: true
-                        description: |
-                          The key may be used to encipher only.
-                      - !ruby/object:Api::Type::Boolean
-                        name: 'decipherOnly'
-                        output: true
-                        description: |
-                          The key may be used to decipher only.
-              - !ruby/object:Api::Type::NestedObject
-                name: 'extendedKeyUsage'
-                output: true
-                description: |
-                  Describes high-level ways in which a key may be used.
-                properties:
-                  - !ruby/object:Api::Type::Boolean
-                    name: 'serverAuth'
-                    output: true
-                    description: |
-                      Corresponds to OID 1.3.6.1.5.5.7.3.1. Officially described as "TLS WWW server authentication", though regularly used for non-WWW TLS.
-                  - !ruby/object:Api::Type::Boolean
-                    name: 'clientAuth'
-                    output: true
-                    description: |
-                      Corresponds to OID 1.3.6.1.5.5.7.3.2. Officially described as "TLS WWW client authentication", though regularly used for non-WWW TLS.
-                  - !ruby/object:Api::Type::Boolean
-                    name: 'codeSigning'
-                    output: true
-                    description: |
-                      Corresponds to OID 1.3.6.1.5.5.7.3.3. Officially described as "Signing of downloadable executable code client authentication".
-                  - !ruby/object:Api::Type::Boolean
-                    name: 'emailProtection'
-                    output: true
-                    description: |
-                      Corresponds to OID 1.3.6.1.5.5.7.3.4. Officially described as "Email protection".
-                  - !ruby/object:Api::Type::Boolean
-                    name: 'timeStamping'
-                    output: true
-                    description: |
-                      Corresponds to OID 1.3.6.1.5.5.7.3.8. Officially described as "Binding the hash of an object to a time".
-                  - !ruby/object:Api::Type::Boolean
-                    name: 'ocspSigning'
-                    output: true
-                    description: |
-                      Corresponds to OID 1.3.6.1.5.5.7.3.9. Officially described as "Signing OCSP responses".
-              - !ruby/object:Api::Type::Array
-                name: 'unknownExtendedKeyUsages'
-                output: true
-                description: |
-                  An ObjectId specifies an object identifier (OID). These provide context and describe types in ASN.1 messages.
-                item_type: !ruby/object:Api::Type::NestedObject
-                  properties:
-                    - !ruby/object:Api::Type::NestedObject
-                      name: 'obectId'
-                      output: true
-                      description: |
-                        Required. Describes how some of the technical fields in a certificate should be populated.
-                      properties:
-                        - !ruby/object:Api::Type::Array
-                          name: 'objectIdPath'
-                          output: true
-                          item_type: Api::Type::Integer
-                          description: |
-                            An ObjectId specifies an object identifier (OID). These provide context and describe types in ASN.1 messages.
-      - !ruby/object:Api::Type::NestedObject
         name: 'publicKey'
         output: true
         description: |
@@ -680,8 +569,8 @@ properties:
             description: |
               The format of the public key. Currently, only PEM format is supported.
             values:
-              - "KEY_TYPE_UNSPECIFIED"
-              - "PEM"
+              - 'KEY_TYPE_UNSPECIFIED'
+              - 'PEM'
       - !ruby/object:Api::Type::NestedObject
         name: 'subjectKeyId'
         output: true
@@ -733,13 +622,6 @@ properties:
     description: |
       The chain that may be used to verify the X.509 certificate. Expected to be in issuer-to-root order according to RFC 5246.
     item_type: Api::Type::String
-  - !ruby/object:Api::Type::Array
-    name: 'pemCertificates'
-    deprecation_message: Deprecated in favor of `pem_certificate_chain`.
-    output: true
-    description: |
-      Required. Expected to be in leaf-to-root order according to RFC 5246.
-    item_type: Api::Type::String
   - !ruby/object:Api::Type::Time
     name: 'createTime'
     description: |
@@ -763,8 +645,8 @@ properties:
       the caller must have the necessary permission to use this template. If this is
       omitted, no template will be used. This template must be in the same location
       as the Certificate.
-    diff_suppress_func: 'compareResourceNames'
-  - !ruby/object:Api::Type::KeyValuePairs
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Labels with user-defined metadata to apply to this resource.
@@ -778,7 +660,8 @@ properties:
       - config
   - !ruby/object:Api::Type::NestedObject
     name: 'config'
-    description: The config used to create a self-signed X.509 certificate or CSR.
+    description:
+      The config used to create a self-signed X.509 certificate or CSR.
     exactly_one_of:
       - pem_csr
       - config
@@ -859,13 +742,13 @@ properties:
               - !ruby/object:Api::Type::Boolean
                 name: 'isCa'
                 description: |
-                  When true, the "CA" in Basic Constraints extension will be set to true. 
+                  When true, the "CA" in Basic Constraints extension will be set to true.
                 immutable: true
               - !ruby/object:Api::Type::Boolean
                 name: 'nonCa'
                 url_param_only: true
                 description: |
-                  When true, the "CA" in Basic Constraints extension will be set to false. 
+                  When true, the "CA" in Basic Constraints extension will be set to false.
                   If both `is_ca` and `non_ca` are unset, the extension will be omitted from the CA certificate.
                 immutable: true
               - !ruby/object:Api::Type::Integer
@@ -1000,7 +883,8 @@ properties:
             properties:
               - !ruby/object:Api::Type::Boolean
                 name: 'critical'
-                description: Indicates whether or not the name constraints are marked
+                description:
+                  Indicates whether or not the name constraints are marked
                   critical.
                 immutable: true
                 required: true
@@ -1085,7 +969,8 @@ properties:
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: 'subject'
-            description: Contains distinguished name fields such as the location and
+            description:
+              Contains distinguished name fields such as the location and
               organization.
             required: true
             immutable: true
@@ -1109,7 +994,8 @@ properties:
                 immutable: true
               - !ruby/object:Api::Type::String
                 name: 'province'
-                description: The province, territory, or regional state of the subject.
+                description:
+                  The province, territory, or regional state of the subject.
                 immutable: true
               - !ruby/object:Api::Type::String
                 name: 'streetAddress'
@@ -1161,8 +1047,9 @@ properties:
                 immutable: true
               - !ruby/object:Api::Type::Array
                 name: 'ipAddresses'
-                description: Contains only valid 32-bit IPv4 addresses or RFC 4291
-                  IPv6 addresses.
+                description:
+                  Contains only valid 32-bit IPv4 addresses or RFC 4291 IPv6
+                  addresses.
                 item_type: Api::Type::String
                 at_least_one_of:
                   - config.0.subject_config.0.subject_alt_name.0.dns_names
@@ -1170,6 +1057,19 @@ properties:
                   - config.0.subject_config.0.subject_alt_name.0.email_addresses
                   - config.0.subject_config.0.subject_alt_name.0.ip_addresses
                 immutable: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'subjectKeyId'
+        description:
+          When specified this provides a custom SKI to be used in the certificate.
+          This should only be used to maintain a SKI of an existing CA originally
+          created outside CA service, which was not generated using method (1)
+          described in RFC 5280 section 4.2.1.2..
+        immutable: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'keyId'
+            description: The value of the KeyId in lowercase hexidecimal.
+            immutable: true
       - !ruby/object:Api::Type::NestedObject
         name: 'publicKey'
         required: true
@@ -1189,5 +1089,5 @@ properties:
               The format of the public key. Currently, only PEM format is supported.
             immutable: true
             values:
-              - "KEY_TYPE_UNSPECIFIED"
-              - "PEM"
+              - 'KEY_TYPE_UNSPECIFIED'
+              - 'PEM'

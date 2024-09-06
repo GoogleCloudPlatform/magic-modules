@@ -1,5 +1,5 @@
     if d.Get("location") == "" {
-        zone, err := getZone(d, config)
+        zone, err := tpgresource.GetZone(d, config)
         if err != nil {
             return err
         }
@@ -10,7 +10,7 @@
     }
     if strings.Contains(url, "locations//") {
         // re-compute url now that location must be set
-        url, err = replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.create_uri}" -%>")
+        url, err = tpgresource.ReplaceVars(d, config, "{{<%=object.__product.name-%>BasePath}}<%=object.create_uri-%>")
         if err != nil {
             return err
         }

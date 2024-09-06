@@ -16,11 +16,6 @@ require 'erb'
 require 'ostruct'
 
 module Compile
-  # Unique ID for the Google libraries to be compiled/used by modules
-  module Libraries
-    NETWORK = 'network'.freeze
-  end
-
   # Helper functions to aid compiling and including files
   module Core
     def compiler
@@ -43,7 +38,7 @@ module Compile
     # that the provider writer wants to expose to the template can be made
     # available through the bindings.
     #
-    # This allows for exposing instance variables, such as @api and config, or
+    # This allows for exposing instance variables, such as @api, or
     # provider or function specific data, such as output_folder. Functions such
     # as Provider::Core::generate_file() or Provider::Core::compile_file() can
     # allow providers to generate such bindings (by passing them in a Hash to
@@ -209,6 +204,11 @@ module Compile
       else
         raise TypeError, "#{ctx.class} is not a valid type for compilation"
       end
+    end
+
+    def hashicorp_copyright_header(lang, pwd)
+      Thread.current[:autogen] = true
+      comment_block(compile("#{pwd}/templates/hashicorp_copyright_header.erb").split("\n"), lang)
     end
 
     def autogen_notice(lang, pwd)

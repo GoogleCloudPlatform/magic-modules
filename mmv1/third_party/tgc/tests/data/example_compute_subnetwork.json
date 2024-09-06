@@ -1,0 +1,42 @@
+[
+  {
+    "name": "//compute.googleapis.com/projects/{{.Provider.project}}/global/networks/test-network",
+    "asset_type": "compute.googleapis.com/Network",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "beta",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+      "discovery_name": "Network",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "autoCreateSubnetworks": false,
+        "name": "test-network",
+        "networkFirewallPolicyEnforcementOrder": "AFTER_CLASSIC_FIREWALL"
+      }
+    }
+  },
+  {
+    "name": "//compute.googleapis.com/projects/{{.Provider.project}}/regions/us-central1/subnetworks/my-test-subnetwork",
+    "asset_type": "compute.googleapis.com/Subnetwork",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "beta",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+      "discovery_name": "Subnetwork",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "ipCidrRange": "10.0.0.0/24",
+        "logConfig": {
+          "aggregationInterval": "INTERVAL_10_MIN",
+          "enable": true,
+          "filterExpr": "true",
+          "flowSampling": 0.5,
+          "metadata": "INCLUDE_ALL_METADATA",
+          "metadataFields": []
+        },
+        "name": "my-test-subnetwork",
+        "region": "projects/{{.Provider.project}}/global/regions/us-central1"
+      }
+    }
+  }
+]

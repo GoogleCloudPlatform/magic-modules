@@ -9,7 +9,7 @@ if err := d.Set("trigger_id", triggerId.(string)); err != nil {
 
 // Store the ID now. We tried to set it before and it failed because
 // trigger_id didn't exist yet.
-id, err = replaceVars(d, config, "projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}")
+id, err = tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}")
 if err != nil {
   return fmt.Errorf("Error constructing id: %s", err)
 }

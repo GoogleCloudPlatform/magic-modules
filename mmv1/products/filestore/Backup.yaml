@@ -25,15 +25,15 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/filestore/docs/backups'
     'Creating Backups': 'https://cloud.google.com/filestore/docs/create-backups'
   api: 'https://cloud.google.com/filestore/docs/reference/rest/v1/projects.locations.instances.backups'
-mutex: "filestore/{{project}}"
-error_retry_predicates: ["isNotFilestoreQuotaError"]
+mutex: 'filestore/{{project}}'
+error_abort_predicates: ['transport_tpg.Is429QuotaError']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "filestore_backup_basic"
-    primary_resource_id: "backup"
+    name: 'filestore_backup_basic'
+    primary_resource_id: 'backup'
     vars:
-      backup_name: "tf-fs-bkup"
-      instance_name: "tf-fs-inst"
+      backup_name: 'tf-fs-bkup'
+      instance_name: 'tf-fs-inst'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -57,7 +57,6 @@ properties:
     required: true
     immutable: true
     url_param_only: true
-    pattern: projects/{{project}}/locations/{{location}}/backups/{{backupId}}
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
@@ -78,7 +77,7 @@ properties:
     description: |
       The time when the snapshot was created in RFC3339 text format.
     output: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Resource labels to represent user-provided metadata.
@@ -113,6 +112,8 @@ properties:
       - :BASIC_HDD
       - :BASIC_SSD
       - :HIGH_SCALE_SSD
+      - :ZONAL
+      - :REGIONAL
       - :ENTERPRISE
     output: true
   - !ruby/object:Api::Type::String
@@ -125,4 +126,3 @@ properties:
     description: |
       KMS key name used for data encryption.
     output: true
-

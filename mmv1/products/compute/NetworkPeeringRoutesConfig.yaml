@@ -37,7 +37,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -51,26 +51,36 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
-id_format: "projects/{{project}}/global/networks/{{network}}/networkPeerings/{{peering}}"
-import_format: ["projects/{{project}}/global/networks/{{network}}/networkPeerings/{{peering}}"]
+id_format: 'projects/{{project}}/global/networks/{{network}}/networkPeerings/{{peering}}'
+import_format:
+  [
+    'projects/{{project}}/global/networks/{{network}}/networkPeerings/{{peering}}',
+  ]
 mutex: 'projects/{{project}}/global/networks/{{network}}/peerings'
 skip_delete: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "network_peering_routes_config_basic"
-    primary_resource_id: "peering_primary_routes"
+    name: 'network_peering_routes_config_basic'
+    primary_resource_id: 'peering_primary_routes'
     vars:
-      peering_primary_name: "primary-peering"
-      peering_secondary_name: "secondary-peering"
-      network_primary_name: "primary-network"
-      network_secondary_name: "secondary-network"
+      peering_primary_name: 'primary-peering'
+      peering_secondary_name: 'secondary-peering'
+      network_primary_name: 'primary-network'
+      network_secondary_name: 'secondary-network'
   - !ruby/object:Provider::Terraform::Examples
-    name: "network_peering_routes_config_gke"
-    primary_resource_id: "peering_gke_routes"
+    name: 'network_peering_routes_config_gke'
+    # currently failing
+    skip_vcr: true
+    primary_resource_id: 'peering_gke_routes'
     vars:
-      network_name: "container-network"
-      subnetwork_name: "container-subnetwork"
-      gke_cluster_name: "private-cluster"
+      network_name: 'container-network'
+      subnetwork_name: 'container-subnetwork'
+      gke_cluster_name: 'private-cluster'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      deletion_protection: 'false'
+    oics_vars_overrides:
+      deletion_protection: 'false'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: 'templates/terraform/encoders/network_peering_routes_config.go.erb'
 parameters:

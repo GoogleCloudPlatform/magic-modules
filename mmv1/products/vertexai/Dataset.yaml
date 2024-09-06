@@ -46,14 +46,13 @@ description: |-
 autogen_async: false
 id_format: '{{name}}'
 exclude_import: true
-skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "vertex_ai_dataset"
+    name: 'vertex_ai_dataset'
     skip_import_test: true
-    primary_resource_id: "dataset"
+    primary_resource_id: 'dataset'
     vars:
-      display_name: "terraform"
+      display_name: 'terraform'
 parameters:
   - !ruby/object:Api::Type::String
     name: region
@@ -81,11 +80,10 @@ properties:
     output: true
     description: |
       The timestamp of when the dataset was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       A set of key/value label pairs to assign to this Workflow.
-    default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: 'encryptionSpec'
     immutable: true

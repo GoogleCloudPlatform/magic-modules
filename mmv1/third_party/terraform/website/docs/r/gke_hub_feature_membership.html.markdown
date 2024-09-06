@@ -4,13 +4,9 @@ description: |-
   Contains information about a GKEHub Feature Memberships.
 ---
 
-# google\_gkehub\_feature\_membership
+# google_gkehub_feature_membership
 
 Contains information about a GKEHub Feature Memberships. Feature Memberships configure GKEHub Features that apply to specific memberships rather than the project as a whole. The google_gke_hub is the Fleet API.
-
-~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
-See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
-
 
 ## Example Usage - Config Management
 
@@ -19,7 +15,6 @@ resource "google_container_cluster" "cluster" {
   name               = "my-cluster"
   location           = "us-central1-a"
   initial_node_count = 1
-  provider = google-beta
 }
 
 resource "google_gke_hub_membership" "membership" {
@@ -29,7 +24,6 @@ resource "google_gke_hub_membership" "membership" {
       resource_link = "//container.googleapis.com/${google_container_cluster.cluster.id}"
     }
   }
-  provider = google-beta
 }
 
 resource "google_gke_hub_feature" "feature" {
@@ -39,7 +33,6 @@ resource "google_gke_hub_feature" "feature" {
   labels = {
     foo = "bar"
   }
-  provider = google-beta
 }
 
 resource "google_gke_hub_feature_membership" "feature_member" {
@@ -47,14 +40,14 @@ resource "google_gke_hub_feature_membership" "feature_member" {
   feature = google_gke_hub_feature.feature.name
   membership = google_gke_hub_membership.membership.membership_id
   configmanagement {
-    version = "1.6.2"
+    version = "1.19.0"
     config_sync {
+      enabled = true
       git {
         sync_repo = "https://github.com/hashicorp/terraform"
       }
     }
   }
-  provider = google-beta
 }
 ```
 ## Example Usage - Config Management with OCI
@@ -64,7 +57,6 @@ resource "google_container_cluster" "cluster" {
   name               = "my-cluster"
   location           = "us-central1-a"
   initial_node_count = 1
-  provider = google-beta
 }
 
 resource "google_gke_hub_membership" "membership" {
@@ -74,7 +66,6 @@ resource "google_gke_hub_membership" "membership" {
       resource_link = "//container.googleapis.com/${google_container_cluster.cluster.id}"
     }
   }
-  provider = google-beta
 }
 
 resource "google_gke_hub_feature" "feature" {
@@ -84,7 +75,6 @@ resource "google_gke_hub_feature" "feature" {
   labels = {
     foo = "bar"
   }
-  provider = google-beta
 }
 
 resource "google_gke_hub_feature_membership" "feature_member" {
@@ -92,8 +82,9 @@ resource "google_gke_hub_feature_membership" "feature_member" {
   feature = google_gke_hub_feature.feature.name
   membership = google_gke_hub_membership.membership.membership_id
   configmanagement {
-    version = "1.12.0"
+    version = "1.19.0"
     config_sync {
+      enabled = true
       oci {
         sync_repo = "us-central1-docker.pkg.dev/sample-project/config-repo/config-sync-gke:latest"
         policy_dir = "config-connector"
@@ -103,7 +94,6 @@ resource "google_gke_hub_feature_membership" "feature_member" {
       }
     }
   }
-  provider = google-beta
 }
 ```
 
@@ -116,7 +106,6 @@ resource "google_gke_hub_feature" "feature" {
   labels = {
     foo = "bar"
   }
-  provider = google-beta
 }
 ```
 
@@ -127,7 +116,6 @@ resource "google_container_cluster" "cluster" {
   name               = "my-cluster"
   location           = "us-central1-a"
   initial_node_count = 1
-  provider = google-beta
 }
 
 resource "google_gke_hub_membership" "membership" {
@@ -137,14 +125,11 @@ resource "google_gke_hub_membership" "membership" {
       resource_link = "//container.googleapis.com/${google_container_cluster.cluster.id}"
     }
   }
-  provider = google-beta
 }
 
 resource "google_gke_hub_feature" "feature" {
   name = "servicemesh"
   location = "global"
-
-  provider = google-beta
 }
 
 resource "google_gke_hub_feature_membership" "feature_member" {
@@ -154,7 +139,132 @@ resource "google_gke_hub_feature_membership" "feature_member" {
   mesh {
     management = "MANAGEMENT_AUTOMATIC"
   }
-  provider = google-beta
+}
+```
+
+## Example Usage - Config Management with Regional Membership
+
+```hcl
+resource "google_container_cluster" "cluster" {
+  name               = "my-cluster"
+  location           = "us-central1-a"
+  initial_node_count = 1
+}
+
+resource "google_gke_hub_membership" "membership" {
+  membership_id = "my-membership"
+  location      = "us-central1"
+  endpoint {
+    gke_cluster {
+      resource_link = "//container.googleapis.com/${google_container_cluster.cluster.id}"
+    }
+  }
+}
+
+resource "google_gke_hub_feature" "feature" {
+  name = "configmanagement"
+  location = "global"
+
+  labels = {
+    foo = "bar"
+  }
+}
+
+resource "google_gke_hub_feature_membership" "feature_member" {
+  location = "global"
+  feature = google_gke_hub_feature.feature.name
+  membership = google_gke_hub_membership.membership.membership_id
+  membership_location = google_gke_hub_membership.membership.location
+  configmanagement {
+    version = "1.19.0"
+    config_sync {
+      enabled = true
+      git {
+        sync_repo = "https://github.com/hashicorp/terraform"
+      }
+    }
+  }
+}
+```
+
+## Example Usage - Policy Controller with minimal configuration
+
+```hcl
+resource "google_container_cluster" "cluster" {
+  name               = "my-cluster"
+  location           = "us-central1-a"
+  initial_node_count = 1
+}
+
+resource "google_gke_hub_membership" "membership" {
+  membership_id = "my-membership"
+  endpoint {
+    gke_cluster {
+      resource_link = "//container.googleapis.com/${google_container_cluster.cluster.id}"
+    }
+  }
+}
+
+resource "google_gke_hub_feature" "feature" {
+  name = "policycontroller"
+  location = "global"
+}
+
+resource "google_gke_hub_feature_membership" "feature_member" {
+  location = "global"
+  feature = google_gke_hub_feature.feature.name
+  membership = google_gke_hub_membership.membership.membership_id
+  policycontroller {
+    policy_controller_hub_config {
+      install_spec = "INSTALL_SPEC_ENABLED"
+    }
+  }
+}
+```
+
+## Example Usage - Policy Controller with custom configurations
+
+```hcl
+resource "google_container_cluster" "cluster" {
+  name               = "my-cluster"
+  location           = "us-central1-a"
+  initial_node_count = 1
+}
+
+resource "google_gke_hub_membership" "membership" {
+  membership_id = "my-membership"
+  endpoint {
+    gke_cluster {
+      resource_link = "//container.googleapis.com/${google_container_cluster.cluster.id}"
+    }
+  }
+}
+
+resource "google_gke_hub_feature" "feature" {
+  name = "policycontroller"
+  location = "global"
+}
+
+resource "google_gke_hub_feature_membership" "feature_member" {
+  location = "global"
+  feature = google_gke_hub_feature.feature.name
+  membership = google_gke_hub_membership.membership.membership_id
+  policycontroller {
+    policy_controller_hub_config {
+      install_spec = "INSTALL_SPEC_SUSPENDED"
+      policy_content {
+        template_library {
+          installation = "NOT_INSTALLED"
+        }
+      }
+      constraint_violation_limit = 50
+      audit_interval_seconds = 120
+      referential_rules_enabled = true
+      log_denies_enabled = true
+      mutation_enabled = true
+    }
+    version = "1.17.0"
+  }
 }
 ```
 
@@ -171,6 +281,10 @@ The following arguments are supported:
 * `mesh` -
   (Optional)
   Service mesh specific spec. Structure is [documented below](#nested_mesh).
+
+* `policycontroller` -
+  (Optional)
+  Policy Controller-specific spec. Structure is [documented below](#nested_policycontroller).
   
 * `feature` -
   (Optional)
@@ -182,7 +296,11 @@ The following arguments are supported:
   
 * `membership` -
   (Optional)
-  The name of the membership
+  The name of the membership  
+
+* `membership_location` -
+  (Optional)
+  The location of the membership, for example, "us-central1". Default is "global".
   
 * `project` -
   (Optional)
@@ -191,26 +309,41 @@ The following arguments are supported:
 
 
 <a name="nested_configmanagement"></a>The `configmanagement` block supports:
-    
-* `binauthz` -
-  (Optional)
-  Binauthz configuration for the cluster. Structure is [documented below](#nested_binauthz).
-    
+
 * `config_sync` -
   (Optional)
   Config Sync configuration for the cluster. Structure is [documented below](#nested_config_sync).
-    
+
+* `management` -
+  (Optional)
+  Set this field to MANAGEMENT_AUTOMATIC to enable
+  [Config Sync auto-upgrades](http://cloud/kubernetes-engine/enterprise/config-sync/docs/how-to/upgrade-config-sync#auto-upgrade-config),
+  and set this field to MANAGEMENT_MANUAL or MANAGEMENT_UNSPECIFIED to disable Config Sync auto-upgrades.
+  This field was introduced in Terraform version [5.41.0](https://github.com/hashicorp/terraform-provider-google/releases/tag/v5.41.0).
+
+* `version` -
+  (Optional)
+  Version of ACM installed.
+
+* `binauthz` -
+  (Optional, Deprecated)
+  Binauthz configuration for the cluster. Structure is [documented below](#nested_binauthz).
+  This field will be ignored and should not be set.
+
 * `hierarchy_controller` -
   (Optional)
   Hierarchy Controller configuration for the cluster. Structure is [documented below](#nested_hierarchy_controller).
+  Configuring Hierarchy Controller through the configmanagement feature is no longer recommended.
+  Use open source Kubernetes [Hierarchical Namespace Controller (HNC)](https://github.com/kubernetes-sigs/hierarchical-namespaces) instead.
+  Follow the [instructions](https://cloud.google.com/kubernetes-engine/enterprise/config-sync/docs/how-to/migrate-hierarchy-controller)
+  to migrate from Hierarchy Controller to HNC.
     
 * `policy_controller` -
   (Optional)
   Policy Controller configuration for the cluster. Structure is [documented below](#nested_policy_controller).
-    
-* `version` -
-  (Optional)
-  Version of ACM installed.
+  Configuring Policy Controller through the configmanagement feature is no longer recommended.
+  Use the policycontroller feature instead.
+
     
 <a name="nested_binauthz"></a>The `binauthz` block supports:
     
@@ -219,7 +352,13 @@ The following arguments are supported:
   Whether binauthz is enabled in this cluster.
     
 <a name="nested_config_sync"></a>The `config_sync` block supports:
-    
+
+* `enabled` -
+  (Optional)
+  Whether Config Sync is enabled in the cluster. This field was introduced in Terraform version
+  [5.41.0](https://github.com/hashicorp/terraform-provider-google/releases/tag/v5.41.0), and
+  needs to be set to `true` explicitly to install Config Sync.
+
 * `git` -
   (Optional) Structure is [documented below](#nested_git).
 
@@ -338,13 +477,166 @@ The following arguments are supported:
 
 * `monitoring` -
   (Optional)
-  Specifies the backends Policy Controller should export metrics to. For example, to specify metrics should be exported to Cloud Monitoring and Prometheus, specify backends: [\"cloudmonitoring\", \"prometheus\"]. Default: [\"cloudmonitoring\", \"prometheus\"]    
+  Specifies the backends Policy Controller should export metrics to. For example, to specify metrics should be exported to Cloud Monitoring and Prometheus, specify backends: ["cloudmonitoring", "prometheus"]. Default: ["cloudmonitoring", "prometheus"]    
 
 <a name="nested_mesh"></a>The `mesh` block supports:
 
 * `management` -
   (Optional)
   Whether to automatically manage Service Mesh. Can either be `MANAGEMENT_AUTOMATIC` or `MANAGEMENT_MANUAL`.
+
+<a name="nested_policycontroller"></a>The `policycontroller` block supports:
+
+* `version` -
+  (Optional)
+  Version of Policy Controller to install. Defaults to the latest version.
+
+* `policy_controller_hub_config` -
+  Policy Controller configuration for the cluster. Structure is [documented below](#nested_policy_controller_hub_config).
+
+<a name="nested_policy_controller_hub_config"></a>The `policy_controller_hub_config` block supports:
+
+* `install_spec` -
+  (Optional)
+  Configures the mode of the Policy Controller installation. Must be one of `INSTALL_SPEC_NOT_INSTALLED`, `INSTALL_SPEC_ENABLED`, `INSTALL_SPEC_SUSPENDED` or `INSTALL_SPEC_DETACHED`.
+
+* `exemptable_namespaces` -
+  (Optional)
+  The set of namespaces that are excluded from Policy Controller checks. Namespaces do not need to currently exist on the cluster.
+
+* `referential_rules_enabled` -
+  (Optional)
+  Enables the ability to use Constraint Templates that reference to objects other than the object currently being evaluated.
+
+* `log_denies_enabled` -
+  (Optional)
+  Logs all denies and dry run failures.
+
+* `mutation_enabled` -
+  (Optional)
+  Enables mutation in policy controller. If true, mutation CRDs, webhook, and controller deployment will be deployed to the cluster.
+
+* `monitoring` -
+  (Optional)
+  Specifies the backends Policy Controller should export metrics to. Structure is [documented below](#nested_monitoring).
+
+* `audit_interval_seconds` -
+  (Optional)
+  Sets the interval for Policy Controller Audit Scans (in seconds). When set to 0, this disables audit functionality altogether.
+
+* `constraint_violation_limit` -
+  (Optional)
+  The maximum number of audit violations to be stored in a constraint. If not set, the  default of 20 will be used.
+
+  * `deployment_configs` -
+  (Optional)
+  Map of deployment configs to deployments ("admission", "audit", "mutation").
+
+* `policy_content` -
+  (Optional)
+  Specifies the desired policy content on the cluster. Structure is [documented below](#nested_policy_content).
+
+<a name="nested_monitoring"></a>The `monitoring` block supports:
+
+* `backends`
+  (Optional)
+  Specifies the list of backends Policy Controller will export to. Must be one of `CLOUD_MONITORING` or `PROMETHEUS`. Defaults to [`CLOUD_MONITORING`, `PROMETHEUS`]. Specifying an empty value `[]` disables metrics export.
+
+<a name="nested_deployment_configs"></a>The `deployment_configs` block supports:
+    
+* `component_name` -
+  (Required)
+  The name of the component. One of `admission` `audit` or `mutation`
+    
+* `container_resources` -
+  (Optional)
+  Container resource requirements.
+    
+* `pod_affinity` -
+  (Optional)
+  Pod affinity configuration. Possible values: AFFINITY_UNSPECIFIED, NO_AFFINITY, ANTI_AFFINITY
+    
+* `pod_tolerations` -
+  (Optional)
+  Pod tolerations of node taints.
+    
+* `replica_count` -
+  (Optional)
+  Pod replica count.
+    
+<a name="nested_container_resources"></a>The `container_resources` block supports:
+    
+* `limits` -
+  (Optional)
+  Limits describes the maximum amount of compute resources allowed for use by the running container.
+    
+* `requests` -
+  (Optional)
+  Requests describes the amount of compute resources reserved for the container by the kube-scheduler.
+    
+<a name="nested_limits"></a>The `limits` block supports:
+    
+* `cpu` -
+  (Optional)
+  CPU requirement expressed in Kubernetes resource units.
+    
+* `memory` -
+  (Optional)
+  Memory requirement expressed in Kubernetes resource units.
+    
+<a name="nested_requests"></a>The `requests` block supports:
+    
+* `cpu` -
+  (Optional)
+  CPU requirement expressed in Kubernetes resource units.
+    
+* `memory` -
+  (Optional)
+  Memory requirement expressed in Kubernetes resource units.
+    
+<a name="nested_pod_tolerations"></a>The `pod_tolerations` block supports:
+    
+* `effect` -
+  (Optional)
+  Matches a taint effect.
+    
+* `key` -
+  (Optional)
+  Matches a taint key (not necessarily unique).
+    
+* `operator` -
+  (Optional)
+  Matches a taint operator.
+    
+* `value` -
+  (Optional)
+  Matches a taint value.
+
+<a name="nested_policy_content"></a>The `policy_content` block supports:
+
+* `bundles` -
+  (Optional)
+  map of bundle name to BundleInstallSpec. The bundle name maps to the `bundleName` key in the `policycontroller.gke.io/constraintData` annotation on a constraint.
+
+* `template_library`
+  (Optional)
+  Configures the installation of the Template Library. Structure is [documented below](#nested_template_library).
+
+<a name="nested_bundles"></a>The `bundles` block supports:
+    
+* `bundle_name` -
+  (Required)
+  The name of the bundle.
+    
+* `exempted_namespaces` -
+  (Optional)
+  The set of namespaces to be exempted from the bundle.
+
+<a name="nested_template_library"></a>The `template_library` block supports:
+
+* `installation`
+  (Optional)
+  Configures the manner in which the template library is installed on the cluster. Must be one of `ALL`, `NOT_INSTALLED` or `INSTALLATION_UNSPECIFIED`. Defaults to `ALL`.
 
 ## Attributes Reference
 
@@ -364,6 +656,21 @@ This resource provides the following
 ## Import
 
 FeatureMembership can be imported using any of these accepted formats:
+
+* `projects/{{project}}/locations/{{location}}/features/{{feature}}/membershipId/{{membership}}`
+* `{{project}}/{{location}}/{{feature}}/{{membership}}`
+* `{{location}}/{{feature}}/{{membership}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import FeatureMembership using one of the formats above. For example:
+
+```tf
+import {
+  id = "projects/{{project}}/locations/{{location}}/features/{{feature}}/membershipId/{{membership}}"
+  to = google_gke_hub_feature_membership.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), FeatureMembership can be imported using one of the formats above. For example:
 
 ```
 $ terraform import google_gke_hub_feature_membership.default projects/{{project}}/locations/{{location}}/features/{{feature}}/membershipId/{{membership}}

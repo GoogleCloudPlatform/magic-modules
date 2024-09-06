@@ -29,7 +29,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -45,18 +45,20 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "global_address_basic"
-    primary_resource_id: "default"
+    name: 'global_address_basic'
+    primary_resource_id: 'default'
     vars:
-      global_address_name: "global-appserver-ip"
+      global_address_name: 'global-appserver-ip'
   - !ruby/object:Provider::Terraform::Examples
-    name: "global_address_private_services_connect"
+    name: 'global_address_private_services_connect'
     min_version: beta
-    primary_resource_id: "default"
+    primary_resource_id: 'default'
     vars:
-      global_address_name: "global-psconnect-ip"
+      global_address_name: 'global-psconnect-ip'
+      network_name: 'my-network-name'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/labels.erb
+  pre_create: templates/terraform/pre_create/compute_global_address.go.erb
 properties:
   - !ruby/object:Api::Type::String
     name: 'address'
@@ -74,13 +76,6 @@ properties:
     name: 'description'
     description: |
       An optional description of this resource.
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: |
-      The unique identifier for the resource. This identifier is defined by
-      the server.
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
@@ -92,13 +87,12 @@ properties:
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
     required: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Labels to apply to this address.  A list of key->value pairs.
     update_verb: :POST
     update_url: 'projects/{{project}}/global/addresses/{{name}}/setLabels'
-    min_version: beta
   - !ruby/object:Api::Type::Fingerprint
     name: 'labelFingerprint'
     description: |
@@ -106,8 +100,6 @@ properties:
       internally during updates.
     update_url: 'projects/{{project}}/global/addresses/{{name}}/setLabels'
     update_verb: :POST
-    min_version: beta
-    exclude: false
   - !ruby/object:Api::Type::Enum
     name: 'ipVersion'
     description: |
@@ -115,23 +107,16 @@ properties:
     values:
       - :IPV4
       - :IPV6
-    diff_suppress_func: 'emptyOrDefaultStringSuppress("IPV4")'
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'region'
-    resource: 'Region'
-    imports: 'selfLink'
-    description: |
-      A reference to the region where the regional address resides.
-    output: true
-    exclude: true
+    diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("IPV4")'
   - !ruby/object:Api::Type::Integer
     name: 'prefixLength'
     description: |
       The prefix length of the IP range. If not present, it means the
       address field is a single IP address.
 
-      This field is not applicable to addresses with addressType=EXTERNAL,
-      or addressType=INTERNAL when purpose=PRIVATE_SERVICE_CONNECT
+      This field is not applicable to addresses with addressType=INTERNAL
+      when purpose=PRIVATE_SERVICE_CONNECT
+    default_from_api: true
   - !ruby/object:Api::Type::Enum
     name: 'addressType'
     description: |
@@ -143,7 +128,7 @@ properties:
       - :EXTERNAL
       - :INTERNAL
     default_value: :EXTERNAL
-    diff_suppress_func: 'emptyOrDefaultStringSuppress("EXTERNAL")'
+    diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("EXTERNAL")'
   - !ruby/object:Api::Type::String
     name: 'purpose'
     description: |
@@ -162,5 +147,4 @@ properties:
       any reserved IP ranges referring to it.
 
       This should only be set when using an Internal address.
-  # status is not useful for state convergence
-  # users[] is not useful for state convergence
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'

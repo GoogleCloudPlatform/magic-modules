@@ -37,54 +37,63 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
   fetch_iam_policy_verb: :GET
   parent_resource_attribute: 'runtime_name'
-  import_format: ["projects/{{project}}/locations/{{location}}/runtimes/{{runtime_name}}",
-    "{{runtime_name}}"]
+  import_format:
+    [
+      'projects/{{project}}/locations/{{location}}/runtimes/{{runtime_name}}',
+      '{{runtime_name}}',
+    ]
   # Sets the base url for base_url:GetIamPolicy and base_url:SetIamPolicy in function `qualifyRuntimeUrl`
   base_url: projects/{{project}}/locations/{{location}}/runtimes/{{runtime_name}}
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "notebook_runtime_basic"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-runtime%s\", context[\"\
+    name: 'notebook_runtime_basic'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-runtime%s\",
+      context[\"\
       random_suffix\"])"
-    primary_resource_id: "runtime"
-    region_override: "us-central1"
+    primary_resource_id: 'runtime'
+    region_override: 'us-central1'
     vars:
-      runtime_name: "notebooks-runtime"
+      runtime_name: 'notebooks-runtime'
   - !ruby/object:Provider::Terraform::Examples
-    name: "notebook_runtime_basic_gpu"
-    primary_resource_id: "runtime_gpu"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-runtime-gpu%s\", context[\"\
+    name: 'notebook_runtime_basic_gpu'
+    primary_resource_id: 'runtime_gpu'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-runtime-gpu%s\",
+      context[\"\
       random_suffix\"])"
-    region_override: "us-central1"
+    region_override: 'us-central1'
     vars:
-      runtime_name: "notebooks-runtime-gpu"
+      runtime_name: 'notebooks-runtime-gpu'
   - !ruby/object:Provider::Terraform::Examples
-    name: "notebook_runtime_basic_container"
-    primary_resource_id: "runtime_container"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-runtime-container%s\"\
+    name: 'notebook_runtime_basic_container'
+    primary_resource_id: 'runtime_container'
+    primary_resource_name:
+      "fmt.Sprintf(\"tf-test-notebooks-runtime-container%s\"\
       , context[\"random_suffix\"])"
-    region_override: "us-central1"
+    region_override: 'us-central1'
     vars:
-      runtime_name: "notebooks-runtime-container"
+      runtime_name: 'notebooks-runtime-container'
   - !ruby/object:Provider::Terraform::Examples
-    name: "notebook_runtime_kernels"
-    primary_resource_id: "runtime_container"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-runtime-container%s\"\
+    name: 'notebook_runtime_kernels'
+    primary_resource_id: 'runtime_container'
+    primary_resource_name:
+      "fmt.Sprintf(\"tf-test-notebooks-runtime-container%s\"\
       , context[\"random_suffix\"])"
-    region_override: "us-central1"
+    region_override: 'us-central1'
     vars:
-      runtime_name: "notebooks-runtime-kernel"
+      runtime_name: 'notebooks-runtime-kernel'
   - !ruby/object:Provider::Terraform::Examples
-    name: "notebook_runtime_script"
-    primary_resource_id: "runtime_container"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-runtime-container%s\"\
+    name: 'notebook_runtime_script'
+    primary_resource_id: 'runtime_container'
+    primary_resource_name:
+      "fmt.Sprintf(\"tf-test-notebooks-runtime-container%s\"\
       , context[\"random_suffix\"])"
-    region_override: "us-central1"
+    region_override: 'us-central1'
     vars:
-      runtime_name: "notebooks-runtime-script"
+      runtime_name: 'notebooks-runtime-script'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/notebooks_runtime.go
+  constants: templates/terraform/constants/notebooks_runtime.go.erb
+  pre_update: templates/terraform/pre_update/notebooks_runtime.go.erb
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'location'
@@ -102,61 +111,60 @@ properties:
     required: true
     immutable: true
     url_param_only: true
-    pattern: projects/{{project}}/locations/{{location}}/runtimes/{{name}}
   - !ruby/object:Api::Type::NestedObject
-    name: "virtualMachine"
+    name: 'virtualMachine'
     exactly_one_of:
       - virtual_machine
     description: |
       Use a Compute Engine VM image to start the managed notebook instance.
     properties:
       - !ruby/object:Api::Type::String
-        name: "instanceName"
+        name: 'instanceName'
         description: |
           The user-friendly name of the Managed Compute Engine instance.
         output: true
       - !ruby/object:Api::Type::String
-        name: "instanceId"
+        name: 'instanceId'
         description: |
           The unique identifier of the Managed Compute Engine instance.
         output: true
       - !ruby/object:Api::Type::NestedObject
-        name: "virtualMachineConfig"
+        name: 'virtualMachineConfig'
         description: |
           Virtual Machine configuration settings.
         properties:
           - !ruby/object:Api::Type::String
-            name: "zone"
+            name: 'zone'
             description: |
               The zone where the virtual machine is located.
             output: true
           - !ruby/object:Api::Type::String
-            name: "machineType"
+            name: 'machineType'
             description: |
               The Compute Engine machine type used for runtimes.
             required: true
           - !ruby/object:Api::Type::NestedObject
-            name: "dataDisk"
+            name: 'dataDisk'
             description: |
               Data disk option configuration settings.
             required: true
             properties:
               - !ruby/object:Api::Type::Boolean
-                name: "autoDelete"
+                name: 'autoDelete'
                 description: |
                   Optional. Specifies whether the disk will be auto-deleted
                   when the instance is deleted (but not when the disk is
                   detached from the instance).
                 output: true
               - !ruby/object:Api::Type::Boolean
-                name: "boot"
+                name: 'boot'
                 description: |
                   Optional. Indicates that this is a boot disk. The virtual
                   machine will use the first partition of the disk for its
                   root filesystem.
                 output: true
               - !ruby/object:Api::Type::String
-                name: "deviceName"
+                name: 'deviceName'
                 description: |
                   Optional. Specifies a unique device name of your choice
                   that is reflected into the /dev/disk/by-id/google-* tree
@@ -169,7 +177,7 @@ properties:
                   is only applicable for persistent disks.
                 output: true
               - !ruby/object:Api::Type::Array
-                name: "guestOsFeatures"
+                name: 'guestOsFeatures'
                 description: |
                   Indicates a list of features to enable on the guest operating
                   system. Applicable only for bootable images. To see a list of
@@ -179,14 +187,14 @@ properties:
                 output: true
                 item_type: Api::Type::String
               - !ruby/object:Api::Type::Integer
-                name: "index"
+                name: 'index'
                 description: |
                   Output only. A zero-based index to this disk, where 0 is
                   reserved for the boot disk. If you have many disks attached
                   to an instance, each disk would have a unique index number.
                 output: true
               - !ruby/object:Api::Type::NestedObject
-                name: "initializeParams"
+                name: 'initializeParams'
                 description: |
                   Input only. Specifies the parameters for a new disk that will
                   be created alongside the new instance. Use initialization
@@ -196,32 +204,32 @@ properties:
                   both.
                 properties:
                   - !ruby/object:Api::Type::String
-                    name: "description"
+                    name: 'description'
                     description: |
                       Provide this property when creating the disk.
                   - !ruby/object:Api::Type::String
-                    name: "diskName"
+                    name: 'diskName'
                     description: |
                       Specifies the disk name. If not specified, the default is
                       to use the name of the instance. If the disk with the
                       instance name exists already in the given zone/region, a
                       new name will be automatically generated.
                   - !ruby/object:Api::Type::Integer
-                    name: "diskSizeGb"
+                    name: 'diskSizeGb'
                     description: |
                       Specifies the size of the disk in base-2 GB. If not
                       specified, the disk will be the same size as the image
                       (usually 10GB). If specified, the size must be equal to
                       or larger than 10GB. Default 100 GB.
                   - !ruby/object:Api::Type::String
-                    name: "diskType"
+                    name: 'diskType'
                     description: |
                       The type of the boot disk attached to this runtime,
                       defaults to standard persistent disk. For valid values,
                       see `https://cloud.google.com/vertex-ai/docs/workbench/
                       reference/rest/v1/projects.locations.runtimes#disktype`
                   - !ruby/object:Api::Type::KeyValuePairs
-                    name: "labels"
+                    name: 'labels'
                     description: |
                       Labels to apply to this disk. These can be later modified
                       by the disks.setLabels method. This field is only
@@ -229,7 +237,7 @@ properties:
                     default_from_api: true
                 immutable: true
               - !ruby/object:Api::Type::String
-                name: "interface"
+                name: 'interface'
                 description: |
                   "Specifies the disk interface to use for attaching this disk,
                   which is either SCSI or NVME. The default is SCSI. Persistent
@@ -238,35 +246,35 @@ properties:
                   can use either NVME or SCSI. For performance characteristics of SCSI
                   over NVMe, see Local SSD performance. Valid values: * NVME * SCSI".
               - !ruby/object:Api::Type::String
-                name: "kind"
+                name: 'kind'
                 description: |
                   Type of the resource. Always compute#attachedDisk for attached
                   disks.
                 output: true
               - !ruby/object:Api::Type::Array
-                name: "licenses"
+                name: 'licenses'
                 description: |
                   Output only. Any valid publicly visible licenses.
                 item_type: Api::Type::String
                 output: true
               - !ruby/object:Api::Type::String
-                name: "mode"
+                name: 'mode'
                 description: |
                   The mode in which to attach this disk, either READ_WRITE
                   or READ_ONLY. If not specified, the default is to attach
                   the disk in READ_WRITE mode.
               - !ruby/object:Api::Type::String
-                name: "source"
+                name: 'source'
                 description: |
                   Specifies a valid partial or full URL to an existing
                   Persistent Disk resource.
               - !ruby/object:Api::Type::String
-                name: "type"
+                name: 'type'
                 description: |
                   Specifies the type of the disk, either SCRATCH or PERSISTENT.
                   If not specified, the default is PERSISTENT.
           - !ruby/object:Api::Type::Array
-            name: "containerImages"
+            name: 'containerImages'
             description: |
               Use a list of container images to start the notebook instance.
             immutable: true
@@ -284,13 +292,13 @@ properties:
                   description: |
                     The tag of the container image. If not specified, this defaults to the latest tag.
           - !ruby/object:Api::Type::NestedObject
-            name: "encryptionConfig"
+            name: 'encryptionConfig'
             description: |
               Encryption settings for virtual machine data disk.
             immutable: true
             properties:
               - !ruby/object:Api::Type::String
-                name: "kmsKey"
+                name: 'kmsKey'
                 description: |
                   The Cloud KMS resource identifier of the customer-managed
                   encryption key used to protect a resource, such as a disks.
@@ -298,13 +306,13 @@ properties:
                   `projects/{PROJECT_ID}/locations/{REGION}/keyRings/
                   {KEY_RING_NAME}/cryptoKeys/{KEY_NAME}`
           - !ruby/object:Api::Type::NestedObject
-            name: "shieldedInstanceConfig"
+            name: 'shieldedInstanceConfig'
             description: |
               Shielded VM Instance configuration settings.
             immutable: true
             properties:
               - !ruby/object:Api::Type::Boolean
-                name: "enableSecureBoot"
+                name: 'enableSecureBoot'
                 description: |
                   Defines whether the instance has Secure Boot enabled.Secure
                   Boot helps ensure that the system only runs authentic software
@@ -312,12 +320,12 @@ properties:
                   halting the boot process if signature verification fails.
                   Disabled by default.
               - !ruby/object:Api::Type::Boolean
-                name: "enableVtpm"
+                name: 'enableVtpm'
                 description: |
                   Defines whether the instance has the vTPM enabled. Enabled by
                   default.
               - !ruby/object:Api::Type::Boolean
-                name: "enableIntegrityMonitoring"
+                name: 'enableIntegrityMonitoring'
                 description: |
                   Defines whether the instance has integrity monitoring enabled.
                   Enables monitoring and attestation of the boot integrity of
@@ -326,22 +334,22 @@ properties:
                   from the implicitly trusted boot image when the instance is
                   created. Enabled by default.
           - !ruby/object:Api::Type::NestedObject
-            name: "acceleratorConfig"
+            name: 'acceleratorConfig'
             description: |
               The Compute Engine accelerator configuration for this runtime.
             properties:
               - !ruby/object:Api::Type::String
-                name: "type"
+                name: 'type'
                 description: |
                   Accelerator model. For valid values, see
                   `https://cloud.google.com/vertex-ai/docs/workbench/reference/
                   rest/v1/projects.locations.runtimes#AcceleratorType`
               - !ruby/object:Api::Type::Integer
-                name: "coreCount"
+                name: 'coreCount'
                 description: |
                   Count of cores of this accelerator.
           - !ruby/object:Api::Type::String
-            name: "network"
+            name: 'network'
             description: |
               The Compute Engine network to be used for machine communications.
               Cannot be specified with subnetwork. If neither `network` nor
@@ -359,7 +367,7 @@ properties:
                 configuring Private Service Access.
             immutable: true
           - !ruby/object:Api::Type::String
-            name: "subnet"
+            name: 'subnet'
             description: |
               The Compute Engine subnetwork to be used for machine
               communications. Cannot be specified with network. A full URL or
@@ -369,7 +377,7 @@ properties:
                 * `projects/[project_id]/regions/us-east1/subnetworks/sub0`
             immutable: true
           - !ruby/object:Api::Type::Boolean
-            name: "internalIpOnly"
+            name: 'internalIpOnly'
             description: |
               If true, runtime will only have internal IP addresses. By default,
               runtimes are not restricted to internal IP addresses, and will
@@ -380,7 +388,7 @@ properties:
             immutable: true
             send_empty_value: true
           - !ruby/object:Api::Type::Array
-            name: "tags"
+            name: 'tags'
             description: |
               The Compute Engine tags to add to runtime (see [Tagging instances]
               (https://cloud.google.com/compute/docs/
@@ -388,14 +396,14 @@ properties:
             default_from_api: true
             item_type: Api::Type::String
           - !ruby/object:Api::Type::KeyValuePairs
-            name: "guestAttributes"
+            name: 'guestAttributes'
             description: |
               The Compute Engine guest attributes. (see [Project and instance
               guest attributes](https://cloud.google.com/compute/docs/
               storing-retrieving-metadata#guest_attributes)).
             output: true
           - !ruby/object:Api::Type::KeyValuePairs
-            name: "metadata"
+            name: 'metadata'
             description: |
               The Compute Engine metadata entries to add to virtual machine.
               (see [Project and instance metadata](https://cloud.google.com
@@ -403,7 +411,7 @@ properties:
               _metadata)).
             default_from_api: true
           - !ruby/object:Api::Type::KeyValuePairs
-            name: "labels"
+            name: 'labels'
             description: |
               The labels to associate with this runtime. Label **keys** must
               contain 1 to 63 characters, and must conform to [RFC 1035]
@@ -414,7 +422,7 @@ properties:
             default_from_api: true
             diff_suppress_func: NotebooksRuntimeLabelDiffSuppress
           - !ruby/object:Api::Type::Enum
-            name: "nicType"
+            name: 'nicType'
             description: |
               The type of vNIC to be used on this interface. This may be gVNIC
               or VirtioNet.
@@ -424,7 +432,7 @@ properties:
               - VIRTIO_NET
               - GVNIC
           - !ruby/object:Api::Type::String
-            name: "reservedIpRange"
+            name: 'reservedIpRange'
             description: |
               Reserved IP Range name is used for VPC Peering. The
               subnetwork allocation will use the range *name* if it's assigned.
@@ -473,53 +481,53 @@ properties:
           The proxy endpoint that is used to access the runtime.
         output: true
   - !ruby/object:Api::Type::NestedObject
-    name: "softwareConfig"
+    name: 'softwareConfig'
     description: |
       The config settings for software inside the runtime.
     default_from_api: true
     update_mask_fields:
-      - "softwareConfig.idleShutdown"
-      - "softwareConfig.idleShutdownTimeout"
-      - "softwareConfig.customGpuDriverPath"
-      - "softwareConfig.postStartupScript"
+      - 'softwareConfig.idleShutdown'
+      - 'softwareConfig.idleShutdownTimeout'
+      - 'softwareConfig.customGpuDriverPath'
+      - 'softwareConfig.postStartupScript'
     properties:
       - !ruby/object:Api::Type::String
-        name: "notebookUpgradeSchedule"
+        name: 'notebookUpgradeSchedule'
         description: |
           Cron expression in UTC timezone for schedule instance auto upgrade.
           Please follow the [cron format](https://en.wikipedia.org/wiki/Cron).
       - !ruby/object:Api::Type::Boolean
-        name: "enableHealthMonitoring"
+        name: 'enableHealthMonitoring'
         description: |
           Verifies core internal services are running. Default: True.
         default_value: true
       - !ruby/object:Api::Type::Boolean
-        name: "idleShutdown"
+        name: 'idleShutdown'
         description: |
           Runtime will automatically shutdown after idle_shutdown_time.
           Default: True
         default_value: true
       - !ruby/object:Api::Type::Integer
-        name: "idleShutdownTimeout"
+        name: 'idleShutdownTimeout'
         description: |
           Time in minutes to wait before shuting down runtime.
           Default: 180 minutes
       - !ruby/object:Api::Type::Boolean
-        name: "installGpuDriver"
+        name: 'installGpuDriver'
         description: |
           Install Nvidia Driver automatically.
       - !ruby/object:Api::Type::Boolean
-        name: "upgradeable"
+        name: 'upgradeable'
         output: true
         description: |
           Bool indicating whether an newer image is available in an image family.
       - !ruby/object:Api::Type::String
-        name: "customGpuDriverPath"
+        name: 'customGpuDriverPath'
         description: |
           Specify a custom Cloud Storage path where the GPU driver is stored.
           If not specified, we'll automatically choose from official GPU drivers.
       - !ruby/object:Api::Type::String
-        name: "postStartupScript"
+        name: 'postStartupScript'
         description: |
           Path to a Bash script that automatically runs after a notebook instance
           fully boots up. The path must be a URL or
@@ -547,17 +555,26 @@ properties:
             - !ruby/object:Api::Type::String
               name: 'tag'
               description: |
-                The tag of the container image. If not specified, this defaults to the latest tag.                
+                The tag of the container image. If not specified, this defaults to the latest tag.
   - !ruby/object:Api::Type::NestedObject
-    name: "metrics"
+    name: 'metrics'
     description: |
       Contains Runtime daemon metrics such as Service status and JupyterLab
       status
     properties:
       - !ruby/object:Api::Type::KeyValuePairs
-        name: "systemMetrics"
+        name: 'systemMetrics'
         description: |
           Contains runtime daemon metrics, such as OS and kernels and
           sessions stats.
         output: true
     output: true
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
+    description: |
+      The labels to associate with this runtime. Label **keys** must
+      contain 1 to 63 characters, and must conform to [RFC 1035]
+      (https://www.ietf.org/rfc/rfc1035.txt). Label **values** may be
+      empty, but, if present, must contain 1 to 63 characters, and must
+      conform to [RFC 1035](https://www.ietf.org/rfc/rfc1035.txt). No
+      more than 32 labels can be associated with a cluster.

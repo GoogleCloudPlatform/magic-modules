@@ -18,13 +18,24 @@ if d.HasChange("desired_state") {
 }
 
 // Override the previous setting of updateMask to include state.
-// updateMask is a URL parameter but not present in the schema, so replaceVars
+// updateMask is a URL parameter but not present in the schema, so ReplaceVars
 // won't set it
-url, err = addQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
 if err != nil {
   return err
 }
 
+// lables and terraform_labels fields are overriden with the labels before updating inside the function waitForDatastreamStreamReady
+labels := d.Get("labels")
+terraformLabels := d.Get("terraform_labels")
+
 if err := waitForDatastreamStreamReady(d, config, d.Timeout(schema.TimeoutCreate) - time.Minute); err != nil {
   return fmt.Errorf("Error waiting for Stream %q to be NOT_STARTED, RUNNING, or PAUSED before updating: %q", d.Get("name").(string), err)
+}
+
+if err := d.Set("labels", labels); err != nil {
+  return fmt.Errorf("Error setting back labels field: %s", err)
+}
+if err := d.Set("terraform_labels", terraformLabels); err != nil {
+  return fmt.Errorf("Error setting back terraform_labels field: %s", err)
 }

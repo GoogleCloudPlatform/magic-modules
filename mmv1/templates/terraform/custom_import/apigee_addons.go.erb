@@ -1,7 +1,7 @@
-config := meta.(*Config)
+config := meta.(*transport_tpg.Config)
 
 // current import_formats can't import fields with forward slashes in their value
-if err := parseImportId([]string{"(?P<org>.+)"}, d, config); err != nil {
+if err := tpgresource.ParseImportId([]string{"(?P<org>.+)"}, d, config); err != nil {
 	return nil, err
 }
 
@@ -27,7 +27,7 @@ if err := d.Set("org", projectId); err != nil {
 }
 
 // Replace import id for the resource id
-id, err := replaceVars(d, config, "organizations/{{org}}")
+id, err := tpgresource.ReplaceVars(d, config, "organizations/{{org}}")
 if err != nil {
 	return nil, fmt.Errorf("Error constructing id: %s", err)
 }

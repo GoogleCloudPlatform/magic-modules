@@ -11,6 +11,9 @@
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License. */}}
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 // ----------------------------------------------------------------------------
 //
 //     ***     AUTO GENERATED CODE    ***    Type: DCL     ***
@@ -26,7 +29,7 @@
 //
 // ----------------------------------------------------------------------------
 
-package google
+package {{$.Package}}
 
 import(
 	"context"
@@ -48,6 +51,9 @@ import(
 	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
 	{{$.Package}} "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/{{$.DCLPackage}}"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgdclresource"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func Resource{{$.PathType}}() *schema.Resource {
@@ -77,6 +83,19 @@ func Resource{{$.PathType}}() *schema.Resource {
 			{{$cdf }},
  {{- end }}
 		),
+{{- end }}
+
+{{- if gt $.SchemaVersion 0 }}
+		SchemaVersion: {{$.SchemaVersion}},
+		StateUpgraders: []schema.StateUpgrader{
+  {{- range $v := $.SchemaVersions }}
+			{
+				Type:    resource{{$.PathType}}ResourceV{{$v}}().CoreConfigSchema().ImpliedType(),
+				Upgrade: Resource{{$.PathType}}UpgradeV{{$v}},
+				Version: {{$v}},
+			},
+  {{- end }}
+		},
 {{- end }}
 
 		Schema: map[string]*schema.Schema{
@@ -204,7 +223,7 @@ func {{$.PathType}}{{$v.PackagePath}}Schema() *schema.Resource {
 {{ end }}
 
 func resource{{$.PathType}}Create(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 {{- range $v := .Properties }}
 	{{- if and ($v.IdentityGetter) ($v.Settable) }}
@@ -228,8 +247,8 @@ func resource{{$.PathType}}Create(d *schema.ResourceData, meta interface{}) erro
 	if err != nil {
 		return err
 	}
-	mutexKV.Lock(lockName)
-	defer mutexKV.Unlock(lockName)
+	transport_tpg.MutexStore.Lock(lockName)
+	defer transport_tpg.MutexStore.Unlock(lockName)
 {{ end }}
 
 {{ if $.PreCreateFunction }}
@@ -253,12 +272,12 @@ should be converted to use the DCL's ID method, so normalization can be uniform.
 {{- if $.CustomCreateDirectiveFunction }}
 	directive := {{ $.CustomCreateDirectiveFunction }}(obj)
 {{- else if $.HasCreate }}
-	directive := CreateDirective
+	directive := tpgdclresource.CreateDirective
 {{- else }}
 	{{/* Resource has no create method, so we skip the BlockModification parameter. */}}
-	directive := UpdateDirective
+	directive := tpgdclresource.UpdateDirective
 {{- end }}
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -268,17 +287,17 @@ should be converted to use the DCL's ID method, so normalization can be uniform.
 	billingProject := ""
 {{- end}}
 	// err == nil indicates that the billing_project value was found
-	if bp, err := getBillingProject(d, config); err == nil {
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	client := NewDCL{{$.TitleCasePackageName}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutCreate))
+	client := transport_tpg.NewDCL{{$.TitleCasePackageName}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutCreate))
 	{{- if $.AppendToBasePath }}
 	client.Config.BasePath += "{{$.AppendToBasePath}}"
 	{{- end }}
 	{{- if $.ReplaceInBasePath.Present }}
 	client.Config.BasePath = strings.ReplaceAll(client.Config.BasePath, "{{$.ReplaceInBasePath.Old}}", "{{$.ReplaceInBasePath.New}}")
 	{{- end }}
-	if bp, err := replaceVars(d, config, client.Config.BasePath); err != nil {
+	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
 		d.SetId("")
 		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
 	} else {
@@ -330,7 +349,7 @@ should be converted to use the DCL's ID method, so normalization can be uniform.
 }
 
 func resource{{$.PathType}}Read(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 {{- range $v := .Properties }}
 	{{- if $v.IdentityGetter }}
@@ -349,7 +368,7 @@ func resource{{$.PathType}}Read(d *schema.ResourceData, meta interface{}) error 
 {{ end }}
 	}
 
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -359,17 +378,17 @@ func resource{{$.PathType}}Read(d *schema.ResourceData, meta interface{}) error 
 	billingProject := ""
 {{- end}}
 	// err == nil indicates that the billing_project value was found
-	if bp, err := getBillingProject(d, config); err == nil {
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	client := NewDCL{{$.TitleCasePackageName}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutRead))
+	client := transport_tpg.NewDCL{{$.TitleCasePackageName}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutRead))
 	{{- if $.AppendToBasePath }}
 	client.Config.BasePath += "{{$.AppendToBasePath}}"
 	{{- end }}
 	{{- if $.ReplaceInBasePath.Present }}
 	client.Config.BasePath = strings.ReplaceAll(client.Config.BasePath, "{{$.ReplaceInBasePath.Old}}", "{{$.ReplaceInBasePath.New}}")
 	{{- end }}
-	if bp, err := replaceVars(d, config, client.Config.BasePath); err != nil {
+	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
 		d.SetId("")
 		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
 	} else {
@@ -378,7 +397,7 @@ func resource{{$.PathType}}Read(d *schema.ResourceData, meta interface{}) error 
 	res, err := client.Get{{$.DCLTitle}}(context.Background(), obj)
 	if err != nil {
 		resourceName := fmt.Sprintf("{{$.PathType}} %q", d.Id())
-		return handleNotFoundDCLError(err, d, resourceName)
+		return tpgdclresource.HandleNotFoundDCLError(err, d, resourceName)
 	}
 
 {{ range $v := .Properties -}}
@@ -394,7 +413,8 @@ func resource{{$.PathType}}Read(d *schema.ResourceData, meta interface{}) error 
 
 {{- if $.Updatable }}
 func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+{{- if $.HasMutableNonLabelsFields }}
+	config := meta.(*transport_tpg.Config)
 
 {{- range $v := .Properties }}
 	{{- if and ($v.IdentityGetter) ($v.Settable) }}
@@ -429,32 +449,32 @@ func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) erro
 	if err != nil {
 		return err
 	}
-	mutexKV.Lock(lockName)
-	defer mutexKV.Unlock(lockName)
+	transport_tpg.MutexStore.Lock(lockName)
+	defer transport_tpg.MutexStore.Unlock(lockName)
 
 {{ end }}
-	directive := UpdateDirective
+	directive := tpgdclresource.UpdateDirective
 	{{- if $.StateHint }}
 	directive = append(directive, dcl.WithStateHint(old))
 	{{- end }}
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
 	billingProject := ""
 	// err == nil indicates that the billing_project value was found
-	if bp, err := getBillingProject(d, config); err == nil {
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	client := NewDCL{{$.TitleCasePackageName}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutUpdate))
+	client := transport_tpg.NewDCL{{$.TitleCasePackageName}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutUpdate))
 	{{- if $.AppendToBasePath }}
 	client.Config.BasePath += "{{$.AppendToBasePath}}"
 	{{- end }}
 	{{- if $.ReplaceInBasePath.Present }}
 	client.Config.BasePath = strings.ReplaceAll(client.Config.BasePath, "{{$.ReplaceInBasePath.Old}}", "{{$.ReplaceInBasePath.New}}")
 	{{- end }}
-	if bp, err := replaceVars(d, config, client.Config.BasePath); err != nil {
+	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
 		d.SetId("")
 		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
 	} else {
@@ -472,12 +492,16 @@ func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) erro
 
 	log.Printf("[DEBUG] Finished creating {{$.DCLTitle}} %q: %#v", d.Id(), res)
 
+{{- else }}
+	// Only the root field "labels" and "terraform_labels" are mutable
+{{- end }}
+
 	return resource{{$.PathType}}Read(d, meta)
 }
 {{- end }}
 
 func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 {{- range $v := .Properties }}
 	{{- if $v.IdentityGetter }}
@@ -501,8 +525,8 @@ func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) erro
 	if err != nil {
 		return err
 	}
-	mutexKV.Lock(lockName)
-	defer mutexKV.Unlock(lockName)
+	transport_tpg.MutexStore.Lock(lockName)
+	defer transport_tpg.MutexStore.Unlock(lockName)
 
 {{ end }}
 {{ if $.PreDeleteFunction }}
@@ -522,7 +546,7 @@ func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) erro
 {{- end }}
 
 	log.Printf("[DEBUG] Deleting {{$.DCLTitle}} %q", d.Id())
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -532,17 +556,17 @@ func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) erro
 	billingProject := ""
 {{- end}}
 	// err == nil indicates that the billing_project value was found
-	if bp, err := getBillingProject(d, config); err == nil {
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	client := NewDCL{{$.TitleCasePackageName}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutDelete))
+	client := transport_tpg.NewDCL{{$.TitleCasePackageName}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutDelete))
 {{- if $.AppendToBasePath }}
 	client.Config.BasePath += "{{$.AppendToBasePath}}"
 {{- end }}
 {{- if $.ReplaceInBasePath.Present }}
 	client.Config.BasePath = strings.ReplaceAll(client.Config.BasePath, "{{$.ReplaceInBasePath.Old}}", "{{$.ReplaceInBasePath.New}}")
 {{- end }}
-	if bp, err := replaceVars(d, config, client.Config.BasePath); err != nil {
+	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
 		d.SetId("")
 		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
 	} else {
@@ -557,14 +581,14 @@ func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resource{{$.PathType}}Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 {{ if $.CustomImportFunction }}
 	if err := {{$.CustomImportFunction}}(d, config); err != nil {
 		return nil, fmt.Errorf("error encountered in import: %v", err)
 	}
 {{ else -}}
 	{{$allowForwardSlash := shouldAllowForwardSlashInFormat $.ID $.Properties}}
-	if err := parseImportId([]string{
+	if err := tpgresource.ParseImportId([]string{
 	{{- range $format := $.ImportFormats }}
 	"{{patternToRegex $format $allowForwardSlash}}",
 	{{- end }}
@@ -641,6 +665,39 @@ func expand{{$.PathType}}{{$v.PackagePath}}Array(o interface{}) []{{$.Package}}.
 }
 		{{- end }}
 
+		{{ if $v.IsComplexMap -}}
+func expand{{$.PathType}}{{$v.PackagePath}}Map(o interface{}) map[string]{{$.Package}}.{{$v.ObjectType}} {
+	if o == nil {
+	{{- if $v.Computed }}
+		return nil
+	{{- else }}
+		return make(map[string]{{$.Package}}.{{$v.ObjectType}})
+	{{- end }}
+	}
+
+	o = o.(*schema.Set).List()
+
+	objs := o.([]interface{})
+	if len(objs) == 0 || objs[0] == nil {
+	{{- if $v.Computed }}
+		return nil
+	{{- else }}
+		return make(map[string]{{$.Package}}.{{$v.ObjectType}})
+	{{- end }}
+	}
+
+	items := make(map[string]{{$.Package}}.{{$v.ObjectType}})
+	for _, item := range objs {
+		i := expand{{$.PathType}}{{$v.PackagePath}}(item)
+		if item != nil {
+			items[item.(map[string]interface{})["{{$v.ComplexMapKeyName}}"].(string)] = *i
+		}
+	}
+
+	return items
+}
+		{{- end }}
+
 func expand{{$.PathType}}{{$v.PackagePath}}(o interface{}) *{{$.Package}}.{{$v.ObjectType}} {
 	if o == nil {
 	{{- if $v.Computed }}
@@ -664,7 +721,7 @@ func expand{{$.PathType}}{{$v.PackagePath}}(o interface{}) *{{$.Package}}.{{$v.O
 	{{- end }}
 	return &{{$.Package}}.{{$v.ObjectType}}{
 	{{- range $p := $v.Properties }}
-		{{- if and ($p.Settable) ($p.ExpandGetter) }}
+		{{- if and ($p.Settable) ($p.ExpandGetter) (or (not $v.IsComplexMap) (ne $p.Name $v.ComplexMapKeyName)) }}
 		{{$p.PackageName}}: {{$p.ExpandGetter}},
 		{{- end -}}
 	{{ end }}
@@ -689,17 +746,36 @@ func flatten{{$.PathType}}{{$v.PackagePath}}Array(objs []{{$.Package}}.{{$v.Obje
 }
 	{{- end }}
 
-func flatten{{$.PathType}}{{$v.PackagePath}}(obj *{{$.Package}}.{{$v.ObjectType}}) interface{} {
-	if obj == nil || obj.Empty(){
+	{{ if $v.IsComplexMap -}}
+func flatten{{$.PathType}}{{$v.PackagePath}}Map(objs map[string]{{$.Package}}.{{$v.ObjectType}}) []interface{} {
+	if objs == nil {
+		return nil
+	}
+
+	items := []interface{}{}
+	for name, item := range objs {
+		i := flatten{{$.PathType}}{{$v.PackagePath}}(&item, name)
+		items = append(items, i)
+	}
+
+	return items
+}
+	{{- end }}
+
+func flatten{{$.PathType}}{{$v.PackagePath}}(obj *{{$.Package}}.{{$v.ObjectType}}{{- if $v.IsComplexMap -}}, name string{{- end -}}) interface{} {
+	if obj == nil {{- if not $v.IsComplexMap -}}|| obj.Empty(){{- end -}}{
 		return nil
 	}
 	transformed := map[string]interface{}{
 {{- range $p := $v.Properties }}
-	{{- if ($p.FlattenGetter) }}
+	{{- if or (not $v.IsComplexMap) (ne $p.Name $v.ComplexMapKeyName) }}
 		"{{$p.Name}}": {{$p.FlattenGetter}},
 	{{- end -}}
 {{ end }}
 	}
+{{ if $v.IsComplexMap }}
+	transformed["{{$v.ComplexMapKeyName}}"] = name
+{{ end }}
 {{ if $v.IsObject }}
 	return []interface{}{transformed}
 {{ else }}
@@ -707,6 +783,55 @@ func flatten{{$.PathType}}{{$v.PackagePath}}(obj *{{$.Package}}.{{$v.ObjectType}
 {{ end }}
 }
 {{ end -}}
+
+{{ if $.HasLabels }}
+func flatten{{$.PathType}}Labels(v map[string]string, d *schema.ResourceData) interface{} {
+	if v == nil {
+		return nil
+	}
+
+	transformed := make(map[string]interface{})
+	if l, ok := d.Get("labels").(map[string]interface{}); ok {
+		for k, _ := range l {
+			transformed[k] = v[k]
+		}
+	}
+
+	return transformed
+}
+
+func flatten{{$.PathType}}TerraformLabels(v map[string]string, d *schema.ResourceData) interface{} {
+	if v == nil {
+		return nil
+	}
+
+	transformed := make(map[string]interface{})
+	if l, ok := d.Get("terraform_labels").(map[string]interface{}); ok {
+		for k, _ := range l {
+			transformed[k] = v[k]
+		}
+	}
+
+	return transformed
+}
+{{ end }}
+
+{{ if $.HasAnnotations }}
+func flatten{{$.PathType}}Annotations(v map[string]string, d *schema.ResourceData) interface{} {
+	if v == nil {
+		return nil
+	}
+
+	transformed := make(map[string]interface{})
+	if l, ok := d.Get("annotations").(map[string]interface{}); ok {
+		for k, _ := range l {
+			transformed[k] = v[k]
+		}
+	}
+
+	return transformed
+}
+{{ end }}
 
 {{ range $v := .EnumArrays -}}
 func flatten{{$.PathType}}{{$v.PackagePath}}Array(obj []{{$.Package}}.{{$v.ObjectType}}Enum) interface{} {

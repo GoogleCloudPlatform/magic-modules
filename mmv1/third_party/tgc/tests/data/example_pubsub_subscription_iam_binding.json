@@ -1,0 +1,37 @@
+[
+  {
+    "name": "//pubsub.googleapis.com/projects/{{.Provider.project}}/subscriptions/example-subscription",
+    "asset_type": "pubsub.googleapis.com/Subscription",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "v1",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/pubsub/v1/rest",
+      "discovery_name": "Subscription",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "ackDeadlineSeconds": 20,
+        "deadLetterPolicy": null,
+        "expirationPolicy": null,
+        "labels": {
+          "goog-terraform-provisioned": "true",
+          "test-label1": "test-value1"
+        },
+        "messageRetentionDuration": "604800s",
+        "pushConfig": {
+          "pushEndpoint": "https://example.com/push"
+        },
+        "topic": "projects/{{.Provider.project}}/topics/example-pubsub-topic"
+      }
+    },
+    "iam_policy": {
+      "bindings": [
+        {
+          "role": "roles/editor",
+          "members": [
+            "user:jane@example.com"
+          ]
+        }
+      ]
+    }
+  }
+]

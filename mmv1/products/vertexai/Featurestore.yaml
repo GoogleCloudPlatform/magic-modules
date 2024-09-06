@@ -26,7 +26,8 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
   fetch_iam_policy_verb: :POST
   parent_resource_attribute: featurestore
-  import_format: ['projects/{{project}}/locations/{{region}}/featurestores/{{name}}']
+  import_format:
+    ['projects/{{project}}/locations/{{region}}/featurestores/{{name}}']
   example_config_body: 'templates/terraform/iam/example_config_body/vertex_ai_featurestore.tf.erb'
   min_version: beta
 async: !ruby/object:Api::OpAsync
@@ -52,61 +53,65 @@ autogen_async: false
 skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "vertex_ai_featurestore"
-    primary_resource_id: "featurestore"
-    primary_resource_name: "fmt.Sprintf(\"terraform%s\", context[\"random_suffix\"\
+    name: 'vertex_ai_featurestore'
+    primary_resource_id: 'featurestore'
+    primary_resource_name: "fmt.Sprintf(\"terraform%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
-      name: "terraform"
-      project: "appeng-flex"
-      kms_key_name: "kms-name"
+      name: 'terraform'
+      project: 'appeng-flex'
+      kms_key_name: 'kms-name'
     test_env_vars:
       org_id: :ORG_ID
       billing_account: :BILLING_ACCT
     test_vars_overrides:
-      kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     ignore_read_extra:
-      - "force_destroy"
+      - 'force_destroy'
   - !ruby/object:Provider::Terraform::Examples
-    name: "vertex_ai_featurestore_with_beta_fields"
-    primary_resource_id: "featurestore"
-    primary_resource_name: "fmt.Sprintf(\"terraform%s\", context[\"random_suffix\"\
+    name: 'vertex_ai_featurestore_with_beta_fields'
+    primary_resource_id: 'featurestore'
+    primary_resource_name: "fmt.Sprintf(\"terraform%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
-      name: "terraform2"
-      project: "appeng-flex"
-      kms_key_name: "kms-name"
+      name: 'terraform2'
+      project: 'appeng-flex'
+      kms_key_name: 'kms-name'
     test_env_vars:
       org_id: :ORG_ID
       billing_account: :BILLING_ACCT
     test_vars_overrides:
-      kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     ignore_read_extra:
-      - "force_destroy"
+      - 'force_destroy'
     min_version: beta
   - !ruby/object:Provider::Terraform::Examples
-    name: "vertex_ai_featurestore_scaling"
-    primary_resource_id: "featurestore"
-    primary_resource_name: "fmt.Sprintf(\"terraform%s\", context[\"random_suffix\"\
+    name: 'vertex_ai_featurestore_scaling'
+    primary_resource_id: 'featurestore'
+    primary_resource_name: "fmt.Sprintf(\"terraform%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
-      name: "terraform3"
-      project: "appeng-flex"
-      kms_key_name: "kms-name"
+      name: 'terraform3'
+      project: 'appeng-flex'
+      kms_key_name: 'kms-name'
     test_env_vars:
       org_id: :ORG_ID
       billing_account: :BILLING_ACCT
     test_vars_overrides:
-      kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     ignore_read_extra:
-      - "force_destroy"
+      - 'force_destroy'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_delete: templates/terraform/pre_delete/vertex_ai_force_delete.go.erb
 virtual_fields:
   - !ruby/object:Api::Type::Boolean
     name: 'force_destroy'
-    description: 'If set to true, any EntityTypes and Features for this Featurestore
-      will also be deleted'
+    description:
+      'If set to true, any EntityTypes and Features for this Featurestore will
+      also be deleted'
     default_value: false
 parameters:
   - !ruby/object:Api::Type::String
@@ -118,11 +123,11 @@ parameters:
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
-    description: The name of the Featurestore. This value may be up to 60 characters,
-      and valid characters are [a-z0-9_]. The first character cannot be a number.
+    description:
+      The name of the Featurestore. This value may be up to 60 characters, and
+      valid characters are [a-z0-9_]. The first character cannot be a number.
     immutable: true
     url_param_only: true
-    pattern: projects/{{project}}/locations/{{region}}/featurestores/{{name}}
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String
     name: 'etag'
@@ -139,7 +144,7 @@ properties:
     output: true
     description: |
       The timestamp of when the featurestore was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       A set of key/value label pairs to assign to this Featurestore.

@@ -33,7 +33,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -49,18 +49,30 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "target_instance_basic"
-    primary_resource_id: "default"
+    name: 'target_instance_basic'
+    primary_resource_id: 'default'
     vars:
-      target_name: "target"
-      instance_name: "target-vm"
+      target_name: 'target'
+      instance_name: 'target-vm'
   - !ruby/object:Provider::Terraform::Examples
     min_version: beta
-    name: "target_instance_custom_network"
-    primary_resource_id: "custom_network"
+    name: 'target_instance_custom_network'
+    primary_resource_id: 'custom_network'
     vars:
-      target_name: "custom-network"
-      instance_name: "custom-network-target-vm"
+      target_name: 'custom-network'
+      instance_name: 'custom-network-target-vm'
+  - !ruby/object:Provider::Terraform::Examples
+    min_version: beta
+    name: 'target_instance_with_security_policy'
+    primary_resource_id: 'default'
+    vars:
+      network_name: 'custom-default-network'
+      subnetname_name: 'custom-default-subnet'
+      instance_name: 'target-vm'
+      region_sec_policy: 'region-secpolicy'
+      target_name: 'target-instance'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  post_create: 'templates/terraform/post_create/compute_target_instance_security_policy.go.erb'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'zone'
@@ -71,6 +83,7 @@ parameters:
     required: false
     immutable: true
     default_from_api: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -89,9 +102,10 @@ properties:
     output: true
   - !ruby/object:Api::Type::String
     name: 'network'
-    description: 'The URL of the network this target instance uses to forward traffic.
-      If not specified, the traffic will be forwarded to the network that the default
-      network interface belongs to.'
+    description:
+      'The URL of the network this target instance uses to forward traffic. If
+      not specified, the traffic will be forwarded to the network that the
+      default network interface belongs to.'
     immutable: true
     min_version: beta
   - !ruby/object:Api::Type::String
@@ -110,7 +124,7 @@ properties:
       provider-level project.
     required: true
     immutable: true
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     custom_expand: 'templates/terraform/custom_expand/self_link_from_name.erb'
   - !ruby/object:Api::Type::Enum
     name: 'natPolicy'
@@ -121,3 +135,10 @@ properties:
     default_value: :NO_NAT
     values:
       - :NO_NAT
+  - !ruby/object:Api::Type::String
+    name: 'securityPolicy'
+    min_version: beta
+    description: |
+      The resource URL for the security policy associated with this target instance.
+    update_url: projects/{{project}}/zones/{{zone}}/targetInstances/{{name}}/setSecurityPolicy
+    update_verb: :POST

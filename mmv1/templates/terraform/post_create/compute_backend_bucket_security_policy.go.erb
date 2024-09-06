@@ -1,6 +1,6 @@
 // security_policy isn't set by Create / Update
 if o, n := d.GetChange("edge_security_policy"); o.(string) != n.(string) {
-		pol, err := ParseSecurityPolicyFieldValue(n.(string), d, config)
+		pol, err := tpgresource.ParseSecurityPolicyFieldValue(n.(string), d, config)
   if err != nil {
     return errwrap.Wrapf("Error parsing Backend Service security policy: {{err}}", err)
   }

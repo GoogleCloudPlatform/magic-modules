@@ -27,7 +27,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -43,32 +43,60 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "service_attachment_basic"
-    primary_resource_id: "psc_ilb_service_attachment"
+    name: 'service_attachment_basic'
+    primary_resource_id: 'psc_ilb_service_attachment'
     vars:
-      service_attachment_name: "my-psc-ilb"
-      network_name: "psc-ilb-network"
-      nat_subnetwork_name: "psc-ilb-nat"
-      producer_subnetwork_name: "psc-ilb-producer-subnetwork"
-      producer_health_check_name: "producer-service-health-check"
-      producer_service_name: "producer-service"
-      producer_forwarding_rule_name: "producer-forwarding-rule"
-      consumer_address_name: "psc-ilb-consumer-address"
-      consumer_forwarding_rule_name: "psc-ilb-consumer-forwarding-rule"
+      service_attachment_name: 'my-psc-ilb'
+      network_name: 'psc-ilb-network'
+      nat_subnetwork_name: 'psc-ilb-nat'
+      producer_subnetwork_name: 'psc-ilb-producer-subnetwork'
+      producer_health_check_name: 'producer-service-health-check'
+      producer_service_name: 'producer-service'
+      producer_forwarding_rule_name: 'producer-forwarding-rule'
+      consumer_address_name: 'psc-ilb-consumer-address'
+      consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
   - !ruby/object:Provider::Terraform::Examples
-    name: "service_attachment_explicit_projects"
-    primary_resource_id: "psc_ilb_service_attachment"
+    name: 'service_attachment_explicit_projects'
+    primary_resource_id: 'psc_ilb_service_attachment'
     vars:
-      service_attachment_name: "my-psc-ilb"
-      network_name: "psc-ilb-network"
-      nat_subnetwork_name: "psc-ilb-nat"
-      producer_subnetwork_name: "psc-ilb-producer-subnetwork"
-      producer_health_check_name: "producer-service-health-check"
-      producer_service_name: "producer-service"
-      producer_forwarding_rule_name: "producer-forwarding-rule"
-      consumer_address_name: "psc-ilb-consumer-address"
-      consumer_forwarding_rule_name: "psc-ilb-consumer-forwarding-rule"
+      service_attachment_name: 'my-psc-ilb'
+      network_name: 'psc-ilb-network'
+      nat_subnetwork_name: 'psc-ilb-nat'
+      producer_subnetwork_name: 'psc-ilb-producer-subnetwork'
+      producer_health_check_name: 'producer-service-health-check'
+      producer_service_name: 'producer-service'
+      producer_forwarding_rule_name: 'producer-forwarding-rule'
+      consumer_address_name: 'psc-ilb-consumer-address'
+      consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'service_attachment_explicit_networks'
+    primary_resource_id: 'psc_ilb_service_attachment'
+    vars:
+      service_attachment_name: 'my-psc-ilb'
+      network_name: 'psc-ilb-network'
+      nat_subnetwork_name: 'psc-ilb-nat'
+      producer_subnetwork_name: 'psc-ilb-producer-subnetwork'
+      producer_health_check_name: 'producer-service-health-check'
+      producer_service_name: 'producer-service'
+      producer_forwarding_rule_name: 'producer-forwarding-rule'
+      consumer_network_name: 'psc-ilb-consumer-network'
+      consumer_address_name: 'psc-ilb-consumer-address'
+      consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'service_attachment_reconcile_connections'
+    primary_resource_id: 'psc_ilb_service_attachment'
+    vars:
+      service_attachment_name: 'my-psc-ilb'
+      network_name: 'psc-ilb-network'
+      nat_subnetwork_name: 'psc-ilb-nat'
+      producer_subnetwork_name: 'psc-ilb-producer-subnetwork'
+      producer_health_check_name: 'producer-service-health-check'
+      producer_service_name: 'producer-service'
+      producer_forwarding_rule_name: 'producer-forwarding-rule'
+      consumer_address_name: 'psc-ilb-consumer-address'
+      consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/compute_service_attachment.go.erb
   update_encoder: 'templates/terraform/update_encoder/compute_service_attachment.go.erb'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
@@ -80,6 +108,8 @@ parameters:
     required: false
     immutable: true
     default_from_api: true
+    ignore_read: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -126,15 +156,13 @@ properties:
           description: |
             The status of the connection from the consumer forwarding rule to
             this service attachment.
-  - !ruby/object:Api::Type::ResourceRef
+  - !ruby/object:Api::Type::String
     name: targetService
     required: true
     immutable: true
-    resource: 'ForwardingRule'
-    imports: 'selfLink'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     description: |
-      The URL of a forwarding rule that represents the service identified by
-      this service attachment.
+      The URL of a service serving the endpoint identified by this service attachment.
   - !ruby/object:Api::Type::Array
     name: 'natSubnets'
     required: true
@@ -147,10 +175,10 @@ properties:
       imports: 'selfLink'
       description: |
         A subnet that is provided for NAT in this service attachment.
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Boolean
     name: 'enableProxyProtocol'
     required: true
-    immutable: true
     description: |
       If true, enable the proxy protocol which is for supplying client TCP/IP
       address data in TCP connections that traverse proxies on their way to
@@ -177,16 +205,35 @@ properties:
       An array of projects that are allowed to connect to this service
       attachment.
     send_empty_value: true
+    is_set: true
+    set_hash_func: computeServiceAttachmentConsumerAcceptListsHash
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::String
           name: 'projectIdOrNum'
-          required: true
+          # TODO (laurensknoll): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
           description: |
             A project that is allowed to connect to this service attachment.
+            Only one of project_id_or_num and network_url may be set.
+        - !ruby/object:Api::Type::String
+          name: 'networkUrl'
+          # TODO (laurensknoll): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
+          description: |
+            The network that is allowed to connect to this service attachment.
+            Only one of project_id_or_num and network_url may be set.
+          diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
         - !ruby/object:Api::Type::Integer
           name: 'connectionLimit'
           required: true
           description: |
             The number of consumer forwarding rules the consumer project can
             create.
+  - !ruby/object:Api::Type::Boolean
+    name: reconcileConnections
+    default_from_api: true
+    send_empty_value: true
+    description: |
+      This flag determines whether a consumer accept/reject list change can reconcile the statuses of existing ACCEPTED or REJECTED PSC endpoints.
+
+      If false, connection policy update will only affect existing PENDING PSC endpoints. Existing ACCEPTED/REJECTED endpoints will remain untouched regardless how the connection policy is modified .
+      If true, update will affect both PENDING and ACCEPTED/REJECTED PSC endpoints. For example, an ACCEPTED PSC endpoint will be moved to REJECTED if its project is added to the reject list.

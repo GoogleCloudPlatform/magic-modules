@@ -12,17 +12,16 @@
   # See the License for the specific language governing permissions and
   # limitations under the License.
 -%>
-
 // need to send value in PATCH due to validation bug on api b/198329756
 nameProp := d.Get("name")
-if v, ok := d.GetOkExists("name"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, nameProp)) {
+if v, ok := d.GetOkExists("name"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, nameProp)) {
 	obj["name"] = nameProp
 }
 
 
 // need to send value in PATCH due to validation bug on api b/198308475
 enableProxyProtocolProp := d.Get("enable_proxy_protocol")
-if v, ok := d.GetOkExists("enable_proxy_protocol"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, enableProxyProtocolProp)) {
+if v, ok := d.GetOkExists("enable_proxy_protocol"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, enableProxyProtocolProp)) {
 	obj["enableProxyProtocol"] = enableProxyProtocolProp
 }
 

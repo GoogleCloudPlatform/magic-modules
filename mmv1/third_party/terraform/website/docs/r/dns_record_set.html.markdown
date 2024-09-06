@@ -4,12 +4,12 @@ description: |-
   Manages a set of DNS records within Google Cloud DNS.
 ---
 
-# google\_dns\_record\_set
+# google_dns_record_set
 
 Manages a set of DNS records within Google Cloud DNS. For more information see [the official documentation](https://cloud.google.com/dns/records/) and
 [API](https://cloud.google.com/dns/api/v1/resourceRecordSets).
 
-~> **Note:** The provider treats this resource as an authoritative record set. This means existing records (including the default records) for the given type will be overwritten when you create this resource in Terraform. In addition, the Google Cloud DNS API requires NS records to be present at all times, so Terraform will not actually remove NS records during destroy but will report that it did.
+~> **Note:** The provider treats this resource as an authoritative record set. This means existing records (including the default records) for the given type will be overwritten when you create this resource in Terraform. In addition, the Google Cloud DNS API requires NS and SOA records to be present at all times, so Terraform will not actually remove NS or SOA records on the root of the zone during destroy but will report that it did.
 
 ## Example Usage
 
@@ -177,7 +177,7 @@ resource "google_dns_record_set" "geo" {
 }
 ```
 
-#### Primary-Backup
+#### Failover
 
 ```hcl
 resource "google_dns_record_set" "a" {
@@ -228,6 +228,7 @@ resource "google_compute_forwarding_rule" "prod" {
   backend_service       = google_compute_region_backend_service.prod.id
   all_ports             = true
   network               = google_compute_network.prod.name
+  allow_global_access   = true
 }
 
 resource "google_compute_region_backend_service" "prod" {
@@ -268,15 +269,15 @@ The following arguments are supported:
 <a name="nested_routing_policy"></a>The `routing_policy` block supports:
 
 * `wrr` - (Optional) The configuration for Weighted Round Robin based routing policy.
-    Structure is [document below](#nested_wrr).
+    Structure is [documented below](#nested_wrr).
 
 * `geo` - (Optional) The configuration for Geolocation based routing policy.
-    Structure is [document below](#nested_geo).
+    Structure is [documented below](#nested_geo).
 
 * `enable_geo_fencing` - (Optional) Specifies whether to enable fencing for geo queries.
 
-* `primary_backup` - (Optional) The configuration for a primary-backup policy with global to regional failover. Queries are responded to with the global primary targets, but if none of the primary targets are healthy, then we fallback to a regional failover policy.
-    Structure is [document below](#nested_primary_backup).
+* `primary_backup` - (Optional) The configuration for a failover policy with global to regional failover. Queries are responded to with the global primary targets, but if none of the primary targets are healthy, then we fallback to a regional failover policy.
+    Structure is [documented below](#nested_primary_backup).
 
 <a name="nested_wrr"></a>The `wrr` block supports:
 
@@ -285,7 +286,7 @@ The following arguments are supported:
 * `rrdatas` - (Optional) Same as `rrdatas` above.
 
 * `health_checked_targets` - (Optional) The list of targets to be health checked. Note that if DNSSEC is enabled for this zone, only one of `rrdatas` or `health_checked_targets` can be set.
-    Structure is [document below](#nested_health_checked_targets).
+    Structure is [documented below](#nested_health_checked_targets).
 
 <a name="nested_geo"></a>The `geo` block supports:
 
@@ -294,12 +295,12 @@ The following arguments are supported:
 * `rrdatas` - (Optional) Same as `rrdatas` above.
 
 * `health_checked_targets` - (Optional) For A and AAAA types only. The list of targets to be health checked. These can be specified along with `rrdatas` within this item.
-    Structure is [document below](#nested_health_checked_targets).
+    Structure is [documented below](#nested_health_checked_targets).
 
 <a name="nested_primary_backup"></a>The `primary_backup` block supports:
 
 * `primary` - (Required) The list of global primary targets to be health checked.
-    Structure is [document below](#nested_health_checked_targets).
+    Structure is [documented below](#nested_health_checked_targets).
 
 * `backup_geo` - (Required) The backup geo targets, which provide a regional failover policy for the otherwise global primary targets.
     Structure is [document above](#nested_geo).
@@ -311,11 +312,11 @@ The following arguments are supported:
 <a name="nested_health_checked_targets"></a>The `health_checked_targets` block supports:
 
 * `internal_load_balancers` - (Required) The list of internal load balancers to health check.
-    Structure is [document below](#nested_internal_load_balancers).
+    Structure is [documented below](#nested_internal_load_balancers).
 
 <a name="nested_internal_load_balancers"></a>The `internal_load_balancers` block supports:
 
-* `load_balancer_type` - (Required) The type of load balancer. This value is case-sensitive. Possible values: ["regionalL4ilb"]
+* `load_balancer_type` - (Optional) The type of load balancer. This value is case-sensitive. Possible values: ["regionalL4ilb", "regionalL7ilb", "globalL7ilb"]
 
 * `ip_address` - (Required) The frontend IP address of the load balancer.
 
@@ -340,10 +341,25 @@ The following arguments are supported:
 
 DNS record sets can be imported using either of these accepted formats:
 
+* `projects/{{project}}/managedZones/{{zone}}/rrsets/{{name}}/{{type}}`
+* `{{project}}/{{zone}}/{{name}}/{{type}}`
+* `{{zone}}/{{name}}/{{type}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import DNS record sets using one of the formats above. For example:
+
+```tf
+import {
+  id = "projects/{{project}}/managedZones/{{zone}}/rrsets/{{name}}/{{type}}"
+  to = google_dns_record_set.default
+}
 ```
-$ terraform import google_dns_record_set.frontend projects/{{project}}/managedZones/{{zone}}/rrsets/{{name}}/{{type}}
-$ terraform import google_dns_record_set.frontend {{project}}/{{zone}}/{{name}}/{{type}}
-$ terraform import google_dns_record_set.frontend {{zone}}/{{name}}/{{type}}
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), DNS record sets can be imported using one of the formats above. For example:
+
+```
+$ terraform import google_dns_record_set.default projects/{{project}}/managedZones/{{zone}}/rrsets/{{name}}/{{type}}
+$ terraform import google_dns_record_set.default {{project}}/{{zone}}/{{name}}/{{type}}
+$ terraform import google_dns_record_set.default {{zone}}/{{name}}/{{type}}
 ```
 
 Note: The record name must include the trailing dot at the end.

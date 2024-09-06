@@ -40,7 +40,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -55,18 +55,27 @@ async: !ruby/object:Api::OpAsync
     path: 'error/errors'
     message: 'message'
 id_format: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}/{{port}}/{{name}}'
-import_format: ['projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}/{{port}}/{{name}}']
+import_format:
+  [
+    'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}/{{port}}/{{name}}',
+  ]
 mutex: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "instance_group_named_port_gke"
-    primary_resource_id: "my_port"
-        # Multiple fine-grained resources
+    name: 'instance_group_named_port_gke'
+    primary_resource_id:
+      'my_port'
+      # Multiple fine-grained resources
     skip_vcr: true
     vars:
-      network_name: "container-network"
-      subnetwork_name: "container-subnetwork"
-      gke_cluster_name: "my-cluster"
+      network_name: 'container-network'
+      subnetwork_name: 'container-subnetwork'
+      gke_cluster_name: 'my-cluster'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      deletion_protection: 'false'
+    oics_vars_overrides:
+      deletion_protection: 'false'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: 'templates/terraform/encoders/normalize_group.go.erb'
 parameters:
@@ -78,7 +87,7 @@ parameters:
     url_param_only: true
     description: |
       The name of the instance group.
-    diff_suppress_func: 'compareResourceNames'
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
   - !ruby/object:Api::Type::ResourceRef
     name: 'zone'
     resource: 'Zone'

@@ -18,16 +18,5 @@ versions:
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://apigee.googleapis.com/v1/
-  # Apigee has no beta API, but running the full Terraform
-  # acceptance tests depends on a beta-only resource and a bug in MM
-  # will generate beta tests against the GA provider in this case, so
-  # we fake a beta API with the same endpoint as the GA API.
-  - !ruby/object:Api::Product::Version
-    name: beta
-    base_url: https://apigee.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Apigee API
-    url: https://console.cloud.google.com/apis/library/apigee.googleapis.com/

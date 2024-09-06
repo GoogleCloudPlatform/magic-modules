@@ -14,7 +14,8 @@
 --- !ruby/object:Api::Resource
 name: 'Database'
 base_url: projects/{{project}}/instances/{{instance}}/databases
-immutable: true
+update_verb: :PATCH
+update_mask: true
 description: |
   A Cloud Spanner Database which is hosted on a Spanner instance.
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -40,54 +41,65 @@ async: !ruby/object:Api::OpAsync
     path: 'error'
     message: 'message'
 autogen_async: true
+# Sweeper skipped as this resource has customized deletion.
 skip_sweeper: true
-id_format: "{{instance}}/{{name}}"
+id_format: '{{instance}}/{{name}}'
 import_format:
-  - "projects/{{project}}/instances/{{instance}}/databases/{{name}}"
-  - "instances/{{instance}}/databases/{{name}}"
-  - "{{project}}/{{instance}}/{{name}}"
-  - "{{instance}}/{{name}}"
+  - 'projects/{{project}}/instances/{{instance}}/databases/{{name}}'
+  - 'instances/{{instance}}/databases/{{name}}'
+  - '{{project}}/{{instance}}/{{name}}'
+  - '{{instance}}/{{name}}'
 docs: !ruby/object:Provider::Terraform::Docs
   warning: |
     On newer versions of the provider, you must explicitly set `deletion_protection=false`
     (and run `terraform apply` to write the field to state) in order to destroy an instance.
     It is recommended to not set this field (or set it to true) until you're ready to destroy.
     On older versions, it is strongly recommended to set `lifecycle { prevent_destroy = true }`
-    on databases in order to prevent accidental data loss. See [Terraform docs](https://www.terraform.io/docs/configuration/resources.html#prevent_destroy)
+    on databases in order to prevent accidental data loss. See
+    [Terraform docs](https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle#prevent_destroy)
     for more information on lifecycle parameters.
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "spanner_database_basic"
-    primary_resource_id: "database"
-        # Randomness due to spanner instance
+    name: 'spanner_database_basic'
+    primary_resource_id:
+      'database'
+      # Randomness due to spanner instance
     skip_vcr: true
     vars:
-      database_name: "my-database"
+      database_name: 'my-database'
     ignore_read_extra:
-      - "deletion_protection"
+      - 'deletion_protection'
 virtual_fields:
   - !ruby/object:Api::Type::Boolean
     name: 'deletion_protection'
     default_value: true
     description: |
-      Whether or not to allow Terraform to destroy the instance. Unless this field is set to false
-      in Terraform state, a `terraform destroy` or `terraform apply` that would delete the instance will fail.
+      Whether Terraform will be prevented from destroying the database. Defaults to true.
+      When a`terraform destroy` or `terraform apply` would delete the database,
+      the command will fail if this field is not set to false in Terraform state.
+      When the field is set to true or unset in Terraform state, a `terraform apply`
+      or `terraform destroy` that would delete the database will fail.
+      When the field is set to false, deleting the database is allowed.
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: 'templates/terraform/constants/spanner_database.go.erb'
   encoder: templates/terraform/encoders/spanner_database.go.erb
   decoder: templates/terraform/decoders/spanner_database.go.erb
   update_encoder: templates/terraform/update_encoder/spanner_database.go.erb
-  resource_definition: 'templates/terraform/resource_definition/spanner_database.go.erb'
   post_create: templates/terraform/post_create/spanner_database.go.erb
   pre_delete: templates/terraform/pre_delete/resource_spanner_database.go
   pre_update: templates/terraform/pre_update/spanner_database.go.erb
+custom_diff: [
+  'resourceSpannerDBDdlCustomDiff',
+]
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'instance'
     resource: 'Instance'
     imports: 'name'
     description: 'The instance to create the database on.'
+    immutable: true
     required: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   # This resource returns only one attribute ("name") from which we parse
   # "instance", "name", and "project".  You will need custom code handling
@@ -111,9 +123,7 @@ properties:
       and 7 days, and can be specified in days, hours, minutes, or seconds. For example,
       the values 1d, 24h, 1440m, and 86400s are equivalent. Default value is 1h.
       If this property is used, you must avoid adding new DDL statements to `ddl` that
-      update the database's version_retention_period. 
-    validation: !ruby/object:Provider::Terraform::Validation
-      function: validateDatabaseRetentionPeriod
+      update the database's version_retention_period.
     default_from_api: true
   - !ruby/object:Api::Type::Array
     name: 'ddl'
@@ -131,29 +141,40 @@ properties:
     name: 'state'
     description: An explanation of the status of the database.
     output: true
-    # This attribute is not useful - we include it in Terraform for historical
-    # reasons, but you should most likely not use it.
-    exclude: false
     values:
       - :READY
       - :CREATING
   - !ruby/object:Api::Type::NestedObject
     name: 'encryptionConfig'
+    immutable: true
     description: |
       Encryption configuration for the database
     properties:
       - !ruby/object:Api::Type::String
         name: 'kmsKeyName'
+        immutable: true
         required: true
         description: |
           Fully qualified name of the KMS key to use to encrypt this database. This key must exist
           in the same location as the Spanner Database.
   - !ruby/object:Api::Type::Enum
     name: 'databaseDialect'
+    immutable: true
     description: |
       The dialect of the Cloud Spanner Database.
-      If it is not provided, "GOOGLE_STANDARD_SQL" will be used. 
+      If it is not provided, "GOOGLE_STANDARD_SQL" will be used.
     values:
       - :GOOGLE_STANDARD_SQL
       - :POSTGRESQL
     default_from_api: true
+  - !ruby/object:Api::Type::Boolean
+    name: 'enableDropProtection'
+    default_value: false
+    description: |
+      Whether drop protection is enabled for this database. Defaults to false.
+      Drop protection is different from
+      the "deletion_protection" attribute in the following ways:
+      (1) "deletion_protection" only protects the database from deletions in Terraform.
+      whereas setting “enableDropProtection” to true protects the database from deletions in all interfaces.
+      (2) Setting "enableDropProtection" to true also prevents the deletion of the parent instance containing the database.
+      "deletion_protection" attribute does not provide protection against the deletion of the parent instance.

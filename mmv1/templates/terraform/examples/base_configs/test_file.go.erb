@@ -1,6 +1,10 @@
+<% if hc_downstream -%>
+<%= lines(hashicorp_copyright_header(:go, pwd)) -%>
+<% end -%>
+
 <%= lines(autogen_notice(:go, pwd)) -%>
 
-package google
+package <%= object.__product.name .downcase -%>_test
 
 import (
 <% unless object.skip_delete -%>
@@ -11,33 +15,40 @@ import (
 <% end -%>
   "testing"
 
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+  "github.com/hashicorp/terraform-plugin-testing/helper/resource"
 <% unless object.skip_delete -%>
-  "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+  "github.com/hashicorp/terraform-plugin-testing/terraform"
 <% end -%>
+
+  "<%= import_path() -%>/acctest"
+  "<%= import_path() -%>/envvar"
+  "<%= import_path() -%>/tpgresource"
+  transport_tpg "<%= import_path() -%>/transport"
 )
 <%
 
-resource_name = product_ns + object.name
-tf_product = (object.__product.legacy_name || product_ns).underscore
+resource_name = object.__product.name  + object.name
+tf_product = (object.__product.legacy_name || object.__product.name ).underscore
 tf_resource = object.name.underscore
 terraform_name = object.legacy_name || "google_#{tf_product}_#{tf_resource}"
 -%>
 <%
-# @api.version_obj_or_closest(version) is slightly wrong; we want the _object_ version or the generation version.
-# Ultimately this will not matter though, since the API default should always be less than the object default.
+# Check if the example has a version specified and that version is lower than the compiler's version
 object.examples
   .reject(&:skip_test)
-  .reject { |e| @api.version_obj_or_closest(version) < @api.version_obj_or_closest(e.min_version) }
+  .reject { |e| !e.min_version.nil? && Api::Product::Version::ORDER.index(@target_version_name) < Api::Product::Version::ORDER.index(e.min_version) }
   .each do |example|
 
 	# {Compute}{Address}_{addressBasic}
     test_slug = "#{resource_name}_#{example.name.camelize(:lower)}Example"
 
     ignore_read = object.all_user_properties
-      .select{|p| p.url_param_only || p.ignore_read || p.is_a?(Api::Type::ResourceRef) }
+      .select{|p| p.url_param_only || p.is_a?(Api::Type::ResourceRef)}
       .map { |p| p.name.underscore }
       .concat(example.ignore_read_extra)
+      .concat(object.ignore_read_labels_fields(object.properties_with_excluded))
+      .concat(object.ignore_read_fields(object.all_user_properties))
+      .sort()
 
     # Use explicit version for the example if given.
     # Otherwise, use object version.
@@ -49,32 +60,33 @@ object.examples
 
 func TestAcc<%= test_slug -%>(t *testing.T) {
 <% if example.skip_vcr -%>
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 <% end -%>
   t.Parallel()
 
 	context := map[string]interface{} {
 <%= lines(indent(compile(pwd + '/templates/terraform/env_var_context.go.erb'), 4)) -%>
 	<% unless example.test_vars_overrides.nil? -%>
-	<% example.test_vars_overrides.each do |var_name, override| -%>
+	<% example.test_vars_overrides.sort.each do |var_name, override| -%>
 			"<%= var_name %>": <%= override %>,
 	<% end -%>
 	<% end -%>
-			"random_suffix": RandString(t, 10),
+			"random_suffix": acctest.RandString(t, 10),
 	}
 
 <% versioned_provider = !example_version.nil? && example_version != 'ga' -%>
-	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		<% unless versioned_provider -%>
-		Providers: TestAccProviders,
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		<% else -%>
-		Providers: TestAccProvidersOiCS,
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		<% end -%>
-		<% if example.pull_external -%>
+		<% if !example.external_providers.nil? && !example.external_providers.empty? -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
-			"time": {},
+		<% example.external_providers.each do |provider| -%>
+			"<%= provider %>": {},
+		<% end -%>
 		},
 		<% end -%>
 		<% unless object.skip_delete -%>
@@ -117,9 +129,9 @@ func testAccCheck<%= resource_name -%>DestroyProducer(t *testing.T) func(s *terr
 		<% if object.custom_code.test_check_destroy -%>
 	<%= lines(compile(pwd + '/' + object.custom_code.test_check_destroy)) -%>
 		<% else -%>
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 
-		url, err := replaceVarsForTest(config, rs, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
+		url, err := tpgresource.ReplaceVarsForTest(config, rs, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
 		if err != nil {
 			return err
 		}
@@ -130,7 +142,19 @@ func testAccCheck<%= resource_name -%>DestroyProducer(t *testing.T) func(s *terr
 			billingProject = config.BillingProject
 		}
 
-		_, err = SendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, url, config.UserAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+                _, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config: config,
+			Method: "<%= object.read_verb.to_s.upcase -%>",
+			Project: billingProject,
+			RawURL: url,
+			UserAgent: config.UserAgent,
+			<% if object.error_retry_predicates -%>
+			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_retry_predicates.join(',') -%>},
+			<% end -%>
+			<% if object.error_abort_predicates -%>
+			ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_abort_predicates.join(',') -%>},
+			<% end -%>
+		})
 		if err == nil {
 				return fmt.Errorf("<%= resource_name -%> still exists at %s", url)
 			}

@@ -26,35 +26,42 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Use with Kubernetes': 'https://cloud.google.com/filestore/docs/accessing-fileshares'
     'Copying Data In/Out': 'https://cloud.google.com/filestore/docs/copying-data'
   api: 'https://cloud.google.com/filestore/docs/reference/rest/v1beta1/projects.locations.instances/create'
-error_retry_predicates: ["isNotFilestoreQuotaError"]
+error_abort_predicates: ['transport_tpg.Is429QuotaError']
 autogen_async: true
 schema_version: 1
+state_upgraders: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "filestore_instance_basic"
-    primary_resource_id: "instance"
+    name: 'filestore_instance_basic'
+    primary_resource_id: 'instance'
     vars:
-      instance_name: "test-instance"
+      instance_name: 'test-instance'
   - !ruby/object:Provider::Terraform::Examples
-    name: "filestore_instance_full"
-    primary_resource_id: "instance"
+    name: 'filestore_instance_full'
+    primary_resource_id: 'instance'
     vars:
-      instance_name: "test-instance"
+      instance_name: 'test-instance'
   - !ruby/object:Provider::Terraform::Examples
-    name: "filestore_instance_enterprise"
-    primary_resource_id: "instance"
+    name: 'filestore_instance_protocol'
+    primary_resource_id: 'instance'
+    min_version: beta
+    vars:
+      instance_name: 'test-instance'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'filestore_instance_enterprise'
+    primary_resource_id: 'instance'
+    # https://github.com/GoogleCloudPlatform/magic-modules/pull/5875#discussion_r844285335
     skip_test: true
     vars:
-      instance_name: "test-instance"
+      instance_name: 'test-instance'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/filestore.erb
   pre_create: templates/terraform/pre_create/filestore_instance.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'zone'
     description: |
       The name of the Filestore zone of the instance.
-    deprecation_message: "Deprecated in favor of location."
+    deprecation_message: '`zone` is deprecated and will be removed in a future major release. Use `location` instead.'
     exactly_one_of:
       - 'zone'
       - 'location'
@@ -80,24 +87,11 @@ properties:
       The resource name of the instance.
     required: true
     url_param_only: true
-    pattern: projects/{{project}}/locations/{{location}}/instances/{{name}}
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
       A description of the instance.
-  - !ruby/object:Api::Type::String
-    name: 'state'
-    description: |
-      The instance state - short description.
-    output: true
-    exclude: true
-  - !ruby/object:Api::Type::String
-    name: 'statusMessage'
-    description: |
-      Additional information about the instance state, if available.
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::Time
     name: 'createTime'
     description: Creation timestamp in RFC3339 text format.
@@ -106,10 +100,24 @@ properties:
     name: 'tier'
     description: |
       The service tier of the instance.
-      Possible values include: STANDARD, PREMIUM, BASIC_HDD, BASIC_SSD, HIGH_SCALE_SSD and ENTERPRISE
+      Possible values include: STANDARD, PREMIUM, BASIC_HDD, BASIC_SSD, HIGH_SCALE_SSD, ZONAL, REGIONAL and ENTERPRISE
     required: true
     immutable: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::Enum
+    name: 'protocol'
+    description: |
+      Either NFSv3, for using NFS version 3 as file sharing protocol,
+      or NFSv4.1, for using NFS version 4.1 as file sharing protocol.
+      NFSv4.1 can be used with HIGH_SCALE_SSD, ZONAL, REGIONAL and ENTERPRISE.
+      The default is NFSv3.
+    default_value: :NFS_V3
+    min_version: 'beta'
+    immutable: true
+    values:
+      - :NFS_V3
+      - :NFS_V4_1
+    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Resource labels to represent user-provided metadata.
@@ -136,11 +144,11 @@ properties:
           required: true
         - !ruby/object:Api::Type::String
           name: 'sourceBackup'
-          output: true
           description: |
             The resource name of the backup, in the format
             projects/{projectId}/locations/{locationId}/backups/{backupId},
             that this file share has been restored from.
+          immutable: true
         - !ruby/object:Api::Type::Array
           name: 'nfsExportOptions'
           description: |
@@ -202,7 +210,7 @@ properties:
             instance is connected.
           required: true
           immutable: true
-          diff_suppress_func: 'compareSelfLinkOrResourceName'
+          diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
         - !ruby/object:Api::Type::Array
           name: 'modes'
           description: |
@@ -224,6 +232,10 @@ properties:
             A /29 CIDR block that identifies the range of IP
             addresses reserved for this instance.
           default_from_api: true
+          # When using connectMode=PRIVATE_SERVICE_ACCESS, the returned value
+          # won't match the sent value as the returned value is an IP range
+          # from the provided named range.
+          custom_flatten: templates/terraform/custom_flatten/filestore_instance_networks_reserved_ip_range.go.erb
         - !ruby/object:Api::Type::Array
           name: 'ipAddresses'
           description: |

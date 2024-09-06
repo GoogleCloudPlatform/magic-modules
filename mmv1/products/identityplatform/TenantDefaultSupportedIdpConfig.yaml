@@ -24,12 +24,15 @@ description: |
   You must enable the
   [Google Identity Platform](https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity) in
   the marketplace prior to using this resource.
-import_format: ["projects/{{project}}/tenants/{{tenant}}/defaultSupportedIdpConfigs/{{idp_id}}"]
+import_format:
+  [
+    'projects/{{project}}/tenants/{{tenant}}/defaultSupportedIdpConfigs/{{idp_id}}',
+  ]
 skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "identity_platform_tenant_default_supported_idp_config_basic"
-    primary_resource_id: "idp_config"
+    name: 'identity_platform_tenant_default_supported_idp_config_basic'
+    primary_resource_id: 'idp_config'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'

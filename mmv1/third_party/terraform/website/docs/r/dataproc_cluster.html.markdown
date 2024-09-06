@@ -4,7 +4,7 @@ description: |-
   Manages a Cloud Dataproc cluster resource.
 ---
 
-# google\_dataproc\_cluster
+# google_dataproc_cluster
 
 Manages a Cloud Dataproc cluster resource within GCP.
 
@@ -14,7 +14,7 @@ Manages a Cloud Dataproc cluster resource within GCP.
 
 
 !> **Warning:** Due to limitations of the API, all arguments except
-`labels`,`cluster_config.worker_config.num_instances` and `cluster_config.preemptible_worker_config.num_instances` are non-updatable. Changing others will cause recreation of the
+`labels`,`cluster_config.worker_config.num_instances` and `cluster_config.preemptible_worker_config.num_instances` are non-updatable. Changing `cluster_config.worker_config.min_num_instances` will be ignored. Changing others will cause recreation of the
 whole cluster!
 
 ## Example Usage - Basic
@@ -129,7 +129,14 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
 * `region` - (Optional) The region in which the cluster and associated nodes will be created in.
    Defaults to `global`.
 
-* `labels` - (Optional, Computed) The list of labels (key/value pairs) to be applied to
+* `labels` - (Optional) The list of labels (key/value pairs) configured on the resource through Terraform and to be applied to
+   instances in the cluster.
+   **Note**: This field is non-authoritative, and will only manage the labels present in your configuration. Please refer to the field `effective_labels` for all of the labels present on the resource.
+
+* `terraform_labels` -
+  The combination of labels configured directly on the resource and default labels configured on the provider.
+
+* `effective_labels` - (Computed) The list of labels (key/value pairs) to be applied to
    instances in the cluster. GCP generates some itself including `goog-dataproc-cluster-name`
    which is the name of the cluster.
 
@@ -374,6 +381,9 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
 * `dataproc_metric_config` (Optional) The Compute Engine accelerator (GPU) configuration for these instances. Can be specified multiple times.
    Structure [defined below](#nested_dataproc_metric_config).
 
+* `auxiliary_node_groups` (Optional) A Dataproc NodeGroup resource is a group of Dataproc cluster nodes that execute an assigned role. 
+   Structure [defined below](#nested_auxiliary_node_groups).
+
 * `metastore_config` (Optional) The config setting for metastore service with the cluster.
    Structure [defined below](#nested_metastore_config).
 - - -
@@ -512,6 +522,11 @@ cluster_config {
 	* `num_local_ssds` - (Optional) The amount of local SSD disks that will be
 	attached to each master cluster node. Defaults to 0.
 
+	* `local_ssd_interface` - Optional. Interface type of local SSDs (default is "scsi").
+	Valid values: "scsi" (Small Computer System Interface), "nvme" (Non-Volatile
+	Memory Express). See
+	[local SSD performance](https://cloud.google.com/compute/docs/disks/local-ssd#performance).
+
 * `accelerators` (Optional) The Compute Engine accelerator (GPU) configuration for these instances. Can be specified multiple times.
 
     * `accelerator_type` - (Required) The short name of the accelerator type to expose to this instance. For example, `nvidia-tesla-k80`.
@@ -532,7 +547,7 @@ cluster_config {
     num_instances    = 3
     machine_type     = "e2-medium"
     min_cpu_platform = "Intel Skylake"
-
+    min_num_instance = 2
     disk_config {
       boot_disk_type    = "pd-standard"
       boot_disk_size_gb = 30
@@ -575,6 +590,8 @@ cluster_config {
 * `image_uri` (Optional) The URI for the image to use for this worker.  See [the guide](https://cloud.google.com/dataproc/docs/guides/dataproc-images)
     for more information.
 
+* `min_num_instances` (Optional) The minimum number of primary worker instances to create.  If `min_num_instances` is set, cluster creation will succeed if the number of primary workers created is at least equal to the `min_num_instances` number.
+
 * `accelerators` (Optional) The Compute Engine accelerator configuration for these instances. Can be specified multiple times.
 
     * `accelerator_type` - (Required) The short name of the accelerator type to expose to this instance. For example, `nvidia-tesla-k80`.
@@ -598,6 +615,16 @@ cluster_config {
       boot_disk_type    = "pd-standard"
       boot_disk_size_gb = 30
       num_local_ssds    = 1
+    }
+    instance_flexibility_policy {
+      instance_selection_list {
+        machine_types = ["n2-standard-2","n1-standard-2"]
+        rank          = 1
+      }
+      instance_selection_list {
+        machine_types = ["n2d-standard-2"]
+        rank          = 3
+      }
     }
   }
 }
@@ -629,6 +656,13 @@ will be set for you based on whatever was set for the `worker_config.machine_typ
 	* `num_local_ssds` - (Optional) The amount of local SSD disks that will be
 	attached to each preemptible worker node. Defaults to 0.
 
+* `instance_flexibility_policy` (Optional) Instance flexibility Policy allowing a mixture of VM shapes and provisioning models.
+
+    * `instance_selection_list` - (Optional) List of instance selection options that the group will use when creating new VMs.
+      * `machine_types` - (Optional) Full machine-type names, e.g. `"n1-standard-16"`.
+
+      * `rank` - (Optional) Preference of this instance selection. A lower number means higher preference. Dataproc will first try to create a VM based on the machine-type with priority rank and fallback to next rank based on availability. Machine types and instance selections with the same priority have the same preference.
+
 - - -
 
 <a name="nested_software_config"></a>The `cluster_config.software_config` block supports:
@@ -657,19 +691,7 @@ cluster_config {
    a cluster. For a list of valid properties please see
   [Cluster properties](https://cloud.google.com/dataproc/docs/concepts/cluster-properties)
 
-* `optional_components` - (Optional) The set of optional components to activate on the cluster.
-    Accepted values are:
-    * ANACONDA
-    * DRUID
-    * FLINK
-    * HBASE
-    * HIVE_WEBHCAT
-    * JUPYTER
-    * PRESTO
-    * RANGER
-    * SOLR
-    * ZEPPELIN
-    * ZOOKEEPER
+* `optional_components` - (Optional) The set of optional components to activate on the cluster. See [Available Optional Components](https://cloud.google.com/dataproc/docs/concepts/components/overview#available_optional_components).
 
 - - -
 
@@ -814,6 +836,76 @@ dataproc_metric_config {
 
 - - -
 
+<a name="nested_auxiliary_node_groups"></a>The `auxiliary_node_groups` block supports:
+
+```hcl
+auxiliary_node_groups{
+  node_group {
+    roles = ["DRIVER"]
+    node_group_config{
+      num_instances=2
+      machine_type="n1-standard-2"
+      min_cpu_platform = "AMD Rome"
+      disk_config {
+        boot_disk_size_gb = 35
+        boot_disk_type = "pd-standard"
+        num_local_ssds = 1
+      }
+      accelerators {
+        accelerator_count = 1
+        accelerator_type  = "nvidia-tesla-t4"
+      }
+    }
+  }
+}
+```
+
+
+* `node_group` - (Required) Node group configuration.
+
+  * `roles` - (Required) Node group roles. 
+     One of `"DRIVER"`.
+
+  * `name` - (Optional) The Node group resource name.
+
+  * `node_group_config` - (Optional) The node group instance group configuration.
+
+    * `num_instances`- (Optional, Computed) Specifies the number of master nodes to create.
+       Please set a number greater than 0. Node Group must have at least 1 instance.
+   
+    * `machine_type` - (Optional, Computed) The name of a Google Compute Engine machine type
+       to create for the node group. If not specified, GCP will default to a predetermined 
+       computed value (currently `n1-standard-4`).
+       
+    * `min_cpu_platform` - (Optional, Computed) The name of a minimum generation of CPU family
+       for the node group. If not specified, GCP will default to a predetermined computed value
+       for each zone. See [the guide](https://cloud.google.com/compute/docs/instances/specify-min-cpu-platform)
+       for details about which CPU families are available (and defaulted) for each zone.
+       
+    * `disk_config` (Optional) Disk Config
+    
+      * `boot_disk_type` - (Optional) The disk type of the primary disk attached to each node.
+         One of `"pd-ssd"` or `"pd-standard"`. Defaults to `"pd-standard"`.
+      
+      * `boot_disk_size_gb` - (Optional, Computed) Size of the primary disk attached to each node, specified
+         in GB. The primary disk contains the boot volume and system libraries, and the
+         smallest allowed disk size is 10GB. GCP will default to a predetermined
+         computed value if not set (currently 500GB). Note: If SSDs are not
+         attached, it also contains the HDFS data blocks and Hadoop working directories.
+         
+      * `num_local_ssds` - (Optional) The amount of local SSD disks that will be attached to each master cluster node. 
+         Defaults to 0.
+
+    * `accelerators` (Optional) The Compute Engine accelerator (GPU) configuration for these instances. Can be specified 
+       multiple times.
+       
+      * `accelerator_type` - (Required) The short name of the accelerator type to expose to this instance. For example, `nvidia-tesla-k80`.
+      
+      * `accelerator_count` - (Required) The number of the accelerator cards of this type exposed to this instance. Often restricted to one of `1`, `2`, `4`, or `8`.
+
+
+- - -
+
 <a name="nested_lifecycle_config"></a>The `lifecycle_config` block supports:
 
 ```hcl
@@ -839,7 +931,7 @@ cluster_config {
 ```hcl
 cluster_config {
   endpoint_config {
-    enable_http_port_access = "true"
+    enable_http_port_access = true
   }
 }
 ```

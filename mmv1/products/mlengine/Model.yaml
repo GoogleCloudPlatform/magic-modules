@@ -17,6 +17,8 @@ base_url: projects/{{project}}/models
 self_link: projects/{{project}}/models/{{name}}
 # This resources is not updatable (outside of versions, which is a version-level method)
 immutable: true
+schema_version: 1
+state_upgraders: true
 async: !ruby/object:Api::OpAsync
   actions: ['delete']
   operation: !ruby/object:Api::OpAsync::Operation
@@ -47,13 +49,13 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "ml_model_basic"
-    primary_resource_id: "default"
+    name: 'ml_model_basic'
+    primary_resource_id: 'default'
     vars:
       model_name: 'default'
   - !ruby/object:Provider::Terraform::Examples
-    name: "ml_model_full"
-    primary_resource_id: "default"
+    name: 'ml_model_full'
+    primary_resource_id: 'default'
     vars:
       model_name: 'default'
 properties:
@@ -78,8 +80,8 @@ properties:
         name: 'name'
         required: true
         description: The name specified for the version when it was created.
-    # Even though only one region is supported, keeping this as an array
-    # to future-proof it.
+  # Even though only one region is supported, keeping this as an array
+  # to future-proof it.
   - !ruby/object:Api::Type::Array
     name: 'regions'
     description: |
@@ -89,11 +91,13 @@ properties:
     item_type: Api::Type::String
   - !ruby/object:Api::Type::Boolean
     name: 'onlinePredictionLogging'
-    description: If true, online prediction access logs are sent to StackDriver Logging.
+    description:
+      If true, online prediction access logs are sent to StackDriver Logging.
   - !ruby/object:Api::Type::Boolean
     name: 'onlinePredictionConsoleLogging'
-    description: If true, online prediction nodes send stderr and stdout streams to
+    description:
+      If true, online prediction nodes send stderr and stdout streams to
       Stackdriver Logging
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: One or more labels that you can add, to organize your models.

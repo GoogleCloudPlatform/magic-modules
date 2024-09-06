@@ -25,10 +25,10 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/ai-platform/notebooks/docs/reference/rest'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "notebook_environment_basic"
-    primary_resource_id: "environment"
+    name: 'notebook_environment_basic'
+    primary_resource_id: 'environment'
     vars:
-      environment_name: "notebooks-environment"
+      environment_name: 'notebooks-environment'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -38,7 +38,6 @@ properties:
     required: true
     immutable: true
     url_param_only: true
-    pattern: projects/{{project}}/locations/{{location}}/environments/{{name}}
   - !ruby/object:Api::Type::ResourceRef
     name: 'location'
     description: 'A reference to the zone where the machine resides.'
@@ -46,7 +45,7 @@ properties:
     imports: 'name'
     required: true
     url_param_only: true
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String

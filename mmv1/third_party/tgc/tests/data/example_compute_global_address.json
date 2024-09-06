@@ -1,0 +1,20 @@
+[
+  {
+    "name": "//compute.googleapis.com/projects/{{.Provider.project}}/global/addresses/global-appserver-ip",
+    "asset_type": "compute.googleapis.com/GlobalAddress",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "beta",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+      "discovery_name": "GlobalAddress",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "addressType": "EXTERNAL",
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
+        "name": "global-appserver-ip"
+      }
+    }
+  }
+]

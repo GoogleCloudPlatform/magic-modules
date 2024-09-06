@@ -41,7 +41,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -55,20 +55,22 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/compute_network_endpoint_group.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "network_endpoint_group"
-    primary_resource_id: "neg"
+    name: 'network_endpoint_group'
+    primary_resource_id: 'neg'
     vars:
-      neg_name: "my-lb-neg"
-      network_name: "neg-network"
-      subnetwork_name: "neg-subnetwork"
+      neg_name: 'my-lb-neg'
+      network_name: 'neg-network'
+      subnetwork_name: 'neg-subnetwork'
   - !ruby/object:Provider::Terraform::Examples
-    name: "network_endpoint_group_non_gcp"
-    primary_resource_id: "neg"
+    name: 'network_endpoint_group_non_gcp'
+    primary_resource_id: 'neg'
     vars:
-      neg_name: "my-lb-neg"
-      network_name: "neg-network"
+      neg_name: 'my-lb-neg'
+      network_name: 'neg-network'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'zone'
@@ -78,12 +80,9 @@ parameters:
       Zone where the network endpoint group is located.
     required: false
     default_from_api: true
+    ignore_read: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'The unique identifier for the resource.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
@@ -96,7 +95,7 @@ properties:
       character, which cannot be a dash.
     required: true
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateGCEName'
+      function: 'verify.ValidateGCEName'
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
@@ -113,11 +112,15 @@ properties:
       INTERNAL_MANAGED, and INTERNAL_SELF_MANAGED and 2) support the RATE or
       CONNECTION balancing modes.
 
-      Possible values include: GCE_VM_IP, GCE_VM_IP_PORT, and NON_GCP_PRIVATE_IP_PORT.
+      Possible values include: GCE_VM_IP, GCE_VM_IP_PORT, NON_GCP_PRIVATE_IP_PORT, INTERNET_IP_PORT, INTERNET_FQDN_PORT, SERVERLESS, and PRIVATE_SERVICE_CONNECT.
     values:
       - :GCE_VM_IP
       - :GCE_VM_IP_PORT
       - :NON_GCP_PRIVATE_IP_PORT
+      - :INTERNET_IP_PORT
+      - :INTERNET_FQDN_PORT
+      - :SERVERLESS
+      - :PRIVATE_SERVICE_CONNECT
     default_value: :GCE_VM_IP_PORT
   - !ruby/object:Api::Type::Integer
     name: 'size'
@@ -131,6 +134,7 @@ properties:
       The network to which all network endpoints in the NEG belong.
       Uses "default" project network if unspecified.
     required: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::ResourceRef
     name: 'subnetwork'
     resource: 'Subnetwork'
@@ -138,6 +142,7 @@ properties:
     description: |
       Optional subnetwork to which all network endpoints in the NEG belong.
     diff_suppress_func: 'compareOptionalSubnet'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Integer
     name: 'defaultPort'
     description: |

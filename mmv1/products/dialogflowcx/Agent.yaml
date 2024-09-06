@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Resource
 name: 'Agent'
-base_url: "projects/{{project}}/locations/{{location}}/agents"
+base_url: 'projects/{{project}}/locations/{{location}}/agents'
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -27,12 +27,15 @@ timeouts: !ruby/object:Api::Timeouts
   update_minutes: 40
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "dialogflowcx_agent_full"
-    primary_resource_id: "full_agent"
+    name: 'dialogflowcx_agent_full'
+    primary_resource_id: 'full_agent'
     vars:
-      agent_name: "dialogflowcx-agent"
-id_format: "projects/{{project}}/locations/{{location}}/agents/{{name}}"
-import_format: ["projects/{{project}}/locations/{{location}}/agents/{{name}}"]
+      agent_name: 'dialogflowcx-agent'
+      bucket_name: 'dialogflowcx-bucket'
+    ignore_read_extra:
+      - git_integration_settings.0.github_settings.0.access_token
+id_format: 'projects/{{project}}/locations/{{location}}/agents/{{name}}'
+import_format: ['projects/{{project}}/locations/{{location}}/agents/{{name}}']
 skip_sweeper: true
 properties:
   - !ruby/object:Api::Type::String
@@ -111,3 +114,99 @@ properties:
     name: 'enableSpellCorrection'
     description: |
       Indicates if automatic spell correction is enabled in detect intent requests.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'advancedSettings'
+    description: |
+      Hierarchical advanced settings for this agent. The settings exposed at the lower level overrides the settings exposed at the higher level.
+      Hierarchy: Agent->Flow->Page->Fulfillment/Parameter.
+    default_from_api: true
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: 'audioExportGcsDestination'
+        description: |
+          If present, incoming audio is exported by Dialogflow to the configured Google Cloud Storage destination. Exposed at the following levels:
+          * Agent level
+          * Flow level
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'uri'
+            description: |
+              The Google Cloud Storage URI for the exported objects. Whether a full object name, or just a prefix, its usage depends on the Dialogflow operation.
+              Format: gs://bucket/object-name-or-prefix
+      - !ruby/object:Api::Type::NestedObject
+        name: 'dtmfSettings'
+        description: |
+          Define behaviors for DTMF (dual tone multi frequency). DTMF settings does not override each other. DTMF settings set at different levels define DTMF detections running in parallel. Exposed at the following levels:
+          * Agent level
+          * Flow level
+          * Page level
+          * Parameter level
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'enabled'
+            description: |
+              If true, incoming audio is processed for DTMF (dual tone multi frequency) events. For example, if the caller presses a button on their telephone keypad and DTMF processing is enabled, Dialogflow will detect the event (e.g. a "3" was pressed) in the incoming audio and pass the event to the bot to drive business logic (e.g. when 3 is pressed, return the account balance).
+          - !ruby/object:Api::Type::Integer
+            name: 'maxDigits'
+            description: |
+              Max length of DTMF digits.
+          - !ruby/object:Api::Type::String
+            name: 'finishDigit'
+            description: |
+              The digit that terminates a DTMF digit sequence.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'gitIntegrationSettings'
+    description: |
+      Git integration settings for this agent.
+    allow_empty_object: true
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: 'githubSettings'
+        description: |
+          Settings of integration with GitHub.
+        custom_flatten: 'templates/terraform/custom_flatten/dialogflowcx_agent_git_integration_settings_github_settings.go.erb'  # accessToken comes from config, no response
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'displayName'
+            description: |
+              The unique repository display name for the GitHub repository.
+          - !ruby/object:Api::Type::String
+            name: 'repositoryUri'
+            description: |
+              The GitHub repository URI related to the agent.
+          - !ruby/object:Api::Type::String
+            name: 'trackingBranch'
+            description: |
+              The branch of the GitHub repository tracked for this agent.
+          - !ruby/object:Api::Type::String
+            name: 'accessToken'
+            description: |
+              The access token used to authenticate the access to the GitHub repository.
+            sensitive: true
+            ignore_read: true
+          - !ruby/object:Api::Type::Array
+            name: 'branches'
+            description: |
+              A list of branches configured to be used from Dialogflow.
+            item_type: Api::Type::String
+  - !ruby/object:Api::Type::NestedObject
+    name: 'textToSpeechSettings'
+    description: |
+      Settings related to speech synthesizing.
+    allow_empty_object: true
+    properties:
+      # This is a map of language -> some settings. List of languages is large and constantly expanding so we use a string instead of a NestedObject with 100 properties.
+      - !ruby/object:Api::Type::String
+        name: 'synthesizeSpeechConfigs'
+        description: |
+          Configuration of how speech should be synthesized, mapping from [language](https://cloud.google.com/dialogflow/cx/docs/reference/language) to [SynthesizeSpeechConfig](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents#synthesizespeechconfig).
+          These settings affect:
+          * The phone gateway synthesize configuration set via Agent.text_to_speech_settings.
+          * How speech is synthesized when invoking session APIs. `Agent.text_to_speech_settings` only applies if `OutputAudioConfig.synthesize_speech_config` is not specified.
+        custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
+        state_func:
+          'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
+          return s }'
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.StringIsJSON'

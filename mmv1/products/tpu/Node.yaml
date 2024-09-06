@@ -26,20 +26,34 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "tpu_node_basic"
-    primary_resource_id: "tpu"
+    name: 'tpu_node_basic'
+    primary_resource_id: 'tpu'
     vars:
-      node_name: "test-tpu"
+      node_name: 'test-tpu'
   - !ruby/object:Provider::Terraform::Examples
-    name: "tpu_node_full"
-    primary_resource_id: "tpu"
+    name: 'tpu_node_full'
+    primary_resource_id: 'tpu'
     vars:
-      node_name: "test-tpu"
+      node_name: 'test-tpu'
+      global_address_name: 'my-global-address'
+      network_name: 'tpu-node-network'
+    skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'tpu_node_full_test'
+    primary_resource_id: 'tpu'
+    vars:
+      node_name: 'test-tpu'
+      network_name: 'tpu-node-network'
+    test_vars_overrides:
+      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
+    skip_docs: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: 'templates/terraform/constants/tpu_node.erb'
-  resource_definition: 'templates/terraform/resource_definition/tpu_node.erb'
+custom_diff: [
+  'tpuNodeCustomizeDiff',
+]
 parameters:
-                                   # TODO: resourceref?
+  # TODO: resourceref?
   - !ruby/object:Api::Type::String
     name: 'zone'
     description: |
@@ -82,7 +96,7 @@ properties:
       this API has been activated. If none is provided, "default" will be
       used.
     default_from_api: true
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::String
     name: 'cidrBlock'
     immutable: true
@@ -150,8 +164,7 @@ properties:
           output: true
           description: |
             The port of this network endpoint.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     immutable: true
     description: Resource labels to represent user provided metadata.
-

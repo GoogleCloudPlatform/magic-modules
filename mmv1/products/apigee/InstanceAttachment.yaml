@@ -12,75 +12,83 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-  name: 'InstanceAttachment'
-  base_url: '{{instance_id}}/attachments'
-  create_url: '{{instance_id}}/attachments'
-  delete_url: '{{instance_id}}/attachments/{{name}}'
-  self_link: '{{instance_id}}/attachments/{{name}}'
-  async: !ruby/object:Api::OpAsync
-    operation: !ruby/object:Api::OpAsync::Operation
-      path: 'name'
-      base_url: '{{op_id}}'
-      wait_ms: 1000
-    result: !ruby/object:Api::OpAsync::Result
-      path: 'response'
-      resource_inside_response: true
-    status: !ruby/object:Api::OpAsync::Status
-      path: 'done'
-      complete: true
-      allowed:
-        - true
-        - false
-    error: !ruby/object:Api::OpAsync::Error
-      path: 'error'
-      message: 'message'
-  immutable: true
-  description: |
-    An `Instance attachment` in Apigee.
-  references: !ruby/object:Api::Resource::ReferenceLinks
-    guides:
-      'Creating an environment': 'https://cloud.google.com/apigee/docs/api-platform/get-started/create-environment'
-    api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.attachments/create'
-  
-  autogen_async: true
-  import_format: ["{{instance_id}}/attachments/{{name}}", "{{instance_id}}/{{name}}"]
-  mutex: "apigeeInstanceAttachments"
-  examples:
-    - !ruby/object:Provider::Terraform::Examples
-      name: "apigee_instance_attachment_basic"
-      skip_test: true
-        # This is a more verbose version of the above that creates all
-        # the resources needed for the acceptance test.
-    - !ruby/object:Provider::Terraform::Examples
-      name: "apigee_instance_attachment_basic_test"
-      primary_resource_id: "apigee_instance_attachment"
-      test_env_vars:
-        org_id: :ORG_ID
-        billing_account: :BILLING_ACCT
-      skip_docs: true
-        # Resource creation race
-      skip_vcr: true
-  timeouts: !ruby/object:Api::Timeouts
-    insert_minutes: 30
-    delete_minutes: 30
-  custom_code: !ruby/object:Provider::Terraform::CustomCode
-    custom_import: templates/terraform/custom_import/apigee_instance_attachment.go.erb
-  parameters:
-    - !ruby/object:Api::Type::String
-      name: 'instanceId'
-      description: |
-        The Apigee instance associated with the Apigee environment,
-        in the format `organisations/{{org_name}}/instances/{{instance_name}}`.
-      required: true
-      url_param_only: true
-  properties:
-    - !ruby/object:Api::Type::String
-      name: 'environment'
-      description: |
-        The resource ID of the environment.
-      required: true
-    - !ruby/object:Api::Type::String
-      name: 'name'
-      description: |
-        The name of the newly created  attachment (output parameter).
-      output: true
+name: 'InstanceAttachment'
+base_url: '{{instance_id}}/attachments'
+create_url: '{{instance_id}}/attachments'
+delete_url: '{{instance_id}}/attachments/{{name}}'
+self_link: '{{instance_id}}/attachments/{{name}}'
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
+immutable: true
+description: |
+  An `Instance attachment` in Apigee.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Creating an environment': 'https://cloud.google.com/apigee/docs/api-platform/get-started/create-environment'
+  api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.attachments/create'
+# Skipping the sweeper due to the non-standard instance_id
+skip_sweeper: true
+autogen_async: true
+import_format:
+  ['{{instance_id}}/attachments/{{name}}', '{{instance_id}}/{{name}}']
+mutex: 'apigeeInstanceAttachments'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'apigee_instance_attachment_basic'
+    vars:
+      project_id: 'my-project'
+      instance_name: 'my-instance-name'
+      environment_name: 'my-environment-name'
+    skip_test:
+      true
+      # This is a more verbose version of the above that creates all
+      # the resources needed for the acceptance test.
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'apigee_instance_attachment_basic_test'
+    primary_resource_id: 'apigee_instance_attachment'
+    test_env_vars:
+      org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
+    skip_docs:
+      true
+      # Resource creation race
+    skip_vcr: true
+timeouts: !ruby/object:Api::Timeouts
+  insert_minutes: 30
+  delete_minutes: 30
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_import: templates/terraform/custom_import/apigee_instance_attachment.go.erb
+parameters:
+  - !ruby/object:Api::Type::String
+    name: 'instanceId'
+    description: |
+      The Apigee instance associated with the Apigee environment,
+      in the format `organizations/{{org_name}}/instances/{{instance_name}}`.
+    required: true
+    url_param_only: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'environment'
+    description: |
+      The resource ID of the environment.
+    required: true
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: |
+      The name of the newly created  attachment (output parameter).
+    output: true

@@ -25,20 +25,23 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   parent_resource_attribute: 'table_id'
   fetch_iam_policy_verb: :POST
   allowed_iam_role: 'roles/bigquery.dataOwner'
-  iam_conditions_request_type: :REQUEST_BODY
   iam_policy_version: '1'
-id_format: "{{table_id}}"
-import_format: ["projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}",
-  "{{table_id}}"]
+id_format: '{{table_id}}'
+import_format:
+  [
+    'projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}',
+    '{{table_id}}',
+  ]
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_bigquery_table"
-    primary_resource_id: "test"
-    primary_resource_name: "fmt.Sprintf(\"tf_test_dataset_id%s\", context[\"random_suffix\"\
+    name: 'bigquery_bigquery_table'
+    primary_resource_id: 'test'
+    primary_resource_name: "fmt.Sprintf(\"tf_test_dataset_id%s\",
+      context[\"random_suffix\"\
       ]), fmt.Sprintf(\"tf_test_table_id%s\", context[\"random_suffix\"])"
     vars:
-      dataset_id: "dataset_id"
-      table_id: "table_id"
+      dataset_id: 'dataset_id'
+      table_id: 'table_id'
 parameters:
   # TODO(alexstephen): Remove once we have support for placing
   # nested object fields in URL
@@ -84,7 +87,7 @@ properties:
     name: 'id'
     description: 'An opaque ID uniquely identifying the table.'
     output: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       The labels associated with this dataset. You can use these to
@@ -171,7 +174,10 @@ properties:
         name: 'expirationMs'
         description: |
           Number of milliseconds for which to keep the storage for a
-          partition.
+          partition. If unspecified when the table is created in a dataset
+          that has `defaultPartitionExpirationMs`, it will inherit
+          the value of `defaultPartitionExpirationMs` from the dataset.
+          To specify a unlimited expiration, set the value to 0.
       - !ruby/object:Api::Type::String
         name: 'field'
         description: |
@@ -313,6 +319,9 @@ properties:
           - :DATASTORE_BACKUP
           - :BIGTABLE
           - :ORC
+          - :PARQUET
+          - :ICEBERG
+          - :DELTA_LAKE
       # TODO: Investigate if this is feasible as a ResourceRef
       # This is a very complicated ResourceRef (one-to-many, where the many are cross-product).
       - !ruby/object:Api::Type::Array
@@ -330,8 +339,8 @@ properties:
         item_type: Api::Type::String
       - !ruby/object:Api::Type::NestedObject
         name: 'schema'
-        description: 'The schema for the data. Schema is required for CSV and JSON
-          formats'
+        description:
+          'The schema for the data. Schema is required for CSV and JSON formats'
         properties:
           - !ruby/object:Api::Type::Array
             name: 'fields'
@@ -372,7 +381,8 @@ properties:
                     - :RECORD
       - !ruby/object:Api::Type::NestedObject
         name: 'googleSheetsOptions'
-        description: 'Additional options if sourceFormat is set to GOOGLE_SHEETS.'
+        description:
+          'Additional options if sourceFormat is set to GOOGLE_SHEETS.'
         properties:
           - !ruby/object:Api::Type::Integer
             name: 'skipLeadingRows'
@@ -405,7 +415,8 @@ properties:
             description: 'The separator for fields in a CSV file'
           - !ruby/object:Api::Type::String
             name: 'quote'
-            description: 'The value that is used to quote data sections in a CSV file'
+            description:
+              'The value that is used to quote data sections in a CSV file'
           - !ruby/object:Api::Type::Integer
             name: 'skipLeadingRows'
             description: |
@@ -442,8 +453,8 @@ properties:
                     properties:
                       - !ruby/object:Api::Type::Enum
                         name: 'encoding'
-                        description: The encoding of the values when the type is not
-                          STRING
+                        description:
+                          The encoding of the values when the type is not STRING
                         values:
                           - :TEXT
                           - :BINARY
@@ -464,8 +475,8 @@ properties:
                         required: true
                       - !ruby/object:Api::Type::Enum
                         name: 'type'
-                        description: The type to convert the value in cells of this
-                          column
+                        description:
+                          The type to convert the value in cells of this column
                         values:
                           - :BYTES
                           - :STRING
@@ -474,7 +485,8 @@ properties:
                           - :BOOLEAN
                 - !ruby/object:Api::Type::Enum
                   name: 'encoding'
-                  description: The encoding of the values when the type is not STRING
+                  description:
+                    The encoding of the values when the type is not STRING
                   values:
                     - :TEXT
                     - :BINARY
@@ -488,11 +500,42 @@ properties:
                     exposed for all columns in this column family
                 - !ruby/object:Api::Type::Enum
                   name: 'type'
-                  description: The type to convert the value in cells of this column
-                    family
+                  description:
+                    The type to convert the value in cells of this column family
                   values:
                     - :BYTES
                     - :STRING
                     - :INTEGER
                     - :FLOAT
                     - :BOOLEAN
+  - !ruby/object:Api::Type::NestedObject
+    name: 'tableReplicationInfo'
+    description: |
+      Replication info of a table created using "AS REPLICA" DDL like:
+      `CREATE MATERIALIZED VIEW mv1 AS REPLICA OF src_mv`.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'sourceProjectId'
+        description: The ID of the source project.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'sourceDatasetId'
+        description: The ID of the source dataset.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'sourceTableId'
+        description: The ID of the source materialized view.
+        required: true
+      - !ruby/object:Api::Type::Integer
+        name: 'replicationIntervalMs'
+        description: |
+          The interval at which the source materialized view is polled for updates. The default is
+          300000.
+        default_value: 300000
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: 'resourceTags'
+    description: |
+      The tags attached to this table. Tag keys are globally unique. Tag key is expected to be
+      in the namespaced format, for example "123456789012/environment" where 123456789012 is the
+      ID of the parent organization or project resource for this tag key. Tag value is expected
+      to be the short name, for example "Production".

@@ -1,7 +1,7 @@
-config := meta.(*Config)
+config := meta.(*transport_tpg.Config)
 
 // current import_formats cannot import fields with forward slashes in their value
-if err := parseImportId([]string{
+if err := tpgresource.ParseImportId([]string{
 		"(?P<envgroup_id>.+)/attachments/(?P<name>.+)",
 		"(?P<envgroup_id>.+)/(?P<name>.+)",
 	}, d, config); err != nil {
@@ -9,7 +9,7 @@ if err := parseImportId([]string{
 	}
 
 // Replace import id for the resource id
-id, err := replaceVars(d, config, "{{envgroup_id}}/attachments/{{name}}")
+id, err := tpgresource.ReplaceVars(d, config, "{{envgroup_id}}/attachments/{{name}}")
 if err != nil {
 	return nil, fmt.Errorf("Error constructing id: %s", err)
 }

@@ -13,7 +13,6 @@
 
 --- !ruby/object:Api::Resource
 name: 'Schema'
-immutable: true
 description: |
   A schema is a format that messages must follow,
   creating a contract between publisher and subscriber that Pub/Sub will enforce.
@@ -23,34 +22,46 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/pubsub/docs/reference/rest/v1/projects.schemas'
 base_url: projects/{{project}}/schemas
 create_url: projects/{{project}}/schemas?schemaId={{name}}
+update_url: projects/{{project}}/schemas/{{name}}:commit
+update_verb: :POST
+update_mask: false
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  parent_resource_attribute: 'schema'
+  method_name_separator: ':'
 async: !ruby/object:Provider::Terraform::PollAsync
-  check_response_func_existence: PollCheckForExistence
-  check_response_func_absence: PollCheckForAbsence
+  check_response_func_existence: transport_tpg.PollCheckForExistence
+  check_response_func_absence: transport_tpg.PollCheckForAbsence
   target_occurrences: 10
   actions: ['delete']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "pubsub_schema_basic"
-    primary_resource_id: "example"
+    name: 'pubsub_schema_basic'
+    primary_resource_id: 'example'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-example-schema%s\",
+      context[\"random_suffix\"\
+      ])"
     vars:
-      schema_name: "example"
+      schema_name: 'example-schema'
   - !ruby/object:Provider::Terraform::Examples
-    name: "pubsub_schema_protobuf"
-    primary_resource_id: "example"
+    name: 'pubsub_schema_protobuf'
+    primary_resource_id: 'example'
     vars:
-      schema_name: "example"
+      schema_name: 'example'
     test_env_vars:
       project_name: :PROJECT_NAME
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
-    description: The ID to use for the schema, which will become the final component
-      of the schema's resource name.
+    description:
+      The ID to use for the schema, which will become the final component of the
+      schema's resource name.
     required: true
     immutable: true
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  update_encoder: templates/terraform/update_encoder/pubsub_schema.erb
 properties:
   - !ruby/object:Api::Type::Enum
     name: 'type'
@@ -65,6 +76,8 @@ properties:
     description: |
       The definition of the schema.
       This should contain a string representing the full definition of the schema
-      that is a valid schema definition of the type specified in type.
-
-    ignore_read: true
+      that is a valid schema definition of the type specified in type. Changes
+      to the definition commit new [schema revisions](https://cloud.google.com/pubsub/docs/commit-schema-revision).
+      A schema can only have up to 20 revisions, so updates that fail with an
+      error indicating that the limit has been reached require manually
+      [deleting old revisions](https://cloud.google.com/pubsub/docs/delete-schema-revision).

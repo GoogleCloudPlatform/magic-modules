@@ -1,0 +1,17 @@
+[
+  {
+    "name": "//compute.googleapis.com/projects/test-project/zones/example_zone/instances/example_instance",
+    "asset_type": "compute.googleapis.com/Instance",
+    "ancestry_path": "organizations/123/folders/456/project/test-project",
+    "iam_policy": {
+      "bindings": [
+        {
+          "role": "roles/compute.osLogin",
+          "members": [
+            "user:jane@example.com"
+          ]
+        }
+      ]
+    }
+  }
+]

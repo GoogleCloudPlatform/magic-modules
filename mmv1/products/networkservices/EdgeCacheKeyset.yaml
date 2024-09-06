@@ -20,15 +20,19 @@ update_verb: :PATCH
 update_mask: true
 description: |
   EdgeCacheKeyset represents a collection of public keys used for validating signed requests.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Create keysets': 'https://cloud.google.com/media-cdn/docs/create-keyset'
+  api: 'https://cloud.google.com/media-cdn/docs/reference/rest/v1/projects.locations.edgeCacheKeysets'
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
     base_url: '{{op_id}}'
     wait_ms: 1000
     timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 30
-      update_minutes: 30
-      delete_minutes: 30
+      insert_minutes: 90
+      update_minutes: 90
+      delete_minutes: 90
   result: !ruby/object:Api::OpAsync::Result
     path: 'response'
   status: !ruby/object:Api::OpAsync::Status
@@ -40,19 +44,21 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
-import_format: ["projects/{{project}}/locations/global/edgeCacheKeysets/{{name}}"]
+import_format:
+  ['projects/{{project}}/locations/global/edgeCacheKeysets/{{name}}']
+error_abort_predicates: ['transport_tpg.Is429QuotaError']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "network_services_edge_cache_keyset_basic"
-    primary_resource_id: "default"
+    name: 'network_services_edge_cache_keyset_basic'
+    primary_resource_id: 'default'
     vars:
-      resource_name: "my-keyset"
+      resource_name: 'my-keyset'
   - !ruby/object:Provider::Terraform::Examples
-    name: "network_services_edge_cache_keyset_dual_token"
-    primary_resource_id: "default"
+    name: 'network_services_edge_cache_keyset_dual_token'
+    primary_resource_id: 'default'
     vars:
-      resource_name: "my-keyset"
-      secret_name: "secret-name"
+      resource_name: 'my-keyset'
+      secret_name: 'secret-name'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -68,11 +74,11 @@ properties:
     name: 'description'
     description: |
       A human-readable description of the resource.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: 'Set of label tags associated with the EdgeCache resource.'
   - !ruby/object:Api::Type::Array
-    name: "public_key"
+    name: 'public_key'
     description: |
       An ordered list of Ed25519 public keys to use for validating signed requests.
       You must specify `public_keys` or `validation_shared_keys` (or both). The keys in `public_keys` are checked first.

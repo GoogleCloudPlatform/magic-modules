@@ -24,12 +24,19 @@ base_url: projects/{{project}}/instances
 immutable: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "sql_source_representation_instance_basic"
-    primary_resource_id: "instance"
+    name: 'sql_source_representation_instance_basic'
+    primary_resource_id: 'instance'
     vars:
-      name: "my-instance"
+      name: 'my-instance'
     ignore_read_extra:
-      - "password"
+      - 'password'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'sql_source_representation_instance_postgres'
+    primary_resource_id: 'instance'
+    vars:
+      name: 'my-instance'
+    ignore_read_extra:
+      - 'password'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: 'templates/terraform/encoders/sql_source_representation_instance.go.erb'
   decoder: 'templates/terraform/decoders/sql_source_representation_instance.go.erb'
@@ -52,10 +59,15 @@ properties:
       The MySQL version running on your source database server.
     required: true
     values:
-      - :MYSQL_5_5
       - :MYSQL_5_6
       - :MYSQL_5_7
       - :MYSQL_8_0
+      - :POSTGRES_9_6
+      - :POSTGRES_10
+      - :POSTGRES_11
+      - :POSTGRES_12
+      - :POSTGRES_13
+      - :POSTGRES_14
   - !ruby/object:Api::Type::NestedObject
     name: 'onPremisesConfiguration'
     description: |
@@ -66,10 +78,8 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'host'
         description: |
-          The externally accessible IPv4 address for the source database server.
+          The IPv4 address and port for the external server, or the the DNS address for the external server. If the external server is hosted on Cloud SQL, the port is 5432.
         required: true
-        validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateIpAddress'
       - !ruby/object:Api::Type::Integer
         name: 'port'
         default_value: 3306
@@ -104,5 +114,3 @@ properties:
         name: 'clientKey'
         description: |
           The private key file for the client certificate on the external server. Required only for server-client authentication. Include only if SSL/TLS is used on the external server.
-
-

@@ -10,121 +10,108 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 --- !ruby/object:Api::Resource
-  # This is the singular of `AccessLevels`, any changes here should be made to `AccessLevels` as well
-  name: 'AccessLevel'
-  # This is an unusual API, so we need to use a few fields to map the methods
-  # to the right URL.
-  # create_url is the Create URL
-  # base_url is the Get and Delete and Patch URL. It is empty on purpose.
-  # List won't work yet. It should share a URL with Create.
-  create_url: "{{parent}}/accessLevels"
-  base_url: ""
-  self_link: "{{name}}"
-  update_verb: :PATCH
-  update_mask: true
-  references: !ruby/object:Api::Resource::ReferenceLinks
-    guides:
-      'Access Policy Quickstart': 'https://cloud.google.com/access-context-manager/docs/quickstart'
-    api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.accessLevels'
-  description: |
-    An AccessLevel is a label that can be applied to requests to GCP services,
-    along with a list of requirements necessary for the label to be applied.
-  docs: !ruby/object:Provider::Terraform::Docs
-    warning: |
-      If you are using User ADCs (Application Default Credentials) with this resource,
-      you must specify a `billing_project` and set `user_project_override` to true
-      in the provider configuration. Otherwise the ACM API will return a 403 error.
-      Your account must have the `serviceusage.services.use` permission on the
-      `billing_project` you defined.
-  autogen_async: true
-  id_format: "{{name}}"
-  import_format: ["{{name}}"]
-  examples:
+# This is the singular of `AccessLevels`, any changes here should be made to `AccessLevels` as well
+name: 'AccessLevel'
+# This is an unusual API, so we need to use a few fields to map the methods
+# to the right URL.
+# create_url is the Create URL
+# base_url is the Get and Delete and Patch URL. It is empty on purpose.
+# List won't work yet. It should share a URL with Create.
+create_url: '{{parent}}/accessLevels'
+base_url: ''
+self_link: '{{name}}'
+update_verb: :PATCH
+update_mask: true
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Access Policy Quickstart': 'https://cloud.google.com/access-context-manager/docs/quickstart'
+  api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.accessLevels'
+description: |
+  An AccessLevel is a label that can be applied to requests to GCP services,
+  along with a list of requirements necessary for the label to be applied.
+docs: !ruby/object:Provider::Terraform::Docs
+  warning: |
+    If you are using User ADCs (Application Default Credentials) with this resource,
+    you must specify a `billing_project` and set `user_project_override` to true
+    in the provider configuration. Otherwise the ACM API will return a 403 error.
+    Your account must have the `serviceusage.services.use` permission on the
+    `billing_project` you defined.
+autogen_async: true
+id_format: '{{name}}'
+import_format: ['{{name}}']
+examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "access_context_manager_access_level_basic"
+    name: 'access_context_manager_access_level_basic'
     skip_test: true
-    primary_resource_id: "access-level"
+    primary_resource_id: 'access-level'
     vars:
-      access_level_name: "chromeos_no_lock"
-  # Skipping the sweeper due to the non-standard base_url
-  skip_sweeper: true
-  custom_code: !ruby/object:Provider::Terraform::CustomCode
-    encoder: templates/terraform/encoders/access_level_never_send_parent.go.erb
-    custom_import: templates/terraform/custom_import/set_access_policy_parent_from_self_link.go.erb
-  parameters:
-    # Parent is a path parameter that _cannot_ be read or sent in the request at all.
-    # This must be done at the provider level.
-    - !ruby/object:Api::Type::String
-      name: parent
-      immutable: true
-      required: true
-      description: |
-        The AccessPolicy this AccessLevel lives in.
-        Format: accessPolicies/{policy_id}
-      ignore_read: true
-    - !ruby/object:Api::Type::String
-      name: name
-      immutable: true
-      required: true
-      description: |
-        Resource name for the Access Level. The short_name component must begin
-        with a letter and only include alphanumeric and '_'.
-        Format: accessPolicies/{policy_id}/accessLevels/{short_name}
-  properties:
-    - !ruby/object:Api::Type::String
-      name: title
-      required: true
-      description: |
-        Human readable title. Must be unique within the Policy.
-    - !ruby/object:Api::Type::String
-      name: 'description'
-      description: |
-        Description of the AccessLevel and its use. Does not affect behavior.
-    # createTime and updateTime are listed in the docs but are not ever present
-    # in actual API responses.
-    - !ruby/object:Api::Type::Time
-      exclude: true
-      name: 'createTime'
-      description: |
-        Time the AccessPolicy was created in UTC.
-      output: true
-    - !ruby/object:Api::Type::Time
-      exclude: true
-      name: 'updateTime'
-      description: |
-        Time the AccessPolicy was updated in UTC.
-      output: true
-    - !ruby/object:Api::Type::NestedObject
-      name: 'basic'
-      description: |
-        A set of predefined conditions for the access level and a combining function.
-      conflicts:
-        - custom
-      properties:
-        - !ruby/object:Api::Type::Enum
-          name: 'combiningFunction'
-          description: |
-            How the conditions list should be combined to determine if a request
-            is granted this AccessLevel. If AND is used, each Condition in
-            conditions must be satisfied for the AccessLevel to be applied. If
-            OR is used, at least one Condition in conditions must be satisfied
-            for the AccessLevel to be applied.
-          default_value: :AND
-          values:
-            - :AND
-            - :OR
-          custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
-        # All of the false defaults below here are omitted on purpose.
-        # Let's keep this as simple as possible, since they will all be set by the API.
-        - !ruby/object:Api::Type::Array
-          name: 'conditions'
-          required: true
-          min_size: 1
-          description: |
-            A set of requirements for the AccessLevel to be granted.
-          item_type: !ruby/object:Api::Type::NestedObject
-            properties:
+      access_level_name: 'chromeos_no_lock'
+# Skipping the sweeper due to the non-standard base_url
+skip_sweeper: true
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  encoder: templates/terraform/encoders/access_level_never_send_parent.go.erb
+  custom_import: templates/terraform/custom_import/set_access_policy_parent_from_self_link.go.erb
+parameters:
+  # Parent is a path parameter that _cannot_ be read or sent in the request at all.
+  # This must be done at the provider level.
+  - !ruby/object:Api::Type::String
+    name: parent
+    immutable: true
+    required: true
+    description: |
+      The AccessPolicy this AccessLevel lives in.
+      Format: accessPolicies/{policy_id}
+    ignore_read: true
+  - !ruby/object:Api::Type::String
+    name: name
+    immutable: true
+    required: true
+    description: |
+      Resource name for the Access Level. The short_name component must begin
+      with a letter and only include alphanumeric and '_'.
+      Format: accessPolicies/{policy_id}/accessLevels/{short_name}
+properties:
+  - !ruby/object:Api::Type::String
+    name: title
+    required: true
+    description: |
+      Human readable title. Must be unique within the Policy.
+  - !ruby/object:Api::Type::String
+    name: 'description'
+    description: |
+      Description of the AccessLevel and its use. Does not affect behavior.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'basic'
+    description: |
+      A set of predefined conditions for the access level and a combining function.
+    conflicts:
+      - custom
+    properties:
+      - !ruby/object:Api::Type::Enum
+        name: 'combiningFunction'
+        description: |
+          How the conditions list should be combined to determine if a request
+          is granted this AccessLevel. If AND is used, each Condition in
+          conditions must be satisfied for the AccessLevel to be applied. If
+          OR is used, at least one Condition in conditions must be satisfied
+          for the AccessLevel to be applied.
+        default_value: :AND
+        values:
+          - :AND
+          - :OR
+        custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
+      # All of the false defaults below here are omitted on purpose.
+      # Let's keep this as simple as possible, since they will all be set by the API.
+      - !ruby/object:Api::Type::Array
+        name: 'conditions'
+        required: true
+        min_size: 1
+        description: |
+          A set of requirements for the AccessLevel to be granted.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
             - !ruby/object:Api::Type::Array
               name: 'ipSubnetworks'
               description: |
@@ -216,28 +203,31 @@
                     An empty list allows all types and all versions.
                   item_type: !ruby/object:Api::Type::NestedObject
                     properties:
-                    - !ruby/object:Api::Type::String
-                      name: 'minimumVersion'
-                      description: |
-                        The minimum allowed OS version. If not set, any version
-                        of this OS satisfies the constraint.
-                        Format: "major.minor.patch" such as "10.5.301", "9.2.1".
-                    - !ruby/object:Api::Type::Boolean
-                      name: 'requireVerifiedChromeOs'
-                      description: If you specify DESKTOP_CHROME_OS for osType, you can optionally include requireVerifiedChromeOs to require Chrome Verified Access.
-                    - !ruby/object:Api::Type::Enum
-                      name: 'osType'
-                      required: true
-                      description: |
-                        The operating system type of the device.
-                      values:
-                        - :OS_UNSPECIFIED
-                        - :DESKTOP_MAC
-                        - :DESKTOP_WINDOWS
-                        - :DESKTOP_LINUX
-                        - :DESKTOP_CHROME_OS
-                        - :ANDROID
-                        - :IOS
+                      - !ruby/object:Api::Type::String
+                        name: 'minimumVersion'
+                        description: |
+                          The minimum allowed OS version. If not set, any version
+                          of this OS satisfies the constraint.
+                          Format: "major.minor.patch" such as "10.5.301", "9.2.1".
+                      - !ruby/object:Api::Type::Boolean
+                        name: 'requireVerifiedChromeOs'
+                        description:
+                          If you specify DESKTOP_CHROME_OS for osType, you can
+                          optionally include requireVerifiedChromeOs to require
+                          Chrome Verified Access.
+                      - !ruby/object:Api::Type::Enum
+                        name: 'osType'
+                        required: true
+                        description: |
+                          The operating system type of the device.
+                        values:
+                          - :OS_UNSPECIFIED
+                          - :DESKTOP_MAC
+                          - :DESKTOP_WINDOWS
+                          - :DESKTOP_LINUX
+                          - :DESKTOP_CHROME_OS
+                          - :ANDROID
+                          - :IOS
                 - !ruby/object:Api::Type::Boolean
                   name: 'requireAdminApproval'
                   description: |
@@ -253,32 +243,55 @@
                 countries/regions.
                 Format: A valid ISO 3166-1 alpha-2 code.
               item_type: Api::Type::String
-    - !ruby/object:Api::Type::NestedObject
-      name: 'custom'
-      description: |
-        Custom access level conditions are set using the Cloud Common Expression Language to represent the necessary conditions for the level to apply to a request. 
-        See CEL spec at: https://github.com/google/cel-spec.
-      conflicts:
-        - basic  
-      properties:
-        - !ruby/object:Api::Type::NestedObject
-          name: 'expr'
-          required: true
-          description: |
-            Represents a textual expression in the Common Expression Language (CEL) syntax. CEL is a C-like expression language.
-            This page details the objects and attributes that are used to the build the CEL expressions for 
-            custom access levels - https://cloud.google.com/access-context-manager/docs/custom-access-level-spec.
-          properties:
+            - !ruby/object:Api::Type::Array
+              name: 'vpcNetworkSources'
+              description: 'The request must originate from one of the provided VPC networks in Google Cloud. Cannot specify this field together with `ip_subnetworks`.'
+              item_type: !ruby/object:Api::Type::NestedObject
+                properties:
+                  - !ruby/object:Api::Type::NestedObject
+                    name: 'vpcSubnetwork'
+                    description: 'Sub networks within a VPC network.'
+                    properties:
+                      - !ruby/object:Api::Type::String
+                        name: 'network'
+                        required: true
+                        description: 'Required. Network name to be allowed by this Access Level. Networks of foreign organizations requires `compute.network.get` permission to be granted to caller.'
+                      - !ruby/object:Api::Type::Array
+                        name: 'vpcIpSubnetworks'
+                        description: 'CIDR block IP subnetwork specification. Must be IPv4.'
+                        item_type: Api::Type::String
+  - !ruby/object:Api::Type::NestedObject
+    name: 'custom'
+    description: |
+      Custom access level conditions are set using the Cloud Common Expression Language to represent the necessary conditions for the level to apply to a request.
+      See CEL spec at: https://github.com/google/cel-spec.
+    conflicts:
+      - basic
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: 'expr'
+        required: true
+        description: |
+          Represents a textual expression in the Common Expression Language (CEL) syntax. CEL is a C-like expression language.
+          This page details the objects and attributes that are used to the build the CEL expressions for
+          custom access levels - https://cloud.google.com/access-context-manager/docs/custom-access-level-spec.
+        properties:
           - !ruby/object:Api::Type::String
             name: 'expression'
             required: true
-            description: Textual representation of an expression in Common Expression Language syntax.
+            description:
+              Textual representation of an expression in Common Expression
+              Language syntax.
           - !ruby/object:Api::Type::String
             name: 'title'
-            description: Title for the expression, i.e. a short string describing its purpose.
+            description:
+              Title for the expression, i.e. a short string describing its
+              purpose.
           - !ruby/object:Api::Type::String
             name: 'description'
-            description: Description of the expression 
+            description: Description of the expression
           - !ruby/object:Api::Type::String
             name: 'location'
-            description: String indicating the location of the expression for error reporting, e.g. a file name and a position in the file      
+            description:
+              String indicating the location of the expression for error
+              reporting, e.g. a file name and a position in the file

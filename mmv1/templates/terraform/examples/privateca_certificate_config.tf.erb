@@ -1,4 +1,4 @@
-# [START privateca_create_certificate_config]
+
 resource "google_privateca_ca_pool" "default" {
   location = "us-central1"
   name = "<%= ctx[:vars]["ca_pool_id"] %>"
@@ -98,4 +98,3 @@ resource "google_privateca_certificate" "<%= ctx[:primary_resource_id] %>" {
     }
   }
 }
-# [END privateca_create_certificate_config]

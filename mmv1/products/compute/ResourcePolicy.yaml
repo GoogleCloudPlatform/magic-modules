@@ -15,16 +15,19 @@
 name: 'ResourcePolicy'
 kind: 'compute#resourcePolicy'
 base_url: projects/{{project}}/regions/{{region}}/resourcePolicies
-immutable: true
 has_self_link: true
+update_verb: :PATCH
+update_url: projects/{{project}}/regions/{{region}}/resourcePolicies/{{name}}
 collection_url_key: 'items'
 description: |
   A policy that can be attached to a resource to specify or schedule actions on that resource.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/resourcePolicies'
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -40,36 +43,49 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "resource_policy_basic"
-    primary_resource_id: "foo"
+    name: 'resource_policy_basic'
+    primary_resource_id: 'foo'
     vars:
-      name: "gce-policy"
+      name: 'gce-policy'
   - !ruby/object:Provider::Terraform::Examples
-    name: "resource_policy_full"
-    primary_resource_id: "bar"
+    name: 'resource_policy_hourly_format'
+    primary_resource_id: 'foo'
+    skip_docs: true
     vars:
-      name: "gce-policy"
+      name: 'gce-policy'
   - !ruby/object:Provider::Terraform::Examples
-    name: "resource_policy_placement_policy"
-    primary_resource_id: "baz"
+    name: 'resource_policy_full'
+    primary_resource_id: 'bar'
     vars:
-      name: "gce-policy"
+      name: 'gce-policy'
   - !ruby/object:Provider::Terraform::Examples
-    name: "resource_policy_placement_policy_max_distance"
-    min_version: "beta"
-    primary_resource_id: "baz"
+    name: 'resource_policy_placement_policy'
+    primary_resource_id: 'baz'
     vars:
-      name: "gce-policy"
+      name: 'gce-policy'
   - !ruby/object:Provider::Terraform::Examples
-    name: "resource_policy_instance_schedule_policy"
-    primary_resource_id: "hourly"
+    name: 'resource_policy_placement_policy_max_distance'
+    min_version: 'beta'
+    primary_resource_id: 'baz'
     vars:
-      name: "gce-policy"
+      name: 'gce-policy'
   - !ruby/object:Provider::Terraform::Examples
-    name: "resource_policy_snapshot_schedule_chain_name"
-    primary_resource_id: "hourly"
+    name: 'resource_policy_instance_schedule_policy'
+    primary_resource_id: 'hourly'
     vars:
-      name: "gce-policy"
+      name: 'gce-policy'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'resource_policy_snapshot_schedule_chain_name'
+    primary_resource_id: 'hourly'
+    vars:
+      name: 'gce-policy'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'resource_policy_consistency_group'
+    primary_resource_id: 'cgroup'
+    vars:
+      name: 'gce-policy'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/compute_resource_policy.go.erb
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: region
@@ -78,7 +94,9 @@ parameters:
     description: Region where resource policy resides.
     immutable: true
     required: false
+    ignore_read: true
     default_from_api: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -100,6 +118,7 @@ properties:
     conflicts:
       - 'group_placement_policy'
       - 'instance_schedule_policy'
+      - 'disk_consistency_group_policy'
     description: |
       Policy for creating snapshots of persistent disks.
     properties:
@@ -128,11 +147,11 @@ properties:
                 description: |
                   Time within the window to start the operations.
                   It must be in an hourly format "HH:MM",
-                  where HH : [00-23] and MM : [00] GMT.
-                  eg: 21:00
+                  where HH : [00-23] and MM : [00] GMT. eg: 21:00
                 required: true
                 validation: !ruby/object:Provider::Terraform::Validation
-                  function: 'validateHourlyOnly'
+                  function: 'verify.ValidateHourlyOnly'
+                diff_suppress_func: 'HourlyFormatSuppressDiff'
           - !ruby/object:Api::Type::NestedObject
             name: 'dailySchedule'
             description: |
@@ -145,7 +164,7 @@ properties:
               - !ruby/object:Api::Type::Integer
                 name: 'daysInCycle'
                 description: |
-                  The number of days between snapshots.
+                  Defines a schedule with units measured in days. The value determines how many days pass between the start of each cycle. Days in cycle for snapshot schedule policy must be 1.
                 required: true
               - !ruby/object:Api::Type::String
                 name: 'startTime'
@@ -155,7 +174,8 @@ properties:
                   both 13:00-5 and 08:00 are valid.
                 required: true
                 validation: !ruby/object:Provider::Terraform::Validation
-                  function: 'validateHourlyOnly'
+                  function: 'verify.ValidateHourlyOnly'
+                diff_suppress_func: 'HourlyFormatSuppressDiff'
           - !ruby/object:Api::Type::NestedObject
             name: 'weeklySchedule'
             description: |
@@ -250,14 +270,15 @@ properties:
           - !ruby/object:Api::Type::String
             name: 'chainName'
             description: |
-              Creates the new snapshot in the snapshot chain labeled with the 
-              specified name. The chain name must be 1-63 characters long and comply 
+              Creates the new snapshot in the snapshot chain labeled with the
+              specified name. The chain name must be 1-63 characters long and comply
               with RFC1035.
   - !ruby/object:Api::Type::NestedObject
     name: 'groupPlacementPolicy'
     conflicts:
       - 'instance_schedule_policy'
       - 'snapshot_schedule_policy'
+      - 'disk_consistency_group_policy'
     description: |
       Resource policy for instances used for placement configuration.
     properties:
@@ -291,6 +312,7 @@ properties:
     conflicts:
       - 'snapshot_schedule_policy'
       - 'group_placement_policy'
+      - 'disk_consistency_group_policy'
     description: |
       Resource policy for scheduling instance operations.
     properties:
@@ -334,3 +356,21 @@ properties:
         name: 'expirationTime'
         description: |
           The expiration time of the schedule. The timestamp is an RFC3339 string.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'diskConsistencyGroupPolicy'
+    conflicts:
+      - 'snapshot_schedule_policy'
+      - 'group_placement_policy'
+      - 'instance_schedule_policy'
+    description: |
+      Replication consistency group for asynchronous disk replication.
+    send_empty_value: true
+    properties:
+      - !ruby/object:Api::Type::Boolean
+        name: 'enabled'
+        immutable: true
+        required: true
+        description: |
+          Enable disk consistency on the resource policy.
+    custom_expand: 'templates/terraform/custom_expand/disk_consistency_group_policy.erb'
+    custom_flatten: 'templates/terraform/custom_flatten/disk_consistency_group_policy.erb'

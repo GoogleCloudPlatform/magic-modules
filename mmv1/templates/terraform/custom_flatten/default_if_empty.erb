@@ -12,14 +12,14 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) interface{} {
-	if v == nil || isEmptyValue(reflect.ValueOf(v)) {
+func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil || tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
 		return <%= go_literal(property.default_value) -%>
 	}
 <%- if property.is_a?(Api::Type::Integer) -%>
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
-		if intVal, err := StringToFixed64(strVal); err == nil {
+		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
 			return intVal
 		} // let terraform core handle it if we can't convert the string to an int.
 	}

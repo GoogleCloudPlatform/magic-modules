@@ -26,14 +26,14 @@ description: |
   the marketplace prior to using this resource.
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "identity_platform_inbound_saml_config_basic"
-    primary_resource_id: "saml_config"
+    name: 'identity_platform_inbound_saml_config_basic'
+    primary_resource_id: 'saml_config'
     vars:
       name: saml.tf-config
       idp_entity_id: tf-idp
       sp_entity_id: tf-sp
     test_vars_overrides:
-      name: '"saml.tf-config-" + RandString(t, 10)'
+      name: '"saml.tf-config-" + acctest.RandString(t, 10)'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'

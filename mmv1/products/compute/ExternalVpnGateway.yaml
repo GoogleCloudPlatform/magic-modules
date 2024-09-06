@@ -26,7 +26,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -42,29 +42,39 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "external_vpn_gateway"
-    primary_resource_id: "external_gateway"
-        # Multiple fine-grained resources
+    name: 'external_vpn_gateway'
+    primary_resource_id:
+      'external_gateway'
+      # Multiple fine-grained resources
     skip_vcr: true
     vars:
-      ha_vpn_gateway_name: "ha-vpn"
-      network_name: "network-1"
-      external_gateway_name: "external-gateway"
-      global_address_name: "global-address"
-      router_name: "ha-vpn-router1"
+      ha_vpn_gateway_name: 'ha-vpn'
+      network_name: 'network-1'
+      external_gateway_name: 'external-gateway'
+      global_address_name: 'global-address'
+      router_name: 'ha-vpn-router1'
   - !ruby/object:Provider::Terraform::Examples
     skip_docs: true
-    name: "only_external_vpn_gateway_full"
-    primary_resource_id: "external_gateway"
+    name: 'only_external_vpn_gateway_full'
+    primary_resource_id: 'external_gateway'
     vars:
-      external_gateway_name: "external-gateway"
+      external_gateway_name: 'external-gateway'
 properties:
   - !ruby/object:Api::Type::String
     name: 'description'
     description: 'An optional description of this resource.'
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: 'Labels for the external VPN gateway resource.'
+    update_verb: :POST
+    update_url: 'projects/{{project}}/global/externalVpnGateways/{{name}}/setLabels'
+  - !ruby/object:Api::Type::Fingerprint
+    name: 'labelFingerprint'
+    description: |
+      The fingerprint used for optimistic locking of this resource.  Used
+      internally during updates.
+    update_url: 'projects/{{project}}/global/externalVpnGateways/{{name}}/setLabels'
+    update_verb: :POST
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |

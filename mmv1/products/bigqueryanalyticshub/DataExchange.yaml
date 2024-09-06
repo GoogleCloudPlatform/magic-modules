@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: "DataExchange"
+name: 'DataExchange'
 base_url: projects/{{project}}/locations/{{location}}/dataExchanges
 create_url: projects/{{project}}/locations/{{location}}/dataExchanges?data_exchange_id={{data_exchange_id}}
 self_link: projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}
@@ -21,28 +21,44 @@ update_mask: true
 description: A Bigquery Analytics Hub data exchange
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    "Official Documentation": "https://cloud.google.com/bigquery/docs/analytics-hub-introduction"
-  api: "https://cloud.google.com/bigquery/docs/reference/analytics-hub/rest/v1/projects.locations.dataExchanges"
+    'Official Documentation': 'https://cloud.google.com/bigquery/docs/analytics-hub-introduction'
+  api: 'https://cloud.google.com/bigquery/docs/reference/analytics-hub/rest/v1/projects.locations.dataExchanges'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
-  exclude: false
   method_name_separator: ':'
   fetch_iam_policy_verb: :POST
   parent_resource_attribute: 'data_exchange_id'
-  import_format: ["projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}",
-    "{{data_exchange_id}}"]
+  import_format:
+    [
+      'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}',
+      '{{data_exchange_id}}',
+    ]
 id_format: projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}
-import_format: ["projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}",
-  "{{data_exchange_id}}"]
+import_format:
+  [
+    'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}',
+    '{{data_exchange_id}}',
+  ]
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_analyticshub_data_exchange_basic"
-    primary_resource_id: "data_exchange"
-    primary_resource_name: "fmt.Sprintf(\"tf_test_my_data_exchange%s\", context[\"\
+    name: 'bigquery_analyticshub_data_exchange_basic'
+    primary_resource_id: 'data_exchange'
+    primary_resource_name: "fmt.Sprintf(\"tf_test_my_data_exchange%s\",
+      context[\"\
       random_suffix\"])"
-    region_override: "US"
+    region_override: 'US'
     vars:
-      data_exchange_id: "my_data_exchange"
-      description: "example data exchange"
+      data_exchange_id: 'my_data_exchange'
+      desc: 'example data exchange'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'bigquery_analyticshub_data_exchange_dcr'
+    primary_resource_id: 'data_exchange'
+    primary_resource_name: "fmt.Sprintf(\"tf_test_my_data_exchange%s\",
+      context[\"\
+      random_suffix\"])"
+    region_override: 'US'
+    vars:
+      data_exchange_id: 'dcr_data_exchange'
+      desc: 'example dcr data exchange'
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -58,7 +74,7 @@ properties:
     immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::String
-    name: "location"
+    name: 'location'
     description: |
       The name of the location this data exchange.
     required: true
@@ -90,3 +106,33 @@ properties:
     name: icon
     description: |-
       Base64 encoded image representing the data exchange.
+  - !ruby/object:Api::Type::NestedObject
+    name: sharingEnvironmentConfig
+    default_from_api: true
+    immutable: true
+    description: |
+      Configurable data sharing environment option for a data exchange.
+      This field is required for data clean room exchanges.
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: 'defaultExchangeConfig'
+        immutable: true
+        allow_empty_object: true
+        send_empty_value: true
+        exactly_one_of:
+          - sharing_environment_config.0.default_exchange_config
+          - sharing_environment_config.0.dcr_exchange_config
+        description: |
+          Default Analytics Hub data exchange, used for secured data sharing.
+        properties: []
+      - !ruby/object:Api::Type::NestedObject
+        name: 'dcrExchangeConfig'
+        immutable: true
+        allow_empty_object: true
+        send_empty_value: true
+        exactly_one_of:
+          - sharing_environment_config.0.default_exchange_config
+          - sharing_environment_config.0.dcr_exchange_config
+        description: |
+          Data Clean Room (DCR), used for privacy-safe and secured data sharing.
+        properties: []

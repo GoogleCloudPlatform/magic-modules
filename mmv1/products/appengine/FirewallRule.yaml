@@ -12,61 +12,61 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-  name: 'FirewallRule'
-  description: |
-    A single firewall rule that is evaluated against incoming traffic
-    and provides an action to take on matched requests.
-  base_url: 'apps/{{project}}/firewall/ingressRules'
-  self_link: 'apps/{{project}}/firewall/ingressRules/{{priority}}'
-  update_verb: :PATCH
-  update_mask: true
-  references: !ruby/object:Api::Resource::ReferenceLinks
-    guides:
-      'Official Documentation': 'https://cloud.google.com/appengine/docs/standard/python/creating-firewalls#creating_firewall_rules'
-    api: 'https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps.firewall.ingressRules'
-  collection_url_key: 'ingressRules'
-  import_format: ["apps/{{project}}/firewall/ingressRules/{{priority}}"]
-  mutex: "apps/{{project}}"
-  async: !ruby/object:Provider::Terraform::PollAsync
-    check_response_func_existence: PollCheckForExistence
-    actions: ['create']
-  skip_sweeper: true
-  examples:
-    - !ruby/object:Provider::Terraform::Examples
-      name: "app_engine_firewall_rule_basic"
-      primary_resource_id: "rule"
-      vars:
-        project_id: "ae-project"
-      test_env_vars:
-        org_id: :ORG_ID
-  parameters:
-    - !ruby/object:Api::Type::Integer
-      name: 'priority'
-      description: |
-        A positive integer that defines the order of rule evaluation.
-        Rules with the lowest priority are evaluated first.
-  
-        A default rule at priority Int32.MaxValue matches all IPv4 and
-        IPv6 traffic when no previous rule matches. Only the action of
-        this rule can be modified by the user.
-  properties:
-    - !ruby/object:Api::Type::String
-      name: 'description'
-      description: |
-        An optional string description of this rule.
-      required: false
-    - !ruby/object:Api::Type::String
-      name: 'sourceRange'
-      description: |
-        IP address or range, defined using CIDR notation, of requests that this rule applies to.
-      required: true
-    - !ruby/object:Api::Type::Enum
-      name: 'action'
-      description: |
-        The action to take if this rule matches.
-      required: true
-      values:
-        - UNSPECIFIED_ACTION
-        - ALLOW
-        - DENY
-  
+name: 'FirewallRule'
+description: |
+  A single firewall rule that is evaluated against incoming traffic
+  and provides an action to take on matched requests.
+base_url: 'apps/{{project}}/firewall/ingressRules'
+self_link: 'apps/{{project}}/firewall/ingressRules/{{priority}}'
+update_verb: :PATCH
+update_mask: true
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/appengine/docs/standard/python/creating-firewalls#creating_firewall_rules'
+  api: 'https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps.firewall.ingressRules'
+collection_url_key: 'ingressRules'
+import_format: ['apps/{{project}}/firewall/ingressRules/{{priority}}']
+mutex: 'apps/{{project}}'
+async: !ruby/object:Provider::Terraform::PollAsync
+  check_response_func_existence: transport_tpg.PollCheckForExistence
+  actions: ['create']
+skip_sweeper: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'app_engine_firewall_rule_basic'
+    primary_resource_id: 'rule'
+    vars:
+      project_id: 'ae-project'
+    test_env_vars:
+      org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
+parameters:
+  - !ruby/object:Api::Type::Integer
+    name: 'priority'
+    description: |
+      A positive integer that defines the order of rule evaluation.
+      Rules with the lowest priority are evaluated first.
+
+      A default rule at priority Int32.MaxValue matches all IPv4 and
+      IPv6 traffic when no previous rule matches. Only the action of
+      this rule can be modified by the user.
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'description'
+    description: |
+      An optional string description of this rule.
+    required: false
+  - !ruby/object:Api::Type::String
+    name: 'sourceRange'
+    description: |
+      IP address or range, defined using CIDR notation, of requests that this rule applies to.
+    required: true
+  - !ruby/object:Api::Type::Enum
+    name: 'action'
+    description: |
+      The action to take if this rule matches.
+    required: true
+    values:
+      - UNSPECIFIED_ACTION
+      - ALLOW
+      - DENY

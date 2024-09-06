@@ -63,17 +63,42 @@ terraform build provider:
 mmv1:
 	cd mmv1;\
 		bundle; \
-		bundle exec compiler.rb -e terraform -o $(OUTPUT_PATH) -v $(VERSION) $(mmv1_compile);
+		if [ "$(VERSION)" = "ga" ]; then \
+			bundle exec compiler.rb -e terraform -o $(OUTPUT_PATH) -v ga --no-docs $(mmv1_compile); \
+			bundle exec compiler.rb -e terraform -o $(OUTPUT_PATH) -v beta --no-code $(mmv1_compile); \
+		else \
+			bundle exec compiler.rb -e terraform -o $(OUTPUT_PATH) -v $(VERSION) $(mmv1_compile); \
+		fi
 
 tpgtools:
 	make serialize
 	cd tpgtools;\
 		go run . --output $(OUTPUT_PATH) --version $(VERSION) $(tpgtools_compile)
 
-validator:
+clean-provider:
+	cd $(OUTPUT_PATH);\
+		go mod download;\
+		find . -type f -not -wholename "./.git*" -not -wholename "./.changelog*" -not -name ".travis.yml" -not -name ".golangci.yml" -not -name "CHANGELOG.md" -not -name "CHANGELOG_v*.md" -not -name "GNUmakefile" -not -name "docscheck.sh" -not -name "LICENSE" -not -name "README.md" -not -wholename "./examples*" -not -name ".go-version" -not -name ".hashibot.hcl" -print0 | xargs -0 git rm > /dev/null
+
+clean-tgc:
+	cd $(OUTPUT_PATH);\
+		rm -rf ./tfplan2cai/testdata/templates/;\
+		rm -rf ./tfplan2cai/testdata/generatedconvert/;\
+		rm -rf ./tfplan2cai/converters/google/provider;\
+		rm -rf ./tfplan2cai/converters/google/resources;\
+		rm -rf ./cai2hcl/*;\
+		find ./tfplan2cai/test/** -type f -exec git rm {} \; > /dev/null;\
+
+tgc:
 	cd mmv1;\
-		bundle; \
-		bundle exec compiler.rb -e terraform -f validator -o $(OUTPUT_PATH) $(mmv1_compile);
+		bundle;\
+		bundle exec compiler -e terraform -f tgc -v beta -o $(OUTPUT_PATH)/tfplan2cai $(mmv1_compile);\
+		bundle exec compiler -e terraform -f tgc_cai2hcl -v beta -o $(OUTPUT_PATH)/cai2hcl $(mmv1_compile);\
+
+tf-oics:
+	cd mmv1;\
+		bundle;\
+		bundle exec compiler.rb -e terraform -f oics -o $(OUTPUT_PATH) $(mmv1_compile);\
 
 test:
 	cd mmv1; \
@@ -108,3 +133,9 @@ doctor:
 	./scripts/doctor
 
 .PHONY: mmv1 tpgtools test
+
+refresh-go:
+	cd mmv1;\
+		bundle exec compiler.rb -e terraform -o $(OUTPUT_PATH) -v $(VERSION) $(mmv1_compile) --go-yaml; \
+		go run . --yaml --template; \
+		go run . --yaml --handwritten

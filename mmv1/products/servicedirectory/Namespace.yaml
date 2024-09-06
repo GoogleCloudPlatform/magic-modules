@@ -24,7 +24,6 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/service-directory/docs/reference/rest/v1beta1/projects.locations.namespaces'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   skip_import_test: true
-  exclude: false
   parent_resource_attribute: 'name'
   method_name_separator: ':'
   fetch_iam_policy_verb: :POST
@@ -33,14 +32,15 @@ min_version: beta
 description: |
   A container for `services`. Namespaces allow administrators to group services
   together and define permissions for a collection of services.
-import_format: ["projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}"]
+import_format:
+  ['projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}']
 skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "service_directory_namespace_basic"
-    primary_resource_id: "example"
+    name: 'service_directory_namespace_basic'
+    primary_resource_id: 'example'
     vars:
-      namespace_id: "example-namespace"
+      namespace_id: 'example-namespace'
     min_version: beta
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/service_directory_namespace.go.erb
@@ -54,6 +54,7 @@ parameters:
     required: true
     url_param_only: true
     ignore_read: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: namespaceId
     description: |
@@ -63,7 +64,7 @@ parameters:
     immutable: true
     url_param_only: true
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateRFC1035Name(2, 63)'
+      function: 'verify.ValidateRFC1035Name(2, 63)'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -71,7 +72,7 @@ properties:
       The resource name for the namespace
       in the format `projects/*/locations/*/namespaces/*`.
     output: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Resource labels associated with this Namespace. No more than 64 user

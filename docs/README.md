@@ -1,4 +1,4 @@
-The docsite is generated using [Hugo](https://gohugo.io/) and hosted using Github Pages. Magic Modules documentation should adhere to the [Google developer documentation style guide](https://developers.google.com/style/).
+The docsite is generated using [Hugo](https://gohugo.io/) and hosted using Github Pages. The theme is [Hugo Book](https://themes.gohugo.io/themes/hugo-book/) by [Alex Shpak](https://github.com/alex-shpak/). Magic Modules documentation should adhere to the [Google developer documentation style guide](https://developers.google.com/style/).
 
 To view locally:
 
@@ -9,3 +9,12 @@ To view locally:
 
 If you are having deployment issues, try to reset your hugo module cache.
 * `hugo mod clean`
+
+To upgrade the theme version:
+1. find the version you want at https://github.com/alex-shpak/hugo-book/commits/master
+2. Run the following
+```bash
+go get github.com/alex-shpak/hugo-book@{{commit_hash}}
+## example
+## go get github.com/alex-shpak/hugo-book@d86d5e70c7c0d787675b13d9aee749c1a8b34776
+```

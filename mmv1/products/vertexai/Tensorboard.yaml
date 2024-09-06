@@ -40,25 +40,24 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 description: |-
   Tensorboard is a physical database that stores users' training metrics. A default Tensorboard is provided in each region of a GCP project. If needed users can also create extra Tensorboards in their projects.
-skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "vertex_ai_tensorboard"
-    primary_resource_id: "tensorboard"
+    name: 'vertex_ai_tensorboard'
+    primary_resource_id: 'tensorboard'
     vars:
-      display_name: "terraform"
+      display_name: 'terraform'
     ignore_read_extra:
-      - "project"
+      - 'project'
   - !ruby/object:Provider::Terraform::Examples
-    name: "vertex_ai_tensorboard_full"
-    primary_resource_id: "tensorboard"
+    name: 'vertex_ai_tensorboard_full'
+    primary_resource_id: 'tensorboard'
     vars:
-      display_name: "terraform"
-      kms_key_name: "kms-name"
+      display_name: 'terraform'
+      kms_key_name: 'kms-name'
     test_vars_overrides:
-      kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     ignore_read_extra:
-      - "project"
+      - 'project'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/vertex_ai_tensorboard_import.go.erb
 parameters:
@@ -95,8 +94,9 @@ properties:
         immutable: true
   - !ruby/object:Api::Type::String
     name: 'blobStoragePathPrefix'
-    description: Consumer project Cloud Storage path prefix used to store blob data,
-      which can either be a bucket or directory. Does not end with a '/'.
+    description:
+      Consumer project Cloud Storage path prefix used to store blob data, which
+      can either be a bucket or directory. Does not end with a '/'.
     output: true
   - !ruby/object:Api::Type::String
     name: 'runCount'
@@ -112,7 +112,7 @@ properties:
     output: true
     description: |
       The timestamp of when the Tensorboard was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       The labels with user-defined metadata to organize your Tensorboards.

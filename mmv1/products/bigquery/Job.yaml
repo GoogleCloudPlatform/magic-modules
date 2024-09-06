@@ -17,6 +17,8 @@ kind: 'bigquery#job'
 base_url: projects/{{project}}/jobs
 self_link: projects/{{project}}/jobs/{{job_id}}?location={{location}}
 immutable: true
+schema_version: 1
+state_upgraders: true
 description: |
   Jobs are actions that BigQuery runs on your behalf to load data, export data, query data, or copy data.
   Once a BigQuery job is created, it cannot be changed or deleted.
@@ -24,123 +26,130 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'BigQuery Jobs Intro': 'https://cloud.google.com/bigquery/docs/jobs-overview'
   api: 'https://cloud.google.com/bigquery/docs/reference/rest/v2/jobs'
-import_format: ["projects/{{project}}/jobs/{{job_id}}/location/{{location}}", "projects/{{project}}/jobs/{{job_id}}",
-  "{{project}}/{{job_id}}", "{{job_id}}"]
+import_format:
+  [
+    'projects/{{project}}/jobs/{{job_id}}/location/{{location}}',
+    'projects/{{project}}/jobs/{{job_id}}',
+    '{{project}}/{{job_id}}',
+    '{{job_id}}',
+  ]
 skip_delete: true
 id_format: projects/{{project}}/jobs/{{job_id}}
 async: !ruby/object:Provider::Terraform::PollAsync
-  check_response_func_existence: PollCheckForExistence
+  check_response_func_existence: transport_tpg.PollCheckForExistence
   actions: ['create']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_job_query"
-    primary_resource_id: "job"
+    name: 'bigquery_job_query'
+    primary_resource_id: 'job'
     vars:
-      job_id: "job_query"
-      account_name: "bqowner"
+      job_id: 'job_query'
+      account_name: 'bqowner'
     ignore_read_extra:
-      - "etag"
-      - "status.0.state"
+      - 'etag'
+      - 'status.0.state'
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_job_query_table_reference"
-    primary_resource_id: "job"
+    name: 'bigquery_job_query_table_reference'
+    primary_resource_id: 'job'
     vars:
-      job_id: "job_query"
-      account_name: "bqowner"
+      job_id: 'job_query'
+      account_name: 'bqowner'
     ignore_read_extra:
-      - "etag"
-      - "query.0.default_dataset.0.dataset_id"
-      - "query.0.destination_table.0.table_id"
-      - "status.0.state"
+      - 'etag'
+      - 'query.0.default_dataset.0.dataset_id'
+      - 'query.0.destination_table.0.table_id'
+      - 'status.0.state'
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_job_load"
-    primary_resource_id: "job"
+    name: 'bigquery_job_load'
+    primary_resource_id: 'job'
     vars:
-      job_id: "job_load"
+      job_id: 'job_load'
     ignore_read_extra:
-      - "etag"
-      - "status.0.state"
+      - 'etag'
+      - 'status.0.state'
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_job_load_geojson"
-    primary_resource_id: "job"
+    name: 'bigquery_job_load_geojson'
+    primary_resource_id: 'job'
     vars:
-      job_id: "job_load"
-      bucket_name: "bq-geojson-sample"
+      job_id: 'job_load'
+      bucket_name: 'bq-geojson'  # Keep small(er) to avoid downstream acctest having too-long a bucket name
     test_env_vars:
       project: :PROJECT_NAME
     ignore_read_extra:
-      - "etag"
-      - "status.0.state"
+      - 'etag'
+      - 'status.0.state'
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_job_load_table_reference"
-    primary_resource_id: "job"
+    name: 'bigquery_job_load_parquet'
+    primary_resource_id: 'job'
     vars:
       job_id: "job_load"
     ignore_read_extra:
-      - "etag"
-      - "load.0.destination_table.0.table_id"
-      - "status.0.state"
-    skip_docs: true      # there are a lot of examples for this resource, so omitting some that are similar to others
+      - 'etag'
+      - 'status.0.state'
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_job_copy"
-    primary_resource_id: "job"
+    name: 'bigquery_job_load_table_reference'
+    primary_resource_id: 'job'
     vars:
-      job_id: "job_copy"
-      account_name: "bqowner"
-      key_name: "example-key"
-      keyring_name: "example-keyring"
+      job_id: 'job_load'
+    ignore_read_extra:
+      - 'etag'
+      - 'load.0.destination_table.0.table_id'
+      - 'status.0.state'
+    skip_docs: true  # there are a lot of examples for this resource, so omitting some that are similar to others
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'bigquery_job_copy'
+    primary_resource_id: 'job'
+    vars:
+      job_id: 'job_copy'
+      account_name: 'bqowner'
+      key_name: 'example-key'
+      keyring_name: 'example-keyring'
     test_env_vars:
       project: :PROJECT_NAME
     ignore_read_extra:
-      - "etag"
-      - "status.0.state"
+      - 'etag'
+      - 'status.0.state'
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_job_copy_table_reference"
-    primary_resource_id: "job"
+    name: 'bigquery_job_copy_table_reference'
+    primary_resource_id: 'job'
     vars:
-      job_id: "job_copy"
-      account_name: "bqowner"
-      key_name: "example-key"
-      keyring_name: "example-keyring"
+      job_id: 'job_copy'
+      account_name: 'bqowner'
+      key_name: 'example-key'
+      keyring_name: 'example-keyring'
     test_env_vars:
       project: :PROJECT_NAME
     ignore_read_extra:
-      - "etag"
-      - "copy.0.destination_table.0.table_id"
-      - "copy.0.source_tables.0.table_id"
-      - "copy.0.source_tables.1.table_id"
-      - "status.0.state"
-    skip_docs: true      # there are a lot of examples for this resource, so omitting some that are similar to others
+      - 'etag'
+      - 'copy.0.destination_table.0.table_id'
+      - 'copy.0.source_tables.0.table_id'
+      - 'copy.0.source_tables.1.table_id'
+      - 'status.0.state'
+    skip_docs: true  # there are a lot of examples for this resource, so omitting some that are similar to others
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_job_extract"
-    primary_resource_id: "job"
+    name: 'bigquery_job_extract'
+    primary_resource_id: 'job'
     vars:
-      job_id: "job_extract"
-      account_name: "bqowner"
+      job_id: 'job_extract'
+      account_name: 'bqowner'
     ignore_read_extra:
-      - "etag"
-      - "status.0.state"
+      - 'etag'
+      - 'status.0.state'
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_job_extract_table_reference"
-    primary_resource_id: "job"
+    name: 'bigquery_job_extract_table_reference'
+    primary_resource_id: 'job'
     vars:
-      job_id: "job_extract"
-      account_name: "bqowner"
+      job_id: 'job_extract'
+      account_name: 'bqowner'
     ignore_read_extra:
-      - "etag"
-      - "extract.0.source_table.0.table_id"
-      - "status.0.state"
-    skip_docs: true      # there are a lot of examples for this resource, so omitting some that are similar to others
+      - 'etag'
+      - 'extract.0.source_table.0.table_id'
+      - 'status.0.state'
+    skip_docs: true  # there are a lot of examples for this resource, so omitting some that are similar to others
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/bigquery_job.go
   encoder: templates/terraform/encoders/bigquery_job.go.erb
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'id'
-    output: true
-    description: |
-      Opaque ID field of the job.
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'user_email'
     output: true
@@ -161,7 +170,7 @@ properties:
         name: 'jobTimeoutMs'
         description: |
           Job timeout in milliseconds. If this time limit is exceeded, BigQuery may attempt to terminate the job.
-      - !ruby/object:Api::Type::KeyValuePairs
+      - !ruby/object:Api::Type::KeyValueLabels
         name: 'labels'
         description: |
           The labels associated with this job. You can use these to organize and group your jobs.
@@ -207,7 +216,7 @@ properties:
                   The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
                   or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
                 required: true
-                diff_suppress_func: 'compareSelfLinkRelativePaths'
+                diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
           - !ruby/object:Api::Type::Array
             name: 'userDefinedFunctionResources'
             description: |
@@ -216,15 +225,16 @@ properties:
               properties:
                 - !ruby/object:Api::Type::String
                   name: 'resourceUri'
-                  description: 'A code resource to load from a Google Cloud Storage
-                    URI (gs://bucket/path).'
                   # TODO (mbang): exactly_one_of: resourceUri, inlineCode
+                  description:
+                    'A code resource to load from a Google Cloud Storage URI
+                    (gs://bucket/path).'
                 - !ruby/object:Api::Type::String
                   name: 'inlineCode'
+                  # TODO (mbang): exactly_one_of: resourceUri, inlineCode
                   description: |
                     An inline resource that contains code for a user-defined function (UDF).
                     Providing a inline code resource is equivalent to providing a URI for a file containing the same code.
-                  # TODO (mbang): exactly_one_of: resourceUri, inlineCode
           - !ruby/object:Api::Type::Enum
             name: 'createDisposition'
             description: |
@@ -263,7 +273,7 @@ properties:
                   The dataset. Can be specified `{{dataset_id}}` if `project_id` is also set,
                   or of the form `projects/{{project}}/datasets/{{dataset_id}}` if not.
                 required: true
-                diff_suppress_func: 'compareSelfLinkRelativePaths'
+                diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
               - !ruby/object:Api::Type::String
                 name: 'projectId'
                 description: 'The ID of the project containing this table.'
@@ -357,7 +367,8 @@ properties:
                   - configuration.0.query.0.script_options.0.key_result_statement
               - !ruby/object:Api::Type::String
                 name: 'statementByteBudget'
-                description: 'Limit on the number of bytes billed per statement. Exceeding
+                description:
+                  'Limit on the number of bytes billed per statement. Exceeding
                   this budget results in an error.'
                 at_least_one_of:
                   - configuration.0.query.0.script_options.0.statement_timeout_ms
@@ -419,7 +430,7 @@ properties:
                   The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
                   or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
                 required: true
-                diff_suppress_func: 'compareSelfLinkRelativePaths'
+                diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
           - !ruby/object:Api::Type::Enum
             name: 'createDisposition'
             description: |
@@ -593,6 +604,22 @@ properties:
                 description: |
                   Describes the Cloud KMS encryption key version used to protect destination BigQuery table.
                 output: true
+          - !ruby/object:Api::Type::NestedObject
+            name: 'parquetOptions'
+            description: |
+              Parquet Options for load and make external tables.
+            properties:
+              - !ruby/object:Api::Type::Boolean
+                name: 'enumAsString'
+                description: |
+                  If sourceFormat is set to PARQUET, indicates whether to infer Parquet ENUM logical type as STRING instead of BYTES by default.
+              - !ruby/object:Api::Type::Boolean
+                name: 'enableListInference'
+                description: |
+                  If sourceFormat is set to PARQUET, indicates whether to use schema inference specifically for Parquet LIST logical type.
+                at_least_one_of:
+                  - configuration.0.load.0.parquet_options.0.enum_as_string
+                  - configuration.0.load.0.parquet_options.0.enable_list_inference
       - !ruby/object:Api::Type::NestedObject
         name: 'copy'
         description: 'Copies a table.'
@@ -627,7 +654,7 @@ properties:
                     The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
                     or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
                   required: true
-                  diff_suppress_func: 'compareSelfLinkRelativePaths'
+                  diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
           - !ruby/object:Api::Type::NestedObject
             name: 'destinationTable'
             description: 'The destination table.'
@@ -650,7 +677,7 @@ properties:
                   The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
                   or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
                 required: true
-                diff_suppress_func: 'compareSelfLinkRelativePaths'
+                diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
           - !ruby/object:Api::Type::Enum
             name: 'createDisposition'
             description: |
@@ -762,7 +789,7 @@ properties:
                   The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
                   or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
                 required: true
-                diff_suppress_func: 'compareSelfLinkRelativePaths'
+                diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
           - !ruby/object:Api::Type::NestedObject
             name: 'sourceModel'
             description: |
@@ -789,12 +816,6 @@ properties:
       Reference describing the unique-per-user name of the job.
     flatten_object: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'projectId'
-        description: |
-          The project ID of the project containing this job.
-        required: true
-        exclude: true
       - !ruby/object:Api::Type::String
         name: 'jobId'
         description: |

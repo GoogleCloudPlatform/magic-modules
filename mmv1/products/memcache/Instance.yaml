@@ -30,17 +30,24 @@ timeouts: !ruby/object:Api::Timeouts
   delete_minutes: 20
 autogen_async: true
 examples:
-        # Temporary as CI has used up servicenetworking quota
   - !ruby/object:Provider::Terraform::Examples
-    skip_vcr: true
-    name: "memcache_instance_basic"
-    primary_resource_id: "instance"
+    name: 'memcache_instance_basic'
+    primary_resource_id: 'instance'
     vars:
-      instance_name: "test-instance"
-      network_name: "test-network"
-      address_name: "address"
+      instance_name: 'test-instance'
+      network_name: 'test-network'
+      address_name: 'address'
+    skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'memcache_instance_basic_test'
+    primary_resource_id: 'instance'
+    vars:
+      instance_name: 'test-instance'
+      network_name: 'test-network'
+      address_name: 'address'
     test_vars_overrides:
-      network_name: 'BootstrapSharedTestNetwork(t, "memcache-private")'
+      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
+    skip_docs: true
 parameters:
   - !ruby/object:Api::Type::String
     name: 'region'
@@ -57,33 +64,12 @@ properties:
     required: true
     immutable: true
     url_param_only: true
-    pattern: projects/{{project}}/locations/{{region}}/instances/{{name}}
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   - !ruby/object:Api::Type::String
     name: 'displayName'
     description: |
       A user-visible name for the instance.
     default_from_api: true
-  - !ruby/object:Api::Type::String
-    name: 'state'
-    description: |
-      The instance state - short description.
-    output: true
-    exclude: true
-  - !ruby/object:Api::Type::Array
-    name: 'instanceMessages'
-    description: |
-      Additional information about the instance state, if available.
-    output: true
-    exclude: true
-    item_type: !ruby/object:Api::Type::NestedObject
-      properties:
-        - !ruby/object:Api::Type::String
-          name: 'code'
-          description: An error code.
-        - !ruby/object:Api::Type::String
-          name: 'message'
-          description: The message to be displayed to a user.
   - !ruby/object:Api::Type::Array
     name: 'memcacheNodes'
     description: |
@@ -93,7 +79,8 @@ properties:
       properties:
         - !ruby/object:Api::Type::String
           name: 'nodeId'
-          description: Identifier of the Memcached node. The node id does not include
+          description:
+            Identifier of the Memcached node. The node id does not include
             project or location like the Memcached instance name.
           output: true
         - !ruby/object:Api::Type::String
@@ -106,8 +93,9 @@ properties:
           output: true
         - !ruby/object:Api::Type::String
           name: 'host'
-          description: Hostname or IP address of the Memcached node used by the clients
-            to connect to the Memcached server on this node.
+          description:
+            Hostname or IP address of the Memcached node used by the clients to
+            connect to the Memcached server on this node.
           output: true
         - !ruby/object:Api::Type::String
           name: state
@@ -121,7 +109,7 @@ properties:
     name: 'discoveryEndpoint'
     description: Endpoint for Discovery API
     output: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Resource labels to represent user-provided metadata.
@@ -160,6 +148,9 @@ properties:
     default_value: :MEMCACHE_1_5
     values:
       - :MEMCACHE_1_5
+      - :MEMCACHE_1_6_15
+    update_url: 'projects/{{project}}/locations/{{region}}/instances/{{name}}:upgrade'
+    update_verb: :POST
   - !ruby/object:Api::Type::NestedObject
     name: nodeConfig
     description: |
@@ -293,7 +284,6 @@ properties:
                   validation: !ruby/object:Provider::Terraform::Validation
                     function: 'validation.IntBetween(0,999999999)'
 
-
   - !ruby/object:Api::Type::NestedObject
     name: maintenanceSchedule
     description: Output only. Published maintenance schedule.
@@ -321,4 +311,12 @@ properties:
           can not go beyond, including reschedule.
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
-
+  - !ruby/object:Api::Type::Array
+    name: 'reservedIpRangeId'
+    immutable: true
+    description: |
+      Contains the name of allocated IP address ranges associated with
+      the private service access connection for example, "test-default"
+      associated with IP range 10.0.0.0/29.
+    ignore_read: true
+    item_type: Api::Type::String

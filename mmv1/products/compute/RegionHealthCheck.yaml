@@ -37,7 +37,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -53,74 +53,76 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_health_check_tcp"
-    primary_resource_id: "tcp-region-health-check"
+    name: 'region_health_check_tcp'
+    primary_resource_id: 'tcp-region-health-check'
     vars:
-      health_check_name: "tcp-region-health-check"
+      health_check_name: 'tcp-region-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_health_check_tcp_full"
-    primary_resource_id: "tcp-region-health-check"
+    name: 'region_health_check_tcp_full'
+    primary_resource_id: 'tcp-region-health-check'
     vars:
-      health_check_name: "tcp-region-health-check"
+      health_check_name: 'tcp-region-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_health_check_ssl"
-    primary_resource_id: "ssl-region-health-check"
+    name: 'region_health_check_ssl'
+    primary_resource_id: 'ssl-region-health-check'
     vars:
-      health_check_name: "ssl-region-health-check"
+      health_check_name: 'ssl-region-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_health_check_ssl_full"
-    primary_resource_id: "ssl-region-health-check"
+    name: 'region_health_check_ssl_full'
+    primary_resource_id: 'ssl-region-health-check'
     vars:
-      health_check_name: "ssl-region-health-check"
+      health_check_name: 'ssl-region-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_health_check_http"
-    primary_resource_id: "http-region-health-check"
+    name: 'region_health_check_http'
+    primary_resource_id: 'http-region-health-check'
     vars:
-      health_check_name: "http-region-health-check"
+      health_check_name: 'http-region-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_health_check_http_logs"
-    primary_resource_id: "http-region-health-check"
+    name: 'region_health_check_http_logs'
+    primary_resource_id: 'http-region-health-check'
     min_version: beta
     vars:
-      health_check_name: "http-region-health-check"
+      health_check_name: 'http-region-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_health_check_http_full"
-    primary_resource_id: "http-region-health-check"
+    name: 'region_health_check_http_full'
+    primary_resource_id: 'http-region-health-check'
     vars:
-      health_check_name: "http-region-health-check"
+      health_check_name: 'http-region-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_health_check_https"
-    primary_resource_id: "https-region-health-check"
+    name: 'region_health_check_https'
+    primary_resource_id: 'https-region-health-check'
     vars:
-      health_check_name: "https-region-health-check"
+      health_check_name: 'https-region-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_health_check_https_full"
-    primary_resource_id: "https-region-health-check"
+    name: 'region_health_check_https_full'
+    primary_resource_id: 'https-region-health-check'
     vars:
-      health_check_name: "https-region-health-check"
+      health_check_name: 'https-region-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_health_check_http2"
-    primary_resource_id: "http2-region-health-check"
+    name: 'region_health_check_http2'
+    primary_resource_id: 'http2-region-health-check'
     vars:
-      health_check_name: "http2-region-health-check"
+      health_check_name: 'http2-region-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_health_check_http2_full"
-    primary_resource_id: "http2-region-health-check"
+    name: 'region_health_check_http2_full'
+    primary_resource_id: 'http2-region-health-check'
     vars:
-      health_check_name: "http2-region-health-check"
+      health_check_name: 'http2-region-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_health_check_grpc"
-    primary_resource_id: "grpc-region-health-check"
+    name: 'region_health_check_grpc'
+    primary_resource_id: 'grpc-region-health-check'
     vars:
-      health_check_name: "grpc-region-health-check"
+      health_check_name: 'grpc-region-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_health_check_grpc_full"
-    primary_resource_id: "grpc-region-health-check"
+    name: 'region_health_check_grpc_full'
+    primary_resource_id: 'grpc-region-health-check'
     vars:
-      health_check_name: "grpc-region-health-check"
+      health_check_name: 'grpc-region-health-check'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/health_check_type.erb
-  resource_definition: templates/terraform/resource_definition/health_check.erb
+custom_diff: [
+  'healthCheckCustomizeDiff',
+]
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
@@ -133,6 +135,7 @@ parameters:
     default_from_api: true
     required: false
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::Integer
     name: 'checkIntervalSec'
@@ -156,13 +159,6 @@ properties:
       A so-far unhealthy instance will be marked healthy after this many
       consecutive successes. The default value is 2.
     default_value: 2
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: |
-      The unique identifier for the resource. This identifier is defined by
-      the server.
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
@@ -237,7 +233,7 @@ properties:
         description: |
           The request path of the HTTP health check request.
           The default value is /.
-        default_value: "/"
+        default_value: '/'
       - !ruby/object:Api::Type::String
         name: 'response'
         at_least_one_of:
@@ -362,7 +358,7 @@ properties:
         description: |
           The request path of the HTTPS health check request.
           The default value is /.
-        default_value: "/"
+        default_value: '/'
       - !ruby/object:Api::Type::String
         name: 'response'
         at_least_one_of:
@@ -699,7 +695,7 @@ properties:
         description: |
           The request path of the HTTP2 health check request.
           The default value is /.
-        default_value: "/"
+        default_value: '/'
       - !ruby/object:Api::Type::String
         name: 'response'
         at_least_one_of:

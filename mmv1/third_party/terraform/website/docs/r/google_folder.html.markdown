@@ -4,7 +4,7 @@ description: |-
  Allows management of a Google Cloud Platform folder.
 ---
 
-# google\_folder
+# google_folder
 
 Allows management of a Google Cloud Platform folder. For more information see 
 [the official documentation](https://cloud.google.com/resource-manager/docs/creating-managing-folders)
@@ -20,6 +20,8 @@ resource must have `roles/resourcemanager.folderCreator`. See the
 [Access Control for Folders Using IAM](https://cloud.google.com/resource-manager/docs/access-control-folders)
 doc for more information.
 
+~> It may take a while for the attached tag bindings to be deleted after the folder is scheduled to be deleted. 
+
 ## Example Usage
 
 ```hcl
@@ -34,6 +36,13 @@ resource "google_folder" "team-abc" {
   display_name = "Team ABC"
   parent       = google_folder.department1.name
 }
+
+# Folder with a tag
+resource "google_folder" "department1" {
+  display_name = "Department 1"
+  parent       = "organizations/1234567"
+  tags = {"1234567/env":"staging"}
+}
 ```
 
 ## Argument Reference
@@ -46,12 +55,15 @@ The following arguments are supported:
 * `parent` - (Required) The resource name of the parent Folder or Organization.
     Must be of the form `folders/{folder_id}` or `organizations/{org_id}`.
 
+* `tags` - (Optional) A map of resource manager tags. Resource manager tag keys and values have the same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456. The field is ignored when empty. The field is immutable and causes resource replacement when  mutated.
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are
 exported:
 
 * `name` - The resource name of the Folder. Its format is folders/{folder_id}.
+* `folder_id` - The folder id from the name "folders/{folder_id}"
 * `lifecycle_state` - The lifecycle state of the folder such as `ACTIVE` or `DELETE_REQUESTED`.
 * `create_time` - Timestamp when the Folder was created. Assigned by the server.
     A timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds. Example: "2014-10-02T15:01:23.045123456Z".
@@ -60,8 +72,21 @@ exported:
 
 Folders can be imported using the folder's id, e.g.
 
+* `folders/{{folder_id}}`
+* `{{folder_id}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import Folders using one of the formats above. For example:
+
+```tf
+import {
+  id = "folders/{{folder_id}}"
+  to = google_folder.default
+}
 ```
-# Both syntaxes are valid
-$ terraform import google_folder.department1 1234567
-$ terraform import google_folder.department1 folders/1234567
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), Folders can be imported using one of the formats above. For example:
+
+```
+$ terraform import google_folder.default {{folder_id}}
+$ terraform import google_folder.default folders/{{folder_id}}
 ```

@@ -24,18 +24,19 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/container-analysis/'
   api: 'https://cloud.google.com/container-analysis/api/reference/rest/'
-mutex: "{{note_name}}"
-id_format: "projects/{{project}}/occurrences/{{name}}"
-import_format: ["projects/{{project}}/occurrences/{{name}}"]
+mutex: '{{note_name}}'
+id_format: 'projects/{{project}}/occurrences/{{name}}'
+import_format: ['projects/{{project}}/occurrences/{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "container_analysis_occurrence_kms"
-        # Occurrence requires custom logic for signing payloads.
+    name:
+      'container_analysis_occurrence_kms'
+      # Occurrence requires custom logic for signing payloads.
     skip_test: true
-    primary_resource_id: "occurrence"
+    primary_resource_id: 'occurrence'
     vars:
-      note_name: "attestation-note"
-      attestor: "attestor"
+      note_name: 'attestation-note'
+      attestor: 'attestor'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/containeranalysis_occurrence.go.erb
   update_encoder: templates/terraform/update_encoder/containeranalysis_occurrence.go.erb
@@ -138,4 +139,3 @@ properties:
                     * `openpgp4fpr:74FAF3B861BDA0870C7B6DEF607E48D2A663AEEA`
                 * RFC6920 digest-named SubjectPublicKeyInfo (digest of the DER serialization):
                     * "ni:///sha-256;cD9o9Cq6LG3jD0iKXqEi_vdjJGecm_iXkbqVoScViaU"
-

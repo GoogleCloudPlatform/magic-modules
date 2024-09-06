@@ -15,7 +15,7 @@
 name: Slo
 base_url: v3/projects/{{project}}/services/{{service}}/serviceLevelObjectives
 # name = projects/{{project}}/services/{{service}}/serviceLevelObjectives/{{slo_id}}
-self_link: "v3/{{name}}"
+self_link: 'v3/{{name}}'
 create_url: v3/projects/{{project}}/services/{{service}}/serviceLevelObjectives?serviceLevelObjectiveId={{slo_id}}
 update_verb: :PATCH
 update_mask: true
@@ -32,47 +32,47 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Service Monitoring': 'https://cloud.google.com/monitoring/service-monitoring'
     'Monitoring API Documentation': 'https://cloud.google.com/monitoring/api/v3/'
   api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/v3/services.serviceLevelObjectives'
-id_format: "{{name}}"
-import_format: ["{{name}}"]
+id_format: '{{name}}'
+import_format: ['{{name}}']
 mutex: monitoring/project/{{project}}/service/{{service}}
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "monitoring_slo_appengine"
-    primary_resource_id: "appeng_slo"
+    name: 'monitoring_slo_appengine'
+    primary_resource_id: 'appeng_slo'
     vars:
-      slo_id: "ae-slo"
+      slo_id: 'ae-slo'
   - !ruby/object:Provider::Terraform::Examples
-    name: "monitoring_slo_request_based"
-    primary_resource_id: "request_based_slo"
+    name: 'monitoring_slo_request_based'
+    primary_resource_id: 'request_based_slo'
     test_env_vars:
       project: :PROJECT_NAME
     vars:
-      service_id: "custom-srv-request-slos"
-      slo_id: "consumed-api-slo"
+      service_id: 'custom-srv-request-slos'
+      slo_id: 'consumed-api-slo'
   - !ruby/object:Provider::Terraform::Examples
     name: 'monitoring_slo_windows_based_good_bad_metric_filter'
-    primary_resource_id: "windows_based"
+    primary_resource_id: 'windows_based'
     vars:
-      service_id: "custom-srv-windows-slos"
-      slo_id: "good-bad-metric-filter"
+      service_id: 'custom-srv-windows-slos'
+      slo_id: 'good-bad-metric-filter'
   - !ruby/object:Provider::Terraform::Examples
     name: 'monitoring_slo_windows_based_metric_mean'
-    primary_resource_id: "windows_based"
+    primary_resource_id: 'windows_based'
     vars:
-      service_id: "custom-srv-windows-slos"
-      slo_id: "metric-mean-range"
+      service_id: 'custom-srv-windows-slos'
+      slo_id: 'metric-mean-range'
   - !ruby/object:Provider::Terraform::Examples
     name: 'monitoring_slo_windows_based_metric_sum'
-    primary_resource_id: "windows_based"
+    primary_resource_id: 'windows_based'
     vars:
-      service_id: "custom-srv-windows-slos"
-      slo_id: "metric-sum-range"
+      service_id: 'custom-srv-windows-slos'
+      slo_id: 'metric-sum-range'
   - !ruby/object:Provider::Terraform::Examples
     name: 'monitoring_slo_windows_based_ratio_threshold'
-    primary_resource_id: "windows_based"
+    primary_resource_id: 'windows_based'
     vars:
-      service_id: "custom-srv-windows-slos"
-      slo_id: "ratio-threshold"
+      service_id: 'custom-srv-windows-slos'
+      slo_id: 'ratio-threshold'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/monitoring_slo.go.erb
   custom_import: templates/terraform/custom_import/self_link_as_name.erb
@@ -95,7 +95,7 @@ parameters:
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
     default_from_api: true
     validation: !ruby/object:Provider::Terraform::Validation
-      regex: '^[a-z0-9\-]+$'
+      regex: '^[a-zA-Z0-9\-_:.]+$'
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -255,11 +255,11 @@ properties:
           Exactly one of the following must be set:
           `basic_sli`, `request_based_sli`, `windows_based_sli`
         update_mask_fields:
-          - "serviceLevelIndicator.requestBased.goodTotalRatio.badServiceFilter"
-          - "serviceLevelIndicator.requestBased.goodTotalRatio.goodServiceFilter"
-          - "serviceLevelIndicator.requestBased.goodTotalRatio.totalServiceFilter"
-          - "serviceLevelIndicator.requestBased.distributionCut.range"
-          - "serviceLevelIndicator.requestBased.distributionCut.distributionFilter"
+          - 'serviceLevelIndicator.requestBased.goodTotalRatio.badServiceFilter'
+          - 'serviceLevelIndicator.requestBased.goodTotalRatio.goodServiceFilter'
+          - 'serviceLevelIndicator.requestBased.goodTotalRatio.totalServiceFilter'
+          - 'serviceLevelIndicator.requestBased.distributionCut.range'
+          - 'serviceLevelIndicator.requestBased.distributionCut.distributionFilter'
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: goodTotalRatio
@@ -361,8 +361,7 @@ properties:
                       - service_level_indicator.0.request_based_sli.0.distribution_cut.0.range.0.max
                     description: |
                       Min value for the range (inclusive). If not given,
-                      will be set to "-infinity", defining an open range
-                      "< range.max"
+                      will be set to 0
                   - !ruby/object:Api::Type::Double
                     name: max
                     at_least_one_of:
@@ -370,8 +369,7 @@ properties:
                       - service_level_indicator.0.request_based_sli.0.distribution_cut.0.range.0.max
                     description: |
                       max value for the range (inclusive). If not given,
-                      will be set to "infinity", defining an open range
-                      ">= range.min"
+                      will be set to 0
       - !ruby/object:Api::Type::NestedObject
         name: windowsBasedSli
         api_name: 'windowsBased'
@@ -391,29 +389,29 @@ properties:
           Exactly one of the following must be set:
           `basic_sli`, `request_based_sli`, `windows_based_sli`
         update_mask_fields:
-          - "serviceLevelIndicator.windowsBased.windowPeriod"
-          - "serviceLevelIndicator.windowsBased.goodBadMetricFilter"
-          - "serviceLevelIndicator.windowsBased.goodTotalRatioThreshold.threshold"
-          - "serviceLevelIndicator.windowsBased.goodTotalRatioThreshold.performance.goodTotalRatio.badServiceFilter"
-          - "serviceLevelIndicator.windowsBased.goodTotalRatioThreshold.performance.goodTotalRatio.goodServiceFilter"
-          - "serviceLevelIndicator.windowsBased.goodTotalRatioThreshold.performance.goodTotalRatio.totalServiceFilter"
-          - "serviceLevelIndicator.windowsBased.goodTotalRatioThreshold.performance.distributionCut.range"
-          - "serviceLevelIndicator.windowsBased.goodTotalRatioThreshold.performance.distributionCut.distributionFilter"
-          - "serviceLevelIndicator.windowsBased.goodTotalRatioThreshold.basicSliPerformance"
-          - "serviceLevelIndicator.windowsBased.metricMeanInRange.timeSeries"
-          - "serviceLevelIndicator.windowsBased.metricMeanInRange.range"
-          - "serviceLevelIndicator.windowsBased.metricSumInRange.timeSeries"
-          - "serviceLevelIndicator.windowsBased.metricSumInRange.range"
+          - 'serviceLevelIndicator.windowsBased.windowPeriod'
+          - 'serviceLevelIndicator.windowsBased.goodBadMetricFilter'
+          - 'serviceLevelIndicator.windowsBased.goodTotalRatioThreshold.threshold'
+          - 'serviceLevelIndicator.windowsBased.goodTotalRatioThreshold.performance.goodTotalRatio.badServiceFilter'
+          - 'serviceLevelIndicator.windowsBased.goodTotalRatioThreshold.performance.goodTotalRatio.goodServiceFilter'
+          - 'serviceLevelIndicator.windowsBased.goodTotalRatioThreshold.performance.goodTotalRatio.totalServiceFilter'
+          - 'serviceLevelIndicator.windowsBased.goodTotalRatioThreshold.performance.distributionCut.range'
+          - 'serviceLevelIndicator.windowsBased.goodTotalRatioThreshold.performance.distributionCut.distributionFilter'
+          - 'serviceLevelIndicator.windowsBased.goodTotalRatioThreshold.basicSliPerformance'
+          - 'serviceLevelIndicator.windowsBased.metricMeanInRange.timeSeries'
+          - 'serviceLevelIndicator.windowsBased.metricMeanInRange.range'
+          - 'serviceLevelIndicator.windowsBased.metricSumInRange.timeSeries'
+          - 'serviceLevelIndicator.windowsBased.metricSumInRange.range'
         properties:
-        # NOTE: If adding properties to windowsBasedSli, remember to add to the
-        # custom updateMask fields in property overrides.
+          # NOTE: If adding properties to windowsBasedSli, remember to add to the
+          # custom updateMask fields in property overrides.
           - !ruby/object:Api::Type::String
             name: windowPeriod
             description: |
               Duration over which window quality is evaluated, given as a
               duration string "{X}s" representing X seconds. Must be an
               integer fraction of a day and at least 60s.
-        # START window_criterion FIELDS
+          # START window_criterion FIELDS
           - !ruby/object:Api::Type::String
             name: goodBadMetricFilter
             exactly_one_of:
@@ -547,8 +545,7 @@ properties:
                               - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.distribution_cut.0.range.0.max
                             description: |
                               Min value for the range (inclusive). If not given,
-                              will be set to "-infinity", defining an open range
-                              "< range.max"
+                              will be set to 0
                           - !ruby/object:Api::Type::Double
                             name: max
                             at_least_one_of:
@@ -556,8 +553,7 @@ properties:
                               - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.distribution_cut.0.range.0.max
                             description: |
                               max value for the range (inclusive). If not given,
-                              will be set to "infinity", defining an open range
-                              ">= range.min"
+                              will be set to 0
               - !ruby/object:Api::Type::NestedObject
                 name: basicSliPerformance
                 exactly_one_of:
@@ -627,7 +623,7 @@ properties:
                         name: enabled
                         default_value: true
                         description: |
-                          Whether an availability SLI is enabled or not. Must be set to `true. Defaults to `true`.        
+                          Whether an availability SLI is enabled or not. Must be set to `true. Defaults to `true`.
                         validation: !ruby/object:Provider::Terraform::Validation
                           function: validateAvailabilitySli
           - !ruby/object:Api::Type::NestedObject

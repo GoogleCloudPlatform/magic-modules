@@ -11,6 +11,9 @@
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License. */}}
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 // ----------------------------------------------------------------------------
 //
 //     ***     AUTO GENERATED CODE    ***    Type: DCL     ***
@@ -26,10 +29,12 @@
 //
 // ----------------------------------------------------------------------------
 
-package google
+package transport
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	framework_schema "github.com/hashicorp/terraform-plugin-framework/provider/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // empty string is passed for dcl default since dcl
@@ -40,9 +45,6 @@ var {{$pkg.BasePathIdentifier.ToTitle}}EndpointEntryKey = "{{$pkg.BasePathIdenti
 var {{$pkg.BasePathIdentifier.ToTitle}}EndpointEntry = &schema.Schema{
 	Type:         schema.TypeString,
 	Optional:     true,
-	DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-		"GOOGLE_{{$pkg.BasePathIdentifier.ToUpper}}_CUSTOM_ENDPOINT",
-	}, ""),
 }
 {{- end}}
 {{end}}
@@ -63,13 +65,42 @@ func ConfigureDCLProvider(provider *schema.Provider) {
 {{- end}}
 }
 
-func ProviderDCLConfigure(d *schema.ResourceData, config *Config) interface{} {
+func HandleDCLCustomEndpointDefaults(d *schema.ResourceData) {
 {{- range $index, $pkg := . }}
 {{- if $pkg.ShouldWriteProductBasePath }}
-	config.{{$pkg.BasePathIdentifier.ToTitle}}BasePath = d.Get({{$pkg.BasePathIdentifier.ToTitle}}EndpointEntryKey).(string)
+	if d.Get({{$pkg.BasePathIdentifier.ToTitle}}EndpointEntryKey) == "" {
+		d.Set({{$pkg.BasePathIdentifier.ToTitle}}EndpointEntryKey, MultiEnvDefault([]string{
+			"GOOGLE_{{$pkg.BasePathIdentifier.ToUpper}}_CUSTOM_ENDPOINT",
+		}, ""))
+	}
 {{- end}}
 {{- end}}
-	config.CloudBuildWorkerPoolBasePath = d.Get(CloudBuildWorkerPoolEndpointEntryKey).(string)
-	return config
 }
 
+// plugin-framework provider set-up
+func ConfigureDCLCustomEndpointAttributesFramework(frameworkSchema *framework_schema.Schema) {
+{{- range $index, $pkg := . }}
+{{- if $pkg.ShouldWriteProductBasePath }}
+	frameworkSchema.Attributes["{{$pkg.BasePathIdentifier}}_custom_endpoint"] = framework_schema.StringAttribute{
+		Optional: true,
+        Validators: []validator.String{
+            CustomEndpointValidator(),
+        },
+	}
+{{- end}}
+{{- end}}
+}
+
+func ProviderDCLConfigure(d *schema.ResourceData, config *Config) interface{} {
+	// networkConnectivity uses mmv1 basePath, assuredworkloads has a location variable in the basepath, can't be defined here.
+	config.ApikeysBasePath = "https://apikeys.googleapis.com/v2/"
+	config.AssuredWorkloadsBasePath = d.Get(AssuredWorkloadsEndpointEntryKey).(string)
+	config.CloudBuildWorkerPoolBasePath = "https://cloudbuild.googleapis.com/v1/"
+	config.CloudResourceManagerBasePath = "https://cloudresourcemanager.googleapis.com/"
+	config.EventarcBasePath = "https://eventarc.googleapis.com/v1/"
+	config.FirebaserulesBasePath = "https://firebaserules.googleapis.com/v1/"
+	config.GKEHubFeatureBasePath = "https://gkehub.googleapis.com/v1beta1/"
+	config.RecaptchaEnterpriseBasePath = "https://recaptchaenterprise.googleapis.com/v1/"
+
+	return config
+}

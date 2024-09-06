@@ -13,7 +13,7 @@
 	# limitations under the License.
 -%>
 
-if d.HasChange("multi_cluster_routing_cluster_ids") && !stringInSlice(updateMask, "multiClusterRoutingUseAny") {
+if d.HasChange("multi_cluster_routing_cluster_ids") && !tpgresource.StringInSlice(updateMask, "multiClusterRoutingUseAny") {
 	updateMask = append(updateMask, "multiClusterRoutingUseAny")
 }
 
@@ -32,9 +32,19 @@ if newRouting != oldRouting {
 		}
 	}
 }
-// updateMask is a URL parameter but not present in the schema, so replaceVars
+
+_, hasStandardIsolation := obj["standardIsolation"]
+_, hasDataBoostIsolationReadOnly := obj["dataBoostIsolationReadOnly"]
+if hasStandardIsolation && hasDataBoostIsolationReadOnly {
+    // Due to the "conflicts" both fields should be present only if neither was
+    // previously specified and the user is now manually adding dataBoostIsolationReadOnly.
+    delete(obj, "standardIsolation")
+    updateMask = append(updateMask, "dataBoostIsolationReadOnly")
+}
+
+// updateMask is a URL parameter but not present in the schema, so ReplaceVars
 // won't set it
-url, err = addQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
 if err != nil {
 	return err
 }

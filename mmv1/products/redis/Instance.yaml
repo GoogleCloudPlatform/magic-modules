@@ -28,64 +28,104 @@ timeouts: !ruby/object:Api::Timeouts
   update_minutes: 20
   delete_minutes: 20
 autogen_async: true
+skip_default_cdiff: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/redis_location_id_for_fallback_zone.go.erb
   decoder: templates/terraform/decoders/redis_instance.go.erb
   extra_schema_entry: templates/terraform/extra_schema_entry/redis_instance.erb
-  constants: templates/terraform/constants/redis_instance.go
-  resource_definition: templates/terraform/resource_definition/redis_instance.erb
+  constants: templates/terraform/constants/redis_instance.go.erb
+custom_diff: [
+  'customdiff.ForceNewIfChange("redis_version", isRedisVersionDecreasing)',
+  'tpgresource.DefaultProviderProject',
+]
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "redis_instance_basic"
-    primary_resource_id: "cache"
+    name: 'redis_instance_basic'
+    primary_resource_id: 'cache'
     vars:
-      instance_name: "memory-cache"
-  - !ruby/object:Provider::Terraform::Examples
-    name: "redis_instance_full"
-    primary_resource_id: "cache"
-    vars:
-      instance_name: "ha-memory-cache"
-      network_name: "redis-test-network"
+      instance_name: 'memory-cache'
+      prevent_destroy: 'true'
     test_vars_overrides:
-      network_name: 'BootstrapSharedTestNetwork(t, "redis-full")'
+      prevent_destroy: 'false'
+    oics_vars_overrides:
+      prevent_destroy: 'false'
   - !ruby/object:Provider::Terraform::Examples
-    name: "redis_instance_full_with_persistence_config"
-    primary_resource_id: "cache-persis"
+    name: 'redis_instance_full'
+    primary_resource_id: 'cache'
     vars:
-      instance_name: "ha-memory-cache-persis"
-      network_name: "redis-test-network"
+      instance_name: 'ha-memory-cache'
+      network_name: 'redis-test-network'
+      prevent_destroy: 'true'
     test_vars_overrides:
-      network_name: 'BootstrapSharedTestNetwork(t, "redis-full-persis")'
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "redis-full")'
+      prevent_destroy: 'false'
+    oics_vars_overrides:
+      prevent_destroy: 'false'
   - !ruby/object:Provider::Terraform::Examples
-    name: "redis_instance_private_service"
-        # Temporary for servicenetworking problems
-    skip_vcr: true
-    primary_resource_id: "cache"
+    name: 'redis_instance_full_with_persistence_config'
+    primary_resource_id: 'cache-persis'
     vars:
-      instance_name: "private-cache"
-      address_name: "address"
-      network_name: "redis-test-network"
+      instance_name: 'ha-memory-cache-persis'
+      network_name: 'redis-test-network'
+      prevent_destroy: 'true'
     test_vars_overrides:
-      network_name: 'BootstrapSharedTestNetwork(t, "redis-private")'
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "redis-full-persis")'
+      prevent_destroy: 'false'
+    oics_vars_overrides:
+      prevent_destroy: 'false'
   - !ruby/object:Provider::Terraform::Examples
-    name: "redis_instance_mrr"
-    primary_resource_id: "cache"
+    name: 'redis_instance_private_service'
+    primary_resource_id: 'cache'
     vars:
-      instance_name: "mrr-memory-cache"
-      network_name: "redis-test-network"
+      instance_name: 'private-cache'
+      address_name: 'address'
+      network_name: 'redis-test-network'
+      prevent_destroy: 'true'
     test_vars_overrides:
-      network_name: 'BootstrapSharedTestNetwork(t, "redis-mrr")'
+      prevent_destroy: 'false'
+    oics_vars_overrides:
+      prevent_destroy: 'false'
+    skip_test: true
   - !ruby/object:Provider::Terraform::Examples
-    name: "redis_instance_cmek"
-    primary_resource_id: "cache"
+    name: 'redis_instance_private_service_test'
+    primary_resource_id: 'cache'
+    vars:
+      instance_name: 'private-cache'
+      network_name: 'redis-test-network'
+      prevent_destroy: 'true'
+    test_vars_overrides:
+      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
+      prevent_destroy: 'false'
+    oics_vars_overrides:
+      prevent_destroy: 'false'
+    skip_docs: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'redis_instance_mrr'
+    primary_resource_id: 'cache'
+    vars:
+      instance_name: 'mrr-memory-cache'
+      network_name: 'redis-test-network'
+      prevent_destroy: 'true'
+    test_vars_overrides:
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "redis-mrr")'
+      prevent_destroy: 'false'
+    oics_vars_overrides:
+      prevent_destroy: 'false'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'redis_instance_cmek'
+    primary_resource_id: 'cache'
     skip_test: true
     vars:
-      instance_name: "cmek-memory-cache"
-      network_name: "redis-test-network"
+      instance_name: 'cmek-memory-cache'
+      network_name: 'redis-test-network'
+      prevent_destroy: 'true'
     test_vars_overrides:
-      network_name: 'BootstrapSharedTestNetwork(t, "redis-cmek")'
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "redis-cmek")'
+      prevent_destroy: 'false'
+    oics_vars_overrides:
+      prevent_destroy: 'false'
 parameters:
-                                   # TODO: resourceref?
+  # TODO: resourceref?
   - !ruby/object:Api::Type::String
     name: 'region'
     description: |
@@ -121,7 +161,7 @@ properties:
     immutable: true
     default_from_api: true
     custom_expand: 'templates/terraform/custom_expand/redis_instance_authorized_network.erb'
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::Enum
     name: connectMode
     description: |
@@ -156,7 +196,7 @@ properties:
       Hostname or IP address of the exposed Redis endpoint used by clients
       to connect to the service.
     output: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: Resource labels to represent user provided metadata.
   - !ruby/object:Api::Type::KeyValuePairs
@@ -334,6 +374,7 @@ properties:
                     function: 'validation.IntBetween(0,999999999)'
   - !ruby/object:Api::Type::NestedObject
     name: maintenanceSchedule
+    output: true
     description: Upcoming maintenance schedule.
     properties:
       - !ruby/object:Api::Type::String
@@ -358,6 +399,11 @@ properties:
           can not go beyond, including reschedule.
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
+  - !ruby/object:Api::Type::String
+    name: maintenanceVersion
+    description: The self service update maintenance version.
+    required: false
+    default_from_api: true
   - !ruby/object:Api::Type::Integer
     name: memorySizeGb
     description: Redis memory size in GiB.
@@ -517,4 +563,3 @@ properties:
     description: |
       Optional. The KMS key reference that you want to use to encrypt the data at rest for this Redis
       instance. If this is provided, CMEK is enabled.
-

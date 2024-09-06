@@ -14,10 +14,11 @@
 --- !ruby/object:Api::Resource
 name: 'TagValue'
 base_url: tagValues
-self_link: "tagValues/{{name}}"
+self_link: 'tagValues/{{name}}'
 update_verb: :PATCH
 update_mask: true
-description: A TagValue is a child of a particular TagKey. TagValues are used to group
+description:
+  A TagValue is a child of a particular TagKey. TagValues are used to group
   cloud resources for the purpose of controlling them using policies.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
@@ -28,21 +29,21 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   parent_resource_attribute: 'tag_value'
   fetch_iam_policy_verb: :POST
 autogen_async: true
-exclude_validator: true
+exclude_tgc: true
 mutex: tagValues/{{parent}}
-id_format: "tagValues/{{name}}"
-import_format: ["tagValues/{{name}}", "{{name}}"]
+id_format: 'tagValues/{{name}}'
+import_format: ['tagValues/{{name}}', '{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "tag_value_basic"
+    name: 'tag_value_basic'
     skip_test: true
-    primary_resource_id: "value"
+    primary_resource_id: 'value'
     vars:
-      key_short_name: "keyname"
-      value_short_name: "valuename"
+      key_short_name: 'keyname'
+      value_short_name: 'valuename'
     test_vars_overrides:
-      key_short_name: '"tf-test-key-" + RandString(t, 10)'
-      value_short_name: '"tf-test-value-" + RandString(t, 10)'
+      key_short_name: '"tf-test-key-" + acctest.RandString(t, 10)'
+      value_short_name: '"tf-test-value-" + acctest.RandString(t, 10)'
     test_env_vars:
       org_id: :ORG_ID
 properties:
@@ -71,7 +72,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: namespacedName
     description: |
-      Output only. Namespaced name of the TagValue. Will be in the format {organizationId}/{tag_key_short_name}/{shortName}.
+      Output only. Namespaced name of the TagValue. Will be in the format {parentNamespace}/{tagKeyShortName}/{shortName}.
     output: true
   - !ruby/object:Api::Type::String
     name: description

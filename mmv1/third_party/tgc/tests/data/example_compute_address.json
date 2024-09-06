@@ -1,0 +1,57 @@
+[
+  {
+    "name": "//compute.googleapis.com/projects/{{.Provider.project}}/global/networks/my-network",
+    "asset_type": "compute.googleapis.com/Network",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "beta",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+      "discovery_name": "Network",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "autoCreateSubnetworks": true,
+        "name": "my-network",
+        "networkFirewallPolicyEnforcementOrder": "AFTER_CLASSIC_FIREWALL"
+      }
+    }
+  },
+  {
+    "name": "//compute.googleapis.com/projects/{{.Provider.project}}/regions/us-central1/addresses/my-internal-address",
+    "asset_type": "compute.googleapis.com/Address",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "beta",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+      "discovery_name": "Address",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "address": "10.0.42.42",
+        "addressType": "INTERNAL",
+        "name": "my-internal-address",
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
+        "region": "projects/{{.Provider.project}}/global/regions/us-central1"
+      }
+    }
+  },
+  {
+    "name": "//compute.googleapis.com/projects/{{.Provider.project}}/regions/us-central1/subnetworks/my-subnet",
+    "asset_type": "compute.googleapis.com/Subnetwork",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "beta",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+      "discovery_name": "Subnetwork",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "ipCidrRange": "10.0.0.0/16",
+        "logConfig": {
+          "enable": false
+        },
+        "name": "my-subnet",
+        "region": "projects/{{.Provider.project}}/global/regions/us-central1"
+      }
+    }
+  }
+]

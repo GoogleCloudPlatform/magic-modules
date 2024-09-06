@@ -35,14 +35,14 @@ description: |
   uses READER and OWNER instead of READ and FULL_CONTROL.
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "storage_object_access_control_public_object"
-    primary_resource_id: "public_rule"
+    name: 'storage_object_access_control_public_object'
+    primary_resource_id: 'public_rule'
     vars:
-      bucket_name: "static-content-bucket"
-      object_name: "public-object"
-id_format: "{{bucket}}/{{object}}/{{entity}}"
-import_format: ["{{bucket}}/{{%object}}/{{entity}}"]
-mutex: "storage/buckets/{{bucket}}/objects/{{object}}"
+      bucket_name: 'static-content-bucket'
+      object_name: 'public-object'
+id_format: '{{bucket}}/{{object}}/{{entity}}'
+import_format: ['{{bucket}}/{{%object}}/{{entity}}']
+mutex: 'storage/buckets/{{bucket}}/objects/{{object}}'
 skip_sweeper: true
 properties:
   - !ruby/object:Api::Type::ResourceRef
@@ -51,7 +51,6 @@ properties:
     imports: 'name'
     description: 'The name of the bucket.'
     required: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_as_string.go.erb'
   - !ruby/object:Api::Type::String
     name: 'domain'
     description: 'The domain associated with the entity.'
@@ -80,13 +79,9 @@ properties:
   # | 'etag' is not applicable for state convergence.
   - !ruby/object:Api::Type::Integer
     name: 'generation'
-    description: 'The content generation of the object, if applied to an object.'
+    description:
+      'The content generation of the object, if applied to an object.'
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'id'
-    description: 'The ID of the access-control entry.'
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'object'
     description: 'The name of the object to apply the access control to.'

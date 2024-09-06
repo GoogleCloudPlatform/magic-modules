@@ -1,11 +1,11 @@
-config := meta.(*Config)
+config := meta.(*transport_tpg.Config)
 d.SetId(res["name"].(string))
-if err := parseImportId([]string{"projects/(?P<project>[^/]+)/instances/(?P<name>[^/]+)"}, d, config); err != nil {
+if err := tpgresource.ParseImportId([]string{"projects/(?P<project>[^/]+)/instances/(?P<name>[^/]+)"}, d, config); err != nil {
 	return nil, err
 }
 res["project"] = d.Get("project").(string)
 res["name"] = d.Get("name").(string)
-id, err := replaceVars(d, config, "{{project}}/{{name}}")
+id, err := tpgresource.ReplaceVars(d, config, "{{project}}/{{name}}")
 if err != nil {
 	return nil, err
 }

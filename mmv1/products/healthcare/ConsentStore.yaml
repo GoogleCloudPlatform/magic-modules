@@ -13,9 +13,9 @@
 
 --- !ruby/object:Api::Resource
 name: 'ConsentStore'
-kind: "healthcare#consentStore"
-base_url: "{{dataset}}/consentStores?consentStoreId={{name}}"
-self_link: "{{dataset}}/consentStores/{{name}}"
+kind: 'healthcare#consentStore'
+base_url: '{{dataset}}/consentStores?consentStoreId={{name}}'
+self_link: '{{dataset}}/consentStores/{{name}}'
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -24,42 +24,45 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
   fetch_iam_policy_verb: :GET
   parent_resource_attribute: 'consent_store_id'
-  import_format: ["{{%dataset}}/consentStores/{{name}}", "{{name}}"]
-  base_url: "{{%dataset}}/consentStores/{{name}}"
-  self_link: "{{%dataset}}/consentStores/{{name}}"
+  import_format: ['{{%dataset}}/consentStores/{{name}}', '{{name}}']
+  base_url: '{{%dataset}}/consentStores/{{name}}'
+  self_link: '{{%dataset}}/consentStores/{{name}}'
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Creating a Consent store': 'https://cloud.google.com/healthcare/docs/how-tos/consent'
   api: 'https://cloud.google.com/healthcare/docs/reference/rest/v1/projects.locations.datasets.consentStores'
-
-id_format: "{{dataset}}/consentStores/{{name}}"
-import_format: ["{{%dataset}}/consentStores/{{name}}"]
+# Skipping the sweeper since this is a fine-grained resource under dataset
+skip_sweeper: true
+id_format: '{{dataset}}/consentStores/{{name}}'
+import_format: ['{{%dataset}}/consentStores/{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "healthcare_consent_store_basic"
-    primary_resource_id: "my-consent"
-    primary_resource_name: ' fmt.Sprintf("projects/%s/locations/%s/datasets/tf-test-my-dataset%s",
-      GetTestProjectFromEnv(), GetTestRegionFromEnv(), context["random_suffix"]),
-      fmt.Sprintf("tf-test-my-consent-store%s", context["random_suffix"])'
+    name: 'healthcare_consent_store_basic'
+    primary_resource_id: 'my-consent'
+    primary_resource_name:
+      ' fmt.Sprintf("projects/%s/locations/%s/datasets/tf-test-my-dataset%s",
+      envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(),
+      context["random_suffix"]), fmt.Sprintf("tf-test-my-consent-store%s",
+      context["random_suffix"])'
     vars:
-      dataset_id: "my-dataset"
-      consent_id: "my-consent-store"
+      dataset_id: 'my-dataset'
+      consent_id: 'my-consent-store'
   - !ruby/object:Provider::Terraform::Examples
-    name: "healthcare_consent_store_full"
-    primary_resource_id: "my-consent"
+    name: 'healthcare_consent_store_full'
+    primary_resource_id: 'my-consent'
     vars:
-      dataset_id: "my-dataset"
-      consent_id: "my-consent-store"
+      dataset_id: 'my-dataset'
+      consent_id: 'my-consent-store'
   - !ruby/object:Provider::Terraform::Examples
-    name: "healthcare_consent_store_iam"
-    primary_resource_id: "my-consent"
+    name: 'healthcare_consent_store_iam'
+    primary_resource_id: 'my-consent'
     vars:
-      dataset_id: "my-dataset"
-      account_id: "my-account"
-      consent_id: "my-consent-store"
+      dataset_id: 'my-dataset'
+      account_id: 'my-account'
+      consent_id: 'my-consent-store'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
-    name: "dataset"
+    name: 'dataset'
     description: |
       Identifies the dataset addressed by this request. Must be in the format
       'projects/{project}/locations/{location}/datasets/{dataset}'
@@ -90,8 +93,8 @@ properties:
     required: false
     description: |
       If true, [consents.patch] [google.cloud.healthcare.v1.consent.UpdateConsent] creates the consent if it does not already exist.
-  - !ruby/object:Api::Type::KeyValuePairs
-    name: labels
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
     required: false
     description: |
       User-supplied key-value pairs used to organize Consent stores.
@@ -106,4 +109,3 @@ properties:
 
       An object containing a list of "key": value pairs.
       Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
-

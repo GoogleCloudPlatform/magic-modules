@@ -11,8 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
-!ruby/object:Api::Product
+--- !ruby/object:Api::Product
 name: BigqueryDatapolicy
 display_name: BigQuery Data Policy
 scopes:
@@ -24,7 +23,3 @@ versions:
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://bigquerydatapolicy.googleapis.com/v1/
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: BigQuery Data Policy API
-    url: https://console.cloud.google.com/apis/library/bigquerydatapolicy.googleapis.com/

@@ -1,0 +1,45 @@
+name: unit-test-tgc
+permissions: read-all
+
+on:
+  workflow_call:
+
+jobs:
+  compile-and-unit-tests:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Download built artifacts
+        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        with:
+          name: artifact-terraform-google-conversion
+          path: artifacts-tgc
+
+      - name: Download built artifacts
+        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        with:
+          name: artifact-terraform-provider-google-beta
+          path: artifacts-tpgb
+
+      - name: Unzip the artifacts and delete the zip
+        run: |
+          unzip artifacts-tgc/output.zip -d ./tgc
+          unzip artifacts-tpgb/output.zip -d ./tpgb
+          rm artifacts-tgc/output.zip
+          rm artifacts-tpgb/output.zip
+
+      - name: Set up Go
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+        with:
+          go-version: '^1.21'
+
+      - name: Build Terraform Google Conversion
+        run: |
+          cd tgc
+          go mod edit -replace=github.com/hashicorp/terraform-provider-google-beta=../tpgb
+          go mod tidy
+          make build
+
+      - name: Run Unit Tests
+        run: |
+          cd tgc
+          make test

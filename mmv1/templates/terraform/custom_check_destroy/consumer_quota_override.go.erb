@@ -1,6 +1,6 @@
-config := GoogleProviderConfig(t)
+config := acctest.GoogleProviderConfig(t)
 
-url, err := replaceVarsForTest(config, rs, "{{ServiceUsageBasePath}}projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/")
+url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{ServiceUsageBasePath}}projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/")
 if err != nil {
 	return err
 }
@@ -11,7 +11,13 @@ if config.BillingProject != "" {
 	billingProject = config.BillingProject
 }
 
-res, err := SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
+res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config: config,
+	Method: "GET",
+	Project: billingProject,
+	RawURL: url,
+	UserAgent: config.UserAgent,
+})
 if err == nil {
 	// Sometimes the API returns an empty response instead of erroring, treat empty as nonexistent
 	if len(res) != 0 {

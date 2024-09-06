@@ -69,7 +69,7 @@ func validateNonManagedBackendServiceBackends(backends []interface{}, d *schema.
 		}
 		backend := b.(map[string]interface{})
 		for _, fn := range backendServiceOnlyManagedFieldNames {
-			if v, ok := backend[fn]; ok && !isEmptyValue(reflect.ValueOf(v)) {
+			if v, ok := backend[fn]; ok && !tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
 				return fmt.Errorf("%q cannot be set for non-managed backend service, found value %v", fn, v)
 			}
 		}

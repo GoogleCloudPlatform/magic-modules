@@ -39,24 +39,25 @@ async: !ruby/object:Api::OpAsync
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   parent_resource_attribute: 'cloud_function'
   method_name_separator: ':'
-  exclude: false
 
 legacy_name: 'google_cloudfunctions_function'
 id_format: 'projects/{{project}}/locations/{{region}}/functions/{{cloud_function}}'
-import_format: ["projects/{{project}}/locations/{{region}}/functions/{{cloud_function}}"]
+import_format:
+  ['projects/{{project}}/locations/{{region}}/functions/{{cloud_function}}']
 exclude_resource: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloudfunctions_cloud_function"
-    primary_resource_id: "function"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-my-function%s\", context[\"random_suffix\"\
+    name: 'cloudfunctions_cloud_function'
+    primary_resource_id: 'function'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-function%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
-      function_name: "my-function"
-      bucket_name: "cloudfunctions-function-example-bucket"
-      zip_path: "path/to/index.zip"
+      function_name: 'my-function'
+      bucket_name: 'cloudfunctions-function-example-bucket'
+      zip_path: 'path/to/index.zip'
     test_vars_overrides:
-      zip_path: 'createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)'
+      zip_path: 'acctest.CreateZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'region'
@@ -76,7 +77,6 @@ properties:
     description: |
       A user-defined name of the function. Function names must
       be unique globally and match pattern `projects/*/locations/*/functions/*`.
-    pattern: projects/{{project}}/locations/{{location}}/functions/{{name}}
   - !ruby/object:Api::Type::String
     name: 'description'
     description: 'User-provided description of a function.'
@@ -119,6 +119,10 @@ properties:
     output: true
     description: 'The email of the service account for this function.'
   - !ruby/object:Api::Type::String
+    name: 'buildServiceAccount'
+    default_from_api: true
+    description: 'The fully-qualified name of the service account to be used for the build step of deploying this function'
+  - !ruby/object:Api::Type::String
     name: 'updateTime'
     output: true
     description: 'The last update timestamp of a Cloud Function'
@@ -128,7 +132,7 @@ properties:
     description: |
       The version identifier of the Cloud Function. Each deployment attempt
       results in a new version of a function being created.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       A set of key/value label pairs associated with this Cloud Function.
@@ -204,4 +208,3 @@ properties:
         name: 'service'
         description: |
           The hostname of the service that should be observed.
-

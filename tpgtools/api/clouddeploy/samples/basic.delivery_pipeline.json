@@ -19,6 +19,16 @@
         "profiles": [
           "example-profile-one",
           "example-profile-two"
+        ],
+        "deployParameters": [
+            {
+              "values": {
+                "deployParameterKey": "deployParameterValue"
+              },
+              "match_target_labels": {
+                "my_first_label": "example-label-1"
+              }
+            }
         ]
       },
       {

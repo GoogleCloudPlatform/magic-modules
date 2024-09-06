@@ -42,18 +42,17 @@ Don't panic - this is all quite safe and we have fixed it before.  We store the 
 
 It's possible for a job to be cancelled or fail in the middle of pushing downstreams in a transient way.  The sorts of failures that happen at scale - lightning strikes a datacenter (ours or GitHub's!) or some other unlikely misfortune happens.  This has a chance to cause a hiccup in the downstream history, but isn't dangerous.  If that happens, the sync tags may need to be manually updated to sit at the same commit, just before the commit which needs to be generated, or some failed tasks might need to be run by hand.
 
-Updating the sync tags is done like this:
-First, check their state: `git fetch origin && git rev-parse origin/tpg-sync origin/tpgb-sync origin/tf-oics-sync origin/tf-validator-sync` will list the commits for each of the sync tags.
-(If you have changed the name of the `googlecloudplatform/magic-modules` remote from `origin`, substitute that name instead)
+First, check their state: `git fetch origin && git rev-parse origin/tpg-sync origin/tpgb-sync origin/tf-oics-sync origin/tgc-sync` will list the commits for each of the sync tags. (If you have changed the name of the `GoogleCloudPlatform/magic-modules` remote from `origin`, substitute that name instead, such as `git fetch upstream && git rev-parse upstream/tpg-sync upstream/tpgb-sync upstream/tf-oics-sync upstream/tgc-sync`)
+
 In normal, steady-state operation, these tags will all be identical.  When a failure occurs, some of them may be one commit ahead of the others.  It is rare for any of them to be 2 or more commits ahead of any other.  If some of them are one commit ahead of the others, and there is no pusher task currently running, this means you need to reset them by hand and rerun the failed jobs.  If they diverge by more than one commit, or a pusher task is currently running, you will need to manually run missing tasks.
 
 ### Divergence by zero commits
 
-Just click retry on the failed job in Cloud Build.  Yay!
+Just click retry on the failed job in Cloud Build. This is fairly rare, as most failures involve a step failing after another has already succeeded.
 
 ### Divergence by exactly one commit.
 
-Find which commit caused the error.  This will usually be easy - cloud build lists the commit which triggered a build, so you can probably just use that one.  You need to set all the sync tags to the parent of that commit.  Say the commit which caused the error is `12345abc`.  You can find the parent of that commit with `git rev-parse 12345abc~` (note the `~` suffix).  Some of the sync tags are likely set to this value already.  For the remainder, simply perform a git push.  Assuming that the parent commit is `98765fed`, that would be, e.g. `git push origin 98765fed:tf-validator-sync`.
+Find which commit caused the error.  This will usually be easy - cloud build lists the commit which triggered a build, so you can probably just use that one.  You need to set all the sync tags to the parent of that commit.  Say the commit which caused the error is `12345abc`.  You can find the parent of that commit with `git rev-parse 12345abc~` (note the `~` suffix).  Some of the sync tags are likely set to this value already.  For the remainder, simply perform a git push.  Assuming that the parent commit is `98765fed`, that would be, e.g. `git push -f origin 98765fed:tf-validator-sync`.
 
 If you are unlucky, there may be open PRs - this only happens if the failure occurred during the ~5 second period surrounding the merging of one of the downstreams.  Close those PRs before proceeding to the final step.
 
@@ -73,7 +72,7 @@ VERSION=beta
 git clone https://github.com/GoogleCloudPlatform/magic-modules fix-gcb-run
 pushd fix-gcb-run
 docker pull gcr.io/graphite-docker-images/downstream-builder;
-for commit in $(git log $SYNC_TAG..main --pretty=%H | tac); do 
+for commit in $(git log $SYNC_TAG..main --pretty=%H | tac); do
   git checkout $commit && \
   docker run -v `pwd`:/workspace -w /workspace -e GITHUB_TOKEN=$MAGICIAN_GITHUB_TOKEN -it gcr.io/graphite-docker-images/downstream-builder downstream $REPO $VERSION $commit || \
   break;
@@ -82,6 +81,13 @@ done
 
 In the event of a failure, this will stop running.  If it succeeds, update the sync tag with `git push origin HEAD:tpg-sync`.
 
+### Downstream build job is not triggered by commits.
+This is rare but we've seen this happened before. In this case, we need to manually trigger a Cloud Build job by running 
+```
+gcloud builds triggers run build-downstreams --project=graphite-docker-images --substitutions=BRANCH_NAME=<BASE_BRANCH_NAME> --sha=<COMMIT_SHA>
+```
+You'll need to substitute `<COMMIT_SHA>` with the commit sha that you'd like to trigger the build against and `<BASE_BRANCH_NAME>` with base branch that this commit is pushed into, likely `main` but could be feature branches in some cases.
+
 ## Deploying the pipeline
 The code on the PR's branch is used to plan actions - no merge is performed.
 If you are making changes to the workflows, your changes will not trigger a workflow run, because of the risk of an untrusted contributor introducing malicious code in this way.  You will need to test locally by using the [cloud build local builder](https://cloud.google.com/cloud-build/docs/build-debug-locally).
@@ -89,13 +95,15 @@ If you are making changes to the containers, your changes will not apply until t
 
 Pausing the pipeline is done in the cloud console, by setting the downstream-builder trigger to disabled.  You can find that trigger [here](https://console.cloud.google.com/cloud-build/triggers/edit/f80a7496-b2f4-4980-a706-c5425a52045b?project=graphite-docker-images)
 
-
 ## Dependency change handbook:
 If someone (often a bot) creates a PR which updates Gemfile or Gemfile.lock, they will not be able to generate diffs.  This is because bundler doesn't allow you to run a binary unless your installed gems exactly match the Gemfile.lock, and since we have to run generation before and after the change, there is no possible container that will satisfy all requirements.
 
 The best approach is
 * Build the `downstream-generator` container locally, with the new Gemfile and Gemfile.lock.  This will involve hand-modifying the Dockerfile to use the local Gemfile/Gemfile.lock instead of wget from this repo's `main` branch.  You don't need to check in those changes.
 * When that container is built, and while nothing else is running in GCB (wait, if you need to), push the container to GCR, and as soon as possible afterwards, merge the dependency-changing PR.
+
+## Changes to cloud build yaml:
+If changes are made to `gcb-contributor-membership-checker.yml` or `gcb-community-checker.yml` they will not be reflected in presubmit runs for existing PRs without a rebase. This is because these build triggers are linked to pull request creation and not pushes to the PR branch. If changes are needed to these build files they will need to be made in a backwards-compatible manner. Note that changes to other files used by these triggers will be immediately reflected in all PRs, leading to a possible disconnect between the yaml files and the rest of the CI code.
 
 ## Historical Note: Design choices & tradeoffs
 * The downstream push doesn't wait for checks on its PRs against downstreams.  This may inconvenience some existing workflows which rely on the downstream PR checks.  This ensures that merge conflicts never come into play, since the downstreams never have dangling PRs, but it requires some up-front work to get those checks into the differ.  If a new check is introduced into the downstream Travis, we will need to introduce it into the terraform-tester container.

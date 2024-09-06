@@ -203,25 +203,6 @@ describe Api::Type::Enum do
 end
 
 describe Api::Type::ResourceRef do
-  context 'requires valid resource' do
-    let(:spec_location) do
-      File.join(File.dirname(__FILE__), 'data',
-                'resourceref-missingresource.yaml')
-    end
-    let(:spec) do
-      File.open(spec_location, 'r')
-    end
-
-    after(:each) { spec.close }
-    subject do
-      lambda do
-        Google::YamlValidator.parse(spec.read).validate
-      end
-    end
-
-    it { is_expected.to raise_error(StandardError, /Missing 'resource'/) }
-  end
-
   context 'requires valid imports' do
     let(:spec_location) do
       File.join(File.dirname(__FILE__), 'data',

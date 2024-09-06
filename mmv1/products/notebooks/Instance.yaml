@@ -13,6 +13,11 @@
 
 --- !ruby/object:Api::Resource
 name: 'Instance'
+# This resource should not be removed until the 2025 major release or later.
+# Check instance availability first before fully removing.
+deprecation_message: >-
+  `google_notebook_instance` is deprecated and will be removed in a future major release.
+  Use `google_workbench_instance` instead.
 description: |
   A Cloud AI Platform Notebook instance.
 
@@ -33,47 +38,79 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
   fetch_iam_policy_verb: :GET
   parent_resource_attribute: 'instance_name'
-  import_format: ["projects/{{project}}/locations/{{location}}/instances/{{instance_name}}",
-    "{{instance_name}}"]
+  import_format:
+    [
+      'projects/{{project}}/locations/{{location}}/instances/{{instance_name}}',
+      '{{instance_name}}',
+    ]
   base_url: projects/{{project}}/locations/{{location}}/instances/{{instance_name}}
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "notebook_instance_basic"
-    primary_resource_id: "instance"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\", context[\"\
+    name: 'notebook_instance_basic'
+    primary_resource_id: 'instance'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\",
+      context[\"\
       random_suffix\"])"
-    region_override: "us-west1-a"
+    region_override: 'us-west1-a'
     vars:
-      instance_name: "notebooks-instance"
+      instance_name: 'notebooks-instance'
   - !ruby/object:Provider::Terraform::Examples
-    name: "notebook_instance_basic_container"
-    primary_resource_id: "instance"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\", context[\"\
+    name: 'notebook_instance_basic_stopped'
+    primary_resource_id: 'instance'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\",
+      context[\"\
       random_suffix\"])"
-    region_override: "us-west1-a"
+    region_override: 'us-west1-a'
     vars:
-      instance_name: "notebooks-instance"
+      instance_name: 'notebooks-instance'
+    ignore_read_extra:
+      - 'desired_state'
   - !ruby/object:Provider::Terraform::Examples
-    name: "notebook_instance_basic_gpu"
-    primary_resource_id: "instance"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\", context[\"\
+    name: 'notebook_instance_basic_container'
+    primary_resource_id: 'instance'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\",
+      context[\"\
       random_suffix\"])"
-    region_override: "us-west1-a"
+    region_override: 'us-west1-a'
     vars:
-      instance_name: "notebooks-instance"
+      instance_name: 'notebooks-instance'
   - !ruby/object:Provider::Terraform::Examples
-    name: "notebook_instance_full"
-    primary_resource_id: "instance"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\", context[\"\
+    name: 'notebook_instance_basic_gpu'
+    primary_resource_id: 'instance'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\",
+      context[\"\
       random_suffix\"])"
-    region_override: "us-west1-a"
+    region_override: 'us-west1-a'
     vars:
-      instance_name: "notebooks-instance"
+      instance_name: 'notebooks-instance'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'notebook_instance_full'
+    primary_resource_id: 'instance'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\",
+      context[\"\
+      random_suffix\"])"
+    region_override: 'us-west1-a'
+    vars:
+      instance_name: 'notebooks-instance'
+      key_name: 'my-crypto-key'
+    test_vars_overrides:
+      key_name: 'acctest.BootstrapKMSKeyInLocation(t, "global").CryptoKey.Name'
     test_env_vars:
       service_account: :SERVICE_ACCT
+virtual_fields:
+  - !ruby/object:Api::Type::String
+    name: desired_state
+    description: |
+      Desired state of the Notebook Instance. Set this field to `ACTIVE` to start the Instance, and `STOPPED` to stop the Instance.
+    default_value: ACTIVE
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/notebooks_instance.go
+  constants: templates/terraform/constants/notebooks_instance.go.erb
+  update_encoder: templates/terraform/update_encoder/notebooks_instance.go.erb
+  post_create: templates/terraform/post_create/notebooks_instance.go.erb
+  post_update: templates/terraform/post_update/notebooks_instance.go.erb
+state_upgraders: true
+schema_version: 1
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'location'
@@ -91,7 +128,6 @@ properties:
     required: true
     immutable: true
     url_param_only: true
-    pattern: projects/{{project}}/locations/{{location}}/instances/{{name}}
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   - !ruby/object:Api::Type::String
     name: 'machineType'
@@ -103,8 +139,7 @@ properties:
     # TODO: Implement allow_stopping_for_update here and for acceleratorConfig
     # update_verb: :PATCH
     # update_url: 'projects/{{project}}/locations/{{location}}/instances/{{name}}:setMachineType'
-    pattern: projects/{{project}}/zones/{{location}}/machineTypes/{{name}}
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String
     name: 'postStartupScript'
@@ -147,6 +182,8 @@ properties:
       - https://www.googleapis.com/auth/cloud-platform
       - https://www.googleapis.com/auth/userinfo.email
     item_type: Api::Type::String
+    default_from_api: true
+    diff_suppress_func: NotebooksInstanceScopesDiffSuppress
   - !ruby/object:Api::Type::NestedObject
     name: 'acceleratorConfig'
     description: |
@@ -308,12 +345,14 @@ properties:
       - CMEK
     description: |
       Disk encryption method used on the boot and data disks, defaults to GMEK.
-    diff_suppress_func: 'emptyOrDefaultStringSuppress("DISK_ENCRYPTION_UNSPECIFIED")'
+    diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("DISK_ENCRYPTION_UNSPECIFIED")'
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'kmsKey'
     description: |
       The KMS key used to encrypt the disks, only applicable if diskEncryption is CMEK.
       Format: projects/{project_id}/locations/{location}/keyRings/{key_ring_id}/cryptoKeys/{key_id}
+    diff_suppress_func: NotebooksInstanceKmsDiffSuppress
   - !ruby/object:Api::Type::Boolean
     name: 'noPublicIp'
     description: |
@@ -327,35 +366,39 @@ properties:
     description: |
       The name of the VPC that this instance is in.
       Format: projects/{project_id}/global/networks/{network_id}
-    diff_suppress_func: compareSelfLinkOrResourceName
+    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
     default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'subnet'
     description: |
       The name of the subnet that this instance is in.
       Format: projects/{project_id}/regions/{region}/subnetworks/{subnetwork_id}
-    diff_suppress_func: compareSelfLinkOrResourceName
+    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
     default_from_api: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Labels to apply to this instance. These can be later modified by the setLabels method.
       An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
     update_verb: :PATCH
     update_url: 'projects/{{project}}/locations/{{location}}/instances/{{name}}:setLabels'
-    default_from_api: true
-    diff_suppress_func: NotebooksInstanceLabelDiffSuppress
   - !ruby/object:Api::Type::Array
     name: 'tags'
     description: |
       The Compute Engine tags to add to instance.
     item_type: Api::Type::String
+    default_from_api: true
+    diff_suppress_func: NotebooksInstanceTagsDiffSuppress
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'metadata'
     description: |
       Custom metadata to apply to this instance.
       An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+    # This was added as part of https://github.com/GoogleCloudPlatform/magic-modules/pull/3761 to
+    # avoid detecting drift, since this field is partially server-managed.
     ignore_read: true
+    update_verb: :PATCH
+    update_url: 'projects/{{project}}/locations/{{location}}/instances/{{name}}:updateMetadataItems'
   - !ruby/object:Api::Type::Time
     name: 'createTime'
     description: 'Instance creation time'

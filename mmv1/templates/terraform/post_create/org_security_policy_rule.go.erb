@@ -1,14 +1,19 @@
 // `parent` is needed to poll the asynchronous operations but its available only on the policy.
 
 policyUrl := fmt.Sprintf("{{ComputeBasePath}}%s", d.Get("policy_id"))
-url, err = replaceVars(d, config, policyUrl)
+url, err = tpgresource.ReplaceVars(d, config, policyUrl)
 if err != nil {
 	return err
 }
 
-policyRes, err := SendRequest(config, "GET", "", url, userAgent, nil)
+policyRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config: config,
+	Method: "GET",
+	RawURL: url,
+	UserAgent: userAgent,
+})
 if err != nil {
-	return handleNotFoundError(err, d, fmt.Sprintf("ComputeOrganizationSecurityPolicy %q", d.Get("policy_id")))
+	return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ComputeOrganizationSecurityPolicy %q", d.Get("policy_id")))
 }
 
 parent := flattenComputeOrganizationSecurityPolicyParent(policyRes["parent"], d, config)

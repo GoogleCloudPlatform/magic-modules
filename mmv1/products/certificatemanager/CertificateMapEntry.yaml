@@ -20,7 +20,7 @@ update_verb: :PATCH
 update_mask: true
 description: |
   CertificateMapEntry is a list of certificate configurations,
-  that have been issued for a particular hostname 
+  that have been issued for a particular hostname
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
@@ -41,23 +41,24 @@ docs: !ruby/object:Provider::Terraform::Docs
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "certificate_manager_certificate_map_entry_full"
-    primary_resource_id: "default"
+    name: 'certificate_manager_certificate_map_entry_full'
+    primary_resource_id: 'default'
     vars:
-      dns_auth_name: "dns-auth"
-      dns_auth_subdomain: "subdomain"
-      dns_auth_name2: "dns-auth2"
-      dns_auth_subdomain2: "subdomain2"
-      cert_map_entry_name: "cert-map-entry"
+      dns_auth_name: 'dns-auth'
+      dns_auth_subdomain: 'subdomain'
+      dns_auth_name2: 'dns-auth2'
+      dns_auth_subdomain2: 'subdomain2'
+      cert_map_entry_name: 'cert-map-entry'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
-    immutable: true
+    immutable:
+      true
       # url_param_only: true
     description: |
-      A user-defined name of the Certificate Map Entry. Certificate Map Entry 
-      names must be unique globally and match pattern 
+      A user-defined name of the Certificate Map Entry. Certificate Map Entry
+      names must be unique globally and match pattern
       'projects/*/locations/*/certificateMaps/*/certificateMapEntries/*'
     custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
@@ -81,23 +82,22 @@ properties:
     name: 'createTime'
     output: true
     description: |
-      Creation timestamp of a Certificate Map Entry. Timestamp in RFC3339 UTC "Zulu" format, 
-      with nanosecond resolution and up to nine fractional digits. 
+      Creation timestamp of a Certificate Map Entry. Timestamp in RFC3339 UTC "Zulu" format,
+      with nanosecond resolution and up to nine fractional digits.
       Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
   - !ruby/object:Api::Type::Time
     name: 'updateTime'
     description: |
-      Update timestamp of a Certificate Map Entry. Timestamp in RFC3339 UTC "Zulu" format, 
-      with nanosecond resolution and up to nine fractional digits. 
+      Update timestamp of a Certificate Map Entry. Timestamp in RFC3339 UTC "Zulu" format,
+      with nanosecond resolution and up to nine fractional digits.
       Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
     output: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Set of labels associated with a Certificate Map Entry.
       An object containing a list of "key": value pairs.
       Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
-    default_from_api: true
   - !ruby/object:Api::Type::Array
     name: 'certificates'
     required: true
@@ -105,7 +105,7 @@ properties:
       A set of Certificates defines for the given hostname.
       There can be defined up to fifteen certificates in each Certificate Map Entry.
       Each certificate must match pattern projects/*/locations/*/certificates/*.
-    diff_suppress_func: projectNumberDiffSuppress
+    diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
     item_type: Api::Type::String
   - !ruby/object:Api::Type::String
     name: 'state'
@@ -130,5 +130,3 @@ properties:
       - matcher
     description: |
       A predefined matcher for particular cases, other than SNI selection
-
-

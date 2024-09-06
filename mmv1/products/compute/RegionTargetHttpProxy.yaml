@@ -27,7 +27,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -43,19 +43,19 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_target_http_proxy_basic"
-    primary_resource_id: "default"
+    name: 'region_target_http_proxy_basic'
+    primary_resource_id: 'default'
     vars:
-      region_target_http_proxy_name: "test-proxy"
-      region_url_map_name: "url-map"
-      region_backend_service_name: "backend-service"
-      region_health_check_name: "http-health-check"
+      region_target_http_proxy_name: 'test-proxy'
+      region_url_map_name: 'url-map'
+      region_backend_service_name: 'backend-service'
+      region_health_check_name: 'http-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_target_http_proxy_https_redirect"
-    primary_resource_id: "default"
+    name: 'region_target_http_proxy_https_redirect'
+    primary_resource_id: 'default'
     vars:
-      region_target_http_proxy_name: "test-https-redirect-proxy"
-      region_url_map_name: "url-map"
+      region_target_http_proxy_name: 'test-https-redirect-proxy'
+      region_url_map_name: 'url-map'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
@@ -68,6 +68,7 @@ parameters:
       If it is not provided, the provider region is used.
     default_from_api: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -101,4 +102,5 @@ properties:
       to the BackendService.
     required: true
     update_verb: :POST
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
     update_url: 'projects/{{project}}/regions/{{region}}/targetHttpProxies/{{name}}/setUrlMap'

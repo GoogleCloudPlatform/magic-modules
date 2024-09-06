@@ -1,6 +1,6 @@
-func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
 		return v
 	}
-	return schema.NewSet(computeRouterNatIPsHash, convertStringArrToInterface(convertAndMapStringArr(v.([]interface{}), ConvertSelfLinkToV1)))
+	return schema.NewSet(computeRouterNatIPsHash, tpgresource.ConvertStringArrToInterface(tpgresource.ConvertAndMapStringArr(v.([]interface{}), tpgresource.ConvertSelfLinkToV1)))
 }

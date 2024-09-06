@@ -31,7 +31,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -47,13 +47,13 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "target_grpc_proxy_basic"
-    primary_resource_id: "default"
+    name: 'target_grpc_proxy_basic'
+    primary_resource_id: 'default'
     vars:
-      proxy_name: "proxy"
-      urlmap_name: "urlmap"
-      backend_name: "backend"
-      healthcheck_name: "healthcheck"
+      proxy_name: 'proxy'
+      urlmap_name: 'urlmap'
+      backend_name: 'backend'
+      healthcheck_name: 'healthcheck'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -87,7 +87,7 @@ properties:
     immutable: true
     update_id: 'urlMap'
     fingerprint_name: 'fingerprint'
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::Boolean
     name: 'validateForProxyless'
     immutable: true
@@ -112,4 +112,3 @@ properties:
       TargetGrpcProxy; otherwise, the request will fail with error
       412 conditionNotMet. To see the latest fingerprint, make a get()
       request to retrieve the TargetGrpcProxy. A base64-encoded string.
-

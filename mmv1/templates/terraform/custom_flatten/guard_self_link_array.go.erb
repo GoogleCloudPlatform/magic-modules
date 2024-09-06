@@ -13,9 +13,9 @@
 	# limitations under the License.
 -%>
 <%# This should be used for multi-resource ref fields that can't be made to real resource refs yet %>
-func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
 		return v
 	}
-	return convertAndMapStringArr(v.([]interface{}), ConvertSelfLinkToV1)
+	return tpgresource.ConvertAndMapStringArr(v.([]interface{}), tpgresource.ConvertSelfLinkToV1)
 }

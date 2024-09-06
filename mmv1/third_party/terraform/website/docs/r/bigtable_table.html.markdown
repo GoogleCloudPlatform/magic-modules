@@ -49,6 +49,32 @@ resource "google_bigtable_table" "table" {
 
   column_family {
     family = "family-second"
+    type   = "intsum"
+  }
+
+  column_family {
+    family = "family-third"
+    type   = <<EOF
+        {
+					"aggregateType": {
+						"max": {},
+						"inputType": {
+							"int64Type": {
+								"encoding": {
+									"bigEndianBytes": {}
+								}
+							}
+						}
+					}
+				}
+        EOF
+  }
+
+  change_stream_retention = "24h0m0s"
+
+  automated_backup_policy {
+    retention_period = "72h0m0s"
+    frequency = "24h0m0s"
   }
 }
 ```
@@ -72,11 +98,16 @@ to delete/recreate the entire `google_bigtable_table` resource.
 
 * `deletion_protection` - (Optional) A field to make the table protected against data loss i.e. when set to PROTECTED, deleting the table, the column families in the table, and the instance containing the table would be prohibited. If not provided, deletion protection will be set to UNPROTECTED.
 
+* `change_stream_retention` - (Optional) Duration to retain change stream data for the table. Set to 0 to disable. Must be between 1 and 7 days.
+
+* `automated_backup_policy` - (Optional) Defines an automated backup policy for a table, specified by Retention Period and Frequency. To disable, set both Retention Period and Frequency to 0.
+
 -----
 
 `column_family` supports the following arguments:
 
 * `family` - (Optional) The name of the column family.
+* `type`   - (Optional) The type of the column family.
 
 ## Attributes Reference
 
@@ -85,10 +116,34 @@ exported:
 
 * `id` - an identifier for the resource with format `projects/{{project}}/instances/{{instance_name}}/tables/{{name}}`
 
+## Timeouts
+
+This resource provides the following
+[Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options:
+
+- `create` - Default is 45 minutes.
+- `update` - Default is 20 minutes.
 
 ## Import
 
+-> **Fields affected by import** The following fields can't be read and will show diffs if set in config when imported: `split_keys`
+
 Bigtable Tables can be imported using any of these accepted formats:
+
+* `projects/{{project}}/instances/{{instance_name}}/tables/{{name}}`
+* `{{project}}/{{instance_name}}/{{name}}`
+* `{{instance_name}}/{{name}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import Bigtable Tables using one of the formats above. For example:
+
+```tf
+import {
+  id = "projects/{{project}}/instances/{{instance_name}}/tables/{{name}}"
+  to = google_bigtable_table.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), Bigtable Tables can be imported using one of the formats above. For example:
 
 ```
 $ terraform import google_bigtable_table.default projects/{{project}}/instances/{{instance_name}}/tables/{{name}}
@@ -96,6 +151,4 @@ $ terraform import google_bigtable_table.default {{project}}/{{instance_name}}/{
 $ terraform import google_bigtable_table.default {{instance_name}}/{{name}}
 ```
 
-The following fields can't be read and will show diffs if set in config when imported:
 
-- `split_keys`

@@ -18,7 +18,7 @@ Four different resources help you manage your IAM policy for a organization. Eac
 
 ~> **Note:** `google_organization_iam_binding` resources **can be** used in conjunction with `google_organization_iam_member` resources **only if** they do not grant privilege to the same role.
 
-## google\_organization\_iam\_policy
+## google_organization_iam_policy
 
 !> **Warning:** New organizations have several default policies which will,
    without extreme caution, be **overwritten** by use of this resource.
@@ -34,7 +34,7 @@ Four different resources help you manage your IAM policy for a organization. Eac
 
 ```hcl
 resource "google_organization_iam_policy" "organization" {
-  org_id      = "your-organization-id"
+  org_id      = "1234567890"
   policy_data = data.google_iam_policy.admin.policy_data
 }
 
@@ -53,7 +53,7 @@ With IAM Conditions:
 
 ```hcl
 resource "google_organization_iam_policy" "organization" {
-  org_id      = "your-organization-id"
+  org_id      = "1234567890"
   policy_data = "${data.google_iam_policy.admin.policy_data}"
 }
 
@@ -74,13 +74,13 @@ data "google_iam_policy" "admin" {
 }
 ```
 
-## google\_organization\_iam\_binding
+## google_organization_iam_binding
 
 ~> **Note:** If `role` is set to `roles/owner` and you don't specify a user or service account you have access to in `members`, you can lock yourself out of your organization.
 
 ```hcl
 resource "google_organization_iam_binding" "organization" {
-  org_id  = "your-organization-id"
+  org_id  = "1234567890"
   role    = "roles/editor"
 
   members = [
@@ -93,7 +93,7 @@ With IAM Conditions:
 
 ```hcl
 resource "google_organization_iam_binding" "organization" {
-  org_id  = "your-organization-id"
+  org_id  = "1234567890"
   role    = "roles/editor"
 
   members = [
@@ -108,11 +108,11 @@ resource "google_organization_iam_binding" "organization" {
 }
 ```
 
-## google\_organization\_iam\_member
+## google_organization_iam_member
 
 ```hcl
 resource "google_organization_iam_member" "organization" {
-  org_id  = "your-organization-id"
+  org_id  = "1234567890"
   role    = "roles/editor"
   member  = "user:jane@example.com"
 }
@@ -122,7 +122,7 @@ With IAM Conditions:
 
 ```hcl
 resource "google_organization_iam_member" "organization" {
-  org_id  = "your-organization-id"
+  org_id  = "1234567890"
   role    = "roles/editor"
   member  = "user:jane@example.com"
 
@@ -134,11 +134,11 @@ resource "google_organization_iam_member" "organization" {
 }
 ```
 
-## google\_organization\_iam\_audit\_config
+## google_organization_iam_audit_config
 
 ```hcl
 resource "google_organization_iam_audit_config" "organization" {
-  org_id = "your-organization-id"
+  org_id = "1234567890"
   service = "allServices"
   audit_log_config {
     log_type = "ADMIN_READ"
@@ -156,14 +156,14 @@ resource "google_organization_iam_audit_config" "organization" {
 
 The following arguments are supported:
 
-* `member/members` - (Required except for google\_organization\_iam\_audit\_config) Identities that will be granted the privilege in `role`.
+* `member/members` - (Required except for google_organization_iam_audit_config) Identities that will be granted the privilege in `role`.
   Each entry can have one of the following values:
   * **user:{emailid}**: An email address that represents a specific Google account. For example, alice@gmail.com or joe@example.com.
   * **serviceAccount:{emailid}**: An email address that represents a service account. For example, my-other-app@appspot.gserviceaccount.com.
   * **group:{emailid}**: An email address that represents a Google group. For example, admins@example.com.
   * **domain:{domain}**: A G Suite domain (primary, instead of alias) name that represents all the users of that domain. For example, google.com or example.com.
 
-* `role` - (Required except for google\_organization\_iam\_audit\_config) The role that should be applied. Only one
+* `role` - (Required except for google_organization_iam_audit_config) The role that should be applied. Only one
     `google_organization_iam_binding` can be used per role. Note that custom roles must be of the format
     `organizations/{{org_id}}/roles/{{role_id}}`.
 
@@ -176,13 +176,11 @@ The following arguments are supported:
     Deleting this removes all policies from the organization, locking out users without
     organization-level access.
 
-* `org_id` - (Optional) The organization ID. If not specified for `google_organization_iam_binding`, `google_organization_iam_member`, or `google_organization_iam_audit_config`, uses the ID of the organization configured with the provider.
-Required for `google_organization_iam_policy` - you must explicitly set the organization, and it
-will not be inferred from the provider.
+* `org_id` - (Required) The organization id of the target organization.
 
-* `service` - (Required only by google\_organization\_iam\_audit\_config) Service which will be enabled for audit logging.  The special value `allServices` covers all services.  Note that if there are google\_organization\_iam\_audit\_config resources covering both `allServices` and a specific service then the union of the two AuditConfigs is used for that service: the `log_types` specified in each `audit_log_config` are enabled, and the `exempted_members` in each `audit_log_config` are exempted.
+* `service` - (Required only by google_organization_iam_audit_config) Service which will be enabled for audit logging.  The special value `allServices` covers all services.  Note that if there are google_organization_iam_audit_config resources covering both `allServices` and a specific service then the union of the two AuditConfigs is used for that service: the `log_types` specified in each `audit_log_config` are enabled, and the `exempted_members` in each `audit_log_config` are exempted.
 
-* `audit_log_config` - (Required only by google\_organization\_iam\_audit\_config) The configuration for logging of each type of permission.  This can be specified multiple times.  Structure is [documented below](#nested_audit_log_config).
+* `audit_log_config` - (Required only by google_organization_iam_audit_config) The configuration for logging of each type of permission.  This can be specified multiple times.  Structure is [documented below](#nested_audit_log_config).
 
 * `condition` - (Optional) An [IAM Condition](https://cloud.google.com/iam/docs/conditions-overview) for a given binding.
   Structure is [documented below](#nested_condition).
@@ -217,32 +215,94 @@ exported:
 
 ## Import
 
-IAM member imports use space-delimited identifiers; the resource in question, the role, and the account.  This member resource can be imported using the `org_id`, role, and member e.g.
-
-```
-$ terraform import google_organization_iam_member.my_organization "your-orgid roles/viewer user:foo@example.com"
-```
-
-IAM binding imports use space-delimited identifiers; the resource in question and the role.  This binding resource can be imported using the `org_id` and role, e.g.
-
-```
-terraform import google_organization_iam_binding.my_organization "your-org-id roles/viewer"
-```
-
-IAM policy imports use the identifier of the resource in question.  This policy resource can be imported using the `org_id`.
-
-```
-$ terraform import google_organization_iam_policy.my_organization your-org-id
-```
-
-IAM audit config imports use the identifier of the resource in question and the service, e.g.
-
-```
-terraform import google_organization_iam_audit_config.my_organization "your-organization-id foo.googleapis.com"
-```
-
 -> **Custom Roles**: If you're importing a IAM resource with a custom role, make sure to use the
  full name of the custom role, e.g. `organizations/{{org_id}}/roles/{{role_id}}`.
 
 -> **Conditional IAM Bindings**: If you're importing a IAM binding with a condition block, make sure
  to include the title of condition, e.g. `terraform import google_organization_iam_binding.my_organization "your-org-id roles/{{role_id}} condition-title"`
+
+### Importing IAM members
+
+IAM member imports use space-delimited identifiers that contain the resource's `org_id`, `role`, and `member` e.g.
+
+* `"{{org_id}} roles/viewer user:foo@example.com"`
+
+An [`import` block](https://developer.hashicorp.com/terraform/language/import) (Terraform v1.5.0 and later) can be used to import IAM members:
+
+```tf
+import {
+  id = "{{org_id}} roles/viewer user:foo@example.com"
+  to = google_organization_iam_member.default
+}
+```
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can also be used:
+
+```
+$ terraform import google_organization_iam_member.default "{{org_id}} roles/viewer user:foo@example.com"
+```
+
+### Importing IAM bindings
+
+IAM binding imports use space-delimited identifiers that contain the `org_id` and role, e.g.
+
+* `"{{org_id}} roles/viewer"`
+
+An [`import` block](https://developer.hashicorp.com/terraform/language/import) (Terraform v1.5.0 and later) can be used to import IAM bindings:
+
+```tf
+import {
+  id = "{{org_id}} roles/viewer"
+  to = google_organization_iam_binding.default
+}
+```
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can also be used:
+
+```
+terraform import google_organization_iam_binding.default "{{org_id}} roles/viewer"
+```
+
+### Importing IAM policies
+
+IAM policy imports use the identifier of the Organization only. For example:
+
+* `"{{org_id}}"`
+
+An [`import` block](https://developer.hashicorp.com/terraform/language/import) (Terraform v1.5.0 and later) can be used to import IAM policies:
+
+```tf
+import {
+  id = "{{org_id}}"
+  to = google_organization_iam_policy.default
+}
+```
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can also be used:
+
+```
+$ terraform import google_organization_iam_policy.default "{{org_id}}"
+```
+
+
+### Importing Audit Configs
+
+An audit config can be imported into a `google_organization_iam_audit_config` resource using the resource's `org_id` and the `service`, e.g:
+
+* `"{{org_id}} foo.googleapis.com"`
+
+
+An [`import` block](https://developer.hashicorp.com/terraform/language/import) (Terraform v1.5.0 and later) can be used to import audit configs:
+
+```tf
+import {
+  id = "{{org_id}} foo.googleapis.com"
+  to = google_organization_iam_audit_config.default
+}
+```
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can also be used:
+
+```
+terraform import google_organization_iam_audit_config.default "{{org_id}} foo.googleapis.com"
+```

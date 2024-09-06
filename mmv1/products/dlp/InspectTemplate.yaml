@@ -13,9 +13,9 @@
 
 --- !ruby/object:Api::Resource
 name: 'InspectTemplate'
-create_url: "{{parent}}/inspectTemplates"
-self_link: "{{parent}}/inspectTemplates/{{name}}"
-base_url: "{{parent}}/inspectTemplates"
+create_url: '{{parent}}/inspectTemplates'
+self_link: '{{parent}}/inspectTemplates/{{name}}'
+base_url: '{{parent}}/inspectTemplates'
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -24,24 +24,46 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/dlp/docs/creating-templates-inspect'
   api: 'https://cloud.google.com/dlp/docs/reference/rest/v2/projects.inspectTemplates'
-id_format: "{{parent}}/inspectTemplates/{{name}}"
+id_format: '{{parent}}/inspectTemplates/{{name}}'
+# Skip sweeper due to non-standard URL
+skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "dlp_inspect_template_basic"
-    primary_resource_id: "basic"
+    name: 'dlp_inspect_template_basic'
+    primary_resource_id: 'basic'
     vars:
-      template: "temp"
+      template: 'temp'
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
-    name: "dlp_inspect_template_custom_type"
-    primary_resource_id: "custom"
+    name: 'dlp_inspect_template_custom_type'
+    primary_resource_id: 'custom'
     vars:
-      template: "temp"
+      template: 'temp'
+    test_env_vars:
+      project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_inspect_template_custom_type_surrogate'
+    primary_resource_id: 'custom_type_surrogate'
+    test_env_vars:
+      project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_inspect_template_with_template_id'
+    primary_resource_id: 'with_template_id'
+    vars:
+      name: 'my-template'
+    test_env_vars:
+      project: :PROJECT_NAME
+    skip_docs: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_inspect_template_max_infotype_per_finding_default'
+    primary_resource_id: 'max_infotype_per_finding_default'
     test_env_vars:
       project: :PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  encoder: templates/terraform/encoders/wrap_object.go.erb
+  decoder: templates/terraform/decoders/dlp_template_id.go.erb
+  encoder: templates/terraform/encoders/wrap_object_with_template_id.go.erb
+  update_encoder: templates/terraform/encoders/wrap_object.go.erb
   custom_import: templates/terraform/custom_import/dlp_import.go.erb
 parameters:
   - !ruby/object:Api::Type::String
@@ -71,6 +93,15 @@ properties:
     name: 'displayName'
     description: |
       User set display name of the inspect template.
+  - !ruby/object:Api::Type::String
+    name: 'templateId'
+    description: |
+      The template id can contain uppercase and lowercase letters, numbers, and hyphens;
+      that is, it must match the regular expression: [a-zA-Z\d-_]+. The maximum length is
+      100 characters. Can be empty to allow the system to generate one.
+    immutable: true
+    default_from_api: true
+    url_param_only: true
   - !ruby/object:Api::Type::NestedObject
     name: 'inspectConfig'
     description: The core content of the template.
@@ -80,8 +111,9 @@ properties:
         description: When true, excludes type information of the findings.
       - !ruby/object:Api::Type::Boolean
         name: 'includeQuote'
-        description: When true, a contextual quote from the data that triggered a
-          finding is included in the response.
+        description:
+          When true, a contextual quote from the data that triggered a finding
+          is included in the response.
       - !ruby/object:Api::Type::Enum
         name: 'minLikelihood'
         description: |
@@ -99,13 +131,15 @@ properties:
         properties:
           - !ruby/object:Api::Type::Integer
             name: 'maxFindingsPerItem'
-            description: Max number of findings that will be returned for each item
+            description:
+              Max number of findings that will be returned for each item
               scanned. The maximum returned is 2000.
             required: true
           - !ruby/object:Api::Type::Integer
             name: 'maxFindingsPerRequest'
-            description: Max number of findings that will be returned per request/job.
-              The maximum returned is 2000.
+            description:
+              Max number of findings that will be returned per request/job. The
+              maximum returned is 2000.
             required: true
           - !ruby/object:Api::Type::Array
             name: 'maxFindingsPerInfoType'
@@ -115,7 +149,6 @@ properties:
               properties:
                 - !ruby/object:Api::Type::NestedObject
                   name: 'infoType'
-                  required: true
                   description: |
                     Type of information the findings limit applies to. Only one limit per infoType should be provided. If InfoTypeLimit does
                     not have an infoType, the DLP API applies the limit against all infoTypes that are found but not
@@ -127,6 +160,24 @@ properties:
                       description: |
                         Name of the information type. Either a name of your choosing when creating a CustomInfoType, or one of the names listed
                         at https://cloud.google.com/dlp/docs/infotypes-reference when specifying a built-in type.
+                    - !ruby/object:Api::Type::String
+                      name: 'version'
+                      description: |
+                        Version name for this InfoType.
+                    - !ruby/object:Api::Type::NestedObject
+                      name: 'sensitivityScore'
+                      description: |
+                        Optional custom sensitivity for this InfoType. This only applies to data profiling.
+                      properties:
+                        - !ruby/object:Api::Type::Enum
+                          name: 'score'
+                          required: true
+                          description: |
+                            The sensitivity score applied to the resource.
+                          values:
+                            - :SENSITIVITY_LOW
+                            - :SENSITIVITY_MODERATE
+                            - :SENSITIVITY_HIGH
                 - !ruby/object:Api::Type::Integer
                   name: 'maxFindings'
                   description: Max findings limit for the given infoType.
@@ -151,6 +202,20 @@ properties:
               name: 'version'
               description: |
                 Version of the information type to use. By default, the version is set to stable
+            - !ruby/object:Api::Type::NestedObject
+              name: 'sensitivityScore'
+              description: |
+                Optional custom sensitivity for this InfoType. This only applies to data profiling.
+              properties:
+                - !ruby/object:Api::Type::Enum
+                  name: 'score'
+                  required: true
+                  description: |
+                    The sensitivity score applied to the resource.
+                  values:
+                    - :SENSITIVITY_LOW
+                    - :SENSITIVITY_MODERATE
+                    - :SENSITIVITY_HIGH
       - !ruby/object:Api::Type::Array
         name: 'contentOptions'
         description: |
@@ -183,6 +248,24 @@ properties:
                     description: |
                       Name of the information type. Either a name of your choosing when creating a CustomInfoType, or one of the names listed
                       at https://cloud.google.com/dlp/docs/infotypes-reference when specifying a built-in type.
+                  - !ruby/object:Api::Type::String
+                    name: 'version'
+                    description: |
+                      Version name for this InfoType.
+                  - !ruby/object:Api::Type::NestedObject
+                    name: 'sensitivityScore'
+                    description: |
+                      Optional custom sensitivity for this InfoType. This only applies to data profiling.
+                    properties:
+                      - !ruby/object:Api::Type::Enum
+                        name: 'score'
+                        required: true
+                        description: |
+                          The sensitivity score applied to the resource.
+                        values:
+                          - :SENSITIVITY_LOW
+                          - :SENSITIVITY_MODERATE
+                          - :SENSITIVITY_HIGH
             - !ruby/object:Api::Type::Array
               name: 'rules'
               required: true
@@ -197,8 +280,9 @@ properties:
                       - !ruby/object:Api::Type::NestedObject
                         name: 'hotwordRegex'
                         required: true
-                        description: Regular expression pattern defining what qualifies
-                          as a hotword.
+                        description:
+                          Regular expression pattern defining what qualifies as
+                          a hotword.
                         properties:
                           - !ruby/object:Api::Type::String
                             name: 'pattern'
@@ -257,8 +341,9 @@ properties:
                               will result in a final likelihood of LIKELY. Either this or fixed_likelihood can be set.
                   - !ruby/object:Api::Type::NestedObject
                     name: 'exclusionRule'
-                    description: The rule that specifies conditions when findings
-                      of infoTypes specified in InspectionRuleSet are removed from
+                    description:
+                      The rule that specifies conditions when findings of
+                      infoTypes specified in InspectionRuleSet are removed from
                       results.
                     properties:
                       - !ruby/object:Api::Type::Enum
@@ -287,8 +372,9 @@ properties:
                                 item_type: Api::Type::String
                           - !ruby/object:Api::Type::NestedObject
                             name: 'cloudStoragePath'
-                            description: Newline-delimited file of words in Cloud
-                              Storage. Only a single file is accepted.
+                            description:
+                              Newline-delimited file of words in Cloud Storage.
+                              Only a single file is accepted.
                             properties:
                               - !ruby/object:Api::Type::String
                                 name: 'path'
@@ -312,8 +398,9 @@ properties:
                             item_type: Api::Type::Integer
                       - !ruby/object:Api::Type::NestedObject
                         name: 'excludeInfoTypes'
-                        description: Set of infoTypes for which findings would affect
-                          this rule.
+                        description:
+                          Set of infoTypes for which findings would affect this
+                          rule.
                         properties:
                           - !ruby/object:Api::Type::Array
                             name: 'infoTypes'
@@ -328,6 +415,67 @@ properties:
                                   description: |
                                     Name of the information type. Either a name of your choosing when creating a CustomInfoType, or one of the names listed
                                     at https://cloud.google.com/dlp/docs/infotypes-reference when specifying a built-in type.
+                                - !ruby/object:Api::Type::String
+                                  name: 'version'
+                                  description: |
+                                    Version name for this InfoType.
+                                - !ruby/object:Api::Type::NestedObject
+                                  name: 'sensitivityScore'
+                                  description: |
+                                    Optional custom sensitivity for this InfoType. This only applies to data profiling.
+                                  properties:
+                                    - !ruby/object:Api::Type::Enum
+                                      name: 'score'
+                                      required: true
+                                      description: |
+                                        The sensitivity score applied to the resource.
+                                      values:
+                                        - :SENSITIVITY_LOW
+                                        - :SENSITIVITY_MODERATE
+                                        - :SENSITIVITY_HIGH
+                      - !ruby/object:Api::Type::NestedObject
+                        name: 'excludeByHotword'
+                        description: |
+                          Drop if the hotword rule is contained in the proximate context.
+                          For tabular data, the context includes the column name.
+                        properties:
+                          - !ruby/object:Api::Type::NestedObject
+                            name: 'hotwordRegex'
+                            required: true
+                            description:
+                              Regular expression pattern defining what qualifies
+                              as a hotword.
+                            properties:
+                              - !ruby/object:Api::Type::String
+                                name: 'pattern'
+                                required: true
+                                description: |
+                                  Pattern defining the regular expression. Its syntax
+                                  (https://github.com/google/re2/wiki/Syntax) can be found under the google/re2 repository on GitHub.
+                              - !ruby/object:Api::Type::Array
+                                name: 'groupIndexes'
+                                description: |
+                                  The index of the submatch to extract as findings. When not specified,
+                                  the entire match is returned. No more than 3 may be included.
+                                item_type: Api::Type::Integer
+                          - !ruby/object:Api::Type::NestedObject
+                            name: 'proximity'
+                            required: true
+                            description: |
+                              Proximity of the finding within which the entire hotword must reside. The total length of the window cannot
+                              exceed 1000 characters. Note that the finding itself will be included in the window, so that hotwords may be
+                              used to match substrings of the finding itself. For example, the certainty of a phone number regex
+                              `(\d{3}) \d{3}-\d{4}` could be adjusted upwards if the area code is known to be the local area code of a company
+                              office using the hotword regex `(xxx)`, where `xxx` is the area code in question.
+                            properties:
+                              - !ruby/object:Api::Type::Integer
+                                name: 'windowBefore'
+                                description: |
+                                  Number of characters before the finding to consider.
+                              - !ruby/object:Api::Type::Integer
+                                name: 'windowAfter'
+                                description: |
+                                  Number of characters after the finding to consider.
       - !ruby/object:Api::Type::Array
         name: 'customInfoTypes'
         description: |
@@ -349,6 +497,24 @@ properties:
                   description: |
                     Name of the information type. Either a name of your choosing when creating a CustomInfoType, or one of the names
                     listed at https://cloud.google.com/dlp/docs/infotypes-reference when specifying a built-in type.
+                - !ruby/object:Api::Type::String
+                  name: 'version'
+                  description: |
+                    Version name for this InfoType.
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'sensitivityScore'
+                  description: |
+                    Optional custom sensitivity for this InfoType. This only applies to data profiling.
+                  properties:
+                    - !ruby/object:Api::Type::Enum
+                      name: 'score'
+                      required: true
+                      description: |
+                        The sensitivity score applied to the resource.
+                      values:
+                        - :SENSITIVITY_LOW
+                        - :SENSITIVITY_MODERATE
+                        - :SENSITIVITY_HIGH
             - !ruby/object:Api::Type::Enum
               name: 'likelihood'
               description: |
@@ -367,6 +533,20 @@ properties:
                 If set to EXCLUSION_TYPE_EXCLUDE this infoType will not cause a finding to be returned. It still can be used for rules matching.
               values:
                 - :EXCLUSION_TYPE_EXCLUDE
+            - !ruby/object:Api::Type::NestedObject
+              name: 'sensitivityScore'
+              description: |
+                Optional custom sensitivity for this InfoType. This only applies to data profiling.
+              properties:
+                - !ruby/object:Api::Type::Enum
+                  name: 'score'
+                  required: true
+                  description: |
+                    The sensitivity score applied to the resource.
+                  values:
+                    - :SENSITIVITY_LOW
+                    - :SENSITIVITY_MODERATE
+                    - :SENSITIVITY_HIGH
             - !ruby/object:Api::Type::NestedObject
               name: 'regex'
               description: Regular expression which defines the rule.
@@ -401,14 +581,23 @@ properties:
                       item_type: Api::Type::String
                 - !ruby/object:Api::Type::NestedObject
                   name: 'cloudStoragePath'
-                  description: Newline-delimited file of words in Cloud Storage. Only
-                    a single file is accepted.
+                  description:
+                    Newline-delimited file of words in Cloud Storage. Only a
+                    single file is accepted.
                   properties:
                     - !ruby/object:Api::Type::String
                       name: 'path'
                       required: true
                       description: |
                         A url representing a file or path (no wildcards) in Cloud Storage. Example: `gs://[BUCKET_NAME]/dictionary.txt`
+            - !ruby/object:Api::Type::NestedObject
+              name: 'surrogateType'
+              description: |
+                Message for detecting output from deidentification transformations that support reversing.
+              immutable: true
+              properties: []
+              send_empty_value: true
+              allow_empty_object: true
             - !ruby/object:Api::Type::NestedObject
               name: 'storedType'
               description: A reference to a StoredInfoType to use with scanning.
@@ -420,4 +609,3 @@ properties:
                   description: |
                     Resource name of the requested StoredInfoType, for example `organizations/433245324/storedInfoTypes/432452342`
                     or `projects/project-id/storedInfoTypes/432452342`.
-

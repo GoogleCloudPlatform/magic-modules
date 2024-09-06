@@ -1,0 +1,19 @@
+[
+    {
+        "name": "//compute.googleapis.com/projects/{{.Provider.project}}/global/urlMaps/urlmap",
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+        "asset_type": "compute.googleapis.com/UrlMap",
+        "resource": {
+            "version": "beta",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+            "discovery_name": "UrlMap",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "defaultService": "projects/{{.Provider.project}}/global/backendServices/default_service",
+                "description": "a description",
+                "name": "urlmap"
+            }
+        },
+        "ancestors": ["organizations/{{.OrgID}}"]
+    }
+]

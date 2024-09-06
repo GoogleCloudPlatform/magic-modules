@@ -1,0 +1,110 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'PrivateConnection'
+base_url: 'projects/{{project}}/locations/{{location}}/privateConnections'
+create_url: 'projects/{{project}}/locations/{{location}}/privateConnections?privateConnectionId={{private_connection_id}}'
+self_link: 'projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}'
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/database-migration/docs/oracle-to-postgresql/create-private-connectivity-configuration'
+  api: 'https://cloud.google.com/database-migration/docs/reference/rest/v1/projects.locations.privateConnections'
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+timeouts: !ruby/object:Api::Timeouts
+  insert_minutes: 60
+  delete_minutes: 60
+autogen_async: true
+description: |
+  The PrivateConnection resource is used to establish private connectivity between Database Migration Service and a customer's network.
+immutable: true
+id_format: projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}
+import_format:
+  [
+    'projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}',
+  ]
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'database_migration_service_private_connection'
+    primary_resource_id: 'default'
+    vars:
+      private_connection_id: 'my-connection'
+      network_name: 'my-network'
+parameters:
+  - !ruby/object:Api::Type::String
+    name: privateConnectionId
+    description: |
+      The private connectivity identifier.
+    required: true
+    immutable: true
+    url_param_only: true
+  - !ruby/object:Api::Type::String
+    name: 'location'
+    description: |
+      The name of the location this private connection is located in.
+    required: true
+    immutable: true
+    url_param_only: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    output: true
+    description: The resource's name.
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
+    description: Labels.
+  - !ruby/object:Api::Type::String
+    name: 'displayName'
+    description: Display name.
+    default_from_api: true
+  - !ruby/object:Api::Type::String
+    name: 'state'
+    description: |
+      State of the PrivateConnection.
+    output: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'error'
+    output: true
+    description: |
+      The PrivateConnection error in case of failure.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'message'
+        description: |
+          A message containing more information about the error that occurred.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'details'
+        description: |
+          A list of messages that carry the error details.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'vpcPeeringConfig'
+    required: true
+    description: |
+      The VPC Peering configuration is used to create VPC peering
+      between databasemigrationservice and the consumer's VPC.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'vpcName'
+        required: true
+        description: |
+          Fully qualified name of the VPC that Database Migration Service will peer to.
+          Format: projects/{project}/global/{networks}/{name}
+      - !ruby/object:Api::Type::String
+        name: 'subnet'
+        required: true
+        description: |
+          A free subnet for peering. (CIDR of /29)

@@ -1,6 +1,7 @@
 resource "google_cloud_run_v2_service" "<%= ctx[:primary_resource_id] %>" {
   name     = "<%= ctx[:vars]['cloud_run_service_name'] %>"
   location = "us-central1"
+  deletion_protection = false
   ingress = "INGRESS_TRAFFIC_ALL"
   
   template {
@@ -51,7 +52,7 @@ data "google_project" "project" {
 resource "google_secret_manager_secret" "secret" {
   secret_id = "<%= ctx[:vars]['secret_id'] %>"
   replication {
-    automatic = true
+    auto {}
   }
 }
 

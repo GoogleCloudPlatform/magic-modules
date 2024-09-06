@@ -1,6 +1,18 @@
-readRes, err := SendRequest(config, "GET", project, url, userAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+readRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config: config,
+	Method: "GET",
+	Project: project,
+	RawURL: url,
+	UserAgent: userAgent,
+<% if object.error_retry_predicates -%>
+	ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_retry_predicates.join(',') -%>},
+<% end -%>
+<% if object.error_abort_predicates -%>
+	ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_abort_predicates.join(',') -%>},
+<% end -%>
+})
 if err != nil {
-	return handleNotFoundError(err, d, fmt.Sprintf("ComputeDisk %q", d.Id()))
+	return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ComputeDisk %q", d.Id()))
 }
 
 // if disks are attached to instances, they must be detached before the disk can be deleted
@@ -8,9 +20,9 @@ if v, ok := readRes["users"].([]interface{}); ok {
 	type detachArgs struct{ project, zone, instance, deviceName string }
 	var detachCalls []detachArgs
 
-	for _, instance := range convertStringArr(v) {
+	for _, instance := range tpgresource.ConvertStringArr(v) {
 		self := d.Get("self_link").(string)
-		instanceProject, instanceZone, instanceName, err := GetLocationalResourcePropertiesFromSelfLinkString(instance)
+		instanceProject, instanceZone, instanceName, err := tpgresource.GetLocationalResourcePropertiesFromSelfLinkString(instance)
 		if err != nil {
 			return err
 		}
@@ -24,10 +36,10 @@ if v, ok := readRes["users"].([]interface{}); ok {
 			return fmt.Errorf("Error retrieving instance %s: %s", instance, err.Error())
 		}
 		for _, disk := range i.Disks {
-			if compareSelfLinkOrResourceName("", disk.Source, self, nil) {
+			if tpgresource.CompareSelfLinkOrResourceName("", disk.Source, self, nil) {
 				detachCalls = append(detachCalls, detachArgs{
 					project:    instanceProject,
-					zone:       GetResourceNameFromSelfLink(i.Zone),
+					zone:       tpgresource.GetResourceNameFromSelfLink(i.Zone),
 					instance:   i.Name,
 					deviceName: disk.DeviceName,
 				})
@@ -44,7 +56,8 @@ if v, ok := readRes["users"].([]interface{}); ok {
 		err = ComputeOperationWaitTime(config, op, call.project,
 			fmt.Sprintf("Detaching disk from %s/%s/%s", call.project, call.zone, call.instance), userAgent, d.Timeout(schema.TimeoutDelete))
 		if err != nil {
-			if opErr, ok := err.(ComputeOperationError); ok && len(opErr.Errors) == 1 && opErr.Errors[0].Code == "RESOURCE_NOT_FOUND" {
+			var opErr ComputeOperationError
+			if errors.As(err, &opErr) && len(opErr.Errors) == 1 && opErr.Errors[0].Code == "RESOURCE_NOT_FOUND" {
 				log.Printf("[WARN] instance %q was deleted while awaiting detach", call.instance)
 				continue
 			}

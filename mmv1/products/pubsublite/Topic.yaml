@@ -26,15 +26,17 @@ update_mask: true
 update_url: projects/{{project}}/locations/{{zone}}/topics/{{name}}
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "pubsub_lite_topic_basic"
-    primary_resource_id: "example"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-example-topic%s\", context[\"random_suffix\"\
+    name: 'pubsub_lite_topic_basic'
+    primary_resource_id: 'example'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-example-topic%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
-      reservation_name: "example-reservation"
-      topic_name: "example-topic"
+      reservation_name: 'example-reservation'
+      topic_name: 'example-topic'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  encoder: templates/terraform/encoders/pubsub_lite.erb
+  encoder:
+    templates/terraform/encoders/pubsub_lite.erb
     #   update_encoder: templates/terraform/update_encoder/pubsub_topic.erb
 parameters:
   - !ruby/object:Api::Type::String
@@ -51,7 +53,7 @@ parameters:
     required: true
     immutable: true
     url_param_only: true
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
 properties:
@@ -110,6 +112,5 @@ properties:
         imports: 'name'
         description: |
           The Reservation to use for this topic's throughput capacity.
-        pattern: 'projects/{{project}}/locations/{{region}}/reservations/{{name}}'
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
         custom_expand: templates/terraform/custom_expand/pubsublite_topic_reservation_config_throughput_reservation.go.erb

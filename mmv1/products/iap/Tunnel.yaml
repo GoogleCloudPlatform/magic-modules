@@ -21,21 +21,20 @@ exclude_resource: true
 description: |
   Only used to generate IAM resources
 iam_policy: !ruby/object:Api::Resource::IamPolicy
-  exclude: false
   method_name_separator: ':'
   fetch_iam_policy_verb: :POST
   parent_resource_type: 'google_project_service'
   parent_resource_attribute: 'project'
   allowed_iam_role: 'roles/iap.tunnelResourceAccessor'
   iam_conditions_request_type: :REQUEST_BODY
-id_format: "projects/{{project}}/iap_tunnel"
-import_format: ["projects/{{project}}/iap_tunnel"]
+id_format: 'projects/{{project}}/iap_tunnel'
+import_format: ['projects/{{project}}/iap_tunnel']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "iap_project"
-    pull_external: true
-    primary_resource_id: "project_service"
-    primary_resource_name: "fmt.Sprintf(\"tf-test%s\", context[\"random_suffix\"])"
+    name: 'iap_project'
+    external_providers: ["random", "time"]
+    primary_resource_id: 'project_service'
+    primary_resource_name: 'fmt.Sprintf("tf-test%s", context["random_suffix"])'
     test_env_vars:
       org_id: :ORG_ID
 properties:

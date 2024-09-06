@@ -24,7 +24,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -45,12 +45,13 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
 exclude_resource: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "instance_basic"
-    primary_resource_id: "default"
+    name: 'instance_basic'
+    primary_resource_id: 'default'
     vars:
-      instance_name: "my-instance"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\", context[\"random_suffix\"\
-      ])"
+      instance_name: 'my-instance'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\",
+        context[\"random_suffix\"\
+        ])"
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'zone'
@@ -58,6 +59,7 @@ parameters:
     imports: 'name'
     description: 'A reference to the zone where the machine resides.'
     required: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::Boolean
     name: 'canIpForward'
@@ -170,6 +172,7 @@ properties:
                 If not specified, the default is pd-standard.
               resource: 'DiskType'
               imports: 'selfLink'
+              custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
             - !ruby/object:Api::Type::String
               name: 'sourceImage'
               description: |
@@ -178,6 +181,32 @@ properties:
                 disks.source is required.  To create a disk with one of
                 the public operating system images, specify the image
                 by its family name.
+            - !ruby/object:Api::Type::Integer
+              name: 'provisionedIops'
+              description: |
+                Indicates how many IOPS to provision for the disk. This
+                sets the number of I/O operations per second that the
+                disk can handle. Note: Updating currently is only supported for
+                hyperdisk skus via disk update api/gcloud without the need to
+                delete and recreate the disk, hyperdisk allows for an update of
+                IOPS every 4 hours. To update your hyperdisk more frequently,
+                you'll need to manually delete and recreate it.
+            - !ruby/object:Api::Type::Integer
+              name: 'provisionedThroughput'
+              description: |
+                Indicates how much throughput to provision for the disk.
+                This sets the number of throughput mb per second that
+                the disk can handle. Note: Updating currently is only supported
+                for hyperdisk skus via disk update api/gcloud without the need
+                to delete and recreate the disk, hyperdisk allows for an update
+                of throughput every 4 hours. To update your hyperdisk more
+                frequently, you'll need to manually delete and recreate it.
+            - !ruby/object:Api::Type::Boolean
+              name: 'enableConfidentialCompute'
+              description: |
+                Whether this disk is using confidential compute mode.
+                Note: Only supported on hyperdisk skus, disk_encryption_key
+                is required when setting to true.
             - !ruby/object:Api::Type::NestedObject
               name: 'sourceImageEncryptionKey'
               description: |
@@ -203,6 +232,15 @@ properties:
                     customer-supplied encryption key that protects this
                     resource.
                   output: true
+            - !ruby/object:Api::Type::String
+              name: 'storagePool'
+              required: false
+              immutable: true
+              description: |
+                The URL of the storage pool in which the new disk is created.
+                For example:
+                * https://www.googleapis.com/compute/v1/projects/{project}/zones/{zone}/storagePools/{storagePool}
+                * /projects/{project}/zones/{zone}/storagePools/{storagePool}
         - !ruby/object:Api::Type::Enum
           name: 'interface'
           description: |
@@ -214,9 +252,9 @@ properties:
           values:
             - :SCSI
             - :NVME
-      # Ignoring kind - It's a constant and we don't need it.
-      # TODO(alexstephen): Place in licenses - it's a Array of
-      # ResourceRefs
+        # Ignoring kind - It's a constant and we don't need it.
+        # TODO(alexstephen): Place in licenses - it's a Array of
+        # ResourceRefs
         - !ruby/object:Api::Type::Enum
           name: 'mode'
           description: |
@@ -238,6 +276,7 @@ properties:
             If desired, you can also attach existing non-root
             persistent disks using this property. This field is only
             applicable for persistent disks.
+          custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
         - !ruby/object:Api::Type::Enum
           name: 'type'
           description: |
@@ -291,7 +330,7 @@ properties:
       internally during updates.
     update_url: 'projects/{{project}}/zones/{{zone}}/instances/{{name}}/setLabels'
     update_verb: :POST
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Labels to apply to this instance.  A list of key->value pairs.
@@ -330,7 +369,8 @@ properties:
     description: 'A reference to a machine type which defines VM kind.'
     update_url: projects/{{project}}/zones/{{zone}}/instances/{{name}}/setMachineType
     update_verb: :POST
-  # TODO(alexstephen): Add metadata
+    # TODO(alexstephen): Add metadata
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::String
     name: 'minCpuPlatform'
     description: |
@@ -365,7 +405,7 @@ properties:
             external internet access.
           item_type: !ruby/object:Api::Type::NestedObject
             properties:
-             # 'kind' is not needed for object convergence
+              # 'kind' is not needed for object convergence
               - !ruby/object:Api::Type::String
                 name: 'name'
                 description: |
@@ -386,6 +426,7 @@ properties:
                   from a shared ephemeral IP address pool. If you specify a
                   static external IP address, it must live in the same
                   region as the zone of the instance.
+                custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
               - !ruby/object:Api::Type::Enum
                 name: 'type'
                 description: |
@@ -445,6 +486,16 @@ properties:
                   unspecified, the primary range of the subnetwork will
                   be used.
         - !ruby/object:Api::Type::String
+          name: 'internalIpv6PrefixLength'
+          description: |
+            The prefix length of the primary internal IPv6 range.
+        - !ruby/object:Api::Type::String
+          name: 'ipv6Address'
+          description: |
+            An IPv6 internal network address for this network interface.
+            If not specified, Google Cloud will automatically assign an
+            internal IPv6 address from the instance's subnetwork.
+        - !ruby/object:Api::Type::String
           name: 'name'
           description: |
             The name of the network interface, generated by the
@@ -460,6 +511,7 @@ properties:
             the default network global/networks/default is used; if the network
             is not specified but the subnetwork is specified, the network is
             inferred.
+          custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
         - !ruby/object:Api::Type::String
           name: 'networkIP'
           description: |
@@ -478,7 +530,15 @@ properties:
             subnet mode, providing the subnetwork is optional. If
             the network is in custom subnet mode, then this field
             should be specified.
-        # networkInterfaces.kind is not necessary for convergence.
+          # networkInterfaces.kind is not necessary for convergence.
+          custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+        - !ruby/object:Api::Type::ResourceRef
+          name: 'networkAttachment'
+          resource: 'networkAttachment'
+          imports: 'selfLink'
+          description: |
+            The URL of the network attachment that this interface should connect to in the following format:
+            projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}.
   - !ruby/object:Api::Type::NestedObject
     name: 'scheduling'
     description: Sets the scheduling options for this instance.
@@ -523,7 +583,8 @@ properties:
           item_type: Api::Type::String
   - !ruby/object:Api::Type::NestedObject
     name: 'shieldedInstanceConfig'
-    description: Configuration for various parameters related to shielded instances.
+    description:
+      Configuration for various parameters related to shielded instances.
     # The code for this update method is custom because MM does not support
     # sending just the nested properties
     update_verb: :PATCH
@@ -541,17 +602,37 @@ properties:
         update_url: projects/{{project}}/instances/{{name}}/updateShieldedInstanceConfig
       - !ruby/object:Api::Type::Boolean
         name: 'enableIntegrityMonitoring'
-        description: Defines whether the instance has integrity monitoring enabled.
+        description:
+          Defines whether the instance has integrity monitoring enabled.
         update_verb: :PATCH
         update_url: projects/{{project}}/instances/{{name}}/updateShieldedInstanceConfig
   - !ruby/object:Api::Type::NestedObject
     name: 'confidentialInstanceConfig'
-    description: 'Configuration for confidential computing (requires setting the machine
-      type to any of the n2d-* types and a boot disk of type pd-ssd).'
+    description:
+      'Configuration for confidential computing (requires setting the machine
+        type to any of the n2d-* types and a boot disk of type pd-ssd).'
     properties:
       - !ruby/object:Api::Type::Boolean
         name: 'enableConfidentialCompute'
-        description: Enables confidential computing
+        description: Enables confidential computing with AMD SEV.
+        at_least_one_of:
+          - confidential_instance_config.0.enable_confidential_compute
+          - confidential_instance_config.0.confidential_instance_type
+        deprecation_message: "`enableConfidentialCompute` is deprecated and will be removed in a future major release. Use `confidentialInstanceType: SEV` instead."
+      - !ruby/object:Api::Type::Enum
+        name: 'confidentialInstanceType'
+        description: |
+          The confidential computing technology the instance uses.
+          SEV is an AMD feature. TDX is an Intel feature. One of the following
+          values is required: SEV, SEV_SNP, TDX. If SEV_SNP, min_cpu_platform =
+          "AMD Milan" is currently required. TDX is only available in beta.
+        values:
+          - :SEV
+          - :SEV_SNP
+          - :TDX
+        at_least_one_of:
+          - confidential_instance_config.0.enable_confidential_compute
+          - confidential_instance_config.0.confidential_instance_type
   - !ruby/object:Api::Type::Enum
     name: 'status'
     description: |

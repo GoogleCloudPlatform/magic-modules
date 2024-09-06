@@ -25,16 +25,58 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/dataform/docs/'
   api: 'https://cloud.google.com/dataform/reference/rest/v1beta1/projects.locations.repositories'
 id_format: projects/{{project}}/locations/{{region}}/repositories/{{name}}
-import_format: ["projects/{{project}}/locations/{{region}}/repositories/{{name}}"]
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  method_name_separator: ':'
+  parent_resource_attribute: 'repository'
+  min_version: beta
+import_format:
+  ['projects/{{project}}/locations/{{region}}/repositories/{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataform_repository'
-    primary_resource_id: dataform_respository
+    # This example is used in the docs to address this issue
+    # See : https://github.com/hashicorp/terraform-provider-google/issues/17335
+    skip_test: true
+    primary_resource_id: dataform_repository
+    primary_resource_name:
+      'fmt.Sprintf("tf_test_dataform_repository%s", context["random_suffix"])'
     min_version: beta
     vars:
-      git_repository_name: "my/repository"
-      dataform_repository_name: "dataform_repository"
+      dataform_repository_name: 'dataform_repository'
       data: secret-data
+      secret_name: my-secret
+      key_ring_name: example-key-ring
+      crypto_key_name: example-crypto-key-name
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dataform_repository_with_cloudsource_repo'
+    # Although the Terraform config can be applied without error, the connection between Dataform and the SourceRepo aren't yet functional
+    # See : https://github.com/hashicorp/terraform-provider-google/issues/17335
+    # See : https://issuetracker.google.com/issues/287850319
+    skip_docs: true
+    primary_resource_id: dataform_repository
+    primary_resource_name:
+      'fmt.Sprintf("tf_test_dataform_repository%s", context["random_suffix"])'
+    min_version: beta
+    vars:
+      git_repository_name: 'my/repository'
+      dataform_repository_name: 'dataform_repository'
+      data: secret-data
+      secret_name: my-secret
+      key_ring_name: example-key-ring
+      crypto_key_name: example-crypto-key-name
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dataform_repository_with_cloudsource_repo_and_ssh'
+    # Although the Terraform config can be applied without error, the connection between Dataform and the SourceRepo aren't yet functional
+    # See : https://github.com/hashicorp/terraform-provider-google/issues/17335
+    # See : https://issuetracker.google.com/issues/287850319
+    skip_docs: true
+    primary_resource_id: dataform_repository
+    min_version: beta
+    vars:
+      git_repository_name: 'my/repository'
+      dataform_repository_name: 'dataform_repository'
+      data: secret-data
+      secret_name: my-secret
 parameters:
   - !ruby/object:Api::Type::String
     name: 'region'
@@ -50,8 +92,8 @@ properties:
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   - !ruby/object:Api::Type::NestedObject
     name: 'gitRemoteSettings'
-    description: Optional. If set, configures this repository to be linked to a Git
-      remote.
+    description:
+      Optional. If set, configures this repository to be linked to a Git remote.
     properties:
       - !ruby/object:Api::Type::String
         name: 'url'
@@ -63,12 +105,62 @@ properties:
         description: The Git remote's default branch name.
       - !ruby/object:Api::Type::String
         name: 'authenticationTokenSecretVersion'
-        required: true
-        description: The name of the Secret Manager secret version to use as an authentication
-          token for Git operations. Must be in the format projects/*/secrets/*/versions/*.
+        exactly_one_of:
+          - gitRemoteSettings.0.authenticationTokenSecretVersion
+          - gitRemoteSettings.0.sshAuthenticationConfig
+        description:
+          The name of the Secret Manager secret version to use as an
+          authentication token for Git operations. This secret is for assigning with HTTPS only(for SSH use `ssh_authentication_config`). Must be in the format
+          projects/*/secrets/*/versions/*.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'sshAuthenticationConfig'
+        exactly_one_of:
+          - gitRemoteSettings.0.authenticationTokenSecretVersion
+          - gitRemoteSettings.0.sshAuthenticationConfig
+        description: Authentication fields for remote uris using SSH protocol.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: userPrivateKeySecretVersion
+            required: true
+            description: The name of the Secret Manager secret version to use as a ssh private key for Git operations. Must be in the format projects/*/secrets/*/versions/*.
+          - !ruby/object:Api::Type::String
+            name: hostPublicKey
+            required: true
+            description: Content of a public SSH key to verify an identity of a remote Git host.
       - !ruby/object:Api::Type::String
         name: 'tokenStatus'
         output: true
         description: |
           Indicates the status of the Git access token. https://cloud.google.com/dataform/reference/rest/v1beta1/projects.locations.repositories#TokenStatus
-
+  - !ruby/object:Api::Type::NestedObject
+    name: 'workspaceCompilationOverrides'
+    description: If set, fields of workspaceCompilationOverrides override the default compilation settings that are specified in dataform.json when creating workspace-scoped compilation results.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: defaultDatabase
+        description: The default database (Google Cloud project ID).
+      - !ruby/object:Api::Type::String
+        name: 'schemaSuffix'
+        description: The suffix that should be appended to all schema (BigQuery dataset ID) names.
+      - !ruby/object:Api::Type::String
+        name: 'tablePrefix'
+        description: The prefix that should be prepended to all table names.
+  - !ruby/object:Api::Type::String
+    name: 'serviceAccount'
+    description: The service account to run workflow invocations under.
+  - !ruby/object:Api::Type::String
+    name: npmrcEnvironmentVariablesSecretVersion
+    description: Optional. The name of the Secret Manager secret version to be used to interpolate variables into the .npmrc file for package installation operations. Must be in the format projects/*/secrets/*/versions/*. The file itself must be in a JSON format.
+  - !ruby/object:Api::Type::String
+    name: displayName
+    description: Optional. The repository's user-friendly name.
+  - !ruby/object:Api::Type::String
+    name: kmsKeyName
+    description: |
+      Optional. The reference to a KMS encryption key. If provided, it will be used to encrypt user data in the repository and all child resources.
+      It is not possible to add or update the encryption key after the repository is created. Example projects/[kms_project_id]/locations/[region]/keyRings/[key_region]/cryptoKeys/[key]
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: labels
+    description: |
+      Optional. Repository user labels.
+      An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.

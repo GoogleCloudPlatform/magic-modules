@@ -11,8 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
-!ruby/object:Api::Product
+--- !ruby/object:Api::Product
 name: Alloydb
 display_name: AlloyDB
 versions:
@@ -24,7 +23,3 @@ versions:
     base_url: https://alloydb.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-identity
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: AlloyDB API
-    url: https://console.cloud.google.com/apis/library/alloydb.googleapis.com

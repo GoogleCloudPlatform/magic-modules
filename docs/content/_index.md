@@ -1,8 +1,5 @@
 ---
-title: "Home"
-weight: 0
-type: "docs"
-date: 2022-11-14T09:50:49-08:00
+title: "Overview"
 ---
 
 
@@ -20,7 +17,7 @@ change.
 
 ## Getting started
 
-Check out the [setup guide](/magic-modules/docs/getting-started/setup/) for information on how to set up your environment.
+Check out the [setup guide]({{< ref "/get-started/generate-providers" >}}) for information on how to set up your environment.
 
 ## Other Resources
 

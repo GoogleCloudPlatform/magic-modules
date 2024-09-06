@@ -1,0 +1,79 @@
+[
+    {
+        "name": "//container.googleapis.com/projects/{{.Provider.project}}/locations/us-central1/clusters/cluster-test",
+        "asset_type": "container.googleapis.com/Cluster",
+        "resource": {
+            "version": "v1",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/container/v1/rest",
+            "discovery_name": "Cluster",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "databaseEncryption": [
+                    {
+                        "key_name": "",
+                        "state": "DECRYPTED"
+                    }
+                ],
+                "initialNodeCount": 3,
+                "location": "us-central1",
+                "name": "cluster-test",
+                "network": "projects/{{.Provider.project}}/global/networks/default",
+                "releaseChannel": [
+                    {
+                        "channel": "RAPID"
+                    }
+                ]
+            }
+        },
+        "ancestors": ["organizations/{{.OrgID}}"],
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
+    },
+    {
+        "name": "//container.googleapis.com/projects/{{.Provider.project}}/locations/us-central1/clusters/cluster-test/nodePools/node-pool-test",
+        "asset_type": "container.googleapis.com/NodePool",
+        "resource": {
+            "version": "v1",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/container/v1/rest",
+            "discovery_name": "NodePool",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "cluster": "projects/{{.Provider.project}}/global/clusters/cluster-test",
+                "config": {
+                    "machineType": "n1-standard-1",
+                    "metadata": {
+                        "disable-legacy-endpoints": "true"
+                    },
+                    "oauthScopes": [
+                        "https://www.googleapis.com/auth/cloud-platform"
+                    ],
+                    "preemptible": true
+                },
+                "location": "us-central1",
+                "management": {
+                    "autoRepair": true,
+                    "autoUpgrade": true
+                },
+                "name": "node-pool-test"
+            }
+        },
+        "ancestors": ["organizations/{{.OrgID}}"],
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
+    },
+    {
+        "name": "//iam.googleapis.com/projects/{{.Provider.project}}/serviceAccounts/placeholder-QJgu5Gv8",
+        "asset_type": "iam.googleapis.com/ServiceAccount",
+        "resource": {
+            "version": "v1",
+            "discovery_document_uri": "https://iam.googleapis.com/$discovery/rest",
+            "discovery_name": "ServiceAccount",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "displayName": "Service Account",
+                "email": "service-account-cc@{{.Provider.project}}.iam.gserviceaccount.com",
+                "projectId": "{{.Provider.project}}"
+            }
+        },
+        "ancestors": ["organizations/{{.OrgID}}"],
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
+    }
+]

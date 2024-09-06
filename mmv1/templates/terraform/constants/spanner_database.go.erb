@@ -13,7 +13,7 @@
 	# limitations under the License.
 -%>
 // customizeDiff func for additional checks on google_spanner_database properties:
-func resourceSpannerDBDdlCustomDiffFunc(diff TerraformResourceDiff) error {
+func resourceSpannerDBDdlCustomDiffFunc(diff tpgresource.TerraformResourceDiff) error {
 	old, new := diff.GetChange("ddl")
 	oldDdls := old.([]interface{})
 	newDdls := new.([]interface{})
@@ -42,44 +42,6 @@ func resourceSpannerDBDdlCustomDiffFunc(diff TerraformResourceDiff) error {
 func resourceSpannerDBDdlCustomDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
 	// separate func to allow unit testing
 	return resourceSpannerDBDdlCustomDiffFunc(diff)
-}
-
-func validateDatabaseRetentionPeriod(v interface{}, k string) (ws []string, errors []error) {
-	value := v.(string)
-	valueError := fmt.Errorf("version_retention_period should be in range [1h, 7d], in a format resembling 1d, 24h, 1440m, or 86400s")
-
-	r := regexp.MustCompile("^(\\d{1}d|\\d{1,3}h|\\d{2,5}m|\\d{4,6}s)$")
-	if !r.MatchString(value) {
-		errors = append(errors, valueError)
-		return
-	}
-
-	unit := value[len(value)-1:]
-	multiple := value[:len(value)-1]
-	num, err := strconv.Atoi(multiple)
-	if err != nil {
-		errors = append(errors, valueError)
-		return
-	}
-
-	if unit == "d" && (num < 1 || num > 7) {
-		errors = append(errors, valueError)
-		return
-	}
-	if unit == "h" && (num < 1 || num > 7*24) {
-		errors = append(errors, valueError)
-		return
-	}
-	if unit == "m" && (num < 1*60 || num > 7*24*60) {
-		errors = append(errors, valueError)
-		return
-	}
-	if unit == "s" && (num < 1*60*60 || num > 7*24*60*60) {
-		errors = append(errors, valueError)
-		return
-	}
-
-	return
 }
 
 func resourceSpannerDBVirtualUpdate(d *schema.ResourceData, resourceSchema map[string]*schema.Schema) bool {

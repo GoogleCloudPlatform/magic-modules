@@ -16,7 +16,7 @@ Three different resources help you manage IAM policies on billing accounts. Each
 
 ~> **Note:** `google_billing_account_iam_binding` resources **can be** used in conjunction with `google_billing_account_iam_member` resources **only if** they do not grant privilege to the same role.
 
-## google\_billing\_account\_iam\_policy
+## google_billing_account_iam_policy
 
 ```hcl
 data "google_iam_policy" "admin" {
@@ -34,7 +34,7 @@ resource "google_billing_account_iam_policy" "editor" {
 }
 ```
 
-## google\_billing\_account\_iam\_binding
+## google_billing_account_iam_binding
 
 ```hcl
 resource "google_billing_account_iam_binding" "editor" {
@@ -46,7 +46,7 @@ resource "google_billing_account_iam_binding" "editor" {
 }
 ```
 
-## google\_billing\_account\_iam\_member
+## google_billing_account_iam_member
 
 ```hcl
 resource "google_billing_account_iam_member" "editor" {
@@ -89,15 +89,69 @@ exported:
 
 ## Import
 
-Instance IAM resources can be imported using the project, table name, role and/or member.
-
-```
-$ terraform import google_billing_account_iam_policy.binding "your-billing-account-id"
-
-$ terraform import google_billing_account_iam_binding.binding "your-billing-account-id roles/billing.user"
-
-$ terraform import google_billing_account_iam_member.binding "your-billing-account-id roles/billing.user user:jane@example.com"
-```
 
 -> **Custom Roles**: If you're importing a IAM resource with a custom role, make sure to use the
  full name of the custom role, e.g. `organizations/my-org-id/roles/my-custom-role`.
+
+### Importing IAM members
+
+IAM member imports use space-delimited identifiers that contain the resource's `billing_account_id`, `role`, and `member`. For example:
+
+* `"{{billing_account_id}} roles/billing.user user:jane@example.com"`
+
+An [`import` block](https://developer.hashicorp.com/terraform/language/import) (Terraform v1.5.0 and later) can be used to import IAM members:
+
+```tf
+import {
+  id = "{{billing_account_id}} roles/billing.user user:jane@example.com"
+  to = google_billing_account_iam_member.default
+}
+```
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can also be used:
+
+```
+$ terraform import google_billing_account_iam_member.default "{{billing_account_id}} roles/billing.user user:jane@example.com"
+```
+
+### Importing IAM bindings
+
+IAM binding imports use space-delimited identifiers that contain the resource's `billing_account_id` and `role`. For example:
+
+* `"{{billing_account_id}} roles/billing.user"`
+
+An [`import` block](https://developer.hashicorp.com/terraform/language/import) (Terraform v1.5.0 and later) can be used to import IAM bindings:
+
+```tf
+import {
+  id = "{{billing_account_id}} roles/billing.user"
+  to = google_billing_account_iam_binding.default
+}
+```
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can also be used:
+
+```
+$ terraform import google_billing_account_iam_binding.default "{{billing_account_id}} roles/billing.user"
+```
+
+### Importing IAM policies
+
+IAM policy imports use the `billing_account_id` identifier of the Billing Account resource only. For example:
+
+* `{{billing_account_id}}`
+
+An [`import` block](https://developer.hashicorp.com/terraform/language/import) (Terraform v1.5.0 and later) can be used to import IAM policies:
+
+```tf
+import {
+  id = {{billing_account_id}}
+  to = google_billing_account_iam_policy.default
+}
+```
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can also be used:
+
+```
+$ terraform import google_billing_account_iam_policy.default {{billing_account_id}}
+```

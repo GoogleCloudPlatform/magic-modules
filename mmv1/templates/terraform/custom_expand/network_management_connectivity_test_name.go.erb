@@ -12,9 +12,9 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	// projects/X/tests/Y - note not "connectivityTests"
-	f, err := parseGlobalFieldValue("tests", v.(string), "project", d, config, true)
+	f, err := tpgresource.ParseGlobalFieldValue("tests", v.(string), "project", d, config, true)
 	if err != nil {
 		return nil, fmt.Errorf("Invalid value for zone: %s", err)
 	}

@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Resource
 name: 'Webhook'
-base_url: "{{parent}}/webhooks"
+base_url: '{{parent}}/webhooks'
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -33,12 +33,12 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_read: templates/terraform/pre_create/dialogflow_set_location.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "dialogflowcx_webhook_full"
-    primary_resource_id: "basic_webhook"
+    name: 'dialogflowcx_webhook_full'
+    primary_resource_id: 'basic_webhook'
     vars:
-      agent_name: "dialogflowcx-agent"
-id_format: "{{parent}}/webhooks/{{name}}"
-import_format: ["{{parent}}/webhooks/{{name}}"]
+      agent_name: 'dialogflowcx-agent'
+id_format: '{{parent}}/webhooks/{{name}}'
+import_format: ['{{parent}}/webhooks/{{name}}']
 skip_sweeper: true
 parameters:
   - !ruby/object:Api::Type::String

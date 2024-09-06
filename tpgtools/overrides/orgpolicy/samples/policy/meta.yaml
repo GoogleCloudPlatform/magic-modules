@@ -1,3 +1,0 @@
-ignore_read:
-  - name
-  - "spec.0.rules.0.condition.0.expression"

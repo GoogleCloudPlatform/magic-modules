@@ -13,6 +13,10 @@ resource "google_app_engine_flexible_app_version" "<%= ctx[:primary_resource_id]
   version_id = "v1"
   service    = "appengine-network-endpoint-group"
   runtime    = "nodejs"
+  flexible_runtime_settings {
+    operating_system = "ubuntu22"
+    runtime_version = "20"
+  }
 
   entrypoint {
     shell = "node ./app.js"
@@ -55,7 +59,7 @@ resource "google_app_engine_flexible_app_version" "<%= ctx[:primary_resource_id]
     }
   }
 
-  noop_on_destroy = true
+  delete_service_on_destroy = true
 }
 
 resource "google_storage_bucket" "<%= ctx[:primary_resource_id] %>" {
@@ -66,5 +70,5 @@ resource "google_storage_bucket" "<%= ctx[:primary_resource_id] %>" {
 resource "google_storage_bucket_object" "<%= ctx[:primary_resource_id] %>" {
   name   = "hello-world.zip"
   bucket = google_storage_bucket.<%= ctx[:primary_resource_id] %>.name
-  source = "./test-fixtures/appengine/hello-world.zip"
+  source = "./test-fixtures/hello-world.zip"
 }

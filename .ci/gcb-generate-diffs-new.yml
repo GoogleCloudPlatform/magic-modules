@@ -1,0 +1,330 @@
+---
+steps:
+    - name: 'gcr.io/cloud-builders/gcloud'
+      id: "Stop Other Ongoing Build"
+      entrypoint: 'bash'
+      args:
+      - -c
+      - |
+        on_going_build=($(gcloud builds list --ongoing --format='value[separator=","](id,substitutions.REVISION_ID)' --filter="substitutions.TRIGGER_NAME:$TRIGGER_NAME substitutions._PR_NUMBER:$_PR_NUMBER" | xargs))
+        for (( i=0; i<${#on_going_build[@]}; i++ )); do
+          IFS="," read -r -a fields <<< "${on_going_build[i]}"
+          if [ "$i" -gt "0" ] && [ "${fields[1]}" != $COMMIT_SHA ]; then # skip current
+            echo "Cancelling build ${fields[0]}"
+
+            gcloud builds cancel ${fields[0]}
+          fi
+        done
+
+    # The GCB / GH integration uses a shallow clone of the repo. We need to convert
+    # that to a full clone in order to work with it properly.
+    # https://cloud.google.com/source-repositories/docs/integrating-with-cloud-build#unshallowing_clones
+    - name: 'gcr.io/cloud-builders/git'
+      args:
+          - fetch
+          - --unshallow
+    # We need to configure git since creating the merge commit is
+    # technically a commit.
+    - name: 'gcr.io/cloud-builders/git'
+      args:
+          - config
+          - --global
+          - user.email
+          - magic-modules+differ@google.com
+    - name: 'gcr.io/cloud-builders/git'
+      args:
+          - config
+          - --global
+          - user.name
+          - "Modular Magician Diff Process"
+    # Then we check out the branch provided, and merge it into
+    # the base branch provided.  This matches the behavior
+    # we're used to from Concourse.
+    - name: 'gcr.io/cloud-builders/git'
+      args:
+          - remote
+          - add
+          - head
+          - $_HEAD_REPO_URL
+
+    - name: 'gcr.io/cloud-builders/git'
+      args:
+          - fetch
+          - head
+          - $_HEAD_BRANCH
+
+    - name: 'gcr.io/cloud-builders/git'
+      args:
+          - checkout
+          - origin/$_BASE_BRANCH
+    - name: 'gcr.io/cloud-builders/git'
+      id: merged
+      args:
+          - merge
+          - --no-ff
+          - head/$_HEAD_BRANCH
+
+    - name: 'gcr.io/graphite-docker-images/build-environment'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
+      id: build-magician-binary
+      waitFor: ["merged"]
+
+    - name: 'gcr.io/graphite-docker-images/build-environment'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
+      id: remove-label
+      secretEnv: ["GITHUB_TOKEN_MAGIC_MODULES"]
+      waitFor: ["build-magician-binary"]
+      env:
+        - BASE_BRANCH=$_BASE_BRANCH
+      args:
+          - 'remove-label'
+          - $_PR_NUMBER
+          - 'awaiting-approval'
+
+    - name: 'gcr.io/graphite-docker-images/build-environment'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
+      id: tpg-head
+      secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS"]
+      waitFor: ["build-magician-binary"]
+      env:
+        - BASE_BRANCH=$_BASE_BRANCH
+      args:
+          - 'generate-downstream'
+          - 'head'
+          - 'terraform'
+          - 'ga'
+          - $_PR_NUMBER
+
+    - name: 'gcr.io/graphite-docker-images/build-environment'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
+      id: tpg-base
+      secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS"]
+      waitFor: ["build-magician-binary"]
+      env:
+        - BASE_BRANCH=$_BASE_BRANCH
+      args:
+          - 'generate-downstream'
+          - 'base'
+          - 'terraform'
+          - 'ga'
+          - $_PR_NUMBER
+
+    - name: 'gcr.io/graphite-docker-images/build-environment'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
+      secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS"]
+      id: tpgb-head
+      waitFor: ["build-magician-binary"]
+      env:
+        - BASE_BRANCH=$_BASE_BRANCH
+      args:
+          - 'generate-downstream'
+          - 'head'
+          - 'terraform'
+          - 'beta'
+          - $_PR_NUMBER
+
+    - name: 'gcr.io/graphite-docker-images/build-environment'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
+      id: tpgb-base
+      secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS"]
+      waitFor: ["build-magician-binary"]
+      env:
+        - BASE_BRANCH=$_BASE_BRANCH
+      args:
+          - 'generate-downstream'
+          - 'base'
+          - 'terraform'
+          - 'beta'
+          - $_PR_NUMBER
+
+    - name: 'gcr.io/graphite-docker-images/build-environment'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
+      id: tgc-head
+      secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS"]
+      waitFor: ["build-magician-binary"]
+      env:
+        - BASE_BRANCH=$_BASE_BRANCH
+      args:
+          - 'generate-downstream'
+          - 'head'
+          - 'terraform-google-conversion'
+          - 'beta'
+          - $_PR_NUMBER
+
+    - name: 'gcr.io/graphite-docker-images/build-environment'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
+      id: tgc-base
+      secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS"]
+      waitFor: ["build-magician-binary"]
+      env:
+        - BASE_BRANCH=$_BASE_BRANCH
+      args:
+          - 'generate-downstream'
+          - 'base'
+          - 'terraform-google-conversion'
+          - 'beta'
+          - $_PR_NUMBER
+
+    - name: 'gcr.io/graphite-docker-images/build-environment'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
+      id: tf-oics-head
+      secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS"]
+      waitFor: ["build-magician-binary"]
+      env:
+        - BASE_BRANCH=$_BASE_BRANCH
+      args:
+          - 'generate-downstream'
+          - 'head'
+          - 'tf-oics'
+          - 'beta'
+          - $_PR_NUMBER
+
+    - name: 'gcr.io/graphite-docker-images/build-environment'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
+      id: tf-oics-base
+      secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS"]
+      waitFor: ["build-magician-binary"]
+      env:
+        - BASE_BRANCH=$_BASE_BRANCH
+      args:
+          - 'generate-downstream'
+          - 'base'
+          - 'tf-oics'
+          - 'beta'
+          - $_PR_NUMBER
+
+    - name: 'gcr.io/graphite-docker-images/go-plus'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
+      id: diff
+      secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS", "GITHUB_TOKEN_MAGIC_MODULES"]
+      args:
+          - 'generate-comment'
+      env:
+        - BUILD_ID=$BUILD_ID
+        - PROJECT_ID=$PROJECT_ID
+        - BUILD_STEP=17
+        - COMMIT_SHA=$COMMIT_SHA
+        - PR_NUMBER=$_PR_NUMBER
+
+    - name: 'gcr.io/graphite-docker-images/go-plus'
+      id: tgc-test
+      allowFailure: true
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
+      secretEnv: ["GITHUB_TOKEN_MAGIC_MODULES"]
+      waitFor: ["tpgb-head", "tpgb-base", "tgc-head", "tgc-base"]
+      args:
+        - 'test-tgc'
+      env:
+        - COMMIT_SHA=$COMMIT_SHA
+        - PR_NUMBER=$_PR_NUMBER
+
+    - name: 'gcr.io/graphite-docker-images/go-plus'
+      id: tgc-test-integration
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
+      allowFailure: true
+      secretEnv: ["GITHUB_TOKEN_MAGIC_MODULES"]
+      waitFor: ["tpgb-head", "tpgb-base", "tgc-head", "tgc-base"]
+      env:
+        - TEST_PROJECT=$_VALIDATOR_TEST_PROJECT
+        - TEST_FOLDER_ID=$_VALIDATOR_TEST_FOLDER
+        - TEST_ANCESTRY=$_VALIDATOR_TEST_ANCESTRY
+        - TEST_ORG_ID=$_VALIDATOR_TEST_ORG
+      args:
+        - 'test-tgc-integration'
+        - $_PR_NUMBER
+        - $COMMIT_SHA
+        - $BUILD_ID
+        - $PROJECT_ID
+        - "18"  # Build step
+        - terraform-google-conversion
+
+    - name: 'gcr.io/graphite-docker-images/go-plus'
+      id: tpgb-test
+      allowFailure: true
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
+      secretEnv: ["GITHUB_TOKEN_MAGIC_MODULES"]
+      waitFor: ["tpgb-head", "tpgb-base"]
+      args:
+        - 'test-tpg'
+      env:
+        - VERSION=beta
+        - COMMIT_SHA=$COMMIT_SHA
+        - PR_NUMBER=$_PR_NUMBER
+
+    - name: 'gcr.io/graphite-docker-images/go-plus'
+      id: tpg-test
+      allowFailure: true
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
+      secretEnv: ["GITHUB_TOKEN_MAGIC_MODULES"]
+      waitFor: ["tpg-head", "tpg-base"]
+      args:
+        - 'test-tpg'
+      env:
+        - VERSION=ga
+        - COMMIT_SHA=$COMMIT_SHA
+        - PR_NUMBER=$_PR_NUMBER
+
+    - name: 'gcr.io/graphite-docker-images/go-plus'
+      id: gcb-tpg-vcr-test
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
+      secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS", "GITHUB_TOKEN_MAGIC_MODULES", "GOOGLE_BILLING_ACCOUNT", "GOOGLE_CUST_ID", "GOOGLE_IDENTITY_USER", "GOOGLE_MASTER_BILLING_ACCOUNT", "GOOGLE_ORG", "GOOGLE_ORG_2", "GOOGLE_ORG_DOMAIN", "GOOGLE_PROJECT", "GOOGLE_PROJECT_NUMBER", "GOOGLE_SERVICE_ACCOUNT", "SA_KEY", "GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION"]
+      waitFor: ["diff"]
+      env:
+        - BASE_BRANCH=$_BASE_BRANCH
+        - "GOOGLE_REGION=us-central1"
+        - "GOOGLE_ZONE=us-central1-a"
+        - "USER=magician"
+      args:
+        - 'test-terraform-vcr'
+        - $_PR_NUMBER
+        - $COMMIT_SHA
+        - $BUILD_ID
+        - $PROJECT_ID
+        - "22"  # Build step
+
+    - name: 'gcr.io/graphite-docker-images/go-plus'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
+      secretEnv: ["GITHUB_TOKEN_MAGIC_MODULES"]
+      waitFor: ["diff"]
+      args:
+          - 'request-service-reviewers'
+          - $_PR_NUMBER
+      env:
+        - COMMIT_SHA=$COMMIT_SHA
+
+# Long timeout to enable waiting on VCR test
+timeout: 64800s
+options:
+    machineType: 'N1_HIGHCPU_32'
+
+logsBucket: 'gs://cloudbuild-generate-diffs-logs'
+availableSecrets:
+  secretManager:
+    - versionName: projects/673497134629/secrets/github-magician-token-generate-diffs-downstreams/versions/latest
+      env: GITHUB_TOKEN_DOWNSTREAMS
+    - versionName: projects/673497134629/secrets/github-magician-token-generate-diffs-magic-modules/versions/latest
+      env: GITHUB_TOKEN_MAGIC_MODULES
+    - versionName: projects/673497134629/secrets/ci-test-billing-account/versions/latest
+      env: GOOGLE_BILLING_ACCOUNT
+    - versionName: projects/673497134629/secrets/ci-test-cust-id/versions/latest
+      env: GOOGLE_CUST_ID
+    - versionName: projects/673497134629/secrets/ci-test-identity-user/versions/latest
+      env: GOOGLE_IDENTITY_USER
+    - versionName: projects/673497134629/secrets/ci-test-master-billing-account/versions/latest
+      env: GOOGLE_MASTER_BILLING_ACCOUNT
+    - versionName: projects/673497134629/secrets/ci-test-org/versions/latest
+      env: GOOGLE_ORG
+    - versionName: projects/673497134629/secrets/ci-test-org-2/versions/latest
+      env: GOOGLE_ORG_2
+    - versionName: projects/673497134629/secrets/ci-test-org-domain/versions/latest
+      env: GOOGLE_ORG_DOMAIN
+    - versionName: projects/673497134629/secrets/ci-test-project/versions/latest
+      env: GOOGLE_PROJECT
+    - versionName: projects/673497134629/secrets/ci-test-project-number/versions/latest
+      env: GOOGLE_PROJECT_NUMBER
+    - versionName: projects/673497134629/secrets/ci-test-service-account/versions/latest
+      env: GOOGLE_SERVICE_ACCOUNT
+    - versionName: projects/673497134629/secrets/ci-test-service-account-key/versions/latest
+      env: SA_KEY
+    - versionName: projects/673497134629/secrets/ci-test-public-advertised-prefix-description/versions/latest
+      env: GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION

@@ -17,6 +17,7 @@ resource "google_container_attached_cluster" "primary" {
   }
   authorization {
     admin_users = [ "user1@example.com", "user2@example.com"]
+    admin_groups = [ "group1@example.com", "group2@example.com"]
   }
   oidc_config {
       issuer_url = "https://oidc.issuer.url"
@@ -34,6 +35,15 @@ resource "google_container_attached_cluster" "primary" {
   monitoring_config {
     managed_prometheus_config {
       enabled = true
+    }
+  }
+  binary_authorization {
+    evaluation_mode = "PROJECT_SINGLETON_POLICY_ENFORCE"
+  }
+  proxy_config {
+    kubernetes_secret {
+      name = "proxy-config"
+      namespace = "default"
     }
   }
 }

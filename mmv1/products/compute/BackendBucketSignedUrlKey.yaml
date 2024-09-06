@@ -38,7 +38,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -53,17 +53,17 @@ async: !ruby/object:Api::OpAsync
     path: 'error/errors'
     message: 'message'
 exclude_import: true
-exclude_validator: true
+exclude_tgc: true
 mutex: signedUrlKey/{{project}}/backendBuckets/{{backend_bucket}}/
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_bucket_signed_url_key"
-    pull_external: true
-    primary_resource_id: "backend_key"
+    name: 'backend_bucket_signed_url_key'
+    external_providers: ["random", "time"]
+    primary_resource_id: 'backend_key'
     vars:
-      key_name: "test-key"
-      backend_name: "test-signed-backend-bucket"
-      bucket_name: "test-storage-bucket"
+      key_name: 'test-key'
+      backend_name: 'test-signed-backend-bucket'
+      bucket_name: 'test-storage-bucket'
     skip_test: true
 parameters:
   - !ruby/object:Api::Type::ResourceRef
@@ -75,6 +75,7 @@ parameters:
     required: true
     immutable: true
     ignore_read: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'

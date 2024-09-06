@@ -17,16 +17,12 @@ display_name: Workflows
 versions:
   - !ruby/object:Api::Product::Version
     name: beta
-    base_url: https://workflows.googleapis.com/v1beta/
+    base_url: https://workflows.googleapis.com/v1/
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://workflows.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Workflows API
-    url: https://console.cloud.google.com/apis/library/workflows.googleapis.com/
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
@@ -37,10 +33,10 @@ async: !ruby/object:Api::OpAsync
     resource_inside_response: true
   status: !ruby/object:Api::OpAsync::Status
     path: 'done'
-    complete: True
+    complete: true
     allowed:
-      - True
-      - False
+      - true
+      - false
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'

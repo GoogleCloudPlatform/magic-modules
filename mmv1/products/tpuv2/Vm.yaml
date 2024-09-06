@@ -1,0 +1,354 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'Vm'
+description: |
+  A Cloud TPU VM instance.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/tpu/docs/'
+  api: 'https://cloud.google.com/tpu/docs/reference/rest/v2/projects.locations.nodes'
+base_url: projects/{{project}}/locations/{{zone}}/nodes
+self_link: projects/{{project}}/locations/{{zone}}/nodes/{{name}}
+create_url: projects/{{project}}/locations/{{zone}}/nodes?nodeId={{name}}
+update_url: projects/{{project}}/locations/{{zone}}/nodes/{{name}}
+update_verb: :PATCH
+update_mask: true
+autogen_async: true
+custom_diff: [
+  'acceleratorTypeCustomizeDiff',
+]
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/tpu_vm.go.erb
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'tpu_v2_vm_basic'
+    min_version: 'beta'
+    primary_resource_id: 'tpu'
+    vars:
+      vm_name: 'test-tpu'
+    skip_vcr: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'tpu_v2_vm_full'
+    min_version: 'beta'
+    primary_resource_id: 'tpu'
+    external_providers: ["random", "time"]
+    vars:
+      vm_name: 'test-tpu'
+      network_name: 'tpu-net'
+      subnet_name: 'tpu-subnet'
+      sa_id: 'tpu-sa'
+      disk_name: 'tpu-disk'
+    skip_vcr: true
+parameters:
+  - !ruby/object:Api::Type::String
+    name: 'zone'
+    description: |
+      The GCP location for the TPU. If it is not provided, the provider zone is used.
+    immutable: true
+    url_param_only: true
+    default_from_api: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    required: true
+    immutable: true
+    description: |
+      The immutable name of the TPU.
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+  - !ruby/object:Api::Type::String
+    name: 'runtimeVersion'
+    required: true
+    immutable: true
+    description: |
+      Runtime version for the TPU.
+  - !ruby/object:Api::Type::String
+    name: 'acceleratorType'
+    default_from_api: true
+    immutable: true
+    conflicts:
+      - accelerator_config
+    description: |
+      TPU accelerator type for the TPU. `accelerator_type` cannot be used at the same time as
+      `accelerator_config`. If neither is specified, `accelerator_type` defaults to 'v2-8'.
+  - !ruby/object:Api::Type::String
+    name: 'description'
+    description: |
+      Text description of the TPU.
+  - !ruby/object:Api::Type::String
+    name: 'cidrBlock'
+    default_from_api: true
+    immutable: true
+    description: |
+      The CIDR block that the TPU node will use when selecting an IP address. This CIDR block must
+      be a /29 block; the Compute Engine networks API forbids a smaller block, and using a larger
+      block would be wasteful (a node can only consume one IP address). Errors will occur if the
+      CIDR block has already been used for a currently existing TPU node, the CIDR block conflicts
+      with any subnetworks in the user's provided network, or the provided network is peered with
+      another network that is using that CIDR block.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'networkConfig'
+    default_from_api: true
+    immutable: true
+    description: |
+      Network configurations for the TPU node.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'network'
+        default_from_api: true
+        immutable: true
+        description: |
+          The name of the network for the TPU node. It must be a preexisting Google Compute Engine
+          network. If both network and subnetwork are specified, the given subnetwork must belong
+          to the given network. If network is not specified, it will be looked up from the
+          subnetwork if one is provided, or otherwise use "default".
+      - !ruby/object:Api::Type::String
+        name: 'subnetwork'
+        default_from_api: true
+        immutable: true
+        description: |
+          The name of the subnetwork for the TPU node. It must be a preexisting Google Compute
+          Engine subnetwork. If both network and subnetwork are specified, the given subnetwork
+          must belong to the given network. If subnetwork is not specified, the subnetwork with the
+          same name as the network will be used.
+      - !ruby/object:Api::Type::Boolean
+        name: 'enableExternalIps'
+        immutable: true
+        send_empty_value: true
+        description: |
+          Indicates that external IP addresses would be associated with the TPU workers. If set to
+          false, the specified subnetwork or network should have Private Google Access enabled.
+      - !ruby/object:Api::Type::Boolean
+        name: 'canIpForward'
+        immutable: true
+        send_empty_value: true
+        description: |
+          Allows the TPU node to send and receive packets with non-matching destination or source
+          IPs. This is required if you plan to use the TPU workers to forward routes.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'serviceAccount'
+    default_from_api: true
+    immutable: true
+    description: |
+      The Google Cloud Platform Service Account to be used by the TPU node VMs. If None is
+      specified, the default compute service account will be used.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'email'
+        default_from_api: true
+        immutable: true
+        description: |
+          Email address of the service account. If empty, default Compute service account will be used.
+      - !ruby/object:Api::Type::Array
+        name: 'scope'
+        default_from_api: true
+        immutable: true
+        diff_suppress_func: 'tpuServiceAccountAddedScopesSuppress'
+        description: |
+          The list of scopes to be made available for this service account. If empty, access to all
+          Cloud APIs will be allowed.
+        item_type: Api::Type::String
+  - !ruby/object:Api::Type::NestedObject
+    name: 'schedulingConfig'
+    immutable: true
+    description: |
+      The scheduling options for this node.
+    properties:
+      - !ruby/object:Api::Type::Boolean
+        name: 'preemptible'
+        immutable: true
+        send_empty_value: true
+        description: |
+          Defines whether the node is preemptible.
+      - !ruby/object:Api::Type::Boolean
+        name: 'reserved'
+        immutable: true
+        send_empty_value: true
+        description: |
+          Whether the node is created under a reservation.
+  - !ruby/object:Api::Type::Array
+    name: 'dataDisks'
+    description: |
+      The additional data disks for the Node.
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'sourceDisk'
+          required: true
+          description: |
+            Specifies the full path to an existing disk. For example:
+            "projects/my-project/zones/us-central1-c/disks/my-disk".
+        - !ruby/object:Api::Type::Enum
+          name: 'mode'
+          default_value: :READ_WRITE
+          description: |
+            The mode in which to attach this disk. If not specified, the default is READ_WRITE
+            mode. Only applicable to dataDisks.
+          values:
+            - 'READ_WRITE'
+            - 'READ_ONLY'
+  - !ruby/object:Api::Type::NestedObject
+    name: 'shieldedInstanceConfig'
+    immutable: true
+    description: |
+      Shielded Instance options.
+    properties:
+      - !ruby/object:Api::Type::Boolean
+        name: 'enableSecureBoot'
+        immutable: true
+        send_empty_value: true
+        required: true
+        description: |
+          Defines whether the instance has Secure Boot enabled.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'acceleratorConfig'
+    default_from_api: true
+    immutable: true
+    conflicts:
+      - accelerator_type
+    description: |
+      The AccleratorConfig for the TPU Node. `accelerator_config` cannot be used at the same time
+      as `accelerator_type`. If neither is specified, `accelerator_type` defaults to 'v2-8'.
+    properties:
+      - !ruby/object:Api::Type::Enum
+        name: 'type'
+        immutable: true
+        required: true
+        description: |
+          Type of TPU.
+        values:
+          - 'V2'
+          - 'V3'
+          - 'V4'
+          - 'V5P'
+      - !ruby/object:Api::Type::String
+        name: 'topology'
+        immutable: true
+        required: true
+        description: |
+          Topology of TPU in chips.
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
+    description: Resource labels to represent user-provided metadata.
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: 'metadata'
+    description: Custom metadata to apply to the TPU Node. Can set startup-script and shutdown-script.
+  - !ruby/object:Api::Type::Array
+    name: 'tags'
+    description: |
+      Tags to apply to the TPU Node. Tags are used to identify valid sources or targets for network firewalls.
+    item_type: Api::Type::String
+  - !ruby/object:Api::Type::String
+    name: 'state'
+    output: true
+    description: |
+      The current state for the TPU Node.
+  - !ruby/object:Api::Type::String
+    name: 'health'
+    output: true
+    description: |
+      The health status of the TPU node.
+  - !ruby/object:Api::Type::String
+    name: 'healthDescription'
+    output: true
+    description: |
+      If this field is populated, it contains a description of why the TPU Node is unhealthy.
+  - !ruby/object:Api::Type::String
+    name: 'apiVersion'
+    output: true
+    description: |
+      The API version that created this Node.
+  - !ruby/object:Api::Type::String
+    name: 'queuedResource'
+    output: true
+    description: |
+      The qualified name of the QueuedResource that requested this Node.
+  - !ruby/object:Api::Type::Boolean
+    name: 'multisliceNode'
+    output: true
+    description: |
+      Whether the Node belongs to a Multislice group.
+  - !ruby/object:Api::Type::Array
+    name: 'networkEndpoints'
+    output: true
+    description: |
+      The network endpoints where TPU workers can be accessed and sent work. It is recommended that
+      runtime clients of the node reach out to the 0th entry in this map first.
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'ipAddress'
+          output: true
+          description: |
+            The internal IP address of this network endpoint.
+        - !ruby/object:Api::Type::Integer
+          name: 'port'
+          output: true
+          description: |
+            The port of this network endpoint.
+        - !ruby/object:Api::Type::NestedObject
+          name: 'accessConfig'
+          output: true
+          description: |
+            The access config for the TPU worker.
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'externalIp'
+              output: true
+              description: |
+                An external IP address associated with the TPU worker.
+  - !ruby/object:Api::Type::Array
+    name: 'symptoms'
+    output: true
+    description: |
+      The Symptoms that have occurred to the TPU Node.
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'createTime'
+          output: true
+          description: |
+            Timestamp when the Symptom is created.
+        - !ruby/object:Api::Type::String
+          name: 'symptomType'
+          output: true
+          description: |
+            Type of the Symptom.
+        - !ruby/object:Api::Type::String
+          name: 'details'
+          output: true
+          description: |
+            Detailed information of the current Symptom.
+        - !ruby/object:Api::Type::String
+          name: 'workerId'
+          output: true
+          description: |
+            A string used to uniquely distinguish a worker within a TPU node.

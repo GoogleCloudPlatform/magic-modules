@@ -26,12 +26,13 @@ update_mask: true
 update_url: projects/{{project}}/locations/{{region}}/reservations/{{name}}
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "pubsub_lite_reservation_basic"
-    primary_resource_id: "example"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-example-reservation%s\", context[\"\
+    name: 'pubsub_lite_reservation_basic'
+    primary_resource_id: 'example'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-example-reservation%s\",
+      context[\"\
       random_suffix\"])"
     vars:
-      reservation_name: "example-reservation"
+      reservation_name: 'example-reservation'
 parameters:
   - !ruby/object:Api::Type::String
     name: region
@@ -43,7 +44,7 @@ parameters:
     required: true
     immutable: true
     url_param_only: true
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
 properties:
   - !ruby/object:Api::Type::Integer
     name: 'throughputCapacity'

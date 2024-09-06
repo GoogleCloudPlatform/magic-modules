@@ -1,5 +1,3 @@
-# [START functions_v2_basic_gcs]
-
 resource "google_storage_bucket" "source-bucket" {
   name     = "<%= ctx[:vars]['bucket_name_source'] %>"
   location = "US"
@@ -93,7 +91,6 @@ resource "google_cloudfunctions2_function" "<%= ctx[:primary_resource_id] %>" {
   }
 
   event_trigger {
-    trigger_region = "us-central1" # The trigger must be in the same location as the bucket
     event_type = "google.cloud.storage.object.v1.finalized"
     retry_policy = "RETRY_POLICY_RETRY"
     service_account_email = google_service_account.account.email
@@ -103,4 +100,3 @@ resource "google_cloudfunctions2_function" "<%= ctx[:primary_resource_id] %>" {
     }
   }
 }
-# [END functions_v2_basic_gcs]

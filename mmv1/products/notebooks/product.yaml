@@ -27,24 +27,20 @@ versions:
     base_url: https://notebooks.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Cloud Notebooks API
-    url: https://console.cloud.google.com/apis/api/notebooks.googleapis.com
 async: !ruby/object:Api::OpAsync
-    operation: !ruby/object:Api::OpAsync::Operation
-      base_url: '{{op_id}}'
-      path: 'name'
-      wait_ms: 1000
-    result: !ruby/object:Api::OpAsync::Result
-      path: 'response'
-      resource_inside_response: true
-    status: !ruby/object:Api::OpAsync::Status
-      path: 'done'
-      complete: True
-      allowed:
-        - True
-        - False
-    error: !ruby/object:Api::OpAsync::Error
-      path: 'error'
-      message: 'message'
+  operation: !ruby/object:Api::OpAsync::Operation
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'

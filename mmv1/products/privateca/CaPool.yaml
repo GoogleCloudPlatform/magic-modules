@@ -46,28 +46,29 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   example_config_body: 'templates/terraform/iam/example_config_body/privateca_ca_pool.tf.erb'
   iam_conditions_request_type: :QUERY_PARAM_NESTED
 autogen_async: true
-import_format: ["projects/{{project}}/locations/{{location}}/caPools/{{name}}"]
+import_format: ['projects/{{project}}/locations/{{location}}/caPools/{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "privateca_capool_basic"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-my-pool%s\", context[\"random_suffix\"\
+    name: 'privateca_capool_basic'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-pool%s\",
+      context[\"random_suffix\"\
       ])"
-    primary_resource_id: "default"
+    primary_resource_id: 'default'
     vars:
-      name: "my-pool"
+      name: 'my-pool'
   - !ruby/object:Provider::Terraform::Examples
-    name: "privateca_capool_all_fields"
-    primary_resource_id: "default"
+    name: 'privateca_capool_all_fields'
+    primary_resource_id: 'default'
     vars:
-      name: "my-pool"
+      name: 'my-pool'
   - !ruby/object:Provider::Terraform::Examples
-    name: "privateca_quickstart"
-    primary_resource_id: "default"
+    name: 'privateca_quickstart'
+    primary_resource_id: 'default'
     skip_test: true
     skip_docs: true
     vars:
-      my_ca_pool: "my-ca-pool"
-      my_certificate: "my-certificate"
+      my_ca_pool: 'my-ca-pool'
+      my_certificate: 'my-certificate'
 parameters:
   - !ruby/object:Api::Type::String
     name: location
@@ -90,8 +91,8 @@ properties:
     description: |
       The Tier of this CaPool.
     values:
-      - "ENTERPRISE"
-      - "DEVOPS"
+      - 'ENTERPRISE'
+      - 'DEVOPS'
     immutable: true
     required: true
   - !ruby/object:Api::Type::NestedObject
@@ -265,12 +266,12 @@ properties:
               - !ruby/object:Api::Type::Boolean
                 name: 'isCa'
                 description: |
-                  When true, the "CA" in Basic Constraints extension will be set to true. 
+                  When true, the "CA" in Basic Constraints extension will be set to true.
               - !ruby/object:Api::Type::Boolean
                 name: 'nonCa'
                 url_param_only: true
                 description: |
-                  When true, the "CA" in Basic Constraints extension will be set to false. 
+                  When true, the "CA" in Basic Constraints extension will be set to false.
                   If both `is_ca` and `non_ca` are unset, the extension will be omitted from the CA certificate.
               - !ruby/object:Api::Type::Integer
                 name: 'maxIssuerPathLength'
@@ -381,7 +382,8 @@ properties:
             properties:
               - !ruby/object:Api::Type::Boolean
                 name: 'critical'
-                description: Indicates whether or not the name constraints are marked
+                description:
+                  Indicates whether or not the name constraints are marked
                   critical.
                 required: true
               - !ruby/object:Api::Type::Array
@@ -452,7 +454,7 @@ properties:
     name: 'publishingOptions'
     description: |
       The PublishingOptions to follow when issuing Certificates from any CertificateAuthority in this CaPool.
-    diff_suppress_func: 'emptyOrUnsetBlockDiffSuppress'
+    diff_suppress_func: 'tpgresource.EmptyOrUnsetBlockDiffSuppress'
     properties:
       - !ruby/object:Api::Type::Boolean
         name: 'publishCaCert'
@@ -469,8 +471,17 @@ properties:
           in all issued Certificates. If this is false, CRLs will not be published and the corresponding X.509 extension will not
           be written in issued certificates. CRLs will expire 7 days from their creation. However, we will rebuild daily. CRLs are
           also rebuilt shortly after a certificate is revoked.
-  - !ruby/object:Api::Type::KeyValuePairs
-    name: labels
+      - !ruby/object:Api::Type::Enum
+        name: 'encodingFormat'
+        description: |
+          Specifies the encoding format of each CertificateAuthority's CA
+          certificate and CRLs. If this is omitted, CA certificates and CRLs
+          will be published in PEM.
+        values:
+          - :PEM
+          - :DER
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
     description: |
       Labels with user-defined metadata.
 

@@ -13,7 +13,6 @@
 
 --- !ruby/object:Api::Resource
 name: 'DenyPolicy'
-min_version: beta
 base_url: policies/{{parent}}/denypolicies
 create_url: policies/{{parent}}/denypolicies?policyId={{name}}
 description: |
@@ -21,21 +20,21 @@ description: |
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Permissions supported in deny policies': 'https://cloud.google.com/iam/docs/deny-permissions-support'
-  api: 'https://cloud.google.com/iam/docs/reference/rest/v2beta/policies'
+  api: 'https://cloud.google.com/iam/docs/reference/rest/v2/policies'
 autogen_async: true
-import_format: ["{{parent}}/{{name}}"]
-id_format: "{{parent}}/{{name}}"
+import_format: ['{{parent}}/{{name}}']
+id_format: '{{parent}}/{{name}}'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "iam_deny_policy_basic"
-    primary_resource_id: "example"
+    name: 'iam_deny_policy_basic'
+    primary_resource_id: 'example'
     vars:
-      policy_name: "my-deny-policy"
-      account_id: "svc-acc"
+      policy_name: 'my-deny-policy'
+      account_id: 'svc-acc'
+      project_name: "my-project"
     test_env_vars:
       org_id: :ORG_ID
       billing_account: :BILLING_ACCT
-    min_version: beta
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -77,7 +76,8 @@ properties:
           properties:
             - !ruby/object:Api::Type::Array
               name: 'deniedPrincipals'
-              description: The identities that are prevented from using one or more
+              description:
+                The identities that are prevented from using one or more
                 permissions on Google Cloud resources.
               item_type: Api::Type::String
             - !ruby/object:Api::Type::Array
@@ -101,8 +101,9 @@ properties:
               item_type: Api::Type::String
             - !ruby/object:Api::Type::NestedObject
               name: 'denialCondition'
-              description: User defined CEVAL expression. A CEVAL expression is used
-                to specify match criteria such as origin.ip, source.region_code and
+              description:
+                User defined CEVAL expression. A CEVAL expression is used to
+                specify match criteria such as origin.ip, source.region_code and
                 contents in the request header.
               properties:
                 - !ruby/object:Api::Type::String

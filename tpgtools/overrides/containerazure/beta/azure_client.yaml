@@ -1,0 +1,7 @@
+# GKE MultiCloud uses a different set of locations than GCE, and our default
+# sweeper logic assumes that resources are in us-central1.
+- type: NO_SWEEPER
+- type: CUSTOMIZE_DIFF
+  details:
+    functions: 
+    - tpgresource.DefaultProviderProject

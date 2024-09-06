@@ -1,0 +1,26 @@
+- type: CUSTOMIZE_DIFF
+  details:
+    functions: 
+    - tpgresource.DefaultProviderProject
+- type: DIFF_SUPPRESS_FUNC
+  field: config.root_volume.volume_type
+  details:
+    diffsuppressfunc: tpgresource.CaseDiffSuppress
+- type: DIFF_SUPPRESS_FUNC
+  field: config.taints.effect
+  details:
+    diffsuppressfunc: tpgresource.CaseDiffSuppress
+- type: CUSTOM_STATE_SETTER
+  field: management
+  details:
+    function: d.Set("management", tpgresource.FlattenContainerAwsNodePoolManagement(res.Management, d, config))
+- type: CUSTOM_SCHEMA_VALUES
+  field: management
+  details:
+    optional: true
+    computed: true
+- type: CUSTOM_SCHEMA_VALUES
+  field: management.auto_repair
+  details:
+    optional: true
+    computed: true

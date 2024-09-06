@@ -4,7 +4,7 @@ description: |-
   Manages a Cloud Router interface.
 ---
 
-# google\_compute\_router_interface
+# google_compute_router_interface
 
 Manages a Cloud Router interface. For more information see
 [the official documentation](https://cloud.google.com/compute/docs/cloudrouter)
@@ -39,6 +39,9 @@ In addition to the above required fields, a router interface must have specified
 
 * `ip_range` - (Optional) IP address and range of the interface. The IP range must be
     in the RFC3927 link-local IP space. Changing this forces a new interface to be created.
+
+* `ip_version` - (Optional)
+    IP version of this interface. Can be either IPV4 or IPV6.
 
 * `vpn_tunnel` - (Optional) The name or resource link to the VPN tunnel this
     interface will be linked to. Changing this forces a new interface to be created. Only
@@ -82,8 +85,23 @@ This resource provides the following
 
 ## Import
 
-Router interfaces can be imported using the `region`, `router`, and `name`, e.g.
+Router interfaces can be imported using the `project` (optional), `region`, `router`, and `name`, e.g.
+
+* `{{project_id}}/{{region}}/{{router}}/{{name}}`
+* `{{region}}/{{router}}/{{name}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import router interfaces using one of the formats above. For example:
+
+```tf
+import {
+  id = "{{project_id}}/{{region}}/{{router}}/{{name}}"
+  to = google_compute_router_interface.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), router interfaces can be imported using one of the formats above. For example:
 
 ```
-$ terraform import google_compute_router_interface.foobar us-central1/router-1/interface-1
+$ terraform import google_compute_router_interface.default {{project_id}}/{{region}}/{{router}}/{{name}}
+$ terraform import google_compute_router_interface.default {{region}}/{{router}}/{{name}}
 ```

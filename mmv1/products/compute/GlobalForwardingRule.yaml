@@ -17,6 +17,9 @@ kind: 'compute#forwardingRule'
 base_url: projects/{{project}}/global/forwardingRules
 immutable: true
 has_self_link: true
+# Has a separate endpoint for labels
+skip_attribution_label: true
+legacy_long_form_project: true
 collection_url_key: 'items'
 description: |
   Represents a GlobalForwardingRule resource. Global forwarding rules are
@@ -24,13 +27,12 @@ description: |
   balancing. Global forwarding rules can only be used for HTTP load
   balancing.
 
-  For more information, see
-  https://cloud.google.com/compute/docs/load-balancing/http/
+  For more information, see https://cloud.google.com/compute/docs/load-balancing/http/
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -46,175 +48,237 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "external_ssl_proxy_lb_mig_backend"
-    primary_resource_id: "default"
+    name: 'external_ssl_proxy_lb_mig_backend'
+    primary_resource_id: 'default'
     skip_test: true
     vars:
-      ssl_proxy_xlb_network: "ssl-proxy-xlb-network"
-      ssl_proxy_xlb_subnet: "ssl-proxy-xlb-subnet"
-      ssl_proxy_xlb_ip: "ssl-proxy-xlb-ip"
-      default_cert: "default-cert"
-      test_proxy: "test-proxy"
-      ssl_proxy_xlb_forwarding_rule: "ssl-proxy-xlb-forwarding-rule"
-      ssl_proxy_xlb_backend_service: "ssl-proxy-xlb-backend-service"
-      ssl_proxy_health_check: "ssl-proxy-health-check"
-      ssl_proxy_xlb_mig_template: "ssl-proxy-xlb-mig-template"
-      ssl_proxy_xlb_mig1: "ssl-proxy-xlb-mig1"
-      ssl_proxy_xlb_fw_allow_hc: "ssl-proxy-xlb-fw-allow-hc"
+      ssl_proxy_xlb_network: 'ssl-proxy-xlb-network'
+      ssl_proxy_xlb_subnet: 'ssl-proxy-xlb-subnet'
+      ssl_proxy_xlb_ip: 'ssl-proxy-xlb-ip'
+      default_cert: 'default-cert'
+      test_proxy: 'test-proxy'
+      ssl_proxy_xlb_forwarding_rule: 'ssl-proxy-xlb-forwarding-rule'
+      ssl_proxy_xlb_backend_service: 'ssl-proxy-xlb-backend-service'
+      ssl_proxy_health_check: 'ssl-proxy-health-check'
+      ssl_proxy_xlb_mig_template: 'ssl-proxy-xlb-mig-template'
+      ssl_proxy_xlb_mig1: 'ssl-proxy-xlb-mig1'
+      ssl_proxy_xlb_fw_allow_hc: 'ssl-proxy-xlb-fw-allow-hc'
     ignore_read_extra:
-      - "port_range"
-      - "target"
-      - "ip_address"
+      - 'port_range'
+      - 'target'
+      - 'ip_address'
   - !ruby/object:Provider::Terraform::Examples
-    name: "external_tcp_proxy_lb_mig_backend"
-    primary_resource_id: "default"
+    name: 'external_tcp_proxy_lb_mig_backend'
+    primary_resource_id: 'default'
     vars:
-      tcp_proxy_xlb_network: "tcp-proxy-xlb-network"
-      tcp_proxy_xlb_subnet: "tcp-proxy-xlb-subnet"
-      tcp_proxy_xlb_ip: "tcp-proxy-xlb-ip"
-      tcp_proxy_xlb_forwarding_rule: "tcp-proxy-xlb-forwarding-rule"
-      test_proxy_health_check: "test-proxy-health-check"
-      tcp_proxy_xlb_backend_service: "tcp-proxy-xlb-backend-service"
-      tcp_proxy_health_check: "tcp-proxy-health-check"
-      tcp_proxy_xlb_mig_template: "tcp-proxy-xlb-mig-template"
-      tcp_proxy_xlb_mig1: "tcp-proxy-xlb-mig1"
-      tcp_proxy_xlb_fw_allow_hc: "tcp-proxy-xlb-fw-allow-hc"
+      tcp_proxy_xlb_network: 'tcp-proxy-xlb-network'
+      tcp_proxy_xlb_subnet: 'tcp-proxy-xlb-subnet'
+      tcp_proxy_xlb_ip: 'tcp-proxy-xlb-ip'
+      tcp_proxy_xlb_forwarding_rule: 'tcp-proxy-xlb-forwarding-rule'
+      test_proxy_health_check: 'test-proxy-health-check'
+      tcp_proxy_xlb_backend_service: 'tcp-proxy-xlb-backend-service'
+      tcp_proxy_health_check: 'tcp-proxy-health-check'
+      tcp_proxy_xlb_mig_template: 'tcp-proxy-xlb-mig-template'
+      tcp_proxy_xlb_mig1: 'tcp-proxy-xlb-mig1'
+      tcp_proxy_xlb_fw_allow_hc: 'tcp-proxy-xlb-fw-allow-hc'
     min_version: beta
     ignore_read_extra:
-      - "port_range"
-      - "target"
-      - "ip_address"
+      - 'port_range'
+      - 'target'
+      - 'ip_address'
   - !ruby/object:Provider::Terraform::Examples
-    name: "external_http_lb_mig_backend_custom_header"
-    primary_resource_id: "default"
+    name: 'external_http_lb_mig_backend_custom_header'
+    primary_resource_id: 'default'
     vars:
-      xlb_network_name: "l7-xlb-network"
-      backend_subnet_name: "l7-xlb-subnet"
-      address_name: "l7-xlb-static-ip"
-      forwarding_rule_name: "l7-xlb-forwarding-rule"
-      target_http_proxy_name: "l7-xlb-target-http-proxy"
-      url_map_name: "l7-xlb-url-map"
-      backend_service_name: "l7-xlb-backend-service"
-      mig_template_name: "l7-xlb-mig-template"
-      hc_name: "l7-xlb-hc"
-      mig_name: "l7-xlb-mig1"
-      fw_allow_hc_name: "l7-xlb-fw-allow-hc"
+      xlb_network_name: 'l7-xlb-network'
+      backend_subnet_name: 'l7-xlb-subnet'
+      address_name: 'l7-xlb-static-ip'
+      forwarding_rule_name: 'l7-xlb-forwarding-rule'
+      target_http_proxy_name: 'l7-xlb-target-http-proxy'
+      url_map_name: 'l7-xlb-url-map'
+      backend_service_name: 'l7-xlb-backend-service'
+      mig_template_name: 'l7-xlb-mig-template'
+      hc_name: 'l7-xlb-hc'
+      mig_name: 'l7-xlb-mig1'
+      fw_allow_hc_name: 'l7-xlb-fw-allow-hc'
     min_version: beta
     ignore_read_extra:
-      - "port_range"
-      - "target"
-      - "ip_address"
+      - 'port_range'
+      - 'target'
+      - 'ip_address'
   - !ruby/object:Provider::Terraform::Examples
-    name: "global_forwarding_rule_http"
-    primary_resource_id: "default"
+    name: 'global_forwarding_rule_http'
+    primary_resource_id: 'default'
     vars:
-      forwarding_rule_name: "global-rule"
-      http_proxy_name: "target-proxy"
-      backend_service_name: "backend"
+      forwarding_rule_name: 'global-rule'
+      http_proxy_name: 'target-proxy'
+      backend_service_name: 'backend'
     ignore_read_extra:
-      - "port_range"
-      - "target"
+      - 'port_range'
+      - 'target'
   - !ruby/object:Provider::Terraform::Examples
-    name: "global_forwarding_rule_internal"
+    name: 'global_forwarding_rule_internal'
     min_version: beta
-    primary_resource_id: "default"
+    primary_resource_id: 'default'
     vars:
-      forwarding_rule_name: "global-rule"
-      http_proxy_name: "target-proxy"
-      backend_service_name: "backend"
-      igm_name: "igm-internal"
+      forwarding_rule_name: 'global-rule'
+      http_proxy_name: 'target-proxy'
+      backend_service_name: 'backend'
+      igm_name: 'igm-internal'
     ignore_read_extra:
-      - "port_range"
-      - "target"
+      - 'port_range'
+      - 'target'
   - !ruby/object:Provider::Terraform::Examples
-    name: "global_forwarding_rule_external_managed"
-    primary_resource_id: "default"
+    name: 'global_forwarding_rule_external_managed'
+    primary_resource_id: 'default'
     vars:
-      forwarding_rule_name: "global-rule"
-      http_proxy_name: "target-proxy"
-      backend_service_name: "backend"
+      forwarding_rule_name: 'global-rule'
+      http_proxy_name: 'target-proxy'
+      backend_service_name: 'backend'
     ignore_read_extra:
-      - "port_range"
-      - "target"
+      - 'port_range'
+      - 'target'
   - !ruby/object:Provider::Terraform::Examples
-    name: "global_forwarding_rule_hybrid"
-    primary_resource_id: "default"
+    name: 'global_forwarding_rule_hybrid'
+    primary_resource_id: 'default'
     vars:
-      forwarding_rule_name: "global-rule"
-      http_proxy_name: "target-proxy"
-      network_name: "my-network"
-      internal_network_name: "my-internal-network"
-      subnetwork_name: "my-subnetwork"
-      default_backend_service_name: "backend-default"
-      hybrid_backend_service_name: "backend-hybrid"
-      internal_backend_service_name": "backend-internal"
-      default_neg_name: "default-neg"
-      hybrid_neg_name: "hybrid-neg"
-      internal_neg_name: "internal-neg"
-      health_check_name: "health-check"
+      forwarding_rule_name: 'global-rule'
+      http_proxy_name: 'target-proxy'
+      network_name: 'my-network'
+      internal_network_name: 'my-internal-network'
+      subnetwork_name: 'my-subnetwork'
+      default_backend_service_name: 'backend-default'
+      hybrid_backend_service_name: 'backend-hybrid'
+      internal_backend_service_name": 'backend-internal'
+      default_neg_name: 'default-neg'
+      hybrid_neg_name: 'hybrid-neg'
+      internal_neg_name: 'internal-neg'
+      health_check_name: 'health-check'
     ignore_read_extra:
-      - "port_range"
-      - "target"
+      - 'port_range'
+      - 'target'
   - !ruby/object:Provider::Terraform::Examples
-    name: "private_service_connect_google_apis"
+    name: 'global_internal_http_lb_with_mig_backend'
+    primary_resource_id: 'google_compute_forwarding_rule'
+    vars:
+      gilb_network_name: 'l7-gilb-network'
+      proxy_subnet_name: 'l7-gilb-proxy-subnet'
+      backend_subnet_name: 'l7-gilb-subnet'
+      forwarding_rule_name: 'l7-gilb-forwarding-rule'
+      target_http_proxy_name: 'l7-gilb-target-http-proxy'
+      url_map_name: 'l7-gilb-url-map'
+      backend_service_name: 'l7-gilb-backend-subnet'
+      mig_template_name: 'l7-gilb-mig-template'
+      hc_name: 'l7-gilb-hc'
+      mig_name: 'l7-gilb-mig1'
+      fw_allow_iap_hc_name: 'l7-gilb-fw-allow-iap-hc'
+      fw_allow_gilb_to_backends_name: 'l7-gilb-fw-allow-gilb-to-backends'
+      vm_test_name: 'l7-gilb-test-vm'
     min_version: beta
-    primary_resource_id: "default"
+    ignore_read_extra:
+      - 'port_range'
+      - 'target'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'private_service_connect_google_apis'
+    min_version: beta
+    primary_resource_id: 'default'
     vars:
-      network_name: "my-network"
-      subnetwork_name: "my-subnetwork"
-      global_address_name: "global-psconnect-ip"
-      forwarding_rule_name: "globalrule"
+      network_name: 'my-network'
+      subnetwork_name: 'my-subnetwork'
+      global_address_name: 'global-psconnect-ip'
+      forwarding_rule_name: 'globalrule'
     test_env_vars:
       project: :PROJECT_NAME
     ignore_read_extra:
-      - "ip_address"
+      - 'ip_address'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'private_service_connect_google_apis_no_automate_dns'
+    min_version: beta
+    primary_resource_id: 'default'
+    vars:
+      network_name: 'my-network'
+      subnetwork_name: 'my-subnetwork'
+      global_address_name: 'global-psconnect-ip'
+      forwarding_rule_name: 'globalrule'
+    test_env_vars:
+      project: :PROJECT_NAME
+    ignore_read_extra:
+      - 'ip_address'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/labels.erb
 properties:
-  - !ruby/object:Api::Type::Time
-    name: 'creationTimestamp'
-    description: 'Creation timestamp in RFC3339 text format.'
+  - !ruby/object:Api::Type::String
+    name: 'pscConnectionId'
+    description: 'The PSC connection id of the PSC Forwarding Rule.'
     output: true
-    exclude: true
+  - !ruby/object:Api::Type::String
+    name: 'pscConnectionStatus'
+    description:
+      'The PSC connection status of the PSC Forwarding Rule. Possible values:
+      `STATUS_UNSPECIFIED`, `PENDING`, `ACCEPTED`, `REJECTED`, `CLOSED`'
+    output: true
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'The unique identifier for the resource.'
-    output: true
   # This is a multi-resource resource reference (Address, GlobalAddress)
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'IPAddress'
     description: |
-      The IP address that this forwarding rule serves. When a client sends
-      traffic to this IP address, the forwarding rule directs the traffic to
-      the target that you specify in the forwarding rule. The
-      loadBalancingScheme and the forwarding rule's target determine the
-      type of IP address that you can use. For detailed information, refer
-      to [IP address specifications](https://cloud.google.com/load-balancing/docs/forwarding-rule-concepts#ip_address_specifications).
+      IP address for which this forwarding rule accepts traffic. When a client
+      sends traffic to this IP address, the forwarding rule directs the traffic
+      to the referenced `target`.
 
-      An address can be specified either by a literal IP address or a
-      reference to an existing Address resource. If you don't specify a
-      reserved IP address, an ephemeral IP address is assigned.
+      While creating a forwarding rule, specifying an `IPAddress` is
+      required under the following circumstances:
 
-      The value must be set to 0.0.0.0 when the target is a targetGrpcProxy
-      that has validateForProxyless field set to true.
+      * When the `target` is set to `targetGrpcProxy` and
+      `validateForProxyless` is set to `true`, the
+      `IPAddress` should be set to `0.0.0.0`.
+      * When the `target` is a Private Service Connect Google APIs
+      bundle, you must specify an `IPAddress`.
 
-      For Private Service Connect forwarding rules that forward traffic to
-      Google APIs, IP address must be provided.
+      Otherwise, you can optionally specify an IP address that references an
+      existing static (reserved) IP address resource. When omitted, Google Cloud
+      assigns an ephemeral IP address.
+
+      Use one of the following formats to specify an IP address while creating a
+      forwarding rule:
+
+      * IP address number, as in `100.1.2.3`
+      * IPv6 address range, as in `2600:1234::/96`
+      * Full resource URL, as in
+      `https://www.googleapis.com/compute/v1/projects/project_id/regions/region/addresses/address-name`
+      * Partial URL or by name, as in:
+        * `projects/project_id/regions/region/addresses/address-name`
+        * `regions/region/addresses/address-name`
+        * `global/addresses/address-name`
+        * `address-name`
+
+      The forwarding rule's `target`,
+      and in most cases, also the `loadBalancingScheme`, determine the
+      type of IP address that you can use. For detailed information, see
+      [IP address
+      specifications](https://cloud.google.com/load-balancing/docs/forwarding-rule-concepts#ip_address_specifications).
+
+      When reading an `IPAddress`, the API always returns the IP
+      address number.
     default_from_api: true
-    diff_suppress_func: 'internalIpDiffSuppress'
+    diff_suppress_func: InternalIpDiffSuppress
   - !ruby/object:Api::Type::Enum
     name: 'IPProtocol'
     description: |
-      The IP protocol to which this rule applies. When the load balancing scheme is
-      INTERNAL_SELF_MANAGED, only TCP is valid. This field must not be set if the
-      global address is configured as a purpose of PRIVATE_SERVICE_CONNECT
-      and addressType of INTERNAL
+      The IP protocol to which this rule applies.
+
+      For protocol forwarding, valid
+      options are `TCP`, `UDP`, `ESP`,
+      `AH`, `SCTP`, `ICMP` and
+      `L3_DEFAULT`.
+
+      The valid IP protocols are different for different load balancing products
+      as described in [Load balancing
+      features](https://cloud.google.com/load-balancing/docs/features#protocols_from_the_load_balancer_to_the_backends).
     values:
       - :TCP
       - :UDP
@@ -222,7 +286,7 @@ properties:
       - :AH
       - :SCTP
       - :ICMP
-    diff_suppress_func: 'caseDiffSuppress'
+    diff_suppress_func: 'tpgresource.CaseDiffSuppress'
     default_from_api: true
   - !ruby/object:Api::Type::Enum
     name: 'ipVersion'
@@ -231,13 +295,12 @@ properties:
     values:
       - :IPV4
       - :IPV6
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Labels to apply to this forwarding rule.  A list of key->value pairs.
     update_verb: :POST
     update_url: 'projects/{{project}}/global/forwardingRules/{{name}}/setLabels'
-    min_version: beta
   - !ruby/object:Api::Type::Fingerprint
     name: 'labelFingerprint'
     description: |
@@ -245,23 +308,18 @@ properties:
       internally during updates.
     update_url: 'projects/{{project}}/global/forwardingRules/{{name}}/setLabels'
     update_verb: :POST
-    min_version: beta
   - !ruby/object:Api::Type::Enum
     name: 'loadBalancingScheme'
     description: |
-      This signifies what the GlobalForwardingRule will be used for.
-      The value of INTERNAL_SELF_MANAGED means that this will be used for
-      Internal Global HTTP(S) LB. The value of EXTERNAL means that this
-      will be used for External Global Load Balancing (HTTP(S) LB,
-      External TCP/UDP LB, SSL Proxy). The value of EXTERNAL_MANAGED means
-      that this will be used for Global external HTTP(S) load balancers.
+      Specifies the forwarding rule type.
 
-      ([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) only) Note: This field must be set "" if the global address is
-      configured as a purpose of PRIVATE_SERVICE_CONNECT and addressType of INTERNAL.
+      For more information about forwarding rules, refer to
+      [Forwarding rule concepts](https://cloud.google.com/load-balancing/docs/forwarding-rule-concepts).
     default_value: :EXTERNAL
     values:
       - :EXTERNAL
       - :EXTERNAL_MANAGED
+      - :INTERNAL_MANAGED
       - :INTERNAL_SELF_MANAGED
   - !ruby/object:Api::Type::Array
     name: 'metadataFilters'
@@ -326,13 +384,19 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
-      Name of the resource; provided by the client when the resource is
-      created. The name must be 1-63 characters long, and comply with
-      RFC1035. Specifically, the name must be 1-63 characters long and match
-      the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the
-      first character must be a lowercase letter, and all following
-      characters must be a dash, lowercase letter, or digit, except the last
-      character, which cannot be a dash.
+      Name of the resource; provided by the client when the resource is created.
+      The name must be 1-63 characters long, and comply with
+      [RFC1035](https://www.ietf.org/rfc/rfc1035.txt).
+
+      Specifically, the name must be 1-63 characters long and match the regular
+      expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the first
+      character must be a lowercase letter, and all following characters must
+      be a dash, lowercase letter, or digit, except the last character, which
+      cannot be a dash.
+
+      For Private Service Connect forwarding rules that forward traffic to Google
+      APIs, the forwarding rule name must be a 1-20 characters string with
+      lowercase letters and numbers and must start with a letter.
     required: true
   - !ruby/object:Api::Type::ResourceRef
     name: 'network'
@@ -340,53 +404,128 @@ properties:
     imports: 'selfLink'
     description: |
       This field is not used for external load balancing.
-      For INTERNAL_SELF_MANAGED load balancing, this field
-      identifies the network that the load balanced IP should belong to
-      for this global forwarding rule. If this field is not specified,
-      the default network will be used.
+
+      For Internal TCP/UDP Load Balancing, this field identifies the network that
+      the load balanced IP should belong to for this Forwarding Rule.
+      If the subnetwork is specified, the network of the subnetwork will be used.
+      If neither subnetwork nor this field is specified, the default network will
+      be used.
+
+      For Private Service Connect forwarding rules that forward traffic to Google
+      APIs, a network must be provided.
+    default_from_api: true
   # TODO(nelsonjr): When implementing new types enable converting the
   # manifest input from a single value to a range of form NN-NN. The API
   # accepts a single value, e.g. '80', but the API stores and returns
   # '80-80'. This causes idempotency false positive.
-    default_from_api: true
-    min_version: beta
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::String
     name: 'portRange'
     description: |
-      This field is used along with the target field for TargetHttpProxy,
-      TargetHttpsProxy, TargetSslProxy, TargetTcpProxy, TargetVpnGateway,
-      TargetPool, TargetInstance.
+      The `portRange` field has the following limitations:
+      * It requires that the forwarding rule `IPProtocol` be TCP, UDP, or SCTP,
+      and
+      * It's applicable only to the following products: external passthrough
+      Network Load Balancers, internal and external proxy Network Load
+      Balancers, internal and external Application Load Balancers, external
+      protocol forwarding, and Classic VPN.
+      * Some products have restrictions on what ports can be used. See
+      [port specifications](https://cloud.google.com/load-balancing/docs/forwarding-rule-concepts#port_specifications)
+      for details.
 
-      Applicable only when IPProtocol is TCP, UDP, or SCTP, only packets
-      addressed to ports in the specified range will be forwarded to target.
-      Forwarding rules with the same [IPAddress, IPProtocol] pair must have
-      disjoint port ranges.
+      For external forwarding rules, two or more forwarding rules cannot use the
+      same `[IPAddress, IPProtocol]` pair, and cannot have overlapping
+      `portRange`s.
 
-      Some types of forwarding target have constraints on the acceptable
-      ports:
+      For internal forwarding rules within the same VPC network, two or more
+      forwarding rules cannot use the same `[IPAddress, IPProtocol]` pair, and
+      cannot have overlapping `portRange`s.
 
-      * TargetHttpProxy: 80, 8080
-      * TargetHttpsProxy: 443
-      * TargetTcpProxy: 25, 43, 110, 143, 195, 443, 465, 587, 700, 993, 995,
-                        1883, 5222
-      * TargetSslProxy: 25, 43, 110, 143, 195, 443, 465, 587, 700, 993, 995,
-                        1883, 5222
-      * TargetVpnGateway: 500, 4500
-  # This is a multi-resource resource reference (TargetHttp(s)Proxy,
-  # TargetSslProxy, TargetTcpProxy, TargetVpnGateway, TargetPool,
-  # TargetInstance)
-    diff_suppress_func: 'portRangeDiffSuppress'
+      @pattern: \d+(?:-\d+)?
+    diff_suppress_func: PortRangeDiffSuppress
+    # This is a multi-resource resource reference (TargetHttp(s)Proxy,
+    # TargetSslProxy, TargetTcpProxy, TargetVpnGateway, TargetPool,
+    # TargetInstance)
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'subnetwork'
+    resource: 'Subnetwork'
+    imports: 'selfLink'
+    description: |
+      This field identifies the subnetwork that the load balanced IP should
+      belong to for this Forwarding Rule, used in internal load balancing and
+      network load balancing with IPv6.
+
+      If the network specified is in auto subnet mode, this field is optional.
+      However, a subnetwork must be specified if the network is in custom subnet
+      mode or when creating external forwarding rule with IPv6.
+    # This is a multi-resource resource reference (TargetHttp(s)Proxy,
+    # TargetSslProxy, TargetTcpProxy, TargetVpnGateway, TargetPool,
+    # TargetInstance)
+    default_from_api: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::String
     name: 'target'
     required: true
     description: |
-      The URL of the target resource to receive the matched traffic.
-      The forwarded traffic must be of a type appropriate to the target object.
-      For INTERNAL_SELF_MANAGED load balancing, only HTTP and HTTPS targets
-      are valid.
+      The URL of the target resource to receive the matched traffic.  For
+      regional forwarding rules, this target must be in the same region as the
+      forwarding rule. For global forwarding rules, this target must be a global
+      load balancing resource.
 
-      ([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) only) For global address with a purpose of PRIVATE_SERVICE_CONNECT and
-      addressType of INTERNAL, only "all-apis" and "vpc-sc" are valid.
+      The forwarded traffic must be of a type appropriate to the target object.
+      *  For load balancers, see the "Target" column in [Port specifications](https://cloud.google.com/load-balancing/docs/forwarding-rule-concepts#ip_address_specifications).
+      *  For Private Service Connect forwarding rules that forward traffic to Google APIs, provide the name of a supported Google API bundle:
+        *  `vpc-sc` - [ APIs that support VPC Service Controls](https://cloud.google.com/vpc-service-controls/docs/supported-products).
+        *  `all-apis` - [All supported Google APIs](https://cloud.google.com/vpc/docs/private-service-connect#supported-apis).
+
+      For Private Service Connect forwarding rules that forward traffic to managed services, the target must be a service attachment.
     update_verb: :POST
     update_url: 'projects/{{project}}/global/forwardingRules/{{name}}/setTarget'
-    diff_suppress_func: 'compareSelfLinkRelativePaths'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+  - !ruby/object:Api::Type::Array
+    name: 'serviceDirectoryRegistrations'
+    description: |
+      Service Directory resources to register this forwarding rule with.
+
+      Currently, only supports a single Service Directory resource.
+    min_size: 0
+    max_size: 1
+    immutable: true
+    default_from_api: true
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'namespace'
+          description: |
+            Service Directory namespace to register the forwarding rule under.
+          immutable: true
+          default_from_api: true
+        - !ruby/object:Api::Type::String
+          name: 'serviceDirectoryRegion'
+          description: |
+            [Optional] Service Directory region to register this global forwarding rule under.
+            Default to "us-central1". Only used for PSC for Google APIs. All PSC for
+            Google APIs Forwarding Rules on the same network should use the same Service
+            Directory region.
+          immutable: true
+  - !ruby/object:Api::Type::Array
+    name: sourceIpRanges
+    description: If not empty, this Forwarding Rule will only forward the traffic when the source IP address matches one of the IP addresses or CIDR ranges set here. Note that a Forwarding Rule can only have up to 64 source IP ranges, and this field can only be used with a regional Forwarding Rule whose scheme is EXTERNAL. Each sourceIpRange entry should be either an IP address (for example, 1.2.3.4) or a CIDR range (for example, 1.2.3.0/24).
+    immutable: true
+    item_type: Api::Type::String
+  - !ruby/object:Api::Type::String
+    name: baseForwardingRule
+    description: '[Output Only] The URL for the corresponding base Forwarding Rule. By base Forwarding Rule, we mean the Forwarding Rule that has the same IP address, protocol, and port settings with the current Forwarding Rule, but without sourceIPRanges specified. Always empty if the current Forwarding Rule does not have sourceIPRanges specified.'
+    output: true
+  - !ruby/object:Api::Type::Boolean
+    name: allowPscGlobalAccess
+    description: This is used in PSC consumer ForwardingRule to control whether the PSC endpoint can be accessed from another region.
+    min_version: beta
+  - !ruby/object:Api::Type::Boolean
+    name: noAutomateDnsZone
+    description:
+      This is used in PSC consumer ForwardingRule to control whether it should try to auto-generate a DNS zone or not.
+      Non-PSC forwarding rules do not use this field.
+    send_empty_value: true
+    immutable: true
+    ignore_read: true

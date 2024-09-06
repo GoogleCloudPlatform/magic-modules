@@ -28,7 +28,7 @@ description: |
 
   A bucket is always owned by the project team owners group.
 iam_policy: !ruby/object:Api::Resource::IamPolicy
-  exclude_validator: true
+  exclude_tgc: true
   allowed_iam_role: 'roles/storage.objectViewer'
   admin_iam_role: 'roles/storage.admin'
   parent_resource_attribute: 'bucket'
@@ -41,14 +41,15 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   wrapped_policy_obj: false
   custom_diff_suppress: 'templates/terraform/iam/storage_bucket_diff_suppress.go.erb'
 exclude_resource: true
-import_format: ["{{name}}"]
+import_format: ['{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "storage_bucket_basic"
-    primary_resource_id: "default"
+    name: 'storage_bucket_basic'
+    primary_resource_id: 'default'
     vars:
-      name: "my-bucket"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-my-bucket%s\", context[\"random_suffix\"\
+      name: 'my-bucket'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-bucket%s\",
+      context[\"random_suffix\"\
       ])"
 parameters:
   - !ruby/object:Api::Type::String
@@ -227,7 +228,8 @@ properties:
         # | 'etag' is not applicable for state convergence.
         - !ruby/object:Api::Type::Integer
           name: 'generation'
-          description: 'The content generation of the object, if applied to an object.'
+          description:
+            'The content generation of the object, if applied to an object.'
           output: true
         - !ruby/object:Api::Type::String
           name: 'id'
@@ -390,6 +392,8 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     description: 'The name of the bucket'
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'verify.ValidateGCSName'
   - !ruby/object:Api::Type::NestedObject
     name: 'owner'
     description: |
@@ -462,7 +466,7 @@ properties:
           object is missing, if applicable, the service will return the
           named object from this bucket as the content for a 404 Not Found
           result.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Labels applied to this bucket.  A list of key->value pairs.

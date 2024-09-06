@@ -17,7 +17,7 @@ resource "google_bigtable_instance" "instance" {
     zone         = "us-central1-c"
     num_nodes    = 3
     storage_type = "HDD"
-  }  
+  }
 
   deletion_protection  = "<%= ctx[:vars]['deletion_protection'] %>"
 }

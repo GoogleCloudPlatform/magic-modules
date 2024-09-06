@@ -46,41 +46,39 @@ async: !ruby/object:Api::OpAsync
     path: 'error/errors'
     message: 'message'
 autogen_async: false
-id_format: "projects/{{project}}/locations/{{location}}/attachedClusters/{{name}}"
-import_format: ["projects/{{project}}/locations/{{location}}/attachedClusters/{{name}}"]
+id_format: 'projects/{{project}}/locations/{{location}}/attachedClusters/{{name}}'
+import_format:
+  ['projects/{{project}}/locations/{{location}}/attachedClusters/{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "container_attached_cluster_basic"
-    primary_resource_name: "fmt.Sprintf(\"basic%s\", context[\"random_suffix\"])"
-    primary_resource_id: "primary"
+    name: 'container_attached_cluster_basic'
+    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
+    primary_resource_id: 'primary'
     vars:
-      name: "basic"
+      name: 'basic'
   - !ruby/object:Provider::Terraform::Examples
-    name: "container_attached_cluster_full"
-    primary_resource_name: "fmt.Sprintf(\"basic%s\", context[\"random_suffix\"])"
-    primary_resource_id: "primary"
+    name: 'container_attached_cluster_full'
+    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
+    primary_resource_id: 'primary'
     vars:
-      name: "basic"
+      name: 'basic'
   - !ruby/object:Provider::Terraform::Examples
-    name: "container_attached_cluster_ignore_errors"
-    primary_resource_name: "fmt.Sprintf(\"basic%s\", context[\"random_suffix\"])"
-    primary_resource_id: "primary"
+    name: 'container_attached_cluster_ignore_errors'
+    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
+    primary_resource_id: 'primary'
     vars:
-      name: "basic"
+      name: 'basic'
     ignore_read_extra:
-      - "deletion_policy"
+      - 'deletion_policy'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/containerattached_cluster_diff.go
+  constants: templates/terraform/constants/containerattached_cluster_diff.go.erb
   pre_update: templates/terraform/pre_update/containerattached_update.go.erb
   pre_delete: templates/terraform/pre_delete/container_attached_deletion_policy.go.erb
 virtual_fields:
-  - !ruby/object:Api::Type::Enum
+  - !ruby/object:Api::Type::String
     name: 'deletion_policy'
-    description: 'Policy to determine what flags to send on delete.'
-    values:
-      - :DELETE
-      - :DELETE_IGNORE_ERRORS
-    default_value: :DELETE
+    description: 'Policy to determine what flags to send on delete. Possible values: DELETE, DELETE_IGNORE_ERRORS'
+    default_value: DELETE
 properties:
   - !ruby/object:Api::Type::String
     name: location
@@ -137,7 +135,8 @@ properties:
     name: distribution
     description: |
       The Kubernetes distribution of the underlying attached cluster. Supported values:
-      "eks", "aks".
+      "eks", "aks", "generic". The generic distribution provides the ability to register
+      or migrate any CNCF conformant cluster.
     required: true
     immutable: true
   - !ruby/object:Api::Type::String
@@ -169,12 +168,6 @@ properties:
         immutable: true
         validation: !ruby/object:Provider::Terraform::Validation
           regex: '^projects/[0-9]+$'
-      # If the user doesn't specify a loggingConfig, the server will supply a default value. Instead of
-      # letting that happen and allowing the config and state to get mismatched, just manually send an
-      # empty object if the user doesn't set anything and require the user to explicitly set the field if a
-      # value is desired.
-      # If the loggingConfig passed to the server is empty, an empty object is returned, so the diff in that
-      # case needs to be ignored.
   - !ruby/object:Api::Type::String
     name: state
     description: |
@@ -207,8 +200,8 @@ properties:
     description: |
       The Kubernetes version of the cluster.
     output: true
-  - !ruby/object:Api::Type::KeyValuePairs
-    name: annotations
+  - !ruby/object:Api::Type::KeyValueAnnotations
+    name: 'annotations'
     description: |
       Optional. Annotations on the cluster. This field has the same
       restrictions as Kubernetes annotations. The total size of all keys and
@@ -239,6 +232,12 @@ properties:
     name: loggingConfig
     description: |
       Logging configuration.
+    # If the user doesn't specify a loggingConfig, the server will supply a default value. Instead of
+    # letting that happen and allowing the config and state to get mismatched, just manually send an
+    # empty object if the user doesn't set anything and require the user to explicitly set the field if a
+    # value is desired.
+    # If the loggingConfig passed to the server is empty, an empty object is returned, so the diff in that
+    # case needs to be ignored.
     send_empty_value: true
     allow_empty_object: true
     custom_expand: 'templates/terraform/custom_expand/containerattached_cluster_empty_logging.go.erb'
@@ -295,6 +294,16 @@ properties:
           For more info on RBAC, see
           https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles
         item_type: Api::Type::String
+      - !ruby/object:Api::Type::Array
+        name: adminGroups
+        description: |
+          Groups that can perform operations as a cluster admin. A managed
+          ClusterRoleBinding will be created to grant the `cluster-admin` ClusterRole
+          to the groups. Up to ten admin groups can be provided.
+
+          For more info on RBAC, see
+          https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles
+        item_type: Api::Type::String
   - !ruby/object:Api::Type::NestedObject
     name: monitoringConfig
     description: |
@@ -312,4 +321,37 @@ properties:
             name: enabled
             description: |
               Enable Managed Collection.
-
+  - !ruby/object:Api::Type::NestedObject
+    name: binaryAuthorization
+    description: |
+      Binary Authorization configuration.
+    allow_empty_object: true
+    default_from_api: true
+    properties:
+      - !ruby/object:Api::Type::Enum
+        name: evaluationMode
+        description: |
+          Configure Binary Authorization evaluation mode.
+        values:
+          - :DISABLED
+          - :PROJECT_SINGLETON_POLICY_ENFORCE
+  - !ruby/object:Api::Type::NestedObject
+    name: proxyConfig
+    description: |
+      Support for proxy configuration.
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: kubernetesSecret
+        description: |
+          The Kubernetes Secret resource that contains the HTTP(S) proxy configuration.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: name
+            required: true
+            description: |
+              Name of the kubernetes secret containing the proxy config.
+          - !ruby/object:Api::Type::String
+            name: namespace
+            required: true
+            description: |
+              Namespace of the kubernetes secret containing the proxy config.

@@ -2,11 +2,50 @@
 package main
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
-	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>"
+	"context"
+	"flag"
+	"log"
+
+	"github.com/hashicorp/terraform-plugin-framework/providerserver"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tf5server"
+	"github.com/hashicorp/terraform-plugin-mux/tf5muxserver"
+
+	"github.com/hashicorp/terraform-provider-google/google/fwprovider"
+	"github.com/hashicorp/terraform-provider-google/google/provider"
 )
 
 func main() {
-	plugin.Serve(&plugin.ServeOpts{
-		ProviderFunc: google.Provider})
+	var debug bool
+
+	flag.BoolVar(&debug, "debug", false, "set to true to run the provider with support for debuggers like delve")
+	flag.Parse()
+
+	// concat with sdkv2 provider
+	providers := []func() tfprotov5.ProviderServer{
+		providerserver.NewProtocol5(fwprovider.New()), // framework provider
+		provider.Provider().GRPCProvider,              // sdk provider
+	}
+
+	// use the muxer
+	muxServer, err := tf5muxserver.NewMuxServer(context.Background(), providers...)
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
+	var serveOpts []tf5server.ServeOpt
+
+	if debug {
+		serveOpts = append(serveOpts, tf5server.WithManagedDebug())
+	}
+
+	err = tf5server.Serve(
+		"registry.terraform.io/hashicorp/google<%= "-" + version unless version == 'ga'  -%>",
+		muxServer.ProviderServer,
+		serveOpts...,
+	)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 }

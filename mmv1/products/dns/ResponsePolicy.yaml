@@ -20,29 +20,30 @@ description: |
 base_url: 'projects/{{project}}/responsePolicies'
 self_link: 'projects/{{project}}/responsePolicies/{{response_policy_name}}'
 update_verb: :PATCH
-min_version: beta
 identity:
   - responsePolicyName
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "dns_response_policy_basic"
-    primary_resource_id: "example-response-policy"
+    name: 'dns_response_policy_basic'
+    primary_resource_id: 'example-response-policy'
     vars:
-      response_policy_name: "example-response-policy"
-      network_1_name: "network-1"
-      network_2_name: "network-2"
-      cluster_1_name: "cluster-1"
+      response_policy_name: 'example-response-policy'
+      network_1_name: 'network-1'
+      network_2_name: 'network-2'
+      cluster_1_name: 'cluster-1'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      deletion_protection: 'false'
+    oics_vars_overrides:
+      deletion_protection: 'false'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_delete: templates/terraform/pre_delete/response_policy_detach_network_gke.erb
 properties:
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: Unique identifier for the resource; defined by the server.
-    output: true
-    exclude: true
   - !ruby/object:Api::Type::String
     name: 'responsePolicyName'
-    description: The user assigned name for this Response Policy, such as `myresponsepolicy`.
+    description:
+      The user assigned name for this Response Policy, such as
+      `myresponsepolicy`.
     immutable: true
     required: true
   - !ruby/object:Api::Type::String
@@ -54,9 +55,11 @@ properties:
     update_verb: :PATCH
   - !ruby/object:Api::Type::Array
     name: 'networks'
-    description: 'The list of network names specifying networks to which this policy
-      is applied.'
+    description:
+      'The list of network names specifying networks to which this policy is
+      applied.'
     update_verb: :PATCH
+    send_empty_value: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::String
@@ -67,17 +70,17 @@ properties:
             This should be formatted like
             `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
           custom_expand: templates/terraform/custom_expand/network_full_url.erb
-          diff_suppress_func: 'compareSelfLinkOrResourceName'
+          diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::Array
     name: 'gkeClusters'
-    description: 'The list of Google Kubernetes Engine clusters that can see this
-      zone.'
+    description:
+      'The list of Google Kubernetes Engine clusters that can see this zone.'
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::String
           name: 'gkeClusterName'
           description: |
-            The resource name of the cluster to bind this ManagedZone to.  
-            This should be specified in the format like  
+            The resource name of the cluster to bind this ManagedZone to.
+            This should be specified in the format like
             `projects/*/locations/*/clusters/*`
           required: true

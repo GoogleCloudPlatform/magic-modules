@@ -39,20 +39,20 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 docs: !ruby/object:Provider::Terraform::Docs
 autogen_async: true
-import_format: ["projects/{{project}}/locations/global/certificateMaps/{{name}}"]
+import_format:
+  ['projects/{{project}}/locations/global/certificateMaps/{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "certificate_manager_certificate_map_basic"
-    primary_resource_id: "default"
+    name: 'certificate_manager_certificate_map_basic'
+    primary_resource_id: 'default'
     vars:
-      cert_map_name: "cert-map"
+      cert_map_name: 'cert-map'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
     immutable: true
     url_param_only: true
-    pattern: projects/{{project}}/locations/global/certificateMaps/{{name}}
     description: |
       A user-defined name of the Certificate Map. Certificate Map names must be unique
       globally and match the pattern `projects/*/locations/*/certificateMaps/*`.
@@ -75,11 +75,10 @@ properties:
       accurate to nanoseconds with up to nine fractional digits.
       Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
     output: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Set of labels associated with a Certificate Map resource.
-    default_from_api: true
   - !ruby/object:Api::Type::Array
     name: 'gclbTargets'
     description: |

@@ -1,0 +1,18 @@
+resource "google_network_services_endpoint_policy" "{{$.PrimaryResourceId}}" {
+  provider               = google-beta
+  name                   = "{{index $.Vars "resource_name"}}"
+  labels                 = {
+    foo = "bar"
+  }
+  description            = "my description"
+  type                   = "SIDECAR_PROXY"
+  traffic_port_selector {
+    ports = ["8081"]
+  }
+  endpoint_matcher {
+    metadata_label_matcher {
+      metadata_label_match_criteria = "MATCH_ANY"
+    }
+  }
+}
+  

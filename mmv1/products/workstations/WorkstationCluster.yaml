@@ -11,7 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
+!ruby/object:Api::Resource
 name: "WorkstationCluster"
 self_link: "projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}"
 base_url: "projects/{{project}}/locations/{{location}}/workstationClusters"
@@ -19,7 +20,7 @@ create_url: "projects/{{project}}/locations/{{location}}/workstationClusters?wor
 update_verb: :PATCH
 update_mask: true
 min_version: beta
-description: "A managed workstation cluster."
+description: "A grouping of workstation configurations and the associated workstations in that region."
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     "Workstations": "https://cloud.google.com/workstations/docs/"
@@ -44,7 +45,10 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: "error"
     message: "message"
-import_format: ["projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}"]
+import_format:
+  [
+    "projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}",
+  ]
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
@@ -59,6 +63,12 @@ examples:
     primary_resource_id: "default"
     vars:
       workstation_cluster_name: "workstation-cluster-private"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "workstation_cluster_custom_domain"
+    min_version: beta
+    primary_resource_id: "default"
+    vars:
+      workstation_cluster_name: "workstation-cluster-custom-domain"
 parameters:
   - !ruby/object:Api::Type::String
     name: "workstationClusterId"
@@ -66,9 +76,10 @@ parameters:
     immutable: true
     url_param_only: true
     description: |
-      The ID of the workstation cluster.
+      ID to use for the workstation cluster.
   - !ruby/object:Api::Type::String
     name: "location"
+    # TODO(esu): Change to required, as it's not possible for this field to be omitted on the API side.
     immutable: true
     url_param_only: true
     description: |
@@ -84,24 +95,31 @@ properties:
     output: true
     description: |
       The system-generated UID of the resource.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: "labels"
-    description: "Client-specified labels that are applied to the resource and that\
-      \ are also propagated to the underlying Compute Engine resources."
+    description:
+      "Client-specified labels that are applied to the resource and that are
+      also propagated to the underlying Compute Engine resources."
   - !ruby/object:Api::Type::String
     name: "network"
     required: true
     immutable: true
     description: |
-      The relative resource name of the VPC network on which the instance can be accessed. 
+      The relative resource name of the VPC network on which the instance can be accessed.
       It is specified in the following form: "projects/{projectNumber}/global/networks/{network_id}".
   - !ruby/object:Api::Type::String
     name: "subnetwork"
     required: true
     immutable: true
     description: |
-      Name of the Compute Engine subnetwork in which instances associated with this cluster will be created. 
+      Name of the Compute Engine subnetwork in which instances associated with this cluster will be created.
       Must be part of the subnetwork specified for this cluster.
+  - !ruby/object:Api::Type::String
+    name: "controlPlaneIp"
+    description: |
+      The private IP address of the control plane for this workstation cluster.
+      Workstation VMs need access to this IP address to work with the service, so make sure that your firewall rules allow egress from the workstation VMs to this address.
+    output: true
   - !ruby/object:Api::Type::String
     name: "displayName"
     description: |
@@ -109,21 +127,21 @@ properties:
   - !ruby/object:Api::Type::Boolean
     name: "degraded"
     description: |
-      Whether this resource is in degraded mode, in which case it may require user action to restore full functionality. 
+      Whether this resource is in degraded mode, in which case it may require user action to restore full functionality.
       Details can be found in the conditions field.
     output: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueAnnotations
     name: "annotations"
     description: "Client-specified annotations. This is distinct from labels."
   - !ruby/object:Api::Type::Fingerprint
     name: "etag"
     description: |
-      Checksum computed by the server. 
+      Checksum computed by the server.
       May be sent on update and delete requests to ensure that the client has an up-to-date value before proceeding.
   - !ruby/object:Api::Type::Time
     name: "createTime"
     description: |
-      Time the Instance was created in UTC.
+      Time when this resource was created.
     output: true
   - !ruby/object:Api::Type::NestedObject
     name: "privateClusterConfig"
@@ -139,17 +157,37 @@ properties:
       - !ruby/object:Api::Type::String
         name: "clusterHostname"
         description: |
-          Hostname for the workstation cluster. 
-          This field will be populated only when private endpoint is enabled. 
+          Hostname for the workstation cluster.
+          This field will be populated only when private endpoint is enabled.
           To access workstations in the cluster, create a new DNS zone mapping this domain name to an internal IP address and a forwarding rule mapping that address to the service attachment.
         output: true
       - !ruby/object:Api::Type::String
         name: "serviceAttachmentUri"
         description: |
-          Service attachment URI for the workstation cluster. 
-          The service attachemnt is created when private endpoint is enabled. 
+          Service attachment URI for the workstation cluster.
+          The service attachment is created when private endpoint is enabled.
           To access workstations in the cluster, configure access to the managed service using (Private Service Connect)[https://cloud.google.com/vpc/docs/configure-private-service-connect-services].
         output: true
+      - !ruby/object:Api::Type::Array
+        name: "allowedProjects"
+        item_type: Api::Type::String
+        default_from_api: true
+        description: |
+          Additional project IDs that are allowed to attach to the workstation cluster's service attachment.
+          By default, the workstation cluster's project and the VPC host project (if different) are allowed.
+  - !ruby/object:Api::Type::NestedObject
+    name: "domainConfig"
+    min_version: beta
+    description: |
+      Configuration options for a custom domain.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: "domain"
+        immutable: true
+        required: true
+        description: |
+          Domain used by Workstations for HTTP ingress.
+
   - !ruby/object:Api::Type::Array
     name: "conditions"
     description: |-

@@ -46,6 +46,9 @@ type Sample struct {
 	// in the testcase. (if the test doesn't have a ga version of the test)
 	HasGAEquivalent bool
 
+	// LongForm is whether this sample is a copy with long form fields expanded to include `/`
+	LongForm bool
+
 	// SamplesPath is the path to the directory where the original sample data is stored
 	SamplesPath Filepath
 
@@ -165,7 +168,7 @@ func findDCLReferencePackage(product SnakeCaseProductName) (DCLPackageName, erro
 }
 
 // BuildDependency produces a Dependency using a file and filename
-func BuildDependency(fileName string, product SnakeCaseProductName, localname, version string, hasGAEquivalent bool, b []byte) (*Dependency, error) {
+func BuildDependency(fileName string, product SnakeCaseProductName, localname, version string, hasGAEquivalent, makeLongForm bool, b []byte) (*Dependency, error) {
 	// Miscellaneous name rather than "resource name" because this is the name in the sample json file - which might not match the TF name!
 	// we have to account for that.
 	var resourceName miscellaneousNameSnakeCase
@@ -194,7 +197,7 @@ func BuildDependency(fileName string, product SnakeCaseProductName, localname, v
 		return nil, fmt.Errorf("Error generating sample dependency reference %s: %s", fileName, err)
 	}
 
-	block, err := ConvertSampleJSONToHCL(packageName, resourceName, version, hasGAEquivalent, b)
+	block, err := ConvertSampleJSONToHCL(packageName, resourceName, version, hasGAEquivalent, makeLongForm, b)
 	if err != nil {
 		glog.Errorf("failed to convert %q", fileName)
 		return nil, fmt.Errorf("Error generating sample dependency %s: %s", fileName, err)
@@ -223,7 +226,7 @@ func (s *Sample) generateSampleDependencyWithName(fileName, localname string) De
 	dependencyBytes, err := ioutil.ReadFile(path.Join(string(s.SamplesPath), fileName))
 	version := s.resourceReference.versionMetadata.V
 	product := s.resourceReference.productMetadata.ProductName
-	d, err := BuildDependency(fileName, product, localname, version, s.HasGAEquivalent, dependencyBytes)
+	d, err := BuildDependency(fileName, product, localname, version, s.HasGAEquivalent, s.LongForm, dependencyBytes)
 	if err != nil {
 		glog.Exit(err)
 	}
@@ -382,52 +385,52 @@ var translationMap = map[string]translationIndex{
 	"org_id": {
 		docsValue:    "123456789",
 		contextKey:   "org_id",
-		contextValue: "GetTestOrgFromEnv(t)",
+		contextValue: "envvar.GetTestOrgFromEnv(t)",
 	},
 	"org_name": {
 		docsValue:    "example.com",
 		contextKey:   "org_domain",
-		contextValue: "GetTestOrgDomainFromEnv(t)",
+		contextValue: "envvar.GetTestOrgDomainFromEnv(t)",
 	},
 	"region": {
 		docsValue:    "us-west1",
 		contextKey:   "region",
-		contextValue: "GetTestRegionFromEnv()",
+		contextValue: "envvar.GetTestRegionFromEnv()",
 	},
 	"zone": {
 		docsValue:    "us-west1-a",
 		contextKey:   "zone",
-		contextValue: "GetTestZoneFromEnv()",
+		contextValue: "envvar.GetTestZoneFromEnv()",
 	},
 	"org_target": {
 		docsValue:    "123456789",
 		contextKey:   "org_target",
-		contextValue: "GetTestOrgTargetFromEnv(t)",
+		contextValue: "envvar.GetTestOrgTargetFromEnv(t)",
 	},
 	"billing_account": {
 		docsValue:    "000000-0000000-0000000-000000",
 		contextKey:   "billing_acct",
-		contextValue: "GetTestBillingAccountFromEnv(t)",
+		contextValue: "envvar.GetTestBillingAccountFromEnv(t)",
 	},
 	"test_service_account": {
-		docsValue:    "emailAddress:my@service-account.com",
+		docsValue:    "my@service-account.com",
 		contextKey:   "service_acct",
-		contextValue: "GetTestServiceAccountFromEnv(t)",
+		contextValue: "envvar.GetTestServiceAccountFromEnv(t)",
 	},
 	"project": {
 		docsValue:    "my-project-name",
 		contextKey:   "project_name",
-		contextValue: "GetTestProjectFromEnv()",
+		contextValue: "envvar.GetTestProjectFromEnv()",
 	},
 	"project_number": {
 		docsValue:    "my-project-number",
 		contextKey:   "project_number",
-		contextValue: "getTestProjectNumberFromEnv()",
+		contextValue: "envvar.GetTestProjectNumberFromEnv()",
 	},
 	"customer_id": {
 		docsValue:    "A01b123xz",
 		contextKey:   "cust_id",
-		contextValue: "GetTestCustIdFromEnv(t)",
+		contextValue: "envvar.GetTestCustIdFromEnv(t)",
 	},
 	// Begin a long list of multicloud-only values which are not going to see reuse.
 	// We can hardcode fake values because we are

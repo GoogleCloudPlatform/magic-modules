@@ -29,7 +29,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -45,19 +45,27 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "target_http_proxy_basic"
-    primary_resource_id: "default"
+    name: 'target_http_proxy_basic'
+    primary_resource_id: 'default'
     vars:
-      target_http_proxy_name: "test-proxy"
-      url_map_name: "url-map"
-      backend_service_name: "backend-service"
-      http_health_check_name: "http-health-check"
+      target_http_proxy_name: 'test-proxy'
+      url_map_name: 'url-map'
+      backend_service_name: 'backend-service'
+      http_health_check_name: 'http-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "target_http_proxy_https_redirect"
-    primary_resource_id: "default"
+    name: 'target_http_proxy_http_keep_alive_timeout'
+    primary_resource_id: 'default'
     vars:
-      target_http_proxy_name: "test-https-redirect-proxy"
-      url_map_name: "url-map"
+      target_http_proxy_name: 'test-http-keep-alive-timeout-proxy'
+      url_map_name: 'url-map'
+      backend_service_name: 'backend-service'
+      http_health_check_name: 'http-health-check'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'target_http_proxy_https_redirect'
+    primary_resource_id: 'default'
+    vars:
+      target_http_proxy_name: 'test-https-redirect-proxy'
+      url_map_name: 'url-map'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -92,9 +100,19 @@ properties:
     required: true
     update_verb: :POST
     update_url: 'projects/{{project}}/targetHttpProxies/{{name}}/setUrlMap'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Boolean
     name: 'proxyBind'
     description: |
       This field only applies when the forwarding rule that references
       this target proxy has a loadBalancingScheme set to INTERNAL_SELF_MANAGED.
     default_from_api: true
+  - !ruby/object:Api::Type::Integer
+    name: 'httpKeepAliveTimeoutSec'
+    description: |
+      Specifies how long to keep a connection open, after completing a response,
+      while there is no matching traffic (in seconds). If an HTTP keepalive is
+      not specified, a default value (610 seconds) will be used. For Global
+      external HTTP(S) load balancer, the minimum allowed value is 5 seconds and
+      the maximum allowed value is 1200 seconds. For Global external HTTP(S)
+      load balancer (classic), this option is not available publicly.

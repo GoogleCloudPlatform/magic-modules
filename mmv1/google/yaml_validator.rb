@@ -118,7 +118,7 @@ module Google
     def check_property_value(property, prop_value, type)
       Google::LOGGER.debug "Checking '#{property}' on #{object_display_name}"
       check_type property, prop_value, type unless type.nil?
-      prop_value.validate if prop_value.is_a?(Api::Object)
+      prop_value.validate if prop_value.is_a?(Google::YamlValidator)
     end
 
     def check_extraneous_properties

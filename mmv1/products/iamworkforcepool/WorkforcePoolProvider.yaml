@@ -29,43 +29,85 @@ docs: !ruby/object:Provider::Terraform::Docs
     Ask your Google Cloud account team to request access to workforce identity federation for your
     billing/quota project. The account team notifies you when the project is granted access.
 autogen_async: true
-import_format: ["locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}"]
+import_format:
+  [
+    'locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}',
+  ]
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "iam_workforce_pool_provider_saml_basic"
-    primary_resource_id: "example"
+    name: 'iam_workforce_pool_provider_saml_basic'
+    primary_resource_id: 'example'
     vars:
-      workforce_pool_id: "example-pool"
-      provider_id: "example-prvdr"
+      workforce_pool_id: 'example-pool'
+      provider_id: 'example-prvdr'
     test_env_vars:
       org_id: :ORG_ID
   - !ruby/object:Provider::Terraform::Examples
-    name: "iam_workforce_pool_provider_saml_full"
-    primary_resource_id: "example"
+    name: 'iam_workforce_pool_provider_saml_full'
+    primary_resource_id: 'example'
     vars:
-      workforce_pool_id: "example-pool"
-      provider_id: "example-prvdr"
+      workforce_pool_id: 'example-pool'
+      provider_id: 'example-prvdr'
     test_env_vars:
       org_id: :ORG_ID
   - !ruby/object:Provider::Terraform::Examples
-    name: "iam_workforce_pool_provider_oidc_basic"
-    primary_resource_id: "example"
+    name: 'iam_workforce_pool_provider_oidc_basic'
+    primary_resource_id: 'example'
     vars:
-      workforce_pool_id: "example-pool"
-      provider_id: "example-prvdr"
+      workforce_pool_id: 'example-pool'
+      provider_id: 'example-prvdr'
     test_env_vars:
       org_id: :ORG_ID
+    ignore_read_extra:
+      - 'oidc.0.client_secret.0.value.0.plain_text'
   - !ruby/object:Provider::Terraform::Examples
-    name: "iam_workforce_pool_provider_oidc_full"
-    primary_resource_id: "example"
+    name: 'iam_workforce_pool_provider_oidc_full'
+    primary_resource_id: 'example'
     vars:
-      workforce_pool_id: "example-pool"
-      provider_id: "example-prvdr"
+      workforce_pool_id: 'example-pool'
+      provider_id: 'example-prvdr'
     test_env_vars:
       org_id: :ORG_ID
+    ignore_read_extra:
+      - 'oidc.0.client_secret.0.value.0.plain_text'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'iam_workforce_pool_provider_oidc_upload_key'
+    skip_docs: true
+    primary_resource_id: 'example'
+    vars:
+      workforce_pool_id: 'example-pool'
+      provider_id: 'example-prvdr'
+    test_env_vars:
+      org_id: :ORG_ID
+    ignore_read_extra:
+      - 'oidc.0.client_secret.0.value.0.plain_text'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'iam_workforce_pool_provider_extra_attributes_oauth2_config_client_basic'
+    primary_resource_id: 'example'
+    vars:
+      workforce_pool_id: 'example-pool'
+      provider_id: 'example-prvdr'
+    test_env_vars:
+      org_id: :ORG_ID
+    ignore_read_extra:
+      - 'oidc.0.client_secret.0.value.0.plain_text'
+      - 'extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'iam_workforce_pool_provider_extra_attributes_oauth2_config_client_full'
+    primary_resource_id: 'example'
+    vars:
+      workforce_pool_id: 'example-pool'
+      provider_id: 'example-prvdr'
+    test_env_vars:
+      org_id: :ORG_ID
+    ignore_read_extra:
+      - 'oidc.0.client_secret.0.value.0.plain_text'
+      - 'extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/iam_workforce_pool_provider.go.erb
   decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.erb
+  post_create: templates/terraform/post_create/iam_workforce_pool_provider.go.erb
+  post_update: templates/terraform/post_update/iam_workforce_pool_provider.go.erb
 properties:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -93,7 +135,7 @@ properties:
     immutable: true
     url_param_only: true
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateWorkforcePoolProviderId'
+      function: 'ValidateWorkforcePoolProviderId'
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
@@ -102,11 +144,14 @@ properties:
     output: true
   - !ruby/object:Api::Type::String
     name: 'displayName'
-    description: A user-specified display name for the provider. Cannot exceed 32
+    description:
+      A user-specified display name for the provider. Cannot exceed 32
       characters.
   - !ruby/object:Api::Type::String
     name: 'description'
-    description: A user-specified description of the provider. Cannot exceed 256 characters.
+    description:
+      A user-specified description of the provider. Cannot exceed 256
+      characters.
   - !ruby/object:Api::Type::Enum
     name: 'state'
     description: |
@@ -219,9 +264,9 @@ properties:
           The metadata xml document should satisfy the following constraints:
           1) Must contain an Identity Provider Entity ID.
           2) Must contain at least one non-expired signing key certificate.
-          3) For each signing key: 
-            a) Valid from should be no more than 7 days from now. 
-            b) Valid to should be no more than 10 years in the future. 
+          3) For each signing key:
+            a) Valid from should be no more than 7 days from now.
+            b) Valid to should be no more than 10 years in the future.
           4) Up to 3 IdP signing keys are allowed in the metadata xml.
 
           When updating the provider's metadata xml, at least one non-expired signing key
@@ -237,11 +282,165 @@ properties:
     properties:
       - !ruby/object:Api::Type::String
         name: issuerUri
-        description: The OIDC issuer URI. Must be a valid URI using the 'https' scheme.
+        description:
+          The OIDC issuer URI. Must be a valid URI using the 'https' scheme.
         required: true
       - !ruby/object:Api::Type::String
         name: clientId
-        description: The client ID. Must match the audience claim of the JWT issued
-          by the identity provider.
+        description:
+          The client ID. Must match the audience claim of the JWT issued by the
+          identity provider.
         required: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'clientSecret'
+        description: |
+          The optional client secret. Required to enable Authorization Code flow for web sign-in.
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'value'
+            exactly_one_of:
+              - oidc.0.client_secret.0.value
+            description: |
+              The value of the client secret.
+            custom_flatten: templates/terraform/custom_flatten/iam_workforce_pool_provider_oidc_client_secret_value.go.erb
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'plainText'
+                description: |
+                  The plain text of the client secret value.
+                sensitive: true
+                required: true
+                validation: !ruby/object:Provider::Terraform::Validation
+                  function: 'validation.StringIsNotEmpty'
+              - !ruby/object:Api::Type::String
+                name: 'thumbprint'
+                description: |
+                  A thumbprint to represent the current client secret value.
+                output: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'webSsoConfig'
+        description: |
+          Configuration for web single sign-on for the OIDC provider. Here, web sign-in refers to console sign-in and gcloud sign-in through the browser.
+        default_from_api: true
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'responseType'
+            description: |
+              The Response Type to request for in the OIDC Authorization Request for web sign-in.
 
+              The `CODE` Response Type is recommended to avoid the Implicit Flow, for security reasons.
+              * CODE: The `response_type=code` selection uses the Authorization Code Flow for web sign-in. Requires a configured client secret.
+              * ID_TOKEN: The `response_type=id_token` selection uses the Implicit Flow for web sign-in.
+            required: true
+            values:
+              - :CODE
+              - :ID_TOKEN
+          - !ruby/object:Api::Type::Enum
+            name: assertionClaimsBehavior
+            description: |
+              The behavior for how OIDC Claims are included in the `assertion` object used for attribute mapping and attribute condition.
+              * MERGE_USER_INFO_OVER_ID_TOKEN_CLAIMS: Merge the UserInfo Endpoint Claims with ID Token Claims, preferring UserInfo Claim Values for the same Claim Name. This option is available only for the Authorization Code Flow.
+              * ONLY_ID_TOKEN_CLAIMS: Only include ID Token Claims.
+            required: true
+            values:
+              - :MERGE_USER_INFO_OVER_ID_TOKEN_CLAIMS
+              - :ONLY_ID_TOKEN_CLAIMS
+          - !ruby/object:Api::Type::Array
+            name: additionalScopes
+            description: |
+              Additional scopes to request for in the OIDC authentication request on top of scopes requested by default. By default, the `openid`, `profile` and `email` scopes that are supported by the identity provider are requested.
+              Each additional scope may be at most 256 characters. A maximum of 10 additional scopes may be configured.
+            required: false
+            item_type: Api::Type::String
+      - !ruby/object:Api::Type::String
+        name: 'jwksJson'
+        description: |
+          OIDC JWKs in JSON String format. For details on definition of a
+          JWK, see https:tools.ietf.org/html/rfc7517. If not set, then we
+          use the `jwks_uri` from the discovery document fetched from the
+          .well-known path for the `issuer_uri`. Currently, RSA and EC asymmetric
+          keys are supported. The JWK must use following format and include only
+          the following fields:
+          ```
+          {
+            "keys": [
+              {
+                    "kty": "RSA/EC",
+                    "alg": "<algorithm>",
+                    "use": "sig",
+                    "kid": "<key-id>",
+                    "n": "",
+                    "e": "",
+                    "x": "",
+                    "y": "",
+                    "crv": ""
+              }
+            ]
+          }
+          ```
+  - !ruby/object:Api::Type::NestedObject
+    name: 'extraAttributesOauth2Client'
+    description: |
+      The configuration for OAuth 2.0 client used to get the additional user
+      attributes. This should be used when users can't get the desired claims
+      in authentication credentials. Currently this configuration is only
+      supported with OIDC protocol.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: issuerUri
+        description: |
+          The OIDC identity provider's issuer URI. Must be a valid URI using the `https` scheme. Required to get the OIDC discovery document.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: clientId
+        description: |
+          The OAuth 2.0 client ID for retrieving extra attributes from the identity provider. Required to get the Access Token using client credentials grant flow.
+        required: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'clientSecret'
+        description: |
+          The OAuth 2.0 client secret for retrieving extra attributes from the identity provider. Required to get the Access Token using client credentials grant flow.
+        required: true
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'value'
+            exactly_one_of:
+              - extraAttributesOauth2Client.0.client_secret.0.value
+            description: |
+              The value of the client secret.
+            custom_flatten: templates/terraform/custom_flatten/iam_workforce_pool_provider_extra_attributes_oauth2_config_client_secret_value.go.erb
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'plainText'
+                description: |
+                  The plain text of the client secret value.
+                required: true
+                validation: !ruby/object:Provider::Terraform::Validation
+                  function: 'validation.StringIsNotEmpty'
+              - !ruby/object:Api::Type::String
+                name: 'thumbprint'
+                description: |
+                  A thumbprint to represent the current client secret value.
+                output: true
+      - !ruby/object:Api::Type::Enum
+        name: 'attributesType'
+        description: |
+          Represents the IdP and type of claims that should be fetched.
+          * AZURE_AD_GROUPS_MAIL: Used to get the user's group claims from the Azure AD identity provider using configuration provided
+          in ExtraAttributesOAuth2Client and `mail` property of the `microsoft.graph.group` object is used for claim mapping.
+          See https://learn.microsoft.com/en-us/graph/api/resources/group?view=graph-rest-1.0#properties for more details on
+          `microsoft.graph.group` properties. The attributes obtained from idntity provider are mapped to `assertion.groups`.
+        required: true
+        values:
+          - :AZURE_AD_GROUPS_MAIL
+      - !ruby/object:Api::Type::NestedObject
+        name: 'queryParameters'
+        description: |
+          Represents the parameters to control which claims are fetched from an IdP.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'filter'
+            description: |
+              The filter used to request specific records from IdP. In case of attributes type as AZURE_AD_GROUPS_MAIL, it represents the
+              filter used to request specific groups for users from IdP. By default, all of the groups associated with the user are fetched. The
+              groups should be mail enabled and security enabled. See https://learn.microsoft.com/en-us/graph/search-query-parameter for more details.

@@ -4,7 +4,7 @@ description: |-
  Collection of resources to manage IAM policy for a Bigtable instance.
 ---
 
-# IAM policy for Bigtable instance
+# IAM policy for Bigtable Instance
 
 Three different resources help you manage IAM policies on bigtable instances. Each of these resources serves a different use case:
 
@@ -16,7 +16,7 @@ Three different resources help you manage IAM policies on bigtable instances. Ea
 
 ~> **Note:** `google_bigtable_instance_iam_binding` resources **can be** used in conjunction with `google_bigtable_instance_iam_member` resources **only if** they do not grant privilege to the same role.
 
-## google\_bigtable\_instance\_iam\_policy
+## google_bigtable_instance_iam_policy
 
 ```hcl
 data "google_iam_policy" "admin" {
@@ -35,7 +35,7 @@ resource "google_bigtable_instance_iam_policy" "editor" {
 }
 ```
 
-## google\_bigtable\_instance\_iam\_binding
+## google_bigtable_instance_iam_binding
 
 ```hcl
 resource "google_bigtable_instance_iam_binding" "editor" {
@@ -47,7 +47,7 @@ resource "google_bigtable_instance_iam_binding" "editor" {
 }
 ```
 
-## google\_bigtable\_instance\_iam\_member
+## google_bigtable_instance_iam_member
 
 ```hcl
 resource "google_bigtable_instance_iam_member" "editor" {
@@ -95,15 +95,69 @@ exported:
 
 ## Import
 
-Instance IAM resources can be imported using the project, instance name, role and/or member.
-
-```
-$ terraform import google_bigtable_instance_iam_policy.editor "projects/{project}/instances/{instance}"
-
-$ terraform import google_bigtable_instance_iam_binding.editor "projects/{project}/instances/{instance} roles/editor"
-
-$ terraform import google_bigtable_instance_iam_member.editor "projects/{project}/instances/{instance} roles/editor user:jane@example.com"
-```
-
 -> **Custom Roles**: If you're importing a IAM resource with a custom role, make sure to use the
  full name of the custom role, e.g. `[projects/my-project|organizations/my-org]/roles/my-custom-role`.
+
+### Importing IAM members
+
+IAM member imports use space-delimited identifiers that contain the resource's `instance`, `role`, and `member`. For example:
+
+* `"projects/{project}/instances/{instance} roles/editor user:jane@example.com"`
+
+An [`import` block](https://developer.hashicorp.com/terraform/language/import) (Terraform v1.5.0 and later) can be used to import IAM members:
+
+```tf
+import {
+  id = "projects/{project}/instances/{instance} roles/editor user:jane@example.com"
+  to = google_bigtable_instance_iam_member.default
+}
+```
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can also be used:
+
+```
+$ terraform import google_bigtable_instance_iam_member.default "projects/{project}/instances/{instance} roles/editor user:jane@example.com"
+```
+
+### Importing IAM bindings
+
+IAM binding imports use space-delimited identifiers that contain the resource's `instance` and `role`. For example:
+
+* `"projects/{project}/instances/{instance} roles/editor"`
+
+An [`import` block](https://developer.hashicorp.com/terraform/language/import) (Terraform v1.5.0 and later) can be used to import IAM bindings:
+
+```tf
+import {
+  id = "projects/{project}/instances/{instance} roles/editor"
+  to = google_bigtable_instance_iam_binding.default
+}
+```
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can also be used:
+
+```
+$ terraform import google_bigtable_instance_iam_binding.default "projects/{project}/instances/{instance} roles/editor"
+```
+
+### Importing IAM policies
+
+IAM policy imports use the `instance` identifier of the Bigtable Instance resource only. For example:
+
+* `"projects/{project}/instances/{instance}"`
+
+An [`import` block](https://developer.hashicorp.com/terraform/language/import) (Terraform v1.5.0 and later) can be used to import IAM policies:
+
+```tf
+import {
+  id = "projects/{project}/instances/{instance}"
+  to = google_bigtable_instance_iam_policy.default
+}
+```
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can also be used:
+
+```
+$ terraform import google_bigtable_instance_iam_policy.default projects/{project}/instances/{instance}
+```
+

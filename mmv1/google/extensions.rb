@@ -18,11 +18,30 @@ class String
     Google::StringUtils.underscore(self)
   end
 
-  def symbolize
-    Google::StringUtils.symbolize(self)
-  end
-
   def first_sentence
     Google::StringUtils.first_sentence(self)
+  end
+
+  def space_separated
+    Google::StringUtils.space_separated(self)
+  end
+
+  def plural
+    Google::StringUtils.plural(self)
+  end
+
+  def title
+    Google::StringUtils.title(self)
+  end
+
+  def camelize(first_letter = :upper)
+    case first_letter
+    when :upper
+      Google::StringUtils.camelize(self, true)
+    when :lower
+      Google::StringUtils.camelize(self, false)
+    else
+      raise ArgumentError, 'Invalid option, use either :upper or :lower.'
+    end
   end
 end

@@ -15,30 +15,31 @@
 name: Service
 base_url: v3/projects/{{project}}/services
 create_url: v3/projects/{{project}}/services?serviceId={{service_id}}
-self_link: "v3/{{name}}"
+self_link: 'v3/{{name}}'
 update_verb: :PATCH
 update_mask: true
 description: |
   A Service is a discrete, autonomous, and network-accessible unit,
-  designed to solve an individual concern (Wikipedia). In Cloud Monitoring,
+  designed to solve an individual concern. In Cloud Monitoring,
   a Service acts as the root resource under which operational aspects of
   the service are accessible
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Service Monitoring': 'https://cloud.google.com/monitoring/service-monitoring'
     'Monitoring API Documentation': 'https://cloud.google.com/monitoring/api/v3/'
+    'Service-orientation on Wikipedia': 'https://en.wikipedia.org/wiki/Service-orientation'
   api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/v3/services'
 legacy_name: 'google_monitoring_custom_service'
-id_format: "{{name}}"
-import_format: ["{{name}}"]
-error_retry_predicates: ["isMonitoringConcurrentEditError"]
+id_format: '{{name}}'
+import_format: ['{{name}}']
+error_retry_predicates: ['transport_tpg.IsMonitoringConcurrentEditError']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "monitoring_service_custom"
-    primary_resource_id: "custom"
+    name: 'monitoring_service_custom'
+    primary_resource_id: 'custom'
     vars:
-      service_id: "custom-srv"
-      resource_name: "//product.googleapis.com/foo/foo/services/test"
+      service_id: 'custom-srv'
+      resource_name: '//product.googleapis.com/foo/foo/services/test'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/self_link_as_name.erb
   encoder: templates/terraform/encoders/monitoring_service.go.erb
@@ -54,7 +55,7 @@ parameters:
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
     default_from_api: true
     validation: !ruby/object:Provider::Terraform::Validation
-      regex: '^[a-z0-9\-]+$'
+      regex: '^[a-zA-Z0-9\-_:.]+$'
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -87,4 +88,3 @@ properties:
           The full name of the resource that defines this service.
           Formatted as described in
           https://cloud.google.com/apis/design/resource_names.
-

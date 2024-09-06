@@ -1,0 +1,25 @@
+[
+  {
+    "name": "//bigquery.googleapis.com/projects/{{.Provider.project}}/datasets/test_dataset",
+    "asset_type": "bigquery.googleapis.com/Dataset",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "v2",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/bigquery/v2/rest",
+      "discovery_name": "Dataset",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "friendlyName": "",
+        "datasetReference": {
+          "datasetId": "test_dataset"
+        },
+        "labels": {
+          "env": "dev",
+          "goog-terraform-provisioned": "true"
+        },
+        "location": "EU",
+        "defaultTableExpirationMs": 3.6e+06
+      }
+    }
+  }
+]

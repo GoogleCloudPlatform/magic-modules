@@ -22,43 +22,44 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://firebase.google.com/products/realtime-database'
   api: 'https://firebase.google.com/docs/reference/rest/database/database-management/rest'
-import_format: ['projects/{{project}}/locations/{{region}}/instances/{{instance_id}}',
-  '{{region}}/{{instance_id}}']
+import_format:
+  [
+    'projects/{{project}}/locations/{{region}}/instances/{{instance_id}}',
+    '{{region}}/{{instance_id}}',
+  ]
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "firebase_database_instance_basic"
-    min_version: "beta"
-    primary_resource_id: "basic"
+    name: 'firebase_database_instance_basic'
+    min_version: 'beta'
+    primary_resource_id: 'basic'
     vars:
-      instance_id: "active-db"
+      instance_id: 'active-db'
     test_env_vars:
       project_id: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
-    name: "firebase_database_instance_full"
-    min_version: "beta"
-    primary_resource_id: "full"
+    name: 'firebase_database_instance_full'
+    min_version: 'beta'
+    primary_resource_id: 'full'
     vars:
-      instance_id: "disabled-db"
+      instance_id: 'disabled-db'
     test_env_vars:
       project_id: :PROJECT_NAME
     ignore_read_extra:
-      - "desired_state"
+      - 'desired_state'
   - !ruby/object:Provider::Terraform::Examples
-    name: "firebase_database_instance_default_database"
-    min_version: "beta"
-    primary_resource_id: "default"
+    name: 'firebase_database_instance_default_database'
+    min_version: 'beta'
+    primary_resource_id: 'default'
     vars:
-      project_id: "rtdb-project"
+      project_id: 'rtdb-project'
     test_env_vars:
       org_id: :ORG_ID
 virtual_fields:
-  - !ruby/object:Api::Type::Enum
+  - !ruby/object:Api::Type::String
     name: desired_state
-    description: The intended database state.
-    values:
-      - :ACTIVE
-      - :DISABLED
-    default_value: :ACTIVE
+    description: |
+      The intended database state. Possible values: ACTIVE, DISABLED.
+    default_value: ACTIVE
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: 'templates/terraform/constants/firebase_database_instance.go.erb'
   decoder: templates/terraform/decoders/firebase_database_instance.go.erb
@@ -79,7 +80,7 @@ parameters:
   - !ruby/object:Api::Type::String
     name: 'instance_id'
     description: |
-      The globally unique identifier of the Firebase Realtime Database instance. 
+      The globally unique identifier of the Firebase Realtime Database instance.
       Instance IDs cannot be reused after deletion.
     required: true
     immutable: true
@@ -88,13 +89,13 @@ properties:
   - !ruby/object:Api::Type::String
     name: name
     description: |
-      The fully-qualified resource name of the Firebase Realtime Database, in the
-      format: projects/PROJECT_NUMBER/locations/REGION_IDENTIFIER/instances/INSTANCE_ID
+      The fully-qualified resource name of the Firebase Realtime Database, in
+      the format: projects/PROJECT_NUMBER/locations/REGION_IDENTIFIER/instances/INSTANCE_ID
       PROJECT_NUMBER: The Firebase project's [`ProjectNumber`](https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects#FirebaseProject.FIELDS.project_number)
       Learn more about using project identifiers in Google's [AIP 2510 standard](https://google.aip.dev/cloud/2510).
     output: true
   - !ruby/object:Api::Type::String
-    name: database_url
+    name: databaseUrl
     description: |
       The database URL in the form of https://{instance-id}.firebaseio.com for us-central1 instances
       or https://{instance-id}.{region}.firebasedatabase.app in other regions.
@@ -119,5 +120,3 @@ properties:
     values:
       - :ACTIVE
       - :DISABLED
-
-

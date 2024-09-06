@@ -29,7 +29,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -46,15 +46,20 @@ async: !ruby/object:Api::OpAsync
 collection_url_key: 'items'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "node_template_basic"
-    primary_resource_id: "template"
+    name: 'node_template_basic'
+    primary_resource_id: 'template'
     vars:
-      template_name: "soletenant-tmpl"
+      template_name: 'soletenant-tmpl'
   - !ruby/object:Provider::Terraform::Examples
-    name: "node_template_server_binding"
-    primary_resource_id: "template"
+    name: 'node_template_server_binding'
+    primary_resource_id: 'template'
     vars:
-      template_name: "soletenant-with-licenses"
+      template_name: 'soletenant-with-licenses'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'node_template_accelerators'
+    primary_resource_id: 'template'
+    vars:
+      template_name: 'soletenant-with-accelerators'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
@@ -66,6 +71,7 @@ parameters:
       If it is not provided, the provider region is used.
     default_from_api: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -144,6 +150,23 @@ properties:
         values:
           - :RESTART_NODE_ON_ANY_SERVER
           - :RESTART_NODE_ON_MINIMAL_SERVERS
+  - !ruby/object:Api::Type::Array
+    name: 'accelerators'
+    description: |
+      List of the type and count of accelerator cards attached to the
+      node template
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::Integer
+          name: 'acceleratorCount'
+          description: |
+            The number of the guest accelerator cards exposed to this
+            node template.
+        - !ruby/object:Api::Type::String
+          name: 'acceleratorType'
+          description: |
+            Full or partial URL of the accelerator type resource to expose
+            to this node template.
   - !ruby/object:Api::Type::Enum
     name: 'cpuOvercommitType'
     description: |

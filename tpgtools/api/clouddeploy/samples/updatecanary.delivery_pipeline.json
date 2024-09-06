@@ -1,0 +1,76 @@
+{
+    "name": "{{pipeline}}",
+    "location": "{{region}}",
+    "project": "{{project}}",
+  
+    "description": "updated description",
+    "annotations": {
+      "my_second_annotation": "updated-example-annotation-2",
+      "my_third_annotation": "example-annotation-3"
+    },
+    "labels": {
+      "my_second_label": "updated-example-label-2",
+      "my_third_label": "example-label-3"
+    },
+    "serialPipeline": {
+      "stages": [
+        {
+          "targetId": "example-target-two",
+          "profiles": ["new-example-profile"],
+          "strategy" : {
+            "canary" :  {
+              "runtimeConfig" : {
+                "kubernetes" : {
+                  "gatewayServiceMesh" : {
+                    "httpRoute": "example-http-route",
+                    "service": "example-service",
+                    "deployment": "example-deployment",
+                    "podSelectorLabel": "example.com/app-name"
+                  }
+                }
+              },
+              "customCanaryDeployment" : {
+                "phaseConfigs" : [
+                  {
+                    "phaseId": "first",
+                    "percentage": 50,
+                    "verify": true
+                  },
+                  {
+                    "phaseId": "stable",
+                    "percentage": 100,
+                    "verify": false
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "targetId": "example-target-three",
+          "strategy" : {
+            "canary" :  {
+              "runtimeConfig" : {
+                "kubernetes" : {
+                  "gatewayServiceMesh" : {
+                    "httpRoute": "example-http-route",
+                    "service": "example-service",
+                    "deployment": "example-deployment",
+                    "podSelectorLabel": "example.com/app-name"
+                  }
+                }
+              },
+              "canaryDeployment" : {
+                "percentages": [0, 5, 20],
+                "verify": true
+              }
+            }
+          },
+          "profiles": [
+            "example-profile-four",
+            "example-profile-five"
+          ]
+        }
+      ]
+    }
+  }

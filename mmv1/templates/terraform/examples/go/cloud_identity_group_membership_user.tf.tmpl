@@ -1,0 +1,29 @@
+resource "google_cloud_identity_group" "group" {
+  display_name = "{{index $.Vars "id_group"}}"
+
+  parent = "customers/{{index $.TestEnvVars "cust_id"}}"
+
+  group_key {
+    id = "{{index $.Vars "id_group"}}@{{index $.TestEnvVars "org_domain"}}"
+  }
+
+  labels = {
+    "cloudidentity.googleapis.com/groups.discussion_forum" = ""
+  }
+}
+
+resource "google_cloud_identity_group_membership" "cloud_identity_group_membership_basic" {
+  group    = google_cloud_identity_group.group.id
+
+  preferred_member_key {
+    id = "{{index $.TestEnvVars "identity_user"}}@{{index $.TestEnvVars "org_domain"}}"
+  }
+
+  roles {
+    name = "MEMBER"
+  }
+
+  roles {
+    name = "MANAGER"
+  }
+}

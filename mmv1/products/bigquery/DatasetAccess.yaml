@@ -47,48 +47,48 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/bigquery/docs/reference/rest/v2/datasets'
 exclude_import: true
 skip_sweeper: true
-exclude_validator: true
-error_retry_predicates: ["isBigqueryIAMQuotaError"]
-mutex: "{{dataset_id}}"
+exclude_tgc: true
+error_retry_predicates: ['transport_tpg.IsBigqueryIAMQuotaError']
+mutex: '{{dataset_id}}'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_dataset_access_basic_user"
-    skip_test: true      # not importable
-    primary_resource_id: "access"
+    name: 'bigquery_dataset_access_basic_user'
+    skip_test: true  # not importable
+    primary_resource_id: 'access'
     vars:
-      dataset_id: "example_dataset"
-      account_name: "bqowner"
+      dataset_id: 'example_dataset'
+      account_name: 'bqowner'
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_dataset_access_view"
-    skip_test: true      # not importable
-    primary_resource_id: "access"
+    name: 'bigquery_dataset_access_view'
+    skip_test: true  # not importable
+    primary_resource_id: 'access'
     vars:
-      dataset_id: "example_dataset"
-      dataset_id2: "example_dataset2"
-      table_id: "example_table"
+      dataset_id: 'example_dataset'
+      dataset_id2: 'example_dataset2'
+      table_id: 'example_table'
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_dataset_access_authorized_dataset"
-    skip_test: true      # not importable
-    primary_resource_id: "access"
+    name: 'bigquery_dataset_access_authorized_dataset'
+    skip_test: true  # not importable
+    primary_resource_id: 'access'
     vars:
-      private: "private"
-      public: "public"
+      private: 'private'
+      public: 'public'
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_dataset_access_authorized_routine"
-    skip_test: true      # not importable
-    primary_resource_type: "google_bigquery_dataset_access"
-    primary_resource_id: "authorized_routine"
+    name: 'bigquery_dataset_access_authorized_routine'
+    skip_test: true  # not importable
+    primary_resource_type: 'google_bigquery_dataset_access'
+    primary_resource_id: 'authorized_routine'
     vars:
-      private_dataset: "private_dataset"
-      public_dataset: "public_dataset"
-      public_routine: "public_routine"
+      private_dataset: 'private_dataset'
+      public_dataset: 'public_dataset'
+      public_routine: 'public_routine'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/bigquery_dataset_access.go.erb
   post_create: templates/terraform/post_create/bigquery_dataset_access.go.erb
   extra_schema_entry: templates/terraform/extra_schema_entry/bigquery_dataset_access.go.erb
 docs: !ruby/object:Provider::Terraform::Docs
   warning: |
-    You must specify the role field using the legacy format `OWNER` instead of `roles/bigquery.dataOwner`. 
+    You must specify the role field using the legacy format `OWNER` instead of `roles/bigquery.dataOwner`.
     The API does accept both formats but it will always return the legacy format which results in Terraform
     showing permanent diff on each plan and apply operation.
 properties:
@@ -110,7 +110,7 @@ properties:
       post-create. See
       [official docs](https://cloud.google.com/bigquery/docs/access-control).
     diff_suppress_func: 'resourceBigQueryDatasetAccessRoleDiffSuppress'
-    custom_expand: "templates/terraform/custom_expand/bigquery_access_role.go.erb"
+    custom_expand: 'templates/terraform/custom_expand/bigquery_access_role.go.erb'
   - !ruby/object:Api::Type::String
     name: 'userByEmail'
     description: |
@@ -125,6 +125,7 @@ properties:
       - view
       - dataset
       - routine
+    custom_expand: 'templates/terraform/custom_expand/string_to_lower_case.go.erb'
     diff_suppress_func: resourceBigQueryDatasetAccessIamMemberDiffSuppress
   - !ruby/object:Api::Type::String
     name: 'groupByEmail'
@@ -138,6 +139,7 @@ properties:
       - view
       - dataset
       - routine
+    custom_expand: 'templates/terraform/custom_expand/string_to_lower_case.go.erb'
     diff_suppress_func: resourceBigQueryDatasetAccessIamMemberDiffSuppress
   - !ruby/object:Api::Type::String
     name: 'domain'
@@ -158,17 +160,9 @@ properties:
     name: 'specialGroup'
     description: |
       A special group to grant access to. Possible values include:
-
-
       * `projectOwners`: Owners of the enclosing project.
-
-
       * `projectReaders`: Readers of the enclosing project.
-
-
       * `projectWriters`: Writers of the enclosing project.
-
-
       * `allAuthenticatedUsers`: All authenticated BigQuery users.
     exactly_one_of:
       - user_by_email

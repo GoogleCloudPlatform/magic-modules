@@ -12,8 +12,8 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
-	fv, err := ParseNetworkFieldValue(v.(string), d, config)
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	fv, err := tpgresource.ParseNetworkFieldValue(v.(string), d, config)
 	if err != nil {
 		return nil, err
 	}

@@ -25,32 +25,26 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/network-intelligence-center/docs'
   api: 'https://cloud.google.com/network-intelligence-center/docs/connectivity-tests/reference/networkmanagement/rest/v1/projects.locations.global.connectivityTests'
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  exclude: true
-  method_name_separator: ':'
-  parent_resource_attribute: 'connectivityTest'
-  import_format: ["projects/{{project}}/locations/global/connectivityTests/{{connectivityTest}}",
-    "{{connectivityTest}}"]
 filename_override: 'connectivity_test_resource'
 id_format: projects/{{project}}/locations/global/connectivityTests/{{name}}
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "network_management_connectivity_test_instances"
-    primary_resource_id: "instance-test"
+    name: 'network_management_connectivity_test_instances'
+    primary_resource_id: 'instance-test'
     vars:
-      primary_resource_name: "conn-test-instances"
-      network_name: "conn-test-net"
-      source_instance: "source-vm"
-      dest_instance: "dest-vm"
+      primary_resource_name: 'conn-test-instances'
+      network_name: 'conn-test-net'
+      source_instance: 'source-vm'
+      dest_instance: 'dest-vm'
   - !ruby/object:Provider::Terraform::Examples
-    name: "network_management_connectivity_test_addresses"
-    primary_resource_id: "address-test"
+    name: 'network_management_connectivity_test_addresses'
+    primary_resource_id: 'address-test'
     vars:
-      primary_resource_name: "conn-test-addr"
-      network: "connectivity-vpc"
-      source_addr: "src-addr"
-      dest_addr: "dest-addr"
+      primary_resource_name: 'conn-test-addr'
+      network: 'connectivity-vpc'
+      source_addr: 'src-addr'
+      dest_addr: 'dest-addr'
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -93,12 +87,12 @@ properties:
       ambiguous. However, the test result may include endpoints that
       you don't intend to test.
     update_mask_fields:
-      - "source.ipAddress"
-      - "source.port"
-      - "source.instance"
-      - "source.network"
-      - "source.networkType"
-      - "source.projectId"
+      - 'source.ipAddress'
+      - 'source.port'
+      - 'source.instance'
+      - 'source.network'
+      - 'source.networkType'
+      - 'source.projectId'
     properties:
       - !ruby/object:Api::Type::String
         name: ipAddress
@@ -162,11 +156,11 @@ properties:
       is ambiguous. However, the result can include endpoints that you
       don't intend to test.
     update_mask_fields:
-      - "destination.ipAddress"
-      - "destination.port"
-      - "destination.instance"
-      - "destination.network"
-      - "destination.projectId"
+      - 'destination.ipAddress'
+      - 'destination.port'
+      - 'destination.instance'
+      - 'destination.network'
+      - 'destination.projectId'
     properties:
       - !ruby/object:Api::Type::String
         name: ipAddress
@@ -202,7 +196,7 @@ properties:
     name: protocol
     description: |-
       IP Protocol of the test. When not provided, "TCP" is assumed.
-    default_value: "TCP"
+    default_value: 'TCP'
   - !ruby/object:Api::Type::Array
     name: relatedProjects
     description: |-
@@ -210,8 +204,7 @@ properties:
       This is applicable to scenarios where a test can cross project
       boundaries.
     item_type: Api::Type::String
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Resource labels to represent user-provided metadata.
-

@@ -1,0 +1,505 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the License);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+--- !ruby/object:Api::Resource
+name: 'Task'
+base_url: 'projects/{{project}}/locations/{{location}}/lakes/{{lake}}/tasks/{{task_id}}'
+self_link: 'projects/{{project}}/locations/{{location}}/lakes/{{lake}}/tasks/{{task_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/lakes/{{lake}}/tasks?task_id={{task_id}}'
+update_url: 'projects/{{project}}/locations/{{location}}/lakes/{{lake}}/tasks/{{task_id}}'
+delete_url: 'projects/{{project}}/locations/{{location}}/lakes/{{lake}}/tasks/{{task_id}}'
+update_verb: :PATCH
+update_mask: true
+# User-provided label cannot start with goog-
+skip_attribution_label: true
+description: |
+  A Dataplex task represents the work that you want Dataplex to do on a schedule. It encapsulates code, parameters, and the schedule.
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 5
+      update_minutes: 5
+      delete_minutes: 5
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
+autogen_async: true
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/dataplex/docs'
+  api: 'https://cloud.google.com/dataplex/docs/reference/rest/v1/projects.locations.lakes.tasks'
+import_format: ['projects/{{project}}/locations/{{location}}/lakes/{{lake}}/tasks/{{task_id}}']
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  exclude: false
+  method_name_separator: ':'
+  parent_resource_attribute: 'task_id'
+  fetch_iam_policy_verb: :GET
+  import_format:
+    [
+      'projects/{{project}}/locations/{{location}}/lakes/{{lake}}/tasks/{{task_id}}',
+      '{{task_id}}',
+    ]
+parameters:
+  - !ruby/object:Api::Type::String
+    name: 'location'
+    url_param_only: true
+    immutable: true
+    description: |
+      The location in which the task will be created in.
+  - !ruby/object:Api::Type::String
+    name: 'lake'
+    url_param_only: true
+    immutable: true
+    description: |
+      The lake in which the task will be created in.
+  - !ruby/object:Api::Type::String
+    name: 'taskId'
+    url_param_only: true
+    immutable: true
+    description: |
+      The task Id of the task.
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    output: true
+    description: |
+      The relative resource name of the task, of the form: projects/{project_number}/locations/{locationId}/lakes/{lakeId}/ tasks/{name}.
+  - !ruby/object:Api::Type::String
+    name: 'uid'
+    output: true
+    description: |
+      System generated globally unique ID for the task. This ID will be different if the task is deleted and re-created with the same name.
+  - !ruby/object:Api::Type::Time
+    name: 'createTime'
+    output: true
+    description: |
+      The time when the task was created.
+  - !ruby/object:Api::Type::Time
+    name: 'updateTime'
+    output: true
+    description: |
+      The time when the task was last updated.
+  - !ruby/object:Api::Type::String
+    name: 'description'
+    description: |
+      User-provided description of the task.
+  - !ruby/object:Api::Type::String
+    name: 'displayName'
+    description: |
+      User friendly display name.
+  - !ruby/object:Api::Type::Enum
+    name: 'state'
+    output: true
+    description: |
+      Current state of the task.
+    values:
+      - :STATE_UNSPECIFIED
+      - :ACTIVE
+      - :CREATING
+      - :DELETING
+      - :ACTION_REQUIRED
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
+    description: |
+      User-defined labels for the task.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'triggerSpec'
+    required: true
+    description: |
+      Configuration for the cluster
+    properties:
+      - !ruby/object:Api::Type::Enum
+        name: 'type'
+        required: true
+        immutable: true
+        description: |
+          Trigger type of the user-specified Task
+        values:
+          - :ON_DEMAND
+          - :RECURRING
+      - !ruby/object:Api::Type::Time
+        name: 'startTime'
+        description: |
+          The first run of the task will be after this time. If not specified, the task will run shortly after being submitted if ON_DEMAND and based on the schedule if RECURRING.
+      - !ruby/object:Api::Type::Boolean
+        name: 'disabled'
+        description: |
+          Prevent the task from executing. This does not cancel already running tasks. It is intended to temporarily disable RECURRING tasks.
+      - !ruby/object:Api::Type::Integer
+        name: 'maxRetries'
+        description: |
+          Number of retry attempts before aborting. Set to zero to never attempt to retry a failed task.
+      - !ruby/object:Api::Type::String
+        name: 'schedule'
+        description: |
+          Cron schedule (https://en.wikipedia.org/wiki/Cron) for running tasks periodically. To explicitly set a timezone to the cron tab, apply a prefix in the cron tab: 'CRON_TZ=${IANA_TIME_ZONE}' or 'TZ=${IANA_TIME_ZONE}'. The ${IANA_TIME_ZONE} may only be a valid string from IANA time zone database. For example, CRON_TZ=America/New_York 1 * * * *, or TZ=America/New_York 1 * * * *. This field is required for RECURRING tasks.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'executionSpec'
+    required: true
+    description: |
+      Configuration for the cluster
+    properties:
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'args'
+        description: |
+          The arguments to pass to the task. The args can use placeholders of the format ${placeholder} as part of key/value string. These will be interpolated before passing the args to the driver. Currently supported placeholders: - ${taskId} - ${job_time} To pass positional args, set the key as TASK_ARGS. The value should be a comma-separated string of all the positional arguments. To use a delimiter other than comma, refer to https://cloud.google.com/sdk/gcloud/reference/topic/escaping. In case of other keys being present in the args, then TASK_ARGS will be passed as the last argument. An object containing a list of 'key': value pairs. Example: { 'name': 'wrench', 'mass': '1.3kg', 'count': '3' }.
+      - !ruby/object:Api::Type::String
+        name: 'serviceAccount'
+        required: true
+        description: |
+          Service account to use to execute a task. If not provided, the default Compute service account for the project is used.
+      - !ruby/object:Api::Type::String
+        name: 'project'
+        description: |
+          The project in which jobs are run. By default, the project containing the Lake is used. If a project is provided, the ExecutionSpec.service_account must belong to this project.
+      - !ruby/object:Api::Type::String
+        name: 'maxJobExecutionLifetime'
+        description: |
+          The maximum duration after which the job execution is expired. A duration in seconds with up to nine fractional digits, ending with 's'. Example: '3.5s'.
+      - !ruby/object:Api::Type::String
+        name: 'kmsKey'
+        description: |
+          The Cloud KMS key to use for encryption, of the form: projects/{project_number}/locations/{locationId}/keyRings/{key-ring-name}/cryptoKeys/{key-name}.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'executionStatus'
+    output: true
+    description: |
+      Configuration for the cluster
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'updateTime'
+        output: true
+        description: |
+          Last update time of the status.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'latestJob'
+        output: true
+        description: |
+          latest job execution.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'name'
+            output: true
+            description: |
+              The relative resource name of the job, of the form: projects/{project_number}/locations/{locationId}/lakes/{lakeId}/tasks/{taskId}/jobs/{jobId}.
+          - !ruby/object:Api::Type::String
+            name: 'uid'
+            output: true
+            description: |
+              System generated globally unique ID for the job.
+          - !ruby/object:Api::Type::Time
+            name: 'startTime'
+            output: true
+            description: |
+              The time when the job was started.
+          - !ruby/object:Api::Type::Time
+            name: 'endTime'
+            output: true
+            description: |
+              The time when the job ended.
+          - !ruby/object:Api::Type::Enum
+            name: 'state'
+            output: true
+            description: |
+              Execution state for the job.
+            values:
+              - :STATE_UNSPECIFIED
+              - :RUNNING
+              - :CANCELLING
+              - :CANCELLED
+              - :SUCCEEDED
+              - :FAILED
+              - :ABORTED
+          - !ruby/object:Api::Type::Integer
+            name: 'retryCount'
+            output: true
+            description: |
+              The number of times the job has been retried (excluding the initial attempt).
+          - !ruby/object:Api::Type::Enum
+            name: 'service'
+            output: true
+            description: |
+              The underlying service running a job.
+            values:
+              - :SERVICE_UNSPECIFIED
+              - :DATAPROC
+          - !ruby/object:Api::Type::String
+            name: 'serviceJob'
+            output: true
+            description: |
+              The full resource name for the job run under a particular service.
+          - !ruby/object:Api::Type::String
+            name: 'message'
+            output: true
+            description: |
+              Additional information about the current state.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'spark'
+    description: |
+      A service with manual scaling runs continuously, allowing you to perform complex initialization and rely on the state of its memory over time.
+    exactly_one_of:
+      - spark
+      - notebook
+    properties:
+      - !ruby/object:Api::Type::Array
+        name: 'fileUris'
+        description: |
+          Cloud Storage URIs of files to be placed in the working directory of each executor.
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::Array
+        name: 'archiveUris'
+        description: |
+          Cloud Storage URIs of archives to be extracted into the working directory of each executor. Supported file types: .jar, .tar, .tar.gz, .tgz, and .zip.
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::NestedObject
+        name: 'infrastructureSpec'
+        description: |
+          Infrastructure specification for the execution.
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'batch'
+            description: |
+              Compute resources needed for a Task when using Dataproc Serverless.
+            properties:
+              - !ruby/object:Api::Type::Integer
+                name: 'executorsCount'
+                default_value: 2
+                description: |
+                  Total number of job executors. Executor Count should be between 2 and 100. [Default=2]
+              - !ruby/object:Api::Type::Integer
+                name: 'maxExecutorsCount'
+                default_value: 1000
+                description: |
+                  Max configurable executors. If maxExecutorsCount > executorsCount, then auto-scaling is enabled. Max Executor Count should be between 2 and 1000. [Default=1000]
+          - !ruby/object:Api::Type::NestedObject
+            name: 'containerImage'
+            description: |
+              Container Image Runtime Configuration.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'image'
+                description: |
+                  Container image to use.
+              - !ruby/object:Api::Type::Array
+                name: 'javaJars'
+                description: |
+                  A list of Java JARS to add to the classpath. Valid input includes Cloud Storage URIs to Jar binaries. For example, gs://bucket-name/my/path/to/file.jar
+                item_type: Api::Type::String
+              - !ruby/object:Api::Type::Array
+                name: 'pythonPackages'
+                description: |
+                  A list of python packages to be installed. Valid formats include Cloud Storage URI to a PIP installable library. For example, gs://bucket-name/my/path/to/lib.tar.gz
+                item_type: Api::Type::String
+              - !ruby/object:Api::Type::KeyValuePairs
+                name: 'properties'
+                description: |
+                  Override to common configuration of open source components installed on the Dataproc cluster. The properties to set on daemon config files. Property keys are specified in prefix:property format, for example core:hadoop.tmp.dir. For more information, see Cluster properties.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'vpcNetwork'
+            description: |
+              Vpc network.
+            properties:
+              - !ruby/object:Api::Type::Array
+                name: 'networkTags'
+                description: |
+                  List of network tags to apply to the job.
+                item_type: Api::Type::String
+              - !ruby/object:Api::Type::String
+                name: 'network'
+                description: |
+                  The Cloud VPC network in which the job is run. By default, the Cloud VPC network named Default within the project is used.
+                exactly_one_of:
+                  - network
+                  - subNetwork
+              - !ruby/object:Api::Type::String
+                name: 'subNetwork'
+                description: |
+                  The Cloud VPC sub-network in which the job is run.
+                exactly_one_of:
+                  - network
+                  - subNetwork
+      - !ruby/object:Api::Type::String
+        name: 'mainJarFileUri'
+        description: |
+          The Cloud Storage URI of the jar file that contains the main class. The execution args are passed in as a sequence of named process arguments (--key=value).
+        exactly_one_of:
+          - mainJarFileUri
+          - mainClass
+          - pythonScriptFile
+          - sqlScriptFile
+          - sqlScript
+      - !ruby/object:Api::Type::String
+        name: 'mainClass'
+        description: |
+          The name of the driver's main class. The jar file that contains the class must be in the default CLASSPATH or specified in jar_file_uris. The execution args are passed in as a sequence of named process arguments (--key=value).
+        exactly_one_of:
+          - mainJarFileUri
+          - mainClass
+          - pythonScriptFile
+          - sqlScriptFile
+          - sqlScript
+      - !ruby/object:Api::Type::String
+        name: 'pythonScriptFile'
+        description: |
+          The Gcloud Storage URI of the main Python file to use as the driver. Must be a .py file. The execution args are passed in as a sequence of named process arguments (--key=value).
+        exactly_one_of:
+          - mainJarFileUri
+          - mainClass
+          - pythonScriptFile
+          - sqlScriptFile
+          - sqlScript
+      - !ruby/object:Api::Type::String
+        name: 'sqlScriptFile'
+        description: |
+          A reference to a query file. This can be the Cloud Storage URI of the query file or it can the path to a SqlScript Content. The execution args are used to declare a set of script variables (set key='value';).
+        exactly_one_of:
+          - mainJarFileUri
+          - mainClass
+          - pythonScriptFile
+          - sqlScriptFile
+          - sqlScript
+      - !ruby/object:Api::Type::String
+        name: 'sqlScript'
+        description: |
+          The query text. The execution args are used to declare a set of script variables (set key='value';).
+        exactly_one_of:
+          - mainJarFileUri
+          - mainClass
+          - pythonScriptFile
+          - sqlScriptFile
+          - sqlScript
+  - !ruby/object:Api::Type::NestedObject
+    name: 'notebook'
+    description: |
+      A service with manual scaling runs continuously, allowing you to perform complex initialization and rely on the state of its memory over time.
+    exactly_one_of:
+      - spark
+      - notebook
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'notebook'
+        required: true
+        description: |
+          Path to input notebook. This can be the Cloud Storage URI of the notebook file or the path to a Notebook Content. The execution args are accessible as environment variables (TASK_key=value).
+      - !ruby/object:Api::Type::NestedObject
+        name: 'infrastructureSpec'
+        description: |
+          Infrastructure specification for the execution.
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'batch'
+            description: |
+              Compute resources needed for a Task when using Dataproc Serverless.
+            properties:
+              - !ruby/object:Api::Type::Integer
+                name: 'executorsCount'
+                default_value: 2
+                description: |
+                  Total number of job executors. Executor Count should be between 2 and 100. [Default=2]
+              - !ruby/object:Api::Type::Integer
+                name: 'maxExecutorsCount'
+                default_value: 1000
+                description: |
+                  Max configurable executors. If maxExecutorsCount > executorsCount, then auto-scaling is enabled. Max Executor Count should be between 2 and 1000. [Default=1000]
+          - !ruby/object:Api::Type::NestedObject
+            name: 'containerImage'
+            description: |
+              Container Image Runtime Configuration.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'image'
+                description: |
+                  Container image to use.
+              - !ruby/object:Api::Type::Array
+                name: 'javaJars'
+                description: |
+                  A list of Java JARS to add to the classpath. Valid input includes Cloud Storage URIs to Jar binaries. For example, gs://bucket-name/my/path/to/file.jar
+                item_type: Api::Type::String
+              - !ruby/object:Api::Type::Array
+                name: 'pythonPackages'
+                description: |
+                  A list of python packages to be installed. Valid formats include Cloud Storage URI to a PIP installable library. For example, gs://bucket-name/my/path/to/lib.tar.gz
+                item_type: Api::Type::String
+              - !ruby/object:Api::Type::KeyValuePairs
+                name: 'properties'
+                description: |
+                  Override to common configuration of open source components installed on the Dataproc cluster. The properties to set on daemon config files. Property keys are specified in prefix:property format, for example core:hadoop.tmp.dir. For more information, see Cluster properties.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'vpcNetwork'
+            description: |
+              Vpc network.
+            properties:
+              - !ruby/object:Api::Type::Array
+                name: 'networkTags'
+                description: |
+                  List of network tags to apply to the job.
+                item_type: Api::Type::String
+              - !ruby/object:Api::Type::String
+                name: 'network'
+                description: |
+                  The Cloud VPC network in which the job is run. By default, the Cloud VPC network named Default within the project is used.
+                exactly_one_of:
+                  - network
+                  - subNetwork
+              - !ruby/object:Api::Type::String
+                name: 'subNetwork'
+                description: |
+                  The Cloud VPC sub-network in which the job is run.
+                exactly_one_of:
+                  - network
+                  - subNetwork
+      - !ruby/object:Api::Type::Array
+        name: 'fileUris'
+        description: |
+          Cloud Storage URIs of files to be placed in the working directory of each executor.
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::Array
+        name: 'archiveUris'
+        description: |
+          Cloud Storage URIs of archives to be extracted into the working directory of each executor. Supported file types: .jar, .tar, .tar.gz, .tgz, and .zip.
+        item_type: Api::Type::String
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dataplex_task_basic'
+    primary_resource_id: 'example'
+    primary_resource_name:
+      'fmt.Sprintf("tf-test-lake%s", context["random_suffix"]),
+      fmt.Sprintf("tf-test-task%s", context["random_suffix"])'
+    test_env_vars:
+      project_name: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dataplex_task_spark'
+    primary_resource_id: 'example_spark'
+    primary_resource_name:
+      'fmt.Sprintf("tf-test-lake%s", context["random_suffix"]),
+      fmt.Sprintf("tf-test-task%s", context["random_suffix"])'
+    test_env_vars:
+      project_name: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dataplex_task_notebook'
+    primary_resource_id: 'example_notebook'
+    primary_resource_name:
+      'fmt.Sprintf("tf-test-lake%s", context["random_suffix"]),
+      fmt.Sprintf("tf-test-task%s", context["random_suffix"])'
+    test_env_vars:
+      project_name: :PROJECT_NAME

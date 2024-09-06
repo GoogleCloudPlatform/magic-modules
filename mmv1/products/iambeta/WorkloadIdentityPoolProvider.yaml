@@ -24,32 +24,65 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Managing workload identity providers': 'https://cloud.google.com/iam/docs/manage-workload-identity-pools-providers#managing_workload_identity_providers'
   api: 'https://cloud.google.com/iam/docs/reference/rest/v1/projects.locations.workloadIdentityPools.providers'
 autogen_async: true
-import_format: ["projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/providers/{{workload_identity_pool_provider_id}}"]
+import_format:
+  [
+    'projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/providers/{{workload_identity_pool_provider_id}}',
+  ]
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "iam_workload_identity_pool_provider_aws_basic"
-    primary_resource_id: "example"
+    name: 'iam_workload_identity_pool_provider_aws_basic'
+    primary_resource_id: 'example'
     vars:
-      workload_identity_pool_id: "example-pool"
-      workload_identity_pool_provider_id: "example-prvdr"
+      workload_identity_pool_id: 'example-pool'
+      workload_identity_pool_provider_id: 'example-prvdr'
   - !ruby/object:Provider::Terraform::Examples
-    name: "iam_workload_identity_pool_provider_aws_full"
-    primary_resource_id: "example"
+    name: 'iam_workload_identity_pool_provider_aws_full'
+    primary_resource_id: 'example'
     vars:
-      workload_identity_pool_id: "example-pool"
-      workload_identity_pool_provider_id: "example-prvdr"
+      workload_identity_pool_id: 'example-pool'
+      workload_identity_pool_provider_id: 'example-prvdr'
   - !ruby/object:Provider::Terraform::Examples
-    name: "iam_workload_identity_pool_provider_oidc_basic"
-    primary_resource_id: "example"
+    name: 'iam_workload_identity_pool_provider_oidc_basic'
+    primary_resource_id: 'example'
     vars:
-      workload_identity_pool_id: "example-pool"
-      workload_identity_pool_provider_id: "example-prvdr"
+      workload_identity_pool_id: 'example-pool'
+      workload_identity_pool_provider_id: 'example-prvdr'
   - !ruby/object:Provider::Terraform::Examples
-    name: "iam_workload_identity_pool_provider_oidc_full"
-    primary_resource_id: "example"
+    name: 'iam_workload_identity_pool_provider_oidc_full'
+    primary_resource_id: 'example'
     vars:
-      workload_identity_pool_id: "example-pool"
-      workload_identity_pool_provider_id: "example-prvdr"
+      workload_identity_pool_id: 'example-pool'
+      workload_identity_pool_provider_id: 'example-prvdr'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'iam_workload_identity_pool_provider_saml_basic'
+    primary_resource_id: 'example'
+    vars:
+      workload_identity_pool_id: 'example-pool'
+      workload_identity_pool_provider_id: 'example-prvdr'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'iam_workload_identity_pool_provider_saml_full'
+    primary_resource_id: 'example'
+    vars:
+      workload_identity_pool_id: 'example-pool'
+      workload_identity_pool_provider_id: 'example-prvdr'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'iam_workload_identity_pool_provider_oidc_upload_key'
+    primary_resource_id: 'example'
+    vars:
+      workload_identity_pool_id: 'example-pool'
+      workload_identity_pool_provider_id: 'example-prvdr'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'iam_workload_identity_pool_provider_x509_basic'
+    primary_resource_id: 'example'
+    vars:
+      workload_identity_pool_id: 'example-pool'
+      workload_identity_pool_provider_id: 'example-prvdr'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'iam_workload_identity_pool_provider_x509_full'
+    primary_resource_id: 'example'
+    vars:
+      workload_identity_pool_id: 'example-pool'
+      workload_identity_pool_provider_id: 'example-prvdr'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/iam_workload_identity_pool_provider.go.erb
   decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.erb
@@ -74,7 +107,7 @@ properties:
     immutable: true
     url_param_only: true
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateWorkloadIdentityPoolProviderId'
+      function: 'ValidateWorkloadIdentityPoolProviderId'
   - !ruby/object:Api::Type::Enum
     name: 'state'
     description: |
@@ -194,11 +227,14 @@ properties:
       ```
   - !ruby/object:Api::Type::NestedObject
     name: aws
-    description: An Amazon Web Services identity provider. Not compatible with the
-      property oidc.
+    description:
+      An Amazon Web Services identity provider. Not compatible with the property
+      oidc or saml.
     exactly_one_of:
       - aws
       - oidc
+      - saml
+      - x509
     properties:
       - !ruby/object:Api::Type::String
         name: accountId
@@ -206,14 +242,18 @@ properties:
         required: true
   - !ruby/object:Api::Type::NestedObject
     name: oidc
-    description: An OpenId Connect 1.0 identity provider. Not compatible with the
-      property aws.
+    description:
+      An OpenId Connect 1.0 identity provider. Not compatible with the property
+      aws or saml.
     exactly_one_of:
       - aws
       - oidc
+      - saml
+      - x509
     update_mask_fields:
-      - "oidc.allowed_audiences"
-      - "oidc.issuer_uri"
+      - 'oidc.allowed_audiences'
+      - 'oidc.issuer_uri'
+      - 'oidc.jwks_json'
     properties:
       - !ruby/object:Api::Type::Array
         name: allowedAudiences
@@ -235,4 +275,93 @@ properties:
         name: issuerUri
         description: The OIDC issuer URL.
         required: true
-
+      - !ruby/object:Api::Type::String
+        name: jwksJson
+        description: |
+          OIDC JWKs in JSON String format. For details on definition of a
+          JWK, see https:tools.ietf.org/html/rfc7517. If not set, then we
+          use the `jwks_uri` from the discovery document fetched from the
+          .well-known path for the `issuer_uri`. Currently, RSA and EC asymmetric
+          keys are supported. The JWK must use following format and include only
+          the following fields:
+          ```
+          {
+            "keys": [
+              {
+                    "kty": "RSA/EC",
+                    "alg": "<algorithm>",
+                    "use": "sig",
+                    "kid": "<key-id>",
+                    "n": "",
+                    "e": "",
+                    "x": "",
+                    "y": "",
+                    "crv": ""
+              }
+            ]
+          }
+          ```
+        required: false
+  - !ruby/object:Api::Type::NestedObject
+    name: saml
+    description:
+      An SAML 2.0 identity provider. Not compatible with the property
+      oidc or aws.
+    exactly_one_of:
+      - aws
+      - oidc
+      - saml
+      - x509
+    properties:
+      - !ruby/object:Api::Type::String
+        name: idpMetadataXml
+        description: SAML Identity provider configuration metadata xml doc.
+        required: true
+  - !ruby/object:Api::Type::NestedObject
+    name: x509
+    description: |
+      An X.509-type identity provider represents a CA. It is trusted to assert a
+      client identity if the client has a certificate that chains up to this CA.
+    exactly_one_of:
+      - aws
+      - oidc
+      - saml
+      - x509
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: trustStore
+        description: |
+          A Trust store, use this trust store as a wrapper to config the trust
+          anchor and optional intermediate cas to help build the trust chain for
+          the incoming end entity certificate. Follow the x509 guidelines to
+          define those PEM encoded certs. Only 1 trust store is currently
+          supported.
+        required: true
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: trustAnchors
+            description: |
+              List of Trust Anchors to be used while performing validation
+              against a given TrustStore. The incoming end entity's certificate
+              must be chained up to one of the trust anchors here.
+            required: true
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: pemCertificate
+                  description: |
+                    PEM certificate of the PKI used for validation. Must only contain one
+                    ca certificate(either root or intermediate cert).
+          - !ruby/object:Api::Type::Array
+            name: intermediateCas
+            description: |
+              Set of intermediate CA certificates used for building the trust chain to
+              trust anchor.
+              IMPORTANT: Intermediate CAs are only supported when configuring x509 federation.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: pemCertificate
+                  description: |
+                    PEM certificate of the PKI used for validation. Must only contain one
+                    ca certificate(either root or intermediate cert).

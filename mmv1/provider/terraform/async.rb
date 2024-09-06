@@ -12,10 +12,9 @@
 # limitations under the License.
 
 require 'api/async'
-require 'provider/abstract_core'
 
 module Provider
-  class Terraform < Provider::AbstractCore
+  class Terraform
     # Async implementation for polling in Terraform
     class PollAsync < Api::Async
       # Details how to poll for an eventually-consistent resource state.
@@ -44,7 +43,8 @@ module Provider
         super
 
         check :check_response_func_existence, type: String, required: true
-        check :check_response_func_absence, type: String, default: 'PollCheckForAbsence'
+        check :check_response_func_absence, type: String,
+                                            default: 'transport_tpg.PollCheckForAbsence'
         check :custom_poll_read, type: String
         check :suppress_error, type: :boolean, default: false
         check :target_occurrences, type: Integer, default: 1

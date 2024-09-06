@@ -1,5 +1,7 @@
 ## product level overrides
-
+- type: PRODUCT_BASE_PATH
+  details:
+    skip: true
 - type: PRODUCT_DOCS_SECTION
   details:
     docssection: Cloud Deploy

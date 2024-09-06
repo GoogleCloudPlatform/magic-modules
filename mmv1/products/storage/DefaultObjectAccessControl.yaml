@@ -1,0 +1,111 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'DefaultObjectAccessControl'
+kind: 'storage#objectAccessControl'
+base_url: b/{{bucket}}/defaultObjectAcl
+self_link: b/{{bucket}}/defaultObjectAcl/{{entity}}
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/storage/docs/access-control/create-manage-lists'
+  api: 'https://cloud.google.com/storage/docs/json_api/v1/defaultObjectAccessControls'
+description: |
+  The DefaultObjectAccessControls resources represent the Access Control
+  Lists (ACLs) applied to a new object within a Google Cloud Storage bucket
+  when no ACL was provided for that object. ACLs let you specify who has
+  access to your bucket contents and to what extent.
+
+  There are two roles that can be assigned to an entity:
+
+  READERs can get an object, though the acl property will not be revealed.
+  OWNERs are READERs, and they can get the acl property, update an object,
+  and call all objectAccessControls methods on the object. The owner of an
+  object is always an OWNER.
+  For more information, see Access Control, with the caveat that this API
+  uses READER and OWNER instead of READ and FULL_CONTROL.
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'storage_default_object_access_control_public'
+    primary_resource_id: 'public_rule'
+    vars:
+      bucket_name: 'static-content-bucket'
+id_format: '{{bucket}}/{{entity}}'
+import_format: ['{{bucket}}/{{entity}}']
+mutex: 'storage/buckets/{{bucket}}'
+skip_sweeper: true
+properties:
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'bucket'
+    resource: 'Bucket'
+    imports: 'name'
+    description: 'The name of the bucket.'
+    required: true
+    ignore_read: true
+  - !ruby/object:Api::Type::String
+    name: 'domain'
+    description: 'The domain associated with the entity.'
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'email'
+    description: 'The email address associated with the entity.'
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'entity'
+    required: true
+    description: |
+      The entity holding the permission, in one of the following forms:
+        * user-{{userId}}
+        * user-{{email}} (such as "user-liz@example.com")
+        * group-{{groupId}}
+        * group-{{email}} (such as "group-example@googlegroups.com")
+        * domain-{{domain}} (such as "domain-example.com")
+        * project-team-{{projectId}}
+        * allUsers
+        * allAuthenticatedUsers
+  - !ruby/object:Api::Type::String
+    name: 'entityId'
+    output: true
+    description: 'The ID for the entity'
+  # | 'etag' is not applicable for state convergence.
+  - !ruby/object:Api::Type::Integer
+    name: 'generation'
+    description:
+      'The content generation of the object, if applied to an object.'
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'object'
+    description: 'The name of the object, if applied to an object.'
+    required: false
+  - !ruby/object:Api::Type::NestedObject
+    name: 'projectTeam'
+    description: 'The project team associated with the entity'
+    output: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'projectNumber'
+        description: 'The project team associated with the entity'
+      - !ruby/object:Api::Type::Enum
+        name: 'team'
+        description: 'The team.'
+        values:
+          - :editors
+          - :owners
+          - :viewers
+  - !ruby/object:Api::Type::Enum
+    name: 'role'
+    description: 'The access permission for the entity.'
+    required: true
+    values:
+      - :OWNER
+      - :READER

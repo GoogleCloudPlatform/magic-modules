@@ -16,10 +16,11 @@ name: 'NodeGroup'
 kind: 'compute#NodeGroup'
 base_url: projects/{{project}}/zones/{{zone}}/nodeGroups
 create_url: projects/{{project}}/zones/{{zone}}/nodeGroups?initialNodeCount=PRE_CREATE_REPLACE_ME
+update_verb: :PATCH
+update_mask: true
 has_self_link: true
 description: |
   Represents a NodeGroup resource to manage a group of sole-tenant nodes.
-immutable: true
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Sole-Tenant Nodes': 'https://cloud.google.com/compute/docs/nodes/'
@@ -29,7 +30,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -43,33 +44,34 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
-docs: !ruby/object:Provider::Terraform::Docs
-  warning: |
-    Due to limitations of the API, Terraform cannot update the
-    number of nodes in a node group and changes to node group size either
-    through Terraform config or through external changes will cause
-    Terraform to delete and recreate the node group.
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "node_group_basic"
-    primary_resource_id: "nodes"
+    name: 'node_group_basic'
+    primary_resource_id: 'nodes'
     vars:
-      group_name: "soletenant-group"
-      template_name: "soletenant-tmpl"
+      group_name: 'soletenant-group'
+      template_name: 'soletenant-tmpl'
   - !ruby/object:Provider::Terraform::Examples
-    name: "node_group_autoscaling_policy"
-    primary_resource_id: "nodes"
+    name: 'node_group_maintenance_interval'
+    min_version: beta
+    primary_resource_id: 'nodes'
     vars:
-      group_name: "soletenant-group"
-      template_name: "soletenant-tmpl"
+      group_name: 'soletenant-group'
+      template_name: 'soletenant-tmpl'
   - !ruby/object:Provider::Terraform::Examples
-    name: "node_group_share_settings"
-    primary_resource_id: "nodes"
+    name: 'node_group_autoscaling_policy'
+    primary_resource_id: 'nodes'
     vars:
-      group_name: "soletenant-group"
-      template_name: "soletenant-tmpl"
-      guest_project_id: "project-id"
-      guest_project_name: "project-name"
+      group_name: 'soletenant-group'
+      template_name: 'soletenant-tmpl'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'node_group_share_settings'
+    primary_resource_id: 'nodes'
+    vars:
+      group_name: 'soletenant-group'
+      template_name: 'soletenant-tmpl'
+      guest_project_id: 'project-id'
+      guest_project_name: 'project-name'
     test_env_vars:
       org_id: :ORG_ID
 custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -84,6 +86,7 @@ parameters:
       Zone where this node group is located
     default_from_api: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -107,24 +110,17 @@ properties:
       The URL of the node template to which this node group belongs.
     update_verb: :POST
     update_url: 'projects/{{project}}/zones/{{zone}}/nodeGroups/{{name}}/setNodeTemplate'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Integer
     name: 'size'
     description: |
-      The total number of nodes in the node group. One of `initial_size` or `size` must be specified.
-    immutable: true
-    send_empty_value: true
-    default_from_api: true
-    exactly_one_of:
-      - size
-      - initial_size
+      The total number of nodes in the node group.
+    output: true
   - !ruby/object:Api::Type::Integer
     name: 'initialSize'
     description: |
-      The initial number of nodes in the node group. One of `initial_size` or `size` must be specified.
+      The initial number of nodes in the node group. One of `initial_size` or `autoscaling_policy` must be configured on resource creation.
     url_param_only: true
-    exactly_one_of:
-      - size
-      - initial_size
   - !ruby/object:Api::Type::String
     name: 'maintenancePolicy'
     description: |
@@ -145,6 +141,8 @@ properties:
     description: |
       If you use sole-tenant nodes for your workloads, you can use the node
       group autoscaler to automatically manage the sizes of your node groups.
+
+      One of `initial_size` or `autoscaling_policy` must be configured on resource creation.
     default_from_api: true
     properties:
       - !ruby/object:Api::Type::Enum
@@ -205,3 +203,14 @@ properties:
               required: true
               description: |
                 The project id/number should be the same as the key of this project config in the project map.
+  - !ruby/object:Api::Type::Enum
+    name: 'maintenanceInterval'
+    min_version: beta
+    description: |
+      Specifies the frequency of planned maintenance events. Set to one of the following:
+        - AS_NEEDED: Hosts are eligible to receive infrastructure and hypervisor updates as they become available.
+        - RECURRENT: Hosts receive planned infrastructure and hypervisor updates on a periodic basis, but not more frequently than every 28 days. This minimizes the number of planned maintenance operations on individual hosts and reduces the frequency of disruptions, both live migrations and terminations, on individual VMs.
+    values:
+      - :AS_NEEDED
+      - :RECURRENT
+    default_from_api: true

@@ -1,27 +1,33 @@
-<% example.test_env_vars&.each do |var_name, var_type| -%>
+<% unless example.test_env_vars.nil? -%>
+<% example.test_env_vars.sort.each do |var_name, var_type| -%>
 	<% if var_type == :ORG_ID  -%>
-		"<%= var_name -%>": GetTestOrgFromEnv(t),
+		"<%= var_name -%>": envvar.GetTestOrgFromEnv(t),
 	<% elsif var_type == :ORG_DOMAIN  -%>
-		"<%= var_name -%>": GetTestOrgDomainFromEnv(t),
+		"<%= var_name -%>": envvar.GetTestOrgDomainFromEnv(t),
 	<% elsif var_type == :CREDENTIALS -%>
-		"<%= var_name -%>": GetTestCredsFromEnv(t),
+		"<%= var_name -%>": envvar.GetTestCredsFromEnv(t),
 	<% elsif var_type == :REGION -%>
-		"<%= var_name -%>": GetTestRegionFromEnv(),
+		"<%= var_name -%>": envvar.GetTestRegionFromEnv(),
 	<% elsif var_type == :ORG_TARGET -%>
-		"<%= var_name -%>": GetTestOrgTargetFromEnv(t),
+		"<%= var_name -%>": envvar.GetTestOrgTargetFromEnv(t),
 	<% elsif var_type == :BILLING_ACCT -%>
-		"<%= var_name -%>": GetTestBillingAccountFromEnv(t),
+		"<%= var_name -%>": envvar.GetTestBillingAccountFromEnv(t),
 	<% elsif var_type == :MASTER_BILLING_ACCT -%>
-		"<%= var_name -%>": GetTestMasterBillingAccountFromEnv(t),
+		"<%= var_name -%>": envvar.GetTestMasterBillingAccountFromEnv(t),
 	<% elsif var_type == :SERVICE_ACCT -%>
-		"<%= var_name -%>": GetTestServiceAccountFromEnv(t),
+		"<%= var_name -%>": envvar.GetTestServiceAccountFromEnv(t),
 	<% elsif var_type == :PROJECT_NAME -%>
-		"<%= var_name -%>": GetTestProjectFromEnv(),
-	<% elsif var_type == :FIRESTORE_PROJECT_NAME -%>
-		"<%= var_name -%>": GetTestFirestoreProjectFromEnv(t),
+		"<%= var_name -%>": envvar.GetTestProjectFromEnv(),
+	<% elsif var_type == :PROJECT_NUMBER -%>
+		"<%= var_name -%>": envvar.GetTestProjectNumberFromEnv(),
 	<% elsif var_type == :CUST_ID  -%>
-		"<%= var_name -%>": GetTestCustIdFromEnv(t),
+		"<%= var_name -%>": envvar.GetTestCustIdFromEnv(t),
 	<% elsif var_type == :IDENTITY_USER  -%>
-		"<%= var_name -%>": GetTestIdentityUserFromEnv(t),
+		"<%= var_name -%>": envvar.GetTestIdentityUserFromEnv(t),
+	<% elsif var_type == :PAP_DESCRIPTION  -%>
+		"<%= var_name -%>": envvar.GetTestPublicAdvertisedPrefixDescriptionFromEnv(t),
+	<% elsif var_type == :ZONE  -%>
+		"<%= var_name -%>": envvar.GetTestZoneFromEnv(),
 	<% end -%>
+<% end -%>
 <% end -%>

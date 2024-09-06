@@ -33,8 +33,10 @@ docs: !ruby/object:Provider::Terraform::Docs
     Your account must have the `serviceusage.services.use` permission on the
     `billing_project` you defined.
 id_format: 'billingAccounts/{{billing_account}}/budgets/{{name}}'
-import_format: ["billingAccounts/{{billing_account}}/budgets/{{name}}", "{{name}}"]
+import_format:
+  ['billingAccounts/{{billing_account}}/budgets/{{name}}', '{{name}}']
 schema_version: 1
+state_upgraders: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'billing_budget_basic'
@@ -57,12 +59,20 @@ examples:
       display_name: 'Example Billing Budget'
     test_env_vars:
       billing_acct: :MASTER_BILLING_ACCT
+      org_id: :ORG_ID
   - !ruby/object:Provider::Terraform::Examples
     name: 'billing_budget_notify'
     primary_resource_id: 'budget'
     vars:
       budget_name: 'Example Billing Budget'
       channel_name: 'Example Notification Channel'
+    test_env_vars:
+      billing_acct: :MASTER_BILLING_ACCT
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'billing_budget_notify_project_recipient'
+    primary_resource_id: 'budget'
+    vars:
+      budget_name: 'Example Billing Budget'
     test_env_vars:
       billing_acct: :MASTER_BILLING_ACCT
   - !ruby/object:Provider::Terraform::Examples
@@ -78,7 +88,7 @@ examples:
     skip_docs: true
     vars:
       display_name: 'Example Billing Budget'
-      topic_name: "example-topic"
+      topic_name: 'example-topic'
     test_env_vars:
       billing_acct: :MASTER_BILLING_ACCT
 parameters:
@@ -109,19 +119,21 @@ properties:
       spend against the budget.
     default_from_api: true
     update_mask_fields:
-      - "budgetFilter.projects"
-      - "budgetFilter.labels"
-      - "budgetFilter.calendarPeriod"
-      - "budgetFilter.customPeriod"
-      - "budgetFilter.services"
-      - "budgetFilter.creditTypesTreatment"
-      - "budgetFilter.creditTypes"
-      - "budgetFilter.subaccounts"
+      - 'budgetFilter.projects'
+      - 'budgetFilter.resourceAncestors'
+      - 'budgetFilter.labels'
+      - 'budgetFilter.calendarPeriod'
+      - 'budgetFilter.customPeriod'
+      - 'budgetFilter.services'
+      - 'budgetFilter.creditTypesTreatment'
+      - 'budgetFilter.creditTypes'
+      - 'budgetFilter.subaccounts'
     properties:
       - !ruby/object:Api::Type::Array
         name: projects
         at_least_one_of:
           - budget_filter.0.projects
+          - budget_filter.0.resource_ancestors
           - budget_filter.0.credit_types_treatment
           - budget_filter.0.services
           - budget_filter.0.subaccounts
@@ -136,6 +148,24 @@ properties:
           the usage occurred on.
         is_set: true
         item_type: Api::Type::String
+      - !ruby/object:Api::Type::Array
+        name: resourceAncestors
+        at_least_one_of:
+          - budget_filter.0.projects
+          - budget_filter.0.resource_ancestors
+          - budget_filter.0.credit_types_treatment
+          - budget_filter.0.services
+          - budget_filter.0.subaccounts
+          - budget_filter.0.labels
+          - budget_filter.0.calendarPeriod
+          - budget_filter.0.customPeriod
+        description: |
+          A set of folder and organization names of the form folders/{folderId} or organizations/{organizationId},
+          specifying that usage from only this set of folders and organizations should be included in the budget.
+          If omitted, the budget includes all usage that the billing account pays for. If the folder or organization
+          contains projects that are paid for by a different Cloud Billing account, the budget doesn't apply to those projects.
+        is_set: true
+        item_type: Api::Type::String
       - !ruby/object:Api::Type::Enum
         name: creditTypesTreatment
         description: |
@@ -148,6 +178,7 @@ properties:
           - :INCLUDE_SPECIFIED_CREDITS
         at_least_one_of:
           - budget_filter.0.projects
+          - budget_filter.0.resource_ancestors
           - budget_filter.0.credit_types_treatment
           - budget_filter.0.services
           - budget_filter.0.subaccounts
@@ -165,6 +196,7 @@ properties:
           https://cloud.google.com/billing/v1/how-tos/catalog-api.
         at_least_one_of:
           - budget_filter.0.projects
+          - budget_filter.0.resource_ancestors
           - budget_filter.0.credit_types_treatment
           - budget_filter.0.services
           - budget_filter.0.subaccounts
@@ -183,6 +215,7 @@ properties:
           **Note:** If the field has a value in the config and needs to be removed, the field has to be an emtpy array in the config.
         at_least_one_of:
           - budget_filter.0.projects
+          - budget_filter.0.resource_ancestors
           - budget_filter.0.credit_types_treatment
           - budget_filter.0.services
           - budget_filter.0.subaccounts
@@ -204,6 +237,7 @@ properties:
           **Note:** If the field has a value in the config and needs to be removed, the field has to be an emtpy array in the config.
         at_least_one_of:
           - budget_filter.0.projects
+          - budget_filter.0.resource_ancestors
           - budget_filter.0.credit_types_treatment
           - budget_filter.0.services
           - budget_filter.0.subaccounts
@@ -219,6 +253,7 @@ properties:
           this set of labeled resources should be included in the budget.
         at_least_one_of:
           - budget_filter.0.projects
+          - budget_filter.0.resource_ancestors
           - budget_filter.0.credit_types_treatment
           - budget_filter.0.services
           - budget_filter.0.subaccounts
@@ -227,11 +262,12 @@ properties:
           - budget_filter.0.customPeriod
         default_from_api: true
         custom_expand: 'templates/terraform/custom_expand/billing_budget_budget_filter_labels.erb'
-        custom_flatten: "templates/terraform/custom_flatten/billing_budget_budget_filter_labels.erb"
+        custom_flatten: 'templates/terraform/custom_flatten/billing_budget_budget_filter_labels.erb'
       - !ruby/object:Api::Type::Enum
         name: calendarPeriod
         at_least_one_of:
           - budget_filter.0.projects
+          - budget_filter.0.resource_ancestors
           - budget_filter.0.credit_types_treatment
           - budget_filter.0.services
           - budget_filter.0.subaccounts
@@ -249,11 +285,14 @@ properties:
           - :QUARTER
           - :YEAR
           - :CALENDAR_PERIOD_UNSPECIFIED
-        diff_suppress_func: 'checkValAndDefaultStringSuppress("MONTH", "budget_filter.0.custom_period.0.start_date")'
+        diff_suppress_func:
+          'checkValAndDefaultStringSuppress("MONTH",
+          "budget_filter.0.custom_period.0.start_date")'
       - !ruby/object:Api::Type::NestedObject
         name: customPeriod
         at_least_one_of:
           - budget_filter.0.projects
+          - budget_filter.0.resource_ancestors
           - budget_filter.0.credit_types_treatment
           - budget_filter.0.services
           - budget_filter.0.subaccounts
@@ -296,7 +335,7 @@ properties:
           - !ruby/object:Api::Type::NestedObject
             name: endDate
             description: |
-              Optional. The end date of the time period. Budgets with elapsed end date won't be processed. 
+              Optional. The end date of the time period. Budgets with elapsed end date won't be processed.
               If unset, specifies to track all usage incurred since the startDate.
             properties:
               - !ruby/object:Api::Type::Integer
@@ -326,9 +365,9 @@ properties:
     description: |
       The budgeted amount for each usage period.
     update_mask_fields:
-      - "amount.specifiedAmount.currencyCode"
-      - "amount.specifiedAmount.units"
-      - "amount.specifiedAmount.nanos"
+      - 'amount.specifiedAmount.currencyCode'
+      - 'amount.specifiedAmount.units'
+      - 'amount.specifiedAmount.nanos'
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: specifiedAmount
@@ -404,10 +443,11 @@ properties:
       billing account's spend, regardless of the thresholds defined
       using threshold rules.
     update_mask_fields:
-      - "notificationsRule.pubsubTopic"
-      - "notificationsRule.schemaVersion"
-      - "notificationsRule.monitoringNotificationChannels"
-      - "notificationsRule.disableDefaultIamRecipients"
+      - 'notificationsRule.pubsubTopic'
+      - 'notificationsRule.schemaVersion'
+      - 'notificationsRule.monitoringNotificationChannels'
+      - 'notificationsRule.disableDefaultIamRecipients'
+      - 'notificationsRule.enableProjectLevelRecipients'
     properties:
       - !ruby/object:Api::Type::String
         name: pubsubTopic
@@ -421,7 +461,7 @@ properties:
           at regular intervals to the topic.
       - !ruby/object:Api::Type::String
         name: schemaVersion
-        default_value: "1.0"
+        default_value: '1.0'
         description: |
           The schema version of the notification. Only "1.0" is
           accepted. It represents the JSON schema as defined in
@@ -447,4 +487,21 @@ properties:
           when a threshold is exceeded. Default recipients are
           those with Billing Account Administrators and Billing
           Account Users IAM roles for the target account.
+      - !ruby/object:Api::Type::Boolean
+        name: enableProjectLevelRecipients
+        default_value: false
+        description: |
+          When set to true, and when the budget has a single project configured,
+          notifications will be sent to project level recipients of that project.
+          This field will be ignored if the budget has multiple or no project configured.
 
+          Currently, project level recipients are the users with Owner role on a cloud project.
+  - !ruby/object:Api::Type::Enum
+    name: ownershipScope
+    description: |
+      The ownership scope of the budget. The ownership scope and users'
+      IAM permissions determine who has full access to the budget's data.
+    values:
+      - :OWNERSHIP_SCOPE_UNSPECIFIED
+      - :ALL_USERS
+      - :BILLING_ACCOUNT

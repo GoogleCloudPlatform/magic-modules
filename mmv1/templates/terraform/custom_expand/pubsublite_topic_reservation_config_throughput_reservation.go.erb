@@ -12,8 +12,8 @@
 		# See the License for the specific language governing permissions and
 		# limitations under the License.
 #%>
-func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
-	f, err := parseRegionalFieldValue("reservations", v.(string), "project", "region", "zone", d, config, true)
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	f, err := tpgresource.ParseRegionalFieldValue("reservations", v.(string), "project", "region", "zone", d, config, true)
 	if err != nil {
 		return nil, fmt.Errorf("Invalid value for throughput_reservation: %s", err)
 	}

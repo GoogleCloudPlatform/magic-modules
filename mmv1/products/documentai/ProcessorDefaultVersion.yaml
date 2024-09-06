@@ -23,13 +23,13 @@ identity:
 description: |
   The default version for the processor. Deleting this resource is a no-op, and does not unset the default version.
 skip_delete: true
-import_format: ["{{%processor}}"]
+import_format: ['{{%processor}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "documentai_default_version"
-    primary_resource_id: "processor"
+    name: 'documentai_default_version'
+    primary_resource_id: 'processor'
     vars:
-      processor_name: "test-processor"
+      processor_name: 'test-processor'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_create: templates/terraform/pre_create/document_ai_processor_default_version_interpolate_location.go.erb
   pre_update: templates/terraform/pre_create/document_ai_processor_default_version_interpolate_location.go.erb
@@ -54,4 +54,4 @@ properties:
     required: true
     immutable: true
 
-    diff_suppress_func: projectNumberDiffSuppress
+    diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
