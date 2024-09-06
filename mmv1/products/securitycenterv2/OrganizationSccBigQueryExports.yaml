@@ -35,7 +35,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v2/organizations.locations.bigQueryExports'
 deprecation_message: >-
   `google_scc_v2_organization_scc_big_query_exports` is deprecated and will be removed in a future major release.
-  Use `google_scc_v2_organization_scc_big_query_export` instead.  
+  Use `google_scc_v2_organization_scc_big_query_export` instead.
 
 parameters:
   - !ruby/object:Api::Type::String
