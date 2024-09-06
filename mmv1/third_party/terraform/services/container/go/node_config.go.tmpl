@@ -110,7 +110,6 @@ func schemaGcfsConfig() *schema.Schema {
 				"enabled": {
 					Type:        schema.TypeBool,
 					Required:    true,
-					ForceNew:    forceNew,
 					Description: `Whether or not GCFS is enabled`,
 				},
 			},
@@ -232,7 +231,7 @@ func schemaNodeConfig() *schema.Schema {
 					Computed: true,
 					Elem:     &schema.Schema{Type: schema.TypeString},
 					Description: `The map of Kubernetes labels (key/value pairs) to be applied to each node. These will added in addition to any default label(s) that Kubernetes may apply to the node.`,
-	{{- if or (ne $.TargetVersionName "") (eq $.TargetVersionName "ga") }}
+	{{- if not (or (eq $.TargetVersionName "") (eq $.TargetVersionName "ga")) }}
 					DiffSuppressFunc: containerNodePoolLabelsSuppress,
 	{{- end }}
 				},
@@ -1693,7 +1692,7 @@ func flattenWorkloadMetadataConfig(c *container.WorkloadMetadataConfig) []map[st
 	}
 	return result
 }
-{{- if or (ne $.TargetVersionName "") (eq $.TargetVersionName "ga") }}
+{{- if not (or (eq $.TargetVersionName "") (eq $.TargetVersionName "ga")) }}
 func flattenSandboxConfig(c *container.SandboxConfig) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
