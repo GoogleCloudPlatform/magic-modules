@@ -101,10 +101,9 @@ var vcrCassetteUpdateCmd = &cobra.Command{
 }
 
 func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.Controller, vt *vcr.Tester) error {
-	// TODO: temporary disable fetch cassettes to cause replay failure
-	// if err := vt.FetchCassettes(provider.Beta, "main", ""); err != nil {
-	// 	return fmt.Errorf("error fetching cassettes: %w", err)
-	// }
+	if err := vt.FetchCassettes(provider.Beta, "main", ""); err != nil {
+		return fmt.Errorf("error fetching cassettes: %w", err)
+	}
 
 	bucketPrefix := fmt.Sprintf("gs://vcr-nightly/beta/%s/%s", today, buildID)
 
