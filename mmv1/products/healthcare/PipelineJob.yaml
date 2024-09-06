@@ -12,32 +12,36 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-# API resource name
 name: 'PipelineJob'
-# Resource description for the provider documentation.
+kind: 'healthcare#pipelineJob'
 description: |
   PipelineJobs are Long Running Operations on Healthcare API to Map or Reconcile
   incoming data into FHIR format
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Creating a PipelineJob': 'https://cloud.google.com/healthcare-api/private/healthcare-data-engine/docs/reference/rest/v1alpha2/projects.locations.datasets.pipelineJobs#PipelineJob'
+    'Creating a PipelineJob': 'https://cloud.google.com/healthcare-api/private/healthcare-data-engine/docs/reference/rest/v1/projects.locations.datasets.pipelineJobs#PipelineJob'
   api: 'https://cloud.google.com/healthcare-api/healthcare-data-engine/docs/reference/rest/v1/projects.locations.datasets.pipelineJobs'
-base_url: 'projects/{{project}}/locations/{{location}}/datasets/{{dataset}}/pipelineJobs'
-self_link: 'projects/{{project}}/locations/{{location}}/datasets/{{dataset}}/pipelineJobs/{{name}}'
-create_url: 'projects/{{project}}/locations/{{location}}/datasets/{{dataset}}/pipelineJobs?pipelineJobId={{name}}'
+base_url: '{{dataset}}/pipelineJobs?pipelineJobId={{name}}'
+self_link: '{{dataset}}/pipelineJobs/{{name}}'
+delete_url: '{{dataset}}/pipelineJobs/{{name}}'
+skip_sweeper: true
 update_verb: :PATCH
 update_mask: true
+id_format: '{{dataset}}/pipelineJobs/{{name}}'
+import_format: ['{{%dataset}}/pipelineJobs/{{name}}', '{{name}}', '{{dataset}}/pipelineJobs?pipelineJobId={{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: 'healthcare_pipeline_job'
-    primary_resource_id: 'default'
+    name: 'healthcare_pipeline_job_basic'
+    primary_resource_id: 'example-pipeline'
     vars:
-      pipeline_job_name: 'example-pipeline-job'
-      dataset: 'example-dataset'
-      data_mapper_mapping_name: 'example-mapping'
-      destination_fhir_store: 'fhir-store'
-      bq_dataset: 'example_dataset'
-      bucket_name: 'example-bucket-name'
+      pipeline_name: 'example_pipeline_job'
+      dataset_name: 'example_dataset'
+      data_mapper_mapping_name: 'example_mapping'
+      destination_fhir_store: 'fhir_store'
+      bq_dataset: 'example_bq_dataset'
+      bucket_name: 'example_bucket_name'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  decoder: templates/terraform/decoders/long_name_to_self_link.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -83,6 +87,12 @@ properties:
       
       An object containing a list of "key": value pairs. 
       Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+  - !ruby/object:Api::Type::String
+    name: 'selfLink'
+    description: |
+      The fully qualified name of this dataset
+    output: true
+    ignore_read: true
   - !ruby/object:Api::Type::NestedObject
     name: mappingPipelineJob
     description: |
@@ -144,7 +154,7 @@ properties:
             name: whistleConfigSource
             description: |
               Specifies the path to the mapping configuration for harmonization pipeline.
-            required: true
+            required: false
             properties:
               - !ruby/object:Api::Type::String
                 name: uri
@@ -254,7 +264,7 @@ properties:
             name: dataMapperConfigSource
             description: |
               Specifies the path to the mapping configuration for Data Mapper pipeline.
-            required: true
+            required: false
             properties:
               - !ruby/object:Api::Type::String
                 name: mapping
@@ -272,7 +282,7 @@ properties:
                   If set, specifies the name of the parameter key used to select 
                   SQL variable parameter values for this mapping. 
                   Otherwise the default value for each SQL variable is used.
-                required: true
+                required: false
               - !ruby/object:Api::Type::NestedObject
                 name: gcs
                 description: |
@@ -333,8 +343,3 @@ properties:
           Specifies the mapping pipeline job to backfill, the name format 
           should follow: projects/{projectId}/locations/{locationId}/datasets/{datasetId}/pipelineJobs/{pipelineJobId}.
         required: false
-
-
-
-
-
