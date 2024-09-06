@@ -25,14 +25,15 @@ import (
 
 // Represents a product to be managed
 type Product struct {
-	NamedObject `yaml:",inline"`
-
-	// Inherited:
 	// The name of the product's API capitalised in the appropriate places.
 	// This isn't just the API name because it doesn't meaningfully separate
 	// words in the api name - "accesscontextmanager" vs "AccessContextManager"
 	// Example inputs: "Compute", "AccessContextManager"
-	// Name string
+	Name string
+
+	// original value of :name before the provider override happens
+	// same as :name if not overridden in provider
+	ApiName string `yaml:"api_name"`
 
 	// Display Name: The full name of the GCP product; eg "Cloud Bigtable"
 	DisplayName string `yaml:"display_name"`
@@ -41,23 +42,19 @@ type Product struct {
 
 	// The list of permission scopes available for the service
 	// For example: `https://www.googleapis.com/auth/compute`
-
 	Scopes []string
 
 	// The API versions of this product
-
 	Versions []*product.Version
 
 	// The base URL for the service API endpoint
 	// For example: `https://www.googleapis.com/compute/v1/`
-
 	BaseUrl string `yaml:"base_url"`
 
 	// A function reference designed for the rare case where you
 	// need to use retries in operation calls. Used for the service api
 	// as it enables itself (self referential) and can result in occasional
 	// failures on operation_get. see github.com/hashicorp/terraform-provider-google/issues/9489
-
 	OperationRetry string `yaml:"operation_retry"`
 
 	Async *Async
@@ -82,6 +79,10 @@ func (p *Product) UnmarshalYAML(unmarshal func(any) error) error {
 }
 
 func (p *Product) Validate() {
+	if len(p.Name) == 0 {
+		log.Fatalf("Missing `name` for product")
+	}
+
 	// product names must start with a capital
 	for i, ch := range p.Name {
 		if !unicode.IsUpper(ch) {
@@ -224,31 +225,9 @@ func (p *Product) TerraformName() string {
 // Debugging Methods
 // ====================
 
-//   def to_s
-//     // relies on the custom to_json definitions
-//     JSON.pretty_generate(self)
-//   end
-
 // Prints a dot notation path to where the field is nested within the parent
 // object when called on a property. eg: parent.meta.label.foo
 // Redefined on Product to terminate the calls up the parent chain.
 func (p Product) Lineage() string {
 	return p.Name
 }
-
-//   def to_json(opts = nil)
-//     json_out = {}
-
-//     instance_variables.each do |v|
-//       if v == :@objects
-//         json_out['@resources'] = objects.to_h { |o| [o.name, o] }
-//       elsif instance_variable_get(v) == false || instance_variable_get(v).nil?
-//         // ignore false or missing because omitting them cleans up result
-//         // and both are the effective defaults of their types
-//       else
-//         json_out[v] = instance_variable_get(v)
-//       end
-//     end
-
-//     JSON.generate(json_out, opts)
-//   end

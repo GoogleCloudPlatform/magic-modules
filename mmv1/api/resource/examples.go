@@ -31,11 +31,6 @@ import (
 // Generates configs to be shown as examples in docs and outputted as tests
 // from a shared template
 type Examples struct {
-	// google.YamlValidator
-
-	// include Compile::Core
-	// include Google::GolangUtils
-
 	// The name of the example in lower snake_case.
 	// Generally takes the form of the resource name followed by some detail
 	// about the specific test. For example, "address_with_subnetwork".
@@ -320,9 +315,6 @@ func ExecuteTemplate(e any, templatePath string, appendNewline bool) string {
 
 func (e *Examples) OiCSLink() string {
 	v := url.Values{}
-	// TODO Q2: Values.Encode() sorts the values by key alphabetically. This will produce
-	//			diffs for every URL when we convert to using this function. We should sort the
-	// 			Ruby-version query alphabetically beforehand to remove these diffs.
 	v.Add("cloudshell_git_repo", "https://github.com/terraform-google-modules/docs-examples.git")
 	v.Add("cloudshell_working_dir", e.Name)
 	v.Add("cloudshell_image", "gcr.io/cloudshell-images/cloudshell:latest")
@@ -367,38 +359,3 @@ func SubstituteTestPaths(config string) string {
 	config = strings.ReplaceAll(config, "path/to/id_rsa.pub", "test-fixtures/ssh_rsa.pub")
 	return config
 }
-
-// func (e *Examples) validate() {
-// super
-// check :name, type: String, required: true
-// check :primary_resource_id, type: String
-// check :min_version, type: String
-// check :vars, type: Hash
-// check :test_env_vars, type: Hash
-// check :test_vars_overrides, type: Hash
-// check :ignore_read_extra, type: Array, item_type: String, default: []
-// check :primary_resource_name, type: String
-// check :skip_test, type: TrueClass
-// check :skip_import_test, type: TrueClass
-// check :skip_docs, type: TrueClass
-// check :config_path, type: String, default: "templates/terraform/examples///{name}.tf.erb"
-// check :skip_vcr, type: TrueClass
-// }
-
-// func (e *Examples) merge(other) {
-// result = self.class.new
-// instance_variables.each do |v|
-//   result.instance_variable_set(v, instance_variable_get(v))
-// end
-
-// other.instance_variables.each do |v|
-//   if other.instance_variable_get(v).instance_of?(Array)
-//     result.instance_variable_set(v, deep_merge(result.instance_variable_get(v),
-//                                                other.instance_variable_get(v)))
-//   else
-//     result.instance_variable_set(v, other.instance_variable_get(v))
-//   end
-// end
-
-// result
-// }

@@ -15,8 +15,6 @@ package resource
 
 // Inserts custom code into terraform resources.
 type CustomCode struct {
-	// google.YamlValidator
-
 	// Collection of fields allowed in the CustomCode section for
 	// Terraform.
 
