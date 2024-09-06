@@ -69,7 +69,10 @@ func DataSourceGoogleBigQueryTablesRead(d *schema.ResourceData, meta interface{}
 
 	for {
 
-  url, err := tpgresource.ReplaceVars(d, config, "{{BigQueryBasePath}}projects/{{project}}/datasets/{{dataset_id}}/tables")
+		url, err := tpgresource.ReplaceVars(d, config, "{{BigQueryBasePath}}projects/{{project}}/datasets/{{dataset_id}}/tables")
+		if err != nil {
+			return err
+		}
 
 		url, err = transport_tpg.AddQueryParams(url, params)
 		if err != nil {
