@@ -154,7 +154,7 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 	// }
 
 	replayingResult := &vcr.Result{
-		FailedTests: []string{"TestAccConfigLoadValidate_accessTokenImpersonated"},
+		FailedTests: []string{"TestAccStorageTransferJob_basic"},
 	}
 	if len(replayingResult.FailedTests) != 0 {
 		fmt.Println("running tests in RECORDING mode now")
