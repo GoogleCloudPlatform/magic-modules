@@ -73,6 +73,9 @@ type withReplayFailedTests struct {
 type withoutReplayFailedTests struct {
 	ReplayingErr error
 	PRNumber     string
+	Head         string
+	Version      provider.Version
+	LogBucket    string
 	BuildID      string
 }
 
@@ -83,6 +86,9 @@ type recordReplay struct {
 	RecordingErr                  error
 	AllRecordingPassed            bool
 	PRNumber                      string
+	Head                          string
+	Version                       provider.Version
+	LogBucket                     string
 	BuildID                       string
 }
 
@@ -180,12 +186,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 	}
 	fmt.Println("Running tests: Go files or test fixtures changed")
 
-	var head string
-	if prNumber != "" {
-		head = "auto-pr-" + prNumber
-	}
-
-	if err := vt.FetchCassettes(provider.Beta, baseBranch, head); err != nil {
+	if err := vt.FetchCassettes(provider.Beta, baseBranch, newBranch); err != nil {
 		return fmt.Errorf("error fetching cassettes: %w", err)
 	}
 
@@ -201,7 +202,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 	}
 
 	if err := vt.UploadLogs(vcr.UploadLogsOptions{
-		Head:           head,
+		Head:           newBranch,
 		BuildID:        buildID,
 		AfterRecording: false,
 		Parallel:       false,
@@ -273,7 +274,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		}
 
 		if err := vt.UploadLogs(vcr.UploadLogsOptions{
-			Head:           head,
+			Head:           newBranch,
 			BuildID:        buildID,
 			AfterRecording: true,
 			Parallel:       false,
@@ -303,7 +304,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 			}
 
 			if err := vt.UploadLogs(vcr.UploadLogsOptions{
-				Head:           head,
+				Head:           newBranch,
 				BuildID:        buildID,
 				AfterRecording: true,
 				Parallel:       true,
@@ -325,6 +326,9 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 			HasTerminatedTests:            hasTerminatedTests,
 			AllRecordingPassed:            allRecordingPassed,
 			PRNumber:                      prNumber,
+			Head:                          newBranch,
+			Version:                       provider.Beta,
+			LogBucket:                     "ci-vcr-logs",
 			BuildID:                       buildID,
 		}
 		recordReplayComment, err := formatRecordReplay(recordReplayData)
@@ -339,6 +343,9 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		withoutReplayFailedTestsData := withoutReplayFailedTests{
 			ReplayingErr: replayingErr,
 			PRNumber:     prNumber,
+			Head:         newBranch,
+			Version:      provider.Beta,
+			LogBucket:    "ci-vcr-logs",
 			BuildID:      buildID,
 		}
 		withoutReplayFailedTestsComment, err := formatWithoutReplayFailedTests(withoutReplayFailedTestsData)
@@ -499,21 +506,21 @@ func formatComment(fileName string, tmplText string, data any) (string, error) {
 }
 
 func formatTestsAnalytics(data analytics) (string, error) {
-	return formatComment("test_terraform_vcr_test_analytics.tmpl", testsAnalyticsTmplText, data)
+	return formatComment("test_analytics.tmpl", testsAnalyticsTmplText, data)
 }
 
 func formatNonExercisedTests(data nonExercisedTests) (string, error) {
-	return formatComment("test_terraform_vcr_recording_mode_results.tmpl", nonExercisedTestsTmplText, data)
+	return formatComment("recording_mode_results.tmpl", nonExercisedTestsTmplText, data)
 }
 
 func formatWithReplayFailedTests(data withReplayFailedTests) (string, error) {
-	return formatComment("test_terraform_vcr_with_replay_failed_tests.tmpl", withReplayFailedTestsTmplText, data)
+	return formatComment("with_replay_failed_tests.tmpl", withReplayFailedTestsTmplText, data)
 }
 
 func formatWithoutReplayFailedTests(data withoutReplayFailedTests) (string, error) {
-	return formatComment("test_terraform_vcr_without_replay_failed_tests.tmpl", withoutReplayFailedTestsTmplText, data)
+	return formatComment("without_replay_failed_tests.tmpl", withoutReplayFailedTestsTmplText, data)
 }
 
 func formatRecordReplay(data recordReplay) (string, error) {
-	return formatComment("test_terraform_vcr_record_replay.tmpl", recordReplayTmplText, data)
+	return formatComment("record_replay.tmpl", recordReplayTmplText, data)
 }
