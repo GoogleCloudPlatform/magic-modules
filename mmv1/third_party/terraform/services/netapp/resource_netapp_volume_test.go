@@ -243,7 +243,7 @@ resource "google_netapp_storage_pool" "default" {
     capacity_gib = "2048"
     network = data.google_compute_network.default.id
 }
-    
+
 resource "google_netapp_storage_pool" "default2" {
     name = "tf-test-pool%{random_suffix}"
     location = "us-west2"
