@@ -39,7 +39,9 @@ Google Cloud/
 
 ### Looking at nightly test results
 
-A CRON trigger causes all acceptance tests for the GA and Beta providers to run overnight, Mon-Sun. These tests use the `main` branches of hashicorp/terraform-provider-google(-beta) repos. The tests interact fully with Google APIs and are used to identify any breaking changes introduced by either a recent PR or a change in the API itself.
+A CRON trigger causes all acceptance tests for the GA and Beta providers to run overnight, Mon-Sun. These tests use the `nightly-test` branches of hashicorp/terraform-provider-google(-beta) repos that are created by checking out of `main` every night through the [`TeamCity - nightly` Github Action](https://github.com/hashicorp/terraform-provider-google/actions/workflows/teamcity-nightly-workflow.yaml). (A separate branch is necessary in order to ensure that all tests are ran on the same commit. Services are separated in their own builds and are sent into an agent queue. Depending on the timing of the queue a build could potentially have a different commit from the rest if `main` received a commit prior to exiting.) 
+
+The tests interact fully with Google APIs and are used to identify any breaking changes introduced by either a recent PR or a change in the API itself.
 
 You can find the builds for nightly tests at:
 
@@ -70,7 +72,7 @@ To do this you should:
 * On the page for the service's build configuation, look in the top right of the page for two buttons, one with the text "Run" and the other containing "...". Click on the righthand-side "..." button to launch the Custom Build modal.
 * Launching a [Custom Build](https://www.jetbrains.com/help/teamcity/running-custom-build.html):
   * Select which branch to test
-     * By default the `Nightly Tests` projects will use `main`.
+     * By default the `Nightly Tests` projects will use the `nightly-test` branch.
      * To change to a different branch, open the `Changes` tab, and select the branch from the `Build branch` dropdown. For more info [see the documentation on build branches](https://www.jetbrains.com/help/teamcity/running-custom-build.html#Build+Branch).
   * Change parameters for the Custom Build you're preparing to launch
     * Click the `Parameters` tab
