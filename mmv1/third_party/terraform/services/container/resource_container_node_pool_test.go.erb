@@ -694,7 +694,7 @@ func TestAccContainerNodePool_withHugepageConfig(t *testing.T) {
 			},
 			// Perform an update.
 			{
-				Config: testAccContainerNodePool_withHugepageConfig(cluster, np, networkName, subnetworkName, 1),
+				Config: testAccContainerNodePool_withHugepageConfig(cluster, np, networkName, subnetworkName, 2),
 			},
 			{
 				ResourceName:      "google_container_node_pool.np",
