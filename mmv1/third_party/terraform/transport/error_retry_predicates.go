@@ -574,7 +574,7 @@ func ExternalIpServiceNotActive(err error) (bool, string) {
 }
 
 // Site verification may return a 400 error while waiting for DNS propagation.
-func IsSiteValidationRetryableError(err error) (bool, string) {
+func IsSiteVerificationRetryableError(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
 		if gerr.Code == 400 && strings.Contains(strings.ToLower(gerr.Body), "verification token could not be found") {
 			return true, "Waiting for verification token to be visible"

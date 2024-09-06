@@ -37,7 +37,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://developers.google.com/site-verification/v1'
 timeouts: !ruby/object:Api::Timeouts
   insert_minutes: 60
-error_retry_predicates: ['transport_tpg.IsSiteValidationRetryableError']
+error_retry_predicates: ['transport_tpg.IsSiteVerificationRetryableError']
 examples:
   - !ruby/object:Provider::Terraform::Examples
     skip_test: true
@@ -68,7 +68,6 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'id'
     output: true
-    immutable: true
     description: |
       The string used to identify this web resource.
   - !ruby/object:Api::Type::NestedObject
@@ -96,6 +95,5 @@ properties:
     description: |
       The email addresses of all direct, verified owners of this exact property. Indirect owners —
       for example verified owners of the containing domain—are not included in this list.
-    immutable: true
     output: true
     item_type: Api::Type::String

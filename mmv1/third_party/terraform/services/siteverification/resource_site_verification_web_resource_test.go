@@ -13,7 +13,7 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func TestAccSiteVerificationWebResource_siteverificationDomain(t *testing.T) {
+func TestAccSiteVerificationWebResource_siteVerificationDomain(t *testing.T) {
 	// This test requires manual project configuration.
 	acctest.SkipIfVcr(t)
 
@@ -40,7 +40,7 @@ func TestAccSiteVerificationWebResource_siteverificationDomain(t *testing.T) {
 		CheckDestroy:             testAccCheckSiteVerificationWebResourceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSiteVerificationWebResource_siteverificationDomain(context),
+				Config: testAccSiteVerificationWebResource_siteVerificationDomain(context),
 			},
 			{
 				ResourceName:            "google_site_verification_web_resource.example",
@@ -55,7 +55,7 @@ func TestAccSiteVerificationWebResource_siteverificationDomain(t *testing.T) {
 	})
 }
 
-func testAccSiteVerificationWebResource_siteverificationDomain(context map[string]interface{}) string {
+func testAccSiteVerificationWebResource_siteVerificationDomain(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 provider "google" {
   alias                 = "scoped"
@@ -155,7 +155,7 @@ func testAccCheckSiteVerificationWebResourceDestroyProducer(t *testing.T) func(s
 				Project:              billingProject,
 				RawURL:               url,
 				UserAgent:            config.UserAgent,
-				ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSiteValidationRetryableError},
+				ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSiteVerificationRetryableError},
 			})
 			if err == nil {
 				return fmt.Errorf("SiteVerificationWebResource still exists at %s", url)
