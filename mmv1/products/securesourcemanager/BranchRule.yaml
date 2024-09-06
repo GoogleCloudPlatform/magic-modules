@@ -45,6 +45,14 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
   allowed_iam_role: 'roles/securesourcemanager.repoAdmin'
   import_format: ['projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}', '{{repository_id}}']
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'secure_source_manager_branch_rule_basic'
+    primary_resource_id: 'default'
+    vars:
+      instance_id: 'my-instance'
+      repository_id: 'my-repository'
+      branch_rule_id: 'my-branchrule'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
