@@ -154,8 +154,8 @@ func TestAccFilestoreInstance_tags(t *testing.T) {
 	t.Parallel()
 
 	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
-	tagKey := acctest.BootstrapSharedTestTagKey(t, "metastore-federations-tagkey")
-	tagValue := acctest.BootstrapSharedTestTagValue(t, "metastore-federations-tagvalue", tagKey)
+	tagKey := acctest.BootstrapSharedTestTagKey(t, "filestore-instances-tagkey")
+	tagValue := acctest.BootstrapSharedTestTagValue(t, "filestore-instances-tagvalue", tagKey)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
