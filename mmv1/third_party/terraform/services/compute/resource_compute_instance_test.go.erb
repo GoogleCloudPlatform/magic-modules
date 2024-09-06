@@ -8004,7 +8004,6 @@ data "google_compute_image" "my_image" {
 }
 
 resource "google_compute_instance" "foobar" {
-  provider     = google-beta
   name         = "%{instance_name}"
   zone         = "%{zone}"
   machine_type = "n2-standard-2"
