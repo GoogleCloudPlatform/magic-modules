@@ -411,7 +411,7 @@ module Provider
 
     def generate_object_modified(object, output_folder, version_name)
       # skip healthcare - exceptional case will be done manually
-      return if output_folder.include? 'healthcare'
+      return if (output_folder.include? 'healthcare') || (output_folder.include? 'memorystore')
 
       pwd = Dir.pwd
       data = build_object_data(pwd, object, output_folder, version_name)

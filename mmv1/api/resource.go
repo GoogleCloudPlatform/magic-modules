@@ -352,6 +352,9 @@ func (r *Resource) SetDefault(product *Product) {
 	for _, property := range r.AllProperties() {
 		property.SetDefault(r)
 	}
+	for _, vf := range r.VirtualFields {
+		vf.SetDefault(r)
+	}
 	if r.IamPolicy != nil && r.IamPolicy.MinVersion == "" {
 		r.IamPolicy.MinVersion = r.MinVersion
 	}
