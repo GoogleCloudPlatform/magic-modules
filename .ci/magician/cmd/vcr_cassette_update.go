@@ -101,19 +101,19 @@ var vcrCassetteUpdateCmd = &cobra.Command{
 }
 
 func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.Controller, vt *vcr.Tester) error {
-	// if err := vt.FetchCassettes(provider.Beta, "main", ""); err != nil {
-	// 	return fmt.Errorf("error fetching cassettes: %w", err)
-	// }
+	if err := vt.FetchCassettes(provider.Beta, "main", ""); err != nil {
+		return fmt.Errorf("error fetching cassettes: %w", err)
+	}
 
 	bucketPrefix := fmt.Sprintf("gs://vcr-nightly/beta/%s/%s", today, buildID)
 
-	// // main cassettes backup
-	// // incase nightly run goes wrong. this will be used to restore the cassettes
-	// cassettePath := vt.CassettePath(provider.Beta)
-	// args := []string{"-m", "-q", "cp", filepath.Join(cassettePath, "*"), bucketPrefix + "/main_cassettes_backup/fixtures/"}
-	// if _, err := rnr.Run("gsutil", args, nil); err != nil {
-	// 	return fmt.Errorf("error backup cassettes: %w", err)
-	// }
+	// main cassettes backup
+	// incase nightly run goes wrong. this will be used to restore the cassettes
+	cassettePath := vt.CassettePath(provider.Beta)
+	args := []string{"-m", "-q", "cp", filepath.Join(cassettePath, "*"), bucketPrefix + "/main_cassettes_backup/fixtures/"}
+	if _, err := rnr.Run("gsutil", args, nil); err != nil {
+		return fmt.Errorf("error backup cassettes: %w", err)
+	}
 
 	providerRepo := &source.Repo{
 		Name: provider.Beta.RepoName(),
@@ -124,38 +124,35 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 	}
 	vt.SetRepoPath(provider.Beta, providerRepo.Path)
 
-	// fmt.Println("running tests in REPLAYING mode now")
-	// replayingResult, replayingErr := vt.Run(vcr.Replaying, provider.Beta, nil)
+	fmt.Println("running tests in REPLAYING mode now")
+	replayingResult, replayingErr := vt.Run(vcr.Replaying, provider.Beta, nil)
 
-	// testLogPath := vt.LogPath(vcr.Replaying, provider.Beta)
-	// if _, err := uploadLogsToGCS(filepath.Join(testLogPath, "*"), bucketPrefix+"/logs/build-log/", rnr); err != nil {
-	// 	return fmt.Errorf("error uploading replaying build log: %w", err)
-	// }
-
-	// // upload replay build and test logs
-	// buildLogPath := filepath.Join(rnr.GetCWD(), "testlogs", fmt.Sprintf("%s_test.log", vcr.Replaying.Lower()))
-	// if _, err := uploadLogsToGCS(buildLogPath, bucketPrefix+"/logs/replaying/", rnr); err != nil {
-	// 	return fmt.Errorf("error uploading replaying test log: %w", err)
-	// }
-
-	// replayingData := vcrCassetteUpdateReplayingResult{
-	// 	ReplayingResult:    replayingResult,
-	// 	ReplayingErr:       replayingErr,
-	// 	AllReplayingPassed: len(replayingResult.FailedTests) == 0 && replayingErr == nil,
-	// }
-	// comment, err := formatVCRCassettesUpdateReplaying(replayingData)
-	// if err != nil {
-	// 	return fmt.Errorf("error formatting replaying result: %w", err)
-	// }
-	// fmt.Println(comment)
-
-	// if len(replayingResult.Panics) != 0 {
-	// 	return fmt.Errorf("provider crashed while running the VCR tests in REPLAYING mode: %v", replayingResult.Panics)
-	// }
-
-	replayingResult := &vcr.Result{
-		FailedTests: []string{"TestAccStorageTransferJob_basic"},
+	// upload replay build and test logs
+	buildLogPath := filepath.Join(rnr.GetCWD(), "testlogs", fmt.Sprintf("%s_test.log", vcr.Replaying.Lower()))
+	if _, err := uploadLogsToGCS(buildLogPath, bucketPrefix+"/logs/replaying/", rnr); err != nil {
+		fmt.Printf("Warning: error uploading replaying test log: %s\n", err)
 	}
+
+	testLogPath := vt.LogPath(vcr.Replaying, provider.Beta)
+	if _, err := uploadLogsToGCS(filepath.Join(testLogPath, "*"), bucketPrefix+"/logs/build-log/", rnr); err != nil {
+		fmt.Printf("Warning: error uploading replaying build log: %s\n", err)
+	}
+
+	replayingData := vcrCassetteUpdateReplayingResult{
+		ReplayingResult:    replayingResult,
+		ReplayingErr:       replayingErr,
+		AllReplayingPassed: len(replayingResult.FailedTests) == 0 && replayingErr == nil,
+	}
+	comment, err := formatVCRCassettesUpdateReplaying(replayingData)
+	if err != nil {
+		return fmt.Errorf("error formatting replaying result: %w", err)
+	}
+	fmt.Println(comment)
+
+	if len(replayingResult.Panics) != 0 {
+		return fmt.Errorf("provider crashed while running the VCR tests in REPLAYING mode: %v", replayingResult.Panics)
+	}
+
 	if len(replayingResult.FailedTests) != 0 {
 		fmt.Println("running tests in RECORDING mode now")
 
@@ -165,18 +162,20 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 		// uploading cassettes failed because recording not work
 		buildLogPath := filepath.Join(rnr.GetCWD(), "testlogs", fmt.Sprintf("%s_test.log", vcr.Recording.Lower()))
 		if _, err := uploadLogsToGCS(buildLogPath, bucketPrefix+"/logs/recording/", rnr); err != nil {
-			return fmt.Errorf("error uploading recording test log: %w", err)
+			fmt.Printf("Warning: error uploading recording test log: %s\n", err)
 		}
 
 		testLogPath := vt.LogPath(vcr.Recording, provider.Beta)
 		if _, err := uploadLogsToGCS(filepath.Join(testLogPath, "*"), bucketPrefix+"/logs/build-log/", rnr); err != nil {
-			return fmt.Errorf("error uploading recording build log: %w", err)
+			fmt.Printf("Warning: error uploading recording build log: %s\n", err)
 		}
+
 		if len(recordingResult.PassedTests) > 0 {
 			cassettesPath := vt.CassettePath(provider.Beta)
 			// TODO: use a temp folder to not mess up the nightly run
 			if _, err := uploadCassettesToGCS(cassettesPath+"/*", "gs://ci-vcr-cassettes/beta/temp-fixtures/", rnr); err != nil {
-				return fmt.Errorf("error uploading cassettes: %w", err)
+				// There could be cases that the tests do not generate any cassettes.
+				fmt.Printf("Warning: error uploading cassettes: %s\n", err)
 			}
 		} else {
 			fmt.Println("No tests passed in recording mode, not uploading cassettes.")

@@ -34,6 +34,8 @@ func TestFormatVCRCassettesUpdateReplaying(t *testing.T) {
 				[]string{
 					"#################################",
 					"Tests Analytics",
+					"#################################",
+					"",
 					"Total tests: 5",
 					"Passed tests: 2",
 					"Skipped tests: 1",
@@ -47,7 +49,8 @@ func TestFormatVCRCassettesUpdateReplaying(t *testing.T) {
 					"#################################",
 					"",
 					"#################################",
-					"Errors occurred during REPLAYING mode.", "#################################",
+					"Errors occurred during REPLAYING mode: some error.",
+					"#################################",
 				},
 				"\n",
 			),
@@ -65,6 +68,8 @@ func TestFormatVCRCassettesUpdateReplaying(t *testing.T) {
 				[]string{
 					"#################################",
 					"Tests Analytics",
+					"#################################",
+					"",
 					"Total tests: 3",
 					"Passed tests: 2",
 					"Skipped tests: 1",
@@ -74,7 +79,8 @@ func TestFormatVCRCassettesUpdateReplaying(t *testing.T) {
 					"",
 					"",
 					"#################################",
-					"All tests passed in REPLAYING mode.", "#################################",
+					"All tests passed in REPLAYING mode.",
+					"#################################",
 				},
 				"\n",
 			),
@@ -93,6 +99,8 @@ func TestFormatVCRCassettesUpdateReplaying(t *testing.T) {
 				[]string{
 					"#################################",
 					"Tests Analytics",
+					"#################################",
+					"",
 					"Total tests: 5",
 					"Passed tests: 2",
 					"Skipped tests: 1",
@@ -160,6 +168,7 @@ func TestFormatVCRCassettesUpdateRecording(t *testing.T) {
 				[]string{
 					"#################################",
 					"RECORDING Tests Report",
+					"#################################",
 					"",
 					"",
 					"Tests passed during RECORDING mode:",
@@ -173,7 +182,7 @@ func TestFormatVCRCassettesUpdateRecording(t *testing.T) {
 					"",
 					"",
 					"",
-					"Errors occurred during RECORDING mode.",
+					"Errors occurred during RECORDING mode: some error.",
 				},
 				"\n",
 			),
@@ -190,6 +199,7 @@ func TestFormatVCRCassettesUpdateRecording(t *testing.T) {
 				[]string{
 					"#################################",
 					"RECORDING Tests Report",
+					"#################################",
 					"",
 					"",
 					"Tests passed during RECORDING mode:",
@@ -219,6 +229,7 @@ func TestFormatVCRCassettesUpdateRecording(t *testing.T) {
 				[]string{
 					"#################################",
 					"RECORDING Tests Report",
+					"#################################",
 					"",
 					"",
 					"Tests passed during RECORDING mode:",
@@ -264,6 +275,7 @@ func TestFormatVCRCassettesUpdateRecording(t *testing.T) {
 				[]string{
 					"#################################",
 					"RECORDING Tests Report",
+					"#################################",
 					"",
 					"",
 					"Tests passed during RECORDING mode:",
