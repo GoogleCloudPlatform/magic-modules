@@ -104,15 +104,6 @@ func TestAccNetappVolume_NetappVolumeBasicExample_update(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
 			},
-			{
-				Config: testAccNetappVolume_volumeBasicExample_autoTier(context),
-			},
-			{
-				ResourceName:            "google_netapp_volume.test_volume",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
-			},
 		},
 	})
 }
@@ -666,34 +657,6 @@ func testAccNetappVolume_volumeBasicExample_cleanupScheduledBackup(t *testing.T,
 		}
 		return nil
 	}
-}
-
-func testAccNetappVolume_volumeBasicExample_autoTier(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_netapp_storage_pool" "default" {
-    name = "tf-test-pool%{random_suffix}"
-    location = "us-west2"
-    service_level = "PREMIUM"
-    capacity_gib = "2048"
-    network = data.google_compute_network.default.id
-    allow_auto_tiering = true
-}
-resource "google_netapp_volume" "test_volume" {
-    location = "us-west2"
-    name = "tf-test-volume%{random_suffix}"
-    capacity_gib = "100"
-    share_name = "tf-test-volume%{random_suffix}"
-    storage_pool = google_netapp_storage_pool.default.name
-    protocols = ["NFSV3"]
-    tiering_policy {
-        cooling_threshold_days = 20
-        tier_action = "ENABLED"
-    }
-}
-data "google_compute_network" "default" {
-    name = "%{network_name}"
-}
-`, context)
 }
 
 func TestAccNetappVolume_autoTieredNetappVolumeExample_update(t *testing.T) {
