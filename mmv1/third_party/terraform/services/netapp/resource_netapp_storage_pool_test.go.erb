@@ -41,15 +41,6 @@ func TestAccNetappStoragePool_storagePoolCreateExample_update(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
 			},
-			{
-				Config: testAccNetappStoragePool_storagePoolCreateExample_autoTieredPool(context),
-			},
-			{
-				ResourceName:            "google_netapp_storage_pool.test_pool",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
-			},
 		},
 	})
 }
@@ -139,7 +130,34 @@ resource "google_netapp_storage_pool" "test_pool" {
 }
 
 
-func testAccNetappStoragePool_storagePoolCreateExample_autoTieredPool(context map[string]interface{}) string {
+func TestAccNetappStoragePool_autoTieredStoragePoolCreateExample_update(t *testing.T) {
+	context := map[string]interface{}{
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckNetappStoragePoolDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetappStoragePool_autoTieredStoragePoolCreateExample_full(context),
+			},
+			{
+				ResourceName:            "google_netapp_storage_pool.test_pool",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccNetappStoragePool_autoTieredStoragePoolCreateExample_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_network" "peering_network" {
   name = "tf-test-network%{random_suffix}"
@@ -163,7 +181,7 @@ resource "google_service_networking_connection" "default" {
 
 resource "google_netapp_storage_pool" "test_pool" {
   name = "tf-test-pool%{random_suffix}"
-  location = "us-central1"
+  location = "us-east4"
   service_level = "PREMIUM"
   capacity_gib = "2048"
   network = google_compute_network.peering_network.id
