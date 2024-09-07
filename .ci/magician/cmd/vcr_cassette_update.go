@@ -159,7 +159,7 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 	if len(replayingResult.FailedTests) != 0 {
 		fmt.Println("running tests in RECORDING mode now")
 
-		recordingResult, recordingErr := vt.RunParallel(vcr.Recording, provider.Beta, nil, replayingResult.FailedTests)
+		recordingResult, recordingErr := vt.RunParallel(vcr.Recording, provider.Beta, []string{"github.com/hashicorp/terraform-provider-google-beta/google-beta/services/storagetransfer"}, replayingResult.FailedTests)
 
 		// upload build and test logs first to preserve debugging logs in case
 		// uploading cassettes failed because recording not work
