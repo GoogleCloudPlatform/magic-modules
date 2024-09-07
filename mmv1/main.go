@@ -30,6 +30,8 @@ var version = flag.String("version", "", "optional version name. If specified, t
 
 var product = flag.String("product", "", "optional product name. If specified, the resources under the specific product will be generated. Otherwise, resources under all products will be generated.")
 
+var resourceToGenerate = flag.String("resource", "", "optional resource name. Limits generation to the specified resource within a particular product.")
+
 // Example usage: --yaml
 var yamlMode = flag.Bool("yaml", false, "copy text over from ruby yaml to go yaml")
 
@@ -119,7 +121,7 @@ func main() {
 
 	for i := 0; i < len(allProductFiles); i++ {
 		wg.Add(1)
-		go GenerateProduct(ch, providerToGenerate, &productsForVersion, startTime, productsToGenerate, generateCode, generateDocs)
+		go GenerateProduct(ch, providerToGenerate, &productsForVersion, startTime, productsToGenerate, *resourceToGenerate, generateCode, generateDocs)
 	}
 	wg.Wait()
 
@@ -144,7 +146,7 @@ func main() {
 	}
 }
 
-func GenerateProduct(productChannel chan string, providerToGenerate *provider.Terraform, productsForVersion *[]*api.Product, startTime time.Time, productsToGenerate []string, generateCode, generateDocs bool) {
+func GenerateProduct(productChannel chan string, providerToGenerate *provider.Terraform, productsForVersion *[]*api.Product, startTime time.Time, productsToGenerate []string, resourceToGenerate string, generateCode, generateDocs bool) {
 
 	defer wg.Done()
 	productName := <-productChannel
@@ -215,6 +217,6 @@ func GenerateProduct(productChannel chan string, providerToGenerate *provider.Te
 		}
 
 		log.Printf("%s: Generating files", productName)
-		providerToGenerate.Generate(*outputPath, productName, generateCode, generateDocs)
+		providerToGenerate.Generate(*outputPath, productName, resourceToGenerate, generateCode, generateDocs)
 	}
 }
