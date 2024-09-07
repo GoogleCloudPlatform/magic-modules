@@ -69,8 +69,6 @@ func testAccSdkProvider_project_precedenceOrderEnvironmentVariables(t *testing.T
 		CLOUDSDK_CORE_PROJECT
 	*/
 
-	project := envvar.GetTestProjectFromEnv()
-
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -144,12 +142,7 @@ func testAccSdkProvider_project_precedenceOrderEnvironmentVariables(t *testing.T
 				},
 				Config: testAccSdkProvider_projectInEnvsOnly(),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					// When not explicitly waiting for the unknown value to resolve the project could be the ENV or could be from the provisioned project
-					// In practice it might be that this data source would be refreshed during an apply (?)
-					resource.TestMatchResourceAttr("data.google_provider_config_sdk.default", "project", regexp.MustCompile(fmt.Sprintf("(tf-test-[0-9a-z]{16}|%s)", project))),
-
-					// When explicitly made to wait, returns the provisioned project's id
-					resource.TestMatchResourceAttr("data.google_provider_config_sdk.wait", "project", regexp.MustCompile("tf-test-[0-9a-z]{16}")),
+					resource.TestCheckResourceAttr("data.google_provider_config_sdk.default", "project", "CLOUDSDK_CORE_PROJECT"),
 				),
 			},
 		},
