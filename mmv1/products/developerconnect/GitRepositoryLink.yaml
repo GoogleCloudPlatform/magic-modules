@@ -24,63 +24,6 @@ name: GitRepositoryLink
 description: "A git repository link to a parent connection."
 min_version: "beta"
 autogen_async: true
-properties:
-  - !ruby/object:Api::Type::String
-    name: name
-    description: "Identifier. Resource name of the repository, in the format\n`projects/*/locations/*/connections/*/gitRepositoryLinks/*`. "
-    output: true
-  - !ruby/object:Api::Type::String
-    name: cloneUri
-    description: "Required. Git Clone URI. "
-    required: true
-  - !ruby/object:Api::Type::String
-    name: createTime
-    description: "Output only. [Output only] Create timestamp "
-    output: true
-  - !ruby/object:Api::Type::String
-    name: updateTime
-    description: "Output only. [Output only] Update timestamp "
-    output: true
-  - !ruby/object:Api::Type::String
-    name: deleteTime
-    description: "Output only. [Output only] Delete timestamp "
-    output: true
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: labels
-    output:
-    api_name:
-    description: "Optional. Labels as key value pairs "
-    min_version:
-    ignore_write:
-    update_verb:
-    update_url:
-    immutable:
-  - !ruby/object:Api::Type::String
-    name: etag
-    description:
-      "Optional. This checksum is computed by the server based on the value
-      of other\nfields, and may be sent on update and delete requests to ensure the\nclient
-      has an up-to-date value before proceeding. "
-  - !ruby/object:Api::Type::Boolean
-    name: reconciling
-    description:
-      "Output only. Set to true when the connection is being set up or updated
-      in the\nbackground. "
-    output: true
-  - !ruby/object:Api::Type::KeyValueAnnotations
-    name: annotations
-    output:
-    api_name:
-    description: "Optional. Allows clients to store small amounts of arbitrary data. "
-    min_version:
-    ignore_write:
-    update_verb:
-    update_url:
-    immutable:
-  - !ruby/object:Api::Type::String
-    name: uid
-    description: "Output only. A system-assigned unique identifier for a the GitRepositoryLink. "
-    output: true
 parameters:
   - !ruby/object:Api::Type::String
     name: location
@@ -128,3 +71,46 @@ async: !ruby/object:Api::OpAsync
     path: error
     message: message
 immutable: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: name
+    description: "Identifier. Resource name of the repository, in the format\n`projects/*/locations/*/connections/*/gitRepositoryLinks/*`. "
+    output: true
+  - !ruby/object:Api::Type::String
+    name: cloneUri
+    description: "Required. Git Clone URI. "
+    required: true
+  - !ruby/object:Api::Type::String
+    name: createTime
+    description: "Output only. [Output only] Create timestamp "
+    output: true
+  - !ruby/object:Api::Type::String
+    name: updateTime
+    description: "Output only. [Output only] Update timestamp "
+    output: true
+  - !ruby/object:Api::Type::String
+    name: deleteTime
+    description: "Output only. [Output only] Delete timestamp "
+    output: true
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: labels
+    description: "Optional. Labels as key value pairs "
+  - !ruby/object:Api::Type::String
+    name: etag
+    description:
+      "Optional. This checksum is computed by the server based on the value
+      of other\nfields, and may be sent on update and delete requests to ensure the\nclient
+      has an up-to-date value before proceeding. "
+  - !ruby/object:Api::Type::Boolean
+    name: reconciling
+    description:
+      "Output only. Set to true when the connection is being set up or updated
+      in the\nbackground. "
+    output: true
+  - !ruby/object:Api::Type::KeyValueAnnotations
+    name: annotations
+    description: "Optional. Allows clients to store small amounts of arbitrary data. "
+  - !ruby/object:Api::Type::String
+    name: uid
+    description: "Output only. A system-assigned unique identifier for a the GitRepositoryLink. "
+    output: true
