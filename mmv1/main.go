@@ -32,6 +32,10 @@ var product = flag.String("product", "", "optional product name. If specified, t
 
 var resourceToGenerate = flag.String("resource", "", "optional resource name. Limits generation to the specified resource within a particular product.")
 
+var doNotGenerateCode = flag.Bool("no-code", false, "do not generate code")
+
+var doNotGenerateDocs = flag.Bool("no-docs", false, "do not generate docs")
+
 // Example usage: --yaml
 var yamlMode = flag.Bool("yaml", false, "copy text over from ruby yaml to go yaml")
 
@@ -67,8 +71,8 @@ func main() {
 		*version = "ga"
 	}
 
-	var generateCode = true
-	var generateDocs = true
+	var generateCode = !*doNotGenerateCode
+	var generateDocs = !*doNotGenerateDocs
 	var productsToGenerate []string
 	var allProducts = false
 	if product == nil || *product == "" {
