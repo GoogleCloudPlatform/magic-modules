@@ -351,24 +351,24 @@ func TestAccComputeAttachedDisk_diskInterface(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-                                Config: testAttachedDiskResource(diskName1, instanceName1) + testAccComputeAttachedDisk_interface(attachedDiskName1, "SCSI"),
-                        },
-                        {
-                                ResourceName:      "google_compute_attached_disk." + attachedDiskName1,
-                                ImportStateId:     importID1,
-                                ImportState:       true,
-                                ImportStateVerify: false,
-                        },
+				Config: testAttachedDiskResource(diskName1, instanceName1) + testAccComputeAttachedDisk_interface(attachedDiskName1, "SCSI"),
+			},
+			{
+				ResourceName:      "google_compute_attached_disk." + attachedDiskName1,
+				ImportStateId:     importID1,
+				ImportState:       true,
+				ImportStateVerify: false,
+			},
 			// API server will use NVME even SCSI is specified
 			{
-                                Config: testAttachedDiskResourceWithMachineType(diskName2, instanceName2, "h3-standard-88") + testAccComputeAttachedDisk_interface(attachedDiskName2, "SCSI"),
-                        },
+				Config: testAttachedDiskResourceWithMachineType(diskName2, instanceName2, "h3-standard-88") + testAccComputeAttachedDisk_interface(attachedDiskName2, "SCSI"),
+			},
 			{
-                                ResourceName:      "google_compute_attached_disk." + attachedDiskName2,
-                                ImportStateId:     importID2,
-                                ImportState:       true,
-                                ImportStateVerify: false,
-                        },
+				ResourceName:      "google_compute_attached_disk." + attachedDiskName2,
+				ImportStateId:     importID2,
+				ImportState:       true,
+				ImportStateVerify: false,
+			},
 		},
 	})
 
@@ -394,7 +394,7 @@ resource "google_compute_attached_disk" "%s" {
 }
 
 func testAttachedDiskResourceWithMachineType(diskName, instanceName, machineType string) string {
-        return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_compute_disk" "test1" {
   name = "%s"
   zone = "us-central1-a"
