@@ -34,6 +34,28 @@ resource "google_data_loss_prevention_discovery_config" "{{$.PrimaryResourceId}}
             detail_of_message = "TABLE_PROFILE"
         }
     }
+    actions {
+        tag_resources {
+            tag_conditions {
+                tag {
+                    namespaced_value = "123456/environment/prod"
+                }
+                sensitivity_score {
+                    score = "SENSITIVITY_HIGH"
+                }
+            }
+            tag_conditions {
+                tag {
+                    namespaced_value = "123456/environment/test"
+                }
+                sensitivity_score {
+                    score = "SENSITIVITY_LOW"
+                }
+            }
+            profile_generations_to_tag = ["PROFILE_GENERATION_NEW", "PROFILE_GENERATION_UPDATE"]
+            lower_data_risk_to_low = true
+        }
+    }
     inspect_templates = ["projects/%{project}/inspectTemplates/${google_data_loss_prevention_inspect_template.basic.name}"] 
 }
 
@@ -51,4 +73,24 @@ resource "google_data_loss_prevention_inspect_template" "basic" {
 			name = "EMAIL_ADDRESS"
 		}
     }
+}
+
+data "google_project" "project" {
+	project_id = "%{project}"
+}
+
+resource "google_tags_tag_key" "tag_key" {
+	parent = "projects/${data.google_project.project.number}"
+	short_name = "environment"
+}
+
+resource "google_tags_tag_value" "tag_value" {
+	parent = "tagKeys/${google_tags_tag_key.tag_key.name}"
+	short_name = "prod"
+}
+
+resource "google_project_iam_member" "tag_role" {
+    project = "%{project}"
+    role    = "roles/resourcemanager.tagUser"
+    member = "serviceAccount:service-${data.google_project.project.number}@dlp-api.iam.gserviceaccount.com"
 }

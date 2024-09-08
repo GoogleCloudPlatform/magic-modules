@@ -47,6 +47,8 @@ examples:
       dataform_repository_name: 'dataform_repository'
       data: 'secret-data'
       secret_name: 'my-secret'
+      key_ring_name: 'example-key-ring'
+      crypto_key_name: 'example-crypto-key-name'
     skip_test: true
   - name: 'dataform_repository_with_cloudsource_repo'
     primary_resource_id: 'dataform_repository'
@@ -57,6 +59,8 @@ examples:
       dataform_repository_name: 'dataform_repository'
       data: 'secret-data'
       secret_name: 'my-secret'
+      key_ring_name: 'example-key-ring'
+      crypto_key_name: 'example-crypto-key-name'
     skip_docs: true
   - name: 'dataform_repository_with_cloudsource_repo_and_ssh'
     primary_resource_id: 'dataform_repository'
@@ -161,10 +165,15 @@ properties:
     type: String
     description: Optional. The repository's user-friendly name.
     min_version: 'beta'
+  - name: 'kmsKeyName'
+    type: String
+    description: |
+      Optional. The reference to a KMS encryption key. If provided, it will be used to encrypt user data in the repository and all child resources.
+      It is not possible to add or update the encryption key after the repository is created. Example projects/[kms_project_id]/locations/[region]/keyRings/[key_region]/cryptoKeys/[key]
+    min_version: 'beta'
   - name: 'labels'
     type: KeyValueLabels
     description: |
       Optional. Repository user labels.
       An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
     min_version: 'beta'
-    immutable: false

@@ -140,7 +140,6 @@ properties:
     type: KeyValueLabels
     description: |
       A set of key/value label pairs to assign to this Featurestore.
-    immutable: false
   - name: 'onlineServingConfig'
     type: NestedObject
     description: |

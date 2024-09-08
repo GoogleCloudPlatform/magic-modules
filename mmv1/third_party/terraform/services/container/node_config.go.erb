@@ -100,19 +100,17 @@ func schemaLoggingVariant() *schema.Schema {
 	}
 }
 
-func schemaGcfsConfig(forceNew bool) *schema.Schema {
+func schemaGcfsConfig() *schema.Schema {
         return &schema.Schema{
                 Type:     schema.TypeList,
 		Optional: true,
 		MaxItems: 1,
 		Description: `GCFS configuration for this node.`,
-		ForceNew: forceNew,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"enabled": {
 					Type:        schema.TypeBool,
 					Required:    true,
-					ForceNew:    forceNew,
 					Description: `Whether or not GCFS is enabled`,
 				},
 			},
@@ -340,7 +338,7 @@ func schemaNodeConfig() *schema.Schema {
 					},
 				},
 
-				"gcfs_config": schemaGcfsConfig(true),
+				"gcfs_config": schemaGcfsConfig(),
 
 				"gvnic": {
 					Type:     schema.TypeList,
@@ -784,6 +782,22 @@ func schemaNodeConfig() *schema.Schema {
 						ForceNew: true,
 						Description: `If enabled boot disks are configured with confidential mode.`,
 				},
+			},
+		},
+	}
+}
+
+// Separate since this currently only supports a single value -- a subset of
+// the overall NodeKubeletConfig
+func schemaNodePoolAutoConfigNodeKubeletConfig() *schema.Schema {
+  return &schema.Schema{
+		Type:        schema.TypeList,
+		Optional:    true,
+		MaxItems:    1,
+		Description: `Node kubelet configs.`,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"insecure_kubelet_readonly_port_enabled": schemaInsecureKubeletReadonlyPortEnabled(),
 			},
 		},
 	}
@@ -1766,6 +1780,16 @@ func flattenKubeletConfig(c *container.NodeKubeletConfig) []map[string]interface
 			"cpu_manager_policy":                     c.CpuManagerPolicy,
 			"insecure_kubelet_readonly_port_enabled": flattenInsecureKubeletReadonlyPortEnabled(c),
 			"pod_pids_limit":                         c.PodPidsLimit,
+		})
+	}
+	return result
+}
+
+func flattenNodePoolAutoConfigNodeKubeletConfig(c *container.NodeKubeletConfig) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"insecure_kubelet_readonly_port_enabled": flattenInsecureKubeletReadonlyPortEnabled(c),
 		})
 	}
 	return result

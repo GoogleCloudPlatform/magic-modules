@@ -10,18 +10,6 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */ -}}
-// We need to pretend IAP isn't there if it's disabled for Terraform to maintain
-// BC behaviour with the handwritten resource.
-v, ok :=  res["iap"]
-if !ok || v == nil {
-	delete(res, "iap")
-	return res, nil
-}
-m := v.(map[string]interface{})
-if ok && m["enabled"] == false {
-	delete(res, "iap")
-}
-
 // Requests with consistentHash will error for specific values of
 // localityLbPolicy. However, the API will not remove it if the backend
 // service is updated to from supporting to non-supporting localityLbPolicy
