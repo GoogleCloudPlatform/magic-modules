@@ -212,10 +212,16 @@ func TestAccFilestoreInstance_deletionProtection_update(t *testing.T) {
 				ResourceName:            "google_filestore_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zone", "location"},
+				ImportStateVerifyIgnore: []string{"zone"},
 			},
 			{
 				Config: testAccFilestoreInstance_deletionProtection_update(name, location, tier, deletionProtection),
+			},
+			{
+				ResourceName:            "google_filestore_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"zone"},
 			},
 			{
 				Config: testAccFilestoreInstance_deletionProtection_update(name, location, tier, !deletionProtection),
@@ -224,7 +230,7 @@ func TestAccFilestoreInstance_deletionProtection_update(t *testing.T) {
 				ResourceName:            "google_filestore_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zone", "location"},
+				ImportStateVerifyIgnore: []string{"zone"},
 			},
 		},
 	})
