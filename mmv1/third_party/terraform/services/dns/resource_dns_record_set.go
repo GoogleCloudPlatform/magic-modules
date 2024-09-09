@@ -476,7 +476,9 @@ func resourceDnsRecordSetDelete(d *schema.ResourceData, meta interface{}) error 
 		return err
 	}
 
+	name := d.Get("name").(string)
 	zone := d.Get("managed_zone").(string)
+	rType := d.Get("type").(string)
 
 	// NS and SOA records on the root zone must always have a value,
 	// so we short-circuit delete this allows terraform delete to work,
