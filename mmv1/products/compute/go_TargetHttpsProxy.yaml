@@ -34,7 +34,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 1000
@@ -229,5 +229,13 @@ properties:
       INTERNAL_SELF_MANAGED and which with EXTERNAL, EXTERNAL_MANAGED
       loadBalancingScheme consult ServerTlsPolicy documentation.
       If left blank, communications are not encrypted.
-    resource: 'SslPolicy'
+
+      If you remove this field from your configuration at the same time as
+      deleting or recreating a referenced ServerTlsPolicy resource, you will
+      receive a resourceInUseByAnotherResource error. Use lifecycle.create_before_destroy
+      within the ServerTlsPolicy resource to avoid this.
+    update_url: 'projects/{{project}}/global/targetHttpsProxies/{{name}}'
+    update_verb: 'PATCH'
+    fingerprint_name: 'fingerprint'
+    resource: 'ServerTlsPolicy'
     imports: 'selfLink'

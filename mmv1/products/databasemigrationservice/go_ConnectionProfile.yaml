@@ -94,6 +94,21 @@ examples:
     ignore_read_extra:
       - 'alloydb.0.settings.0.initial_user.0.password'
     skip_test: true
+  - name: 'database_migration_service_connection_profile_existing_mysql'
+    primary_resource_id: 'existing-mysql'
+    vars:
+      destination_csql: 'destination-csql'
+      destination_cp: 'destination-cp'
+  - name: 'database_migration_service_connection_profile_existing_postgres'
+    primary_resource_id: 'existing-psql'
+    vars:
+      destination_csql: 'destination-csql'
+      destination_cp: 'destination-cp'
+  - name: 'database_migration_service_connection_profile_existing_alloydb'
+    primary_resource_id: 'existing-alloydb'
+    vars:
+      destination_alloydb: 'destination-alloydb'
+      destination_cp: 'destination-cp'
 parameters:
   - name: 'connectionProfileId'
     type: String
@@ -127,7 +142,6 @@ properties:
     type: KeyValueLabels
     description: |
       The resource labels for connection profile to use to annotate any related underlying resources such as Compute Engine VMs.
-    immutable: false
   - name: 'state'
     type: Enum
     description: |
@@ -185,24 +199,29 @@ properties:
       - name: 'host'
         type: String
         description: |
-          Required. The IP or hostname of the source MySQL database.
-        required: true
+          The IP or hostname of the source MySQL database.
+        required_with:
+          - 'mysql.0.port'
+          - 'mysql.0.username'
       - name: 'port'
         type: Integer
         description: |
-          Required. The network port of the source MySQL database.
-        required: true
+          The network port of the source MySQL database.
+        required_with:
+          - 'mysql.0.host'
+          - 'mysql.0.username'
       - name: 'username'
         type: String
         description: |
-          Required. The username that Database Migration Service will use to connect to the database. The value is encrypted when stored in Database Migration Service.
-        required: true
+          The username that Database Migration Service will use to connect to the database. The value is encrypted when stored in Database Migration Service.
+        required_with:
+          - 'mysql.0.host'
+          - 'mysql.0.port'
       - name: 'password'
         type: String
         description: |
-          Required. Input only. The password for the user that Database Migration Service will be using to connect to the database.
+          Input only. The password for the user that Database Migration Service will be using to connect to the database.
           This field is not returned on request, and the value is encrypted when stored in Database Migration Service.
-        required: true
         immutable: true
         sensitive: true
         custom_flatten: 'templates/terraform/custom_flatten/go/database_migration_service_connection_profile_mysql_password.go.tmpl'
@@ -267,26 +286,38 @@ properties:
       - name: 'host'
         type: String
         description: |
-          Required. The IP or hostname of the source MySQL database.
-        required: true
+          The IP or hostname of the source MySQL database.
+        required_with:
+          - 'postgresql.0.port'
+          - 'postgresql.0.username'
+          - 'postgresql.0.password'
       - name: 'port'
         type: Integer
         description: |
-          Required. The network port of the source MySQL database.
-        required: true
+          The network port of the source MySQL database.
+        required_with:
+          - 'postgresql.0.host'
+          - 'postgresql.0.username'
+          - 'postgresql.0.password'
       - name: 'username'
         type: String
         description: |
-          Required. The username that Database Migration Service will use to connect to the database. The value is encrypted when stored in Database Migration Service.
-        required: true
+          The username that Database Migration Service will use to connect to the database. The value is encrypted when stored in Database Migration Service.
+        required_with:
+          - 'postgresql.0.host'
+          - 'postgresql.0.port'
+          - 'postgresql.0.password'
       - name: 'password'
         type: String
         description: |
-          Required. Input only. The password for the user that Database Migration Service will be using to connect to the database.
+          Input only. The password for the user that Database Migration Service will be using to connect to the database.
           This field is not returned on request, and the value is encrypted when stored in Database Migration Service.
-        required: true
         immutable: true
         sensitive: true
+        required_with:
+          - 'postgresql.0.host'
+          - 'postgresql.0.port'
+          - 'postgresql.0.username'
         custom_flatten: 'templates/terraform/custom_flatten/go/database_migration_service_connection_profile_postgresql_password.go.tmpl'
       - name: 'passwordSet'
         type: Boolean
@@ -339,6 +370,10 @@ properties:
         type: String
         description: |
           If the source is a Cloud SQL database, use this field to provide the Cloud SQL instance ID of the source.
+      - name: 'alloydbClusterId'
+        type: String
+        description: |
+          If the connected database is an AlloyDB instance, use this field to provide the AlloyDB cluster ID.
       - name: 'networkArchitecture'
         type: Enum
         description: |

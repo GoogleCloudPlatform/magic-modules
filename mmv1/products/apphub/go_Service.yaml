@@ -65,7 +65,7 @@ examples:
       application_id: 'example-application-1'
       service_project_attachment_id: 'project-1'
       display_name: 'Example Service Full'
-      description: 'Register service for testing'
+      desc: 'Register service for testing'
       business_name: 'Alice'
       business_email: 'alice@google.com'
       developer_name: 'Bob'

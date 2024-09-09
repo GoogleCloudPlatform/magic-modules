@@ -36,8 +36,7 @@ type GithubClient interface {
 }
 
 type CloudbuildClient interface {
-	ApproveCommunityChecker(prNumber, commitSha string) error
-	TriggerMMPresubmitRuns(commitSha string, substitutions map[string]string) error
+	ApproveDownstreamGenAndTest(prNumber, commitSha string) error
 }
 
 type ExecRunner interface {

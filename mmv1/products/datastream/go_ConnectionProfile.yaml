@@ -123,7 +123,6 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: Labels.
-    immutable: false
   - name: 'displayName'
     type: String
     description: Display name.

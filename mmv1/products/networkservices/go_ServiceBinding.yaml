@@ -85,7 +85,6 @@ properties:
     type: KeyValueLabels
     description: Set of label tags associated with the ServiceBinding resource.
     min_version: 'beta'
-    immutable: false
   - name: 'description'
     type: String
     description: |

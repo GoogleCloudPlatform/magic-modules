@@ -118,6 +118,21 @@ examples:
     test_vars_overrides:
       'deletion_protection': 'false'
     skip_test: true
+  - name: 'datastream_stream_sql_server_change_tables'
+    primary_resource_id: 'default'
+    vars:
+      database_name: 'db'
+      database_password: 'password'
+      database_user: 'user'
+      deletion_protection: 'true'
+      destination_connection_profile_id: 'destination-profile'
+      source_connection_profile_id: 'source-profile'
+      sql_server_name: 'sql-server'
+      sql_server_root_password: 'root-password'
+      stream_id: 'stream'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+    skip_test: true
   - name: 'datastream_stream_postgresql_bigquery_dataset_id'
     primary_resource_id: 'default'
     vars:
@@ -162,7 +177,9 @@ examples:
 virtual_fields:
   - name: 'desired_state'
     description: |
-      Desired state of the Stream. Set this field to `RUNNING` to start the stream, and `PAUSED` to pause the stream.
+      Desired state of the Stream. Set this field to `RUNNING` to start the stream,
+      `NOT_STARTED` to create the stream without starting and `PAUSED` to pause
+      the stream from a `RUNNING` state.
       Possible values: NOT_STARTED, RUNNING, PAUSED. Default: NOT_STARTED
     type: String
     default_value: "NOT_STARTED"
@@ -197,7 +214,6 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: Labels.
-    immutable: false
   - name: 'displayName'
     type: String
     description: Display name.
@@ -1018,6 +1034,22 @@ properties:
             send_empty_value: true
             validation:
               function: 'validation.IntAtLeast(0)'
+          - name: 'transactionLogs'
+            type: NestedObject
+            description: |
+              CDC reader reads from transaction logs.
+            send_empty_value: true
+            allow_empty_object: true
+            properties:
+              []
+          - name: 'changeTables'
+            type: NestedObject
+            description: |
+              CDC reader reads from change tables.
+            send_empty_value: true
+            allow_empty_object: true
+            properties:
+              []
   - name: 'destinationConfig'
     type: NestedObject
     description: |
@@ -1160,9 +1192,8 @@ properties:
             immutable: true
             send_empty_value: true
             allow_empty_object: true
-            exactly_one_of:
-              - 'destination_config.0.bigquery_destination_config.0.merge'
-              - 'destination_config.0.bigquery_destination_config.0.append_only'
+            conflicts:
+              - destination_config.0.bigquery_destination_config.0.append_only
             properties:
               []
           - name: 'appendOnly'
@@ -1174,9 +1205,8 @@ properties:
             immutable: true
             send_empty_value: true
             allow_empty_object: true
-            exactly_one_of:
-              - 'destination_config.0.bigquery_destination_config.0.merge'
-              - 'destination_config.0.bigquery_destination_config.0.append_only'
+            conflicts:
+              - destination_config.0.bigquery_destination_config.0.merge
             properties:
               []
   - name: 'state'

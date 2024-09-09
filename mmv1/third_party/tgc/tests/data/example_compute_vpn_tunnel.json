@@ -1,5 +1,16 @@
 [
-               "foo": "bar",
+  {
+      "name":"//compute.googleapis.com/projects/{{.Provider.project}}/regions/us-central1/vpnTunnels/tunnel-1",
+      "asset_type":"compute.googleapis.com/VpnTunnel",
+      "resource":{
+         "version":"v1",
+         "discovery_document_uri":"https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+         "discovery_name":"VpnTunnel",
+         "parent":"//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+         "data":{
+            "ikeVersion":2,
+            "labels":{
+               "foo":"bar",
                "goog-terraform-provisioned": "true"
             },
             "name":"tunnel-1",
@@ -61,6 +72,9 @@
          "data":{
             "addressType":"EXTERNAL",
             "name":"vpn-static-ip",
+            "labels": {
+              "goog-terraform-provisioned": "true"
+            },
             "region":"projects/{{.Provider.project}}/global/regions/us-central1"
          }
       },

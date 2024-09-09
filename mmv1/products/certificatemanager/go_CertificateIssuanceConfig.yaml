@@ -115,7 +115,6 @@ properties:
     description: |
       'Set of label tags associated with the CertificateIssuanceConfig resource.
        An object containing a list of "key": value pairs. Example: { "name": "wrench", "count": "3" }.
-    immutable: false
   - name: 'certificateAuthorityConfig'
     type: NestedObject
     description: |

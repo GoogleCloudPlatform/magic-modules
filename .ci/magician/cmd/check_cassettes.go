@@ -103,7 +103,10 @@ func execCheckCassettes(commit string, vt *vcr.Tester, ctlr *source.Controller) 
 	}
 	vt.SetRepoPath(provider.Beta, providerRepo.Path)
 
-	result, err := vt.Run(vcr.Replaying, provider.Beta, nil)
+	result, err := vt.Run(vcr.RunOptions{
+		Mode:    vcr.Replaying,
+		Version: provider.Beta,
+	})
 	if err != nil {
 		fmt.Println("Error running VCR: ", err)
 	}

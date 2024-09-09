@@ -122,7 +122,6 @@ properties:
     description: |
       Set of label tags associated with the AddressGroup resource.
       An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
-    immutable: false
   - name: 'type'
     type: Enum
     description: |

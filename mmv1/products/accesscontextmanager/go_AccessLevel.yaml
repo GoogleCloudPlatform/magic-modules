@@ -57,7 +57,7 @@ async:
 custom_code:
   encoder: 'templates/terraform/encoders/go/access_level_never_send_parent.go.tmpl'
   custom_import: 'templates/terraform/custom_import/go/set_access_policy_parent_from_self_link.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'access_context_manager_access_level_basic'
     primary_resource_id: 'access-level'
