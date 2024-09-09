@@ -31,7 +31,7 @@ self_link: 'projects/{{project}}/locations/{{location}}/ekmConnections/{{name}}'
 create_url: 'projects/{{project}}/locations/{{location}}/ekmConnections?ekmConnectionId={{name}}'
 update_verb: 'PATCH'
 update_mask: true
-skip_delete: true
+exclude_delete: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/ekmConnections/{{name}}'
 timeouts:

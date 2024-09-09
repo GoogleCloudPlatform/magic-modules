@@ -127,7 +127,7 @@ delete_url: '<%= object.delete_url %>'
 delete_verb: '<%= object.delete_verb.to_s %>'
 <%  end -%>
 <%  unless !object.skip_delete -%>
-skip_delete: <%= object.skip_delete %>
+exclude_delete: <%= object.skip_delete %>
 <%  end -%>
 <%  unless object.immutable.nil? -%>
 immutable: <%= object.immutable %>
@@ -440,7 +440,7 @@ filename_override: '<%= object.filename_override %>'
 exclude_tgc: <%= object.exclude_tgc %>
 <%  end -%>
 <%  unless !object.skip_sweeper -%>
-skip_sweeper: <%= object.skip_sweeper %>
+exclude_sweeper: <%= object.skip_sweeper %>
 <%  end -%>
 <%    if !object.sweeper.nil? && !object.sweeper.sweepable_identifier_field.nil? -%>
 sweeper:

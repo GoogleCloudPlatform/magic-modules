@@ -34,7 +34,7 @@ base_url: 'projects/{{project}}/locations/{{location}}/externalAccountKeys'
 self_link: 'projects/{{project}}/locations/{{location}}/externalAccountKeys/{{key_id}}'
 create_url: 'projects/{{project}}/locations/{{location}}/externalAccountKeys'
 skip_read: true
-skip_delete: true
+exclude_delete: true
 immutable: true
 exclude_import: true
 timeouts:

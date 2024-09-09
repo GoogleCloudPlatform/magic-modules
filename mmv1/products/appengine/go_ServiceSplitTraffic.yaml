@@ -28,7 +28,7 @@ create_verb: 'PATCH'
 update_url: 'apps/{{project}}/services/{{service}}?migrateTraffic={{migrate_traffic}}'
 update_verb: 'PATCH'
 update_mask: true
-skip_delete: true
+exclude_delete: true
 mutex: 'apps/{{project}}'
 import_format:
   - 'apps/{{project}}/services/{{service}}'

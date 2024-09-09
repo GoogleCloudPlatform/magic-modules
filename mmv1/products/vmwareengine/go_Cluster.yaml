@@ -52,7 +52,7 @@ async:
     message: 'message'
   include_project: true
 custom_code:
-skip_sweeper: true
+exclude_sweeper: true
 error_abort_predicates:
 
   - 'transport_tpg.Is429QuotaError'
