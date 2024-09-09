@@ -24,7 +24,7 @@ if err := d.Set("fingerprint", flattenComputeRegionNetworkFirewallPolicyWithRule
 
 res, err = resourceComputeRegionNetworkFirewallPolicyWithRulesDecoder(d, meta, res)
 if err != nil {
-	return err
+  return err
 }
 
 log.Printf("[DEBUG] Updating RegionNetworkFirewallPolicyWithRules %q", d.Id())

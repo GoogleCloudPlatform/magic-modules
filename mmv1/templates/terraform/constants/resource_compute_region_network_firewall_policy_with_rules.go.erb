@@ -10,10 +10,9 @@ func regionNetworkFirewallPolicyWithRulesConvertPriorityToInt(v interface {}) (i
   }
 
   if floatVal, ok := v.(float64); ok {
- 	  intVal := int64(floatVal)
- 	  return intVal, nil
- 	}
-
+    intVal := int64(floatVal)
+    return intVal, nil
+  }
   return 0, fmt.Errorf("Incorrect rule priority: %s. Priority must be a number", v)
 }
 
@@ -25,30 +24,28 @@ func regionNetworkFirewallPolicyWithRulesIsPredefinedRule(rule map[string]interf
   priorityInt, err :=  regionNetworkFirewallPolicyWithRulesConvertPriorityToInt(priority)
 
   if err != nil {
-      return false, err
-    }
+    return false, err
+  }
 
   return priorityInt >= ReservedPriorityStart, nil
-
 }
 
 func regionNetworkFirewallPolicyWithRulesSplitPredefinedRules(allRules []interface{}) ([]interface{}, []interface{}, error) {
-	predefinedRules := make([]interface{}, 0)
-	rules := make([]interface{}, 0)
+  predefinedRules := make([]interface{}, 0)
+  rules := make([]interface{}, 0)
 
-	for _, rule := range allRules {
-	  isPredefined, err :=  regionNetworkFirewallPolicyWithRulesIsPredefinedRule(rule.(map[string]interface{}))
-	  if err != nil {
-	    return nil, nil, err
-	  }
+  for _, rule := range allRules {
+    isPredefined, err :=  regionNetworkFirewallPolicyWithRulesIsPredefinedRule(rule.(map[string]interface{}))
+    if err != nil {
+      return nil, nil, err
+    }
 
-		if isPredefined {
-		 predefinedRules = append(predefinedRules, rule)
-		} else {
-			rules = append(rules, rule)
-		}
-	}
+    if isPredefined {
+      predefinedRules = append(predefinedRules, rule)
+    } else {
+      rules = append(rules, rule)
+    }
+  }
 
   return rules, predefinedRules, nil
 }
-
