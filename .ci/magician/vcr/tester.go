@@ -158,8 +158,6 @@ func (vt *Tester) Run(mode Mode, version provider.Version, testDirs []string) (*
 	if len(testDirs) == 0 {
 		var err error
 		testDirs, err = vt.googleTestDirectory()
-		fmt.Println("testDirs:")
-		fmt.Println(testDirs)
 		if err != nil {
 			return nil, err
 		}

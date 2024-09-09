@@ -156,7 +156,7 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 	if len(replayingResult.FailedTests) != 0 {
 		fmt.Println("running tests in RECORDING mode now")
 
-		recordingResult, recordingErr := vt.RunParallel(vcr.Recording, provider.Beta, []string{"github.com/hashicorp/terraform-provider-google-beta/google-beta/services/storagetransfer"}, replayingResult.FailedTests)
+		recordingResult, recordingErr := vt.RunParallel(vcr.Recording, provider.Beta, nil, replayingResult.FailedTests)
 
 		// upload build and test logs first to preserve debugging logs in case
 		// uploading cassettes failed because recording not work
@@ -172,8 +172,7 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 
 		if len(recordingResult.PassedTests) > 0 {
 			cassettesPath := vt.CassettePath(provider.Beta)
-			// TODO: use a temp folder to not mess up the nightly run
-			if _, err := uploadCassettesToGCS(cassettesPath+"/*", "gs://ci-vcr-cassettes/beta/temp-fixtures/", rnr); err != nil {
+			if _, err := uploadCassettesToGCS(cassettesPath+"/*", "gs://ci-vcr-cassettes/beta/fixtures/", rnr); err != nil {
 				// There could be cases that the tests do not generate any cassettes.
 				fmt.Printf("Warning: error uploading cassettes: %s\n", err)
 			}
