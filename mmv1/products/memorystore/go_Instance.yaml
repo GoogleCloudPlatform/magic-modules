@@ -87,7 +87,7 @@ virtual_fields:
     type: Array
     immutable: true
     required: true
-    item_type: 
+    item_type:
       type: NestedObject
       properties:
         - type: String
