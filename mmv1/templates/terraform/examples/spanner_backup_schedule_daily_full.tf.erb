@@ -16,9 +16,9 @@ resource "google_spanner_database" "database" {
 }
 
 resource "google_spanner_backup_schedule" "<%= ctx[:primary_resource_id] %>" {
-  database = google_spanner_database.database.name
+  instance = google_spanner_instance.main.name
 
-  name = "<%= ctx[:vars]['backup_schedule_name'] %>"
+  database = google_spanner_database.database.name
 
   retention_duration = "31620000s" // 366 days (maximum possible retention)
 

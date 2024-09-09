@@ -47,13 +47,11 @@ examples:
     primary_resource_id: 'full-backup'
     vars:
       database_name: 'database-id'
-      backup_schedule_name: 'daily-full-backup'
   - !ruby/object:Provider::Terraform::Examples
     name: 'spanner_backup_schedule_daily_incremental'
     primary_resource_id: 'incremental-backup'
     vars:
       database_name: 'database-id'
-      backup_schedule_name: 'daily-incremental-backup'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'instance'
@@ -81,7 +79,7 @@ properties:
     immutable: true
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String
-    name: retention_duration
+    name: retentionDuration
     required: true
     description: |
       At what relative time in the future, compared to its creation time, the backup should be deleted, e.g. keep backups for 7 days.
@@ -95,45 +93,45 @@ properties:
     allow_empty_object: true
     immutable: true
     properties:
-    - !ruby/object:Api::Type::NestedObject
-      name: cron_spec
-      description: |
-        Cron style schedule specification..
-      immutable: true
-      properties:
-        - !ruby/object:Api::Type::String
-          name: text
-          description: |
-            Textual representation of the crontab. User can customize the
-            backup frequency and the backup version time using the cron
-            expression. The version time must be in UTC timzeone.
-            The backup will contain an externally consistent copy of the
-            database at the version time. Allowed frequencies are 12 hour, 1 day,
-            1 week and 1 month. Examples of valid cron specifications:
-              0 2/12 * * * : every 12 hours at (2, 14) hours past midnight in UTC.
-              0 2,14 * * * : every 12 hours at (2,14) hours past midnight in UTC.
-              0 2 * * *    : once a day at 2 past midnight in UTC.
-              0 2 * * 0    : once a week every Sunday at 2 past midnight in UTC.
-              0 2 8 * *    : once a month on 8th day at 2 past midnight in UTC.
+      - !ruby/object:Api::Type::NestedObject
+        name: cronSpec
+        description: |
+          Cron style schedule specification..
+        immutable: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: text
+            description: |
+              Textual representation of the crontab. User can customize the
+              backup frequency and the backup version time using the cron
+              expression. The version time must be in UTC timzeone.
+              The backup will contain an externally consistent copy of the
+              database at the version time. Allowed frequencies are 12 hour, 1 day,
+              1 week and 1 month. Examples of valid cron specifications:
+                0 2/12 * * * : every 12 hours at (2, 14) hours past midnight in UTC.
+                0 2,14 * * * : every 12 hours at (2,14) hours past midnight in UTC.
+                0 2 * * *    : once a day at 2 past midnight in UTC.
+                0 2 * * 0    : once a week every Sunday at 2 past midnight in UTC.
+                0 2 8 * *    : once a month on 8th day at 2 past midnight in UTC.
   - !ruby/object:Api::Type::NestedObject
-    name: full_backup_spec
+    name: fullBackupSpec
     description: |
       The schedule creates only full backups..
     exactly_one_of:
-      - full_backup_spec
-      - incremental_backup_spec
+      - fullBackupSpec
+      - incrementalBackupSpec
     send_empty_value: true
     allow_empty_object: true
     immutable: true
     properties: []
   - !ruby/object:Api::Type::NestedObject
-    name: incremental_backup_spec
+    name: incrementalBackupSpec
     description: |
       The schedule creates incremental backup chains.
     exactly_one_of:
-      - full_backup_spec
-      - incremental_backup_spec
+      - fullBackupSpec
+      - incrementalBackupSpec
     send_empty_value: true
     allow_empty_object: true
     immutable: true
-    properties: [ ]
+    properties: []
