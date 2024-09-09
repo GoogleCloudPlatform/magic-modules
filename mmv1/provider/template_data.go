@@ -175,12 +175,12 @@ func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, g
 
 	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).ParseFiles(templates...)
 	if err != nil {
-		glog.Exit(err)
+		glog.Exit(fmt.Sprintf("error parsing %s for filepath %s ", templateFileName, filePath), err)
 	}
 
 	contents := bytes.Buffer{}
 	if err = tmpl.ExecuteTemplate(&contents, templateFileName, input); err != nil {
-		glog.Exit(err)
+		glog.Exit(fmt.Sprintf("error executing %s for filepath %s ", templateFileName, filePath), err)
 	}
 
 	sourceByte := contents.Bytes()

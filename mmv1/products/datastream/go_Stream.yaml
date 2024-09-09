@@ -177,7 +177,9 @@ examples:
 virtual_fields:
   - name: 'desired_state'
     description: |
-      Desired state of the Stream. Set this field to `RUNNING` to start the stream, and `PAUSED` to pause the stream.
+      Desired state of the Stream. Set this field to `RUNNING` to start the stream,
+      `NOT_STARTED` to create the stream without starting and `PAUSED` to pause
+      the stream from a `RUNNING` state.
       Possible values: NOT_STARTED, RUNNING, PAUSED. Default: NOT_STARTED
     type: String
     default_value: "NOT_STARTED"

@@ -11,13 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Warning: This is a temporary file, and should not be edited directly
 ---
-!ruby/object:Api::Product
+name: 'Memorystore'
+display_name: 'Memorystore'
 versions:
-  - !ruby/object:Api::Product::Version
-    base_url: https://memorystore.googleapis.com/v1beta/
-    name: beta
-name: Memorystore
-display_name: Memorystore
+  - name: 'beta'
+    base_url: 'https://memorystore.googleapis.com/v1beta/'
 scopes:
-  - https://www.googleapis.com/auth/cloud-platform
+  - 'https://www.googleapis.com/auth/cloud-platform'
