@@ -168,15 +168,21 @@ properties:
     name: 'type'
     description: |
       The type of the migration job.
+    immutable: true
+    required: true
     values:
       - :ONE_TIME
       - :CONTINUOUS
   - !ruby/object:Api::Type::String
     name: 'source'
+    immutable: true
+    required: true
     description: |
       The name of the source connection profile resource in the form of projects/{project}/locations/{location}/connectionProfiles/{sourceConnectionProfile}.
   - !ruby/object:Api::Type::String
     name: 'destination'
+    immutable: true
+    required: true
     description: |
       The name of the destination connection profile resource in the form of projects/{project}/locations/{location}/connectionProfiles/{destinationConnectionProfile}.
   - !ruby/object:Api::Type::NestedObject
@@ -228,7 +234,10 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'staticIpConnectivity'
     description: |
-      static ip connectivity data (default, no additional details needed).
+      If set to an empty object (`{}`), the source database will allow incoming
+      connections from the public IP of the destination database. 
+      You can retrieve the public IP of the Cloud SQL instance from the 
+      Cloud SQL console or using Cloud SQL APIs.
     exactly_one_of:
       - reverseSshConnectivity
       - vpcPeeringConnectivity
@@ -256,7 +265,7 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'vm'
         description: |
-          he name of the virtual machine (Compute Engine) used as the bastion server
+          The name of the virtual machine (Compute Engine) used as the bastion server
           for the SSH tunnel.
       - !ruby/object:Api::Type::String
         name: 'vpc'

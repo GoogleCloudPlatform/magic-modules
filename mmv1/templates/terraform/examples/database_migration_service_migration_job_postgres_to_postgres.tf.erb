@@ -81,10 +81,9 @@ resource "google_database_migration_service_migration_job" "<%= ctx[:primary_res
   }
   static_ip_connectivity {
   }
-  source             = "projects/${data.google_project.project.project_id}/locations/us-central1/connectionProfiles/<%= ctx[:vars]["source_cp"] %>"
-  destination             = "projects/${data.google_project.project.project_id}/locations/us-central1/connectionProfiles/<%= ctx[:vars]["destination_cp"] %>"
+  source          = google_database_migration_service_connection_profile.source_cp.name
+  destination     = google_database_migration_service_connection_profile.destination_cp.name
   type            = "CONTINUOUS"
-  depends_on = [google_database_migration_service_connection_profile.source_cp, google_database_migration_service_connection_profile.destination_cp]
 }
 
 
