@@ -28,7 +28,7 @@ create_verb: 'PATCH'
 update_url: 'apps/{{project}}/services/{{service}}?migrateTraffic={{migrate_traffic}}'
 update_verb: 'PATCH'
 update_mask: true
-skip_delete: true
+exclude_delete: true
 mutex: 'apps/{{project}}'
 import_format:
   - 'apps/{{project}}/services/{{service}}'
@@ -40,7 +40,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'appengine#operation'
     path: 'name'
     wait_ms: 1000

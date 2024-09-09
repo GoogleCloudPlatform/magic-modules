@@ -25,6 +25,12 @@ references:
     'Create and associate firewall endpoints': 'https://cloud.google.com/firewall/docs/configure-firewall-endpoints'
   api: 'https://cloud.google.com/firewall/docs/reference/network-security/rest/v1/projects.locations.firewallEndpointAssociations#FirewallEndpointAssociation'
 docs:
+  warning: |
+    If you are using User ADCs (Application Default Credentials) with this resource,
+    you must specify a `billing_project_id` and set `user_project_override` to true
+    in the provider configuration. Otherwise the ACM API will return a 403 error.
+    Your account must have the `serviceusage.services.use` permission on the
+    `billing_project_id` you defined.
 base_url: '{{parent}}/locations/{{location}}/firewallEndpointAssociations'
 self_link: '{{parent}}/locations/{{location}}/firewallEndpointAssociations/{{name}}'
 create_url: '{{parent}}/locations/{{location}}/firewallEndpointAssociations?firewallEndpointAssociationId={{name}}'
@@ -95,7 +101,6 @@ properties:
     type: KeyValueLabels
     description: |
       A map of key/value label pairs to assign to the resource.
-    immutable: false
   - name: 'disabled'
     type: Boolean
     description: |

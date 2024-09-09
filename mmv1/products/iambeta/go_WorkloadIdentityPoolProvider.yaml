@@ -85,6 +85,16 @@ examples:
     vars:
       workload_identity_pool_id: 'example-pool'
       workload_identity_pool_provider_id: 'example-prvdr'
+  - name: 'iam_workload_identity_pool_provider_x509_basic'
+    primary_resource_id: 'example'
+    vars:
+      workload_identity_pool_id: 'example-pool'
+      workload_identity_pool_provider_id: 'example-prvdr'
+  - name: 'iam_workload_identity_pool_provider_x509_full'
+    primary_resource_id: 'example'
+    vars:
+      workload_identity_pool_id: 'example-pool'
+      workload_identity_pool_provider_id: 'example-prvdr'
 parameters:
 properties:
   - name: 'workloadIdentityPoolId'
@@ -233,6 +243,7 @@ properties:
       - 'aws'
       - 'oidc'
       - 'saml'
+      - 'x509'
     properties:
       - name: 'accountId'
         type: String
@@ -251,6 +262,7 @@ properties:
       - 'aws'
       - 'oidc'
       - 'saml'
+      - 'x509'
     properties:
       - name: 'allowedAudiences'
         type: Array
@@ -309,8 +321,59 @@ properties:
       - 'aws'
       - 'oidc'
       - 'saml'
+      - 'x509'
     properties:
       - name: 'idpMetadataXml'
         type: String
         description: SAML Identity provider configuration metadata xml doc.
         required: true
+  - name: 'x509'
+    type: NestedObject
+    description: |
+      An X.509-type identity provider represents a CA. It is trusted to assert a
+      client identity if the client has a certificate that chains up to this CA.
+    exactly_one_of:
+      - 'aws'
+      - 'oidc'
+      - 'saml'
+      - 'x509'
+    properties:
+      - name: 'trustStore'
+        type: NestedObject
+        description: |
+          A Trust store, use this trust store as a wrapper to config the trust
+          anchor and optional intermediate cas to help build the trust chain for
+          the incoming end entity certificate. Follow the x509 guidelines to
+          define those PEM encoded certs. Only 1 trust store is currently
+          supported.
+        required: true
+        properties:
+          - name: 'trustAnchors'
+            type: Array
+            description: |
+              List of Trust Anchors to be used while performing validation
+              against a given TrustStore. The incoming end entity's certificate
+              must be chained up to one of the trust anchors here.
+            required: true
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'pemCertificate'
+                  type: String
+                  description: |
+                    PEM certificate of the PKI used for validation. Must only contain one
+                    ca certificate(either root or intermediate cert).
+          - name: 'intermediateCas'
+            type: Array
+            description: |
+              Set of intermediate CA certificates used for building the trust chain to
+              trust anchor.
+              IMPORTANT: Intermediate CAs are only supported when configuring x509 federation.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'pemCertificate'
+                  type: String
+                  description: |
+                    PEM certificate of the PKI used for validation. Must only contain one
+                    ca certificate(either root or intermediate cert).

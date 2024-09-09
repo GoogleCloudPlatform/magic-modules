@@ -5,7 +5,7 @@ resource "google_apphub_application" "<%= ctx[:primary_resource_id] %>" {
   scope {
     type = "REGIONAL"
   }
-  description = "<%= ctx[:vars]['description'] %>"
+  description = "<%= ctx[:vars]['desc'] %>"
   attributes {
     environment {
       type = "STAGING"

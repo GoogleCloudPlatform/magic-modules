@@ -37,7 +37,7 @@ custom_code:
   pre_update: 'templates/terraform/pre_create/go/dialogflow_set_location.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/go/dialogflowcx_set_location_skip_default_obj.go.tmpl'
   custom_import: 'templates/terraform/custom_import/go/dialogflowcx_intent.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'dialogflowcx_intent_full'
     primary_resource_id: 'basic_intent'
@@ -184,7 +184,6 @@ properties:
       The key/value metadata to label an intent. Labels can contain lowercase letters, digits and the symbols '-' and '_'. International characters are allowed, including letters from unicase alphabets. Keys must start with a letter. Keys and values can be no longer than 63 characters and no more than 128 bytes.
       Prefix "sys-" is reserved for Dialogflow defined labels. Currently allowed Dialogflow defined labels include: * sys-head * sys-contextual The above labels do not require value. "sys-head" means the intent is a head intent. "sys.contextual" means the intent is a contextual intent.
       An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
-    immutable: false
   - name: 'description'
     type: String
     description: |

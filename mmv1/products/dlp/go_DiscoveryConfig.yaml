@@ -37,6 +37,7 @@ custom_code:
   update_encoder: 'templates/terraform/encoders/go/wrap_object.go.tmpl'
   decoder: 'templates/terraform/decoders/go/unwrap_resource.go.tmpl'
   custom_import: 'templates/terraform/custom_import/go/dlp_import.go.tmpl'
+exclude_sweeper: true
 examples:
   - name: 'dlp_discovery_config_basic'
     primary_resource_id: 'basic'
@@ -204,6 +205,50 @@ properties:
               enum_values:
                 - 'TABLE_PROFILE'
                 - 'RESOURCE_NAME'
+        - name: 'tagResources'
+          type: NestedObject
+          description: Publish a message into the Pub/Sub topic.
+          properties:
+            - name: 'tagConditions'
+              type: Array
+              description: The tags to associate with different conditions.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'tag'
+                    type: NestedObject
+                    description: The tag value to attach to resources.
+                    properties:
+                      - name: 'namespacedValue'
+                        type: String
+                        description: The namespaced name for the tag value to attach to resources. Must be in the format `{parent_id}/{tag_key_short_name}/{short_name}`, for example, "123456/environment/prod".
+                  - name: 'sensitivityScore'
+                    type: NestedObject
+                    description: Conditions attaching the tag to a resource on its profile having this sensitivity score.
+                    properties:
+                      - name: 'score'
+                        type: Enum
+                        description: |
+                          The sensitivity score applied to the resource.
+                        required: true
+                        enum_values:
+                          - 'SENSITIVITY_LOW'
+                          - 'SENSITIVITY_MODERATE'
+                          - 'SENSITIVITY_HIGH'
+            - name: 'profileGenerationsToTag'
+              type: Array
+              description: The profile generations for which the tag should be attached to resources. If you attach a tag to only new profiles, then if the sensitivity score of a profile subsequently changes, its tag doesn't change. By default, this field includes only new profiles. To include both new and updated profiles for tagging, this field should explicitly include both `PROFILE_GENERATION_NEW` and `PROFILE_GENERATION_UPDATE`.
+              item_type:
+                type: Enum
+                description: |
+                  This field only has a name and description because of MM
+                  limitations. It should not appear in downstreams.
+                enum_values:
+                  - 'PROFILE_GENERATION_NEW'
+                  - 'PROFILE_GENERATION_UPDATE'
+            - name: 'lowerDataRiskToLow'
+              type: Boolean
+              description: Whether applying a tag to a resource should lower the risk of the profile for that resource. For example, in conjunction with an [IAM deny policy](https://cloud.google.com/iam/docs/deny-overview), you can deny all principals a permission if a tag value is present, mitigating the risk of the resource. This also lowers the data risk of resources at the lower levels of the resource hierarchy. For example, reducing the data risk of a table data profile also reduces the data risk of the constituent column data profiles.
   - name: 'targets'
     type: Array
     description: Target to match against for determining what to scan and how frequently
@@ -345,6 +390,17 @@ properties:
                         - 'UPDATE_FREQUENCY_NEVER'
                         - 'UPDATE_FREQUENCY_DAILY'
                         - 'UPDATE_FREQUENCY_MONTHLY'
+                - name: 'inspectTemplateModifiedCadence'
+                  type: NestedObject
+                  description: Governs when to update data profiles when the inspection rules defined by the `InspectTemplate` change. If not set, changing the template will not cause a data profile to update.
+                  properties:
+                    - name: 'frequency'
+                      type: Enum
+                      description: How frequently data profiles can be updated when the template is modified. Defaults to never.
+                      enum_values:
+                        - 'UPDATE_FREQUENCY_NEVER'
+                        - 'UPDATE_FREQUENCY_DAILY'
+                        - 'UPDATE_FREQUENCY_MONTHLY'
             - name: 'disabled'
               type: NestedObject
               description: 'Tables that match this filter will not have profiles created.'
@@ -474,6 +530,18 @@ properties:
                     - 'UPDATE_FREQUENCY_NEVER'
                     - 'UPDATE_FREQUENCY_DAILY'
                     - 'UPDATE_FREQUENCY_MONTHLY'
+                - name: 'inspectTemplateModifiedCadence'
+                  type: NestedObject
+                  description: Governs when to update data profiles when the inspection rules defined by the `InspectTemplate` change. If not set, changing the template will not cause a data profile to update.
+                  properties:
+                    - name: 'frequency'
+                      type: Enum
+                      description: How frequently data profiles can be updated when the template is modified. Defaults to never.
+                      required: true
+                      enum_values:
+                        - 'UPDATE_FREQUENCY_NEVER'
+                        - 'UPDATE_FREQUENCY_DAILY'
+                        - 'UPDATE_FREQUENCY_MONTHLY'
             - name: 'disabled'
               type: NestedObject
               description: 'Disable profiling for database resources that match this filter.'

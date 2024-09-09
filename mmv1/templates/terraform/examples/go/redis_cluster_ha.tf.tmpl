@@ -12,16 +12,25 @@ resource "google_redis_cluster" "{{$.PrimaryResourceId}}" {
   redis_configs = {
     maxmemory-policy	= "volatile-ttl"
   }
+  deletion_protection_enabled = {{index $.Vars "deletion_protection_enabled"}}
+
   zone_distribution_config {
     mode = "MULTI_ZONE"
+  }
+  maintenance_policy {
+    weekly_maintenance_window {
+      day = "MONDAY"
+      start_time {
+        hours = 1
+        minutes = 0
+        seconds = 0
+        nanos = 0
+      }
+    }
   }
   depends_on = [
     google_network_connectivity_service_connection_policy.default
   ]
-
-  lifecycle {
-    prevent_destroy = {{index $.Vars "prevent_destroy"}}
-  }
 }
 
 resource "google_network_connectivity_service_connection_policy" "default" {

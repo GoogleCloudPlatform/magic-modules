@@ -8,18 +8,11 @@ resource "google_tpu_node" "{{$.PrimaryResourceId}}" {
 
   accelerator_type = "v3-8"
 
-{{/*   We previously used the first available version from the
-  google_tpu_tensorflow_versions data source. However, this started to return a
-  random set of versions which caused our tests to occasionally fail, so we pin
-  tensorflow_version to a specific version so that our tests pass reliably. */ -}}
   tensorflow_version = "2.10.0"
 
   description = "Terraform Google Provider test TPU"
   use_service_networking = true
-{{/*   We previously used a separate network resource here, but TPUs only allow using 50
-  different network names, ever. This caused our tests to start failing, so just
-  use the default network in order to still demonstrate using as many fields as
-  possible on the resource. */ -}}
+
   network = data.google_compute_network.network.id
 
   labels = {

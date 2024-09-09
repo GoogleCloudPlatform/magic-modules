@@ -28,6 +28,7 @@ timeouts:
   insert_minutes: 1
   update_minutes: 1
   delete_minutes: 1
+custom_code:
 examples:
   - name: 'composer_user_workloads_config_map_basic'
     primary_resource_id: 'config_map'

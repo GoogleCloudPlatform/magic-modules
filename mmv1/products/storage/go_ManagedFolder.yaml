@@ -46,7 +46,7 @@ timeouts:
   delete_minutes: 20
 custom_code:
   custom_update: 'templates/terraform/custom_update/go/storage_managed_folder.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'storage_managed_folder_basic'
     primary_resource_id: 'folder'

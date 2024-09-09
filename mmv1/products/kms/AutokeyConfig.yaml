@@ -39,7 +39,14 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 id_format: 'folders/{{folder}}/autokeyConfig'
 import_format: ['folders/{{folder}}/autokeyConfig']
 min_version: beta
+# Using a handwritten sweeper because of pre_delete.
+skip_sweeper: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/autokey_config_folder_diff.go.erb
+  pre_create: templates/terraform/pre_create/kms_autokey_config_folder.go.erb
+  pre_delete: templates/terraform/pre_delete/kms_autokey_config_folder.go.erb
+  pre_read: templates/terraform/pre_read/kms_autokey_config_folder.go.erb
+  pre_update: templates/terraform/pre_update/kms_autokey_config_folder.go.erb
   test_check_destroy: templates/terraform/custom_check_destroy/kms_autokey_config.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
@@ -65,6 +72,7 @@ parameters:
     required: true
     immutable: true
     url_param_only: true
+    diff_suppress_func: 'folderPrefixSuppress'
     description: |
       The folder for which to retrieve config.
 properties:

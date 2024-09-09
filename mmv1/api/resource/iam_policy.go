@@ -14,7 +14,8 @@
 package resource
 
 import (
-	"gopkg.in/yaml.v3"
+	"log"
+	"slices"
 )
 
 // Information about the IAM policy for this resource
@@ -22,8 +23,6 @@ import (
 // and accessed via their parent resource
 // See: https://cloud.google.com/iam/docs/overview
 type IamPolicy struct {
-	// google.YamlValidator
-
 	// boolean of if this binding should be generated
 	Exclude bool
 
@@ -117,7 +116,7 @@ type IamPolicy struct {
 	SubstituteZoneValue bool `yaml:"substitute_zone_value"`
 }
 
-func (p *IamPolicy) UnmarshalYAML(n *yaml.Node) error {
+func (p *IamPolicy) UnmarshalYAML(unmarshal func(any) error) error {
 	p.MethodNameSeparator = "/"
 	p.FetchIamPolicyVerb = "GET"
 	p.FetchIamPolicyMethod = "getIamPolicy"
@@ -132,7 +131,7 @@ func (p *IamPolicy) UnmarshalYAML(n *yaml.Node) error {
 	type iamPolicyAlias IamPolicy
 	aliasObj := (*iamPolicyAlias)(p)
 
-	err := n.Decode(&aliasObj)
+	err := unmarshal(aliasObj)
 	if err != nil {
 		return err
 	}
@@ -140,6 +139,19 @@ func (p *IamPolicy) UnmarshalYAML(n *yaml.Node) error {
 	return nil
 }
 
-// func (p *IamPolicy) validate() {
+func (p *IamPolicy) Validate(rName string) {
+	allowed := []string{"GET", "POST"}
+	if !slices.Contains(allowed, p.FetchIamPolicyVerb) {
+		log.Fatalf("Value on `fetch_iam_policy_verb` should be one of %#v in resource %s", allowed, rName)
+	}
 
-// }
+	allowed = []string{"POST", "PUT"}
+	if !slices.Contains(allowed, p.SetIamPolicyVerb) {
+		log.Fatalf("Value on `set_iam_policy_verb` should be one of %#v in resource %s", allowed, rName)
+	}
+
+	allowed = []string{"REQUEST_BODY", "QUERY_PARAM", "QUERY_PARAM_NESTED"}
+	if p.IamConditionsRequestType != "" && !slices.Contains(allowed, p.IamConditionsRequestType) {
+		log.Fatalf("Value on `iam_conditions_request_type` should be one of %#v in resource %s", allowed, rName)
+	}
+}

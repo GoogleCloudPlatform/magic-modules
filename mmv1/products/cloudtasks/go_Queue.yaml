@@ -49,6 +49,14 @@ examples:
       - 'app_engine_routing_override.0.service'
       - 'app_engine_routing_override.0.version'
       - 'app_engine_routing_override.0.instance'
+  - name: 'cloud_tasks_queue_http_target_oidc'
+    primary_resource_id: 'http_target_oidc'
+    vars:
+      name: 'cloud-tasks-queue-http-target-oidc'
+  - name: 'cloud_tasks_queue_http_target_oauth'
+    primary_resource_id: 'http_target_oauth'
+    vars:
+      name: 'cloud-tasks-queue-http-target-oauth'
 parameters:
   - name: 'location'
     type: String
@@ -199,3 +207,168 @@ properties:
           This field may contain any value between 0.0 and 1.0, inclusive. 0.0 is the
           default and means that no operations are logged.
         required: true
+  - name: 'httpTarget'
+    type: NestedObject
+    description: Modifies HTTP target for HTTP tasks.
+    properties:
+      - name: 'httpMethod'
+        type: Enum
+        description: |
+          The HTTP method to use for the request.
+
+          When specified, it overrides HttpRequest for the task.
+          Note that if the value is set to GET the body of the task will be ignored at execution time.
+        default_from_api: true
+        enum_values:
+          - 'HTTP_METHOD_UNSPECIFIED'
+          - 'POST'
+          - 'GET'
+          - 'HEAD'
+          - 'PUT'
+          - 'DELETE'
+          - 'PATCH'
+          - 'OPTIONS'
+      - name: 'uriOverride'
+        type: NestedObject
+        description: |
+          URI override.
+
+          When specified, overrides the execution URI for all the tasks in the queue.
+        properties:
+          - name: 'scheme'
+            type: Enum
+            description: |
+              Scheme override.
+
+              When specified, the task URI scheme is replaced by the provided value (HTTP or HTTPS).
+            default_from_api: true
+            enum_values:
+              - 'HTTP'
+              - 'HTTPS'
+          - name: 'host'
+            type: String
+            description: |
+              Host override.
+
+              When specified, replaces the host part of the task URL.
+              For example, if the task URL is "https://www.google.com", and host value
+              is set to "example.net", the overridden URI will be changed to "https://example.net".
+              Host value cannot be an empty string (INVALID_ARGUMENT).
+          - name: 'port'
+            type: String
+            description: |
+              Port override.
+
+              When specified, replaces the port part of the task URI.
+              For instance, for a URI http://www.google.com/foo and port=123, the overridden URI becomes http://www.google.com:123/foo.
+              Note that the port value must be a positive integer.
+              Setting the port to 0 (Zero) clears the URI port.
+          - name: 'pathOverride'
+            type: NestedObject
+            description: |
+              URI path.
+
+              When specified, replaces the existing path of the task URL.
+              Setting the path value to an empty string clears the URI path segment.
+            properties:
+              - name: 'path'
+                type: String
+                description: The URI path (e.g., /users/1234). Default is an empty string.
+                default_from_api: true
+          - name: 'queryOverride'
+            type: NestedObject
+            description: |
+              URI query.
+
+              When specified, replaces the query part of the task URI. Setting the query value to an empty string clears the URI query segment.
+            properties:
+              - name: 'queryParams'
+                type: String
+                description: The query parameters (e.g., qparam1=123&qparam2=456). Default is an empty string.
+                default_from_api: true
+          - name: 'uriOverrideEnforceMode'
+            type: Enum
+            description: |
+              URI Override Enforce Mode
+
+              When specified, determines the Target UriOverride mode. If not specified, it defaults to ALWAYS.
+            default_from_api: true
+            enum_values:
+              - 'ALWAYS'
+              - 'IF_NOT_EXISTS'
+      - name: 'headerOverrides'
+        type: Array
+        description: |
+          HTTP target headers.
+
+          This map contains the header field names and values.
+          Headers will be set when running the CreateTask and/or BufferTask.
+
+          These headers represent a subset of the headers that will be configured for the task's HTTP request.
+          Some HTTP request headers will be ignored or replaced.
+
+          Headers which can have multiple values (according to RFC2616) can be specified using comma-separated values.
+
+          The size of the headers must be less than 80KB. Queue-level headers to override headers of all the tasks in the queue.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'header'
+              type: NestedObject
+              description: |
+                Header embodying a key and a value.
+              required: true
+              properties:
+                - name: 'key'
+                  type: String
+                  description: The Key of the header.
+                  required: true
+                - name: 'value'
+                  type: String
+                  description: The Value of the header.
+                  required: true
+      - name: 'oauthToken'
+        type: NestedObject
+        description: |
+          If specified, an OAuth token is generated and attached as the Authorization header in the HTTP request.
+
+          This type of authorization should generally be used only when calling Google APIs hosted on *.googleapis.com.
+          Note that both the service account email and the scope MUST be specified when using the queue-level authorization override.
+        conflicts:
+          - oidcToken
+        properties:
+          - name: 'serviceAccountEmail'
+            type: String
+            description: |
+              Service account email to be used for generating OAuth token.
+              The service account must be within the same project as the queue.
+              The caller must have iam.serviceAccounts.actAs permission for the service account.
+            required: true
+          - name: 'scope'
+            type: String
+            description: |
+              OAuth scope to be used for generating OAuth access token.
+              If not specified, "https://www.googleapis.com/auth/cloud-platform" will be used.
+            default_from_api: true
+      - name: 'oidcToken'
+        type: NestedObject
+        description: |
+          If specified, an OIDC token is generated and attached as an Authorization header in the HTTP request.
+
+          This type of authorization can be used for many scenarios, including calling Cloud Run, or endpoints where you intend to validate the token yourself.
+          Note that both the service account email and the audience MUST be specified when using the queue-level authorization override.
+        conflicts:
+          - oauthToken
+        properties:
+          - name: 'serviceAccountEmail'
+            type: String
+            description: |
+              Service account email to be used for generating OIDC token.
+              The service account must be within the same project as the queue.
+              The caller must have iam.serviceAccounts.actAs permission for the service account.
+            required: true
+          - name: 'audience'
+            type: String
+            description: |
+              Audience to be used when generating OIDC token. If not specified, the URI specified in target will be used.
+            default_from_api: true

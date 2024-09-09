@@ -49,7 +49,14 @@ examples:
     region_override: 'US'
     vars:
       data_exchange_id: 'my_data_exchange'
-      description: 'example data exchange'
+      desc: 'example data exchange'
+  - name: 'bigquery_analyticshub_data_exchange_dcr'
+    primary_resource_id: 'data_exchange'
+    primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"])'
+    region_override: 'US'
+    vars:
+      data_exchange_id: 'dcr_data_exchange'
+      desc: 'example dcr data exchange'
 parameters:
 properties:
   - name: 'name'
@@ -98,3 +105,35 @@ properties:
     type: String
     description: |-
       Base64 encoded image representing the data exchange.
+  - name: 'sharingEnvironmentConfig'
+    type: NestedObject
+    description: |
+      Configurable data sharing environment option for a data exchange.
+      This field is required for data clean room exchanges.
+    immutable: true
+    default_from_api: true
+    properties:
+      - name: 'defaultExchangeConfig'
+        type: NestedObject
+        description: |
+          Default Analytics Hub data exchange, used for secured data sharing.
+        immutable: true
+        send_empty_value: true
+        allow_empty_object: true
+        exactly_one_of:
+          - 'sharing_environment_config.0.default_exchange_config'
+          - 'sharing_environment_config.0.dcr_exchange_config'
+        properties:
+          []
+      - name: 'dcrExchangeConfig'
+        type: NestedObject
+        description: |
+          Data Clean Room (DCR), used for privacy-safe and secured data sharing.
+        immutable: true
+        send_empty_value: true
+        allow_empty_object: true
+        exactly_one_of:
+          - 'sharing_environment_config.0.default_exchange_config'
+          - 'sharing_environment_config.0.dcr_exchange_config'
+        properties:
+          []

@@ -50,7 +50,7 @@ async:
     message: 'message'
 custom_code:
   custom_import: 'templates/terraform/custom_import/go/apigee_nat_address.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'apigee_nat_address_basic'
     vars:
