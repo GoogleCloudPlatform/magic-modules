@@ -39,7 +39,7 @@ func CopyText(identifier string, last bool) {
 	}
 
 	for _, productPath := range allProductFiles {
-		if strings.Contains(productPath, "healthcare") {
+		if strings.Contains(productPath, "healthcare") || strings.Contains(productPath, "memorystore") {
 			continue
 		}
 		// Gather go and ruby file pairs
