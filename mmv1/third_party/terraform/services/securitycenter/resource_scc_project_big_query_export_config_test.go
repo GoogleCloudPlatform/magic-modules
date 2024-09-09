@@ -35,7 +35,7 @@ func TestAccSecurityCenterProjectBigQueryExportConfig_basic(t *testing.T) {
 				Config: testAccSecurityCenterProjectBigQueryExportConfig_basic(context),
 			},
 			{
-				ResourceName:            "google_scc_project_scc_big_query_exports.default",
+				ResourceName:            "google_scc_project_scc_big_query_export.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"update_time", "project"},
@@ -44,7 +44,7 @@ func TestAccSecurityCenterProjectBigQueryExportConfig_basic(t *testing.T) {
 				Config: testAccSecurityCenterProjectBigQueryExportConfig_update(context),
 			},
 			{
-				ResourceName:            "google_scc_project_scc_big_query_exports.default",
+				ResourceName:            "google_scc_project_scc_big_query_export.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"update_time", "project"},
@@ -78,7 +78,7 @@ resource "time_sleep" "wait_1_minute" {
 	create_duration = "3m"
 }
 
-resource "google_scc_project_scc_big_query_exports" "default" {
+resource "google_scc_project_scc_big_query_export" "default" {
   big_query_export_id    = "%{big_query_export_id}"
   project      = "%{project}"
   dataset      = google_bigquery_dataset.default.id
@@ -111,7 +111,7 @@ resource "google_bigquery_dataset" "default" {
   }
 }
 
-resource "google_scc_project_scc_big_query_exports" "default" {
+resource "google_scc_project_scc_big_query_export" "default" {
   big_query_export_id    = "%{big_query_export_id}"
   project      = "%{project}"
   dataset      = google_bigquery_dataset.default.id
