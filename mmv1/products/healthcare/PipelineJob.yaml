@@ -37,7 +37,6 @@ examples:
       pipeline_name: 'example_pipeline_job'
       dataset_name: 'example_dataset'
       fhir_store_name: 'fhir_store'
-      bq_dataset: 'example_bq_dataset'
       bucket_name: 'example_bucket_name'
   - !ruby/object:Provider::Terraform::Examples
     name: 'healthcare_pipeline_job_backfill'
