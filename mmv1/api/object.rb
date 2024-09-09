@@ -30,12 +30,13 @@ module Api
     end
 
     def deep_merge(arr1, arr2)
+      return arr2 if arr1.nil?
+      return arr1 if arr2.nil?
+
       # Scopes is an array of standard strings. In which case return the
       # version in the overrides. This allows scopes to be removed rather
       # than allowing for a merge of the two arrays
-      if string_array?(arr1)
-        return arr2.nil? ? arr1 : arr2
-      end
+      return arr2 if string_array?(arr1)
 
       # Merge any elements that exist in both
       result = arr1.map do |el1|

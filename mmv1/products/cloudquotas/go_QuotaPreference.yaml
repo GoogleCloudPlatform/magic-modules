@@ -28,7 +28,7 @@ create_url: '{{parent}}/locations/global/quotaPreferences?quotaPreferenceId={{na
 update_url: '{{parent}}/locations/global/quotaPreferences/{{name}}?ignoreSafetyChecks={{ignore_safety_checks}}'
 update_verb: 'PATCH'
 update_mask: true
-skip_delete: true
+exclude_delete: true
 import_format:
   - '{{%parent}}/locations/global/quotaPreferences/{{name}}'
 timeouts:
@@ -66,7 +66,6 @@ properties:
     type: String
     description: |
       The resource name of the quota preference. Required except in the CREATE requests.
-    pattern: '{{parent}}/locations/global/quotaPreferences/{{name}}'
     default_from_api: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
@@ -106,6 +105,7 @@ properties:
         description: |
           The trace id that the Google Cloud uses to provision the requested quota. This trace id may be used by the client to contact Cloud support to track the state of a quota preference request. The trace id is only produced for increase requests and is unique for each request. The quota decrease requests do not have a trace id.
         output: true
+        custom_expand: 'templates/terraform/custom_expand/go/cloudquotas_quota_preference_trace_id.go.tmpl'
       - name: 'annotations'
         type: KeyValuePairs
         description: |-

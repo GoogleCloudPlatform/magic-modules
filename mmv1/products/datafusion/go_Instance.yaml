@@ -30,6 +30,7 @@ timeouts:
   delete_minutes: 50
 autogen_async: true
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
@@ -44,6 +45,7 @@ async:
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
+  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
     - '{{name}}'
@@ -157,7 +159,6 @@ properties:
     description: |
       The resource labels for instance to use to annotate any related underlying resources,
       such as Compute Engine VMs.
-    immutable: false
   - name: 'options'
     type: KeyValuePairs
     description: |

@@ -21,7 +21,7 @@ resource "google_secret_manager_secret_iam_member" "secret-access" {
 resource "google_artifact_registry_repository" "<%= ctx[:primary_resource_id] %>" {
   location      = "us-central1"
   repository_id = "<%= ctx[:vars]['repository_id'] %>"
-  description   = "<%= ctx[:vars]['description'] %>"
+  description   = "<%= ctx[:vars]['desc'] %>"
   format        = "NPM"
   mode          = "REMOTE_REPOSITORY"
   remote_repository_config {

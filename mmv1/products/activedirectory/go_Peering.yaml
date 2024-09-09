@@ -36,6 +36,7 @@ timeouts:
   delete_minutes: 20
 autogen_async: true
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
@@ -78,7 +79,6 @@ properties:
     type: KeyValueLabels
     description: 'Resource labels that can contain user-provided metadata'
     min_version: 'beta'
-    immutable: false
   - name: 'authorizedNetwork'
     type: String
     description: |

@@ -57,7 +57,7 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/features/{{name}}'
     - '{{name}}'
 custom_code:
-skip_sweeper: true
+exclude_sweeper: true
 legacy_long_form_project: true
 examples:
   - name: 'gkehub_feature_multi_cluster_ingress'
@@ -127,7 +127,6 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: GCP labels for this Feature.
-    immutable: false
   - name: 'resourceState'
     type: NestedObject
     description: State of the Feature resource itself.
@@ -271,6 +270,13 @@ properties:
           - name: 'version'
             type: String
             description: 'Version of ACM installed'
+          - name: 'management'
+            type: Enum
+            description: 'Set this field to MANAGEMENT_AUTOMATIC to enable Config Sync auto-upgrades, and set this field to MANAGEMENT_MANUAL or MANAGEMENT_UNSPECIFIED to disable Config Sync auto-upgrades.'
+            enum_values:
+              - 'MANAGEMENT_UNSPECIFIED'
+              - 'MANAGEMENT_AUTOMATIC'
+              - 'MANAGEMENT_MANUAL'
           - name: 'configSync'
             type: NestedObject
             description: 'ConfigSync configuration for the cluster'

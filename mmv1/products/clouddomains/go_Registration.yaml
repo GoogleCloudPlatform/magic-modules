@@ -29,7 +29,7 @@ id_format: 'projects/{{project}}/locations/{{location}}/registrations/{{domain_n
 base_url: 'projects/{{project}}/locations/{{location}}/registrations'
 self_link: 'projects/{{project}}/locations/{{location}}/registrations/{{domain_name}}'
 create_url: 'projects/{{project}}/locations/{{location}}/registrations:register'
-skip_delete: true
+exclude_delete: true
 immutable: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/registrations/{{domain_name}}'
@@ -95,7 +95,6 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: Set of labels associated with the Registration.
-    immutable: false
   - name: 'domainNotices'
     type: Array
     description: The list of domain notices that you acknowledge. Possible value is HSTS_PRELOADED
