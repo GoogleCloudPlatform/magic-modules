@@ -41,64 +41,64 @@ async: !ruby/object:Api::OpAsync
     path: "done"
     complete: true
     allowed:
-    - true
-    - false
+      - true
+      - false
   error: !ruby/object:Api::OpAsync::Error
     path: "error"
     message: "message"
 
 examples:
-- !ruby/object:Provider::Terraform::Examples
-  name: "discoveryengine_targetsite_basic"
-  primary_resource_id: 'basic'
-  vars:
-    data_store_id: "data-store-id"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "discoveryengine_targetsite_basic"
+    primary_resource_id: 'basic'
+    vars:
+      data_store_id: "data-store-id"
 parameters:
-- !ruby/object:Api::Type::String
-  name: 'location'
-  required: true
-  immutable: true
-  url_param_only: true
-  description: |
-    The geographic location where the data store should reside. The value can
-    only be one of "global", "us" and "eu".
-- !ruby/object:Api::Type::String
-  name: 'dataStoreId'
-  required: true
-  immutable: true
-  url_param_only: true
-  description: |
-    The unique id of the data store.
+  - !ruby/object:Api::Type::String
+    name: 'location'
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The geographic location where the data store should reside. The value can
+      only be one of "global", "us" and "eu".
+  - !ruby/object:Api::Type::String
+    name: 'dataStoreId'
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The unique id of the data store.
 
 properties:
-- !ruby/object:Api::Type::String
-  name: 'name'
-  description: |
-    The unique full resource name of the target site. Values are of the format
-    `projects/{project}/locations/{location}/collections/{collection_id}/dataStores/{data_store_id}/siteSearchEngine/targetSites/{target_site_id}`.
-    This field must be a UTF-8 encoded string with a length limit of 1024
-    characters.
-  output: true
-- !ruby/object:Api::Type::String
-  name: 'providedUriPattern'
-  description: |
-    The user provided URI pattern from which the `generated_uri_pattern` is
-    generated.
-  required: true
-- !ruby/object:Api::Type::Enum
-  name: 'type'
-  description: |
-    The possible target site types.
-  values:
-  - :INCLUDE
-  - :EXCLUDE
-- !ruby/object:Api::Type::Boolean
-  name: 'exactMatch'
-  description: |
-    If set to false, a uri_pattern is generated to include all pages whose
-    address contains the provided_uri_pattern. If set to true, an uri_pattern
-    is generated to try to be an exact match of the provided_uri_pattern or just
-    the specific page if the provided_uri_pattern is a specific one.
-    provided_uri_pattern is always normalized to generate the URI pattern to be
-    used by the search engine.
-  default_value: false
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: |
+      The unique full resource name of the target site. Values are of the format
+      `projects/{project}/locations/{location}/collections/{collection_id}/dataStores/{data_store_id}/siteSearchEngine/targetSites/{target_site_id}`.
+      This field must be a UTF-8 encoded string with a length limit of 1024
+      characters.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'providedUriPattern'
+    description: |
+      The user provided URI pattern from which the `generated_uri_pattern` is
+      generated.
+    required: true
+  - !ruby/object:Api::Type::Enum
+    name: 'type'
+    description: |
+      The possible target site types.
+    values:
+      - :INCLUDE
+      - :EXCLUDE
+  - !ruby/object:Api::Type::Boolean
+    name: 'exactMatch'
+    description: |
+      If set to false, a uri_pattern is generated to include all pages whose
+      address contains the provided_uri_pattern. If set to true, an uri_pattern
+      is generated to try to be an exact match of the provided_uri_pattern or
+      just the specific page if the provided_uri_pattern is a specific one.
+      provided_uri_pattern is always normalized to generate the URI pattern to
+      be used by the search engine.
+    default_value: false
