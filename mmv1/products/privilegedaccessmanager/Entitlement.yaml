@@ -24,6 +24,9 @@ description: |
 update_verb: :PATCH
 update_mask: true
 autogen_async: true
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_update: templates/terraform/pre_update/privileged_access_manager_entitlement.go.erb
+  constants: templates/terraform/constants/privileged_access_manager_entitlement.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "privileged_access_manager_entitlement_basic"
@@ -32,6 +35,32 @@ examples:
       entitlement_id: "example-entitlement"
     test_env_vars:
       project: :PROJECT_NAME
+parameters:
+  - !ruby/object:Api::Type::String
+    name: location
+    description: |
+      The region of the Entitlement resource.
+    url_param_only: true
+    required: true
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: entitlementId
+    description: |
+      The ID to use for this Entitlement. This will become the last part of the resource name.
+      This value should be 4-63 characters, and valid characters are "[a-z]", "[0-9]", and "-". The first character should be from [a-z].
+      This value should be unique among all other Entitlements under the specified `parent`.
+    url_param_only: true
+    required: true
+    immutable: true
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: validateEntitlementId
+  - !ruby/object:Api::Type::String
+    name: parent
+    immutable: true
+    required: true
+    url_param_only: true
+    description: |
+      Format: projects/{project-id|project-number} or organizations/{organization-number} or folders/{folder-number}
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -231,32 +260,3 @@ properties:
         description: |
           Optional. Additional email address to be notified about an eligible entitlement.
         allow_empty_object: true
-parameters:
-  - !ruby/object:Api::Type::String
-    name: location
-    description: |
-      The region of the Entitlement resource.
-    url_param_only: true
-    required: true
-    immutable: true
-  - !ruby/object:Api::Type::String
-    name: entitlementId
-    description: |
-      The ID to use for this Entitlement. This will become the last part of the resource name.
-      This value should be 4-63 characters, and valid characters are "[a-z]", "[0-9]", and "-". The first character should be from [a-z].
-      This value should be unique among all other Entitlements under the specified `parent`.
-    url_param_only: true
-    required: true
-    immutable: true
-    validation: !ruby/object:Provider::Terraform::Validation
-      function: validateEntitlementId
-  - !ruby/object:Api::Type::String
-    name: parent
-    immutable: true
-    required: true
-    url_param_only: true
-    description: |
-      Format: projects/{project-id|project-number} or organizations/{organization-number} or folders/{folder-number}
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  pre_update: templates/terraform/pre_update/privileged_access_manager_entitlement.go.erb
-  constants: templates/terraform/constants/privileged_access_manager_entitlement.go.erb

@@ -35,7 +35,7 @@ examples:
     vars:
       mute_config_id: 'my-config'
     test_env_vars:
-      project_id: PROJECT_NAME
+      project_id: :PROJECT_NAME
 parameters:
   - !ruby/object:Api::Type::String
     name: location

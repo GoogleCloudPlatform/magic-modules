@@ -42,11 +42,10 @@ iam_policy:
   import_format:
     - '{{%parent}}/locations/{{location}}/buckets/{{bucket}}/views/{{name}}'
     - '{{name}}'
-  min_version: 'beta'
 custom_code:
   encoder: 'templates/terraform/encoders/go/logging_log_view.go.tmpl'
   pre_read: 'templates/terraform/pre_read/go/logging_log_view.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'logging_log_view_basic'
     primary_resource_id: 'logging_log_view'

@@ -31,13 +31,20 @@ self_link: 'projects/{{project}}/locations/{{location}}/ekmConnections/{{name}}'
 create_url: 'projects/{{project}}/locations/{{location}}/ekmConnections?ekmConnectionId={{name}}'
 update_verb: 'PATCH'
 update_mask: true
-skip_delete: true
+exclude_delete: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/ekmConnections/{{name}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_attribute: 'name'
+  iam_conditions_request_type: 'QUERY_PARAM_NESTED'
+  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/ekmConnections/{{name}}'
 custom_code:
 examples:
   - name: 'kms_ekm_connection_basic'

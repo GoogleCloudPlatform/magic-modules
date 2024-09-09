@@ -53,6 +53,19 @@ examples:
       display_name: 'my-query'
       dataset_id: 'my_dataset'
     skip_test: true
+  - name: 'bigquerydatatransfer_config_cmek'
+    primary_resource_id: 'query_config_cmek'
+    vars:
+      dataset_id: 'example_dataset'
+      key_name: 'example-key'
+      keyring_name: 'example-keyring'
+    skip_test: true
+  - name: 'bigquerydatatransfer_config_salesforce'
+    primary_resource_id: 'salesforce_config'
+    vars:
+      display_name: 'my-salesforce-config'
+      dataset_id: 'my_dataset'
+    skip_test: true
 parameters:
   - name: 'location'
     type: String
@@ -172,6 +185,16 @@ properties:
       reingests data for [today-10, today-1], rather than ingesting data for
       just [today-1]. Only valid if the data source supports the feature.
       Set the value to 0 to use the default value.
+  - name: 'encryptionConfiguration'
+    type: NestedObject
+    description: |
+      Represents the encryption configuration for a transfer.
+    properties:
+      - name: 'kmsKeyName'
+        type: String
+        description: |
+          The name of the KMS key used for encrypting BigQuery data.
+        required: true
   - name: 'disabled'
     type: Boolean
     description: |

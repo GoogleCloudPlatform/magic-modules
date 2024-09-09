@@ -73,12 +73,12 @@ nested_query:
   is_list_of_ids: true
   modify_by_patch: true
 custom_code:
-  pre_create: 'templates/terraform/pre_create/go/access_context_manager_service_perimeter_dry_run_resource.go.tmpl'
-  pre_update: 'templates/terraform/pre_create/go/access_context_manager_service_perimeter_dry_run_resource.go.tmpl'
-  pre_delete: 'templates/terraform/pre_create/go/access_context_manager_service_perimeter_dry_run_resource.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/go/access_context_manager_dry_run_resource.go.tmpl'
+  pre_update: 'templates/terraform/pre_create/go/access_context_manager_dry_run_resource.go.tmpl'
+  pre_delete: 'templates/terraform/pre_create/go/access_context_manager_dry_run_resource.go.tmpl'
   custom_import: 'templates/terraform/custom_import/go/access_context_manager_service_perimeter_resource.go.tmpl'
 exclude_tgc: true
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'access_context_manager_service_perimeter_dry_run_resource_basic'
     primary_resource_id: 'service-perimeter-dry-run-resource'

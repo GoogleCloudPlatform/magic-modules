@@ -50,7 +50,7 @@ async:
     path: 'error/errors'
     message: 'message'
 custom_code:
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'gkehub_namespace_basic'
     primary_resource_id: 'namespace'
@@ -138,4 +138,3 @@ properties:
     type: KeyValueLabels
     description: |
       Labels for this Namespace.
-    immutable: false

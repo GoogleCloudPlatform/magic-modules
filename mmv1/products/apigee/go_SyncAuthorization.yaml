@@ -28,7 +28,7 @@ create_url: 'organizations/{{name}}:setSyncAuthorization'
 update_url: 'organizations/{{name}}:setSyncAuthorization'
 update_verb: 'POST'
 read_verb: 'POST'
-skip_delete: true
+exclude_delete: true
 import_format:
   - 'organizations/{{name}}/syncAuthorization'
 timeouts:

@@ -25,7 +25,7 @@ docs:
 base_url: 'sites/{{site_id}}/versions'
 self_link: 'sites/{{site_id}}/versions/{{version_id}}'
 create_url: 'sites/{{site_id}}/versions'
-skip_delete: true
+exclude_delete: true
 immutable: true
 import_format:
   - 'sites/{{site_id}}/versions/{{version_id}}'
@@ -37,7 +37,7 @@ timeouts:
 custom_code:
   decoder: 'templates/terraform/decoders/go/firebasehosting_version.go.tmpl'
   post_create: 'templates/terraform/post_create/go/firebasehosting_version_immediate_finalize.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'firebasehosting_version_redirect'
     primary_resource_id: 'default'
@@ -59,8 +59,13 @@ examples:
     vars:
       site_id: 'site-id'
       cloud_run_service_id: 'cloud-run-service-via-hosting'
+      deletion_protection: 'true'
     test_env_vars:
       project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'firebasehosting_version_cloud_functions'
     primary_resource_id: 'default'
     min_version: 'beta'

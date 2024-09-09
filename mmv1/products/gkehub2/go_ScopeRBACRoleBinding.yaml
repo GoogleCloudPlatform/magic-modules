@@ -50,7 +50,7 @@ async:
     path: 'error/errors'
     message: 'message'
 custom_code:
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'gkehub_scope_rbac_role_binding_basic'
     primary_resource_id: 'scope_rbac_role_binding'
@@ -153,4 +153,3 @@ properties:
     type: KeyValueLabels
     description: |
       Labels for this ScopeRBACRoleBinding.
-    immutable: false

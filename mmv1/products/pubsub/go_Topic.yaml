@@ -49,6 +49,7 @@ async:
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'topic'
+  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
 custom_code:
   encoder: 'templates/terraform/encoders/go/no_send_name.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/go/pubsub_topic.tmpl'
@@ -105,7 +106,6 @@ properties:
     type: KeyValueLabels
     description: |
       A set of key/value label pairs to assign to this Topic.
-    immutable: false
   - name: 'messageStoragePolicy'
     type: NestedObject
     description: |
@@ -130,7 +130,6 @@ properties:
     type: NestedObject
     description: |
       Settings for validating messages published against a schema.
-    default_from_api: true
     properties:
       - name: 'schema'
         type: String

@@ -53,7 +53,7 @@ docs:
     producer network.
 id_format: 'services/{{service}}/projects/{{project}}/networks/{{network}}'
 base_url: ''
-skip_delete: true
+exclude_delete: true
 import_format:
   - 'services/{{service}}/projects/{{project}}/networks/{{network}}'
 timeouts:

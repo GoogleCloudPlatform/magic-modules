@@ -98,6 +98,9 @@
       "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
       "data": {
         "addressType": "INTERNAL",
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
         "name": "private-ip-address",
         "prefixLength": 16,
         "purpose": "VPC_PEERING"

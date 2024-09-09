@@ -116,4 +116,3 @@ properties:
     type: KeyValueLabels
     description: |
       The labels with user-defined metadata to organize your Tensorboards.
-    immutable: false
