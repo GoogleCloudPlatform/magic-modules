@@ -1,10 +1,7 @@
 data "google_project" "project" {
-  provider = google-beta
 }
 
 resource "google_firestore_database" "<%= ctx[:primary_resource_id] %>" {
-  provider = google-beta
-
   project                           = "<%= ctx[:test_env_vars]['project_id'] %>"
   name                              = "<%= ctx[:vars]['database_id']%>"
   location_id                       = "nam5"
@@ -24,23 +21,17 @@ resource "google_firestore_database" "<%= ctx[:primary_resource_id] %>" {
 }
 
 resource "google_kms_crypto_key" "crypto_key" {
-  provider = google-beta
-
   name     = "<%= ctx[:vars]['kms_key_name'] %>"
   key_ring = google_kms_key_ring.key_ring.id
   purpose  = "ENCRYPT_DECRYPT"
 }
 
 resource "google_kms_key_ring" "key_ring" {
-  provider = google-beta
-
   name     = "<%= ctx[:vars]['kms_key_ring_name'] %>"
   location = "us"
 }
 
 resource "google_kms_crypto_key_iam_binding" "firestore_cmek_keyuser" {
-  provider = google-beta
-
   crypto_key_id = google_kms_crypto_key.crypto_key.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 

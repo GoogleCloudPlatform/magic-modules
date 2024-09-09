@@ -60,7 +60,7 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
-id_format: '{{project}}/{{zone}}/{{network_endpoint_group}}/endpoints'
+id_format: '{{project}}/{{zone}}/{{network_endpoint_group}}'
 import_format:
   - 'projects/{{project}}/zones/{{zone}}/networkEndpointGroups/{{network_endpoint_group}}'
 mutex: networkEndpoint/{{project}}/{{zone}}/{{network_endpoint_group}}

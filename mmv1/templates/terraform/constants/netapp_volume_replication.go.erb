@@ -1,5 +1,5 @@
 // Custom function to wait for mirrorState target states
-func NetAppVolumeReplicationWaitForMirror(d *schema.ResourceData, meta interface{}, targetState string) error {
+func NetappVolumeReplicationWaitForMirror(d *schema.ResourceData, meta interface{}, targetState string) error {
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {

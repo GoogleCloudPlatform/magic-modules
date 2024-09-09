@@ -44,7 +44,13 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
+  constants: 'templates/terraform/constants/go/autokey_config_folder_diff.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/go/kms_autokey_config_folder.go.tmpl'
+  pre_read: 'templates/terraform/pre_read/go/kms_autokey_config_folder.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/go/kms_autokey_config_folder.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/go/kms_autokey_config_folder.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/go/kms_autokey_config.go.tmpl'
+exclude_sweeper: true
 examples:
   - name: 'kms_autokey_config_all'
     primary_resource_id: 'example-autokeyconfig'
@@ -56,6 +62,7 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     external_providers: ["random", "time"]
+    skip_vcr: true
 parameters:
   - name: 'folder'
     type: String
@@ -65,6 +72,7 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
+    diff_suppress_func: 'folderPrefixSuppress'
 properties:
   - name: 'keyProject'
     type: String

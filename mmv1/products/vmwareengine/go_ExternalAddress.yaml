@@ -52,6 +52,7 @@ async:
     message: 'message'
   include_project: true
 custom_code:
+exclude_sweeper: true
 error_retry_predicates:
 
   - 'transport_tpg.ExternalIpServiceNotActive'

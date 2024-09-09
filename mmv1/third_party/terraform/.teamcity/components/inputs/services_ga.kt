@@ -301,11 +301,6 @@ var ServicesListGa = mapOf(
         "displayName" to "Dataprocmetastore",
         "path" to "./google/services/dataprocmetastore"
     ),
-    "datastore" to mapOf(
-        "name" to "datastore",
-        "displayName" to "Datastore",
-        "path" to "./google/services/datastore"
-    ),
     "datastream" to mapOf(
         "name" to "datastream",
         "displayName" to "Datastream",
@@ -490,6 +485,11 @@ var ServicesListGa = mapOf(
         "name" to "memcache",
         "displayName" to "Memcache",
         "path" to "./google/services/memcache"
+    ),
+    "memorystore" to mapOf(
+        "name" to "memorystore",
+        "displayName" to "Memorystore",
+        "path" to "./google/services/memorystore"
     ),
     "migrationcenter" to mapOf(
         "name" to "migrationcenter",

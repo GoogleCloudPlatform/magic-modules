@@ -56,7 +56,7 @@ identity:
   - name
 custom_code:
   custom_delete: 'templates/terraform/custom_delete/go/firebase_app_deletion_policy.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'firebase_apple_app_basic'
     primary_resource_id: 'default'
@@ -92,7 +92,7 @@ virtual_fields:
       (Optional) Set to `ABANDON` to allow the Apple to be untracked from terraform state
       rather than deleted upon `terraform destroy`. This is useful because the Apple may be
       serving traffic. Set to `DELETE` to delete the Apple. Defaults to `DELETE`.
-    type: Enum
+    type: String
     default_value: "DELETE"
 parameters:
 properties:

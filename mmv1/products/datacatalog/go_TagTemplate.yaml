@@ -47,7 +47,7 @@ custom_code:
   pre_update: 'templates/terraform/pre_update/go/tagtemplate_fields.go.tmpl'
   post_update: 'templates/terraform/post_update/go/tagtemplate_fields.go.tmpl'
   custom_import: 'templates/terraform/custom_import/go/data_catalog_tag_template.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'data_catalog_tag_template_basic'
     primary_resource_id: 'basic_tag_template'

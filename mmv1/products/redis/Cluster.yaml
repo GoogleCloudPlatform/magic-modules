@@ -57,11 +57,11 @@ examples:
       policy_name: "mypolicy"
       subnet_name: "mysubnet"
       network_name: "mynetwork"
-      prevent_destroy: 'true'
+      deletion_protection_enabled: 'true'
     test_vars_overrides:
-      prevent_destroy: 'false'
+      deletion_protection_enabled: 'false'
     oics_vars_overrides:
-      prevent_destroy: 'false'
+      deletion_protection_enabled: 'false'
   - !ruby/object:Provider::Terraform::Examples
     name: "redis_cluster_ha_single_zone"
     primary_resource_id: "cluster-ha-single-zone"
@@ -70,11 +70,11 @@ examples:
       policy_name: "mypolicy"
       subnet_name: "mysubnet"
       network_name: "mynetwork"
-      prevent_destroy: 'true'
+      deletion_protection_enabled: 'true'
     test_vars_overrides:
-      prevent_destroy: 'false'
+      deletion_protection_enabled: 'false'
     oics_vars_overrides:
-      prevent_destroy: 'false'
+      deletion_protection_enabled: 'false'
 properties:
   - !ruby/object:Api::Type::Time
     name: createTime
@@ -262,9 +262,135 @@ properties:
     description: |
       Required. Number of shards for the Redis cluster.
     required: true
+  - !ruby/object:Api::Type::Boolean
+    name: deletionProtectionEnabled
+    description: |
+      Optional. Indicates if the cluster is deletion protected or not.
+      If the value if set to true, any delete cluster operation will fail.
+      Default value is true.
+    required: false
+    default_value: true
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'redisConfigs'
     description: |
       Configure Redis Cluster behavior using a subset of native Redis configuration parameters.
       Please check Memorystore documentation for the list of supported parameters:
       https://cloud.google.com/memorystore/docs/cluster/supported-instance-configurations
+  - !ruby/object:Api::Type::NestedObject
+    name: maintenancePolicy
+    description: Maintenance policy for a cluster
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'createTime'
+        output: true
+        description: |
+          Output only. The time when the policy was created.
+          A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
+          resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::String
+        name: 'updateTime'
+        output: true
+        description: |
+          Output only. The time when the policy was last updated.
+          A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
+          resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::Array
+        name: 'weeklyMaintenanceWindow'
+        description: |
+          Optional. Maintenance window that is applied to resources covered by this policy.
+          Minimum 1. For the current version, the maximum number
+          of weekly_window is expected to be one.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Enum
+              name: 'day'
+              required: true
+              description: |
+                Required. The day of week that maintenance updates occur.
+
+                - DAY_OF_WEEK_UNSPECIFIED: The day of the week is unspecified.
+                - MONDAY: Monday
+                - TUESDAY: Tuesday
+                - WEDNESDAY: Wednesday
+                - THURSDAY: Thursday
+                - FRIDAY: Friday
+                - SATURDAY: Saturday
+                - SUNDAY: Sunday
+              values:
+                - :DAY_OF_WEEK_UNSPECIFIED
+                - :MONDAY
+                - :TUESDAY
+                - :WEDNESDAY
+                - :THURSDAY
+                - :FRIDAY
+                - :SATURDAY
+                - :SUNDAY
+            - !ruby/object:Api::Type::String
+              name: 'duration'
+              output: true
+              description: |
+                Output only. Duration of the maintenance window.
+                The current window is fixed at 1 hour.
+                A duration in seconds with up to nine fractional digits,
+                terminated by 's'. Example: "3.5s".
+            - !ruby/object:Api::Type::NestedObject
+              name: 'startTime'
+              required: true
+              allow_empty_object: true
+              send_empty_value: true
+              description: |
+                Required. Start time of the window in UTC time.
+              properties:
+                - !ruby/object:Api::Type::Integer
+                  name: 'hours'
+                  description: |
+                    Hours of day in 24 hour format. Should be from 0 to 23.
+                    An API may choose to allow the value "24:00:00" for scenarios like business closing time.
+                  validation: !ruby/object:Provider::Terraform::Validation
+                    function: 'validation.IntBetween(0,23)'
+                - !ruby/object:Api::Type::Integer
+                  name: 'minutes'
+                  description: |
+                    Minutes of hour of day. Must be from 0 to 59.
+                  validation: !ruby/object:Provider::Terraform::Validation
+                    function: 'validation.IntBetween(0,59)'
+                - !ruby/object:Api::Type::Integer
+                  name: 'seconds'
+                  description: |
+                    Seconds of minutes of the time. Must normally be from 0 to 59.
+                    An API may allow the value 60 if it allows leap-seconds.
+                  validation: !ruby/object:Provider::Terraform::Validation
+                    function: 'validation.IntBetween(0,60)'
+                - !ruby/object:Api::Type::Integer
+                  name: 'nanos'
+                  description: |
+                    Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+                  validation: !ruby/object:Provider::Terraform::Validation
+                    function: 'validation.IntBetween(0,999999999)'
+  - !ruby/object:Api::Type::NestedObject
+    name: maintenanceSchedule
+    output: true
+    description: Upcoming maintenance schedule.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'startTime'
+        output: true
+        description: |
+          Output only. The start time of any upcoming scheduled maintenance for this cluster.
+          A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
+          resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::String
+        name: 'endTime'
+        output: true
+        description: |
+          Output only. The end time of any upcoming scheduled maintenance for this cluster.
+          A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
+          resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::String
+        name: 'scheduleDeadlineTime'
+        output: true
+        description: |
+          Output only. The deadline that the maintenance schedule start time
+          can not go beyond, including reschedule.
+          A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
+          resolution and up to nine fractional digits.

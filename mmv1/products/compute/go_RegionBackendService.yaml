@@ -33,7 +33,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 1000
@@ -149,9 +149,7 @@ properties:
 
             See the [Backend Services Overview](https://cloud.google.com/load-balancing/docs/backend-service#balancing-mode)
             for an explanation of load balancing modes.
-
-            From version 6.0.0 default value will be UTILIZATION to match default GCP value.
-          default_value: "CONNECTION"
+          default_value: "UTILIZATION"
           enum_values:
             - 'UTILIZATION'
             - 'RATE'
@@ -651,11 +649,9 @@ properties:
         description: |
           Time for which instance will be drained (not accept new
           connections, but still work to finish started).
-
-          From version 6.0.0 ConnectionDrainingTimeoutSec default value will be 300 to match default GCP value.
         api_name: drainingTimeoutSec
         send_empty_value: true
-        default_value: 0
+        default_value: 300
   - name: 'creationTimestamp'
     type: Time
     description: |
@@ -752,16 +748,18 @@ properties:
     description: Settings for enabling Cloud Identity Aware Proxy
     send_empty_value: true
     properties:
+      - name: 'enabled'
+        type: Boolean
+        description: Whether the serving infrastructure will authenticate and authorize all incoming requests.
+        required: true
       - name: 'oauth2ClientId'
         type: String
         description: |
           OAuth2 Client ID for IAP
-        required: true
       - name: 'oauth2ClientSecret'
         type: String
         description: |
           OAuth2 Client Secret for IAP
-        required: true
         ignore_read: true
         sensitive: true
         send_empty_value: true
@@ -869,9 +867,6 @@ properties:
       Settings controlling eviction of unhealthy hosts from the load balancing pool.
       This field is applicable only when the `load_balancing_scheme` is set
       to INTERNAL_MANAGED and the `protocol` is set to HTTP, HTTPS, or HTTP2.
-
-      From version 6.0.0 outlierDetection default terraform values will be removed to match default GCP value.
-      Default values are enforce by GCP without providing them.
     properties:
       - name: 'baseEjectionTime'
         type: NestedObject
@@ -922,7 +917,6 @@ properties:
           - 'outlier_detection.0.success_rate_minimum_hosts'
           - 'outlier_detection.0.success_rate_request_volume'
           - 'outlier_detection.0.success_rate_stdev_factor'
-        default_value: 5
       - name: 'consecutiveGatewayFailure'
         type: Integer
         description: |
@@ -941,7 +935,6 @@ properties:
           - 'outlier_detection.0.success_rate_minimum_hosts'
           - 'outlier_detection.0.success_rate_request_volume'
           - 'outlier_detection.0.success_rate_stdev_factor'
-        default_value: 5
       - name: 'enforcingConsecutiveErrors'
         type: Integer
         description: |
@@ -960,7 +953,6 @@ properties:
           - 'outlier_detection.0.success_rate_minimum_hosts'
           - 'outlier_detection.0.success_rate_request_volume'
           - 'outlier_detection.0.success_rate_stdev_factor'
-        default_value: 100
       - name: 'enforcingConsecutiveGatewayFailure'
         type: Integer
         description: |
@@ -979,7 +971,6 @@ properties:
           - 'outlier_detection.0.success_rate_minimum_hosts'
           - 'outlier_detection.0.success_rate_request_volume'
           - 'outlier_detection.0.success_rate_stdev_factor'
-        default_value: 0
       - name: 'enforcingSuccessRate'
         type: Integer
         description: |
@@ -998,7 +989,6 @@ properties:
           - 'outlier_detection.0.success_rate_minimum_hosts'
           - 'outlier_detection.0.success_rate_request_volume'
           - 'outlier_detection.0.success_rate_stdev_factor'
-        default_value: 100
       - name: 'interval'
         type: NestedObject
         description: |
@@ -1046,7 +1036,6 @@ properties:
           - 'outlier_detection.0.success_rate_minimum_hosts'
           - 'outlier_detection.0.success_rate_request_volume'
           - 'outlier_detection.0.success_rate_stdev_factor'
-        default_value: 10
       - name: 'successRateMinimumHosts'
         type: Integer
         description: |
@@ -1066,7 +1055,6 @@ properties:
           - 'outlier_detection.0.success_rate_minimum_hosts'
           - 'outlier_detection.0.success_rate_request_volume'
           - 'outlier_detection.0.success_rate_stdev_factor'
-        default_value: 5
       - name: 'successRateRequestVolume'
         type: Integer
         description: |
@@ -1087,7 +1075,6 @@ properties:
           - 'outlier_detection.0.success_rate_minimum_hosts'
           - 'outlier_detection.0.success_rate_request_volume'
           - 'outlier_detection.0.success_rate_stdev_factor'
-        default_value: 100
       - name: 'successRateStdevFactor'
         type: Integer
         description: |
@@ -1109,7 +1096,6 @@ properties:
           - 'outlier_detection.0.success_rate_minimum_hosts'
           - 'outlier_detection.0.success_rate_request_volume'
           - 'outlier_detection.0.success_rate_stdev_factor'
-        default_value: 1900
   - name: 'portName'
     type: String
     description: |

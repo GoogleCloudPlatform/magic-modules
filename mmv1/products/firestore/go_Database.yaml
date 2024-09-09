@@ -81,7 +81,6 @@ examples:
       - 'deletion_policy'
   - name: 'firestore_cmek_database'
     primary_resource_id: 'database'
-    min_version: 'beta'
     vars:
       database_id: 'cmek-database-id'
       delete_protection_state: 'DELETE_PROTECTION_ENABLED'
@@ -119,7 +118,6 @@ examples:
       - 'deletion_policy'
   - name: 'firestore_cmek_database_in_datastore_mode'
     primary_resource_id: 'database'
-    min_version: 'beta'
     vars:
       database_id: 'cmek-database-id'
       delete_protection_state: 'DELETE_PROTECTION_ENABLED'
@@ -141,7 +139,7 @@ virtual_fields:
       If the deletion policy is `DELETE`, the database will both be removed from Terraform state and deleted from Google Cloud upon destruction.
       The default value is `ABANDON`.
       See also `delete_protection`.
-    type: Enum
+    type: String
     default_value: "ABANDON"
 parameters:
 properties:
@@ -267,7 +265,6 @@ properties:
        The CMEK (Customer Managed Encryption Key) configuration for a Firestore
        database. If not present, the database is secured by the default Google
        encryption key.
-    min_version: 'beta'
     immutable: true
     properties:
       - name: 'kmsKeyName'

@@ -10,12 +10,15 @@
       "data": {
         "displayName": "terraform",
         "labels": {
-          "env": "test"
+          "env": "test",
+          "goog-terraform-provisioned": "true"
         },
         "metadataSchemaUri": "gs://google-cloud-aiplatform/schema/dataset/metadata/image_1.0.0.yaml"
       }
     },
     "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
-    "ancestors": ["organizations/{{.OrgID}}"]
+    "ancestors": [
+      "organizations/{{.OrgID}}"
+    ]
   }
 ]

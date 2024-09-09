@@ -106,14 +106,11 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_update: templates/terraform/pre_update/workbench_instance.go.erb
   post_update: templates/terraform/post_update/workbench_instance.go.erb
 virtual_fields:
-  - !ruby/object:Api::Type::Enum
+  - !ruby/object:Api::Type::String
     name: desired_state
     description: |
       Desired state of the Workbench Instance. Set this field to `ACTIVE` to start the Instance, and `STOPPED` to stop the Instance.
-    values:
-      - :ACTIVE
-      - :STOPPED
-    default_value: :ACTIVE
+    default_value: ACTIVE
 parameters:
   - !ruby/object:Api::Type::String
     name: location

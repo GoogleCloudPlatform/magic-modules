@@ -11,6 +11,7 @@ resource "google_project" "service_project" {
   name = "Service Project"
   org_id = "{{index $.TestEnvVars "org_id"}}"
   billing_account = "{{index $.TestEnvVars "billing_account"}}"
+  deletion_policy = "DELETE"
 }
 
 # Enable Compute API
@@ -49,7 +50,7 @@ resource "google_apphub_service" "{{$.PrimaryResourceId}}" {
   service_id = google_compute_forwarding_rule.forwarding_rule.name
   discovered_service = data.google_apphub_discovered_service.catalog-service.name
   display_name = "{{index $.Vars "display_name"}}"
-  description = "{{index $.Vars "description"}}"
+  description = "{{index $.Vars "desc"}}"
   attributes {
     environment {
       type = "STAGING"

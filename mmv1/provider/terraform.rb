@@ -410,6 +410,9 @@ module Provider
     end
 
     def generate_object_modified(object, output_folder, version_name)
+      # skip healthcare - exceptional case will be done manually
+      return if (output_folder.include? 'healthcare') || (output_folder.include? 'memorystore')
+
       pwd = Dir.pwd
       data = build_object_data(pwd, object, output_folder, version_name)
       Dir.chdir output_folder
@@ -562,6 +565,9 @@ module Provider
     end
 
     def force_new?(property, resource)
+      # Client-side fields don't inherit immutability
+      return property.immutable if property.client_side
+
       (
         (!property.output || property.is_a?(Api::Type::KeyValueEffectiveLabels)) &&
         (property.immutable ||
@@ -573,10 +579,10 @@ module Provider
             )
           )
         )
-      ) ||
-        (property.is_a?(Api::Type::KeyValueTerraformLabels) &&
-          !updatable?(resource, resource.all_user_properties) && !resource.root_labels?
-        )
+      ) || (
+        property.is_a?(Api::Type::KeyValueTerraformLabels) &&
+        !updatable?(resource, resource.all_user_properties) && !resource.root_labels?
+      )
     end
 
     # Returns tuples of (fieldName, list of update masks) for

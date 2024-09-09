@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: 'backup'
+name: 'Backup'
 description: |
   NetApp Volumes supports volume backups, which are copies of your volumes
   stored independently from the volume. Backups are stored in backup vaults,
@@ -39,6 +39,8 @@ create_verb: :POST
 update_url: projects/{{project}}/locations/{{location}}/backupVaults/{{vault_name}}/backups/{{name}}
 update_verb: :PATCH
 update_mask: true
+# Skipping the sweeper since we need to sweep multiple regions
+skip_sweeper: true
 delete_url: projects/{{project}}/locations/{{location}}/backupVaults/{{vault_name}}/backups/{{name}}
 delete_verb: :DELETE
 autogen_async: true

@@ -143,7 +143,6 @@ properties:
     type: KeyValueLabels
     description: |
       User-defined labels for the alloydb backup. An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
-    immutable: false
   - name: 'state'
     type: String
     description: Output only. The current state of the backup.

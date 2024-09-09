@@ -3,8 +3,8 @@ package breaking_changes
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 type fieldTestCase struct {
@@ -555,81 +555,6 @@ var FieldShrinkingMaxTestCases = []fieldTestCase{
 		oldField: &schema.Schema{},
 		newField: &schema.Schema{
 			MaxItems: 2,
-		},
-		expectedViolation: true,
-	},
-}
-
-func TestFieldAddingSubfieldToConfigModeAttr(t *testing.T) {
-	for _, tc := range FieldAddingSubfieldToConfigModeAttrTestCases {
-		tc.check(FieldAddingSubfieldToConfigModeAttr, t)
-	}
-}
-
-var FieldAddingSubfieldToConfigModeAttrTestCases = []fieldTestCase{
-	{
-		name: "no new subfields",
-		oldField: &schema.Schema{
-			ConfigMode:  schema.SchemaConfigModeAttr,
-			Description: "beep",
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"field_one": {},
-				},
-			},
-		},
-		newField: &schema.Schema{
-			ConfigMode:  schema.SchemaConfigModeAttr,
-			Description: "beep",
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"field_one": {},
-				},
-			},
-		},
-		expectedViolation: false,
-	},
-	{
-		name: "adding a subfield with no SchemaConfigModeAttr",
-		oldField: &schema.Schema{
-			Description: "beep",
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"field_one": {},
-				},
-			},
-		},
-		newField: &schema.Schema{
-			Description: "beep",
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"field_one": {},
-					"field_two": {},
-				},
-			},
-		},
-		expectedViolation: false,
-	},
-	{
-		name: "adding a field with SchemaConfigModeAttr",
-		oldField: &schema.Schema{
-			ConfigMode:  schema.SchemaConfigModeAttr,
-			Description: "beep",
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"field_one": {},
-				},
-			},
-		},
-		newField: &schema.Schema{
-			ConfigMode:  schema.SchemaConfigModeAttr,
-			Description: "beep",
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"field_one": {},
-					"field_two": {},
-				},
-			},
 		},
 		expectedViolation: true,
 	},

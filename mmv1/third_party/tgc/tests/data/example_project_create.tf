@@ -33,6 +33,7 @@ resource "google_project" "my_project-in-a-folder" {
   folder_id  = google_folder.department1.name
 
   billing_account = "{{.Project.BillingAccountName}}"
+  deletion_policy = "DELETE"
 
   labels  = {
     "project-label-key-a" = "project-label-val-a"
@@ -42,4 +43,5 @@ resource "google_project" "my_project-in-a-folder" {
 resource "google_folder" "department1" {
   display_name = "Department 1"
   parent     = "organizations/{{.OrgID}}"
+  deletion_protection = false
 }

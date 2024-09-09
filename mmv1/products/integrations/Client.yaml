@@ -84,34 +84,12 @@ properties:
           the kms key is stored at the same project as customer's project and ecrypted
           with CMEK, otherwise, the kms key is stored in the tenant project and
           encrypted with GMEK.
-    conflicts:
-      - provision_gmek
-  - !ruby/object:Api::Type::Boolean
-    name: 'createSampleWorkflows'
-    description: |
-      Indicates if sample workflow should be created along with provisioning.
-    immutable: true
-    ignore_read: true
-    deprecation_message: "`create_sample_workflows` is deprecated and will be removed in a future major release. Use `create_sample_integrations` instead."
-    conflicts:
-      - create_sample_integrations
   - !ruby/object:Api::Type::Boolean
     name: 'createSampleIntegrations'
     description: |
       Indicates if sample integrations should be created along with provisioning.
     immutable: true
     ignore_read: true
-    conflicts:
-      - create_sample_workflows
-  - !ruby/object:Api::Type::Boolean
-    name: 'provisionGmek'
-    description: |
-      Indicates provision with GMEK or CMEK.
-    deprecation_message: "`provision_gmek` is deprecated and will be removed in a future major release. Client would be provisioned as gmek if `cloud_kms_config` is not given."
-    immutable: true
-    ignore_read: true
-    conflicts:
-      - cloud_kms_config
   - !ruby/object:Api::Type::String
     name: 'runAsServiceAccount'
     description: |
@@ -129,7 +107,3 @@ examples:
     vars:
       key_ring_name: my-keyring
       service_account_id: service-acc
-  - !ruby/object:Provider::Terraform::Examples
-    name: "integrations_client_deprecated_fields"
-    primary_resource_id: "example"
-    skip_docs: true
