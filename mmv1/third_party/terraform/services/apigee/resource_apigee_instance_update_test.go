@@ -53,6 +53,7 @@ resource "google_project" "project1" {
   name            = "tf-test%{random_suffix_1}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_service" "apigee" {
@@ -122,6 +123,7 @@ resource "google_project" "project1" {
   name            = "tf-test%{random_suffix_1}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project" "project2" {
@@ -129,6 +131,7 @@ resource "google_project" "project2" {
   name            = "tf-test%{random_suffix_2}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_service" "apigee" {
