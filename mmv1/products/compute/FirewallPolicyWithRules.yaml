@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the License);
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,7 +18,9 @@ base_url: 'locations/global/firewallPolicies?parentId={{parent}}'
 self_link: 'locations/global/firewallPolicies/{{policy_id}}'
 create_url: 'locations/global/firewallPolicies?parentId={{parent}}'
 update_verb: :PATCH
-description: "The Compute FirewallPolicy with rules resource"
+description: |
+  The Compute FirewallPolicy with rules resource. It declaratively manges all
+  rules in the firewall policy.
 id_format: 'locations/global/firewallPolicies/{{policy_id}}'
 import_format: ['locations/global/firewallPolicies/{{policy_id}}']
 examples:
@@ -69,7 +71,7 @@ properties:
   - !ruby/object:Api::Type::Array
     name: 'rule'
     api_name: 'rules'
-    description: A list of firewall policy rules. It must include pre-defined rules.
+    description: A list of firewall policy rules.
     required: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
@@ -242,7 +244,7 @@ properties:
             enabled.
   - !ruby/object:Api::Type::Array
     name: 'predefinedRules'
-    description: A list of firewall policy rules. It must include pre-defined rules.
+    description: A list of pre-define firewall policy rules.
     output: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:

@@ -25,6 +25,7 @@ resource "google_compute_firewall_policy_with_rules" "<%= ctx[:primary_resource_
       dest_threat_intelligences = ["iplist-search-engines-crawlers", "iplist-tor-exit-nodes"]
       dest_address_groups = [google_network_security_address_group.address_group_1.id]
     }
+    target_resources = ["https://www.googleapis.com/compute/beta/projects/${data.google_project.project.name}/global/networks/default"]
   }
   rule {
     description    = "udp rule"
