@@ -35,7 +35,7 @@ func TestAccSecurityCenterFolderBigQueryExportConfig_basic(t *testing.T) {
 				Config: testAccSecurityCenterFolderBigQueryExportConfig_basic(context),
 			},
 			{
-				ResourceName:            "google_scc_folder_scc_big_query_exports.default",
+				ResourceName:            "google_scc_folder_scc_big_query_export.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"update_time"},
@@ -44,11 +44,11 @@ func TestAccSecurityCenterFolderBigQueryExportConfig_basic(t *testing.T) {
 				Config: testAccSecurityCenterFolderBigQueryExportConfig_update(context),
 			},
 			{
-				ResourceName:            "google_scc_folder_scc_big_query_exports.default",
+				ResourceName:            "google_scc_folder_scc_big_query_export.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"update_time"},
-			},
+			},	
 		},
 	})
 }
@@ -78,7 +78,7 @@ resource "time_sleep" "wait_1_minute" {
 	depends_on = [google_bigquery_dataset.default]
 	create_duration = "3m"
 }
-resource "google_scc_folder_scc_big_query_exports" "default" {
+resource "google_scc_folder_scc_big_query_export" "default" {
   big_query_export_id    = "%{big_query_export_id}"
   folder 	   = google_folder.folder.folder_id
   dataset      = google_bigquery_dataset.default.id
@@ -112,12 +112,12 @@ resource "google_bigquery_dataset" "default" {
 	ignore_changes = [default_partition_expiration_ms]
   }
 }
-resource "google_scc_folder_scc_big_query_exports" "default" {
+resource "google_scc_folder_scc_big_query_export" "default" {
   big_query_export_id    = "%{big_query_export_id}"
   folder 	   = google_folder.folder.folder_id
   dataset      = google_bigquery_dataset.default.id
   description  = "SCC Findings Big Query Export Update"
-  filter       = "state=\"ACTIVE\" AND NOT mute=\"MUTED\""
+  filter       = ""
 }
 
 `, context)
