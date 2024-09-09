@@ -101,6 +101,18 @@ The following arguments are supported:
 	  "READ_ONLY"
 	  "READ_WRITE"
 
+* `interface` -
+  (Optional)
+  The disk interface used for attaching this disk. One of SCSI or NVME.
+
+	This field is only used for specific cases, please don't specify
+	this field without advice from Google. Not specifying the feild
+	will allow the the server to assign the correct interface.
+
+	Possible values:
+	  "SCSI"
+	  "NVME"
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:
