@@ -41,7 +41,7 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}'
     - '{{listing_id}}'
 custom_code:
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'bigquery_analyticshub_listing_basic'
     primary_resource_id: 'listing'

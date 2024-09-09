@@ -73,7 +73,7 @@ nested_query:
   modify_by_patch: true
 custom_code:
 exclude_tgc: true
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'access_context_manager_access_level_condition_basic'
     primary_resource_id: 'access-level-condition'

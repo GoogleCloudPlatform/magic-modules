@@ -42,7 +42,7 @@ iam_policy:
   example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
 custom_code:
   custom_import: 'templates/terraform/custom_import/go/service_directory_namespace.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'service_directory_namespace_basic'
     primary_resource_id: 'example'

@@ -63,7 +63,7 @@ custom_code:
   constants: 'templates/terraform/constants/go/bigquery_dataset_access.go.tmpl'
   post_create: 'templates/terraform/post_create/go/bigquery_dataset_access.go.tmpl'
 exclude_tgc: true
-skip_sweeper: true
+exclude_sweeper: true
 error_retry_predicates:
 
   - 'transport_tpg.IsBigqueryIAMQuotaError'

@@ -33,7 +33,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'identity_platform_tenant_default_supported_idp_config_basic'
     primary_resource_id: 'idp_config'

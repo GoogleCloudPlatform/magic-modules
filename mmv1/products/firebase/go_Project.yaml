@@ -32,7 +32,7 @@ docs:
 base_url: 'projects/{{project}}'
 self_link: 'projects/{{project}}'
 create_url: 'projects/{{project}}:addFirebase'
-skip_delete: true
+exclude_delete: true
 immutable: true
 import_format:
   - 'projects/{{project}}'
@@ -58,7 +58,7 @@ async:
 custom_code:
   constants: 'templates/terraform/constants/go/firebase_project.go.tmpl'
   pre_create: 'templates/terraform/pre_create/go/firebase_project.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'firebase_project_basic'
     primary_resource_id: 'default'

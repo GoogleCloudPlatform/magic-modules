@@ -46,7 +46,7 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'vmware_engine_network_standard'
     primary_resource_id: 'vmw-engine-network'

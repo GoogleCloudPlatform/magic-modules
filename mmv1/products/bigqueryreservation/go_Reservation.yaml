@@ -30,7 +30,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'bigquery_reservation_basic'
     primary_resource_id: 'reservation'

@@ -38,7 +38,7 @@ timeouts:
   delete_minutes: 20
 custom_code:
   constants: 'templates/terraform/constants/go/bigquery_dataset.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'bigquery_dataset_basic'
     primary_resource_id: 'dataset'
