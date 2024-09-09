@@ -37,7 +37,7 @@ custom_code:
   update_encoder: 'templates/terraform/encoders/go/wrap_object.go.tmpl'
   decoder: 'templates/terraform/decoders/go/unwrap_resource.go.tmpl'
   custom_import: 'templates/terraform/custom_import/go/dlp_import.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'dlp_discovery_config_basic'
     primary_resource_id: 'basic'

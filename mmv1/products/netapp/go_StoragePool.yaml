@@ -68,7 +68,7 @@ async:
     resource_inside_response: false
 custom_code:
   pre_update: 'templates/terraform/pre_update/go/netapp_storagepool.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'Storage_pool_create'
     primary_resource_id: 'test_pool'

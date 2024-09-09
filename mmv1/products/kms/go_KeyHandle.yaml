@@ -31,7 +31,7 @@ id_format: 'projects/{{project}}/locations/{{location}}/keyHandles/{{name}}'
 base_url: 'projects/{{project}}/locations/{{location}}/keyHandles'
 self_link: 'projects/{{project}}/locations/{{location}}/keyHandles/{{name}}'
 create_url: 'projects/{{project}}/locations/{{location}}/keyHandles?keyHandleId={{name}}'
-skip_delete: true
+exclude_delete: true
 immutable: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/keyHandles/{{name}}'

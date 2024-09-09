@@ -57,7 +57,7 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'netapp_backup'
     primary_resource_id: 'test_backup'
