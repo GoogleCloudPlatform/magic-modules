@@ -34,7 +34,7 @@ timeouts:
 autogen_async: true
 custom_code:
   custom_import: 'templates/terraform/custom_import/go/alloydb_user.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'alloydb_user_builtin'
     primary_resource_id: 'user1'

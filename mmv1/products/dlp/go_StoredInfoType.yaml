@@ -46,7 +46,7 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/go/dlp_import.go.tmpl'
 custom_diff:
   - 'storedInfoTypeCustomizeDiff'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'dlp_stored_info_type_basic'
     primary_resource_id: 'basic'

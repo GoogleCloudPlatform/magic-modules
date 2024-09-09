@@ -27,7 +27,7 @@ create_url: 'organizations/{{organization}}/settings?updateMask=disableDefaultSi
 create_verb: 'PATCH'
 update_url: 'organizations/{{organization}}/settings?updateMask=disableDefaultSink,storageLocation,kmsKeyName'
 update_verb: 'PATCH'
-skip_delete: true
+exclude_delete: true
 import_format:
   - 'organizations/{{organization}}/settings'
 timeouts:

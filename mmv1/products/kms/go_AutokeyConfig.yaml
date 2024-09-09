@@ -50,7 +50,7 @@ custom_code:
   pre_update: 'templates/terraform/pre_update/go/kms_autokey_config_folder.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/go/kms_autokey_config_folder.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/go/kms_autokey_config.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'kms_autokey_config_all'
     primary_resource_id: 'example-autokeyconfig'

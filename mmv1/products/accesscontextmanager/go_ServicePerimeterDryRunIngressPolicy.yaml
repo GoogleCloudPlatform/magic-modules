@@ -77,7 +77,7 @@ custom_code:
   pre_delete: 'templates/terraform/pre_create/go/access_context_manager_dry_run_resource.go.tmpl'
   custom_import: 'templates/terraform/custom_import/go/access_context_manager_service_perimeter_ingress_policy.go.tmpl'
 exclude_tgc: true
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'access_context_manager_service_perimeter_dry_run_ingress_policy'
     skip_test: true
