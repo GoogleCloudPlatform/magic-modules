@@ -27,7 +27,7 @@ create_url: 'folders/{{folder}}/settings?updateMask=disableDefaultSink,storageLo
 create_verb: 'PATCH'
 update_url: 'folders/{{folder}}/settings?updateMask=disableDefaultSink,storageLocation,kmsKeyName'
 update_verb: 'PATCH'
-skip_delete: true
+exclude_delete: true
 import_format:
   - 'folders/{{folder}}/settings'
 timeouts:

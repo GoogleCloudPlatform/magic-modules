@@ -38,7 +38,7 @@ timeouts:
 custom_code:
   post_create: 'templates/terraform/post_create/go/iap_client.go.tmpl'
   custom_import: 'templates/terraform/custom_import/go/iap_client.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 error_retry_predicates:
 
   - 'transport_tpg.IapClient409Operation'

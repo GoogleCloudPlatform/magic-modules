@@ -57,7 +57,7 @@ async:
 custom_code:
   custom_delete: 'templates/terraform/custom_delete/go/replace_all_access_levels_empty_list.go.tmpl'
   custom_import: 'templates/terraform/custom_import/go/set_access_policy_parent_from_access_policy.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'access_context_manager_access_levels_basic'
     primary_resource_id: 'access-levels'

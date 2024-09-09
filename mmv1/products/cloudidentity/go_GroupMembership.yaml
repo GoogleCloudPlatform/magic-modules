@@ -40,7 +40,7 @@ custom_code:
   post_create: 'templates/terraform/post_create/go/set_computed_name.tmpl'
   custom_update: 'templates/terraform/custom_update/go/cloud_identity_group_membership.go.tmpl'
   post_import: 'templates/terraform/post_import/go/cloud_identity_group_membership.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 read_error_transform: 'transformCloudIdentityGroupMembershipReadError'
 examples:
   - name: 'cloud_identity_group_membership'

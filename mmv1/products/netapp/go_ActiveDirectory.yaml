@@ -44,7 +44,7 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'netapp_active_directory_full'
     primary_resource_id: 'test_active_directory_full'
