@@ -20,7 +20,7 @@ docs:
 base_url: '{{processor}}'
 self_link: '{{processor}}'
 create_url: '{{processor}}:setDefaultProcessorVersion'
-skip_delete: true
+exclude_delete: true
 immutable: true
 import_format:
   - '{{%processor}}'

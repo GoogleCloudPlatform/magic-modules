@@ -48,7 +48,7 @@ async:
 custom_code:
   post_create: 'templates/terraform/post_create/go/set_computed_name.tmpl'
   custom_import: 'templates/terraform/custom_import/go/cloud_identity_group_import.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'cloud_identity_groups_basic'
     primary_resource_id: 'cloud_identity_group_basic'

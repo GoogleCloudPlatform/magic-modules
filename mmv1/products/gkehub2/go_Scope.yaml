@@ -57,7 +57,7 @@ iam_policy:
     - 'projects/{{project}}/locations/global/scopes/{{scope_id}}'
     - '{{scope_id}}'
 custom_code:
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'gkehub_scope_basic'
     primary_resource_id: 'scope'

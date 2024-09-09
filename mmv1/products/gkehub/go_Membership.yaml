@@ -58,7 +58,7 @@ iam_policy:
     - '{{membership_id}}'
 custom_code:
   constants: 'templates/terraform/constants/go/gke_hub_membership_diff.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 schema_version: 1
 state_upgraders: true
 examples:
