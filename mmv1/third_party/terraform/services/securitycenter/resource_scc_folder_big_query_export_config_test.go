@@ -48,7 +48,7 @@ func TestAccSecurityCenterFolderBigQueryExportConfig_basic(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"update_time"},
-			},	
+			},
 		},
 	})
 }
