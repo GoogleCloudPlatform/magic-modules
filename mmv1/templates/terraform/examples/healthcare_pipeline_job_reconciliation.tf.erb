@@ -26,7 +26,7 @@ resource "google_healthcare_dataset" "dataset" {
 }
 
 resource "google_healthcare_fhir_store" "fhirstore" {
-  name    = "<%= ctx[:vars]['destination_fhir_store'] %>"
+  name    = "<%= ctx[:vars]['fhir_store_name'] %>"
   dataset = google_healthcare_dataset.dataset.id
   version = "R4"
   enable_update_create          = true

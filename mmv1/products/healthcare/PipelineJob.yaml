@@ -31,15 +31,22 @@ id_format: '{{dataset}}/pipelineJobs/{{name}}'
 import_format: ['{{%dataset}}/pipelineJobs/{{name}}', '{{name}}', '{{dataset}}/pipelineJobs?pipelineJobId={{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: 'healthcare_pipeline_job_basic'
+    name: 'healthcare_pipeline_job_reconciliation'
     primary_resource_id: 'example-pipeline'
     vars:
       pipeline_name: 'example_pipeline_job'
       dataset_name: 'example_dataset'
-      data_mapper_mapping_name: 'example_mapping'
-      destination_fhir_store: 'fhir_store'
+      fhir_store_name: 'fhir_store'
       bq_dataset: 'example_bq_dataset'
       bucket_name: 'example_bucket_name'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'healthcare_pipeline_job_backfill'
+    primary_resource_id: 'example-pipeline'
+    vars:
+      backfill_pipeline_name: 'example_backfill_pipeline'
+      dataset_name: 'example_dataset'
+      fhir_store_name: 'fhir_store'
+      mapping_pipeline_name: 'example_mapping_pipeline'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   decoder: templates/terraform/decoders/long_name_to_self_link.go.erb
 parameters:
@@ -95,6 +102,9 @@ properties:
     ignore_read: true
   - !ruby/object:Api::Type::NestedObject
     name: mappingPipelineJob
+    conflicts:
+      - reconciliationPipelineJob
+      - backfillPipelineJob
     description: |
       Specifies mapping configuration.
     required: false
@@ -112,6 +122,8 @@ properties:
             required: false
           - !ruby/object:Api::Type::NestedObject
             name: dataMapperConfigSource
+            conflicts:
+              - whistleConfigSource
             description: |
               Specifies the path to the mapping configuration for Data Mapper pipeline.
             required: true
@@ -152,6 +164,8 @@ properties:
                     required: true
           - !ruby/object:Api::Type::NestedObject
             name: whistleConfigSource
+            conflicts:
+              - dataMapperConfigSource
             description: |
               Specifies the path to the mapping configuration for harmonization pipeline.
             required: false
@@ -170,6 +184,8 @@ properties:
                 required: true
       - !ruby/object:Api::Type::NestedObject
         name: fhirStreamingSource
+        conflicts:
+          - cloudSpannerSource
         description: |
           A streaming FHIR data source.
         required: false
@@ -186,6 +202,8 @@ properties:
             required: false
       - !ruby/object:Api::Type::NestedObject
         name: cloudSpannerSource
+        conflicts:
+          - fhirStreamingSource
         description: |
           Cloud Spanner data source.
         required: false
@@ -205,25 +223,10 @@ properties:
             description: |
               Describes the cloud spanner data source.
             required: false
-      - !ruby/object:Api::Type::NestedObject
-        name: bigquerySource
-        description: |
-          BigQuery data source.
-        required: false
-        properties:
-          - !ruby/object:Api::Type::String
-            name: bigqueryDataset
-            description: |
-              Required. The path to the BigQuery dataset in the format 
-              projects/{projectId}/datasets/{datasetId}.
-            required: true
-          - !ruby/object:Api::Type::String
-            name: description
-            description: |
-              Describes the bigquery data source.
-            required: false
       - !ruby/object:Api::Type::String
         name: fhirStoreDestination
+        conflicts:
+          - reconciliationDestination
         description: |
           If set, the mapping pipeline will write snapshots to this 
           FHIR store without assigning stable IDs. You must 
@@ -237,6 +240,8 @@ properties:
         required: false
       - !ruby/object:Api::Type::Boolean
         name: reconciliationDestination
+        conflicts:
+          - fhirStoreDestination
         description: |
           If set to true, a mapping pipeline will send output snapshots 
           to the reconciliation pipeline in its dataset. A reconciliation 
@@ -245,6 +250,9 @@ properties:
         required: false
   - !ruby/object:Api::Type::NestedObject
     name: reconciliationPipelineJob
+    conflicts:
+      - mappingPipelineJob
+      - backfillPipelineJob
     description: |
       Specifies reconciliation configuration.
     required: false
@@ -262,6 +270,8 @@ properties:
             required: false
           - !ruby/object:Api::Type::NestedObject
             name: dataMapperConfigSource
+            conflicts:
+              - whistleConfigSource
             description: |
               Specifies the path to the mapping configuration for Data Mapper pipeline.
             required: false
@@ -301,6 +311,8 @@ properties:
                     required: true
           - !ruby/object:Api::Type::NestedObject
             name: whistleConfigSource
+            conflicts:
+              - dataMapperConfigSource
             description: |
               Specifies the path to the mapping configuration for harmonization pipeline.
             required: true
@@ -333,6 +345,9 @@ properties:
         required: false
   - !ruby/object:Api::Type::NestedObject
     name: backfillPipelineJob
+    conflicts:
+      - mappingPipelineJob
+      - reconciliationPipelineJob
     description: |
       Specifies the backfill configuration.
     required: false
