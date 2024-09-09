@@ -279,6 +279,7 @@ module "project-services" {
     "looker.googleapis.com",
     "managedidentities.googleapis.com",
     "memcache.googleapis.com",
+    "memorystore.googleapis.com",
     "metastore.googleapis.com",
     "migrationcenter.googleapis.com",
     "ml.googleapis.com",

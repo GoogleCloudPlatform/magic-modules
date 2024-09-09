@@ -23,8 +23,6 @@ import (
 // and accessed via their parent resource
 // See: https://cloud.google.com/iam/docs/overview
 type IamPolicy struct {
-	// google.YamlValidator
-
 	// boolean of if this binding should be generated
 	Exclude bool
 
