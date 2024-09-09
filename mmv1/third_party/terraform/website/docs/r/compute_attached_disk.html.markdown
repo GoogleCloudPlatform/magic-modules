@@ -103,10 +103,10 @@ The following arguments are supported:
 
 * `interface` -
   (Optional)
-  The disk interface used for attaching this disk. One of SCSI or NVME.
+  The disk interface used for attaching this disk.
 
 	This field is only used for specific cases, please don't specify
-	this field without advice from Google. Not specifying the feild
+	this field without advice from Google. Not specifying the field
 	will allow the the server to assign the correct interface.
 
 	Possible values:
