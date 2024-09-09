@@ -28,6 +28,9 @@
         "address": "10.0.42.42",
         "addressType": "INTERNAL",
         "name": "my-internal-address",
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
         "region": "projects/{{.Provider.project}}/global/regions/us-central1"
       }
     }
@@ -45,9 +48,6 @@
         "ipCidrRange": "10.0.0.0/16",
         "logConfig": {
           "enable": false
-        },
-        "labels": {
-          "goog-terraform-provisioned": "true"
         },
         "name": "my-subnet",
         "region": "projects/{{.Provider.project}}/global/regions/us-central1"

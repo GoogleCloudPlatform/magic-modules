@@ -62,7 +62,6 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     default_from_api: true
-    pattern: '{{parent}}/locations/global/quotaPreferences/{{name}}'
     description: |
       The resource name of the quota preference. Required except in the CREATE requests.
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'

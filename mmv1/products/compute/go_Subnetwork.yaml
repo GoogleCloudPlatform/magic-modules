@@ -55,7 +55,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 1000
@@ -74,8 +74,10 @@ iam_policy:
 custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/go/subnetwork.tmpl'
   constants: 'templates/terraform/constants/go/subnetwork.tmpl'
+  post_update: 'templates/terraform/post_update/go/compute_subnetwork.go.tmpl'
 custom_diff:
   - 'customdiff.ForceNewIfChange("ip_cidr_range", IsShrinkageIpCidr)'
+  - 'sendSecondaryIpRangeIfEmptyDiff'
 examples:
   - name: 'subnetwork_basic'
     primary_resource_id: 'network-with-private-secondary-ip-ranges'
@@ -116,6 +118,28 @@ examples:
     vars:
       subnetwork_name: 'subnet-cidr-overlap'
       network_name: 'net-cidr-overlap'
+  - name: 'subnetwork_reserved_internal_range'
+    primary_resource_id: 'subnetwork-reserved-internal-range'
+    min_version: 'beta'
+    vars:
+      subnetwork_name: 'subnetwork-reserved-internal-range'
+      network_name: 'network-reserved-internal-range'
+  - name: 'subnetwork_reserved_secondary_range'
+    primary_resource_id: 'subnetwork-reserved-secondary-range'
+    min_version: 'beta'
+    vars:
+      subnetwork_name: 'subnetwork-reserved-secondary-range'
+      network_name: 'network-reserved-secondary-range'
+virtual_fields:
+  - name: 'send_secondary_ip_range_if_empty'
+    description: |
+      Controls the removal behavior of secondary_ip_range.
+      When false, removing secondary_ip_range from config will not produce a diff as
+      the provider will default to the API's value.
+      When true, the provider will treat removing secondary_ip_range as sending an
+      empty list of secondary IP ranges to the API.
+      Defaults to false.
+    type: Boolean
 parameters:
 properties:
   - name: 'creationTimestamp'
@@ -141,11 +165,20 @@ properties:
       Provide this property when you create the subnetwork. For example,
       10.0.0.0/8 or 192.168.0.0/16. Ranges must be unique and
       non-overlapping within a network. Only IPv4 is supported.
-    required: true
+      Field is optional when `reserved_internal_range` is defined, otherwise required.
+    required: false
+    default_from_api: true
     update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}/expandIpCidrRange'
     update_verb: 'POST'
     validation:
       function: 'verify.ValidateIpCidrRange'
+  - name: 'reservedInternalRange'
+    type: ResourceRef
+    description: |
+      The ID of the reserved internal range. Must be prefixed with `networkconnectivity.googleapis.com`
+      E.g. `networkconnectivity.googleapis.com/projects/{project}/locations/global/internalRanges/{rangeId}`
+    resource: 'InternalRange'
+    imports: 'selfLink'
   - name: 'name'
     type: String
     description: |
@@ -205,13 +238,10 @@ properties:
       to either primary or secondary ranges.
 
       **Note**: This field uses [attr-as-block mode](https://www.terraform.io/docs/configuration/attr-as-blocks.html) to avoid
-      breaking users during the 0.12 upgrade. To explicitly send a list
-      of zero objects you must use the following syntax:
-      `example=[]`
-      For more details about this behavior, see [this section](https://www.terraform.io/docs/configuration/attr-as-blocks.html#defining-a-fixed-object-collection-value).
+      breaking users during the 0.12 upgrade. To explicitly send a list of zero objects,
+      set `send_secondary_ip_range_if_empty = true`
     api_name: secondaryIpRanges
     unordered_list: true
-    schema_config_mode_attr: true
     default_from_api: true
     send_empty_value: true
     update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}'
@@ -238,9 +268,18 @@ properties:
             range. Provide this property when you create the subnetwork.
             Ranges must be unique and non-overlapping with all primary and
             secondary IP ranges within a network. Only IPv4 is supported.
-          required: true
+            Field is optional when `reserved_internal_range` is defined, otherwise required.
+          required: false
+          default_from_api: true
           validation:
             function: 'verify.ValidateIpCidrRange'
+        - name: 'reservedInternalRange'
+          type: ResourceRef
+          description: |
+            The ID of the reserved internal range. Must be prefixed with `networkconnectivity.googleapis.com`
+            E.g. `networkconnectivity.googleapis.com/projects/{project}/locations/global/internalRanges/{rangeId}`
+          resource: 'InternalRange'
+          imports: 'selfLink'
   - name: 'privateIpGoogleAccess'
     type: Boolean
     description: |

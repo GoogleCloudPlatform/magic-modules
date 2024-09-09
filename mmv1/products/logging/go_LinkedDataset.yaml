@@ -48,7 +48,7 @@ async:
     message: 'message'
 custom_code:
   encoder: 'templates/terraform/encoders/go/logging_linked_dataset.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'logging_linked_dataset_basic'
     primary_resource_id: 'logging_linked_dataset'

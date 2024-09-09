@@ -34,7 +34,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 1000
@@ -99,7 +99,6 @@ properties:
     description: |
       The fingerprint used for optimistic locking of this resource.  Used
       internally during updates.
-    min_version: 'beta'
     output: true
     update_url: 'projects/{{project}}/global/addresses/{{name}}/setLabels'
     update_verb: 'POST'

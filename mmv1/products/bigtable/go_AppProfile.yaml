@@ -39,7 +39,7 @@ custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/go/bigtable_app_profile.go.tmpl'
   encoder: 'templates/terraform/encoders/go/bigtable_app_profile.go.tmpl'
   pre_update: 'templates/terraform/pre_update/go/bigtable_app_profile.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'bigtable_app_profile_anycluster'
     primary_resource_id: 'ap'

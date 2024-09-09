@@ -45,7 +45,7 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-skip_sweeper: true
+exclude_sweeper: true
 error_abort_predicates:
 
   - 'transport_tpg.Is429QuotaError'

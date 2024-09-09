@@ -62,7 +62,7 @@ custom_code:
   pre_create: 'templates/terraform/constants/go/vertex_ai_featurestore_entitytype.go.tmpl'
   pre_delete: 'templates/terraform/constants/go/vertex_ai_featurestore_entitytype.go.tmpl'
   custom_import: 'templates/terraform/custom_import/go/vertex_ai_featurestore_entitytype.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'vertex_ai_featurestore_entitytype'
     primary_resource_id: 'entity'
@@ -128,7 +128,6 @@ properties:
     type: KeyValueLabels
     description: |
       A set of key/value label pairs to assign to this EntityType.
-    immutable: false
   - name: 'monitoringConfig'
     type: NestedObject
     description: |

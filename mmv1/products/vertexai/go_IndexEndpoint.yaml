@@ -94,7 +94,6 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: The labels with user-defined metadata to organize your Indexes.
-    immutable: false
   - name: 'createTime'
     type: String
     description: The timestamp of when the Index was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.

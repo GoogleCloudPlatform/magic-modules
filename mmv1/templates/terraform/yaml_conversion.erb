@@ -39,6 +39,9 @@ exclude: <%= object.exclude %>
 <%  unless object.readonly.nil? -%>
 readonly: <%= object.readonly %>
 <%  end -%>
+<%  unless !object.skip_attribution_label -%>
+skip_attribution_label: <%= object.skip_attribution_label %>
+<%  end -%>
 <%
 #references blocks
 -%>
@@ -124,7 +127,7 @@ delete_url: '<%= object.delete_url %>'
 delete_verb: '<%= object.delete_verb.to_s %>'
 <%  end -%>
 <%  unless !object.skip_delete -%>
-skip_delete: <%= object.skip_delete %>
+exclude_delete: <%= object.skip_delete %>
 <%  end -%>
 <%  unless object.immutable.nil? -%>
 immutable: <%= object.immutable %>
@@ -415,7 +418,7 @@ custom_code:
 <%  end -%>
 <% 
 custom_diff = object.custom_diff.reject {
-  |cdiff| cdiff == "tpgresource.SetLabelsDiff" || cdiff == "tpgresource.SetMetadataLabelsDiff" || cdiff == "tpgresource.SetAnnotationsDiff" || cdiff == "tpgresource.SetMetadataAnnotationsDiff"
+  |cdiff| cdiff == "tpgresource.SetLabelsDiff" ||  cdiff == "tpgresource.SetLabelsDiffWithoutAttributionLabel" || cdiff == "tpgresource.SetMetadataLabelsDiff" || cdiff == "tpgresource.SetAnnotationsDiff" || cdiff == "tpgresource.SetMetadataAnnotationsDiff"
 }
 -%>
 <%  unless custom_diff.empty? -%>
@@ -437,7 +440,7 @@ filename_override: '<%= object.filename_override %>'
 exclude_tgc: <%= object.exclude_tgc %>
 <%  end -%>
 <%  unless !object.skip_sweeper -%>
-skip_sweeper: <%= object.skip_sweeper %>
+exclude_sweeper: <%= object.skip_sweeper %>
 <%  end -%>
 <%    if !object.sweeper.nil? && !object.sweeper.sweepable_identifier_field.nil? -%>
 sweeper:

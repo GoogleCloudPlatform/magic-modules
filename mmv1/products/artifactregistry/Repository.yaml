@@ -52,13 +52,13 @@ examples:
       ])"
     vars:
       repository_id: 'my-repository'
-      description: 'example docker repository'
+      desc: 'example docker repository'
   - !ruby/object:Provider::Terraform::Examples
     name: 'artifact_registry_repository_docker'
     primary_resource_id: 'my-repo'
     vars:
       repository_id: 'my-repository'
-      description: 'example docker repository'
+      desc: 'example docker repository'
   - !ruby/object:Provider::Terraform::Examples
     name: 'artifact_registry_repository_cmek'
     primary_resource_id: 'my-repo'
@@ -72,34 +72,34 @@ examples:
     primary_resource_id: 'my-repo'
     vars:
       repository_id: 'my-repository'
-      description: 'example virtual docker repository'
+      desc: 'example virtual docker repository'
       upstream_repository_id: 'my-repository-upstream'
-      upstream_description: 'example docker repository (upstream source)'
+      upstream_desc: 'example docker repository (upstream source)'
       upstream_policy_id: 'my-repository-upstream'
   - !ruby/object:Provider::Terraform::Examples
     name: 'artifact_registry_repository_remote'
     primary_resource_id: 'my-repo'
     vars:
       repository_id: 'my-repository'
-      description: 'example remote docker repository'
+      desc: 'example remote docker repository'
   - !ruby/object:Provider::Terraform::Examples
     name: 'artifact_registry_repository_remote_apt'
     primary_resource_id: 'my-repo'
     vars:
       repository_id: 'debian-buster'
-      description: 'example remote apt repository'
+      desc: 'example remote apt repository'
   - !ruby/object:Provider::Terraform::Examples
     name: 'artifact_registry_repository_remote_yum'
     primary_resource_id: 'my-repo'
     vars:
       repository_id: 'rocky-9'
-      description: 'example remote yum repository'
+      desc: 'example remote yum repository'
   - !ruby/object:Provider::Terraform::Examples
     name: 'artifact_registry_repository_cleanup'
     primary_resource_id: 'my-repo'
     vars:
       repository_id: 'my-repository'
-      description: 'example docker repository with cleanup policies'
+      desc: 'example docker repository with cleanup policies'
   - !ruby/object:Provider::Terraform::Examples
     name: 'artifact_registry_repository_remote_dockerhub_auth'
     primary_resource_id: 'my-repo'
@@ -109,7 +109,7 @@ examples:
       - 'remote_repository_config.0.disable_upstream_validation'
     vars:
       repository_id: 'example-dockerhub-remote'
-      description: 'example remote dockerhub repository with credentials'
+      desc: 'example remote dockerhub repository with credentials'
       secret_id: 'example-secret'
       secret_resource_id: 'example-remote-secret'
       username: 'remote-username'
@@ -123,7 +123,7 @@ examples:
       - 'remote_repository_config.0.disable_upstream_validation'
     vars:
       repository_id: 'example-docker-custom-remote'
-      description: 'example remote custom docker repository with credentials'
+      desc: 'example remote custom docker repository with credentials'
       secret_id: 'example-secret'
       secret_resource_id: 'example-remote-secret'
       username: 'remote-username'
@@ -137,7 +137,7 @@ examples:
       - 'remote_repository_config.0.disable_upstream_validation'
     vars:
       repository_id: 'example-maven-custom-remote'
-      description: 'example remote custom maven repository with credentials'
+      desc: 'example remote custom maven repository with credentials'
       secret_id: 'example-secret'
       secret_resource_id: 'example-remote-secret'
       username: 'remote-username'
@@ -151,7 +151,7 @@ examples:
       - 'remote_repository_config.0.disable_upstream_validation'
     vars:
       repository_id: 'example-npm-custom-remote'
-      description: 'example remote custom npm repository with credentials'
+      desc: 'example remote custom npm repository with credentials'
       secret_id: 'example-secret'
       secret_resource_id: 'example-remote-secret'
       username: 'remote-username'
@@ -165,7 +165,7 @@ examples:
       - 'remote_repository_config.0.disable_upstream_validation'
     vars:
       repository_id: 'example-python-custom-remote'
-      description: 'example remote custom python repository with credentials'
+      desc: 'example remote custom python repository with credentials'
       secret_id: 'example-secret'
       secret_resource_id: 'example-remote-secret'
       username: 'remote-username'

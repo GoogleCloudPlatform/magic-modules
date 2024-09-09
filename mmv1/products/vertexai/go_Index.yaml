@@ -223,7 +223,6 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: The labels with user-defined metadata to organize your Indexes.
-    immutable: false
   - name: 'createTime'
     type: String
     description:

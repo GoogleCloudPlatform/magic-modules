@@ -18,7 +18,7 @@
 package {{ $.Res.PackageName }}_test
 
 import (
-{{- if not $.Res.SkipDelete }}
+{{- if not $.Res.ExcludeDelete }}
 	{{- if not $.Res.CustomCode.TestCheckDestroy }}
 	"fmt"
 	{{- end }}
@@ -27,7 +27,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-{{- if not $.Res.SkipDelete }}
+{{- if not $.Res.ExcludeDelete }}
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 {{- end }}
 
@@ -65,7 +65,7 @@ func TestAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T
 		{{- end }}
 		},
 	{{- end }}
-	{{- if not $.Res.SkipDelete }}
+	{{- if not $.Res.ExcludeDelete }}
 		CheckDestroy: testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t),
 	{{- end }}
 		Steps: []resource.TestStep{
@@ -94,7 +94,7 @@ func testAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(context map[
 
 {{ end }}
 
-{{ if not $.Res.SkipDelete }}
+{{ if not $.Res.ExcludeDelete }}
 func testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for name, rs := range s.RootModule().Resources {

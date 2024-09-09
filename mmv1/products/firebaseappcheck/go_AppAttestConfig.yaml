@@ -28,7 +28,7 @@ create_url: 'projects/{{project}}/apps/{{app_id}}/appAttestConfig?updateMask=tok
 create_verb: 'PATCH'
 update_verb: 'PATCH'
 update_mask: true
-skip_delete: true
+exclude_delete: true
 import_format:
   - 'projects/{{project}}/apps/{{app_id}}/appAttestConfig'
   - '{{project}}/{{app_id}}'

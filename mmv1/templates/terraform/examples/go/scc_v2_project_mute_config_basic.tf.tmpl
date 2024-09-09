@@ -1,0 +1,8 @@
+resource "google_scc_v2_project_mute_config" "{{$.PrimaryResourceId}}" {
+  mute_config_id    = "{{index $.Vars "mute_config_id"}}"
+  project = "{{index $.TestEnvVars "project_id"}}"
+  location     = "global"
+  description  = "My custom Cloud Security Command Center Finding Project mute Configuration"
+  filter = "severity = \"HIGH\""
+  type = "STATIC"
+}

@@ -49,7 +49,7 @@ async:
 collection_url_key: 'items'
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/go/sql_database_deletion_policy.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 read_error_transform: 'transformSQLDatabaseReadError'
 examples:
   - name: 'sql_database_basic'
