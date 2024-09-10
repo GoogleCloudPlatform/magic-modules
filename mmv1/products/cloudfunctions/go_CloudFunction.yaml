@@ -135,7 +135,6 @@ properties:
     type: KeyValueLabels
     description: |
       A set of key/value label pairs associated with this Cloud Function.
-    immutable: false
   - name: 'environmentVariables'
     type: KeyValuePairs
     description: |

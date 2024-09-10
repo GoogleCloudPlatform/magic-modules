@@ -43,7 +43,7 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'iam_access_boundary_policy_basic'
     primary_resource_id: 'example'

@@ -50,7 +50,7 @@ async:
     message: 'message'
 custom_code:
   test_check_destroy: 'templates/terraform/custom_check_destroy/go/appengine.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 error_retry_predicates:
 
   - 'transport_tpg.IsAppEngineRetryableError'

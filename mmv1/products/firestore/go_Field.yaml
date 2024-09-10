@@ -60,7 +60,7 @@ custom_code:
   custom_delete: 'templates/terraform/custom_delete/go/firestore_field_delete.go.tmpl'
   custom_import: 'templates/terraform/custom_import/go/firestore_field.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/go/firestore_field.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 error_retry_predicates:
 
   - 'transport_tpg.FirestoreField409RetryUnderlyingDataChanged'
@@ -99,6 +99,7 @@ properties:
     description: |
       The Firestore database id. Defaults to `"(default)"`.
     url_param_only: true
+    immutable: true
     default_value: "(default)"
   - name: 'collection'
     type: String
@@ -106,12 +107,14 @@ properties:
       The id of the collection group to configure.
     url_param_only: true
     required: true
+    immutable: true
   - name: 'field'
     type: String
     description: |
       The id of the field to configure.
     url_param_only: true
     required: true
+    immutable: true
   - name: 'name'
     type: String
     description: |

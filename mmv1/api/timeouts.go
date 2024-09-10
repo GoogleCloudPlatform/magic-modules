@@ -13,7 +13,8 @@
 
 package api
 
-// Default timeout for all operation types is 20, the Terraform default (https://www.terraform.io/plugin/sdkv2/resources/retries-and-customizable-timeouts)
+// Default timeout for all operation types is 20, the Terraform default
+// (https://www.terraform.io/plugin/sdkv2/resources/retries-and-customizable-timeouts)
 // minutes. This can be overridden for each resource.
 const DEFAULT_INSERT_TIMEOUT_MINUTES = 20
 const DEFAULT_UPDATE_TIMEOUT_MINUTES = 20
@@ -21,17 +22,10 @@ const DEFAULT_DELETE_TIMEOUT_MINUTES = 20
 
 // Provides timeout information for the different operation types
 type Timeouts struct {
-	// google.YamlValidator
 	InsertMinutes int `yaml:"insert_minutes"`
 	UpdateMinutes int `yaml:"update_minutes"`
 	DeleteMinutes int `yaml:"delete_minutes"`
 }
-
-// def initialize
-//   super
-
-//   validate
-// end
 
 func NewTimeouts() *Timeouts {
 	return &Timeouts{
@@ -40,11 +34,3 @@ func NewTimeouts() *Timeouts {
 		DeleteMinutes: DEFAULT_DELETE_TIMEOUT_MINUTES,
 	}
 }
-
-// def validate
-//   super
-
-//   check :insert_minutes, type: Integer, default: DEFAULT_INSERT_TIMEOUT_MINUTES
-//   check :update_minutes, type: Integer, default: DEFAULT_UPDATE_TIMEOUT_MINUTES
-//   check :delete_minutes, type: Integer, default: DEFAULT_DELETE_TIMEOUT_MINUTES
-// end

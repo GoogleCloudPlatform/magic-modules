@@ -134,8 +134,8 @@ properties:
       characters may be allowed in the future. Therefore, you are advised to use
       an internal label representation, such as JSON, which doesn't rely upon
       specific characters being disallowed.  For example, representing labels
-      as the string:  `name + \"_\" + value` would prove problematic if we were to
-      allow `\"_\"` in a future release. "
+      as the string:  `name + "_" + value` would prove problematic if we were to
+      allow `"_"` in a future release. "
     min_version: 'beta'
   - name: 'capacityGib'
     type: String

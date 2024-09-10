@@ -52,7 +52,7 @@ collection_url_key: 'items'
 identity:
   - entity
 custom_code:
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'storage_bucket_access_control_public_bucket'
     primary_resource_id: 'public_rule'

@@ -10,9 +10,8 @@ resource "google_alloydb_cluster" "default" {
   cluster_id = "{{index $.Vars "alloydb_cluster_name"}}"
   location   = "us-central1"
   network_config {
-    network = google_compute_network.default.id
+    network = data.google_compute_network.default.id
   }
-
   initial_user {
     password = "{{index $.Vars "alloydb_cluster_pass"}}"
   }

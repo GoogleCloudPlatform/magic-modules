@@ -5,7 +5,7 @@ resource "google_apphub_application" "{{$.PrimaryResourceId}}" {
   scope {
     type = "REGIONAL"
   }
-  description = "{{index $.Vars "description"}}"
+  description = "{{index $.Vars "desc"}}"
   attributes {
     environment {
       type = "STAGING"

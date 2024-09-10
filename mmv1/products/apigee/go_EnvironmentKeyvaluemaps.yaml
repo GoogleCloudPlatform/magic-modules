@@ -38,7 +38,7 @@ custom_code:
   decoder: 'templates/terraform/decoders/go/apigee_environment_keyvaluemaps.go.tmpl'
   custom_create: 'templates/terraform/custom_create/go/apigee_environment_keyvaluemaps.go.tmpl'
   custom_import: 'templates/terraform/custom_import/go/apigee_environment_keyvaluemaps.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'apigee_environment_keyvaluemaps_basic'
     primary_resource_id: 'apigee_environment_keyvaluemaps'

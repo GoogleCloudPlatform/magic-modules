@@ -86,6 +86,8 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: streamingConfig
     required: true
+    allow_empty_object: true
+    send_empty_value: true
     description: |
       The config for triggering streaming-based notifications.
     update_mask_fields:
@@ -94,6 +96,7 @@ properties:
       - !ruby/object:Api::Type::String
         name: filter
         required: true
+        send_empty_value: true
         description: |
           Expression that defines the filter to apply across create/update
           events of assets or findings as specified by the event type. The

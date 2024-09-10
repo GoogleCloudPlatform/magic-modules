@@ -112,4 +112,3 @@ properties:
     description: |
       Resource labels to represent user-provided metadata.
     min_version: 'beta'
-    immutable: false

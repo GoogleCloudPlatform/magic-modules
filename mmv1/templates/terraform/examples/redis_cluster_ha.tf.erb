@@ -12,7 +12,7 @@ resource "google_redis_cluster" "<%= ctx[:primary_resource_id] %>" {
   redis_configs = {
     maxmemory-policy	= "volatile-ttl"
   }
-  deletion_protection_enabled = <%= ctx[:vars]['deletion_protection_enabled'] == 'true' %>
+  deletion_protection_enabled = <%= ctx[:vars]['deletion_protection_enabled']%>
 
   zone_distribution_config {
     mode = "MULTI_ZONE"

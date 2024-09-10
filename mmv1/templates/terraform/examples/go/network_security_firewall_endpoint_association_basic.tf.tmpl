@@ -1,7 +1,13 @@
+resource "google_compute_network" "foobar" {
+  name                    = "tf-test-my-vpc%{randomSuffix}"
+  auto_create_subnetworks = false
+}
+
 resource "google_network_security_firewall_endpoint" "{{$.PrimaryResourceId}}" {
-  name        = "{{index $.Vars "resource_name_prefix"}}"
-  parent      = "organizations/{{index $.TestEnvVars "org_id"}}"
-  location    = "us-central1-a"
+  name               = "{{index $.Vars "resource_name_prefix"}}"
+  parent             = "organizations/{{index $.TestEnvVars "org_id"}}"
+  location           = "us-central1-a"
+  billing_project_id = "{{index $.TestEnvVars "project"}}"
 
   labels = {
     foo = "bar"
@@ -9,9 +15,12 @@ resource "google_network_security_firewall_endpoint" "{{$.PrimaryResourceId}}" {
 }
 
 resource "google_network_security_firewall_endpoint_association" "{{$.PrimaryResourceId}}_association" {
-  name        = "{{index $.Vars "resource_name_prefix"}}-association"
-  parent      = "projects/{{index $.TestEnvVars "project"}}"
-  location    = "us-central1-a"
+  name              = "{{index $.Vars "resource_name_prefix"}}-association"
+  parent            = "projects/{{index $.TestEnvVars "project"}}"
+  location          = "us-central1-a"
+  network           = google_compute_network.foobar.id
+  firewall_endpoint = google_network_security_firewall_endpoint.{{$.PrimaryResourceId}}.id
+  disabled          = false
 
   labels = {
     foo = "bar"
