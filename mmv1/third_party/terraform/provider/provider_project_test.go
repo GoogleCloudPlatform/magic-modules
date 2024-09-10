@@ -1,7 +1,6 @@
 package provider_test
 
 import (
-	"fmt"
 	"regexp"
 	"testing"
 
@@ -171,8 +170,9 @@ func testAccSdkProvider_project_emptyStringValidation(t *testing.T) {
 
 func testAccSdkProvider_project_unknownHandling(t *testing.T) {
 
-	project := envvar.GetTestProjectFromEnv()
 	context := map[string]interface{}{
+		"random_suffix":      acctest.RandString(t, 10),
+		"test_step":          "0", // each test step updates this value
 		"org_id":             envvar.GetTestOrgFromEnv(t),
 		"billing_account_id": envvar.GetTestBillingAccountFromEnv(t),
 	}
@@ -180,15 +180,18 @@ func testAccSdkProvider_project_unknownHandling(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
-		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSdkProvider_projectUnknownHandling(context),
+				Config: testAccSdkProvider_projectUnknownHandling(context, "1"),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					// Matches ENV instead of the project id output from google_project resource
-					resource.TestCheckResourceAttr("data.google_provider_config_sdk.default", "project", project),
+					resource.TestMatchResourceAttr("data.google_provider_config_sdk.default-1", "project", regexp.MustCompile("tf-test-[0-9a-z]{10}-[0-9]{1,}")),
+				),
+			},
+			{
+				Config: testAccSdkProvider_projectUnknownHandling_wait(context, "2"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestMatchResourceAttr("data.google_provider_config_sdk.default-2", "project", regexp.MustCompile("tf-test-[0-9a-z]{10}-[0-9]{1,}")),
+					resource.TestMatchResourceAttr("data.google_provider_config_sdk.wait-2", "project", regexp.MustCompile("tf-test-[0-9a-z]{10}-[0-9]{1,}")),
 				),
 			},
 			{
@@ -198,10 +201,22 @@ func testAccSdkProvider_project_unknownHandling(t *testing.T) {
 						t.Setenv(v, "")
 					}
 				},
-				Config: testAccSdkProvider_projectUnknownHandling(context),
+				Config: testAccSdkProvider_projectUnknownHandling(context, "3"),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					// Matches project id output from google_project resource
-					resource.TestMatchResourceAttr("data.google_provider_config_sdk.default", "project", regexp.MustCompile(fmt.Sprintf("tf-test-[0-9a-z]{16}|%s", project))),
+					resource.TestMatchResourceAttr("data.google_provider_config_sdk.default-3", "project", regexp.MustCompile("tf-test-[0-9a-z]{10}-[0-9]{1,}")),
+				),
+			},
+			{
+				// Unset all ENVs for project
+				PreConfig: func() {
+					for _, v := range envvar.ProjectEnvVars {
+						t.Setenv(v, "")
+					}
+				},
+				Config: testAccSdkProvider_projectUnknownHandling_wait(context, "4"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestMatchResourceAttr("data.google_provider_config_sdk.default-4", "project", regexp.MustCompile("tf-test-[0-9a-z]{10}-[0-9]{1,}")),
+					resource.TestMatchResourceAttr("data.google_provider_config_sdk.wait-4", "project", regexp.MustCompile("tf-test-[0-9a-z]{10}-[0-9]{1,}")),
 				),
 			},
 		},
@@ -227,12 +242,11 @@ data "google_provider_config_sdk" "default" {}
 }
 
 // testAccSdkProvider_projectUnknownHandling is specifically for testing how an unknown value is used.
-func testAccSdkProvider_projectUnknownHandling(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "random_id" "project_name" {
-  byte_length = 8
-}
+func testAccSdkProvider_projectUnknownHandling(context map[string]interface{}, stepNumber string) string {
+	// Force resources to be recreated on each test step by using stepNumber
+	context["test_step"] = stepNumber
 
+	return acctest.Nprintf(`
 provider "google" {
 	alias = "alternate"
 }
@@ -240,7 +254,7 @@ provider "google" {
 resource "google_project" "project" {
   provider        = google.alternate
   name            = "Test Acc Project"
-  project_id      = "tf-test-${random_id.project_name.hex}"
+  project_id      = "tf-test-%{random_suffix}-%{test_step}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account_id}"
   deletion_policy = "DELETE"
@@ -251,7 +265,19 @@ provider "google" {
 	project = google_project.project.project_id
 }
 
-data "google_provider_config_sdk" "default" {
+data "google_provider_config_sdk" "default-%{test_step}" {
+}
+`, context)
+}
+
+func testAccSdkProvider_projectUnknownHandling_wait(context map[string]interface{}, stepNumber string) string {
+	// Force resources to be recreated on each test step by using stepNumber
+	context["test_step"] = stepNumber
+
+	return testAccSdkProvider_projectUnknownHandling(context, stepNumber) +
+		acctest.Nprintf(`
+data "google_provider_config_sdk" "wait-%{test_step}" {
+  depends_on = [google_project.project]
 }
 `, context)
 }
