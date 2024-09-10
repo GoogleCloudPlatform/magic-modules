@@ -26,7 +26,11 @@ The solution we've implemented includes:
     * Sweeps up old `UTC-nightly-test-YYYY-MM-DD` branches [over 3 days old](https://github.com/hashicorp/terraform-provider-google/blob/5bce89216324fcf9165ef5fc8d1634e55465282b/.github/workflows/teamcity-nightly-workflow.yaml#L83)
 * [Updates to TeamCity](https://github.com/GoogleCloudPlatform/magic-modules/pull/10785) so that any builds triggered by the nightly cron at **4am UTC** check out the `nightly-test` branch 
 
-This diagram shows what happens at 3am UTC when the GHAs run, and how this system helps TeamCity use a consistent commit if there are PRs merged after 4am UTC when test builds are triggered and queued:
+<p align="center">
+<img src="https://github.com/user-attachments/assets/acf538b9-9888-40d8-925d-775c48e9654a">
+</p>
+
+This diagram shows what happens if a new PR was merged to main at 4am when the nightly test builds start running:
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/76646535-01e9-4ea4-9963-89b58887a318">
