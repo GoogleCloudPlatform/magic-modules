@@ -15,6 +15,7 @@
 name: 'BackupSchedule'
 base_url: projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules
 self_link: 'projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules/{{name}}'
+create_url: 'projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules?parent=projects/{{project}}/instances/{{instance}}/databases/{{database}}&backup_schedule_id={{name}}'
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -28,7 +29,8 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/spanner_schedule_backup.go.erb
   decoder: templates/terraform/decoders/spanner_schedule_backup.go.erb
-  pre_create: templates/terraform/pre_create/spanner_schedule_backup.go.erb
+  pre_update: templates/terraform/pre_update/spanner_schedule_backup.go.erb
+# Sweeper skipped as this resource will be deleted by the database sweeper.
 skip_sweeper: true
 id_format: 'projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules/{{name}}'
 import_format:
@@ -47,19 +49,30 @@ examples:
     primary_resource_id: 'full-backup'
     vars:
       database_name: 'database-id'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      deletion_protection: 'false'
+    oics_vars_overrides:
+      deletion_protection: 'false'
   - !ruby/object:Provider::Terraform::Examples
     name: 'spanner_backup_schedule_daily_incremental'
     primary_resource_id: 'incremental-backup'
     vars:
       database_name: 'database-id'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      deletion_protection: 'false'
+    oics_vars_overrides:
+      deletion_protection: 'false'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'instance'
-    resource: 'Database'
-    imports: 'instance'
-    description: 'The instance to create the backup schedule on.'
+    resource: 'Instance'
+    imports: 'name'
+    description: 'The instance to create the database on.'
     immutable: true
     required: true
+    url_param_only: true
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::ResourceRef
     name: 'database'
@@ -68,14 +81,15 @@ parameters:
     description: 'The database to create the backup schedule on.'
     immutable: true
     required: true
+    url_param_only: true
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: name
     output: true
     description: |
-      The unique backup schedule identifier across all locations and databases for the given project. Format:
-      'projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules/{{backupSchedule}}'
+      The unique backup schedule identifier across all locations and databases for the given project, which cannot be changed after
+      the schedule is created. Values are of the form [a-z][-a-z0-9]*[a-z0-9].
     immutable: true
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String
@@ -91,13 +105,11 @@ properties:
       Defines specifications of the backup schedule.
     send_empty_value: true
     allow_empty_object: true
-    immutable: true
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: cronSpec
         description: |
           Cron style schedule specification..
-        immutable: true
         properties:
           - !ruby/object:Api::Type::String
             name: text

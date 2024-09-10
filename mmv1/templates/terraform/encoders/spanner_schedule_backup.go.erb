@@ -1,18 +1,15 @@
+obj["name"] = d.Get("name").(string)
 if obj["name"] == nil {
   if err := d.Set("name", id.PrefixedUniqueId("tfgen-spanid-")[:30]); err != nil {
     return nil, fmt.Errorf("Error setting name: %s", err)
   }
 }
-obj["name"] = d.Get("name").(string)
 config := meta.(*transport_tpg.Config)
-fmt.Printf("Got name: %s\n", obj["name"].(string))
-obj["backup_schedule_id"] = obj["name"].(string)
 var err error
 obj["name"], err = tpgresource.ReplaceVars(d, config, "projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules/{{name}}")
 if err != nil {
   return obj, err
 }
-delete(obj, "name")
 delete(obj, "instance")
 delete(obj, "database")
 return obj, nil
