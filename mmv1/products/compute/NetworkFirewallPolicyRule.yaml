@@ -54,6 +54,9 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_delete: 'templates/terraform/constants/compute_network_firewall_policy_rule_operation.go.erb'
   custom_import: 'templates/terraform/custom_import/network_firewall_policy_rule_import.go.erb'
   test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb'
+custom_diff:
+  - 'tpgresource.DefaultProviderProject'
+  - 'tpgresource.DefaultProviderRegion'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'firewallPolicy'
@@ -68,6 +71,7 @@ parameters:
     description: |
       The project for the resource
     immutable: true
+    url_param_only: true
     default_from_api: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
 properties:
