@@ -30,8 +30,6 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/spanner_schedule_backup.go.erb
   decoder: templates/terraform/decoders/spanner_schedule_backup.go.erb
   pre_update: templates/terraform/pre_update/spanner_schedule_backup.go.erb
-# Sweeper skipped as this resource will be deleted by the database sweeper.
-skip_sweeper: true
 id_format: 'projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules/{{name}}'
 import_format:
   - 'projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules/{{name}}'
