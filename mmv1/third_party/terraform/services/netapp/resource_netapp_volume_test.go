@@ -659,7 +659,7 @@ func testAccNetappVolume_volumeBasicExample_cleanupScheduledBackup(t *testing.T,
 	}
 }
 
-func TestAccNetappVolume_autoTieredNetappVolumeExample_update(t *testing.T) {
+func TestAccNetappVolume_autoTieredNetappVolume(t *testing.T) {
 	context := map[string]interface{}{
 		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
 		"random_suffix": acctest.RandString(t, 10),
