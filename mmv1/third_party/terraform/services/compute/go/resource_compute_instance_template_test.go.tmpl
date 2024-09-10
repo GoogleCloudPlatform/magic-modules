@@ -804,6 +804,15 @@ func TestAccComputeInstanceTemplate_ConfidentialInstanceConfigMain(t *testing.T)
 					testAccCheckComputeInstanceTemplateHasConfidentialInstanceConfig(&instanceTemplate2, false, "SEV_SNP"),
 				),
 			},
+			{{- if ne $.TargetVersionName "ga" }}
+			{
+				Config: testAccComputeInstanceTemplateConfidentialInstanceConfigEnableTdx(acctest.RandString(t, 10), "TDX"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceTemplateExists(t, "google_compute_instance_template.foobar5", &instanceTemplate),
+					testAccCheckComputeInstanceTemplateHasConfidentialInstanceConfig(&instanceTemplate, false, "TDX"),
+				),
+			},
+			{{- end }}
 		},
 	})
 }
@@ -860,6 +869,48 @@ func TestAccComputeInstanceTemplate_invalidDiskType(t *testing.T) {
 			{
 				Config:      testAccComputeInstanceTemplate_invalidDiskType(acctest.RandString(t, 10)),
 				ExpectError: regexp.MustCompile("SCRATCH disks must have a disk_type of local-ssd"),
+			},
+		},
+	})
+}
+
+func TestAccComputeInstanceTemplate_withNamePrefix(t *testing.T) {
+	// Randomness from generated name suffix
+	acctest.SkipIfVcr(t)
+
+	t.Parallel()
+
+	// 8 + 46 = 54 which is the valid max
+	normalPrefix := "tf-test-" + fmt.Sprintf("%046s", "")
+	reducedSuffixPrefix := "tf-test-" + fmt.Sprintf("%029s", "")
+	invalidPrefix := "tf-test-" + fmt.Sprintf("%047s", "")
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceTemplate_withNamePrefix(normalPrefix),
+			},
+			{
+				ResourceName:            "google_compute_instance_template.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name_prefix"},
+			},
+			{
+				Config:      testAccComputeInstanceTemplate_withNamePrefix(invalidPrefix),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile("cannot be longer than 54 characters"),
+			},
+			{
+				Config: testAccComputeInstanceTemplate_withNamePrefix(reducedSuffixPrefix),
+			},
+			{
+				ResourceName:            "google_compute_instance_template.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name_prefix"},
 			},
 		},
 	})
@@ -1043,7 +1094,7 @@ func TestAccComputeInstanceTemplate_managedEnvoy(t *testing.T) {
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
-		}, 
+		},
 	})
 }
 
@@ -1621,7 +1672,7 @@ func testAccCheckComputeInstanceTemplateExistsInProject(t *testing.T, n, p strin
 		found, err := config.NewComputeClient(config.UserAgent).InstanceTemplates.Get(
 			p, templateName).View("FULL").Do()
 		{{- end }}
-		
+
 		if err != nil {
 			return err
 		}
@@ -2599,6 +2650,28 @@ resource "google_compute_instance_template" "foobar" {
 `, suffix, suffix)
 }
 
+func testAccComputeInstanceTemplate_withNamePrefix(prefix string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+	family  = "debian-12"
+	project = "debian-cloud"
+}
+resource "google_compute_instance_template" "foobar" {
+  name_prefix    = "%s"
+  machine_type   = "n1-standard-1"   // can't be e2 because of local-ssd
+  can_ip_forward = false
+  disk {
+    source_image = data.google_compute_image.my_image.name
+    auto_delete  = true
+    boot         = true
+  }
+  network_interface {
+    network = "default"
+  }
+}
+`, prefix)
+}
+
 func testAccComputeInstanceTemplate_with375GbScratchDisk(suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -2853,6 +2926,7 @@ resource "google_project" "host_project" {
   project_id      = "%s-host"
   org_id          = "%s"
   billing_account = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_service" "host_project" {
@@ -2869,6 +2943,7 @@ resource "google_project" "service_project" {
   project_id      = "%s-service"
   org_id          = "%s"
   billing_account = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_service" "service_project" {
@@ -3440,6 +3515,41 @@ resource "google_compute_instance_template" "foobar4" {
 `, suffix, minCpuPlatform, confidentialInstanceType, suffix, minCpuPlatform, confidentialInstanceType)
 }
 
+{{ if ne $.TargetVersionName `ga` -}}
+func testAccComputeInstanceTemplateConfidentialInstanceConfigEnableTdx(suffix string, confidentialInstanceType string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image3" {
+  family  = "ubuntu-2204-lts"
+  project = "tdx-guest-images"
+}
+
+resource "google_compute_instance_template" "foobar5" {
+  name         = "tf-test-instance5-template-%s"
+  machine_type = "c3-standard-4"
+
+  disk {
+    source_image = data.google_compute_image.my_image3.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  confidential_instance_config {
+    confidential_instance_type = %q
+  }
+
+  scheduling {
+    on_host_maintenance = "TERMINATE"
+  }
+
+}
+`, suffix, confidentialInstanceType)
+}
+{{- end }}
+
 func testAccComputeInstanceTemplateAdvancedMachineFeatures(suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -3974,7 +4084,7 @@ resource "google_compute_instance_template" "foobar" {
   }
 
   partner_metadata = {
-  	"test.compute.googleapis.com" = jsonencode({ 
+  	"test.compute.googleapis.com" = jsonencode({
   		entries = {
   			key1 = "value1"
   			key2 = 2

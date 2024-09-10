@@ -113,7 +113,6 @@ properties:
     type: KeyValueLabels
     description: Set of label tags associated with the TcpRoute resource.
     min_version: 'beta'
-    immutable: false
   - name: 'description'
     type: String
     description: |
@@ -205,3 +204,12 @@ properties:
               description: |
                 If true, Router will use the destination IP and port of the original connection as the destination of the request.
               min_version: 'beta'
+            - name: 'idleTimeout'
+              type: String
+              description: |
+                Specifies the idle timeout for the selected route. The idle timeout is defined as the period in which there are no bytes sent or received on either the upstream or downstream connection. If not set, the default idle timeout is 30 seconds. If set to 0s, the timeout will be disabled.
+
+                A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
+              min_version: 'beta'
+              validation:
+                regex: '^(0|[1-9][0-9]*)(\.[0-9]{1,9})?s$'

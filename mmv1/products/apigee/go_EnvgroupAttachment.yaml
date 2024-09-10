@@ -49,7 +49,7 @@ async:
     message: 'message'
 custom_code:
   custom_import: 'templates/terraform/custom_import/go/apigee_environment_group_attachment.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'apigee_environment_group_attachment_basic'
     vars:

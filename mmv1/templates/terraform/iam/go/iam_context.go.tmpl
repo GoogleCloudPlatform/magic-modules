@@ -8,7 +8,7 @@
 {{- if $.IamPolicy.TestProjectName }}
 		"project_id" :   fmt.Sprintf("{{ $.IamPolicy.TestProjectName }}%s", acctest.RandString(t, 10)),
 {{- end }}
-{{- template "EnvVarContext" $.FirstTestExample }}
+{{- template "EnvVarContext" dict "TestEnvVars" $.FirstTestExample.TestEnvVars "HasNewLine" true}}
 {{- if $.FirstTestExample.TestVarsOverrides }}
 {{-    range $varName, $override := $.FirstTestExample.TestVarsOverrides }}
 		"{{ $varName }}": {{ $override }},

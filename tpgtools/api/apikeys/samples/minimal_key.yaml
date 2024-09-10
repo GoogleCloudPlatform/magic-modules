@@ -17,8 +17,6 @@ type: key
 versions:
 - ga
 resource: samples/minimal.key.json
-dependencies:
-- samples/basic.cloudresourcemanager.project.json
 variables:
 - name: app
   type: resource_name

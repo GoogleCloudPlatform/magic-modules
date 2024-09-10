@@ -301,11 +301,6 @@ var ServicesListBeta = mapOf(
         "displayName" to "Dataprocmetastore",
         "path" to "./google-beta/services/dataprocmetastore"
     ),
-    "datastore" to mapOf(
-        "name" to "datastore",
-        "displayName" to "Datastore",
-        "path" to "./google-beta/services/datastore"
-    ),
     "datastream" to mapOf(
         "name" to "datastream",
         "displayName" to "Datastream",
@@ -495,6 +490,11 @@ var ServicesListBeta = mapOf(
         "name" to "memcache",
         "displayName" to "Memcache",
         "path" to "./google-beta/services/memcache"
+    ),
+    "memorystore" to mapOf(
+        "name" to "memorystore",
+        "displayName" to "Memorystore",
+        "path" to "./google-beta/services/memorystore"
     ),
     "migrationcenter" to mapOf(
         "name" to "migrationcenter",

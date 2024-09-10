@@ -46,13 +46,13 @@ var (
 )
 
 type vcrCassetteUpdateReplayingResult struct {
-	ReplayingResult    *vcr.Result
+	ReplayingResult    vcr.Result
 	ReplayingErr       error
 	AllReplayingPassed bool
 }
 
 type vcrCassetteUpdateRecordingResult struct {
-	RecordingResult    *vcr.Result
+	RecordingResult    vcr.Result
 	HasTerminatedTests bool
 	RecordingErr       error
 	AllRecordingPassed bool
@@ -100,7 +100,7 @@ var vcrCassetteUpdateCmd = &cobra.Command{
 	},
 }
 
-func execVCRCassetteUpdate(buildID, today string, rnr exec.ExecRunner, ctlr *source.Controller, vt *vcr.Tester) error {
+func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.Controller, vt *vcr.Tester) error {
 	if err := vt.FetchCassettes(provider.Beta, "main", ""); err != nil {
 		return fmt.Errorf("error fetching cassettes: %w", err)
 	}
@@ -125,7 +125,10 @@ func execVCRCassetteUpdate(buildID, today string, rnr exec.ExecRunner, ctlr *sou
 	vt.SetRepoPath(provider.Beta, providerRepo.Path)
 
 	fmt.Println("running tests in REPLAYING mode now")
-	replayingResult, replayingErr := vt.Run(vcr.Replaying, provider.Beta, nil)
+	replayingResult, replayingErr := vt.Run(vcr.RunOptions{
+		Mode:    vcr.Replaying,
+		Version: provider.Beta,
+	})
 
 	// upload replay build and test logs
 	buildLogPath := filepath.Join(rnr.GetCWD(), "testlogs", fmt.Sprintf("%s_test.log", vcr.Replaying.Lower()))
@@ -156,7 +159,11 @@ func execVCRCassetteUpdate(buildID, today string, rnr exec.ExecRunner, ctlr *sou
 	if len(replayingResult.FailedTests) != 0 {
 		fmt.Println("running tests in RECORDING mode now")
 
-		recordingResult, recordingErr := vt.RunParallel(vcr.Recording, provider.Beta, nil, replayingResult.FailedTests)
+		recordingResult, recordingErr := vt.RunParallel(vcr.RunOptions{
+			Mode:    vcr.Recording,
+			Version: provider.Beta,
+			Tests:   replayingResult.FailedTests,
+		})
 
 		// upload build and test logs first to preserve debugging logs in case
 		// uploading cassettes failed because recording not work
@@ -199,15 +206,15 @@ func execVCRCassetteUpdate(buildID, today string, rnr exec.ExecRunner, ctlr *sou
 	return nil
 }
 
-func uploadLogsToGCS(src, dest string, rnr exec.ExecRunner) (string, error) {
+func uploadLogsToGCS(src, dest string, rnr ExecRunner) (string, error) {
 	return uploadToGCS(src, dest, []string{"-h", "Content-Type:text/plain", "-q", "cp", "-r"}, rnr)
 }
 
-func uploadCassettesToGCS(src, dest string, rnr exec.ExecRunner) (string, error) {
+func uploadCassettesToGCS(src, dest string, rnr ExecRunner) (string, error) {
 	return uploadToGCS(src, dest, []string{"-m", "-q", "cp"}, rnr)
 }
 
-func uploadToGCS(src, dest string, opts []string, rnr exec.ExecRunner) (string, error) {
+func uploadToGCS(src, dest string, opts []string, rnr ExecRunner) (string, error) {
 	fmt.Printf("uploading from %s to %s\n", src, dest)
 	args := append(opts, src, dest)
 	fmt.Println("gsutil", args)

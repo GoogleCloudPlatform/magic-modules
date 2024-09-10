@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-func TestAccNetappactiveDirectory_activeDirectory_FullUpdate(t *testing.T) {
+func TestAccNetappActiveDirectory_activeDirectory_FullUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -20,7 +20,7 @@ func TestAccNetappactiveDirectory_activeDirectory_FullUpdate(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetappactiveDirectory_activeDirectoryCreateExample_Full(context),
+				Config: testAccNetappActiveDirectory_activeDirectoryCreateExample_Full(context),
 			},
 			{
 				ResourceName:            "google_netapp_active_directory.test_active_directory_full",
@@ -29,7 +29,7 @@ func TestAccNetappactiveDirectory_activeDirectory_FullUpdate(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"location", "name", "pass", "labels", "terraform_labels"},
 			},
 			{
-				Config: testAccNetappactiveDirectory_activeDirectoryCreateExample_Update(context),
+				Config: testAccNetappActiveDirectory_activeDirectoryCreateExample_Update(context),
 			},
 			{
 				ResourceName:            "google_netapp_active_directory.test_active_directory_full",
@@ -41,7 +41,7 @@ func TestAccNetappactiveDirectory_activeDirectory_FullUpdate(t *testing.T) {
 	})
 }
 
-func testAccNetappactiveDirectory_activeDirectoryCreateExample_Full(context map[string]interface{}) string {
+func testAccNetappActiveDirectory_activeDirectoryCreateExample_Full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_netapp_active_directory" "test_active_directory_full" {
     name = "tf-test-test-active-directory-full%{random_suffix}"
@@ -70,7 +70,7 @@ resource "google_netapp_active_directory" "test_active_directory_full" {
 `, context)
 }
 
-func testAccNetappactiveDirectory_activeDirectoryCreateExample_Update(context map[string]interface{}) string {
+func testAccNetappActiveDirectory_activeDirectoryCreateExample_Update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_netapp_active_directory" "test_active_directory_full" {
     name = "tf-test-test-active-directory-full%{random_suffix}"

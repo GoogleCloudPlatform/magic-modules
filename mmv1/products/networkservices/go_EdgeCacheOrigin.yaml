@@ -89,7 +89,6 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: 'Set of label tags associated with the EdgeCache resource.'
-    immutable: false
   - name: 'originAddress'
     type: String
     description: |

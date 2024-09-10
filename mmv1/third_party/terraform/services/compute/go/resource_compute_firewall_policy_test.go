@@ -54,6 +54,7 @@ func testAccComputeFirewallPolicy_basic(org, policyName, folderName string) stri
 resource "google_folder" "folder" {
   display_name = "%s"
   parent       = "%s"
+  deletion_protection = false
 }
 
 resource "google_compute_firewall_policy" "default" {
@@ -69,6 +70,7 @@ func testAccComputeFirewallPolicy_update(org, policyName, folderName string) str
 resource "google_folder" "folder" {
   display_name = "%s"
   parent       = "%s"
+  deletion_protection = false
 }
 
 resource "google_compute_firewall_policy" "default" {

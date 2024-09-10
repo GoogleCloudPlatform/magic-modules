@@ -138,21 +138,9 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 			{{- range $prop := $.OrderProperties $.AllUserProperties }}
 {{template "SchemaFields" $prop -}}
 			{{- end }}
-{{- if $.VirtualFields -}}
-{{-   range $field := $.VirtualFields }}
-            "{{ $field.Name -}}": {
-                Type: {{ $field.TFType $field.Type -}},
-                Optional: true,
-{{-      if $field.Immutable }}
-                ForceNew: true,
-{{-     end}}
-{{-      if not (eq $field.DefaultValue nil) }}
-                Default:  {{ $field.GoLiteral $field.DefaultValue -}},
-{{-     end}}
-                Description: `{{ replace $field.GetDescription "`" "'" -1 -}}`,
-            },
-{{-   end}}
-{{- end}}
+            {{- range $prop := $.VirtualFields }}
+{{template "SchemaFields" $prop -}}
+            {{- end }}
 {{- if $.CustomCode.ExtraSchemaEntry }} 
     {{ $.CustomTemplate $.CustomCode.ExtraSchemaEntry false -}}
 {{- end}}
@@ -432,9 +420,6 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{if and ($.GetAsync) ($.GetAsync.IsA "PollAsync")}}
 func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interface{}) transport_tpg.PollReadFunc {
     return func() (map[string]interface{}, error) {
-{{if $.GetAsync.CustomPollRead -}}
-//TODO custom poll read
-{{    else -}}
         config := meta.(*transport_tpg.Config)
 
 
@@ -516,7 +501,6 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
         }
 {{ end }}
         return res, nil
-{{    end  -}}
     }
 }
 {{  end }}
@@ -1016,7 +1000,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
 {{- if and ($.GetAsync) (and (and ($.GetAsync.IsA "OpAsync") $.GetAsync.IncludeProject) ($.GetAsync.Allow "delete")) }}
     var project string
 {{- end }}
-{{- if $.SkipDelete }}
+{{- if $.ExcludeDelete }}
     log.Printf("[WARNING] {{ $.ProductMetadata.Name }}{{" "}}{{ $.Name }} resources" +
     " cannot be deleted from Google Cloud. The resource %s will be removed from Terraform" +
     " state, but will still be present on Google Cloud.", d.Id())

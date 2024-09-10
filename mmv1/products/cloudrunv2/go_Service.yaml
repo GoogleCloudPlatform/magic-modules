@@ -55,6 +55,7 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/services/{{name}}'
     - '{{name}}'
 custom_code:
+  pre_delete: 'templates/terraform/pre_delete/go/cloudrunv2_service_deletion_policy.go.tmpl'
 taint_resource_on_failed_create: true
 examples:
   - name: 'cloudrunv2_service_basic'
@@ -62,10 +63,14 @@ examples:
     primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-service%s", context["random_suffix"])'
     vars:
       cloud_run_service_name: 'cloudrun-service'
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'cloudrunv2_service_limits'
     primary_resource_id: 'default'
     vars:
       cloud_run_service_name: 'cloudrun-service'
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'cloudrunv2_service_sql'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
@@ -76,6 +81,8 @@ examples:
       deletion_protection: 'true'
     test_vars_overrides:
       'deletion_protection': 'false'
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'cloudrunv2_service_vpcaccess'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
@@ -84,38 +91,75 @@ examples:
       vpc_access_connector_name: 'run-vpc'
       vpc_compute_subnetwork_name: 'run-subnetwork'
       compute_network_name: 'run-network'
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'cloudrunv2_service_directvpc'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
     vars:
       cloud_run_service_name: 'cloudrun-service'
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'cloudrunv2_service_probes'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
     vars:
       cloud_run_service_name: 'cloudrun-service'
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'cloudrunv2_service_secret'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
     vars:
       cloud_run_service_name: 'cloudrun-service'
       secret_id: 'secret-1'
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'cloudrunv2_service_multicontainer'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-service%s", context["random_suffix"])'
     min_version: 'beta'
     vars:
       cloud_run_service_name: 'cloudrun-service'
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'cloudrunv2_service_mount_gcs'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-service-%s", context["random_suffix"])'
     vars:
       cloud_run_service_name: 'cloudrun-service'
+    ignore_read_extra:
+      - 'deletion_protection'
+    skip_vcr: true
   - name: 'cloudrunv2_service_mount_nfs'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-service-%s", context["random_suffix"])'
     vars:
       cloud_run_service_name: 'cloudrun-service'
+    ignore_read_extra:
+      - 'deletion_protection'
+    skip_vcr: true
+  - name: 'cloudrunv2_service_mesh'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-service-%s", context["random_suffix"])'
+    min_version: 'beta'
+    vars:
+      cloud_run_service_name: 'cloudrun-service'
+      mesh_name: 'network-services-mesh'
+    ignore_read_extra:
+      - 'deletion_protection'
+    external_providers: ["time"]
+virtual_fields:
+  - name: 'deletion_protection'
+    description: |
+      Whether Terraform will be prevented from destroying the service. Defaults to true.
+      When a`terraform destroy` or `terraform apply` would delete the service,
+      the command will fail if this field is not set to false in Terraform state.
+      When the field is set to true or unset in Terraform state, a `terraform apply`
+      or `terraform destroy` that would delete the service will fail.
+      When the field is set to false, deleting the service is allowed.
+    type: Boolean
+    default_value: true
 parameters:
   - name: 'location'
     type: String
@@ -156,7 +200,6 @@ properties:
 
       Cloud Run API v2 does not support labels with  `run.googleapis.com`, `cloud.googleapis.com`, `serving.knative.dev`, or `autoscaling.knative.dev` namespaces, and they will be rejected.
       All system labels in v1 now have a corresponding field in v2 Service.
-    immutable: false
   - name: 'annotations'
     type: KeyValueAnnotations
     description: |-
@@ -242,6 +285,14 @@ properties:
         type: Boolean
         description: |
           If True, indicates to use the default project's binary authorization policy. If False, binary authorization will be disabled.
+        conflicts:
+          - policy
+      - name: 'policy'
+        type: String
+        description: |
+          The path to a binary authorization policy. Format: projects/{project}/platforms/cloudRun/{policy-name}
+        conflicts:
+          - use_default
   - name: 'customAudiences'
     type: Array
     description: |
@@ -388,25 +439,26 @@ properties:
             - name: 'args'
               type: Array
               description: |-
-                Arguments to the entrypoint. The docker image's CMD is used if this is not provided. Variable references $(VAR_NAME) are expanded using the container's environment. If a variable cannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded, regardless of whether the variable exists or not. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell
+                Arguments to the entrypoint. The docker image's CMD is used if this is not provided. Variable references are not supported in Cloud Run.
               item_type:
                 type: String
             - name: 'env'
               type: Array
               description: |-
                 List of environment variables to set in the container.
+              is_set: true
               item_type:
                 type: NestedObject
                 properties:
                   - name: 'name'
                     type: String
                     description: |-
-                      Name of the environment variable. Must be a C_IDENTIFIER, and mnay not exceed 32768 characters.
+                      Name of the environment variable. Must be a C_IDENTIFIER, and may not exceed 32768 characters.
                     required: true
                   - name: 'value'
                     type: String
                     description: |-
-                      Variable references $(VAR_NAME) are expanded using the previous defined environment variables in the container and any route environment variables. If a variable cannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded, regardless of whether the variable exists or not. Defaults to "", and the maximum length is 32768 bytes
+                      Literal value of the environment variable. Defaults to "" and the maximum allowed length is 32768 characters. Variable references are not supported in Cloud Run.
                     # exactly_one_of:
                     #   - template.0.containers.0.env.0.value
                     #   - template.0.containers.0.env.0.valueSource
@@ -497,7 +549,6 @@ properties:
               type: NestedObject
               description: |-
                 Periodic probe of container liveness. Container will be restarted if the probe fails. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
-              default_from_api: true
               properties:
                 - name: 'initialDelaySeconds'
                   type: Integer
@@ -772,7 +823,7 @@ properties:
             - name: 'gcs'
               type: NestedObject
               description: |-
-                Cloud Storage bucket mounted as a volume using GCSFuse. This feature is only supported in the gen2 execution environment and requires launch-stage to be set to ALPHA or BETA.
+                Cloud Storage bucket mounted as a volume using GCSFuse. This feature is only supported in the gen2 execution environment.
               # exactly_one_of:
               #   - template.0.volumes.0.secret
               #   - template.0.volumes.0.cloudSqlInstance
@@ -824,6 +875,16 @@ properties:
         type: Boolean
         description: |-
           Enables session affinity. For more information, go to https://cloud.google.com/run/docs/configuring/session-affinity
+      - name: 'serviceMesh'
+        type: NestedObject
+        description: |-
+          Enables Cloud Service Mesh for this Revision.
+        min_version: 'beta'
+        properties:
+          - name: 'mesh'
+            type: String
+            description: |-
+              The Mesh resource name. For more information see https://cloud.google.com/service-mesh/docs/reference/network-services/rest/v1/projects.locations.meshes#resource:-mesh.
   - name: 'traffic'
     type: Array
     description: |-

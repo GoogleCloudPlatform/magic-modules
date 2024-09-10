@@ -84,7 +84,6 @@ properties:
     type: KeyValueLabels
     description:
       'Set of label tags associated with the DNS Authorization resource.'
-    immutable: false
   - name: 'domain'
     type: String
     description: |

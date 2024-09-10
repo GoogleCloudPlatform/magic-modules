@@ -47,7 +47,7 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'cloudids_endpoint'
     primary_resource_id: 'example-endpoint'

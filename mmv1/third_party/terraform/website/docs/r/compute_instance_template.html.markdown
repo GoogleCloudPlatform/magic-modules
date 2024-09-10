@@ -224,6 +224,47 @@ With this setup Terraform generates a unique name for your Instance
 Template and can then update the Instance Group manager without conflict before
 destroying the previous Instance Template.
 
+## Example usage - Confidential Computing
+
+Example with [Confidential Mode](https://cloud.google.com/confidential-computing/confidential-vm/docs/confidential-vm-overview) activated.
+
+```tf
+resource "google_service_account" "default" {
+  account_id   = "my-custom-sa"
+  display_name = "Custom SA for VM Instance"
+}
+
+resource "google_compute_instance_template" "confidential_instance_template" {
+  name             = "my-confidential-instance-template"
+  region           = "us-central1"
+  machine_type     = "n2d-standard-2"
+  min_cpu_platform = "AMD Milan"
+
+  confidential_instance_config {
+    enable_confidential_compute = true
+    confidential_instance_type  = "SEV"
+  }
+
+  disk {
+    source_image = "ubuntu-os-cloud/ubuntu-2004-lts"
+  }
+
+  network_interface {
+    network = "default"
+
+    access_config {
+      // Ephemeral public IP
+    }
+  }
+
+  service_account {
+    # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
+    email  = google_service_account.default.email
+    scopes = ["cloud-platform"]
+  }
+}
+```
+
 ## Deploying the Latest Image
 
 A common way to use instance templates and managed instance groups is to deploy the
@@ -295,7 +336,14 @@ The following arguments are supported:
   this blank, Terraform will auto-generate a unique name.
 
 * `name_prefix` - (Optional) Creates a unique name beginning with the specified
-  prefix. Conflicts with `name`.
+  prefix. Conflicts with `name`. Max length is 54 characters.
+  Prefixes with lengths longer than 37 characters will use a shortened
+  UUID that will be more prone to collisions.
+
+  Resulting name for a `name_prefix` <= 37 characters:
+  `name_prefix` + YYYYmmddHHSSssss + 8 digit incremental counter
+  Resulting name for a `name_prefix` 38 - 54 characters:
+  `name_prefix` + YYmmdd + 3 digit incremental counter
 
 * `can_ip_forward` - (Optional) Whether to allow sending and receiving of
     packets with non-matching source or destination IPs. This defaults to false.

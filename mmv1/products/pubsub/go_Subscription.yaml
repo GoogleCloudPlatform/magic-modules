@@ -127,7 +127,6 @@ properties:
     type: KeyValueLabels
     description: |
       A set of key/value label pairs to assign to this Subscription.
-    immutable: false
   - name: 'bigqueryConfig'
     type: NestedObject
     description: |
@@ -213,6 +212,10 @@ properties:
         description: |
           The maximum bytes that can be written to a Cloud Storage file before a new file is created. Min 1 KB, max 10 GiB.
           The maxBytes limit may be exceeded in cases where messages are larger than the limit.
+      - name: 'maxMessages'
+        type: Integer
+        description: |
+          The maximum messages that can be written to a Cloud Storage file before a new file is created. Min 1000 messages.
       - name: 'state'
         type: Enum
         description: |
@@ -231,6 +234,10 @@ properties:
             type: Boolean
             description: |
               When true, write the subscription name, messageId, publishTime, attributes, and orderingKey as additional fields in the output.
+          - name: 'useTopicSchema'
+            type: Boolean
+            description: |
+              When true, the output Cloud Storage file will be serialized using the topic schema, if it exists.
       - name: 'serviceAccountEmail'
         type: String
         description: |
@@ -394,6 +401,8 @@ properties:
       you can't modify the filter.
     required: false
     immutable: true
+    validation:
+      regex: '^.{0,256}$'
   - name: 'deadLetterPolicy'
     type: NestedObject
     description: |

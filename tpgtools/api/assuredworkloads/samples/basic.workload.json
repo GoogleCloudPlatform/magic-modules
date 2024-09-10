@@ -16,7 +16,7 @@
   "resourceSettings": [
     {
       "resourceType": "CONSUMER_FOLDER",
-      "displayName": "folder-display-name"
+      "displayName": "{{name}}"
     },
     {
       "resourceType": "ENCRYPTION_KEYS_PROJECT"

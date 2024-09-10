@@ -86,10 +86,14 @@ examples:
       site_id: 'site-id'
       custom_domain: 'run.custom.domain.com'
       cloud_run_service_id: 'cloud-run-service-via-hosting'
+      deletion_protection: 'true'
     test_env_vars:
       project_id: 'PROJECT_NAME'
     test_vars_overrides:
       'custom_domain': '"run.custom.domain.com"'
+      'deletion_protection': 'false'
+    ignore_read_extra:
+      - 'deletion_protection'
 virtual_fields:
   - name: 'wait_dns_verification'
     description: |

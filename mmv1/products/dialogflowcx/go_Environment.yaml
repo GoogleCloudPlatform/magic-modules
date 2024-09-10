@@ -58,7 +58,7 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/go/dialogflowcx_environment.go.tmpl'
 custom_diff:
   - 'tpgresource.DefaultProviderProject'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'dialogflowcx_environment_full'
     primary_resource_id: 'development'

@@ -90,7 +90,6 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: The labels with user-defined metadata to organize your FeatureGroup.
-    immutable: false
   - name: 'description'
     type: String
     description: The description of the FeatureGroup.
