@@ -15,7 +15,7 @@
 name: 'BackupSchedule'
 base_url: projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules
 self_link: 'projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules/{{name}}'
-create_url: 'projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules?parent=projects/{{project}}/instances/{{instance}}/databases/{{database}}&backup_schedule_id={{name}}'
+create_url: 'projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules?backup_schedule_id={{name}}'
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -46,6 +46,8 @@ examples:
     name: 'spanner_backup_schedule_daily_full'
     primary_resource_id: 'full-backup'
     vars:
+      name: 'backup-schedule-id'
+      instance_name: 'instance-id'
       database_name: 'database-id'
       deletion_protection: 'true'
     test_vars_overrides:
@@ -56,6 +58,8 @@ examples:
     name: 'spanner_backup_schedule_daily_incremental'
     primary_resource_id: 'incremental-backup'
     vars:
+      name: 'backup-schedule-id'
+      instance_name: 'instance-id'
       database_name: 'database-id'
       deletion_protection: 'true'
     test_vars_overrides:
@@ -83,13 +87,15 @@ parameters:
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::String
-    name: name
-    output: true
+    name: 'name'
     description: |
-      The unique backup schedule identifier across all locations and databases for the given project, which cannot be changed after
-      the schedule is created. Values are of the form [a-z][-a-z0-9]*[a-z0-9].
+      A unique identifier for the database, which cannot be changed after
+      the instance is created. Values are of the form [a-z][-a-z0-9]*[a-z0-9].
     immutable: true
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+    required: true
+    validation: !ruby/object:Provider::Terraform::Validation
+      regex: '^[a-z][a-z0-9_\-]*[a-z0-9]$'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   - !ruby/object:Api::Type::String
     name: retentionDuration
     required: true
