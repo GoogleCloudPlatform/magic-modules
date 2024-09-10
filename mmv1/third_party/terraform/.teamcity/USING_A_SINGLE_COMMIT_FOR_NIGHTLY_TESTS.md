@@ -32,3 +32,10 @@ This diagram shows what happens at 3am UTC when the GHAs run, and how this syste
   <img src="https://github.com/user-attachments/assets/76646535-01e9-4ea4-9963-89b58887a318">
 </p>
 
+## What this means for you
+
+[PERFORMING_TASKS_IN_TEAMCITY.md](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/.teamcity/PERFORMING_TASKS_IN_TEAMCITY.md) has been updated to reflect these changes.
+
+A useful tip is to be aware of this dropdown in the TeamCity UI that allows you to select a given branch. If you select `refs/heads/nightly-test` from the dropdown you will only see builds that have used that branch. 
+
+![Screenshot 2024-09-10 at 17 59 18](https://github.com/user-attachments/assets/2d88e640-77b3-48f9-b44b-a02a7d47d9f4)
