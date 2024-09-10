@@ -1,5 +1,5 @@
 obj["name"] = d.Get("name").(string)
-if obj["name"] == nil {
+if obj["name"] == nil || obj["name"] == ""  {
   if err := d.Set("name", id.PrefixedUniqueId("tfgen-spanid-")[:30]); err != nil {
     return nil, fmt.Errorf("Error setting name: %s", err)
   }
