@@ -24,7 +24,7 @@ docs:
 id_format: 'projects/{{project_number}}/locations/{{location}}'
 base_url: 'projects/{{project_number}}/locations/{{location}}:initialize'
 skip_read: true
-skip_delete: true
+exclude_delete: true
 immutable: true
 exclude_import: true
 timeouts:
@@ -46,7 +46,7 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'document_ai_warehouse_location'
     primary_resource_id: 'example'

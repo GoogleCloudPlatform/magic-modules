@@ -66,7 +66,7 @@ custom_code:
   pre_delete: 'templates/terraform/pre_delete/go/resource_spanner_database.go.tmpl'
 custom_diff:
   - 'resourceSpannerDBDdlCustomDiff'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'spanner_database_basic'
     primary_resource_id: 'database'
