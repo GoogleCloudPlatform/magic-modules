@@ -67,8 +67,9 @@ parameters:
     required: true
     immutable: true
     url_param_only: true
+    default_value: 'global'
     description: |
-      The geographic location where the Certificate Map Entry should reside.
+      The geographic location where the Certificate Map Entry should reside. Defaults to global.
   - !ruby/object:Api::Type::ResourceRef
     name: 'map'
     required: true

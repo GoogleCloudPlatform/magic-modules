@@ -61,8 +61,9 @@ parameters:
     required: true
     immutable: true
     url_param_only: true
+    default_value: 'global'
     description: |
-      The geographic location where the Certificate Map should reside.
+      The geographic location where the Certificate Map should reside. Defaults to global.
 properties:
   - !ruby/object:Api::Type::String
     name: 'description'
