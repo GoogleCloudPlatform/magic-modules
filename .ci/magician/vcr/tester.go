@@ -71,14 +71,17 @@ var testPanicExpression = regexp.MustCompile(`^panic: .*`)
 var safeToLog = map[string]bool{
 	"ACCTEST_PARALLELISM":                        true,
 	"COMMIT_SHA":                                 true,
+	"GITHUB_TOKEN":                               false,
 	"GITHUB_TOKEN_CLASSIC":                       false,
+	"GITHUB_TOKEN_DOWNSTREAMS":                   false,
+	"GITHUB_TOKEN_MAGIC_MODULES":                 false,
 	"GOCACHE":                                    true,
 	"GOOGLE_APPLICATION_CREDENTIALS":             false,
 	"GOOGLE_BILLING_ACCOUNT":                     false,
 	"GOOGLE_CREDENTIALS":                         false,
 	"GOOGLE_CUST_ID":                             true,
 	"GOOGLE_IDENTITY_USER":                       true,
-	"GOOGLE_MASTER_BILLING_ACCOUNT":              true,
+	"GOOGLE_MASTER_BILLING_ACCOUNT":              false,
 	"GOOGLE_ORG":                                 true,
 	"GOOGLE_ORG_2":                               true,
 	"GOOGLE_ORG_DOMAIN":                          true,
@@ -101,7 +104,7 @@ var safeToLog = map[string]bool{
 	"USER":                                       true,
 	"VCR_MODE":                                   true,
 	"VCR_PATH":                                   true,
-} // true if shown, false if hidden
+} // true if shown, false if hidden (default false)
 
 // Create a new tester in the current working directory and write the service account key file.
 func NewTester(env map[string]string, logBucket, cassetteBucket string, rnr ExecRunner) (*Tester, error) {
