@@ -59,6 +59,13 @@ examples:
       data_store_id: "data-store-id"
     ignore_read_extra:
       - 'project'
+  - !ruby/object:Provider::Terraform::Examples
+    name: "discoveryengine_targetsite_advanced"
+    primary_resource_id: 'advanced'
+    vars:
+      data_store_id: "data-store-id"
+    ignore_read_extra:
+      - 'project'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/set_computed_name.erb
   custom_import: templates/terraform/custom_import/discoveryengine_targetsite_set_id.go.erb
