@@ -87,6 +87,7 @@ properties:
       The user provided URI pattern from which the `generated_uri_pattern` is
       generated.
     required: true
+    ignore_read: true
   - !ruby/object:Api::Type::Enum
     name: 'type'
     description: |
