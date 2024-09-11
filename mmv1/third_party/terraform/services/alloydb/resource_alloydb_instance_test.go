@@ -644,6 +644,9 @@ func TestAccAlloydbInstance_networkConfig(t *testing.T) {
 				Config: testAccAlloydbInstance_networkConfig(context2),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.enable_public_ip", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.authorized_external_networks.0.cidr_range", "8.8.8.8/30"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.authorized_external_networks.1.cidr_range", "8.8.4.4/30"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.authorized_external_networks.#", "2"),
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.enable_outbound_public_ip", "false"),
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "outbound_public_ip_addresses.#", "0"),
 				),
@@ -658,6 +661,8 @@ func TestAccAlloydbInstance_networkConfig(t *testing.T) {
 				Config: testAccAlloydbInstance_networkConfigWithAnAuthNetwork(context3),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.enable_public_ip", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.authorized_external_networks.0.cidr_range", "8.8.8.8/30"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.authorized_external_networks.#", "1"),
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.enable_outbound_public_ip", "true"),
 					resource.TestCheckResourceAttrSet("google_alloydb_instance.default", "outbound_public_ip_addresses.0"),
 				),
