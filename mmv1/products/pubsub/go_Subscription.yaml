@@ -56,6 +56,11 @@ examples:
     vars:
       topic_name: 'example-topic'
       subscription_name: 'example-subscription'
+  - name: 'pubsub_subscription_pull_filter'
+    primary_resource_id: 'example'
+    vars:
+      topic_name: 'example-topic'
+      subscription_name: 'example-subscription'
   - name: 'pubsub_subscription_dead_letter'
     primary_resource_id: 'example'
     vars:
