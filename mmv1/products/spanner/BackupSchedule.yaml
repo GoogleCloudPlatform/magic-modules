@@ -89,10 +89,9 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
-      A unique identifier for the database, which cannot be changed after
-      the instance is created. Values are of the form [a-z][-a-z0-9]*[a-z0-9].
+      A unique identifier for the backup schedule, which cannot be changed after
+      the backup schedule is created. Values are of the form [a-z][-a-z0-9]*[a-z0-9].
     immutable: true
-    required: true
     validation: !ruby/object:Provider::Terraform::Validation
       regex: '^[a-z][a-z0-9_\-]*[a-z0-9]$'
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
