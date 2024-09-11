@@ -396,7 +396,7 @@ properties:
     name: 'filter'
     required: false
     validation: !ruby/object:Provider::Terraform::Validation
-      regex: '^.{0,256}$'
+      regex: '^[\s\S]{0,256}$'
     description: |
       The subscription only delivers the messages that match the filter.
       Pub/Sub automatically acknowledges the messages that don't match the filter. You can filter messages

@@ -402,7 +402,7 @@ properties:
     required: false
     immutable: true
     validation:
-      regex: '^.{0,256}$'
+      regex: '^[\s\S]{0,256}$'
   - name: 'deadLetterPolicy'
     type: NestedObject
     description: |
