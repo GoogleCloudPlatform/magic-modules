@@ -1,0 +1,51 @@
+resource "google_healthcare_pipeline_job" "<%= ctx[:primary_resource_id] %>" {
+  name  = "<%= ctx[:vars]['pipeline_name'] %>"
+  location = "us-central1"
+  dataset = google_healthcare_dataset.dataset.id
+  disable_lineage = true
+  mapping_pipeline_job {
+    mapping_config {
+      whistle_config_source {
+        uri = "gs://${google_storage_bucket.bucket.name}/${google_storage_bucket_object.mapping_file.name}"
+        import_uri_prefix = "gs://${google_storage_bucket.bucket.name}"
+      }
+    }
+    fhir_streaming_source {
+      fhir_store = "${google_healthcare_dataset.dataset.id}/fhirStores/${google_healthcare_fhir_store.source_fhirstore.name}"
+    }
+    fhir_store_destination = "${google_healthcare_dataset.dataset.id}/fhirStores/${google_healthcare_fhir_store.dest_fhirstore.name}"
+  }
+}
+
+resource "google_healthcare_dataset" "dataset" {
+  name     = "<%= ctx[:vars]['dataset_name'] %>"
+  location = "us-central1"
+}
+
+resource "google_healthcare_fhir_store" "source_fhirstore" {
+  name    = "<%= ctx[:vars]['source_fhirstore_name'] %>"
+  dataset = google_healthcare_dataset.dataset.id
+  version = "R4"
+  enable_update_create          = true
+  disable_referential_integrity = true
+}
+
+resource "google_healthcare_fhir_store" "dest_fhirstore" {
+  name    = "<%= ctx[:vars]['dest_fhirstore_name'] %>"
+  dataset = google_healthcare_dataset.dataset.id
+  version = "R4"
+  enable_update_create          = true
+  disable_referential_integrity = true
+}
+
+resource "google_storage_bucket" "bucket" {
+    name          = "<%= ctx[:vars]['bucket_name'] %>"
+    location      = "us-central1"
+    uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_object" "mapping_file" {
+  name    = "mapping.wstl"
+  content = " "
+  bucket  = google_storage_bucket.bucket.name
+}
