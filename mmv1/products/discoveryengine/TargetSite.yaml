@@ -104,3 +104,64 @@ properties:
       provided_uri_pattern is always normalized to generate the URI pattern to
       be used by the search engine.
     default_value: false
+  - !ruby/object:Api::Type::String
+    name: 'generatedUriPattern'
+    description: |
+      This is system-generated based on the `provided_uri_pattern`.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'rootDomainUri'
+    description: |
+      Root domain of the `provided_uri_pattern`.
+    output: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'siteVerificationInfo'
+    description: |
+      Site ownership and validity verification status.
+    output: true
+    properties:
+      - !ruby/object:Api::Type::Enum
+        name: 'siteVerificationState'
+        description: |
+          Site verification state indicating the ownership and validity.
+        values:
+          - :VERIFIED
+          - :UNVERIFIED
+          - :EXEMPTED
+      - !ruby/object:Api::Type::Time
+        name: "verifyTime"
+        description: |
+          Latest site verification time.
+  - !ruby/object:Api::Type::Enum
+    name: 'indexingStatus'
+    description: |
+      The indexing status.
+    output: true
+    values:
+      - :PENDING
+      - :FAILED
+      - :SUCCEEDED
+      - :DELETING
+  - !ruby/object:Api::Type::Time
+    name: "updateTime"
+    description: |
+      The target site's last updated time.
+    output: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'failureReason'
+    description: |
+      Site search indexing failure reasons.
+    output: true
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: 'quotaFailure'
+        description: |
+          Site verification state indicating the ownership and validity.
+        exactly_one_of:
+        - quota_failure
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'totalRequiredQuota'
+            description: |
+              This number is an estimation on how much total quota this project
+              needs to successfully complete indexing.
