@@ -1,6 +1,7 @@
 package provider_test
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"testing"
@@ -8,6 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
+	googleoauth "golang.org/x/oauth2/google"
 )
 
 // TestAccSdkProvider_access_token is a series of acc tests asserting how the SDK provider handles access_token arguments
@@ -19,6 +23,7 @@ func TestAccSdkProvider_access_token(t *testing.T) {
 		"when access_token is unset in the config, environment variables are used in a given order":                 testAccSdkProvider_access_token_precedenceOrderEnvironmentVariables, // GOOGLE_OAUTH_ACCESS_TOKEN
 		"when access_token is set to an empty string in the config the value isn't ignored and results in an error": testAccSdkProvider_access_token_emptyStringValidation,
 		"access_token conflicts with credentials":                                                                   testAccSdkProvider_access_token_conflictsWithCredentials,
+		"access_token can be used to authenticate the provider":                                                     testAccSdkProvider_access_token_authInUse,
 	}
 
 	for name, tc := range testCases {
@@ -206,6 +211,58 @@ credentials = "%s"
 	})
 }
 
+func testAccSdkProvider_access_token_authInUse(t *testing.T) {
+
+	goodCredentials := envvar.GetTestCredsFromEnv()
+
+	// Access token to pass in via config
+	// Environment might return a path or a JSON
+	contents, _, err := verify.PathOrContents(goodCredentials)
+	if err != nil {
+		t.Fatalf("error determining if creds in test environment are a path or contents: %s", err)
+	}
+	// Get googleoauth.Credentials
+	c, err := googleoauth.CredentialsFromJSON(context.Background(), []byte(contents), transport_tpg.DefaultClientScopes...)
+	if err != nil {
+		t.Fatalf("invalid test credentials: %s", err)
+	}
+	// Get value for access_token
+	token, err := c.TokenSource.Token()
+	if err != nil {
+		t.Fatalf("Unable to generate test access token: %s", err)
+	}
+	accessToken := token.AccessToken
+
+	// Inputs ready
+	context := map[string]interface{}{
+		"access_token":  accessToken,
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		// No PreCheck for checking ENVs
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				PreConfig: func() {
+					// unset all relevant ENVs, so value passed in via
+					// context is the only usable input
+					t.Setenv("GOOGLE_OAUTH_ACCESS_TOKEN", "")
+					for _, env := range envvar.CredsEnvVars {
+						t.Setenv(env, "")
+					}
+				},
+				Config: testAccSdkProvider_access_token_useAccessToken(context),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					// Assert provider is using access_token argument for auth
+					resource.TestCheckResourceAttrSet("data.google_provider_config_sdk.default", "access_token"),
+					resource.TestCheckResourceAttr("data.google_provider_config_sdk.default", "credentials", ""),
+				),
+			},
+		},
+	})
+}
+
 // testAccSdkProvider_access_tokenInProviderBlock allows setting the access_token argument in a provider block.
 // This function uses data.google_provider_config_sdk because it is implemented with the SDKv2
 func testAccSdkProvider_access_tokenInProviderBlock(context map[string]interface{}) string {
@@ -249,6 +306,22 @@ data "google_provider_config_sdk" "default" {}
 output "access_token" {
   value = data.google_provider_config_sdk.default.access_token
   sensitive = true
+}
+`, context)
+}
+
+func testAccSdkProvider_access_token_useAccessToken(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+provider "google" {
+  access_token = "%{access_token}"
+}
+
+data "google_provider_config_sdk" "default" {
+}
+
+resource "google_service_account" "default" {
+  account_id   = "tf-test-%{random_suffix}"
+  display_name = "AccTest Service Account"
 }
 `, context)
 }
