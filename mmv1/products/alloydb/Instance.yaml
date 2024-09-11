@@ -389,4 +389,3 @@ properties:
       The outbound public IP addresses for the instance. This is available ONLY when
       networkConfig.enableOutboundPublicIp is set to true. These IP addresses are used
       for outbound connections.
-      
