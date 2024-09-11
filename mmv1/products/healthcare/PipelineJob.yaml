@@ -136,7 +136,7 @@ properties:
                 name: mapping
                 description: |
                   Specifies the name of the mapping in the Data Mapper workspace.
-                required: true 
+                required: true
               - !ruby/object:Api::Type::String
                 name: mappingVersionId
                 description: |
