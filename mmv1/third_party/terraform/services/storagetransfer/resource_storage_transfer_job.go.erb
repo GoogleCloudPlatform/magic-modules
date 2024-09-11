@@ -403,60 +403,60 @@ func transferOptionsSchema() *schema.Schema {
 }
 
 func metadataOptionsSchema() *schema.Schema {
-return &schema.Schema{
-Type:     schema.TypeList,
-Optional: true,
-MaxItems: 1,
-Elem: &schema.Resource{
-Schema: map[string]*schema.Schema{
-"symlink": {
-Type:         schema.TypeString,
-Optional:     true,
-ValidateFunc: validation.StringInSlice([]string{"SYMLINK_UNSPECIFIED","SYMLINK_SKIP","SYMLINK_PRESERVE"}, false),
-},
-"mode": {
-Type:         schema.TypeString,
-Optional:     true,
-ValidateFunc: validation.StringInSlice([]string{"MODE_UNSPECIFIED","MODE_SKIP","MODE_PRESERVE"}, false),
-},
-"gid": {
-Type:         schema.TypeString,
-Optional:     true,
-ValidateFunc: validation.StringInSlice([]string{"GID_UNSPECIFIED","GID_SKIP","GID_NUMBER"}, false),
-},
-"uid": {
-Type:         schema.TypeString,
-Optional:     true,
-ValidateFunc: validation.StringInSlice([]string{"UID_UNSPECIFIED","UID_SKIP","UID_NUMBER"}, false),
-},
-"acl": {
-Type:         schema.TypeString,
-Optional:     true,
-ValidateFunc: validation.StringInSlice([]string{"ACL_UNSPECIFIED","ACL_DESTINATION_BUCKET_DEFAULT","ACL_PRESERVE"}, false),
-},
-"storage_class": {
-Type:         schema.TypeString,
-Optional:     true,
-ValidateFunc: validation.StringInSlice([]string{"STORAGE_CLASS_UNSPECIFIED","STORAGE_CLASS_DESTINATION_BUCKET_DEFAULT","STORAGE_CLASS_PRESERVE","STORAGE_CLASS_STANDARD","STORAGE_CLASS_NEARLINE","STORAGE_CLASS_COLDLINE","STORAGE_CLASS_ARCHIVE"}, false),
-},
-"temporary_hold": {
-Type:         schema.TypeString,
-Optional:     true,
-ValidateFunc: validation.StringInSlice([]string{"TEMPORARY_HOLD_UNSPECIFIED","TEMPORARY_HOLD_SKIP","TEMPORARY_HOLD_PRESERVE"}, false),
-},
-"kms_key": {
-Type:         schema.TypeString,
-Optional:     true,
-ValidateFunc: validation.StringInSlice([]string{"KMS_KEY_UNSPECIFIED","KMS_KEY_DESTINATION_BUCKET_DEFAULT","KMS_KEY_PRESERVE"}, false),
-},
-"time_created": {
-Type:         schema.TypeString,
-Optional:     true,
-ValidateFunc: validation.StringInSlice([]string{"TIME_CREATED_UNSPECIFIED","TIME_CREATED_SKIP","TIME_CREATED_PRESERVE_AS_CUSTOM_TIME"}, false),
-},
-},
-},
-}
+  return &schema.Schema{
+    Type:     schema.TypeList,
+    Optional: true,
+    MaxItems: 1,
+    Elem: &schema.Resource{
+      Schema: map[string]*schema.Schema{
+        "symlink": {
+          Type:         schema.TypeString,
+          Optional:     true,
+          ValidateFunc: validation.StringInSlice([]string{"SYMLINK_UNSPECIFIED","SYMLINK_SKIP","SYMLINK_PRESERVE"}, false),
+        },
+        "mode": {
+          Type:         schema.TypeString,
+          Optional:     true,
+          ValidateFunc: validation.StringInSlice([]string{"MODE_UNSPECIFIED","MODE_SKIP","MODE_PRESERVE"}, false),
+        },
+        "gid": {
+          Type:         schema.TypeString,
+          Optional:     true,
+          ValidateFunc: validation.StringInSlice([]string{"GID_UNSPECIFIED","GID_SKIP","GID_NUMBER"}, false),
+        },
+        "uid": {
+          Type:         schema.TypeString,
+          Optional:     true,
+          ValidateFunc: validation.StringInSlice([]string{"UID_UNSPECIFIED","UID_SKIP","UID_NUMBER"}, false),
+        },
+        "acl": {
+          Type:         schema.TypeString,
+          Optional:     true,
+          ValidateFunc: validation.StringInSlice([]string{"ACL_UNSPECIFIED","ACL_DESTINATION_BUCKET_DEFAULT","ACL_PRESERVE"}, false),
+        },
+        "storage_class": {
+          Type:         schema.TypeString,
+          Optional:     true,
+          ValidateFunc: validation.StringInSlice([]string{"STORAGE_CLASS_UNSPECIFIED","STORAGE_CLASS_DESTINATION_BUCKET_DEFAULT","STORAGE_CLASS_PRESERVE","STORAGE_CLASS_STANDARD","STORAGE_CLASS_NEARLINE","STORAGE_CLASS_COLDLINE","STORAGE_CLASS_ARCHIVE"}, false),
+        },
+        "temporary_hold": {
+          Type:         schema.TypeString,
+          Optional:     true,
+          ValidateFunc: validation.StringInSlice([]string{"TEMPORARY_HOLD_UNSPECIFIED","TEMPORARY_HOLD_SKIP","TEMPORARY_HOLD_PRESERVE"}, false),
+        },
+        "kms_key": {
+          Type:         schema.TypeString,
+          Optional:     true,
+          ValidateFunc: validation.StringInSlice([]string{"KMS_KEY_UNSPECIFIED","KMS_KEY_DESTINATION_BUCKET_DEFAULT","KMS_KEY_PRESERVE"}, false),
+        },
+        "time_created": {
+          Type:         schema.TypeString,
+          Optional:     true,
+          ValidateFunc: validation.StringInSlice([]string{"TIME_CREATED_UNSPECIFIED","TIME_CREATED_SKIP","TIME_CREATED_PRESERVE_AS_CUSTOM_TIME"}, false),
+        },
+      },
+    },
+  }
 }
 
 func timeObjectSchema() *schema.Resource {
@@ -1277,42 +1277,42 @@ func flattenTransferOption(option *storagetransfer.TransferOptions) []map[string
 }
 
 func expandMetadataOptions(metadataOptions []interface{}) *storagetransfer.MetadataOptions {
-if len(metadataOptions) == 0 || metadataOptions[0] == nil {
-return nil
+  if len(metadataOptions) == 0 || metadataOptions[0] == nil {
+    return nil
 }
 
 metadataOption := metadataOptions[0].(map[string]interface{})
-return &storagetransfer.MetadataOptions{
-Symlink:        metadataOption["symlink"].(string),
-Mode:           metadataOption["mode"].(string),
-Gid:            metadataOption["gid"].(string),
-Uid:            metadataOption["uid"].(string),
-Acl:            metadataOption["acl"].(string),
-StorageClass:   metadataOption["storage_class"].(string),
-TemporaryHold:  metadataOption["temporary_hold"].(string),
-KmsKey:         metadataOption["kms_key"].(string),
-TimeCreated:    metadataOption["time_created"].(string),
-}
+  return &storagetransfer.MetadataOptions{
+    Symlink:        metadataOption["symlink"].(string),
+    Mode:           metadataOption["mode"].(string),
+    Gid:            metadataOption["gid"].(string),
+    Uid:            metadataOption["uid"].(string),
+    Acl:            metadataOption["acl"].(string),
+    StorageClass:   metadataOption["storage_class"].(string),
+    TemporaryHold:  metadataOption["temporary_hold"].(string),
+    KmsKey:         metadataOption["kms_key"].(string),
+    TimeCreated:    metadataOption["time_created"].(string),
+  }
 }
 
 func flattenMetadataOptions(metadataOptions *storagetransfer.MetadataOptions) []map[string]interface{} {
-if metadataOptions == nil {
-return nil
-}
+  if metadataOptions == nil {
+    return nil
+  }
 
-data := map[string]interface{}{
-"symlink":        metadataOptions.Symlink,
-"mode":           metadataOptions.Mode,
-"gid":            metadataOptions.Gid,
-"uid":            metadataOptions.Uid,
-"acl":            metadataOptions.Acl,
-"storage_class":   metadataOptions.StorageClass,
-"temporary_hold":  metadataOptions.TemporaryHold,
-"kms_key":         metadataOptions.KmsKey,
-"time_created":    metadataOptions.TimeCreated,
-}
+  data := map[string]interface{}{
+    "symlink":        metadataOptions.Symlink,
+    "mode":           metadataOptions.Mode,
+    "gid":            metadataOptions.Gid,
+    "uid":            metadataOptions.Uid,
+    "acl":            metadataOptions.Acl,
+    "storage_class":   metadataOptions.StorageClass,
+    "temporary_hold":  metadataOptions.TemporaryHold,
+    "kms_key":         metadataOptions.KmsKey,
+    "time_created":    metadataOptions.TimeCreated,
+  }
 
-return []map[string]interface{}{data}
+  return []map[string]interface{}{data}
 }
 
 func expandTransferSpecs(transferSpecs []interface{}) *storagetransfer.TransferSpec {
