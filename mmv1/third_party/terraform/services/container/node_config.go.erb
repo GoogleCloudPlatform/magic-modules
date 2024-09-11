@@ -1204,7 +1204,6 @@ func expandKubeletConfig(v interface{}) *container.NodeKubeletConfig {
 	kConfig := &container.NodeKubeletConfig{}
 	if cpuManagerPolicy, ok := cfg["cpu_manager_policy"]; ok {
 		kConfig.CpuManagerPolicy = cpuManagerPolicy.(string)
-		kConfig.ForceSendFields = append(kConfig.ForceSendFields, "CpuManagerPolicy")
 	}
 	if cpuCfsQuota, ok := cfg["cpu_cfs_quota"]; ok {
 		kConfig.CpuCfsQuota = cpuCfsQuota.(bool)
