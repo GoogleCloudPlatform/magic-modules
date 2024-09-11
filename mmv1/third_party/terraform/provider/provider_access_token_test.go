@@ -16,11 +16,16 @@ import (
 // It is a counterpart to TestAccFwProvider_access_token
 func TestAccSdkProvider_access_token(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
-		"config takes precedence over environment variables":                                                        testAccSdkProvider_access_token_configPrecedenceOverEnvironmentVariables,
-		"when access_token is unset in the config, environment variables are used in a given order":                 testAccSdkProvider_access_token_precedenceOrderEnvironmentVariables, // GOOGLE_OAUTH_ACCESS_TOKEN
+		// Configuring the provider using inputs
+		"config takes precedence over environment variables":                                        testAccSdkProvider_access_token_configPrecedenceOverEnvironmentVariables,
+		"when access_token is unset in the config, environment variables are used in a given order": testAccSdkProvider_access_token_precedenceOrderEnvironmentVariables, // GOOGLE_OAUTH_ACCESS_TOKEN
+
+		// Schema-level validation
 		"when access_token is set to an empty string in the config the value isn't ignored and results in an error": testAccSdkProvider_access_token_emptyStringValidation,
-		"access_token conflicts with credentials":                                                                   testAccSdkProvider_access_token_conflictsWithCredentials,
-		"access_token can be used to authenticate the provider":                                                     testAccSdkProvider_access_token_authInUse,
+		"access_token conflicts with credentials": testAccSdkProvider_access_token_conflictsWithCredentials,
+
+		// Usage
+		"access_token can be used to authenticate the provider": testAccSdkProvider_access_token_authInUse,
 	}
 
 	for name, tc := range testCases {

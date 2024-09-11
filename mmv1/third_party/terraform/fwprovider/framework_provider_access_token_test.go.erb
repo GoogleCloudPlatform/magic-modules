@@ -19,16 +19,18 @@ import (
 // It is a counterpart to TestAccSdkProvider_access_token
 func TestAccFwProvider_access_token(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
+		// Configuring the provider using inputs
 		"config takes precedence over environment variables":                                                        testAccFwProvider_access_token_configPrecedenceOverEnvironmentVariables,
 		"when access_token is unset in the config, environment variables are used in a given order":                 testAccFwProvider_access_token_precedenceOrderEnvironmentVariables, // GOOGLE_OAUTH_ACCESS_TOKEN
+
+		// Schema-level validation
 		"when access_token is set to an empty string in the config the value isn't ignored and results in an error": testAccFwProvider_access_token_emptyStringValidation,
 		"access_token conflicts with credentials":                                                                   testAccFwProvider_access_token_conflictsWithCredentials,
 		<% unless version == 'ga' -%>
-		// Start beta-only test cases
-		// Beta-only generation is needed because we need to access a PF-implemented data source linked to resource in an API.
-		// Currently this only exists in TPGB.
+		// Usage
+		//    Beta-only generation is needed because we need to access a PF-implemented data source linked to resource in an API.
+		//    Currently this only exists in TPGB.
 		"access_token can be used to authenticate the provider": testAccFwProvider_access_token_authInUse,
-		// End beta-only test cases
 		<% end -%>
 	}
 
