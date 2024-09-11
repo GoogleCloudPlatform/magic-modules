@@ -23,6 +23,9 @@ func TestAccSdkProvider_user_project_override(t *testing.T) {
 		"when user_project_override is set in the config the value can be a boolean (true/false) or a string (true/false/1/0)": testAccSdkProvider_user_project_override_booleansInConfigOnly,
 		"when user_project_override is set via environment variables any of these values can be used: true/false/1/0":          testAccSdkProvider_user_project_override_envStringsAccepted,
 
+		// Usage
+		"user_project_override controls which project is used for quota and billing purposes":            testAccProviderUserProjectOverride,
+		"user_project_override works for resources that don't take a project id as an argument directly": testAccProviderIndirectUserProjectOverride,
 	}
 
 	for name, tc := range testCases {
@@ -245,3 +248,166 @@ output "user_project_override" {
 `, context)
 }
 
+// Test setup:
+// - Provisions project-1 and project-2
+// - The API required for the provisioned resource is only enabled in project-2
+// - The provider is configured using an access token linked to project-1
+// The test demonstrates how:
+// - If user_project_override = false : the apply fails as the API is disabled in project-1
+// - If user_project_override = true : the apply succeeds as X-Goog-User-Project will reference project-2, where API is enabled
+func testAccProviderUserProjectOverride(t *testing.T) {
+	// Parallel fine-grained resource creation
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	org := envvar.GetTestOrgFromEnv(t)
+	billing := envvar.GetTestBillingAccountFromEnv(t)
+	pid := "tf-test-" + acctest.RandString(t, 10)
+	topicName := "tf-test-topic-" + acctest.RandString(t, 10)
+
+	config := acctest.BootstrapConfig(t)
+	accessToken, err := acctest.SetupProjectsAndGetAccessToken(org, billing, pid, "pubsub", config)
+	if err != nil {
+		t.Error(err)
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		// No TestDestroy since that's not really the point of this test
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccProviderUserProjectOverride_step2(accessToken, pid, false, topicName),
+				ExpectError: regexp.MustCompile("Cloud Pub/Sub API has not been used"),
+			},
+			{
+				Config: testAccProviderUserProjectOverride_step2(accessToken, pid, true, topicName),
+			},
+			{
+				ResourceName:            "google_pubsub_topic.project-2-topic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testAccProviderUserProjectOverride_step3(accessToken, true),
+			},
+		},
+	})
+}
+
+// Do the same thing as TestAccProviderUserProjectOverride, but using a resource that gets its project via
+// a reference to a different resource instead of a project field.
+func testAccProviderIndirectUserProjectOverride(t *testing.T) {
+	// Parallel fine-grained resource creation
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	org := envvar.GetTestOrgFromEnv(t)
+	billing := envvar.GetTestBillingAccountFromEnv(t)
+	pid := "tf-test-" + acctest.RandString(t, 10)
+
+	config := acctest.BootstrapConfig(t)
+	accessToken, err := acctest.SetupProjectsAndGetAccessToken(org, billing, pid, "cloudkms", config)
+	if err != nil {
+		t.Error(err)
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		// No TestDestroy since that's not really the point of this test
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccProviderIndirectUserProjectOverride_step2(pid, accessToken, false),
+				ExpectError: regexp.MustCompile(`Cloud Key Management Service \(KMS\) API has not been used`),
+			},
+			{
+				Config: testAccProviderIndirectUserProjectOverride_step2(pid, accessToken, true),
+			},
+			{
+				ResourceName:      "google_kms_crypto_key.project-2-key",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccProviderIndirectUserProjectOverride_step3(accessToken, true),
+			},
+		},
+	})
+}
+
+// Set up two projects. Project 1 has a service account that is used to create a
+// pubsub topic in project 2. The pubsub API is only enabled in project 2,
+// which causes the create to fail unless user_project_override is set to true.
+
+func testAccProviderUserProjectOverride_step2(accessToken, pid string, override bool, topicName string) string {
+	return fmt.Sprintf(`
+// See step 3 below, which is really step 2 minus the pubsub topic.
+// Step 3 exists because provider configurations can't be removed while objects
+// created by that provider still exist in state. Step 3 will remove the
+// pubsub topic so the whole config can be deleted.
+%s
+
+resource "google_pubsub_topic" "project-2-topic" {
+	provider = google.project-1-token
+	project  = "%s-2"
+
+	name = "%s"
+	labels = {
+	  foo = "bar"
+	}
+}
+`, testAccProviderUserProjectOverride_step3(accessToken, override), pid, topicName)
+}
+
+func testAccProviderUserProjectOverride_step3(accessToken string, override bool) string {
+	return fmt.Sprintf(`
+provider "google" {
+	alias  = "project-1-token"
+	access_token = "%s"
+	user_project_override = %v
+}
+`, accessToken, override)
+}
+
+func testAccProviderIndirectUserProjectOverride_step2(pid, accessToken string, override bool) string {
+	return fmt.Sprintf(`
+// See step 3 below, which is really step 2 minus the kms resources.
+// Step 3 exists because provider configurations can't be removed while objects
+// created by that provider still exist in state. Step 3 will remove the
+// kms resources so the whole config can be deleted.
+%s
+
+resource "google_kms_key_ring" "project-2-keyring" {
+	provider = google.project-1-token
+	project  = "%s-2"
+
+	name     = "%s"
+	location = "us-central1"
+}
+
+resource "google_kms_crypto_key" "project-2-key" {
+	provider = google.project-1-token
+	name     = "%s"
+	key_ring = google_kms_key_ring.project-2-keyring.id
+}
+
+data "google_kms_secret_ciphertext" "project-2-ciphertext" {
+	provider   = google.project-1-token
+	crypto_key = google_kms_crypto_key.project-2-key.id
+	plaintext  = "my-secret"
+}
+`, testAccProviderIndirectUserProjectOverride_step3(accessToken, override), pid, pid, pid)
+}
+
+func testAccProviderIndirectUserProjectOverride_step3(accessToken string, override bool) string {
+	return fmt.Sprintf(`
+provider "google" {
+	alias = "project-1-token"
+
+	access_token          = "%s"
+	user_project_override = %v
+}
+`, accessToken, override)
+}
