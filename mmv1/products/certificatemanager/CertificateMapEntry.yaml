@@ -13,9 +13,9 @@
 
 --- !ruby/object:Api::Resource
 name: 'CertificateMapEntry'
-base_url: 'projects/{{project}}/locations/global/certificateMaps/{{map}}/certificateMapEntries'
-create_url: 'projects/{{project}}/locations/global/certificateMaps/{{map}}/certificateMapEntries?certificateMapEntryId={{name}}'
-self_link: 'projects/{{project}}/locations/global/certificateMaps/{{map}}/certificateMapEntries/{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/certificateMaps/{{map}}/certificateMapEntries'
+create_url: 'projects/{{project}}/locations/{{location}}/certificateMaps/{{map}}/certificateMapEntries?certificateMapEntryId={{name}}'
+self_link: 'projects/{{project}}/locations/{{location}}/certificateMaps/{{map}}/certificateMapEntries/{{name}}'
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -62,6 +62,13 @@ parameters:
       'projects/*/locations/*/certificateMaps/*/certificateMapEntries/*'
     custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+  - !ruby/object:Api::Type::String
+    name: 'location'
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The geographic location where the Certificate Map Entry should reside.
   - !ruby/object:Api::Type::ResourceRef
     name: 'map'
     required: true

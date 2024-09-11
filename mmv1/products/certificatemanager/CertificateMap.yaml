@@ -13,9 +13,9 @@
 
 --- !ruby/object:Api::Resource
 name: 'CertificateMap'
-base_url: 'projects/{{project}}/locations/global/certificateMaps'
-create_url: 'projects/{{project}}/locations/global/certificateMaps?certificateMapId={{name}}'
-self_link: 'projects/{{project}}/locations/global/certificateMaps/{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/certificateMaps'
+create_url: 'projects/{{project}}/locations/{{location}}/certificateMaps?certificateMapId={{name}}'
+self_link: 'projects/{{project}}/locations/{{location}}/certificateMaps/{{name}}'
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -40,7 +40,7 @@ async: !ruby/object:Api::OpAsync
 docs: !ruby/object:Provider::Terraform::Docs
 autogen_async: true
 import_format:
-  ['projects/{{project}}/locations/global/certificateMaps/{{name}}']
+  ['projects/{{project}}/locations/{{location}}/certificateMaps/{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'certificate_manager_certificate_map_basic'
@@ -56,6 +56,13 @@ parameters:
     description: |
       A user-defined name of the Certificate Map. Certificate Map names must be unique
       globally and match the pattern `projects/*/locations/*/certificateMaps/*`.
+  - !ruby/object:Api::Type::String
+    name: 'location'
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The geographic location where the Certificate Map should reside.
 properties:
   - !ruby/object:Api::Type::String
     name: 'description'

@@ -18,13 +18,13 @@ description: |
   CertificateMap defines a collection of certificate configurations,
   which are usable by any associated target proxies
 docs:
-base_url: 'projects/{{project}}/locations/global/certificateMaps'
-self_link: 'projects/{{project}}/locations/global/certificateMaps/{{name}}'
-create_url: 'projects/{{project}}/locations/global/certificateMaps?certificateMapId={{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/certificateMaps'
+self_link: 'projects/{{project}}/locations/{{location}}/certificateMaps/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/certificateMaps?certificateMapId={{name}}'
 update_verb: 'PATCH'
 update_mask: true
 import_format:
-  - 'projects/{{project}}/locations/global/certificateMaps/{{name}}'
+  - 'projects/{{project}}/locations/{{location}}/certificateMaps/{{name}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -55,6 +55,13 @@ parameters:
     description: |
       A user-defined name of the Certificate Map. Certificate Map names must be unique
       globally and match the pattern `projects/*/locations/*/certificateMaps/*`.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'location'
+    type: String
+    description: |
+      The geographic location where the Certificate Map should reside.
     url_param_only: true
     required: true
     immutable: true
