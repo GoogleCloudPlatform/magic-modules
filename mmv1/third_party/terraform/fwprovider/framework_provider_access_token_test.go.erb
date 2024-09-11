@@ -1,6 +1,10 @@
+<% autogen_exception -%>
 package fwprovider_test
 
 import (
+<% unless version == 'ga' -%>
+	"context"
+<% end -%>
 	"fmt"
 	"regexp"
 	"testing"
@@ -8,6 +12,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+<% unless version == 'ga' -%>
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
+	googleoauth "golang.org/x/oauth2/google"
+<% end -%>
 )
 
 // TestAccFwProvider_access_token is a series of acc tests asserting how the plugin-framework provider handles access_token arguments
@@ -19,6 +28,13 @@ func TestAccFwProvider_access_token(t *testing.T) {
 		"when access_token is unset in the config, environment variables are used in a given order":                 testAccFwProvider_access_token_precedenceOrderEnvironmentVariables, // GOOGLE_OAUTH_ACCESS_TOKEN
 		"when access_token is set to an empty string in the config the value isn't ignored and results in an error": testAccFwProvider_access_token_emptyStringValidation,
 		"access_token conflicts with credentials":                                                                   testAccFwProvider_access_token_conflictsWithCredentials,
+		<% unless version == 'ga' -%>
+		// Start beta-only test cases
+		// Beta-only generation is needed because we need to access a PF-implemented data source linked to resource in an API.
+		// Currently this only exists in TPGB.
+		"access_token can be used to authenticate the provider": testAccFwProvider_access_token_authInUse,
+		// End beta-only test cases
+		<% end -%>
 	}
 
 	for name, tc := range testCases {
@@ -206,6 +222,65 @@ credentials = "%s"
 	})
 }
 
+<% unless version == 'ga' -%>
+func testAccFwProvider_access_token_authInUse(t *testing.T) {
+	acctest.SkipIfVcr(t) // Skip because Firebase is weird with VCR, and we have to use Firebase resources in the test
+
+	goodCredentials := envvar.GetTestCredsFromEnv()
+
+	// Access token to pass in via config
+	// Environment might return a path or a JSON
+	contents, _, err := verify.PathOrContents(goodCredentials)
+	if err != nil {
+		t.Fatalf("error determining if creds in test environment are a path or contents: %s", err)
+	}
+	// Get googleoauth.Credentials
+	c, err := googleoauth.CredentialsFromJSON(context.Background(), []byte(contents), transport_tpg.DefaultClientScopes...)
+	if err != nil {
+		t.Fatalf("invalid test credentials: %s", err)
+	}
+	// Get value for access_token
+	token, err := c.TokenSource.Token()
+	if err != nil {
+		t.Fatalf("Unable to generate test access token: %s", err)
+	}
+	accessToken := token.AccessToken
+
+	// Inputs ready
+	context := map[string]interface{}{
+		"access_token":  accessToken,
+		"random_suffix": acctest.RandString(t, 10),
+		"bundle_id":     "apple.app." + acctest.RandString(t, 5),
+		"display_name":  "tf-test Display Name AppleAppConfig DataSource",
+		"app_store_id":  12345,
+		"team_id":       1234567890,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		// No PreCheck for checking ENVs
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				PreConfig: func() {
+					// unset all relevant ENVs, so value passed in via
+					// context is the only usable input
+					t.Setenv("GOOGLE_OAUTH_ACCESS_TOKEN", "")
+					for _, env := range envvar.CredsEnvVars {
+						t.Setenv(env, "")
+					}
+				},
+				Config: testAccFwProvider_access_token_useAccessToken(context),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					// Assert provider is using access_token argument for auth, not credentials
+					resource.TestCheckResourceAttrSet("data.google_provider_config_plugin_framework.default", "access_token"),
+					resource.TestCheckNoResourceAttr("data.google_provider_config_plugin_framework.default", "credentials"),
+				),
+			},
+		},
+	})
+}
+<% end -%>
+
 // testAccFwProvider_access_tokenInProviderBlock allows setting the access_token argument in a provider block.
 // This function uses data.google_provider_config_plugin_framework because it is implemented with the SDKv2
 func testAccFwProvider_access_tokenInProviderBlock(context map[string]interface{}) string {
@@ -252,3 +327,29 @@ output "access_token" {
 }
 `, context)
 }
+
+<% unless version == 'ga' -%>
+func testAccFwProvider_access_token_useAccessToken(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+provider "google" {
+  access_token = "%{access_token}"
+}
+
+data "google_provider_config_plugin_framework" "default" {
+}
+
+resource "google_firebase_apple_app" "my_app_config" {
+  project = data.google_provider_config_plugin_framework.default.project
+  bundle_id = "%{bundle_id}"
+  display_name = "%{display_name}"
+  app_store_id = "%{app_store_id}"
+  team_id = "%{team_id}"
+}
+
+// This is implemented with plugin-framework so tests our use of access_token in a PF specific way
+data "google_firebase_apple_app_config" "my_app_config" {
+  app_id = google_firebase_apple_app.my_app_config.app_id
+}
+`, context)
+}
+<% end -%>
