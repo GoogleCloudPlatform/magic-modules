@@ -44,7 +44,7 @@ timeouts:
 custom_code:
   decoder: 'templates/terraform/decoders/go/firestore_document.go.tmpl'
   custom_import: 'templates/terraform/custom_import/go/firestore_document.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'firestore_document_basic'
     primary_resource_id: 'mydoc'

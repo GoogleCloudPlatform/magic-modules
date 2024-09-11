@@ -26,7 +26,7 @@ docs:
 id_format: 'projects/{{project}}/jobs/{{job_id}}'
 base_url: 'projects/{{project}}/jobs'
 self_link: 'projects/{{project}}/jobs/{{job_id}}?location={{location}}'
-skip_delete: true
+exclude_delete: true
 immutable: true
 import_format:
   - 'projects/{{project}}/jobs/{{job_id}}/location/{{location}}'

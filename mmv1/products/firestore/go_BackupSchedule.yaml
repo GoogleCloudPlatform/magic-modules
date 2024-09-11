@@ -42,7 +42,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'firestore_backup_schedule_daily'
     primary_resource_id: 'daily-backup'
