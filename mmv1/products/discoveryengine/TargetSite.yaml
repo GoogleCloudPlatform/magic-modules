@@ -23,7 +23,10 @@ base_url: 'projects/{{project}}/locations/{{location}}/collections/default_colle
 self_link: '{{name}}'
 create_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/siteSearchEngine/targetSites'
 delete_url: '{{name}}'
-import_format: ['{{name}}']
+import_format:
+  [
+    'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/siteSearchEngine/targetSites/{{target_site_id}}',
+  ]
 
 autogen_async: true
 async: !ruby/object:Api::OpAsync
@@ -55,6 +58,7 @@ examples:
       data_store_id: "data-store-id"
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/set_computed_name.erb
+  custom_import: templates/terraform/custom_import/discoveryengine_targetsite_set_id.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -71,6 +75,13 @@ parameters:
     url_param_only: true
     description: |
       The unique id of the data store.
+  - !ruby/object:Api::Type::String
+    name: 'targetSiteId'
+    output: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The unique id of the target site.
 
 properties:
   - !ruby/object:Api::Type::String
