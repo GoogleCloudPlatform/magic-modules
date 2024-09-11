@@ -235,8 +235,8 @@ properties:
     name: 'staticIpConnectivity'
     description: |
       If set to an empty object (`{}`), the source database will allow incoming
-      connections from the public IP of the destination database. 
-      You can retrieve the public IP of the Cloud SQL instance from the 
+      connections from the public IP of the destination database.
+      You can retrieve the public IP of the Cloud SQL instance from the
       Cloud SQL console or using Cloud SQL APIs.
     exactly_one_of:
       - reverseSshConnectivity
