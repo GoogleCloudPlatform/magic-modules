@@ -184,7 +184,7 @@ properties:
       imports: 'selfLink'
       description: 'A reference to an address associated with this NAT'
     custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
-    diff_suppress_func: 'hasInitialNatIpsDiffSuppress'
+    default_from_api: true
   - !ruby/object:Api::Type::Array
     name: 'drainNatIps'
     description: |
@@ -198,7 +198,7 @@ properties:
       imports: 'selfLink'
       description: 'A reference to an address associated with this NAT'
     custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
-    diff_suppress_func: 'hasInitialNatIpsDiffSuppress'
+    default_from_api: true
   - !ruby/object:Api::Type::Enum
     name: 'sourceSubnetworkIpRangesToNat'
     required: true
