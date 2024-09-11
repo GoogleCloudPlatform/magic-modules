@@ -34,7 +34,7 @@ type IamPolicy struct {
 	// Boolean of if tests for IAM resources should exclude import test steps
 	// Used to handle situations where typical generated IAM tests cannot import
 	// due to the parent resource having an API-generated id
-	SkipImportTest bool `yaml:"skip_import_test"`
+	ExcludeImportTest bool `yaml:"exclude_import_test"`
 
 	// Character that separates resource identifier from method call in URL
 	// For example, PubSub subscription uses {resource}:getIamPolicy

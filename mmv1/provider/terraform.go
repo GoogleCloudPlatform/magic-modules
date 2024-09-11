@@ -143,7 +143,7 @@ func (t *Terraform) GenerateResource(object api.Resource, templateData TemplateD
 func (t *Terraform) GenerateResourceTests(object api.Resource, templateData TemplateData, outputFolder string) {
 	eligibleExample := false
 	for _, example := range object.Examples {
-		if !example.SkipTest {
+		if !example.ExcludeTest {
 			if object.ProductMetadata.VersionObjOrClosest(t.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) >= 0 {
 				eligibleExample = true
 				break
@@ -210,7 +210,7 @@ func (t *Terraform) GenerateIamPolicy(object api.Resource, templateData Template
 
 		// Only generate test if testable examples exist.
 		examples := google.Reject(object.Examples, func(e resource.Examples) bool {
-			return e.SkipTest
+			return e.ExcludeTest
 		})
 		if len(examples) != 0 {
 			targetFilePath := path.Join(targetFolder, fmt.Sprintf("iam_%s_generated_test.go", t.FullResourceName(object)))

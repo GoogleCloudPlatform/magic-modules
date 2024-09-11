@@ -127,13 +127,13 @@ type Examples struct {
 	IgnoreReadExtra []string `yaml:"ignore_read_extra"`
 
 	// Whether to skip generating tests for this resource
-	SkipTest bool `yaml:"skip_test"`
+	ExcludeTest bool `yaml:"exclude_test"`
 
 	// Whether to skip generating docs for this example
-	SkipDocs bool `yaml:"skip_docs"`
+	ExcludeDocs bool `yaml:"exclude_docs"`
 
 	// Whether to skip import tests for this example
-	SkipImportTest bool `yaml:"skip_import_test"`
+	ExcludeImportTest bool `yaml:"exclude_import_test"`
 
 	// The name of the primary resource for use in IAM tests. IAM tests need
 	// a reference to the primary resource to create IAM policies for

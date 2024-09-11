@@ -136,7 +136,7 @@ type Type struct {
 
 	EnumValues []string `yaml:"enum_values"`
 
-	SkipDocsValues bool `yaml:"skip_docs_values"`
+	ExcludeDocsValues bool `yaml:"exclude_docs_values"`
 
 	// ====================
 	// Array Fields
