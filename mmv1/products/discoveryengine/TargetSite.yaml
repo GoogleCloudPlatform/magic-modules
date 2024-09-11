@@ -22,6 +22,8 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 base_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/siteSearchEngine/targetSites'
 self_link: '{{name}}'
 create_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/siteSearchEngine/targetSites'
+update_verb: :PATCH
+update_mask: false
 delete_url: '{{name}}'
 import_format:
   [
@@ -56,6 +58,8 @@ examples:
     primary_resource_id: 'basic'
     vars:
       data_store_id: "data-store-id"
+    ignore_read_extra:
+      - 'project'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/set_computed_name.erb
   custom_import: templates/terraform/custom_import/discoveryengine_targetsite_set_id.go.erb
