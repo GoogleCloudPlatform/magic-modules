@@ -62,6 +62,7 @@ examples:
       - 'project'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/set_computed_name.erb
+  post_update: templates/terraform/post_update/set_computed_name.erb
   custom_import: templates/terraform/custom_import/discoveryengine_targetsite_set_id.go.erb
 parameters:
   - !ruby/object:Api::Type::String
