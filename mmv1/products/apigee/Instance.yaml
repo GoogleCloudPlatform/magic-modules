@@ -16,6 +16,9 @@ name: 'Instance'
 base_url: 'instances'
 create_url: '{{org_id}}/instances'
 self_link: '{{org_id}}/instances/{{name}}'
+create_verb: :POST
+update_verb: :PATCH
+update_mask: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
@@ -33,7 +36,7 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
-immutable: true
+immutable: false
 description: |
   An `Instance` is the runtime dataplane in Apigee.
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -131,6 +134,7 @@ examples:
     skip_vcr: true
 timeouts: !ruby/object:Api::Timeouts
   insert_minutes: 60
+  update_minutes: 20
   delete_minutes: 60
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/apigee_instance.go.erb
@@ -150,17 +154,20 @@ properties:
     description: |
       Resource ID of the instance.
     required: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: 'location'
     description: |
       Required. Compute Engine location where the instance resides.
     required: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: 'peeringCidrRange'
     description: |
       The size of the CIDR block range that will be reserved by the instance. For valid values,
       see [CidrRange](https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances#CidrRange) on the documentation.
     default_from_api: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: 'ipRange'
     description: |
@@ -171,15 +178,18 @@ properties:
       available /22 CIDR block from Service Networking. The customer should use this CIDR block
       for configuring their firewall needs to allow traffic from Apigee.
       Input format: "a.b.c.d/22"
+    immutable: true
     ignore_read: true
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
       Description of the instance.
+    immutable: true
   - !ruby/object:Api::Type::String
     name: 'displayName'
     description: |
       Display name of the instance.
+    immutable: true
   - !ruby/object:Api::Type::String
     name: 'diskEncryptionKeyName'
     description: |

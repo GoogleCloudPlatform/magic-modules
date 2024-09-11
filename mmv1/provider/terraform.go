@@ -77,21 +77,26 @@ func NewTerraform(product *api.Product, versionName string, startTime time.Time)
 	return &t
 }
 
-func (t *Terraform) Generate(outputFolder, productPath string, generateCode, generateDocs bool) {
+func (t *Terraform) Generate(outputFolder, productPath, resourceToGenerate string, generateCode, generateDocs bool) {
 	if err := os.MkdirAll(outputFolder, os.ModePerm); err != nil {
 		log.Println(fmt.Errorf("error creating output directory %v: %v", outputFolder, err))
 	}
 
-	t.GenerateObjects(outputFolder, generateCode, generateDocs)
+	t.GenerateObjects(outputFolder, resourceToGenerate, generateCode, generateDocs)
 
 	if generateCode {
 		t.GenerateOperation(outputFolder)
 	}
 }
 
-func (t *Terraform) GenerateObjects(outputFolder string, generateCode, generateDocs bool) {
+func (t *Terraform) GenerateObjects(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
 	for _, object := range t.Product.Objects {
 		object.ExcludeIfNotInVersion(&t.Version)
+
+		if resourceToGenerate != "" && object.Name != resourceToGenerate {
+			log.Printf("Excluding %s per user request", object.Name)
+			continue
+		}
 
 		t.GenerateObject(*object, outputFolder, t.TargetVersionName, generateCode, generateDocs)
 	}

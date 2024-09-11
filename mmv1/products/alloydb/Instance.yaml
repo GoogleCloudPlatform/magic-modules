@@ -370,6 +370,10 @@ properties:
           Enabling public ip for the instance. If a user wishes to disable this,
           please also clear the list of the authorized external networks set on
           the same instance.
+      - !ruby/object:Api::Type::Boolean
+        name: enableOutboundPublicIp
+        description: |
+          Enabling outbound public ip for the instance.
   - !ruby/object:Api::Type::String
     name: 'publicIpAddress'
     output: true
@@ -377,3 +381,11 @@ properties:
       The public IP addresses for the Instance. This is available ONLY when
       networkConfig.enablePublicIp is set to true. This is the connection
       endpoint for an end-user application.
+  - !ruby/object:Api::Type::Array
+    item_type: Api::Type::String
+    name: 'outboundPublicIpAddresses'
+    output: true
+    description: |
+      The outbound public IP addresses for the instance. This is available ONLY when
+      networkConfig.enableOutboundPublicIp is set to true. These IP addresses are used
+      for outbound connections.
