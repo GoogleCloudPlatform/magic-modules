@@ -19,11 +19,10 @@ description: |
 references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.collections.dataStores.siteSearchEngine.targetSites'
 
+immutable: true
 base_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/siteSearchEngine/targetSites'
 self_link: '{{name}}'
 create_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/siteSearchEngine/targetSites'
-update_verb: :PATCH
-update_mask: false
 delete_url: '{{name}}'
 import_format:
   [
@@ -62,7 +61,6 @@ examples:
       - 'project'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/set_computed_name.erb
-  post_update: templates/terraform/post_update/set_computed_name.erb
   custom_import: templates/terraform/custom_import/discoveryengine_targetsite_set_id.go.erb
 parameters:
   - !ruby/object:Api::Type::String
