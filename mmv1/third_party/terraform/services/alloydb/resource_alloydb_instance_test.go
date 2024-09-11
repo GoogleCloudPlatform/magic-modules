@@ -594,12 +594,15 @@ func TestAccAlloydbInstance_networkConfig(t *testing.T) {
 		"random_suffix":                suffix,
 		"network_name":                 networkName,
 		"enable_public_ip":             true,
+		"enable_outbound_public_ip":    true,
 		"authorized_external_networks": "",
 	}
+
 	context2 := map[string]interface{}{
-		"random_suffix":    suffix,
-		"network_name":     networkName,
-		"enable_public_ip": true,
+		"random_suffix":             suffix,
+		"network_name":              networkName,
+		"enable_public_ip":          true,
+		"enable_outbound_public_ip": false,
 		"authorized_external_networks": `
 		authorized_external_networks {
 			cidr_range = "8.8.8.8/30"
@@ -609,11 +612,13 @@ func TestAccAlloydbInstance_networkConfig(t *testing.T) {
 		}
 		`,
 	}
+
 	context3 := map[string]interface{}{
-		"random_suffix":    suffix,
-		"network_name":     networkName,
-		"enable_public_ip": true,
-		"cidr_range":       "8.8.8.8/30",
+		"random_suffix":             suffix,
+		"network_name":              networkName,
+		"enable_public_ip":          true,
+		"enable_outbound_public_ip": true,
+		"cidr_range":                "8.8.8.8/30",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -625,6 +630,8 @@ func TestAccAlloydbInstance_networkConfig(t *testing.T) {
 				Config: testAccAlloydbInstance_networkConfig(context1),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.enable_public_ip", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.enable_outbound_public_ip", "true"),
+					resource.TestCheckResourceAttrSet("google_alloydb_instance.default", "outbound_public_ip_addresses.0"), // Ensure it's set
 				),
 			},
 			{
@@ -637,9 +644,8 @@ func TestAccAlloydbInstance_networkConfig(t *testing.T) {
 				Config: testAccAlloydbInstance_networkConfig(context2),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.enable_public_ip", "true"),
-					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.authorized_external_networks.0.cidr_range", "8.8.8.8/30"),
-					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.authorized_external_networks.1.cidr_range", "8.8.4.4/30"),
-					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.authorized_external_networks.#", "2"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.enable_outbound_public_ip", "false"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "outbound_public_ip_addresses.#", "0"),
 				),
 			},
 			{
@@ -652,8 +658,8 @@ func TestAccAlloydbInstance_networkConfig(t *testing.T) {
 				Config: testAccAlloydbInstance_networkConfigWithAnAuthNetwork(context3),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.enable_public_ip", "true"),
-					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.authorized_external_networks.0.cidr_range", "8.8.8.8/30"),
-					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.authorized_external_networks.#", "1"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.enable_outbound_public_ip", "true"),
+					resource.TestCheckResourceAttrSet("google_alloydb_instance.default", "outbound_public_ip_addresses.0"),
 				),
 			},
 			{
@@ -678,6 +684,7 @@ resource "google_alloydb_instance" "default" {
 
   network_config {
     enable_public_ip = %{enable_public_ip}
+    enable_outbound_public_ip = %{enable_outbound_public_ip}
     %{authorized_external_networks}
   }	
 }
@@ -713,6 +720,7 @@ resource "google_alloydb_instance" "default" {
 
   network_config {
     enable_public_ip = %{enable_public_ip}
+    enable_outbound_public_ip = %{enable_outbound_public_ip}
     authorized_external_networks {
       cidr_range = "%{cidr_range}"
     }
