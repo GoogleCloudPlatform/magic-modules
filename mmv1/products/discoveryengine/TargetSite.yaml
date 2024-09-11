@@ -170,7 +170,7 @@ properties:
         description: |
           Site verification state indicating the ownership and validity.
         exactly_one_of:
-        - quota_failure
+          - quota_failure
         properties:
           - !ruby/object:Api::Type::Integer
             name: 'totalRequiredQuota'
