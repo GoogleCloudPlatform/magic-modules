@@ -867,15 +867,15 @@ resource "google_compute_router" "foobar" {
 }
 
 resource "google_compute_address" "foobar" {
-  count         = %s
-  name          = "%s-address-${count.index}"
-  region        = google_compute_subnetwork.foobar.region
+  count  = %s
+  name   = "%s-address-${count.index}"
+  region = google_compute_subnetwork.foobar.region
 }
 
 resource "google_compute_router_nat" "foobar" {
-  name                               = "%s-nat"
-  router                             = google_compute_router.foobar.name
-  region                             = google_compute_router.foobar.region
+  name   = "%s-nat"
+  router = google_compute_router.foobar.name
+  region = google_compute_router.foobar.region
 
   nat_ip_allocate_option             = "MANUAL_ONLY"
   source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
@@ -917,9 +917,9 @@ resource "google_compute_router" "foobar" {
 }
 
 resource "google_compute_address" "foobar" {
-  count         = %s
-  name          = "%s-address-${count.index}"
-  region        = google_compute_subnetwork.foobar.region
+  count  = %s
+  name   = "%s-address-${count.index}"
+  region = google_compute_subnetwork.foobar.region
 
   lifecycle {
     create_before_destroy = true
@@ -927,9 +927,9 @@ resource "google_compute_address" "foobar" {
 }
 
 resource "google_compute_router_nat" "foobar" {
-  name                               = "%s-nat"
-  router                             = google_compute_router.foobar.name
-  region                             = google_compute_router.foobar.region
+  name   = "%s-nat"
+  router = google_compute_router.foobar.name
+  region = google_compute_router.foobar.region
 
   nat_ip_allocate_option             = "MANUAL_ONLY"
   source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
@@ -971,9 +971,9 @@ resource "google_compute_router" "foobar" {
 }
 
 resource "google_compute_address" "foobar" {
-  count         = %s
-  name          = "%s-address-${count.index}"
-  region        = google_compute_subnetwork.foobar.region
+  count  = %s
+  name   = "%s-address-${count.index}"
+  region = google_compute_subnetwork.foobar.region
 
   lifecycle {
     create_before_destroy = true
@@ -981,9 +981,9 @@ resource "google_compute_address" "foobar" {
 }
 
 resource "google_compute_router_nat" "foobar" {
-  name                               = "%s-nat"
-  router                             = google_compute_router.foobar.name
-  region                             = google_compute_router.foobar.region
+  name   = "%s-nat"
+  router = google_compute_router.foobar.name
+  region = google_compute_router.foobar.region
 
   nat_ip_allocate_option             = "MANUAL_ONLY"
   source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
