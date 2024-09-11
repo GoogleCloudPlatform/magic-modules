@@ -1,7 +1,6 @@
 package provider_test
 
 import (
-	"context"
 	"fmt"
 	"regexp"
 	"testing"
@@ -9,9 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-	"github.com/hashicorp/terraform-provider-google/google/verify"
-	googleoauth "golang.org/x/oauth2/google"
 )
 
 // TestAccSdkProvider_access_token is a series of acc tests asserting how the SDK provider handles access_token arguments
@@ -213,25 +209,8 @@ credentials = "%s"
 
 func testAccSdkProvider_access_token_authInUse(t *testing.T) {
 
-	goodCredentials := envvar.GetTestCredsFromEnv()
-
 	// Access token to pass in via config
-	// Environment might return a path or a JSON
-	contents, _, err := verify.PathOrContents(goodCredentials)
-	if err != nil {
-		t.Fatalf("error determining if creds in test environment are a path or contents: %s", err)
-	}
-	// Get googleoauth.Credentials
-	c, err := googleoauth.CredentialsFromJSON(context.Background(), []byte(contents), transport_tpg.DefaultClientScopes...)
-	if err != nil {
-		t.Fatalf("invalid test credentials: %s", err)
-	}
-	// Get value for access_token
-	token, err := c.TokenSource.Token()
-	if err != nil {
-		t.Fatalf("Unable to generate test access token: %s", err)
-	}
-	accessToken := token.AccessToken
+	accessToken := acctest.GetAccessTokenFromTestCredsFromEnv(t)
 
 	// Inputs ready
 	context := map[string]interface{}{
