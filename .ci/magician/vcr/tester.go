@@ -92,7 +92,7 @@ var safeToLog = map[string]bool{
 	"GOPATH":                                     true,
 	"HOME":                                       true,
 	"PATH":                                       true,
-	"SA_KEY":                                     true,
+	"SA_KEY":                                     false,
 	"TF_ACC":                                     true,
 	"TF_LOG":                                     true,
 	"TF_LOG_PATH_MASK":                           true,
