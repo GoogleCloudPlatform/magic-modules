@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/services/filestore"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func testResourceFilestoreInstanceStateDataV0() map[string]interface{} {
@@ -152,8 +151,7 @@ func TestAccFilestoreInstance_reservedIpRange_update(t *testing.T) {
 
 func TestAccFilestoreInstance_tags(t *testing.T) {
 	t.Parallel()
-
-	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+        name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	tagKey := acctest.BootstrapSharedTestTagKey(t, "filestore-instances-tagkey")
 	tagValue := acctest.BootstrapSharedTestTagValue(t, "filestore-instances-tagvalue", tagKey)
 
@@ -163,13 +161,13 @@ func TestAccFilestoreInstance_tags(t *testing.T) {
 		CheckDestroy:             testAccCheckFilestoreInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFileInstanceTags(name, map[string]string{org + "/" + tagKey: tagValue}),
+				Config: testAccFileInstanceTags(name, map[string]string{tagKey: tagValue}),
 			},
 			{
 				ResourceName:            "google_filestore_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"tags"},
+				ImportStateVerifyIgnore: []string{"zone", "location", "networks.0.reserved_ip_range", "tags"},
 			},
 		},
 	})
@@ -217,31 +215,26 @@ resource "google_filestore_instance" "instance" {
 `, name)
 }
 
-func testAccFileInstanceTags(context map[string]interface{}, tags map[string]string) string {
+func testAccFileInstanceTags(name string, tags map[string]string) string {
+	return fmt.Sprintf(`
+resource "google_filestore_instance" "instance" {
+  name = "tf-instance-%s"
+  zone = "us-central1-b"
+  tier = "BASIC_HDD"
 
-	r := fmt.Sprintf(`
-	resource "google_filestore_instance" "%{resource_name}" {
-	  name = "tf-instance-%s"
-          zone = "us-central1-b"
-          tier = "BASIC_HDD"
+  file_shares {
+    capacity_gb = 1024
+    name        = "share1"
+  }
 
-          file_shares {
-            capacity_gb = 1024
-            name        = "share1"
-          }
-
-          networks {
-            network           = "default"
-            modes             = ["MODE_IPV4"]
-            reserved_ip_range = "172.19.31.0/24"
-          }
-	  tags = {`, context)
-
-	l := ""
-	for key, value := range tags {
-		l += fmt.Sprintf("%q = %q\n", key, value)
-	}
-	}
-	}
-	return r + l
+  networks {
+    network           = "default"
+    modes             = ["MODE_IPV4"]
+    reserved_ip_range = "172.19.31.0/29"
+  }
+tags = {
+	"tagKeys/281478409127147" = "tagValues/281479442205542"
+}
+}
+`, name)
 }
