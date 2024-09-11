@@ -18,7 +18,7 @@ description: |
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Create and manage Data Mapper workspaces ': 'https://cloud.google.com/healthcare-api/healthcare-data-engine/docs/manage-workspaces'
-  api: 'https://cloud.google.com/healthcare-api/healthcare-data-engine/docs/reference/rest/v1/projects.locations.datasets.dataMapperWorkspaces#get'
+  api: 'https://cloud.google.com/healthcare-api/healthcare-data-engine/docs/reference/rest/v1/projects.locations.datasets.dataMapperWorkspaces'
 base_url: '{{dataset}}/dataMapperWorkspaces?workspaceId={{name}}'
 self_link: '{{dataset}}/dataMapperWorkspaces/{{name}}'
 create_url: '{{dataset}}/dataMapperWorkspaces?workspaceId={{name}}'
