@@ -3,6 +3,9 @@ package fwprovider_test
 
 import (
 	"fmt"
+<% unless version == 'ga' -%>
+	"os"
+<% end -%>
 	"regexp"
 	"testing"
 
@@ -217,6 +220,12 @@ credentials = "%s"
 <% unless version == 'ga' -%>
 func testAccFwProvider_access_token_authInUse(t *testing.T) {
 	acctest.SkipIfVcr(t) // Skip because Firebase is weird with VCR, and we have to use Firebase resources in the test
+
+	// Skip if not running in a acc test environment,
+	// as acc test environment variables needed to get accessToken 
+	if v := os.Getenv("TF_ACC"); v == "" {
+		t.Skip("Acceptance tests skipped unless env 'TF_ACC' set")
+	}
 
 	// Access token to pass in via config
 	accessToken := acctest.GetAccessTokenFromTestCredsFromEnv(t)

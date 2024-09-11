@@ -2,6 +2,7 @@ package provider_test
 
 import (
 	"fmt"
+	"os"
 	"regexp"
 	"testing"
 
@@ -208,6 +209,11 @@ credentials = "%s"
 }
 
 func testAccSdkProvider_access_token_authInUse(t *testing.T) {
+	// Skip if not running in a acc test environment,
+	// as acc test environment variables needed to get accessToken
+	if v := os.Getenv("TF_ACC"); v == "" {
+		t.Skip("Acceptance tests skipped unless env 'TF_ACC' set")
+	}
 
 	// Access token to pass in via config
 	accessToken := acctest.GetAccessTokenFromTestCredsFromEnv(t)
