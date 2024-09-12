@@ -154,7 +154,7 @@ properties:
         type: String
         description: |
           Output only. Current step of the installation process.
-          Possible values: STAGE_UNSPECIFIED, PENDING_CREATE_APP, PENDING_USER_OAUTH\nPENDING_INSTALL_APP, COMPLETE
+          Possible values: `STAGE_UNSPECIFIED`, `PENDING_CREATE_APP`, `PENDING_USER_OAUTH`, `PENDING_INSTALL_APP`, `COMPLETE`
         min_version: 'beta'
         output: true
       - name: 'message'
