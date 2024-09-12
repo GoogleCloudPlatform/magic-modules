@@ -113,7 +113,7 @@ func TestAccComputeRegionNetworkFirewallPolicyRule_multipleRules(t *testing.T) {
 	})
 }
 
-func TestAccComputeRegionNetworkFirewallPolicyRule_regionalHandWritten(t *testing.T) {
+func TestAccComputeRegionNetworkFirewallPolicyRule_secureTags(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -130,7 +130,7 @@ func TestAccComputeRegionNetworkFirewallPolicyRule_regionalHandWritten(t *testin
 		CheckDestroy:             testAccCheckComputeRegionNetworkFirewallPolicyRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionNetworkFirewallPolicyRule_regionalHandWritten(context),
+				Config: testAccComputeRegionNetworkFirewallPolicyRule_secureTags(context),
 			},
 			{
 				ResourceName:      "google_compute_region_network_firewall_policy_rule.primary",
@@ -138,7 +138,7 @@ func TestAccComputeRegionNetworkFirewallPolicyRule_regionalHandWritten(t *testin
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccComputeRegionNetworkFirewallPolicyRule_regionalHandWrittenUpdate(context),
+				Config: testAccComputeRegionNetworkFirewallPolicyRule_secureTagsUpdate(context),
 			},
 			{
 				ResourceName:      "google_compute_region_network_firewall_policy_rule.primary",
@@ -149,10 +149,10 @@ func TestAccComputeRegionNetworkFirewallPolicyRule_regionalHandWritten(t *testin
 	})
 }
 
-func testAccComputeRegionNetworkFirewallPolicyRule_regionalHandWritten(context map[string]interface{}) string {
+func testAccComputeRegionNetworkFirewallPolicyRule_secureTags(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_network_security_address_group" "basic_regional_networksecurity_address_group" {
-  name        = "tf-test-policy%{random_suffix}"
+  name        = "tf-test-address-%{random_suffix}"
   parent      = "projects/%{project_name}"
   description = "Sample regional networksecurity_address_group"
   location    = "%{region}"
@@ -162,22 +162,24 @@ resource "google_network_security_address_group" "basic_regional_networksecurity
 }
 
 resource "google_compute_region_network_firewall_policy" "basic_regional_network_firewall_policy" {
-  name        = "tf-test-policy%{random_suffix}"
+  name        = "tf-test-policy-%{random_suffix}"
   description = "Sample regional network firewall policy"
   project     = "%{project_name}"
   region      = "%{region}"
 }
 
 resource "google_compute_region_network_firewall_policy_rule" "primary" {
-  action                  = "allow"
-  description             = "This is a simple rule description"
-  direction               = "INGRESS"
-  disabled                = false
-  enable_logging          = true
-  firewall_policy         = google_compute_region_network_firewall_policy.basic_regional_network_firewall_policy.id
-  priority                = 1000
-  region                  = "%{region}"
-  rule_name               = "test-rule"
+  action          = "allow"
+  description     = "This is a simple rule description"
+  direction       = "INGRESS"
+  disabled        = false
+  enable_logging  = true
+  firewall_policy = google_compute_region_network_firewall_policy.basic_regional_network_firewall_policy.id
+  priority        = 1000
+  region          = "%{region}"
+  tls_inspect     = false
+  rule_name       = "tf-test-rule-%{random_suffix}"
+
   target_service_accounts = ["%{service_acct}"]
 
   match {
@@ -199,14 +201,15 @@ resource "google_compute_region_network_firewall_policy_rule" "primary" {
 }
 
 resource "google_compute_network" "basic_network" {
-  name = "tf-test-network%{random_suffix}"
+  name = "tf-test-network-%{random_suffix}"
+  auto_create_subnetworks = false
 }
 
 resource "google_tags_tag_key" "basic_key" {
   description = "For keyname resources."
   parent      = "organizations/%{org_id}"
   purpose     = "GCE_FIREWALL"
-  short_name  = "tf-test-tagkey%{random_suffix}"
+  short_name  = "tf-test-tagkey-%{random_suffix}"
 
   purpose_data = {
     network = "%{project_name}/${google_compute_network.basic_network.name}"
@@ -216,16 +219,16 @@ resource "google_tags_tag_key" "basic_key" {
 resource "google_tags_tag_value" "basic_value" {
   description = "For valuename resources."
   parent      = "tagKeys/${google_tags_tag_key.basic_key.name}"
-  short_name  = "tf-test-tagvalue%{random_suffix}"
+  short_name  = "tf-test-tagvalue-%{random_suffix}"
 }
 
 `, context)
 }
 
-func testAccComputeRegionNetworkFirewallPolicyRule_regionalHandWrittenUpdate(context map[string]interface{}) string {
+func testAccComputeRegionNetworkFirewallPolicyRule_secureTagsUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_network_security_address_group" "basic_regional_networksecurity_address_group" {
-  name        = "tf-test-policy%{random_suffix}"
+  name        = "tf-test-address-%{random_suffix}"
   parent      = "projects/%{project_name}"
   description = "Sample regional networksecurity_address_group. Update"
   location    = "%{region}"
@@ -235,7 +238,7 @@ resource "google_network_security_address_group" "basic_regional_networksecurity
 }
 
 resource "google_compute_region_network_firewall_policy" "basic_regional_network_firewall_policy" {
-  name        = "tf-test-policy%{random_suffix}"
+  name        = "tf-test-policy-%{random_suffix}"
   description = "Sample regional network firewall policy"
   project     = "%{project_name}"
   region      = "%{region}"
@@ -250,20 +253,20 @@ resource "google_compute_region_network_firewall_policy_rule" "primary" {
   firewall_policy = google_compute_region_network_firewall_policy.basic_regional_network_firewall_policy.id
   priority        = 1000
   region          = "%{region}"
-  rule_name       = "updated-test-rule"
+  tls_inspect     = false
+  rule_name       = "tf-test-updated-rule-%{random_suffix}"
 
   match {
     dest_ip_ranges = ["0.0.0.0/0"]
     dest_fqdns = ["example.com"]
     dest_region_codes = ["US"]
     dest_threat_intelligences = ["iplist-known-malicious-ips"]
+    dest_address_groups = [google_network_security_address_group.basic_regional_networksecurity_address_group.id]
 
     layer4_configs {
       ip_protocol = "tcp"
       ports       = ["123"]
     }
-    
-    dest_address_groups = [google_network_security_address_group.basic_regional_networksecurity_address_group.id]
   }
 
   target_secure_tags {
@@ -272,14 +275,15 @@ resource "google_compute_region_network_firewall_policy_rule" "primary" {
 }
 
 resource "google_compute_network" "basic_network" {
-  name = "tf-test-network%{random_suffix}"
+  name = "tf-test-network-%{random_suffix}"
+  auto_create_subnetworks = false
 }
 
 resource "google_tags_tag_key" "basic_key" {
   description = "For keyname resources."
   parent      = "organizations/%{org_id}"
   purpose     = "GCE_FIREWALL"
-  short_name  = "tf-test-tagkey%{random_suffix}"
+  short_name  = "tf-test-tagkey-%{random_suffix}"
 
   purpose_data = {
     network = "%{project_name}/${google_compute_network.basic_network.name}"
@@ -289,7 +293,7 @@ resource "google_tags_tag_key" "basic_key" {
 resource "google_tags_tag_value" "basic_value" {
   description = "For valuename resources."
   parent      = "tagKeys/${google_tags_tag_key.basic_key.name}"
-  short_name  = "tf-test-tagvalue%{random_suffix}"
+  short_name  = "tf-test-tagvalue-%{random_suffix}"
 }
 
 `, context)
@@ -339,7 +343,9 @@ resource "google_compute_region_network_firewall_policy_rule" "fw_policy_rule1" 
   action          = "allow"
   direction       = "EGRESS"
   disabled        = false
+  tls_inspect     = false
   region          = "%{region}"
+
   match {
     layer4_configs {
       ip_protocol = "tcp"
@@ -400,8 +406,8 @@ resource "google_compute_region_network_firewall_policy_rule" "fw_policy_rule1" 
   direction               = "EGRESS"
   disabled                = false
   target_service_accounts = [google_service_account.service_account1.email]
+  tls_inspect             = false
   region                  = "%{region}"
-
   match {
     layer4_configs {
       ip_protocol = "tcp"
