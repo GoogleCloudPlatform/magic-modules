@@ -16,7 +16,7 @@
 name: 'Task'
 description: |
   A Dataplex task represents the work that you want Dataplex to do on a schedule. It encapsulates code, parameters, and the schedule.
-skip_attribution_label: true
+exclude_attribution_label: true
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/dataplex/docs'

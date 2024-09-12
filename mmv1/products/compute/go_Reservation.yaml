@@ -68,7 +68,7 @@ examples:
       project: 'PROJECT_NAME'
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
-    skip_docs: true
+    exclude_docs: true
     skip_vcr: true
 parameters:
   - name: 'zone'

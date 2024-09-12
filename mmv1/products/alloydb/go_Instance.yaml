@@ -68,7 +68,7 @@ examples:
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
-    skip_test: true
+    exclude_test: true
   - name: 'alloydb_secondary_instance_basic'
     primary_resource_id: 'secondary'
     vars:
@@ -80,7 +80,7 @@ examples:
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
-    skip_test: true
+    exclude_test: true
   - name: 'alloydb_instance_basic_test'
     primary_resource_id: 'default'
     vars:
@@ -92,7 +92,7 @@ examples:
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
-    skip_docs: true
+    exclude_docs: true
   - name: 'alloydb_secondary_instance_basic_test'
     primary_resource_id: 'secondary'
     vars:
@@ -106,7 +106,7 @@ examples:
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
-    skip_docs: true
+    exclude_docs: true
   - name: 'alloydb_instance_psc_test'
     primary_resource_id: 'default'
     vars:
@@ -116,7 +116,7 @@ examples:
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
-    skip_docs: true
+    exclude_docs: true
 parameters:
   - name: 'cluster'
     type: ResourceRef
@@ -369,6 +369,10 @@ properties:
           Enabling public ip for the instance. If a user wishes to disable this,
           please also clear the list of the authorized external networks set on
           the same instance.
+      - name: 'enableOutboundPublicIp'
+        type: Boolean
+        description: |
+          Enabling outbound public ip for the instance.
   - name: 'publicIpAddress'
     type: String
     description: |
@@ -376,3 +380,12 @@ properties:
       networkConfig.enablePublicIp is set to true. This is the connection
       endpoint for an end-user application.
     output: true
+  - name: 'outboundPublicIpAddresses'
+    type: Array
+    description: |
+      The outbound public IP addresses for the instance. This is available ONLY when
+      networkConfig.enableOutboundPublicIp is set to true. These IP addresses are used
+      for outbound connections.
+    output: true
+    item_type:
+      type: String

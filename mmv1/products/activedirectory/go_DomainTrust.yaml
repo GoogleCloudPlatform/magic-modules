@@ -64,7 +64,7 @@ custom_code:
 examples:
   - name: 'active_directory_domain_trust_basic'
     primary_resource_id: 'ad-domain-trust'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'domain'
     type: String

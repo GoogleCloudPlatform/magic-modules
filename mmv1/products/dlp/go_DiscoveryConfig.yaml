@@ -44,18 +44,18 @@ examples:
     test_env_vars:
       project: 'PROJECT_NAME'
       location: 'REGION'
-    skip_test: true
+    exclude_test: true
   - name: 'dlp_discovery_config_actions'
     primary_resource_id: 'actions'
     test_env_vars:
       project: 'PROJECT_NAME'
-    skip_test: true
+    exclude_test: true
   - name: 'dlp_discovery_config_org_running'
     primary_resource_id: 'org_running'
     test_env_vars:
       project: 'PROJECT_NAME'
       organization: 'ORG_ID'
-    skip_test: true
+    exclude_test: true
   - name: 'dlp_discovery_config_org_folder_paused'
     primary_resource_id: 'org_folder_paused'
     test_env_vars:
@@ -65,22 +65,22 @@ examples:
     primary_resource_id: 'conditions_cadence'
     test_env_vars:
       project: 'PROJECT_NAME'
-    skip_test: true
+    exclude_test: true
   - name: 'dlp_discovery_config_filter_regexes_and_conditions'
     primary_resource_id: 'filter_regexes_and_conditions'
     test_env_vars:
       project: 'PROJECT_NAME'
-    skip_test: true
+    exclude_test: true
   - name: 'dlp_discovery_config_cloud_sql'
     primary_resource_id: 'cloud_sql'
     test_env_vars:
       project: 'PROJECT_NAME'
-    skip_test: true
+    exclude_test: true
   - name: 'dlp_discovery_config_cloud_storage'
     primary_resource_id: 'cloud_storage'
     test_env_vars:
       project: 'PROJECT_NAME'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'parent'
     type: String

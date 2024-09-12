@@ -36,7 +36,7 @@ custom_code:
 examples:
   - name: 'identity_platform_default_supported_idp_config_basic'
     primary_resource_id: 'idp_config'
-    skip_test: true
+    exclude_test: true
 parameters:
 properties:
   - name: 'name'

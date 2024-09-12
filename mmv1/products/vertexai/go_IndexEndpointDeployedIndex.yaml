@@ -94,7 +94,7 @@ examples:
       bucket_name: 'bucket-name'
       display_name: 'vertex-deployed-index'
       deployed_index_id: 'deployed_index_id'
-    skip_docs: true
+    exclude_docs: true
   - name: 'vertex_ai_index_endpoint_deployed_index_automatic_resources'
     primary_resource_id: 'automatic_resources'
     vars:
@@ -102,7 +102,7 @@ examples:
       bucket_name: 'bucket-name'
       display_name: 'vertex-deployed-index'
       deployed_index_id: 'deployed_index_id'
-    skip_docs: true
+    exclude_docs: true
 parameters:
   - name: 'indexEndpoint'
     type: ResourceRef

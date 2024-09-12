@@ -19,7 +19,7 @@ description: |
   A ForwardingRule resource. A ForwardingRule resource specifies which pool
   of target virtual machines to forward a packet to if it matches the given
   [IPAddress, IPProtocol, portRange] tuple.
-skip_attribution_label: true
+exclude_attribution_label: true
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/compute/docs/load-balancing/network/forwarding-rules'

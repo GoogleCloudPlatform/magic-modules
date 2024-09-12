@@ -68,7 +68,7 @@ examples:
       topic_name: 'example-topic'
       key_name: 'example-key'
       keyring_name: 'example-keyring'
-    skip_test: true
+    exclude_test: true
   - name: 'pubsub_topic_geo_restricted'
     primary_resource_id: 'example'
     vars:

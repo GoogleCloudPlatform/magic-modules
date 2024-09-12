@@ -53,13 +53,13 @@ examples:
   - name: 'apigee_environment_group_basic'
     vars:
       envgroup_name: 'my-envgroup'
-    skip_test: true
+    exclude_test: true
   - name: 'apigee_environment_group_basic_test'
     primary_resource_id: 'apigee_environment_group'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
-    skip_docs: true
+    exclude_docs: true
     skip_vcr: true
 parameters:
   - name: 'orgId'

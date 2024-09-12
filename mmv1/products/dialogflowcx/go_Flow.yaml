@@ -52,7 +52,7 @@ examples:
     primary_resource_id: 'default_start_flow'
     vars:
       agent_name: 'dialogflowcx-agent'
-    skip_docs: true
+    exclude_docs: true
 virtual_fields:
   - name: 'is_default_start_flow'
     description: |
