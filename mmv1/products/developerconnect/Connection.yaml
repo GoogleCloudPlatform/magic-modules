@@ -140,7 +140,7 @@ properties:
         name: stage
         description: |
           Output only. Current step of the installation process.
-          Possible values: STAGE_UNSPECIFIED, PENDING_CREATE_APP, PENDING_USER_OAUTH\nPENDING_INSTALL_APP, COMPLETE
+          Possible values: STAGE_UNSPECIFIED, PENDING_CREATE_APP, PENDING_USER_OAUTH, PENDING_INSTALL_APP, COMPLETE
         output: true
       - !ruby/object:Api::Type::String
         name: message
