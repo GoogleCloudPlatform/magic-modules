@@ -24,13 +24,13 @@ description: |
   verification data exists at creation time and does not exist at destruction time
   and will fail if the required condition is not met.
 base_url: webResource
-self_link: webResource/{{id}}
+self_link: webResource/{{web_resource_id}}
 create_url: webResource?verificationMethod={{verification_method}}
-delete_url: webResource/{{id}}
-id_format: '{{id}}'
+delete_url: webResource/{{web_resource_id}}
+id_format: webResource/{{web_resource_id}}
 immutable: true
 identity:
-  - id
+  - web_resource_id
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Getting Started': 'https://developers.google.com/site-verification/v1/getting_started'
@@ -66,8 +66,9 @@ parameters:
       - :TAG_MANAGER
 properties:
   - !ruby/object:Api::Type::String
-    name: 'id'
+    name: 'web_resource_id'
     output: true
+    api_name: id
     description: |
       The string used to identify this web resource.
   - !ruby/object:Api::Type::NestedObject

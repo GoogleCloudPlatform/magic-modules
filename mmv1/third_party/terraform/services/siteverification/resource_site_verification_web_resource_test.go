@@ -49,7 +49,7 @@ func TestAccSiteVerificationWebResource_siteVerificationDomain(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"verification_method"},
 			},
 			{
-				Config: testAccSiteVerificationWebResource_siteverificationRemoveDomain(context),
+				Config: testAccSiteVerificationWebResource_siteVerificationRemoveDomain(context),
 			},
 		},
 	})
@@ -96,10 +96,10 @@ resource "google_site_verification_web_resource" "example" {
 `, context)
 }
 
-func testAccSiteVerificationWebResource_siteverificationRemoveDomain(context map[string]interface{}) string {
+func testAccSiteVerificationWebResource_siteVerificationRemoveDomain(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 provider "google" {
-  provider               = google.scoped
+  alias                 = "scoped"
   user_project_override = true
   scopes = [
     "https://www.googleapis.com/auth/siteverification",
@@ -166,7 +166,7 @@ func testAccCheckSiteVerificationWebResourceDestroyProducer(t *testing.T) func(s
 	}
 }
 
-func TestAccSiteVerificationWebResource_siteverificationBucket(t *testing.T) {
+func TestAccSiteVerificationWebResource_siteVerificationBucket(t *testing.T) {
 	t.Parallel()
 
 	bucket := "tf-sitverification-test-" + acctest.RandString(t, 10)
@@ -180,7 +180,7 @@ func TestAccSiteVerificationWebResource_siteverificationBucket(t *testing.T) {
 		CheckDestroy:             testAccCheckSiteVerificationWebResourceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSiteVerificationWebResource_siteverificationBucket(context),
+				Config: testAccSiteVerificationWebResource_siteVerificationBucket(context),
 			},
 			{
 				ResourceName:            "google_site_verification_web_resource.example",
@@ -189,13 +189,13 @@ func TestAccSiteVerificationWebResource_siteverificationBucket(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"verification_method"},
 			},
 			{
-				Config: testAccSiteVerificationWebResource_siteverificationRemoveBucket(context),
+				Config: testAccSiteVerificationWebResource_siteVerificationRemoveBucket(context),
 			},
 		},
 	})
 }
 
-func testAccSiteVerificationWebResource_siteverificationBucket(context map[string]interface{}) string {
+func testAccSiteVerificationWebResource_siteVerificationBucket(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 provider "google" {
   alias                 = "scoped"
@@ -246,7 +246,7 @@ resource "google_site_verification_web_resource" "example" {
 `, context)
 }
 
-func testAccSiteVerificationWebResource_siteverificationRemoveBucket(context map[string]interface{}) string {
+func testAccSiteVerificationWebResource_siteVerificationRemoveBucket(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 provider "google" {
   alias                 = "scoped"
