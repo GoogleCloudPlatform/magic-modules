@@ -57,6 +57,8 @@ examples:
       prevent_destroy: 'true'
     test_vars_overrides:
       prevent_destroy: 'false'
+    oics_vars_overrides:
+      prevent_destroy: 'false'
   - !ruby/object:Provider::Terraform::Examples
     name: 'secure_source_manager_repository_initial_config'
     primary_resource_id: 'default'
@@ -68,6 +70,8 @@ examples:
       instance_id: 'my-instance'
       prevent_destroy: 'true'
     test_vars_overrides:
+      prevent_destroy: 'false'
+    oics_vars_overrides:
       prevent_destroy: 'false'
 parameters:
   - !ruby/object:Api::Type::String
