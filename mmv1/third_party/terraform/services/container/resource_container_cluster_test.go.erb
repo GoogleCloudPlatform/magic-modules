@@ -3390,7 +3390,7 @@ func TestAccContainerCluster_withAutopilot_withNodePoolDefaults(t *testing.T) {
 				ResourceName:            "google_container_cluster.primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{deletion_protection"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -10736,7 +10736,7 @@ func testAccContainerCluster_withAutopilotKubeletConfigUpdates(name, insecureKub
 `, name, insecureKubeletReadonlyPortEnabled)
 }
 
-func TestAccContainerCluster_withAutopilot_withNodePoolDefaults(name, networkName, subnetworkName string) string {
+func testAccContainerCluster_withAutopilot_withNodePoolDefaults(name, networkName, subnetworkName string) string {
   return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
   name                = "%s"
