@@ -25,6 +25,7 @@ func TestAccDataprocMetastoreService_updateAndImport(t *testing.T) {
 				ResourceName:      "google_dataproc_metastore_service.my_metastore",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
 				Config: testAccDataprocMetastoreService_updateAndImport(name, tier[1]),
@@ -33,6 +34,7 @@ func TestAccDataprocMetastoreService_updateAndImport(t *testing.T) {
 				ResourceName:      "google_dataproc_metastore_service.my_metastore",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -44,6 +46,7 @@ resource "google_dataproc_metastore_service" "my_metastore" {
 	service_id = "%s"
 	location   = "us-central1"
 	tier       = "%s"
+	deletion_protection = false
 
 	hive_metastore_config {
 		version = "2.3.6"
@@ -71,7 +74,7 @@ func TestAccDataprocMetastoreService_dataprocMetastoreServiceScheduledBackupExam
 				ResourceName:            "google_dataproc_metastore_service.backup",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"service_id", "location", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"service_id", "location", "labels", "terraform_labels", "deletion_protection"},
 			},
 			{
 				Config: testAccDataprocMetastoreService_dataprocMetastoreServiceScheduledBackupExampleUpdate(context),
@@ -139,6 +142,7 @@ resource "google_dataproc_metastore_service" "backup" {
   location   = "us-central1"
   port       = 9080
   tier       = "DEVELOPER"
+  deletion_protection = false
 
   maintenance_window {
     hour_of_day = 2

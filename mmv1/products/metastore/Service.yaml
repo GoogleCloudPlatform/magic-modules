@@ -53,6 +53,17 @@ async: !ruby/object:Api::OpAsync
     path: 'error'
     message: 'message'
 autogen_async: true
+virtual_fields:
+  - !ruby/object:Api::Type::Boolean
+    name: 'deletion_protection'
+    default_value: false
+    description: |
+      Whether Terraform will be prevented from destroying the service. Defaults to true.
+      When a`terraform destroy` or `terraform apply` would delete the domain,
+      the command will fail if this field is not set to false in Terraform state.
+      When the field is set to true or unset in Terraform state, a `terraform apply`
+      or `terraform destroy` that would delete the domain will fail.
+      When the field is set to false, deleting the domain is allowed.
 import_format:
   ['projects/{{project}}/locations/{{location}}/services/{{service_id}}']
 examples:
@@ -63,6 +74,8 @@ examples:
     primary_resource_id: 'default'
     vars:
       metastore_service_name: 'metastore-srv'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataproc_metastore_service_cmek_test'
     skip_docs: true

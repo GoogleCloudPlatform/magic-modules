@@ -16,4 +16,5 @@ resource "google_dataproc_metastore_service" "<%= ctx[:primary_resource_id] %>" 
   labels = {
     env = "test"
   }
+  deletion_protection = false
 }
