@@ -187,8 +187,6 @@ properties:
                 required: true
       - !ruby/object:Api::Type::NestedObject
         name: fhirStreamingSource
-        conflicts:
-          - cloudSpannerSource
         description: |
           A streaming FHIR data source.
         required: false
@@ -202,29 +200,6 @@ properties:
             name: description
             description: |
               Describes the streaming FHIR data source.
-            required: false
-      - !ruby/object:Api::Type::NestedObject
-        name: cloudSpannerSource
-        conflicts:
-          - fhirStreamingSource
-        description: |
-          Cloud Spanner data source.
-        required: false
-        properties:
-          - !ruby/object:Api::Type::String
-            name: databasePath
-            description: |
-              The path to the cloud spanner source database in the format projects/{projectId}/instances/{instance_id}/databases/{database_id}.
-            required: true
-          - !ruby/object:Api::Type::String
-            name: changeStream
-            description: |
-              Change stream name.
-            required: true
-          - !ruby/object:Api::Type::String
-            name: description
-            description: |
-              Describes the cloud spanner data source.
             required: false
       - !ruby/object:Api::Type::String
         name: fhirStoreDestination
