@@ -6,19 +6,22 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 )
 
-func TestAccSecurityCenterFolderBigQueryExportConfig_basic(t *testing.T) {
+func TestAccSecurityCenterFolderBigQueryExportConfig_update(t *testing.T) {
 	t.Parallel()
 
 	randomSuffix := acctest.RandString(t, 10)
 	dataset_id := "tf_test_" + randomSuffix
+	dataset_id2 := "tf_test_" + randomSuffix
 	orgID := envvar.GetTestOrgFromEnv(t)
 
 	context := map[string]interface{}{
 		"org_id":              orgID,
 		"random_suffix":       randomSuffix,
 		"dataset_id":          dataset_id,
+		"dataset_id2":         dataset_id2,
 		"big_query_export_id": "tf-test-export-" + randomSuffix,
 		"folder_name":         "tf-test-folder-name-" + randomSuffix,
 	}
@@ -27,7 +30,6 @@ func TestAccSecurityCenterFolderBigQueryExportConfig_basic(t *testing.T) {
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
 			"time":   {},
 		},
 		Steps: []resource.TestStep{
@@ -42,6 +44,11 @@ func TestAccSecurityCenterFolderBigQueryExportConfig_basic(t *testing.T) {
 			},
 			{
 				Config: testAccSecurityCenterFolderBigQueryExportConfig_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_scc_folder_scc_big_query_export.default", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_scc_folder_scc_big_query_export.default",
@@ -99,7 +106,7 @@ resource "google_folder" "folder" {
   deletion_protection = false
 }
 resource "google_bigquery_dataset" "default" {
-  dataset_id                  = "%{dataset_id}"
+  dataset_id                  = "%{dataset_id2}"
   friendly_name               = "test"
   description                 = "This is a test description"
   location                    = "US"

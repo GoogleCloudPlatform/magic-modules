@@ -24,7 +24,8 @@ description: |
   A Cloud Security Command Center (Cloud SCC) Big Query Export Config.
   It represents exporting Security Command Center data, including assets, findings, and security marks
   to a BigQuery instance.
-  ~> **Note:** In order to use Cloud SCC resources, your organization must be enrolled
+
+  -> **Note:** In order to use Cloud SCC resources, your organization must be enrolled
   in [SCC Standard/Premium](https://cloud.google.com/security-command-center/docs/quickstart-security-command-center).
   Without doing so, you may run into errors during resource creation.
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -35,6 +36,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'scc_folder_big_query_export_config_basic'
     primary_resource_id: 'custom_big_query_export_config'
+    skip_test: true
     vars:
       big_query_export_id: 'my-export'
       dataset: 'my-dataset'
