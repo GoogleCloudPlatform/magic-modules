@@ -44,10 +44,12 @@ examples:
       'example-keyhandle'
     min_version: beta
     vars:
+      folder_name:
+        'my-folder'
       key_project_name:
         'key-proj'
       resource_project_name:
-        'resources'
+        'res-proj'
     test_env_vars:
       org_id: :ORG_ID
       billing_account: :BILLING_ACCT
