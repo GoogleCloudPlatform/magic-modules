@@ -512,6 +512,9 @@ properties:
     name: tieringPolicy
     description: |-
       Tiering policy for the volume.
+    update_mask_fields:
+      - 'tiering_policy.cooling_threshold_days'
+      - 'tiering_policy.tier_action'
     properties:
       - !ruby/object:Api::Type::Integer
         name: 'coolingThresholdDays'
