@@ -31,6 +31,8 @@ examples:
     vars:
       cluster_id: "my-cluster"
       topic_id: "my-topic"
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  post_create: templates/terraform/post_create/sleep.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: location
