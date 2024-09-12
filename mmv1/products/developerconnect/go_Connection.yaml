@@ -105,7 +105,7 @@ properties:
             type: String
             description: |
               Required. A SecretManager resource containing the OAuth token
-              that authorizes the connection. 
+              that authorizes the connection.
               Format: `projects/*/secrets/*/versions/*`.
             min_version: 'beta'
             required: true
@@ -160,7 +160,7 @@ properties:
   - name: 'installationState'
     type: NestedObject
     description: |
-      Describes stage and necessary actions to be taken by the user to complete the installation. 
+      Describes stage and necessary actions to be taken by the user to complete the installation.
       Used for GitHub and GitHub Enterprise based connections.
     min_version: 'beta'
     output: true
@@ -193,7 +193,7 @@ properties:
     type: Boolean
     description:
       Optional. If disabled is set to true, functionality is disabled for
-      this connection. Repository based API methods and webhooks processing 
+      this connection. Repository based API methods and webhooks processing
       for repositories in this connection will be disabled.
     min_version: 'beta'
   - name: 'reconciling'
@@ -206,7 +206,7 @@ properties:
   - name: 'annotations'
     type: KeyValueAnnotations
     description: |
-      Optional. Allows clients to store small amounts of arbitrary data. 
+      Optional. Allows clients to store small amounts of arbitrary data.
     min_version: 'beta'
   - name: 'etag'
     type: String

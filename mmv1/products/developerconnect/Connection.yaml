@@ -101,7 +101,7 @@ properties:
             name: oauthTokenSecretVersion
             description: |
               Required. A SecretManager resource containing the OAuth token
-              that authorizes the connection. 
+              that authorizes the connection.
               Format: `projects/*/secrets/*/versions/*`.
             required: true
           - !ruby/object:Api::Type::String
@@ -147,7 +147,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: installationState
     description: |
-      Describes stage and necessary actions to be taken by the user to complete the installation. 
+      Describes stage and necessary actions to be taken by the user to complete the installation.
       Used for GitHub and GitHub Enterprise based connections.
     output: true
     properties:
@@ -176,7 +176,7 @@ properties:
     name: disabled
     description:
       Optional. If disabled is set to true, functionality is disabled for
-      this connection. Repository based API methods and webhooks processing 
+      this connection. Repository based API methods and webhooks processing
       for repositories in this connection will be disabled.
   - !ruby/object:Api::Type::Boolean
     name: reconciling
@@ -187,7 +187,7 @@ properties:
   - !ruby/object:Api::Type::KeyValueAnnotations
     name: annotations
     description: |
-      Optional. Allows clients to store small amounts of arbitrary data. 
+      Optional. Allows clients to store small amounts of arbitrary data.
   - !ruby/object:Api::Type::String
     name: etag
     description: |
