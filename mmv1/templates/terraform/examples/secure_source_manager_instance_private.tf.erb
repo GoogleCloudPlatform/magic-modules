@@ -61,7 +61,7 @@ resource "google_secure_source_manager_instance" "<%= ctx[:primary_resource_id] 
     ca_pool = google_privateca_ca_pool.ca_pool.id
   }
 
-  # For preventing accidental deletions
+  # Prevent accidental deletions.
   lifecycle {
     prevent_destroy = "<%= ctx[:vars]['prevent_destroy'] %>"
   }

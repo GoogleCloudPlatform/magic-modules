@@ -5,7 +5,7 @@ resource "google_secure_source_manager_instance" "<%= ctx[:primary_resource_id] 
       "foo" = "bar"
     }
 
-    # For preventing accidental deletions
+    # Prevent accidental deletions.
     lifecycle {
       prevent_destroy = "<%= ctx[:vars]['prevent_destroy'] %>"
     }
