@@ -11,10 +11,16 @@ import (
 
 func TestAccFwProvider_project(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
-		"config takes precedence over environment variables":                           testAccFwProvider_project_configPrecedenceOverEnvironmentVariables,
-		"when project is unset in the config, environment variables are used":          testAccFwProvider_project_precedenceOrderEnvironmentVariables,
+		// Configuring the provider using inputs
+		"config takes precedence over environment variables":                  testAccFwProvider_project_configPrecedenceOverEnvironmentVariables,
+		"when project is unset in the config, environment variables are used": testAccFwProvider_project_precedenceOrderEnvironmentVariables,
+
+		// Schema-level validation
 		"when project is set to an empty string in the config the value isn't ignored": testAccFwProvider_project_emptyStringValidation,
-		"when project is unknown in the config, environment variables are used":        testAccFwProvider_project_unknownHandling,
+
+		// Usage
+		//    There aren't currently any test cases covering usage of the default project values here
+		//    However use of default project values is present in the majority of our resource acceptance tests
 	}
 
 	for name, tc := range testCases {
@@ -168,61 +174,6 @@ func testAccFwProvider_project_emptyStringValidation(t *testing.T) {
 	})
 }
 
-func testAccFwProvider_project_unknownHandling(t *testing.T) {
-
-	context := map[string]interface{}{
-		"random_suffix":      acctest.RandString(t, 10),
-		"test_step":          "0", // each test step updates this value
-		"org_id":             envvar.GetTestOrgFromEnv(t),
-		"billing_account_id": envvar.GetTestBillingAccountFromEnv(t),
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccFwProvider_projectUnknownHandling(context, "1"),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestMatchResourceAttr("data.google_provider_config_plugin_framework.default-1", "project", regexp.MustCompile("tf-test-[0-9a-z]{10}-[0-9]{1,}")),
-				),
-			},
-			{
-				Config: testAccFwProvider_projectUnknownHandling_wait(context, "2"),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestMatchResourceAttr("data.google_provider_config_plugin_framework.default-2", "project", regexp.MustCompile("tf-test-[0-9a-z]{10}-[0-9]{1,}")),
-					resource.TestMatchResourceAttr("data.google_provider_config_plugin_framework.wait-2", "project", regexp.MustCompile("tf-test-[0-9a-z]{10}-[0-9]{1,}")),
-				),
-			},
-			{
-				// Unset all ENVs for project
-				PreConfig: func() {
-					for _, v := range envvar.ProjectEnvVars {
-						t.Setenv(v, "")
-					}
-				},
-				Config: testAccFwProvider_projectUnknownHandling(context, "3"),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestMatchResourceAttr("data.google_provider_config_plugin_framework.default-3", "project", regexp.MustCompile("tf-test-[0-9a-z]{10}-[0-9]{1,}")),
-				),
-			},
-			{
-				// Unset all ENVs for project
-				PreConfig: func() {
-					for _, v := range envvar.ProjectEnvVars {
-						t.Setenv(v, "")
-					}
-				},
-				Config: testAccFwProvider_projectUnknownHandling_wait(context, "4"),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestMatchResourceAttr("data.google_provider_config_plugin_framework.default-4", "project", regexp.MustCompile("tf-test-[0-9a-z]{10}-[0-9]{1,}")),
-					resource.TestMatchResourceAttr("data.google_provider_config_plugin_framework.wait-4", "project", regexp.MustCompile("tf-test-[0-9a-z]{10}-[0-9]{1,}")),
-				),
-			},
-		},
-	})
-}
-
 // testAccFwProvider_projectInProviderBlock allows setting the project argument in a provider block.
 func testAccFwProvider_projectInProviderBlock(context map[string]interface{}) string {
 	return acctest.Nprintf(`
@@ -240,45 +191,4 @@ func testAccFwProvider_projectInEnvsOnly() string {
 	return `
 data "google_provider_config_plugin_framework" "default" {}
 `
-}
-
-// testAccFwProvider_projectUnknownHandling is specifically for testing how an unknown value is used.
-func testAccFwProvider_projectUnknownHandling(context map[string]interface{}, stepNumber string) string {
-	// Force resources to be recreated on each test step by using stepNumber
-	context["test_step"] = stepNumber
-
-	return acctest.Nprintf(`
-provider "google" {
-	alias = "alternate"
-}
-
-resource "google_project" "project" {
-  provider        = google.alternate
-  name            = "Test Acc Project"
-  project_id      = "tf-test-%{random_suffix}-%{test_step}"
-  org_id          = "%{org_id}"
-  billing_account = "%{billing_account_id}"
-  deletion_policy = "DELETE"
-}
-
-// Note that this is the unaliased provider, and is used in the data source below
-provider "google" {
-	project = google_project.project.project_id
-}
-
-data "google_provider_config_plugin_framework" "default-%{test_step}" {
-}
-`, context)
-}
-
-func testAccFwProvider_projectUnknownHandling_wait(context map[string]interface{}, stepNumber string) string {
-	// Force resources to be recreated on each test step by using stepNumber
-	context["test_step"] = stepNumber
-
-	return testAccFwProvider_projectUnknownHandling(context, stepNumber) +
-		acctest.Nprintf(`
-data "google_provider_config_plugin_framework" "wait-%{test_step}" {
-  depends_on = [google_project.project]
-}
-`, context)
 }
