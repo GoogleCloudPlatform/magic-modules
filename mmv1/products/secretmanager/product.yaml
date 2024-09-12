@@ -14,6 +14,7 @@
 --- !ruby/object:Api::Product
 name: SecretManager
 display_name: Secret Manager
+legacy_name: secret_manager
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
