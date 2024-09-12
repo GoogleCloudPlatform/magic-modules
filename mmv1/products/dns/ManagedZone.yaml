@@ -149,6 +149,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'dnssecConfig'
     description: DNSSEC configuration
+    default_from_api: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'kind'
