@@ -269,7 +269,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 			testState = "success"
 		}
 
-		if err := vt.UploadCassettes(prNumber, provider.Beta); err != nil {
+		if err := vt.UploadCassettes(newBranch, provider.Beta); err != nil {
 			return fmt.Errorf("error uploading cassettes: %w", err)
 		}
 
