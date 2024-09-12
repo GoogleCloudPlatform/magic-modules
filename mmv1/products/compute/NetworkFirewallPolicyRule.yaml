@@ -216,14 +216,6 @@ properties:
     values:
       - :INGRESS
       - :EGRESS
-  - !ruby/object:Api::Type::Array
-    name: 'targetResources'
-    item_type: Api::Type::String
-    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    description: |
-      A list of network resource URLs to which this rule applies.
-      This field allows you to control which network's VMs get this rule.
-      If this field is left blank, all VMs within the organization will receive the rule.
   - !ruby/object:Api::Type::Boolean
     name: 'enableLogging'
     description: |
