@@ -4,4 +4,8 @@ resource "google_secure_source_manager_instance" "<%= ctx[:primary_resource_id] 
     labels = {
       "foo" = "bar"
     }
+
+    lifecycle {
+      prevent_destroy = "<%= ctx[:vars]['prevent_destroy'] %>"
+    }
 }

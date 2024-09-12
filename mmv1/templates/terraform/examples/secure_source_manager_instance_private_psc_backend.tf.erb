@@ -63,6 +63,11 @@ resource "google_secure_source_manager_instance" "<%= ctx[:primary_resource_id] 
     is_private = true
     ca_pool = google_privateca_ca_pool.ca_pool.id
   }
+
+  lifecycle {
+    prevent_destroy = "<%= ctx[:vars]['prevent_destroy'] %>"
+  }
+
   depends_on = [
     google_privateca_certificate_authority.root_ca,
     time_sleep.wait_120_seconds
