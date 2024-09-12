@@ -43,6 +43,12 @@ examples:
       topic_name: 'example-topic'
       subscription_name: 'example-subscription'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'pubsub_subscription_pull_filter'
+    primary_resource_id: 'example'
+    vars:
+      topic_name: 'example-topic'
+      subscription_name: 'example-subscription'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'pubsub_subscription_dead_letter'
     primary_resource_id: 'example'
     vars:
@@ -396,7 +402,7 @@ properties:
     name: 'filter'
     required: false
     validation: !ruby/object:Provider::Terraform::Validation
-      regex: '^.{0,256}$'
+      regex: '^[\s\S]{0,256}$'
     description: |
       The subscription only delivers the messages that match the filter.
       Pub/Sub automatically acknowledges the messages that don't match the filter. You can filter messages
