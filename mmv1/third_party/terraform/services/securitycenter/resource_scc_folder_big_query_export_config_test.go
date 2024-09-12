@@ -4,9 +4,9 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 )
 
 func TestAccSecurityCenterFolderBigQueryExportConfig_update(t *testing.T) {
@@ -30,7 +30,7 @@ func TestAccSecurityCenterFolderBigQueryExportConfig_update(t *testing.T) {
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
-			"time":   {},
+			"time": {},
 		},
 		Steps: []resource.TestStep{
 			{
