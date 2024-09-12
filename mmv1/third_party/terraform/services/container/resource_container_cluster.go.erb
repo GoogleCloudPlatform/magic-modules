@@ -4363,7 +4363,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 				Update: &container.ClusterUpdate{
 					DesiredNodeKubeletConfig: &container.NodeKubeletConfig{
 						InsecureKubeletReadonlyPortEnabled: expandInsecureKubeletReadonlyPortEnabled(insecureKubeletReadonlyPortEnabled),
-						ForceSendFields:                    []string{"InsecureKubeletReadonlyPortEnabled"},
 					},
 				},
 			}
