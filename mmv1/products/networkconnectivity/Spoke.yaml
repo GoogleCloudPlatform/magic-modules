@@ -56,6 +56,24 @@ examples:
       instance_name: "basic-instance"
       hub_name: "basic-hub1"
       spoke_name: "basic-spoke"
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'network_connectivity_spoke_vpn_tunnel_basic'
+    primary_resource_id: 'primary'
+    vars:
+      network_name: "basic-network"
+      subnetwork_name: "basic-subnetwork"
+      gateway_name: "vpn-gateway"
+      external_gateway_name: "external-vpn-gateway"
+      router_name: "external-vpn-gateway"
+      vpn_tunnel_1_name: "tunnel1"
+      vpn_tunnel_2_name: "tunnel2"
+      router_interface_1_name: "router-interface1"
+      router_peer_1_name: "router-peer1"
+      router_interface_2_name: "router-interface2"
+      router_peer_2_name: "router-peer2"
+      hub_name: "basic-hub1"
+      vpn_tunnel_1_spoke_name: "vpn-tunnel-1-spoke"
+      vpn_tunnel_2_spoke_name: "vpn-tunnel-2-spoke"
 description: "The NetworkConnectivity Spoke resource"
 parameters:
   - !ruby/object:Api::Type::String
