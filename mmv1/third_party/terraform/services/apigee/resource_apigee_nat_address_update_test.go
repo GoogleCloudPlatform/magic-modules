@@ -1,8 +1,58 @@
+package apigee_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+)
+
+func TestAccApigeeNatAddress_apigeeNatAddressUpdateTest(t *testing.T) {
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"random_suffix":   acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckApigeeNatAddressDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccApigeeNatAddress_apigeeNatAddressBasicTestExample(context),
+			},
+			{
+				ResourceName:            "google_apigee_nat_address.apigee_nat_address",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"activate", "instance_id"},
+			},
+			{
+				Config: testAccApigeeNatAddress_apigeeNatAddressUpdateTest(context),
+			},
+			{
+				ResourceName:            "google_apigee_nat_address.apigee_nat_address",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"activate", "instance_id"},
+			},
+		},
+	})
+}
+
+func testAccApigeeNatAddress_apigeeNatAddressUpdateTest(context map[string]interface{}) string {
+	return acctest.Nprintf(`
 resource "google_project" "project" {
   project_id      = "tf-test%{random_suffix}"
   name            = "tf-test%{random_suffix}"
-  org_id          = "<%= ctx[:test_env_vars]['org_id'] %>"
-  billing_account = "<%= ctx[:test_env_vars]['billing_account'] %>"
+  org_id          = "%{org_id}"
+  billing_account = "%{billing_account}"
   deletion_policy = "DELETE"
 }
 
@@ -59,7 +109,10 @@ resource "google_apigee_instance" "apigee_instance" {
   org_id   = google_apigee_organization.apigee_org.id
 }
 
-resource "google_apigee_nat_address" "<%= ctx[:primary_resource_id] %>" {
+resource "google_apigee_nat_address" "apigee_nat_address" {
   name        = "tf-test%{random_suffix}"
+	activate    = true
   instance_id = google_apigee_instance.apigee_instance.id
+}
+`, context)
 }
