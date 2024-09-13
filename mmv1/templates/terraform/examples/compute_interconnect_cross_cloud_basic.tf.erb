@@ -1,0 +1,12 @@
+data "google_project" "project" {}
+
+resource "google_compute_interconnect" "<%= ctx[:primary_resource_id] %>" {
+  name                 = "<%= ctx[:vars]['interconnect_name'] %>"
+  description          = "description"
+  noc_contact_email    = "user@google.com"
+  admin_enabled        = true
+  link_type            = "LINK_TYPE_ETHERNET_100G_LR"
+  requested_link_count = 5
+  interconnect_type    = "DEDICATED"
+  remote_location      = "http://www.googleapis.com/compute/v1/projects/project-name/global/interconnectRemoteLocations/interconnect-remote-location"
+}

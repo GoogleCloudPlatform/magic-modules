@@ -49,6 +49,7 @@ examples:
     primary_resource_id: 'example-interconnect'
     vars:
       interconnect_name: 'example-interconnect'
+      customer_name: 'example_customer'
       deletion_protection: 'true'
     test_vars_overrides:
       deletion_protection: 'false'
