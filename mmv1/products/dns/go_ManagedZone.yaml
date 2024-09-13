@@ -138,6 +138,7 @@ properties:
   - name: 'dnssecConfig'
     type: NestedObject
     description: DNSSEC configuration
+    default_from_api: true
     properties:
       - name: 'kind'
         type: String

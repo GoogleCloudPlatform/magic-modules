@@ -171,7 +171,6 @@ properties:
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
-  # 'fingerprint' used internally for object consistency.
   - name: 'host_rule'
     type: Array
     description: 'The list of HostRules to use against the URL.'

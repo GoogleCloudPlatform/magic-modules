@@ -291,3 +291,11 @@ properties:
       the format tagValues/456. The field is ignored (both PUT & PATCH) when empty.
     immutable: true
     ignore_read: true
+  - name: 'deletionProtectionEnabled'
+    type: Boolean
+    description: |
+      Indicates whether the instance is protected against deletion.
+  - name: 'deletionProtectionReason'
+    type: String
+    description: |
+      The reason for enabling deletion protection.
