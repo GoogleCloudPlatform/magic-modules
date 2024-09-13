@@ -28,9 +28,6 @@ description: |
   Snapshots are incremental, so you can create regular snapshots on a
   persistent disk faster and at a much lower cost than if you regularly
   created a full image of the disk.
-# 'createSnapshot' is a zonal operation while 'snapshot.delete' is a global
-# operation. we'll leave the object as global operation and use the disk's
-# zonal operation for the create action.
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/compute/docs/disks/create-snapshots'
@@ -143,7 +140,6 @@ parameters:
         description: |
           The service account used for the encryption request for the given KMS key.
           If absent, the Compute Engine Service Agent service account is used.
-    # ignore_read in providers - this is only used in Create
   - name: 'sourceDiskEncryptionKey'
     type: NestedObject
     description: |
@@ -157,7 +153,6 @@ parameters:
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
-        # The docs list this field but it is never returned.
         sensitive: true
       - name: 'kmsKeyServiceAccount'
         type: String
@@ -202,7 +197,6 @@ properties:
   - name: 'description'
     type: String
     description: 'An optional description of this resource.'
-  # 'sourceDiskId' not useful for object convergence.
     immutable: true
   - name: 'storageBytes'
     type: Integer

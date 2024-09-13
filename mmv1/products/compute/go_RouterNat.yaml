@@ -16,6 +16,9 @@
 name: 'RouterNat'
 description: |
   A NAT service created in a router.
+
+  ~> **Note:** Recreating a `google_compute_address` that is being used by `google_compute_router_nat` will give a `resourceInUseByAnotherResource` error.
+  Use `lifecycle.create_before_destroy` on this address resource to avoid this type of error as shown in the Manual Ips example.
 references:
   guides:
     'Google Cloud Router': 'https://cloud.google.com/router/docs/'
@@ -149,6 +152,9 @@ properties:
     description: |
       Self-links of NAT IPs. Only valid if natIpAllocateOption
       is set to MANUAL_ONLY.
+      If this field is used alongside with a count created list of address resources `google_compute_address.foobar.*.self_link`,
+      the access level resource for the address resource must have a `lifecycle` block with `create_before_destroy = true` so
+      the number of resources can be increased/decreased without triggering the `resourceInUseByAnotherResource` error.
     is_set: true
     send_empty_value: true
     set_hash_func: computeRouterNatIPsHash
