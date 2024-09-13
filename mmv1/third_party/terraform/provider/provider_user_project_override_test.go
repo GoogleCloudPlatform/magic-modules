@@ -248,10 +248,9 @@ output "user_project_override" {
 `, context)
 }
 
-// Test setup:
-// - Provisions project-1 and project-2
-// - The API required for the provisioned resource is only enabled in project-2
-// - The provider is configured using an access token linked to project-1
+// Set up two projects. Project 1 has a service account that is used to create a
+// pubsub topic in project 2. The pubsub API is only enabled in project 2,
+// which causes the create to fail unless user_project_override is set to true.
 // The test demonstrates how:
 // - If user_project_override = false : the apply fails as the API is disabled in project-1
 // - If user_project_override = true : the apply succeeds as X-Goog-User-Project will reference project-2, where API is enabled
@@ -267,8 +266,11 @@ func testAccProviderUserProjectOverride(t *testing.T) {
 
 	config := acctest.BootstrapConfig(t)
 	accessToken, err := acctest.SetupProjectsAndGetAccessToken(org, billing, pid, "pubsub", config)
-	if err != nil {
-		t.Error(err)
+	if err != nil || accessToken == "" {
+		if err == nil {
+			t.Fatal("error when setting up projects and retrieving access token: access token is an empty string")
+		}
+		t.Fatalf("error when setting up projects and retrieving access token: %s", err)
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -309,8 +311,11 @@ func testAccProviderIndirectUserProjectOverride(t *testing.T) {
 
 	config := acctest.BootstrapConfig(t)
 	accessToken, err := acctest.SetupProjectsAndGetAccessToken(org, billing, pid, "cloudkms", config)
-	if err != nil {
-		t.Error(err)
+	if err != nil || accessToken == "" {
+		if err == nil {
+			t.Fatal("error when setting up projects and retrieving access token: access token is an empty string")
+		}
+		t.Fatalf("error when setting up projects and retrieving access token: %s", err)
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -336,10 +341,6 @@ func testAccProviderIndirectUserProjectOverride(t *testing.T) {
 		},
 	})
 }
-
-// Set up two projects. Project 1 has a service account that is used to create a
-// pubsub topic in project 2. The pubsub API is only enabled in project 2,
-// which causes the create to fail unless user_project_override is set to true.
 
 func testAccProviderUserProjectOverride_step2(accessToken, pid string, override bool, topicName string) string {
 	return fmt.Sprintf(`
