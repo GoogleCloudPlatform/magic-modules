@@ -1308,7 +1308,7 @@ func SetupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 	// After project-2 is created and the firebase API is enabled, 
 	// we need to make the GCP project a Firebase project.
 	// Using google_firebase_project in the acceptance test wasn't sufficient.
-	if service == "firebase" {
+	if service == "putting a string that doesn't work here!" {
 		url := fmt.Sprintf("%sprojects/%s:addFirebase", config.FirebaseBasePath, p2)
 		obj := make(map[string]interface{})
 		headers := make(http.Header)
