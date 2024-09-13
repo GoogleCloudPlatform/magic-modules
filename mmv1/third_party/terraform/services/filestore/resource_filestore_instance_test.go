@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/services/filestore"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -152,6 +153,7 @@ func TestAccFilestoreInstance_reservedIpRange_update(t *testing.T) {
 func TestAccFilestoreInstance_tags(t *testing.T) {
 	t.Parallel()
         name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+        org := envvar.GetTestOrgFromEnv(t)
 	tagKey := acctest.BootstrapSharedTestTagKey(t, "filestore-instances-tagkey")
 	tagValue := acctest.BootstrapSharedTestTagValue(t, "filestore-instances-tagvalue", tagKey)
 
@@ -161,7 +163,7 @@ func TestAccFilestoreInstance_tags(t *testing.T) {
 		CheckDestroy:             testAccCheckFilestoreInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFileInstanceTags(name, map[string]string{tagKey: tagValue}),
+				Config: testAccFileInstanceTags(name, map[string]string{org + "/" + tagKey: tagValue}),
 			},
 			{
 				ResourceName:            "google_filestore_instance.instance",
@@ -232,9 +234,13 @@ resource "google_filestore_instance" "instance" {
     modes             = ["MODE_IPV4"]
     reserved_ip_range = "172.19.31.0/29"
   }
-tags = {
-	"tagKeys/281478409127147" = "tagValues/281479442205542"
-}
-}
-`, name)
+tags = {`, name)
+
+	l := ""
+	for key, value := range tags {
+		l += fmt.Sprintf("%q = %q\n", key, value)
+	}
+
+	l += fmt.Sprintf("}\n}")
+	return r + l
 }
