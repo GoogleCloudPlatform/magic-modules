@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'IngressPolicy'
+api_resource_type: ServicePerimeter
 description: |
   This resource has been deprecated, please refer to ServicePerimeterIngressPolicy.
 references:

@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'kmsconfig'
+api_resource_type: KmsConfig
 description: |
   NetApp Volumes always encrypts your data at rest using volume-specific keys.
 

@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'Slo'
+api_resource_type: ServiceLevelObjective
 description: |
   A Service-Level Objective (SLO) describes the level of desired good
   service. It consists of a service-level indicator (SLI), a performance

@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'Trigger'
+api_resource_type: BuildTrigger
 description: |
   Configuration for an automated build in response to source repository changes.
 references:

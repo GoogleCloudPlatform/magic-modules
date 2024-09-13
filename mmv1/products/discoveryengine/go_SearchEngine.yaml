@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'SearchEngine'
+api_resource_type: Engine
 description: |
   Vertex AI Search and Conversation can be used to create a search engine or a chat application by connecting it with a datastore
 references:

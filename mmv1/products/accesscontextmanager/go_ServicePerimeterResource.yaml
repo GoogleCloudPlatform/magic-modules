@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'ServicePerimeterResource'
+api_resource_type: ServicePerimeter
 description: |
   Allows configuring a single GCP resource that should be inside the `status` block of a service perimeter.
   This resource is intended to be used in cases where it is not possible to compile a full list

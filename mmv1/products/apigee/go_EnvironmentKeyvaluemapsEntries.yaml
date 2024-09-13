@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'EnvironmentKeyvaluemapsEntries'
+api_resource_type: KeyValueEntry
 description: |
   Creates key value entries in a key value map scoped to an environment.
 references:

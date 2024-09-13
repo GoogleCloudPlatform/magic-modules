@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'Datascan'
+api_resource_type: DataScan
 description: |
   Represents a user-visible job which provides the insights for the related data source.
 skip_attribution_label: true

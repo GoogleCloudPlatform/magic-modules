@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'OrganizationSecurityHealthAnalyticsCustomModule'
+api_resource_type: SecurityHealthAnalyticsCustomModule
 description: |
   Represents an instance of a Security Health Analytics custom module, including
   its full module name, display name, enablement state, and last updated time.

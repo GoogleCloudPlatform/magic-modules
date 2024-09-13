@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'OrganizationMuteConfig'
+api_resource_type: MuteConfig
 description: |
   Mute Findings is a volume management feature in Security Command Center
   that lets you manually or programmatically hide irrelevant findings,

@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'OrganizationFeed'
+api_resource_type: Feed
 description: |
   Describes a Cloud Asset Inventory feed used to to listen to asset updates.
 references:

@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'Config'
+api_resource_type: TransferConfig
 description: |
   Represents a data transfer configuration. A transfer configuration
   contains all metadata needed to perform a data transfer.

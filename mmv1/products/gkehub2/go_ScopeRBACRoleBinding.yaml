@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'ScopeRBACRoleBinding'
+api_resource_type: RBACRoleBinding
 description: |
   RBACRoleBinding represents a rbacrolebinding across the Fleet.
 references:

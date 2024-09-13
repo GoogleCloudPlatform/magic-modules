@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'SSHPublicKey'
+api_resource_type: SshPublicKey
 kind: 'user#sshPublicKeys'
 description: |
   The SSH public key information associated with a Google account.

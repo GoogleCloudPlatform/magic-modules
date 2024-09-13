@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'SourceRepresentationInstance'
+api_resource_type: Instance
 kind: 'sql#instance'
 description: |
   A source representation instance is a Cloud SQL instance that represents
