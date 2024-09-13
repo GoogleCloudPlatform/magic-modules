@@ -327,7 +327,6 @@ properties:
           type: NestedObject
           description: |-
             Policy condition for matching versions.
-          # TODO (jrsb): exactly_one_of: condition, mostRecentVersions
           properties:
             - name: 'tagState'
               type: Enum
@@ -371,7 +370,6 @@ properties:
           description: |-
             Policy condition for retaining a minimum number of versions. May only be
             specified with a Keep action.
-          # TODO (jrsb): exactly_one_of: condition, mostRecentVersions
           properties:
             - name: 'packageNamePrefixes'
               type: Array

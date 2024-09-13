@@ -252,7 +252,6 @@ properties:
                         type: String
                         description: |
                           The localized error message in the above locale.
-      # Status.lastAttempt
                         output: true
       - name: 'lastAttempt'
         type: NestedObject
@@ -389,5 +388,4 @@ properties:
                             description: |
                               The localized error message in the above locale.
 
-#Examples for testing
                             output: true

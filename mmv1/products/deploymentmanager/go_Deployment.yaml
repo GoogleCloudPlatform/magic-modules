@@ -132,7 +132,6 @@ properties:
     type: String
     description: |
       Optional user-provided description of deployment.
-    # Custom Update
     update_url: 'projects/{{project}}/global/deployments/{{name}}?preview={{preview}}&createPolicy={{create_policy}}&deletePolicy={{delete_policy}}'
     update_id: '1_non-preview'
     fingerprint_name: 'fingerprint'
@@ -161,7 +160,6 @@ properties:
     description: |
       Parameters that define your deployment, including the deployment
       configuration and relevant templates.
-    # Custom Update
     required: true
     ignore_read: true
     update_url: 'projects/{{project}}/global/deployments/{{name}}?preview={{preview}}&createPolicy={{create_policy}}&deletePolicy={{delete_policy}}'
