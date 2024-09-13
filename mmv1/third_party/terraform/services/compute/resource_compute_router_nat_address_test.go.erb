@@ -62,7 +62,7 @@ func TestAccComputeRouterNatAddress_withAddressCountDecrease(t *testing.T) {
 					resource.TestCheckResourceAttr("google_compute_router_nat.foobar", "initial_nat_ips.#", "1"),
 					resource.TestCheckResourceAttr("google_compute_router_nat.foobar", "nat_ips.#", "1"),
 					resource.TestCheckResourceAttr("google_compute_router_nat_address.foobar", "nat_ips.#", "2"),
-          resource.TestCheckResourceAttr("data.google_compute_router_nat.foo", "nat_ips.#", "1"),
+					resource.TestCheckResourceAttr("data.google_compute_router_nat.foo", "nat_ips.#", "1"),
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_router_nat.foo",
 						"google_compute_router_nat.foobar",
