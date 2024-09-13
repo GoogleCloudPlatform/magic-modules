@@ -15,6 +15,7 @@
 ---
 name: 'SecretManager'
 display_name: 'Secret Manager'
+legacy_name: 'secret_manager'
 versions:
   - name: 'ga'
     base_url: 'https://secretmanager.googleapis.com/v1/'
