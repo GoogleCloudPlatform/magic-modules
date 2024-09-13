@@ -61,9 +61,9 @@ properties:
       The state of the key. Can be set to one of ACTIVE, INACTIVE.
     default_value: :ACTIVE
     values:
+    # - :DELETED (not directly settable)
       - :ACTIVE
       - :INACTIVE
-      # - :DELETED (not directly settable)
     update_verb: :PUT
     update_url: projects/{{project}}/hmacKeys/{{access_id}}
     update_id: 'state'
