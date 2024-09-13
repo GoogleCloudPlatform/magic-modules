@@ -128,7 +128,6 @@ properties:
                 type: String
                 description: |
                   The Doc AI processor type name.
-        # select any one of the property types (integer, float, text, property, enum, dateTime, map, timestamp)
         - name: 'integerTypeOptions'
           type: NestedObject
           description: |

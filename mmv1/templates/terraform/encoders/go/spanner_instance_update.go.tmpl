@@ -6,6 +6,9 @@ obj["name"] = fmt.Sprintf("projects/%s/instances/%s", project, obj["name"])
 newObj := make(map[string]interface{})
 newObj["instance"] = obj
 updateMask := make([]string, 0)
+if d.HasChange("edition") {
+  updateMask = append(updateMask, "edition")
+}
 if d.HasChange("num_nodes") {
 	updateMask = append(updateMask, "nodeCount")
 }

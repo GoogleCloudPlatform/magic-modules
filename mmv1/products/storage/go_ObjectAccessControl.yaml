@@ -83,7 +83,6 @@ properties:
   - name: 'entityId'
     type: String
     description: 'The ID for the entity'
-  # | 'etag' is not applicable for state convergence.
     output: true
   - name: 'generation'
     type: Integer

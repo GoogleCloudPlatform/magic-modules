@@ -283,3 +283,11 @@ properties:
     description: |
       KMS key name used for data encryption.
     immutable: true
+  - name: 'deletionProtectionEnabled'
+    type: Boolean
+    description: |
+      Indicates whether the instance is protected against deletion.
+  - name: 'deletionProtectionReason'
+    type: String
+    description: |
+      The reason for enabling deletion protection.

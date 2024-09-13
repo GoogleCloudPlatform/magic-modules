@@ -23,7 +23,6 @@ references:
 docs:
   note: |
     You can retrieve the email of the Cloud Build Service Account used in jobs by using the `google_project_service_identity` resource.
-  # import by default only works with old-style self links ending in a name
 id_format: 'projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/triggers'
 self_link: 'projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}'

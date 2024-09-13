@@ -24,7 +24,9 @@ docs:
 base_url: 'instances'
 self_link: '{{org_id}}/instances/{{name}}'
 create_url: '{{org_id}}/instances'
-immutable: true
+update_verb: 'PATCH'
+update_mask: true
+immutable: false
 mutex: '{{org_id}}/apigeeInstances'
 import_format:
   - '{{org_id}}/instances/{{name}}'
@@ -121,16 +123,19 @@ properties:
     description: |
       Resource ID of the instance.
     required: true
+    immutable: true
   - name: 'location'
     type: String
     description: |
       Required. Compute Engine location where the instance resides.
     required: true
+    immutable: true
   - name: 'peeringCidrRange'
     type: String
     description: |
       The size of the CIDR block range that will be reserved by the instance. For valid values,
       see [CidrRange](https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances#CidrRange) on the documentation.
+    immutable: true
     default_from_api: true
   - name: 'ipRange'
     type: String
@@ -142,15 +147,18 @@ properties:
       available /22 CIDR block from Service Networking. The customer should use this CIDR block
       for configuring their firewall needs to allow traffic from Apigee.
       Input format: "a.b.c.d/22"
+    immutable: true
     ignore_read: true
   - name: 'description'
     type: String
     description: |
       Description of the instance.
+    immutable: true
   - name: 'displayName'
     type: String
     description: |
       Display name of the instance.
+    immutable: true
   - name: 'diskEncryptionKeyName'
     type: String
     description: |

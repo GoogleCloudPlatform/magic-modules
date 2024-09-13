@@ -129,7 +129,6 @@ properties:
       - name: 'extensionRef'
         type: String
         description: The ref of the Extension from the Registry (e.g. publisher-id/awesome-extension)
-        # Installing from an extensionRef is the only way for now
         min_version: 'beta'
         required: true
         immutable: true

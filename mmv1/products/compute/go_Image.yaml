@@ -110,8 +110,6 @@ properties:
     type: Integer
     description: |
       Size of the image when restored onto a persistent disk (in GB).
-    # TODO(alexstephen): Build family support.
-    # Families use a different API
     default_from_api: true
   - name: 'family'
     type: String
@@ -228,7 +226,6 @@ properties:
         description: |
           An optional SHA1 checksum of the disk image before unpackaging.
           This is provided by the client when the disk image is created.
-      # TODO(alexstephen): Figure out cross-module ResourceRefs
         api_name: sha1Checksum
       - name: 'source'
         type: String

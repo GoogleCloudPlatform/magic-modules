@@ -473,7 +473,6 @@ properties:
               - name: 'policyContent'
                 type: NestedObject
                 description: 'Specifies the desired policy content on the cluster.'
-                # default_from_api: true
                 properties:
                   - name: 'templateLibrary'
                     type: NestedObject

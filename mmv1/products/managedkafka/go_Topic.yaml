@@ -30,6 +30,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
+  post_create: 'templates/terraform/post_create/go/sleep.go.tmpl'
 examples:
   - name: 'managedkafka_topic_basic'
     primary_resource_id: 'example'

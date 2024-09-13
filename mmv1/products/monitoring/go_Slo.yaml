@@ -411,7 +411,6 @@ properties:
               Duration over which window quality is evaluated, given as a
               duration string "{X}s" representing X seconds. Must be an
               integer fraction of a day and at least 60s.
-          # START window_criterion FIELDS
           - name: 'goodBadMetricFilter'
             type: String
             description: |
@@ -741,7 +740,6 @@ properties:
                       max value for the range (inclusive). If not given,
                       will be set to "infinity", defining an open range
                       ">= range.min"
-        # END window_criterion FIELDS
                     at_least_one_of:
                       - 'service_level_indicator.0.windows_based_sli.0.metric_sum_in_range.0.range.0.min'
                       - 'service_level_indicator.0.windows_based_sli.0.metric_sum_in_range.0.range.0.max'

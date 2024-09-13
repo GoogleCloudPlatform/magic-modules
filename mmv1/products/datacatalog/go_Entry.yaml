@@ -98,8 +98,6 @@ properties:
     type: String
     description: |
       Entry description, which can consist of several sentences or paragraphs that describe entry contents.
-    # This is a string instead of a NestedObject because schemas contain ColumnSchemas, which can contain nested ColumnSchemas.
-    # We'll have people provide the json blob for the schema instead.
   - name: 'schema'
     type: String
     description: |

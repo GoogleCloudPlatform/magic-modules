@@ -16,7 +16,6 @@
 name: 'Zone'
 kind: 'compute#zone'
 description: 'Represents a Zone resource.'
-# Used as a resource reference
 exclude: true
 readonly: true
 docs:

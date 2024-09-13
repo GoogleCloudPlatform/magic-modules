@@ -37,7 +37,7 @@ timeouts:
 custom_code:
   decoder: 'templates/terraform/decoders/go/long_name_to_self_link.go.tmpl'
   custom_import: 'templates/terraform/custom_import/go/healthcare_fhir_store.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'healthcare_fhir_store_basic'
     primary_resource_id: 'default'

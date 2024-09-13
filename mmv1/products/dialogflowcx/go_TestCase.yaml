@@ -162,7 +162,6 @@ properties:
                       type: String
                       description: |
                         The finish digit (if any).
-            # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
             - name: 'injectedParameters'
               type: String
               description: |
@@ -313,7 +312,6 @@ properties:
                           type: String
                           description: |
                             The finish digit (if any).
-                # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
                 - name: 'injectedParameters'
                   type: String
                   description: |
