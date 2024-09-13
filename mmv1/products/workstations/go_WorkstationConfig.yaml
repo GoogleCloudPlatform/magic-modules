@@ -491,7 +491,6 @@ properties:
               type: String
               description: |
                 Name of the snapshot to use as the source for the disk. This can be the snapshot's `self_link`, `id`, or a string in the format of `projects/{project}/global/snapshots/{snapshot}`. If set, `sizeGb` and `fsType` must be empty. Can only be updated if it has an existing value.
-              # TODO(esu): Add conflicting fields once complex lists are supported.
               min_version: 'beta'
   - name: 'ephemeralDirectories'
     type: Array
@@ -581,7 +580,6 @@ properties:
         type: String
         description: |
           If set, overrides the default DIR specified by the image.
-        # Allow unsetting to revert to container default.
         min_version: 'beta'
         send_empty_value: true
       - name: 'env'

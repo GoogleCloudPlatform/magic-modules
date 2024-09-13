@@ -214,7 +214,6 @@ properties:
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
-  # This is a multi-resource resource reference (Address, GlobalAddress)
   - name: 'IPAddress'
     type: String
     description: |
@@ -445,9 +444,6 @@ properties:
       If the network specified is in auto subnet mode, this field is optional.
       However, a subnetwork must be specified if the network is in custom subnet
       mode or when creating external forwarding rule with IPv6.
-    # This is a multi-resource resource reference (TargetHttp(s)Proxy,
-    # TargetSslProxy, TargetTcpProxy, TargetVpnGateway, TargetPool,
-    # TargetInstance)
     default_from_api: true
     custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
     resource: 'Subnetwork'

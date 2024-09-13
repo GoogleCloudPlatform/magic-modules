@@ -1113,9 +1113,6 @@ properties:
       The protocol this RegionBackendService uses to communicate with backends.
       The default is HTTP. **NOTE**: HTTP2 is only valid for beta HTTP/2 load balancer
       types and may result in errors if used with the GA API.
-    # This is removed to avoid breaking terraform, as default values cannot be
-    # unspecified. Providers should include this as needed via overrides
-    # default_value: :TCP
     default_from_api: true
     enum_values:
       - 'HTTP'

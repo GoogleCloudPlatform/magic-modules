@@ -251,7 +251,6 @@ properties:
     type: NestedObject
     description: |-
       Destination volume parameters.
-    # destinationVolumeParameters is only used on CREATE. Will not be returned on READ.
     ignore_read: true
     properties:
       - name: 'storagePool'
