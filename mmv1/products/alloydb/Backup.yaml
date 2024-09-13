@@ -33,6 +33,17 @@ async: !ruby/object:Api::OpAsync
 import_format:
   ['projects/{{project}}/locations/{{location}}/backups/{{backup_id}}']
 autogen_async: true
+virtual_fields:
+  - !ruby/object:Api::Type::Boolean
+    name: 'deletion_protection'
+    default_value: false
+    description: |
+      Whether Terraform will be prevented from destroying the backup. Defaults to true.
+      When a`terraform destroy` or `terraform apply` would delete the backup,
+      the command will fail if this field is not set to false in Terraform state.
+      When the field is set to true or unset in Terraform state, a `terraform apply`
+      or `terraform destroy` that would delete the backup will fail.
+      When the field is set to false, deleting the backup is allowed.
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'alloydb_backup_basic'
@@ -45,6 +56,7 @@ examples:
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
+      - 'deletion_protection'
     skip_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'alloydb_backup_basic_test'
@@ -90,6 +102,7 @@ examples:
     skip_docs: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/alloydb_backup.erb
+  pre_delete: 'templates/terraform/pre_delete/alloydb_backup.go.erb'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'backupId'

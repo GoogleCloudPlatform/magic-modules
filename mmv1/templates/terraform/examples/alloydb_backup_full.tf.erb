@@ -4,6 +4,7 @@ resource "google_alloydb_backup" "<%= ctx[:primary_resource_id] %>" {
   cluster_name = google_alloydb_cluster.<%= ctx[:primary_resource_id] %>.name
 
   description = "example description"
+  deletion_protection = false
   type = "ON_DEMAND"
   labels = {
     "label" = "key"
