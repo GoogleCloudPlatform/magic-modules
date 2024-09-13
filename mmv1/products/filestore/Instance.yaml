@@ -265,3 +265,11 @@ properties:
     immutable: true
     description: |
       KMS key name used for data encryption.
+  - !ruby/object:Api::Type::Boolean
+    name: 'deletionProtectionEnabled'
+    description: |
+      Indicates whether the instance is protected against deletion.
+  - !ruby/object:Api::Type::String
+    name: 'deletionProtectionReason'
+    description: |
+      The reason for enabling deletion protection.
