@@ -14,13 +14,18 @@
 --- !ruby/object:Api::Resource
 name: Config
 base_url: projects/{{project}}/locations/{{region}}/config
-create_url: projects/{{project}}/locations/{{region}}/config
+create_url: 'projects/{{project}}/locations/{{region}}/config'
+create_verb: :PATCH
+update_url: 'projects/{{project}}/locations/{{region}}/config'
 update_verb: :PATCH
+update_mask: true
 min_version: beta
 description: |-
   A singleton resource represents a Dataform configuration for project location.
 references: !ruby/object:Api::Resource::ReferenceLinks
-  api: 'https://cloud.google.com/dataform/reference/rest/v1beta1/projects.locations.config'
+  guides:
+    'Official Documentation': 'https://cloud.google.com/dataform/docs/'
+  api: 'https://cloud.google.com/dataform/reference/rest/v1beta1/projects.locations'
 id_format: projects/{{project}}/locations/{{region}}/config
 import_format:
   ['projects/{{project}}/locations/{{region}}/config']
