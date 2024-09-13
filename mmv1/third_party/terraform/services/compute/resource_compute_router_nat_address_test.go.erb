@@ -62,16 +62,7 @@ func TestAccComputeRouterNatAddress_withAddressCountDecrease(t *testing.T) {
 					resource.TestCheckResourceAttr("google_compute_router_nat.foobar", "initial_nat_ips.#", "1"),
 					resource.TestCheckResourceAttr("google_compute_router_nat.foobar", "nat_ips.#", "1"),
 					resource.TestCheckResourceAttr("google_compute_router_nat_address.foobar", "nat_ips.#", "2"),
-					resource.TestCheckResourceAttr("data.google_compute_router_nat.foo", "nat_ips.#", "1"),
-					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
-						"data.google_compute_router_nat.foo",
-						"google_compute_router_nat.foobar",
-						map[string]struct{}{
-							"initial_nat_ips":   {},
-							"initial_nat_ips.#": {},
-							"initial_nat_ips.0": {},
-						},
-					),
+					resource.TestCheckResourceAttr("data.google_compute_router_nat.foo", "nat_ips.#", "2"),
 				),
 			},
 			{
@@ -85,15 +76,7 @@ func TestAccComputeRouterNatAddress_withAddressCountDecrease(t *testing.T) {
 					resource.TestCheckResourceAttr("google_compute_router_nat.foobar", "initial_nat_ips.#", "1"),
 					resource.TestCheckResourceAttr("google_compute_router_nat.foobar", "nat_ips.#", "2"),
 					resource.TestCheckResourceAttr("google_compute_router_nat_address.foobar", "nat_ips.#", "3"),
-					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
-						"data.google_compute_router_nat.foo",
-						"google_compute_router_nat.foobar",
-						map[string]struct{}{
-							"initial_nat_ips":   {},
-							"initial_nat_ips.#": {},
-							"initial_nat_ips.0": {},
-						},
-					),
+					resource.TestCheckResourceAttr("data.google_compute_router_nat.foo", "nat_ips.#", "3"),
 				),
 			},
 			{
@@ -107,15 +90,7 @@ func TestAccComputeRouterNatAddress_withAddressCountDecrease(t *testing.T) {
 					resource.TestCheckResourceAttr("google_compute_router_nat.foobar", "initial_nat_ips.#", "1"),
 					resource.TestCheckResourceAttr("google_compute_router_nat.foobar", "nat_ips.#", "3"),
 					resource.TestCheckResourceAttr("google_compute_router_nat_address.foobar", "nat_ips.#", "2"),
-					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
-						"data.google_compute_router_nat.foo",
-						"google_compute_router_nat.foobar",
-						map[string]struct{}{
-							"initial_nat_ips":   {},
-							"initial_nat_ips.#": {},
-							"initial_nat_ips.0": {},
-						},
-					),
+					resource.TestCheckResourceAttr("data.google_compute_router_nat.foo", "nat_ips.#", "2"),
 				),
 			},
 			{
@@ -152,6 +127,7 @@ func TestAccComputeRouterNatAddress_withAddressRemoved(t *testing.T) {
 			{
 				Config: testAccComputeRouterNatAddressWithAddressRemoved(routerName),
 				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("data.google_compute_router_nat.foo", "nat_ips.#", "1"),
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_router_nat.foo",
 						"google_compute_router_nat.foobar",
@@ -195,15 +171,7 @@ func TestAccComputeRouterNatAddress_withNatIpsAndDrainNatIps(t *testing.T) {
 					resource.TestCheckResourceAttr("google_compute_router_nat.foobar", "initial_nat_ips.#", "1"),
 					resource.TestCheckResourceAttr("google_compute_router_nat.foobar", "nat_ips.#", "1"),
 					resource.TestCheckResourceAttr("google_compute_router_nat_address.foobar", "nat_ips.#", "3"),
-					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
-						"data.google_compute_router_nat.foo",
-						"google_compute_router_nat.foobar",
-						map[string]struct{}{
-							"initial_nat_ips":   {},
-							"initial_nat_ips.#": {},
-							"initial_nat_ips.0": {},
-						},
-					),
+					resource.TestCheckResourceAttr("data.google_compute_router_nat.foo", "nat_ips.#", "3"),
 				),
 			},
 			{
@@ -223,15 +191,7 @@ func TestAccComputeRouterNatAddress_withNatIpsAndDrainNatIps(t *testing.T) {
 					resource.TestCheckResourceAttr("google_compute_router_nat.foobar", "initial_nat_ips.#", "1"),
 					resource.TestCheckResourceAttr("google_compute_router_nat.foobar", "nat_ips.#", "3"),
 					resource.TestCheckResourceAttr("google_compute_router_nat_address.foobar", "nat_ips.#", "1"),
-					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
-						"data.google_compute_router_nat.foo",
-						"google_compute_router_nat.foobar",
-						map[string]struct{}{
-							"initial_nat_ips":   {},
-							"initial_nat_ips.#": {},
-							"initial_nat_ips.0": {},
-						},
-					),
+					resource.TestCheckResourceAttr("data.google_compute_router_nat.foo", "nat_ips.#", "1"),
 				),
 			},
 			{
@@ -249,6 +209,7 @@ func TestAccComputeRouterNatAddress_withNatIpsAndDrainNatIps(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckNoResourceAttr("google_compute_router_nat.foobar", "initial_nat_ips"),
 					resource.TestCheckResourceAttr("google_compute_router_nat.foobar", "nat_ips.#", "1"),
+					resource.TestCheckResourceAttr("data.google_compute_router_nat.foo", "nat_ips.#", "1"),
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_router_nat.foo",
 						"google_compute_router_nat.foobar",
@@ -332,6 +293,8 @@ data "google_compute_router_nat" "foo" {
   name = google_compute_router_nat.foobar.name
   router = google_compute_router_nat.foobar.router
   region = google_compute_router.foobar.region
+
+  depends_on = [google_compute_router_nat_address.foobar]
 }
 `, routerName, routerName, routerName, routerCount, routerName, routerName)
 }
@@ -375,12 +338,6 @@ resource "google_compute_router" "foobar" {
   region   = google_compute_subnetwork.foobar.region
   network  = google_compute_network.foobar.self_link
 }
-
-data "google_compute_router_nat" "foo" {
-  name = google_compute_router_nat.foobar.name
-  router = google_compute_router_nat.foobar.router
-  region = google_compute_router.foobar.region
-}
 `, routerName, routerName, routerName, routerName, routerName, routerName, routerName)
 }
 
@@ -413,6 +370,14 @@ resource "google_compute_router_nat" "foobar" {
     source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
   }
 }
+
+data "google_compute_router_nat" "foo" {
+  name = google_compute_router_nat.foobar.name
+  router = google_compute_router_nat.foobar.router
+  region = google_compute_router.foobar.region
+
+  depends_on = [google_compute_router_nat_address.foobar]
+}
 `, testAccComputeRouterNatAddressBaseResourcesWithNatIps(routerName), routerName)
 }
 
@@ -433,6 +398,12 @@ resource "google_compute_router_nat" "foobar" {
     name                    = google_compute_subnetwork.foobar.self_link
     source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
   }
+}
+
+data "google_compute_router_nat" "foo" {
+  name = google_compute_router_nat.foobar.name
+  router = google_compute_router_nat.foobar.router
+  region = google_compute_router.foobar.region
 }
 `, testAccComputeRouterNatAddressBaseResourcesWithNatIps(routerName), routerName)
 }
@@ -467,6 +438,14 @@ resource "google_compute_router_nat" "foobar" {
 
   nat_ip_allocate_option = "MANUAL_ONLY"
   initial_nat_ips = [google_compute_address.addr4.self_link]
+}
+
+data "google_compute_router_nat" "foo" {
+  name = google_compute_router_nat.foobar.name
+  router = google_compute_router_nat.foobar.router
+  region = google_compute_router.foobar.region
+
+  depends_on = [google_compute_router_nat_address.foobar]
 }
 `, testAccComputeRouterNatAddressBaseResourcesWithNatIps(routerName), routerName)
 }
@@ -505,6 +484,14 @@ resource "google_compute_router_nat" "foobar" {
   nat_ip_allocate_option = "MANUAL_ONLY"
   initial_nat_ips = [google_compute_address.addr4.self_link]
 }
+
+data "google_compute_router_nat" "foo" {
+  name = google_compute_router_nat.foobar.name
+  router = google_compute_router_nat.foobar.router
+  region = google_compute_router.foobar.region
+
+  depends_on = [google_compute_router_nat_address.foobar]
+}
 `, testAccComputeRouterNatAddressBaseResourcesWithNatIps(routerName), routerName)
 }
 
@@ -539,6 +526,14 @@ resource "google_compute_router_nat" "foobar" {
 
   nat_ip_allocate_option = "MANUAL_ONLY"
   initial_nat_ips = [google_compute_address.addr4.self_link]
+}
+
+data "google_compute_router_nat" "foo" {
+  name = google_compute_router_nat.foobar.name
+  router = google_compute_router_nat.foobar.router
+  region = google_compute_router.foobar.region
+
+  depends_on = [google_compute_router_nat_address.foobar]
 }
 `, testAccComputeRouterNatAddressBaseResourcesWithNatIps(routerName), routerName)
 }
