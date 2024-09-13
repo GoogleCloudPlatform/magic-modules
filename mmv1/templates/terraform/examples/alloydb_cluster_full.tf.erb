@@ -44,6 +44,7 @@ resource "google_alloydb_cluster" "<%= ctx[:primary_resource_id] %>" {
   labels = {
     test = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
   }
+  deletion_protection = false
 }
 
 data "google_project" "project" {}

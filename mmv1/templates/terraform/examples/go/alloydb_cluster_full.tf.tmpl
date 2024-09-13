@@ -4,6 +4,7 @@ resource "google_alloydb_cluster" "{{$.PrimaryResourceId}}" {
   network_config {
     network = google_compute_network.default.id
   }
+  deletion_protection = false
   database_version = "POSTGRES_15"
 
   initial_user {

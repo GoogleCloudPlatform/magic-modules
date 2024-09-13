@@ -2,3 +2,6 @@
 if deletionPolicy := d.Get("deletion_policy"); deletionPolicy == "FORCE" {
     url = url + "?force=true"
 }
+if d.Get("deletion_protection").(bool) {
+    return fmt.Errorf("cannot destroy domain without setting deletion_protection=false and running `terraform apply`")
+}
