@@ -14,7 +14,7 @@ func TestAccSecurityCenterFolderBigQueryExportConfig_update(t *testing.T) {
 
 	randomSuffix := acctest.RandString(t, 10)
 	dataset_id := "tf_test_" + randomSuffix
-	dataset_id2 := "tf_test_" + randomSuffix
+	dataset_id2 := dataset_id + "2"
 	orgID := envvar.GetTestOrgFromEnv(t)
 
 	context := map[string]interface{}{
