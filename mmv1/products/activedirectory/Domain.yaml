@@ -54,7 +54,7 @@ autogen_async: true
 virtual_fields:
   - !ruby/object:Api::Type::Boolean
     name: 'deletion_protection'
-    default_value: true
+    default_value: false
     description: |
       Whether Terraform will be prevented from destroying the domain. Defaults to true.
       When a`terraform destroy` or `terraform apply` would delete the domain,

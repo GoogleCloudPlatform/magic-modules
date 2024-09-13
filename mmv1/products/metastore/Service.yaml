@@ -64,6 +64,8 @@ virtual_fields:
       When the field is set to true or unset in Terraform state, a `terraform apply`
       or `terraform destroy` that would delete the domain will fail.
       When the field is set to false, deleting the domain is allowed.
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_delete: 'templates/terraform/pre_delete/dataproc_metastore_service.go.erb'
 import_format:
   ['projects/{{project}}/locations/{{location}}/services/{{service_id}}']
 examples:
