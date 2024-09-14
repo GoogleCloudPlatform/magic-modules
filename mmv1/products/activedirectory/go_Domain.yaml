@@ -27,6 +27,7 @@ self_link: '{{name}}'
 create_url: 'projects/{{project}}/locations/global/domains?domainName={{domain_name}}'
 update_verb: 'PATCH'
 update_mask: true
+ # equivalent to {{name}}, but makes sweepers work
 delete_url: 'projects/{{project}}/locations/global/domains/{{domain_name}}'
 import_format:
   - '{{name}}'
@@ -42,6 +43,7 @@ async:
     base_url: '{{op_id}}'
     path: 'name'
     wait_ms: 1000
+      # It takes about 35-40 mins to get the resource created
     timeouts:
       insert_minutes: 60
       update_minutes: 60
@@ -63,6 +65,9 @@ examples:
     primary_resource_id: 'ad-domain'
     vars:
       name: 'myorg'
+      # the part of the domain before the first "." must be <15 chars, and
+      # the random suffix is 10 chars. In order to make sure these get swept,
+      # 'tfgen' is the only option here.
       domain_name: 'tfgen'
     ignore_read_extra:
       - 'deletion_protection'

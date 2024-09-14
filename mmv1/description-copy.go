@@ -22,7 +22,7 @@ func CopyAllDescriptions(tempMode bool) {
 		"attributes:",
 	}
 
-	for i, id := range identifiers {
+	for _, id := range identifiers {
 		CopyText(id, tempMode)
 	}
 
@@ -35,9 +35,13 @@ func copyComments() {
 	log.Printf("Starting to copy comments from Ruby yaml files to Go yaml files")
 
 	renamedFields := map[string]string{
-		"skip_sweeper": "exclude_sweeper",
-		"skip_delete":  "exclude_delete",
-		"values":       "enum_values",
+		"skip_sweeper":           "exclude_sweeper",
+		"skip_delete":            "exclude_delete",
+		"skip_test":              "exclude_test",
+		"skip_import_test":       "exclude_import_test",
+		"skip_docs":              "exclude_docs",
+		"skip_attribution_label": "exclude_attribution_label",
+		"values":                 "enum_values",
 	}
 	var allProductFiles []string = make([]string, 0)
 	files, err := filepath.Glob("products/**/go_product.yaml")

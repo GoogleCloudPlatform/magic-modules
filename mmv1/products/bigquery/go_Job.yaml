@@ -79,6 +79,7 @@ examples:
     primary_resource_id: 'job'
     vars:
       job_id: 'job_load'
+ # Keep small(er) to avoid downstream acctest having too-long a bucket name
       bucket_name: 'bq-geojson'
     test_env_vars:
       project: 'PROJECT_NAME'
@@ -225,11 +226,13 @@ properties:
               properties:
                 - name: 'resourceUri'
                   type: String
+                  # TODO (mbang): exactly_one_of: resourceUri, inlineCode
                   description:
                     'A code resource to load from a Google Cloud Storage URI
                     (gs://bucket/path).'
                 - name: 'inlineCode'
                   type: String
+                  # TODO (mbang): exactly_one_of: resourceUri, inlineCode
                   description: |
                     An inline resource that contains code for a user-defined function (UDF).
                     Providing a inline code resource is equivalent to providing a URI for a file containing the same code.

@@ -61,6 +61,8 @@ examples:
       cust_id: 'CUST_ID'
     exclude_test: true
 parameters:
+  # Parent is a path parameter that _cannot_ be read or sent in the request at all.
+  # This must be done at the provider level.
   - name: 'organizationId'
     type: String
     description: |

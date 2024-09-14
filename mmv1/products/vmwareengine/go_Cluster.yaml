@@ -52,6 +52,7 @@ async:
     message: 'message'
   include_project: true
 custom_code:
+# There is a handwritten sweeper that provides a list of locations to sweep
 exclude_sweeper: true
 error_abort_predicates:
 

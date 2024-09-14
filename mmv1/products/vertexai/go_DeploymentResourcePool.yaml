@@ -24,6 +24,7 @@ docs:
 base_url: 'projects/{{project}}/locations/{{region}}/deploymentResourcePools'
 self_link: 'projects/{{project}}/locations/{{region}}/deploymentResourcePools/{{name}}'
 create_url: 'projects/{{project}}/locations/{{region}}/deploymentResourcePools'
+# No method is not defined for DeploymentResourcePools
 immutable: true
 timeouts:
   insert_minutes: 20

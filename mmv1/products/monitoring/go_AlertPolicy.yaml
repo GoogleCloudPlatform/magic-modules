@@ -46,6 +46,7 @@ error_abort_predicates:
 
   - 'transport_tpg.Is429QuotaError'
 examples:
+  # skipping tests because the API is full of race conditions
   - name: 'monitoring_alert_policy_basic'
     primary_resource_id: 'alert_policy'
     vars:
@@ -911,6 +912,7 @@ properties:
                 valid Prometheus label name.
   - name: 'notificationChannels'
     type: Array
+    # TODO chrisst - turn this into a resource ref
     description: |
       Identifies the notification channels to which notifications should be
       sent when incidents are opened or closed or when new violations occur

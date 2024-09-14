@@ -307,6 +307,7 @@ properties:
             type: NestedObject
             description: |
               Token parameters for the auth request.
+ # ParameterMap
             properties:
               - name: 'entries'
                 type: Array
@@ -314,16 +315,19 @@ properties:
                   A list of parameter map entries.
                 item_type:
                   type: NestedObject
+ # ParameterMapEntry
                   properties:
                     - name: 'key'
                       type: NestedObject
                       description: |
                         Key of the map entry.
+ # ParameterMapField
                       properties:
                         - name: 'literalValue'
                           type: NestedObject
                           description: |
                             Passing a literal value
+ # ValueType
                           properties:
                             - name: 'stringValue'
                               type: String
@@ -333,11 +337,13 @@ properties:
                       type: NestedObject
                       description: |
                         Value of the map entry.
+ # ParameterMapField
                       properties:
                         - name: 'literalValue'
                           type: NestedObject
                           description: |
                             Passing a literal value
+ # ValueType
                           properties:
                             - name: 'stringValue'
                               type: String

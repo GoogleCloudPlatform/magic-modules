@@ -88,6 +88,7 @@ examples:
       'deletion_protection': 'false'
       'stream_cmek': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     external_providers: ["random", "time"]
+      # Random provider
     skip_vcr: true
   - name: 'datastream_stream_postgresql'
     primary_resource_id: 'default'
@@ -143,6 +144,7 @@ examples:
       sql_user_name: 'my-user'
       source_connection_profile_id: 'source-profile'
     external_providers: ["random", "time"]
+    # Random provider
     skip_vcr: true
   - name: 'datastream_stream_bigquery'
     primary_resource_id: 'default'
@@ -159,6 +161,7 @@ examples:
       'deletion_protection': 'false'
       'bigquery_destination_table_kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     external_providers: ["random", "time"]
+      # Random provider
     skip_vcr: true
   - name: 'datastream_stream_bigquery_append_only'
     primary_resource_id: 'default'
@@ -173,6 +176,7 @@ examples:
     test_vars_overrides:
       'deletion_protection': 'false'
     external_providers: ["random", "time"]
+      # Random provider
     skip_vcr: true
 virtual_fields:
   - name: 'desired_state'

@@ -46,6 +46,7 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
+# There is a handwritten sweeper that provides a list of locations to sweep
 exclude_sweeper: true
 examples:
   - name: 'vmware_engine_network_standard'

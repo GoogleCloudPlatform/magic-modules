@@ -44,6 +44,8 @@ async:
     message: 'message'
 custom_code:
 examples:
+  # These tests depend on secrets stored in a separate project, so we prefer not
+  # to show them in the docs.
   - name: 'developer_connect_git_repository_link_github'
     primary_resource_id: 'primary'
     min_version: 'beta'

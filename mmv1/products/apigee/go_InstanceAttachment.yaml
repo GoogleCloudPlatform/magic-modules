@@ -50,6 +50,7 @@ async:
     message: 'message'
 custom_code:
   custom_import: 'templates/terraform/custom_import/go/apigee_instance_attachment.go.tmpl'
+# Skipping the sweeper due to the non-standard instance_id
 exclude_sweeper: true
 examples:
   - name: 'apigee_instance_attachment_basic'

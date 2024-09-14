@@ -62,10 +62,12 @@ examples:
     primary_resource_id: 'default'
     ignore_read_extra:
       - 'name_prefix'
+      # Uses id.UniqueId
     skip_vcr: true
   - name: 'ssl_certificate_random_provider'
     primary_resource_id: 'default'
     external_providers: ["random", "time"]
+      # Uses id.UniqueId
     skip_vcr: true
   - name: 'ssl_certificate_target_https_proxies'
     primary_resource_id: 'default'
@@ -76,6 +78,7 @@ examples:
       http_health_check_name: 'http-health-check'
     ignore_read_extra:
       - 'name_prefix'
+      # Uses id.UniqueId
     skip_vcr: true
 parameters:
 properties:

@@ -39,6 +39,7 @@ timeouts:
 async:
   actions: ['']
   type: 'OpAsync'
+  # necessary to compile
   operation:
     base_url: '{{op_id}}'
   result:

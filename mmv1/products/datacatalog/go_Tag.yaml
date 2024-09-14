@@ -75,6 +75,7 @@ examples:
       force_delete: 'false'
     test_vars_overrides:
       'force_delete': 'true'
+    # Multiple fine-grained resources
     skip_vcr: true
   - name: 'data_catalog_entry_tag_false'
     primary_resource_id: 'basic_tag'

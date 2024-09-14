@@ -269,6 +269,7 @@ properties:
               All the time and date values in exclusionWindows entry in the API are in UTC. We
               only allow <=1 recurrence (daily or weekly) exclusion window for a BackupPlan while no
               restriction on number of single occurrence windows.
+            # Exclusion Window Object
             item_type:
               type: NestedObject
               properties:
@@ -310,6 +311,7 @@ properties:
                     function: 'verify.ValidateDuration()'
                 - name: 'singleOccurrenceDate'
                   type: NestedObject
+                  # TODO (cmfeng): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                   description: |
                     No recurrence. The exclusion window occurs only once and on this date in UTC.
                     Only one of singleOccurrenceDate, daily and daysOfWeek may be set.
@@ -328,12 +330,14 @@ properties:
                         Day of a month.
                 - name: 'daily'
                   type: Boolean
+                  # TODO (cmfeng): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                   description: |
                     The exclusion window occurs every day if set to "True".
                     Specifying this field to "False" is an error.
                     Only one of singleOccurrenceDate, daily and daysOfWeek may be set.
                 - name: 'daysOfWeek'
                   type: NestedObject
+                  # TODO (cmfeng): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                   description: |
                     The exclusion window occurs on these days of each week in UTC.
                     Only one of singleOccurrenceDate, daily and daysOfWeek may be set.
@@ -354,6 +358,7 @@ properties:
                           - 'FRIDAY'
                           - 'SATURDAY'
                           - 'SUNDAY'
+            # Exclusion Window Object - End
   - name: 'etag'
     type: String
     description: |

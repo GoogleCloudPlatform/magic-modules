@@ -34,6 +34,7 @@ timeouts:
 autogen_async: true
 custom_code:
   custom_import: 'templates/terraform/custom_import/go/alloydb_user.go.tmpl'
+# Skipping the sweeper because instances will be deleted during cluster sweeps
 exclude_sweeper: true
 examples:
   - name: 'alloydb_user_builtin'
