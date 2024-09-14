@@ -111,7 +111,7 @@ resource "google_apigee_instance" "apigee_instance" {
 
 resource "google_apigee_nat_address" "apigee_nat_address" {
   name        = "tf-test%{random_suffix}"
-	activate    = true
+  activate    = true
   instance_id = google_apigee_instance.apigee_instance.id
 }
 `, context)
