@@ -250,10 +250,6 @@ func TestDetectMissingDocs(t *testing.T) {
 					},
 					{
 						Field:   "field_five",
-						Section: "Arguments Reference",
-					},
-					{
-						Field:   "field_five",
 						Section: "Attributes Reference",
 					},
 				},
