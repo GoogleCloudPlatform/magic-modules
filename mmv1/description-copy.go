@@ -168,5 +168,10 @@ func terminateText(line string) bool {
 		return false
 	}
 
+	// Whole line comments
+	if regexp.MustCompile(`^\s*#.*?`).MatchString(line) {
+		return true
+	}
+
 	return regexp.MustCompile(`^\s*[a-z_]+:[\s$]*`).MatchString(line)
 }

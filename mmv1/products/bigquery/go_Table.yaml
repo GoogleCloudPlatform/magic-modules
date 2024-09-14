@@ -162,7 +162,6 @@ properties:
                 function (UDF). Providing a inline code resource is
                 equivalent to providing a URI for a file containing the
                 same code.
-            # TODO: Convert into cross-product ResourceRef
             - name: 'resourceUri'
               type: String
               description: |
