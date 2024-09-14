@@ -138,9 +138,9 @@ properties:
     properties:
       - !ruby/object:Api::Type::String
         name: stage
-        description:
-          "Output only. Current step of the installation process. \n Possible
-          values:\n STAGE_UNSPECIFIED\nPENDING_CREATE_APP\nPENDING_USER_OAUTH\nPENDING_INSTALL_APP\nCOMPLETE"
+        description: |
+          Output only. Current step of the installation process.
+          Possible values: `STAGE_UNSPECIFIED`, `PENDING_CREATE_APP`, `PENDING_USER_OAUTH`, `PENDING_INSTALL_APP`, `COMPLETE`
         output: true
       - !ruby/object:Api::Type::String
         name: message

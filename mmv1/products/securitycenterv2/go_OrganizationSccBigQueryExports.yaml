@@ -21,7 +21,6 @@ description: |
   ~> **Note:** In order to use Cloud SCC resources, your organization must be enrolled
   in [SCC Standard/Premium](https://cloud.google.com/security-command-center/docs/quickstart-security-command-center).
   Without doing so, you may run into errors during resource creation.
-deprecation_message: "`google_scc_v2_organization_scc_big_query_exports` is deprecated and will be removed in a future major release. Use `google_scc_v2_organization_scc_big_query_export` instead."
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/security-command-center/docs/how-to-analyze-findings-in-big-query'
@@ -40,6 +39,7 @@ timeouts:
   delete_minutes: 20
 custom_code:
   post_import: 'templates/terraform/post_import/go/scc_v2_organization_big_query_export_config.go.tmpl'
+deprecation_message: '`google_scc_v2_organization_scc_big_query_exports` is deprecated and will be removed in a future major release. Use `google_scc_v2_organization_scc_big_query_export` instead.'
 examples:
   - name: 'scc_v2_organization_big_query_exports_config_basic'
     primary_resource_id: 'custom_big_query_export_config'

@@ -187,7 +187,6 @@ properties:
     description: |
       A description of resources that the DeployedIndex uses, which to large degree are decided by Vertex AI, and optionally allows only a modest additional configuration.
 
-    # Note: Having the fields within automaticResouces not being marked as immutable was done in order to support the ability to update such fields. See : https://github.com/GoogleCloudPlatform/magic-modules/pull/11039#issuecomment-2209316648
     default_from_api: true
     properties:
       - name: 'minReplicaCount'
@@ -217,13 +216,10 @@ properties:
 
         n1-standard-16 and n1-standard-32 are still available, but we recommend e2-standard-16 and e2-highmem-16 for cost efficiency.
 
-    # Having fields within dedicatedResources not being marked as immutable as well as removing
-    # fields such as acceleratorType, acceleratorCount, tpuTopology was done in order to support the ability to update such fields. This is discussed extensively [here](https://github.com/GoogleCloudPlatform/magic-modules/pull/11039#issuecomment-2209316648).
     properties:
       - name: 'machineSpec'
         type: NestedObject
         description: The minimum number of replicas this DeployedModel will be always deployed on.
-            # This field (and its nested fields) is not updatable via the mutateDeployedIndex method in the API, which is the only update method usable by this 'fine-grained' resource. This is why the field is marked as immutable despite the API docs not marking the field as immutable.
         required: true
         immutable: true
         properties:
@@ -249,13 +245,11 @@ properties:
   - name: 'enableAccessLogging'
     type: Boolean
     description: If true, private endpoint's access logs are sent to Cloud Logging.
-    # This field is not updatable via the mutateDeployedIndex method in the API, which is the only update method usable by this 'fine-grained' resource. This is why the field is marked as immutable despite the API docs not marking the field as immutable.
     immutable: true
     default_value: false
   - name: 'deployedIndexAuthConfig'
     type: NestedObject
     description: If set, the authentication is enabled for the private endpoint.
-    # This field (and its nested fields) is not updatable via the mutateDeployedIndex method in the API, which is the only update method usable by this 'fine-grained' resource. This is why the field is marked as immutable despite the API docs not marking the field as immutable.
     immutable: true
     properties:
       - name: 'authProvider'
