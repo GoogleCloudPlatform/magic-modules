@@ -4,6 +4,7 @@ resource "google_alloydb_backup" "{{$.PrimaryResourceId}}" {
   cluster_name = google_alloydb_cluster.{{$.PrimaryResourceId}}.name
 
   depends_on = [google_alloydb_instance.{{$.PrimaryResourceId}}]
+  deletion_protection = false
 }
 
 resource "google_alloydb_cluster" "{{$.PrimaryResourceId}}" {
