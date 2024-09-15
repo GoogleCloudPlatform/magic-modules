@@ -89,6 +89,7 @@ examples:
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
+      - 'deletion_protection'
     skip_test: true
   - name: 'alloydb_secondary_cluster_basic'
     primary_resource_id: 'secondary'
@@ -116,6 +117,16 @@ virtual_fields:
       Possible values: DEFAULT, FORCE
     type: String
     default_value: "DEFAULT"
+  - !ruby/object:Api::Type::Boolean
+    name: 'deletion_protection'
+    default_value: false
+    description: |
+      Whether Terraform will be prevented from destroying the cluster. Defaults to true.
+      When a`terraform destroy` or `terraform apply` would delete the cluster,
+      the command will fail if this field is not set to false in Terraform state.
+      When the field is set to true or unset in Terraform state, a `terraform apply`
+      or `terraform destroy` that would delete the cluster will fail.
+      When the field is set to false, deleting the cluster is allowed.
 parameters:
   - name: 'clusterId'
     type: String

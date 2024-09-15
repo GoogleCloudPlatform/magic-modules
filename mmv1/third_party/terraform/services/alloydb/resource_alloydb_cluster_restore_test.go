@@ -34,7 +34,7 @@ func TestAccAlloydbCluster_restore(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.source",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
+				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location", "deletion_protection"},
 			},
 			{
 				// Invalid input check - cannot pass in both sources
@@ -54,7 +54,7 @@ func TestAccAlloydbCluster_restore(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.restored_from_backup",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location", "restore_backup_source"},
+				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location", "restore_backup_source", "deletion_protection"},
 			},
 			{
 				// Validate PITR succeeds
@@ -64,7 +64,7 @@ func TestAccAlloydbCluster_restore(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.restored_from_point_in_time",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location", "restore_continuous_backup_source"},
+				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location", "restore_continuous_backup_source", "deletion_protection"},
 			},
 			{
 				// Make sure updates work without recreating the clusters

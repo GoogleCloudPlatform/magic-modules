@@ -4,6 +4,7 @@ resource "google_alloydb_cluster" "<%= ctx[:primary_resource_id] %>" {
   network_config {
     network = google_compute_network.default.id
   }
+  deletion_protection = false
 }
 
 data "google_project" "project" {}
