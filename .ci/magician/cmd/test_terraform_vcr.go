@@ -21,15 +21,15 @@ import (
 )
 
 var (
-	//go:embed test_terraform_vcr_test_analytics.tmpl
+	//go:embed templates/vcr/test_analytics.tmpl
 	testsAnalyticsTmplText string
-	//go:embed test_terraform_vcr_non_exercised_tests.tmpl
+	//go:embed templates/vcr/non_exercised_tests.tmpl
 	nonExercisedTestsTmplText string
-	//go:embed test_terraform_vcr_with_replay_failed_tests.tmpl
+	//go:embed templates/vcr/with_replay_failed_tests.tmpl
 	withReplayFailedTestsTmplText string
-	//go:embed test_terraform_vcr_without_replay_failed_tests.tmpl
+	//go:embed templates/vcr/without_replay_failed_tests.tmpl
 	withoutReplayFailedTestsTmplText string
-	//go:embed test_terraform_vcr_record_replay.tmpl
+	//go:embed templates/vcr/record_replay.tmpl
 	recordReplayTmplText string
 )
 
