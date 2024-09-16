@@ -45,20 +45,25 @@ var templateMode = flag.Bool("template", false, "copy templates over from .erb t
 // Example usage: --handwritten
 var handwrittenMode = flag.Bool("handwritten", false, "copy handwritten files over from .erb to go .tmpl")
 
+var yamlTempMode = flag.Bool("yaml-temp", false, "copy text over from ruby yaml to go yaml in a temp file")
+
+var handwrittenTempFiles = flag.String("handwritten-temp", "", "copy specific handwritten files over from .erb to go .tmpl.temp comma separated")
+var templateTempFiles = flag.String("template-temp", "", "copy specific templates over from .erb to go .tmpl.temp comma separated")
+
 func main() {
 
 	flag.Parse()
 
-	if *yamlMode {
-		CopyAllDescriptions()
+	if *yamlMode || *yamlTempMode {
+		CopyAllDescriptions(*yamlTempMode)
 	}
 
-	if *templateMode {
-		convertTemplates()
+	if *templateMode || *templateTempFiles != "" {
+		convertTemplates(*templateTempFiles)
 	}
 
-	if *handwrittenMode {
-		convertAllHandwrittenFiles()
+	if *handwrittenMode || *handwrittenTempFiles != "" {
+		convertAllHandwrittenFiles(*handwrittenTempFiles)
 	}
 
 	if outputPath == nil || *outputPath == "" {
