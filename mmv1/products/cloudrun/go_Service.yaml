@@ -96,7 +96,7 @@ examples:
       project: 'PROJECT_NAME'
     ignore_read_extra:
       - 'autogenerate_revision_name'
-    skip_docs: true
+    exclude_docs: true
   - name: 'cloud_run_service_secret_environment_variables'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
@@ -107,7 +107,7 @@ examples:
       project: 'PROJECT_NAME'
     ignore_read_extra:
       - 'autogenerate_revision_name'
-    skip_docs: true
+    exclude_docs: true
   - name: 'cloud_run_service_secret_volumes'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
@@ -118,7 +118,7 @@ examples:
       project: 'PROJECT_NAME'
     ignore_read_extra:
       - 'autogenerate_revision_name'
-    skip_docs: true
+    exclude_docs: true
   - name: 'cloud_run_service_probes'
     primary_resource_id: 'default'
     vars:

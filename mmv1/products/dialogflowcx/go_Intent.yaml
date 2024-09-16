@@ -47,12 +47,12 @@ examples:
     primary_resource_id: 'default_negative_intent'
     vars:
       agent_name: 'dialogflowcx-agent'
-    skip_docs: true
+    exclude_docs: true
   - name: 'dialogflowcx_intent_default_welcome_intent'
     primary_resource_id: 'default_welcome_intent'
     vars:
       agent_name: 'dialogflowcx-agent'
-    skip_docs: true
+    exclude_docs: true
 virtual_fields:
   - name: 'is_default_welcome_intent'
     description: |

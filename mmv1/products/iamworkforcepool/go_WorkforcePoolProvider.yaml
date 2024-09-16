@@ -96,7 +96,7 @@ examples:
       org_id: 'ORG_ID'
     ignore_read_extra:
       - 'oidc.0.client_secret.0.value.0.plain_text'
-    skip_docs: true
+    exclude_docs: true
   - name: 'iam_workforce_pool_provider_extra_attributes_oauth2_config_client_basic'
     primary_resource_id: 'example'
     vars:

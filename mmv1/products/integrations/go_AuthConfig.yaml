@@ -43,54 +43,54 @@ examples:
     primary_resource_id: 'basic_example'
     vars:
       auth_config_name: 'test-authconfig'
-    skip_test: true
+    exclude_test: true
   - name: 'integrations_auth_config_advance'
     primary_resource_id: 'advance_example'
     vars:
       auth_config_name: 'test-authconfig'
-    skip_docs: true
+    exclude_docs: true
   - name: 'integrations_auth_config_username_and_password'
     primary_resource_id: 'username_and_password_example'
     vars:
       auth_config_name: 'test-authconfig-username-and-password'
-    skip_docs: true
+    exclude_docs: true
   - name: 'integrations_auth_config_oauth2_authorization_code'
     primary_resource_id: 'oauth2_authotization_code_example'
     vars:
       auth_config_name: 'test-authconfig-oauth2-authorization-code'
-    skip_docs: true
+    exclude_docs: true
   - name: 'integrations_auth_config_oauth2_client_credentials'
     primary_resource_id: 'oauth2_client_credentials_example'
     vars:
       auth_config_name: 'test-authconfig-oauth2-client-credentials'
-    skip_docs: true
+    exclude_docs: true
   - name: 'integrations_auth_config_jwt'
     primary_resource_id: 'jwt_example'
     vars:
       auth_config_name: 'test-authconfig-jwt'
-    skip_docs: true
+    exclude_docs: true
   - name: 'integrations_auth_config_auth_token'
     primary_resource_id: 'auth_token_example'
     vars:
       auth_config_name: 'test-authconfig-auth-token'
-    skip_docs: true
+    exclude_docs: true
   - name: 'integrations_auth_config_service_account'
     primary_resource_id: 'service_account_example'
     vars:
       auth_config_name: 'test-authconfig-service-account'
       service_account_id: 'sa'
-    skip_docs: true
+    exclude_docs: true
   - name: 'integrations_auth_config_oidc_token'
     primary_resource_id: 'oidc_token_example'
     vars:
       auth_config_name: 'test-authconfig-oidc-token'
       service_account_id: 'sa'
-    skip_docs: true
+    exclude_docs: true
   - name: 'integrations_auth_config_client_certificate_only'
     primary_resource_id: 'client_certificate_example'
     vars:
       auth_config_name: 'test-authconfig-client-certificate'
-    skip_docs: true
+    exclude_docs: true
 parameters:
   - name: 'location'
     type: String

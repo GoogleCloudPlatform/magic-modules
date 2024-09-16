@@ -40,7 +40,7 @@ examples:
     primary_resource_id: 'basic_entity_type'
     vars:
       intent_name: 'basic-entity-type'
-    skip_test: true
+    exclude_test: true
 parameters:
 properties:
   - name: 'name'

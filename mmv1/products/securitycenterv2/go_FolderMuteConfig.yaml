@@ -46,7 +46,7 @@ examples:
     test_vars_overrides:
       'sleep': 'true'
     external_providers: ["random", "time"]
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'folder'
     type: String

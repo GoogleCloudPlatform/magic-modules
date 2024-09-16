@@ -65,7 +65,7 @@ examples:
       - 'project'
       - 'etag'
       - 'deletion_policy'
-    skip_test: true
+    exclude_test: true
   - name: 'firestore_database'
     primary_resource_id: 'database'
     vars:
@@ -102,7 +102,7 @@ examples:
       - 'project'
       - 'etag'
       - 'deletion_policy'
-    skip_test: true
+    exclude_test: true
   - name: 'firestore_database_in_datastore_mode'
     primary_resource_id: 'datastore_mode_database'
     vars:

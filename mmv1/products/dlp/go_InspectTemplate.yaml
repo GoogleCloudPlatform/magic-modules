@@ -60,7 +60,7 @@ examples:
       name: 'my-template'
     test_env_vars:
       project: 'PROJECT_NAME'
-    skip_docs: true
+    exclude_docs: true
   - name: 'dlp_inspect_template_max_infotype_per_finding_default'
     primary_resource_id: 'max_infotype_per_finding_default'
     test_env_vars:

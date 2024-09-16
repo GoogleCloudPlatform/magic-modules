@@ -51,7 +51,7 @@ examples:
       org_id: 'ORG_ID'
       project: 'PROJECT_NAME'
     external_providers: ["random", "time"]
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'folder'
     type: String
