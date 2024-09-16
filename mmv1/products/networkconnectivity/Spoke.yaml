@@ -147,7 +147,6 @@ properties:
           IP ranges allowed to be included during import from hub (does not control transit connectivity).
           The only allowed value for now is "ALL_IPV4_RANGES".
         item_type: Api::Type::String
-        default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: linkedInterconnectAttachments
     description: A collection of VLAN attachment resources. These resources should be redundant attachments that all advertise the same prefixes to Google Cloud. Alternatively, in active/passive configurations, all attachments should be capable of advertising the same prefixes.
@@ -176,7 +175,6 @@ properties:
           IP ranges allowed to be included during import from hub (does not control transit connectivity).
           The only allowed value for now is "ALL_IPV4_RANGES".
         item_type: Api::Type::String
-        default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: linkedRouterApplianceInstances
     description: The URIs of linked Router appliance resources
@@ -219,7 +217,6 @@ properties:
           IP ranges allowed to be included during import from hub (does not control transit connectivity).
           The only allowed value for now is "ALL_IPV4_RANGES".
         item_type: Api::Type::String
-        default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: linkedVpcNetwork
     description: VPC network that is associated with the spoke.
