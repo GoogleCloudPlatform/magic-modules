@@ -100,6 +100,19 @@ func (ar *Runner) ReadFile(name string) (string, error) {
 	return string(data), nil
 }
 
+// Note: This is not used yet.
+func (ar *Runner) AppendFile(name, data string) error {
+	f, err := os.OpenFile(ar.abs(name), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return fmt.Errorf("error opening file %s: %v", name, err)
+	}
+	defer f.Close()
+	if _, err := f.Write([]byte(data)); err != nil {
+		return fmt.Errorf("error writing to file %s: %v", name, err)
+	}
+	return nil
+}
+
 // Run the given command with the given args and env, return output and error if any
 func (ar *Runner) Run(name string, args []string, env map[string]string) (string, error) {
 	cmd := exec.Command(name, args...)

@@ -47,6 +47,7 @@ type ExecRunner interface {
 	PushDir(path string) error
 	PopDir() error
 	WriteFile(name, data string) error
+	AppendFile(name, data string) error // Not used (yet).
 	Run(name string, args []string, env map[string]string) (string, error)
 	MustRun(name string, args []string, env map[string]string) string
 }

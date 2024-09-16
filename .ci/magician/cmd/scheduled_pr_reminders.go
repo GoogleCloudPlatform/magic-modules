@@ -38,13 +38,13 @@ var (
 	// used for flags
 	dryRun bool
 
-	//go:embed SCHEDULED_PR_WAITING_FOR_CONTRIBUTOR.md.tmpl
+	//go:embed templates/SCHEDULED_PR_WAITING_FOR_CONTRIBUTOR.md.tmpl
 	waitingForContributorTemplate string
 
-	//go:embed SCHEDULED_PR_WAITING_FOR_MERGE.md.tmpl
+	//go:embed templates/SCHEDULED_PR_WAITING_FOR_MERGE.md.tmpl
 	waitingForMergeTemplate string
 
-	//go:embed SCHEDULED_PR_WAITING_FOR_REVIEW.md.tmpl
+	//go:embed templates/SCHEDULED_PR_WAITING_FOR_REVIEW.md.tmpl
 	waitingForReviewTemplate string
 )
 

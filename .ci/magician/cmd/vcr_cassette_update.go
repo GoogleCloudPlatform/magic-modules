@@ -39,9 +39,9 @@ var vcuEnvironmentVariables = [...]string{
 }
 
 var (
-	//go:embed vcr_cassettes_update_replaying.tmpl
+	//go:embed templates/vcr/vcr_cassettes_update_replaying.tmpl
 	replayingTmplText string
-	//go:embed vcr_cassettes_update_recording.tmpl
+	//go:embed templates/vcr/vcr_cassettes_update_recording.tmpl
 	recordingTmplText string
 )
 

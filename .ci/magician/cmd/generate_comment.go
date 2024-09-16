@@ -40,7 +40,7 @@ import (
 )
 
 var (
-	//go:embed DIFF_COMMENT.md
+	//go:embed templates/DIFF_COMMENT.md.tmpl
 	diffComment string
 )
 
