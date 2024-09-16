@@ -1301,6 +1301,7 @@ func SetupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 	if err != nil {
 		return "", err
 	}
+	time.Sleep(1 * time.Minute)
 
 {{ if ne $.TargetVersionName `ga` -}}
 	// For Firebase test only
@@ -1330,6 +1331,7 @@ func SetupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 		if err != nil {
 			return "", fmt.Errorf("Error waiting for firebase to be enabled in project %s: %s", p2, err)
 		}
+		time.Sleep(1 * time.Minute)
 	}
 {{- end }}
 
