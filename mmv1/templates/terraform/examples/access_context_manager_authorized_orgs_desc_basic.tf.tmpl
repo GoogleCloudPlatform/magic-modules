@@ -1,4 +1,4 @@
-resource "google_access_context_manager_authorized_orgs_desc" "<%= ctx[:primary_resource_id] %>" {
+resource "google_access_context_manager_authorized_orgs_desc" "{{$.PrimaryResourceId}}" {
   parent = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}"
   name   = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/authorizedOrgsDescs/fakeDescName"
   authorization_type = "AUTHORIZATION_TYPE_TRUST"
@@ -8,6 +8,6 @@ resource "google_access_context_manager_authorized_orgs_desc" "<%= ctx[:primary_
 }
 
 resource "google_access_context_manager_access_policy" "test-access" {
-  parent = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"
+  parent = "organizations/{{index $.TestEnvVars "org_id"}}"
   title  = "my policy"
 }

@@ -1,5 +1,5 @@
 resource "google_sql_database_instance" "postgresqldb" {
-  name             = "<%= ctx[:vars]["sqldb"] %>"
+  name             = "{{index $.Vars "sqldb"}}"
   database_version = "POSTGRES_12"
   settings {
     tier = "db-custom-2-13312"
@@ -8,25 +8,25 @@ resource "google_sql_database_instance" "postgresqldb" {
 }
 
 resource "google_sql_ssl_cert" "sql_client_cert" {
-  common_name = "<%= ctx[:vars]["sqldb_cert"] %>"
+  common_name = "{{index $.Vars "sqldb_cert"}}"
   instance    = google_sql_database_instance.postgresqldb.name
 
   depends_on = [google_sql_database_instance.postgresqldb]
 }
 
 resource "google_sql_user" "sqldb_user" {
-  name     = "<%= ctx[:vars]["sqldb_user"] %>"
+  name     = "{{index $.Vars "sqldb_user"}}"
   instance = google_sql_database_instance.postgresqldb.name
-  password = "<%= ctx[:vars]["sqldb_pass"] %>"
+  password = "{{index $.Vars "sqldb_pass"}}"
 
 
   depends_on = [google_sql_ssl_cert.sql_client_cert]
 }
 
-resource "google_database_migration_service_connection_profile" "<%= ctx[:primary_resource_id] %>" {
+resource "google_database_migration_service_connection_profile" "{{$.PrimaryResourceId}}" {
   location = "us-central1"
-  connection_profile_id = "<%= ctx[:vars]["profile"] %>"
-  display_name = "<%= ctx[:vars]["profile"] %>_display"
+  connection_profile_id = "{{index $.Vars "profile"}}"
+  display_name = "{{index $.Vars "profile"}}_display"
   labels = { 
     foo = "bar" 
   }
@@ -40,7 +40,7 @@ resource "google_database_migration_service_connection_profile" "<%= ctx[:primar
       client_certificate = google_sql_ssl_cert.sql_client_cert.cert
       ca_certificate = google_sql_ssl_cert.sql_client_cert.server_ca_cert
     }
-    cloud_sql_id = "<%= ctx[:vars]["sqldb"] %>"
+    cloud_sql_id = "{{index $.Vars "sqldb"}}"
   }
   depends_on = [google_sql_user.sqldb_user]
 }

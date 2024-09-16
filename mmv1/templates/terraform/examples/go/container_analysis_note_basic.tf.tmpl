@@ -1,8 +1,0 @@
-resource "google_container_analysis_note" "{{$.PrimaryResourceId}}" {
-  name = "{{index $.Vars "note_name"}}"
-  attestation_authority {
-    hint {
-      human_readable_name = "Attestor Note"
-    }
-  }
-}

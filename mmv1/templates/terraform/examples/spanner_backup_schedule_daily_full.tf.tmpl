@@ -1,5 +1,5 @@
 resource "google_spanner_instance" "main" {
-  name         = "<%= ctx[:vars]['instance_name'] %>"
+  name         = "{{index $.Vars "instance_name"}}"
   config       = "regional-europe-west1"
   display_name = "main-instance"
   num_nodes    = 1
@@ -7,21 +7,21 @@ resource "google_spanner_instance" "main" {
 
 resource "google_spanner_database" "database" {
   instance = google_spanner_instance.main.name
-  name     = "<%= ctx[:vars]['database_name'] %>"
+  name     = "{{index $.Vars "database_name"}}"
   version_retention_period = "3d"
   ddl = [
     "CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
     "CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)",
   ]
-  deletion_protection = "<%= ctx[:vars]['deletion_protection'] %>"
+  deletion_protection = "{{index $.Vars "deletion_protection"}}"
 }
 
-resource "google_spanner_backup_schedule" "<%= ctx[:primary_resource_id] %>" {
+resource "google_spanner_backup_schedule" "{{$.PrimaryResourceId}}" {
   instance = google_spanner_instance.main.name
 
   database = google_spanner_database.database.name
 
-  name = "<%= ctx[:vars]['name'] %>"
+  name = "{{index $.Vars "name"}}"
 
   retention_duration = "31620000s" // 366 days (maximum possible retention)
 

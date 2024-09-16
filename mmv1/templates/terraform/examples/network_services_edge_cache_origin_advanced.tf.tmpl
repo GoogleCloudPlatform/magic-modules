@@ -1,5 +1,5 @@
 resource "google_network_services_edge_cache_origin" "fallback" {
-  name                 = "<%= ctx[:vars]['resource_name_2'] %>"
+  name                 = "{{index $.Vars "resource_name_2"}}"
   origin_address       = "fallback.example.com"
   description          = "The default bucket for media edge test"
   max_attempts         = 3
@@ -41,8 +41,8 @@ resource "google_network_services_edge_cache_origin" "fallback" {
   }
 }
 
-resource "google_network_services_edge_cache_origin" "<%= ctx[:primary_resource_id] %>" {
-  name                 = "<%= ctx[:vars]['resource_name'] %>"
+resource "google_network_services_edge_cache_origin" "{{$.PrimaryResourceId}}" {
+  name                 = "{{index $.Vars "resource_name"}}"
   origin_address       = "gs://media-edge-default"
   failover_origin      = google_network_services_edge_cache_origin.fallback.id
   description          = "The default bucket for media edge test"

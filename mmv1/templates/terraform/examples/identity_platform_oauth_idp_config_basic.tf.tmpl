@@ -1,5 +1,5 @@
-resource "google_identity_platform_oauth_idp_config" "<%= ctx[:primary_resource_id] %>" {
-  name          = "<%= ctx[:vars]["name"] %>"
+resource "google_identity_platform_oauth_idp_config" "{{$.PrimaryResourceId}}" {
+  name          = "{{index $.Vars "name"}}"
   display_name  = "Display Name"
   client_id     = "client-id"
   issuer        = "issuer"

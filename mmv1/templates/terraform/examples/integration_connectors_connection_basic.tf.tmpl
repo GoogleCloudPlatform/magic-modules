@@ -1,8 +1,8 @@
 data "google_project" "test_project" {
 }
 
-resource "google_integration_connectors_connection" "<%= ctx[:primary_resource_id] %>" {
-  name     = "<%= ctx[:vars]['connection_name'] %>"
+resource "google_integration_connectors_connection" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.Vars "connection_name"}}"
   location = "us-central1"
   connector_version = "projects/${data.google_project.test_project.project_id}/locations/global/providers/gcp/connectors/pubsub/versions/1"
   description = "tf created description"

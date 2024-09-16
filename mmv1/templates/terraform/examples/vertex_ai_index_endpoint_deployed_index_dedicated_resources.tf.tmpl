@@ -1,9 +1,9 @@
-resource "google_vertex_ai_index_endpoint_deployed_index" "<%= ctx[:primary_resource_id] %>" {
+resource "google_vertex_ai_index_endpoint_deployed_index" "{{$.PrimaryResourceId}}" {
   depends_on = [ google_vertex_ai_index_endpoint.vertex_endpoint ]
   index_endpoint = google_vertex_ai_index_endpoint.vertex_endpoint.id
   index = google_vertex_ai_index.index.id // this is the index that will be deployed onto an endpoint
-  deployed_index_id = "<%= ctx[:vars]['deployed_index_id'] %>"
-  display_name = "<%= ctx[:vars]['display_name'] %>"
+  deployed_index_id = "{{index $.Vars "deployed_index_id"}}"
+  display_name = "{{index $.Vars "display_name"}}"
   dedicated_resources {
     machine_spec {
       machine_type      = "n1-standard-32"
@@ -14,7 +14,7 @@ resource "google_vertex_ai_index_endpoint_deployed_index" "<%= ctx[:primary_reso
 }
 
 resource "google_storage_bucket" "bucket" {
-  name     = "<%= ctx[:vars]['bucket_name'] %>"
+  name     = "{{index $.Vars "bucket_name"}}"
   location = "us-central1"
   uniform_bucket_level_access = true
 }
@@ -35,7 +35,7 @@ resource "google_vertex_ai_index" "index" {
     foo = "bar"
   }
   region   = "us-central1"
-  display_name = "<%= ctx[:vars]['display_name_index'] %>"
+  display_name = "{{index $.Vars "display_name_index"}}"
   description = "index for test"
   metadata {
     contents_delta_uri = "gs://${google_storage_bucket.bucket.name}/contents"

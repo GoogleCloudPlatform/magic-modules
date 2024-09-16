@@ -1,10 +1,10 @@
 resource "google_biglake_catalog" "catalog" {
-    name = "<%= ctx[:vars]['catalog_id'] %>"
+    name = "{{index $.Vars "catalog_id"}}"
     location = "US"
 }
 
 resource "google_storage_bucket" "bucket" {
-  name                        = "<%= ctx[:vars]['bucket_id'] %>"
+  name                        = "{{index $.Vars "bucket_id"}}"
   location                    = "US"
   force_destroy               = true
   uniform_bucket_level_access = true
@@ -16,8 +16,8 @@ resource "google_storage_bucket_object" "metadata_folder" {
   bucket  = google_storage_bucket.bucket.name
 }
 
-resource "google_biglake_database" "<%= ctx[:primary_resource_id] %>"  {
-    name = "<%= ctx[:vars]['name'] %>"
+resource "google_biglake_database" "{{$.PrimaryResourceId}}"  {
+    name = "{{index $.Vars "name"}}"
     catalog = google_biglake_catalog.catalog.id
     type = "HIVE"
     hive_options {

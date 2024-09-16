@@ -1,6 +1,6 @@
 idParts := strings.Split(d.Id(), "/")
 if len(idParts) != 4 {
-  return nil, fmt.Errorf("unexpected format of ID (%q), expected folders/{{folder}}/notificationConfigs/{{config_id}}", d.Id())
+  return nil, fmt.Errorf("unexpected format of ID (%q), expected folders/{{"{{"}}folder{{"}}"}}/notificationConfigs/{{"{{"}}config_id{{"}}"}}", d.Id())
 }
 
 if err := d.Set("folder", idParts[1]); err != nil {

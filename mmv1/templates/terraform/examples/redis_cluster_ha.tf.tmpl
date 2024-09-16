@@ -1,5 +1,5 @@
-resource "google_redis_cluster" "<%= ctx[:primary_resource_id] %>" {
-  name           = "<%= ctx[:vars]['cluster_name'] %>"
+resource "google_redis_cluster" "{{$.PrimaryResourceId}}" {
+  name           = "{{index $.Vars "cluster_name"}}"
   shard_count    = 3
   psc_configs {
     network = google_compute_network.producer_net.id
@@ -12,7 +12,7 @@ resource "google_redis_cluster" "<%= ctx[:primary_resource_id] %>" {
   redis_configs = {
     maxmemory-policy	= "volatile-ttl"
   }
-  deletion_protection_enabled = <%= ctx[:vars]['deletion_protection_enabled']%>
+  deletion_protection_enabled = {{index $.Vars "deletion_protection_enabled"}}
 
   zone_distribution_config {
     mode = "MULTI_ZONE"
@@ -34,7 +34,7 @@ resource "google_redis_cluster" "<%= ctx[:primary_resource_id] %>" {
 }
 
 resource "google_network_connectivity_service_connection_policy" "default" {
-  name = "<%= ctx[:vars]['policy_name'] %>"
+  name = "{{index $.Vars "policy_name"}}"
   location = "us-central1"
   service_class = "gcp-memorystore-redis"
   description   = "my basic service connection policy"
@@ -45,13 +45,13 @@ resource "google_network_connectivity_service_connection_policy" "default" {
 }
 
 resource "google_compute_subnetwork" "producer_subnet" {
-  name          = "<%= ctx[:vars]['subnet_name'] %>"
+  name          = "{{index $.Vars "subnet_name"}}"
   ip_cidr_range = "10.0.0.248/29"
   region        = "us-central1"
   network       = google_compute_network.producer_net.id
 }
 
 resource "google_compute_network" "producer_net" {
-  name                    = "<%= ctx[:vars]['network_name'] %>"
+  name                    = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = false
 }

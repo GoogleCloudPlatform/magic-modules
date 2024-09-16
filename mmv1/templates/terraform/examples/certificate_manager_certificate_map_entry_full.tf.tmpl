@@ -1,5 +1,5 @@
 resource "google_certificate_manager_certificate_map" "certificate_map" {
-  name        = "<%= ctx[:vars]['cert_map_entry_name'] %>"
+  name        = "{{index $.Vars "cert_map_entry_name"}}"
   description = "My acceptance test certificate map"
    labels      = {
     "terraform" : true,
@@ -7,8 +7,8 @@ resource "google_certificate_manager_certificate_map" "certificate_map" {
   }
 }
 
-resource "google_certificate_manager_certificate_map_entry" "<%= ctx[:primary_resource_id] %>" {
-  name        = "<%= ctx[:vars]['cert_map_entry_name'] %>"
+resource "google_certificate_manager_certificate_map_entry" "{{$.PrimaryResourceId}}" {
+  name        = "{{index $.Vars "cert_map_entry_name"}}"
   description = "My acceptance test certificate map entry"
   map = google_certificate_manager_certificate_map.certificate_map.name 
   labels      = {
@@ -20,7 +20,7 @@ resource "google_certificate_manager_certificate_map_entry" "<%= ctx[:primary_re
 }
 
 resource "google_certificate_manager_certificate" "certificate" {
-  name        = "<%= ctx[:vars]['cert_map_entry_name'] %>"
+  name        = "{{index $.Vars "cert_map_entry_name"}}"
   description = "The default cert"
   scope       = "DEFAULT"
   managed {
@@ -37,13 +37,13 @@ resource "google_certificate_manager_certificate" "certificate" {
 
 
 resource "google_certificate_manager_dns_authorization" "instance" {
-  name        = "<%= ctx[:vars]['dns_auth_name'] %>"
+  name        = "{{index $.Vars "dns_auth_name"}}"
   description = "The default dnss"
-  domain      = "<%= ctx[:vars]['dns_auth_subdomain'] %>.hashicorptest.com"
+  domain      = "{{index $.Vars "dns_auth_subdomain"}}.hashicorptest.com"
 }
 
 resource "google_certificate_manager_dns_authorization" "instance2" {
-  name        = "<%= ctx[:vars]['dns_auth_name2'] %>"
+  name        = "{{index $.Vars "dns_auth_name2"}}"
   description = "The default dnss"
-  domain      = "<%= ctx[:vars]['dns_auth_subdomain2'] %>.hashicorptest.com"
+  domain      = "{{index $.Vars "dns_auth_subdomain2"}}.hashicorptest.com"
 }

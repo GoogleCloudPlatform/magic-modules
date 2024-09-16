@@ -1,11 +1,11 @@
-resource "google_logging_project_bucket_config" "<%= ctx[:primary_resource_id] %>" {
+resource "google_logging_project_bucket_config" "{{$.PrimaryResourceId}}" {
     location  = "global"
-    project   = "<%= ctx[:test_env_vars]['project'] %>"
+    project   = "{{index $.TestEnvVars "project"}}"
     bucket_id = "_Default"
 }
 
-resource "google_logging_metric" "<%= ctx[:primary_resource_id] %>" {
-  name        = "<%= ctx[:vars]["logging_metric_name"] %>"
+resource "google_logging_metric" "{{$.PrimaryResourceId}}" {
+  name        = "{{index $.Vars "logging_metric_name"}}"
   filter      = "resource.type=gae_app AND severity>=ERROR"
-  bucket_name = google_logging_project_bucket_config.<%= ctx[:primary_resource_id] %>.id
+  bucket_name = google_logging_project_bucket_config.{{$.PrimaryResourceId}}.id
 }

@@ -19,7 +19,7 @@ if err := d.Set("access_id", accessId); err != nil {
 	return fmt.Errorf("Error setting access_id: %s", err)
 }
 
-id, err = tpgresource.ReplaceVars(d, config, "projects/{{project}}/hmacKeys/{{access_id}}")
+id, err = tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}"}}/hmacKeys/{{"{{"}}access_id{{"}}"}}")
 if err != nil {
 	return fmt.Errorf("Error constructing id: %s", err)
 }

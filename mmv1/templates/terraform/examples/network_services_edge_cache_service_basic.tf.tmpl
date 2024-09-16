@@ -1,11 +1,11 @@
 resource "google_storage_bucket" "dest" {
-  name          = "<%= ctx[:vars]['bucket_name'] %>"
+  name          = "{{index $.Vars "bucket_name"}}"
   location      = "US"
   force_destroy = true
 }
 
 resource "google_network_services_edge_cache_origin" "instance" {
-  name                 = "<%= ctx[:vars]['origin_name'] %>"
+  name                 = "{{index $.Vars "origin_name"}}"
   origin_address       = google_storage_bucket.dest.url
   description          = "The default bucket for media edge test"
   max_attempts         = 2
@@ -14,8 +14,8 @@ resource "google_network_services_edge_cache_origin" "instance" {
   }
 }
 
-resource "google_network_services_edge_cache_service" "<%= ctx[:primary_resource_id] %>" {
-  name                 = "<%= ctx[:vars]['service_name'] %>"
+resource "google_network_services_edge_cache_service" "{{$.PrimaryResourceId}}" {
+  name                 = "{{index $.Vars "service_name"}}"
   description          = "some description"
   routing {
     host_rule {

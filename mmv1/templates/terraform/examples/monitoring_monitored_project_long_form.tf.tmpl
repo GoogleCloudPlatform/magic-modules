@@ -1,11 +1,11 @@
-resource "google_monitoring_monitored_project" "<%= ctx[:primary_resource_id] %>" {
-  metrics_scope = "<%= ctx[:test_env_vars]['project_id'] %>"
-  name          = "locations/global/metricsScopes/<%= ctx[:test_env_vars]['project_id'] %>/projects/${google_project.basic.project_id}"
+resource "google_monitoring_monitored_project" "{{$.PrimaryResourceId}}" {
+  metrics_scope = "{{index $.TestEnvVars "project_id"}}"
+  name          = "locations/global/metricsScopes/{{index $.TestEnvVars "project_id"}}/projects/${google_project.basic.project_id}"
 }
 
 resource "google_project" "basic" {
-  project_id = "<%= ctx[:vars]['monitored_project'] %>"
-  name       = "<%= ctx[:vars]['monitored_project'] %>-display"
-  org_id     = "<%= ctx[:test_env_vars]['org_id'] %>"
+  project_id = "{{index $.Vars "monitored_project"}}"
+  name       = "{{index $.Vars "monitored_project"}}-display"
+  org_id     = "{{index $.TestEnvVars "org_id"}}"
   deletion_policy = "DELETE"
 }

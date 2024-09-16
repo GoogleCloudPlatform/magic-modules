@@ -1,7 +1,7 @@
 resource "google_compute_subnetwork" "network-for-l7lb" {
   provider = google-beta
 
-  name          = "<%= ctx[:vars]['subnetwork_name'] %>"
+  name          = "{{index $.Vars "subnetwork_name"}}"
   ip_cidr_range = "10.0.0.0/22"
   region        = "us-central1"
   purpose       = "REGIONAL_MANAGED_PROXY"
@@ -12,6 +12,6 @@ resource "google_compute_subnetwork" "network-for-l7lb" {
 resource "google_compute_network" "custom-test" {
   provider = google-beta
 
-  name                    = "<%= ctx[:vars]['network_name'] %>"
+  name                    = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = false
 }

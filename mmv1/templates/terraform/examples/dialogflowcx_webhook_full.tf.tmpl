@@ -1,5 +1,5 @@
 resource "google_dialogflow_cx_agent" "agent" {
-  display_name = "<%= ctx[:vars]["agent_name"] %>"
+  display_name = "{{index $.Vars "agent_name"}}"
   location = "global"
   default_language_code = "en"
   supported_language_codes = ["it","de","es"]
@@ -14,7 +14,7 @@ resource "google_dialogflow_cx_agent" "agent" {
 }
 
 
-resource "google_dialogflow_cx_webhook" "<%= ctx[:primary_resource_id] %>" {
+resource "google_dialogflow_cx_webhook" "{{$.PrimaryResourceId}}" {
   parent       = google_dialogflow_cx_agent.agent.id
   display_name = "MyFlow"
   generic_web_service {

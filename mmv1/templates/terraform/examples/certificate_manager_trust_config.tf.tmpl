@@ -1,5 +1,5 @@
-resource "google_certificate_manager_trust_config" "<%= ctx[:primary_resource_id] %>" {
-  name        = "<%= ctx[:vars]["trust_config_name"] %>"
+resource "google_certificate_manager_trust_config" "{{$.PrimaryResourceId}}" {
+  name        = "{{index $.Vars "trust_config_name"}}"
   description = "sample description for the trust config"
   location    = "us-central1"
 

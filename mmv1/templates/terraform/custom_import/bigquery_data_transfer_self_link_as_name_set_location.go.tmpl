@@ -6,7 +6,7 @@ if err := tpgresource.ParseImportId([]string{"(?P<project>[^ ]+) (?P<name>[^ ]+)
 	return nil, err
 }
 
-// import location if the name format follows: projects/{{project}}/locations/{{location}}/transferConfigs/{{config_id}}
+// import location if the name format follows: projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/transferConfigs/{{"{{"}}config_id{{"}}"}}
 name := d.Get("name").(string)
 stringParts := strings.Split(name, "/")
 if len(stringParts) == 6 {

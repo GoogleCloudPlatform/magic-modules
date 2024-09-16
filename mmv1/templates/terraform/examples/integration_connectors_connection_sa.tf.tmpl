@@ -2,7 +2,7 @@ data "google_project" "test_project" {
 }
 
 resource "google_secret_manager_secret" "secret-basic" {
-  secret_id     = "<%= ctx[:vars]['secret_id'] %>"
+  secret_id     = "{{index $.Vars "secret_id"}}"
   replication {
     user_managed {
       replicas {
@@ -25,8 +25,8 @@ resource "google_secret_manager_secret_iam_member" "secret_iam" {
   depends_on = [google_secret_manager_secret_version.secret-version-basic]
 }
 
-resource "google_integration_connectors_connection" "<%= ctx[:primary_resource_id] %>" {
-  name     = "<%= ctx[:vars]['connection_name'] %>"
+resource "google_integration_connectors_connection" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.Vars "connection_name"}}"
   description = "tf updated description"
   location = "us-central1"
   service_account = "${data.google_project.test_project.number}-compute@developer.gserviceaccount.com"

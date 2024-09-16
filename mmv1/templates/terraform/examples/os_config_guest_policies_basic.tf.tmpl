@@ -6,7 +6,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   provider = google-beta
-  name           = "<%= ctx[:vars]['instance_name'] %>"
+  name           = "{{index $.Vars "instance_name"}}"
   machine_type   = "e2-medium"
   zone           = "us-central1-a"
   can_ip_forward = false
@@ -27,9 +27,9 @@ resource "google_compute_instance" "foobar" {
   }
 }
 
-resource "google_os_config_guest_policies" "<%= ctx[:primary_resource_id] %>" {
+resource "google_os_config_guest_policies" "{{$.PrimaryResourceId}}" {
   provider = google-beta
-  guest_policy_id = "<%= ctx[:vars]['guest_policy_id'] %>"
+  guest_policy_id = "{{index $.Vars "guest_policy_id"}}"
 
   assignment {
     instances = [google_compute_instance.foobar.id]

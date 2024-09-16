@@ -56,8 +56,8 @@ resource "google_compute_instance_group_manager" "a3_dws" {
 
 }
 
-resource "google_compute_resize_request" "<%= ctx[:primary_resource_id] %>" {
-  name                   = "<%= ctx[:vars]['resize_request_name'] %>"
+resource "google_compute_resize_request" "{{$.PrimaryResourceId}}" {
+  name                   = "{{index $.Vars "resize_request_name"}}"
   instance_group_manager = google_compute_instance_group_manager.a3_dws.name
   zone                   = "us-central1-a"
   description            = "Test resize request resource"

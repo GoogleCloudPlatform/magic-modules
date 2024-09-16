@@ -2,10 +2,10 @@ data "google_project" "project" {
   provider = google-beta
 }
 
-resource "google_compute_region_target_https_proxy" "<%= ctx[:primary_resource_id] %>" {
+resource "google_compute_region_target_https_proxy" "{{$.PrimaryResourceId}}" {
   provider          = google-beta
   region           = "us-central1"
-  name              = "<%= ctx[:vars]['target_https_proxy_name'] %>"
+  name              = "{{index $.Vars "target_https_proxy_name"}}"
   url_map           = google_compute_region_url_map.default.id
   ssl_certificates  = [google_compute_region_ssl_certificate.default.id]
   server_tls_policy = google_network_security_server_tls_policy.default.id
@@ -14,7 +14,7 @@ resource "google_compute_region_target_https_proxy" "<%= ctx[:primary_resource_i
 resource "google_certificate_manager_trust_config" "default" {
   provider    = google-beta
   location    = "us-central1"
-  name        = "<%= ctx[:vars]["trust_config_name"] %>"
+  name        = "{{index $.Vars "trust_config_name"}}"
   description = "sample description for trust config"
 
   trust_stores {
@@ -34,7 +34,7 @@ resource "google_certificate_manager_trust_config" "default" {
 resource "google_network_security_server_tls_policy" "default" {
   provider               = google-beta
   location               = "us-central1"
-  name                   = "<%= ctx[:vars]['server_tls_policy_name'] %>"
+  name                   = "{{index $.Vars "server_tls_policy_name"}}"
   description            = "my description"
   allow_open             = "false"
   mtls_policy {
@@ -46,7 +46,7 @@ resource "google_network_security_server_tls_policy" "default" {
 resource "google_compute_region_ssl_certificate" "default" {
   provider    = google-beta
   region      = "us-central1"
-  name        = "<%= ctx[:vars]['ssl_certificate_name'] %>"
+  name        = "{{index $.Vars "ssl_certificate_name"}}"
   private_key = file("path/to/private.key")
   certificate = file("path/to/certificate.crt")
 }
@@ -54,7 +54,7 @@ resource "google_compute_region_ssl_certificate" "default" {
 resource "google_compute_region_url_map" "default" {
   provider    = google-beta
   region      = "us-central1"
-  name        = "<%= ctx[:vars]['url_map_name'] %>"
+  name        = "{{index $.Vars "url_map_name"}}"
   description = "a description"
 
   default_service = google_compute_region_backend_service.default.id
@@ -78,7 +78,7 @@ resource "google_compute_region_url_map" "default" {
 resource "google_compute_region_backend_service" "default" {
   provider    = google-beta
   region      = "us-central1"
-  name        = "<%= ctx[:vars]['backend_service_name'] %>"
+  name        = "{{index $.Vars "backend_service_name"}}"
   port_name   = "http"
   protocol    = "HTTP"
   timeout_sec = 10
@@ -91,7 +91,7 @@ resource "google_compute_region_backend_service" "default" {
 resource "google_compute_region_health_check" "default" {
   provider           = google-beta
   region             = "us-central1"
-  name               = "<%= ctx[:vars]['http_health_check_name'] %>"
+  name               = "{{index $.Vars "http_health_check_name"}}"
   check_interval_sec = 1
   timeout_sec        = 1
 

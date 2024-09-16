@@ -6,7 +6,7 @@ if err :=  tpgresource.ParseImportId([]string{
 }
 
 // Replace import id for the resource id
-id, err := tpgresource.ReplaceVars(d, config, "{{entitytype}}/features/{{name}}")
+id, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}entitytype{{"}}"}}/features/{{"{{"}}name{{"}}"}}")
 if err != nil {
 	return nil, fmt.Errorf("Error constructing id: %s", err)
 }

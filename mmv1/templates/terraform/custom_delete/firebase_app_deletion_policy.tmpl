@@ -15,7 +15,7 @@
 	}
 	billingProject = project
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{FirebaseBasePath}}{{name}}:remove")
+	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}FirebaseBasePath{{"}}"}}{{"{{"}}name{{"}}"}}:remove")
 	if err != nil {
 		return err
 	}

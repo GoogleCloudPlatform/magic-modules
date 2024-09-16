@@ -1,13 +1,13 @@
 resource "google_firebase_hosting_site" "default" {
   provider = google-beta
-  project  = "<%= ctx[:test_env_vars]['project_id'] %>"
-  site_id  = "<%= ctx[:vars]['site_id'] %>"
+  project  = "{{index $.TestEnvVars "project_id"}}"
+  site_id  = "{{index $.Vars "site_id"}}"
 }
 
 resource "google_cloud_run_v2_service" "default" {
   provider = google-beta
-  project  = "<%= ctx[:test_env_vars]['project_id'] %>"
-  name     = "<%= ctx[:vars]['cloud_run_service_id'] %>"
+  project  = "{{index $.TestEnvVars "project_id"}}"
+  name     = "{{index $.Vars "cloud_run_service_id"}}"
   location = "us-central1"
 
   # Warning: allows all public traffic
@@ -19,7 +19,7 @@ resource "google_cloud_run_v2_service" "default" {
     }
   }
 
-  deletion_protection = "<%= ctx[:vars]["deletion_protection"] %>"
+  deletion_protection = "{{index $.Vars "deletion_protection"}}"
 }
 
 resource "google_firebase_hosting_version" "default" {
@@ -46,9 +46,9 @@ resource "google_firebase_hosting_release" "default" {
 resource "google_firebase_hosting_custom_domain" "default" {
   provider = google-beta
 
-  project  = "<%= ctx[:test_env_vars]['project_id'] %>"
+  project  = "{{index $.TestEnvVars "project_id"}}"
   site_id  = google_firebase_hosting_site.default.site_id
-  custom_domain = "<%= ctx[:vars]['custom_domain'] %>"
+  custom_domain = "{{index $.Vars "custom_domain"}}"
 
   wait_dns_verification = false
 }

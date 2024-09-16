@@ -1,6 +1,6 @@
 resource "google_privateca_ca_pool" "default" {
   provider = google-beta
-  name     = "<%= ctx[:vars]['privateca_ca_pool_name'] %>"
+  name     = "{{index $.Vars "privateca_ca_pool_name"}}"
   location = "us-central1"
   tier     = "DEVOPS"
 
@@ -29,7 +29,7 @@ resource "google_privateca_certificate_authority" "default" {
   provider = google-beta
   pool     = google_privateca_ca_pool.default.name
 
-  certificate_authority_id = "<%= ctx[:vars]['privateca_certificate_authority_id'] %>"
+  certificate_authority_id = "{{index $.Vars "privateca_certificate_authority_id"}}"
   location                 = "us-central1"
   lifetime                 = "86400s"
   type                     = "SELF_SIGNED"
@@ -80,7 +80,7 @@ resource "google_privateca_ca_pool_iam_member" "default" {
 
 resource "google_certificate_manager_trust_config" "default" {
   provider    = google-beta
-  name        = "<%= ctx[:vars]['trust_config_name'] %>"
+  name        = "{{index $.Vars "trust_config_name"}}"
   description = "sample trust config description"
   location    = "us-central1"
 
@@ -94,9 +94,9 @@ resource "google_certificate_manager_trust_config" "default" {
   }
 }
 
-resource "google_network_security_tls_inspection_policy" "<%= ctx[:primary_resource_id] %>" {
+resource "google_network_security_tls_inspection_policy" "{{$.PrimaryResourceId}}" {
   provider = google-beta
-  name     = "<%= ctx[:vars]['resource_name'] %>"
+  name     = "{{index $.Vars "resource_name"}}"
   location = "us-central1"
   ca_pool  = google_privateca_ca_pool.default.id
 

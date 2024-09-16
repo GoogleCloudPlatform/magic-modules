@@ -1,6 +1,6 @@
 # Create a single Compute Engine instance
-resource "google_compute_instance" "<%= ctx[:primary_resource_id] %>" {
-  name         = "<%= ctx[:vars]['flask_vm'] %>"
+resource "google_compute_instance" "{{$.PrimaryResourceId}}" {
+  name         = "{{index $.Vars "flask_vm"}}"
   machine_type = "f1-micro"
   zone         = "us-west1-a"
   tags         = ["ssh"]
@@ -27,7 +27,7 @@ resource "google_compute_instance" "<%= ctx[:primary_resource_id] %>" {
 }
 
 resource "google_compute_firewall" "ssh" {
-  name = "<%= ctx[:vars]['allow_ssh'] %>"
+  name = "{{index $.Vars "allow_ssh"}}"
   allow {
     ports    = ["22"]
     protocol = "tcp"
@@ -41,7 +41,7 @@ resource "google_compute_firewall" "ssh" {
 
 
 resource "google_compute_firewall" "flask" {
-  name    = "<%= ctx[:vars]['flask_app_firewall'] %>"
+  name    = "{{index $.Vars "flask_app_firewall"}}"
   network = "default"
 
   allow {
@@ -55,7 +55,7 @@ resource "google_compute_firewall" "flask" {
 # with versioning enabled
 
 resource "google_storage_bucket" "default" {
-  name          = "<%= ctx[:vars]['bucket_tfstate'] %>"
+  name          = "{{index $.Vars "bucket_tfstate"}}"
   force_destroy = false
   location      = "US"
   storage_class = "STANDARD"

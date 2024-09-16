@@ -9,7 +9,7 @@
 	}
 
 	// Replace import id for the resource id
-	id, err := tpgresource.ReplaceVars(d, config, "{{parent}}/entityTypes/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}parent{{"}}"}}/entityTypes/{{"{{"}}name{{"}}"}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}

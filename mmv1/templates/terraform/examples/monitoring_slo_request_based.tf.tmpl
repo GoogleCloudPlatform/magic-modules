@@ -1,11 +1,11 @@
 resource "google_monitoring_custom_service" "customsrv" {
-  service_id = "<%= ctx[:vars]['service_id'] %>"
+  service_id = "{{index $.Vars "service_id"}}"
   display_name = "My Custom Service"
 }
 
-resource "google_monitoring_slo" "<%= ctx[:primary_resource_id] %>" {
+resource "google_monitoring_slo" "{{$.PrimaryResourceId}}" {
   service = google_monitoring_custom_service.customsrv.service_id
-  slo_id = "<%= ctx[:vars]['slo_id'] %>"
+  slo_id = "{{index $.Vars "slo_id"}}"
   display_name = "Terraform Test SLO with request based SLI (good total ratio)"
 
   goal = 0.9

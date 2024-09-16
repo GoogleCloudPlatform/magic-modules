@@ -1,10 +1,10 @@
 resource "google_service_account" "service_account" {
-  account_id   = "<%= ctx[:vars]['account_id'] %>"
+  account_id   = "{{index $.Vars "account_id"}}"
   display_name = "Service Account"
 }
 
 resource "google_data_pipeline_pipeline" "primary" {
-  name         = "<%= ctx[:vars]["pipeline_name"] %>"
+  name         = "{{index $.Vars "pipeline_name"}}"
   display_name = "my-pipeline"
   type         = "PIPELINE_TYPE_BATCH"
   state        = "STATE_ACTIVE"

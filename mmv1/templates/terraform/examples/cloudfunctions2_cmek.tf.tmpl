@@ -1,5 +1,5 @@
 locals {
-  project = "<%= ctx[:test_env_vars]['project'] %>" # Google Cloud Platform Project ID
+  project = "{{index $.TestEnvVars "project"}}" # Google Cloud Platform Project ID
 }
 
 data "google_project" "project" {
@@ -9,7 +9,7 @@ data "google_project" "project" {
 resource "google_storage_bucket" "bucket" {
   provider = google-beta
 
-  name     = "${local.project}-<%= ctx[:vars]['bucket_name'] %>"  # Every bucket name must be globally unique
+  name     = "${local.project}-{{index $.Vars "bucket_name"}}"  # Every bucket name must be globally unique
   location = "US"
   uniform_bucket_level_access = true
 }
@@ -19,7 +19,7 @@ resource "google_storage_bucket_object" "object" {
 
   name   = "function-source.zip"
   bucket = google_storage_bucket.bucket.name
-  source = "<%= ctx[:vars]['zip_path'] %>"  # Add path to the zipped function source code
+  source = "{{index $.Vars "zip_path"}}"  # Add path to the zipped function source code
 }
 
 resource "google_project_service_identity" "ea_sa" {
@@ -32,7 +32,7 @@ resource "google_project_service_identity" "ea_sa" {
 resource "google_artifact_registry_repository" "unencoded-ar-repo" {
   provider = google-beta
 
-  repository_id = "<%= ctx[:vars]['unencoded-ar-repo'] %>"
+  repository_id = "{{index $.Vars "unencoded-ar-repo"}}"
   location = "us-central1"
   format = "DOCKER"
 }
@@ -49,7 +49,7 @@ resource "google_artifact_registry_repository_iam_member" "member" {
 resource "google_kms_crypto_key_iam_member" "gcf_cmek_keyuser_1" {
   provider = google-beta
 
-  crypto_key_id = "<%= ctx[:vars]['kms_key_name'] %>"
+  crypto_key_id = "{{index $.Vars "kms_key_name"}}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 
   member = "serviceAccount:service-${data.google_project.project.number}@gcf-admin-robot.iam.gserviceaccount.com"
@@ -58,7 +58,7 @@ resource "google_kms_crypto_key_iam_member" "gcf_cmek_keyuser_1" {
 resource "google_kms_crypto_key_iam_member" "gcf_cmek_keyuser_2" {
   provider = google-beta
 
-  crypto_key_id = "<%= ctx[:vars]['kms_key_name'] %>"
+  crypto_key_id = "{{index $.Vars "kms_key_name"}}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 
   member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-artifactregistry.iam.gserviceaccount.com"
@@ -67,7 +67,7 @@ resource "google_kms_crypto_key_iam_member" "gcf_cmek_keyuser_2" {
 resource "google_kms_crypto_key_iam_member" "gcf_cmek_keyuser_3" {
   provider = google-beta
 
-  crypto_key_id = "<%= ctx[:vars]['kms_key_name'] %>"
+  crypto_key_id = "{{index $.Vars "kms_key_name"}}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 
   member = "serviceAccount:service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com"
@@ -76,7 +76,7 @@ resource "google_kms_crypto_key_iam_member" "gcf_cmek_keyuser_3" {
 resource "google_kms_crypto_key_iam_member" "gcf_cmek_keyuser_4" {
   provider = google-beta
 
-  crypto_key_id = "<%= ctx[:vars]['kms_key_name'] %>"
+  crypto_key_id = "{{index $.Vars "kms_key_name"}}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 
   member = "serviceAccount:service-${data.google_project.project.number}@serverless-robot-prod.iam.gserviceaccount.com"
@@ -85,7 +85,7 @@ resource "google_kms_crypto_key_iam_member" "gcf_cmek_keyuser_4" {
 resource "google_kms_crypto_key_iam_member" "gcf_cmek_keyuser_5" {
   provider = google-beta
 
-  crypto_key_id = "<%= ctx[:vars]['kms_key_name'] %>"
+  crypto_key_id = "{{index $.Vars "kms_key_name"}}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 
   member = google_project_service_identity.ea_sa.member
@@ -95,9 +95,9 @@ resource "google_artifact_registry_repository" "encoded-ar-repo" {
   provider = google-beta
 
   location = "us-central1"
-  repository_id = "<%= ctx[:vars]['cmek-repo'] %>"
+  repository_id = "{{index $.Vars "cmek-repo"}}"
   format = "DOCKER"
-  kms_key_name = "<%= ctx[:vars]['kms_key_name'] %>"
+  kms_key_name = "{{index $.Vars "kms_key_name"}}"
 
   depends_on = [
     google_kms_crypto_key_iam_member.gcf_cmek_keyuser_1,
@@ -108,13 +108,13 @@ resource "google_artifact_registry_repository" "encoded-ar-repo" {
   ]
 }
 
-resource "google_cloudfunctions2_function" "<%= ctx[:primary_resource_id] %>" {
+resource "google_cloudfunctions2_function" "{{$.PrimaryResourceId}}" {
   provider = google-beta
 
-  name = "<%= ctx[:vars]['function'] %>"
+  name = "{{index $.Vars "function"}}"
   location = "us-central1"
   description = "CMEK function"
-  kms_key_name = "<%= ctx[:vars]['kms_key_name'] %>"
+  kms_key_name = "{{index $.Vars "kms_key_name"}}"
 
   build_config {
     runtime = "nodejs16"

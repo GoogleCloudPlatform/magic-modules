@@ -4,16 +4,16 @@ variable "subnetwork_cidr" {
 }
 
 resource "google_compute_network" "default" {
-  name                    = "<%= ctx[:vars]['network_name'] %>"
+  name                    = "{{index $.Vars "network_name"}}"
 }
 
 resource "google_compute_network" "internal" {
-  name                    = "<%= ctx[:vars]['internal_network_name'] %>"
+  name                    = "{{index $.Vars "internal_network_name"}}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "internal"{
-  name                    = "<%= ctx[:vars]['subnetwork_name'] %>"
+  name                    = "{{index $.Vars "subnetwork_name"}}"
   network                 = google_compute_network.internal.id
   ip_cidr_range           = var.subnetwork_cidr
   region                  = "us-central1"
@@ -22,7 +22,7 @@ resource "google_compute_subnetwork" "internal"{
 
 // Zonal NEG with GCE_VM_IP_PORT
 resource "google_compute_network_endpoint_group" "default" {
-  name                  = "<%= ctx[:vars]['default_neg_name'] %>"
+  name                  = "{{index $.Vars "default_neg_name"}}"
   network               = google_compute_network.default.id
   default_port          = "90"
   zone                  = "us-central1-a"
@@ -31,7 +31,7 @@ resource "google_compute_network_endpoint_group" "default" {
 
 // Zonal NEG with GCE_VM_IP
 resource "google_compute_network_endpoint_group" "internal" {
-  name                  = "<%= ctx[:vars]['internal_neg_name'] %>"
+  name                  = "{{index $.Vars "internal_neg_name"}}"
   network               = google_compute_network.internal.id
   subnetwork            = google_compute_subnetwork.internal.id
   zone                  = "us-central1-a"
@@ -40,7 +40,7 @@ resource "google_compute_network_endpoint_group" "internal" {
 
 // Hybrid connectivity NEG
 resource "google_compute_network_endpoint_group" "hybrid" {
-  name                  = "<%= ctx[:vars]['hybrid_neg_name'] %>"
+  name                  = "{{index $.Vars "hybrid_neg_name"}}"
   network               = google_compute_network.default.id
   default_port          = "90"
   zone                  = "us-central1-a"
@@ -55,7 +55,7 @@ resource "google_compute_network_endpoint" "hybrid-endpoint" {
 
 // Backend service for Zonal NEG
 resource "google_compute_backend_service" "default" {
-  name                  = "<%= ctx[:vars]['default_backend_service_name'] %>"
+  name                  = "{{index $.Vars "default_backend_service_name"}}"
   port_name             = "http"
   protocol              = "HTTP"
   timeout_sec           = 10
@@ -69,7 +69,7 @@ resource "google_compute_backend_service" "default" {
 
 // Backgend service for Hybrid NEG
 resource "google_compute_backend_service" "hybrid" {
-  name                  = "<%= ctx[:vars]['hybrid_backend_service_name'] %>"
+  name                  = "{{index $.Vars "hybrid_backend_service_name"}}"
   port_name             = "http"
   protocol              = "HTTP"
   timeout_sec           = 10
@@ -82,7 +82,7 @@ resource "google_compute_backend_service" "hybrid" {
 }
 
 resource "google_compute_health_check" "default" {
-  name               = "<%= ctx[:vars]['health_check_name'] %>"
+  name               = "{{index $.Vars "health_check_name"}}"
   timeout_sec        = 1
   check_interval_sec = 1
 
@@ -92,7 +92,7 @@ resource "google_compute_health_check" "default" {
 }
 
 resource "google_compute_url_map" "default" {
-  name            = "url-map-<%= ctx[:vars]['http_proxy_name'] %>"
+  name            = "url-map-{{index $.Vars "http_proxy_name"}}"
   description     = "a description"
   default_service = google_compute_backend_service.default.id
 
@@ -118,13 +118,13 @@ resource "google_compute_url_map" "default" {
 }
 
 resource "google_compute_target_http_proxy" "default" {
-  name        = "<%= ctx[:vars]['http_proxy_name'] %>"
+  name        = "{{index $.Vars "http_proxy_name"}}"
   description = "a description"
   url_map     = google_compute_url_map.default.id
 }
 
 resource "google_compute_global_forwarding_rule" "default" {
-  name       = "<%= ctx[:vars]['forwarding_rule_name'] %>"
+  name       = "{{index $.Vars "forwarding_rule_name"}}"
   target     = google_compute_target_http_proxy.default.id
   port_range = "80"
 }

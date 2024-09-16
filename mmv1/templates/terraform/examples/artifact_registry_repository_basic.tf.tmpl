@@ -1,6 +1,6 @@
-resource "google_artifact_registry_repository" "<%= ctx[:primary_resource_id] %>" {
+resource "google_artifact_registry_repository" "{{$.PrimaryResourceId}}" {
   location      = "us-central1"
-  repository_id = "<%= ctx[:vars]['repository_id'] %>"
-  description   = "<%= ctx[:vars]['desc'] %>"
+  repository_id = "{{index $.Vars "repository_id"}}"
+  description   = "{{index $.Vars "desc"}}"
   format        = "DOCKER"
 }

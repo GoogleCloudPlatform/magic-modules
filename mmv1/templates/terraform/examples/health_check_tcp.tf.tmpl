@@ -1,5 +1,5 @@
 resource "google_compute_health_check" "tcp-health-check" {
-  name = "<%= ctx[:vars]['health_check_name'] %>"
+  name = "{{index $.Vars "health_check_name"}}"
 
   timeout_sec        = 1
   check_interval_sec = 1

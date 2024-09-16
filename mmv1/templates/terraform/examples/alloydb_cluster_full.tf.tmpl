@@ -1,5 +1,5 @@
-resource "google_alloydb_cluster" "<%= ctx[:primary_resource_id] %>" {
-  cluster_id = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
+resource "google_alloydb_cluster" "{{$.PrimaryResourceId}}" {
+  cluster_id = "{{index $.Vars "alloydb_cluster_name"}}"
   location   = "us-central1"
   network_config {
     network = google_compute_network.default.id
@@ -7,8 +7,8 @@ resource "google_alloydb_cluster" "<%= ctx[:primary_resource_id] %>" {
   database_version = "POSTGRES_15"
 
   initial_user {
-    user     = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
-    password = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
+    user     = "{{index $.Vars "alloydb_cluster_name"}}"
+    password = "{{index $.Vars "alloydb_cluster_name"}}"
   }
 
   continuous_backup_config {
@@ -37,17 +37,17 @@ resource "google_alloydb_cluster" "<%= ctx[:primary_resource_id] %>" {
     }
 
     labels = {
-      test = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
+      test = "{{index $.Vars "alloydb_cluster_name"}}"
     }
   }
 
   labels = {
-    test = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
+    test = "{{index $.Vars "alloydb_cluster_name"}}"
   }
 }
 
 data "google_project" "project" {}
 
 resource "google_compute_network" "default" {
-  name = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
+  name = "{{index $.Vars "alloydb_cluster_name"}}"
 }

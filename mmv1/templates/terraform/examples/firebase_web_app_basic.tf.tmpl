@@ -1,7 +1,7 @@
-resource "google_firebase_web_app" "<%= ctx[:primary_resource_id] %>" {
+resource "google_firebase_web_app" "{{$.PrimaryResourceId}}" {
 	provider = google-beta
-	project = "<%= ctx[:test_env_vars]['project_id'] %>"
-	display_name = "<%= ctx[:vars]['display_name'] %>"
+	project = "{{index $.TestEnvVars "project_id"}}"
+	display_name = "{{index $.Vars "display_name"}}"
 }
 
 data "google_firebase_web_app_config" "basic" {
@@ -11,7 +11,7 @@ data "google_firebase_web_app_config" "basic" {
 
 resource "google_storage_bucket" "default" {
     provider = google-beta
-    name     = "<%= ctx[:vars]['bucket_name'] %>"
+    name     = "{{index $.Vars "bucket_name"}}"
     location = "US"
 }
 

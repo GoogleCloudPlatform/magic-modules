@@ -1,5 +1,5 @@
-resource "google_certificate_manager_certificate" "<%= ctx[:primary_resource_id] %>" {
-  name        = "<%= ctx[:vars]['cert_name'] %>"
+resource "google_certificate_manager_certificate" "{{$.PrimaryResourceId}}" {
+  name        = "{{index $.Vars "cert_name"}}"
   description = "Regional cert"
   location    = "us-central1"
   self_managed {

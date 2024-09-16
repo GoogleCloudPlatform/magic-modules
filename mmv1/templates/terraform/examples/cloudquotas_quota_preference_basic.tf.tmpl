@@ -1,6 +1,6 @@
-resource "google_cloud_quotas_quota_preference" "<%= ctx[:primary_resource_id] %>" {
-  parent        = "projects/<%= ctx[:test_env_vars]['project'] %>"
-  name          = "<%= ctx[:vars]['name'] %>"
+resource "google_cloud_quotas_quota_preference" "{{$.PrimaryResourceId}}" {
+  parent        = "projects/{{index $.TestEnvVars "project"}}"
+  name          = "{{index $.Vars "name"}}"
   dimensions    = { region = "us-east1" }
   service       = "compute.googleapis.com"
   quota_id      = "CPUS-per-project-region"

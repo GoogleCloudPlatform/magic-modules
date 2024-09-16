@@ -1,11 +1,11 @@
-resource "google_filestore_snapshot" "<%= ctx[:primary_resource_id] %>" {
-  name     = "<%= ctx[:vars]["snapshot_name"] %>"
+resource "google_filestore_snapshot" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.Vars "snapshot_name"}}"
   instance = google_filestore_instance.instance.name
   location = "us-east1"
 }
 
 resource "google_filestore_instance" "instance" {
-  name     = "<%= ctx[:vars]["instance_name"] %>"
+  name     = "{{index $.Vars "instance_name"}}"
   location = "us-east1"
   tier     = "ENTERPRISE"
 

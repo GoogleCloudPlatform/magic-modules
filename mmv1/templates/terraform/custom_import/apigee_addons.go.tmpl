@@ -17,8 +17,8 @@ switch len(parts) {
 		return nil, fmt.Errorf(
 			"Saw %s when the org is expected to have shape %s or %s",
 			d.Get("org"),
-			"{{org}}",
-			"organizations/{{org}}",
+			"{{"{{"}}org{{"}}"}}",
+			"organizations/{{"{{"}}org{{"}}"}}",
 		)
 }
 
@@ -27,7 +27,7 @@ if err := d.Set("org", projectId); err != nil {
 }
 
 // Replace import id for the resource id
-id, err := tpgresource.ReplaceVars(d, config, "organizations/{{org}}")
+id, err := tpgresource.ReplaceVars(d, config, "organizations/{{"{{"}}org{{"}}"}}")
 if err != nil {
 	return nil, fmt.Errorf("Error constructing id: %s", err)
 }

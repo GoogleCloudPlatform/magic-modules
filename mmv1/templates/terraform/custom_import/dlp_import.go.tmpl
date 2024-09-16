@@ -14,16 +14,16 @@
 			return nil, fmt.Errorf("Error setting name: %s", err)
 		}
 	} else {
-		return nil, fmt.Errorf("Unexpected import id: %s, expected form {{parent}}/<%= object.name.camelize(:lower) -%>/{{name}}", d.Get("name").(string))
+		return nil, fmt.Errorf("Unexpected import id: %s, expected form {{"{{"}}parent{{"}}"}}/{{camelize $.Name "lower"}}/{{"{{"}}name{{"}}"}}", d.Get("name").(string))
 	}
-	// Remove "/<%= object.name.camelize(:lower) -%>/{{name}}" from the id
+	// Remove "/{{camelize $.Name "lower"}}/{{"{{"}}name{{"}}"}}" from the id
 	parts = parts[:len(parts)-2]
 	if err := d.Set("parent", strings.Join(parts, "/")); err != nil {
 		return nil, fmt.Errorf("Error setting parent: %s", err)
 	}
 
 	// Replace import id for the resource id
-	id, err := tpgresource.ReplaceVars(d, config, "{{parent}}/<%= object.name.camelize(:lower) -%>s/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}parent{{"}}"}}/{{camelize $.Name "lower"}}s/{{"{{"}}name{{"}}"}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}

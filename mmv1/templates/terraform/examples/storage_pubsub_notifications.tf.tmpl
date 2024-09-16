@@ -22,13 +22,13 @@ resource "google_pubsub_topic_iam_binding" "binding" {
 
 // Create a new storage bucket.
 resource "google_storage_bucket" "bucket" {
-  name     = "<%= ctx[:vars]['example_bucket_name'] %>"
+  name     = "{{index $.Vars "example_bucket_name"}}"
   provider = google-beta
   location = "US"
   uniform_bucket_level_access = true
 }
 
-resource "google_pubsub_topic" "<%= ctx[:primary_resource_id] %>" {
-  name     = "<%= ctx[:vars]['your_topic_name'] %>"
+resource "google_pubsub_topic" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.Vars "your_topic_name"}}"
   provider = google-beta
 }

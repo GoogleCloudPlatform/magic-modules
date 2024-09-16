@@ -1,8 +1,8 @@
 data "google_project" "project" {
 }
 
-resource "google_network_security_server_tls_policy" "<%= ctx[:primary_resource_id] %>" {
-  name     = "<%= ctx[:vars]['resource_name'] %>"
+resource "google_network_security_server_tls_policy" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.Vars "resource_name"}}"
 
   description = "my description"
   location    = "global"
@@ -19,7 +19,7 @@ resource "google_network_security_server_tls_policy" "<%= ctx[:primary_resource_
 }
 
 resource "google_certificate_manager_trust_config" "default" {
-  name        = "<%= ctx[:vars]['trust_config_name'] %>"
+  name        = "{{index $.Vars "trust_config_name"}}"
   description = "sample trust config description"
   location    = "global"
 

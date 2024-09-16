@@ -2,18 +2,18 @@ data "google_project" "project" {
 
 }
 
-resource "google_dataplex_lake" "<%= ctx[:primary_resource_id] %>" {
+resource "google_dataplex_lake" "{{$.PrimaryResourceId}}" {
   name         = "tf-test-lake%{random_suffix}"
   location     = "us-central1"
-  project = "<%= ctx[:test_env_vars]['project_name'] %>"
+  project = "{{index $.TestEnvVars "project_name"}}"
 }
 
 
-resource "google_dataplex_task" "<%= ctx[:primary_resource_id] %>" {
+resource "google_dataplex_task" "{{$.PrimaryResourceId}}" {
 
     task_id      = "tf-test-task%{random_suffix}"
     location     = "us-central1"
-    lake         = google_dataplex_lake.<%= ctx[:primary_resource_id] %>.name
+    lake         = google_dataplex_lake.{{$.PrimaryResourceId}}.name
     
     description = "Test Task Basic"
     
@@ -31,7 +31,7 @@ resource "google_dataplex_task" "<%= ctx[:primary_resource_id] %>" {
     
     execution_spec {
         service_account = "${data.google_project.project.number}-compute@developer.gserviceaccount.com"
-        project = "<%= ctx[:test_env_vars]['project_name'] %>"
+        project = "{{index $.TestEnvVars "project_name"}}"
         max_job_execution_lifetime = "100s"
         kms_key = "234jn2kjn42k3n423"
     }
@@ -41,6 +41,6 @@ resource "google_dataplex_task" "<%= ctx[:primary_resource_id] %>" {
 
     }
     
-    project = "<%= ctx[:test_env_vars]['project_name'] %>"
+    project = "{{index $.TestEnvVars "project_name"}}"
     
 }

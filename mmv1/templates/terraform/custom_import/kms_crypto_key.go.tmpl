@@ -17,7 +17,7 @@
 		return nil, fmt.Errorf("Error setting skip_initial_version_creation: %s", err)
 	}
 
-	id, err := tpgresource.ReplaceVars(d, config, "<%= id_format(object) -%>")
+	id, err := tpgresource.ReplaceVars(d, config, "{{$.GetIdFormat}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}

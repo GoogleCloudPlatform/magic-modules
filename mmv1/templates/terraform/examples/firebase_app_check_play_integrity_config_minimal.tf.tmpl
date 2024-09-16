@@ -2,7 +2,7 @@
 resource "google_project_service" "play_integrity" {
   provider = google-beta
 
-  project = "<%= ctx[:test_env_vars]['project_id'] %>"
+  project = "{{index $.TestEnvVars "project_id"}}"
   service = "playintegrity.googleapis.com"
 
   # Don't disable the service if the resource block is removed by accident.
@@ -12,9 +12,9 @@ resource "google_project_service" "play_integrity" {
 resource "google_firebase_android_app" "default" {
   provider = google-beta
 
-  project       = "<%= ctx[:test_env_vars]['project_id'] %>"
+  project       = "{{index $.TestEnvVars "project_id"}}"
   display_name  = "Play Integrity app"
-  package_name  = "<%= ctx[:vars]['package_name'] %>"
+  package_name  = "{{index $.Vars "package_name"}}"
   sha1_hashes   = ["2145bdf698b8715039bd0e83f2069bed435ac21c"]
   sha256_hashes = ["2145bdf698b8715039bd0e83f2069bed435ac21ca1b2c3d4e5f6123456789abc"]
 }
@@ -29,7 +29,7 @@ resource "time_sleep" "wait_30s" {
 resource "google_firebase_app_check_play_integrity_config" "default" {
   provider = google-beta
 
-  project = "<%= ctx[:test_env_vars]['project_id'] %>"
+  project = "{{index $.TestEnvVars "project_id"}}"
   app_id  = google_firebase_android_app.default.app_id
 
   depends_on = [time_sleep.wait_30s]

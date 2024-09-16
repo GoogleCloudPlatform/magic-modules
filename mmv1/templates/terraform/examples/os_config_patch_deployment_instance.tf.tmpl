@@ -4,7 +4,7 @@ data "google_compute_image" "my_image" {
 }
 
 resource "google_compute_instance" "foobar" {
-  name           = "<%= ctx[:vars]['instance_name'] %>"
+  name           = "{{index $.Vars "instance_name"}}"
   machine_type   = "e2-medium"
   zone           = "us-central1-a"
   can_ip_forward = false
@@ -25,8 +25,8 @@ resource "google_compute_instance" "foobar" {
   }
 }
 
-resource "google_os_config_patch_deployment" "<%= ctx[:primary_resource_id] %>" {
-  patch_deployment_id = "<%= ctx[:vars]['patch_deployment_id'] %>"
+resource "google_os_config_patch_deployment" "{{$.PrimaryResourceId}}" {
+  patch_deployment_id = "{{index $.Vars "patch_deployment_id"}}"
 
   instance_filter {
     instances = [google_compute_instance.foobar.id]

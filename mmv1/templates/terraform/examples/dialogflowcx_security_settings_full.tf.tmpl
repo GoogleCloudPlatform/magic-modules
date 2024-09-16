@@ -1,6 +1,6 @@
 resource "google_data_loss_prevention_inspect_template" "inspect" {
-  parent       = "projects/<%= ctx[:test_env_vars]['project'] %>/locations/global"
-  display_name = "<%= ctx[:vars]['inspect_name'] %>"
+  parent       = "projects/{{index $.TestEnvVars "project"}}/locations/global"
+  display_name = "{{index $.Vars "inspect_name"}}"
   inspect_config {
     info_types {
       name = "EMAIL_ADDRESS"
@@ -9,8 +9,8 @@ resource "google_data_loss_prevention_inspect_template" "inspect" {
 }
 
 resource "google_data_loss_prevention_deidentify_template" "deidentify" {
-  parent       = "projects/<%= ctx[:test_env_vars]['project'] %>/locations/global"
-  display_name = "<%= ctx[:vars]['deidentify_name'] %>"
+  parent       = "projects/{{index $.TestEnvVars "project"}}/locations/global"
+  display_name = "{{index $.Vars "deidentify_name"}}"
   deidentify_config {
     info_type_transformations {
       transformations {
@@ -27,13 +27,13 @@ resource "google_data_loss_prevention_deidentify_template" "deidentify" {
 }
 
 resource "google_storage_bucket" "bucket" {
-  name                        = "<%= ctx[:vars]["bucket_name"] %>"
+  name                        = "{{index $.Vars "bucket_name"}}"
   location                    = "US"
   uniform_bucket_level_access = true
 }
 
-resource "google_dialogflow_cx_security_settings" "<%= ctx[:primary_resource_id] %>" {
-  display_name        = "<%= ctx[:vars]["settings_name"] %>"
+resource "google_dialogflow_cx_security_settings" "{{$.PrimaryResourceId}}" {
+  display_name        = "{{index $.Vars "settings_name"}}"
   location            = "global"
   redaction_strategy  = "REDACT_WITH_SERVICE"
   redaction_scope     = "REDACT_DISK_STORAGE"

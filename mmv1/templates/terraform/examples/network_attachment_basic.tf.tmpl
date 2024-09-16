@@ -1,5 +1,5 @@
 resource "google_compute_network_attachment" "default" {
-    name = "<%= ctx[:vars]['resource_name'] %>"
+    name = "{{index $.Vars "resource_name"}}"
     region = "us-central1"
     description = "basic network attachment description"
     connection_preference = "ACCEPT_MANUAL"
@@ -18,12 +18,12 @@ resource "google_compute_network_attachment" "default" {
 }
 
 resource "google_compute_network" "default" {
-    name = "<%= ctx[:vars]['network_name'] %>"
+    name = "{{index $.Vars "network_name"}}"
     auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-    name = "<%= ctx[:vars]['subnetwork_name'] %>"
+    name = "{{index $.Vars "subnetwork_name"}}"
     region = "us-central1"
 
     network = google_compute_network.default.id
@@ -31,17 +31,17 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_project" "rejected_producer_project" {
-    project_id      = "<%= ctx[:vars]['rejected_producer_project_name'] %>"
-    name            = "<%= ctx[:vars]['rejected_producer_project_name'] %>"
-    org_id          = "<%= ctx[:test_env_vars]['org_id'] %>"
-    billing_account = "<%= ctx[:test_env_vars]['billing_account'] %>"
+    project_id      = "{{index $.Vars "rejected_producer_project_name"}}"
+    name            = "{{index $.Vars "rejected_producer_project_name"}}"
+    org_id          = "{{index $.TestEnvVars "org_id"}}"
+    billing_account = "{{index $.TestEnvVars "billing_account"}}"
     deletion_policy = "DELETE"
 }
 
 resource "google_project" "accepted_producer_project" {
-    project_id      = "<%= ctx[:vars]['accepted_producer_project_name'] %>"
-    name            = "<%= ctx[:vars]['accepted_producer_project_name'] %>"
-    org_id          = "<%= ctx[:test_env_vars]['org_id'] %>"
-    billing_account = "<%= ctx[:test_env_vars]['billing_account'] %>"
+    project_id      = "{{index $.Vars "accepted_producer_project_name"}}"
+    name            = "{{index $.Vars "accepted_producer_project_name"}}"
+    org_id          = "{{index $.TestEnvVars "org_id"}}"
+    billing_account = "{{index $.TestEnvVars "billing_account"}}"
     deletion_policy = "DELETE"
 }

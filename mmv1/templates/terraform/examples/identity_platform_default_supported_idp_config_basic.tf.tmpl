@@ -1,4 +1,4 @@
-resource "google_identity_platform_default_supported_idp_config" "<%= ctx[:primary_resource_id] %>" {
+resource "google_identity_platform_default_supported_idp_config" "{{$.PrimaryResourceId}}" {
   enabled       = true
   idp_id        = "playgames.google.com"
   client_id     = "client-id"

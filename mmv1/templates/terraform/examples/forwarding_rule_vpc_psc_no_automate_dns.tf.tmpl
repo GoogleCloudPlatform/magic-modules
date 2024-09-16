@@ -1,5 +1,5 @@
-resource "google_compute_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
-  name                    = "<%= ctx[:vars]['forwarding_rule_name'] %>"
+resource "google_compute_forwarding_rule" "{{$.PrimaryResourceId}}" {
+  name                    = "{{index $.Vars "forwarding_rule_name"}}"
   region                  = "us-central1"
   load_balancing_scheme   = ""
   target                  = google_compute_service_attachment.producer_service_attachment.id
@@ -10,19 +10,19 @@ resource "google_compute_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
 }
 
 resource "google_compute_network" "consumer_net" {
-  name                    = "<%= ctx[:vars]['consumer_network_name'] %>"
+  name                    = "{{index $.Vars "consumer_network_name"}}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "consumer_subnet" {
-  name          = "<%= ctx[:vars]['consumer_network_name'] %>"
+  name          = "{{index $.Vars "consumer_network_name"}}"
   ip_cidr_range = "10.0.0.0/16"
   region        = "us-central1"
   network       = google_compute_network.consumer_net.id
 }
 
 resource "google_compute_address" "consumer_address" {
-  name         = "<%= ctx[:vars]['ip_name'] %>-1"
+  name         = "{{index $.Vars "ip_name"}}-1"
   region       = "us-central1"
   subnetwork   = google_compute_subnetwork.consumer_subnet.id
   address_type = "INTERNAL"
@@ -30,19 +30,19 @@ resource "google_compute_address" "consumer_address" {
 
 
 resource "google_compute_network" "producer_net" {
-  name                    = "<%= ctx[:vars]['producer_network_name'] %>"
+  name                    = "{{index $.Vars "producer_network_name"}}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "producer_subnet" {
-  name          = "<%= ctx[:vars]['producer_network_name'] %>"
+  name          = "{{index $.Vars "producer_network_name"}}"
   ip_cidr_range = "10.0.0.0/16"
   region        = "us-central1"
   network       = google_compute_network.producer_net.id
 }
 
 resource "google_compute_subnetwork" "psc_producer_subnet" {
-  name          = "<%= ctx[:vars]['producer_psc_network_name'] %>"
+  name          = "{{index $.Vars "producer_psc_network_name"}}"
   ip_cidr_range = "10.1.0.0/16"
   region        = "us-central1"
 
@@ -51,7 +51,7 @@ resource "google_compute_subnetwork" "psc_producer_subnet" {
 }
 
 resource "google_compute_service_attachment" "producer_service_attachment" {
-  name        = "<%= ctx[:vars]['service_attachment_name'] %>"
+  name        = "{{index $.Vars "service_attachment_name"}}"
   region      = "us-central1"
   description = "A service attachment configured with Terraform"
 
@@ -62,7 +62,7 @@ resource "google_compute_service_attachment" "producer_service_attachment" {
 }
 
 resource "google_compute_forwarding_rule" "producer_target_service" {
-  name     = "<%= ctx[:vars]['producer_forwarding_rule_name'] %>"
+  name     = "{{index $.Vars "producer_forwarding_rule_name"}}"
   region   = "us-central1"
 
   load_balancing_scheme = "INTERNAL"
@@ -73,14 +73,14 @@ resource "google_compute_forwarding_rule" "producer_target_service" {
 }
 
 resource "google_compute_region_backend_service" "producer_service_backend" {
-  name     = "<%= ctx[:vars]['producer_backend_name'] %>"
+  name     = "{{index $.Vars "producer_backend_name"}}"
   region   = "us-central1"
 
   health_checks = [google_compute_health_check.producer_service_health_check.id]
 }
 
 resource "google_compute_health_check" "producer_service_health_check" {
-  name     = "<%= ctx[:vars]['producer_healthcheck_name'] %>"
+  name     = "{{index $.Vars "producer_healthcheck_name"}}"
 
   check_interval_sec = 1
   timeout_sec        = 1

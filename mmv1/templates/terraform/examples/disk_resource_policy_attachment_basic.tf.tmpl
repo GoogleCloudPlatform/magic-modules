@@ -1,11 +1,11 @@
-resource "google_compute_disk_resource_policy_attachment" "<%= ctx[:primary_resource_id] %>" {
+resource "google_compute_disk_resource_policy_attachment" "{{$.PrimaryResourceId}}" {
   name = google_compute_resource_policy.policy.name
   disk = google_compute_disk.ssd.name
   zone = "us-central1-a"
 }
 
 resource "google_compute_disk" "ssd" {
-  name  = "<%= ctx[:vars]['disk_name'] %>"
+  name  = "{{index $.Vars "disk_name"}}"
   image = data.google_compute_image.my_image.self_link
   size  = 50
   type  = "pd-ssd"
@@ -13,7 +13,7 @@ resource "google_compute_disk" "ssd" {
 }
 
 resource "google_compute_resource_policy" "policy" {
-  name = "<%= ctx[:vars]['policy_name'] %>"
+  name = "{{index $.Vars "policy_name"}}"
   region = "us-central1"
   snapshot_schedule_policy {
     schedule {

@@ -1,10 +1,10 @@
 resource "google_folder" "folder" {
-  parent       = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"
-  display_name = "<%= ctx[:vars]['folder_display_name'] %>"
+  parent       = "organizations/{{index $.TestEnvVars "org_id"}}"
+  display_name = "{{index $.Vars "folder_display_name"}}"
 }
 
-resource "google_scc_v2_folder_mute_config" "<%= ctx[:primary_resource_id] %>" {
-  mute_config_id    = "<%= ctx[:vars]['mute_config_id'] %>"
+resource "google_scc_v2_folder_mute_config" "{{$.PrimaryResourceId}}" {
+  mute_config_id    = "{{index $.Vars "mute_config_id"}}"
   folder = google_folder.folder.folder_id
   location     = "global"
   description  = "My custom Cloud Security Command Center Finding Folder mute Configuration"

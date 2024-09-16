@@ -19,13 +19,13 @@ if err := d.Set("policy_id", policyId.(string)); err != nil {
 }
 
 // Store the ID now.
-id, err = tpgresource.ReplaceVars(d, config, "locations/global/firewallPolicies/{{policy_id}}")
+id, err = tpgresource.ReplaceVars(d, config, "locations/global/firewallPolicies/{{"{{"}}policy_id{{"}}"}}")
 if err != nil {
   return fmt.Errorf("Error constructing id: %s", err)
 }
 d.SetId(id)
 
-url, err = tpgresource.ReplaceVarsForId(d, config, "{{ComputeBasePath}}locations/global/firewallPolicies/{{policy_id}}")
+url, err = tpgresource.ReplaceVarsForId(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}locations/global/firewallPolicies/{{"{{"}}policy_id{{"}}"}}")
 if err != nil {
   return err
 }

@@ -8,18 +8,18 @@ data "google_project" "project" {
 
 }
 
-resource "google_dataplex_lake" "<%= ctx[:primary_resource_id] %>" {
+resource "google_dataplex_lake" "{{$.PrimaryResourceId}}" {
   name         = "tf-test-lake%{random_suffix}"
   location     = "us-central1"
-  project = "<%= ctx[:test_env_vars]['project_name'] %>"
+  project = "{{index $.TestEnvVars "project_name"}}"
 }
 
 
-resource "google_dataplex_task" "<%= ctx[:primary_resource_id] %>" {
+resource "google_dataplex_task" "{{$.PrimaryResourceId}}" {
 
     task_id      = "tf-test-task%{random_suffix}"
     location     = "us-central1"
-    lake         = google_dataplex_lake.<%= ctx[:primary_resource_id] %>.name
+    lake         = google_dataplex_lake.{{$.PrimaryResourceId}}.name
     trigger_spec  {
         type = "ON_DEMAND"
     }
@@ -56,6 +56,6 @@ resource "google_dataplex_task" "<%= ctx[:primary_resource_id] %>" {
         sql_script = "show databases"
     }
     
-    project = "<%= ctx[:test_env_vars]['project_name'] %>"
+    project = "{{index $.TestEnvVars "project_name"}}"
     
 }

@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package provider_test
 
 import (
@@ -365,7 +364,7 @@ func testAccCheckComputeAddressDestroyProducer(t *testing.T) func(s *terraform.S
 
 			config := acctest.GoogleProviderConfig(t)
 
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/addresses/{{name}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/addresses/{{"{{"}}name{{"}}"}}")
 			if err != nil {
 				return err
 			}

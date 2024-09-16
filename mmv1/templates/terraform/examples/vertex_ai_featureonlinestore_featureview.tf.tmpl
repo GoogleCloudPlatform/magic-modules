@@ -1,5 +1,5 @@
 resource "google_vertex_ai_feature_online_store" "featureonlinestore" {
-  name = "<%= ctx[:vars]['name'] %>"
+  name = "{{index $.Vars "name"}}"
   labels = {
     foo = "bar"
   }
@@ -15,7 +15,7 @@ resource "google_vertex_ai_feature_online_store" "featureonlinestore" {
 
 resource "google_bigquery_dataset" "tf-test-dataset" {
 
-  dataset_id    = "<%= ctx[:vars]['name'] %>"
+  dataset_id    = "{{index $.Vars "name"}}"
   friendly_name = "test"
   description   = "This is a test description"
   location      = "US"
@@ -25,7 +25,7 @@ resource "google_bigquery_table" "tf-test-table" {
   deletion_protection = false
 
   dataset_id = google_bigquery_dataset.tf-test-dataset.dataset_id
-  table_id   = "<%= ctx[:vars]['name'] %>"
+  table_id   = "{{index $.Vars "name"}}"
   schema     = <<EOF
   [
   {
@@ -50,8 +50,8 @@ resource "google_bigquery_table" "tf-test-table" {
 EOF
 }
 
-resource "google_vertex_ai_feature_online_store_featureview" "<%= ctx[:primary_resource_id] %>" {
-  name                 = "<%= ctx[:vars]['name'] %>"
+resource "google_vertex_ai_feature_online_store_featureview" "{{$.PrimaryResourceId}}" {
+  name                 = "{{index $.Vars "name"}}"
   region               = "us-central1"
   feature_online_store = google_vertex_ai_feature_online_store.featureonlinestore.name
   sync_config {

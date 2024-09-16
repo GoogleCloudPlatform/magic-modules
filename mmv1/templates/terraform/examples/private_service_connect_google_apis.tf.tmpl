@@ -1,14 +1,14 @@
 resource "google_compute_network" "network" {
   provider      = google-beta
-  project       = "<%= ctx[:test_env_vars]['project'] %>"
-  name          = "<%= ctx[:vars]['network_name'] %>"
+  project       = "{{index $.TestEnvVars "project"}}"
+  name          = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "vpc_subnetwork" {
   provider                 = google-beta
   project                  = google_compute_network.network.project
-  name                     = "<%= ctx[:vars]['subnetwork_name'] %>"
+  name                     = "{{index $.Vars "subnetwork_name"}}"
   ip_cidr_range            = "10.2.0.0/16"
   region                   = "us-central1"
   network                  = google_compute_network.network.id
@@ -18,7 +18,7 @@ resource "google_compute_subnetwork" "vpc_subnetwork" {
 resource "google_compute_global_address" "default" {
   provider      = google-beta
   project       = google_compute_network.network.project
-  name          = "<%= ctx[:vars]['global_address_name'] %>"
+  name          = "{{index $.Vars "global_address_name"}}"
   address_type  = "INTERNAL"
   purpose       = "PRIVATE_SERVICE_CONNECT"
   network       = google_compute_network.network.id
@@ -28,7 +28,7 @@ resource "google_compute_global_address" "default" {
 resource "google_compute_global_forwarding_rule" "default" {
   provider      = google-beta
   project       = google_compute_network.network.project
-  name          = "<%= ctx[:vars]['forwarding_rule_name'] %>"
+  name          = "{{index $.Vars "forwarding_rule_name"}}"
   target        = "all-apis"
   network       = google_compute_network.network.id
   ip_address    = google_compute_global_address.default.id

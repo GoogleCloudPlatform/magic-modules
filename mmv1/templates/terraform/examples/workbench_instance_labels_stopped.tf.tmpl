@@ -1,5 +1,5 @@
-resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]['instance_name'] %>"
+resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "instance_name"}}"
   location = "us-central1-a"
 
   gce_setup {
@@ -12,7 +12,7 @@ resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
     }
 
     service_accounts {
-      email = "<%= ctx[:test_env_vars]['service_account'] %>"
+      email = "{{index $.TestEnvVars "service_account"}}"
     }
 
     metadata = {
