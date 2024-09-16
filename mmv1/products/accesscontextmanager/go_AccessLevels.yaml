@@ -13,6 +13,7 @@
 
 # Warning: This is a temporary file, and should not be edited directly
 ---
+# This is the plural of `AccessLevel`, any changes here should be made to `AccessLevel` as well
 name: 'AccessLevels'
 description: |
   Replace all existing Access Levels in an Access Policy with the Access Levels provided. This is done atomically.
@@ -57,6 +58,7 @@ async:
 custom_code:
   custom_delete: 'templates/terraform/custom_delete/go/replace_all_access_levels_empty_list.go.tmpl'
   custom_import: 'templates/terraform/custom_import/go/set_access_policy_parent_from_access_policy.go.tmpl'
+# Skipping the sweeper due to the non-standard base_url
 exclude_sweeper: true
 examples:
   - name: 'access_context_manager_access_levels_basic'
@@ -66,6 +68,8 @@ examples:
       access_level_name2: 'mac_no_lock'
     exclude_test: true
 parameters:
+  # Parent is a path parameter that _cannot_ be read or sent in the request at all.
+  # This must be done at the provider level.
   - name: 'parent'
     type: String
     description: |
@@ -105,6 +109,8 @@ properties:
           type: NestedObject
           description: |
             A set of predefined conditions for the access level and a combining function.
+          # conflicts:
+          #   - custom
           properties:
             - name: 'combiningFunction'
               type: Enum
@@ -119,6 +125,8 @@ properties:
               enum_values:
                 - 'AND'
                 - 'OR'
+            # All of the false defaults below here are omitted on purpose.
+            # Let's keep this as simple as possible, since they will all be set by the API.
             - name: 'conditions'
               type: Array
               description: |
@@ -282,6 +290,8 @@ properties:
           description: |
             Custom access level conditions are set using the Cloud Common Expression Language to represent the necessary conditions for the level to apply to a request.
             See CEL spec at: https://github.com/google/cel-spec.
+          # conflicts:
+          #   - basic
           properties:
             - name: 'expr'
               type: NestedObject

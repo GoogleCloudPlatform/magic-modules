@@ -91,6 +91,8 @@ examples:
     ignore_read_extra:
       - 'deletion_protection'
       - 'subordinate_config.0.certificate_authority'
+      # This example ultimately generates a random id making replaying impossible at
+      # https://github.com/hashicorp/terraform-provider-google-beta/blob/22bfbbcf2250054e622743c4a35a872e43ed5aed/google-beta/privateca_ca_utils.go#L147
     skip_vcr: true
   - name: 'privateca_certificate_authority_byo_key'
     primary_resource_id: 'default'
@@ -107,7 +109,10 @@ examples:
       'deletion_protection': 'false'
     ignore_read_extra:
       - 'deletion_protection'
+    # Skip test because it depends on a beta resource, but PrivateCA does
+    # not have a beta endpoint
     exclude_test: true
+      # Multiple IAM bindings on the same key cause non-determinism
     skip_vcr: true
   - name: 'privateca_certificate_authority_custom_ski'
     primary_resource_id: 'default'
@@ -124,6 +129,7 @@ examples:
       'deletion_protection': 'false'
     ignore_read_extra:
       - 'deletion_protection'
+    # Multiple IAM bindings on the same key cause non-determinism
     skip_vcr: true
 virtual_fields:
   - name: 'deletion_protection'
@@ -637,6 +643,7 @@ properties:
       "notAfterTime" fields inside an X.509 certificate. A duration in seconds with up to nine
       fractional digits, terminated by 's'. Example: "3.5s".
     immutable: true
+ # 10 years
     default_value: "315360000s"
   - name: 'keySpec'
     type: NestedObject
@@ -692,6 +699,7 @@ properties:
           - 'subordinate_config.0.certificate_authority'
           - 'subordinate_config.0.pem_issuer_chain'
         diff_suppress_func: 'tpgresource.CompareResourceNames'
+        # certificateAuthority is not included in the response since the sub-CA is activated via specifing pemIssuerChain
         custom_flatten: 'templates/terraform/custom_flatten/go/privateca_certificate_authority_subordinate_config_certificate_authority.go.tmpl'
       - name: 'pemIssuerChain'
         type: NestedObject

@@ -68,6 +68,7 @@ examples:
       'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
     exclude_docs: true
 parameters:
+  # TODO: resourceref?
   - name: 'zone'
     type: String
     description: |
