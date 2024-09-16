@@ -54,6 +54,8 @@ func TestAccDataSourceGooglePrivilegedAccessManagerEntitlement_optionalProject(t
 
 func testAccDataSourceGooglePrivilegedAccessManagerEntitlement_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_project" "project" {}
+
 resource "google_privileged_access_manager_entitlement" "tfentitlement" {
 	entitlement_id = "tf-test-example-entitlement%{random_suffix}"
 	location = "global"
@@ -78,7 +80,6 @@ resource "google_privileged_access_manager_entitlement" "tfentitlement" {
 		}
 	}
 }
-data "google_project" "project" {}
 
 data "google_privileged_access_manager_entitlement" "tfentitlement" {
   entitlement_id     = google_privileged_access_manager_entitlement.tfentitlement.entitlement_id
@@ -89,6 +90,8 @@ data "google_privileged_access_manager_entitlement" "tfentitlement" {
 
 func testAccDataSourceGooglePrivilegedAccessManagerEntitlement_optionalProject(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_project" "project" {}
+
 resource "google_privileged_access_manager_entitlement" "tfentitlement" {
 	entitlement_id = "tf-test-example-entitlement%{random_suffix}"
 	location = "global"
