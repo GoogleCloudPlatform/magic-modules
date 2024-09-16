@@ -2475,7 +2475,11 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 
 			if desiredStatus == "RUNNING" {
 				if previousStatus == "SUSPENDED" {
+<% unless version == 'ga' -%>
+					op, err = config.NewComputeClient(userAgent).Instances.Resume(project, zone, instance.Name, &compute.InstancesResumeRequest{}).Do()
+<% else -%>
 					op, err = config.NewComputeClient(userAgent).Instances.Resume(project, zone, instance.Name).Do()
+<% end -%>
 					if err != nil {
 						return err
 					}
