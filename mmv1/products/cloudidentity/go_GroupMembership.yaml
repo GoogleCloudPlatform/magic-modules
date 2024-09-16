@@ -50,7 +50,7 @@ examples:
     test_env_vars:
       org_domain: 'ORG_DOMAIN'
       cust_id: 'CUST_ID'
-    skip_test: true
+    exclude_test: true
   - name: 'cloud_identity_group_membership_user'
     primary_resource_id: 'cloud_identity_group_membership_basic'
     vars:
@@ -59,7 +59,7 @@ examples:
       org_domain: 'ORG_DOMAIN'
       cust_id: 'CUST_ID'
       identity_user: 'IDENTITY_USER'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'group'
     type: ResourceRef

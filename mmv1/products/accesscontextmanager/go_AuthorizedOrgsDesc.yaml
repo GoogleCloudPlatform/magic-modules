@@ -65,7 +65,7 @@ exclude_sweeper: true
 examples:
   - name: 'access_context_manager_authorized_orgs_desc_basic'
     primary_resource_id: 'authorized-orgs-desc'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'parent'
     type: String

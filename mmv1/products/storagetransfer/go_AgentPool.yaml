@@ -41,7 +41,7 @@ examples:
       agent-pool-name: 'agent-pool-example'
     test_env_vars:
       project_id: 'PROJECT_NAME'
-    skip_test: true
+    exclude_test: true
 parameters:
 properties:
   - name: 'name'

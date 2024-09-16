@@ -69,7 +69,7 @@ examples:
     ignore_read_extra:
       - 'client.0.api_key'
       - 'client.0.firebase_subdomain'
-    skip_docs: true
+    exclude_docs: true
 parameters:
 properties:
   - name: 'name'
