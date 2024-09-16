@@ -120,7 +120,6 @@ properties:
           Updating this list will restart the instance. Updating the allowed email domains from terraform
           means the value provided will be considered as the entire list and not an amendment to the
           existing list of allowed email domains.
-  # Admin Settings Object - End
         item_type:
           type: String
   - name: 'consumerNetwork'
@@ -254,7 +253,6 @@ properties:
         type: String
         description: |
           Full name and version of the CMEK key currently in use to encrypt Looker data.
-  # Encryption Config  Object - End
         output: true
   - name: 'ingressPrivateIp'
     type: String
@@ -360,7 +358,6 @@ properties:
         type: String
         description: |
           The client secret for the Oauth config.
-  # Oauth Object - End
         required: true
   - name: 'platformEdition'
     type: Enum
@@ -426,8 +423,6 @@ properties:
         type: Integer
         description: |
           Number of additional Developer Users to allocate to the Looker Instance.
-  # UserMetadata Object - End
-  # CustomDomain Object
   - name: 'customDomain'
     type: NestedObject
     description: |

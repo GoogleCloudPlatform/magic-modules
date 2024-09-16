@@ -159,7 +159,6 @@ properties:
                         type: Boolean
                         description: |
                           Whether the playback of this message can be interrupted by the end user's speech and the client can then starts the next Dialogflow request.
-                  # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
                         output: true
                   - name: 'payload'
                     type: String
@@ -359,7 +358,6 @@ properties:
                         type: Boolean
                         description: |
                           Whether the playback of this message can be interrupted by the end user's speech and the client can then starts the next Dialogflow request.
-                  # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
                         output: true
                   - name: 'payload'
                     type: String

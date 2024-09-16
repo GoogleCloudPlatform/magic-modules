@@ -67,9 +67,6 @@ properties:
   - name: 'description'
     type: String
     description: The description specified for the model when it was created.
-  # Ignoring most of defaultVersion.
-  # Only name should be exposed. Use the Version resource to learn more
-  # about versions.
   - name: 'defaultVersion'
     type: NestedObject
     description: |
@@ -79,8 +76,6 @@ properties:
       - name: 'name'
         type: String
         description: The name specified for the version when it was created.
-  # Even though only one region is supported, keeping this as an array
-  # to future-proof it.
         required: true
   - name: 'regions'
     type: Array

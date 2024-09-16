@@ -19,6 +19,10 @@ resource "google_compute_address" "address" {
   count  = 2
   name   = "{{index $.Vars "address_name"}}-${count.index}"
   region = google_compute_subnetwork.subnet.region
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "google_compute_router_nat" "{{$.PrimaryResourceId}}" {
