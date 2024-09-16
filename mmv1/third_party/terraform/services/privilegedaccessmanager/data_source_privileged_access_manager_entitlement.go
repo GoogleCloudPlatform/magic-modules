@@ -19,7 +19,6 @@ func DataSourceGooglePrivilegedAccessManagerEntitlement() *schema.Resource {
 	}
 }
 
-
 func dataSourceGooglePrivilegedAccessManagerEntitlementRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 
