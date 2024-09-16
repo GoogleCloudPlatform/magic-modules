@@ -168,6 +168,15 @@ func (td *TemplateData) GenerateSweeperFile(filePath string, resource api.Resour
 	td.GenerateFile(filePath, templatePath, resource, false, templates...)
 }
 
+func (td *TemplateData) GenerateTGCResourceFile(filePath string, resource api.Resource) {
+	templatePath := "templates/tgc/resource_converter.go.tmpl"
+	templates := []string{
+		templatePath,
+		"templates/terraform/expand_property_method.go.tmpl",
+	}
+	td.GenerateFile(filePath, templatePath, resource, true, templates...)
+}
+
 func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, goFormat bool, templates ...string) {
 	// log.Printf("Generating %s", filePath)
 
