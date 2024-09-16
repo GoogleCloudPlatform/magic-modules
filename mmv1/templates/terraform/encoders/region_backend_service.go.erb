@@ -12,7 +12,6 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-
 if d.Get("load_balancing_scheme").(string) == "EXTERNAL_MANAGED" || d.Get("load_balancing_scheme").(string) == "INTERNAL_MANAGED" {
 	return obj, nil
 }
