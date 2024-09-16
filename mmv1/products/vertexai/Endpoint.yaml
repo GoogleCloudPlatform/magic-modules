@@ -54,8 +54,7 @@ description:
   predictions and explanations.'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name:
-      'vertex_ai_endpoint_network'
+    name: 'vertex_ai_endpoint_network'
       # Test is covered by handwritten test to include an update.
     skip_test: true
     primary_resource_id: 'endpoint'

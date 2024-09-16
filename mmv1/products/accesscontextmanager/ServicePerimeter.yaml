@@ -11,8 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This is the singular of `ServicePerimeters`, any changes here should be made to `ServicePerimeters` as well
 --- !ruby/object:Api::Resource
+# This is the singular of `ServicePerimeters`, any changes here should be made to `ServicePerimeters` as well
 name: 'ServicePerimeter'
 # This is an unusual API, so we need to use a few fields to map the methods
 # to the right URL.
