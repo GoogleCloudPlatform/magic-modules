@@ -57,8 +57,8 @@ var (
 		},
 		{
 			id:        "melinath",
-			startDate: newDate(2024, 6, 26, pdtLoc),
-			endDate:   newDate(2024, 7, 22, pdtLoc),
+			startDate: newDate(2024, 9, 18, pdtLoc),
+			endDate:   newDate(2024, 9, 23, pdtLoc),
 		},
 		{
 			id:        "slevenick",
