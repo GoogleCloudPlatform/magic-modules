@@ -66,6 +66,7 @@ examples:
       private_cloud_id: 'sample-pc'
       management_cluster_id: 'sample-mgmt-cluster'
       network_policy_id: 'sample-np'
+ # update tests will take care of all CRUD tests. Parent PC creation is expensive and node reservation is required.
     exclude_test: true
 parameters:
   - name: 'parent'

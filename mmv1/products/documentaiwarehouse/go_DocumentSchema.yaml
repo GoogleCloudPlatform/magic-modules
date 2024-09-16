@@ -34,6 +34,7 @@ custom_code:
 examples:
   - name: 'document_ai_warehouse_document_schema_text'
     primary_resource_id: 'example_text'
+    # docs only, testing is done in an update test
     exclude_test: true
 parameters:
   - name: 'project_number'

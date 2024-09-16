@@ -59,6 +59,7 @@ examples:
       org_id: 'ORG_ID'
       org_domain: 'ORG_DOMAIN'
       cust_id: 'CUST_ID'
+    # Has a handwritten test due to AccessPolicy-related tests needing to run synchronously
     exclude_test: true
 parameters:
   # Parent is a path parameter that _cannot_ be read or sent in the request at all.

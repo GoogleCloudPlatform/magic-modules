@@ -60,6 +60,7 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     external_providers: ["random", "time"]
+ # update tests will take care of create and update. Legacy network needs to be created on an isolated project.
     exclude_test: true
 parameters:
   - name: 'location'

@@ -71,6 +71,7 @@ examples:
     primary_resource_id: 'instance'
     vars:
       instance_name: 'test-instance'
+    # https://github.com/GoogleCloudPlatform/magic-modules/pull/5875#discussion_r844285335
     exclude_test: true
 parameters:
   - name: 'zone'

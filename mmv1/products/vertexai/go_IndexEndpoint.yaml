@@ -61,6 +61,7 @@ examples:
     primary_resource_id: 'index_endpoint'
   - name: 'vertex_ai_index_endpoint_with_false_psc'
     primary_resource_id: 'index_endpoint'
+    # It's not distinguishable if the psc is false or not set, so we need to skip the test.
     exclude_import_test: true
     exclude_docs: true
   - name: 'vertex_ai_index_endpoint_with_public_endpoint'

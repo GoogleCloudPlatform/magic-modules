@@ -57,11 +57,15 @@ examples:
     primary_resource_id: 'foobar'
     vars:
       region_commitment_name: 'my-region-commitment'
+    # Creating a resource means signing a contract
+    # Spanning years that cannot be deleted
     exclude_test: true
   - name: 'compute_region_commitment_full'
     primary_resource_id: 'foobar'
     vars:
       region_commitment_name: 'my-full-commitment'
+    # Creating a resource means signing a contract
+    # Spanning years that cannot be deleted
     exclude_test: true
 parameters:
   - name: 'region'

@@ -69,6 +69,7 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
+      # Resource creation race
     skip_vcr: true
 parameters:
   - name: 'zone'

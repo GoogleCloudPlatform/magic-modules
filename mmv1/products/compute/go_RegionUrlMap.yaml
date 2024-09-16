@@ -122,6 +122,7 @@ examples:
       regional_l7_xlb_map: 'regional-l7-xlb-map'
       l7_xlb_proxy: 'l7-xlb-proxy'
       l7_xlb_forwarding_rule: 'l7-xlb-forwarding-rule'
+ # Similar to other samples
     exclude_test: true
     exclude_docs: true
   - name: 'region_url_map_path_template_match'

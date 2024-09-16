@@ -76,6 +76,7 @@ examples:
     ignore_read_extra:
       - 'noop_on_destroy'
       - 'deployment.0.zip'
+    # https://github.com/hashicorp/terraform-provider-google/issues/19040
     exclude_test: true
 virtual_fields:
   - name: 'noop_on_destroy'

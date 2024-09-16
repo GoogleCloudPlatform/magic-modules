@@ -240,6 +240,7 @@ examples:
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
       - 'build_config.0.source.0.storage_source.0.bucket'
+ # the example file is written in a repetitive way to help acc tests, so exclude
     exclude_docs: true
     skip_vcr: true
   - name: 'cloudfunctions2_cmek_docs'
@@ -254,6 +255,7 @@ examples:
       unencoded-ar-repo: 'ar-repo'
       kms_key_name: 'cmek-key'
       project: 'my-project-name'
+ # this example file will cause IAM conflicts between tests if used to make a test
     exclude_test: true
   - name: 'cloudfunctions2_abiu'
     primary_resource_id: 'function'

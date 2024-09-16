@@ -16,6 +16,7 @@
 name: 'Datascan'
 description: |
   Represents a user-visible job which provides the insights for the related data source.
+# User-provided label cannot start with goog-
 exclude_attribution_label: true
 references:
   guides:

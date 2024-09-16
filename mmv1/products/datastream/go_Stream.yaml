@@ -71,6 +71,7 @@ examples:
       'deletion_protection': 'false'
     external_providers: ["random", "time"]
     exclude_docs: true
+      # Random provider
     skip_vcr: true
   - name: 'datastream_stream_full'
     primary_resource_id: 'default'
@@ -133,6 +134,7 @@ examples:
       stream_id: 'stream'
     test_vars_overrides:
       'deletion_protection': 'false'
+    # Requires SQLServer Configuration
     exclude_test: true
   - name: 'datastream_stream_postgresql_bigquery_dataset_id'
     primary_resource_id: 'default'

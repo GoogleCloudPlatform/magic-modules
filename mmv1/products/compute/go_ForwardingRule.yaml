@@ -19,6 +19,7 @@ description: |
   A ForwardingRule resource. A ForwardingRule resource specifies which pool
   of target virtual machines to forward a packet to if it matches the given
   [IPAddress, IPProtocol, portRange] tuple.
+# Has a separate endpoint for labels
 exclude_attribution_label: true
 references:
   guides:

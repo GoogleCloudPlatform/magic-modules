@@ -59,7 +59,18 @@ custom_code:
 examples:
   - name: 'clouddomains_registration_full'
     primary_resource_id: 'my_registration'
+    # Must be tested in staging environment with all-time unique domains
     exclude_test: true
+    # ignore_read_extra:
+    #   - 'contact_settings.0.registrant_contact.0.phone_number'
+    #   - 'contact_settings.0.registrant_contact.0.fax_number'
+    #   - 'contact_settings.0.registrant_contact.0.postal_address'
+    #   - 'contact_settings.0.admin_contact.0.phone_number'
+    #   - 'contact_settings.0.admin_contact.0.fax_number'
+    #   - 'contact_settings.0.admin_contact.0.postal_address'
+    #   - 'contact_settings.0.technical_contact.0.phone_number'
+    #   - 'contact_settings.0.technical_contact.0.fax_number'
+    #   - 'contact_settings.0.technical_contact.0.postal_address'
 parameters:
   - name: 'location'
     type: String

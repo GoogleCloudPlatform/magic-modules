@@ -65,6 +65,11 @@ examples:
   - name: 'edgecontainer_local_control_plane_node_pool'
     primary_resource_id: 'default'
     exclude_test: true
+  # Skip the docs generation for the edgecontainer_local_control_plane_node_pool_internal test
+  # to avoid leaking the machine name, and node location to public.
+  # Skip the vcr test because as we only have limited machine resources and we don't want it run
+  # in github presubmit test.
+  # TODO: enable the test when GDCE have extra prod rack for TF e2e testing.
   - name: 'edgecontainer_local_control_plane_node_pool_internal'
     primary_resource_id: 'default'
     exclude_test: true

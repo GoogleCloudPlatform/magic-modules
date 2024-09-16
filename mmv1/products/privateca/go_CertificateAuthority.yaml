@@ -109,7 +109,10 @@ examples:
       'deletion_protection': 'false'
     ignore_read_extra:
       - 'deletion_protection'
+    # Skip test because it depends on a beta resource, but PrivateCA does
+    # not have a beta endpoint
     exclude_test: true
+      # Multiple IAM bindings on the same key cause non-determinism
     skip_vcr: true
   - name: 'privateca_certificate_authority_custom_ski'
     primary_resource_id: 'default'

@@ -101,6 +101,7 @@ examples:
       - 'etag'
       - 'load.0.destination_table.0.table_id'
       - 'status.0.state'
+ # there are a lot of examples for this resource, so omitting some that are similar to others
     exclude_docs: true
   - name: 'bigquery_job_copy'
     primary_resource_id: 'job'
@@ -129,6 +130,7 @@ examples:
       - 'copy.0.source_tables.0.table_id'
       - 'copy.0.source_tables.1.table_id'
       - 'status.0.state'
+ # there are a lot of examples for this resource, so omitting some that are similar to others
     exclude_docs: true
   - name: 'bigquery_job_extract'
     primary_resource_id: 'job'
@@ -147,6 +149,7 @@ examples:
       - 'etag'
       - 'extract.0.source_table.0.table_id'
       - 'status.0.state'
+ # there are a lot of examples for this resource, so omitting some that are similar to others
     exclude_docs: true
 parameters:
 properties:

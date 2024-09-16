@@ -71,6 +71,7 @@ examples:
       domain_name: 'tfgen'
     ignore_read_extra:
       - 'deletion_protection'
+    # skip the test until Active Directory setup issue got resolved
     exclude_test: true
 virtual_fields:
   - name: 'deletion_protection'
