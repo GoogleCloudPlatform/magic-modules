@@ -56,14 +56,14 @@ autogen_async: true
 virtual_fields:
   - !ruby/object:Api::Type::Boolean
     name: 'deletion_protection'
-    default_value: true
+    default_value: false
     description: |
       Whether Terraform will be prevented from destroying the service. Defaults to true.
-      When a`terraform destroy` or `terraform apply` would delete the domain,
+      When a`terraform destroy` or `terraform apply` would delete the service,
       the command will fail if this field is not set to false in Terraform state.
       When the field is set to true or unset in Terraform state, a `terraform apply`
-      or `terraform destroy` that would delete the domain will fail.
-      When the field is set to false, deleting the domain is allowed.
+      or `terraform destroy` that would delete the service will fail.
+      When the field is set to false, deleting the service is allowed.
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_delete: 'templates/terraform/pre_delete/dataproc_metastore_service.go.erb'
 import_format:

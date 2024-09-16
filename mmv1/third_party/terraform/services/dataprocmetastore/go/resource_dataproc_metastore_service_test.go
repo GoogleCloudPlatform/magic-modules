@@ -142,7 +142,6 @@ resource "google_dataproc_metastore_service" "backup" {
   location   = "us-central1"
   port       = 9080
   tier       = "DEVELOPER"
-  deletion_protection = false
 
   maintenance_window {
     hour_of_day = 2

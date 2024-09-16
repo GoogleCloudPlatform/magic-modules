@@ -421,7 +421,7 @@ that are derived from the API.
 ### Service deletion now prevented by default with `deletion_protection`
 
 The field `deletion_protection` has been added with a default value of `true`. This field prevents
-Terraform from destroying or recreating the Service. In 6.0.0, existing domains will have 
+Terraform from destroying or recreating the Service. In 6.0.0, existing services will have 
 `deletion_protection` set to `true` during the next refresh unless otherwise set in configuration.
 
 **`deletion_protection` does NOT prevent deletion outside of Terraform.**
