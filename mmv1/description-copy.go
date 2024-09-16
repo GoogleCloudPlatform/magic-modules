@@ -26,12 +26,12 @@ func CopyAllDescriptions(tempMode bool) {
 		CopyText(id, tempMode)
 	}
 
-	copyComments()
+	copyComments(tempMode)
 }
 
 // TODO rewrite: ServicePerimeters.yaml is an exeption and needs manually fixing the comments over after switchover
 // Used to copy/paste comments from Ruby -> Go YAML files
-func copyComments() {
+func copyComments(tempMode bool) {
 	log.Printf("Starting to copy comments from Ruby yaml files to Go yaml files")
 
 	renamedFields := map[string]string{
@@ -41,10 +41,17 @@ func copyComments() {
 		"skip_import_test":       "exclude_import_test",
 		"skip_docs":              "exclude_docs",
 		"skip_attribution_label": "exclude_attribution_label",
+		"skip_read":              "exclude_read",
+		"skip_default_cdiff":     "exclude_default_cdiff",
+		"skip_docs_values":       "skip_docs_values",
 		"values":                 "enum_values",
 	}
 	var allProductFiles []string = make([]string, 0)
-	files, err := filepath.Glob("products/**/go_product.yaml")
+	glob := "products/**/go_product.yaml"
+	if tempMode {
+		glob = "products/**/*.temp"
+	}
+	files, err := filepath.Glob(glob)
 	if err != nil {
 		return
 	}
@@ -64,6 +71,20 @@ func copyComments() {
 			if strings.HasSuffix(yamlPath, "_new") {
 				continue
 			}
+
+			if tempMode {
+				cutName, found := strings.CutSuffix(yamlPath, ".temp")
+				if !found {
+					continue
+				}
+
+				baseName := filepath.Base(yamlPath)
+				yamlMap[baseName] = make([]string, 2)
+				yamlMap[baseName][1] = yamlPath
+				yamlMap[baseName][0] = cutName
+				continue
+			}
+
 			fileName := filepath.Base(yamlPath)
 			baseName, found := strings.CutPrefix(fileName, "go_")
 			if yamlMap[baseName] == nil {
