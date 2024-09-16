@@ -1,7 +1,7 @@
-resource "google_compute_region_url_map" "<%= ctx[:primary_resource_id] %>" {
+resource "google_compute_region_url_map" "{{$.PrimaryResourceId}}" {
   region = "us-central1"
 
-  name        = "<%= ctx[:vars]['url_map_name'] %>"
+  name        = "{{index $.Vars "url_map_name"}}"
   description = "a description"
 
   default_service = google_compute_region_backend_service.home-backend.id
@@ -41,7 +41,7 @@ resource "google_compute_region_url_map" "<%= ctx[:primary_resource_id] %>" {
 resource "google_compute_region_backend_service" "home-backend" {
   region = "us-central1"
 
-  name        = "<%= ctx[:vars]['home_backend_service_name'] %>"
+  name        = "{{index $.Vars "home_backend_service_name"}}"
   port_name   = "http"
   protocol    = "HTTP"
   timeout_sec = 10
@@ -53,7 +53,7 @@ resource "google_compute_region_backend_service" "home-backend" {
 resource "google_compute_region_backend_service" "cart-backend" {
   region = "us-central1"
 
-  name        = "<%= ctx[:vars]['cart_backend_service_name'] %>"
+  name        = "{{index $.Vars "cart_backend_service_name"}}"
   port_name   = "http"
   protocol    = "HTTP"
   timeout_sec = 10
@@ -65,7 +65,7 @@ resource "google_compute_region_backend_service" "cart-backend" {
 resource "google_compute_region_backend_service" "user-backend" {
   region = "us-central1"
 
-  name        = "<%= ctx[:vars]['user_backend_service_name'] %>"
+  name        = "{{index $.Vars "user_backend_service_name"}}"
   port_name   = "http"
   protocol    = "HTTP"
   timeout_sec = 10
@@ -77,7 +77,7 @@ resource "google_compute_region_backend_service" "user-backend" {
 resource "google_compute_region_health_check" "default" {
   region = "us-central1"
 
-  name               = "<%= ctx[:vars]['health_check_name'] %>"
+  name               = "{{index $.Vars "health_check_name"}}"
   check_interval_sec = 1
   timeout_sec        = 1
   http_health_check {

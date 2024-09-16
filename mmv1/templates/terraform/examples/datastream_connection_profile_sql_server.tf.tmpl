@@ -1,9 +1,9 @@
 resource "google_sql_database_instance" "instance" {
-    name                = "<%= ctx[:vars]['sql_server_name'] %>"
+    name                = "{{index $.Vars "sql_server_name"}}"
     database_version    = "SQLSERVER_2019_STANDARD"
     region              = "us-central1"
-    root_password       = "<%= ctx[:vars]['sql_server_root_password'] %>"
-    deletion_protection = "<%= ctx[:vars]['deletion_protection'] %>"
+    root_password       = "{{index $.Vars "sql_server_root_password"}}"
+    deletion_protection = "{{index $.Vars "deletion_protection"}}"
 
     settings {
         tier = "db-custom-2-4096"
@@ -34,20 +34,20 @@ resource "google_sql_database_instance" "instance" {
 }
 
 resource "google_sql_database" "db" {
-    name       = "<%= ctx[:vars]['database_name'] %>"
+    name       = "{{index $.Vars "database_name"}}"
     instance   = google_sql_database_instance.instance.name
 }
 
 resource "google_sql_user" "user" {
-    name     = "<%= ctx[:vars]['database_user'] %>"
+    name     = "{{index $.Vars "database_user"}}"
     instance = google_sql_database_instance.instance.name
-    password = "<%= ctx[:vars]['database_password'] %>"
+    password = "{{index $.Vars "database_password"}}"
 }
 
 resource "google_datastream_connection_profile" "default" {
     display_name          = "SQL Server Source"
     location              = "us-central1"
-    connection_profile_id = "<%= ctx[:vars]['source_connection_profile_id'] %>"
+    connection_profile_id = "{{index $.Vars "source_connection_profile_id"}}"
 
     sql_server_profile {
         hostname = google_sql_database_instance.instance.public_ip_address

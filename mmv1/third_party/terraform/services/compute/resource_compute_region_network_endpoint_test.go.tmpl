@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package compute_test
 import (
 	"fmt"
@@ -144,7 +143,7 @@ resource "google_compute_region_network_endpoint" "add2" {
 `, context) + testAccComputeRegionNetworkEndpoint_noRegionNetworkEndpoints(context)
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 
 func TestAccComputeRegionNetworkEndpoint_regionNetworkEndpointPortmapExample(t *testing.T) {
 	t.Parallel()
@@ -246,7 +245,7 @@ resource "google_compute_region_network_endpoint" "region_network_endpoint_portm
 }
 `, context) + testAccComputeRegionNetworkEndpoint_regionNetworkEndpointPortmapNoEndpointExample(context)
 }
-<% end -%>
+{{- end }}
 
 func testAccComputeRegionNetworkEndpoint_noRegionNetworkEndpoints(context map[string]interface{}) string {
 	return acctest.Nprintf(`
@@ -286,11 +285,11 @@ func testAccCheckComputeRegionNetworkEndpointWithPortsDestroyed(t *testing.T, ne
 func testAccComputeRegionNetworkEndpointListEndpointPorts(t *testing.T, negId string) (map[string]struct{}, error) {
 	config := acctest.GoogleProviderConfig(t)
 
-	<% if version == 'ga' -%>
+	{{ if eq $.TargetVersionName `ga` }}
 	url := fmt.Sprintf("https://www.googleapis.com/compute/v1/%s/listNetworkEndpoints", negId)
-	<% else -%>
+	{{- else }}
 	url := fmt.Sprintf("https://www.googleapis.com/compute/beta/%s/listNetworkEndpoints", negId)
-	<% end -%>
+	{{- end }}
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config: config,
 		Method: "POST",

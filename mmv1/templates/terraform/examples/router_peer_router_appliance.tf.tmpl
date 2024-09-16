@@ -1,31 +1,31 @@
 resource "google_compute_network" "network" {
-  name                    = "<%= ctx[:vars]['router_name'] %>-net"
+  name                    = "{{index $.Vars "router_name"}}-net"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "subnetwork" {
-  name          = "<%= ctx[:vars]['router_name'] %>-sub"
+  name          = "{{index $.Vars "router_name"}}-sub"
   network       = google_compute_network.network.self_link
   ip_cidr_range = "10.0.0.0/16"
   region        = "us-central1"
 }
 
 resource "google_compute_address" "addr_intf" {
-  name         = "<%= ctx[:vars]['router_name'] %>-addr-intf"
+  name         = "{{index $.Vars "router_name"}}-addr-intf"
   region       = google_compute_subnetwork.subnetwork.region
   subnetwork   = google_compute_subnetwork.subnetwork.id
   address_type = "INTERNAL"
 }
 
 resource "google_compute_address" "addr_intf_redundant" {
-  name         = "<%= ctx[:vars]['router_name'] %>-addr-intf-red"
+  name         = "{{index $.Vars "router_name"}}-addr-intf-red"
   region       = google_compute_subnetwork.subnetwork.region
   subnetwork   = google_compute_subnetwork.subnetwork.id
   address_type = "INTERNAL"
 }
 
 resource "google_compute_address" "addr_peer" {
-  name         = "<%= ctx[:vars]['router_name'] %>-addr-peer"
+  name         = "{{index $.Vars "router_name"}}-addr-peer"
   region       = google_compute_subnetwork.subnetwork.region
   subnetwork   = google_compute_subnetwork.subnetwork.id
   address_type = "INTERNAL"
@@ -50,11 +50,11 @@ resource "google_compute_instance" "instance" {
 }
 
 resource "google_network_connectivity_hub" "hub" {
-  name = "<%= ctx[:vars]['router_name'] %>-hub"
+  name = "{{index $.Vars "router_name"}}-hub"
 }
 
 resource "google_network_connectivity_spoke" "spoke" {
-  name     = "<%= ctx[:vars]['router_name'] %>-spoke"
+  name     = "{{index $.Vars "router_name"}}-spoke"
   location = google_compute_subnetwork.subnetwork.region
   hub      = google_network_connectivity_hub.hub.id
 
@@ -68,7 +68,7 @@ resource "google_network_connectivity_spoke" "spoke" {
 }
 
 resource "google_compute_router" "router" {
-  name    = "<%= ctx[:vars]['router_name'] %>-router"
+  name    = "{{index $.Vars "router_name"}}-router"
   region  = google_compute_subnetwork.subnetwork.region
   network = google_compute_network.network.self_link
   bgp {
@@ -77,7 +77,7 @@ resource "google_compute_router" "router" {
 }
 
 resource "google_compute_router_interface" "interface_redundant" {
-  name               = "<%= ctx[:vars]['router_name'] %>-intf-red"
+  name               = "{{index $.Vars "router_name"}}-intf-red"
   region             = google_compute_router.router.region
   router             = google_compute_router.router.name
   subnetwork         = google_compute_subnetwork.subnetwork.self_link
@@ -85,7 +85,7 @@ resource "google_compute_router_interface" "interface_redundant" {
 }
 
 resource "google_compute_router_interface" "interface" {
-  name                = "<%= ctx[:vars]['router_name'] %>-intf"
+  name                = "{{index $.Vars "router_name"}}-intf"
   region              = google_compute_router.router.region
   router              = google_compute_router.router.name
   subnetwork          = google_compute_subnetwork.subnetwork.self_link
@@ -94,7 +94,7 @@ resource "google_compute_router_interface" "interface" {
 }
 
 resource "google_compute_router_peer" "peer" {
-  name                      = "<%= ctx[:vars]['peer_name'] %>"
+  name                      = "{{index $.Vars "peer_name"}}"
   router                    = google_compute_router.router.name
   region                    = google_compute_router.router.region
   interface                 = google_compute_router_interface.interface.name

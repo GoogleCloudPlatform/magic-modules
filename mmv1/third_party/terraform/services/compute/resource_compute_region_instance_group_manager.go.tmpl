@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package compute
 
 import (
@@ -15,11 +14,11 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
-<% if version == "ga" -%>
+{{ if eq $.TargetVersionName `ga` }}
 	"google.golang.org/api/compute/v1"
-<% else -%>
+{{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
-<% end -%>
+{{- end }}
 )
 
 func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
@@ -281,7 +280,7 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 				},
 			},
 
-			<% unless version == "ga" -%>
+			{{ if ne $.TargetVersionName `ga` -}}
 			"standby_policy": {
 				Type:        schema.TypeList,
 				Computed:    true,
@@ -322,7 +321,7 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 				Optional:    true,
 				Description: `The target number of stopped instances for this managed instance group.`,
 			},
-			<% end -%>
+			{{- end }}
 
 			"update_policy": {
 				Type:        schema.TypeList,
@@ -385,14 +384,14 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 							Description:   `Specifies a percentage of instances between 0 to 100%, inclusive. For example, specify 80 for 80%.`,
 						},
 
-						<% unless version == "ga" -%>
+						{{ if ne $.TargetVersionName `ga` -}}
 						"min_ready_sec": {
 							Type:         schema.TypeInt,
 							Optional:     true,
 							ValidateFunc: validation.IntBetween(0, 3600),
 							Description:  `Minimum number of seconds to wait for after a newly created instance becomes available. This value must be from range [0, 3600].`,
 						},
-						<% end -%>
+						{{- end }}
 						"instance_redistribution_type": {
 							Type:             schema.TypeString,
 							Optional:         true,
@@ -574,7 +573,7 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 					},
 				},
 			},
-			<% unless version == "ga" -%>
+			{{- if ne $.TargetVersionName "ga" }}
 			"params": {
 				Type:        schema.TypeList,
 				MaxItems:    1,
@@ -593,7 +592,7 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 					},
 				},
 			},
-			<% end -%>
+			{{- end }}
 		},
 		UseJSONNumber: true,
 	}
@@ -626,19 +625,19 @@ func resourceComputeRegionInstanceGroupManagerCreate(d *schema.ResourceData, met
 		TargetPools:                 tpgresource.ConvertStringSet(d.Get("target_pools").(*schema.Set)),
 		AutoHealingPolicies:         expandAutoHealingPolicies(d.Get("auto_healing_policies").([]interface{})),
 		Versions:                    expandVersions(d.Get("version").([]interface{})),
-		<% unless version == "ga" -%>
+		{{- if ne $.TargetVersionName "ga" }}
 		StandbyPolicy:               expandStandbyPolicy(d),
 		TargetSuspendedSize:         int64(d.Get("target_suspended_size").(int)),
 		TargetStoppedSize:           int64(d.Get("target_stopped_size").(int)),
-		<% end -%>
+		{{- end }}
 		UpdatePolicy:                expandRegionUpdatePolicy(d.Get("update_policy").([]interface{})),
 		InstanceLifecyclePolicy:     expandInstanceLifecyclePolicy(d.Get("instance_lifecycle_policy").([]interface{})),
 		AllInstancesConfig:          expandAllInstancesConfig(nil, d.Get("all_instances_config").([]interface{})),
 		DistributionPolicy:          expandDistributionPolicy(d),
 		StatefulPolicy:              expandStatefulPolicy(d),
-		<% unless version == "ga" -%>
+		{{- if ne $.TargetVersionName "ga" }}
 		Params:                      expandInstanceGroupManagerParams(d),
-		<% end -%>
+		{{- end }}
 		// Force send TargetSize to allow size of 0.
 		ForceSendFields: []string{"TargetSize"},
 	}
@@ -649,7 +648,7 @@ func resourceComputeRegionInstanceGroupManagerCreate(d *schema.ResourceData, met
 		return fmt.Errorf("Error creating RegionInstanceGroupManager: %s", err)
 	}
 
-	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/instanceGroupManagers/{{"{{"}}name{{"}}"}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -823,7 +822,7 @@ func resourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, meta 
 	if err := d.Set("version", flattenVersions(manager.Versions)); err != nil {
 		return err
 	}
-	<% unless version == "ga" -%>
+	{{- if ne $.TargetVersionName "ga" }}
 	if err = d.Set("standby_policy", flattenStandbyPolicy(manager.StandbyPolicy)); err != nil {
 		return fmt.Errorf("Error setting standby_policy in state: %s", err.Error())
 	}
@@ -833,7 +832,7 @@ func resourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, meta 
 	if err := d.Set("target_stopped_size", manager.TargetStoppedSize); err != nil {
 		return fmt.Errorf("Error setting target_stopped_size: %s", err)
 	}
-	<% end -%>
+	{{- end }}
 	if err := d.Set("update_policy", flattenRegionUpdatePolicy(manager.UpdatePolicy)); err != nil {
 		return fmt.Errorf("Error setting update_policy in state: %s", err.Error())
 	}
@@ -912,7 +911,7 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 		change = true
 	}
 
-	<% unless version == "ga" -%>
+	{{ if ne $.TargetVersionName `ga` -}}
 	if d.HasChange("standby_policy") {
 		updatedManager.StandbyPolicy = expandStandbyPolicy(d)
 		change = true
@@ -929,7 +928,7 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 		updatedManager.ForceSendFields = append(updatedManager.ForceSendFields, "TargetStoppedSize")
 		change = true
 	}
-	<% end -%>
+	{{- end }}
 
 	if d.HasChange("update_policy") {
 		updatedManager.UpdatePolicy = expandRegionUpdatePolicy(d.Get("update_policy").([]interface{}))
@@ -1076,10 +1075,10 @@ func expandRegionUpdatePolicy(configured []interface{}) *compute.InstanceGroupMa
 		updatePolicy.Type = data["type"].(string)
 		updatePolicy.InstanceRedistributionType = data["instance_redistribution_type"].(string)
 		updatePolicy.ReplacementMethod = data["replacement_method"].(string)
-<% unless version == "ga" -%>
+{{- if ne $.TargetVersionName "ga" }}
 		updatePolicy.MinReadySec = int64(data["min_ready_sec"].(int))
 		updatePolicy.ForceSendFields = []string{"MinReadySec"}
-<% end -%>
+{{- end }}
 
 		// percent and fixed values are conflicting
 		// when the percent values are set, the fixed values will be ignored
@@ -1132,9 +1131,9 @@ func flattenRegionUpdatePolicy(updatePolicy *compute.InstanceGroupManagerUpdateP
 			up["max_unavailable_fixed"] = 0
 			up["max_unavailable_percent"] = 0
 		}
-<% unless version == "ga" -%>
+{{- if ne $.TargetVersionName "ga" }}
 		up["min_ready_sec"] = updatePolicy.MinReadySec
-<% end -%>
+{{- end }}
 		up["minimal_action"] = updatePolicy.MinimalAction
 		up["most_disruptive_allowed_action"] = updatePolicy.MostDisruptiveAllowedAction
 		up["type"] = updatePolicy.Type
@@ -1198,7 +1197,7 @@ func resourceRegionInstanceGroupManagerStateImporter(d *schema.ResourceData, met
 	}
 
 	// Replace import id for the resource id
-	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/instanceGroupManagers/{{"{{"}}name{{"}}"}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}

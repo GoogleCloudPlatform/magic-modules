@@ -4,9 +4,9 @@ resource "google_dialogflow_agent" "basic_agent" {
   time_zone = "America/New_York"
 }
 
-resource "google_dialogflow_fulfillment" "<%= ctx[:primary_resource_id] %>" {
+resource "google_dialogflow_fulfillment" "{{$.PrimaryResourceId}}" {
   depends_on = [google_dialogflow_agent.basic_agent]
-  display_name = "<%= ctx[:vars]["fulfillment_name"] %>"
+  display_name = "{{index $.Vars "fulfillment_name"}}"
   enabled    = true
   generic_web_service {
 			uri      = "https://google.com"

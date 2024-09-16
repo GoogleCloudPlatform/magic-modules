@@ -1,5 +1,5 @@
-resource "google_dataproc_metastore_service" "<%= ctx[:primary_resource_id] %>" {
-  service_id = "<%= ctx[:vars]['metastore_service_name'] %>"
+resource "google_dataproc_metastore_service" "{{$.PrimaryResourceId}}" {
+  service_id = "{{index $.Vars "metastore_service_name"}}"
   location   = "us-central1"
   port       = 9080
   tier       = "DEVELOPER"

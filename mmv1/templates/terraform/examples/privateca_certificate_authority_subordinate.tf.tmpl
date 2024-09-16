@@ -1,6 +1,6 @@
 resource "google_privateca_certificate_authority" "root-ca" {
-  pool = "<%= ctx[:vars]["pool_name"] %>"
-  certificate_authority_id = "<%= ctx[:vars]["certificate_authority_id"] %>-root"
+  pool = "{{index $.Vars "pool_name"}}"
+  certificate_authority_id = "{{index $.Vars "certificate_authority_id"}}-root"
   location = "us-central1"
   config {
     subject_config {
@@ -39,13 +39,13 @@ resource "google_privateca_certificate_authority" "root-ca" {
   ignore_active_certificates_on_deletion = true
 }
 
-resource "google_privateca_certificate_authority" "<%= ctx[:primary_resource_id] %>" {
+resource "google_privateca_certificate_authority" "{{$.PrimaryResourceId}}" {
   // This example assumes this pool already exists.
   // Pools cannot be deleted in normal test circumstances, so we depend on static pools
-  pool = "<%= ctx[:vars]["pool_name"] %>"
-  certificate_authority_id = "<%= ctx[:vars]["certificate_authority_id"] %>-sub"
-  location = "<%= ctx[:vars]["pool_location"] %>"
-  deletion_protection = "<%= ctx[:vars]["deletion_protection"] %>"
+  pool = "{{index $.Vars "pool_name"}}"
+  certificate_authority_id = "{{index $.Vars "certificate_authority_id"}}-sub"
+  location = "{{index $.Vars "pool_location"}}"
+  deletion_protection = "{{index $.Vars "deletion_protection"}}"
   subordinate_config {
     certificate_authority = google_privateca_certificate_authority.root-ca.name
   }

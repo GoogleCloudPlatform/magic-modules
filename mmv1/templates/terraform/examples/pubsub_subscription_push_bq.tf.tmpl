@@ -1,10 +1,10 @@
-resource "google_pubsub_topic" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]['topic_name'] %>"
+resource "google_pubsub_topic" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "topic_name"}}"
 }
 
-resource "google_pubsub_subscription" "<%= ctx[:primary_resource_id] %>" {
-  name  = "<%= ctx[:vars]['subscription_name'] %>"
-  topic = google_pubsub_topic.<%= ctx[:primary_resource_id] %>.id
+resource "google_pubsub_subscription" "{{$.PrimaryResourceId}}" {
+  name  = "{{index $.Vars "subscription_name"}}"
+  topic = google_pubsub_topic.{{$.PrimaryResourceId}}.id
 
   bigquery_config {
     table = "${google_bigquery_table.test.project}.${google_bigquery_table.test.dataset_id}.${google_bigquery_table.test.table_id}"
@@ -29,12 +29,12 @@ resource "google_project_iam_member" "editor" {
 }
 
 resource "google_bigquery_dataset" "test" {
-  dataset_id = "<%= ctx[:vars]['dataset_id'] %>"
+  dataset_id = "{{index $.Vars "dataset_id"}}"
 }
 
 resource "google_bigquery_table" "test" {
   deletion_protection = false
-  table_id   = "<%= ctx[:vars]['table_id'] %>"
+  table_id   = "{{index $.Vars "table_id"}}"
   dataset_id = google_bigquery_dataset.test.dataset_id
 
   schema = <<EOF

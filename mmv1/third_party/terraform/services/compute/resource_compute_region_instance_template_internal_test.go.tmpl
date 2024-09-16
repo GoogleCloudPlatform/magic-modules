@@ -1,8 +1,7 @@
-<% autogen_exception -%>
 
 package compute
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 
 import (
 	"reflect"
@@ -221,4 +220,4 @@ func TestComputeRegionInstanceTemplate_scratchDiskSizeCustomizeDiff(t *testing.T
 		}
 	}
 }
-<% end -%>
+{{- end }}

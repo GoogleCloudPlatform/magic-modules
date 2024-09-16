@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package cloudrunv2_test
 
 import (
@@ -971,7 +970,7 @@ resource "google_cloud_run_v2_service" "default" {
 `, context)
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccCloudRunV2Service_cloudrunv2ServiceWithServiceMinInstances(t *testing.T) {
   t.Parallel()
   context := map[string]interface{} {
@@ -1073,9 +1072,9 @@ resource "google_cloud_run_v2_service" "default" {
 
 `, context)
 }
-<% end -%>
+{{- end }}
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccCloudRunV2Service_cloudrunv2ServiceMeshUpdate(t *testing.T) {
 	t.Parallel()
 
@@ -1194,4 +1193,4 @@ resource "google_network_services_mesh" "new_mesh" {
 }
 `, context)
 }
-<% end -%>
+{{- end }}

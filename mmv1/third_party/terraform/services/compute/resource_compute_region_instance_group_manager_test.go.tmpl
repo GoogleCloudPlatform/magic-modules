@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package compute_test
 
 import (
@@ -9,9 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-  <% unless version == "ga" -%>
+  {{- if ne $.TargetVersionName "ga" }}
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-  <% end -%>
+  {{- end }}
 )
 
 func TestAccRegionInstanceGroupManager_basic(t *testing.T) {
@@ -378,7 +377,7 @@ func TestAccRegionInstanceGroupManager_stateful(t *testing.T) {
 }
 
 
-<% unless version == "ga" -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccRegionInstanceGroupManager_stoppedSuspendedTargetSize(t *testing.T) {
   t.Parallel()
 
@@ -412,7 +411,7 @@ func TestAccRegionInstanceGroupManager_stoppedSuspendedTargetSize(t *testing.T) 
     },
   })
 }
-<% end -%>
+{{- end }}
 
 func TestAccRegionInstanceGroupManager_APISideListRecordering(t *testing.T) {
 	t.Parallel()
@@ -433,7 +432,7 @@ func TestAccRegionInstanceGroupManager_APISideListRecordering(t *testing.T) {
 	})
 }
 
-<% unless version == "ga" -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccRegionInstanceGroupManager_resourceManagerTags(t *testing.T) {
 	t.Parallel()
 
@@ -459,7 +458,7 @@ func TestAccRegionInstanceGroupManager_resourceManagerTags(t *testing.T) {
 		},
 	})
 }
-<% end -%>
+{{- end }}
 
 func testAccCheckRegionInstanceGroupManagerDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
@@ -1447,9 +1446,9 @@ resource "google_compute_region_instance_group_manager" "igm-rolling-update-poli
     most_disruptive_allowed_action = "REPLACE"
     max_surge_fixed                = 0
     max_unavailable_fixed          = 2
-<% unless version == "ga" -%>
+{{- if ne $.TargetVersionName "ga" }}
     min_ready_sec                  = 10
-<% end -%>
+{{- end }}
     replacement_method             = "RECREATE"
   }
   named_port {
@@ -1752,7 +1751,7 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
 `, context)
 }
 
-<% unless version == "ga" -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccRegionInstanceGroupManager_stoppedSuspendedTargetSize(network, template, igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -1861,9 +1860,9 @@ resource "google_compute_region_instance_group_manager" "sr-igm" {
 }
 `, network, template, igm)
 }
-<% end -%>
+{{- end }}
 
-<% unless version == "ga" -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccRegionInstanceGroupManager_resourceManagerTags(template_name, tag_name, igm_name, project_id string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -1917,4 +1916,4 @@ resource "google_compute_region_instance_group_manager" "rigm-tags" {
 }
 `, template_name, project_id, tag_name, tag_name, igm_name)
 }
-<% end -%>
+{{- end }}

@@ -1,4 +1,4 @@
-resource "google_vertex_ai_index_endpoint" "<%= ctx[:primary_resource_id] %>" {
+resource "google_vertex_ai_index_endpoint" "{{$.PrimaryResourceId}}" {
   display_name = "sample-endpoint"
   description  = "A sample vertex endpoint"
   region       = "us-central1"

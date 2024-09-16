@@ -1,5 +1,0 @@
-resource "google_network_services_edge_cache_origin" "{{$.PrimaryResourceId}}" {
-  name                 = "{{index $.Vars "resource_name"}}"
-  origin_address       = "gs://media-edge-default"
-  description          = "The default bucket for media edge test"
-}

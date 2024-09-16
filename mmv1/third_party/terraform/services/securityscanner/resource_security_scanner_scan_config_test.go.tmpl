@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package securityscanner_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
@@ -71,7 +70,7 @@ resource "google_security_scanner_scan_config" "terraform-scan-config" {
 }
 `, context)
 }
-<% else %>
+{{- else }}
 // Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
-<% end -%>
+{{- end }}
 

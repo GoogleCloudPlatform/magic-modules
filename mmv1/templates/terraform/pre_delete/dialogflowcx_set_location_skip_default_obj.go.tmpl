@@ -7,7 +7,7 @@ if parts := regexp.MustCompile(`locations\/([^\/]*)\/`).FindStringSubmatch(d.Get
 	return fmt.Errorf(
 		"Saw %s when the parent is expected to contains location %s",
 		d.Get("parent"),
-		"projects/{{project}}/locations/{{location}}/...",
+		"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/...",
 	)
 }
 
@@ -20,6 +20,6 @@ isDefaultWelcomeIntent, _ := d.Get("is_default_welcome_intent").(bool)
 isDefaultNegativeIntent, _ := d.Get("is_default_negative_intent").(bool)
 if isDefaultStartFlow || isDefaultWelcomeIntent || isDefaultNegativeIntent {
 	// we can't delete these resources so do nothing
-	log.Printf("[DEBUG] Not deleting default <%= object.resource_name -%>")
+	log.Printf("[DEBUG] Not deleting default {{$.ResourceName}}")
 	return nil
 }

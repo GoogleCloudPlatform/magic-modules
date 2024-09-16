@@ -1,4 +1,4 @@
-<% unless compiler == "terraformgoogleconversion-codegen" -%>
+{{- if ne $.Compiler "terraformgoogleconversion-codegen" }}
 // waitforConnectionReady waits for an connecion to leave the
 // "CREATING" state, to indicate that it's ready.
 func waitforConnectionReady(d *schema.ResourceData, config *transport_tpg.Config, timeout time.Duration) error {
@@ -17,4 +17,4 @@ func waitforConnectionReady(d *schema.ResourceData, config *transport_tpg.Config
 	return nil
 	})
 }
-<% end -%>
+{{- end }}

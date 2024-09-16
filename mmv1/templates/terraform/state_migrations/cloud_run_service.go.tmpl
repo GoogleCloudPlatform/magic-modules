@@ -567,7 +567,7 @@ will use the project's default service account.`,
 													Required:    true,
 													Description: `Volume's name.`,
 												},
-<% unless version == "ga" -%>
+{{- if ne $.TargetVersionName "ga" }}
 												"empty_dir": {
 													Type:        schema.TypeList,
 													Optional:    true,
@@ -588,7 +588,7 @@ will use the project's default service account.`,
 														},
 													},
 												},
-<% end -%>
+{{- end }}
 												"secret": {
 													Type:     schema.TypeList,
 													Optional: true,

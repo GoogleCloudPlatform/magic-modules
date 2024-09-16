@@ -1,10 +1,10 @@
-resource "google_privateca_certificate_authority" "<%= ctx[:primary_resource_id] %>" {
+resource "google_privateca_certificate_authority" "{{$.PrimaryResourceId}}" {
   // This example assumes this pool already exists.
   // Pools cannot be deleted in normal test circumstances, so we depend on static pools
-  pool = "<%= ctx[:vars]["pool_name"] %>"
-  certificate_authority_id = "<%= ctx[:vars]["certificate_authority_id"] %>"
-  location = "<%= ctx[:vars]["pool_location"] %>"
-  deletion_protection = "<%= ctx[:vars]["deletion_protection"] %>"
+  pool = "{{index $.Vars "pool_name"}}"
+  certificate_authority_id = "{{index $.Vars "certificate_authority_id"}}"
+  location = "{{index $.Vars "pool_location"}}"
+  deletion_protection = "{{index $.Vars "deletion_protection"}}"
   config {
     subject_config {
       subject {

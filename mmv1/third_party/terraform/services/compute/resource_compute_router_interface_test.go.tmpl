@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package compute_test
 
 import (
@@ -33,13 +32,13 @@ func TestAccComputeRouterInterface_basic(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_compute_router_interface.foobar",
-				ImportState:       true, // Will use the 3 part {{region}}/{{router}}/{{name}} import id by default as it's the id in state
+				ImportState:       true, // Will use the 3 part {{"{{"}}region{{"}}"}}/{{"{{"}}router{{"}}"}}/{{"{{"}}name{{"}}"}} import id by default as it's the id in state
 				ImportStateVerify: true,
 			},
 			{
 				ResourceName:      "google_compute_router_interface.foobar",
 				ImportState:       true,
-				ImportStateId:     importIdFourPart, // Make test step use 4 part {{project}}/{{region}}/{{router}}/{{name}} import id
+				ImportStateId:     importIdFourPart, // Make test step use 4 part {{"{{"}}project{{"}}"}}/{{"{{"}}region{{"}}"}}/{{"{{"}}router{{"}}"}}/{{"{{"}}name{{"}}"}} import id
 				ImportStateVerify: true,
 			},
 			{

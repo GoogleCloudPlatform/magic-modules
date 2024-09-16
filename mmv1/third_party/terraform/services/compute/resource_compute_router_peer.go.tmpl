@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package compute
 
 import (
@@ -287,7 +286,7 @@ assigns unused addresses from the 2600:2d00:0:2::/64 or 2600:2d00:0:3::/64 range
 				ValidateFunc: verify.ValidateIpAddress,
 				Description:  `IPv4 address of the BGP interface outside Google Cloud Platform.`,
 			},
-<% unless version == "ga" -%>
+{{- if ne $.TargetVersionName "ga" }}
 			"export_policies": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -312,7 +311,7 @@ Please use Beta API to use Route Policies.`,
 					Type: schema.TypeString,
 				},
 			},
-<% end -%>
+{{- end }}
 			"region": {
 				Type:             schema.TypeString,
 				Computed:         true,
@@ -495,7 +494,7 @@ func resourceComputeRouterBgpPeerCreate(d *schema.ResourceData, meta interface{}
 	} else if v, ok := d.GetOkExists("peer_ipv6_nexthop_address"); !tpgresource.IsEmptyValue(reflect.ValueOf(peerIpv4NexthopAddressProp)) && (ok || !reflect.DeepEqual(v, peerIpv4NexthopAddressProp)) {
 		obj["peerIpv4NexthopAddress"] = peerIpv4NexthopAddressProp
 	}
-<% unless version == "ga" -%>
+{{- if ne $.TargetVersionName "ga" }}
 	exportPoliciesProp, err := expandNestedComputeRouterBgpPeerExportPolicies(d.Get("export_policies"), d, config)
 	if err != nil {
 		return err
@@ -508,7 +507,7 @@ func resourceComputeRouterBgpPeerCreate(d *schema.ResourceData, meta interface{}
 	} else if v, ok := d.GetOkExists("import_policies"); ok || !reflect.DeepEqual(v, importPoliciesProp) {
 		obj["importPolicies"] = importPoliciesProp
 	}
-<% end -%>
+{{- end }}
 	ipv6NexthopAddressProp, err := expandNestedComputeRouterBgpPeerIpv6NexthopAddress(d.Get("ipv6_nexthop_address"), d, config)
 	if err != nil {
 		return err
@@ -535,14 +534,14 @@ func resourceComputeRouterBgpPeerCreate(d *schema.ResourceData, meta interface{}
 		obj["md5AuthenticationKey"] = md5AuthenticationKeyProp
 	}
 
-	lockName, err := tpgresource.ReplaceVars(d, config, "router/{{region}}/{{router}}")
+	lockName, err := tpgresource.ReplaceVars(d, config, "router/{{"{{"}}region{{"}}"}}/{{"{{"}}router{{"}}"}}")
 	if err != nil {
 		return err
 	}
 	transport_tpg.MutexStore.Lock(lockName)
 	defer transport_tpg.MutexStore.Unlock(lockName)
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/routers/{{router}}")
+	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/routers/{{"{{"}}router{{"}}"}}")
 	if err != nil {
 		return err
 	}
@@ -580,7 +579,7 @@ func resourceComputeRouterBgpPeerCreate(d *schema.ResourceData, meta interface{}
 	}
 
 	// Store the ID now
-	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/regions/{{region}}/routers/{{router}}/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/routers/{{"{{"}}router{{"}}"}}/{{"{{"}}name{{"}}"}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -613,7 +612,7 @@ func resourceComputeRouterBgpPeerRead(d *schema.ResourceData, meta interface{}) 
 		return err
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/routers/{{router}}")
+	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/routers/{{"{{"}}router{{"}}"}}")
 	if err != nil {
 		return err
 	}
@@ -715,14 +714,14 @@ func resourceComputeRouterBgpPeerRead(d *schema.ResourceData, meta interface{}) 
 	if err := d.Set("peer_ipv4_nexthop_address", flattenNestedComputeRouterBgpPeerPeerIpv4NexthopAddress(res["peerIpv4NexthopAddress"], d, config)); err != nil {
 		return fmt.Errorf("Error reading RouterBgpPeer: %s", err)
 	}
-<% unless version == "ga" -%>
+{{- if ne $.TargetVersionName "ga" }}
 	if err := d.Set("export_policies", flattenNestedComputeRouterBgpPeerExportPolicies(res["exportPolicies"], d, config)); err != nil {
 		return fmt.Errorf("Error reading RouterBgpPeer: %s", err)
 	}
 	if err := d.Set("import_policies", flattenNestedComputeRouterBgpPeerImportPolicies(res["importPolicies"], d, config)); err != nil {
 		return fmt.Errorf("Error reading RouterBgpPeer: %s", err)
 	}
-<% end -%>
+{{- end }}
 	if err := d.Set("ipv6_nexthop_address", flattenNestedComputeRouterBgpPeerIpv6NexthopAddress(res["ipv6NexthopAddress"], d, config)); err != nil {
 		return fmt.Errorf("Error reading RouterBgpPeer: %s", err)
 	}
@@ -848,7 +847,7 @@ func resourceComputeRouterBgpPeerUpdate(d *schema.ResourceData, meta interface{}
 	} else if v, ok := d.GetOkExists("peer_ipv4_nexthop_address"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, peerIpv4NexthopAddressProp)) {
 		obj["peerIpv4NexthopAddress"] = peerIpv4NexthopAddressProp
 	}
-<% unless version == "ga" -%>
+{{- if ne $.TargetVersionName "ga" }}
 	exportPoliciesProp, err := expandNestedComputeRouterBgpPeerExportPolicies(d.Get("export_policies"), d, config)
 	if err != nil {
 		return err
@@ -861,7 +860,7 @@ func resourceComputeRouterBgpPeerUpdate(d *schema.ResourceData, meta interface{}
 	} else if v, ok := d.GetOkExists("import_policies"); ok || !reflect.DeepEqual(v, importPoliciesProp) {
 		obj["importPolicies"] = importPoliciesProp
 	}
-<% end -%>
+{{- end }}
 	ipv6NexthopAddressProp, err := expandNestedComputeRouterBgpPeerIpv6NexthopAddress(d.Get("ipv6_nexthop_address"), d, config)
 	if err != nil {
 		return err
@@ -888,14 +887,14 @@ func resourceComputeRouterBgpPeerUpdate(d *schema.ResourceData, meta interface{}
 		obj["md5AuthenticationKey"] = md5AuthenticationKeyProp
 	}
 
-	lockName, err := tpgresource.ReplaceVars(d, config, "router/{{region}}/{{router}}")
+	lockName, err := tpgresource.ReplaceVars(d, config, "router/{{"{{"}}region{{"}}"}}/{{"{{"}}router{{"}}"}}")
 	if err != nil {
 		return err
 	}
 	transport_tpg.MutexStore.Lock(lockName)
 	defer transport_tpg.MutexStore.Unlock(lockName)
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/routers/{{router}}")
+	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/routers/{{"{{"}}router{{"}}"}}")
 	if err != nil {
 		return err
 	}
@@ -959,14 +958,14 @@ func resourceComputeRouterBgpPeerDelete(d *schema.ResourceData, meta interface{}
 	}
 	billingProject = project
 
-	lockName, err := tpgresource.ReplaceVars(d, config, "router/{{region}}/{{router}}")
+	lockName, err := tpgresource.ReplaceVars(d, config, "router/{{"{{"}}region{{"}}"}}/{{"{{"}}router{{"}}"}}")
 	if err != nil {
 		return err
 	}
 	transport_tpg.MutexStore.Lock(lockName)
 	defer transport_tpg.MutexStore.Unlock(lockName)
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/routers/{{router}}")
+	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/routers/{{"{{"}}router{{"}}"}}")
 	if err != nil {
 		return err
 	}
@@ -1021,7 +1020,7 @@ func resourceComputeRouterBgpPeerImport(d *schema.ResourceData, meta interface{}
 	}
 
 	// Replace import id for the resource id
-	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/regions/{{region}}/routers/{{router}}/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/routers/{{"{{"}}router{{"}}"}}/{{"{{"}}name{{"}}"}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -1286,7 +1285,7 @@ func flattenNestedComputeRouterBgpPeerPeerIpv4NexthopAddress(v interface{}, d *s
 	return v
 }
 
-<% unless version == "ga" -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func flattenNestedComputeRouterBgpPeerExportPolicies(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
@@ -1294,7 +1293,7 @@ func flattenNestedComputeRouterBgpPeerExportPolicies(v interface{}, d *schema.Re
 func flattenNestedComputeRouterBgpPeerImportPolicies(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
-<% end -%>
+{{- end }}
 
 func flattenNestedComputeRouterBgpPeerIpv6NexthopAddress(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
@@ -1525,7 +1524,7 @@ func expandNestedComputeRouterBgpPeerPeerIpv4NexthopAddress(v interface{}, d tpg
 	return v, nil
 }
 
-<% unless version == "ga" -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func expandNestedComputeRouterBgpPeerExportPolicies(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
@@ -1533,7 +1532,7 @@ func expandNestedComputeRouterBgpPeerExportPolicies(v interface{}, d tpgresource
 func expandNestedComputeRouterBgpPeerImportPolicies(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
-<% end -%>
+{{- end }}
 
 func expandNestedComputeRouterBgpPeerIpv6NexthopAddress(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
@@ -1749,7 +1748,7 @@ func resourceComputeRouterBgpPeerPatchDeleteEncoder(d *schema.ResourceData, meta
 // extracting list of objects.
 func resourceComputeRouterBgpPeerListForPatch(d *schema.ResourceData, meta interface{}) ([]interface{}, []interface{}, error) {
 	config := meta.(*transport_tpg.Config)
-	url, err := tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/routers/{{router}}")
+	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/routers/{{"{{"}}router{{"}}"}}")
 	if err != nil {
 		return nil, nil, err
 	}

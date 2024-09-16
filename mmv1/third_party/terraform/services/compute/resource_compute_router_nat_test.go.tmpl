@@ -1,11 +1,10 @@
-<% autogen_exception -%>
 package compute_test
 
 import (
 	"fmt"
-<% unless version == "ga" -%>
+{{- if ne $.TargetVersionName "ga" }}
 	"regexp"
-<% end -%>
+{{- end }}
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -236,7 +235,7 @@ func TestAccComputeRouterNat_withPortAllocationMethods(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeRouterNat_withNatIpsAndDrainNatIps(t *testing.T) {
 	t.Parallel()
 
@@ -285,7 +284,7 @@ func TestAccComputeRouterNat_withNatIpsAndDrainNatIps(t *testing.T) {
 	})
 }
 
-<% end -%>
+{{ end }}
 
 func TestAccComputeRouterNat_withNatRules(t *testing.T) {
 	t.Parallel()
@@ -495,7 +494,7 @@ func TestAccComputeRouterNat_AutoNetworkTier(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeRouterNat_withPrivateNat(t *testing.T) {
 	t.Parallel()
 
@@ -698,7 +697,7 @@ func TestAccComputeRouterNat_withPrivateNatAndEmptyActionActiveRanges(t *testing
 		},
 	})
 }
-<% end -%>
+{{- end }}
 
 func TestAccComputeRouterNat_withAddressCountDecrease(t *testing.T) {
 	t.Parallel()
@@ -1414,7 +1413,7 @@ resource "google_compute_router" "foobar" {
 `, routerName, routerName, routerName, routerName, routerName, routerName, routerName)
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeRouterNatWithNatIps(routerName string) string {
 	return fmt.Sprintf(`
 %s
@@ -1523,7 +1522,7 @@ resource "google_compute_router_nat" "foobar" {
 }
 `, testAccComputeRouterNatBaseResourcesWithNatIps(routerName), routerName)
 }
-<% end -%>
+{{- end }}
 
 func testAccComputeRouterNatRulesBasic_omitRules(routerName string) string {
 	return fmt.Sprintf(`
@@ -1963,7 +1962,7 @@ resource "google_compute_router" "foobar" {
 `, routerName, routerName, routerName, routerName, routerName, hubName, routerName, routerName)
 }
 
-<% unless version == "ga" -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeRouterNatPrivateType(routerName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "foobar" {
@@ -2112,7 +2111,7 @@ resource "google_compute_router_nat" "foobar" {
 `, testAccComputeRouterNatBaseResourcesWithPrivateNatSubnetworks(routerName, hubName), routerName, ruleNumber, ruleDescription, match)
 }
 
-<% end -%>
+{{ end }}
 
 func testAccComputeRouterNatWitAutoNetworkTier(routerName, hubName string) string {
 	return fmt.Sprintf(`

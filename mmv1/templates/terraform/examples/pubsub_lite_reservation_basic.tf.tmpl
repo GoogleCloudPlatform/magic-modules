@@ -1,5 +1,5 @@
-resource "google_pubsub_lite_reservation" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]['reservation_name'] %>"
+resource "google_pubsub_lite_reservation" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "reservation_name"}}"
   project = data.google_project.project.number
   throughput_capacity = 2
 }

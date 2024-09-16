@@ -60,10 +60,10 @@ resource "google_apigee_organization" "apigee_org" {
 }
 
 resource "google_apigee_instance" "apigee_instance" {
-  name                     = "<%= ctx[:vars]['instance_name'] %>"
+  name                     = "{{index $.Vars "instance_name"}}"
   location                 = "us-central1"
   description              = "Terraform-managed Apigee Runtime Instance"
-  display_name             = "<%= ctx[:vars]['instance_name'] %>"
+  display_name             = "{{index $.Vars "instance_name"}}"
   org_id                   = google_apigee_organization.apigee_org.id
   disk_encryption_key_name = google_kms_crypto_key.apigee_key.id
 }

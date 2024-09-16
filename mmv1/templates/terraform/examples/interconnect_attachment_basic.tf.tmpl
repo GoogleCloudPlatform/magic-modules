@@ -1,5 +1,5 @@
-resource "google_compute_interconnect_attachment" "<%= ctx[:primary_resource_id] %>" {
-  name                     = "<%= ctx[:vars]['interconnect_attachment_name'] %>"
+resource "google_compute_interconnect_attachment" "{{$.PrimaryResourceId}}" {
+  name                     = "{{index $.Vars "interconnect_attachment_name"}}"
   edge_availability_domain = "AVAILABILITY_DOMAIN_1"
   type                     = "PARTNER"
   router                   = google_compute_router.foobar.id
@@ -7,7 +7,7 @@ resource "google_compute_interconnect_attachment" "<%= ctx[:primary_resource_id]
 }
 
 resource "google_compute_router" "foobar" {
-  name    = "<%= ctx[:vars]['router_name'] %>"
+  name    = "{{index $.Vars "router_name"}}"
   network = google_compute_network.foobar.name
   bgp {
     asn = 16550
@@ -15,6 +15,6 @@ resource "google_compute_router" "foobar" {
 }
 
 resource "google_compute_network" "foobar" {
-  name                    = "<%= ctx[:vars]['network_name'] %>"
+  name                    = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = false
 }

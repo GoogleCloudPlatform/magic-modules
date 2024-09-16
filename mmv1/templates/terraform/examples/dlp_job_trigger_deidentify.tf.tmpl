@@ -1,5 +1,5 @@
-resource "google_data_loss_prevention_job_trigger" "<%= ctx[:primary_resource_id] %>" {
-  parent       = "projects/<%= ctx[:test_env_vars]['project'] %>"
+resource "google_data_loss_prevention_job_trigger" "{{$.PrimaryResourceId}}" {
+  parent       = "projects/{{index $.TestEnvVars "project"}}"
   description  = "Description for the job_trigger created by terraform"
   display_name = "TerraformDisplayName"
   
@@ -17,7 +17,7 @@ resource "google_data_loss_prevention_job_trigger" "<%= ctx[:primary_resource_id
         file_types_to_transform = ["CSV", "TSV"]
         transformation_details_storage_config {
           table {
-            project_id = "<%= ctx[:test_env_vars]['project'] %>"
+            project_id = "{{index $.TestEnvVars "project"}}"
             dataset_id = google_bigquery_dataset.default.dataset_id
             table_id   = google_bigquery_table.default.table_id
           }
@@ -40,7 +40,7 @@ resource "google_data_loss_prevention_job_trigger" "<%= ctx[:primary_resource_id
 }
   
 resource "google_bigquery_dataset" "default" {
-  dataset_id                  = "<%= ctx[:vars]['name'] %>"
+  dataset_id                  = "{{index $.Vars "name"}}"
   friendly_name               = "terraform-test"
   description                 = "Description for the dataset created by terraform"
   location                    = "US"
@@ -53,7 +53,7 @@ resource "google_bigquery_dataset" "default" {
   
 resource "google_bigquery_table" "default" {
   dataset_id          = google_bigquery_dataset.default.dataset_id
-  table_id            = "<%= ctx[:vars]['name'] %>"
+  table_id            = "{{index $.Vars "name"}}"
   deletion_protection = false
   
   time_partitioning {

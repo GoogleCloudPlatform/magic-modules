@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package compute
 
 import (
@@ -7,15 +6,15 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-<% end -%>
+{{- end }}
 
-<% if version == "ga" -%>
+{{ if eq $.TargetVersionName `ga` }}
 	"google.golang.org/api/compute/v1"
-<% else -%>
+{{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
-<% end -%>
+{{- end }}
 )
 
 func computeInstanceDeleteAccessConfigs(d *schema.ResourceData, config *transport_tpg.Config, instNetworkInterface *compute.NetworkInterface, project, zone, userAgent, instanceName string) error {
@@ -73,7 +72,7 @@ func computeInstanceCreateUpdateWhileStoppedCall(d *schema.ResourceData, config 
 
 		op, err := config.NewComputeClient(userAgent).Instances.UpdateNetworkInterface(project, zone, instanceName, instNetworkInterface.Name, networkInterfacePatchObj).Do()
 		if err != nil {
-			return errwrap.Wrapf("Error updating network interface: {{err}}", err)
+			return errwrap.Wrapf("Error updating network interface: {{"{{"}}err{{"}}"}}", err)
 		}
 		opErr := ComputeOperationWaitTime(config, op, project, "network interface to update", userAgent, d.Timeout(schema.TimeoutUpdate))
 		if opErr != nil {
@@ -90,7 +89,7 @@ func computeInstanceCreateUpdateWhileStoppedCall(d *schema.ResourceData, config 
 	}
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func computeInstanceAddSecurityPolicy(d *schema.ResourceData, config *transport_tpg.Config, securityPolicyWithNics map[string][]string, project, zone, userAgent, instanceName string) error {
 	for sp, nics := range securityPolicyWithNics {
 		req := &compute.InstancesSetSecurityPolicyRequest{
@@ -163,4 +162,4 @@ func validateSecurityPolicy(rawNetworkInterface map[string]interface{}) error {
 	return nil
 }
 
-<% end -%>
+{{ end }}

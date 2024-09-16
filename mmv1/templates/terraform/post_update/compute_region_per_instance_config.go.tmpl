@@ -19,7 +19,7 @@ if tpgresource.IsEmptyValue(reflect.ValueOf(mostDisruptiveAction)) {
 }
 obj["mostDisruptiveAllowedAction"] = mostDisruptiveAction
 
-url, err = tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{region_instance_group_manager}}/applyUpdatesToInstances")
+url, err = tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/instanceGroupManagers/{{"{{"}}region_instance_group_manager{{"}}"}}/applyUpdatesToInstances")
 if err != nil {
 	return err
 }

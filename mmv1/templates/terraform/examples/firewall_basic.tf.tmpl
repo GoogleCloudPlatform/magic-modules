@@ -1,5 +1,5 @@
 resource "google_compute_firewall" "default" {
-  name    = "<%= ctx[:vars]['firewall_name'] %>"
+  name    = "{{index $.Vars "firewall_name"}}"
   network = google_compute_network.default.name
 
   allow {
@@ -15,5 +15,5 @@ resource "google_compute_firewall" "default" {
 }
 
 resource "google_compute_network" "default" {
-  name = "<%= ctx[:vars]['network_name'] %>"
+  name = "{{index $.Vars "network_name"}}"
 }

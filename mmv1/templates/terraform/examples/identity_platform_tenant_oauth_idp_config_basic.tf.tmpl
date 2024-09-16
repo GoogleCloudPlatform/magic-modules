@@ -2,8 +2,8 @@ resource "google_identity_platform_tenant" "tenant" {
   display_name  = "tenant"
 }
 
-resource "google_identity_platform_tenant_oauth_idp_config" "<%= ctx[:primary_resource_id] %>" {
-  name          = "<%= ctx[:vars]["name"] %>"
+resource "google_identity_platform_tenant_oauth_idp_config" "{{$.PrimaryResourceId}}" {
+  name          = "{{index $.Vars "name"}}"
   tenant        = google_identity_platform_tenant.tenant.name
   display_name  = "Display Name"
   client_id     = "client-id"

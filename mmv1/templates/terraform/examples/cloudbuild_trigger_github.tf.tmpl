@@ -1,4 +1,4 @@
-resource "google_cloudbuild_trigger" "<%= ctx[:primary_resource_id] %>" {
+resource "google_cloudbuild_trigger" "{{$.PrimaryResourceId}}" {
   location = "europe-west4"
 
   github {

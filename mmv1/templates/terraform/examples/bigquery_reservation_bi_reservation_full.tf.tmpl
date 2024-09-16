@@ -24,16 +24,16 @@ resource "google_bigquery_dataset" "bar2" {
   location                    = "EU"
 }
 
-resource "google_bigquery_bi_reservation" "<%= ctx[:primary_resource_id] %>" {
+resource "google_bigquery_bi_reservation" "{{$.PrimaryResourceId}}" {
 	location  = "EU"
 	size      = "2800000000"
   preferred_tables {
-      project_id  = "<%= ctx[:test_env_vars]['project'] %>"
+      project_id  = "{{index $.TestEnvVars "project"}}"
       dataset_id  = google_bigquery_dataset.bar.dataset_id
       table_id    = google_bigquery_table.foo.table_id
   }
   preferred_tables {
-      project_id  = "<%= ctx[:test_env_vars]['project'] %>"
+      project_id  = "{{index $.TestEnvVars "project"}}"
       dataset_id  = google_bigquery_dataset.bar2.dataset_id
       table_id    = google_bigquery_table.foo2.table_id
   }

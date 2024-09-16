@@ -1,23 +1,22 @@
-<% autogen_exception -%>
 package compute
 
 import (
-	<% unless version == 'ga' -%>
+	{{- if ne $.TargetVersionName "ga" }}
 	"encoding/json"
-	<% end -%>
+	{{- end }}
 	"errors"
-	<% unless version == 'ga' -%>
+	{{- if ne $.TargetVersionName "ga" }}
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/googleapi"
 	"reflect"
-	<% end -%>
+	{{- end }}
 	"sort"
 
-<% if version == "ga" -%>
+{{ if eq $.TargetVersionName `ga` }}
 	"google.golang.org/api/compute/v1"
-<% else -%>
+{{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
-<% end -%>
+{{- end }}
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -169,7 +168,7 @@ func resourceInstanceMetadata(d tpgresource.TerraformResourceData) (*compute.Met
 
 	return m, nil
 }
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 func resourceInstancePartnerMetadata(d tpgresource.TerraformResourceData) (map[string]compute.StructuredEntries, error) {
 	partnerMetadata := make(map[string]compute.StructuredEntries)
@@ -229,4 +228,4 @@ func ComparePartnerMetadataDiff(_, old, new string, d *schema.ResourceData) bool
 	}
 	return false
 }
-<% end -%>
+{{- end }}

@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package compute
 
 import (
@@ -7,11 +6,11 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-<% if version == "ga" -%>
+{{- if eq $.TargetVersionName "ga" }}
 	"google.golang.org/api/compute/v1"
-<% else -%>
+{{- else }}
 	"google.golang.org/api/compute/v0.beta"
-<% end -%>
+{{- end }}
 )
 
 func DataSourceGoogleComputeRouterStatus() *schema.Resource {
@@ -104,7 +103,7 @@ func dataSourceComputeRouterStatusRead(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("Error setting best_routes_for_router: %s", err)
 	}
 
-	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/regions/{{region}}/routers/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/routers/{{"{{"}}name{{"}}"}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}

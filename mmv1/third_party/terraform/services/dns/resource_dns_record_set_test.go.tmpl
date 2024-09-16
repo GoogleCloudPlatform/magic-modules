@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package dns_test
 
 import (
@@ -603,7 +602,7 @@ func testAccCheckDnsRecordSetDestroyProducer(t *testing.T) func(s *terraform.Sta
 
 			config := acctest.GoogleProviderConfig(t)
 
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{DNSBasePath}}projects/{{project}}/managedZones/{{managed_zone}}/rrsets/{{name}}/{{type}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}DNSBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/managedZones/{{"{{"}}managed_zone{{"}}"}}/rrsets/{{"{{"}}name{{"}}"}}/{{"{{"}}type{{"}}"}}")
 			if err != nil {
 				return err
 			}

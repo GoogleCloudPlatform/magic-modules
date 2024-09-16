@@ -5,7 +5,7 @@ if err := tpgresource.ParseImportId([]string{"projects/(?P<project>[^/]+)/instan
 }
 res["project"] = d.Get("project").(string)
 res["name"] = d.Get("name").(string)
-id, err := tpgresource.ReplaceVars(d, config, "{{project}}/{{name}}")
+id, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}project{{"}}"}}/{{"{{"}}name{{"}}"}}")
 if err != nil {
 	return nil, err
 }

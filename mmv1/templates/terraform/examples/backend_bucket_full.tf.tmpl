@@ -1,7 +1,7 @@
-resource "google_compute_backend_bucket" "<%= ctx[:primary_resource_id] %>" {
-  name        = "<%= ctx[:vars]['backend_bucket_name'] %>"
+resource "google_compute_backend_bucket" "{{$.PrimaryResourceId}}" {
+  name        = "{{index $.Vars "backend_bucket_name"}}"
   description = "Contains beautiful beta mages"
-  bucket_name = google_storage_bucket.<%= ctx[:primary_resource_id] %>.name
+  bucket_name = google_storage_bucket.{{$.PrimaryResourceId}}.name
   enable_cdn  = true
   cdn_policy {
     cache_mode = "CACHE_ALL_STATIC"
@@ -16,7 +16,7 @@ resource "google_compute_backend_bucket" "<%= ctx[:primary_resource_id] %>" {
   ]
 }
 
-resource "google_storage_bucket" "<%= ctx[:primary_resource_id] %>" {
-  name     = "<%= ctx[:vars]['bucket_name'] %>"
+resource "google_storage_bucket" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.Vars "bucket_name"}}"
   location = "EU"
 }

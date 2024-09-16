@@ -10,7 +10,7 @@
 
     stringParts := strings.Split(d.Get("name").(string), "/")
     if len(stringParts) < 3 {
-        return nil, fmt.Errorf("Error parsing parent name. Should be in form {{parent}}/tagValues/{{tag_value}}")
+        return nil, fmt.Errorf("Error parsing parent name. Should be in form {{"{{"}}parent{{"}}"}}/tagValues/{{"{{"}}tag_value{{"}}"}}")
     }
     if err := d.Set("parent", stringParts[0]); err != nil {
         return nil, fmt.Errorf("Error setting parent, %s", err)

@@ -1,5 +1,5 @@
 resource "google_compute_disk" "default" {
-  name  = "<%= ctx[:vars]['disk_name'] %>"
+  name  = "{{index $.Vars "disk_name"}}"
   type  = "pd-ssd"
   zone  = "us-central1-a"
   image = "debian-11-bullseye-v20220719"

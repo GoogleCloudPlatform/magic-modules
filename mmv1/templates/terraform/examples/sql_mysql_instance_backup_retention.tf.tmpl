@@ -1,5 +1,5 @@
-resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
-  name             = "<%= ctx[:vars]['mysql_instance_backup_retention'] %>"
+resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
+  name             = "{{index $.Vars "mysql_instance_backup_retention"}}"
   region           = "asia-northeast1"
   database_version = "MYSQL_8_0"
   settings {
@@ -12,5 +12,5 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
       }
     }
   }
-  deletion_protection =  "<%= ctx[:vars]['deletion_protection'] %>"
+  deletion_protection =  "{{index $.Vars "deletion_protection"}}"
 }

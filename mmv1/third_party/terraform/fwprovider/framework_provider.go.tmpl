@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package fwprovider
 
 import (
@@ -20,9 +19,9 @@ import (
     "github.com/hashicorp/terraform-provider-google/google/fwtransport"
     "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	"github.com/hashicorp/terraform-provider-google/version"
-    <% unless version == 'ga' -%>
+    {{- if ne $.TargetVersionName "ga" }}
     "github.com/hashicorp/terraform-provider-google/google/services/firebase"
-    <% end -%>
+    {{- end }}
 
     transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -147,14 +146,14 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
                 Optional: true,
             },
             // Generated Products
-            <% products.each do |product| -%>
-            "<%= product[:definitions].name.underscore -%>_custom_endpoint": &schema.StringAttribute{
+            {{- range $product := $.Products }}
+            "{{ underscore $product.Name }}_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
                 Validators: []validator.String{
                     transport_tpg.CustomEndpointValidator(),
                 },
             },
-            <% end -%>
+            {{- end }}
 
             // Handwritten Products / Versioned / Atypical Entries
             "cloud_billing_custom_endpoint": &schema.StringAttribute{
@@ -187,14 +186,14 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
                     transport_tpg.CustomEndpointValidator(),
                 },
             },
-            <% unless version == "ga" -%>
+            {{- if ne $.TargetVersionName "ga" }}
             "runtimeconfig_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
                 Validators: []validator.String{
                     transport_tpg.CustomEndpointValidator(),
                 },
             },
-            <% end -%>
+            {{- end }}
             "iam_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
                 Validators: []validator.String{
@@ -272,11 +271,11 @@ func (p *FrameworkProvider) DataSources(_ context.Context) []func() datasource.D
     return []func() datasource.DataSource{
         resourcemanager.NewGoogleClientConfigDataSource,
         resourcemanager.NewGoogleClientOpenIDUserinfoDataSource,
-        <% unless version == 'ga' -%>
+        {{- if ne $.TargetVersionName "ga" }}
         firebase.NewGoogleFirebaseAndroidAppConfigDataSource,
         firebase.NewGoogleFirebaseAppleAppConfigDataSource,
         firebase.NewGoogleFirebaseWebAppConfigDataSource,
-        <% end -%>
+        {{- end }}
     }
 }
 

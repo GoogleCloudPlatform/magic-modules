@@ -1,10 +1,10 @@
 resource "google_service_account" "test_account" {
-  account_id   = "<%= ctx[:vars]['account_id'] %>"
+  account_id   = "{{index $.Vars "account_id"}}"
   display_name = "Test Service Account"
 }
 
-resource "google_workflows_workflow" "<%= ctx[:primary_resource_id] %>" {
-  name          = "<%= ctx[:vars]['name'] %>"
+resource "google_workflows_workflow" "{{$.PrimaryResourceId}}" {
+  name          = "{{index $.Vars "name"}}"
   region        = "us-central1"
   description   = "Magic"
   service_account = google_service_account.test_account.id

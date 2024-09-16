@@ -1,5 +1,5 @@
 resource "google_compute_region_disk" "primary" {
-  name                      = "<%= ctx[:vars]['region_disk_name'] %>"
+  name                      = "{{index $.Vars "region_disk_name"}}"
   type                      = "pd-ssd"
   region                    = "us-central1"
   physical_block_size_bytes = 4096
@@ -8,7 +8,7 @@ resource "google_compute_region_disk" "primary" {
 }
 
 resource "google_compute_region_disk" "secondary" {
-  name                      = "<%= ctx[:vars]['secondary_region_disk_name'] %>"
+  name                      = "{{index $.Vars "secondary_region_disk_name"}}"
   type                      = "pd-ssd"
   region                    = "us-east1"
   physical_block_size_bytes = 4096

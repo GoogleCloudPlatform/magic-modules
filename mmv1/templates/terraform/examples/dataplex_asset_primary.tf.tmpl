@@ -8,20 +8,20 @@ resource "google_storage_bucket" "primary_bucket" {
     ]
   }
 
-  project = "<%= ctx[:test_env_vars]['project_name'] %>"
+  project = "{{index $.TestEnvVars "project_name"}}"
 }
 
-resource "google_dataplex_lake" "<%= ctx[:primary_resource_id] %>" {
+resource "google_dataplex_lake" "{{$.PrimaryResourceId}}" {
   name         = "tf-test-lake%{random_suffix}"
   location     = "us-central1"
-  project = "<%= ctx[:test_env_vars]['project_name'] %>"
+  project = "{{index $.TestEnvVars "project_name"}}"
 }
 
 
-resource "google_dataplex_zone" "<%= ctx[:primary_resource_id] %>" {
+resource "google_dataplex_zone" "{{$.PrimaryResourceId}}" {
   name         = "tf-test-zone%{random_suffix}"
   location     = "us-central1"
-  lake = google_dataplex_lake.<%= ctx[:primary_resource_id] %>.name
+  lake = google_dataplex_lake.{{$.PrimaryResourceId}}.name
   type = "RAW"
 
   discovery_spec {
@@ -33,27 +33,27 @@ resource "google_dataplex_zone" "<%= ctx[:primary_resource_id] %>" {
     location_type = "SINGLE_REGION"
   }
 
-  project = "<%= ctx[:test_env_vars]['project_name'] %>"
+  project = "{{index $.TestEnvVars "project_name"}}"
 }
 
 
 
-resource "google_dataplex_asset" "<%= ctx[:primary_resource_id] %>" {
+resource "google_dataplex_asset" "{{$.PrimaryResourceId}}" {
   name          = "tf-test-asset%{random_suffix}"
   location      = "us-central1"
 
-  lake = google_dataplex_lake.<%= ctx[:primary_resource_id] %>.name
-  dataplex_zone = google_dataplex_zone.<%= ctx[:primary_resource_id] %>.name
+  lake = google_dataplex_lake.{{$.PrimaryResourceId}}.name
+  dataplex_zone = google_dataplex_zone.{{$.PrimaryResourceId}}.name
   discovery_spec {
     enabled = false
   }
 
   resource_spec {
-    name = "projects/<%= ctx[:test_env_vars]['project_name'] %>/buckets/dataplex-bucket-%{random_suffix}"
+    name = "projects/{{index $.TestEnvVars "project_name"}}/buckets/dataplex-bucket-%{random_suffix}"
     type = "STORAGE_BUCKET"
   }
 
-  project = "<%= ctx[:test_env_vars]['project_name'] %>"
+  project = "{{index $.TestEnvVars "project_name"}}"
   depends_on = [
     google_storage_bucket.primary_bucket
   ]

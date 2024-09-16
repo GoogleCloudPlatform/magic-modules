@@ -1,5 +1,5 @@
-resource "google_dataproc_autoscaling_policy" "<%= ctx[:primary_resource_id] %>" {
-  policy_id = "<%= ctx[:vars]['name'] %>"
+resource "google_dataproc_autoscaling_policy" "{{$.PrimaryResourceId}}" {
+  policy_id = "{{index $.Vars "name"}}"
   location  = "us-central1"
 
   worker_config {

@@ -1,11 +1,10 @@
-<% autogen_exception -%>
 
 package compute_test
 
 import (
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 	"encoding/json"
-<% end -%>
+{{- end }}
 	"fmt"
 	"reflect"
 	"regexp"
@@ -21,15 +20,15 @@ import (
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 
-<% if version == "ga" -%>
+{{ if eq $.TargetVersionName `ga` }}
 	"google.golang.org/api/compute/v1"
-<% else -%>
+{{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
-<% end -%>
+{{- end }}
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 	"google.golang.org/api/googleapi"
-<% end -%>
+{{- end }}
 )
 
 const DEFAULT_MIN_CPU_TEST_VALUE = "Intel Haswell"
@@ -120,7 +119,7 @@ func TestAccComputeInstanceTemplate_preemptible(t *testing.T) {
 	})
 }
 
-<% unless version == "ga" -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeInstanceTemplate_maintenance_interval(t *testing.T) {
 	t.Parallel()
 
@@ -156,7 +155,7 @@ func TestAccComputeInstanceTemplate_maintenance_interval(t *testing.T) {
 		},
 	})
 }
-<% end -%>
+{{- end }}
 
 func TestAccComputeInstanceTemplate_IP(t *testing.T) {
 	t.Parallel()
@@ -805,7 +804,7 @@ func TestAccComputeInstanceTemplate_ConfidentialInstanceConfigMain(t *testing.T)
 					testAccCheckComputeInstanceTemplateHasConfidentialInstanceConfig(&instanceTemplate2, false, "SEV_SNP"),
 				),
 			},
-			<% unless version == "ga" -%>
+			{{- if ne $.TargetVersionName "ga" }}
 			{
 				Config: testAccComputeInstanceTemplateConfidentialInstanceConfigEnableTdx(acctest.RandString(t, 10), "TDX"),
 				Check: resource.ComposeTestCheckFunc(
@@ -813,7 +812,7 @@ func TestAccComputeInstanceTemplate_ConfidentialInstanceConfigMain(t *testing.T)
 					testAccCheckComputeInstanceTemplateHasConfidentialInstanceConfig(&instanceTemplate, false, "TDX"),
 				),
 			},
-			<% end -%>
+			{{- end }}
 		},
 	})
 }
@@ -838,7 +837,7 @@ func TestAccComputeInstanceTemplate_AdvancedMachineFeatures(t *testing.T) {
 	})
 }
 
-<% unless version == "ga" -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeInstanceTemplate_enableDisplay(t *testing.T) {
 	t.Parallel()
 
@@ -859,7 +858,7 @@ func TestAccComputeInstanceTemplate_enableDisplay(t *testing.T) {
 	})
 }
 
-<% end -%>
+{{ end }}
 func TestAccComputeInstanceTemplate_invalidDiskType(t *testing.T) {
 	t.Parallel()
 
@@ -1301,7 +1300,7 @@ func TestAccComputeInstanceTemplate_localSsdRecoveryTimeout(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeInstanceTemplate_partnerMetadata(t *testing.T) {
 	t.Parallel()
 
@@ -1336,7 +1335,7 @@ func TestAccComputeInstanceTemplate_partnerMetadata(t *testing.T) {
 	})
 
 }
-<% end -%>
+{{- end }}
 
 func TestAccComputeInstanceTemplate_sourceSnapshotEncryptionKey(t *testing.T) {
 	t.Parallel()
@@ -1407,7 +1406,7 @@ func TestAccComputeInstanceTemplate_sourceImageEncryptionKey(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeInstanceTemplate_NetworkAttachment(t *testing.T) {
 	t.Parallel()
 
@@ -1447,7 +1446,7 @@ func TestAccComputeInstanceTemplate_NetworkAttachment(t *testing.T) {
 		},
 	})
 }
-<% end -%>
+{{- end }}
 
 func TestAccComputeInstanceTemplate_migration(t *testing.T) {
 	acctest.SkipIfVcr(t)
@@ -1666,13 +1665,13 @@ func testAccCheckComputeInstanceTemplateExistsInProject(t *testing.T, n, p strin
 
 		splits := strings.Split(rs.Primary.ID, "/")
 		templateName := splits[len(splits)-1]
-		<% if version == "ga" -%>
+		{{- if eq $.TargetVersionName "ga" }}
 		found, err := config.NewComputeClient(config.UserAgent).InstanceTemplates.Get(
 			p, templateName).Do()
-		<% else -%>
+		{{- else }}
 		found, err := config.NewComputeClient(config.UserAgent).InstanceTemplates.Get(
 			p, templateName).View("FULL").Do()
-		<% end -%>
+		{{- end }}
 
 		if err != nil {
 			return err
@@ -1789,7 +1788,7 @@ func testAccCheckComputeInstanceTemplatePreemptible(instanceTemplate *compute.In
 	}
 }
 
-<% unless version == "ga" -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccCheckComputeInstanceTemplateMaintenanceInterval(instanceTemplate *compute.InstanceTemplate, maintenance_interval string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if instanceTemplate.Properties.Scheduling.MaintenanceInterval != maintenance_interval {
@@ -1798,7 +1797,7 @@ func testAccCheckComputeInstanceTemplateMaintenanceInterval(instanceTemplate *co
 		return nil
 	}
 }
-<% end -%>
+{{- end }}
 
 func testAccCheckComputeInstanceTemplateProvisioningModel(instanceTemplate *compute.InstanceTemplate, provisioning_model string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -1839,7 +1838,7 @@ func testAccCheckComputeInstanceTemplateLocalSsdRecoveryTimeout(instanceTemplate
 	}
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccCheckComputeInstanceTemplatePartnerMetadata(instanceTemplate *compute.InstanceTemplate, expectedPartnerMetadata map[string]compute.StructuredEntries) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if instanceTemplate == nil {
@@ -1867,7 +1866,7 @@ func testAccCheckComputeInstanceTemplatePartnerMetadata(instanceTemplate *comput
 
 	}
 }
-<% end -%>
+{{- end }}
 
 func testAccCheckComputeInstanceTemplateAutomaticRestart(instanceTemplate *compute.InstanceTemplate, automaticRestart bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -1994,7 +1993,7 @@ func testAccCheckComputeInstanceTemplateHasMinCpuPlatform(instanceTemplate *comp
 	}
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccCheckComputeInstanceTemplateHasNetworkAttachment(instanceTemplate *compute.InstanceTemplate, networkAttachmentName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, networkInterface := range instanceTemplate.Properties.NetworkInterfaces {
@@ -2005,7 +2004,7 @@ func testAccCheckComputeInstanceTemplateHasNetworkAttachment(instanceTemplate *c
 		return fmt.Errorf("Network Attachment %s, was not found in the instance template", networkAttachmentName)
 	}
 }
-<% end -%>
+{{- end }}
 
 func testAccCheckComputeInstanceTemplateHasInstanceResourcePolicies(instanceTemplate *compute.InstanceTemplate, resourcePolicy string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -2347,7 +2346,7 @@ resource "google_compute_instance_template" "foobar" {
 `, suffix)
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeInstanceTemplate_maintenance_interval(suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -2391,7 +2390,7 @@ resource "google_compute_instance_template" "foobar" {
 }
 `, suffix)
 }
-<% end -%>
+{{- end }}
 
 func testAccComputeInstanceTemplate_ip(suffix string) string {
 	return fmt.Sprintf(`
@@ -3516,7 +3515,7 @@ resource "google_compute_instance_template" "foobar4" {
 `, suffix, minCpuPlatform, confidentialInstanceType, suffix, minCpuPlatform, confidentialInstanceType)
 }
 
-<% unless version == "ga" -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeInstanceTemplateConfidentialInstanceConfigEnableTdx(suffix string, confidentialInstanceType string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image3" {
@@ -3549,7 +3548,7 @@ resource "google_compute_instance_template" "foobar5" {
 }
 `, suffix, confidentialInstanceType)
 }
-<% end -%>
+{{- end }}
 
 func testAccComputeInstanceTemplateAdvancedMachineFeatures(suffix string) string {
 	return fmt.Sprintf(`
@@ -3586,7 +3585,7 @@ resource "google_compute_instance_template" "foobar" {
 `, suffix)
 }
 
-<% unless version == "ga" -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeInstanceTemplate_enableDisplay(suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -3611,7 +3610,7 @@ resource "google_compute_instance_template" "foobar" {
 `, suffix)
 }
 
-<% end -%>
+{{ end }}
 func testAccComputeInstanceTemplate_invalidDiskType(suffix string) string {
 	return fmt.Sprintf(`
 # Use this datasource insead of hardcoded values when https://github.com/hashicorp/terraform/issues/22679
@@ -4060,7 +4059,7 @@ resource "google_compute_instance_template" "foobar" {
 `, suffix)
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeInstanceTemplate_partnerMetadata(suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -4102,7 +4101,7 @@ resource "google_compute_instance_template" "foobar" {
 }
 `, suffix)
 }
-<% end -%>
+{{- end }}
 
 func testAccComputeInstanceTemplate_sourceSnapshotEncryptionKey(context map[string]interface{}) string {
 	return acctest.Nprintf(`
@@ -4290,7 +4289,7 @@ resource "google_compute_instance_template" "foobar" {
 `, context)
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeInstanceTemplate_network_attachment(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_image" "my_image" {
@@ -4324,4 +4323,4 @@ resource "google_compute_instance_template" "foobar" {
 }
 `, context)
 }
-<% end -%>
+{{- end }}

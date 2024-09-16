@@ -1,5 +1,5 @@
 func getExistingFirebaseProjectId(config *transport_tpg.Config, d *schema.ResourceData, billingProject string, userAgent string) (string, error) {
-	url, err := tpgresource.ReplaceVars(d, config, "{{FirebaseBasePath}}projects/{{project}}")
+	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}FirebaseBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}")
 	if err != nil {
 		return "", err
 	}
@@ -12,7 +12,7 @@ func getExistingFirebaseProjectId(config *transport_tpg.Config, d *schema.Resour
 		UserAgent: userAgent,
 	})
 	if err == nil {
-		id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}")
+		id, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}"}}")
 		if err != nil {
 			return "", fmt.Errorf("Error constructing id: %s", err)
 		}

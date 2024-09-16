@@ -1,5 +1,5 @@
-resource "google_data_fusion_instance" "<%= ctx[:primary_resource_id] %>" {
-  name             = "<%= ctx[:vars]["instance_name"] %>"
+resource "google_data_fusion_instance" "{{$.PrimaryResourceId}}" {
+  name             = "{{index $.Vars "instance_name"}}"
   region           = "us-central1"
   type             = "BASIC"
   private_instance = true
@@ -12,16 +12,16 @@ resource "google_data_fusion_instance" "<%= ctx[:primary_resource_id] %>" {
     }
   }
 
-  <%= ctx[:vars]['prober_test_run'] %>
+  {{index $.Vars "prober_test_run"}}
 }
 
 resource "google_compute_network" "psc" {
-  name                    = "<%= ctx[:vars]["network_name"] %>"
+  name                    = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "psc" {
-  name   = "<%= ctx[:vars]["subnet_name"] %>"
+  name   = "{{index $.Vars "subnet_name"}}"
   region = "us-central1"
 
   network       = google_compute_network.psc.id
@@ -29,7 +29,7 @@ resource "google_compute_subnetwork" "psc" {
 }
 
 resource "google_compute_network_attachment" "psc" {
-  name                  = "<%= ctx[:vars]["attachment_name"] %>"
+  name                  = "{{index $.Vars "attachment_name"}}"
   region                = "us-central1"
   connection_preference = "ACCEPT_AUTOMATIC"
 

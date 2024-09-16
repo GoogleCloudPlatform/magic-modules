@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 
 package compute
 
@@ -19,11 +18,11 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 
-<% if version == "ga" -%>
+{{ if eq $.TargetVersionName `ga` }}
 	"google.golang.org/api/compute/v1"
-<% else -%>
+{{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
-<% end -%>
+{{- end }}
 )
 
 var (
@@ -37,9 +36,9 @@ var (
 		"scheduling.0.instance_termination_action",
 		"scheduling.0.max_run_duration",
 		"scheduling.0.on_instance_stop_action",
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 		"scheduling.0.maintenance_interval",
-<% end -%>
+{{- end }}
 		"scheduling.0.local_ssd_recovery_timeout",
 	}
 
@@ -353,14 +352,14 @@ Google Cloud KMS.`,
 				Description: `A brief description of this resource.`,
 			},
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 			"enable_display": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				ForceNew:    true,
 				Description: `Enable Virtual Displays on this instance. Note: allow_stopping_for_update must be set to true in order to update this field.`,
 			},
-<% end -%>
+{{- end }}
 
 			"instance_description": {
 				Type:        schema.TypeString,
@@ -382,7 +381,7 @@ Google Cloud KMS.`,
 				ForceNew:    true,
 				Description: `An alternative to using the startup-script metadata key, mostly to match the compute_instance resource. This replaces the startup-script metadata key on the created instance and thus the two mechanisms are not allowed to be used simultaneously.`,
 			},
-			<% unless version == 'ga' -%>
+			{{- if ne $.TargetVersionName "ga" }}
 			"partner_metadata": {
 				Type:                  schema.TypeMap,
 				Optional:              true,
@@ -391,7 +390,7 @@ Google Cloud KMS.`,
 				Elem:                  &schema.Schema{Type: schema.TypeString},
 				Description:           `Partner Metadata Map made available within the instance.`,
 			},
-			<% end -%>
+			{{- end }}
 
 			"metadata_fingerprint": {
 				Type:        schema.TypeString,
@@ -442,7 +441,7 @@ Google Cloud KMS.`,
 							Description:      `The name of the subnetwork to attach this interface to. The subnetwork must exist in the same region this instance will be created in. Either network or subnetwork must be provided.`,
 						},
 
-						<% unless version == 'ga' -%>
+						{{ if ne $.TargetVersionName `ga` -}}
 						"network_attachment": {
 							Type:             schema.TypeString,
 							Optional:         true,
@@ -451,7 +450,7 @@ Google Cloud KMS.`,
 							DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 							Description:      `The URL of the network attachment that this interface should connect to in the following format: projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}.`,
 						},
-						<% end -%>
+						{{- end }}
 
 						"subnetwork_project": {
 							Type:        schema.TypeString,
@@ -760,14 +759,14 @@ be from 0 to 999,999,999 inclusive.`,
 								},
 							},
 						},
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 						"maintenance_interval" : {
 							Type:        schema.TypeString,
 							Optional:    true,
 							ForceNew:    true,
 							Description: `Specifies the frequency of planned maintenance events. The accepted values are: PERIODIC`,
 						},
-<% end -%>
+{{- end }}
 						"local_ssd_recovery_timeout" : {
 							Type:        schema.TypeList,
 							Optional:    true,
@@ -1370,12 +1369,12 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 	if err != nil {
 		return err
 	}
-	<% unless version == 'ga' -%>
+	{{- if ne $.TargetVersionName "ga" }}
 	PartnerMetadata, err := resourceInstancePartnerMetadata(d)
 	if err != nil {
 		return err
 	}
-	<% end -%>
+	{{- end }}
 
 	networks, err := expandNetworkInterfaces(d, config)
 	if err != nil {
@@ -1404,9 +1403,9 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 		MinCpuPlatform:             d.Get("min_cpu_platform").(string),
 		Disks:                      disks,
 		Metadata:                   metadata,
-		<% unless version == 'ga' -%>
+		{{- if ne $.TargetVersionName "ga" }}
 		PartnerMetadata:            PartnerMetadata,
-		<% end -%>
+		{{- end }}
 		NetworkInterfaces:          networks,
 		NetworkPerformanceConfig:   networkPerformanceConfig,
 		Scheduling:                 scheduling,
@@ -1415,9 +1414,9 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 		ConfidentialInstanceConfig: expandConfidentialInstanceConfig(d),
 		ShieldedInstanceConfig:     expandShieldedVmConfigs(d),
 		AdvancedMachineFeatures:    expandAdvancedMachineFeatures(d),
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 		DisplayDevice:              expandDisplayDevice(d),
-<% end -%>
+{{- end }}
 		ResourcePolicies:           resourcePolicies,
 		ReservationAffinity:        reservationAffinity,
 	}
@@ -1530,7 +1529,7 @@ func flattenDisk(disk *compute.AttachedDisk, configDisk map[string]any, defaultP
 		if disk.InitializeParams.SourceImage != "" {
 			path, err := resolveImageRefToRelativeURI(defaultProject, disk.InitializeParams.SourceImage)
 			if err != nil {
-				return nil, errwrap.Wrapf("Error expanding source image input to relative URI: {{err}}", err)
+				return nil, errwrap.Wrapf("Error expanding source image input to relative URI: {{"{{"}}err{{"}}"}}", err)
 			}
 			diskMap["source_image"] = path
 		} else {
@@ -1723,11 +1722,11 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 	}
 
 	splits := strings.Split(idStr, "/")
-	<% if version == "ga" -%>
+	{{- if eq $.TargetVersionName "ga" }}
 	instanceTemplate, err := config.NewComputeClient(userAgent).InstanceTemplates.Get(project, splits[len(splits)-1]).Do()
-	<% else -%>
+	{{- else }}
 	instanceTemplate, err := config.NewComputeClient(userAgent).InstanceTemplates.Get(project, splits[len(splits)-1]).View("FULL").Do()
-	<% end -%>
+	{{- end }}
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Instance Template %q", d.Get("name").(string)))
 	}
@@ -1754,7 +1753,7 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 		}
 	}
 
-	<% unless version == 'ga' -%>
+	{{ if ne $.TargetVersionName `ga` -}}
 	if instanceTemplate.Properties.PartnerMetadata != nil {
 		partnerMetadata, err := flattenPartnerMetadata(instanceTemplate.Properties.PartnerMetadata)
 		if err != nil {
@@ -1764,7 +1763,7 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 			return fmt.Errorf("Error setting partner metadata: %s", err)
 		}
 	}
-	<% end -%>
+	{{- end }}
 
 	// Set the tags fingerprint if there is one.
 	if instanceTemplate.Properties.Tags != nil {
@@ -1884,13 +1883,13 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 			return fmt.Errorf("Error setting advanced_machine_features: %s", err)
 		}
 	}
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 	if instanceTemplate.Properties.DisplayDevice != nil {
 		if err = d.Set("enable_display", flattenEnableDisplay(instanceTemplate.Properties.DisplayDevice)); err != nil {
 			return fmt.Errorf("Error setting enable_display: %s", err)
 		}
 	}
-<% end -%>
+{{- end }}
 
 	if instanceTemplate.Properties.ResourcePolicies != nil {
 		if err = d.Set("resource_policies", instanceTemplate.Properties.ResourcePolicies); err != nil {
@@ -1966,7 +1965,7 @@ func resourceComputeInstanceTemplateImportState(d *schema.ResourceData, meta int
 	}
 
 	// Replace import id for the resource id
-	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/global/instanceTemplates/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}"}}/global/instanceTemplates/{{"{{"}}name{{"}}"}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}

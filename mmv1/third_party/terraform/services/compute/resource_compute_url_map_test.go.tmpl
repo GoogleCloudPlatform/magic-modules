@@ -1,10 +1,9 @@
-<% autogen_exception -%>
 package compute_test
 
 import (
 	"fmt"
-	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -68,56 +67,56 @@ func TestAccComputeUrlMap_advanced(t *testing.T) {
 }
 
 func TestAccComputeUrlMap_defaultRouteActionPathUrlRewrite(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    CheckDestroy:             testAccCheckComputeUrlMapDestroyProducer(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccComputeUrlMap_defaultRouteActionPathUrlRewrite(acctest.RandString(t, 10)),
-        Check: resource.ComposeTestCheckFunc(
-          testAccCheckComputeUrlMapExists(
-            t, "google_compute_url_map.foobar"),
-        ),
-      },
-      {
-        Config: testAccComputeUrlMap_defaultRouteActionPathUrlRewrite_update(acctest.RandString(t, 10)),
-        Check: resource.ComposeTestCheckFunc(
-          testAccCheckComputeUrlMapExists(
-            t, "google_compute_url_map.foobar"),
-        ),
-      },
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeUrlMapDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeUrlMap_defaultRouteActionPathUrlRewrite(acctest.RandString(t, 10)),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeUrlMapExists(
+						t, "google_compute_url_map.foobar"),
+				),
+			},
+			{
+				Config: testAccComputeUrlMap_defaultRouteActionPathUrlRewrite_update(acctest.RandString(t, 10)),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeUrlMapExists(
+						t, "google_compute_url_map.foobar"),
+				),
+			},
+		},
+	})
 }
 
 func TestAccComputeUrlMap_defaultRouteActionUrlRewrite(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    CheckDestroy:             testAccCheckComputeUrlMapDestroyProducer(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccComputeUrlMap_defaultRouteActionUrlRewrite(acctest.RandString(t, 10)),
-        Check: resource.ComposeTestCheckFunc(
-          testAccCheckComputeUrlMapExists(
-            t, "google_compute_url_map.foobar"),
-        ),
-      },
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeUrlMapDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeUrlMap_defaultRouteActionUrlRewrite(acctest.RandString(t, 10)),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeUrlMapExists(
+						t, "google_compute_url_map.foobar"),
+				),
+			},
 
-      {
-        Config: testAccComputeUrlMap_defaultRouteActionUrlRewrite_update(acctest.RandString(t, 10)),
-        Check: resource.ComposeTestCheckFunc(
-          testAccCheckComputeUrlMapExists(
-            t, "google_compute_url_map.foobar"),
-        ),
-      },
-    },
-  })
+			{
+				Config: testAccComputeUrlMap_defaultRouteActionUrlRewrite_update(acctest.RandString(t, 10)),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeUrlMapExists(
+						t, "google_compute_url_map.foobar"),
+				),
+			},
+		},
+	})
 }
 
 func TestAccComputeUrlMap_noPathRulesWithUpdate(t *testing.T) {
@@ -177,69 +176,69 @@ func testAccCheckComputeUrlMapExists(t *testing.T, n string) resource.TestCheckF
 }
 
 func TestAccComputeUrlMap_defaultRouteActionTrafficDirectorPathUpdate(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  randString := acctest.RandString(t, 10)
+	randString := acctest.RandString(t, 10)
 
-  bsName := fmt.Sprintf("urlmap-test-%s", randString)
-  hcName := fmt.Sprintf("urlmap-test-%s", randString)
-  umName := fmt.Sprintf("urlmap-test-%s", randString)
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    CheckDestroy:             testAccCheckComputeUrlMapDestroyProducer(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccComputeUrlMap_defaultRouteActionTrafficDirectorPath(bsName, hcName, umName),
-      },
-      {
-        ResourceName:      "google_compute_url_map.foobar",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
-      {
-        Config: testAccComputeUrlMap_defaultRouteActionTrafficDirectorPathUpdate(bsName, hcName, umName),
-      },
-      {
-        ResourceName:      "google_compute_url_map.foobar",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
-    },
-  })
+	bsName := fmt.Sprintf("urlmap-test-%s", randString)
+	hcName := fmt.Sprintf("urlmap-test-%s", randString)
+	umName := fmt.Sprintf("urlmap-test-%s", randString)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeUrlMapDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeUrlMap_defaultRouteActionTrafficDirectorPath(bsName, hcName, umName),
+			},
+			{
+				ResourceName:      "google_compute_url_map.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeUrlMap_defaultRouteActionTrafficDirectorPathUpdate(bsName, hcName, umName),
+			},
+			{
+				ResourceName:      "google_compute_url_map.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
 }
 
 func TestAccComputeUrlMap_defaultRouteActionTrafficDirectorUpdate(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  randString := acctest.RandString(t, 10)
+	randString := acctest.RandString(t, 10)
 
-  bsName := fmt.Sprintf("urlmap-test-%s", randString)
-  hcName := fmt.Sprintf("urlmap-test-%s", randString)
-  umName := fmt.Sprintf("urlmap-test-%s", randString)
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    CheckDestroy:             testAccCheckComputeUrlMapDestroyProducer(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccComputeUrlMap_defaultRouteActionTrafficDirector(bsName, hcName, umName),
-      },
-      {
-        ResourceName:      "google_compute_url_map.foobar",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
-      {
-        Config: testAccComputeUrlMap_defaultRouteActionTrafficDirectorUpdate(bsName, hcName, umName),
-      },
-      {
-        ResourceName:      "google_compute_url_map.foobar",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
-    },
-  })
+	bsName := fmt.Sprintf("urlmap-test-%s", randString)
+	hcName := fmt.Sprintf("urlmap-test-%s", randString)
+	umName := fmt.Sprintf("urlmap-test-%s", randString)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeUrlMapDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeUrlMap_defaultRouteActionTrafficDirector(bsName, hcName, umName),
+			},
+			{
+				ResourceName:      "google_compute_url_map.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeUrlMap_defaultRouteActionTrafficDirectorUpdate(bsName, hcName, umName),
+			},
+			{
+				ResourceName:      "google_compute_url_map.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
 }
 
 func TestAccComputeUrlMap_trafficDirectorUpdate(t *testing.T) {
@@ -349,6 +348,7 @@ func TestAccComputeUrlMap_defaultUrlRedirect(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeUrlMapDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeUrlMap_defaultUrlRedirectConfig(randomSuffix),
@@ -361,42 +361,6 @@ func TestAccComputeUrlMap_defaultUrlRedirect(t *testing.T) {
 		},
 	})
 }
-
-<% unless version == 'ga' -%>
-func TestAccComputeUrlMap_urlMapCustomErrorResponsePolicyUpdate(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		CheckDestroy:             testAccCheckComputeUrlMapDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeUrlMap_urlMapCustomErrorResponsePolicy(context),
-			},
-			{
-				ResourceName:            "google_compute_url_map.urlmap",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"default_service"},
-			},
-			{
-				Config: testAccComputeUrlMap_urlMapCustomErrorResponsePolicyUpdate(context),
-			},
-			{
-				ResourceName:            "google_compute_url_map.urlmap",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"default_service"},
-			},
-		},
-	})
-}
-<% end -%>
 
 func testAccComputeUrlMap_basic1(bsName, hcName, umName string) string {
 	return fmt.Sprintf(`
@@ -605,7 +569,7 @@ resource "google_compute_url_map" "foobar" {
 }
 
 func testAccComputeUrlMap_defaultRouteActionPathUrlRewrite(suffix string) string {
-  return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_compute_backend_service" "foobar" {
   name          = "urlmap-test-%s"
   health_checks = [google_compute_http_health_check.zero.self_link]
@@ -653,7 +617,7 @@ resource "google_compute_url_map" "foobar" {
 }
 
 func testAccComputeUrlMap_defaultRouteActionPathUrlRewrite_update(suffix string) string {
-  return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_compute_backend_service" "foobar" {
   name          = "urlmap-test-%s"
   health_checks = [google_compute_http_health_check.zero.self_link]
@@ -701,7 +665,7 @@ resource "google_compute_url_map" "foobar" {
 }
 
 func testAccComputeUrlMap_defaultRouteActionUrlRewrite(suffix string) string {
-  return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_compute_backend_service" "foobar" {
   name          = "urlmap-test-%s"
   health_checks = [google_compute_http_health_check.zero.self_link]
@@ -729,7 +693,7 @@ resource "google_compute_url_map" "foobar" {
 }
 
 func testAccComputeUrlMap_defaultRouteActionUrlRewrite_update(suffix string) string {
-  return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_compute_backend_service" "foobar" {
   name          = "urlmap-test-%s"
   health_checks = [google_compute_http_health_check.zero.self_link]
@@ -1272,7 +1236,7 @@ resource "google_compute_health_check" "default" {
 }
 
 func testAccComputeUrlMap_defaultRouteActionTrafficDirectorPath(bsName, hcName, umName string) string {
-  return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_compute_url_map" "foobar" {
   name        = "%s"
   description = "a description"
@@ -1387,7 +1351,7 @@ resource "google_compute_health_check" "default" {
 }
 
 func testAccComputeUrlMap_defaultRouteActionTrafficDirectorPathUpdate(bsName, hcName, umName string) string {
-  return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_compute_url_map" "foobar" {
   name        = "%s"
   description = "a description"
@@ -1500,9 +1464,8 @@ resource "google_compute_health_check" "default" {
 `, umName, bsName, bsName, hcName)
 }
 
-
 func testAccComputeUrlMap_defaultRouteActionTrafficDirector(bsName, hcName, umName string) string {
-  return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_compute_url_map" "foobar" {
   name        = "%s"
   description = "a description"
@@ -1607,7 +1570,7 @@ resource "google_compute_health_check" "default" {
 }
 
 func testAccComputeUrlMap_defaultRouteActionTrafficDirectorUpdate(bsName, hcName, umName string) string {
-  return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_compute_url_map" "foobar" {
   name        = "%s"
   description = "a description"
@@ -1721,193 +1684,3 @@ resource "google_compute_url_map" "foobar" {
 }
 `, randomSuffix)
 }
-
-<% unless version == 'ga' -%>
-func testAccComputeUrlMap_urlMapCustomErrorResponsePolicy(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_compute_url_map" "urlmap" {
-  provider    = google-beta
-  name        = "urlmap%{random_suffix}"
-  description = "a description"
-
-  default_service = google_compute_backend_service.example.id
-
-  default_custom_error_response_policy {
-    error_response_rule {
-      match_response_codes = ["5xx"] # All 5xx responses will be catched
-      path = "/*"
-      override_response_code = 502
-    }
-    error_service = google_compute_backend_bucket.error.id
-  }
-
-  host_rule {
-    hosts        = ["mysite.com"]
-    path_matcher = "mysite"
-  }
-
-  path_matcher {
-    name            = "mysite"
-    default_service = google_compute_backend_service.example.id
-
-    default_custom_error_response_policy {
-      error_response_rule {
-        match_response_codes = ["4xx", "5xx"] # All 4xx and 5xx responses will be catched on path login
-        path = "/login"
-        override_response_code = 404
-      }
-      error_response_rule {
-        match_response_codes = ["503"] # Only a 503 response will be catched on path example
-        path = "/example"
-        override_response_code = 502
-      }
-      error_service = google_compute_backend_bucket.error.id
-    }
-
-    path_rule {
-      paths   = ["/*"]
-      service = google_compute_backend_service.example.id
-
-      custom_error_response_policy {
-        error_response_rule {
-          match_response_codes = ["4xx"]
-          path = "/register"
-          override_response_code = 401
-        }
-        error_service = google_compute_backend_bucket.error.id
-      }
-    }
-  }
-}
-
-resource "google_compute_backend_service" "example" {
-  provider    = google-beta
-  name        = "login%{random_suffix}"
-  port_name   = "http"
-  protocol    = "HTTP"
-  timeout_sec = 10
-  load_balancing_scheme = "EXTERNAL_MANAGED"
-
-  health_checks = [google_compute_http_health_check.default.id]
-}
-
-resource "google_compute_http_health_check" "default" {
-  provider           = google-beta
-  name               = "tf-test-health-check%{random_suffix}"
-  request_path       = "/"
-  check_interval_sec = 1
-  timeout_sec        = 1
-}
-
-resource "google_compute_backend_bucket" "error" {
-  provider    = google-beta
-  name        = "tf-test-error-backend-bucket%{random_suffix}"
-  bucket_name = google_storage_bucket.error.name
-  enable_cdn  = true
-}
-
-resource "google_storage_bucket" "error" {
-  provider    = google-beta
-  name        = "tf-test-static-asset-bucket%{random_suffix}"
-  location    = "US"
-}
-`, context)
-}
-<% end -%>
-
-<% unless version == 'ga' -%>
-func testAccComputeUrlMap_urlMapCustomErrorResponsePolicyUpdate(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_compute_url_map" "urlmap" {
-  provider    = google-beta
-  name        = "urlmap%{random_suffix}"
-  description = "a description"
-
-  default_service = google_compute_backend_service.example.id
-
-  default_custom_error_response_policy {
-    error_response_rule {
-      match_response_codes = ["5xx", "4xx"] # All 5xx responses will be catched
-      path = "/test/*"
-      override_response_code = 503
-    }
-    error_service = google_compute_backend_bucket.error.id
-  }
-
-  host_rule {
-    hosts        = ["mysite.com"]
-    path_matcher = "mysite"
-  }
-
-  path_matcher {
-    name            = "mysite"
-    default_service = google_compute_backend_service.example.id
-
-    default_custom_error_response_policy {
-      error_response_rule {
-        match_response_codes = ["5xx"] # All 4xx and 5xx responses will be catched on path login
-        path = "/*"
-        override_response_code = 502
-      }
-      error_response_rule {
-        match_response_codes = ["4xx"] # Only a 503 response will be catched on path example
-        path = "/example/test"
-        override_response_code = 400
-      }
-      error_service = google_compute_backend_bucket.error.id
-    }
-
-    path_rule {
-      paths   = ["/*"]
-      service = google_compute_backend_service.example.id
-
-      custom_error_response_policy {
-        error_response_rule {
-          match_response_codes = ["5xx"]
-          path = "/register/example/*"
-          override_response_code = 403
-        }
-        error_service = google_compute_backend_bucket.error.id
-      }
-    }
-  }
-}
-
-resource "google_compute_backend_service" "example" {
-  provider    = google-beta
-  name        = "login%{random_suffix}"
-  port_name   = "http"
-  protocol    = "HTTP"
-  timeout_sec = 10
-  load_balancing_scheme = "EXTERNAL_MANAGED"
-
-  health_checks = [google_compute_http_health_check.default.id]
-}
-
-resource "google_compute_http_health_check" "default" {
-  provider           = google-beta
-  name               = "tf-test-health-check%{random_suffix}"
-  request_path       = "/"
-  check_interval_sec = 1
-  timeout_sec        = 1
-}
-
-resource "google_compute_backend_bucket" "error" {
-  provider    = google-beta
-  name        = "tf-test-error-backend-bucket-2%{random_suffix}"
-  bucket_name = google_storage_bucket.error.name
-  enable_cdn  = true
-
-	lifecycle {
-		create_before_destroy = true
-	}
-}
-
-resource "google_storage_bucket" "error" {
-  provider    = google-beta
-  name        = "tf-test-static-asset-bucket-2%{random_suffix}"
-  location    = "US"
-}
-`, context)
-}
-<% end -%>

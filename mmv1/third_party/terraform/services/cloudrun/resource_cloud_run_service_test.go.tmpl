@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package cloudrun_test
 
 import (
@@ -772,7 +771,7 @@ resource "google_cloud_run_service" "default" {
 `, context)
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 
 func TestAccCloudRunService_probes(t *testing.T) {
 	t.Parallel()
@@ -1085,7 +1084,7 @@ resource "google_cloud_run_service" "default" {
 `, name, project)
 }
 
-<% end -%>
+{{ end }}
 
 func TestAccCloudRunService_withCreationOnlyAttribution(t *testing.T) {
 	t.Parallel()
@@ -1423,7 +1422,7 @@ resource "google_cloud_run_service" "default" {
 `, name, project)
 }
 
-  <% unless version == 'ga' -%>
+  {{ if ne $.TargetVersionName `ga` -}}
 
 func TestAccCloudRunService_emptyDirVolume(t *testing.T) {
 	t.Parallel()
@@ -1483,4 +1482,4 @@ resource "google_cloud_run_service" "default" {
 }
 `, name, project)
 }
-  <% end -%>
+  {{- end }}

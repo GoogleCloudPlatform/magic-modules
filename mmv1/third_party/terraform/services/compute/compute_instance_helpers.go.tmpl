@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package compute
 
 import (
@@ -13,11 +12,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"google.golang.org/api/googleapi"
 
-<% if version == "ga" -%>
+{{ if eq $.TargetVersionName `ga` }}
 	"google.golang.org/api/compute/v1"
-<% else -%>
+{{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
-<% end -%>
+{{- end }}
 )
 
 func instanceSchedulingNodeAffinitiesElemSchema() *schema.Resource {
@@ -164,11 +163,11 @@ func expandScheduling(v interface{}) (*compute.Scheduling, error) {
 		scheduling.OnInstanceStopAction = transformedOnInstanceStopAction
 		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "OnInstanceStopAction")
 	}
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 	if v, ok := original["maintenance_interval"]; ok {
 		scheduling.MaintenanceInterval = v.(string)
 	}
-<% end -%>
+{{- end }}
 	if v, ok := original["local_ssd_recovery_timeout"]; ok {
 		transformedLocalSsdRecoveryTimeout, err := expandComputeLocalSsdRecoveryTimeout(v)
 		if err != nil {
@@ -286,11 +285,11 @@ func flattenScheduling(resp *compute.Scheduling) []map[string]interface{} {
 		schedulingMap["on_instance_stop_action"] = flattenOnInstanceStopAction(resp.OnInstanceStopAction)
 	}
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 	if resp.MaintenanceInterval != "" {
 		schedulingMap["maintenance_interval"] = resp.MaintenanceInterval
 	}
-<% end -%>
+{{- end }}
 
 	if resp.LocalSsdRecoveryTimeout != nil {
 		schedulingMap["local_ssd_recovery_timeout"] = flattenComputeLocalSsdRecoveryTimeout(resp.LocalSsdRecoveryTimeout)
@@ -352,11 +351,11 @@ func flattenAccessConfigs(accessConfigs []*compute.AccessConfig) ([]map[string]i
 		if natIP == "" {
 			natIP = ac.NatIP
 		}
-		<% unless version == 'ga' -%>
+		{{- if ne $.TargetVersionName "ga" }}
 		if ac.SecurityPolicy != "" {
 			flattened[i]["security_policy"] = ac.SecurityPolicy
 		}
-		<% end -%>
+		{{- end }}
 	}
 	return flattened, natIP
 }
@@ -371,11 +370,11 @@ func flattenIpv6AccessConfigs(ipv6AccessConfigs []*compute.AccessConfig) []map[s
 		flattened[i]["external_ipv6"] = ac.ExternalIpv6
 		flattened[i]["external_ipv6_prefix_length"] = strconv.FormatInt(ac.ExternalIpv6PrefixLength, 10)
 		flattened[i]["name"] = ac.Name
-		<% unless version == 'ga' -%>
+		{{- if ne $.TargetVersionName "ga" }}
 		if ac.SecurityPolicy != "" {
 			flattened[i]["security_policy"] = ac.SecurityPolicy
 		}
-		<% end -%>
+		{{- end }}
 	}
 	return flattened
 }
@@ -418,7 +417,7 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 			internalIP = iface.NetworkIP
 		}
 
-		<% unless version == 'ga' -%>
+		{{ if ne $.TargetVersionName `ga` -}}
 		if iface.NetworkAttachment != "" {
 			networkAttachment, err := tpgresource.GetRelativePath(iface.NetworkAttachment)
 			if err != nil {
@@ -426,16 +425,16 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 			flattened[i]["network_attachment"] = networkAttachment
 		}
-		<% end -%>
+		{{- end }}
 
-		<% unless version == 'ga' -%>
+		{{ if ne $.TargetVersionName `ga` -}}
 		// the security_policy for a network_interface is found in one of its accessConfigs.
 		if len(iface.AccessConfigs) > 0 && iface.AccessConfigs[0].SecurityPolicy != "" {
 			flattened[i]["security_policy"] = iface.AccessConfigs[0].SecurityPolicy
 		} else if len(iface.Ipv6AccessConfigs) > 0 && iface.Ipv6AccessConfigs[0].SecurityPolicy != "" {
 			flattened[i]["security_policy"] = iface.Ipv6AccessConfigs[0].SecurityPolicy
 		}
-		<% end -%>
+		{{- end }}
 	}
 	return flattened, region, internalIP, externalIP, nil
 }
@@ -494,7 +493,7 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 		data := raw.(map[string]interface{})
 
 
-		<% unless version == 'ga' -%>
+		{{ if ne $.TargetVersionName `ga` -}}
 		var networkAttachment = ""
 		network := data["network"].(string)
 		subnetwork := data["subnetwork"].(string)
@@ -506,7 +505,7 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 			return nil, fmt.Errorf("exactly one of network, subnetwork, or network_attachment must be provided")
 		}
 
-		<% else -%>
+		{{- else }}
 
 		network := data["network"].(string)
 		subnetwork := data["subnetwork"].(string)
@@ -514,7 +513,7 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 			return nil, fmt.Errorf("exactly one of network or subnetwork must be provided")
 		}
 
-		<% end -%>
+		{{ end }}
 
 		nf, err := tpgresource.ParseNetworkFieldValue(network, d, config)
 		if err != nil {
@@ -530,9 +529,9 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 		ifaces[i] = &compute.NetworkInterface{
 			NetworkIP:         data["network_ip"].(string),
 			Network:           nf.RelativeLink(),
-			<% unless version == 'ga' -%>
+			{{- if ne $.TargetVersionName "ga" }}
 			NetworkAttachment: networkAttachment,
-			<% end -%>
+			{{- end }}
 			Subnetwork:        sf.RelativeLink(),
 			AccessConfigs:     expandAccessConfigs(data["access_config"].([]interface{})),
 			AliasIpRanges:     expandAliasIpRanges(data["alias_ip_range"].([]interface{})),
@@ -633,10 +632,10 @@ func flattenConfidentialInstanceConfig(ConfidentialInstanceConfig *compute.Confi
 		return nil
 	}
 
-	return []map[string]interface{}{{
+	return []map[string]interface{}{{"{{"}}
 		"enable_confidential_compute": ConfidentialInstanceConfig.EnableConfidentialCompute,
 		"confidential_instance_type": ConfidentialInstanceConfig.ConfidentialInstanceType,
-	}}
+	{{"}}"}}
 }
 
 func expandAdvancedMachineFeatures(d tpgresource.TerraformResourceData) *compute.AdvancedMachineFeatures {
@@ -656,11 +655,11 @@ func flattenAdvancedMachineFeatures(AdvancedMachineFeatures *compute.AdvancedMac
 	if AdvancedMachineFeatures == nil {
 		return nil
 	}
-	return []map[string]interface{}{{
+	return []map[string]interface{}{{"{{"}}
 		"enable_nested_virtualization": AdvancedMachineFeatures.EnableNestedVirtualization,
 		"threads_per_core":             AdvancedMachineFeatures.ThreadsPerCore,
 		"visible_core_count":           AdvancedMachineFeatures.VisibleCoreCount,
-	}}
+	{{"}}"}}
 }
 
 func flattenShieldedVmConfig(shieldedVmConfig *compute.ShieldedInstanceConfig) []map[string]bool {
@@ -668,11 +667,11 @@ func flattenShieldedVmConfig(shieldedVmConfig *compute.ShieldedInstanceConfig) [
 		return nil
 	}
 
-	return []map[string]bool{{
+	return []map[string]bool{{"{{"}}
 		"enable_secure_boot":          shieldedVmConfig.EnableSecureBoot,
 		"enable_vtpm":                 shieldedVmConfig.EnableVtpm,
 		"enable_integrity_monitoring": shieldedVmConfig.EnableIntegrityMonitoring,
-	}}
+	{{"}}"}}
 }
 
 func expandDisplayDevice(d tpgresource.TerraformResourceData) *compute.DisplayDevice {
@@ -832,10 +831,10 @@ func flattenReservationAffinity(affinity *compute.ReservationAffinity) []map[str
 	}
 
 	if affinity.ConsumeReservationType == "SPECIFIC_RESERVATION" {
-		flattened["specific_reservation"] = []map[string]interface{}{{
+		flattened["specific_reservation"] = []map[string]interface{}{{"{{"}}
 			"key":    affinity.Key,
 			"values": affinity.Values,
-		}}
+		{{"}}"}}
 	}
 
 	return []map[string]interface{}{flattened}

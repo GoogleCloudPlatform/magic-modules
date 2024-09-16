@@ -1,6 +1,6 @@
-resource "google_cloud_run_v2_service" "<%= ctx[:primary_resource_id] %>" {
+resource "google_cloud_run_v2_service" "{{$.PrimaryResourceId}}" {
   provider = google-beta
-  name     = "<%= ctx[:vars]['cloud_run_service_name'] %>"
+  name     = "{{index $.Vars "cloud_run_service_name"}}"
   depends_on = [time_sleep.wait_for_mesh]
   deletion_protection = false
 
@@ -25,5 +25,5 @@ resource "time_sleep" "wait_for_mesh" {
 
 resource "google_network_services_mesh" "mesh" {
   provider = google-beta
-  name     = "<%= ctx[:vars]['mesh_name'] %>"
+  name     = "{{index $.Vars "mesh_name"}}"
 }

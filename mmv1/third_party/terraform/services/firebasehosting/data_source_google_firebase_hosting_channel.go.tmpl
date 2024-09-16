@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package firebasehosting
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 import (
 	"fmt"
 
@@ -25,7 +24,7 @@ func DataSourceGoogleFirebaseHostingChannel() *schema.Resource {
 func dataSourceGoogleFirebaseHostingChannelRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 
-	id, err := tpgresource.ReplaceVars(d, config, "sites/{{site_id}}/channels/{{channel_id}}")
+	id, err := tpgresource.ReplaceVars(d, config, "sites/{{"{{"}}site_id{{"}}"}}/channels/{{"{{"}}channel_id{{"}}"}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -45,4 +44,4 @@ func dataSourceGoogleFirebaseHostingChannelRead(d *schema.ResourceData, meta int
 	}
 	return nil
 }
-<% end -%>
+{{- end }}

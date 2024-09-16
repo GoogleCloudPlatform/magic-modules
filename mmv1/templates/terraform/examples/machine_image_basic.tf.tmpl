@@ -1,6 +1,6 @@
 resource "google_compute_instance" "vm" {
   provider     = google-beta
-  name         = "<%= ctx[:vars]['vm_name'] %>"
+  name         = "{{index $.Vars "vm_name"}}"
   machine_type = "e2-medium"
 
   boot_disk {
@@ -14,8 +14,8 @@ resource "google_compute_instance" "vm" {
   }
 }
 
-resource "google_compute_machine_image" "<%= ctx[:primary_resource_id] %>" {
+resource "google_compute_machine_image" "{{$.PrimaryResourceId}}" {
   provider        = google-beta
-  name            = "<%= ctx[:vars]['image_name'] %>"
+  name            = "{{index $.Vars "image_name"}}"
   source_instance = google_compute_instance.vm.self_link
 }

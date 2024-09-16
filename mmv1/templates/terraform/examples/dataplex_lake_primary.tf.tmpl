@@ -1,4 +1,4 @@
-resource "google_dataplex_lake" "<%= ctx[:primary_resource_id] %>" {
+resource "google_dataplex_lake" "{{$.PrimaryResourceId}}" {
   location     = "us-central1"
   name         = "tf-test-lake%{random_suffix}"
   description  = "Test Lake"
@@ -8,6 +8,6 @@ resource "google_dataplex_lake" "<%= ctx[:primary_resource_id] %>" {
     my-lake = "exists"
   }
 
-  project = "<%= ctx[:test_env_vars]['project_name'] %>"
+  project = "{{index $.TestEnvVars "project_name"}}"
 }
 

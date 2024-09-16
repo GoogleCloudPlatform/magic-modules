@@ -1,11 +1,11 @@
-resource "google_pubsub_lite_reservation" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]['reservation_name'] %>"
+resource "google_pubsub_lite_reservation" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "reservation_name"}}"
   project = data.google_project.project.number
   throughput_capacity = 2
 }
 
-resource "google_pubsub_lite_topic" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]['topic_name'] %>"
+resource "google_pubsub_lite_topic" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "topic_name"}}"
   project = data.google_project.project.number
 
   partition_config {
@@ -21,7 +21,7 @@ resource "google_pubsub_lite_topic" "<%= ctx[:primary_resource_id] %>" {
   }
 
   reservation_config {
-    throughput_reservation = google_pubsub_lite_reservation.<%= ctx[:primary_resource_id] %>.name
+    throughput_reservation = google_pubsub_lite_reservation.{{$.PrimaryResourceId}}.name
   }
 }
 

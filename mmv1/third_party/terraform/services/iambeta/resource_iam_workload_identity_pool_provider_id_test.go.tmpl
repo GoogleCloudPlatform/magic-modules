@@ -1,7 +1,6 @@
-<% autogen_exception -%>
 package iambeta_test
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 import (
 	"strings"
 	"testing"
@@ -34,4 +33,4 @@ func TestValidateIAMBetaWorkloadIdentityPoolProviderId(t *testing.T) {
 		t.Errorf("Failed to validate WorkloadIdentityPoolProvider names: %v", es)
 	}
 }
-<% end -%>
+{{- end }}

@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package container
 
 import (
@@ -21,11 +20,11 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 
-<% if version == "ga" -%>
+{{ if eq $.TargetVersionName `ga` }}
 	"google.golang.org/api/container/v1"
-<% else -%>
+{{- else }}
 	container "google.golang.org/api/container/v1beta1"
-<% end -%>
+{{- end }}
 )
 
 // Single-digit hour is equivalent to hour with leading zero e.g. suppress diff 1:00 => 01:00.
@@ -91,10 +90,10 @@ var (
 		"addons_config.0.gcs_fuse_csi_driver_config",
 		"addons_config.0.stateful_ha_config",
 		"addons_config.0.ray_operator_config",
-	<% unless version == 'ga' -%>
+	{{- if ne $.TargetVersionName "ga" }}
 		"addons_config.0.istio_config",
 		"addons_config.0.kalm_config",
-	<% end -%>
+	{{- end }}
 	}
 
 	privateClusterConfigKeys = []string{
@@ -159,9 +158,9 @@ func clusterSchemaNodePoolDefaults() *schema.Schema {
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"containerd_config": schemaContainerdConfig(),
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 							"gcfs_config": schemaGcfsConfig(),
-<% end -%>
+{{- end }}
 							"insecure_kubelet_readonly_port_enabled": schemaInsecureKubeletReadonlyPortEnabled(),
 							"logging_variant": schemaLoggingVariant(),
 						},
@@ -210,9 +209,9 @@ func ResourceContainerCluster() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			resourceNodeConfigEmptyGuestAccelerator,
 			customdiff.ForceNewIfChange("enable_l4_ilb_subsetting", isBeenEnabled),
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 			customdiff.ForceNewIfChange("enable_fqdn_network_policy", isBeenEnabled),
-<% end -%>
+{{- end }}
 			containerClusterAutopilotCustomizeDiff,
 			containerClusterNodeVersionRemoveDefaultCustomizeDiff,
 			containerClusterNetworkPolicyEmptyCustomizeDiff,
@@ -460,7 +459,7 @@ func ResourceContainerCluster() *schema.Resource {
 								},
 							},
 						},
-						<% unless version == 'ga' -%>
+						{{- if ne $.TargetVersionName "ga" }}
 						"istio_config": {
 							Type:         schema.TypeList,
 							Optional:     true,
@@ -502,7 +501,7 @@ func ResourceContainerCluster() *schema.Resource {
 								},
 							},
 						},
-						<% end -%>
+						{{- end }}
 						"config_connector_config": {
 							Type:         schema.TypeList,
 							Optional:     true,
@@ -942,15 +941,15 @@ func ResourceContainerCluster() *schema.Resource {
 				Optional:    true,
 				ForceNew:    true,
 				Description: `Whether to enable Cloud TPU resources in this cluster.`,
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 				ConflictsWith: []string{"tpu_config"},
 				Computed: true,
 				// TODO: deprecate when tpu_config is correctly returned by the API
 				// Deprecated: "Deprecated in favor of tpu_config",
-<% end -%>
+{{- end }}
 			},
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 			"tpu_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -979,7 +978,7 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-<% end -%>
+{{- end }}
 
 			"enable_legacy_abac": {
 				Type:        schema.TypeBool,
@@ -1059,9 +1058,9 @@ func ResourceContainerCluster() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 				ConflictsWith: []string{"cluster_telemetry"},
-<% end -%>
+{{- end }}
 				ValidateFunc: validation.StringInSlice([]string{"logging.googleapis.com", "logging.googleapis.com/kubernetes", "none"}, false),
 				Description:  `The logging service that the cluster should write logs to. Available options include logging.googleapis.com(Legacy Stackdriver), logging.googleapis.com/kubernetes(Stackdriver Kubernetes Engine Logging), and none. Defaults to logging.googleapis.com/kubernetes.`,
 			},
@@ -1170,7 +1169,7 @@ func ResourceContainerCluster() *schema.Resource {
 				},
 			},
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 			"protect_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -1212,7 +1211,7 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-<% end -%>
+{{- end }}
 
 			"security_posture_config": {
 				Type:        schema.TypeList,
@@ -1253,11 +1252,11 @@ func ResourceContainerCluster() *schema.Resource {
 							Type:        schema.TypeList,
 							Optional:    true,
 							Computed:    true,
-<% if version == "ga" -%>
+{{- if eq $.TargetVersionName "ga" }}
 							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS, APISERVER, SCHEDULER, CONTROLLER_MANAGER, STORAGE, HPA, POD, DAEMONSET, DEPLOYMENT, STATEFULSET, KUBELET, CADVISOR and DCGM.`,
-<% else -%>
+{{- else }}
 							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS, APISERVER, SCHEDULER, CONTROLLER_MANAGER, STORAGE, HPA, POD, DAEMONSET, DEPLOYMENT, STATEFULSET, WORKLOADS, KUBELET, CADVISOR and DCGM.`,
-<% end -%>
+{{- end }}
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
@@ -1440,9 +1439,9 @@ func ResourceContainerCluster() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 				ConflictsWith: []string{"cluster_telemetry"},
-<% end -%>
+{{- end }}
 				ValidateFunc: validation.StringInSlice([]string{"monitoring.googleapis.com", "monitoring.googleapis.com/kubernetes", "none"}, false),
 				Description:  `The monitoring service that the cluster should write metrics to. Automatically send metrics from pods in the cluster to the Google Cloud Monitoring API. VM metrics will be collected by Google Compute Engine regardless of this setting Available options include monitoring.googleapis.com(Legacy Stackdriver), monitoring.googleapis.com/kubernetes(Stackdriver Kubernetes Engine Monitoring), and none. Defaults to monitoring.googleapis.com/kubernetes.`,
 			},
@@ -1538,7 +1537,7 @@ func ResourceContainerCluster() *schema.Resource {
 				Description: `The Kubernetes version on the nodes. Must either be unset or set to the same value as min_master_version on create. Defaults to the default version set by GKE which is not necessarily the latest version. This only affects nodes in the default node pool. While a fuzzy version can be specified, it's recommended that you specify explicit versions as Terraform will see spurious diffs when fuzzy versions are used. See the google_container_engine_versions data source's version_prefix field to approximate fuzzy versions in a Terraform-compatible way. To update nodes in other node pools, use the version attribute on the node pool.`,
 			},
 
-<% unless version == "ga" -%>
+{{ if ne $.TargetVersionName `ga` -}}
 			"pod_security_policy_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -1555,7 +1554,7 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-<% end -%>
+{{- end }}
 			"secret_manager_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -1984,7 +1983,7 @@ func ResourceContainerCluster() *schema.Resource {
 				Description: `The IP address range of the Cloud TPUs in this cluster, in CIDR notation (e.g. 1.2.3.4/29).`,
 			},
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 			"cluster_telemetry": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -2002,7 +2001,7 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-<% end -%>
+{{- end }}
 
 			"default_snat_status": {
 				Type: schema.TypeList,
@@ -2056,14 +2055,14 @@ func ResourceContainerCluster() *schema.Resource {
 			   Description: `Whether multi-networking is enabled for this cluster.`,
 			   Default: false,
 			},
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 			"enable_fqdn_network_policy": {
 			   Type: schema.TypeBool,
 			   Optional: true,
 			   Description: `Whether FQDN Network Policy is enabled on this cluster.`,
 			   Default: false,
 			},
-<% end -%>
+{{- end }}
 			"private_ipv6_google_access": {
 			   Type: schema.TypeString,
 			   Optional: true,
@@ -2213,7 +2212,7 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-			<% unless version == 'ga' -%>
+			{{- if ne $.TargetVersionName "ga" }}
 				"workload_alts_config": {
 					Type:             schema.TypeList,
 					Optional:         true,
@@ -2230,7 +2229,7 @@ func ResourceContainerCluster() *schema.Resource {
 							},
 					},
 				},
-				<% end -%>
+				{{- end }}
 		},
 	}
 }
@@ -2350,9 +2349,9 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		AddonsConfig:            expandClusterAddonsConfig(d.Get("addons_config")),
 		EnableKubernetesAlpha:   d.Get("enable_kubernetes_alpha").(bool),
 		IpAllocationPolicy:      ipAllocationBlock,
-<% unless version == "ga" -%>
+{{- if ne $.TargetVersionName "ga" }}
 		PodSecurityPolicyConfig: expandPodSecurityPolicyConfig(d.Get("pod_security_policy_config")),
-<% end -%>
+{{- end }}
 		SecretManagerConfig: 	 expandSecretManagerConfig(d.Get("secret_manager_config")),
 		Autoscaling:             expandClusterAutoscaling(d.Get("cluster_autoscaling"), d),
 		BinaryAuthorization:     expandBinaryAuthorization(d.Get("binary_authorization")),
@@ -2362,9 +2361,9 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			ForceSendFields: []string{"Enabled"},
 		},
 		ReleaseChannel:          expandReleaseChannel(d.Get("release_channel")),
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 		ClusterTelemetry: expandClusterTelemetry(d.Get("cluster_telemetry")),
-<% end -%>
+{{- end }}
 		EnableTpu:               d.Get("enable_tpu").(bool),
 		NetworkConfig: &container.NetworkConfig{
 			EnableIntraNodeVisibility:            d.Get("enable_intranode_visibility").(bool),
@@ -2376,18 +2375,18 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			DnsConfig:                            expandDnsConfig(d.Get("dns_config")),
 			GatewayApiConfig:                     expandGatewayApiConfig(d.Get("gateway_api_config")),
 			EnableMultiNetworking:                d.Get("enable_multi_networking").(bool),
-<% unless version == "ga" -%>
+{{- if ne $.TargetVersionName "ga" }}
 			EnableFqdnNetworkPolicy:              d.Get("enable_fqdn_network_policy").(bool),
-<% end -%>
+{{- end }}
 	    },
 		MasterAuth:     expandMasterAuth(d.Get("master_auth")),
 		NotificationConfig: expandNotificationConfig(d.Get("notification_config")),
 		ConfidentialNodes: expandConfidentialNodes(d.Get("confidential_nodes")),
 		ResourceLabels: tpgresource.ExpandStringMap(d, "effective_labels"),
 		NodePoolAutoConfig: expandNodePoolAutoConfig(d.Get("node_pool_auto_config")),
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 		ProtectConfig: expandProtectConfig(d.Get("protect_config")),
-<% end -%>
+{{- end }}
 		CostManagementConfig: expandCostManagementConfig(d.Get("cost_management_config")),
 		EnableK8sBetaApis:   expandEnableK8sBetaApis(d.Get("enable_k8s_beta_apis"), nil),
 	}
@@ -2502,11 +2501,11 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		cluster.IdentityServiceConfig = expandIdentityServiceConfig(v)
 	}
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 	if v, ok := d.GetOk("tpu_config"); ok {
 		cluster.TpuConfig = expandContainerClusterTpuConfig(v)
 	}
-<% end -%>
+{{- end }}
 
 	if v, ok := d.GetOk("resource_usage_export_config"); ok {
 		cluster.ResourceUsageExportConfig = expandResourceUsageExportConfig(v)
@@ -2560,11 +2559,11 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		cluster.AddonsConfig.GcePersistentDiskCsiDriverConfig.Enabled = true
 	}
 
-	<% unless version == 'ga' -%>
+	{{ if ne $.TargetVersionName `ga` -}}
 	if v, ok := d.GetOk("workload_alts_config"); ok {
 		cluster.WorkloadAltsConfig = expandWorkloadAltsConfig(v)
 	}
-	<% end -%>
+	{{- end }}
 
 	req := &container.CreateClusterRequest{
 		Cluster: cluster,
@@ -2642,11 +2641,11 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			},
 		})
 		if err != nil {
-			return errwrap.Wrapf("Error deleting default node pool: {{err}}", err)
+			return errwrap.Wrapf("Error deleting default node pool: {{"{{"}}err{{"}}"}}", err)
 		}
 		err = ContainerOperationWait(config, op, project, location, "removing default node pool", userAgent, d.Timeout(schema.TimeoutCreate))
 		if err != nil {
-			return errwrap.Wrapf("Error while waiting to delete default node pool: {{err}}", err)
+			return errwrap.Wrapf("Error while waiting to delete default node pool: {{"{{"}}err{{"}}"}}", err)
 		}
 	}
 
@@ -2678,12 +2677,12 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			},
 		})
 		if err != nil {
-			return errwrap.Wrapf(fmt.Sprintf("Error updating cluster for %v: {{err}}", update.ForceSendFields), err)
+			return errwrap.Wrapf(fmt.Sprintf("Error updating cluster for %v: {{"{{"}}err{{"}}"}}", update.ForceSendFields), err)
 		}
 
 		err = ContainerOperationWait(config, op, project, location, "updating enable private endpoint", userAgent, d.Timeout(schema.TimeoutCreate))
 		if err != nil {
-			return errwrap.Wrapf(fmt.Sprintf("Error while waiting on cluster update for %v: {{err}}", update.ForceSendFields), err)
+			return errwrap.Wrapf(fmt.Sprintf("Error while waiting on cluster update for %v: {{"{{"}}err{{"}}"}}", update.ForceSendFields), err)
 		}
 	}
 
@@ -2710,12 +2709,12 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			},
 		})
 		if err != nil {
-			return errwrap.Wrapf("Error updating AdditionalPodRangesConfig: {{err}}", err)
+			return errwrap.Wrapf("Error updating AdditionalPodRangesConfig: {{"{{"}}err{{"}}"}}", err)
 		}
 
 		err = ContainerOperationWait(config, op, project, location, "updating AdditionalPodRangesConfig", userAgent, d.Timeout(schema.TimeoutCreate))
 		if err != nil {
-			return errwrap.Wrapf("Error while waiting to update AdditionalPodRangesConfig: {{err}}", err)
+			return errwrap.Wrapf("Error while waiting to update AdditionalPodRangesConfig: {{"{{"}}err{{"}}"}}", err)
 		}
 	}
 
@@ -2918,11 +2917,11 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("enable_multi_networking", cluster.NetworkConfig.EnableMultiNetworking); err != nil {
 		return fmt.Errorf("Error setting enable_multi_networking: %s", err)
 	}
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 	if err := d.Set("enable_fqdn_network_policy", cluster.NetworkConfig.EnableFqdnNetworkPolicy); err != nil {
 		return fmt.Errorf("Error setting enable_fqdn_network_policy: %s", err)
 	}
-<% end -%>
+{{- end }}
 	if err := d.Set("private_ipv6_google_access", cluster.NetworkConfig.PrivateIpv6GoogleAccess); err != nil {
 		return fmt.Errorf("Error setting private_ipv6_google_access: %s", err)
 	}
@@ -2987,7 +2986,7 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 	if err := d.Set("pod_security_policy_config", flattenPodSecurityPolicyConfig(cluster.PodSecurityPolicyConfig)); err != nil {
 		return err
 	}
@@ -2995,7 +2994,7 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("cluster_telemetry", flattenClusterTelemetry(cluster.ClusterTelemetry)); err != nil {
 		return err
 	}
-<% end -%>
+{{- end }}
 
 	if err := d.Set("secret_manager_config", flattenSecretManagerConfig(cluster.SecretManagerConfig)); err != nil {
 		return err
@@ -3049,17 +3048,17 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 	if err := d.Set("protect_config", flattenProtectConfig(cluster.ProtectConfig)); err != nil {
 		return err
 	}
-<% end -%>
+{{- end }}
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 	if err := d.Set("workload_alts_config", flattenWorkloadAltsConfig(cluster.WorkloadAltsConfig)); err != nil {
 		return err
 	}
-<% end -%>
+{{- end }}
 
 	return nil
 }
@@ -3404,7 +3403,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s L4 ILB Subsetting has been updated to %v", d.Id(), enabled)
 	}
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 	if d.HasChange("enable_fqdn_network_policy") {
 		enabled := d.Get("enable_fqdn_network_policy").(bool)
 		req := &container.UpdateClusterRequest{
@@ -3420,7 +3419,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		log.Printf("[INFO] GKE cluster %s FQDN Network Policy has been updated to %v", d.Id(), enabled)
 	}
-<% end -%>
+{{- end }}
 
 	if d.HasChange("enable_cilium_clusterwide_network_policy") {
 		enabled := d.Get("enable_cilium_clusterwide_network_policy").(bool)
@@ -4016,7 +4015,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s database encryption config has been updated", d.Id())
 	}
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 	if d.HasChange("pod_security_policy_config") {
 		c := d.Get("pod_security_policy_config")
 		req := &container.UpdateClusterRequest{
@@ -4043,7 +4042,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 		log.Printf("[INFO] GKE cluster %s pod security policy config has been updated", d.Id())
 	}
-<% end -%>
+{{- end }}
 
 	if d.HasChange("secret_manager_config") {
 		c := d.Get("secret_manager_config")
@@ -4189,13 +4188,13 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		op, err := clusterNodePoolDeleteCall.Do()
 		if err != nil {
 			if !transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
-				return errwrap.Wrapf("Error deleting default node pool: {{err}}", err)
+				return errwrap.Wrapf("Error deleting default node pool: {{"{{"}}err{{"}}"}}", err)
 			}
 			log.Printf("[WARN] Container cluster %q default node pool already removed, no change", d.Id())
 		} else {
 			err = ContainerOperationWait(config, op, project, location, "removing default node pool", userAgent, d.Timeout(schema.TimeoutUpdate))
 			if err != nil {
-				return errwrap.Wrapf("Error deleting default node pool: {{err}}", err)
+				return errwrap.Wrapf("Error deleting default node pool: {{"{{"}}err{{"}}"}}", err)
 			}
 		}
 	}
@@ -4352,7 +4351,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 	}
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 	if d.HasChange("node_pool_defaults") && d.HasChange("node_pool_defaults.0.node_config_defaults.0.gcfs_config") {
 		if v, ok := d.GetOk("node_pool_defaults.0.node_config_defaults.0.gcfs_config"); ok {
 			gcfsConfig := v.([]interface{})[0].(map[string]interface{})
@@ -4373,7 +4372,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 			log.Printf("[INFO] GKE cluster %s default gcfs config has been updated", d.Id())
 		}
 	}
-<% end -%>
+{{- end }}
 
 	if d.HasChange("security_posture_config") {
 		req := &container.UpdateClusterRequest{
@@ -4463,7 +4462,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 	d.Partial(false)
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 	if d.HasChange("cluster_telemetry") {
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
@@ -4495,13 +4494,13 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		log.Printf("[INFO] GKE cluster %s Cluster Telemetry has been updated to %#v", d.Id(), req.Update.DesiredClusterTelemetry)
 	}
-<% end -%>
+{{- end }}
 
 	if _, err := containerClusterAwaitRestingState(config, project, location, clusterName, userAgent, d.Timeout(schema.TimeoutUpdate)); err != nil {
 		return err
 	}
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 	if d.HasChange("protect_config") {
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
@@ -4515,8 +4514,8 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		log.Printf("[INFO] GKE cluster %s Protect Config has been updated to %#v", d.Id(), req.Update.DesiredProtectConfig)
 	}
-<% end -%>
-<% unless version == 'ga' -%>
+{{- end }}
+{{- if ne $.TargetVersionName "ga" }}
 	if d.HasChange("workload_alts_config") {
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
@@ -4531,7 +4530,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		log.Printf("[INFO] GKE cluster %s's WorkloadALTSConfig has been updated", d.Id())
 	}
-<% end -%>
+{{- end }}
 	return resourceContainerClusterRead(d, meta)
 }
 
@@ -4764,7 +4763,7 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 		}
 	}
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 	if v, ok := config["istio_config"]; ok && len(v.([]interface{})) > 0 {
 		addon := v.([]interface{})[0].(map[string]interface{})
 		ac.IstioConfig = &container.IstioConfig{
@@ -4781,7 +4780,7 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 			ForceSendFields: []string{"Enabled"},
 		}
 	}
-<% end -%>
+{{- end }}
 
 	return ac
 }
@@ -5106,7 +5105,7 @@ func expandAuthenticatorGroupsConfig(configured interface{}) *container.Authenti
 	return result
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func expandProtectConfig(configured interface{}) *container.ProtectConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -5156,7 +5155,7 @@ func flattenProtectConfigWorkloadConfig(wc *container.WorkloadConfig) []map[stri
 
 	return []map[string]interface{}{result}
 }
-<% end -%>
+{{- end }}
 
 func expandSecurityPostureConfig(configured interface{}) *container.SecurityPostureConfig {
 	l := configured.([]interface{})
@@ -5440,7 +5439,7 @@ func expandReleaseChannel(configured interface{}) *container.ReleaseChannel {
 	}
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func expandClusterTelemetry(configured interface{}) *container.ClusterTelemetry {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -5452,7 +5451,7 @@ func expandClusterTelemetry(configured interface{}) *container.ClusterTelemetry 
 	}
 }
 
-<% end -%>
+{{ end }}
 func expandDefaultSnatStatus(configured interface{}) *container.DefaultSnatStatus {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -5493,7 +5492,7 @@ func expandIdentityServiceConfig(configured interface{}) *container.IdentityServ
 	return v
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func expandPodSecurityPolicyConfig(configured interface{}) *container.PodSecurityPolicyConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -5506,7 +5505,7 @@ func expandPodSecurityPolicyConfig(configured interface{}) *container.PodSecurit
 		ForceSendFields: []string{"Enabled"},
 	}
 }
-<% end -%>
+{{- end }}
 
 func expandSecretManagerConfig(configured interface{}) *container.SecretManagerConfig {
 	l := configured.([]interface{})
@@ -5661,7 +5660,7 @@ func expandMonitoringConfig(configured interface{}) *container.MonitoringConfig 
 	}
 	mc := &container.MonitoringConfig{}
 	config := l[0].(map[string]interface{})
-<%# In version == 'ga' enable_components will always be specified. %>
+{{/* In version == 'ga' enable_components will always be specified. */}}
 	if v, ok := config["enable_components"]; ok {
 		enable_components := v.([]interface{})
 		mc.ComponentConfig = &container.MonitoringComponentConfig{
@@ -5687,7 +5686,7 @@ func expandMonitoringConfig(configured interface{}) *container.MonitoringConfig 
 	return mc
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func expandContainerClusterTpuConfig(configured interface{}) *container.TpuConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -5700,7 +5699,7 @@ func expandContainerClusterTpuConfig(configured interface{}) *container.TpuConfi
 		UseServiceNetworking: config["use_service_networking"].(bool),
 	}
 }
-<% end -%>
+{{- end }}
 
 func expandContainerClusterAuthenticatorGroupsConfig(configured interface{}) *container.AuthenticatorGroupsConfig {
 	l := configured.([]interface{})
@@ -5785,7 +5784,7 @@ func expandNodePoolAutoConfigNetworkTags(configured interface{}) *container.Netw
 	return nt
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func expandWorkloadAltsConfig(configured interface{}) *container.WorkloadALTSConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -5798,7 +5797,7 @@ func expandWorkloadAltsConfig(configured interface{}) *container.WorkloadALTSCon
 		ForceSendFields: []string{"EnableAlts"},
 	}
 }
-<% end -%>
+{{- end }}
 
 func flattenNotificationConfig(c *container.NotificationConfig) []map[string]interface{} {
 	if c == nil {
@@ -5963,18 +5962,18 @@ func flattenClusterAddonsConfig(c *container.AddonsConfig) []map[string]interfac
 			},
 		}
 		if rayConfig.RayClusterLoggingConfig != nil {
-			result["ray_operator_config"].([]map[string]any)[0]["ray_cluster_logging_config"] = []map[string]interface{}{{
+			result["ray_operator_config"].([]map[string]any)[0]["ray_cluster_logging_config"] = []map[string]interface{}{{"{{"}}
 				"enabled": rayConfig.RayClusterLoggingConfig.Enabled,
-			}}
+			{{"}}"}}
 		}
 		if rayConfig.RayClusterMonitoringConfig != nil {
-			result["ray_operator_config"].([]map[string]any)[0]["ray_cluster_monitoring_config"] = []map[string]interface{}{{
+			result["ray_operator_config"].([]map[string]any)[0]["ray_cluster_monitoring_config"] = []map[string]interface{}{{"{{"}}
 				"enabled": rayConfig.RayClusterMonitoringConfig.Enabled,
-			}}
+			{{"}}"}}
 		}
 	}
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 	if c.IstioConfig != nil {
 		result["istio_config"] = []map[string]interface{}{
 			{
@@ -5991,7 +5990,7 @@ func flattenClusterAddonsConfig(c *container.AddonsConfig) []map[string]interfac
 			},
 		}
 	}
-<% end -%>
+{{- end }}
 
 	return []map[string]interface{}{result}
 }
@@ -6076,7 +6075,7 @@ func flattenReleaseChannel(c *container.ReleaseChannel) []map[string]interface{}
 	return result
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 
 func flattenClusterTelemetry(c *container.ClusterTelemetry) []map[string]interface{} {
 	result := []map[string]interface{}{}
@@ -6088,7 +6087,7 @@ func flattenClusterTelemetry(c *container.ClusterTelemetry) []map[string]interfa
 	return result
 }
 
-<% end -%>
+{{ end }}
 
 func flattenDefaultSnatStatus(c *container.DefaultSnatStatus) []map[string]interface{} {
 	result := []map[string]interface{}{}
@@ -6380,7 +6379,7 @@ func flattenMasterAuthorizedNetworksConfig(c *container.MasterAuthorizedNetworks
 	return []map[string]interface{}{result}
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func flattenPodSecurityPolicyConfig(c *container.PodSecurityPolicyConfig) []map[string]interface{} {
 	if c == nil {
 		return []map[string]interface{}{
@@ -6396,7 +6395,7 @@ func flattenPodSecurityPolicyConfig(c *container.PodSecurityPolicyConfig) []map[
 	}
 }
 
-<% end -%>
+{{ end }}
 
 func flattenSecretManagerConfig(c *container.SecretManagerConfig) []map[string]interface{} {
 	if c == nil {
@@ -6623,7 +6622,7 @@ func flattenNodePoolAutoConfigNetworkTags(c *container.NetworkTags) []map[string
 	return []map[string]interface{}{result}
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func flattenWorkloadAltsConfig(c *container.WorkloadALTSConfig) []map[string]interface{} {
 	if c == nil {
 		return nil
@@ -6634,7 +6633,7 @@ func flattenWorkloadAltsConfig(c *container.WorkloadALTSConfig) []map[string]int
 		},
 	}
 }
-<% end -%>
+{{- end }}
 
 func resourceContainerClusterStateImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*transport_tpg.Config)
@@ -6829,7 +6828,7 @@ func containerClusterNetworkPolicyEmptyCustomizeDiff(_ context.Context, d *schem
 	return nil
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func podSecurityPolicyCfgSuppress(k, old, new string, r *schema.ResourceData) bool {
 	if k == "pod_security_policy_config.#" && old == "1" && new == "0" {
 		if v, ok := r.GetOk("pod_security_policy_config"); ok {
@@ -6843,7 +6842,7 @@ func podSecurityPolicyCfgSuppress(k, old, new string, r *schema.ResourceData) bo
 	}
 	return false
 }
-<% end -%>
+{{- end }}
 
 func SecretManagerCfgSuppress(k, old, new string, r *schema.ResourceData) bool {
 	if k == "secret_manager_config.#" && old == "1" && new == "0" {

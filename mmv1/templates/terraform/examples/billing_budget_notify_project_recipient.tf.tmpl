@@ -1,13 +1,13 @@
 data "google_billing_account" "account" {
-  billing_account = "<%= ctx[:test_env_vars]['billing_acct'] -%>"
+  billing_account = "{{index $.TestEnvVars "billing_acct"}}"
 }
 
 data "google_project" "project" {
 }
 
-resource "google_billing_budget" "<%= ctx[:primary_resource_id] %>" {
+resource "google_billing_budget" "{{$.PrimaryResourceId}}" {
   billing_account = data.google_billing_account.account.id
-  display_name    = "<%= ctx[:vars]['budget_name'] %>"
+  display_name    = "{{index $.Vars "budget_name"}}"
 
   budget_filter {
     projects = ["projects/${data.google_project.project.number}"]

@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package container
 
 import (
@@ -234,7 +233,7 @@ func resourceContainerClusterResourceV1() *schema.Resource {
 								},
 							},
 						},
-						<% unless version == 'ga' -%>
+						{{- if ne $.TargetVersionName "ga" }}
 						"istio_config": {
 							Type:         schema.TypeList,
 							Optional:     true,
@@ -276,7 +275,7 @@ func resourceContainerClusterResourceV1() *schema.Resource {
 								},
 							},
 						},
-						<% end -%>
+						{{- end }}
 						"config_connector_config": {
 							Type:         schema.TypeList,
 							Optional:     true,
@@ -567,7 +566,7 @@ func resourceContainerClusterResourceV1() *schema.Resource {
 							Elem:             &schema.Schema{Type: schema.TypeString},
 							Description:      `The list of Google Compute Engine zones in which the NodePool's nodes can be created by NAP.`,
 						},
-						<% unless version == 'ga' -%>
+						{{- if ne $.TargetVersionName "ga" }}
 						"autoscaling_profile": {
 							Type:             schema.TypeString,
 							Default:          "BALANCED",
@@ -576,7 +575,7 @@ func resourceContainerClusterResourceV1() *schema.Resource {
 							ValidateFunc:     validation.StringInSlice([]string{"BALANCED", "OPTIMIZE_UTILIZATION"}, false),
 							Description:      `Configuration options for the Autoscaling profile feature, which lets you choose whether the cluster autoscaler should optimize for resource utilization or resource availability when deciding to remove nodes from a cluster. Can be BALANCED or OPTIMIZE_UTILIZATION. Defaults to BALANCED.`,
 						},
-						<% end -%>
+						{{- end }}
 					},
 				},
 			},
@@ -654,15 +653,15 @@ func resourceContainerClusterResourceV1() *schema.Resource {
 				Optional:    true,
 				ForceNew:    true,
 				Description: `Whether to enable Cloud TPU resources in this cluster.`,
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 				ConflictsWith: []string{"tpu_config"},
 				Computed: true,
 				// TODO: deprecate when tpu_config is correctly returned by the API
 				// Deprecated: "Deprecated in favor of tpu_config",
-<% end -%>
+{{- end }}
 			},
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 			"tpu_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -691,7 +690,7 @@ func resourceContainerClusterResourceV1() *schema.Resource {
 					},
 				},
 			},
-<% end -%>
+{{- end }}
 
 			"enable_legacy_abac": {
 				Type:        schema.TypeBool,
@@ -771,9 +770,9 @@ func resourceContainerClusterResourceV1() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 				ConflictsWith: []string{"cluster_telemetry"},
-<% end -%>
+{{- end }}
 				ValidateFunc: validation.StringInSlice([]string{"logging.googleapis.com", "logging.googleapis.com/kubernetes", "none"}, false),
 				Description:  `The logging service that the cluster should write logs to. Available options include logging.googleapis.com(Legacy Stackdriver), logging.googleapis.com/kubernetes(Stackdriver Kubernetes Engine Logging), and none. Defaults to logging.googleapis.com/kubernetes.`,
 			},
@@ -882,7 +881,7 @@ func resourceContainerClusterResourceV1() *schema.Resource {
 				},
 			},
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 			"protect_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -924,7 +923,7 @@ func resourceContainerClusterResourceV1() *schema.Resource {
 					},
 				},
 			},
-<% end -%>
+{{- end }}
 
 			"security_posture_config": {
 				Type:        schema.TypeList,
@@ -965,11 +964,11 @@ func resourceContainerClusterResourceV1() *schema.Resource {
 							Type:        schema.TypeList,
 							Optional:    true,
 							Computed:    true,
-<% if version == "ga" -%>
+{{- if eq $.TargetVersionName "ga" }}
 							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS, APISERVER, SCHEDULER, CONTROLLER_MANAGER, STORAGE, HPA, POD, DAEMONSET, DEPLOYMENT, STATEFULSET and DCGM.`,
-<% else -%>
+{{- else }}
 							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS, APISERVER, SCHEDULER, CONTROLLER_MANAGER, STORAGE, HPA, POD, DAEMONSET, DEPLOYMENT, STATEFULSET, WORKLOADS and DCGM.`,
-<% end -%>
+{{- end }}
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
@@ -1159,9 +1158,9 @@ func resourceContainerClusterResourceV1() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 				ConflictsWith: []string{"cluster_telemetry"},
-<% end -%>
+{{- end }}
 				ValidateFunc: validation.StringInSlice([]string{"monitoring.googleapis.com", "monitoring.googleapis.com/kubernetes", "none"}, false),
 				Description:  `The monitoring service that the cluster should write metrics to. Automatically send metrics from pods in the cluster to the Google Cloud Monitoring API. VM metrics will be collected by Google Compute Engine regardless of this setting Available options include monitoring.googleapis.com(Legacy Stackdriver), monitoring.googleapis.com/kubernetes(Stackdriver Kubernetes Engine Monitoring), and none. Defaults to monitoring.googleapis.com/kubernetes.`,
 			},
@@ -1251,7 +1250,7 @@ func resourceContainerClusterResourceV1() *schema.Resource {
 				Description: `The Kubernetes version on the nodes. Must either be unset or set to the same value as min_master_version on create. Defaults to the default version set by GKE which is not necessarily the latest version. This only affects nodes in the default node pool. While a fuzzy version can be specified, it's recommended that you specify explicit versions as Terraform will see spurious diffs when fuzzy versions are used. See the google_container_engine_versions data source's version_prefix field to approximate fuzzy versions in a Terraform-compatible way. To update nodes in other node pools, use the version attribute on the node pool.`,
 			},
 
-<% unless version == "ga" -%>
+{{ if ne $.TargetVersionName `ga` -}}
 			"pod_security_policy_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -1268,7 +1267,7 @@ func resourceContainerClusterResourceV1() *schema.Resource {
 					},
 				},
 			},
-<% end -%>
+{{- end }}
 
 			"project": {
 				Type:        schema.TypeString,
@@ -1665,7 +1664,7 @@ func resourceContainerClusterResourceV1() *schema.Resource {
 				Description: `The IP address range of the Cloud TPUs in this cluster, in CIDR notation (e.g. 1.2.3.4/29).`,
 			},
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 			"cluster_telemetry": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -1683,7 +1682,7 @@ func resourceContainerClusterResourceV1() *schema.Resource {
 					},
 				},
 			},
-<% end -%>
+{{- end }}
 
 			"default_snat_status": {
 				Type: schema.TypeList,
@@ -1725,7 +1724,7 @@ func resourceContainerClusterResourceV1() *schema.Resource {
 			   Description: `Whether L4ILB Subsetting is enabled for this cluster.`,
 			   Default: false,
 			},
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 			"enable_multi_networking": {
 			   Type: schema.TypeBool,
 			   Optional: true,
@@ -1739,7 +1738,7 @@ func resourceContainerClusterResourceV1() *schema.Resource {
 			   Description: `Whether FQDN Network Policy is enabled on this cluster.`,
 			   Default: false,
 			},
-<% end -%>
+{{- end }}
 			"private_ipv6_google_access": {
 			   Type: schema.TypeString,
 			   Optional: true,

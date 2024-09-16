@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package dns_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -208,4 +207,4 @@ resource "google_container_cluster" "cluster-1" {
 }
 `, suffix, suffix, suffix, suffix)
 }
-<% end -%>
+{{- end }}

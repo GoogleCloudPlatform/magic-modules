@@ -1,5 +1,5 @@
-resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]['sqlserver_instance_with_authorized_network'] %>"
+resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "sqlserver_instance_with_authorized_network"}}"
   region           = "us-central1"
   database_version = "SQLSERVER_2019_STANDARD"
   root_password = "INSERT-PASSWORD-HERE"
@@ -13,5 +13,5 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
       }
     }
   }
-  deletion_protection = "<%= ctx[:vars]['deletion_protection'] %>"
+  deletion_protection = "{{index $.Vars "deletion_protection"}}"
 }

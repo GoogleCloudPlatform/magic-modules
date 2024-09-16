@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package kms_test
 
 import (
@@ -68,7 +67,7 @@ func TestAccKmsKeyRingIamBinding(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccKmsKeyRingIamBinding_withCondition(t *testing.T) {
 	t.Parallel()
 
@@ -102,7 +101,7 @@ func TestAccKmsKeyRingIamBinding_withCondition(t *testing.T) {
 		},
 	})
 }
-<% end -%>
+{{- end }}
 
 func TestAccKmsKeyRingIamMember(t *testing.T) {
 	t.Parallel()
@@ -141,7 +140,7 @@ func TestAccKmsKeyRingIamMember(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccKmsKeyRingIamMember_withCondition(t *testing.T) {
 	t.Parallel()
 
@@ -175,7 +174,7 @@ func TestAccKmsKeyRingIamMember_withCondition(t *testing.T) {
 		},
 	})
 }
-<% end -%>
+{{- end }}
 
 func TestAccKmsKeyRingIamPolicy(t *testing.T) {
 	t.Parallel()
@@ -213,7 +212,7 @@ func TestAccKmsKeyRingIamPolicy(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccKmsKeyRingIamPolicy_withCondition(t *testing.T) {
 	t.Parallel()
 
@@ -247,7 +246,7 @@ func TestAccKmsKeyRingIamPolicy_withCondition(t *testing.T) {
 		},
 	})
 }
-<% end -%>
+{{- end }}
 
 func testAccCheckGoogleKmsKeyRingIam(t *testing.T, keyRingId, role string, members []string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -365,7 +364,7 @@ resource "google_kms_key_ring_iam_binding" "foo" {
 `, projectId, orgId, billingAccount, account, account, DEFAULT_KMS_TEST_LOCATION, keyRingName, roleId)
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccKmsKeyRingIamBinding_withCondition(projectId, orgId, billingAccount, account, keyRingName, roleId, conditionTitle string) string {
 	return fmt.Sprintf(`
 resource "google_project" "test_project" {
@@ -410,7 +409,7 @@ resource "google_kms_key_ring_iam_binding" "foo" {
 }
 `, projectId, orgId, billingAccount, account, keyRingName, roleId, conditionTitle)
 }
-<% end -%>
+{{- end }}
 
 func testAccKmsKeyRingIamMember_basic(projectId, orgId, billingAccount, account, keyRingName, roleId string) string {
 	return fmt.Sprintf(`
@@ -452,7 +451,7 @@ resource "google_kms_key_ring_iam_member" "foo" {
 `, projectId, orgId, billingAccount, account, DEFAULT_KMS_TEST_LOCATION, keyRingName, roleId)
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccKmsKeyRingIamMember_withCondition(projectId, orgId, billingAccount, account, keyRingName, roleId, conditionTitle string) string {
 	return fmt.Sprintf(`
 resource "google_project" "test_project" {
@@ -497,7 +496,7 @@ resource "google_kms_key_ring_iam_member" "foo" {
 }
 `, projectId, orgId, billingAccount, account, DEFAULT_KMS_TEST_LOCATION, keyRingName, roleId, conditionTitle)
 }
-<% end -%>
+{{- end }}
 
 func testAccKmsKeyRingIamPolicy_basic(projectId, orgId, billingAccount, account, keyRingName, roleId string) string {
 	return fmt.Sprintf(`
@@ -546,7 +545,7 @@ resource "google_kms_key_ring_iam_policy" "foo" {
 `, projectId, orgId, billingAccount, account, DEFAULT_KMS_TEST_LOCATION, keyRingName, roleId)
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccKmsKeyRingIamPolicy_withCondition(projectId, orgId, billingAccount, account, keyRingName, roleId, conditionTitle string) string {
 	return fmt.Sprintf(`
 resource "google_project" "test_project" {
@@ -598,4 +597,4 @@ resource "google_kms_key_ring_iam_policy" "foo" {
 }
 `, projectId, orgId, billingAccount, account, DEFAULT_KMS_TEST_LOCATION, keyRingName, roleId, conditionTitle)
 }
-<% end -%>
+{{- end }}

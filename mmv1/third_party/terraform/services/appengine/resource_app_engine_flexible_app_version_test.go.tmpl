@@ -1,7 +1,6 @@
-<% autogen_exception -%>
 package appengine_test
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 
 import (
   "log"
@@ -443,4 +442,4 @@ func testAccCheckAppEngineFlexibleAppVersionDestroyProducer(t *testing.T) func(s
   }
 }
 
-<% end -%>
+{{ end }}

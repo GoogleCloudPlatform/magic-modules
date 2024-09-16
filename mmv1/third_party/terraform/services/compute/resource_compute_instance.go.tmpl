@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package compute
 
 import (
@@ -22,11 +21,11 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
-<% if version == "ga" -%>
+{{ if eq $.TargetVersionName `ga` }}
 	"google.golang.org/api/compute/v1"
-<% else -%>
+{{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
-<% end -%>
+{{- end }}
 )
 
 func IpCidrRangeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
@@ -87,9 +86,9 @@ var (
 		"scheduling.0.instance_termination_action",
 		"scheduling.0.max_run_duration",
 		"scheduling.0.on_instance_stop_action",
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 		"scheduling.0.maintenance_interval",
-<% end -%>
+{{- end }}
 		"scheduling.0.local_ssd_recovery_timeout",
 	}
 
@@ -421,7 +420,7 @@ func ResourceComputeInstance() *schema.Resource {
 							Description:      `The name or self_link of the subnetwork attached to this interface.`,
 						},
 
-						<% unless version == 'ga' -%>
+						{{ if ne $.TargetVersionName `ga` -}}
 						"network_attachment": {
 							Type:             schema.TypeString,
 							Optional:         true,
@@ -430,7 +429,7 @@ func ResourceComputeInstance() *schema.Resource {
 							DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 							Description:      `The URL of the network attachment that this interface should connect to in the following format: projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}.`,
 						},
-						<% end %>
+						{{- end }}
 
 						"subnetwork_project": {
 							Type:        schema.TypeString,
@@ -483,13 +482,13 @@ func ResourceComputeInstance() *schema.Resource {
 										Optional:    true,
 										Description: `The DNS domain name for the public PTR record.`,
 									},
-									<% unless version == 'ga' -%>
+									{{- if ne $.TargetVersionName "ga" }}
 									"security_policy": {
 										Type:        schema.TypeString,
 										Computed:    true,
 										Description: `A full or partial URL to a security policy to add to this instance. If this field is set to an empty string it will remove the associated security policy.`,
 									},
-									<% end -%>
+									{{- end }}
 								},
 							},
 						},
@@ -567,13 +566,13 @@ func ResourceComputeInstance() *schema.Resource {
 										ForceNew:    true,
 										Description: `The name of this access configuration. In ipv6AccessConfigs, the recommended name is External IPv6.`,
 									},
-									<% unless version == 'ga' -%>
+									{{- if ne $.TargetVersionName "ga" }}
 									"security_policy": {
 										Type:        schema.TypeString,
 										Computed:    true,
 										Description: `A full or partial URL to a security policy to add to this instance. If this field is set to an empty string it will remove the associated security policy.`,
 									},
-									<% end -%>
+									{{- end }}
 								},
 							},
 						},
@@ -600,13 +599,13 @@ func ResourceComputeInstance() *schema.Resource {
 							Description: `The networking queue count that's specified by users for the network interface. Both Rx and Tx queues will be set to this number. It will be empty if not specified.`,
 						},
 
-						<% unless version == 'ga' -%>
+						{{ if ne $.TargetVersionName `ga` -}}
 						"security_policy": {
 							Type:        schema.TypeString,
 							Optional:    true,
 							Description: `A full or partial URL to a security policy to add to this instance. If this field is set to an empty string it will remove the associated security policy.`,
 						},
-						<% end -%>
+						{{- end }}
 					},
 				},
 			},
@@ -785,7 +784,7 @@ func ResourceComputeInstance() *schema.Resource {
 				Description: `Metadata key/value pairs made available within the instance.`,
 			},
 
-			<% unless version == 'ga' -%>
+			{{ if ne $.TargetVersionName `ga` -}}
 			"partner_metadata": {
 				Type:                  schema.TypeMap,
 				Optional:              true,
@@ -794,7 +793,7 @@ func ResourceComputeInstance() *schema.Resource {
 				Elem:                  &schema.Schema{Type: schema.TypeString},
 				Description:           `Partner Metadata Map made available within the instance.`,
 			},
-			<% end -%>
+			{{- end }}
 
 			"metadata_startup_script": {
 				Type:        schema.TypeString,
@@ -931,14 +930,14 @@ be from 0 to 999,999,999 inclusive.`,
 								},
 							},
 						},
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 						"maintenance_interval": {
 							Type:          schema.TypeString,
 							Optional:      true,
 							AtLeastOneOf:  schedulingKeys,
 							Description:   `Specifies the frequency of planned maintenance events. The accepted values are: PERIODIC`,
 						},
-<% end -%>
+{{- end }}
 						"local_ssd_recovery_timeout" : {
 							Type:        schema.TypeList,
 							Optional:    true,
@@ -1287,11 +1286,11 @@ func getInstance(config *transport_tpg.Config, d *schema.ResourceData) (*compute
 	if err != nil {
 		return nil, err
 	}
-	<% if version == "ga" -%>
+	{{- if eq $.TargetVersionName "ga" }}
 	instance, err := config.NewComputeClient(userAgent).Instances.Get(project, zone, d.Get("name").(string)).Do()
-	<% else -%>
+	{{- else }}
 	instance, err := config.NewComputeClient(userAgent).Instances.Get(project, zone, d.Get("name").(string)).View("FULL").Do()
-	<% end -%>
+	{{- end }}
 	if err != nil {
 		return nil, transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Instance %s", d.Get("name").(string)))
 	}
@@ -1376,12 +1375,12 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 		return nil, fmt.Errorf("Error creating metadata: %s", err)
 	}
 
-	<% unless version == 'ga' -%>
+	{{ if ne $.TargetVersionName `ga` -}}
 	PartnerMetadata, err := resourceInstancePartnerMetadata(d)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating partner metadata: %s", err)
 	}
-	<% end -%>
+	{{- end }}
 
 	networkInterfaces, err := expandNetworkInterfaces(d, config)
 	if err != nil {
@@ -1408,9 +1407,9 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 		Disks:                      disks,
 		MachineType:                machineTypeUrl,
 		Metadata:                   metadata,
-		<% unless version == 'ga' -%>
+		{{- if ne $.TargetVersionName "ga" }}
 		PartnerMetadata:            PartnerMetadata,
-		<% end -%>
+		{{- end }}
 		Name:                       d.Get("name").(string),
 		NetworkInterfaces:          networkInterfaces,
 		NetworkPerformanceConfig:   networkPerformanceConfig,
@@ -1515,12 +1514,12 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 		return err
 	}
 
-	<% unless version == 'ga' -%>
+	{{ if ne $.TargetVersionName `ga` -}}
 	securityPolicies, err := computeInstanceMapSecurityPoliciesCreate(d, config)
 	if err != nil {
 		return err
 	}
-	<% end -%>
+	{{- end }}
 
 	log.Printf("[INFO] Requesting instance creation")
 	op, err := config.NewComputeClient(userAgent).Instances.Insert(project, zone.Name, instance).Do()
@@ -1539,12 +1538,12 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 		return waitErr
 	}
 
-	<% unless version == 'ga' -%>
+	{{ if ne $.TargetVersionName `ga` -}}
 	err = computeInstanceAddSecurityPolicy(d, config, securityPolicies, project, z, userAgent, instance.Name)
 	if err != nil {
 		return fmt.Errorf("Error creating instance while setting the security policies: %s", err)
 	}
-	<% end -%>
+	{{- end }}
 
 	err = waitUntilInstanceHasDesiredStatus(config, d)
 	if err != nil {
@@ -1588,7 +1587,7 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 		return fmt.Errorf("Error setting metadata_fingerprint: %s", err)
 	}
 
-	<% unless version == 'ga' -%>
+	{{ if ne $.TargetVersionName `ga` -}}
 	if instance.PartnerMetadata != nil {
 		partnerMetadata, err := flattenPartnerMetadata(instance.PartnerMetadata)
 		if err != nil {
@@ -1598,7 +1597,7 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 			return fmt.Errorf("Error setting partner metadata: %s", err)
 		}
 	}
-	<% end -%>
+	{{- end }}
 
 	if err := d.Set("can_ip_forward", instance.CanIpForward); err != nil {
 		return fmt.Errorf("Error setting can_ip_forward: %s", err)
@@ -1932,7 +1931,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		}
 	}
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 	if d.HasChange("partner_metadata") {
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() error {
@@ -1962,7 +1961,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		}
 	}
 
-<% end -%>
+{{ end }}
 	if d.HasChange("tags") {
 		tags := resourceInstanceTags(d)
 		tagsV1 := &compute.Tags{}
@@ -2094,7 +2093,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		return fmt.Errorf("Instance had unexpected number of network interfaces: %d", len(instance.NetworkInterfaces))
 	}
 
-	<% unless version == 'ga' -%>
+	{{ if ne $.TargetVersionName `ga` -}}
 	updateSecurityPolicy := false
 	for i := 0; i < len(instance.NetworkInterfaces); i++ {
 		prefix := fmt.Sprintf("network_interface.%d", i)
@@ -2116,7 +2115,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			return err
 		}
 	}
-	<% end -%>
+	{{- end }}
 
 	var updatesToNIWhileStopped []func(inst *compute.Instance) error
 	for i := 0; i < len(networkInterfaces); i++ {
@@ -2149,7 +2148,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				}
 				resp, err := config.NewComputeClient(userAgent).Subnetworks.Get(sf.Project, sf.Region, sf.Name).Do()
 				if err != nil {
-					return errwrap.Wrapf("Error getting subnetwork value: {{err}}", err)
+					return errwrap.Wrapf("Error getting subnetwork value: {{"{{"}}err{{"}}"}}", err)
 				}
 				nf, err := tpgresource.ParseNetworkFieldValue(resp.Network, d, config)
 				if err != nil {
@@ -2199,7 +2198,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				}
 				op, err := config.NewComputeClient(userAgent).Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, ni).Do()
 				if err != nil {
-					return errwrap.Wrapf("Error removing alias_ip_range: {{err}}", err)
+					return errwrap.Wrapf("Error removing alias_ip_range: {{"{{"}}err{{"}}"}}", err)
 				}
 				opErr := ComputeOperationWaitTime(config, op, project, "updating alias ip ranges", userAgent, d.Timeout(schema.TimeoutUpdate))
 				if opErr != nil {
@@ -2220,7 +2219,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			updateCall := config.NewComputeClient(userAgent).Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, networkInterfacePatchObj).Do
 			op, err := updateCall()
 			if err != nil {
-				return errwrap.Wrapf("Error updating network interface: {{err}}", err)
+				return errwrap.Wrapf("Error updating network interface: {{"{{"}}err{{"}}"}}", err)
 			}
 			opErr := ComputeOperationWaitTime(config, op, project, "network interface to update", userAgent, d.Timeout(schema.TimeoutUpdate))
 			if opErr != nil {
@@ -2237,7 +2236,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			updateCall := config.NewComputeClient(userAgent).Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, networkInterfacePatchObj).Do
 			op, err := updateCall()
 			if err != nil {
-				return errwrap.Wrapf("Error updating network interface: {{err}}", err)
+				return errwrap.Wrapf("Error updating network interface: {{"{{"}}err{{"}}"}}", err)
 			}
 			opErr := ComputeOperationWaitTime(config, op, project, "network interface to update", userAgent, d.Timeout(schema.TimeoutUpdate))
 			if opErr != nil {
@@ -2254,7 +2253,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			updateCall := config.NewComputeClient(userAgent).Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, networkInterfacePatchObj).Do
 			op, err := updateCall()
 			if err != nil {
-				return errwrap.Wrapf("Error updating network interface: {{err}}", err)
+				return errwrap.Wrapf("Error updating network interface: {{"{{"}}err{{"}}"}}", err)
 			}
 			opErr := ComputeOperationWaitTime(config, op, project, "network interface to update", userAgent, d.Timeout(schema.TimeoutUpdate))
 			if opErr != nil {
@@ -2271,7 +2270,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			updateCall := config.NewComputeClient(userAgent).Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, networkInterfacePatchObj).Do
 			op, err := updateCall()
 			if err != nil {
-				return errwrap.Wrapf("Error updating network interface: {{err}}", err)
+				return errwrap.Wrapf("Error updating network interface: {{"{{"}}err{{"}}"}}", err)
 			}
 			opErr := ComputeOperationWaitTime(config, op, project, "network interface to update", userAgent, d.Timeout(schema.TimeoutUpdate))
 			if opErr != nil {
@@ -2394,7 +2393,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		for _, disk := range attach {
 			op, err := config.NewComputeClient(userAgent).Instances.AttachDisk(project, zone, instance.Name, disk).Do()
 			if err != nil {
-				return errwrap.Wrapf("Error attaching disk : {{err}}", err)
+				return errwrap.Wrapf("Error attaching disk : {{"{{"}}err{{"}}"}}", err)
 			}
 
 			opErr := ComputeOperationWaitTime(config, op, project, "attaching disk", userAgent, d.Timeout(schema.TimeoutUpdate))
@@ -2476,7 +2475,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			if desiredStatus == "RUNNING" {
 				op, err = startInstanceOperation(d, config)
 				if err != nil {
-					return errwrap.Wrapf("Error starting instance: {{err}}", err)
+					return errwrap.Wrapf("Error starting instance: {{"{{"}}err{{"}}"}}", err)
 				}
 			} else if desiredStatus == "TERMINATED" {
 				op, err = config.NewComputeClient(userAgent).Instances.Stop(project, zone, instance.Name).Do()
@@ -2508,7 +2507,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		if statusBeforeUpdate != "TERMINATED" {
 			op, err := config.NewComputeClient(userAgent).Instances.Stop(project, zone, instance.Name).Do()
 			if err != nil {
-				return errwrap.Wrapf("Error stopping instance: {{err}}", err)
+				return errwrap.Wrapf("Error stopping instance: {{"{{"}}err{{"}}"}}", err)
 			}
 
 			opErr := ComputeOperationWaitTime(config, op, project, "stopping instance", userAgent, d.Timeout(schema.TimeoutUpdate))
@@ -2668,7 +2667,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			(statusBeforeUpdate == "TERMINATED" && desiredStatus == "RUNNING") {
 			op, err := startInstanceOperation(d, config)
 			if err != nil {
-				return errwrap.Wrapf("Error starting instance: {{err}}", err)
+				return errwrap.Wrapf("Error starting instance: {{"{{"}}err{{"}}"}}", err)
 			}
 
 			opErr := ComputeOperationWaitTime(config, op, project,
@@ -2679,13 +2678,13 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		}
 	}
 
-	<% unless version == 'ga' -%>
+	{{ if ne $.TargetVersionName `ga` -}}
 	// The access config must be updated only if the machine is still RUNNING and after each access_config for each interface has been re-created.
 	err = computeInstanceAddSecurityPolicy(d, config, securityPolicies, project, zone, userAgent, instance.Name)
 	if err != nil {
 		return fmt.Errorf("Error updating instance while setting the security policies: %s", err)
 	}
-	<% end -%>
+	{{- end }}
 
 	// We made it, disable partial mode
 	d.Partial(false)
@@ -2944,7 +2943,7 @@ func resourceComputeInstanceImportState(d *schema.ResourceData, meta interface{}
 	}
 
 	// Replace import id for the resource id
-	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/zones/{{zone}}/instances/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -3102,7 +3101,7 @@ func flattenBootDisk(d *schema.ResourceData, disk *compute.AttachedDisk, config 
 			result["initialize_params"] = m
 		}
 	} else {
-		result["initialize_params"] = []map[string]interface{}{{
+		result["initialize_params"] = []map[string]interface{}{{"{{"}}
 			"type": tpgresource.GetResourceNameFromSelfLink(diskDetails.Type),
 			// If the config specifies a family name that doesn't match the image name, then
 			// the diff won't be properly suppressed. See DiffSuppressFunc for this field.
@@ -3115,7 +3114,7 @@ func flattenBootDisk(d *schema.ResourceData, disk *compute.AttachedDisk, config 
 			"provisioned_throughput": diskDetails.ProvisionedThroughput,
 			"enable_confidential_compute": diskDetails.EnableConfidentialCompute,
 			"storage_pool": tpgresource.GetResourceNameFromSelfLink(diskDetails.StoragePool),
-		}}
+		{{"}}"}}
 	}
 
 	if disk.DiskEncryptionKey != nil {

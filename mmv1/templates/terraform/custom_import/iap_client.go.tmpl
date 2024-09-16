@@ -10,7 +10,7 @@ if len(nameParts) != 6 {
 	return nil, fmt.Errorf(
 			"Saw %s when the name is expected to have shape %s",
 			d.Get("brand").(string),
-			"projects/{{project_number}}/brands/{{brand_id}}/identityAwareProxyClients/{{client_id}}",
+			"projects/{{"{{"}}project_number{{"}}"}}/brands/{{"{{"}}brand_id{{"}}"}}/identityAwareProxyClients/{{"{{"}}client_id{{"}}"}}",
 		)
 }
 

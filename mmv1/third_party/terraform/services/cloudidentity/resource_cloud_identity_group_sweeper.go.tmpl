@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package cloudidentity
 
 import (
@@ -49,11 +48,11 @@ func testSweepCloudIdentityGroup(region string) error {
 		},
 	}
 
-<% unless version == 'ga' -%>
-	listTemplate := "https://cloudidentity.googleapis.com/v1beta1/groups?parent={{parent}}"
-<% else -%>
-	listTemplate := "https://cloudidentity.googleapis.com/v1/groups?parent={{parent}}"
-<% end -%>
+{{ if ne $.TargetVersionName `ga` -}}
+	listTemplate := "https://cloudidentity.googleapis.com/v1beta1/groups?parent={{"{{"}}parent{{"}}"}}"
+{{- else }}
+	listTemplate := "https://cloudidentity.googleapis.com/v1/groups?parent={{"{{"}}parent{{"}}"}}"
+{{- end }}
 	listUrl, err := tpgresource.ReplaceVars(d, config, listTemplate)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] error preparing sweeper list url: %s", err)
@@ -97,11 +96,11 @@ func testSweepCloudIdentityGroup(region string) error {
 			continue
 		}
 
-<% unless version == 'ga' -%>
-		deleteTemplate := "https://cloudidentity.googleapis.com/v1beta1/{{name}}"
-<% else -%>
-		deleteTemplate := "https://cloudidentity.googleapis.com/v1/{{name}}"
-<% end -%>
+{{ if ne $.TargetVersionName `ga` -}}
+		deleteTemplate := "https://cloudidentity.googleapis.com/v1beta1/{{"{{"}}name{{"}}"}}"
+{{- else }}
+		deleteTemplate := "https://cloudidentity.googleapis.com/v1/{{"{{"}}name{{"}}"}}"
+{{- end }}
 		deleteUrl, err := tpgresource.ReplaceVars(d, config, deleteTemplate)
 		if err != nil {
 			log.Printf("[INFO][SWEEPER_LOG] error preparing delete url: %s", err)

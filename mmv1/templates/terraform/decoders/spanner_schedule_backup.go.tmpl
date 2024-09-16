@@ -7,7 +7,7 @@ res["project"] = d.Get("project").(string)
 res["instance"] = d.Get("instance").(string)
 res["database"] = d.Get("database").(string)
 res["name"] = d.Get("name").(string)
-id, err := tpgresource.ReplaceVars(d, config, "{{instance}}/{{database}}/{{name}}")
+id, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}instance{{"}}"}}/{{"{{"}}database{{"}}"}}/{{"{{"}}name{{"}}"}}")
 if err != nil {
   return nil, err
 }

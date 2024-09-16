@@ -1,6 +1,6 @@
-resource "google_storage_bucket" "<%= ctx[:primary_resource_id] %>" {
+resource "google_storage_bucket" "{{$.PrimaryResourceId}}" {
   provider      = google-beta
-  name          = "<%= ctx[:vars]['example_bucket'] %>"
+  name          = "{{index $.Vars "example_bucket"}}"
   location      = "US"
   uniform_bucket_level_access = true
 

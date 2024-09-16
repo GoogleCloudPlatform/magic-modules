@@ -1,5 +1,5 @@
 resource "google_sql_database_instance" "mysql_instance" {
-  name             = "<%= ctx[:vars]['mysql_instance'] %>"
+  name             = "{{index $.Vars "mysql_instance"}}"
   region           = "asia-northeast1"
   database_version = "MYSQL_8_0"
   settings {
@@ -8,7 +8,7 @@ resource "google_sql_database_instance" "mysql_instance" {
       ssl_mode = "TRUSTED_CLIENT_CERTIFICATE_REQUIRED"
     }
   }
-  deletion_protection = "<%= ctx[:vars]['deletion_protection'] %>"
+  deletion_protection = "{{index $.Vars "deletion_protection"}}"
 }
 
 resource "google_sql_ssl_cert" "mysql_client_cert" {
@@ -17,7 +17,7 @@ resource "google_sql_ssl_cert" "mysql_client_cert" {
 }
 
 resource "google_sql_database_instance" "postgres_instance" {
-  name             = "<%= ctx[:vars]['postgres_instance'] %>"
+  name             = "{{index $.Vars "postgres_instance"}}"
   region           = "asia-northeast1"
   database_version = "postgres_14"
   settings {
@@ -26,7 +26,7 @@ resource "google_sql_database_instance" "postgres_instance" {
       ssl_mode = "TRUSTED_CLIENT_CERTIFICATE_REQUIRED"
     }
   }
-  deletion_protection = "<%= ctx[:vars]['deletion_protection'] %>"
+  deletion_protection = "{{index $.Vars "deletion_protection"}}"
 }
 
 resource "google_sql_ssl_cert" "postgres_client_cert" {
@@ -34,8 +34,8 @@ resource "google_sql_ssl_cert" "postgres_client_cert" {
   instance    = google_sql_database_instance.postgres_instance.name
 }
 
-resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
-  name             = "<%= ctx[:vars]['sqlserver_instance'] %>"
+resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
+  name             = "{{index $.Vars "sqlserver_instance"}}"
   region           = "asia-northeast1"
   database_version = "SQLSERVER_2019_STANDARD"
   root_password = "INSERT-PASSWORD-HERE"
@@ -45,5 +45,5 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
       ssl_mode = "ENCRYPTED_ONLY"
     }
   }
-  deletion_protection = "<%= ctx[:vars]['deletion_protection'] %>"
+  deletion_protection = "{{index $.Vars "deletion_protection"}}"
 }

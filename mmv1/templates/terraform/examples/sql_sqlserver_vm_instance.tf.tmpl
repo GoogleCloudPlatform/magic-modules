@@ -1,22 +1,22 @@
 # VPC network
 resource "google_compute_network" "default" {
   provider                = google-beta
-  name                    = "<%= ctx[:vars]['vpc_network'] %>"
+  name                    = "{{index $.Vars "vpc_network"}}"
   auto_create_subnetworks = false
 }
 
 # Subnet
 resource "google_compute_subnetwork" "default" {
   provider      = google-beta
-  name          = "<%= ctx[:vars]['vpc_subnet'] %>"
+  name          = "{{index $.Vars "vpc_subnet"}}"
   ip_cidr_range = "10.0.1.0/24"
   region        = "europe-west1"
   network       = google_compute_network.default.id
 }
 
-resource "google_compute_instance" "<%= ctx[:primary_resource_id] %>" {
+resource "google_compute_instance" "{{$.PrimaryResourceId}}" {
   provider = google-beta
-  name     = "<%= ctx[:vars]['sqlserver_vm'] %>"
+  name     = "{{index $.Vars "sqlserver_vm"}}"
   boot_disk {
     auto_delete = true
     device_name = "persistent-disk-0"
@@ -41,7 +41,7 @@ resource "google_compute_instance" "<%= ctx[:primary_resource_id] %>" {
 
 resource "google_compute_firewall" "sql_server_1433" {
   provider      = google-beta
-  name          = "<%= ctx[:vars]['sql_server_1433_3'] %>"
+  name          = "{{index $.Vars "sql_server_1433_3"}}"
   allow {
     ports    = ["1433"]
     protocol = "tcp"

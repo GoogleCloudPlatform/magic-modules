@@ -1,12 +1,12 @@
 
 resource "google_compute_network" "default" {
-  name                    = "<%= ctx[:vars]['lb_network'] %>"
+  name                    = "{{index $.Vars "lb_network"}}"
   auto_create_subnetworks = false
   routing_mode            = "REGIONAL"
 }
 
 resource "google_compute_subnetwork" "default" {
-  name                       = "<%= ctx[:vars]['backend_subnet'] %>"
+  name                       = "{{index $.Vars "backend_subnet"}}"
   ip_cidr_range              = "10.1.2.0/24"
   network                    = google_compute_network.default.id
   private_ipv6_google_access = "DISABLE_GOOGLE_ACCESS"
@@ -16,7 +16,7 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_compute_subnetwork" "proxy_only" {
-  name          = "<%= ctx[:vars]['proxy_only_subnet'] %>"
+  name          = "{{index $.Vars "proxy_only_subnet"}}"
   ip_cidr_range = "10.129.0.0/23"
   network       = google_compute_network.default.id
   purpose       = "REGIONAL_MANAGED_PROXY"
@@ -25,7 +25,7 @@ resource "google_compute_subnetwork" "proxy_only" {
 }
 
 resource "google_compute_firewall" "default" {
-  name = "<%= ctx[:vars]['fw_allow_health_check'] %>"
+  name = "{{index $.Vars "fw_allow_health_check"}}"
   allow {
     protocol = "tcp"
   }
@@ -37,7 +37,7 @@ resource "google_compute_firewall" "default" {
 }
 
 resource "google_compute_firewall" "allow_proxy" {
-  name = "<%= ctx[:vars]['fw_allow_proxies'] %>"
+  name = "{{index $.Vars "fw_allow_proxies"}}"
   allow {
     ports    = ["443"]
     protocol = "tcp"
@@ -58,7 +58,7 @@ resource "google_compute_firewall" "allow_proxy" {
 }
 
 resource "google_compute_instance_template" "default" {
-  name = "<%= ctx[:vars]['l7_xlb_backend_template'] %>"
+  name = "{{index $.Vars "l7_xlb_backend_template"}}"
   disk {
     auto_delete  = true
     boot         = true
@@ -96,7 +96,7 @@ resource "google_compute_instance_template" "default" {
 }
 
 resource "google_compute_instance_group_manager" "default" {
-  name = "<%= ctx[:vars]['l7_xlb_backend_example'] %>"
+  name = "{{index $.Vars "l7_xlb_backend_example"}}"
   zone = "us-west1-a"
   named_port {
     name = "http"
@@ -111,7 +111,7 @@ resource "google_compute_instance_group_manager" "default" {
 }
 
 resource "google_compute_address" "default" {
-  name         = "<%= ctx[:vars]['address_name'] %>"
+  name         = "{{index $.Vars "address_name"}}"
   address_type = "EXTERNAL"
   network_tier = "STANDARD"
   region       = "us-west1"
@@ -119,7 +119,7 @@ resource "google_compute_address" "default" {
 
 
 resource "google_compute_region_health_check" "default" {
-  name               = "<%= ctx[:vars]['l7_xlb_basic_check'] %>"
+  name               = "{{index $.Vars "l7_xlb_basic_check"}}"
   check_interval_sec = 5
   healthy_threshold  = 2
   http_health_check {
@@ -133,7 +133,7 @@ resource "google_compute_region_health_check" "default" {
 }
 
 resource "google_compute_region_backend_service" "default" {
-  name                            = "<%= ctx[:vars]['l7_xlb_backend_service'] %>"
+  name                            = "{{index $.Vars "l7_xlb_backend_service"}}"
   region                          = "us-west1"
   load_balancing_scheme           = "EXTERNAL_MANAGED"
   health_checks                   = [google_compute_region_health_check.default.id]
@@ -147,14 +147,14 @@ resource "google_compute_region_backend_service" "default" {
   }
 }
 
-resource "google_compute_region_url_map" "<%= ctx[:primary_resource_id] %>" {
-  name            = "<%= ctx[:vars]['regional_l7_xlb_map'] %>"
+resource "google_compute_region_url_map" "{{$.PrimaryResourceId}}" {
+  name            = "{{index $.Vars "regional_l7_xlb_map"}}"
   region          = "us-west1"
   default_service = google_compute_region_backend_service.default.id
 }
 
 resource "google_compute_region_target_http_proxy" "default" {
-  name    = "<%= ctx[:vars]['l7_xlb_proxy'] %>"
+  name    = "{{index $.Vars "l7_xlb_proxy"}}"
   region  = "us-west1"
   url_map = google_compute_region_url_map.default.id
 }

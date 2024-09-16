@@ -1,12 +1,12 @@
 resource "google_compute_security_policy" "default" {
-  name        = "<%= ctx[:vars]['sec_policy_name'] %>"
+  name        = "{{index $.Vars "sec_policy_name"}}"
   description = "basic global security policy"
   type        = "CLOUD_ARMOR"
 }
 
 # A default rule is generated when creating the security_policy resource, import is needed to patch it
 # import {
-#   id = "projects/<%= ctx[:test_env_vars]['project_id'] %>/global/securityPolicies/<%= ctx[:vars]['sec_policy_name'] %>/priority/2147483647"
+#   id = "projects/{{index $.TestEnvVars "project_id"}}/global/securityPolicies/{{index $.Vars "sec_policy_name"}}/priority/2147483647"
 #   to = google_compute_security_policy_rule.default_rule
 # }
 resource "google_compute_security_policy_rule" "default_rule" {
@@ -22,7 +22,7 @@ resource "google_compute_security_policy_rule" "default_rule" {
   }
 }
 
-resource "google_compute_security_policy_rule" "<%= ctx[:primary_resource_id] %>" {
+resource "google_compute_security_policy_rule" "{{$.PrimaryResourceId}}" {
   security_policy = google_compute_security_policy.default.name
   description     = "new rule"
   priority        = 100

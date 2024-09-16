@@ -1,9 +1,9 @@
-resource "google_filestore_snapshot" "<%= ctx[:primary_resource_id] %>" {
-  name     = "<%= ctx[:vars]["snapshot_name"] %>"
+resource "google_filestore_snapshot" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.Vars "snapshot_name"}}"
   instance = google_filestore_instance.instance.name
   location = "us-west1"
 
-  description = "Snapshot of <%= ctx[:vars]["instance_name"] %>"
+  description = "Snapshot of {{index $.Vars "instance_name"}}"
 
   labels = {
     my_label = "value"
@@ -11,7 +11,7 @@ resource "google_filestore_snapshot" "<%= ctx[:primary_resource_id] %>" {
 }
 
 resource "google_filestore_instance" "instance" {
-  name     = "<%= ctx[:vars]["instance_name"] %>"
+  name     = "{{index $.Vars "instance_name"}}"
   location = "us-west1"
   tier     = "ENTERPRISE"
 

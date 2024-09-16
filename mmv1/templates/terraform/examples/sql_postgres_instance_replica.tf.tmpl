@@ -1,5 +1,5 @@
 resource "google_sql_database_instance" "primary" {
-  name             = "<%= ctx[:vars]['postgres_primary_instance_name'] %>"
+  name             = "{{index $.Vars "postgres_primary_instance_name"}}"
   region           = "europe-west4"
   database_version = "POSTGRES_14"
   settings {
@@ -8,11 +8,11 @@ resource "google_sql_database_instance" "primary" {
       enabled            = "true"
     }
   }
-  deletion_protection =  "<%= ctx[:vars]['deletion_protection'] %>"
+  deletion_protection =  "{{index $.Vars "deletion_protection"}}"
 }
 
-resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
-  name                 = "<%= ctx[:vars]['postgres_replica_instance_name'] %>"
+resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
+  name                 = "{{index $.Vars "postgres_replica_instance_name"}}"
   master_instance_name = google_sql_database_instance.primary.name
   region               = "europe-west4"
   database_version     = "POSTGRES_14"
@@ -26,5 +26,5 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
     availability_type = "ZONAL"
     disk_size         = "100"
   }
-  deletion_protection =  "<%= ctx[:vars]['deletion_protection'] %>"
+  deletion_protection =  "{{index $.Vars "deletion_protection"}}"
 }

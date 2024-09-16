@@ -1,11 +1,11 @@
-resource "google_data_catalog_entry" "<%= ctx[:primary_resource_id] %>" {
+resource "google_data_catalog_entry" "{{$.PrimaryResourceId}}" {
   entry_group = google_data_catalog_entry_group.entry_group.id
-  entry_id = "<%= ctx[:vars]['entry_id'] %>"
+  entry_id = "{{index $.Vars "entry_id"}}"
 
   user_specified_type = "my_custom_type"
   user_specified_system = "SomethingExternal"
 }
 
 resource "google_data_catalog_entry_group" "entry_group" {
-  entry_group_id = "<%= ctx[:vars]['entry_group_id'] %>"
+  entry_group_id = "{{index $.Vars "entry_group_id"}}"
 }
