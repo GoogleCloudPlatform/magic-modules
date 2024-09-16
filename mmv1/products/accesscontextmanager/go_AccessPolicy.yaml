@@ -67,6 +67,7 @@ iam_policy:
     - '{{name}}'
 custom_code:
   post_create: 'templates/terraform/post_create/go/accesspolicy.tmpl'
+# Skipping the sweeper due to the non-standard base_url
 exclude_sweeper: true
 examples:
   - name: 'access_context_manager_access_policy_basic'

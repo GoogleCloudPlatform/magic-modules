@@ -39,6 +39,7 @@ timeouts:
 async:
   actions: ['']
   type: 'OpAsync'
+  # necessary to compile
   operation:
     base_url: '{{op_id}}'
   result:
@@ -48,6 +49,7 @@ custom_code:
 examples:
   - name: 'artifact_registry_vpcsc_config'
     primary_resource_id: 'my-config'
+    # Requires VPC SC Policy configured on organization
     exclude_test: true
 parameters:
   - name: 'location'

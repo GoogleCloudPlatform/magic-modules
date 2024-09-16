@@ -46,21 +46,25 @@ error_abort_predicates:
 
   - 'transport_tpg.Is429QuotaError'
 examples:
+  # skipping tests because the API is full of race conditions
   - name: 'monitoring_alert_policy_basic'
     primary_resource_id: 'alert_policy'
     vars:
       alert_policy_display_name: 'My Alert Policy'
     exclude_test: true
+  # skipping tests because the API is full of race conditions
   - name: 'monitoring_alert_policy_evaluation_missing_data'
     primary_resource_id: 'alert_policy'
     vars:
       alert_policy_display_name: 'My Alert Policy'
     exclude_test: true
+  # skipping tests because the API is full of race conditions
   - name: 'monitoring_alert_policy_forecast_options'
     primary_resource_id: 'alert_policy'
     vars:
       alert_policy_display_name: 'My Alert Policy'
     exclude_test: true
+  # skipping tests because the API is full of race conditions
   - name: 'monitoring_alert_policy_promql_condition'
     primary_resource_id: 'alert_policy'
     vars:
@@ -911,6 +915,7 @@ properties:
                 valid Prometheus label name.
   - name: 'notificationChannels'
     type: Array
+    # TODO chrisst - turn this into a resource ref
     description: |
       Identifies the notification channels to which notifications should be
       sent when incidents are opened or closed or when new violations occur

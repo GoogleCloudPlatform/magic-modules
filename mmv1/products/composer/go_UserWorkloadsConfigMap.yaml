@@ -20,10 +20,12 @@ description: |
 min_version: 'beta'
 references:
   guides:
+  # TODO: add v1 reference when this is moved to ga
   api: 'https://cloud.google.com/composer/docs/reference/rest/v1beta1/projects.locations.environments.userWorkloadsConfigMaps'
 docs:
 base_url: 'projects/{{project}}/locations/{{region}}/environments/{{environment}}/userWorkloadsConfigMaps'
 self_link: 'projects/{{project}}/locations/{{region}}/environments/{{environment}}/userWorkloadsConfigMaps/{{name}}'
+# Overrides one or more timeouts, in minutes. All timeouts default to 20.
 timeouts:
   insert_minutes: 1
   update_minutes: 1

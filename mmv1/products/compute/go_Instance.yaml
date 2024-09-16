@@ -80,6 +80,8 @@ properties:
     type: Boolean
     description: Whether the resource should be protected against deletion.
     update_url: '/projects/{{project}}/zones/{{zone}}/instances/{resourceId}/setDeletionProtection'
+    # The code for this update is custom because MM doesn't support
+    # sending empty bodies + the new option as a request parameter.
     update_verb: 'POST'
   - name: 'disks'
     type: Array
@@ -163,6 +165,7 @@ properties:
             - name: 'diskSizeGb'
               type: Integer
               description: Specifies the size of the disk in base-2 GB.
+            # diskStorageType - deprecated
             - name: 'diskType'
               type: ResourceRef
               description: |
@@ -251,6 +254,9 @@ properties:
           enum_values:
             - 'SCSI'
             - 'NVME'
+        # Ignoring kind - It's a constant and we don't need it.
+        # TODO(alexstephen): Place in licenses - it's a Array of
+        # ResourceRefs
         - name: 'mode'
           type: Enum
           description: |
@@ -260,6 +266,7 @@ properties:
           enum_values:
             - 'READ_WRITE'
             - 'READ_ONLY'
+        # This is the name, not selfLink of a disk.
         - name: 'source'
           type: ResourceRef
           description: |
@@ -299,6 +306,8 @@ properties:
           description: |
             The number of the guest accelerator cards exposed to this
             instance.
+        # TODO(alexstephen): Change to ResourceRef once AcceleratorType is
+        # created.
         - name: 'acceleratorType'
           type: String
           description: |
@@ -333,6 +342,26 @@ properties:
       Labels to apply to this instance.  A list of key->value pairs.
     update_url: 'projects/{{project}}/zones/{{zone}}/instances/{{name}}/setLabels'
     update_verb: 'POST'
+  # TODO(nelsonjr): Implement updating metadata *after* resource is created.
+
+  # Expose instance 'metadata' as a simple name/value pair hash. However the API
+  # defines metadata as a NestedObject with the following layout:
+  #
+  # metadata {
+  #   fingerprint: 'hash-of-last-metadata'
+  #   items: [
+  #     {
+  #       key: 'metadata1-key'
+  #       value: 'metadata1-value'
+  #     },
+  #     ...
+  #   ]
+  # }
+  #
+  # Fingerprint is an optimistic locking mechanism for updates, which requires
+  # adding the 'fingerprint' of the last metadata to allow update.
+  #
+  # To comply with the API please add an encoder: and decoder: to the provider.
   - name: 'metadata'
     type: KeyValuePairs
     description: |
@@ -344,6 +373,7 @@ properties:
     description: 'A reference to a machine type which defines VM kind.'
     update_url: 'projects/{{project}}/zones/{{zone}}/instances/{{name}}/setMachineType'
     update_verb: 'POST'
+    # TODO(alexstephen): Add metadata
     custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
     resource: 'MachineType'
     imports: 'selfLink'
@@ -383,6 +413,7 @@ properties:
           item_type:
             type: NestedObject
             properties:
+              # 'kind' is not needed for object convergence
               - name: 'name'
                 type: String
                 description: |
@@ -506,6 +537,7 @@ properties:
             subnet mode, providing the subnetwork is optional. If
             the network is in custom subnet mode, then this field
             should be specified.
+          # networkInterfaces.kind is not necessary for convergence.
           custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
           resource: 'Subnetwork'
           imports: 'selfLink'
@@ -565,6 +597,8 @@ properties:
     description:
       Configuration for various parameters related to shielded instances.
     update_url: 'projects/{{project}}/instances/{{name}}/updateShieldedInstanceConfig'
+    # The code for this update method is custom because MM does not support
+    # sending just the nested properties
     update_verb: 'PATCH'
     properties:
       - name: 'enableSecureBoot'
@@ -619,6 +653,10 @@ properties:
 
       As a user, use RUNNING to keep a machine "on" and TERMINATED to
       turn a machine off
+    # GCP API shows this as output: true.
+    # This is incorrect because you can make actions on the Instance (start, stop)
+    # In an idempotent world, the best way to express these actions is to
+    # change the status value.
     enum_values:
       - 'PROVISIONING'
       - 'STAGING'
@@ -640,6 +678,7 @@ properties:
       by the setTags method. Each tag within the list must comply with
       RFC1035.
     properties:
+      # TODO(alexstephen) Investigate bytes type
       - name: 'fingerprint'
         type: String
         description: |

@@ -130,6 +130,7 @@ examples:
       cloud_run_service_name: 'cloudrun-service'
     ignore_read_extra:
       - 'deletion_protection'
+    # Currently failing
     skip_vcr: true
   - name: 'cloudrunv2_service_mount_nfs'
     primary_resource_id: 'default'
@@ -138,6 +139,7 @@ examples:
       cloud_run_service_name: 'cloudrun-service'
     ignore_read_extra:
       - 'deletion_protection'
+    # Currently failing
     skip_vcr: true
   - name: 'cloudrunv2_service_mesh'
     primary_resource_id: 'default'
@@ -459,10 +461,16 @@ properties:
                     type: String
                     description: |-
                       Literal value of the environment variable. Defaults to "" and the maximum allowed length is 32768 characters. Variable references are not supported in Cloud Run.
+                    # exactly_one_of:
+                    #   - template.0.containers.0.env.0.value
+                    #   - template.0.containers.0.env.0.valueSource
                   - name: 'valueSource'
                     type: NestedObject
                     description: |-
                       Source for the environment variable's value.
+                    # exactly_one_of:
+                    #   - template.0.containers.0.env.0.value
+                    #   - template.0.containers.0.env.0.valueSource
                     properties:
                       - name: 'secretKeyRef'
                         type: NestedObject
@@ -570,6 +578,10 @@ properties:
                     HTTPGet specifies the http request to perform.
                   send_empty_value: true
                   allow_empty_object: true
+                  # exactly_one_of:
+                  #   - template.0.containers.0.startupProbe.0.httpGet
+                  #   - template.0.containers.0.startupProbe.0.tcpSocket
+                  #   - template.0.containers.0.startupProbe.0.grpc
                   properties:
                     - name: 'path'
                       type: String
@@ -698,6 +710,10 @@ properties:
                     TCPSocket specifies an action involving a TCP port. Exactly one of HTTPGet or TCPSocket must be specified.
                   send_empty_value: true
                   allow_empty_object: true
+                  # exactly_one_of:
+                  #   - template.0.containers.0.startupProbe.0.httpGet
+                  #   - template.0.containers.0.startupProbe.0.tcpSocket
+                  #   - template.0.containers.0.startupProbe.0.grpc
                   properties:
                     - name: 'port'
                       type: Integer
@@ -711,6 +727,10 @@ properties:
                     GRPC specifies an action involving a GRPC port.
                   send_empty_value: true
                   allow_empty_object: true
+                  # exactly_one_of:
+                  #   - template.0.containers.0.startupProbe.0.httpGet
+                  #   - template.0.containers.0.startupProbe.0.tcpSocket
+                  #   - template.0.containers.0.startupProbe.0.grpc
                   properties:
                     - name: 'port'
                       type: Integer
@@ -746,6 +766,10 @@ properties:
               type: NestedObject
               description: |-
                 Secret represents a secret that should populate this volume. More info: https://kubernetes.io/docs/concepts/storage/volumes#secret
+              # exactly_one_of:
+              #   - template.0.volumes.0.secret
+              #   - template.0.volumes.0.cloudSqlInstance
+              #   - template.0.volumes.0.emptyDir
               properties:
                 - name: 'secret'
                   type: String
@@ -780,6 +804,11 @@ properties:
               type: NestedObject
               description: |-
                 For Cloud SQL volumes, contains the specific instances that should be mounted. Visit https://cloud.google.com/sql/docs/mysql/connect-run for more information on how to connect Cloud SQL and Cloud Run.
+              # exactly_one_of:
+              #   - template.0.volumes.0.secret
+              #   - template.0.volumes.0.cloudSqlInstance
+              #   - template.0.volumes.0.emptyDir
+              #   - template.0.volumes.0.gcs
               properties:
                 - name: 'instances'
                   type: Array
@@ -793,6 +822,11 @@ properties:
               description: |-
                 Ephemeral storage used as a shared volume.
               min_version: 'beta'
+              # exactly_one_of:
+              #   - template.0.volumes.0.secret
+              #   - template.0.volumes.0.cloudSqlInstance
+              #   - template.0.volumes.0.emptyDir
+              #   - template.0.volumes.0.gcs
               properties:
                 - name: 'medium'
                   type: Enum
@@ -809,6 +843,11 @@ properties:
               type: NestedObject
               description: |-
                 Cloud Storage bucket mounted as a volume using GCSFuse. This feature is only supported in the gen2 execution environment.
+              # exactly_one_of:
+              #   - template.0.volumes.0.secret
+              #   - template.0.volumes.0.cloudSqlInstance
+              #   - template.0.volumes.0.emptyDir
+              #   - template.0.volumes.0.gcs
               properties:
                 - name: 'bucket'
                   type: String

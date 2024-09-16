@@ -157,6 +157,7 @@ properties:
       Is required when creating resources. Name is primarily intended
       for creation idempotence and configuration definition. Cannot be updated.
       More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+    # This is a convenience field as terraform expects `name` to be a top level property
     url_param_only: true
     required: true
     immutable: true
