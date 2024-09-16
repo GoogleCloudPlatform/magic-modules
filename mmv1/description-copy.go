@@ -7,10 +7,11 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 )
 
-func CopyAllDescriptions() {
+func CopyAllDescriptions(tempMode bool) {
 	identifiers := []string{
 		"description:",
 		"note:",
@@ -22,20 +23,27 @@ func CopyAllDescriptions() {
 	}
 
 	for i, id := range identifiers {
-		CopyText(id, len(identifiers)-1 == i)
+		CopyText(id, len(identifiers)-1 == i, tempMode)
 	}
 }
 
 // Used to copy/paste text from Ruby -> Go YAML files
-func CopyText(identifier string, last bool) {
+func CopyText(identifier string, last, tempMode bool) {
 	var allProductFiles []string = make([]string, 0)
-	files, err := filepath.Glob("products/**/go_product.yaml")
+	glob := "products/**/go_product.yaml"
+	if tempMode {
+		glob = "products/**/*.temp"
+	}
+	files, err := filepath.Glob(glob)
 	if err != nil {
 		return
 	}
 	for _, filePath := range files {
 		dir := filepath.Dir(filePath)
-		allProductFiles = append(allProductFiles, fmt.Sprintf("products/%s", filepath.Base(dir)))
+		productPath := fmt.Sprintf("products/%s", filepath.Base(dir))
+		if !slices.Contains(allProductFiles, productPath) {
+			allProductFiles = append(allProductFiles, productPath)
+		}
 	}
 
 	for _, productPath := range allProductFiles {
@@ -52,6 +60,20 @@ func CopyText(identifier string, last bool) {
 			if strings.HasSuffix(yamlPath, "_new") {
 				continue
 			}
+
+			if tempMode {
+				cutName, found := strings.CutSuffix(yamlPath, ".temp")
+				if !found {
+					continue
+				}
+
+				baseName := filepath.Base(yamlPath)
+				yamlMap[baseName] = make([]string, 2)
+				yamlMap[baseName][1] = yamlPath
+				yamlMap[baseName][0] = cutName
+				continue
+			}
+
 			fileName := filepath.Base(yamlPath)
 			baseName, found := strings.CutPrefix(fileName, "go_")
 			if yamlMap[baseName] == nil {
