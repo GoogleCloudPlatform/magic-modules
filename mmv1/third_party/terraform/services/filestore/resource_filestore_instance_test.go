@@ -1,3 +1,5 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
 package filestore_test
 
 import (
@@ -150,31 +152,6 @@ func TestAccFilestoreInstance_reservedIpRange_update(t *testing.T) {
 	})
 }
 
-func TestAccFilestoreInstance_tags(t *testing.T) {
-	t.Parallel()
-        name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
-        org := envvar.GetTestOrgFromEnv(t)
-	tagKey := acctest.BootstrapSharedTestTagKey(t, "filestore-instances-tagkey")
-	tagValue := acctest.BootstrapSharedTestTagValue(t, "filestore-instances-tagvalue", tagKey)
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckFilestoreInstanceDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccFileInstanceTags(name, map[string]string{org + "/" + tagKey: tagValue}),
-			},
-			{
-				ResourceName:            "google_filestore_instance.instance",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zone", "location", "networks.0.reserved_ip_range", "tags"},
-			},
-		},
-	})
-}
-
 func testAccFilestoreInstance_reservedIpRange_update(name string) string {
 	return fmt.Sprintf(`
 resource "google_filestore_instance" "instance" {
@@ -217,8 +194,33 @@ resource "google_filestore_instance" "instance" {
 `, name)
 }
 
+func TestAccFilestoreInstance_tags(t *testing.T) {
+	t.Parallel()
+        name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+        org := envvar.GetTestOrgFromEnv(t)
+	tagKey := acctest.BootstrapSharedTestTagKey(t, "filestore-instances-tagkey")
+	tagValue := acctest.BootstrapSharedTestTagValue(t, "filestore-instances-tagvalue", tagKey)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckFilestoreInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFileInstanceTags(name, map[string]string{org + "/" + tagKey: tagValue}),
+			},
+			{
+				ResourceName:            "google_filestore_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"zone", "location", "networks.0.reserved_ip_range", "tags"},
+			},
+		},
+	})
+}
+
 func testAccFileInstanceTags(name string, tags map[string]string) string {
-	return fmt.Sprintf(`
+	r := fmt.Sprintf(`
 resource "google_filestore_instance" "instance" {
   name = "tf-instance-%s"
   zone = "us-central1-b"
@@ -232,7 +234,7 @@ resource "google_filestore_instance" "instance" {
   networks {
     network           = "default"
     modes             = ["MODE_IPV4"]
-    reserved_ip_range = "172.19.31.0/29"
+    reserved_ip_range = "172.19.31.8/29"
   }
 tags = {`, name)
 
