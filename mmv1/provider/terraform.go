@@ -268,7 +268,9 @@ func (t Terraform) CopyCommonFiles(outputFolder string, generateCode, generateDo
 	log.Printf("Copying common files for %s", ProviderName(t))
 
 	files := t.getCommonCopyFiles(t.TargetVersionName, generateCode, generateDocs)
-	t.CopyFileList(outputFolder, files)
+	if generateCode {
+		t.CopyFileList(outputFolder, files)
+	}
 }
 
 // To copy a new folder, add the folder to foldersCopiedToRootDir or foldersCopiedToGoogleDir.
@@ -359,7 +361,14 @@ func (t Terraform) CopyFileList(outputFolder string, files map[string]string) {
 			log.Fatalf("Cannot read source file %s while copying: %s", source, err)
 		}
 
-		err = os.WriteFile(targetFile, sourceByte, 0644)
+		var permission fs.FileMode
+		if strings.HasSuffix(targetDir, "scripts") {
+			permission = 0755
+		} else {
+			permission = 0644
+		}
+
+		err = os.WriteFile(targetFile, sourceByte, permission)
 		if err != nil {
 			log.Fatalf("Cannot write target file %s while copying: %s", target, err)
 		}

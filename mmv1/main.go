@@ -149,8 +149,8 @@ func main() {
 	providerToGenerate = setProvider(*forceProvider, *version, productsForVersion[0], startTime)
 	providerToGenerate.CopyCommonFiles(*outputPath, generateCode, generateDocs)
 
-	log.Printf("Compiling common files for terraform")
 	if generateCode {
+		log.Printf("Compiling common files for terraform")
 		providerToGenerate.CompileCommonFiles(*outputPath, productsForVersion, "")
 
 		// TODO rewrite: product overrides
