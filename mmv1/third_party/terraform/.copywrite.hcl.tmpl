@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 schema_version = 1
 
 project {
@@ -17,11 +16,11 @@ project {
     ".changelog/**",
     "examples/**",
     "scripts/**",
-<% if version.nil? || version == 'ga' -%>
+{{- if or (eq $.TargetVersionName "") (eq $.TargetVersionName "ga") }}
     "google/**/test-fixtures/**",
-<% else -%>
-    "google-<%= version -%>/**/test-fixtures/**",
-<% end -%>
+{{- else }}
+    "google-{{ $.TargetVersionName }}/**/test-fixtures/**",
+{{- end }}
     "META.d/*.yml",
     "META.d/*.yaml",
     ".golangci.yml",
