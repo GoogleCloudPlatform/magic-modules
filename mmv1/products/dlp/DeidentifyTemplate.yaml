@@ -1040,7 +1040,8 @@ properties:
                       name: redactConfig
                       description: |
                         Redact a given value. For example, if used with an InfoTypeTransformation transforming PHONE_NUMBER, and input 'My phone number is 206-555-0123', the output would be 'My phone number is '.
-                      properties: []     # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/projects.deidentifyTemplates#redactconfig
+                      properties:
+                        []  # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/projects.deidentifyTemplates#redactconfig
                       # The fields below are necessary to include the "redactConfig" transformation in the payload
                       # A side-effect is null values when the field is unused, see: https://github.com/hashicorp/terraform-provider-google/issues/13201
                       send_empty_value: true
@@ -1221,8 +1222,7 @@ properties:
                                               Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
                                             validation:
                                               !ruby/object:Provider::Terraform::Validation
-                                              function:
-                                                'validation.IntBetween(0, 24)'  # "An API may choose to allow the value "24:00:00" for scenarios like business closing time."
+                                              function: 'validation.IntBetween(0, 24)'  # "An API may choose to allow the value "24:00:00" for scenarios like business closing time."
                                           - !ruby/object:Api::Type::Integer
                                             name: minutes
                                             description:
@@ -1241,8 +1241,7 @@ properties:
                                               allows leap-seconds.
                                             validation:
                                               !ruby/object:Provider::Terraform::Validation
-                                              function:
-                                                'validation.IntBetween(0, 60)'  # "An API may allow the value 60 if it allows leap-seconds."
+                                              function: 'validation.IntBetween(0, 60)'  # "An API may allow the value 60 if it allows leap-seconds."
                                           - !ruby/object:Api::Type::Integer
                                             name: nanos
                                             description:
@@ -1424,7 +1423,8 @@ properties:
                       name: redactConfig
                       description: |
                         Redact a given value. For example, if used with an InfoTypeTransformation transforming PHONE_NUMBER, and input 'My phone number is 206-555-0123', the output would be 'My phone number is '.
-                      properties: []  # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/projects.deidentifyTemplates#redactconfig
+                      properties:
+                        []  # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/projects.deidentifyTemplates#redactconfig
                       # The fields below are necessary to include the "redactConfig" transformation in the payload
                       # A side-effect is null values when the field is unused, see: https://github.com/hashicorp/terraform-provider-google/issues/13201
                       send_empty_value: true
@@ -2423,8 +2423,7 @@ properties:
                                               Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
                                             validation:
                                               !ruby/object:Provider::Terraform::Validation
-                                              function:
-                                                'validation.IntBetween(0, 24)'  # "An API may choose to allow the value "24:00:00" for scenarios like business closing time."
+                                              function: 'validation.IntBetween(0, 24)'  # "An API may choose to allow the value "24:00:00" for scenarios like business closing time."
                                           - !ruby/object:Api::Type::Integer
                                             name: minutes
                                             description: |
@@ -2439,8 +2438,7 @@ properties:
                                               Seconds of minutes of the time. Must normally be from 0 to 59. An API may allow the value 60 if it allows leap-seconds.
                                             validation:
                                               !ruby/object:Provider::Terraform::Validation
-                                              function:
-                                                'validation.IntBetween(0, 60)'  # "An API may allow the value 60 if it allows leap-seconds."
+                                              function: 'validation.IntBetween(0, 60)'  # "An API may allow the value 60 if it allows leap-seconds."
                                           - !ruby/object:Api::Type::Integer
                                             name: nanos
                                             description: |
@@ -2496,7 +2494,8 @@ properties:
                                 name: redactConfig
                                 description: |
                                   Redact a given value. For example, if used with an InfoTypeTransformation transforming PHONE_NUMBER, and input 'My phone number is 206-555-0123', the output would be 'My phone number is '.
-                                properties: []  # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/projects.deidentifyTemplates#redactconfig
+                                properties:
+                                  []  # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/projects.deidentifyTemplates#redactconfig
                                 # The fields below are necessary to include the "redactConfig" transformation in the payload
                                 # A side-effect is null values when the field is unused, see: https://github.com/hashicorp/terraform-provider-google/issues/13201
                                 send_empty_value: true
@@ -3022,7 +3021,8 @@ properties:
                                 name: replaceWithInfoTypeConfig
                                 description: |
                                   Replace each matching finding with the name of the info type.
-                                properties: []  # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/projects.deidentifyTemplates#DeidentifyTemplate.ReplaceWithInfoTypeConfig
+                                properties:
+                                  []  # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/projects.deidentifyTemplates#DeidentifyTemplate.ReplaceWithInfoTypeConfig
                                 # The fields below are necessary to include the "replaceWithInfoTypeConfig" transformation in the payload
                                 # A side-effect is null values when the field is unused, see: https://github.com/hashicorp/terraform-provider-google/issues/13201
                                 send_empty_value: true

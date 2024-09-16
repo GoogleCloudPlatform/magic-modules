@@ -69,8 +69,7 @@ examples:
     ignore_read_extra:
       - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
-    name:
-      'privateca_certificate_authority_subordinate'
+    name: 'privateca_certificate_authority_subordinate'
       # This example ultimately generates a random id making replaying impossible at
       # https://github.com/hashicorp/terraform-provider-google-beta/blob/22bfbbcf2250054e622743c4a35a872e43ed5aed/google-beta/privateca_ca_utils.go#L147
     skip_vcr: true
@@ -88,10 +87,10 @@ examples:
       - 'deletion_protection'
       - 'subordinate_config.0.certificate_authority'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'privateca_certificate_authority_byo_key'
     # Skip test because it depends on a beta resource, but PrivateCA does
     # not have a beta endpoint
     skip_test: true
-    name: 'privateca_certificate_authority_byo_key'
     primary_resource_id:
       'default'
       # Multiple IAM bindings on the same key cause non-determinism

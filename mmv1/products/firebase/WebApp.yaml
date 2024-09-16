@@ -59,8 +59,8 @@ identity:
   - name
 examples:
   - !ruby/object:Provider::Terraform::Examples  # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14158
-    skip_vcr: true
     name: 'firebase_web_app_basic'
+    skip_vcr: true
     min_version: 'beta'
     primary_resource_id: 'basic'
     vars:

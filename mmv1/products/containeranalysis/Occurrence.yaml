@@ -29,9 +29,8 @@ id_format: 'projects/{{project}}/occurrences/{{name}}'
 import_format: ['projects/{{project}}/occurrences/{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name:
-      'container_analysis_occurrence_kms'
-      # Occurrence requires custom logic for signing payloads.
+    name: 'container_analysis_occurrence_kms'
+    # Occurrence requires custom logic for signing payloads.
     skip_test: true
     primary_resource_id: 'occurrence'
     vars:

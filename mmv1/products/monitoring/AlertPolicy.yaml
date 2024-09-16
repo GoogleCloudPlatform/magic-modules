@@ -33,29 +33,29 @@ error_abort_predicates: ['transport_tpg.Is429QuotaError']
 examples:
   # skipping tests because the API is full of race conditions
   - !ruby/object:Provider::Terraform::Examples
-    skip_test: true
     name: 'monitoring_alert_policy_basic'
+    skip_test: true
     primary_resource_id: 'alert_policy'
     vars:
       alert_policy_display_name: 'My Alert Policy'
   # skipping tests because the API is full of race conditions
   - !ruby/object:Provider::Terraform::Examples
-    skip_test: true
     name: 'monitoring_alert_policy_evaluation_missing_data'
+    skip_test: true
     primary_resource_id: 'alert_policy'
     vars:
       alert_policy_display_name: 'My Alert Policy'
   # skipping tests because the API is full of race conditions
   - !ruby/object:Provider::Terraform::Examples
-    skip_test: true
     name: 'monitoring_alert_policy_forecast_options'
+    skip_test: true
     primary_resource_id: 'alert_policy'
     vars:
       alert_policy_display_name: 'My Alert Policy'
   # skipping tests because the API is full of race conditions
   - !ruby/object:Provider::Terraform::Examples
-    skip_test: true
     name: 'monitoring_alert_policy_promql_condition'
+    skip_test: true
     primary_resource_id: 'alert_policy'
     vars:
       alert_policy_display_name: 'My Alert Policy'

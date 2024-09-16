@@ -12,6 +12,17 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
+# 'BackupRun' is not idempotent and will not be covered.
+# | - !ruby/object:Api::Resource
+# |   name: 'BackupRun'
+# |   kind: 'sql#backupRun'
+# |   base_url: projects/{{project}}/instances/{{instance}}/backupRuns
+# 'Operation' is not idempotent and will not be covered.
+# (it is used internally to assert the state of operations being performed)
+# | - !ruby/object:Api::Resource
+# |   name: 'Operation'
+# |   kind: 'sql#operation'
+# |   base_url: projects/{{project}}/operations
 name: SQL
 display_name: Cloud SQL
 client_name: 'SqlAdmin'
@@ -39,14 +50,3 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
-# 'BackupRun' is not idempotent and will not be covered.
-# | - !ruby/object:Api::Resource
-# |   name: 'BackupRun'
-# |   kind: 'sql#backupRun'
-# |   base_url: projects/{{project}}/instances/{{instance}}/backupRuns
-# 'Operation' is not idempotent and will not be covered.
-# (it is used internally to assert the state of operations being performed)
-# | - !ruby/object:Api::Resource
-# |   name: 'Operation'
-# |   kind: 'sql#operation'
-# |   base_url: projects/{{project}}/operations

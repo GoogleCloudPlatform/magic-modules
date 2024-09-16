@@ -49,12 +49,11 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
     ]
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
     name: 'apigateway_api_config_basic'
+    min_version: beta
     primary_resource_id: 'api_cfg'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-api%s",
-      context["random_suffix"]), fmt.Sprintf("tf-test-my-config%s",
-      context["random_suffix"])'  # Need to pass 2 ids into a Sprintf - parent resource id also needed to identify primary resource
+    # Need to pass 2 ids into a Sprintf - parent resource id also needed to identify primary resource
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-api%s", context["random_suffix"]), fmt.Sprintf("tf-test-my-config%s", context["random_suffix"])'
     vars:
       api_id: 'my-api'
       config_id: 'my-config'

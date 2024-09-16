@@ -45,8 +45,7 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 id_format: 'projects/{{project}}/deployments/{{name}}'
 import_format: ['projects/{{project}}/deployments/{{name}}']
-timeouts:
-  !ruby/object:Api::Timeouts  # Very long to support very long deployments
+timeouts: !ruby/object:Api::Timeouts  # Very long to support very long deployments
   insert_minutes: 60
   update_minutes: 60
   delete_minutes: 60
@@ -83,8 +82,8 @@ examples:
     vars:
       deployment_name: 'my-deployment'
     skip_test: true
-custom_code:
-  !ruby/object:Provider::Terraform::CustomCode  # post-create failure: Delete deployment if an invalid deployment was created
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  # post-create failure: Delete deployment if an invalid deployment was created
   post_create_failure: 'templates/terraform/post_create_failure/delete_on_failure.go.erb'
   # Custom diff to force new if 'preview' is true
   constants: 'templates/terraform/constants/deployment_manager_deployment.go.erb'
@@ -122,6 +121,7 @@ parameters:
       - :ABANDON
       - :DELETE
   - !ruby/object:Api::Type::Boolean
+    # Custom Update
     name: 'preview'
     description: |
       If set to true, a deployment is created with "shell" resources
@@ -134,7 +134,6 @@ parameters:
       to true or if other fields are updated while preview is true.
     default_value: false
     url_param_only: true
-    # Custom Update
     update_id: '0_preview'
     fingerprint_name: 'fingerprint'
     update_verb: :PATCH
@@ -146,20 +145,20 @@ properties:
       Unique name for the deployment
     required: true
   - !ruby/object:Api::Type::String
+    # Custom Update
     name: 'description'
     description: |
       Optional user-provided description of deployment.
-    # Custom Update
     fingerprint_name: 'fingerprint'
     update_id: '1_non-preview'
     update_verb: :PATCH
     update_url: projects/{{project}}/global/deployments/{{name}}?preview={{preview}}&createPolicy={{create_policy}}&deletePolicy={{delete_policy}}
   - !ruby/object:Api::Type::Array
+    # Custom Update
     name: 'labels'
     description: |
       Key-value pairs to apply to this labels.
     send_empty_value: true
-    # Custom Update
     fingerprint_name: 'fingerprint'
     update_id: '1_non-preview'
     update_verb: :PATCH
@@ -176,12 +175,12 @@ properties:
           description: |
             Value of label.
   - !ruby/object:Api::Type::NestedObject
+    # Custom Update
     name: 'target'
     required: true
     description: |
       Parameters that define your deployment, including the deployment
       configuration and relevant templates.
-    # Custom Update
     fingerprint_name: 'fingerprint'
     update_id: '1_non-preview'
     update_verb: :PATCH

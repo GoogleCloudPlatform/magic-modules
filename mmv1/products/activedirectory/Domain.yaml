@@ -75,9 +75,8 @@ examples:
       # the part of the domain before the first "." must be <15 chars, and
       # the random suffix is 10 chars. In order to make sure these get swept,
       # 'tfgen' is the only option here.
-      domain_name:
-        tfgen
-        # skip the test until Active Directory setup issue got resolved
+      domain_name: tfgen
+    # skip the test until Active Directory setup issue got resolved
     skip_test: true
     ignore_read_extra:
       - 'deletion_protection'

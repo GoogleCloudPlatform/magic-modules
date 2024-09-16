@@ -132,8 +132,6 @@ properties:
       composite index is not directional, the `__name__` will be ordered
       `"ASCENDING"` (unless explicitly specified otherwise).
     required: true
-    # Single field indexes _exist_, but the API only lets us manage composite ones.
-    min_size: 2
     diff_suppress_func: firestoreIFieldsDiffSuppress
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
@@ -176,4 +174,7 @@ properties:
                 Indicates the vector index is a flat index.
               allow_empty_object: true
               send_empty_value: true
-              properties: [] # Meant to be an empty object with no properties.
+              properties:
+                []   # Meant to be an empty object with no properties.
+    # Single field indexes _exist_, but the API only lets us manage composite ones.
+    min_size: 2

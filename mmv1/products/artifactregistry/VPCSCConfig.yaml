@@ -32,9 +32,9 @@ update_verb: :PATCH
 skip_delete: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
+    name: 'artifact_registry_vpcsc_config'
     # Requires VPC SC Policy configured on organization
     skip_test: true
-    name: 'artifact_registry_vpcsc_config'
     primary_resource_id: 'my-config'
 autogen_async: false
 async: !ruby/object:Api::OpAsync

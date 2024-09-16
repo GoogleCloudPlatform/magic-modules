@@ -646,7 +646,6 @@ properties:
     # This is incorrect because you can make actions on the Instance (start, stop)
     # In an idempotent world, the best way to express these actions is to
     # change the status value.
-    output: false
     values:
       - :PROVISIONING
       - :STAGING

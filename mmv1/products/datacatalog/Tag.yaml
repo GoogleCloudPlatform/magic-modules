@@ -60,9 +60,8 @@ examples:
     oics_vars_overrides:
       force_delete: 'true'
   - !ruby/object:Provider::Terraform::Examples
-    name:
-      'data_catalog_entry_tag_full'
-      # Multiple fine-grained resources
+    name: 'data_catalog_entry_tag_full'
+    # Multiple fine-grained resources
     skip_vcr: true
     primary_resource_id: 'basic_tag'
     vars:

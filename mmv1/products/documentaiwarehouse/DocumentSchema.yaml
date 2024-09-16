@@ -27,9 +27,9 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/document_ai_warehouse_document_schema.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
+    name: "document_ai_warehouse_document_schema_text"
     # docs only, testing is done in an update test
     skip_test: true
-    name: "document_ai_warehouse_document_schema_text"
     primary_resource_id: "example_text"
 parameters:
   - !ruby/object:Api::Type::String
