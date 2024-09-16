@@ -12,7 +12,6 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-
     newObj := make(map[string]interface{})
     newObj["<%= object.name.camelize(:lower) -%>"] = obj
     triggerIdProp, ok := d.GetOk("trigger_id")
