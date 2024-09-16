@@ -400,9 +400,9 @@ is set to true. Defaults to ZONAL.`,
 							Description: `Enables Vertex AI Integration.`,
 						},
 						"enable_dataplex_integration": {
-							Type:             schema.TypeBool,
-							Optional:         true,
-							Description:      `Enables Dataplex Integration.`,
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: `Enables Dataplex Integration.`,
 						},
 						"disk_size": {
 							Type:     schema.TypeInt,
@@ -2236,11 +2236,11 @@ func flattenDatabaseFlags(databaseFlags []*sqladmin.DatabaseFlags) []map[string]
 
 func flattenIpConfiguration(ipConfiguration *sqladmin.IpConfiguration, d *schema.ResourceData) interface{} {
 	data := map[string]interface{}{
-		"ipv4_enabled":                                  ipConfiguration.Ipv4Enabled,
-		"private_network":                               ipConfiguration.PrivateNetwork,
-		"allocated_ip_range":                            ipConfiguration.AllocatedIpRange,
+		"ipv4_enabled":       ipConfiguration.Ipv4Enabled,
+		"private_network":    ipConfiguration.PrivateNetwork,
+		"allocated_ip_range": ipConfiguration.AllocatedIpRange,
 		"enable_private_path_for_google_cloud_services": ipConfiguration.EnablePrivatePathForGoogleCloudServices,
-		"ssl_mode":                                      ipConfiguration.SslMode,
+		"ssl_mode": ipConfiguration.SslMode,
 	}
 
 	if ipConfiguration.AuthorizedNetworks != nil {
