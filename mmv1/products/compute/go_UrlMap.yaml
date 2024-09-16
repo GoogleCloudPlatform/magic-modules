@@ -937,7 +937,7 @@ properties:
                       - 'PERMANENT_REDIRECT'
                       - 'SEE_OTHER'
                       - 'TEMPORARY_REDIRECT'
-                    skip_docs_values: true
+                    exclude_docs_values: true
                   - name: 'stripQuery'
                     type: Boolean
                     description: |
@@ -1677,7 +1677,7 @@ properties:
                       - 'PERMANENT_REDIRECT'
                       - 'SEE_OTHER'
                       - 'TEMPORARY_REDIRECT'
-                    skip_docs_values: true
+                    exclude_docs_values: true
                   - name: 'stripQuery'
                     type: Boolean
                     description: |
@@ -1743,7 +1743,7 @@ properties:
                 - 'PERMANENT_REDIRECT'
                 - 'SEE_OTHER'
                 - 'TEMPORARY_REDIRECT'
-              skip_docs_values: true
+              exclude_docs_values: true
             - name: 'stripQuery'
               type: Boolean
               description: |
@@ -2237,7 +2237,7 @@ properties:
           - 'PERMANENT_REDIRECT'
           - 'SEE_OTHER'
           - 'TEMPORARY_REDIRECT'
-        skip_docs_values: true
+        exclude_docs_values: true
       - name: 'stripQuery'
         type: Boolean
         description: |
