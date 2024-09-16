@@ -61,7 +61,7 @@ func convertTemplate(folder, tempFileTargets string) int {
 		if checkExceptionList(filePath) {
 			continue
 		}
-		if len(tempSlice) > 0 {
+		if len(tempSlice) > 1 {
 			// log.Printf("%s", filePath)
 			if !slices.Contains(tempSlice, filePath) {
 				continue
@@ -77,7 +77,7 @@ func convertTemplate(folder, tempFileTargets string) int {
 
 		goTemplate := strings.Replace(file, "erb", "tmpl", 1)
 		outPath := path.Join(goDir, goTemplate)
-		if len(tempSlice) > 0 {
+		if len(tempSlice) > 1 {
 			outPath = outPath + ".temp"
 		}
 		err = ioutil.WriteFile(outPath, data, 0644)
@@ -148,7 +148,7 @@ func convertHandwrittenFiles(folder, handwrittenTempFiles string) int {
 		if checkExceptionList(filePath) {
 			continue
 		}
-		if len(tempSlice) > 0 {
+		if len(tempSlice) > 1 {
 			if !slices.Contains(tempSlice, filePath) {
 				continue
 			}
@@ -166,7 +166,7 @@ func convertHandwrittenFiles(folder, handwrittenTempFiles string) int {
 			goTemplate = strings.Replace(file, ".erb", "", 1)
 		}
 		outPath := path.Join(goDir, goTemplate)
-		if len(tempSlice) > 0 {
+		if len(tempSlice) > 1 {
 			outPath = outPath + ".temp"
 		}
 		err = ioutil.WriteFile(outPath, data, 0644)
