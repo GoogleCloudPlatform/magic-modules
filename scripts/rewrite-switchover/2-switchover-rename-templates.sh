@@ -10,7 +10,6 @@ for subitem in mmv1/templates/terraform/*; do
     done
 done
 
-
 for subitem in mmv1/third_party/terraform/*; do
     for filename in $subitem/*; do
         if [[ $filename != *"*"* ]]; then
