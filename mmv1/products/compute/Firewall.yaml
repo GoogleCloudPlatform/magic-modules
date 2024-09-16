@@ -59,8 +59,8 @@ async:
     message: 'message'
 collection_url_key: 'items'
 custom_code:
-  extra_schema_entry: 'templates/terraform/extra_schema_entry/go/firewall.tmpl'
-  constants: 'templates/terraform/constants/go/firewall.tmpl'
+  extra_schema_entry: 'templates/terraform/extra_schema_entry/firewall.tmpl'
+  constants: 'templates/terraform/constants/firewall.tmpl'
 custom_diff:
   - 'resourceComputeFirewallEnableLoggingCustomizeDiff'
   - 'resourceComputeFirewallSourceFieldsCustomizeDiff'
@@ -207,8 +207,8 @@ properties:
       If defined, logging is enabled, and logs will be exported to Cloud Logging.
     send_empty_value: true
     diff_suppress_func: 'diffSuppressEnableLogging'
-    custom_flatten: 'templates/terraform/custom_flatten/go/firewall_log_config.go.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/firewall_log_config.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/firewall_log_config.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/firewall_log_config.go.tmpl'
     properties:
       - name: 'metadata'
         type: Enum
@@ -237,7 +237,7 @@ properties:
     description: |
       The name or self_link of the network to attach this firewall to.
     required: true
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Network'
     imports: 'selfLink'
   - name: 'priority'

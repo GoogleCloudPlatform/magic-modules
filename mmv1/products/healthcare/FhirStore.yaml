@@ -35,8 +35,8 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  decoder: 'templates/terraform/decoders/go/long_name_to_self_link.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/healthcare_fhir_store.go.tmpl'
+  decoder: 'templates/terraform/decoders/long_name_to_self_link.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/healthcare_fhir_store.go.tmpl'
 exclude_sweeper: true
 examples:
   - name: 'healthcare_fhir_store_basic'

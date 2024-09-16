@@ -51,7 +51,7 @@ iam_policy:
   allowed_iam_role: 'roles/compute.admin'
   parent_resource_attribute: 'machine_image'
   iam_conditions_request_type: 'QUERY_PARAM'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
 custom_code:
 examples:
   - name: 'machine_image_basic'
@@ -88,7 +88,7 @@ properties:
       this as a partial or full URL to the resource.'
     min_version: 'beta'
     required: true
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Instance'
     imports: 'selfLink'
   - name: 'storageLocations'

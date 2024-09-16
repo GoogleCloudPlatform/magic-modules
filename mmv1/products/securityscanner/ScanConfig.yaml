@@ -31,8 +31,8 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  post_create: 'templates/terraform/post_create/go/set_computed_name.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/self_link_as_name.tmpl'
+  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
+  custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
 examples:
   - name: 'scan_config_basic'
     primary_resource_id: 'scan-config'
@@ -103,7 +103,7 @@ properties:
             required: true
             immutable: true
             sensitive: true
-            custom_flatten: 'templates/terraform/custom_flatten/go/scan_config_auth_custom_password.go.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/scan_config_auth_custom_password.go.tmpl'
       - name: 'customAccount'
         type: NestedObject
         description: |
@@ -128,7 +128,7 @@ properties:
             required: true
             immutable: true
             sensitive: true
-            custom_flatten: 'templates/terraform/custom_flatten/go/scan_config_auth_google_password.go.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/scan_config_auth_google_password.go.tmpl'
           - name: 'loginUrl'
             type: String
             description: |

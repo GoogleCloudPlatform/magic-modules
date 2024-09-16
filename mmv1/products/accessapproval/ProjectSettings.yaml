@@ -34,7 +34,7 @@ timeouts:
   delete_minutes: 20
 custom_code:
   pre_create: 'templates/terraform/update_mask.go.tmpl'
-  custom_delete: 'templates/terraform/custom_delete/go/clear_project_access_approval_settings.go.tmpl'
+  custom_delete: 'templates/terraform/custom_delete/clear_project_access_approval_settings.go.tmpl'
 examples:
   - name: 'project_access_approval_full'
     primary_resource_id: 'project_access_approval'

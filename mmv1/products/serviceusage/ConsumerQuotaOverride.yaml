@@ -60,7 +60,7 @@ nested_query:
   is_list_of_ids: false
   modify_by_patch: false
 custom_code:
-  test_check_destroy: 'templates/terraform/custom_check_destroy/go/consumer_quota_override.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/consumer_quota_override.go.tmpl'
 exclude_sweeper: true
 examples:
   - name: 'consumer_quota_override'
@@ -99,7 +99,7 @@ parameters:
       The server-generated name of the quota override.
     min_version: 'beta'
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'force'
     type: Boolean
     description: |
@@ -142,7 +142,7 @@ properties:
       The overriding quota limit value. Can be any nonnegative integer, or -1 (unlimited quota).
     min_version: 'beta'
     required: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/consumer_quote_override_override_value.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/consumer_quote_override_override_value.go.tmpl'
   - name: 'dimensions'
     type: KeyValuePairs
     description: |

@@ -34,7 +34,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  decoder: 'templates/terraform/decoders/go/long_name_to_self_link.go.tmpl'
+  decoder: 'templates/terraform/decoders/long_name_to_self_link.go.tmpl'
 error_retry_predicates:
 
   - 'transport_tpg.HealthcareDatasetNotInitialized'

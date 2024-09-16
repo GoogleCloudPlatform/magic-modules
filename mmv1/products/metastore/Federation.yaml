@@ -46,7 +46,7 @@ iam_policy:
   exclude_import_test: true
   method_name_separator: ':'
   parent_resource_attribute: 'federation_id'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/federations/{{federation_id}}'
     - '{{federation_id}}'

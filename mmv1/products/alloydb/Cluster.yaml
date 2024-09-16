@@ -62,9 +62,9 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  pre_create: 'templates/terraform/pre_create/go/alloydb_cluster.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/go/alloydb_cluster.go.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/go/alloydb_cluster.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/alloydb_cluster.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/alloydb_cluster.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/alloydb_cluster.go.tmpl'
 # Skipping the sweeper because we need to force-delete clusters.
 exclude_sweeper: true
 examples:
@@ -277,7 +277,7 @@ properties:
     description: |
       Initial user to setup during cluster creation.
     ignore_read: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/alloydb_cluster_input_user_flatten.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/alloydb_cluster_input_user_flatten.go.tmpl'
     properties:
       - name: 'user'
         type: String
@@ -413,7 +413,7 @@ properties:
             description: |
               The times during the day to start a backup. At least one start time must be provided. The start times are assumed to be in UTC and to be an exact hour (e.g., 04:00:00).
             required: true
-            custom_flatten: 'templates/terraform/custom_flatten/go/alloydb_cluster_input_automated_backup_policy_start_times_flatten.go.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/alloydb_cluster_input_automated_backup_policy_start_times_flatten.go.tmpl'
             item_type:
               type: NestedObject
               properties:

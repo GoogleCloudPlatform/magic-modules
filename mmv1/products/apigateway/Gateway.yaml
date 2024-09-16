@@ -53,7 +53,7 @@ iam_policy:
   allowed_iam_role: 'roles/apigateway.viewer'
   parent_resource_attribute: 'gateway'
   base_url: 'projects/{{project}}/locations/{{region}}/gateways/{{gateway}}'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{region}}/gateways/{{gateway}}'
     - '{{project}}/{{region}}/{{gateway}}'

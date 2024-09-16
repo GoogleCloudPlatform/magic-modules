@@ -49,7 +49,7 @@ async:
     path: 'error/errors'
     message: 'message'
 custom_code:
-  test_check_destroy: 'templates/terraform/custom_check_destroy/go/appengine.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/appengine.go.tmpl'
 exclude_sweeper: true
 error_retry_predicates:
 

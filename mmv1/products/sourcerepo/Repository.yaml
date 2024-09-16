@@ -36,12 +36,12 @@ collection_url_key: 'repos'
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'repository'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
-  custom_diff_suppress: 'templates/terraform/iam/go/sourcerepo_diff_suppress.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  custom_diff_suppress: 'templates/terraform/iam/sourcerepo_diff_suppress.go.tmpl'
 custom_code:
-  constants: 'templates/terraform/constants/go/source_repo_repository.go.tmpl'
-  update_encoder: 'templates/terraform/update_encoder/go/source_repo_repository.tmpl'
-  post_create: 'templates/terraform/post_create/go/source_repo_repository_update.go.tmpl'
+  constants: 'templates/terraform/constants/source_repo_repository.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/source_repo_repository.tmpl'
+  post_create: 'templates/terraform/post_create/source_repo_repository_update.go.tmpl'
 exclude_tgc: true
 examples:
   - name: 'sourcerepo_repository_basic'
@@ -64,8 +64,8 @@ properties:
       The repo name may contain slashes. eg, `name/with/slash`
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/repository_short_name_from_name.go.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/shortname_to_url.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/repository_short_name_from_name.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.tmpl'
   - name: 'url'
     type: String
     description: |

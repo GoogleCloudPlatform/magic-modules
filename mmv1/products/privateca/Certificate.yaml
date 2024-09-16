@@ -33,7 +33,7 @@ timeouts:
   delete_minutes: 20
 autogen_async: true
 custom_code:
-  pre_create: 'templates/terraform/pre_create/go/privateca_certificate.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/privateca_certificate.go.tmpl'
 exclude_sweeper: true
 examples:
   - name: 'privateca_certificate_config'
@@ -699,8 +699,8 @@ properties:
         required: true
         immutable: true
         send_empty_value: true
-        custom_flatten: 'templates/terraform/custom_flatten/go/privateca_certificate_509_config.go.tmpl'
-        custom_expand: 'templates/terraform/custom_expand/go/privateca_certificate_509_config.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/privateca_certificate_509_config.go.tmpl'
+        custom_expand: 'templates/terraform/custom_expand/privateca_certificate_509_config.go.tmpl'
         properties:
           - name: 'additionalExtensions'
             type: Array

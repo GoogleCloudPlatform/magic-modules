@@ -111,7 +111,7 @@ parameters:
     description: |
       A reference to the region where the regional NEGs reside.
     required: true
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Region'
     imports: 'name'
 properties:
@@ -158,7 +158,7 @@ properties:
 
       The URL of the network to which all network endpoints in the NEG belong. Uses
       "default" project network if unspecified.
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Network'
     imports: 'selfLink'
   - name: 'subnetwork'
@@ -167,7 +167,7 @@ properties:
       This field is only used for PSC NEGs.
 
       Optional URL of the subnetwork to which all network endpoints in the NEG belong.
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Subnetwork'
     imports: 'selfLink'
   - name: 'cloudRun'

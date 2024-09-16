@@ -43,7 +43,7 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  custom_update: 'templates/terraform/custom_update/go/vertex_ai_index.go.tmpl'
+  custom_update: 'templates/terraform/custom_update/vertex_ai_index.go.tmpl'
 examples:
   - name: 'vertex_ai_index'
     primary_resource_id: 'index'
@@ -76,7 +76,7 @@ properties:
     type: String
     description: The resource name of the Index.
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'displayName'
     type: String
     description:
@@ -103,13 +103,13 @@ properties:
           The expected structure and format of the files this URI points to is
           described at https://cloud.google.com/vertex-ai/docs/matching-engine/using-matching-engine#input-data-format
         required: true
-        custom_flatten: 'templates/terraform/custom_flatten/go/vertex_ai_index_ignore_contents_delta_uri.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/vertex_ai_index_ignore_contents_delta_uri.go.tmpl'
       - name: 'isCompleteOverwrite'
         type: Boolean
         description: |-
           If this field is set together with contentsDeltaUri when calling IndexService.UpdateIndex,
           then existing content of the Index will be replaced by the data from the contentsDeltaUri.
-        custom_flatten: 'templates/terraform/custom_flatten/go/vertex_ai_index_ignore_is_complete_overwrite.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/vertex_ai_index_ignore_is_complete_overwrite.go.tmpl'
         default_value: false
       - name: 'config'
         type: NestedObject

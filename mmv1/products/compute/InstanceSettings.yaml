@@ -49,8 +49,8 @@ async:
     path: 'error/errors'
     message: 'message'
 custom_code:
-  custom_delete: 'templates/terraform/custom_delete/go/clear_instance_settings.go.tmpl'
-  test_check_destroy: 'templates/terraform/custom_check_destroy/go/skip_delete_during_test.go.tmpl'
+  custom_delete: 'templates/terraform/custom_delete/clear_instance_settings.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
 examples:
   - name: 'instance_settings_basic'
     primary_resource_id: 'gce_instance_settings'
@@ -59,7 +59,7 @@ parameters:
     type: ResourceRef
     description: 'A reference to the zone where the machine resides.'
     required: true
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Zone'
     imports: 'name'
 properties:
@@ -69,7 +69,7 @@ properties:
         The fingerprint used for optimistic locking of this resource.  Used
         internally during updates.
     output: true
-    custom_expand: 'templates/terraform/custom_expand/go/compute_instance_settings_fingerprint.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/compute_instance_settings_fingerprint.tmpl'
   - name: 'metadata'
     type: NestedObject
     description: |

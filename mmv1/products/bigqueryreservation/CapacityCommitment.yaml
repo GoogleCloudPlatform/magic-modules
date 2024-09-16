@@ -36,8 +36,8 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  constants: 'templates/terraform/constants/go/bigquery_reservation_capacity_commitment.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/bigquery_reservation_capacity_commitment_set_id.go.tmpl'
+  constants: 'templates/terraform/constants/bigquery_reservation_capacity_commitment.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/bigquery_reservation_capacity_commitment_set_id.go.tmpl'
 examples:
   - name: 'bigquery_reservation_capacity_commitment_basic'
     primary_resource_id: 'commitment'

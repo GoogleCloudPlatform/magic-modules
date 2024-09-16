@@ -35,7 +35,7 @@ iam_policy:
   fetch_iam_policy_verb: 'POST'
   allowed_iam_role: 'roles/bigquery.dataOwner'
   parent_resource_attribute: 'table_id'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   iam_policy_version: '1'
 custom_code:
 examples:

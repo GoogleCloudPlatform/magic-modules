@@ -73,10 +73,10 @@ nested_query:
   is_list_of_ids: true
   modify_by_patch: true
 custom_code:
-  pre_create: 'templates/terraform/pre_create/go/access_context_manager_dry_run_resource.go.tmpl'
-  pre_update: 'templates/terraform/pre_create/go/access_context_manager_dry_run_resource.go.tmpl'
-  pre_delete: 'templates/terraform/pre_create/go/access_context_manager_dry_run_resource.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/access_context_manager_service_perimeter_resource.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/access_context_manager_dry_run_resource.go.tmpl'
+  pre_update: 'templates/terraform/pre_create/access_context_manager_dry_run_resource.go.tmpl'
+  pre_delete: 'templates/terraform/pre_create/access_context_manager_dry_run_resource.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/access_context_manager_service_perimeter_resource.go.tmpl'
 exclude_tgc: true
 # Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter
 exclude_sweeper: true

@@ -65,7 +65,7 @@ async:
 # If a resize request is in the ACCEPTED state, it must be canceled before it can be
 # deleted. If a resize request is NOT in the ACCEPTED state, it can be directly deleted.
 custom_code:
-  custom_delete: 'templates/terraform/custom_delete/go/compute_mig_resize_request_delete.go.tmpl'
+  custom_delete: 'templates/terraform/custom_delete/compute_mig_resize_request_delete.go.tmpl'
 # Examples for testing
 examples:
   - name: 'compute_mig_resize_request'

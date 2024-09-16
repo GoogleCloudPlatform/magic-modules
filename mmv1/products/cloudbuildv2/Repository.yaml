@@ -37,7 +37,7 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-  encoder: 'templates/terraform/encoders/go/cloudbuildv2_repository.go.tmpl'
+  encoder: 'templates/terraform/encoders/cloudbuildv2_repository.go.tmpl'
 exclude_tgc: true
 legacy_long_form_project: true
 examples:

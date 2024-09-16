@@ -46,12 +46,12 @@ async:
 custom_code:
 examples:
   - name: 'application_basic'
-    config_path: 'templates/terraform/examples/go/apphub_application_basic.tf.tmpl'
+    config_path: 'templates/terraform/examples/apphub_application_basic.tf.tmpl'
     primary_resource_id: 'example'
     vars:
       application_id: 'example-application'
   - name: 'application_full'
-    config_path: 'templates/terraform/examples/go/apphub_application_full.tf.tmpl'
+    config_path: 'templates/terraform/examples/apphub_application_full.tf.tmpl'
     primary_resource_id: 'example2'
     vars:
       application_id: 'example-application'

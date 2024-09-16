@@ -45,7 +45,7 @@ collection_url_key: 'functions'
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'cloud_function'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
 custom_code:
 examples:
   - name: 'cloudfunctions_cloud_function'

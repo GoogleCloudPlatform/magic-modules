@@ -33,9 +33,9 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  constants: 'templates/terraform/constants/go/access_approval.go.tmpl'
+  constants: 'templates/terraform/constants/access_approval.go.tmpl'
   pre_create: 'templates/terraform/update_mask.go.tmpl'
-  custom_delete: 'templates/terraform/custom_delete/go/clear_folder_access_approval_settings.go.tmpl'
+  custom_delete: 'templates/terraform/custom_delete/clear_folder_access_approval_settings.go.tmpl'
 examples:
   - name: 'folder_access_approval_full'
     primary_resource_id: 'folder_access_approval'

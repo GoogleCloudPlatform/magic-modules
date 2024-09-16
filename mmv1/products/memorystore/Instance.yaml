@@ -44,8 +44,8 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  encoder: 'templates/terraform/encoders/go/memorystore_instance.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/memorystore_instance.go.tmpl'
+  encoder: 'templates/terraform/encoders/memorystore_instance.go.tmpl'
+  decoder: 'templates/terraform/decoders/memorystore_instance.go.tmpl'
 examples:
   - name: 'memorystore_instance_basic'
     primary_resource_id: 'instance-basic'

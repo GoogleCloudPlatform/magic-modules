@@ -46,7 +46,7 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-  constants: 'templates/terraform/constants/go/posture.go.tmpl'
+  constants: 'templates/terraform/constants/posture.go.tmpl'
 custom_diff:
   - 'revisionIdCustomizeDiff'
 examples:
@@ -276,7 +276,7 @@ properties:
                             description: |
                               Immutable. The name of the custom constraint. This is unique within the organization.
                             required: true
-                            custom_flatten: 'templates/terraform/custom_flatten/go/securityposture_custom_constraint_name.go.tmpl'
+                            custom_flatten: 'templates/terraform/custom_flatten/securityposture_custom_constraint_name.go.tmpl'
                           - name: 'displayName'
                             type: String
                             description: |

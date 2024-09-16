@@ -43,8 +43,8 @@ async:
     path: 'error/errors'
     message: 'message'
 custom_code:
-  encoder: 'templates/terraform/encoders/go/sql_source_representation_instance.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/sql_source_representation_instance.go.tmpl'
+  encoder: 'templates/terraform/encoders/sql_source_representation_instance.go.tmpl'
+  decoder: 'templates/terraform/decoders/sql_source_representation_instance.go.tmpl'
 examples:
   - name: 'sql_source_representation_instance_basic'
     primary_resource_id: 'instance'
@@ -116,7 +116,7 @@ properties:
         description: |
           The password for the replication user account.
         sensitive: true
-        custom_flatten: 'templates/terraform/custom_flatten/go/source_representation_instance_configuration_password.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/source_representation_instance_configuration_password.go.tmpl'
       - name: 'dumpFilePath'
         type: String
         description: |

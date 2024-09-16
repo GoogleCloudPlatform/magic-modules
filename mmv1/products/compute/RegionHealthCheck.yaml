@@ -54,7 +54,7 @@ async:
     message: 'message'
 collection_url_key: 'items'
 custom_code:
-  encoder: 'templates/terraform/encoders/go/health_check_type.tmpl'
+  encoder: 'templates/terraform/encoders/health_check_type.tmpl'
 custom_diff:
   - 'healthCheckCustomizeDiff'
 examples:
@@ -120,8 +120,8 @@ parameters:
     required: false
     immutable: true
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Region'
     imports: 'selfLink'
 properties:
@@ -848,7 +848,7 @@ properties:
     description: |
       Configure logging on this health check.
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/health_check_log_config.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/health_check_log_config.go.tmpl'
     properties:
       - name: 'enable'
         type: Boolean

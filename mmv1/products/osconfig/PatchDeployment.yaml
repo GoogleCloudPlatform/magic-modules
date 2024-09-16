@@ -32,10 +32,10 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  encoder: 'templates/terraform/encoders/go/os_config_patch_deployment.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/os_config_patch_deployment.go.tmpl'
-  post_create: 'templates/terraform/post_create/go/set_computed_name.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/self_link_as_name.tmpl'
+  encoder: 'templates/terraform/encoders/os_config_patch_deployment.go.tmpl'
+  decoder: 'templates/terraform/decoders/os_config_patch_deployment.go.tmpl'
+  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
+  custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
 examples:
   - name: 'os_config_patch_deployment_basic'
     primary_resource_id: 'patch'
@@ -769,7 +769,7 @@ properties:
           Time of the day to run a recurring deployment.
         required: true
         send_empty_value: true
-        custom_flatten: 'templates/terraform/custom_flatten/go/os_config_patch_deployment_recurring_schedule_time_of_day.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/os_config_patch_deployment_recurring_schedule_time_of_day.go.tmpl'
         properties:
           - name: 'hours'
             type: Integer

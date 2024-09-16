@@ -173,7 +173,7 @@ properties:
         type: String
         description: |
           The project number of the parent project of the feature Groups.
-        custom_flatten: 'templates/terraform/custom_flatten/go/vertex_ai_feature_view_ignore_project_number.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/vertex_ai_feature_view_ignore_project_number.go.tmpl'
   - name: 'vectorSearchConfig'
     type: NestedObject
     description: |

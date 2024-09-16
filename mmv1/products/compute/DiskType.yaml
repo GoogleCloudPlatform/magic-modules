@@ -42,7 +42,7 @@ parameters:
     type: ResourceRef
     description: 'A reference to the zone where the disk type resides.'
     required: true
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Zone'
     imports: 'name'
 properties:

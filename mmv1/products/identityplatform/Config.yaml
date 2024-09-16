@@ -42,7 +42,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  custom_create: 'templates/terraform/custom_create/go/identity_platform_config.go.tmpl'
+  custom_create: 'templates/terraform/custom_create/identity_platform_config.go.tmpl'
 exclude_sweeper: true
 examples:
   - name: 'identity_platform_config_basic'
@@ -123,7 +123,7 @@ properties:
         type: NestedObject
         description: |
           Configuration options related to authenticating an anonymous user.
-        custom_flatten: 'templates/terraform/custom_flatten/go/identity_platform_config_anonymous.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/identity_platform_config_anonymous.go.tmpl'
         properties:
           - name: 'enabled'
             type: Boolean
@@ -281,7 +281,7 @@ properties:
         type: NestedObject
         description: |
           Configuration related to restricting a user's ability to affect their account.
-        custom_flatten: 'templates/terraform/custom_flatten/go/identity_platform_config_client_permissions.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/identity_platform_config_client_permissions.go.tmpl'
         properties:
           - name: 'disabledUserSignup'
             type: Boolean
@@ -380,7 +380,7 @@ properties:
         description: |
           Configuration for logging requests made to this project to Stackdriver Logging
         send_empty_value: true
-        custom_flatten: 'templates/terraform/custom_flatten/go/identity_platform_config_logging.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/identity_platform_config_logging.go.tmpl'
         properties:
           - name: 'enabled'
             type: Boolean

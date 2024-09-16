@@ -71,7 +71,7 @@ async:
     message: 'message'
 collection_url_key: 'items'
 custom_code:
-  constants: 'templates/terraform/constants/go/compute_managed_ssl_certificate.go.tmpl'
+  constants: 'templates/terraform/constants/compute_managed_ssl_certificate.go.tmpl'
 examples:
   - name: 'managed_ssl_certificate_basic'
     primary_resource_id: 'default'

@@ -57,10 +57,10 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  encoder: 'templates/terraform/encoders/go/access_level_never_send_parent.go.tmpl'
-  post_create: 'templates/terraform/post_create/go/sleep_2_min.go.tmpl'
+  encoder: 'templates/terraform/encoders/access_level_never_send_parent.go.tmpl'
+  post_create: 'templates/terraform/post_create/sleep_2_min.go.tmpl'
   pre_update: 'templates/terraform/update_mask.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/set_access_policy_parent_from_self_link.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/set_access_policy_parent_from_self_link.go.tmpl'
 # Skipping the sweeper due to the non-standard base_url
 exclude_sweeper: true
 examples:

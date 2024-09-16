@@ -46,7 +46,7 @@ iam_policy:
   method_name_separator: ':'
   allowed_iam_role: 'roles/cloudbuild.connectionViewer'
   parent_resource_attribute: 'name'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
 custom_code:
 exclude_tgc: true
 legacy_long_form_project: true

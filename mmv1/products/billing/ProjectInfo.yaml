@@ -33,9 +33,9 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  encoder: 'templates/terraform/encoders/go/billing_project_info.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/billing_project_info.go.tmpl'
-  test_check_destroy: 'templates/terraform/custom_check_destroy/go/billing_project_info.go.tmpl'
+  encoder: 'templates/terraform/encoders/billing_project_info.go.tmpl'
+  decoder: 'templates/terraform/decoders/billing_project_info.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/billing_project_info.go.tmpl'
 examples:
   - name: 'billing_project_info_basic'
     primary_resource_id: 'default'

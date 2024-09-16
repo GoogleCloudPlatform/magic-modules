@@ -35,7 +35,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  custom_import: 'templates/terraform/custom_import/go/scc_mute_config.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/scc_mute_config.go.tmpl'
 # Skipping sweeper since this is a child resource
 exclude_sweeper: true
 examples:

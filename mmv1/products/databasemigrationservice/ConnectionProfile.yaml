@@ -224,7 +224,7 @@ properties:
           This field is not returned on request, and the value is encrypted when stored in Database Migration Service.
         immutable: true
         sensitive: true
-        custom_flatten: 'templates/terraform/custom_flatten/go/database_migration_service_connection_profile_mysql_password.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/database_migration_service_connection_profile_mysql_password.go.tmpl'
       - name: 'passwordSet'
         type: Boolean
         description: |
@@ -250,7 +250,7 @@ properties:
               If this field is used then the 'clientCertificate' field is mandatory.
             immutable: true
             sensitive: true
-            custom_flatten: 'templates/terraform/custom_flatten/go/database_migration_service_connection_profile_mysql_ssl_client_key.go.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/database_migration_service_connection_profile_mysql_ssl_client_key.go.tmpl'
           - name: 'clientCertificate'
             type: String
             description: |
@@ -258,7 +258,7 @@ properties:
               If this field is used then the 'clientKey' field is mandatory
             immutable: true
             sensitive: true
-            custom_flatten: 'templates/terraform/custom_flatten/go/database_migration_service_connection_profile_mysql_ssl_client_certificate.go.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/database_migration_service_connection_profile_mysql_ssl_client_certificate.go.tmpl'
           - name: 'caCertificate'
             type: String
             description: |
@@ -267,7 +267,7 @@ properties:
             required: true
             immutable: true
             sensitive: true
-            custom_flatten: 'templates/terraform/custom_flatten/go/database_migration_service_connection_profile_mysql_ssl_ca_certificate.go.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/database_migration_service_connection_profile_mysql_ssl_ca_certificate.go.tmpl'
       - name: 'cloudSqlId'
         type: String
         description: |
@@ -318,7 +318,7 @@ properties:
           - 'postgresql.0.host'
           - 'postgresql.0.port'
           - 'postgresql.0.username'
-        custom_flatten: 'templates/terraform/custom_flatten/go/database_migration_service_connection_profile_postgresql_password.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/database_migration_service_connection_profile_postgresql_password.go.tmpl'
       - name: 'passwordSet'
         type: Boolean
         description: |
@@ -346,7 +346,7 @@ properties:
             sensitive: true
             required_with:
               - 'client_certificate'
-            custom_flatten: 'templates/terraform/custom_flatten/go/database_migration_service_connection_profile_postgresql_ssl_client_key.go.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/database_migration_service_connection_profile_postgresql_ssl_client_key.go.tmpl'
           - name: 'clientCertificate'
             type: String
             description: |
@@ -356,7 +356,7 @@ properties:
             sensitive: true
             required_with:
               - 'client_key'
-            custom_flatten: 'templates/terraform/custom_flatten/go/database_migration_service_connection_profile_postgresql_ssl_client_certificate.go.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/database_migration_service_connection_profile_postgresql_ssl_client_certificate.go.tmpl'
           - name: 'caCertificate'
             type: String
             description: |
@@ -365,7 +365,7 @@ properties:
             required: true
             immutable: true
             sensitive: true
-            custom_flatten: 'templates/terraform/custom_flatten/go/database_migration_service_connection_profile_postgresql_ssl_ca_certificate.go.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/database_migration_service_connection_profile_postgresql_ssl_ca_certificate.go.tmpl'
       - name: 'cloudSqlId'
         type: String
         description: |
@@ -416,7 +416,7 @@ properties:
         required: true
         immutable: true
         sensitive: true
-        custom_flatten: 'templates/terraform/custom_flatten/go/database_migration_service_connection_profile_oracle_password.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/database_migration_service_connection_profile_oracle_password.go.tmpl'
       - name: 'passwordSet'
         type: Boolean
         description: |
@@ -449,7 +449,7 @@ properties:
             sensitive: true
             required_with:
               - 'client_certificate'
-            custom_flatten: 'templates/terraform/custom_flatten/go/database_migration_service_connection_profile_oracle_ssl_client_key.go.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/database_migration_service_connection_profile_oracle_ssl_client_key.go.tmpl'
           - name: 'clientCertificate'
             type: String
             description: |
@@ -459,7 +459,7 @@ properties:
             sensitive: true
             required_with:
               - 'client_key'
-            custom_flatten: 'templates/terraform/custom_flatten/go/database_migration_service_connection_profile_oracle_ssl_client_certificate.go.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/database_migration_service_connection_profile_oracle_ssl_client_certificate.go.tmpl'
           - name: 'caCertificate'
             type: String
             description: |
@@ -468,7 +468,7 @@ properties:
             required: true
             immutable: true
             sensitive: true
-            custom_flatten: 'templates/terraform/custom_flatten/go/database_migration_service_connection_profile_oracle_ssl_ca_certificate.go.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/database_migration_service_connection_profile_oracle_ssl_ca_certificate.go.tmpl'
       - name: 'staticServiceIpConnectivity'
         type: NestedObject
         description: |
@@ -516,7 +516,7 @@ properties:
             exactly_one_of:
               - 'forward_ssh_connectivity.0.password'
               - 'forward_ssh_connectivity.0.private_key'
-            custom_flatten: 'templates/terraform/custom_flatten/go/database_migration_service_connection_profile_oracle_forward_ssh_password.go.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/database_migration_service_connection_profile_oracle_forward_ssh_password.go.tmpl'
           - name: 'privateKey'
             type: String
             description: |
@@ -526,7 +526,7 @@ properties:
             exactly_one_of:
               - 'oracle.0.forward_ssh_connectivity.0.password'
               - 'oracle.0.forward_ssh_connectivity.0.private_key'
-            custom_flatten: 'templates/terraform/custom_flatten/go/database_migration_service_connection_profile_oracle_forward_ssh_private_key.go.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/database_migration_service_connection_profile_oracle_forward_ssh_private_key.go.tmpl'
       - name: 'privateConnectivity'
         type: NestedObject
         description: |
@@ -669,7 +669,7 @@ properties:
               Input only. Initial root password.
             immutable: true
             sensitive: true
-            custom_flatten: 'templates/terraform/custom_flatten/go/database_migration_service_connection_profile_cloudsql_settings_root_password.go.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/database_migration_service_connection_profile_cloudsql_settings_root_password.go.tmpl'
           - name: 'rootPasswordSet'
             type: Boolean
             description: |
@@ -740,7 +740,7 @@ properties:
                   The initial password for the user.
                 required: true
                 sensitive: true
-                custom_flatten: 'templates/terraform/custom_flatten/go/database_migration_service_connection_profile_alloydb_settings_initial_user_password.go.tmpl'
+                custom_flatten: 'templates/terraform/custom_flatten/database_migration_service_connection_profile_alloydb_settings_initial_user_password.go.tmpl'
               - name: 'passwordSet'
                 type: Boolean
                 description: |

@@ -50,12 +50,12 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/locations/{{location}}/services/{{name}}'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/services/{{name}}'
     - '{{name}}'
 custom_code:
-  pre_delete: 'templates/terraform/pre_delete/go/cloudrunv2_service_deletion_policy.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/cloudrunv2_service_deletion_policy.go.tmpl'
 taint_resource_on_failed_create: true
 examples:
   - name: 'cloudrunv2_service_basic'
@@ -178,8 +178,8 @@ properties:
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/resource_from_self_link.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.tmpl'
   - name: 'description'
     type: String
     description: |

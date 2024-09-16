@@ -49,7 +49,7 @@ async:
   result:
     resource_inside_response: true
 custom_code:
-  decoder: 'templates/terraform/decoders/go/kms.go.tmpl'
+  decoder: 'templates/terraform/decoders/kms.go.tmpl'
 examples:
   - name: 'kms_key_handle_basic'
     primary_resource_id: 'example-keyhandle'

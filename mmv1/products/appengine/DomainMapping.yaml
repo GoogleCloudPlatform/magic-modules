@@ -47,7 +47,7 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  decoder: 'templates/terraform/decoders/go/app_engine_domain_mapping.go.tmpl'
+  decoder: 'templates/terraform/decoders/app_engine_domain_mapping.go.tmpl'
 examples:
   - name: 'app_engine_domain_mapping_basic'
     primary_resource_id: 'domain_mapping'

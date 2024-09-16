@@ -51,15 +51,15 @@ async:
 collection_url_key: 'items'
 iam_policy:
   parent_resource_attribute: 'name'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/global/backendBuckets/{{name}}'
     - '{{name}}'
   min_version: 'beta'
 custom_code:
-  encoder: 'templates/terraform/encoders/go/compute_backend_bucket.go.tmpl'
-  post_create: 'templates/terraform/post_create/go/compute_backend_bucket_security_policy.go.tmpl'
-  post_update: 'templates/terraform/post_create/go/compute_backend_bucket_security_policy.go.tmpl'
+  encoder: 'templates/terraform/encoders/compute_backend_bucket.go.tmpl'
+  post_create: 'templates/terraform/post_create/compute_backend_bucket_security_policy.go.tmpl'
+  post_update: 'templates/terraform/post_create/compute_backend_bucket_security_policy.go.tmpl'
 examples:
   - name: 'backend_bucket_basic'
     primary_resource_id: 'image_backend'

@@ -34,7 +34,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  custom_import: 'templates/terraform/custom_import/go/service_directory_endpoint.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/service_directory_endpoint.go.tmpl'
 exclude_sweeper: true
 examples:
   - name: 'service_directory_endpoint_basic'

@@ -42,9 +42,9 @@ async:
   target_occurrences: 1
   actions: ['create']
 custom_code:
-  constants: 'templates/terraform/constants/go/subscription.go.tmpl'
-  encoder: 'templates/terraform/encoders/go/no_send_name.go.tmpl'
-  update_encoder: 'templates/terraform/update_encoder/go/pubsub_subscription.tmpl'
+  constants: 'templates/terraform/constants/subscription.go.tmpl'
+  encoder: 'templates/terraform/encoders/no_send_name.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/pubsub_subscription.tmpl'
 examples:
   - name: 'pubsub_subscription_push'
     primary_resource_id: 'example'
@@ -114,8 +114,8 @@ properties:
     description: 'Name of the subscription.'
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/shortname_to_url.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.tmpl'
   - name: 'topic'
     type: ResourceRef
     description: |
@@ -125,7 +125,7 @@ properties:
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_expand: 'templates/terraform/custom_expand/go/computed_subscription_topic.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/computed_subscription_topic.tmpl'
     resource: 'Topic'
     imports: 'name'
   - name: 'labels'
@@ -321,7 +321,7 @@ properties:
         description: |
           When set, the payload to the push endpoint is not wrapped.Sets the
           `data` field as the HTTP body for delivery.
-        custom_flatten: 'templates/terraform/custom_flatten/go/pubsub_no_wrapper_write_metadata_flatten.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/pubsub_no_wrapper_write_metadata_flatten.go.tmpl'
         properties:
           - name: 'writeMetadata'
             type: Boolean

@@ -61,12 +61,12 @@ iam_policy:
   fetch_iam_policy_verb: 'POST'
   allowed_iam_role: 'roles/accesscontextmanager.policyAdmin'
   parent_resource_attribute: 'name'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'accessPolicies/{{name}}'
     - '{{name}}'
 custom_code:
-  post_create: 'templates/terraform/post_create/go/accesspolicy.tmpl'
+  post_create: 'templates/terraform/post_create/accesspolicy.tmpl'
 # Skipping the sweeper due to the non-standard base_url
 exclude_sweeper: true
 examples:
@@ -107,7 +107,7 @@ properties:
     description: |
       Resource name of the AccessPolicy. Format: '{{policy_id}}'
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'createTime'
     type: Time
     description: |

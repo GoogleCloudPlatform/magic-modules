@@ -70,11 +70,11 @@ iam_policy:
   allowed_iam_role: 'roles/compute.networkUser'
   parent_resource_attribute: 'subnetwork'
   iam_conditions_request_type: 'QUERY_PARAM'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
 custom_code:
-  extra_schema_entry: 'templates/terraform/extra_schema_entry/go/subnetwork.tmpl'
-  constants: 'templates/terraform/constants/go/subnetwork.tmpl'
-  post_update: 'templates/terraform/post_update/go/compute_subnetwork.go.tmpl'
+  extra_schema_entry: 'templates/terraform/extra_schema_entry/subnetwork.tmpl'
+  constants: 'templates/terraform/constants/subnetwork.tmpl'
+  post_update: 'templates/terraform/post_update/compute_subnetwork.go.tmpl'
 custom_diff:
   - 'customdiff.ForceNewIfChange("ip_cidr_range", IsShrinkageIpCidr)'
   - 'sendSecondaryIpRangeIfEmptyDiff'
@@ -199,7 +199,7 @@ properties:
       Only networks that are in the distributed mode can have subnetworks.
     required: true
     immutable: true
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Network'
     imports: 'selfLink'
   - name: 'purpose'
@@ -302,8 +302,8 @@ properties:
     required: false
     immutable: true
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Region'
     imports: 'name'
   - name: 'logConfig'
@@ -318,8 +318,8 @@ properties:
     update_verb: 'PATCH'
     update_id: 'logConfig'
     fingerprint_name: 'fingerprint'
-    custom_flatten: 'templates/terraform/custom_flatten/go/subnetwork_log_config.go.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/subnetwork_log_config.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/subnetwork_log_config.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/subnetwork_log_config.go.tmpl'
     properties:
       - name: 'aggregationInterval'
         type: Enum

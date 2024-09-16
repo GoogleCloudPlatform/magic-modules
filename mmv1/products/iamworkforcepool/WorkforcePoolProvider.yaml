@@ -50,10 +50,10 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  constants: 'templates/terraform/constants/go/iam_workforce_pool_provider.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/treat_deleted_state_as_gone.go.tmpl'
-  post_create: 'templates/terraform/post_create/go/iam_workforce_pool_provider.go.tmpl'
-  post_update: 'templates/terraform/post_update/go/iam_workforce_pool_provider.go.tmpl'
+  constants: 'templates/terraform/constants/iam_workforce_pool_provider.go.tmpl'
+  decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
+  post_create: 'templates/terraform/post_create/iam_workforce_pool_provider.go.tmpl'
+  post_update: 'templates/terraform/post_update/iam_workforce_pool_provider.go.tmpl'
 examples:
   - name: 'iam_workforce_pool_provider_saml_basic'
     primary_resource_id: 'example'
@@ -312,7 +312,7 @@ properties:
               The value of the client secret.
             exactly_one_of:
               - 'oidc.0.client_secret.0.value'
-            custom_flatten: 'templates/terraform/custom_flatten/go/iam_workforce_pool_provider_oidc_client_secret_value.go.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/iam_workforce_pool_provider_oidc_client_secret_value.go.tmpl'
             properties:
               - name: 'plainText'
                 type: String
@@ -419,7 +419,7 @@ properties:
               The value of the client secret.
             exactly_one_of:
               - 'extraAttributesOauth2Client.0.client_secret.0.value'
-            custom_flatten: 'templates/terraform/custom_flatten/go/iam_workforce_pool_provider_extra_attributes_oauth2_config_client_secret_value.go.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/iam_workforce_pool_provider_extra_attributes_oauth2_config_client_secret_value.go.tmpl'
             properties:
               - name: 'plainText'
                 type: String

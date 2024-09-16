@@ -42,7 +42,7 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
   iam_conditions_request_type: 'QUERY_PARAM_NESTED'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/ekmConnections/{{name}}'
 custom_code:
@@ -70,7 +70,7 @@ properties:
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareResourceNames'
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'serviceResolvers'
     type: Array
     description: |

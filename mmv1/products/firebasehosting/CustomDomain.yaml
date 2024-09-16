@@ -53,8 +53,8 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  post_create: 'templates/terraform/post_create/go/firebasehosting_custom_domain_wait_dns_verification.tmpl'
-  test_check_destroy: 'templates/terraform/custom_check_destroy/go/firebasehosting_custom_domain_soft_delete.go.tmpl'
+  post_create: 'templates/terraform/post_create/firebasehosting_custom_domain_wait_dns_verification.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/firebasehosting_custom_domain_soft_delete.go.tmpl'
 examples:
   - name: 'firebasehosting_customdomain_basic'
     primary_resource_id: 'default'
@@ -392,8 +392,8 @@ properties:
             A list of messages that carry the error details.
           min_version: 'beta'
           state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-          custom_flatten: 'templates/terraform/custom_flatten/go/json_schema.tmpl'
-          custom_expand: 'templates/terraform/custom_expand/go/json_schema.tmpl'
+          custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+          custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
           validation:
             function: 'validation.StringIsJSON'
   - name: 'cert'

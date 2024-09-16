@@ -56,7 +56,7 @@ async:
     message: 'message'
 collection_url_key: 'items'
 custom_code:
-  extra_schema_entry: 'templates/terraform/extra_schema_entry/go/ssl_certificate.tmpl'
+  extra_schema_entry: 'templates/terraform/extra_schema_entry/ssl_certificate.tmpl'
 examples:
   - name: 'ssl_certificate_basic'
     primary_resource_id: 'default'
@@ -119,7 +119,7 @@ properties:
 
       These are in the same namespace as the managed SSL certificates.
     default_from_api: true
-    custom_expand: 'templates/terraform/custom_expand/go/name_or_name_prefix.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/name_or_name_prefix.go.tmpl'
     validation:
       function: 'verify.ValidateGCEName'
   - name: 'privateKey'
@@ -130,4 +130,4 @@ properties:
     ignore_read: true
     sensitive: true
     diff_suppress_func: 'sha256DiffSuppress'
-    custom_flatten: 'templates/terraform/custom_flatten/go/sha256.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/sha256.tmpl'

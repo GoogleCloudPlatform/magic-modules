@@ -56,7 +56,7 @@ async:
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'workstation_config_id'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs/{{workstation_config_id}}'
     - '{{workstation_config_id}}'
@@ -311,7 +311,7 @@ properties:
               A set of Compute Engine Shielded instance options.
             min_version: 'beta'
             default_from_api: true
-            custom_flatten: 'templates/terraform/custom_flatten/go/workstations_config_shielded_instance.go.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/workstations_config_shielded_instance.go.tmpl'
             properties:
               - name: 'enableSecureBoot'
                 type: Boolean
@@ -337,7 +337,7 @@ properties:
               A set of Compute Engine Confidential VM instance options.
             min_version: 'beta'
             default_from_api: true
-            custom_flatten: 'templates/terraform/custom_flatten/go/workstations_config_confidential_instance.go.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/workstations_config_confidential_instance.go.tmpl'
             properties:
               - name: 'enableConfidentialCompute'
                 type: Boolean

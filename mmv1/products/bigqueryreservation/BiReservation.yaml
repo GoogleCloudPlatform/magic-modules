@@ -34,8 +34,8 @@ timeouts:
   delete_minutes: 20
 custom_code:
   pre_create: 'templates/terraform/update_mask.go.tmpl'
-  custom_delete: 'templates/terraform/custom_delete/go/clear_bigquery_bi_reservation.go.tmpl'
-  test_check_destroy: 'templates/terraform/custom_check_destroy/go/bigquery_bi_reservation.go.tmpl'
+  custom_delete: 'templates/terraform/custom_delete/clear_bigquery_bi_reservation.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/bigquery_bi_reservation.go.tmpl'
 examples:
   - name: 'bigquery_reservation_bi_reservation_basic'
     primary_resource_id: 'reservation'

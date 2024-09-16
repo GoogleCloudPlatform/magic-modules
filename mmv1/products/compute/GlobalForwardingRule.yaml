@@ -48,7 +48,7 @@ async:
     message: 'message'
 collection_url_key: 'items'
 custom_code:
-  post_create: 'templates/terraform/post_create/go/labels.tmpl'
+  post_create: 'templates/terraform/post_create/labels.tmpl'
 legacy_long_form_project: true
 examples:
   - name: 'external_ssl_proxy_lb_mig_backend'
@@ -413,7 +413,7 @@ properties:
   # manifest input from a single value to a range of form NN-NN. The API
   # accepts a single value, e.g. '80', but the API stores and returns
   # '80-80'. This causes idempotency false positive.
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Network'
     imports: 'selfLink'
   - name: 'portRange'
@@ -457,7 +457,7 @@ properties:
     # TargetSslProxy, TargetTcpProxy, TargetVpnGateway, TargetPool,
     # TargetInstance)
     default_from_api: true
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Subnetwork'
     imports: 'selfLink'
   - name: 'target'

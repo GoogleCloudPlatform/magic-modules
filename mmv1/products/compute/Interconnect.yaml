@@ -45,7 +45,7 @@ async:
     path: 'error/errors'
     message: 'message'
 custom_code:
-  constants: 'templates/terraform/constants/go/interconnect.go.tmpl'
+  constants: 'templates/terraform/constants/interconnect.go.tmpl'
 examples:
   - name: 'compute_interconnect_basic'
     primary_resource_id: 'example-interconnect'

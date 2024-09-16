@@ -49,7 +49,7 @@ iam_policy:
   allowed_iam_role: 'roles/privateca.certificateManager'
   parent_resource_attribute: 'ca_pool'
   iam_conditions_request_type: 'QUERY_PARAM_NESTED'
-  example_config_body: 'templates/terraform/iam/example_config_body/go/privateca_ca_pool.tf.tmpl'
+  example_config_body: 'templates/terraform/iam/example_config_body/privateca_ca_pool.tf.tmpl'
 custom_code:
 examples:
   - name: 'privateca_capool_basic'
@@ -207,8 +207,8 @@ properties:
           includes conflicting values for the same properties, they will be overwritten by the values defined here. If a certificate
           request uses a CertificateTemplate that defines conflicting predefinedValues for the same properties, the certificate
           issuance request will fail.
-        custom_flatten: 'templates/terraform/custom_flatten/go/privateca_certificate_509_config.go.tmpl'
-        custom_expand: 'templates/terraform/custom_expand/go/privateca_certificate_509_config.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/privateca_certificate_509_config.go.tmpl'
+        custom_expand: 'templates/terraform/custom_expand/privateca_certificate_509_config.go.tmpl'
         properties:
           - name: 'additionalExtensions'
             type: Array

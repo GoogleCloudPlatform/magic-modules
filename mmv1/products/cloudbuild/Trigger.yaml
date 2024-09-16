@@ -37,11 +37,11 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  constants: 'templates/terraform/constants/go/cloudbuild_trigger.tmpl'
-  post_create: 'templates/terraform/post_create/go/cloudbuild_trigger_id.go.tmpl'
-  pre_read: 'templates/terraform/pre_read/go/cloudbuild_trigger.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/go/cloudbuild_trigger.go.tmpl'
-  post_import: 'templates/terraform/post_import/go/cloudbuild_trigger.go.tmpl'
+  constants: 'templates/terraform/constants/cloudbuild_trigger.tmpl'
+  post_create: 'templates/terraform/post_create/cloudbuild_trigger_id.go.tmpl'
+  pre_read: 'templates/terraform/pre_read/cloudbuild_trigger.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/cloudbuild_trigger.go.tmpl'
+  post_import: 'templates/terraform/post_import/cloudbuild_trigger.go.tmpl'
 custom_diff:
   - 'stepTimeoutCustomizeDiff'
 schema_version: 2
@@ -716,7 +716,7 @@ properties:
       Builds created by this trigger will require approval before they execute.
       Any user with a Cloud Build Approver role for the project can approve a build.
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/cloudbuild_approval_required.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/cloudbuild_approval_required.go.tmpl'
     properties:
       - name: 'approvalRequired'
         type: Boolean

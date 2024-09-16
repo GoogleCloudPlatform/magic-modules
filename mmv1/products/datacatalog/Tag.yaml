@@ -44,8 +44,8 @@ nested_query:
   is_list_of_ids: false
   modify_by_patch: false
 custom_code:
-  encoder: 'templates/terraform/encoders/go/data_catalog_tag.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/data_catalog_tag.go.tmpl'
+  encoder: 'templates/terraform/encoders/data_catalog_tag.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/data_catalog_tag.go.tmpl'
 examples:
   - name: 'data_catalog_entry_tag_basic'
     primary_resource_id: 'basic_tag'
@@ -163,8 +163,8 @@ properties:
           type: NestedObject
           description: |
             Holds the value for a tag field with enum type. This value must be one of the allowed values in the definition of this enum.
-          custom_flatten: 'templates/terraform/custom_flatten/go/data_catalog_tag.go.tmpl'
-          custom_expand: 'templates/terraform/custom_expand/go/data_catalog_tag.go.tmpl'
+          custom_flatten: 'templates/terraform/custom_flatten/data_catalog_tag.go.tmpl'
+          custom_expand: 'templates/terraform/custom_expand/data_catalog_tag.go.tmpl'
           flatten_object: true
           properties:
             - name: 'enum_value'

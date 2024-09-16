@@ -45,7 +45,7 @@ async:
     message: 'message'
 collection_url_key: 'items'
 custom_code:
-  constants: 'templates/terraform/constants/go/compute_resource_policy.go.tmpl'
+  constants: 'templates/terraform/constants/compute_resource_policy.go.tmpl'
 examples:
   - name: 'resource_policy_basic'
     primary_resource_id: 'foo'
@@ -89,7 +89,7 @@ parameters:
     immutable: true
     ignore_read: true
     default_from_api: true
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Region'
     imports: 'name'
 properties:
@@ -362,8 +362,8 @@ properties:
       - snapshot_schedule_policy
       - group_placement_policy
       - instance_schedule_policy
-    custom_flatten: 'templates/terraform/custom_flatten/go/disk_consistency_group_policy.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/disk_consistency_group_policy.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/disk_consistency_group_policy.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/disk_consistency_group_policy.tmpl'
     properties:
       - name: 'enabled'
         type: Boolean

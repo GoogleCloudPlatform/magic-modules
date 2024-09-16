@@ -50,7 +50,7 @@ parameters:
     type: ResourceRef
     description: 'A reference to the zone where the instance group resides.'
     required: true
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Zone'
     imports: 'name'
 properties:
@@ -102,7 +102,7 @@ properties:
     type: ResourceRef
     description: |
       The network to which all instances in the instance group belong.
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Network'
     imports: 'selfLink'
   - name: 'region'
@@ -110,13 +110,13 @@ properties:
     description: |
       The region where the instance group is located
       (for regional resources).
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Region'
     imports: 'selfLink'
   - name: 'subnetwork'
     type: ResourceRef
     description: |
       The subnetwork to which all instances in the instance group belong.
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Subnetwork'
     imports: 'selfLink'

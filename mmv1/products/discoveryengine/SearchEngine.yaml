@@ -42,7 +42,7 @@ async:
   result:
     resource_inside_response: true
 custom_code:
-  encoder: 'templates/terraform/encoders/go/discovery_engine_search_engine_hardcode_solution_type.go.tmpl'
+  encoder: 'templates/terraform/encoders/discovery_engine_search_engine_hardcode_solution_type.go.tmpl'
 examples:
   - name: 'discoveryengine_searchengine_basic'
     primary_resource_id: 'basic'

@@ -49,7 +49,7 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  custom_import: 'templates/terraform/custom_import/go/apigee_nat_address.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/apigee_nat_address.go.tmpl'
 exclude_sweeper: true
 examples:
   - name: 'apigee_nat_address_basic'

@@ -45,8 +45,8 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  constants: 'templates/terraform/constants/go/privileged_access_manager_entitlement.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/go/privileged_access_manager_entitlement.go.tmpl'
+  constants: 'templates/terraform/constants/privileged_access_manager_entitlement.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/privileged_access_manager_entitlement.go.tmpl'
 examples:
   - name: 'privileged_access_manager_entitlement_basic'
     primary_resource_id: 'tfentitlement'

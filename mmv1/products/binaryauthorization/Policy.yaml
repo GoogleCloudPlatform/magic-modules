@@ -33,8 +33,8 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  constants: 'templates/terraform/constants/go/binaryauthorization_policy.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/go/restore_default_binaryauthorization_policy.tmpl'
+  constants: 'templates/terraform/constants/binaryauthorization_policy.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/restore_default_binaryauthorization_policy.tmpl'
 examples:
   - name: 'binary_authorization_policy_basic'
     primary_resource_id: 'policy'
@@ -146,7 +146,7 @@ properties:
           is_set: true
           diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
           set_hash_func: tpgresource.SelfLinkNameHash
-          custom_expand: 'templates/terraform/custom_expand/go/binaryauthorization_attestors.tmpl'
+          custom_expand: 'templates/terraform/custom_expand/binaryauthorization_attestors.tmpl'
           item_type:
             type: String
         - name: 'enforcementMode'
@@ -187,7 +187,7 @@ properties:
         is_set: true
         diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
         set_hash_func: tpgresource.SelfLinkNameHash
-        custom_expand: 'templates/terraform/custom_expand/go/binaryauthorization_attestors.tmpl'
+        custom_expand: 'templates/terraform/custom_expand/binaryauthorization_attestors.tmpl'
         item_type:
           type: String
       - name: 'enforcementMode'

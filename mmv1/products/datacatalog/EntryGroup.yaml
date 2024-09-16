@@ -37,12 +37,12 @@ iam_policy:
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'entry_group'
   base_url: 'projects/{{project}}/locations/{{region}}/entryGroups/{{entry_group}}'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{region}}/entryGroups/{{entry_group}}'
     - '{{entry_group}}'
 custom_code:
-  custom_import: 'templates/terraform/custom_import/go/data_catalog_entry_group.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/data_catalog_entry_group.go.tmpl'
 examples:
   - name: 'data_catalog_entry_group_basic'
     primary_resource_id: 'basic_entry_group'

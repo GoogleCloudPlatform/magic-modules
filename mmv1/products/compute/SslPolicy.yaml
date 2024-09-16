@@ -46,8 +46,8 @@ async:
     message: 'message'
 collection_url_key: 'items'
 custom_code:
-  constants: 'templates/terraform/constants/go/ssl_policy.tmpl'
-  update_encoder: 'templates/terraform/update_encoder/go/ssl_policy.tmpl'
+  constants: 'templates/terraform/constants/ssl_policy.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/ssl_policy.tmpl'
 custom_diff:
   - 'sslPolicyCustomizeDiff'
 examples:

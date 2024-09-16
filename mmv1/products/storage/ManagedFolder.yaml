@@ -46,7 +46,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  custom_update: 'templates/terraform/custom_update/go/storage_managed_folder.go.tmpl'
+  custom_update: 'templates/terraform/custom_update/storage_managed_folder.go.tmpl'
  # Skipping sweeper since this is a child resource.
 exclude_sweeper: true
 examples:

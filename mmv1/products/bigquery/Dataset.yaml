@@ -37,7 +37,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  constants: 'templates/terraform/constants/go/bigquery_dataset.go.tmpl'
+  constants: 'templates/terraform/constants/bigquery_dataset.go.tmpl'
 exclude_sweeper: true
 examples:
   - name: 'bigquery_dataset_basic'
@@ -348,7 +348,7 @@ properties:
       Changing this forces a new resource to be created.
     immutable: true
     diff_suppress_func: 'tpgresource.CaseDiffSuppress'
-    custom_flatten: 'templates/terraform/custom_flatten/go/bigquery_dataset_location.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/bigquery_dataset_location.go.tmpl'
     default_value: "US"
   - name: 'defaultEncryptionConfiguration'
     type: NestedObject

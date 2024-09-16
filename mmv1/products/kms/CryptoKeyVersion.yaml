@@ -39,9 +39,9 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  pre_update: 'templates/terraform/pre_update/go/kms_crypto_key_version.go.tmpl'
-  custom_delete: 'templates/terraform/custom_delete/go/kms_crypto_key_version.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/kms_crypto_key_version.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/kms_crypto_key_version.go.tmpl'
+  custom_delete: 'templates/terraform/custom_delete/kms_crypto_key_version.tmpl'
+  custom_import: 'templates/terraform/custom_import/kms_crypto_key_version.go.tmpl'
 examples:
   - name: 'kms_crypto_key_version_basic'
     primary_resource_id: 'example-key'

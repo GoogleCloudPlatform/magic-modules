@@ -34,13 +34,13 @@ iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'managed_zone'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/managedZones/{{managed_zone}}'
     - '{{project}}/{{managed_zone}}'
 custom_code:
-  update_encoder: 'templates/terraform/update_encoder/go/managed_dns_zone.go.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/go/managed_dns_zone.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/managed_dns_zone.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/managed_dns_zone.go.tmpl'
 examples:
   - name: 'dns_managed_zone_quickstart'
     primary_resource_id: 'default'
@@ -258,7 +258,7 @@ properties:
       while private zones are visible only to Virtual Private Cloud resources.
     immutable: true
     diff_suppress_func: 'tpgresource.CaseDiffSuppress'
-    custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
     default_value: "public"
     enum_values:
       - 'private'
@@ -272,7 +272,7 @@ properties:
     at_least_one_of:
       - 'gke_clusters'
       - 'networks'
-    custom_expand: 'templates/terraform/custom_expand/go/dns_managed_zone_private_visibility_config.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/dns_managed_zone_private_visibility_config.go.tmpl'
     properties:
       - name: 'gkeClusters'
         type: Array
@@ -385,7 +385,7 @@ properties:
               `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
             required: true
             diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-            custom_expand: 'templates/terraform/custom_expand/go/network_full_url.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/network_full_url.tmpl'
   - name: 'reverseLookup'
     type: Boolean
     description: |
@@ -395,8 +395,8 @@ properties:
     api_name: reverseLookupConfig
     min_version: 'beta'
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/object_to_bool.go.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/bool_to_object.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/object_to_bool.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/bool_to_object.go.tmpl'
   - name: 'serviceDirectoryConfig'
     type: NestedObject
     description:
@@ -420,8 +420,8 @@ properties:
               or simply `projects/{project}/locations/{location}/namespaces/{namespace_id}`
               Ignored for `public` visibility zones.
             required: true
-            custom_flatten: 'templates/terraform/custom_flatten/go/full_to_relative_path.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/go/sd_full_url.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/full_to_relative_path.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/sd_full_url.tmpl'
   - name: 'cloudLoggingConfig'
     type: NestedObject
     description: 'Cloud logging configuration'

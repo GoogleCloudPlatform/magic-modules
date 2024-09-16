@@ -51,7 +51,7 @@ iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'tag_key'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
 custom_code:
 exclude_tgc: true
 examples:
@@ -71,7 +71,7 @@ properties:
     description: |
       The generated numeric id for the TagKey.
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'parent'
     type: String
     description: |

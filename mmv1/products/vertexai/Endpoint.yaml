@@ -48,7 +48,7 @@ iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'endpoint'
-  example_config_body: 'templates/terraform/iam/example_config_body/go/vertex_ai_endpoint.tf.tmpl'
+  example_config_body: 'templates/terraform/iam/example_config_body/vertex_ai_endpoint.tf.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/endpoints/{{name}}'
     - '{{name}}'

@@ -44,12 +44,12 @@ async:
     path: 'error/errors'
     message: 'message'
 custom_code:
-  encoder: 'templates/terraform/encoders/go/compute_region_target_https_proxy.go.tmpl'
+  encoder: 'templates/terraform/encoders/compute_region_target_https_proxy.go.tmpl'
   # update_encoder is usually the same as encoder by default. This resource is an uncommon case where the whole resource
   # is marked to be immutable, but we have a field specific update that overrides it (e.g certifiacteManagerCertificates).
   # This causes the encoder logic to not be applied during update.
-  update_encoder: 'templates/terraform/encoders/go/compute_region_target_https_proxy.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/compute_region_target_https_proxy.go.tmpl'
+  update_encoder: 'templates/terraform/encoders/compute_region_target_https_proxy.go.tmpl'
+  decoder: 'templates/terraform/decoders/compute_region_target_https_proxy.go.tmpl'
 examples:
   - name: 'region_target_https_proxy_basic'
     primary_resource_id: 'default'
@@ -94,8 +94,8 @@ parameters:
     required: false
     immutable: true
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Region'
     imports: 'name'
 properties:
@@ -154,7 +154,7 @@ properties:
     conflicts:
       - ssl_certificates
     diff_suppress_func: 'tpgresource.CompareResourceNames'
-    custom_expand: 'templates/terraform/custom_expand/go/certificate_manager_certificate_construct_full_url.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/certificate_manager_certificate_construct_full_url.go.tmpl'
     item_type:
       type: String
   - name: 'sslCertificates'
@@ -167,7 +167,7 @@ properties:
     update_verb: 'POST'
     conflicts:
       - certificate_manager_certificates
-    custom_expand: 'templates/terraform/custom_expand/go/array_resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
     item_type:
       name: 'sslCertificate'
       type: ResourceRef
@@ -184,7 +184,7 @@ properties:
     update_verb: 'PATCH'
     update_id: 'sslPolicy'
     fingerprint_name: 'fingerprint'
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'RegionSslPolicy'
     imports: 'selfLink'
   - name: 'urlMap'
@@ -195,7 +195,7 @@ properties:
     required: true
     update_url: 'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setUrlMap'
     update_verb: 'POST'
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'RegionUrlMap'
     imports: 'selfLink'
   - name: 'httpKeepAliveTimeoutSec'

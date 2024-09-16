@@ -61,7 +61,7 @@ properties:
   - name: 'name'
     type: String
     description: The resource name of the Feature Group.
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'createTime'
     type: String
     description: The timestamp of when the FeatureGroup was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
@@ -82,7 +82,7 @@ properties:
     type: String
     description: The description of the FeatureGroup.
     # When API starts returning description, this line should be removed.
-    custom_flatten: 'templates/terraform/custom_flatten/go/vertex_ai_feature_group_ignore_description.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/vertex_ai_feature_group_ignore_description.go.tmpl'
   - name: 'bigQuery'
     type: NestedObject
     description: Indicates that features for this group come from BigQuery Table/View. By default treats the source as a sparse time series source, which is required to have an entityId and a feature_timestamp column in the source.

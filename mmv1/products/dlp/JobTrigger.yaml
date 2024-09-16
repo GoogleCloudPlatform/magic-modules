@@ -32,10 +32,10 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  encoder: 'templates/terraform/encoders/go/dlp_job_trigger.go.tmpl'
-  update_encoder: 'templates/terraform/encoders/go/wrap_object.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/dlp_job_trigger.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/dlp_import.go.tmpl'
+  encoder: 'templates/terraform/encoders/dlp_job_trigger.go.tmpl'
+  update_encoder: 'templates/terraform/encoders/wrap_object.go.tmpl'
+  decoder: 'templates/terraform/decoders/dlp_job_trigger.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/dlp_import.go.tmpl'
 # Skip sweeper due to non-standard URL
 exclude_sweeper: true
 examples:
@@ -136,7 +136,7 @@ properties:
     description: |
       The resource name of the job trigger. Set by the server.
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'createTime'
     type: String
     description: |

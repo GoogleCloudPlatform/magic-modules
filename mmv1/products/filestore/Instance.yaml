@@ -47,7 +47,7 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  pre_create: 'templates/terraform/pre_create/go/filestore_instance.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/filestore_instance.go.tmpl'
 error_abort_predicates:
 
   - 'transport_tpg.Is429QuotaError'
@@ -104,7 +104,7 @@ properties:
       The resource name of the instance.
     url_param_only: true
     required: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'description'
     type: String
     description: |
@@ -129,7 +129,7 @@ properties:
       The default is NFSv3.
     min_version: 'beta'
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
     default_value: "NFS_V3"
     enum_values:
       - 'NFS_V3'
@@ -255,7 +255,7 @@ properties:
           # When using connectMode=PRIVATE_SERVICE_ACCESS, the returned value
           # won't match the sent value as the returned value is an IP range
           # from the provided named range.
-          custom_flatten: 'templates/terraform/custom_flatten/go/filestore_instance_networks_reserved_ip_range.go.tmpl'
+          custom_flatten: 'templates/terraform/custom_flatten/filestore_instance_networks_reserved_ip_range.go.tmpl'
         - name: 'ipAddresses'
           type: Array
           description: |
@@ -270,7 +270,7 @@ properties:
             If not provided, the connect mode defaults to
             DIRECT_PEERING.
           immutable: true
-          custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
+          custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
           default_value: "DIRECT_PEERING"
           enum_values:
             - 'DIRECT_PEERING'

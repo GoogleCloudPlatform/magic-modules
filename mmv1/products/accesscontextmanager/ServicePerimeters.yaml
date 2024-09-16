@@ -50,8 +50,8 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  custom_delete: 'templates/terraform/custom_delete/go/replace_all_service_perimeters_empty_list.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/set_access_policy_parent_from_access_policy.go.tmpl'
+  custom_delete: 'templates/terraform/custom_delete/replace_all_service_perimeters_empty_list.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/set_access_policy_parent_from_access_policy.go.tmpl'
 # Skipping the sweeper due to the non-standard base_url
 exclude_sweeper: true
 examples:
@@ -77,7 +77,7 @@ properties:
     type: Array
     description: |
       The desired Service Perimeters that should replace all existing Service Perimeters in the Access Policy.
-    custom_flatten: 'templates/terraform/custom_flatten/go/accesscontextmanager_serviceperimeters_custom_flatten.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/accesscontextmanager_serviceperimeters_custom_flatten.go.tmpl'
     item_type:
       type: NestedObject
       properties:
@@ -129,7 +129,7 @@ properties:
             with a common perimeter, but should not be able to share data among
             themselves.
           immutable: true
-          custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
+          custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
           default_value: "PERIMETER_TYPE_REGULAR"
           enum_values:
             - 'PERIMETER_TYPE_REGULAR'

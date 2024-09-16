@@ -44,11 +44,11 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  encoder: 'templates/terraform/encoders/go/kms_crypto_key.go.tmpl'
-  update_encoder: 'templates/terraform/update_encoder/go/kms_crypto_key.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/kms.go.tmpl'
-  custom_delete: 'templates/terraform/custom_delete/go/kms_crypto_key.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/kms_crypto_key.go.tmpl'
+  encoder: 'templates/terraform/encoders/kms_crypto_key.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/kms_crypto_key.go.tmpl'
+  decoder: 'templates/terraform/decoders/kms.go.tmpl'
+  custom_delete: 'templates/terraform/custom_delete/kms_crypto_key.tmpl'
+  custom_import: 'templates/terraform/custom_import/kms_crypto_key.go.tmpl'
 schema_version: 1
 state_upgraders: true
 supports_indirect_user_project_override: true

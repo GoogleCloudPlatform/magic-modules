@@ -86,7 +86,7 @@ properties:
     type: NestedObject
     description: Reference describing the ID of this routine
     required: true
-    custom_expand: 'templates/terraform/custom_expand/go/bigquery_routine_ref.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/bigquery_routine_ref.go.tmpl'
     flatten_object: true
     properties:
       - name: 'datasetId'
@@ -172,8 +172,8 @@ properties:
             suppress the recurring diff this causes. As a workaround, we recommend using
             the schema as returned by the API.
           state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-          custom_flatten: 'templates/terraform/custom_flatten/go/json_schema.tmpl'
-          custom_expand: 'templates/terraform/custom_expand/go/json_schema.tmpl'
+          custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+          custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
           validation:
             function: 'validation.StringIsJSON'
   - name: 'returnType'
@@ -189,8 +189,8 @@ properties:
       cannot suppress the recurring diff this causes. As a workaround, we recommend using
       the schema as returned by the API.
     state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-    custom_flatten: 'templates/terraform/custom_flatten/go/json_schema.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/json_schema.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
     validation:
       function: 'validation.StringIsJSON'
   - name: 'returnTableType'
@@ -202,8 +202,8 @@ properties:
       that references this routine. If present, then the columns in the evaluated table result will
       be cast to match the column types specificed in return table type, at query time.
     state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-    custom_flatten: 'templates/terraform/custom_flatten/go/json_schema.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/json_schema.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
     validation:
       function: 'validation.StringIsJSON'
   - name: 'importedLibraries'

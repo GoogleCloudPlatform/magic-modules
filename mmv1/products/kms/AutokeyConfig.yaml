@@ -47,12 +47,12 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  constants: 'templates/terraform/constants/go/autokey_config_folder_diff.go.tmpl'
-  pre_create: 'templates/terraform/pre_create/go/kms_autokey_config_folder.go.tmpl'
-  pre_read: 'templates/terraform/pre_read/go/kms_autokey_config_folder.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/go/kms_autokey_config_folder.go.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/go/kms_autokey_config_folder.go.tmpl'
-  test_check_destroy: 'templates/terraform/custom_check_destroy/go/kms_autokey_config.go.tmpl'
+  constants: 'templates/terraform/constants/autokey_config_folder_diff.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/kms_autokey_config_folder.go.tmpl'
+  pre_read: 'templates/terraform/pre_read/kms_autokey_config_folder.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/kms_autokey_config_folder.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/kms_autokey_config_folder.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/kms_autokey_config.go.tmpl'
 # Using a handwritten sweeper because of pre_delete.
 exclude_sweeper: true
 examples:

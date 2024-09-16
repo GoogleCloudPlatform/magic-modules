@@ -40,13 +40,13 @@ iam_policy:
   fetch_iam_policy_verb: 'POST'
   allowed_iam_role: 'roles/containeranalysis.notes.occurrences.viewer'
   parent_resource_attribute: 'note'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/notes/{{name}}'
     - '{{name}}'
 custom_code:
-  encoder: 'templates/terraform/encoders/go/containeranalysis_attestation_field_name.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/containeranalysis_attestation_field_name.go.tmpl'
+  encoder: 'templates/terraform/encoders/containeranalysis_attestation_field_name.go.tmpl'
+  decoder: 'templates/terraform/decoders/containeranalysis_attestation_field_name.go.tmpl'
 examples:
   - name: 'container_analysis_note_basic'
     primary_resource_id: 'note'
@@ -65,7 +65,7 @@ properties:
       The name of the note.
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'shortDescription'
     type: String
     description: |

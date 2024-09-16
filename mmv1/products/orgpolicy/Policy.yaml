@@ -32,10 +32,10 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  constants: 'templates/terraform/constants/go/org_policy_policy.go.tmpl'
-  encoder: 'templates/terraform/encoders/go/org_policy_policy.go.tmpl'
-  pre_read: 'templates/terraform/pre_read/go/org_policy_policy.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/go/org_policy_policy.go.tmpl'
+  constants: 'templates/terraform/constants/org_policy_policy.go.tmpl'
+  encoder: 'templates/terraform/encoders/org_policy_policy.go.tmpl'
+  pre_read: 'templates/terraform/pre_read/org_policy_policy.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/org_policy_policy.go.tmpl'
 error_retry_predicates:
 
   - 'transport_tpg.IsOrgpolicyRetryableError'
@@ -108,20 +108,20 @@ properties:
               type: String
               description: Setting this to `"TRUE"` means that all values are allowed. This field can be set only in Policies for list constraints.
               send_empty_value: true
-              custom_flatten: 'templates/terraform/custom_flatten/go/enum_bool.go.tmpl'
-              custom_expand: 'templates/terraform/custom_expand/go/enum_bool.go.tmpl'
+              custom_flatten: 'templates/terraform/custom_flatten/enum_bool.go.tmpl'
+              custom_expand: 'templates/terraform/custom_expand/enum_bool.go.tmpl'
             - name: 'denyAll'
               type: String
               description: Setting this to `"TRUE"` means that all values are denied. This field can be set only in Policies for list constraints.
               send_empty_value: true
-              custom_flatten: 'templates/terraform/custom_flatten/go/enum_bool.go.tmpl'
-              custom_expand: 'templates/terraform/custom_expand/go/enum_bool.go.tmpl'
+              custom_flatten: 'templates/terraform/custom_flatten/enum_bool.go.tmpl'
+              custom_expand: 'templates/terraform/custom_expand/enum_bool.go.tmpl'
             - name: 'enforce'
               type: String
               description: If `"TRUE"`, then the `Policy` is enforced. If `"FALSE"`, then any configuration is acceptable. This field can be set only in Policies for boolean constraints.
               send_empty_value: true
-              custom_flatten: 'templates/terraform/custom_flatten/go/enum_bool.go.tmpl'
-              custom_expand: 'templates/terraform/custom_expand/go/enum_bool.go.tmpl'
+              custom_flatten: 'templates/terraform/custom_flatten/enum_bool.go.tmpl'
+              custom_expand: 'templates/terraform/custom_expand/enum_bool.go.tmpl'
             - name: 'condition'
               type: NestedObject
               description: 'A condition which determines whether this rule is used in the evaluation of the policy. When set, the `expression` field in the `Expr'' must include from 1 to 10 subexpressions, joined by the "||" or "&&" operators. Each subexpression must be of the form "resource.matchTag(''/tag_key_short_name, ''tag_value_short_name'')". or "resource.matchTagId(''tagKeys/key_id'', ''tagValues/value_id'')". where key_name and value_name are the resource names for Label Keys and Values. These names are available from the Tag Manager Service. An example expression is: "resource.matchTag(''123456789/environment, ''prod'')". or "resource.matchTagId(''tagKeys/123'', ''tagValues/456'')".'
@@ -184,20 +184,20 @@ properties:
               type: String
               description: Setting this to `"TRUE"` means that all values are allowed. This field can be set only in Policies for list constraints.
               send_empty_value: true
-              custom_flatten: 'templates/terraform/custom_flatten/go/enum_bool.go.tmpl'
-              custom_expand: 'templates/terraform/custom_expand/go/enum_bool.go.tmpl'
+              custom_flatten: 'templates/terraform/custom_flatten/enum_bool.go.tmpl'
+              custom_expand: 'templates/terraform/custom_expand/enum_bool.go.tmpl'
             - name: 'denyAll'
               type: String
               description: Setting this to `"TRUE"` means that all values are denied. This field can be set only in Policies for list constraints.
               send_empty_value: true
-              custom_flatten: 'templates/terraform/custom_flatten/go/enum_bool.go.tmpl'
-              custom_expand: 'templates/terraform/custom_expand/go/enum_bool.go.tmpl'
+              custom_flatten: 'templates/terraform/custom_flatten/enum_bool.go.tmpl'
+              custom_expand: 'templates/terraform/custom_expand/enum_bool.go.tmpl'
             - name: 'enforce'
               type: String
               description: If `"TRUE"`, then the `Policy` is enforced. If `"FALSE"`, then any configuration is acceptable. This field can be set only in Policies for boolean constraints.
               send_empty_value: true
-              custom_flatten: 'templates/terraform/custom_flatten/go/enum_bool.go.tmpl'
-              custom_expand: 'templates/terraform/custom_expand/go/enum_bool.go.tmpl'
+              custom_flatten: 'templates/terraform/custom_flatten/enum_bool.go.tmpl'
+              custom_expand: 'templates/terraform/custom_expand/enum_bool.go.tmpl'
             - name: 'condition'
               type: NestedObject
               description: 'A condition which determines whether this rule is used in the evaluation of the policy. When set, the `expression` field in the `Expr'' must include from 1 to 10 subexpressions, joined by the "||" or "&&" operators. Each subexpression must be of the form "resource.matchTag(''/tag_key_short_name, ''tag_value_short_name'')". or "resource.matchTagId(''tagKeys/key_id'', ''tagValues/value_id'')". where key_name and value_name are the resource names for Label Keys and Values. These names are available from the Tag Manager Service. An example expression is: "resource.matchTag(''123456789/environment, ''prod'')". or "resource.matchTagId(''tagKeys/123'', ''tagValues/456'')".'

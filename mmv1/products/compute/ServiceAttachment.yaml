@@ -44,8 +44,8 @@ async:
     path: 'error/errors'
     message: 'message'
 custom_code:
-  constants: 'templates/terraform/constants/go/compute_service_attachment.go.tmpl'
-  update_encoder: 'templates/terraform/update_encoder/go/compute_service_attachment.go.tmpl'
+  constants: 'templates/terraform/constants/compute_service_attachment.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/compute_service_attachment.go.tmpl'
 examples:
   - name: 'service_attachment_basic'
     primary_resource_id: 'psc_ilb_service_attachment'
@@ -105,7 +105,7 @@ parameters:
     immutable: true
     ignore_read: true
     default_from_api: true
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Region'
     imports: 'name'
 properties:
@@ -185,7 +185,7 @@ properties:
       An array of subnets that is provided for NAT in this service attachment.
     required: true
     send_empty_value: true
-    custom_expand: 'templates/terraform/custom_expand/go/array_resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
     item_type:
       name: 'subnet'
       type: ResourceRef

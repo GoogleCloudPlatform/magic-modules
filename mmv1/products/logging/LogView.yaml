@@ -38,13 +38,13 @@ iam_policy:
   allowed_iam_role: 'roles/logging.admin'
   parent_resource_attribute: 'name'
   iam_conditions_request_type: 'REQUEST_BODY'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - '{{%parent}}/locations/{{location}}/buckets/{{bucket}}/views/{{name}}'
     - '{{name}}'
 custom_code:
-  encoder: 'templates/terraform/encoders/go/logging_log_view.go.tmpl'
-  pre_read: 'templates/terraform/pre_read/go/logging_log_view.go.tmpl'
+  encoder: 'templates/terraform/encoders/logging_log_view.go.tmpl'
+  pre_read: 'templates/terraform/pre_read/logging_log_view.go.tmpl'
 # Skipping sweeper since this is a child resource.
 exclude_sweeper: true
 examples:

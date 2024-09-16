@@ -162,7 +162,7 @@ properties:
           Password for the Oracle connection.
         required: true
         sensitive: true
-        custom_flatten: 'templates/terraform/custom_flatten/go/datastream_connection_profile_oracle_profile_password.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_oracle_profile_password.go.tmpl'
       - name: 'databaseService'
         type: String
         description: |
@@ -225,7 +225,7 @@ properties:
           Password for the MySQL connection.
         required: true
         sensitive: true
-        custom_flatten: 'templates/terraform/custom_flatten/go/datastream_connection_profile_mysql_profile_password.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_mysql_profile_password.go.tmpl'
       - name: 'sslConfig'
         type: NestedObject
         description: |
@@ -239,7 +239,7 @@ properties:
               'ca_certificate' fields are mandatory.
             immutable: true
             sensitive: true
-            custom_flatten: 'templates/terraform/custom_flatten/go/datastream_connection_profile_mysql_profile_ssl_config_client_key.go.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_mysql_profile_ssl_config_client_key.go.tmpl'
           - name: 'clientKeySet'
             type: Boolean
             description: |
@@ -254,7 +254,7 @@ properties:
               mandatory.
             immutable: true
             sensitive: true
-            custom_flatten: 'templates/terraform/custom_flatten/go/datastream_connection_profile_mysql_profile_ssl_config_client_certificate.go.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_mysql_profile_ssl_config_client_certificate.go.tmpl'
           - name: 'clientCertificateSet'
             type: Boolean
             description: |
@@ -267,7 +267,7 @@ properties:
               server's certificate.
             immutable: true
             sensitive: true
-            custom_flatten: 'templates/terraform/custom_flatten/go/datastream_connection_profile_mysql_profile_ssl_config_ca_certificate.go.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_mysql_profile_ssl_config_ca_certificate.go.tmpl'
           - name: 'caCertificateSet'
             type: Boolean
             description: |
@@ -321,7 +321,7 @@ properties:
           Password for the PostgreSQL connection.
         required: true
         sensitive: true
-        custom_flatten: 'templates/terraform/custom_flatten/go/datastream_connection_profile_postgresql_profile_password.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_postgresql_profile_password.go.tmpl'
       - name: 'database'
         type: String
         description: |
@@ -360,7 +360,7 @@ properties:
           Password for the SQL Server connection.
         required: true
         sensitive: true
-        custom_flatten: 'templates/terraform/custom_flatten/go/datastream_connection_profile_sql_server_profile_password.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_sql_server_profile_password.go.tmpl'
       - name: 'database'
         type: String
         description: |
@@ -396,7 +396,7 @@ properties:
         sensitive: true
         conflicts:
           - forward_ssh_connectivity.0.private_key
-        custom_flatten: 'templates/terraform/custom_flatten/go/datastream_connection_profile_forward_ssh_connectivity_password.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_forward_ssh_connectivity_password.go.tmpl'
       - name: 'privateKey'
         type: String
         description: |
@@ -405,7 +405,7 @@ properties:
         sensitive: true
         conflicts:
           - forward_ssh_connectivity.0.password
-        custom_flatten: 'templates/terraform/custom_flatten/go/datastream_connection_profile_forward_ssh_connectivity_private_key.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_forward_ssh_connectivity_private_key.go.tmpl'
   - name: 'privateConnectivity'
     type: NestedObject
     description: |

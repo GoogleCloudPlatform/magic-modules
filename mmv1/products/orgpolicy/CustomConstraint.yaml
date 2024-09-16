@@ -33,7 +33,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  update_encoder: 'templates/terraform/update_encoder/go/org_policy_custom_constraint.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/org_policy_custom_constraint.go.tmpl'
 examples:
   - name: 'org_policy_custom_constraint_basic'
     primary_resource_id: 'constraint'
@@ -66,8 +66,8 @@ properties:
       Immutable. The name of the custom constraint. This is unique within the organization.
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/shortname_to_url.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.tmpl'
   - name: 'displayName'
     type: String
     description: |

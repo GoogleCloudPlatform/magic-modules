@@ -55,11 +55,11 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-  constants: 'templates/terraform/constants/go/netapp_volume_replication.go.tmpl'
-  post_create: 'templates/terraform/post_create/go/netapp_volume_replication_post_create.go.tmpl'
-  post_delete: 'templates/terraform/post_delete/go/netapp_volume_replication_delete_destination_volume.go.tmpl'
-  post_update: 'templates/terraform/post_update/go/netapp_volume_replication_mirror_state.go.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/go/netapp_volume_replication_stop_before_delete.go.tmpl'
+  constants: 'templates/terraform/constants/netapp_volume_replication.go.tmpl'
+  post_create: 'templates/terraform/post_create/netapp_volume_replication_post_create.go.tmpl'
+  post_delete: 'templates/terraform/post_delete/netapp_volume_replication_delete_destination_volume.go.tmpl'
+  post_update: 'templates/terraform/post_update/netapp_volume_replication_mirror_state.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/netapp_volume_replication_stop_before_delete.go.tmpl'
 examples:
   - name: 'netapp_volume_replication_create'
     primary_resource_id: 'test_replication'
@@ -178,7 +178,7 @@ properties:
       transfer ended and destination volume became accessible read-only. TRANSFERRING means a MIRRORED volume
       currently receives an update. Updated every 5 minutes.
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/netapp_volume_replicaton_mirror_state.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/netapp_volume_replicaton_mirror_state.go.tmpl'
     enum_values:
       - 'MIRROR_STATE_UNSPECIFIED'
       - 'PREPARING'

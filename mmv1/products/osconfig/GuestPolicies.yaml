@@ -35,7 +35,7 @@ timeouts:
 identity:
   - guestPolicyId
 custom_code:
-  post_create: 'templates/terraform/post_create/go/set_computed_name.tmpl'
+  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
 examples:
   - name: 'os_config_guest_policies_basic'
     primary_resource_id: 'guest_policies'

@@ -53,15 +53,15 @@ iam_policy:
     # TODO (camthornton): Change to repository_id in 4.0
   parent_resource_attribute: 'repository'
   base_url: 'projects/{{project}}/locations/{{location}}/repositories/{{name}}'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   self_link: 'projects/{{project}}/locations/{{location}}/repositories/{{name}}'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/repositories/{{repository}}'
     - '{{repository}}'
 custom_code:
-  constants: 'templates/terraform/constants/go/artifact_registry_repository.go.tmpl'
-  encoder: 'templates/terraform/encoders/go/location_from_region.go.tmpl'
-  pre_create: 'templates/terraform/pre_create/go/artifact_registry_remote_repository.go.tmpl'
+  constants: 'templates/terraform/constants/artifact_registry_repository.go.tmpl'
+  encoder: 'templates/terraform/encoders/location_from_region.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/artifact_registry_remote_repository.go.tmpl'
 examples:
   - name: 'artifact_registry_repository_basic'
     primary_resource_id: 'my-repo'
@@ -182,8 +182,8 @@ properties:
       The name of the repository, for example:
       "repo1"
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/shortname_to_url.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.tmpl'
   - name: 'repository_id'
     type: String
     description: |-
@@ -192,7 +192,7 @@ properties:
     url_param_only: true
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'location'
     type: String
     description: |
@@ -269,7 +269,7 @@ properties:
         description: |-
           Version policy defines the versions that the registry will accept.
         immutable: true
-        custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
         default_value: "VERSION_POLICY_UNSPECIFIED"
         enum_values:
           - 'VERSION_POLICY_UNSPECIFIED'
@@ -462,7 +462,7 @@ properties:
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.docker_repository.0.custom_repository
-            custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
             # Eventually lets delete default_value and custom_flatten in a major release
             default_value: "DOCKER_HUB"
             enum_values:
@@ -500,7 +500,7 @@ properties:
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.maven_repository.0.custom_repository
-            custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
             # Eventually lets delete default_value and custom_flatten in a major release
             default_value: "MAVEN_CENTRAL"
             enum_values:
@@ -538,7 +538,7 @@ properties:
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.npm_repository.0.custom_repository
-            custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
             # Eventually lets delete default_value and custom_flatten in a major release
             default_value: "NPMJS"
             enum_values:
@@ -576,7 +576,7 @@ properties:
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.python_repository.0.custom_repository
-            custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
             # Eventually lets delete default_value and custom_flatten in a major release
             default_value: "PYPI"
             enum_values:
@@ -663,7 +663,7 @@ properties:
           not be validated.
         # Ignore read on this field because it is INPUT_ONLY.
         # Need to use custom flatten because ignore_read doesn't work with nested fields.
-        custom_flatten: 'templates/terraform/custom_flatten/go/artifactregistry_rr_disable_upstream_validation.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/artifactregistry_rr_disable_upstream_validation.go.tmpl'
   - name: 'cleanupPolicyDryRun'
     type: Boolean
     description: |-

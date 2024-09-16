@@ -50,7 +50,7 @@ async:
     message: 'message'
 collection_url_key: 'items'
 custom_code:
-  post_create: 'templates/terraform/post_create/go/compute_target_instance_security_policy.go.tmpl'
+  post_create: 'templates/terraform/post_create/compute_target_instance_security_policy.go.tmpl'
 examples:
   - name: 'target_instance_basic'
     primary_resource_id: 'default'
@@ -80,7 +80,7 @@ parameters:
     required: false
     immutable: true
     default_from_api: true
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Zone'
     imports: 'name'
 properties:
@@ -122,7 +122,7 @@ properties:
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_expand: 'templates/terraform/custom_expand/go/self_link_from_name.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/self_link_from_name.tmpl'
     resource: 'Instance'
     imports: 'selfLink'
   - name: 'natPolicy'

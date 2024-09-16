@@ -99,7 +99,7 @@ properties:
     type: ResourceRef
     description: 'The region where the zone is located.'
     output: true
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Region'
     imports: 'selfLink'
   - name: 'status'

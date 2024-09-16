@@ -35,10 +35,10 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  encoder: 'templates/terraform/encoders/go/wrap_object.go.tmpl'
-  update_encoder: 'templates/terraform/encoders/go/wrap_object.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/unwrap_resource.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/dlp_import.go.tmpl'
+  encoder: 'templates/terraform/encoders/wrap_object.go.tmpl'
+  update_encoder: 'templates/terraform/encoders/wrap_object.go.tmpl'
+  decoder: 'templates/terraform/decoders/unwrap_resource.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/dlp_import.go.tmpl'
 exclude_sweeper: true
 examples:
   - name: 'dlp_discovery_config_basic'
@@ -106,7 +106,7 @@ properties:
     type: String
     description: Unique resource name for the DiscoveryConfig, assigned by the service when the DiscoveryConfig is created.
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'displayName'
     type: String
     description: Display Name (max 1000 Chars)

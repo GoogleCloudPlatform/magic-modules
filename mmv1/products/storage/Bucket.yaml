@@ -47,8 +47,8 @@ iam_policy:
   parent_resource_attribute: 'bucket'
   iam_conditions_request_type: 'QUERY_PARAM'
   base_url: 'b/{{name}}'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
-  custom_diff_suppress: 'templates/terraform/iam/go/storage_bucket_diff_suppress.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  custom_diff_suppress: 'templates/terraform/iam/storage_bucket_diff_suppress.go.tmpl'
   import_format:
     - 'b/{{name}}'
     - '{{name}}'

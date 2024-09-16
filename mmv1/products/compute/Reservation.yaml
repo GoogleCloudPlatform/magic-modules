@@ -53,8 +53,8 @@ async:
     message: 'message'
 collection_url_key: 'items'
 custom_code:
-  update_encoder: 'templates/terraform/update_encoder/go/reservation.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/go/shared_reservation_update.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/reservation.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/shared_reservation_update.go.tmpl'
 examples:
   - name: 'reservation_basic'
     primary_resource_id: 'gce_reservation'
@@ -78,7 +78,7 @@ parameters:
       The zone where the reservation is made.
     required: true
     immutable: true
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Zone'
     imports: 'name'
 properties:

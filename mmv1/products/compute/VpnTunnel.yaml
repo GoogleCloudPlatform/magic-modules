@@ -45,9 +45,9 @@ async:
     message: 'message'
 collection_url_key: 'items'
 custom_code:
-  constants: 'templates/terraform/constants/go/vpn_tunnel.tmpl'
-  encoder: 'templates/terraform/encoders/go/vpn_tunnel.go.tmpl'
-  post_create: 'templates/terraform/post_create/go/labels.tmpl'
+  constants: 'templates/terraform/constants/vpn_tunnel.tmpl'
+  encoder: 'templates/terraform/encoders/vpn_tunnel.go.tmpl'
+  post_create: 'templates/terraform/post_create/labels.tmpl'
 examples:
   - name: 'vpn_tunnel_basic'
     primary_resource_id: 'tunnel1'
@@ -68,8 +68,8 @@ parameters:
       `target_vpn_gateway`.'
     required: false
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Region'
     imports: 'name'
 properties:
@@ -106,7 +106,7 @@ properties:
       URL of the Target VPN gateway with which this VPN tunnel is
       associated.
     immutable: true
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'VpnGateway'
     imports: 'selfLink'
   - name: 'vpnGateway'
@@ -116,7 +116,7 @@ properties:
       This must be used if a High Availability VPN gateway resource is created.
       This field must reference a `google_compute_ha_vpn_gateway` resource.
     immutable: true
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'HaVpnGateway'
     imports: 'selfLink'
   - name: 'vpnGatewayInterface'
@@ -132,7 +132,7 @@ properties:
     immutable: true
     conflicts:
       - peer_gcp_gateway
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'ExternalVpnGateway'
     imports: 'selfLink'
   - name: 'peerExternalGatewayInterface'
@@ -149,7 +149,7 @@ properties:
       This field must reference a `google_compute_ha_vpn_gateway` resource.
     conflicts:
       - peer_external_gateway
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'HaVpnGateway'
     imports: 'selfLink'
   - name: 'router'
@@ -157,7 +157,7 @@ properties:
     description: |
       URL of router resource to be used for dynamic routing.
     immutable: true
-    custom_expand: 'templates/terraform/custom_expand/go/compute_full_url.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/compute_full_url.tmpl'
     resource: 'Router'
     imports: 'selfLink'
   - name: 'peerIp'

@@ -58,7 +58,7 @@ async:
     message: 'message'
 collection_url_key: 'items'
 custom_code:
-  constants: 'templates/terraform/constants/go/compute_network_endpoint_group.go.tmpl'
+  constants: 'templates/terraform/constants/compute_network_endpoint_group.go.tmpl'
 examples:
   - name: 'network_endpoint_group'
     primary_resource_id: 'neg'
@@ -79,7 +79,7 @@ parameters:
     required: false
     ignore_read: true
     default_from_api: true
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Zone'
     imports: 'name'
 properties:
@@ -132,7 +132,7 @@ properties:
       The network to which all network endpoints in the NEG belong.
       Uses "default" project network if unspecified.
     required: true
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Network'
     imports: 'selfLink'
   - name: 'subnetwork'
@@ -140,7 +140,7 @@ properties:
     description: |
       Optional subnetwork to which all network endpoints in the NEG belong.
     diff_suppress_func: 'compareOptionalSubnet'
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Subnetwork'
     imports: 'selfLink'
   - name: 'defaultPort'

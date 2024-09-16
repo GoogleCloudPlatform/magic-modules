@@ -51,8 +51,8 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  post_create: 'templates/terraform/post_create/go/set_computed_name.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/discoveryengine_targetsite_set_id.go.tmpl'
+  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
+  custom_import: 'templates/terraform/custom_import/discoveryengine_targetsite_set_id.go.tmpl'
 examples:
   - name: 'discoveryengine_targetsite_basic'
     primary_resource_id: 'basic'

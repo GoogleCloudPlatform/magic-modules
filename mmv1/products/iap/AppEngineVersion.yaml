@@ -37,7 +37,7 @@ iam_policy:
   allowed_iam_role: 'roles/iap.httpsResourceAccessor'
   parent_resource_attribute: 'version_id'
   iam_conditions_request_type: 'REQUEST_BODY'
-  example_config_body: 'templates/terraform/iam/example_config_body/go/app_engine_version.tf.tmpl'
+  example_config_body: 'templates/terraform/iam/example_config_body/app_engine_version.tf.tmpl'
 custom_code:
 exclude_tgc: true
 examples:

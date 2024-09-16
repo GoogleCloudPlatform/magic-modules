@@ -31,12 +31,12 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  constants: 'templates/terraform/constants/go/monitoring_monitored_project.go.tmpl'
-  encoder: 'templates/terraform/encoders/go/monitoring_monitored_project.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/monitoring_monitored_project.go.tmpl'
-  pre_read: 'templates/terraform/pre_read/go/monitoring_monitored_project.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/monitoring_monitored_project.go.tmpl'
-  test_check_destroy: 'templates/terraform/custom_check_destroy/go/monitoring_monitored_project.go.tmpl'
+  constants: 'templates/terraform/constants/monitoring_monitored_project.go.tmpl'
+  encoder: 'templates/terraform/encoders/monitoring_monitored_project.go.tmpl'
+  decoder: 'templates/terraform/decoders/monitoring_monitored_project.go.tmpl'
+  pre_read: 'templates/terraform/pre_read/monitoring_monitored_project.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/monitoring_monitored_project.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/monitoring_monitored_project.go.tmpl'
 error_retry_predicates:
 
   - 'transport_tpg.IsMonitoringPermissionError'

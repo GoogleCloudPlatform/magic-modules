@@ -72,7 +72,7 @@ properties:
     min_version: 'beta'
     url_param_only: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'description'
     type: String
     description: Description of the MetadataStore.

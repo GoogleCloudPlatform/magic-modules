@@ -36,7 +36,7 @@ iam_policy:
   allowed_iam_role: 'roles/iap.tunnelResourceAccessor'
   parent_resource_attribute: 'project'
   iam_conditions_request_type: 'REQUEST_BODY'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
 custom_code:
 examples:
   - name: 'iap_project'

@@ -68,9 +68,9 @@ nested_query:
   is_list_of_ids: false
   modify_by_patch: false
 custom_code:
-  encoder: 'templates/terraform/encoders/go/compute_instance_group_membership.go.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/go/compute_instance_group_membership.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/compute_instance_group_membership.go.tmpl'
+  encoder: 'templates/terraform/encoders/compute_instance_group_membership.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/compute_instance_group_membership.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/compute_instance_group_membership.go.tmpl'
 exclude_tgc: true
 examples:
   - name: 'instance_group_membership'
@@ -84,7 +84,7 @@ parameters:
     type: ResourceRef
     description: 'A reference to the zone where the instance group resides.'
     url_param_only: true
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Zone'
     imports: 'name'
   - name: 'instanceGroup'
@@ -102,7 +102,7 @@ properties:
     type: ResourceRef
     description: 'An instance being added to the InstanceGroup'
     required: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/full_to_relative_path.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/full_to_relative_path.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Instance'
     imports: 'selfLink'

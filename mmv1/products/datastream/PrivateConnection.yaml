@@ -46,10 +46,10 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  constants: 'templates/terraform/constants/go/private_connection.go.tmpl'
-  post_create: 'templates/terraform/post_create/go/private_connection.go.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/go/private_connection.go.tmpl'
-  post_import: 'templates/terraform/post_import/go/private_connection.go.tmpl'
+  constants: 'templates/terraform/constants/private_connection.go.tmpl'
+  post_create: 'templates/terraform/post_create/private_connection.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/private_connection.go.tmpl'
+  post_import: 'templates/terraform/post_import/private_connection.go.tmpl'
 # Skipping the sweeper since the resource needs force-deletion
 exclude_sweeper: true
 schema_version: 1

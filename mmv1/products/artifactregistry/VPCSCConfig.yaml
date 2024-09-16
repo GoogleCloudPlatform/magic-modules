@@ -45,7 +45,7 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-  encoder: 'templates/terraform/encoders/go/location_from_region.go.tmpl'
+  encoder: 'templates/terraform/encoders/location_from_region.go.tmpl'
 examples:
   - name: 'artifact_registry_vpcsc_config'
     primary_resource_id: 'my-config'

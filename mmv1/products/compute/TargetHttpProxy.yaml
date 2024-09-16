@@ -99,7 +99,7 @@ properties:
     required: true
     update_url: 'projects/{{project}}/targetHttpProxies/{{name}}/setUrlMap'
     update_verb: 'POST'
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'UrlMap'
     imports: 'selfLink'
   - name: 'proxyBind'

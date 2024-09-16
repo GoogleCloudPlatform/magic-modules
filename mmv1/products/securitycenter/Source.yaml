@@ -38,13 +38,13 @@ iam_policy:
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'source'
   base_url: 'organizations/{{organization}}/sources/{{source}}'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'organizations/{{organization}}/sources/{{source}}'
     - '{{source}}'
 custom_code:
-  post_create: 'templates/terraform/post_create/go/set_computed_name.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/scc_source_self_link_as_name_set_organization.go.tmpl'
+  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
+  custom_import: 'templates/terraform/custom_import/scc_source_self_link_as_name_set_organization.go.tmpl'
 examples:
   - name: 'scc_source_basic'
     primary_resource_id: 'custom_source'

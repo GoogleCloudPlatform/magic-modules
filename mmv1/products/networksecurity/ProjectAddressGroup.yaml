@@ -38,7 +38,7 @@ iam_policy:
   allowed_iam_role: 'roles/compute.networkAdmin'
   parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/locations/{{location}}/addressGroups/{{name}}'
-  example_config_body: 'templates/terraform/iam/example_config_body/go/networksecurity_project_address_group.tf.tmpl'
+  example_config_body: 'templates/terraform/iam/example_config_body/networksecurity_project_address_group.tf.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/addressGroups/{{name}}'
     - '{{project}}/{{location}}/{{name}}'

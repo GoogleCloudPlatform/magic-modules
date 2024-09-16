@@ -71,10 +71,10 @@ async:
     resource_inside_response: false
   include_project: true
 custom_code:
-  constants: 'templates/terraform/constants/go/service_networking_vpc_service_controls.go.tmpl'
-  custom_create: 'templates/terraform/custom_create/go/service_networking_vpc_service_controls.go.tmpl'
-  pre_read: 'templates/terraform/pre_read/go/service_networking_vpc_service_controls.go.tmpl'
-  custom_update: 'templates/terraform/custom_create/go/service_networking_vpc_service_controls.go.tmpl'
+  constants: 'templates/terraform/constants/service_networking_vpc_service_controls.go.tmpl'
+  custom_create: 'templates/terraform/custom_create/service_networking_vpc_service_controls.go.tmpl'
+  pre_read: 'templates/terraform/pre_read/service_networking_vpc_service_controls.go.tmpl'
+  custom_update: 'templates/terraform/custom_create/service_networking_vpc_service_controls.go.tmpl'
  # excluding tgc because of helpers in custom_code.constants
 exclude_tgc: true
 examples:

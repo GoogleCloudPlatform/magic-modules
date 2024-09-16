@@ -49,9 +49,9 @@ async:
     message: 'message'
 collection_url_key: 'items'
 custom_code:
-  constants: 'templates/terraform/constants/go/compute_forwarding_rule.go.tmpl'
-  pre_create: 'templates/terraform/pre_create/go/compute_forwarding_rule.go.tmpl'
-  post_create: 'templates/terraform/post_create/go/labels.tmpl'
+  constants: 'templates/terraform/constants/compute_forwarding_rule.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/compute_forwarding_rule.go.tmpl'
+  post_create: 'templates/terraform/post_create/labels.tmpl'
 custom_diff:
   - 'forwardingRuleCustomizeDiff'
 legacy_long_form_project: true
@@ -226,8 +226,8 @@ parameters:
       This field is not applicable to global forwarding rules.
     required: false
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Region'
     imports: 'name'
 properties:
@@ -346,7 +346,7 @@ properties:
 
       Required for Internal TCP/UDP Load Balancing and Network Load Balancing;
       must be omitted for all other load balancer types.
-    custom_expand: 'templates/terraform/custom_expand/go/self_link_from_name.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/self_link_from_name.tmpl'
     resource: 'BackendService'
     imports: 'selfLink'
   - name: 'loadBalancingScheme'
@@ -397,7 +397,7 @@ properties:
     # manifest input from a single value to a range of form NN-NN. The API
     # accepts a single value, e.g. '80', but the API stores and returns
     # '80-80'. This causes idempotency false positive.
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Network'
     imports: 'selfLink'
   - name: 'portRange'
@@ -455,7 +455,7 @@ properties:
 
       @pattern: \d+(?:-\d+)?
     is_set: true
-    custom_expand: 'templates/terraform/custom_expand/go/set_to_list.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/set_to_list.tmpl'
     item_type:
       type: String
     max_size: 5
@@ -473,7 +473,7 @@ properties:
     # TargetSslProxy, TargetTcpProxy, TargetVpnGateway, TargetPool,
     # TargetInstance)
     default_from_api: true
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Subnetwork'
     imports: 'selfLink'
   - name: 'target'
@@ -494,7 +494,7 @@ properties:
     update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setTarget'
     update_verb: 'POST'
     diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
-    custom_expand: 'templates/terraform/custom_expand/go/self_link_from_name.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/self_link_from_name.tmpl'
   - name: 'labelFingerprint'
     type: Fingerprint
     description: |

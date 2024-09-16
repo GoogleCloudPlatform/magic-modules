@@ -31,7 +31,7 @@ iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'policy_id'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{policy_id}}'
     - '{{policy_id}}'

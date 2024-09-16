@@ -63,8 +63,8 @@ async:
     message: 'message'
 collection_url_key: 'versions'
 custom_code:
-  custom_delete: 'templates/terraform/custom_delete/go/appversion_delete.go.tmpl'
-  test_check_destroy: 'templates/terraform/custom_check_destroy/go/appengine.go.tmpl'
+  custom_delete: 'templates/terraform/custom_delete/appversion_delete.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/appengine.go.tmpl'
 error_retry_predicates:
 
   - 'transport_tpg.IsAppEngineRetryableError'
@@ -367,7 +367,7 @@ properties:
       - basic_scaling
       - manual_scaling
     # This flattener is entirely handwritten and must be updated with **any** new field or subfield
-    custom_flatten: 'templates/terraform/custom_flatten/go/appengine_standardappversion_automatic_scaling_handlenil.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/appengine_standardappversion_automatic_scaling_handlenil.go.tmpl'
     properties:
       - name: 'maxConcurrentRequests'
         type: Integer

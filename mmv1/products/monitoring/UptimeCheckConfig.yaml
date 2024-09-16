@@ -35,10 +35,10 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  constants: 'templates/terraform/constants/go/monitoring_uptime_check_config.go.tmpl'
-  post_create: 'templates/terraform/post_create/go/set_computed_name.tmpl'
-  custom_delete: 'templates/terraform/custom_delete/go/monitoring_uptime_check_config.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/self_link_as_name.tmpl'
+  constants: 'templates/terraform/constants/monitoring_uptime_check_config.go.tmpl'
+  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
+  custom_delete: 'templates/terraform/custom_delete/monitoring_uptime_check_config.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
 error_retry_predicates:
 
   - 'transport_tpg.IsMonitoringConcurrentEditError'
@@ -90,7 +90,7 @@ properties:
     description: The id of the uptime check
     api_name: id
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/id_from_name.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
   - name: 'displayName'
     type: String
     description:
@@ -239,7 +239,7 @@ properties:
             description: The password to authenticate.
             required: true
             sensitive: true
-            custom_flatten: 'templates/terraform/custom_flatten/go/uptime_check_http_password.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/uptime_check_http_password.tmpl'
           - name: 'username'
             type: String
             description: The username to authenticate.
@@ -432,8 +432,8 @@ properties:
         at_least_one_of:
           - 'resource_group.0.resource_type'
           - 'resource_group.0.group_id'
-        custom_flatten: 'templates/terraform/custom_flatten/go/group_id_to_name.tmpl'
-        custom_expand: 'templates/terraform/custom_expand/go/resource_from_self_link.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/group_id_to_name.tmpl'
+        custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.tmpl'
         resource: 'Group'
         imports: 'name'
   - name: 'monitoredResource'

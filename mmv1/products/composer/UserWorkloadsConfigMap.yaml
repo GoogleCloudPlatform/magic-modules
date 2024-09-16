@@ -64,8 +64,8 @@ properties:
     min_version: 'beta'
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/shortname_to_url.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.tmpl'
     validation:
       function: 'verify.ValidateGCEName'
   - name: 'data'

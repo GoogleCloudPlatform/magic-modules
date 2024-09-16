@@ -77,7 +77,7 @@ parameters:
     required: true
     immutable: true
     default_from_api: true
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Region'
     imports: 'name'
 properties:
@@ -153,7 +153,7 @@ properties:
     description: |
       An array of URLs where each entry is the URL of a subnet provided by the service consumer to use for endpoints in the producers that connect to this network attachment.
     required: true
-    custom_expand: 'templates/terraform/custom_expand/go/array_resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
     item_type:
       name: 'subnet'
       type: ResourceRef

@@ -58,15 +58,15 @@ iam_policy:
   allowed_iam_role: 'roles/apigateway.viewer'
   parent_resource_attribute: 'api_config'
   base_url: 'projects/{{project}}/locations/global/apis/{{api}}/configs/{{api_config}}'
-  example_config_body: 'templates/terraform/iam/example_config_body/go/api_gateway_api_config.tf.tmpl'
+  example_config_body: 'templates/terraform/iam/example_config_body/api_gateway_api_config.tf.tmpl'
   import_format:
     - 'projects/{{project}}/locations/global/apis/{{api}}/configs/{{api_config}}'
     - '{{project}}/{{api}}/{{api_config}}'
     - '{{api}}/{{api_config}}'
     - '{{api_config}}'
 custom_code:
-  extra_schema_entry: 'templates/terraform/extra_schema_entry/go/api_config.tmpl'
-  encoder: 'templates/terraform/encoders/go/api_config.go.tmpl'
+  extra_schema_entry: 'templates/terraform/extra_schema_entry/api_config.tmpl'
+  encoder: 'templates/terraform/encoders/api_config.go.tmpl'
 examples:
   - name: 'apigateway_api_config_basic'
     primary_resource_id: 'api_cfg'

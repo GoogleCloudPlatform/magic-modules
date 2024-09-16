@@ -64,9 +64,9 @@ async:
     message: 'message'
 custom_code:
   # Custom diff to force new if 'preview' is true
-  constants: 'templates/terraform/constants/go/deployment_manager_deployment.go.tmpl'
+  constants: 'templates/terraform/constants/deployment_manager_deployment.go.tmpl'
   # post-create failure: Delete deployment if an invalid deployment was created
-  post_create_failure: 'templates/terraform/post_create_failure/go/delete_on_failure.go.tmpl'
+  post_create_failure: 'templates/terraform/post_create_failure/delete_on_failure.go.tmpl'
 custom_diff:
   - 'customDiffDeploymentManagerDeployment'
 examples:

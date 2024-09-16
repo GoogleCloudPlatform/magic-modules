@@ -38,7 +38,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  custom_import: 'templates/terraform/custom_import/go/data_catalog_entry.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/data_catalog_entry.go.tmpl'
 supports_indirect_user_project_override: true
 examples:
   - name: 'data_catalog_entry_basic'
@@ -108,8 +108,8 @@ properties:
       https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.entryGroups.entries#schema
       for what fields this schema can contain.
     state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-    custom_flatten: 'templates/terraform/custom_flatten/go/json_schema.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/json_schema.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
     validation:
       function: 'validation.StringIsJSON'
   - name: 'type'

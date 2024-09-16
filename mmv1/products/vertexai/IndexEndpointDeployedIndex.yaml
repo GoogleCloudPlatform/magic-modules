@@ -53,11 +53,11 @@ async:
     message: 'message'
   include_project: true
 custom_code:
-  encoder: 'templates/terraform/encoders/go/vertex_ai_index_endpoint_deployed_index.go.tmpl'
-  update_encoder: 'templates/terraform/update_encoder/go/vertex_ai_index_endpoint_deployed_index.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/vertex_ai_index_endpoint_deployed_index.go.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/go/vertex_ai_index_endpoint_deployed_index.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/vertex_ai_index_endpoint_deployed_index.go.tmpl'
+  encoder: 'templates/terraform/encoders/vertex_ai_index_endpoint_deployed_index.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/vertex_ai_index_endpoint_deployed_index.go.tmpl'
+  decoder: 'templates/terraform/decoders/vertex_ai_index_endpoint_deployed_index.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/vertex_ai_index_endpoint_deployed_index.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/vertex_ai_index_endpoint_deployed_index.go.tmpl'
 examples:
   - name: 'vertex_ai_index_endpoint_deployed_index_basic'
     primary_resource_id: 'basic_deployed_index'

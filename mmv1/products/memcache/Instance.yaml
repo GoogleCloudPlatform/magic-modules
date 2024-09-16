@@ -78,7 +78,7 @@ properties:
     url_param_only: true
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'displayName'
     type: String
     description: |

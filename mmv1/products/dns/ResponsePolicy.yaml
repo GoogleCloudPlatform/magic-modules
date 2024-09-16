@@ -29,7 +29,7 @@ timeouts:
 identity:
   - responsePolicyName
 custom_code:
-  pre_delete: 'templates/terraform/pre_delete/go/response_policy_detach_network_gke.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/response_policy_detach_network_gke.tmpl'
 examples:
   - name: 'dns_response_policy_basic'
     primary_resource_id: 'example-response-policy'
@@ -73,7 +73,7 @@ properties:
             `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
           required: true
           diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-          custom_expand: 'templates/terraform/custom_expand/go/network_full_url.tmpl'
+          custom_expand: 'templates/terraform/custom_expand/network_full_url.tmpl'
   - name: 'gkeClusters'
     type: Array
     description:

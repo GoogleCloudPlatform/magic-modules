@@ -47,7 +47,7 @@ async:
     message: 'message'
 collection_url_key: 'items'
 custom_code:
-  pre_create: 'templates/terraform/pre_create/go/compute_node_group_url_replace.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/compute_node_group_url_replace.go.tmpl'
 examples:
   - name: 'node_group_basic'
     primary_resource_id: 'nodes'
@@ -81,8 +81,8 @@ parameters:
       Zone where this node group is located
     required: false
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Zone'
     imports: 'selfLink'
 properties:
@@ -106,7 +106,7 @@ properties:
     required: true
     update_url: 'projects/{{project}}/zones/{{zone}}/nodeGroups/{{name}}/setNodeTemplate'
     update_verb: 'POST'
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'NodeTemplate'
     imports: 'selfLink'
   - name: 'size'

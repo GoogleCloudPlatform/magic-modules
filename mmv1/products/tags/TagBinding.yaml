@@ -56,7 +56,7 @@ nested_query:
   is_list_of_ids: false
   modify_by_patch: false
 custom_code:
-  custom_import: 'templates/terraform/custom_import/go/tags_tag_binding.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/tags_tag_binding.go.tmpl'
 examples:
   - name: 'tag_binding_basic'
     primary_resource_id: 'binding'
@@ -78,7 +78,7 @@ properties:
     description: |
       The generated id for the TagBinding. This is a string of the form: `tagBindings/{full-resource-name}/{tag-value-name}`
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/tags_tag_binding_name.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/tags_tag_binding_name.tmpl'
   - name: 'parent'
     type: String
     description: |

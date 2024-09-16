@@ -55,10 +55,10 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  constants: 'templates/terraform/constants/go/firestore_index.go.tmpl'
-  encoder: 'templates/terraform/encoders/go/index.go.tmpl'
-  post_create: 'templates/terraform/post_create/go/index.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/index_self_link_as_name_set_project.go.tmpl'
+  constants: 'templates/terraform/constants/firestore_index.go.tmpl'
+  encoder: 'templates/terraform/encoders/index.go.tmpl'
+  post_create: 'templates/terraform/post_create/index.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/index_self_link_as_name_set_project.go.tmpl'
 error_retry_predicates:
 
   - 'transport_tpg.FirestoreIndex409Retry'
@@ -115,7 +115,7 @@ properties:
     type: Enum
     description: |
       The API scope at which a query is run.
-    custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
     default_value: "ANY_API"
     enum_values:
       - 'ANY_API'
