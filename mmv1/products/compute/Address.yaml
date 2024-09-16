@@ -78,8 +78,7 @@ examples:
     primary_resource_id: 'internal_with_shared_loadbalancer_vip'
     vars:
       address_name: 'my-internal-address'
-    skip_docs:
-      true  # It is almost identical to internal_with_gce_endpoint
+    skip_docs: true  # It is almost identical to internal_with_gce_endpoint
   # TODO(rileykarson): Remove this example when instance is supported
   - !ruby/object:Provider::Terraform::Examples
     name: 'instance_with_ip'

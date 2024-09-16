@@ -36,8 +36,7 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
 skip_delete: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name:
-      'scc_source_basic'
+    name: 'scc_source_basic'
       # resource can't be destroyed, so checkdestroy fails unnecessarily
     skip_test: true
     primary_resource_id: 'custom_source'
