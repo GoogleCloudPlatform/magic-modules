@@ -73,6 +73,7 @@ examples:
     vars:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
+ # not importable
     exclude_test: true
   - name: 'bigquery_dataset_access_view'
     primary_resource_id: 'access'
@@ -80,12 +81,14 @@ examples:
       dataset_id: 'example_dataset'
       dataset_id2: 'example_dataset2'
       table_id: 'example_table'
+ # not importable
     exclude_test: true
   - name: 'bigquery_dataset_access_authorized_dataset'
     primary_resource_id: 'access'
     vars:
       private: 'private'
       public: 'public'
+ # not importable
     exclude_test: true
   - name: 'bigquery_dataset_access_authorized_routine'
     primary_resource_id: 'authorized_routine'
@@ -93,6 +96,7 @@ examples:
       private_dataset: 'private_dataset'
       public_dataset: 'public_dataset'
       public_routine: 'public_routine'
+ # not importable
     exclude_test: true
 parameters:
 properties:

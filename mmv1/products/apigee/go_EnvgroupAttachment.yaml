@@ -52,6 +52,8 @@ custom_code:
 exclude_sweeper: true
 examples:
   - name: 'apigee_environment_group_attachment_basic'
+      # This is a more verbose version of the above that creates all
+      # the resources needed for the acceptance test.
     vars:
       project_id: 'my-project'
       envgroup_name: 'my-envgroup'
@@ -63,6 +65,7 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
+      # Resource creation race
     skip_vcr: true
 parameters:
   - name: 'envgroupId'

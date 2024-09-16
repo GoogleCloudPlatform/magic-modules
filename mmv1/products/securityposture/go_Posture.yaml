@@ -37,6 +37,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 autogen_async: true
+# Sets parameters for handling operations returned by the API.
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'

@@ -48,6 +48,7 @@ async:
     message: 'message'
 custom_code:
   encoder: 'templates/terraform/encoders/go/logging_linked_dataset.go.tmpl'
+# Skip sweeper gen since this is a child resource.
 exclude_sweeper: true
 examples:
   - name: 'logging_linked_dataset_basic'
@@ -85,6 +86,7 @@ parameters:
     url_param_only: true
     immutable: true
     default_from_api: true
+ # Make this a String for now since we don't have a good way to reference multiple resources.
   - name: 'bucket'
     type: String
     description: The bucket to which the linked dataset is attached.

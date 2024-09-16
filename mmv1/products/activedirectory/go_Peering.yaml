@@ -58,6 +58,7 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
+      # skip the test until Active Directory setup issue got resolved
     exclude_test: true
     exclude_import_test: true
 parameters:

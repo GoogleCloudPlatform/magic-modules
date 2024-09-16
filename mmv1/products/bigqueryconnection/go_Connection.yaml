@@ -63,8 +63,10 @@ examples:
     test_vars_overrides:
       'deletion_protection': 'false'
     ignore_read_extra:
+ # password removed
       - 'cloud_sql.0.credential'
     external_providers: ["random", "time"]
+      # Random provider
     skip_vcr: true
   - name: 'bigquery_connection_full'
     primary_resource_id: 'connection'
@@ -76,8 +78,10 @@ examples:
     test_vars_overrides:
       'deletion_protection': 'false'
     ignore_read_extra:
+ # password removed
       - 'cloud_sql.0.credential'
     external_providers: ["random", "time"]
+      # Random provider
     skip_vcr: true
   - name: 'bigquery_connection_aws'
     primary_resource_id: 'connection'
@@ -122,6 +126,7 @@ examples:
       'kms_key_name': 'acctest.BootstrapKMSKey(t).CryptoKey.Name'
       'policyChanged': 'acctest.BootstrapPSARole(t, "bq-", "bigquery-encryption", "roles/cloudkms.cryptoKeyEncrypterDecrypter")'
     ignore_read_extra:
+ # password removed
       - 'cloud_sql.0.credential'
 parameters:
 properties:
