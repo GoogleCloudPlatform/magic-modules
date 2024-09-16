@@ -52,7 +52,7 @@ examples:
     ignore_read_extra:
       - 'project'
     external_providers: ["random", "time"]
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'bigQueryExportId'
     type: String

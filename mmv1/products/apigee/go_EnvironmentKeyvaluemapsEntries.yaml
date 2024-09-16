@@ -43,20 +43,20 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
-    skip_test: true
+    exclude_test: true
   - name: 'apigee_environment_keyvaluemaps_entries_test'
     primary_resource_id: 'apigee_environment_keyvaluemaps_entries'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
-    skip_docs: true
+    exclude_docs: true
   - name: 'apigee_environment_keyvaluemaps_entries_beta_test'
     primary_resource_id: 'apigee_environment_keyvaluemaps_entries'
     min_version: 'beta'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
-    skip_docs: true
+    exclude_docs: true
 parameters:
   - name: 'env_keyvaluemap_id'
     type: String

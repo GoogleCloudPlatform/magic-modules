@@ -60,13 +60,13 @@ examples:
     primary_resource_name: 'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
     vars:
       data_store_id: 'data-store-id'
-    skip_docs: true
+    exclude_docs: true
   - name: 'discoveryengine_datastore_document_processing_config_layout'
     primary_resource_id: 'document_processing_config_layout'
     primary_resource_name: 'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
     vars:
       data_store_id: 'data-store-id'
-    skip_docs: true
+    exclude_docs: true
 parameters:
   - name: 'location'
     type: String

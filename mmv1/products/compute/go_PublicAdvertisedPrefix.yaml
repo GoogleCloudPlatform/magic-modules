@@ -50,7 +50,7 @@ examples:
       prefixes_name: 'my-prefix'
     test_env_vars:
       desc: 'PAP_DESCRIPTION'
-    skip_test: true
+    exclude_test: true
 parameters:
 properties:
   - name: 'description'

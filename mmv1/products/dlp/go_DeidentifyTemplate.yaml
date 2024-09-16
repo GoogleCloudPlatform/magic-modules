@@ -46,7 +46,7 @@ examples:
     primary_resource_id: 'basic'
     test_env_vars:
       project: 'PROJECT_NAME'
-    skip_docs: true
+    exclude_docs: true
   - name: 'dlp_deidentify_template_image_transformations'
     primary_resource_id: 'basic'
     test_env_vars:
@@ -57,7 +57,7 @@ examples:
       name: 'my-template'
     test_env_vars:
       project: 'PROJECT_NAME'
-    skip_docs: true
+    exclude_docs: true
 parameters:
   - name: 'parent'
     type: String

@@ -55,7 +55,7 @@ examples:
     primary_resource_id: 'foo'
     vars:
       name: 'gce-policy'
-    skip_docs: true
+    exclude_docs: true
   - name: 'resource_policy_full'
     primary_resource_id: 'bar'
     vars:

@@ -85,7 +85,7 @@ examples:
       force_delete: 'false'
     test_vars_overrides:
       'force_delete': 'true'
-    skip_docs: true
+    exclude_docs: true
 parameters:
   - name: 'parent'
     type: String

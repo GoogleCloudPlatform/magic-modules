@@ -52,20 +52,20 @@ examples:
     vars:
       display_name: 'my-query'
       dataset_id: 'my_dataset'
-    skip_test: true
+    exclude_test: true
   - name: 'bigquerydatatransfer_config_cmek'
     primary_resource_id: 'query_config_cmek'
     vars:
       dataset_id: 'example_dataset'
       key_name: 'example-key'
       keyring_name: 'example-keyring'
-    skip_test: true
+    exclude_test: true
   - name: 'bigquerydatatransfer_config_salesforce'
     primary_resource_id: 'salesforce_config'
     vars:
       display_name: 'my-salesforce-config'
       dataset_id: 'my_dataset'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'location'
     type: String

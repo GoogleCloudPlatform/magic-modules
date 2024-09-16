@@ -54,7 +54,7 @@ examples:
       reservation_name: 'example-reservation'
     test_env_vars:
       project: 'PROJECT_NAME'
-    skip_docs: true
+    exclude_docs: true
 parameters:
   - name: 'location'
     type: String

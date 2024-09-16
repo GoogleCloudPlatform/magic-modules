@@ -22,12 +22,12 @@
     {{- end}}
   {{- end }}
   {{- $.ResourceMetadata.FormatDocDescription $.GetDescription true -}}
-  {{- if and (and ($.IsA "Array") ($.ItemType.IsA "Enum")) (and (not $.Output) (not $.ItemType.SkipDocsValues))}}
+  {{- if and (and ($.IsA "Array") ($.ItemType.IsA "Enum")) (and (not $.Output) (not $.ItemType.ExcludeDocsValues))}}
     {{- if $.ItemType.DefaultValue }}
   Default value is `{{ $.ItemType.DefaultValue }}`.
     {{- end }}
   Each value may be one of: {{ $.ItemType.EnumValuesToString "`" false }}.
-  {{- else if and ($.IsA "Enum") (and (not $.Output) (not $.SkipDocsValues))}}
+  {{- else if and ($.IsA "Enum") (and (not $.Output) (not $.ExcludeDocsValues))}}
     {{- if $.DefaultValue }}
   Default value is `{{ $.DefaultValue }}`.
     {{- end }}

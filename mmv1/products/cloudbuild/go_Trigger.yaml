@@ -57,7 +57,7 @@ examples:
       sa_name: 'cloud-sa'
   - name: 'cloudbuild_trigger_include_build_logs'
     primary_resource_id: 'include-build-logs-trigger'
-    skip_test: true
+    exclude_test: true
   - name: 'cloudbuild_trigger_pubsub_config'
     primary_resource_id: 'pubsub-config-trigger'
     vars:
@@ -74,7 +74,7 @@ examples:
       cloudbuild_trigger_name: 'manual-trigger'
   - name: 'cloudbuild_trigger_manual_github_enterprise'
     primary_resource_id: 'manual-ghe-trigger'
-    skip_test: true
+    exclude_test: true
   - name: 'cloudbuild_trigger_manual_bitbucket_server'
     primary_resource_id: 'manual-bitbucket-trigger'
   - name: 'cloudbuild_trigger_repo'
@@ -101,7 +101,7 @@ examples:
     primary_resource_id: 'ghe-trigger'
     vars:
       cloudbuild_trigger_name: 'ghe-trigger'
-    skip_test: true
+    exclude_test: true
   - name: 'cloudbuild_trigger_allow_failure'
     primary_resource_id: 'allow-failure-trigger'
     vars:

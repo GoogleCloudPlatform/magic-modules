@@ -44,7 +44,7 @@ custom_code:
 examples:
   - name: 'kms_key_ring_basic'
     primary_resource_id: 'example-keyring'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'location'
     type: String

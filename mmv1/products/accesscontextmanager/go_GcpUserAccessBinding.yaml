@@ -59,7 +59,7 @@ examples:
       org_id: 'ORG_ID'
       org_domain: 'ORG_DOMAIN'
       cust_id: 'CUST_ID'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'organizationId'
     type: String

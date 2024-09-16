@@ -42,7 +42,7 @@ async:
   result:
     resource_inside_response: false
 iam_policy:
-  skip_import_test: true
+  exclude_import_test: true
   method_name_separator: ':'
   allowed_iam_role: 'roles/cloudbuild.connectionViewer'
   parent_resource_attribute: 'name'
@@ -57,9 +57,9 @@ examples:
     vars:
       connection_name: 'tf-test-connection'
   - name: 'cloudbuildv2_connection_ghe'
-    skip_test: true
+    exclude_test: true
   - name: 'cloudbuildv2_connection_github'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'name'
     type: String

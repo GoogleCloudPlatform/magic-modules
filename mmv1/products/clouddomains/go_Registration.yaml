@@ -58,7 +58,7 @@ custom_code:
 examples:
   - name: 'clouddomains_registration_full'
     primary_resource_id: 'my_registration'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'location'
     type: String

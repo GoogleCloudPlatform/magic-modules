@@ -41,7 +41,7 @@ examples:
       type: 'CONFIGURABLE_BAD_IP'
     test_env_vars:
       org_id: 'ORG_ID'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'organization'
     type: String

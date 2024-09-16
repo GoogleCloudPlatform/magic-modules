@@ -50,7 +50,7 @@ examples:
     primary_resource_id: 'dataset'
     vars:
       display_name: 'terraform'
-    skip_import_test: true
+    exclude_import_test: true
 parameters:
   - name: 'region'
     type: String

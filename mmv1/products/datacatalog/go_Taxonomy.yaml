@@ -32,7 +32,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 iam_policy:
-  skip_import_test: true
+  exclude_import_test: true
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'taxonomy'

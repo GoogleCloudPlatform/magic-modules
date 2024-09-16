@@ -60,7 +60,7 @@ examples:
       connection_name: 'test-pubsub'
     ignore_read_extra:
       - 'status.0.description'
-    skip_test: true
+    exclude_test: true
   - name: 'integration_connectors_connection_advanced'
     primary_resource_id: 'zendeskconnection'
     vars:
@@ -68,7 +68,7 @@ examples:
       secret_id: 'test-secret'
     ignore_read_extra:
       - 'status.0.description'
-    skip_test: true
+    exclude_test: true
   - name: 'integration_connectors_connection_sa'
     primary_resource_id: 'zendeskconnection'
     vars:
@@ -76,8 +76,8 @@ examples:
       secret_id: 'test-secret'
     ignore_read_extra:
       - 'status.0.description'
-    skip_test: true
-    skip_docs: true
+    exclude_test: true
+    exclude_docs: true
   - name: 'integration_connectors_connection_oauth'
     primary_resource_id: 'boxconnection'
     vars:
@@ -85,8 +85,8 @@ examples:
       secret_id: 'test-secret'
     ignore_read_extra:
       - 'status.0.description'
-    skip_test: true
-    skip_docs: true
+    exclude_test: true
+    exclude_docs: true
   - name: 'integration_connectors_connection_oauth_ssh'
     primary_resource_id: 'boxconnection'
     vars:
@@ -94,8 +94,8 @@ examples:
       secret_id: 'test-secret'
     ignore_read_extra:
       - 'status.0.description'
-    skip_test: true
-    skip_docs: true
+    exclude_test: true
+    exclude_docs: true
   - name: 'integration_connectors_connection_oauth_cc'
     primary_resource_id: 'boxconnection'
     vars:
@@ -103,8 +103,8 @@ examples:
       secret_id: 'test-secret'
     ignore_read_extra:
       - 'status.0.description'
-    skip_test: true
-    skip_docs: true
+    exclude_test: true
+    exclude_docs: true
   - name: 'integration_connectors_connection_oauth_jwt'
     primary_resource_id: 'boxconnection'
     vars:
@@ -112,8 +112,8 @@ examples:
       secret_id: 'test-secret'
     ignore_read_extra:
       - 'status.0.description'
-    skip_test: true
-    skip_docs: true
+    exclude_test: true
+    exclude_docs: true
 parameters:
   - name: 'location'
     type: String

@@ -52,7 +52,7 @@ examples:
       instance_name: 'test-instance'
       network_name: 'test-network'
       address_name: 'address'
-    skip_test: true
+    exclude_test: true
   - name: 'memcache_instance_basic_test'
     primary_resource_id: 'instance'
     vars:
@@ -61,7 +61,7 @@ examples:
       address_name: 'address'
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
-    skip_docs: true
+    exclude_docs: true
 parameters:
   - name: 'region'
     type: String

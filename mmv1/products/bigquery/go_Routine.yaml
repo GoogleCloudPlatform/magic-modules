@@ -79,7 +79,7 @@ examples:
       dataset_id: 'dataset_id'
       connection_id: 'connection_id'
       routine_id: 'routine_id'
-    skip_test: true
+    exclude_test: true
 parameters:
 properties:
   - name: 'routineReference'

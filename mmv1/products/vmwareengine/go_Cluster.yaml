@@ -66,7 +66,7 @@ examples:
       management_cluster_id: 'sample-mgmt-cluster'
     test_env_vars:
       region: 'REGION'
-    skip_test: true
+    exclude_test: true
   - name: 'vmware_engine_cluster_full'
     primary_resource_id: 'vmw-ext-cluster'
     vars:
@@ -76,7 +76,7 @@ examples:
       management_cluster_id: 'sample-mgmt-cluster'
     test_env_vars:
       region: 'REGION'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'parent'
     type: String

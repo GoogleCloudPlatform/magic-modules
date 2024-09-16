@@ -58,7 +58,7 @@ examples:
     primary_resource_id: 'external_gateway'
     vars:
       external_gateway_name: 'external-gateway'
-    skip_docs: true
+    exclude_docs: true
 parameters:
 properties:
   - name: 'description'

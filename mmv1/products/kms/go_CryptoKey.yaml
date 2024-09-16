@@ -55,10 +55,10 @@ supports_indirect_user_project_override: true
 examples:
   - name: 'kms_crypto_key_basic'
     primary_resource_id: 'example-key'
-    skip_test: true
+    exclude_test: true
   - name: 'kms_crypto_key_asymmetric_sign'
     primary_resource_id: 'example-asymmetric-sign-key'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'keyRing'
     type: String

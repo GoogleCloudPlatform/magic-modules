@@ -78,7 +78,7 @@ examples:
     primary_resource_id: 'internal_with_shared_loadbalancer_vip'
     vars:
       address_name: 'my-internal-address'
-    skip_docs: true
+    exclude_docs: true
   - name: 'instance_with_ip'
     primary_resource_id: 'static'
     vars:

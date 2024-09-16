@@ -58,7 +58,7 @@ examples:
     vars:
       access_level_name: 'chromeos_no_lock'
       service_perimeter_name: 'restrict_storage'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'parent'
     type: String

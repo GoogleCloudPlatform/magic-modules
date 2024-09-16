@@ -33,7 +33,7 @@ id_format: '{{name}}'
 base_url: 'projects/{{project}}/locations/{{location}}/externalAccountKeys'
 self_link: 'projects/{{project}}/locations/{{location}}/externalAccountKeys/{{key_id}}'
 create_url: 'projects/{{project}}/locations/{{location}}/externalAccountKeys'
-skip_read: true
+exclude_read: true
 exclude_delete: true
 immutable: true
 exclude_import: true
@@ -52,7 +52,7 @@ examples:
     primary_resource_id: 'prod'
     test_env_vars:
       project: 'PROJECT_NAME'
-    skip_import_test: true
+    exclude_import_test: true
 parameters:
 properties:
   - name: 'name'

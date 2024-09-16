@@ -45,7 +45,7 @@ examples:
     primary_resource_id: 'lien'
     vars:
       project_id: 'staging-project'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'parent'
     type: String

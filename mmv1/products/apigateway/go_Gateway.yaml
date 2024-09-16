@@ -48,7 +48,7 @@ async:
 identity:
   - gatewayId
 iam_policy:
-  skip_import_test: true
+  exclude_import_test: true
   method_name_separator: ':'
   allowed_iam_role: 'roles/apigateway.viewer'
   parent_resource_attribute: 'gateway'
@@ -77,7 +77,7 @@ examples:
       api_id: 'my-api'
       config_id: 'my-config'
       gateway_id: 'my-gateway'
-    skip_docs: true
+    exclude_docs: true
 parameters:
   - name: 'region'
     type: String

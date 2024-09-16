@@ -226,8 +226,9 @@ properties:
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'machineSpec'
-        description: The minimum number of replicas this DeployedModel will be always deployed on.
-            # This field (and its nested fields) is not updatable via the mutateDeployedIndex method in the API, which is the only update method usable by this 'fine-grained' resource. This is why the field is marked as immutable despite the API docs not marking the field as immutable.
+        description: |
+          The minimum number of replicas this DeployedModel will be always deployed on.
+        # This field (and its nested fields) is not updatable via the mutateDeployedIndex method in the API, which is the only update method usable by this 'fine-grained' resource. This is why the field is marked as immutable despite the API docs not marking the field as immutable.
         immutable: true
         required: true
         properties:
@@ -252,13 +253,15 @@ properties:
         default_from_api: true
   - !ruby/object:Api::Type::Boolean
     name: enableAccessLogging
-    description: If true, private endpoint's access logs are sent to Cloud Logging.
+    description: |
+      If true, private endpoint's access logs are sent to Cloud Logging.
     # This field is not updatable via the mutateDeployedIndex method in the API, which is the only update method usable by this 'fine-grained' resource. This is why the field is marked as immutable despite the API docs not marking the field as immutable.
     immutable: true
     default_value: false
   - !ruby/object:Api::Type::NestedObject
     name: deployedIndexAuthConfig
-    description: If set, the authentication is enabled for the private endpoint.
+    description: |
+      If set, the authentication is enabled for the private endpoint.
     # This field (and its nested fields) is not updatable via the mutateDeployedIndex method in the API, which is the only update method usable by this 'fine-grained' resource. This is why the field is marked as immutable despite the API docs not marking the field as immutable.
     immutable: true
     properties:
@@ -279,7 +282,6 @@ properties:
             item_type: Api::Type::String
   - !ruby/object:Api::Type::Array
     name: reservedIpRanges
-    # This field is not updatable via the mutateDeployedIndex method in the API, which is the only update method usable by this 'fine-grained' resource. This is why the field is marked as immutable despite the API docs not marking the field as immutable.
     immutable: true
     description: |
       A list of reserved ip ranges under the VPC network that can be used for this DeployedIndex.
@@ -288,13 +290,14 @@ properties:
       The value should be the name of the address (https://cloud.google.com/compute/docs/reference/rest/v1/addresses) Example: ['vertex-ai-ip-range'].
 
       For more information about subnets and network IP ranges, please see https://cloud.google.com/vpc/docs/subnets#manually_created_subnet_ip_ranges.
+    # This field is not updatable via the mutateDeployedIndex method in the API, which is the only update method usable by this 'fine-grained' resource. This is why the field is marked as immutable despite the API docs not marking the field as immutable.
     item_type: Api::Type::String
   - !ruby/object:Api::Type::String
     name: deploymentGroup
-    # This field is not updatable via the mutateDeployedIndex method in the API, which is the only update method usable by this 'fine-grained' resource. This is why the field is marked as immutable despite the API docs not marking the field as immutable.
     immutable: true
     default_value: 'default'
     description: |
       The deployment group can be no longer than 64 characters (eg: 'test', 'prod'). If not set, we will use the 'default' deployment group.
       Creating deployment_groups with reserved_ip_ranges is a recommended practice when the peered network has multiple peering ranges. This creates your deployments from predictable IP spaces for easier traffic administration. Also, one deployment_group (except 'default') can only be used with the same reserved_ip_ranges which means if the deployment_group has been used with reserved_ip_ranges: [a, b, c], using it with [a, b] or [d, e] is disallowed. [See the official documentation here](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.indexEndpoints#DeployedIndex.FIELDS.deployment_group).
       Note: we only support up to 5 deployment groups (not including 'default').
+    # This field is not updatable via the mutateDeployedIndex method in the API, which is the only update method usable by this 'fine-grained' resource. This is why the field is marked as immutable despite the API docs not marking the field as immutable.

@@ -110,7 +110,7 @@ examples:
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
       - 'build_config.0.source.0.storage_source.0.bucket'
-    skip_test: true
+    exclude_test: true
   - name: 'cloudfunctions2_basic_gcs'
     primary_resource_id: 'function'
     vars:
@@ -229,7 +229,7 @@ examples:
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
       - 'build_config.0.source.0.storage_source.0.bucket'
-    skip_docs: true
+    exclude_docs: true
     skip_vcr: true
   - name: 'cloudfunctions2_cmek_docs'
     primary_resource_id: 'function'
@@ -243,7 +243,7 @@ examples:
       unencoded-ar-repo: 'ar-repo'
       kms_key_name: 'cmek-key'
       project: 'my-project-name'
-    skip_test: true
+    exclude_test: true
   - name: 'cloudfunctions2_abiu'
     primary_resource_id: 'function'
     min_version: 'beta'

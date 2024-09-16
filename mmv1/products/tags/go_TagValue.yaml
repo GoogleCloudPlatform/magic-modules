@@ -67,7 +67,7 @@ examples:
     test_vars_overrides:
       'key_short_name': '"tf-test-key-" + acctest.RandString(t, 10)'
       'value_short_name': '"tf-test-value-" + acctest.RandString(t, 10)'
-    skip_test: true
+    exclude_test: true
 parameters:
 properties:
   - name: 'name'

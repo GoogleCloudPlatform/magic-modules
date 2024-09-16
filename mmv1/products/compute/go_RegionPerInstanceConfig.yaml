@@ -71,7 +71,7 @@ examples:
       template_name: 'my-template'
       igm_name: 'my-rigm'
       disk_name: 'my-disk-name'
-    skip_test: true
+    exclude_test: true
 virtual_fields:
   - name: 'minimal_action'
     description: |

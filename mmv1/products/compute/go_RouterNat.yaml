@@ -75,7 +75,7 @@ examples:
       nat_name: 'my-router-nat'
       network_name: 'my-network'
       subnet_name: 'my-subnetwork'
-    skip_test: true
+    exclude_test: true
   - name: 'router_nat_manual_ips'
     primary_resource_id: 'nat_manual'
     vars:
@@ -84,7 +84,7 @@ examples:
       network_name: 'my-network'
       subnet_name: 'my-subnetwork'
       address_name: 'nat-manual-ip'
-    skip_test: true
+    exclude_test: true
   - name: 'router_nat_rules'
     primary_resource_id: 'nat_rules'
     vars:
@@ -95,7 +95,7 @@ examples:
       address_name1: 'nat-address1'
       address_name2: 'nat-address2'
       address_name3: 'nat-address3'
-    skip_test: true
+    exclude_test: true
   - name: 'router_nat_private'
     primary_resource_id: 'nat_type'
     min_version: 'beta'
@@ -106,7 +106,7 @@ examples:
       subnet_name: 'my-subnetwork'
       hub_name: 'my-hub'
       spoke_name: 'my-spoke'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'router'
     type: ResourceRef

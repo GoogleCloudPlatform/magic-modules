@@ -64,7 +64,7 @@ examples:
     vars:
       access_level_name1: 'chromeos_no_lock'
       access_level_name2: 'mac_no_lock'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'parent'
     type: String

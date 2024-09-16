@@ -37,7 +37,7 @@ examples:
     primary_resource_id: 'processor'
     vars:
       processor_name: 'test-processor'
-    skip_docs: true
+    exclude_docs: true
 parameters:
   - name: 'location'
     type: String

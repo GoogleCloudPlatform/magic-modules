@@ -104,7 +104,7 @@ examples:
     ignore_read_extra:
       - 'target'
       - 'ip_address'
-    skip_test: true
+    exclude_test: true
   - name: 'regional_external_http_load_balancer'
     primary_resource_id: 'default'
     min_version: 'beta'
@@ -122,8 +122,8 @@ examples:
       regional_l7_xlb_map: 'regional-l7-xlb-map'
       l7_xlb_proxy: 'l7-xlb-proxy'
       l7_xlb_forwarding_rule: 'l7-xlb-forwarding-rule'
-    skip_test: true
-    skip_docs: true
+    exclude_test: true
+    exclude_docs: true
   - name: 'region_url_map_path_template_match'
     primary_resource_id: 'urlmap'
     vars:

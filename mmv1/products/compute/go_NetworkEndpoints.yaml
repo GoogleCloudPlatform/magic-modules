@@ -81,7 +81,7 @@ examples:
       instance_name: 'endpoint-instance'
       network_name: 'neg-network'
       subnetwork_name: 'neg-subnetwork'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'zone'
     type: ResourceRef

@@ -56,7 +56,7 @@ examples:
     test_env_vars:
       location: 'REGION'
       zone: 'ZONE'
-    skip_test: true
+    exclude_test: true
   - name: 'edgenetwork_subnet_with_vlan_id'
     primary_resource_id: 'example_subnet_with_vlan_id'
     vars:
@@ -65,7 +65,7 @@ examples:
     test_env_vars:
       location: 'REGION'
       zone: 'ZONE'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'location'
     type: String

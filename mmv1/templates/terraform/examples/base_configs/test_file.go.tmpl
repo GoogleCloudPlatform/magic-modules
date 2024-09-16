@@ -72,7 +72,7 @@ func TestAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T
 			{
 				Config: testAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(context),
 			},
-	{{- if not $e.SkipImportTest }}
+	{{- if not $e.ExcludeImportTest }}
 			{
 				ResourceName:      "{{ $e.ResourceType $.Res.TerraformName }}.{{ $e.PrimaryResourceId }}",
 				ImportState:       true,

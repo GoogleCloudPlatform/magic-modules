@@ -100,7 +100,7 @@ examples:
       - 'etag'
       - 'load.0.destination_table.0.table_id'
       - 'status.0.state'
-    skip_docs: true
+    exclude_docs: true
   - name: 'bigquery_job_copy'
     primary_resource_id: 'job'
     vars:
@@ -128,7 +128,7 @@ examples:
       - 'copy.0.source_tables.0.table_id'
       - 'copy.0.source_tables.1.table_id'
       - 'status.0.state'
-    skip_docs: true
+    exclude_docs: true
   - name: 'bigquery_job_extract'
     primary_resource_id: 'job'
     vars:
@@ -146,7 +146,7 @@ examples:
       - 'etag'
       - 'extract.0.source_table.0.table_id'
       - 'status.0.state'
-    skip_docs: true
+    exclude_docs: true
 parameters:
 properties:
   - name: 'user_email'

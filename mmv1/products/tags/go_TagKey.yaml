@@ -63,7 +63,7 @@ examples:
       org_id: 'ORG_ID'
     test_vars_overrides:
       'short_name': '"tf-test-key-" + acctest.RandString(t, 10)'
-    skip_test: true
+    exclude_test: true
 parameters:
 properties:
   - name: 'name'

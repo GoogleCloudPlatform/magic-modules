@@ -42,7 +42,7 @@ examples:
       key_name: 'kms-key'
     test_env_vars:
       org_id: 'ORG_TARGET'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'organization'
     type: String

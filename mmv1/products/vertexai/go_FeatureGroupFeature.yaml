@@ -58,7 +58,7 @@ examples:
       job_id: 'job_load'
       name: 'example_feature'
       feature_group_name: 'example_feature_group'
-    skip_docs: true
+    exclude_docs: true
 parameters:
   - name: 'featureGroup'
     type: String

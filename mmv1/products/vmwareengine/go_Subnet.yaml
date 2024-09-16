@@ -62,7 +62,7 @@ examples:
       subnet_id: 'service-1'
     test_env_vars:
       region: 'REGION'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'parent'
     type: String
