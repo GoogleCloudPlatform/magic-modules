@@ -106,7 +106,7 @@ func (tgc TerraformGoogleConversion) GenerateObject(object api.Resource, outputF
 		return
 	}
 
-	// tgc.GenerateIamPolicy(object, *templateData, outputFolder, generateCode, generateDocs)
+	tgc.GenerateIamPolicy(object, *templateData, outputFolder, generateCode, generateDocs)
 }
 
 func (tgc TerraformGoogleConversion) GenerateResource(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
@@ -118,6 +118,36 @@ func (tgc TerraformGoogleConversion) GenerateResource(object api.Resource, templ
 
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_%s.go", productName, google.Underscore(object.Name)))
 	templateData.GenerateTGCResourceFile(targetFilePath, object)
+}
+
+// Generate the IAM policy for this object. This is used to query and test
+// IAM policies separately from the resource itself
+// Docs are generated for the terraform provider, not here.
+func (tgc TerraformGoogleConversion) GenerateIamPolicy(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
+	if !generateCode || object.IamPolicy.ExcludeTgc {
+		return
+	}
+
+	productName := tgc.Product.ApiName
+	targetFolder := path.Join(outputFolder, "converters/google/resources/services", productName)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+
+	name := object.FilenameOverride
+	if name == "" {
+		name = google.Underscore(object.Name)
+	}
+
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_%s_iam.go", productName, name))
+	templateData.GenerateTGCIamResourceFile(targetFilePath, object)
+
+	targetFilePath = path.Join(targetFolder, fmt.Sprintf("iam_%s_%s.go", productName, name))
+	templateData.GenerateIamPolicyFile(targetFilePath, object)
+
+	// Don't generate tests - we can rely on the terraform provider
+	//  to test these.
+
 }
 
 func (tgc TerraformGoogleConversion) CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string) {
