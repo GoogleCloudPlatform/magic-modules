@@ -13,10 +13,13 @@
 
 # Warning: This is a temporary file, and should not be edited directly
 ---
-name: 'SiteVerification'
-display_name: 'Site Verification'
+name: 'SecretManagerRegional'
+legacy_name: 'secret_manager'
+display_name: 'Secret Manager'
 versions:
   - name: 'ga'
-    base_url: 'https://www.googleapis.com/siteVerification/v1/'
+    base_url: 'https://secretmanager.{{location}}.rep.googleapis.com/v1/'
+  - name: 'beta'
+    base_url: 'https://secretmanager.{{location}}.rep.googleapis.com/v1/'
 scopes:
-  - 'https://www.googleapis.com/auth/siteverification'
+  - 'https://www.googleapis.com/auth/cloud-platform'
