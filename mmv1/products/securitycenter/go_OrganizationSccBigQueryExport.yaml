@@ -24,23 +24,22 @@ description: |
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/security-command-center/docs/how-to-analyze-findings-in-big-query'
-  api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v2/organizations.locations.bigQueryExports'
+  api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v1/organizations.bigQueryExports'
 docs:
-base_url: 'organizations/{{organization}}/locations/{{location}}/bigQueryExports'
-self_link: 'organizations/{{organization}}/locations/{{location}}/bigQueryExports/{{big_query_export_id}}'
-create_url: 'organizations/{{organization}}/locations/{{location}}/bigQueryExports?bigQueryExportId={{big_query_export_id}}'
+base_url: 'organizations/{{organization}}/bigQueryExports'
+self_link: 'organizations/{{organization}}/bigQueryExports/{{big_query_export_id}}'
+create_url: 'organizations/{{organization}}/bigQueryExports?bigQueryExportId={{big_query_export_id}}'
 update_verb: 'PATCH'
 update_mask: true
 import_format:
-  - 'organizations/{{organization}}/locations/{{location}}/bigQueryExports/{{big_query_export_id}}'
+  - 'organizations/{{organization}}/bigQueryExports/{{big_query_export_id}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  post_import: 'templates/terraform/post_import/go/scc_v2_organization_big_query_export_config.go.tmpl'
 examples:
-  - name: 'scc_v2_organization_big_query_export_config_basic'
+  - name: 'scc_organization_big_query_export_config_basic'
     primary_resource_id: 'custom_big_query_export_config'
     vars:
       big_query_export_id: 'my-export'
@@ -67,20 +66,14 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-  - name: 'location'
-    type: String
-    description: |
-      location Id is provided by organization. If not provided, Use global as default.
-    url_param_only: true
-    immutable: true
-    default_value: "global"
 properties:
   - name: 'name'
     type: String
     description: |
       The resource name of this export, in the format
-      `organizations/{{organization}}/locations/{{location}}/bigQueryExports/{{big_query_export_id}}`.
+      `organizations/{{organization}}/bigQueryExports/{{big_query_export_id}}`.
       This field is provided in responses, and is ignored when provided in create requests.
+    output: true
   - name: 'description'
     type: String
     description: |
@@ -134,7 +127,7 @@ properties:
       The supported operators are:
 
       * = for all value types.
-      * >, <, >=, <= for integer values.
+      * \>, <, >=, <= for integer values.
       * :, meaning substring matching, for strings.
 
       The supported value types are:
