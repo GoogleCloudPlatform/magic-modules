@@ -47,7 +47,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 1000
@@ -162,7 +162,6 @@ parameters:
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
-        # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
       - name: 'kmsKeyName'
         type: String
         description: |

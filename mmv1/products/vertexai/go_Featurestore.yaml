@@ -53,7 +53,7 @@ iam_policy:
   min_version: 'beta'
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/go/vertex_ai_force_delete.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'vertex_ai_featurestore'
     primary_resource_id: 'featurestore'
@@ -140,7 +140,6 @@ properties:
     type: KeyValueLabels
     description: |
       A set of key/value label pairs to assign to this Featurestore.
-    immutable: false
   - name: 'onlineServingConfig'
     type: NestedObject
     description: |

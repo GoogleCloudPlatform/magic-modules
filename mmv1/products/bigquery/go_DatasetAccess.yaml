@@ -63,7 +63,7 @@ custom_code:
   constants: 'templates/terraform/constants/go/bigquery_dataset_access.go.tmpl'
   post_create: 'templates/terraform/post_create/go/bigquery_dataset_access.go.tmpl'
 exclude_tgc: true
-skip_sweeper: true
+exclude_sweeper: true
 error_retry_predicates:
 
   - 'transport_tpg.IsBigqueryIAMQuotaError'
@@ -130,6 +130,7 @@ properties:
       - 'dataset'
       - 'routine'
     diff_suppress_func: 'resourceBigQueryDatasetAccessIamMemberDiffSuppress'
+    custom_expand: 'templates/terraform/custom_expand/go/string_to_lower_case.go.tmpl'
   - name: 'groupByEmail'
     type: String
     description: An email address of a Google Group to grant access to.
@@ -143,6 +144,7 @@ properties:
       - 'dataset'
       - 'routine'
     diff_suppress_func: 'resourceBigQueryDatasetAccessIamMemberDiffSuppress'
+    custom_expand: 'templates/terraform/custom_expand/go/string_to_lower_case.go.tmpl'
   - name: 'domain'
     type: String
     description: |

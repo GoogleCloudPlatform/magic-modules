@@ -117,7 +117,6 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: 'Set of label tags associated with the Certificate resource.'
-    immutable: false
   - name: 'scope'
     type: String
     description: |
@@ -134,6 +133,13 @@ properties:
     immutable: true
     diff_suppress_func: 'certManagerDefaultScopeDiffSuppress'
     default_value: "DEFAULT"
+  - name: 'sanDnsnames'
+    type: Array
+    description: |
+      The list of Subject Alternative Names of dnsName type defined in the certificate (see RFC 5280 4.2.1.6)
+    output: true
+    item_type:
+      type: String
   - name: 'selfManaged'
     type: NestedObject
     description: |
@@ -221,9 +227,6 @@ properties:
           If this field is not set, the certificates will instead be publicly signed as documented at https://cloud.google.com/load-balancing/docs/ssl-certificates/google-managed-certs#caa.
           Either issuanceConfig or dnsAuthorizations should be specificed, but not both.
 
-        # when the certificate is created with issuanceConfig in the format "projects/{{project_id}}/locations/global/certificateIssuanceConfigs/{{CICName}}", the
-        # format changes in the response message to "projects/{{project_number}}/locations/global/certificateIssuanceConfigs/{{CICName}}". That causes the tests to fail
-        # that's why "tpgresource.CompareResourceNames" is needed.
         immutable: true
         diff_suppress_func: 'tpgresource.CompareResourceNames'
       - name: 'state'

@@ -1,5 +1,4 @@
 resource "google_compute_health_check" "{{$.PrimaryResourceId}}" {
-  provider = "google-beta"
   name = "{{index $.Vars "health_check_name"}}"
   check_interval_sec = 30
 

@@ -19,6 +19,7 @@ description: |
   A ForwardingRule resource. A ForwardingRule resource specifies which pool
   of target virtual machines to forward a packet to if it matches the given
   [IPAddress, IPProtocol, portRange] tuple.
+skip_attribution_label: true
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/compute/docs/load-balancing/network/forwarding-rules'
@@ -35,7 +36,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 1000
@@ -47,8 +48,8 @@ async:
     message: 'message'
 collection_url_key: 'items'
 custom_code:
-  pre_create: templates/terraform/pre_create/compute_forwarding_rule.go.tmpl
   constants: 'templates/terraform/constants/go/compute_forwarding_rule.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/go/compute_forwarding_rule.go.tmpl'
   post_create: 'templates/terraform/post_create/go/labels.tmpl'
 custom_diff:
   - 'forwardingRuleCustomizeDiff'
@@ -243,6 +244,12 @@ properties:
 
       This can only be set to true for load balancers that have their
       `loadBalancingScheme` set to `INTERNAL`.
+  - name: 'forwardingRuleId'
+    type: Integer
+    description: |
+      The unique identifier number for the resource. This identifier is defined by the server.
+    api_name: id
+    output: true
   - name: 'pscConnectionId'
     type: String
     description: 'The PSC connection id of the PSC Forwarding Rule.'
@@ -258,7 +265,6 @@ properties:
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
-  # This is a multi-resource resource reference (Address, GlobalAddress)
   - name: 'IPAddress'
     type: String
     description: |
@@ -455,9 +461,6 @@ properties:
       If the network specified is in auto subnet mode, this field is optional.
       However, a subnetwork must be specified if the network is in custom subnet
       mode or when creating external forwarding rule with IPv6.
-    # This is a multi-resource resource reference (TargetHttp(s)Proxy,
-    # TargetSslProxy, TargetTcpProxy, TargetVpnGateway, TargetPool,
-    # TargetInstance)
     default_from_api: true
     custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
     resource: 'Subnetwork'

@@ -40,7 +40,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 1000
@@ -109,7 +109,6 @@ properties:
             type: String
             description: |
               Textual representation of an expression in Common Expression Language syntax. The application context of the containing message determines which well-known feature set of CEL is supported.
-          # >> These fields are not yet supported, following the global security policy resource.
             required: true
       - name: 'exprOptions'
         type: NestedObject

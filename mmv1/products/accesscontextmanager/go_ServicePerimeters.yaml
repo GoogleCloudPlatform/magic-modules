@@ -51,7 +51,7 @@ async:
 custom_code:
   custom_delete: 'templates/terraform/custom_delete/go/replace_all_service_perimeters_empty_list.go.tmpl'
   custom_import: 'templates/terraform/custom_import/go/set_access_policy_parent_from_access_policy.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'access_context_manager_service_perimeters_basic'
     primary_resource_id: 'service-perimeter'
@@ -143,12 +143,6 @@ properties:
                 A list of GCP resources that are inside of the service perimeter.
                 Currently only projects are allowed.
                 Format: projects/{project_number}
-              # TODO: (mbang) won't work for arrays yet, uncomment here once they are supported.
-              # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
-              # at_least_one_of:
-              #   - status.0.resources
-              #   - status.0.access_levels
-              #   - status.0.restricted_services
               is_set: true
               item_type:
                 type: String
@@ -165,12 +159,6 @@ properties:
                 be empty.
 
                 Format: accessPolicies/{policy_id}/accessLevels/{access_level_name}
-              # TODO: (mbang) won't work for arrays yet, uncomment here once they are supported.
-              # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
-              # at_least_one_of:
-              #   - status.0.resources
-              #   - status.0.access_levels
-              #   - status.0.restricted_services
               is_set: true
               item_type:
                 type: String
@@ -182,12 +170,6 @@ properties:
                 `storage.googleapis.com` is specified, access to the storage
                 buckets inside the perimeter must meet the perimeter's access
                 restrictions.
-              # TODO: (mbang) won't work for arrays yet, uncomment here once they are supported.
-              # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
-              # at_least_one_of:
-              #   - status.0.resources
-              #   - status.0.access_levels
-              #   - status.0.restricted_services
               is_set: true
               item_type:
                 type: String
@@ -455,12 +437,6 @@ properties:
                 A list of GCP resources that are inside of the service perimeter.
                 Currently only projects are allowed.
                 Format: projects/{project_number}
-              # TODO: (mbang) won't work for arrays yet, uncomment here once they are supported.
-              # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
-              # at_least_one_of:
-              #   - spec.0.resources
-              #   - spec.0.access_levels
-              #   - spec.0.restricted_services
               is_set: true
               item_type:
                 type: String
@@ -477,12 +453,6 @@ properties:
                 be empty.
 
                 Format: accessPolicies/{policy_id}/accessLevels/{access_level_name}
-              # TODO: (mbang) won't work for arrays yet, uncomment here once they are supported.
-              # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
-              # at_least_one_of:
-              #   - spec.0.resources
-              #   - spec.0.access_levels
-              #   - spec.0.restricted_services
               is_set: true
               item_type:
                 type: String
@@ -494,12 +464,6 @@ properties:
                 `storage.googleapis.com` is specified, access to the storage
                 buckets inside the perimeter must meet the perimeter's access
                 restrictions.
-              # TODO: (mbang) won't work for arrays yet, uncomment here once they are supported.
-              # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
-              # at_least_one_of:
-              #   - spec.0.resources
-              #   - spec.0.access_levels
-              #   - spec.0.restricted_services
               is_set: true
               item_type:
                 type: String

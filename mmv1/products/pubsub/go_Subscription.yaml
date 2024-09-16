@@ -56,6 +56,11 @@ examples:
     vars:
       topic_name: 'example-topic'
       subscription_name: 'example-subscription'
+  - name: 'pubsub_subscription_pull_filter'
+    primary_resource_id: 'example'
+    vars:
+      topic_name: 'example-topic'
+      subscription_name: 'example-subscription'
   - name: 'pubsub_subscription_dead_letter'
     primary_resource_id: 'example'
     vars:
@@ -127,7 +132,6 @@ properties:
     type: KeyValueLabels
     description: |
       A set of key/value label pairs to assign to this Subscription.
-    immutable: false
   - name: 'bigqueryConfig'
     type: NestedObject
     description: |
@@ -213,6 +217,10 @@ properties:
         description: |
           The maximum bytes that can be written to a Cloud Storage file before a new file is created. Min 1 KB, max 10 GiB.
           The maxBytes limit may be exceeded in cases where messages are larger than the limit.
+      - name: 'maxMessages'
+        type: Integer
+        description: |
+          The maximum messages that can be written to a Cloud Storage file before a new file is created. Min 1000 messages.
       - name: 'state'
         type: Enum
         description: |
@@ -231,6 +239,10 @@ properties:
             type: Boolean
             description: |
               When true, write the subscription name, messageId, publishTime, attributes, and orderingKey as additional fields in the output.
+          - name: 'useTopicSchema'
+            type: Boolean
+            description: |
+              When true, the output Cloud Storage file will be serialized using the topic schema, if it exists.
       - name: 'serviceAccountEmail'
         type: String
         description: |
@@ -387,8 +399,6 @@ properties:
         diff_suppress_func: 'comparePubsubSubscriptionExpirationPolicy'
   - name: 'filter'
     type: String
-    validation: !ruby/object:Provider::Terraform::Validation
-      function: 'verify.ValidateRegexp(`^.{1,256}$`)'
     description: |
       The subscription only delivers the messages that match the filter.
       Pub/Sub automatically acknowledges the messages that don't match the filter. You can filter messages
@@ -396,6 +406,8 @@ properties:
       you can't modify the filter.
     required: false
     immutable: true
+    validation:
+      regex: '^[\s\S]{0,256}$'
   - name: 'deadLetterPolicy'
     type: NestedObject
     description: |

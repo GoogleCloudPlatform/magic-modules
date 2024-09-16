@@ -86,9 +86,6 @@ properties:
   - name: 'description'
     type: String
     description: The description of the Index.
-  # Please take a look at the following links for the original definition:
-  # https://cloud.google.com/vertex-ai/docs/matching-engine/create-manage-index#create_index-drest
-  # https://cloud.google.com/vertex-ai/docs/matching-engine/configuring-indexes
   - name: 'metadata'
     type: NestedObject
     description: An additional information about the Index
@@ -223,7 +220,6 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: The labels with user-defined metadata to organize your Indexes.
-    immutable: false
   - name: 'createTime'
     type: String
     description:

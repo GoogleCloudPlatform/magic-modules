@@ -688,7 +688,6 @@ properties:
           subordinate CertificateAuthority. This field is used for information
           and usability purposes only. The resource name is in the format
           `projects/*/locations/*/caPools/*/certificateAuthorities/*`.
-        # certificateAuthority is not included in the response since the sub-CA is activated via specifing pemIssuerChain
         exactly_one_of:
           - 'subordinate_config.0.certificate_authority'
           - 'subordinate_config.0.pem_issuer_chain'
@@ -783,4 +782,3 @@ properties:
 
       An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass":
       "1.3kg", "count": "3" }.
-    immutable: false

@@ -45,7 +45,6 @@ resource "google_alloydb_cluster" "restored_via_pitr" {
   network_config {
     network = data.google_compute_network.default.id
   }
-
   restore_continuous_backup_source {
     cluster = google_alloydb_cluster.{{$.PrimaryResourceId}}.name
     point_in_time = "2023-08-03T19:19:00.094Z"

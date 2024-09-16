@@ -120,6 +120,7 @@ properties:
       }
     key_name: 'cluster'
     value_type:
+      name: clusterAdmissionRule
       type: NestedObject
       properties:
         - name: 'evaluationMode'

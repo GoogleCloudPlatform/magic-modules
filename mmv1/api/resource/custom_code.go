@@ -15,8 +15,6 @@ package resource
 
 // Inserts custom code into terraform resources.
 type CustomCode struct {
-	// google.YamlValidator
-
 	// Collection of fields allowed in the CustomCode section for
 	// Terraform.
 
@@ -136,24 +134,3 @@ type CustomCode struct {
 	// with a success HTTP code for deleted resources
 	TestCheckDestroy string `yaml:"test_check_destroy"`
 }
-
-// def validate
-//   super
-
-//   check :extra_schema_entry, type: String
-//   check :encoder, type: String
-//   check :update_encoder, type: String
-//   check :decoder, type: String
-//   check :constants, type: String
-//   check :pre_create, type: String
-//   check :post_create, type: String
-//   check :custom_create, type: String
-//   check :pre_read, type: String
-//   check :pre_update, type: String
-//   check :post_update, type: String
-//   check :custom_update, type: String
-//   check :pre_delete, type: String
-//   check :custom_import, type: String
-//   check :post_import, type: String
-//   check :test_check_destroy, type: String
-// end

@@ -83,7 +83,6 @@ examples:
     primary_resource_id: 'endpoint'
     vars:
       metastore_service_name: 'metastore-endpoint'
-    skip_test: true
     skip_docs: true
   - name: 'dataproc_metastore_service_aux'
     primary_resource_id: 'aux'
@@ -176,7 +175,6 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: 'User-defined labels for the metastore service.'
-  # This is an x-product resource reference.
   - name: 'network'
     type: String
     description: |

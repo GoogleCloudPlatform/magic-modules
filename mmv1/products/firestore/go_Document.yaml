@@ -44,7 +44,7 @@ timeouts:
 custom_code:
   decoder: 'templates/terraform/decoders/go/firestore_document.go.tmpl'
   custom_import: 'templates/terraform/custom_import/go/firestore_document.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'firestore_document_basic'
     primary_resource_id: 'mydoc'
@@ -68,6 +68,7 @@ parameters:
     description: |
       The Firestore database id. Defaults to `"(default)"`.
     url_param_only: true
+    immutable: true
     default_value: "(default)"
   - name: 'collection'
     type: String
@@ -75,12 +76,14 @@ parameters:
       The collection ID, relative to database. For example: chatrooms or chatrooms/my-document/private-messages.
     url_param_only: true
     required: true
+    immutable: true
   - name: 'documentId'
     type: String
     description: |
       The client-assigned document ID to use for this document during creation.
     url_param_only: true
     required: true
+    immutable: true
 properties:
   - name: 'name'
     type: String
@@ -92,7 +95,6 @@ properties:
     type: String
     description: |
       A relative path to the collection this document exists within
-    # This is a string instead of a NestedObject because fields can be deeply nested
     output: true
   - name: 'fields'
     type: String

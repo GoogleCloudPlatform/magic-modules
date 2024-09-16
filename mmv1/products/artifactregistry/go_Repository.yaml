@@ -67,12 +67,12 @@ examples:
     primary_resource_name: 'fmt.Sprintf("tf-test-my-repository%s", context["random_suffix"])'
     vars:
       repository_id: 'my-repository'
-      description: 'example docker repository'
+      desc: 'example docker repository'
   - name: 'artifact_registry_repository_docker'
     primary_resource_id: 'my-repo'
     vars:
       repository_id: 'my-repository'
-      description: 'example docker repository'
+      desc: 'example docker repository'
   - name: 'artifact_registry_repository_cmek'
     primary_resource_id: 'my-repo'
     vars:
@@ -84,35 +84,35 @@ examples:
     primary_resource_id: 'my-repo'
     vars:
       repository_id: 'my-repository'
-      description: 'example virtual docker repository'
+      desc: 'example virtual docker repository'
       upstream_repository_id: 'my-repository-upstream'
-      upstream_description: 'example docker repository (upstream source)'
+      upstream_desc: 'example docker repository (upstream source)'
       upstream_policy_id: 'my-repository-upstream'
   - name: 'artifact_registry_repository_remote'
     primary_resource_id: 'my-repo'
     vars:
       repository_id: 'my-repository'
-      description: 'example remote docker repository'
+      desc: 'example remote docker repository'
   - name: 'artifact_registry_repository_remote_apt'
     primary_resource_id: 'my-repo'
     vars:
       repository_id: 'debian-buster'
-      description: 'example remote apt repository'
+      desc: 'example remote apt repository'
   - name: 'artifact_registry_repository_remote_yum'
     primary_resource_id: 'my-repo'
     vars:
       repository_id: 'rocky-9'
-      description: 'example remote yum repository'
+      desc: 'example remote yum repository'
   - name: 'artifact_registry_repository_cleanup'
     primary_resource_id: 'my-repo'
     vars:
       repository_id: 'my-repository'
-      description: 'example docker repository with cleanup policies'
+      desc: 'example docker repository with cleanup policies'
   - name: 'artifact_registry_repository_remote_dockerhub_auth'
     primary_resource_id: 'my-repo'
     vars:
       repository_id: 'example-dockerhub-remote'
-      description: 'example remote dockerhub repository with credentials'
+      desc: 'example remote dockerhub repository with credentials'
       secret_id: 'example-secret'
       secret_resource_id: 'example-remote-secret'
       username: 'remote-username'
@@ -123,7 +123,7 @@ examples:
     primary_resource_id: 'my-repo'
     vars:
       repository_id: 'example-docker-custom-remote'
-      description: 'example remote custom docker repository with credentials'
+      desc: 'example remote custom docker repository with credentials'
       secret_id: 'example-secret'
       secret_resource_id: 'example-remote-secret'
       username: 'remote-username'
@@ -134,7 +134,7 @@ examples:
     primary_resource_id: 'my-repo'
     vars:
       repository_id: 'example-maven-custom-remote'
-      description: 'example remote custom maven repository with credentials'
+      desc: 'example remote custom maven repository with credentials'
       secret_id: 'example-secret'
       secret_resource_id: 'example-remote-secret'
       username: 'remote-username'
@@ -145,7 +145,7 @@ examples:
     primary_resource_id: 'my-repo'
     vars:
       repository_id: 'example-npm-custom-remote'
-      description: 'example remote custom npm repository with credentials'
+      desc: 'example remote custom npm repository with credentials'
       secret_id: 'example-secret'
       secret_resource_id: 'example-remote-secret'
       username: 'remote-username'
@@ -156,7 +156,7 @@ examples:
     primary_resource_id: 'my-repo'
     vars:
       repository_id: 'example-python-custom-remote'
-      description: 'example remote custom python repository with credentials'
+      desc: 'example remote custom python repository with credentials'
       secret_id: 'example-secret'
       secret_resource_id: 'example-remote-secret'
       username: 'remote-username'
@@ -212,7 +212,6 @@ properties:
       longer than 63 characters. Label keys must begin with a lowercase letter
       and may only contain lowercase letters, numeric characters, underscores,
       and dashes.
-    immutable: false
   - name: 'kmsKeyName'
     type: String
     description: |-
@@ -314,6 +313,7 @@ properties:
     key_description: |-
       The policy ID. Must be unique within a repository.
     value_type:
+      name: cleanupPolicies
       type: NestedObject
       properties:
         - name: 'action'
@@ -327,7 +327,6 @@ properties:
           type: NestedObject
           description: |-
             Policy condition for matching versions.
-          # TODO (jrsb): exactly_one_of: condition, mostRecentVersions
           properties:
             - name: 'tagState'
               type: Enum
@@ -371,7 +370,6 @@ properties:
           description: |-
             Policy condition for retaining a minimum number of versions. May only be
             specified with a Keep action.
-          # TODO (jrsb): exactly_one_of: condition, mostRecentVersions
           properties:
             - name: 'packageNamePrefixes'
               type: Array

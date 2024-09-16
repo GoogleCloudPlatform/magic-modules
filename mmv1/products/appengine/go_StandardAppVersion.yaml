@@ -43,7 +43,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'appengine#operation'
     path: 'name'
     wait_ms: 1000
@@ -289,6 +289,7 @@ properties:
         key_description: |
           name of file
         value_type:
+          name: files
           type: NestedObject
           properties:
             - name: 'sha1Sum'
@@ -441,8 +442,4 @@ properties:
           **Note:** When managing the number of instances at runtime through the App Engine Admin API or the (now deprecated) Python 2
           Modules API set_num_instances() you must use `lifecycle.ignore_changes = ["manual_scaling"[0].instances]` to prevent drift detection.
 
-# StandardAppVersion and FlexibleAppVersion use the same API endpoint (apps.services.versions)
-# They are split apart as some of the fields will are necessary for one and not the other, and
-# other fields may have different defaults.  However, some fields are the same.  If fixing a bug
-# in one, please check the other for the same fix.
         required: true

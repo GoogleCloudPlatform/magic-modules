@@ -29,7 +29,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 1000
@@ -171,7 +171,6 @@ properties:
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
-  # 'fingerprint' used internally for object consistency.
   - name: 'host_rule'
     type: Array
     description: 'The list of HostRules to use against the URL.'

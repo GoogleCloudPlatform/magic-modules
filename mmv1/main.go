@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"golang.org/x/exp/slices"
@@ -17,7 +18,9 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/provider"
 )
 
-// TODO Q2: additional flags
+var wg sync.WaitGroup
+
+// TODO rewrite: additional flags
 
 // Example usage: --output $GOPATH/src/github.com/terraform-providers/terraform-provider-google-beta
 var outputPath = flag.String("output", "", "path to output generated files to")
@@ -26,6 +29,12 @@ var outputPath = flag.String("output", "", "path to output generated files to")
 var version = flag.String("version", "", "optional version name. If specified, this version is preferred for resource generation when applicable")
 
 var product = flag.String("product", "", "optional product name. If specified, the resources under the specific product will be generated. Otherwise, resources under all products will be generated.")
+
+var resourceToGenerate = flag.String("resource", "", "optional resource name. Limits generation to the specified resource within a particular product.")
+
+var doNotGenerateCode = flag.Bool("no-code", false, "do not generate code")
+
+var doNotGenerateDocs = flag.Bool("no-docs", false, "do not generate docs")
 
 // Example usage: --yaml
 var yamlMode = flag.Bool("yaml", false, "copy text over from ruby yaml to go yaml")
@@ -62,8 +71,8 @@ func main() {
 		*version = "ga"
 	}
 
-	var generateCode = true
-	var generateDocs = true
+	var generateCode = !*doNotGenerateCode
+	var generateDocs = !*doNotGenerateDocs
 	var productsToGenerate []string
 	var allProducts = false
 	if product == nil || *product == "" {
@@ -83,7 +92,7 @@ func main() {
 		dir := filepath.Dir(filePath)
 		allProductFiles = append(allProductFiles, fmt.Sprintf("products/%s", filepath.Base(dir)))
 	}
-	// TODO Q2: override directory
+	// TODO rewrite: override directory
 
 	if allProducts {
 		productsToGenerate = allProductFiles
@@ -100,91 +109,36 @@ func main() {
 	// Building compute takes a long time and can't be parallelized within the product
 	// so lets build it first
 	sort.Slice(allProductFiles, func(i int, j int) bool {
-		if allProductFiles[i] == "compute" {
+		if allProductFiles[i] == "products/compute" {
 			return true
 		}
 		return false
 	})
 
-	// In order to only copy/compile files once per provider this must be called outside
-	// of the products loop. This will get called with the provider from the final iteration
-	// of the loop
 	var providerToGenerate *provider.Terraform
 	var productsForVersion []*api.Product
-	for _, productName := range allProductFiles {
-		productYamlPath := path.Join(productName, "go_product.yaml")
 
-		// TODO Q2: uncomment the error check that if the product.yaml exists for each product
-		// after Go-converted product.yaml files are complete for all products
-		// if _, err := os.Stat(productYamlPath); errors.Is(err, os.ErrNotExist) {
-		// 	log.Fatalf("%s does not contain a product.yaml file", productName)
-		// }
-
-		// TODO Q2: product overrides
-
-		if _, err := os.Stat(productYamlPath); err == nil {
-			var resources []*api.Resource = make([]*api.Resource, 0)
-
-			productApi := &api.Product{}
-			api.Compile(productYamlPath, productApi)
-
-			if !productApi.ExistsAtVersionOrLower(*version) {
-				log.Printf("%s does not have a '%s' version, skipping", productName, *version)
-				continue
-			}
-
-			resourceFiles, err := filepath.Glob(fmt.Sprintf("%s/*", productName))
-			if err != nil {
-				log.Fatalf("Cannot get resources files: %v", err)
-			}
-			for _, resourceYamlPath := range resourceFiles {
-				if filepath.Base(resourceYamlPath) == "product.yaml" || filepath.Ext(resourceYamlPath) != ".yaml" {
-					continue
-				}
-
-				// Prepend "go_" to the Go yaml files' name to distinguish with the ruby yaml files
-				if filepath.Base(resourceYamlPath) == "go_product.yaml" || !strings.HasPrefix(filepath.Base(resourceYamlPath), "go_") {
-					continue
-				}
-
-				resource := &api.Resource{}
-				api.Compile(resourceYamlPath, resource)
-
-				resource.TargetVersionName = *version
-				resource.Properties = resource.AddLabelsRelatedFields(resource.PropertiesWithExcluded(), nil)
-				resource.SetDefault(productApi)
-				resource.Validate()
-				resources = append(resources, resource)
-			}
-
-			// TODO Q2: override resources
-
-			// Sort resources by name
-			sort.Slice(resources, func(i, j int) bool {
-				return resources[i].Name < resources[j].Name
-			})
-
-			productApi.Objects = resources
-			productApi.Validate()
-
-			// TODO Q2: set other providers via flag
-			providerToGenerate = provider.NewTerraform(productApi, *version, startTime)
-
-			productsForVersion = append(productsForVersion, productApi)
-
-			if !slices.Contains(productsToGenerate, productName) {
-				log.Printf("%s not specified, skipping generation", productName)
-				continue
-			}
-
-			log.Printf("%s: Generating files", productName)
-			providerToGenerate.Generate(*outputPath, productName, generateCode, generateDocs)
-		}
+	ch := make(chan string, len(allProductFiles))
+	for _, pf := range allProductFiles {
+		ch <- pf
 	}
+
+	for i := 0; i < len(allProductFiles); i++ {
+		wg.Add(1)
+		go GenerateProduct(ch, providerToGenerate, &productsForVersion, startTime, productsToGenerate, *resourceToGenerate, generateCode, generateDocs)
+	}
+	wg.Wait()
+
+	close(ch)
 
 	slices.SortFunc(productsForVersion, func(p1, p2 *api.Product) int {
 		return strings.Compare(strings.ToLower(p1.Name), strings.ToLower(p2.Name))
 	})
+
+	// In order to only copy/compile files once per provider this must be called outside
+	// of the products loop. This will get called with the provider from the final iteration
+	// of the loop
+	providerToGenerate = provider.NewTerraform(productsForVersion[0], *version, startTime)
 
 	providerToGenerate.CopyCommonFiles(*outputPath, generateCode, generateDocs)
 
@@ -192,6 +146,81 @@ func main() {
 	if generateCode {
 		providerToGenerate.CompileCommonFiles(*outputPath, productsForVersion, "")
 
-		// TODO Q2: product overrides
+		// TODO rewrite: product overrides
+	}
+}
+
+func GenerateProduct(productChannel chan string, providerToGenerate *provider.Terraform, productsForVersion *[]*api.Product, startTime time.Time, productsToGenerate []string, resourceToGenerate string, generateCode, generateDocs bool) {
+
+	defer wg.Done()
+	productName := <-productChannel
+
+	productYamlPath := path.Join(productName, "go_product.yaml")
+
+	// TODO rewrite: uncomment the error check that if the product.yaml exists for each product
+	// after Go-converted product.yaml files are complete for all products
+	// if _, err := os.Stat(productYamlPath); errors.Is(err, os.ErrNotExist) {
+	// 	log.Fatalf("%s does not contain a product.yaml file", productName)
+	// }
+
+	// TODO rewrite: product overrides
+
+	if _, err := os.Stat(productYamlPath); err == nil {
+		var resources []*api.Resource = make([]*api.Resource, 0)
+
+		productApi := &api.Product{}
+		api.Compile(productYamlPath, productApi)
+
+		if !productApi.ExistsAtVersionOrLower(*version) {
+			log.Printf("%s does not have a '%s' version, skipping", productName, *version)
+			return
+		}
+
+		resourceFiles, err := filepath.Glob(fmt.Sprintf("%s/*", productName))
+		if err != nil {
+			log.Fatalf("Cannot get resources files: %v", err)
+		}
+		for _, resourceYamlPath := range resourceFiles {
+			if filepath.Base(resourceYamlPath) == "product.yaml" || filepath.Ext(resourceYamlPath) != ".yaml" {
+				continue
+			}
+
+			// Prepend "go_" to the Go yaml files' name to distinguish with the ruby yaml files
+			if filepath.Base(resourceYamlPath) == "go_product.yaml" || !strings.HasPrefix(filepath.Base(resourceYamlPath), "go_") {
+				continue
+			}
+
+			resource := &api.Resource{}
+			api.Compile(resourceYamlPath, resource)
+
+			resource.TargetVersionName = *version
+			resource.Properties = resource.AddLabelsRelatedFields(resource.PropertiesWithExcluded(), nil)
+			resource.SetDefault(productApi)
+			resource.Validate()
+			resources = append(resources, resource)
+		}
+
+		// TODO rewrite: override resources
+
+		// Sort resources by name
+		sort.Slice(resources, func(i, j int) bool {
+			return resources[i].Name < resources[j].Name
+		})
+
+		productApi.Objects = resources
+		productApi.Validate()
+
+		// TODO rewrite: set other providers via flag
+		providerToGenerate = provider.NewTerraform(productApi, *version, startTime)
+
+		*productsForVersion = append(*productsForVersion, productApi)
+
+		if !slices.Contains(productsToGenerate, productName) {
+			log.Printf("%s not specified, skipping generation", productName)
+			return
+		}
+
+		log.Printf("%s: Generating files", productName)
+		providerToGenerate.Generate(*outputPath, productName, resourceToGenerate, generateCode, generateDocs)
 	}
 }

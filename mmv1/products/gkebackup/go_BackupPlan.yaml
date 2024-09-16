@@ -227,7 +227,6 @@ properties:
       Description: A set of custom labels supplied by the user.
       A list of key->value pairs.
       Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
-    immutable: false
   - name: 'backupSchedule'
     type: NestedObject
     description:
@@ -270,7 +269,6 @@ properties:
               All the time and date values in exclusionWindows entry in the API are in UTC. We
               only allow <=1 recurrence (daily or weekly) exclusion window for a BackupPlan while no
               restriction on number of single occurrence windows.
-            # Exclusion Window Object
             item_type:
               type: NestedObject
               properties:

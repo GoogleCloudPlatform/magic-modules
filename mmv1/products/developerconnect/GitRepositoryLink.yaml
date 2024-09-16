@@ -1,0 +1,116 @@
+--- !ruby/object:Api::Resource
+base_url: projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/gitRepositoryLinks
+create_url: projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/gitRepositoryLinks?gitRepositoryLinkId={{git_repository_link_id}}
+self_link: projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/gitRepositoryLinks/{{git_repository_link_id}}
+id_format: projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/gitRepositoryLinks/{{git_repository_link_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/gitRepositoryLinks/{{git_repository_link_id}}
+examples:
+  # These tests depend on secrets stored in a separate project, so we prefer not
+  # to show them in the docs.
+  - !ruby/object:Provider::Terraform::Examples
+    name: "developer_connect_git_repository_link_github"
+    primary_resource_id: "primary"
+    skip_docs: true
+    min_version: beta
+    vars:
+      connection_name: "my-connection"
+      git_repository_link_name: "my-repository"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "developer_connect_git_repository_link_github_doc"
+    min_version: beta
+    skip_test: true
+name: GitRepositoryLink
+description: "A git repository link to a parent connection."
+min_version: "beta"
+autogen_async: true
+parameters:
+  - !ruby/object:Api::Type::String
+    name: location
+    description:
+      "Resource ID segment making up resource `name`. It identifies the resource
+      within its parent collection as described in https://google.aip.dev/122. See documentation
+      for resource type `developerconnect.googleapis.com/GitRepositoryLink`. "
+    url_param_only: true
+    required: true
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: parent_connection
+    description:
+      "Resource ID segment making up resource `name`. It identifies the resource
+      within its parent collection as described in https://google.aip.dev/122. See documentation
+      for resource type `developerconnect.googleapis.com/GitRepositoryLink`. "
+    url_param_only: true
+    required: true
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: gitRepositoryLinkId
+    description:
+      "Required. The ID to use for the repository, which will become the
+      final component of\nthe repository's resource name. This ID should be unique in
+      the connection.\nAllows alphanumeric characters and any of -._~%!$&'()*+,;=@. "
+    url_param_only: true
+    required: true
+    immutable: true
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: name
+    base_url: "{{op_id}}"
+    wait_ms: 1000
+    timeouts:
+  result: !ruby/object:Api::OpAsync::Result
+    path: response
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: done
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: error
+    message: message
+immutable: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: name
+    description: "Identifier. Resource name of the repository, in the format\n`projects/*/locations/*/connections/*/gitRepositoryLinks/*`. "
+    output: true
+  - !ruby/object:Api::Type::String
+    name: cloneUri
+    description: "Required. Git Clone URI. "
+    required: true
+  - !ruby/object:Api::Type::String
+    name: createTime
+    description: "Output only. [Output only] Create timestamp "
+    output: true
+  - !ruby/object:Api::Type::String
+    name: updateTime
+    description: "Output only. [Output only] Update timestamp "
+    output: true
+  - !ruby/object:Api::Type::String
+    name: deleteTime
+    description: "Output only. [Output only] Delete timestamp "
+    output: true
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: labels
+    description: "Optional. Labels as key value pairs "
+  - !ruby/object:Api::Type::String
+    name: etag
+    description:
+      "Optional. This checksum is computed by the server based on the value
+      of other\nfields, and may be sent on update and delete requests to ensure the\nclient
+      has an up-to-date value before proceeding. "
+  - !ruby/object:Api::Type::Boolean
+    name: reconciling
+    description:
+      "Output only. Set to true when the connection is being set up or updated
+      in the\nbackground. "
+    output: true
+  - !ruby/object:Api::Type::KeyValueAnnotations
+    name: annotations
+    description: "Optional. Allows clients to store small amounts of arbitrary data. "
+  - !ruby/object:Api::Type::String
+    name: uid
+    description: "Output only. A system-assigned unique identifier for a the GitRepositoryLink. "
+    output: true

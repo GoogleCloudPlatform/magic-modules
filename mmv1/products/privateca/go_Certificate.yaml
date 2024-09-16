@@ -34,7 +34,7 @@ timeouts:
 autogen_async: true
 custom_code:
   pre_create: 'templates/terraform/pre_create/go/privateca_certificate.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'privateca_certificate_config'
     primary_resource_id: 'default'
@@ -672,7 +672,6 @@ properties:
     type: KeyValueLabels
     description: |
       Labels with user-defined metadata to apply to this resource.
-    immutable: false
   - name: 'pemCsr'
     type: String
     description: |

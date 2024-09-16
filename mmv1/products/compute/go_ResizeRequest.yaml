@@ -37,7 +37,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 1000
@@ -252,7 +252,6 @@ properties:
                         type: String
                         description: |
                           The localized error message in the above locale.
-      # Status.lastAttempt
                         output: true
       - name: 'lastAttempt'
         type: NestedObject
@@ -389,5 +388,4 @@ properties:
                             description: |
                               The localized error message in the above locale.
 
-#Examples for testing
                             output: true

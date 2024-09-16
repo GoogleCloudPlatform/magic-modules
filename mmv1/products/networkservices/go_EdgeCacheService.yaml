@@ -88,7 +88,6 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: 'Set of label tags associated with the EdgeCache resource.'
-    immutable: false
   - name: 'disableQuic'
     type: Boolean
     description: |
@@ -327,9 +326,6 @@ properties:
                           type: String
                           description: |
                             For satisfying the matchRule condition, the path of the request must exactly match the value specified in fullPathMatch after removing any query parameters and anchor that may be part of the original URL.
-                          # TODO: (scottsuarez) conflicts also won't work for array path matchers yet, uncomment here once supported.
-                          # conflicts:
-                          #   - Routing.PathMatcher.RouteRule.prefixMatch
                     min_size: 1
                     max_size: 5
                   - name: 'headerAction'

@@ -941,6 +941,8 @@ gvnic {
 
 * `shielded_instance_config` - (Optional) Shielded Instance options. Structure is [documented below](#nested_shielded_instance_config).
 
+* `storage_pools` - (Optional) The list of Storage Pools where boot disks are provisioned.
+
 * `tags` - (Optional) The list of instance tags applied to all nodes. Tags are used to identify
     valid sources or targets for network firewalls.
 
@@ -1288,9 +1290,9 @@ Enables monitoring and attestation of the boot integrity of the instance. The at
 
 <a name="nested_kubelet_config"></a>The `kubelet_config` block supports:
 
-* `cpu_manager_policy` - (Required) The CPU management policy on the node. See
+* `cpu_manager_policy` - (Optional) The CPU management policy on the node. See
 [K8S CPU Management Policies](https://kubernetes.io/docs/tasks/administer-cluster/cpu-management-policies/).
-One of `"none"` or `"static"`. Defaults to `none` when `kubelet_config` is unset.
+One of `"none"` or `"static"`. If unset (or set to the empty string `""`), the API will treat the field as if set to "none".
 
 * `cpu_cfs_quota` - (Optional) If true, enables CPU CFS quota enforcement for
 containers that specify CPU limits.
@@ -1299,11 +1301,6 @@ containers that specify CPU limits.
 as a sequence of decimal numbers, each with optional fraction and a unit suffix,
 such as `"300ms"`. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m",
 "h". The value must be a positive duration.
-
--> Note: At the time of writing (2020/08/18) the GKE API rejects the `none`
-value and accepts an invalid `default` value instead. While this remains true,
-not specifying the `kubelet_config` block should be the equivalent of specifying
-`none`.
 
 * `insecure_kubelet_readonly_port_enabled` - (Optional) Controls whether the kubelet read-only port is enabled. It is strongly recommended to set this to `FALSE`. Possible values: `TRUE`, `FALSE`.
 

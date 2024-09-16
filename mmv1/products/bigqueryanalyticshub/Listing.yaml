@@ -52,7 +52,7 @@ examples:
     vars:
       data_exchange_id: 'my_data_exchange'
       listing_id: 'my_listing'
-      description: 'example data exchange'
+      desc: 'example data exchange'
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_analyticshub_listing_restricted'
     primary_resource_id: 'listing'
@@ -65,7 +65,7 @@ examples:
     vars:
       data_exchange_id: 'my_data_exchange'
       listing_id: 'my_listing'
-      description: 'example data exchange'
+      desc: 'example data exchange'
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_analyticshub_listing_dcr'
     primary_resource_id: 'listing'
@@ -78,7 +78,7 @@ examples:
     vars:
       data_exchange_id: 'dcr_data_exchange'
       listing_id: 'dcr_listing'
-      description: 'example dcr data exchange'
+      desc: 'example dcr data exchange'
 properties:
   - !ruby/object:Api::Type::String
     name: name
