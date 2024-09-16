@@ -63,6 +63,12 @@ resource "google_secure_source_manager_instance" "{{$.PrimaryResourceId}}" {
     is_private = true
     ca_pool = google_privateca_ca_pool.ca_pool.id
   }
+
+  # Prevent accidental deletions.
+  lifecycle {
+    prevent_destroy = "{{index $.Vars "prevent_destroy"}}"
+  }
+
   depends_on = [
     google_privateca_certificate_authority.root_ca,
     time_sleep.wait_120_seconds

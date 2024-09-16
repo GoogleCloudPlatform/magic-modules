@@ -13,49 +13,50 @@
 
 # Warning: This is a temporary file, and should not be edited directly
 ---
-name: 'OrganizationSccBigQueryExport'
+name: 'FolderSccBigQueryExport'
 description: |
   A Cloud Security Command Center (Cloud SCC) Big Query Export Config.
   It represents exporting Security Command Center data, including assets, findings, and security marks
-  using gcloud scc bqexports
-  ~> **Note:** In order to use Cloud SCC resources, your organization must be enrolled
+  to a BigQuery instance.
+
+  -> **Note:** In order to use Cloud SCC resources, your organization must be enrolled
   in [SCC Standard/Premium](https://cloud.google.com/security-command-center/docs/quickstart-security-command-center).
   Without doing so, you may run into errors during resource creation.
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/security-command-center/docs/how-to-analyze-findings-in-big-query'
-  api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v2/organizations.locations.bigQueryExports'
+  api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v1/folders.bigQueryExports'
 docs:
-base_url: 'organizations/{{organization}}/locations/{{location}}/bigQueryExports'
-self_link: 'organizations/{{organization}}/locations/{{location}}/bigQueryExports/{{big_query_export_id}}'
-create_url: 'organizations/{{organization}}/locations/{{location}}/bigQueryExports?bigQueryExportId={{big_query_export_id}}'
+base_url: 'folders/{{folder}}/bigQueryExports'
+self_link: 'folders/{{folder}}/bigQueryExports/{{big_query_export_id}}'
+create_url: 'folders/{{folder}}/bigQueryExports?bigQueryExportId={{big_query_export_id}}'
 update_verb: 'PATCH'
 update_mask: true
 import_format:
-  - 'organizations/{{organization}}/locations/{{location}}/bigQueryExports/{{big_query_export_id}}'
+  - 'folders/{{folder}}/bigQueryExports/{{big_query_export_id}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  post_import: 'templates/terraform/post_import/go/scc_v2_organization_big_query_export_config.go.tmpl'
 examples:
-  - name: 'scc_v2_organization_big_query_export_config_basic'
+  - name: 'scc_folder_big_query_export_config_basic'
     primary_resource_id: 'custom_big_query_export_config'
     vars:
       big_query_export_id: 'my-export'
       dataset: 'my-dataset'
+      dataset_id: 'my_dataset_id'
       name: 'my-export'
+      folder_display_name: 'folder-name'
     test_env_vars:
       org_id: 'ORG_ID'
       project: 'PROJECT_NAME'
-    external_providers: ["random", "time"]
     exclude_test: true
 parameters:
-  - name: 'organization'
+  - name: 'folder'
     type: String
     description: |
-      The organization whose Cloud Security Command Center the Big Query Export
+      The folder where Cloud Security Command Center Big Query Export
       Config lives in.
     url_param_only: true
     required: true
@@ -67,24 +68,19 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-  - name: 'location'
-    type: String
-    description: |
-      location Id is provided by organization. If not provided, Use global as default.
-    url_param_only: true
-    immutable: true
-    default_value: "global"
 properties:
   - name: 'name'
     type: String
     description: |
       The resource name of this export, in the format
-      `organizations/{{organization}}/locations/{{location}}/bigQueryExports/{{big_query_export_id}}`.
+      `projects/{{project}}/bigQueryExports/{{big_query_export_id}}`.
       This field is provided in responses, and is ignored when provided in create requests.
+    output: true
   - name: 'description'
     type: String
     description: |
-      The description of the notification config (max of 1024 characters).
+      The description of the export (max of 1024 characters).
+    required: true
     validation:
       function: 'validation.StringLenBetween(0, 1024)'
   - name: 'dataset'
@@ -93,17 +89,18 @@ properties:
       The dataset to write findings' updates to.
       Its format is "projects/[projectId]/datasets/[bigquery_dataset_id]".
       BigQuery Dataset unique ID must contain only letters (a-z, A-Z), numbers (0-9), or underscores (_).
+    required: true
   - name: 'createTime'
     type: String
     description: |
-      The time at which the BigQuery export was created. This field is set by the server and will be ignored if provided on export on creation.
+      The time at which the BigQuery export was created.
       A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
       Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
     output: true
   - name: 'updateTime'
     type: String
     description: |
-      The most recent time at which the BigQuery export was updated. This field is set by the server and will be ignored if provided on export creation or update.
+      The most recent time at which the BigQuery export was updated.
       A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
       Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
     output: true
@@ -111,7 +108,6 @@ properties:
     type: String
     description: |
       Email address of the user who last edited the BigQuery export.
-      This field is set by the server and will be ignored if provided on export creation or update.
     output: true
   - name: 'principal'
     type: String
@@ -146,3 +142,5 @@ properties:
       See
       [Filtering notifications](https://cloud.google.com/security-command-center/docs/how-to-api-filter-notifications)
       for information on how to write a filter.
+    required: true
+    send_empty_value: true
