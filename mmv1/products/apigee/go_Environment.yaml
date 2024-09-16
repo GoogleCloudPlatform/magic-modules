@@ -63,14 +63,14 @@ examples:
   - name: 'apigee_environment_basic'
     vars:
       environment_name: 'my-environment'
-    skip_test: true
+    exclude_test: true
   - name: 'apigee_environment_basic_test'
     primary_resource_id: 'apigee_environment'
     primary_resource_name: 'fmt.Sprintf("organizations/tf-test%s", context["random_suffix"]), fmt.Sprintf("tf-test%s", context["random_suffix"])'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
-    skip_docs: true
+    exclude_docs: true
     skip_vcr: true
   - name: 'apigee_environment_basic_deployment_apiproxy_type_test'
     primary_resource_id: 'apigee_environment'
@@ -78,7 +78,7 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
-    skip_docs: true
+    exclude_docs: true
     skip_vcr: true
   - name: 'apigee_environment_patch_update_test'
     primary_resource_id: 'apigee_environment'
@@ -87,7 +87,7 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
-    skip_docs: true
+    exclude_docs: true
     skip_vcr: true
 parameters:
   - name: 'orgId'

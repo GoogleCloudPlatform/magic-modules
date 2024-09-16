@@ -42,7 +42,7 @@ examples:
     test_env_vars:
       billing_account: 'BILLING_ACCT'
       org_id: 'ORG_ID'
-    skip_import_test: true
+    exclude_import_test: true
 parameters:
 properties:
   - name: 'billing_account'

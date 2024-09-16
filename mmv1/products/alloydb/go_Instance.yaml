@@ -68,7 +68,7 @@ examples:
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
-    skip_test: true
+    exclude_test: true
   - name: 'alloydb_secondary_instance_basic'
     primary_resource_id: 'secondary'
     vars:
@@ -80,7 +80,7 @@ examples:
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
-    skip_test: true
+    exclude_test: true
   - name: 'alloydb_instance_basic_test'
     primary_resource_id: 'default'
     vars:
@@ -92,7 +92,7 @@ examples:
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
-    skip_docs: true
+    exclude_docs: true
   - name: 'alloydb_secondary_instance_basic_test'
     primary_resource_id: 'secondary'
     vars:
@@ -106,7 +106,7 @@ examples:
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
-    skip_docs: true
+    exclude_docs: true
   - name: 'alloydb_instance_psc_test'
     primary_resource_id: 'default'
     vars:
@@ -116,7 +116,7 @@ examples:
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
-    skip_docs: true
+    exclude_docs: true
 parameters:
   - name: 'cluster'
     type: ResourceRef

@@ -59,54 +59,54 @@ examples:
   - name: 'apigee_instance_basic'
     vars:
       instance_name: 'my-instance-name'
-    skip_test: true
+    exclude_test: true
   - name: 'apigee_instance_basic_test'
     primary_resource_id: 'apigee_instance'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
-    skip_docs: true
+    exclude_docs: true
     skip_vcr: true
   - name: 'apigee_instance_cidr_range'
     vars:
       instance_name: 'my-instance-name'
-    skip_test: true
+    exclude_test: true
   - name: 'apigee_instance_cidr_range_test'
     primary_resource_id: 'apigee_instance'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
-    skip_docs: true
+    exclude_docs: true
     skip_vcr: true
   - name: 'apigee_instance_ip_range'
     vars:
       instance_name: 'my-instance-name'
-    skip_test: true
+    exclude_test: true
   - name: 'apigee_instance_ip_range_test'
     primary_resource_id: 'apigee_instance'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
-    skip_docs: true
+    exclude_docs: true
     skip_vcr: true
   - name: 'apigee_instance_full'
     vars:
       instance_name: 'my-instance-name'
-    skip_test: true
+    exclude_test: true
   - name: 'apigee_instance_full_test'
     primary_resource_id: 'apigee_instance'
     min_version: 'beta'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
-    skip_docs: true
+    exclude_docs: true
     skip_vcr: true
   - name: 'apigee_instance_service_attachment_basic_test'
     primary_resource_id: 'apigee_instance'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
-    skip_docs: true
+    exclude_docs: true
     skip_vcr: true
 parameters:
   - name: 'orgId'

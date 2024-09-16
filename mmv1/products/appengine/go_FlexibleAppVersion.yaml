@@ -76,7 +76,7 @@ examples:
     ignore_read_extra:
       - 'noop_on_destroy'
       - 'deployment.0.zip'
-    skip_test: true
+    exclude_test: true
 virtual_fields:
   - name: 'noop_on_destroy'
     description: |

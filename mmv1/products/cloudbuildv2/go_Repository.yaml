@@ -46,23 +46,23 @@ examples:
     vars:
       connection_name: 'connection'
       repository_name: 'repository'
-    skip_docs: true
+    exclude_docs: true
   - name: 'cloudbuildv2_repository_github'
     primary_resource_id: 'primary'
     vars:
       connection_name: 'connection'
       repository_name: 'repository'
-    skip_docs: true
+    exclude_docs: true
   - name: 'cloudbuildv2_repository_gle'
     primary_resource_id: 'primary'
     vars:
       connection_name: 'connection'
       repository_name: 'repository'
-    skip_docs: true
+    exclude_docs: true
   - name: 'cloudbuildv2_repository_ghe_doc'
-    skip_test: true
+    exclude_test: true
   - name: 'cloudbuildv2_repository_github_doc'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'location'
     type: String

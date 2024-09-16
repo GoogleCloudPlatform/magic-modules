@@ -77,7 +77,7 @@ examples:
       project_id: 'quota'
     test_env_vars:
       org_id: 'ORG_ID'
-    skip_docs: true
+    exclude_docs: true
   - name: 'region_consumer_quota_override'
     primary_resource_id: 'override'
     min_version: 'beta'

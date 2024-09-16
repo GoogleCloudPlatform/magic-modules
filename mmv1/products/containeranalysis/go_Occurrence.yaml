@@ -44,7 +44,7 @@ examples:
     vars:
       note_name: 'attestation-note'
       attestor: 'attestor'
-    skip_test: true
+    exclude_test: true
 parameters:
 properties:
   - name: 'name'

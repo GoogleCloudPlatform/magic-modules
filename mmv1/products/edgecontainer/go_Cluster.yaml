@@ -67,7 +67,7 @@ examples:
     primary_resource_id: 'default'
     vars:
       edgecontainer_cluster_name: 'local-control-plane-cluster'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'location'
     type: String

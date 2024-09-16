@@ -70,7 +70,7 @@ examples:
     test_vars_overrides:
       'deletion_protection': 'false'
     external_providers: ["random", "time"]
-    skip_docs: true
+    exclude_docs: true
     skip_vcr: true
   - name: 'datastream_stream_full'
     primary_resource_id: 'default'
@@ -95,14 +95,14 @@ examples:
       stream_id: 'my-stream'
       source_connection_profile_id: 'source-profile'
       destination_connection_profile_id: 'destination-profile'
-    skip_test: true
+    exclude_test: true
   - name: 'datastream_stream_oracle'
     primary_resource_id: 'default'
     vars:
       stream_id: 'my-stream'
       source_connection_profile_id: 'source-profile'
       destination_connection_profile_id: 'destination-profile'
-    skip_test: true
+    exclude_test: true
   - name: 'datastream_stream_sql_server'
     primary_resource_id: 'default'
     vars:
@@ -117,7 +117,7 @@ examples:
       stream_id: 'stream'
     test_vars_overrides:
       'deletion_protection': 'false'
-    skip_test: true
+    exclude_test: true
   - name: 'datastream_stream_sql_server_change_tables'
     primary_resource_id: 'default'
     vars:
@@ -132,7 +132,7 @@ examples:
       stream_id: 'stream'
     test_vars_overrides:
       'deletion_protection': 'false'
-    skip_test: true
+    exclude_test: true
   - name: 'datastream_stream_postgresql_bigquery_dataset_id'
     primary_resource_id: 'default'
     vars:

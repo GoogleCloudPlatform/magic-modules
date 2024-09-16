@@ -72,8 +72,8 @@ values will be stored in the raw state as plain text: {{ $.SensitivePropsToStrin
 {{ end }}
 {{- if $.Examples }}
 	{{- range $e := $.Examples }}
-		{{- if not $e.SkipDocs }}
-			{{- if not (or $e.SkipTest $e.TestEnvVars) }}
+		{{- if not $e.ExcludeDocs }}
+			{{- if not (or $e.ExcludeTest $e.TestEnvVars) }}
 <div class = "oics-button" style="float: right; margin: 0 0 -15px">
   <a href="{{ $e.OiCSLink }}" target="_blank">
     <img alt="Open in Cloud Shell" src="//gstatic.com/cloudssh/images/open-btn.svg" style="max-height: 44px; margin: 32px auto; max-width: 100%;">

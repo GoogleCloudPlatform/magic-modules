@@ -52,7 +52,7 @@ examples:
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
-    skip_test: true
+    exclude_test: true
   - name: 'alloydb_backup_basic_test'
     primary_resource_id: 'default'
     vars:
@@ -65,7 +65,7 @@ examples:
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
-    skip_docs: true
+    exclude_docs: true
   - name: 'alloydb_backup_full'
     primary_resource_id: 'default'
     vars:
@@ -76,7 +76,7 @@ examples:
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
-    skip_test: true
+    exclude_test: true
   - name: 'alloydb_backup_full_test'
     primary_resource_id: 'default'
     vars:
@@ -89,7 +89,7 @@ examples:
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
-    skip_docs: true
+    exclude_docs: true
     skip_vcr: true
 parameters:
   - name: 'backupId'
