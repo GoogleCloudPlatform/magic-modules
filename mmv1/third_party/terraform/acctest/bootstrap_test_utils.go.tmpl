@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package acctest
 
 import (
@@ -6,17 +5,17 @@ import (
 	"fmt"
 	"log"
 	"maps"
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 	"net/http"
-<% end -%>
+{{- end }}
 	"os"
 	"strings"
 	"testing"
 	"time"
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 	tpgfirebase "github.com/hashicorp/terraform-provider-google/google/services/firebase"
-<% end -%>
+{{- end }}
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/services/privateca"
@@ -1303,7 +1302,7 @@ func SetupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 		return "", err
 	}
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 	// For Firebase test only
 	// After project-2 is created and the firebase API is enabled, 
 	// we need to make the GCP project a Firebase project.
@@ -1332,7 +1331,7 @@ func SetupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 			return "", fmt.Errorf("Error waiting for firebase to be enabled in project %s: %s", p2, err)
 		}
 	}
-<% end -%>
+{{- end }}
 
 	// Enable the test runner to create service accounts and get an access token on behalf of
 	// the project 1 service account
