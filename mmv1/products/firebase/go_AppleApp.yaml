@@ -56,6 +56,7 @@ identity:
   - name
 custom_code:
   custom_delete: 'templates/terraform/custom_delete/go/firebase_app_deletion_policy.tmpl'
+# Sweeper skipped as this resource has customized deletion.
 exclude_sweeper: true
 examples:
   - name: 'firebase_apple_app_basic'
@@ -75,6 +76,7 @@ examples:
       display_name: 'Display Name Full'
       bundle_id: 'apple.app.12345'
       app_store_id: '12345'
+ # Has to be a 10-digit number.
       team_id: '9987654321'
       api_key_name: 'api-key'
     test_env_vars:

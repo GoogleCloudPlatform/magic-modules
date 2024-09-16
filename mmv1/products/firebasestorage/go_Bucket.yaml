@@ -28,6 +28,7 @@ self_link: 'projects/{{project}}/buckets/{{bucket_id}}'
 create_url: 'projects/{{project}}/buckets/{{bucket_id}}:addFirebase'
 delete_url: 'projects/{{project}}/buckets/{{bucket_id}}:removeFirebase'
 delete_verb: 'POST'
+ # Does not support update operation. There is nothing to update.
 immutable: true
 import_format:
   - 'projects/{{project}}/buckets/{{bucket_id}}'

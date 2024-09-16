@@ -68,6 +68,10 @@ custom_diff:
   - 'resourceComputeRouterNatDrainNatIpsCustomDiff'
 exclude_tgc: true
 examples:
+  # These examples are not used to autogenerate tests, as fine-grained
+  # resources do not fit the normal test flow - we need to test deletion
+  # in a test step while parent resource still exists vs in CheckDestroy
+  # when all resources have been deleted.
   - name: 'router_nat_basic'
     primary_resource_id: 'nat'
     vars:

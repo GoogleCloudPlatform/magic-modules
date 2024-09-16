@@ -57,6 +57,7 @@ iam_policy:
     - 'projects/{{project}}/locations/global/scopes/{{scope_id}}'
     - '{{scope_id}}'
 custom_code:
+# Skip sweeper gen since this is a child resource.
 exclude_sweeper: true
 examples:
   - name: 'gkehub_scope_basic'

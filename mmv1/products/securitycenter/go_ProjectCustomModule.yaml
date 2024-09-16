@@ -65,6 +65,7 @@ properties:
       characters or underscores only.
     required: true
     immutable: true
+    # API error for invalid display names is just "INVALID_ARGUMENT" with no details
     validation:
       function: 'verify.ValidateRegexp(`^[a-z][\w_]{0,127}$`)'
   - name: 'enablementState'

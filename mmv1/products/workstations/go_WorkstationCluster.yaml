@@ -82,6 +82,7 @@ parameters:
       The location where the workstation cluster should reside.
     min_version: 'beta'
     url_param_only: true
+    # TODO(esu): Change to required, as it's not possible for this field to be omitted on the API side.
     immutable: true
 properties:
   - name: 'name'

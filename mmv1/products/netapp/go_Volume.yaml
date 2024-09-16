@@ -287,6 +287,7 @@ properties:
     description: |-
       Used to create this volume from a snapshot (= cloning) or an backup.
     immutable: true
+    # This parameter is only used at CREATE. READs will omit it.
     ignore_read: true
     properties:
       - name: 'sourceSnapshot'

@@ -13,6 +13,10 @@
 
 # Warning: This is a temporary file, and should not be edited directly
 ---
+# StandardAppVersion and FlexibleAppVersion use the same API endpoint (apps.services.versions)
+# They are split apart as some of the fields will are necessary for one and not the other, and
+# other fields may have different defaults.  However, some fields are the same.  If fixing a bug
+# in one, please check the other for the same fix.
 name: 'StandardAppVersion'
 description: |
   Standard App Version resource to create a new version of standard GAE Application.
@@ -186,6 +190,7 @@ properties:
             - 'REDIRECT_HTTP_RESPONSE_CODE_307'
         - name: 'script'
           type: NestedObject
+          # TODO (mbang): Exactly one of script, staticFiles, or apiEndpoint must be set
           description: |
             Executes a script to handle the requests that match this URL pattern.
             Only the auto value is supported for Node.js in the App Engine standard environment, for example "script:" "auto".
@@ -197,6 +202,7 @@ properties:
               required: true
         - name: 'staticFiles'
           type: NestedObject
+          # TODO (mbang): Exactly one of script, staticFiles, or apiEndpoint must be set
           description: |
             Files served directly to the user for a given URL, such as images, CSS stylesheets, or JavaScript source files. Static file handlers describe which files in the application directory are static files, and which URLs serve them.
           properties:
@@ -360,6 +366,7 @@ properties:
     conflicts:
       - basic_scaling
       - manual_scaling
+    # This flattener is entirely handwritten and must be updated with **any** new field or subfield
     custom_flatten: 'templates/terraform/custom_flatten/go/appengine_standardappversion_automatic_scaling_handlenil.go.tmpl'
     properties:
       - name: 'maxConcurrentRequests'
@@ -441,5 +448,4 @@ properties:
 
           **Note:** When managing the number of instances at runtime through the App Engine Admin API or the (now deprecated) Python 2
           Modules API set_num_instances() you must use `lifecycle.ignore_changes = ["manual_scaling"[0].instances]` to prevent drift detection.
-
         required: true

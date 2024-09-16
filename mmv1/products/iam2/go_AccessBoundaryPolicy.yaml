@@ -43,6 +43,7 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
+# Skipping sweeper since this is a child resource
 exclude_sweeper: true
 examples:
   - name: 'iam_access_boundary_policy_basic'

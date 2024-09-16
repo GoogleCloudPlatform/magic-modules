@@ -51,6 +51,7 @@ examples:
       'deletion_protection': 'false'
     ignore_read_extra:
       - 'ignore_warnings'
+    # bigtable instance does not use the shared HTTP client, this test creates an instance
     skip_vcr: true
   - name: 'bigtable_app_profile_singlecluster'
     primary_resource_id: 'ap'
@@ -62,6 +63,7 @@ examples:
       'deletion_protection': 'false'
     ignore_read_extra:
       - 'ignore_warnings'
+    # bigtable instance does not use the shared HTTP client, this test creates an instance
     skip_vcr: true
   - name: 'bigtable_app_profile_multicluster'
     primary_resource_id: 'ap'
@@ -73,6 +75,7 @@ examples:
       'deletion_protection': 'false'
     ignore_read_extra:
       - 'ignore_warnings'
+    # bigtable instance does not use the shared HTTP client, this test creates an instance
     skip_vcr: true
   - name: 'bigtable_app_profile_priority'
     primary_resource_id: 'ap'
@@ -84,6 +87,7 @@ examples:
       'deletion_protection': 'false'
     ignore_read_extra:
       - 'ignore_warnings'
+    # bigtable instance does not use the shared HTTP client, this test creates an instance
     skip_vcr: true
 parameters:
   - name: 'appProfileId'

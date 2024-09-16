@@ -94,6 +94,7 @@ properties:
         required: true
         enum_values:
           - 'IPV4'
+ # probably could have been an enum, but it's a string in the API
       - name: 'ipProtocol'
         type: String
         description: |
@@ -113,6 +114,7 @@ properties:
     type: Enum
     description: |
       Other routes that will be referenced to determine the next hop of the packet.
+ # next_hop union
     exactly_one_of:
       - 'next_hop_ilb_ip'
       - 'next_hop_other_routes'
@@ -122,6 +124,7 @@ properties:
     type: String
     description: |
       The IP address of a global-access-enabled L4 ILB that is the next hop for matching packets.
+ # next_hop union
     exactly_one_of:
       - 'next_hop_ilb_ip'
       - 'next_hop_other_routes'
@@ -134,6 +137,7 @@ properties:
     type: NestedObject
     description: |
       VM instances to which this policy-based route applies to.
+ # target union
     conflicts:
       - interconnect_attachment
     properties:
@@ -141,6 +145,7 @@ properties:
         type: Array
         description: |
           A list of VM instance tags that this policy-based route applies to. VM instances that have ANY of tags specified here will install this PBR.
+ # optional in API docs, but that doesn't make sense here
         required: true
         item_type:
           type: String
@@ -148,6 +153,7 @@ properties:
     type: NestedObject
     description: |
       The interconnect attachments that this policy-based route applies to.
+ # target union
     conflicts:
       - virtual_machine
     properties:
@@ -155,6 +161,7 @@ properties:
         type: String
         description: |
           Cloud region to install this policy-based route on for Interconnect attachments. Use `all` to install it on all Interconnect attachments.
+ # optional in API docs, but that doesn't make sense here
         required: true
   - name: 'createTime'
     type: Time
@@ -179,6 +186,7 @@ properties:
     item_type:
       type: NestedObject
       properties:
+ # technically enum, but doesn't matter for output fields
         - name: 'code'
           type: String
           description: |

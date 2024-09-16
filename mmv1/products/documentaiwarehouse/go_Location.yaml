@@ -50,6 +50,7 @@ exclude_sweeper: true
 examples:
   - name: 'document_ai_warehouse_location'
     primary_resource_id: 'example'
+    # docs only, testing is done in a DocumentSchema update test
     exclude_test: true
 parameters:
   - name: 'project_number'

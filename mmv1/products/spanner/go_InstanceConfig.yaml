@@ -48,6 +48,7 @@ custom_code:
   update_encoder: 'templates/terraform/update_encoder/go/spanner_instance_config_update.go.tmpl'
   decoder: 'templates/terraform/decoders/go/spanner_instance_config.go.tmpl'
 exclude_tgc: true
+# Sweeper skipped as this resource has customized deletion.
 exclude_sweeper: true
 examples:
   - name: 'spanner_instance_config_basic'

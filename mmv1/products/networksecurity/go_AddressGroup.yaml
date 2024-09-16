@@ -16,6 +16,7 @@
 name: 'AddressGroup'
 description: |
   AddressGroup is a resource that specifies how a collection of IP/DNS used in Firewall Policy.
+ # TODO(diogoesteves): change the url to GA once it is available.
 references:
   guides:
     'Use AddressGroups': 'https://cloud.google.com/vpc/docs/use-address-groups-firewall-policies'

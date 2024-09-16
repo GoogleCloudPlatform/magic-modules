@@ -49,7 +49,9 @@ examples:
     test_env_vars:
       project_id: 'PROJECT_NAME'
     test_vars_overrides:
+      # Don't add prefix. This string is a random UUID4
       'token': '"5E728315-E121-467F-BCA1-1FE71130BB98"'
+    # Need the time_sleep resource
     external_providers: ["random", "time"]
 parameters:
   - name: 'app_id'

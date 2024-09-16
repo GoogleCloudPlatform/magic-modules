@@ -53,7 +53,9 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
       billing_acct: 'BILLING_ACCT'
+        # Resource creation race
     test_vars_overrides:
+      # Set quota start time for the following day.
       'quota_start_time': 'time.Now().AddDate(0, 0, 1).Format(time.RFC3339)'
     ignore_read_extra:
       - 'client.0.api_key'

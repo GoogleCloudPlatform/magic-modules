@@ -99,6 +99,7 @@ properties:
       When providing an FQDN (hostname), it must be publicly resolvable (e.g. via Google public DNS) and IP addresses must be publicly routable.  It must not contain a protocol (e.g., https://) and it must not contain any slashes.
       If a Cloud Storage bucket is provided, it must be in the canonical "gs://bucketname" format. Other forms, such as "storage.googleapis.com", will be rejected.
     required: true
+ # default http2 from api
   - name: 'protocol'
     type: Enum
     description: |
@@ -110,6 +111,7 @@ properties:
       - 'HTTP2'
       - 'HTTPS'
       - 'HTTP'
+ # default from api
   - name: 'port'
     type: Integer
     description: |
@@ -142,6 +144,7 @@ properties:
       The value of timeout.maxAttemptsTimeout dictates the timeout across all origins.
       A reference to a Topic resource.
     diff_suppress_func: 'tpgresource.CompareResourceNames'
+ # default CONNECT_FAILURE from api
   - name: 'retryConditions'
     type: Array
     description: |

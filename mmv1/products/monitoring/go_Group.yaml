@@ -54,6 +54,7 @@ parameters:
 properties:
   - name: 'parentName'
     type: String
+    # TODO chrisst - turn into self-reference if possible.
     description: |
       The name of the group's parent, if it has one. The format is
       "projects/{project_id_or_number}/groups/{group_id}". For

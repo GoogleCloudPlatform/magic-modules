@@ -24,6 +24,7 @@ description: |
   verify the status of the individual instances.
 
   A managed instance group can have up to 1000 VM instances per group.
+# Used as a resource reference
 exclude: true
 docs:
 base_url: 'projects/{{project}}/zones/{{zone}}/instanceGroupManagers'
@@ -146,6 +147,7 @@ properties:
       An optional description of this resource. Provide this property when
       you create the resource.
     immutable: true
+  # fingerprint ignored as it is an internal locking detail
   - name: 'id'
     type: Integer
     description: 'A unique identifier for this resource'
@@ -164,6 +166,7 @@ properties:
       group. The group uses this template to create all new instances in the
       managed instance group.
     required: true
+  # kind is internal transport detail
     custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
     resource: 'InstanceTemplate'
     imports: 'selfLink'
@@ -173,6 +176,7 @@ properties:
       The name of the managed instance group. The name must be 1-63
       characters long, and comply with RFC1035.
     required: true
+  # TODO(nelsonjr): Make namedPorts a NameValue(name[string], port[integer])
   - name: 'namedPorts'
     type: Array
     description:

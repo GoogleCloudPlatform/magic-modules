@@ -50,6 +50,7 @@ async:
 iam_policy:
   method_name_separator: ':'
   allowed_iam_role: 'roles/artifactregistry.reader'
+    # TODO (camthornton): Change to repository_id in 4.0
   parent_resource_attribute: 'repository'
   base_url: 'projects/{{project}}/locations/{{location}}/repositories/{{name}}'
   example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
@@ -117,6 +118,8 @@ examples:
       secret_resource_id: 'example-remote-secret'
       username: 'remote-username'
       secret_data: 'remote-password'
+    # Ignore this field as it is INPUT_ONLY. AR will not return this in the
+    # response.
     ignore_read_extra:
       - 'remote_repository_config.0.disable_upstream_validation'
   - name: 'artifact_registry_repository_remote_docker_custom_with_auth'
@@ -129,6 +132,8 @@ examples:
       username: 'remote-username'
       secret_data: 'remote-password'
     ignore_read_extra:
+      # Ignore this field as it is INPUT_ONLY. AR will not return this in the
+      # response.
       - 'remote_repository_config.0.disable_upstream_validation'
   - name: 'artifact_registry_repository_remote_maven_custom_with_auth'
     primary_resource_id: 'my-repo'
@@ -140,6 +145,8 @@ examples:
       username: 'remote-username'
       secret_data: 'remote-password'
     ignore_read_extra:
+      # Ignore this field as it is INPUT_ONLY. AR will not return this in the
+      # response.
       - 'remote_repository_config.0.disable_upstream_validation'
   - name: 'artifact_registry_repository_remote_npm_custom_with_auth'
     primary_resource_id: 'my-repo'
@@ -151,6 +158,8 @@ examples:
       username: 'remote-username'
       secret_data: 'remote-password'
     ignore_read_extra:
+      # Ignore this field as it is INPUT_ONLY. AR will not return this in the
+      # response.
       - 'remote_repository_config.0.disable_upstream_validation'
   - name: 'artifact_registry_repository_remote_python_custom_with_auth'
     primary_resource_id: 'my-repo'
@@ -162,6 +171,8 @@ examples:
       username: 'remote-username'
       secret_data: 'remote-password'
     ignore_read_extra:
+      # Ignore this field as it is INPUT_ONLY. AR will not return this in the
+      # response.
       - 'remote_repository_config.0.disable_upstream_validation'
 parameters:
 properties:
@@ -246,6 +257,7 @@ properties:
       format type.
     allow_empty_object: true
     properties:
+      # Maven properties.
       - name: 'allowSnapshotOverwrites'
         type: Boolean
         description: |-
@@ -327,6 +339,7 @@ properties:
           type: NestedObject
           description: |-
             Policy condition for matching versions.
+          # TODO (jrsb): exactly_one_of: condition, mostRecentVersions
           properties:
             - name: 'tagState'
               type: Enum
@@ -370,6 +383,7 @@ properties:
           description: |-
             Policy condition for retaining a minimum number of versions. May only be
             specified with a Keep action.
+          # TODO (jrsb): exactly_one_of: condition, mostRecentVersions
           properties:
             - name: 'packageNamePrefixes'
               type: Array
@@ -449,6 +463,7 @@ properties:
             conflicts:
               - remoteRepositoryConfig.0.docker_repository.0.custom_repository
             custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
+            # Eventually lets delete default_value and custom_flatten in a major release
             default_value: "DOCKER_HUB"
             enum_values:
               - 'DOCKER_HUB'
@@ -486,6 +501,7 @@ properties:
             conflicts:
               - remoteRepositoryConfig.0.maven_repository.0.custom_repository
             custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
+            # Eventually lets delete default_value and custom_flatten in a major release
             default_value: "MAVEN_CENTRAL"
             enum_values:
               - 'MAVEN_CENTRAL'
@@ -523,6 +539,7 @@ properties:
             conflicts:
               - remoteRepositoryConfig.0.npm_repository.0.custom_repository
             custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
+            # Eventually lets delete default_value and custom_flatten in a major release
             default_value: "NPMJS"
             enum_values:
               - 'NPMJS'
@@ -560,6 +577,7 @@ properties:
             conflicts:
               - remoteRepositoryConfig.0.python_repository.0.custom_repository
             custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
+            # Eventually lets delete default_value and custom_flatten in a major release
             default_value: "PYPI"
             enum_values:
               - 'PYPI'
@@ -643,6 +661,8 @@ properties:
         description: |-
           If true, the remote repository upstream and upstream credentials will
           not be validated.
+        # Ignore read on this field because it is INPUT_ONLY.
+        # Need to use custom flatten because ignore_read doesn't work with nested fields.
         custom_flatten: 'templates/terraform/custom_flatten/go/artifactregistry_rr_disable_upstream_validation.go.tmpl'
   - name: 'cleanupPolicyDryRun'
     type: Boolean

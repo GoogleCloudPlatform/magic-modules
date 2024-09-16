@@ -62,6 +62,10 @@ parameters:
     type: String
     description: The location of this cloud function.
     required: true
+    # This is not a real API field.
+    # This is a more user-centric way for users to specify
+    # that they want to use a HTTP Trigger rather than
+    # send httpsTrigger with an empty dictionary.
   - name: 'trigger_http'
     type: Boolean
     description: 'Use HTTP to trigger this function'

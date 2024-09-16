@@ -104,6 +104,7 @@ properties:
           default_value: "PRIVATE_SERVICE_ACCESS"
           enum_values:
             - 'PRIVATE_SERVICE_ACCESS'
+  ## outputs
   - name: 'oauth2ClientId'
     type: String
     description: |

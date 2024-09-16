@@ -33,6 +33,12 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+  # PubSub resources don't have operations but are negatively cached
+  # and eventually consistent.
+  # Because some users check whether the PubSub resource exists prior
+  # to applying a new resource, we need to add this PollAsync to GET the
+  # resource until it exists and the negative cached result goes away.
+  # Context: hashicorp/terraform-provider-google#4993
 async:
   type: 'PollAsync'
   check_response_func_existence: 'transport_tpg.PollCheckForExistence'

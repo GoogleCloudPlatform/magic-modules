@@ -90,6 +90,7 @@ examples:
       - 'reconciling'
       - 'update_time'
     exclude_docs: true
+    # https://github.com/hashicorp/terraform-provider-google/issues/16231
     skip_vcr: true
 parameters:
   - name: 'backupId'

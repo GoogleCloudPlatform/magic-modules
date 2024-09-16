@@ -59,6 +59,8 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
       project: 'PROJECT_NAME'
+    # Handwritten test will take care of creates and updates.
+    # Firewall endpoint association creation is subjet to firewall endpoint creation which is long and expensive.
     exclude_test: true
 parameters:
   - name: 'name'

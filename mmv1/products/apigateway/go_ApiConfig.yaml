@@ -70,6 +70,7 @@ custom_code:
 examples:
   - name: 'apigateway_api_config_basic'
     primary_resource_id: 'api_cfg'
+    # Need to pass 2 ids into a Sprintf - parent resource id also needed to identify primary resource
     primary_resource_name: 'fmt.Sprintf("tf-test-my-api%s", context["random_suffix"]), fmt.Sprintf("tf-test-my-config%s", context["random_suffix"])'
     min_version: 'beta'
     vars:

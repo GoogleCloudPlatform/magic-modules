@@ -50,6 +50,7 @@ async:
     path: 'error/errors'
     message: 'message'
 custom_code:
+# Skip sweeper gen since this is a child resource.
 exclude_sweeper: true
 examples:
   - name: 'gkehub_scope_rbac_role_binding_basic'

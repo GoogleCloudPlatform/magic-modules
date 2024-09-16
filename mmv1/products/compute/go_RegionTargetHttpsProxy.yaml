@@ -45,6 +45,9 @@ async:
     message: 'message'
 custom_code:
   encoder: 'templates/terraform/encoders/go/compute_region_target_https_proxy.go.tmpl'
+  # update_encoder is usually the same as encoder by default. This resource is an uncommon case where the whole resource
+  # is marked to be immutable, but we have a field specific update that overrides it (e.g certifiacteManagerCertificates).
+  # This causes the encoder logic to not be applied during update.
   update_encoder: 'templates/terraform/encoders/go/compute_region_target_https_proxy.go.tmpl'
   decoder: 'templates/terraform/decoders/go/compute_region_target_https_proxy.go.tmpl'
 examples:
@@ -121,6 +124,25 @@ properties:
       character, which cannot be a dash.
     required: true
     immutable: true
+  # This field is present in the schema but as of 2019 Sep 23 attempting to set it fails with
+  # a 400 "QUIC override is supported only with global TargetHttpsProxy". jamessynge@ said in an
+  # email sent on 2019 Sep 20 that support for this "is probably far in the future."
+  # - !ruby/object:Api::Type::Enum
+  #   name: 'quicOverride'
+  #   description: |
+  #     Specifies the QUIC override policy for this resource. This determines
+  #     whether the load balancer will attempt to negotiate QUIC with clients
+  #     or not. Can specify one of NONE, ENABLE, or DISABLE. If NONE is
+  #     specified, uses the QUIC policy with no user overrides, which is
+  #     equivalent to DISABLE. Not specifying this field is equivalent to
+  #     specifying NONE.
+  #   values:
+  #     - :NONE
+  #     - :ENABLE
+  #     - :DISABLE
+  #   update_verb: :POST
+  #   update_url:
+  #     'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setQuicOverride'
   - name: 'certificateManagerCertificates'
     type: Array
     description: |

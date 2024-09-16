@@ -23,10 +23,15 @@ references:
 docs:
 base_url: 'folders/{{folder}}/settings'
 self_link: 'folders/{{folder}}/settings'
+# Hardcode the updateMask since d.HasChanged does not work on create.
 create_url: 'folders/{{folder}}/settings?updateMask=disableDefaultSink,storageLocation,kmsKeyName'
+# This is a singleton resource that already is created, so create
+# is really an update, and therefore should be PATCHed.
 create_verb: 'PATCH'
 update_url: 'folders/{{folder}}/settings?updateMask=disableDefaultSink,storageLocation,kmsKeyName'
 update_verb: 'PATCH'
+# update_mask: true
+# This is a singleton resource that cannot be deleted, so skip delete.
 exclude_delete: true
 import_format:
   - 'folders/{{folder}}/settings'

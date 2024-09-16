@@ -53,6 +53,7 @@ examples:
       external_gateway_name: 'external-gateway'
       global_address_name: 'global-address'
       router_name: 'ha-vpn-router1'
+      # Multiple fine-grained resources
     skip_vcr: true
   - name: 'only_external_vpn_gateway_full'
     primary_resource_id: 'external_gateway'

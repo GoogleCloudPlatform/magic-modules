@@ -21,6 +21,9 @@ description: |
   ~> **Note:** Due to limitations of the Notebooks Runtime API, many fields
   in this resource do not properly detect drift. These fields will also not
   appear in state once imported.
+# When set, if any parameter change, they will get recreated.
+# Use wisely because any `update_url:` in the hierarchy below this will get ignored.
+# immutable: true
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/ai-platform-notebooks'
@@ -52,6 +55,7 @@ async:
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'runtime_name'
+  # Sets the base url for base_url:GetIamPolicy and base_url:SetIamPolicy in function `qualifyRuntimeUrl`
   base_url: 'projects/{{project}}/locations/{{location}}/runtimes/{{runtime_name}}'
   example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
   import_format:

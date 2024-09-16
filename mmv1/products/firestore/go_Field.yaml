@@ -60,6 +60,7 @@ custom_code:
   custom_delete: 'templates/terraform/custom_delete/go/firestore_field_delete.go.tmpl'
   custom_import: 'templates/terraform/custom_import/go/firestore_field.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/go/firestore_field.go.tmpl'
+# Sweeper skipped as this resource has customized deletion.
 exclude_sweeper: true
 error_retry_predicates:
 

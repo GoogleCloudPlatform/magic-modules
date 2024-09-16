@@ -230,6 +230,12 @@ properties:
     type: NestedObject
     description: |
       Logging configuration.
+    # If the user doesn't specify a loggingConfig, the server will supply a default value. Instead of
+    # letting that happen and allowing the config and state to get mismatched, just manually send an
+    # empty object if the user doesn't set anything and require the user to explicitly set the field if a
+    # value is desired.
+    # If the loggingConfig passed to the server is empty, an empty object is returned, so the diff in that
+    # case needs to be ignored.
     send_empty_value: true
     allow_empty_object: true
     diff_suppress_func: 'suppressAttachedClustersLoggingConfigDiff'

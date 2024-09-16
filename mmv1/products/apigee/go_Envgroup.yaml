@@ -54,12 +54,15 @@ examples:
     vars:
       envgroup_name: 'my-envgroup'
     exclude_test: true
+      # This is a more verbose version of the above that creates all
+      # the resources needed for the acceptance test.
   - name: 'apigee_environment_group_basic_test'
     primary_resource_id: 'apigee_environment_group'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
+      # Resource creation race
     skip_vcr: true
 parameters:
   - name: 'orgId'

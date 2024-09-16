@@ -64,6 +64,7 @@ examples:
       address_name: 'address-name'
       kms_key_name: 'kms-name'
       network_name: 'network-name'
+      # Test is covered by handwritten test to include an update.
     exclude_test: true
 parameters:
   - name: 'location'

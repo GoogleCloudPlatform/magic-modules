@@ -37,6 +37,7 @@ base_url: 'b/{{bucket}}/managedFolders'
 self_link: 'b/{{bucket}}/managedFolders/{{%name}}'
 has_self_link: true
 delete_url: 'b/{{bucket}}/managedFolders/{{%name}}?allowNonEmpty={{force_destroy}}'
+# iam_policy: handwritten in mmv1/third_party/terraform/services/storage/iam_storage_managed_folder.go
 import_format:
   - '{{bucket}}/managedFolders/{{%name}}'
   - '{{bucket}}/{{%name}}'
@@ -46,6 +47,7 @@ timeouts:
   delete_minutes: 20
 custom_code:
   custom_update: 'templates/terraform/custom_update/go/storage_managed_folder.go.tmpl'
+ # Skipping sweeper since this is a child resource.
 exclude_sweeper: true
 examples:
   - name: 'storage_managed_folder_basic'
@@ -78,6 +80,9 @@ parameters:
       trailing '/'. For example, `example_dir/example_dir2/`.
     required: true
     immutable: true
+    # The API returns values with trailing slashes, even if not
+    # provided. Enforcing trailing slashes prevents diffs and ensures
+    # consistent output.
     validation:
       regex: '/$'
 properties:

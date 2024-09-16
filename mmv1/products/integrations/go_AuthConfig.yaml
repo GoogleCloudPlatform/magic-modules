@@ -43,6 +43,7 @@ examples:
     primary_resource_id: 'basic_example'
     vars:
       auth_config_name: 'test-authconfig'
+ # This is already part of other examples.
     exclude_test: true
   - name: 'integrations_auth_config_advance'
     primary_resource_id: 'advance_example'
@@ -307,6 +308,7 @@ properties:
             type: NestedObject
             description: |
               Token parameters for the auth request.
+ # ParameterMap
             properties:
               - name: 'entries'
                 type: Array
@@ -314,16 +316,19 @@ properties:
                   A list of parameter map entries.
                 item_type:
                   type: NestedObject
+ # ParameterMapEntry
                   properties:
                     - name: 'key'
                       type: NestedObject
                       description: |
                         Key of the map entry.
+ # ParameterMapField
                       properties:
                         - name: 'literalValue'
                           type: NestedObject
                           description: |
                             Passing a literal value
+ # ValueType
                           properties:
                             - name: 'stringValue'
                               type: String
@@ -333,11 +338,13 @@ properties:
                       type: NestedObject
                       description: |
                         Value of the map entry.
+ # ParameterMapField
                       properties:
                         - name: 'literalValue'
                           type: NestedObject
                           description: |
                             Passing a literal value
+ # ValueType
                           properties:
                             - name: 'stringValue'
                               type: String

@@ -58,6 +58,8 @@ examples:
       instance_template_name: 'my-instance-template'
       target_pool_name: 'my-target-pool'
       igm_name: 'my-igm'
+        # Add test_vars_overrides and oics_vars_overrides to fix the failing test,
+        # which is caused by upgradting terraform-plugin-sdk to 2.24.0.
       provider_name: 'google-beta'
       provider_alias: ''
     test_vars_overrides:

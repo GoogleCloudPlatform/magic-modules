@@ -55,11 +55,13 @@ examples:
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-client-tls-policy'
+    # Currently failing
     skip_vcr: true
   - name: 'network_security_client_tls_policy_advanced'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-client-tls-policy'
+    # Currently failing
     skip_vcr: true
 parameters:
   - name: 'name'

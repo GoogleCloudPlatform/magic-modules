@@ -400,6 +400,9 @@ properties:
                 A description of a scaling schedule.
   - name: 'target'
     type: String
+    # TODO(#303): resourceref once RegionIGM exists
+    # resource: 'RegionInstanceGroupManager'
+    # imports: 'selfLink'
     description: |
       URL of the managed instance group that this autoscaler will scale.
     required: true

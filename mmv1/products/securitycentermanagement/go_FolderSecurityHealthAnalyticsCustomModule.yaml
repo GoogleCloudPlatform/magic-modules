@@ -95,6 +95,7 @@ properties:
       128 characters, start with a lowercase letter, and contain alphanumeric
       characters or underscores only.
     immutable: true
+    # API error for invalid display names is just "INVALID_ARGUMENT" with no details
     validation:
       function: 'verify.ValidateRegexp(`^[a-z][\w_]{0,127}$`)'
   - name: 'enablementState'

@@ -41,6 +41,9 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+# 'createSnapshot' is a zonal operation while 'snapshot.delete' is a global
+# operation. we'll leave the object as global operation and use the disk's
+# zonal operation for the create action.
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
@@ -85,6 +88,7 @@ parameters:
     description: 'A reference to the disk used to create this snapshot.'
     required: true
     immutable: true
+    # ignore_read in providers - this is only used in Create
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
     resource: 'Disk'
@@ -130,6 +134,7 @@ parameters:
           The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
           encryption key that protects this resource.
         output: true
+        # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
       - name: 'kmsKeySelfLink'
         type: String
         description: |
@@ -140,6 +145,7 @@ parameters:
         description: |
           The service account used for the encryption request for the given KMS key.
           If absent, the Compute Engine Service Agent service account is used.
+    # ignore_read in providers - this is only used in Create
   - name: 'sourceDiskEncryptionKey'
     type: NestedObject
     description: |
@@ -153,6 +159,7 @@ parameters:
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
+        # The docs list this field but it is never returned.
         sensitive: true
       - name: 'kmsKeyServiceAccount'
         type: String
@@ -169,6 +176,7 @@ properties:
     description: 'The unique identifier for the resource.'
     api_name: id
     output: true
+  # 'status' not useful for object convergence.
   - name: 'diskSizeGb'
     type: Integer
     description: 'Size of the snapshot, specified in GB.'
@@ -198,6 +206,7 @@ properties:
     type: String
     description: 'An optional description of this resource.'
     immutable: true
+  # 'sourceDiskId' not useful for object convergence.
   - name: 'storageBytes'
     type: Integer
     description: |
@@ -205,6 +214,7 @@ properties:
       storage, this number is expected to change with snapshot
       creation/deletion.
     output: true
+  # 'storageBytesStatus' not useful for object convergence.
   - name: 'storageLocations'
     type: Array
     description: |

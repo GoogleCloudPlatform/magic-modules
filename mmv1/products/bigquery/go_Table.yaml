@@ -46,6 +46,8 @@ examples:
       dataset_id: 'dataset_id'
       table_id: 'table_id'
 parameters:
+  # TODO(alexstephen): Remove once we have support for placing
+  # nested object fields in URL
   - name: 'dataset'
     type: String
     description: Name of the dataset
@@ -162,6 +164,7 @@ properties:
                 function (UDF). Providing a inline code resource is
                 equivalent to providing a URI for a file containing the
                 same code.
+            # TODO: Convert into cross-product ResourceRef
             - name: 'resourceUri'
               type: String
               description: |
@@ -326,6 +329,8 @@ properties:
           - 'PARQUET'
           - 'ICEBERG'
           - 'DELTA_LAKE'
+      # TODO: Investigate if this is feasible as a ResourceRef
+      # This is a very complicated ResourceRef (one-to-many, where the many are cross-product).
       - name: 'sourceUris'
         type: Array
         description: |

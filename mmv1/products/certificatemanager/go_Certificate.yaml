@@ -228,6 +228,9 @@ properties:
           Either issuanceConfig or dnsAuthorizations should be specificed, but not both.
 
         immutable: true
+        # when the certificate is created with issuanceConfig in the format "projects/{{project_id}}/locations/global/certificateIssuanceConfigs/{{CICName}}", the
+        # format changes in the response message to "projects/{{project_number}}/locations/global/certificateIssuanceConfigs/{{CICName}}". That causes the tests to fail
+        # that's why "tpgresource.CompareResourceNames" is needed.
         diff_suppress_func: 'tpgresource.CompareResourceNames'
       - name: 'state'
         type: String

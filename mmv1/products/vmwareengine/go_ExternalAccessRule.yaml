@@ -48,6 +48,7 @@ async:
     message: 'message'
   include_project: true
 custom_code:
+# There is a handwritten sweeper that provides a list of locations to sweep
 exclude_sweeper: true
 examples:
   - name: 'vmware_engine_external_access_rule_basic'
@@ -58,6 +59,7 @@ examples:
       network_policy_id: 'sample-np'
     test_env_vars:
       region: 'REGION'
+ # update tests will take care of create and update. The test id dependent on PC creation, which is expensive and requires node reservation.
     exclude_test: true
   - name: 'vmware_engine_external_access_rule_full'
     primary_resource_id: 'vmw-engine-external-access-rule'
@@ -70,6 +72,7 @@ examples:
       external_address_id: 'sample-ea'
     test_env_vars:
       region: 'REGION'
+ # update tests will take care of create and update. The test id dependent on PC creation, which is expensive and requires node reservation.
     exclude_test: true
 parameters:
   - name: 'parent'

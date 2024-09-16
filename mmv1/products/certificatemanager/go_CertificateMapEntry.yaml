@@ -54,6 +54,7 @@ examples:
 parameters:
   - name: 'name'
     type: String
+      # url_param_only: true
     description: |
       A user-defined name of the Certificate Map Entry. Certificate Map Entry
       names must be unique globally and match pattern

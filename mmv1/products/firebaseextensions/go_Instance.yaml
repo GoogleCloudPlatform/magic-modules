@@ -25,6 +25,7 @@ self_link: 'projects/{{project}}/instances/{{instance_id}}'
 create_url: 'projects/{{project}}/instances?instanceId={{instance_id}}'
 update_verb: 'PATCH'
 update_mask: true
+  # TODO: add API field once documentation is ready
 import_format:
   - 'projects/{{project}}/instances/{{instance_id}}'
   - '{{project}}/{{instance_id}}'
@@ -53,6 +54,7 @@ examples:
     primary_resource_id: 'resize_image'
     min_version: 'beta'
     vars:
+      # using a hyphen "-"" because underscore is not a valid instance ID
       instance-id: 'storage-resize-images'
       bucket_id: 'bucket-id'
       service-account-id: 's-a'
@@ -130,6 +132,7 @@ properties:
         type: String
         description: The ref of the Extension from the Registry (e.g. publisher-id/awesome-extension)
         min_version: 'beta'
+        # Installing from an extensionRef is the only way for now
         required: true
         immutable: true
       - name: 'extensionVersion'

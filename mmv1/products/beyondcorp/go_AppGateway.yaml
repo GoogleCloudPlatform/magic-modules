@@ -27,6 +27,7 @@ docs:
 base_url: 'projects/{{project}}/locations/{{region}}/appGateways'
 self_link: 'projects/{{project}}/locations/{{region}}/appGateways/{{name}}'
 create_url: 'projects/{{project}}/locations/{{region}}/appGateways?app_gateway_id={{name}}'
+# This resources is not updatable
 immutable: true
 timeouts:
   insert_minutes: 20

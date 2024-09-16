@@ -357,10 +357,16 @@ properties:
                         type: String
                         description: |-
                           Literal value of the environment variable. Defaults to "" and the maximum allowed length is 32768 characters. Variable references are not supported in Cloud Run.
+                        # exactly_one_of:
+                        #   - template.0.template.0.containers.0.env.0.value
+                        #   - template.0.template.0.containers.0.env.0.valueSource
                       - name: 'valueSource'
                         type: NestedObject
                         description: |-
                           Source for the environment variable's value.
+                        # exactly_one_of:
+                        #   - template.0.template.0.containers.0.env.0.value
+                        #   - template.0.template.0.containers.0.env.0.valueSource
                         properties:
                           - name: 'secretKeyRef'
                             type: NestedObject
@@ -442,6 +448,12 @@ properties:
                   type: NestedObject
                   description: |-
                     Secret represents a secret that should populate this volume. More info: https://kubernetes.io/docs/concepts/storage/volumes#secret
+                  # exactly_one_of:
+                  #   - template.0.template.0.volumes.0.secret
+                  #   - template.0.template.0.volumes.0.cloudSqlInstance
+                  #   - template.0.template.0.volumes.0.emptyDir
+                  #   - template.0.volumes.0.gcs
+                  #   - template.0.volumes.0.nfs
                   properties:
                     - name: 'secret'
                       type: String
@@ -477,6 +489,12 @@ properties:
                   type: NestedObject
                   description: |-
                     For Cloud SQL volumes, contains the specific instances that should be mounted. Visit https://cloud.google.com/sql/docs/mysql/connect-run for more information on how to connect Cloud SQL and Cloud Run.
+                  # exactly_one_of:
+                  #   - template.0.template.0.volumes.0.secret
+                  #   - template.0.template.0.volumes.0.cloudSqlInstance
+                  #   - template.0.template.0.volumes.0.emptyDir
+                  #   - template.0.volumes.0.gcs
+                  #   - template.0.volumes.0.nfs
                   properties:
                     - name: 'instances'
                       type: Array
@@ -489,6 +507,12 @@ properties:
                   description: |-
                     Ephemeral storage used as a shared volume.
                   min_version: 'beta'
+                  # exactly_one_of:
+                  #   - template.0.template.0.volumes.0.secret
+                  #   - template.0.template.0.volumes.0.cloudSqlInstance
+                  #   - template.0.template.0.volumes.0.emptyDir
+                  #   - template.0.volumes.0.gcs
+                  #   - template.0.volumes.0.nfs
                   properties:
                     - name: 'medium'
                       type: Enum
@@ -505,6 +529,12 @@ properties:
                   type: NestedObject
                   description: |-
                     Cloud Storage bucket mounted as a volume using GCSFuse.
+                  # exactly_one_of:
+                  #   - template.0.volumes.0.secret
+                  #   - template.0.volumes.0.cloudSqlInstance
+                  #   - template.0.volumes.0.emptyDir
+                  #   - template.0.volumes.0.gcs
+                  #   - template.0.volumes.0.nfs
                   properties:
                     - name: 'bucket'
                       type: String
@@ -519,6 +549,12 @@ properties:
                   type: NestedObject
                   description: |-
                     NFS share mounted as a volume.
+                  # exactly_one_of:
+                  #   - template.0.volumes.0.secret
+                  #   - template.0.volumes.0.cloudSqlInstance
+                  #   - template.0.volumes.0.emptyDir
+                  #   - template.0.volumes.0.gcs
+                  #   - template.0.volumes.0.nfs
                   properties:
                     - name: 'server'
                       type: String

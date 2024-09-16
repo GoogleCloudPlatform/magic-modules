@@ -115,6 +115,7 @@ properties:
               default_from_api: true
             - name: 'asciiArmoredPgpPublicKey'
               type: String
+              # TODO (mbang): Exactly one of asciiArmoredPgpPublicKey or pkixPublicKey must be set
               description: |
                 ASCII-armored representation of a PGP public key, as the
                 entire output by the command
@@ -127,6 +128,7 @@ properties:
                 be overwritten by the API-calculated ID.
             - name: 'pkixPublicKey'
               type: NestedObject
+              # TODO (mbang): Exactly one of asciiArmoredPgpPublicKey or pkixPublicKey must be set
               description: |
                 A raw PKIX SubjectPublicKeyInfo format public key.
 
