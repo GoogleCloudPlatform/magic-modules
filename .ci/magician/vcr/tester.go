@@ -406,7 +406,6 @@ func (vt *Tester) getLogPath(mode Mode, version provider.Version) (string, error
 // UploadLogsOptions defines options for uploading logs.
 type UploadLogsOptions struct {
 	PRNumber       string
-	Head           string
 	BuildID        string
 	Parallel       bool
 	AfterRecording bool
