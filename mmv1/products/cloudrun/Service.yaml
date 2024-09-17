@@ -55,6 +55,7 @@ examples:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloud_run_service_gpu'
+    min_version: 'beta'
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
       context[\"random_suffix\"\
