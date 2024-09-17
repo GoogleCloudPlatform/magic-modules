@@ -752,6 +752,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'iap'
     description: Settings for enabling Cloud Identity Aware Proxy
+    default_from_api: true
     send_empty_value: true
     properties:
       - !ruby/object:Api::Type::Boolean
