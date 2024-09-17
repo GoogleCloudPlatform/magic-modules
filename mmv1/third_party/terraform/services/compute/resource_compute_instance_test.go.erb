@@ -8479,7 +8479,6 @@ resource "google_compute_instance" "foobar" {
   network_interface {
     network = "default"
   }
-  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
 
 }
 `, context)
