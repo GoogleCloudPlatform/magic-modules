@@ -3,13 +3,13 @@
  * version. We are suppressing this server generated subminor.
  */
 func CloudDataprocBatchRuntimeConfigVersionDiffSuppressFunc(old, new string) bool {
-        if old == "" || strings.HasPrefix(new, old) {
-          return true
-        }
+	if old != "" && strings.HasPrefix(new, old) || (new != "" && strings.HasPrefix(old, new)) {
+		return true
+	}
 
-        return false
+	return old == new
 }
 
 func CloudDataprocBatchRuntimeConfigVersionDiffSuppress(_, old, new string, d *schema.ResourceData) bool {
-        return CloudDataprocBatchRuntimeConfigVersionDiffSuppressFunc(old, new)
+	return CloudDataprocBatchRuntimeConfigVersionDiffSuppressFunc(old, new)
 }

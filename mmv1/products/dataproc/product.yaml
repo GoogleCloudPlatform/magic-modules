@@ -17,8 +17,5 @@ versions:
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://dataproc.googleapis.com/v1/
-  - !ruby/object:Api::Product::Version
-    name: beta
-    base_url: https://dataproc.googleapis.com/v1beta2/
 scopes:
   - https://www.googleapis.com/auth/cloud-identity

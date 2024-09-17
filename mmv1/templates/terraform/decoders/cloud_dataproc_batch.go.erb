@@ -15,7 +15,6 @@
 if obj1, ok := res["runtimeConfig"]; ok {
     if rconfig, ok :=  obj1.(map[string]interface{}); ok {
        if obj2, ok := rconfig["properties"]; ok {
-           rconfig["version"] = d.Get("runtime_config.0.version").(string)
            if properties, ok :=  obj2.(map[string]interface{}); ok {
                // Update effective_properties to include both server set and client set properties
                propertiesCopy := make(map[string]interface{})
