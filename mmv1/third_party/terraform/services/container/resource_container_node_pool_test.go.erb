@@ -3444,7 +3444,8 @@ resource "google_container_node_pool" "np" {
   cluster            = google_container_cluster.cluster.name
   initial_node_count = 1
   node_config {
-    image_type = "COS_CONTAINERD"
+    image_type   = "COS_CONTAINERD"
+	machine_type = "c2d-standard-2" # This is required for hugepage_size_1g https://cloud.google.com/kubernetes-engine/docs/how-to/node-system-config#huge-page-options
     linux_node_config {
       hugepages_config {
 	    hugepage_size_2m = %d
