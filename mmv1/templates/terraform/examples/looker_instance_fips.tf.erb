@@ -3,8 +3,7 @@ resource "google_looker_instance" "<%= ctx[:primary_resource_id] %>" {
   platform_edition   = "LOOKER_CORE_ENTERPRISE_ANNUAL"
   region             = "us-central1"
   public_ip_enabled  = true
-  // FIPS enabled
-  fips_enabled: true
+  fips_enabled = true
   oauth_config {
     client_id = "<%= ctx[:vars]["client_id"] %>"
     client_secret = "<%= ctx[:vars]["client_secret"] %>"
