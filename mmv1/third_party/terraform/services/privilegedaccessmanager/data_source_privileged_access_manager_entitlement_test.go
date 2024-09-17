@@ -60,7 +60,7 @@ resource "google_privileged_access_manager_entitlement" "tfentitlement" {
 	entitlement_id = "tf-test-example-entitlement%{random_suffix}"
 	location = "global"
 	max_request_duration = "43200s"
-	parent = "projects/${data.google_project.project.number}"
+	parent = "projects/${data.google_project.project.project_id}"
 	requester_justification_config { 
 		unstructured{}
 	}
@@ -75,7 +75,7 @@ resource "google_privileged_access_manager_entitlement" "tfentitlement" {
 				role = "roles/storage.admin"
 				condition_expression = "request.time < timestamp(\"2024-04-23T18:30:00.000Z\")"
 			}
-			resource = "//cloudresourcemanager.googleapis.com/projects/${data.google_project.project.number}"
+			resource = "//cloudresourcemanager.googleapis.com/projects/${data.google_project.project.project_id}"
 			resource_type = "cloudresourcemanager.googleapis.com/Project"
 		}
 	}
@@ -96,7 +96,7 @@ resource "google_privileged_access_manager_entitlement" "tfentitlement" {
 	entitlement_id = "tf-test-example-entitlement%{random_suffix}"
 	location = "global"
 	max_request_duration = "43200s"
-	parent = "projects/${data.google_project.project.number}"
+	parent = "projects/${data.google_project.project.project_id}"
 	requester_justification_config { 
 		unstructured{}
 	}
@@ -110,7 +110,7 @@ resource "google_privileged_access_manager_entitlement" "tfentitlement" {
 			role_bindings{
 				role = "roles/storage.admin"
 			}
-			resource = "//cloudresourcemanager.googleapis.com/projects/${data.google_project.project.number}"
+			resource = "//cloudresourcemanager.googleapis.com/projects/${data.google_project.project.project_id}"
 			resource_type = "cloudresourcemanager.googleapis.com/Project"
 		}
 	}
