@@ -101,18 +101,11 @@ func schemaLoggingVariant() *schema.Schema {
 }
 
 func schemaGcfsConfig() *schema.Schema {
-<<<<<<< HEAD
 	return &schema.Schema{
 		Type:        schema.TypeList,
 		Optional:    true,
 		Computed:    true,
 		MaxItems:    1,
-=======
-        return &schema.Schema{
-                Type:     schema.TypeList,
-		Optional: true,
-		MaxItems: 1,
->>>>>>> 8b0ff8b92 (revert change for GcfsConfig)
 		Description: `GCFS configuration for this node.`,
 		Elem:        &schema.Resource{
 			Schema: map[string]*schema.Schema{
