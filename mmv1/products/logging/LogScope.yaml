@@ -1,0 +1,80 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'LogScope'
+base_url: '{{parent}}/locations/{{location}}/logScopes'
+create_url: '{{parent}}/locations/{{location}}/logScopes?logScopeId={{name}}'
+self_link: '{{parent}}/locations/{{location}}/logScopes/{{name}}'
+import_format: ['{{%parent}}/locations/{{location}}/logScopes/{{name}}']
+update_verb: :PATCH
+update_mask: true
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/logging/docs/apis'
+  api: 'https://cloud.google.com/logging/docs/reference/v2/rest/v2/projects.locations.logScopes'
+description: |
+  Describes a group of resources to read log entries from.  
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  skip_import_test: true
+  parent_resource_attribute: 'name'
+  import_format: ['{{%parent}}/locations/{{location}}/logScopes/{{name}}', '{{name}}']
+  allowed_iam_role: 'roles/logging.admin'
+  method_name_separator: ':'
+  fetch_iam_policy_verb: :POST
+  iam_conditions_request_type: :REQUEST_BODY
+parameters:
+  - !ruby/object:Api::Type::String
+    name: parent
+    description: The parent of the resource.
+    url_param_only: true
+    immutable: true
+    default_from_api: true
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+  - !ruby/object:Api::Type::String
+    name: location
+    description:
+      'The location of the resource. The supported locations are: global,
+      us-central1, us-east1, us-west1, asia-east1, europe-west1.'
+    url_param_only: true
+    immutable: true
+    default_from_api: true 
+properties:
+  - !ruby/object:Api::Type::String
+    name: name
+    description:
+      'The resource name of the log scope. For example:
+      \`projects/my-project/locations/global/logScopes/my-log-scope\`'
+    required: true
+    immutable: true
+    ignore_read: true
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
+  - !ruby/object:Api::Type::String
+    name: resource_name
+    description:
+      'Names of one or more parent resources : *  \`projects/[PROJECT_ID]\`
+      May alternatively be one or more views :
+      * \`projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]\`
+      A log scope can include a maximum of 50 projects and a maximum of 100 resources in total.'
+    required: true
+  - !ruby/object:Api::Type::String
+    name: description
+    description: Describes this log scopes.
+  - !ruby/object:Api::Type::String
+    name: createTime
+    description: Output only. The creation timestamp of the log scopes.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: updateTime
+    description: Output only. The last update timestamp of the log scopes.
+    output: true
