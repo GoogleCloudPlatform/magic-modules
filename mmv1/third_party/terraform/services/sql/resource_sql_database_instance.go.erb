@@ -2250,7 +2250,6 @@ func flattenSettings(settings *sqladmin.Settings, d *schema.ResourceData) []map[
 	data["enable_google_ml_integration"] = settings.EnableGoogleMlIntegration
 	data["enable_dataplex_integration"] = settings.EnableDataplexIntegration
 
-
 	if settings.UserLabels != nil {
 		data["user_labels"] = settings.UserLabels
 	}
@@ -2678,25 +2677,6 @@ func isSwitchoverFromOldPrimarySide(d *schema.ResourceDiff) bool {
 	}
 	replicaConfiguration := newReplicaConfiguration.([]interface{})[0].(map[string]interface{})
 	cascadableReplica, cascadableReplicaFieldExists := replicaConfiguration["cascadable_replica"]
-
-	log.Printf("asdf oldReplicaNames=%v, newReplicaNames=%v", oldReplicaNames.([]interface{}), newReplicaNames.([]interface{}))
-	log.Printf("asdf newMasterInstanceName %v", newMasterInstanceName)
-
-	if newMasterInstanceName != nil {
-		log.Printf("asdf 1")
-	}
-	if oldInstanceType.(string) == "CLOUD_SQL_INSTANCE" && newInstanceType.(string) == "READ_REPLICA_INSTANCE" {
-		log.Printf("asdf 2")
-	}
-	if slices.Contains(oldReplicaNames.([]interface{}), newMasterInstanceName) {
-		log.Printf("asdf 3")
-	}
-	if !slices.Contains(newReplicaNames.([]interface{}), newMasterInstanceName) {
-		log.Printf("asdf 4")
-	}
-	if cascadableReplicaFieldExists && cascadableReplica.(bool) {
-		log.Printf("asdf 5")
-	}
 
 	return newMasterInstanceName != nil &&
 	oldInstanceType.(string) == "CLOUD_SQL_INSTANCE" && newInstanceType.(string) == "READ_REPLICA_INSTANCE" &&

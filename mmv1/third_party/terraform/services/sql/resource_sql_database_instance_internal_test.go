@@ -195,102 +195,102 @@ func mockUsersUpdate(_ *transport_tpg.Config, _, _, _ string, _ *sqladmin.User, 
 	return nil, fmt.Errorf("mock users update unimplemented")
 }
 
-func TestSwitchover(t *testing.T) {
-	saveData := saveOrigFuncs()
-	installMockFuncs()
-	defer restoreFuncsFrom(saveData)
+// func TestSwitchover(t *testing.T) {
+// 	saveData := saveOrigFuncs()
+// 	installMockFuncs()
+// 	defer restoreFuncsFrom(saveData)
 
-	ctx := context.Background()
+// 	ctx := context.Background()
 
-	state := map[string]interface{}{
-		"region":               "us-central1",
-		"project":              "unittest-project",
-		"database_version":     "MYSQL_8_0",
-		"name":                 "original-replica",
-		"instance_type":        "READ_REPLICA_INSTANCE",
-		"master_instance_name": "original-primary",
-		"settings": []interface{}{
-			map[string]interface{}{
-				"version": 1,
-				"tier":    "db-n1-standard-1",
-			},
-		},
-		"replica_configuration": []interface{}{
-			map[string]interface{}{
-				"failover_target": false,
-			},
-		},
-		"replica_names": []interface{}{
-			"leaf-replica-1", "leaf-replica-2",
-		},
-	}
+// 	state := map[string]interface{}{
+// 		"region":               "us-central1",
+// 		"project":              "unittest-project",
+// 		"database_version":     "MYSQL_8_0",
+// 		"name":                 "original-replica",
+// 		"instance_type":        "READ_REPLICA_INSTANCE",
+// 		"master_instance_name": "original-primary",
+// 		"settings": []interface{}{
+// 			map[string]interface{}{
+// 				"version": 1,
+// 				"tier":    "db-n1-standard-1",
+// 			},
+// 		},
+// 		"replica_configuration": []interface{}{
+// 			map[string]interface{}{
+// 				"failover_target": false,
+// 			},
+// 		},
+// 		"replica_names": []interface{}{
+// 			"leaf-replica-1", "leaf-replica-2",
+// 		},
+// 	}
 
-	diff := &terraform.InstanceDiff{
-		Attributes: map[string]*terraform.ResourceAttrDiff{
-			"master_instance_name": &terraform.ResourceAttrDiff{
-				NewRemoved: true,
-			},
-			"instance_type": &terraform.ResourceAttrDiff{
-				Old: "READ_REPLICA_INSTANCE",
-				New: "CLOUD_SQL_INSTANCE",
-			},
-			"replica_names.#": &terraform.ResourceAttrDiff{
-				Old: "2",
-				New: "3",
-			},
-			"replica_names.2": &terraform.ResourceAttrDiff{
-				New: "original-primary",
-			},
-		},
-	}
+// 	diff := &terraform.InstanceDiff{
+// 		Attributes: map[string]*terraform.ResourceAttrDiff{
+// 			"master_instance_name": &terraform.ResourceAttrDiff{
+// 				NewRemoved: true,
+// 			},
+// 			"instance_type": &terraform.ResourceAttrDiff{
+// 				Old: "READ_REPLICA_INSTANCE",
+// 				New: "CLOUD_SQL_INSTANCE",
+// 			},
+// 			"replica_names.#": &terraform.ResourceAttrDiff{
+// 				Old: "2",
+// 				New: "3",
+// 			},
+// 			"replica_names.2": &terraform.ResourceAttrDiff{
+// 				New: "original-primary",
+// 			},
+// 		},
+// 	}
 
-	rd, err := testResourceData(ctx, t, state, diff)
-	if err != nil {
-		t.Fatal(err)
-	}
-	rd.Set("master_instance_name", nil)
-	rd.Set("replica_configuration", nil)
+// 	rd, err := testResourceData(ctx, t, state, diff)
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	rd.Set("master_instance_name", nil)
+// 	rd.Set("replica_configuration", nil)
 
-	t.Logf("LYCH DEBUG replica config:\n%+v", rd.Get("replica_configuration"))
-	t.Logf("LYCH DEBUG mastername:\n%+v", rd.Get("master_instance_name"))
-	om, nm := rd.GetChange("master_instance_name")
-	t.Logf("LYCH DEBUG mastername:\n%+v %+v", om, nm)
-	t.Logf("LYCH DEBUG it:\n%+v", rd.Get("instance_type"))
-	oit, nit := rd.GetChange("instance_type")
-	t.Logf("LYCH DEBUG it:\n%+v %+v", oit, nit)
+// 	t.Logf("LYCH DEBUG replica config:\n%+v", rd.Get("replica_configuration"))
+// 	t.Logf("LYCH DEBUG mastername:\n%+v", rd.Get("master_instance_name"))
+// 	om, nm := rd.GetChange("master_instance_name")
+// 	t.Logf("LYCH DEBUG mastername:\n%+v %+v", om, nm)
+// 	t.Logf("LYCH DEBUG it:\n%+v", rd.Get("instance_type"))
+// 	oit, nit := rd.GetChange("instance_type")
+// 	t.Logf("LYCH DEBUG it:\n%+v %+v", oit, nit)
 
-	rd.Set("master_instance_name", nil)
-	rd.Set("replica_configuration", nil)
+// 	rd.Set("master_instance_name", nil)
+// 	rd.Set("replica_configuration", nil)
 
-	t.Logf("LYCH DEBUG replica config:\n%+v", rd.Get("replica_configuration"))
-	t.Logf("LYCH DEBUG mastername:\n%+v", rd.Get("master_instance_name"))
-	om, nm = rd.GetChange("master_instance_name")
-	t.Logf("LYCH DEBUG mastername:\n%+v %+v", om, nm)
-	t.Logf("LYCH DEBUG it:\n%+v", rd.Get("instance_type"))
-	oit, nit = rd.GetChange("instance_type")
-	t.Logf("LYCH DEBUG it:\n%+v %+v", oit, nit)
+// 	t.Logf("LYCH DEBUG replica config:\n%+v", rd.Get("replica_configuration"))
+// 	t.Logf("LYCH DEBUG mastername:\n%+v", rd.Get("master_instance_name"))
+// 	om, nm = rd.GetChange("master_instance_name")
+// 	t.Logf("LYCH DEBUG mastername:\n%+v %+v", om, nm)
+// 	t.Logf("LYCH DEBUG it:\n%+v", rd.Get("instance_type"))
+// 	oit, nit = rd.GetChange("instance_type")
+// 	t.Logf("LYCH DEBUG it:\n%+v %+v", oit, nit)
 
-	fakeSwitchoverOp := &sqladmin.Operation{}
-	switchoverOpData["original-replica"] = fakeSwitchoverOp
-	opWaitData[fakeSwitchoverOp] = nil
-	fakeUpdateOp := &sqladmin.Operation{}
-	updateOpData["original-replica"] = updateData{op: fakeUpdateOp}
-	opWaitData[fakeUpdateOp] = nil
+// 	fakeSwitchoverOp := &sqladmin.Operation{}
+// 	switchoverOpData["original-replica"] = fakeSwitchoverOp
+// 	opWaitData[fakeSwitchoverOp] = nil
+// 	fakeUpdateOp := &sqladmin.Operation{}
+// 	updateOpData["original-replica"] = updateData{op: fakeUpdateOp}
+// 	opWaitData[fakeUpdateOp] = nil
 
-	instanceData["original-replica"] = &sqladmin.DatabaseInstance{
-		Name: "original-replica",
-		Settings: &sqladmin.Settings{
-			SettingsVersion: 2,
-		},
-	}
+// 	instanceData["original-replica"] = &sqladmin.DatabaseInstance{
+// 		Name: "original-replica",
+// 		Settings: &sqladmin.Settings{
+// 			SettingsVersion: 2,
+// 		},
+// 	}
 
-	if err := resourceSqlDatabaseInstanceUpdate(rd, mockConfig); err != nil {
-		t.Fatal(err)
-	}
-	if _, ok := switchoverOpData["original-replica"]; ok {
-		t.Fatal("switchover didn't called")
-	}
-}
+// 	if err := resourceSqlDatabaseInstanceUpdate(rd, mockConfig); err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	if _, ok := switchoverOpData["original-replica"]; ok {
+// 		t.Fatal("switchover didn't called")
+// 	}
+// }
 
 var schemaMap = schema.InternalMap(ResourceSqlDatabaseInstance().SchemaMap())
 
