@@ -101,12 +101,13 @@ func schemaLoggingVariant() *schema.Schema {
 }
 
 func schemaGcfsConfig() *schema.Schema {
-        return &schema.Schema{
-                Type:     schema.TypeList,
-		Optional: true,
-		MaxItems: 1,
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Optional:    true,
+		Computed:    true,
+		MaxItems:    1,
 		Description: `GCFS configuration for this node.`,
-		Elem: &schema.Resource{
+		Elem:        &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"enabled": {
 					Type:        schema.TypeBool,
@@ -115,7 +116,7 @@ func schemaGcfsConfig() *schema.Schema {
 				},
 			},
 		},
-        }
+	}
 }
 
 func schemaNodeConfig() *schema.Schema {
