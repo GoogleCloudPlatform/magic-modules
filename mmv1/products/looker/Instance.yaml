@@ -47,6 +47,13 @@ examples:
       client_id: 'my-client-id'
       client_secret: 'my-client-secret'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'looker_instance_fips'
+    primary_resource_id: 'looker-instance'
+    vars:
+      instance_name: 'my-instance-fips'
+      client_id: 'my-client-id'
+      client_secret: 'my-client-secret'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'looker_instance_enterprise_full'
     primary_resource_id: 'looker-instance'
     vars:
@@ -249,6 +256,10 @@ properties:
         description: |
           Full name and version of the CMEK key currently in use to encrypt Looker data.
   # Encryption Config  Object - End
+  - !ruby/object:Api::Type::Boolean
+    name: fipsEnabled
+    description: |
+      FIPS 140-2 Encryption enablement for Looker (Google Cloud Core).
   - !ruby/object:Api::Type::String
     name: ingressPrivateIp
     description: |
