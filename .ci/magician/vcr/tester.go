@@ -48,13 +48,15 @@ type logKey struct {
 }
 
 type Tester struct {
-	env           map[string]string           // shared environment variables for running tests
-	rnr           ExecRunner                  // for running commands and manipulating files
-	baseDir       string                      // the directory in which this tester was created
-	saKeyPath     string                      // where sa_key.json is relative to baseDir
-	cassettePaths map[provider.Version]string // where cassettes are relative to baseDir by version
-	logPaths      map[logKey]string           // where logs are relative to baseDir by version and mode
-	repoPaths     map[provider.Version]string // relative paths of already cloned repos by version
+	env            map[string]string           // shared environment variables for running tests
+	rnr            ExecRunner                  // for running commands and manipulating files
+	logBucket      string                      // GCS bucket name to store logs
+	cassetteBucket string                      // GCS bucket name to store cassettes
+	baseDir        string                      // the directory in which this tester was created
+	saKeyPath      string                      // where sa_key.json is relative to baseDir
+	cassettePaths  map[provider.Version]string // where cassettes are relative to baseDir by version
+	logPaths       map[logKey]string           // where logs are relative to baseDir by version and mode
+	repoPaths      map[provider.Version]string // relative paths of already cloned repos by version
 }
 
 const accTestParallelism = 32
@@ -67,19 +69,24 @@ var testResultsExpression = regexp.MustCompile(`(?m:^--- (PASS|FAIL|SKIP): (Test
 var testPanicExpression = regexp.MustCompile(`^panic: .*`)
 
 // Create a new tester in the current working directory and write the service account key file.
-func NewTester(env map[string]string, rnr ExecRunner) (*Tester, error) {
-	saKeyPath := "sa_key.json"
-	if err := rnr.WriteFile(saKeyPath, env["SA_KEY"]); err != nil {
-		return nil, err
+func NewTester(env map[string]string, logBucket, cassetteBucket string, rnr ExecRunner) (*Tester, error) {
+	var saKeyPath string
+	if saKeyVal, ok := env["SA_KEY"]; ok {
+		saKeyPath = "sa_key.json"
+		if err := rnr.WriteFile(saKeyPath, saKeyVal); err != nil {
+			return nil, err
+		}
 	}
 	return &Tester{
-		env:           env,
-		rnr:           rnr,
-		baseDir:       rnr.GetCWD(),
-		saKeyPath:     saKeyPath,
-		cassettePaths: make(map[provider.Version]string, provider.NumVersions),
-		logPaths:      make(map[logKey]string, provider.NumVersions*numModes),
-		repoPaths:     make(map[provider.Version]string, provider.NumVersions),
+		env:            env,
+		rnr:            rnr,
+		logBucket:      logBucket,
+		cassetteBucket: cassetteBucket,
+		baseDir:        rnr.GetCWD(),
+		saKeyPath:      saKeyPath,
+		cassettePaths:  make(map[provider.Version]string, provider.NumVersions),
+		logPaths:       make(map[logKey]string, provider.NumVersions*numModes),
+		repoPaths:      make(map[provider.Version]string, provider.NumVersions),
 	}, nil
 }
 
@@ -98,19 +105,19 @@ func (vt *Tester) FetchCassettes(version provider.Version, baseBranch, prNumber 
 	vt.rnr.Mkdir(cassettePath)
 	if baseBranch != "FEATURE-BRANCH-major-release-6.0.0" {
 		// pull main cassettes (major release uses branch specific casssettes as primary ones)
-		bucketPath := fmt.Sprintf("gs://ci-vcr-cassettes/%sfixtures/*", version.BucketPath())
+		bucketPath := fmt.Sprintf("gs://%s/%sfixtures/*", vt.cassetteBucket, version.BucketPath())
 		if err := vt.fetchBucketPath(bucketPath, cassettePath); err != nil {
 			fmt.Println("Error fetching cassettes: ", err)
 		}
 	}
 	if baseBranch != "main" {
-		bucketPath := fmt.Sprintf("gs://ci-vcr-cassettes/%srefs/branches/%s/fixtures/*", version.BucketPath(), baseBranch)
+		bucketPath := fmt.Sprintf("gs://%s/%srefs/branches/%s/fixtures/*", vt.cassetteBucket, version.BucketPath(), baseBranch)
 		if err := vt.fetchBucketPath(bucketPath, cassettePath); err != nil {
 			fmt.Println("Error fetching cassettes: ", err)
 		}
 	}
 	if prNumber != "" {
-		bucketPath := fmt.Sprintf("gs://ci-vcr-cassettes/%srefs/heads/auto-pr-%s/fixtures/*", version.BucketPath(), prNumber)
+		bucketPath := fmt.Sprintf("gs://%s/%srefs/heads/auto-pr-%s/fixtures/*", vt.cassetteBucket, version.BucketPath(), prNumber)
 		if err := vt.fetchBucketPath(bucketPath, cassettePath); err != nil {
 			fmt.Println("Error fetching cassettes: ", err)
 		}
@@ -398,7 +405,6 @@ func (vt *Tester) getLogPath(mode Mode, version provider.Version) (string, error
 
 // UploadLogsOptions defines options for uploading logs.
 type UploadLogsOptions struct {
-	LogBucket      string
 	PRNumber       string
 	BuildID        string
 	Parallel       bool
@@ -409,7 +415,7 @@ type UploadLogsOptions struct {
 
 // UploadLogs uploads logs to Google Cloud Storage.
 func (vt *Tester) UploadLogs(opts UploadLogsOptions) error {
-	bucketPath := fmt.Sprintf("gs://%s/%s/", opts.LogBucket, opts.Version)
+	bucketPath := fmt.Sprintf("gs://%s/%s/", vt.logBucket, opts.Version)
 	if opts.PRNumber != "" {
 		bucketPath += fmt.Sprintf("refs/heads/auto-pr-%s/", opts.PRNumber)
 	}
@@ -472,12 +478,18 @@ func (vt *Tester) UploadLogs(opts UploadLogsOptions) error {
 	return nil
 }
 
-func (vt *Tester) UploadCassettes(logBucket, prNumber string, version provider.Version) error {
+func (vt *Tester) UploadCassettes(prNumber string, version provider.Version) error {
 	cassettePath, ok := vt.cassettePaths[version]
 	if !ok {
 		return fmt.Errorf("no cassettes found for version %s", version)
 	}
-	args := []string{"-m", "-q", "cp", filepath.Join(cassettePath, "*"), fmt.Sprintf("gs://%s/%s/refs/heads/auto-pr-%s/fixtures/", logBucket, version, prNumber)}
+	args := []string{
+		"-m",
+		"-q",
+		"cp",
+		filepath.Join(cassettePath, "*"),
+		fmt.Sprintf("gs://%s/%s/refs/heads/auto-pr-%s/fixtures/", vt.cassetteBucket, version, prNumber),
+	}
 	fmt.Println("Uploading cassettes:\n", "gsutil", strings.Join(args, " "))
 	if _, err := vt.rnr.Run("gsutil", args, nil); err != nil {
 		fmt.Println("Error uploading cassettes: ", err)

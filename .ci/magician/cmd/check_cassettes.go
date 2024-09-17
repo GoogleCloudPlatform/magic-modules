@@ -64,7 +64,7 @@ var checkCassettesCmd = &cobra.Command{
 
 		ctlr := source.NewController(env["GOPATH"], "modular-magician", githubToken, rnr)
 
-		vt, err := vcr.NewTester(env, rnr)
+		vt, err := vcr.NewTester(env, "vcr-check-cassettes", "ci-vcr-cassettes", rnr)
 		if err != nil {
 			return fmt.Errorf("error creating VCR tester: %w", err)
 		}
@@ -111,9 +111,8 @@ func execCheckCassettes(commit string, vt *vcr.Tester, ctlr *source.Controller) 
 		fmt.Println("Error running VCR: ", err)
 	}
 	if err := vt.UploadLogs(vcr.UploadLogsOptions{
-		LogBucket: "vcr-check-cassettes",
-		Mode:      vcr.Replaying,
-		Version:   provider.Beta,
+		Mode:    vcr.Replaying,
+		Version: provider.Beta,
 	}); err != nil {
 		return fmt.Errorf("error uploading logs: %w", err)
 	}

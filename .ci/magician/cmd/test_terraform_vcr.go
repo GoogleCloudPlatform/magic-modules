@@ -120,7 +120,7 @@ var testTerraformVCRCmd = &cobra.Command{
 		}
 		ctlr := source.NewController(env["GOPATH"], "modular-magician", env["GITHUB_TOKEN_DOWNSTREAMS"], rnr)
 
-		vt, err := vcr.NewTester(env, rnr)
+		vt, err := vcr.NewTester(env, "ci-vcr-logs", "ci-vcr-cassettes", rnr)
 		if err != nil {
 			return fmt.Errorf("error creating VCR tester: %w", err)
 		}
@@ -196,11 +196,10 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 	}
 
 	if err := vt.UploadLogs(vcr.UploadLogsOptions{
-		LogBucket: "ci-vcr-logs",
-		PRNumber:  prNumber,
-		BuildID:   buildID,
-		Mode:      vcr.Replaying,
-		Version:   provider.Beta,
+		PRNumber: prNumber,
+		BuildID:  buildID,
+		Mode:     vcr.Replaying,
+		Version:  provider.Beta,
 	}); err != nil {
 		return fmt.Errorf("error uploading replaying logs: %w", err)
 	}
@@ -262,17 +261,16 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 			testState = "success"
 		}
 
-		if err := vt.UploadCassettes("ci-vcr-cassettes", prNumber, provider.Beta); err != nil {
+		if err := vt.UploadCassettes(prNumber, provider.Beta); err != nil {
 			return fmt.Errorf("error uploading cassettes: %w", err)
 		}
 
 		if err := vt.UploadLogs(vcr.UploadLogsOptions{
-			LogBucket: "ci-vcr-logs",
-			PRNumber:  prNumber,
-			BuildID:   buildID,
-			Parallel:  true,
-			Mode:      vcr.Recording,
-			Version:   provider.Beta,
+			PRNumber: prNumber,
+			BuildID:  buildID,
+			Parallel: true,
+			Mode:     vcr.Recording,
+			Version:  provider.Beta,
 		}); err != nil {
 			return fmt.Errorf("error uploading recording logs: %w", err)
 		}
@@ -297,7 +295,6 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 			}
 
 			if err := vt.UploadLogs(vcr.UploadLogsOptions{
-				LogBucket:      "ci-vcr-logs",
 				PRNumber:       prNumber,
 				BuildID:        buildID,
 				Parallel:       true,
