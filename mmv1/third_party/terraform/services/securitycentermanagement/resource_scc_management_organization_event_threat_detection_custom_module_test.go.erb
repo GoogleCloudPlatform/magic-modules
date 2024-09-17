@@ -1,3 +1,5 @@
+<% autogen_exception -%>
+
 package securitycentermanagement_test
 
 import (
@@ -23,10 +25,6 @@ func TestAccSecurityCenterManagement(t *testing.T) {
 	}
 
 	for name, tc := range testCases {
-		// shadow the tc variable into scope so that when
-		// the loop continues, if t.Run hasn't executed tc(t)
-		// yet, we don't have a race condition
-		// see https://github.com/golang/go/wiki/CommonMistakes#using-goroutines-on-loop-iterator-variables
 		tc := tc
 		t.Run(name, func(t *testing.T) {
 			tc(t)
@@ -35,8 +33,8 @@ func TestAccSecurityCenterManagement(t *testing.T) {
 }
 
 func testAccSecurityCenterManagementOrganizationEventThreatDetectionCustomModule(t *testing.T) {
-	// t.Parallel()
-
+	// Comment explaining the beta-only status due to concurrent modification issues (Error 409).
+	// This is being marked as beta-only. See the bug link: <https://b.corp.google.com/issues/358692342>
 	context := map[string]interface{}{
 		"org_id":        envvar.GetTestOrgFromEnv(t),
 		"location":      "global",
@@ -45,7 +43,7 @@ func testAccSecurityCenterManagementOrganizationEventThreatDetectionCustomModule
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t), // Ensure beta factory is used
 		CheckDestroy:             testAccSecurityCenterManagementOrganizationEventThreatDetectionCustomModuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -72,6 +70,7 @@ func testAccSecurityCenterManagementOrganizationEventThreatDetectionCustomModule
 
 func testAccSecurityCenterManagementOrganizationEventThreatDetectionCustomModule__sccOrganizationCustomModuleExample(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+<% unless version == 'ga' -%>
 resource "google_scc_management_organization_event_threat_detection_custom_module" "example" {
 	organization = "%{org_id}"
 	location = "%{location}"
@@ -90,11 +89,15 @@ resource "google_scc_management_organization_event_threat_detection_custom_modul
 			  ]}
             EOF
 }
+<% else -%>
+# GA version doesn't support this field
+<% end -%>
 `, context)
 }
 
 func testAccSecurityCenterManagementOrganizationEventThreatDetectionCustomModule_sccOrganizationCustomModuleUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+<% unless version == 'ga' -%>
 resource "google_scc_management_organization_event_threat_detection_custom_module" "example" {
 	organization = "%{org_id}"
 	location = "%{location}"
@@ -112,6 +115,9 @@ resource "google_scc_management_organization_event_threat_detection_custom_modul
 			  ]}
             EOF
 }
+<% else -%>
+# GA version doesn't support this field
+<% end -%>
 `, context)
 }
 
