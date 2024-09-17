@@ -71,7 +71,8 @@ examples:
     primary_resource_id: 'instance'
     vars:
       instance_name: 'test-instance'
-    skip_test: true
+    # https://github.com/GoogleCloudPlatform/magic-modules/pull/5875#discussion_r844285335
+    exclude_test: true
 parameters:
   - name: 'zone'
     type: String
@@ -251,6 +252,9 @@ properties:
             addresses reserved for this instance.
           immutable: true
           default_from_api: true
+          # When using connectMode=PRIVATE_SERVICE_ACCESS, the returned value
+          # won't match the sent value as the returned value is an IP range
+          # from the provided named range.
           custom_flatten: 'templates/terraform/custom_flatten/go/filestore_instance_networks_reserved_ip_range.go.tmpl'
         - name: 'ipAddresses'
           type: Array

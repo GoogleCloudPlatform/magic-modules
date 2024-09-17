@@ -32,7 +32,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 iam_policy:
-  skip_import_test: true
+  exclude_import_test: true
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'taxonomy'
@@ -87,6 +87,7 @@ properties:
     description: |
       A list of policy types that are activated for this taxonomy. If not set,
       defaults to an empty list.
+ # TOOD: should this be enum or string
     item_type:
       type: Enum
       description: 'Defines policy types where policy tag can be used for'

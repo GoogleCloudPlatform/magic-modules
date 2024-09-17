@@ -46,17 +46,20 @@ examples:
       package_name: 'package.name.playintegrity'
     test_env_vars:
       project_id: 'PROJECT_NAME'
+    # Need the time_sleep resource
     external_providers: ["random", "time"]
   - name: 'firebase_app_check_play_integrity_config_full'
     primary_resource_id: 'default'
     min_version: 'beta'
     vars:
       package_name: 'package.name.playintegrity'
+      # Don't add random suffix
       token_ttl: '7200s'
     test_env_vars:
       project_id: 'PROJECT_NAME'
     test_vars_overrides:
       'token_ttl': '"7200s"'
+    # Need the time_sleep resource
     external_providers: ["random", "time"]
 parameters:
   - name: 'app_id'

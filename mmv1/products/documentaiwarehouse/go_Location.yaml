@@ -23,7 +23,7 @@ references:
 docs:
 id_format: 'projects/{{project_number}}/locations/{{location}}'
 base_url: 'projects/{{project_number}}/locations/{{location}}:initialize'
-skip_read: true
+exclude_read: true
 exclude_delete: true
 immutable: true
 exclude_import: true
@@ -50,7 +50,8 @@ exclude_sweeper: true
 examples:
   - name: 'document_ai_warehouse_location'
     primary_resource_id: 'example'
-    skip_test: true
+    # docs only, testing is done in a DocumentSchema update test
+    exclude_test: true
 parameters:
   - name: 'project_number'
     type: String

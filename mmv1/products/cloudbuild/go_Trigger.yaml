@@ -23,10 +23,12 @@ references:
 docs:
   note: |
     You can retrieve the email of the Cloud Build Service Account used in jobs by using the `google_project_service_identity` resource.
+# For global triggers, the id format is changed to projects/{{project}}/triggers/{{trigger_id}} via code overrides.
 id_format: 'projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/triggers'
 self_link: 'projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}'
 update_verb: 'PATCH'
+  # import by default only works with old-style self links ending in a name
 import_format:
   - 'projects/{{project}}/triggers/{{trigger_id}}'
   - 'projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}'
@@ -57,7 +59,7 @@ examples:
       sa_name: 'cloud-sa'
   - name: 'cloudbuild_trigger_include_build_logs'
     primary_resource_id: 'include-build-logs-trigger'
-    skip_test: true
+    exclude_test: true
   - name: 'cloudbuild_trigger_pubsub_config'
     primary_resource_id: 'pubsub-config-trigger'
     vars:
@@ -74,7 +76,7 @@ examples:
       cloudbuild_trigger_name: 'manual-trigger'
   - name: 'cloudbuild_trigger_manual_github_enterprise'
     primary_resource_id: 'manual-ghe-trigger'
-    skip_test: true
+    exclude_test: true
   - name: 'cloudbuild_trigger_manual_bitbucket_server'
     primary_resource_id: 'manual-bitbucket-trigger'
   - name: 'cloudbuild_trigger_repo'
@@ -101,7 +103,7 @@ examples:
     primary_resource_id: 'ghe-trigger'
     vars:
       cloudbuild_trigger_name: 'ghe-trigger'
-    skip_test: true
+    exclude_test: true
   - name: 'cloudbuild_trigger_allow_failure'
     primary_resource_id: 'allow-failure-trigger'
     vars:

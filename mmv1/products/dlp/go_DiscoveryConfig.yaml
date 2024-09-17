@@ -13,7 +13,9 @@
 
 # Warning: This is a temporary file, and should not be edited directly
 ---
+# API resource name
 name: 'DiscoveryConfig'
+# Resource description for the provider documentation.
 description: |
   Configuration for discovery to scan resources for profile generation. Only one discovery configuration may exist per organization, folder, or project.
 references:
@@ -44,18 +46,18 @@ examples:
     test_env_vars:
       project: 'PROJECT_NAME'
       location: 'REGION'
-    skip_test: true
+    exclude_test: true
   - name: 'dlp_discovery_config_actions'
     primary_resource_id: 'actions'
     test_env_vars:
       project: 'PROJECT_NAME'
-    skip_test: true
+    exclude_test: true
   - name: 'dlp_discovery_config_org_running'
     primary_resource_id: 'org_running'
     test_env_vars:
       project: 'PROJECT_NAME'
       organization: 'ORG_ID'
-    skip_test: true
+    exclude_test: true
   - name: 'dlp_discovery_config_org_folder_paused'
     primary_resource_id: 'org_folder_paused'
     test_env_vars:
@@ -65,22 +67,22 @@ examples:
     primary_resource_id: 'conditions_cadence'
     test_env_vars:
       project: 'PROJECT_NAME'
-    skip_test: true
+    exclude_test: true
   - name: 'dlp_discovery_config_filter_regexes_and_conditions'
     primary_resource_id: 'filter_regexes_and_conditions'
     test_env_vars:
       project: 'PROJECT_NAME'
-    skip_test: true
+    exclude_test: true
   - name: 'dlp_discovery_config_cloud_sql'
     primary_resource_id: 'cloud_sql'
     test_env_vars:
       project: 'PROJECT_NAME'
-    skip_test: true
+    exclude_test: true
   - name: 'dlp_discovery_config_cloud_storage'
     primary_resource_id: 'cloud_storage'
     test_env_vars:
       project: 'PROJECT_NAME'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'parent'
     type: String
@@ -289,9 +291,11 @@ properties:
                 - name: 'otherTables'
                   type: NestedObject
                   description: Catch-all. This should always be the last filter in the list because anything above it will apply first.
+                    # The fields below are necessary to include the "otherTables" filter in the payload
                   send_empty_value: true
                   allow_empty_object: true
                   properties:
+ # Meant to be an empty object with no properties - see here : https://cloud.google.com/sensitive-data-protection/docs/reference/rest/v2/organizations.locations.discoveryConfigs#allotherbigquerytables
                     []
                 - name: 'tableReference'
                   type: NestedObject
@@ -404,9 +408,11 @@ properties:
             - name: 'disabled'
               type: NestedObject
               description: 'Tables that match this filter will not have profiles created.'
+                # The fields below are necessary to include the "disabled" filter in the payload
               send_empty_value: true
               allow_empty_object: true
               properties:
+ # Meant to be an empty object with no properties - see here : https://cloud.google.com/sensitive-data-protection/docs/reference/rest/v2/organizations.locations.discoveryConfigs#disabled
                 []
         - name: 'cloudSqlTarget'
           type: NestedObject
@@ -449,6 +455,7 @@ properties:
                   send_empty_value: true
                   allow_empty_object: true
                   properties:
+ # Meant to be an empty object with no properties. The fields below are necessary to include the "others" filter in the payload
                     []
                 - name: 'databaseResourceReference'
                   type: NestedObject
@@ -552,9 +559,11 @@ properties:
         - name: 'secretsTarget'
           type: NestedObject
           description: Discovery target that looks for credentials and secrets stored in cloud resource metadata and reports them as vulnerabilities to Security Command Center. Only one target of this type is allowed.
+            # The fields below are necessary to include the "secretsDiscoveryTarget" target in the payload
           send_empty_value: true
           allow_empty_object: true
           properties:
+ # Meant to be an empty object with no properties - see here : https://cloud.google.com/sensitive-data-protection/docs/reference/rest/v2/organizations.locations.discoveryConfigs#DiscoveryConfig.SecretsDiscoveryTarget
             []
         - name: 'cloudStorageTarget'
           type: NestedObject
@@ -605,6 +614,7 @@ properties:
                   send_empty_value: true
                   allow_empty_object: true
                   properties:
+ # Meant to be an empty object with no properties. The fields below are necessary to include the "others" filter in the payload
                     []
             - name: 'conditions'
               type: NestedObject

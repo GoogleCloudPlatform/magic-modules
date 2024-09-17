@@ -53,7 +53,7 @@ custom_code:
 examples:
   - name: 'compute_project_cloud_armor_tier_basic'
     primary_resource_id: 'cloud_armor_tier_config'
-    skip_test: true
+    exclude_test: true
   - name: 'compute_project_cloud_armor_tier_project_set'
     primary_resource_id: 'cloud_armor_tier_config'
     vars:
@@ -61,7 +61,7 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
-    skip_test: true
+    exclude_test: true
 parameters:
 properties:
   - name: 'cloudArmorTier'

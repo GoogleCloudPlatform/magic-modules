@@ -24,7 +24,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"reflect"
 	"slices"
 	"strings"
 	"time"
@@ -34,13 +33,6 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 )
-
-const TERRAFORM_PROVIDER_GA = "github.com/hashicorp/terraform-provider-google"
-const TERRAFORM_PROVIDER_BETA = "github.com/hashicorp/terraform-provider-google-beta"
-const TERRAFORM_PROVIDER_PRIVATE = "internal/terraform-next"
-const RESOURCE_DIRECTORY_GA = "google"
-const RESOURCE_DIRECTORY_BETA = "google-beta"
-const RESOURCE_DIRECTORY_PRIVATE = "google-private"
 
 type Terraform struct {
 	ResourceCount int
@@ -58,7 +50,7 @@ type Terraform struct {
 	StartTime time.Time
 }
 
-func NewTerraform(product *api.Product, versionName string, startTime time.Time) *Terraform {
+func NewTerraform(product *api.Product, versionName string, startTime time.Time) Terraform {
 	t := Terraform{
 		ResourceCount:     0,
 		IAMResourceCount:  0,
@@ -70,14 +62,14 @@ func NewTerraform(product *api.Product, versionName string, startTime time.Time)
 
 	t.Product.SetPropertiesBasedOnVersion(&t.Version)
 	for _, r := range t.Product.Objects {
-		r.SetCompiler(t.providerName())
-		r.ImportPath = t.ImportPathFromVersion(versionName)
+		r.SetCompiler(ProviderName(t))
+		r.ImportPath = ImportPathFromVersion(t, versionName)
 	}
 
-	return &t
+	return t
 }
 
-func (t *Terraform) Generate(outputFolder, productPath, resourceToGenerate string, generateCode, generateDocs bool) {
+func (t Terraform) Generate(outputFolder, productPath, resourceToGenerate string, generateCode, generateDocs bool) {
 	if err := os.MkdirAll(outputFolder, os.ModePerm); err != nil {
 		log.Println(fmt.Errorf("error creating output directory %v: %v", outputFolder, err))
 	}
@@ -148,7 +140,7 @@ func (t *Terraform) GenerateResource(object api.Resource, templateData TemplateD
 func (t *Terraform) GenerateResourceTests(object api.Resource, templateData TemplateData, outputFolder string) {
 	eligibleExample := false
 	for _, example := range object.Examples {
-		if !example.SkipTest {
+		if !example.ExcludeTest {
 			if object.ProductMetadata.VersionObjOrClosest(t.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) >= 0 {
 				eligibleExample = true
 				break
@@ -214,7 +206,7 @@ func (t *Terraform) GenerateIamPolicy(object api.Resource, templateData Template
 
 		// Only generate test if testable examples exist.
 		examples := google.Reject(object.Examples, func(e resource.Examples) bool {
-			return e.SkipTest
+			return e.ExcludeTest
 		})
 		if len(examples) != 0 {
 			targetFilePath := path.Join(targetFolder, fmt.Sprintf("iam_%s_generated_test.go", t.FullResourceName(object)))
@@ -273,7 +265,7 @@ func (t *Terraform) FullResourceName(object api.Resource) string {
 }
 
 func (t Terraform) CopyCommonFiles(outputFolder string, generateCode, generateDocs bool) {
-	log.Printf("Copying common files for %s", t.providerName())
+	log.Printf("Copying common files for %s", ProviderName(t))
 
 	files := t.getCommonCopyFiles(t.TargetVersionName, generateCode, generateDocs)
 	t.CopyFileList(outputFolder, files)
@@ -565,8 +557,8 @@ func (t Terraform) replaceImportPath(outputFolder, target string) {
 
 	data := string(sourceByte)
 
-	gaImportPath := t.ImportPathFromVersion("ga")
-	betaImportPath := t.ImportPathFromVersion("beta")
+	gaImportPath := ImportPathFromVersion(t, "ga")
+	betaImportPath := ImportPathFromVersion(t, "beta")
 
 	if strings.Contains(data, betaImportPath) {
 		log.Fatalf("Importing a package from module %s is not allowed in file %s. Please import a package from module %s.", betaImportPath, filepath.Base(target), gaImportPath)
@@ -605,22 +597,6 @@ func (t Terraform) replaceImportPath(outputFolder, target string) {
 	if err != nil {
 		log.Fatalf("Cannot write file %s to replace import path: %s", target, err)
 	}
-}
-
-func (t Terraform) ImportPathFromVersion(v string) string {
-	var tpg, dir string
-	switch v {
-	case "ga":
-		tpg = TERRAFORM_PROVIDER_GA
-		dir = RESOURCE_DIRECTORY_GA
-	case "beta":
-		tpg = TERRAFORM_PROVIDER_BETA
-		dir = RESOURCE_DIRECTORY_BETA
-	default:
-		tpg = TERRAFORM_PROVIDER_PRIVATE
-		dir = RESOURCE_DIRECTORY_PRIVATE
-	}
-	return fmt.Sprintf("%s/%s", tpg, dir)
 }
 
 func (t Terraform) ProviderFromVersion() string {
@@ -706,12 +682,6 @@ func (t *Terraform) generateResourcesForVersion(products []*api.Product) {
 			})
 		}
 	}
-}
-
-// # TODO(nelsonjr): Review all object interfaces and move to private methods
-// # that should not be exposed outside the object hierarchy.
-func (t Terraform) providerName() string {
-	return reflect.TypeOf(t).Name()
 }
 
 // # Adapted from the method used in templating

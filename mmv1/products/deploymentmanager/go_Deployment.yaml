@@ -39,9 +39,11 @@ create_url: 'projects/{{project}}/global/deployments?preview={{preview}}&createP
 update_url: 'projects/{{project}}/global/deployments/{{name}}?preview={{preview}}&createPolicy={{create_policy}}&deletePolicy={{delete_policy}}'
 update_verb: 'PATCH'
 delete_url: 'projects/{{project}}/global/deployments/{{name}}?deletePolicy={{delete_policy}}'
+# A deployment is updatable, but we need to have custom update behavior.
 immutable: true
 import_format:
   - 'projects/{{project}}/deployments/{{name}}'
+ # Very long to support very long deployments
 timeouts:
   insert_minutes: 60
   update_minutes: 60
@@ -61,7 +63,9 @@ async:
     path: 'error/errors'
     message: 'message'
 custom_code:
+  # Custom diff to force new if 'preview' is true
   constants: 'templates/terraform/constants/go/deployment_manager_deployment.go.tmpl'
+  # post-create failure: Delete deployment if an invalid deployment was created
   post_create_failure: 'templates/terraform/post_create_failure/go/delete_on_failure.go.tmpl'
 custom_diff:
   - 'customDiffDeploymentManagerDeployment'
@@ -71,14 +75,16 @@ examples:
     primary_resource_name: 'fmt.Sprintf("tf-test-my-deployment-%s", context["random_suffix"])'
     vars:
       deployment_name: 'my-deployment'
-    skip_test: true
+    exclude_test: true
   - name: 'deployment_manager_deployment_imports'
     primary_resource_id: 'deployment'
     primary_resource_name: 'fmt.Sprintf("tf-test-my-deployment-%s", context["random_suffix"])'
     vars:
       deployment_name: 'my-deployment'
-    skip_test: true
+    exclude_test: true
 parameters:
+  # These properties are query parameters given on create/update/delete.
+  # They should be tracked and updatable.
   - name: 'createPolicy'
     type: Enum
     description: |
@@ -106,6 +112,7 @@ parameters:
     enum_values:
       - 'ABANDON'
       - 'DELETE'
+    # Custom Update
   - name: 'preview'
     type: Boolean
     description: |
@@ -128,6 +135,7 @@ properties:
     description: |
       Unique name for the deployment
     required: true
+    # Custom Update
   - name: 'description'
     type: String
     description: |
@@ -135,6 +143,7 @@ properties:
     update_url: 'projects/{{project}}/global/deployments/{{name}}?preview={{preview}}&createPolicy={{create_policy}}&deletePolicy={{delete_policy}}'
     update_id: '1_non-preview'
     fingerprint_name: 'fingerprint'
+    # Custom Update
   - name: 'labels'
     type: Array
     description: |
@@ -155,6 +164,7 @@ properties:
           type: String
           description: |
             Value of label.
+    # Custom Update
   - name: 'target'
     type: NestedObject
     description: |

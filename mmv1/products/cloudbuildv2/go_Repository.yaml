@@ -41,34 +41,37 @@ custom_code:
 exclude_tgc: true
 legacy_long_form_project: true
 examples:
+# These tests depend on secrets stored in a separate project, so we prefer not
+# to show them in the docs.
   - name: 'cloudbuildv2_repository_ghe'
     primary_resource_id: 'primary'
     vars:
       connection_name: 'connection'
       repository_name: 'repository'
-    skip_docs: true
+    exclude_docs: true
   - name: 'cloudbuildv2_repository_github'
     primary_resource_id: 'primary'
     vars:
       connection_name: 'connection'
       repository_name: 'repository'
-    skip_docs: true
+    exclude_docs: true
   - name: 'cloudbuildv2_repository_gle'
     primary_resource_id: 'primary'
     vars:
       connection_name: 'connection'
       repository_name: 'repository'
-    skip_docs: true
+    exclude_docs: true
   - name: 'cloudbuildv2_repository_ghe_doc'
-    skip_test: true
+    exclude_test: true
   - name: 'cloudbuildv2_repository_github_doc'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'location'
     type: String
     description: The location for the resource
     url_param_only: true
     immutable: true
+ # EXTRACT_FROM_FIELD_IF_EMPTY
     default_from_api: true
   - name: 'parent_connection'
     type: ResourceRef

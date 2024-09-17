@@ -115,6 +115,7 @@ properties:
                   description: |
                     Whether the playback of this message can be interrupted by the end user's speech and the client can then starts the next Dialogflow request.
                   output: true
+            # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
             - name: 'payload'
               type: String
               description: |
@@ -133,6 +134,7 @@ properties:
                 * In the entryFulfillment of a Page if entering the page indicates that the conversation succeeded.
                 * In a webhook response when you determine that you handled the customer issue.
               properties:
+                # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
                 - name: 'metadata'
                   type: String
                   description: |
@@ -169,6 +171,7 @@ properties:
                 * In the entryFulfillment of a Page if entering the page indicates something went extremely wrong in the conversation.
                 * In a webhook response when you determine that the customer issue can only be handled by a human.
               properties:
+                # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
                 - name: 'metadata'
                   type: String
                   description: |
@@ -242,6 +245,7 @@ properties:
         item_type:
           type: NestedObject
           properties:
+            # This object has a recursive schema so we use a string instead of a NestedObject
             - name: 'cases'
               type: String
               description: |
@@ -319,6 +323,7 @@ properties:
                                 description: |
                                   Whether the playback of this message can be interrupted by the end user's speech and the client can then starts the next Dialogflow request.
                                 output: true
+                          # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
                           - name: 'payload'
                             type: String
                             description: |
@@ -337,6 +342,7 @@ properties:
                               * In the entryFulfillment of a Page if entering the page indicates that the conversation succeeded.
                               * In a webhook response when you determine that you handled the customer issue.
                             properties:
+                              # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
                               - name: 'metadata'
                                 type: String
                                 description: |
@@ -373,6 +379,7 @@ properties:
                               * In the entryFulfillment of a Page if entering the page indicates something went extremely wrong in the conversation.
                               * In a webhook response when you determine that the customer issue can only be handled by a human.
                             properties:
+                              # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
                               - name: 'metadata'
                                 type: String
                                 description: |
@@ -446,6 +453,7 @@ properties:
                       item_type:
                         type: NestedObject
                         properties:
+                          # This object has a recursive schema so we use a string instead of a NestedObject
                           - name: 'cases'
                             type: String
                             description: |
@@ -514,6 +522,7 @@ properties:
                                       description: |
                                         Whether the playback of this message can be interrupted by the end user's speech and the client can then starts the next Dialogflow request.
                                       output: true
+                                # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
                                 - name: 'payload'
                                   type: String
                                   description: |
@@ -532,6 +541,7 @@ properties:
                                     * In the entryFulfillment of a Page if entering the page indicates that the conversation succeeded.
                                     * In a webhook response when you determine that you handled the customer issue.
                                   properties:
+                                    # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
                                     - name: 'metadata'
                                       type: String
                                       description: |
@@ -568,6 +578,7 @@ properties:
                                     * In the entryFulfillment of a Page if entering the page indicates something went extremely wrong in the conversation.
                                     * In a webhook response when you determine that the customer issue can only be handled by a human.
                                   properties:
+                                    # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
                                     - name: 'metadata'
                                       type: String
                                       description: |
@@ -641,6 +652,7 @@ properties:
                             item_type:
                               type: NestedObject
                               properties:
+                                # This object has a recursive schema so we use a string instead of a NestedObject
                                 - name: 'cases'
                                   type: String
                                   description: |
@@ -661,6 +673,7 @@ properties:
                         description: |
                           The target flow to transition to.
                           Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
+            # This can be an arbitrary value, so we use a string instead of a NestedObject.
             - name: 'defaultValue'
               type: String
               description: |
@@ -772,6 +785,7 @@ properties:
                         description: |
                           Whether the playback of this message can be interrupted by the end user's speech and the client can then starts the next Dialogflow request.
                         output: true
+                  # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
                   - name: 'payload'
                     type: String
                     description: |
@@ -790,6 +804,7 @@ properties:
                       * In the entryFulfillment of a Page if entering the page indicates that the conversation succeeded.
                       * In a webhook response when you determine that you handled the customer issue.
                     properties:
+                      # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
                       - name: 'metadata'
                         type: String
                         description: |
@@ -826,6 +841,7 @@ properties:
                       * In the entryFulfillment of a Page if entering the page indicates something went extremely wrong in the conversation.
                       * In a webhook response when you determine that the customer issue can only be handled by a human.
                     properties:
+                      # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
                       - name: 'metadata'
                         type: String
                         description: |
@@ -899,6 +915,7 @@ properties:
               item_type:
                 type: NestedObject
                 properties:
+                  # This object has a recursive schema so we use a string instead of a NestedObject
                   - name: 'cases'
                     type: String
                     description: |

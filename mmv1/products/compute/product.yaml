@@ -11,9 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# TODO(nelsonjr): Make all Zone and Region resource ref
-
 --- !ruby/object:Api::Product
+# TODO(nelsonjr): Make all Zone and Region resource ref
 name: Compute
 display_name: Compute Engine
 versions:

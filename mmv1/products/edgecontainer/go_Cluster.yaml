@@ -57,17 +57,21 @@ examples:
     primary_resource_id: 'default'
     vars:
       edgecontainer_cluster_name: 'basic-cluster'
+    # Currently failing
     skip_vcr: true
   - name: 'edgecontainer_cluster_with_maintenance_window'
     primary_resource_id: 'default'
     vars:
       edgecontainer_cluster_name: 'cluster-with-maintenance'
+    # Currently failing
     skip_vcr: true
+  # Skip the local control plane cluster test as we only have limited machine resources.
+  # Instead the local control plane cluster test will be tested in the node pool test.
   - name: 'edgecontainer_local_control_plane_cluster'
     primary_resource_id: 'default'
     vars:
       edgecontainer_cluster_name: 'local-control-plane-cluster'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'location'
     type: String

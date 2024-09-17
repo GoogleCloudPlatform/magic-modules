@@ -65,7 +65,9 @@ examples:
     test_env_vars:
       project_id: 'PROJECT_NAME'
     test_vars_overrides:
+      # Use the default hosting site for the project in tests
       'site_id': 'envvar.GetTestProjectFromEnv()'
+      # Don't add random suffix
       'custom_domain': '"basic.custom.domain.com"'
   - name: 'firebasehosting_customdomain_full'
     primary_resource_id: 'default'
@@ -77,6 +79,7 @@ examples:
     test_env_vars:
       project_id: 'PROJECT_NAME'
     test_vars_overrides:
+      # Don't add random suffix
       'custom_domain': '"full.source.domain.com"'
       'redirect_target': '"destination.domain.com"'
   - name: 'firebasehosting_customdomain_cloud_run'
@@ -84,6 +87,7 @@ examples:
     min_version: 'beta'
     vars:
       site_id: 'site-id'
+      # Don't add random suffix
       custom_domain: 'run.custom.domain.com'
       cloud_run_service_id: 'cloud-run-service-via-hosting'
       deletion_protection: 'true'

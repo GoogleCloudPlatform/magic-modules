@@ -60,7 +60,7 @@ examples:
       dataset_name: 'example-dataset'
       fhir_store_name: 'example-fhir-store'
       pubsub_topic: 'fhir-notifications'
-    skip_docs: true
+    exclude_docs: true
   - name: 'healthcare_fhir_store_notification_configs'
     primary_resource_id: 'default'
     vars:

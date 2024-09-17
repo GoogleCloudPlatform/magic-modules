@@ -46,6 +46,7 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/go/dlp_import.go.tmpl'
 custom_diff:
   - 'storedInfoTypeCustomizeDiff'
+# Skip sweeper due to non-standard URL
 exclude_sweeper: true
 examples:
   - name: 'dlp_stored_info_type_basic'

@@ -72,7 +72,7 @@ examples:
       instance_name: 'my-instance'
       client_id: 'my-client-id'
       client_secret: 'my-client-secret'
-    skip_test: true
+    exclude_test: true
   - name: 'looker_instance_enterprise_full_test'
     primary_resource_id: 'looker-instance'
     vars:
@@ -87,7 +87,7 @@ examples:
       'address_name': 'acctest.BootstrapSharedTestGlobalAddress(t, "looker-vpc-network-3", acctest.AddressWithPrefixLength(8))'
       'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
       'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "looker-vpc-network-3", acctest.ServiceNetworkWithPrefixLength(8))'
-    skip_docs: true
+    exclude_docs: true
   - name: 'looker_instance_custom_domain'
     primary_resource_id: 'looker-instance'
     vars:
@@ -104,6 +104,7 @@ parameters:
     immutable: true
     default_from_api: true
 properties:
+  # Admin Settings Object
   - name: 'adminSettings'
     type: NestedObject
     description: |
@@ -122,6 +123,7 @@ properties:
           existing list of allowed email domains.
         item_type:
           type: String
+  # Admin Settings Object - End
   - name: 'consumerNetwork'
     type: String
     description: |
@@ -134,6 +136,7 @@ properties:
       The time the instance was created in RFC3339 UTC "Zulu" format,
       accurate to nanoseconds.
     output: true
+  # Deny Maintenance Period Object
   - name: 'denyMaintenancePeriod'
     type: NestedObject
     description: |
@@ -226,11 +229,13 @@ properties:
               Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
             validation:
               function: 'validation.IntBetween(0,999999999)'
+  # Deny Maintenance Period Object - End
   - name: 'egressPublicIp'
     type: String
     description: |
       Public Egress IP (IPv4).
     output: true
+  # Encryption Config Object
   - name: 'encryptionConfig'
     type: NestedObject
     description: |
@@ -254,6 +259,7 @@ properties:
         description: |
           Full name and version of the CMEK key currently in use to encrypt Looker data.
         output: true
+  # Encryption Config  Object - End
   - name: 'ingressPrivateIp'
     type: String
     description: |
@@ -274,6 +280,7 @@ properties:
     description: |
       Looker instance URI which can be used to access the Looker Instance UI.
     output: true
+  # Maintenance Window Object
   - name: 'maintenanceWindow'
     type: NestedObject
     description: |
@@ -334,6 +341,7 @@ properties:
               Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
             validation:
               function: 'validation.IntBetween(0,999999999)'
+  # Maintenance Window Object - End
   - name: 'name'
     type: String
     description: |
@@ -343,6 +351,7 @@ properties:
     immutable: true
     validation:
       regex: '^[a-z][a-z0-9-]{0,61}[a-z0-9]$'
+  # Oauth Object
   - name: 'oauthConfig'
     type: NestedObject
     description: |
@@ -359,6 +368,7 @@ properties:
         description: |
           The client secret for the Oauth config.
         required: true
+  # Oauth Object - End
   - name: 'platformEdition'
     type: Enum
     description: |
@@ -397,6 +407,7 @@ properties:
       The time the instance was updated in RFC3339 UTC "Zulu" format,
       accurate to nanoseconds.
     output: true
+  # UserMetadata Object
   - name: 'userMetadata'
     type: NestedObject
     description: |
@@ -423,6 +434,8 @@ properties:
         type: Integer
         description: |
           Number of additional Developer Users to allocate to the Looker Instance.
+  # UserMetadata Object - End
+  # CustomDomain Object
   - name: 'customDomain'
     type: NestedObject
     description: |

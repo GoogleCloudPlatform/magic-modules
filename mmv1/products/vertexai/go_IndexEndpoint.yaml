@@ -49,20 +49,21 @@ examples:
     vars:
       address_name: 'address-name'
       network_name: 'network-name'
-    skip_test: true
+    exclude_test: true
   - name: 'vertex_ai_index_endpoint_test'
     primary_resource_id: 'index_endpoint'
     vars:
       network_name: 'network-name'
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
-    skip_docs: true
+    exclude_docs: true
   - name: 'vertex_ai_index_endpoint_with_psc'
     primary_resource_id: 'index_endpoint'
   - name: 'vertex_ai_index_endpoint_with_false_psc'
     primary_resource_id: 'index_endpoint'
-    skip_import_test: true
-    skip_docs: true
+    # It's not distinguishable if the psc is false or not set, so we need to skip the test.
+    exclude_import_test: true
+    exclude_docs: true
   - name: 'vertex_ai_index_endpoint_with_public_endpoint'
     primary_resource_id: 'index_endpoint'
     test_vars_overrides:
@@ -74,6 +75,7 @@ parameters:
     url_param_only: true
     immutable: true
 properties:
+  # Intentionally deployedIndexes[] is not included because it's an output-only field and another terraform resource will manage a deployed index.
   - name: 'name'
     type: String
     description: The resource name of the Index.
