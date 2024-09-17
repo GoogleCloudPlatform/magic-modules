@@ -2362,7 +2362,6 @@ func TestAccSqlDatabaseInstance_ReplicaPromoteSkippedWithNoMasterInstanceNameAnd
 	})
 }
 
-// asdf
 // Switchover between primary and cascadable replica sunny case
 func TestAccSqlDatabaseInstance_SwitchoverSuccess(t *testing.T) {
 	t.Parallel()
