@@ -423,6 +423,21 @@ resource "google_project_iam_member" "aiplatform_agent_encrypter_decrypter" {
   member  = "serviceAccount:service-${google_project.proj.number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
 }
 
+# TestAccComputeInstance_confidentialHyperDiskBootDisk
+resource "google_project_iam_member" "compute_default_sa_encrypter_decrypter" {
+  project = google_project.proj.project_id
+  role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member  = "serviceAccount:${google_project.proj.number}-compute@developer.gserviceaccount.com"
+}
+
+# TestAccComputeInstance_confidentialHyperDiskBootDisk
+resource "google_project_iam_member" "compute_agent_encrypter_decrypter" {
+  project = google_project.proj.project_id
+  role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member  = "serviceAccount:service-${google_project.proj.number}@compute-system.iam.gserviceaccount.com"
+}
+
+
 data "google_organization" "org2" {
   organization = var.org2_id
 }
