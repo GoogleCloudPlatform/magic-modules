@@ -195,7 +195,13 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		testState = "failure"
 	}
 
-	if err := vt.UploadLogs("ci-vcr-logs", prNumber, buildID, false, false, vcr.Replaying, provider.Beta); err != nil {
+	if err := vt.UploadLogs(vcr.UploadLogsOptions{
+		LogBucket: "ci-vcr-logs",
+		PRNumber:  prNumber,
+		BuildID:   buildID,
+		Mode:      vcr.Replaying,
+		Version:   provider.Beta,
+	}); err != nil {
 		return fmt.Errorf("error uploading replaying logs: %w", err)
 	}
 
@@ -260,7 +266,14 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 			return fmt.Errorf("error uploading cassettes: %w", err)
 		}
 
-		if err := vt.UploadLogs("ci-vcr-logs", prNumber, buildID, true, false, vcr.Recording, provider.Beta); err != nil {
+		if err := vt.UploadLogs(vcr.UploadLogsOptions{
+			LogBucket: "ci-vcr-logs",
+			PRNumber:  prNumber,
+			BuildID:   buildID,
+			Parallel:  true,
+			Mode:      vcr.Recording,
+			Version:   provider.Beta,
+		}); err != nil {
 			return fmt.Errorf("error uploading recording logs: %w", err)
 		}
 
@@ -283,9 +296,18 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 				testState = "failure"
 			}
 
-			if err := vt.UploadLogs("ci-vcr-logs", prNumber, buildID, true, true, vcr.Replaying, provider.Beta); err != nil {
+			if err := vt.UploadLogs(vcr.UploadLogsOptions{
+				LogBucket:      "ci-vcr-logs",
+				PRNumber:       prNumber,
+				BuildID:        buildID,
+				Parallel:       true,
+				AfterRecording: true,
+				Mode:           vcr.Replaying,
+				Version:        provider.Beta,
+			}); err != nil {
 				return fmt.Errorf("error uploading recording logs: %w", err)
 			}
+
 		}
 
 		hasTerminatedTests := (len(recordingResult.PassedTests) + len(recordingResult.FailedTests)) < len(replayingResult.FailedTests)

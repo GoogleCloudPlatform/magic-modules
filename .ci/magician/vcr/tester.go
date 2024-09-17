@@ -396,39 +396,78 @@ func (vt *Tester) getLogPath(mode Mode, version provider.Version) (string, error
 	return logPath, nil
 }
 
-func (vt *Tester) UploadLogs(logBucket, prNumber, buildID string, parallel, afterRecording bool, mode Mode, version provider.Version) error {
-	bucketPath := fmt.Sprintf("gs://%s/%s/", logBucket, version)
-	if prNumber != "" {
-		bucketPath += fmt.Sprintf("refs/heads/auto-pr-%s/", prNumber)
+// UploadLogsOptions defines options for uploading logs.
+type UploadLogsOptions struct {
+	LogBucket      string
+	PRNumber       string
+	BuildID        string
+	Parallel       bool
+	AfterRecording bool
+	Mode           Mode
+	Version        provider.Version
+}
+
+// UploadLogs uploads logs to Google Cloud Storage.
+func (vt *Tester) UploadLogs(opts UploadLogsOptions) error {
+	bucketPath := fmt.Sprintf("gs://%s/%s/", opts.LogBucket, opts.Version)
+	if opts.PRNumber != "" {
+		bucketPath += fmt.Sprintf("refs/heads/auto-pr-%s/", opts.PRNumber)
 	}
-	if buildID != "" {
-		bucketPath += fmt.Sprintf("artifacts/%s/", buildID)
+	if opts.BuildID != "" {
+		bucketPath += fmt.Sprintf("artifacts/%s/", opts.BuildID)
 	}
-	lgky := logKey{mode, version}
+	lgky := logKey{opts.Mode, opts.Version}
 	logPath, ok := vt.logPaths[lgky]
 	if !ok {
-		return fmt.Errorf("no log path found for mode %s and version %s", mode.Lower(), version)
+		return fmt.Errorf("no log path found for mode %s and version %s", opts.Mode.Lower(), opts.Version)
 	}
-	args := []string{"-h", "Content-Type:text/plain", "-q", "cp", "-r", filepath.Join(vt.baseDir, "testlogs", fmt.Sprintf("%s_test.log", mode.Lower())), bucketPath + "build-log/"}
+	args := []string{
+		"-h",
+		"Content-Type:text/plain",
+		"-q",
+		"cp",
+		"-r",
+		filepath.Join(vt.baseDir, "testlogs", fmt.Sprintf("%s_test.log", opts.Mode.Lower())),
+		bucketPath + "build-log/",
+	}
 	fmt.Println("Uploading build log:\n", "gsutil", strings.Join(args, " "))
 	if _, err := vt.rnr.Run("gsutil", args, nil); err != nil {
 		fmt.Println("Error uploading build log: ", err)
 	}
 	var suffix string
-	if afterRecording {
+	if opts.AfterRecording {
 		suffix = "_after_recording"
 	}
-	if parallel {
-		args := []string{"-h", "Content-Type:text/plain", "-m", "-q", "cp", "-r", filepath.Join(vt.baseDir, "testlogs", mode.Lower()+"_build", "*"), fmt.Sprintf("%sbuild-log/%s_build%s/", bucketPath, mode.Lower(), suffix)}
+	if opts.Parallel {
+		args := []string{
+			"-h",
+			"Content-Type:text/plain",
+			"-m",
+			"-q",
+			"cp",
+			"-r",
+			filepath.Join(vt.baseDir, "testlogs", opts.Mode.Lower()+"_build", "*"),
+			fmt.Sprintf("%sbuild-log/%s_build%s/", bucketPath, opts.Mode.Lower(), suffix),
+		}
 		fmt.Println("Uploading build logs:\n", "gsutil", strings.Join(args, " "))
 		if _, err := vt.rnr.Run("gsutil", args, nil); err != nil {
 			fmt.Println("Error uploading build logs: ", err)
 		}
 	}
-	args = []string{"-h", "Content-Type:text/plain", "-m", "-q", "cp", "-r", filepath.Join(logPath, "*"), fmt.Sprintf("%s%s%s/", bucketPath, mode.Lower(), suffix)}
+	args = []string{
+		"-h",
+		"Content-Type:text/plain",
+		"-m",
+		"-q",
+		"cp",
+		"-r",
+		filepath.Join(logPath, "*"),
+		fmt.Sprintf("%s%s%s/", bucketPath, opts.Mode.Lower(), suffix),
+	}
 	fmt.Println("Uploading logs:\n", "gsutil", strings.Join(args, " "))
 	if _, err := vt.rnr.Run("gsutil", args, nil); err != nil {
 		fmt.Println("Error uploading logs: ", err)
+		vt.printLogs(logPath)
 	}
 	return nil
 }
