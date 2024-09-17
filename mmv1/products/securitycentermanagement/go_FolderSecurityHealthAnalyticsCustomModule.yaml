@@ -47,7 +47,7 @@ examples:
     test_vars_overrides:
       'sleep': 'true'
     external_providers: ["random", "time"]
-    skip_test: true
+    exclude_test: true
   - name: 'scc_management_folder_security_health_analytics_custom_module_full'
     primary_resource_id: 'example'
     vars:
@@ -59,7 +59,7 @@ examples:
     test_vars_overrides:
       'sleep': 'true'
     external_providers: ["random", "time"]
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'folder'
     type: String
@@ -95,6 +95,7 @@ properties:
       128 characters, start with a lowercase letter, and contain alphanumeric
       characters or underscores only.
     immutable: true
+    # API error for invalid display names is just "INVALID_ARGUMENT" with no details
     validation:
       function: 'verify.ValidateRegexp(`^[a-z][\w_]{0,127}$`)'
   - name: 'enablementState'

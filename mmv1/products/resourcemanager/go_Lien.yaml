@@ -20,6 +20,11 @@ description:
 docs:
 id_format: '{{name}}'
 base_url: 'liens'
+# This resource has some issues - it returns a list when you query for it.
+# You can't use the same URL for GET and DELETE.  This here is the URL that
+# we use for GET, and the DELETE is in custom code.  If this happens a lot,
+# we might build a more general solution, but this is the only resource I know
+# of where that happens.
 self_link: 'liens?parent={{parent}}'
 immutable: true
 import_format:
@@ -45,7 +50,7 @@ examples:
     primary_resource_id: 'lien'
     vars:
       project_id: 'staging-project'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'parent'
     type: String

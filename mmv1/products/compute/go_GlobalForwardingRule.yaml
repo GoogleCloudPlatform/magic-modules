@@ -22,7 +22,8 @@ description: |
   balancing.
 
   For more information, see https://cloud.google.com/compute/docs/load-balancing/http/
-skip_attribution_label: true
+# Has a separate endpoint for labels
+exclude_attribution_label: true
 docs:
 base_url: 'projects/{{project}}/global/forwardingRules'
 has_self_link: true
@@ -68,7 +69,7 @@ examples:
       - 'port_range'
       - 'target'
       - 'ip_address'
-    skip_test: true
+    exclude_test: true
   - name: 'external_tcp_proxy_lb_mig_backend'
     primary_resource_id: 'default'
     min_version: 'beta'
@@ -214,6 +215,7 @@ properties:
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
+  # This is a multi-resource resource reference (Address, GlobalAddress)
   - name: 'IPAddress'
     type: String
     description: |
@@ -407,6 +409,10 @@ properties:
       For Private Service Connect forwarding rules that forward traffic to Google
       APIs, a network must be provided.
     default_from_api: true
+  # TODO(nelsonjr): When implementing new types enable converting the
+  # manifest input from a single value to a range of form NN-NN. The API
+  # accepts a single value, e.g. '80', but the API stores and returns
+  # '80-80'. This causes idempotency false positive.
     custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
     resource: 'Network'
     imports: 'selfLink'
@@ -434,6 +440,9 @@ properties:
 
       @pattern: \d+(?:-\d+)?
     diff_suppress_func: 'PortRangeDiffSuppress'
+    # This is a multi-resource resource reference (TargetHttp(s)Proxy,
+    # TargetSslProxy, TargetTcpProxy, TargetVpnGateway, TargetPool,
+    # TargetInstance)
   - name: 'subnetwork'
     type: ResourceRef
     description: |
@@ -444,6 +453,9 @@ properties:
       If the network specified is in auto subnet mode, this field is optional.
       However, a subnetwork must be specified if the network is in custom subnet
       mode or when creating external forwarding rule with IPv6.
+    # This is a multi-resource resource reference (TargetHttp(s)Proxy,
+    # TargetSslProxy, TargetTcpProxy, TargetVpnGateway, TargetPool,
+    # TargetInstance)
     default_from_api: true
     custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
     resource: 'Subnetwork'

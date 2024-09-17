@@ -49,7 +49,9 @@ examples:
       secret_name: 'my-secret'
       key_ring_name: 'example-key-ring'
       crypto_key_name: 'example-crypto-key-name'
-    skip_test: true
+    # This example is used in the docs to address this issue
+    # See : https://github.com/hashicorp/terraform-provider-google/issues/17335
+    exclude_test: true
   - name: 'dataform_repository_with_cloudsource_repo'
     primary_resource_id: 'dataform_repository'
     primary_resource_name: 'fmt.Sprintf("tf_test_dataform_repository%s", context["random_suffix"])'
@@ -61,7 +63,10 @@ examples:
       secret_name: 'my-secret'
       key_ring_name: 'example-key-ring'
       crypto_key_name: 'example-crypto-key-name'
-    skip_docs: true
+    # Although the Terraform config can be applied without error, the connection between Dataform and the SourceRepo aren't yet functional
+    # See : https://github.com/hashicorp/terraform-provider-google/issues/17335
+    # See : https://issuetracker.google.com/issues/287850319
+    exclude_docs: true
   - name: 'dataform_repository_with_cloudsource_repo_and_ssh'
     primary_resource_id: 'dataform_repository'
     min_version: 'beta'
@@ -70,7 +75,10 @@ examples:
       dataform_repository_name: 'dataform_repository'
       data: 'secret-data'
       secret_name: 'my-secret'
-    skip_docs: true
+    # Although the Terraform config can be applied without error, the connection between Dataform and the SourceRepo aren't yet functional
+    # See : https://github.com/hashicorp/terraform-provider-google/issues/17335
+    # See : https://issuetracker.google.com/issues/287850319
+    exclude_docs: true
 parameters:
   - name: 'region'
     type: String

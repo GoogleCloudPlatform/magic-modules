@@ -81,6 +81,7 @@ properties:
   - name: 'description'
     type: String
     description: The description of the FeatureGroup.
+    # When API starts returning description, this line should be removed.
     custom_flatten: 'templates/terraform/custom_flatten/go/vertex_ai_feature_group_ignore_description.go.tmpl'
   - name: 'bigQuery'
     type: NestedObject

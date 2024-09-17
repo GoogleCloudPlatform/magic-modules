@@ -44,16 +44,18 @@ async:
     message: 'message'
 custom_code:
 examples:
+  # These tests depend on secrets stored in a separate project, so we prefer not
+  # to show them in the docs.
   - name: 'developer_connect_git_repository_link_github'
     primary_resource_id: 'primary'
     min_version: 'beta'
     vars:
       connection_name: 'my-connection'
       git_repository_link_name: 'my-repository'
-    skip_docs: true
+    exclude_docs: true
   - name: 'developer_connect_git_repository_link_github_doc'
     min_version: 'beta'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'location'
     type: String

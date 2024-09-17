@@ -50,6 +50,7 @@ async:
     message: 'message'
 custom_code:
   custom_import: 'templates/terraform/custom_import/go/apigee_instance_attachment.go.tmpl'
+# Skipping the sweeper due to the non-standard instance_id
 exclude_sweeper: true
 examples:
   - name: 'apigee_instance_attachment_basic'
@@ -57,13 +58,16 @@ examples:
       project_id: 'my-project'
       instance_name: 'my-instance-name'
       environment_name: 'my-environment-name'
-    skip_test: true
+    exclude_test: true
+      # This is a more verbose version of the above that creates all
+      # the resources needed for the acceptance test.
   - name: 'apigee_instance_attachment_basic_test'
     primary_resource_id: 'apigee_instance_attachment'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
-    skip_docs: true
+    exclude_docs: true
+      # Resource creation race
     skip_vcr: true
 parameters:
   - name: 'instanceId'

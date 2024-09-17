@@ -60,6 +60,7 @@ examples:
       instance_name: 'my-instance'
       prober_test_run: ''
     test_vars_overrides:
+      # Mark for testing to avoid service networking connection usage that is not cleaned up
       'prober_test_run': '`options = { prober_test_run = "true" }`'
   - name: 'data_fusion_instance_full'
     primary_resource_id: 'extended_instance'
@@ -69,6 +70,7 @@ examples:
       network_name: 'datafusion-full-network'
       prober_test_run: ''
     test_vars_overrides:
+      # Mark for testing to avoid service networking connection usage that is not cleaned up
       'prober_test_run': '`options = { prober_test_run = "true" }`'
   - name: 'data_fusion_instance_psc'
     primary_resource_id: 'psc_instance'
@@ -79,6 +81,7 @@ examples:
       attachment_name: 'datafusion-psc-attachment'
       prober_test_run: ''
     test_vars_overrides:
+      # Mark for testing to avoid service networking connection usage that is not cleaned up
       'prober_test_run': '`options = { prober_test_run = "true" }`'
   - name: 'data_fusion_instance_cmek'
     primary_resource_id: 'cmek'
@@ -90,6 +93,7 @@ examples:
       instance_name: 'my-instance'
       prober_test_run: ''
     test_vars_overrides:
+      # Mark for testing to avoid service networking connection usage that is not cleaned up
       'prober_test_run': '`options = { prober_test_run = "true" }`'
   - name: 'data_fusion_instance_event'
     primary_resource_id: 'event'
@@ -213,6 +217,7 @@ properties:
     type: String
     description: |
       Service account which will be used to access resources in the customer project.
+ # This field is deprecated and needs to be absent in GA provider.
     min_version: 'beta'
     output: true
     deprecation_message: '`service_account` is deprecated and will be removed in a future major release. Instead, use `tenant_project_id` to extract the tenant project ID.'

@@ -57,7 +57,8 @@ examples:
     test_env_vars:
       org_domain: 'ORG_DOMAIN'
       cust_id: 'CUST_ID'
-    skip_test: true
+    # Has a handwritten test due to CloudIdentityGroup-related tests needing to run synchronously
+    exclude_test: true
 parameters:
   - name: 'initialGroupConfig'
     type: Enum

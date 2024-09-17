@@ -70,7 +70,7 @@ examples:
       metastore_service_name: 'example-service'
       key_name: 'example-key'
       keyring_name: 'example-keyring'
-    skip_docs: true
+    exclude_docs: true
     skip_vcr: true
   - name: 'dataproc_metastore_service_cmek_example'
     primary_resource_id: 'default'
@@ -78,29 +78,29 @@ examples:
       metastore_service_name: 'example-service'
       key_name: 'example-key'
       keyring_name: 'example-keyring'
-    skip_test: true
+    exclude_test: true
   - name: 'dataproc_metastore_service_endpoint'
     primary_resource_id: 'endpoint'
     vars:
       metastore_service_name: 'metastore-endpoint'
-    skip_docs: true
+    exclude_docs: true
   - name: 'dataproc_metastore_service_aux'
     primary_resource_id: 'aux'
     vars:
       metastore_service_name: 'metastore-aux'
-    skip_docs: true
+    exclude_docs: true
   - name: 'dataproc_metastore_service_metadata'
     primary_resource_id: 'metadata'
     vars:
       metastore_service_name: 'metastore-metadata'
-    skip_docs: true
+    exclude_docs: true
   - name: 'dataproc_metastore_service_private_service_connect'
     primary_resource_id: 'default'
     vars:
       metastore_service_name: 'metastore-srv'
       network_name: 'my-network'
       subnet_name: 'my-subnetwork'
-    skip_test: true
+    exclude_test: true
   - name: 'dataproc_metastore_service_private_service_connect_custom_routes'
     primary_resource_id: 'default'
     min_version: 'beta'
@@ -108,12 +108,12 @@ examples:
       metastore_service_name: 'metastore-srv'
       network_name: 'my-network'
       subnet_name: 'my-subnetwork'
-    skip_test: true
+    exclude_test: true
   - name: 'dataproc_metastore_service_telemetry'
     primary_resource_id: 'telemetry'
     vars:
       metastore_service_name: 'ms-telemetry'
-    skip_docs: true
+    exclude_docs: true
   - name: 'dataproc_metastore_service_dpms2'
     primary_resource_id: 'dpms2'
     vars:
@@ -126,7 +126,7 @@ examples:
     primary_resource_id: 'dpms2_scaling_factor_lt1'
     vars:
       metastore_service_name: 'ms-dpms2sflt1'
-    skip_docs: true
+    exclude_docs: true
   - name: 'dataproc_metastore_service_scheduled_backup'
     primary_resource_id: 'backup'
     vars:
@@ -175,6 +175,7 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: 'User-defined labels for the metastore service.'
+  # This is an x-product resource reference.
   - name: 'network'
     type: String
     description: |

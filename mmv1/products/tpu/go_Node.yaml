@@ -58,7 +58,7 @@ examples:
       node_name: 'test-tpu'
       global_address_name: 'my-global-address'
       network_name: 'tpu-node-network'
-    skip_test: true
+    exclude_test: true
   - name: 'tpu_node_full_test'
     primary_resource_id: 'tpu'
     vars:
@@ -66,8 +66,9 @@ examples:
       network_name: 'tpu-node-network'
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
-    skip_docs: true
+    exclude_docs: true
 parameters:
+  # TODO: resourceref?
   - name: 'zone'
     type: String
     description: |

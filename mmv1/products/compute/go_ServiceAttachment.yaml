@@ -231,11 +231,13 @@ properties:
       properties:
         - name: 'projectIdOrNum'
           type: String
+          # TODO (laurensknoll): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
           description: |
             A project that is allowed to connect to this service attachment.
             Only one of project_id_or_num and network_url may be set.
         - name: 'networkUrl'
           type: String
+          # TODO (laurensknoll): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
           description: |
             The network that is allowed to connect to this service attachment.
             Only one of project_id_or_num and network_url may be set.

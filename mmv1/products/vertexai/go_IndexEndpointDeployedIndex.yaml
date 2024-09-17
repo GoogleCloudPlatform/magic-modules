@@ -94,7 +94,7 @@ examples:
       bucket_name: 'bucket-name'
       display_name: 'vertex-deployed-index'
       deployed_index_id: 'deployed_index_id'
-    skip_docs: true
+    exclude_docs: true
   - name: 'vertex_ai_index_endpoint_deployed_index_automatic_resources'
     primary_resource_id: 'automatic_resources'
     vars:
@@ -102,7 +102,7 @@ examples:
       bucket_name: 'bucket-name'
       display_name: 'vertex-deployed-index'
       deployed_index_id: 'deployed_index_id'
-    skip_docs: true
+    exclude_docs: true
 parameters:
   - name: 'indexEndpoint'
     type: ResourceRef
@@ -187,6 +187,7 @@ properties:
     description: |
       A description of resources that the DeployedIndex uses, which to large degree are decided by Vertex AI, and optionally allows only a modest additional configuration.
 
+    # Note: Having the fields within automaticResouces not being marked as immutable was done in order to support the ability to update such fields. See : https://github.com/GoogleCloudPlatform/magic-modules/pull/11039#issuecomment-2209316648
     default_from_api: true
     properties:
       - name: 'minReplicaCount'
@@ -216,11 +217,15 @@ properties:
 
         n1-standard-16 and n1-standard-32 are still available, but we recommend e2-standard-16 and e2-highmem-16 for cost efficiency.
 
+    # Having fields within dedicatedResources not being marked as immutable as well as removing
+    # fields such as acceleratorType, acceleratorCount, tpuTopology was done in order to support the ability to update such fields. This is discussed extensively [here](https://github.com/GoogleCloudPlatform/magic-modules/pull/11039#issuecomment-2209316648).
     properties:
       - name: 'machineSpec'
         type: NestedObject
-        description: The minimum number of replicas this DeployedModel will be always deployed on.
+        description: |
+          The minimum number of replicas this DeployedModel will be always deployed on.
         required: true
+        # This field (and its nested fields) is not updatable via the mutateDeployedIndex method in the API, which is the only update method usable by this 'fine-grained' resource. This is why the field is marked as immutable despite the API docs not marking the field as immutable.
         immutable: true
         properties:
           - name: 'machineType'
@@ -244,12 +249,16 @@ properties:
         default_from_api: true
   - name: 'enableAccessLogging'
     type: Boolean
-    description: If true, private endpoint's access logs are sent to Cloud Logging.
+    description: |
+      If true, private endpoint's access logs are sent to Cloud Logging.
+    # This field is not updatable via the mutateDeployedIndex method in the API, which is the only update method usable by this 'fine-grained' resource. This is why the field is marked as immutable despite the API docs not marking the field as immutable.
     immutable: true
     default_value: false
   - name: 'deployedIndexAuthConfig'
     type: NestedObject
-    description: If set, the authentication is enabled for the private endpoint.
+    description: |
+      If set, the authentication is enabled for the private endpoint.
+    # This field (and its nested fields) is not updatable via the mutateDeployedIndex method in the API, which is the only update method usable by this 'fine-grained' resource. This is why the field is marked as immutable despite the API docs not marking the field as immutable.
     immutable: true
     properties:
       - name: 'authProvider'
@@ -279,6 +288,7 @@ properties:
 
       For more information about subnets and network IP ranges, please see https://cloud.google.com/vpc/docs/subnets#manually_created_subnet_ip_ranges.
     immutable: true
+    # This field is not updatable via the mutateDeployedIndex method in the API, which is the only update method usable by this 'fine-grained' resource. This is why the field is marked as immutable despite the API docs not marking the field as immutable.
     item_type:
       type: String
   - name: 'deploymentGroup'

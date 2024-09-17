@@ -89,7 +89,7 @@ examples:
       topic_name: 'example-topic'
     test_env_vars:
       billing_acct: 'MASTER_BILLING_ACCT'
-    skip_docs: true
+    exclude_docs: true
 parameters:
   - name: 'billingAccount'
     type: String

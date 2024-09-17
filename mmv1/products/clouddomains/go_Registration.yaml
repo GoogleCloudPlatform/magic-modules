@@ -29,6 +29,7 @@ id_format: 'projects/{{project}}/locations/{{location}}/registrations/{{domain_n
 base_url: 'projects/{{project}}/locations/{{location}}/registrations'
 self_link: 'projects/{{project}}/locations/{{location}}/registrations/{{domain_name}}'
 create_url: 'projects/{{project}}/locations/{{location}}/registrations:register'
+# Cannot be deleted
 exclude_delete: true
 immutable: true
 import_format:
@@ -58,7 +59,18 @@ custom_code:
 examples:
   - name: 'clouddomains_registration_full'
     primary_resource_id: 'my_registration'
-    skip_test: true
+    # Must be tested in staging environment with all-time unique domains
+    exclude_test: true
+    # ignore_read_extra:
+    #   - 'contact_settings.0.registrant_contact.0.phone_number'
+    #   - 'contact_settings.0.registrant_contact.0.fax_number'
+    #   - 'contact_settings.0.registrant_contact.0.postal_address'
+    #   - 'contact_settings.0.admin_contact.0.phone_number'
+    #   - 'contact_settings.0.admin_contact.0.fax_number'
+    #   - 'contact_settings.0.admin_contact.0.postal_address'
+    #   - 'contact_settings.0.technical_contact.0.phone_number'
+    #   - 'contact_settings.0.technical_contact.0.fax_number'
+    #   - 'contact_settings.0.technical_contact.0.postal_address'
 parameters:
   - name: 'location'
     type: String
@@ -245,6 +257,7 @@ properties:
           Warning: For new Registrations, the registrant receives an email confirmation that they must complete within 15 days to
           avoid domain suspension.
         required: true
+        # ignore read on phone and fax numbers. Need to use custom flatten because ignore_read doesn't work with nested fields
         custom_flatten: 'templates/terraform/custom_flatten/go/clouddomains_ignore_numbers_registrant.go.tmpl'
         properties:
           - name: 'email'
@@ -317,6 +330,7 @@ properties:
           Warning: For new Registrations, the registrant receives an email confirmation that they must complete within 15 days to
           avoid domain suspension.
         required: true
+        # ignore read on phone and fax numbers. Need to use custom flatten because ignore_read doesn't work with nested fields
         custom_flatten: 'templates/terraform/custom_flatten/go/clouddomains_ignore_numbers_admin.go.tmpl'
         properties:
           - name: 'email'
@@ -389,6 +403,7 @@ properties:
           Warning: For new Registrations, the registrant receives an email confirmation that they must complete within 15 days to
           avoid domain suspension.
         required: true
+        # ignore read on phone and fax numbers. Need to use custom flatten because ignore_read doesn't work with nested fields
         custom_flatten: 'templates/terraform/custom_flatten/go/clouddomains_ignore_numbers_technical.go.tmpl'
         properties:
           - name: 'email'

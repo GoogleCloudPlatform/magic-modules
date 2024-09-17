@@ -54,7 +54,7 @@ examples:
     primary_resource_id: 'store'
     vars:
       name: 'test-store'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'region'
     type: String

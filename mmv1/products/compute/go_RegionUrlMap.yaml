@@ -104,7 +104,7 @@ examples:
     ignore_read_extra:
       - 'target'
       - 'ip_address'
-    skip_test: true
+    exclude_test: true
   - name: 'regional_external_http_load_balancer'
     primary_resource_id: 'default'
     min_version: 'beta'
@@ -122,8 +122,9 @@ examples:
       regional_l7_xlb_map: 'regional-l7-xlb-map'
       l7_xlb_proxy: 'l7-xlb-proxy'
       l7_xlb_forwarding_rule: 'l7-xlb-forwarding-rule'
-    skip_test: true
-    skip_docs: true
+ # Similar to other samples
+    exclude_test: true
+    exclude_docs: true
   - name: 'region_url_map_path_template_match'
     primary_resource_id: 'urlmap'
     vars:
@@ -171,6 +172,7 @@ properties:
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
+  # 'fingerprint' used internally for object consistency.
   - name: 'host_rule'
     type: Array
     description: 'The list of HostRules to use against the URL.'
@@ -238,6 +240,12 @@ properties:
             none of the pathRules defined by this PathMatcher is matched by
             the URL's path portion.
           custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+          # TODO: (mbang) won't work for array path matchers yet, uncomment here once they are supported.
+          # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
+          # TODO: add defaultRouteAction.weightedBackendService here once they are supported.
+          # exactly_one_of:
+          #   - path_matchers.0.default_service
+          #   - path_matchers.0.default_url_redirect
           resource: 'RegionBackendService'
           imports: 'selfLink'
         - name: 'description'
@@ -993,7 +1001,7 @@ properties:
                       - 'PERMANENT_REDIRECT'
                       - 'SEE_OTHER'
                       - 'TEMPORARY_REDIRECT'
-                    skip_docs_values: true
+                    exclude_docs_values: true
                   - name: 'stripQuery'
                     type: Boolean
                     description: |
@@ -1437,7 +1445,7 @@ properties:
                       - 'PERMANENT_REDIRECT'
                       - 'SEE_OTHER'
                       - 'TEMPORARY_REDIRECT'
-                    skip_docs_values: true
+                    exclude_docs_values: true
                   - name: 'stripQuery'
                     type: Boolean
                     description: |
@@ -1448,6 +1456,12 @@ properties:
                     required: true
         - name: 'defaultUrlRedirect'
           type: NestedObject
+          # TODO: (mbang) won't work for array path matchers yet, uncomment here once they are supported.
+          # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
+          # TODO: add defaultRouteAction.weightedBackendService here once they are supported.
+          # exactly_one_of:
+          #   - path_matchers.0.default_service
+          #   - path_matchers.0.default_url_redirect
           description: |
             When none of the specified hostRules match, the request is redirected to a URL specified
             by defaultUrlRedirect. If defaultUrlRedirect is specified, defaultService or
@@ -1504,7 +1518,7 @@ properties:
                 - 'PERMANENT_REDIRECT'
                 - 'SEE_OTHER'
                 - 'TEMPORARY_REDIRECT'
-              skip_docs_values: true
+              exclude_docs_values: true
             - name: 'stripQuery'
               type: Boolean
               description: |
@@ -1606,7 +1620,7 @@ properties:
           - 'PERMANENT_REDIRECT'
           - 'SEE_OTHER'
           - 'TEMPORARY_REDIRECT'
-        skip_docs_values: true
+        exclude_docs_values: true
       - name: 'stripQuery'
         type: Boolean
         description: |

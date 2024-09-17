@@ -44,7 +44,7 @@ examples:
       org_id: 'ORG_ID'
     test_vars_overrides:
       'sleep': 'true'
-    skip_test: true
+    exclude_test: true
   - name: 'scc_organization_custom_module_full'
     primary_resource_id: 'example'
     vars:
@@ -53,7 +53,7 @@ examples:
       org_id: 'ORG_ID'
     test_vars_overrides:
       'sleep': 'true'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'organization'
     type: String
@@ -81,6 +81,7 @@ properties:
       characters or underscores only.
     required: true
     immutable: true
+    # API error for invalid display names is just "INVALID_ARGUMENT" with no details
     validation:
       function: 'verify.ValidateRegexp(`^[a-z][\w_]{0,127}$`)'
   - name: 'enablementState'
