@@ -1194,6 +1194,7 @@ func (r Resource) ExtractIdentifiers(url string) []string {
 
 func (r Resource) IamImportFormats() []string {
 	var importFormat []string
+
 	if r.IamPolicy != nil {
 		importFormat = r.IamPolicy.ImportFormat
 	}
