@@ -1038,7 +1038,7 @@ sole_tenant_config {
 
 <a name="nested_gcfs_config"></a>The `gcfs_config` block supports:
 
-* `enabled` (Optional) - Whether or not the Google Container Filesystem (GCFS) is enabled
+* `enabled` (Required) - Whether or not the Google Container Filesystem (GCFS) is enabled
 
 <a name="nested_gvnic"></a>The `gvnic` block supports:
 
