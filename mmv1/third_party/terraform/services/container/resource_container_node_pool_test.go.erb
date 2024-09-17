@@ -3457,7 +3457,7 @@ resource "google_container_node_pool" "np" {
     ]
   }
 }
-`, cluster, networkName, subnetworkName, np, hugepage)
+`, cluster, networkName, subnetworkName, np, hugepage, hugepage)
 }
 
 func testAccContainerNodePool_withMultiNicNetworkConfig(cluster, np, network string) string {
