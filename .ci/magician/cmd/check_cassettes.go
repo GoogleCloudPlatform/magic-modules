@@ -110,7 +110,11 @@ func execCheckCassettes(commit string, vt *vcr.Tester, ctlr *source.Controller) 
 	if err != nil {
 		fmt.Println("Error running VCR: ", err)
 	}
-	if err := vt.UploadLogs("vcr-check-cassettes", "", "", false, false, vcr.Replaying, provider.Beta); err != nil {
+	if err := vt.UploadLogs(vcr.UploadLogsOptions{
+		LogBucket: "vcr-check-cassettes",
+		Mode:      vcr.Replaying,
+		Version:   provider.Beta,
+	}); err != nil {
 		return fmt.Errorf("error uploading logs: %w", err)
 	}
 	fmt.Println(len(result.FailedTests), " failed tests: ", result.FailedTests)
