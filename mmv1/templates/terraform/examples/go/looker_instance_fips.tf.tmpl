@@ -1,0 +1,11 @@
+resource "google_looker_instance" "{{$.PrimaryResourceId}}" {
+  name               = "{{index $.Vars "instance_name"}}"
+  platform_edition   = "LOOKER_CORE_ENTERPRISE_ANNUAL"
+  region             = "us-central1"
+  public_ip_enabled  = true
+  fips_enabled = true
+  oauth_config {
+    client_id = "{{index $.Vars "client_id"}}"
+    client_secret = "{{index $.Vars "client_secret"}}"
+  }  
+}
