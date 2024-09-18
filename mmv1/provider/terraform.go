@@ -268,9 +268,7 @@ func (t Terraform) CopyCommonFiles(outputFolder string, generateCode, generateDo
 	log.Printf("Copying common files for %s", ProviderName(t))
 
 	files := t.getCommonCopyFiles(t.TargetVersionName, generateCode, generateDocs)
-	if generateCode {
-		t.CopyFileList(outputFolder, files)
-	}
+	t.CopyFileList(outputFolder, files, generateCode)
 }
 
 // To copy a new folder, add the folder to foldersCopiedToRootDir or foldersCopiedToGoogleDir.
@@ -342,7 +340,7 @@ func (t Terraform) getCopyFilesInFolder(folderPath, targetDir string) map[string
 	return m
 }
 
-func (t Terraform) CopyFileList(outputFolder string, files map[string]string) {
+func (t Terraform) CopyFileList(outputFolder string, files map[string]string, generateCode bool) {
 	for target, source := range files {
 		targetFile := filepath.Join(outputFolder, target)
 		targetDir := filepath.Dir(targetFile)
@@ -374,7 +372,7 @@ func (t Terraform) CopyFileList(outputFolder string, files map[string]string) {
 		}
 
 		// Replace import path based on version (beta/alpha)
-		if filepath.Ext(target) == ".go" || filepath.Ext(target) == ".mod" {
+		if filepath.Ext(target) == ".go" || (filepath.Ext(target) == ".mod" && generateCode) {
 			t.replaceImportPath(outputFolder, target)
 		}
 
