@@ -180,6 +180,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_runtimeconfig_config":                      runtimeconfig.DataSourceGoogleRuntimeconfigConfig(),
 	"google_runtimeconfig_variable":                    runtimeconfig.DataSourceGoogleRuntimeconfigVariable(),
 	<% end -%>
+	"google_secret_manager_regional_secret_version":    secretmanagerregional.DataSourceSecretManagerRegionalRegionalSecretVersion(),
 	"google_secret_manager_regional_secret":            secretmanagerregional.DataSourceSecretManagerRegionalRegionalSecret(),
 	"google_secret_manager_secret":                     secretmanager.DataSourceSecretManagerSecret(),
 	"google_secret_manager_secrets":                    secretmanager.DataSourceSecretManagerSecrets(),
