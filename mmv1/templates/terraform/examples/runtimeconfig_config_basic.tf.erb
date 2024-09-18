@@ -1,5 +1,0 @@
-resource "google_runtimeconfig_config" "<%= ctx[:primary_resource_id] %>" {
-  provider    = google-beta
-  name        = "<%= ctx[:vars]['config_name'] %>"
-  description = "Runtime configuration values for my service"
-}

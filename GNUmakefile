@@ -9,9 +9,7 @@ ifeq ($(ENGINE),tpgtools)
   # exist so exclusively build base tpgtools implementation
   mmv1_compile=-p does-not-exist
 else ifneq ($(PRODUCT),)
-  mmv1_compile=-p products/$(PRODUCT)
-else
-  mmv1_compile=-a
+  mmv1_compile=--product $(PRODUCT)
 endif
 
 # tpgtools setup
@@ -26,12 +24,12 @@ else
 endif
 
 ifneq ($(RESOURCE),)
-  mmv1_compile += -t $(RESOURCE)
+  mmv1_compile += --resource $(RESOURCE)
   tpgtools_compile += --resource $(RESOURCE)
 endif
 
 ifneq ($(OVERRIDES),)
-  mmv1_compile += -r $(OVERRIDES)
+  mmv1_compile += --overrides $(OVERRIDES)
   tpgtools_compile += --overrides $(OVERRIDES)/tpgtools/overrides --path $(OVERRIDES)/tpgtools/api
   serialize_compile = --overrides $(OVERRIDES)/tpgtools/overrides --path $(OVERRIDES)/tpgtools/api
 else
@@ -62,12 +60,11 @@ terraform build provider:
 
 mmv1:
 	cd mmv1;\
-		bundle; \
 		if [ "$(VERSION)" = "ga" ]; then \
-			bundle exec compiler.rb -e terraform -o $(OUTPUT_PATH) -v ga --no-docs $(mmv1_compile); \
-			bundle exec compiler.rb -e terraform -o $(OUTPUT_PATH) -v beta --no-code $(mmv1_compile); \
+			go run . --output $(OUTPUT_PATH) --version ga --no-docs; \
+			go run . --output $(OUTPUT_PATH) --version beta --no-code; \
 		else \
-			bundle exec compiler.rb -e terraform -o $(OUTPUT_PATH) -v $(VERSION) $(mmv1_compile); \
+			go run . --output $(OUTPUT_PATH) --version $(VERSION) $(mmv1_compile); \
 		fi
 
 tpgtools:
@@ -82,28 +79,19 @@ clean-provider:
 
 clean-tgc:
 	cd $(OUTPUT_PATH);\
-		rm -rf ./tfplan2cai/testdata/templates/;\
-		rm -rf ./tfplan2cai/testdata/generatedconvert/;\
-		rm -rf ./tfplan2cai/converters/google/provider;\
-		rm -rf ./tfplan2cai/converters/google/resources;\
-		rm -rf ./cai2hcl/*;\
-		find ./tfplan2cai/test/** -type f -exec git rm {} \; > /dev/null;\
+  		# TODO tgc
 
 tgc:
 	cd mmv1;\
-		bundle;\
-		bundle exec compiler -e terraform -f tgc -v beta -o $(OUTPUT_PATH)/tfplan2cai $(mmv1_compile);\
-		bundle exec compiler -e terraform -f tgc_cai2hcl -v beta -o $(OUTPUT_PATH)/cai2hcl $(mmv1_compile);\
+  		# TODO tgc
 
 tf-oics:
 	cd mmv1;\
-		bundle;\
-		bundle exec compiler.rb -e terraform -f oics -o $(OUTPUT_PATH) $(mmv1_compile);\
+  		# TODO OICS
 
 test:
 	cd mmv1; \
-		bundle; \
-		bundle exec rake test
+  		# TODO test
 
 serialize:
 	cd tpgtools;\

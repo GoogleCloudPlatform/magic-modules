@@ -149,8 +149,8 @@ func main() {
 	providerToGenerate = setProvider(*forceProvider, *version, productsForVersion[0], startTime)
 	providerToGenerate.CopyCommonFiles(*outputPath, generateCode, generateDocs)
 
-	log.Printf("Compiling common files for terraform")
 	if generateCode {
+		log.Printf("Compiling common files for terraform")
 		providerToGenerate.CompileCommonFiles(*outputPath, productsForVersion, "")
 
 		// TODO rewrite: product overrides
@@ -162,7 +162,7 @@ func GenerateProduct(productChannel chan string, providerToGenerate provider.Pro
 	defer wg.Done()
 	productName := <-productChannel
 
-	productYamlPath := path.Join(productName, "go_product.yaml")
+	productYamlPath := path.Join(productName, "product.yaml")
 
 	// TODO rewrite: uncomment the error check that if the product.yaml exists for each product
 	// after Go-converted product.yaml files are complete for all products
@@ -189,11 +189,6 @@ func GenerateProduct(productChannel chan string, providerToGenerate provider.Pro
 		}
 		for _, resourceYamlPath := range resourceFiles {
 			if filepath.Base(resourceYamlPath) == "product.yaml" || filepath.Ext(resourceYamlPath) != ".yaml" {
-				continue
-			}
-
-			// Prepend "go_" to the Go yaml files' name to distinguish with the ruby yaml files
-			if filepath.Base(resourceYamlPath) == "go_product.yaml" || !strings.HasPrefix(filepath.Base(resourceYamlPath), "go_") {
 				continue
 			}
 
