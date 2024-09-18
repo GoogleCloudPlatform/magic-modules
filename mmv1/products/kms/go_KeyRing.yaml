@@ -44,7 +44,13 @@ custom_code:
 examples:
   - name: 'kms_key_ring_basic'
     primary_resource_id: 'example-keyring'
-    skip_test: true
+      # Because we can't really delete the resource, we get an error of
+      # dangling resources with the auto generated tests. The hand-written
+      # tests do a better job at testing that the key was removed from state
+      # and that no keyrings are left behind since they create (and destroy)
+      # a project just for this test, but they require org level IAM roles
+      # for the test service account.
+    exclude_test: true
 parameters:
   - name: 'location'
     type: String

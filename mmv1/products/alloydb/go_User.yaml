@@ -34,6 +34,7 @@ timeouts:
 autogen_async: true
 custom_code:
   custom_import: 'templates/terraform/custom_import/go/alloydb_user.go.tmpl'
+# Skipping the sweeper because instances will be deleted during cluster sweeps
 exclude_sweeper: true
 examples:
   - name: 'alloydb_user_builtin'
@@ -47,7 +48,7 @@ examples:
       network_name: 'alloydb-network'
     ignore_read_extra:
       - 'password'
-    skip_test: true
+    exclude_test: true
   - name: 'alloydb_user_builtin_test'
     primary_resource_id: 'user1'
     vars:
@@ -61,7 +62,7 @@ examples:
       'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
     ignore_read_extra:
       - 'password'
-    skip_docs: true
+    exclude_docs: true
   - name: 'alloydb_user_iam'
     primary_resource_id: 'user2'
     vars:
@@ -70,7 +71,7 @@ examples:
       alloydb_cluster_pass: 'cluster_secret'
       alloydb_user_name: 'user2@foo.com'
       network_name: 'alloydb-network'
-    skip_test: true
+    exclude_test: true
   - name: 'alloydb_user_iam_test'
     primary_resource_id: 'user2'
     vars:
@@ -81,7 +82,7 @@ examples:
       network_name: 'alloydb-network'
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
-    skip_docs: true
+    exclude_docs: true
 parameters:
   - name: 'cluster'
     type: ResourceRef

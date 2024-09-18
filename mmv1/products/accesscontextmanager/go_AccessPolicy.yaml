@@ -67,18 +67,19 @@ iam_policy:
     - '{{name}}'
 custom_code:
   post_create: 'templates/terraform/post_create/go/accesspolicy.tmpl'
+# Skipping the sweeper due to the non-standard base_url
 exclude_sweeper: true
 examples:
   - name: 'access_context_manager_access_policy_basic'
     primary_resource_id: 'access-policy'
-    skip_test: true
+    exclude_test: true
   - name: 'access_context_manager_access_policy_scoped'
     primary_resource_id: 'access-policy'
     test_env_vars:
       org_id: 'ORG_ID'
       project: 'PROJECT_NAME'
-    skip_test: true
-    skip_import_test: true
+    exclude_test: true
+    exclude_import_test: true
 parameters:
   - name: 'parent'
     type: String

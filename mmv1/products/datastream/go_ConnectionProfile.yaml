@@ -63,11 +63,13 @@ examples:
     test_vars_overrides:
       'deletion_protection': 'false'
     external_providers: ["random", "time"]
+    # Random provider
     skip_vcr: true
   - name: 'datastream_connection_profile_full'
     primary_resource_id: 'default'
     vars:
       connection_profile_id: 'my-profile'
+      # Workaround for https://github.com/hashicorp/terraform-provider-google/issues/12410
     ignore_read_extra:
       - 'forward_ssh_connectivity.0.password'
   - name: 'datastream_connection_profile_postgres'
@@ -78,7 +80,7 @@ examples:
       deletion_protection: 'true'
     test_vars_overrides:
       'deletion_protection': 'false'
-    skip_test: true
+    exclude_test: true
   - name: 'datastream_connection_profile_sql_server'
     primary_resource_id: 'default'
     vars:
@@ -91,7 +93,7 @@ examples:
       sql_server_root_password: 'root-password'
     test_vars_overrides:
       'deletion_protection': 'false'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'connectionProfileId'
     type: String

@@ -45,7 +45,7 @@ custom_code:
 custom_diff:
   - 'customdiff.ForceNewIfChange("redis_version", isRedisVersionDecreasing)'
   - 'tpgresource.DefaultProviderProject'
-skip_default_cdiff: true
+exclude_default_cdiff: true
 examples:
   - name: 'redis_instance_basic'
     primary_resource_id: 'cache'
@@ -81,7 +81,7 @@ examples:
       prevent_destroy: 'true'
     test_vars_overrides:
       'prevent_destroy': 'false'
-    skip_test: true
+    exclude_test: true
   - name: 'redis_instance_private_service_test'
     primary_resource_id: 'cache'
     vars:
@@ -91,7 +91,7 @@ examples:
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
       'prevent_destroy': 'false'
-    skip_docs: true
+    exclude_docs: true
   - name: 'redis_instance_mrr'
     primary_resource_id: 'cache'
     vars:
@@ -110,8 +110,9 @@ examples:
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedTestNetwork(t, "redis-cmek")'
       'prevent_destroy': 'false'
-    skip_test: true
+    exclude_test: true
 parameters:
+  # TODO: resourceref?
   - name: 'region'
     type: String
     description: |
@@ -425,6 +426,8 @@ properties:
       unique and non-overlapping with existing subnets in an authorized
       network.
     immutable: true
+    # In some situations the returned IP range may not match the sent value
+    # but will be a subset of the range.
     ignore_read: true
     default_from_api: true
   - name: 'tier'

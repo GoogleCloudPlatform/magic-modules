@@ -41,13 +41,13 @@ examples:
     vars:
       attestor_name: 'test-attestor'
       note_name: 'test-attestor-note'
-    skip_test: true
+    exclude_test: true
   - name: 'binary_authorization_policy_global_evaluation'
     primary_resource_id: 'policy'
     vars:
       attestor_name: 'test-attestor'
       note_name: 'test-attestor-note'
-    skip_test: true
+    exclude_test: true
 parameters:
 properties:
   - name: 'description'

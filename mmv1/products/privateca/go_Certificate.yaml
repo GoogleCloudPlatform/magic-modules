@@ -43,10 +43,10 @@ examples:
       certificate_name: 'my-certificate'
     test_env_vars:
       project: 'PROJECT_NAME'
-    skip_docs: true
+    exclude_docs: true
   - name: 'privateca_certificate_generated_key'
     primary_resource_id: 'default'
-    skip_test: true
+    exclude_test: true
   - name: 'privateca_certificate_with_template'
     primary_resource_id: 'default'
     vars:
@@ -120,6 +120,7 @@ properties:
       "notAfterTime" fields inside an X.509 certificate. A duration in seconds with up to nine
       fractional digits, terminated by 's'. Example: "3.5s".
     immutable: true
+ # 10 years
     default_value: "315360000s"
   - name: 'revocationDetails'
     type: NestedObject
@@ -658,6 +659,8 @@ properties:
       Output only. The time at which this CertificateAuthority was updated.
       This is in RFC3339 text format.
     output: true
+    # Note: would be a resourceref, except that CertificateTemplate is in the DCL
+    # and we don't have references across mmv1-dcl bridge yet.
   - name: 'certificateTemplate'
     type: String
     description: |

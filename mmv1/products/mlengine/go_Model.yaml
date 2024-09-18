@@ -26,6 +26,7 @@ references:
 docs:
 base_url: 'projects/{{project}}/models'
 self_link: 'projects/{{project}}/models/{{name}}'
+# This resources is not updatable (outside of versions, which is a version-level method)
 immutable: true
 timeouts:
   insert_minutes: 20
@@ -79,9 +80,9 @@ properties:
       - name: 'name'
         type: String
         description: The name specified for the version when it was created.
+        required: true
   # Even though only one region is supported, keeping this as an array
   # to future-proof it.
-        required: true
   - name: 'regions'
     type: Array
     description: |

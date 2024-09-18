@@ -55,13 +55,16 @@ examples:
   - name: 'apigee_nat_address_basic'
     vars:
       nat_address_name: 'my-nat-address'
-    skip_test: true
+    exclude_test: true
+      # This is a more verbose version of the above that creates all
+      # the resources needed for the acceptance test.
   - name: 'apigee_nat_address_basic_test'
     primary_resource_id: 'apigee_nat_address'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
-    skip_docs: true
+    exclude_docs: true
+      # Resource creation race
     skip_vcr: true
 parameters:
   - name: 'instanceId'

@@ -296,6 +296,10 @@ properties:
     properties:
       - name: 'platform'
         type: String
+        # Docs (https://cloud.google.com/compute/docs/reference/rest/beta/regionNetworkEndpointGroups) say support is offered for:
+        # API Gateway: apigateway.googleapis.com, App Engine: appengine.googleapis.com,
+        # Cloud Functions: cloudfunctions.googleapis.com, Cloud Run: run.googleapis.com
+        # However, only API Gateway is currently supported
         description: |
           The platform of the NEG backend target(s). Possible values:
           API Gateway: apigateway.googleapis.com

@@ -37,6 +37,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 autogen_async: true
+# Sets parameters for handling operations returned by the API.
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
@@ -54,7 +55,7 @@ examples:
     vars:
       posture_id: 'posture_example'
     test_env_vars:
-      org_id: 'ORG_ID'
+      org_id: 'ORG_TARGET'
 parameters:
   - name: 'parent'
     type: String

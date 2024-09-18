@@ -40,12 +40,12 @@ examples:
     primary_resource_id: 'example'
     vars:
       display_name: 'basic_custom_module'
-    skip_test: true
+    exclude_test: true
   - name: 'scc_management_organization_project_security_health_analytics_custom_module_full'
     primary_resource_id: 'example'
     vars:
       display_name: 'full_custom_module'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'location'
     type: String
@@ -74,6 +74,7 @@ properties:
       characters or underscores only.
     required: false
     immutable: true
+    # API error for invalid display names is just "INVALID_ARGUMENT" with no details
     validation:
       function: 'verify.ValidateRegexp(`^[a-z][\w_]{0,127}$`)'
   - name: 'enablementState'

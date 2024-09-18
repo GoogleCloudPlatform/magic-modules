@@ -43,18 +43,21 @@ examples:
       instance_name: 'guest-policy-inst'
       guest_policy_id: 'guest-policy'
     ignore_read_extra:
+ # project number is returned in rest response
       - 'project'
   - name: 'os_config_guest_policies_packages'
     primary_resource_id: 'guest_policies'
     vars:
       guest_policy_id: 'guest-policy'
     ignore_read_extra:
+ # project number is returned in rest response
       - 'project'
   - name: 'os_config_guest_policies_recipes'
     primary_resource_id: 'guest_policies'
     vars:
       guest_policy_id: 'guest-policy'
     ignore_read_extra:
+ # project number is returned in rest response
       - 'project'
 parameters:
   - name: 'guestPolicyId'
@@ -248,8 +251,8 @@ properties:
           type: NestedObject
           description: |
             An Apt Repository.
-          # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
           min_version: 'beta'
+          # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
           properties:
             - name: 'archiveType'
               type: Enum
@@ -290,8 +293,8 @@ properties:
           type: NestedObject
           description: |
             A Yum Repository.
-          # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
           min_version: 'beta'
+          # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
           properties:
             - name: 'id'
               type: String
@@ -322,8 +325,8 @@ properties:
           type: NestedObject
           description: |
             A Zypper Repository.
-          # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
           min_version: 'beta'
+          # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
           properties:
             - name: 'id'
               type: String
@@ -354,8 +357,8 @@ properties:
           type: NestedObject
           description: |
             A Goo Repository.
-          # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
           min_version: 'beta'
+          # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
           properties:
             - name: 'name'
               type: String
@@ -418,8 +421,8 @@ properties:
                 type: NestedObject
                 description: |
                   A generic remote artifact.
-                # TODO (mbang): add `conflicts` when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 min_version: 'beta'
+                # TODO (mbang): add `conflicts` when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 properties:
                   - name: 'uri'
                     type: String
@@ -437,8 +440,8 @@ properties:
                 type: NestedObject
                 description: |
                   A Google Cloud Storage artifact.
-                # TODO (mbang): add `conflicts` when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 min_version: 'beta'
+                # TODO (mbang): add `conflicts` when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 properties:
                   - name: 'bucket'
                     type: String
@@ -471,8 +474,8 @@ properties:
                 type: NestedObject
                 description: |
                   Copies a file onto the instance.
-                # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 min_version: 'beta'
+                # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 properties:
                   - name: 'artifactId'
                     type: String
@@ -508,8 +511,8 @@ properties:
                 type: NestedObject
                 description: |
                   Extracts an archive into the specified directory.
-                # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 min_version: 'beta'
+                # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 properties:
                   - name: 'artifactId'
                     type: String
@@ -540,8 +543,8 @@ properties:
                 type: NestedObject
                 description: |
                   Installs an MSI file.
-                # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 min_version: 'beta'
+                # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 properties:
                   - name: 'artifactId'
                     type: String
@@ -569,8 +572,8 @@ properties:
                 type: NestedObject
                 description: |
                   Installs a deb file via dpkg.
-                # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 min_version: 'beta'
+                # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 properties:
                   - name: 'artifactId'
                     type: String
@@ -582,8 +585,8 @@ properties:
                 type: NestedObject
                 description: |
                   Installs an rpm file via the rpm utility.
-                # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 min_version: 'beta'
+                # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 properties:
                   - name: 'artifactId'
                     type: String
@@ -595,8 +598,8 @@ properties:
                 type: NestedObject
                 description: |
                   Executes an artifact or local file.
-                # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 min_version: 'beta'
+                # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 properties:
                   - name: 'args'
                     type: Array
@@ -615,20 +618,20 @@ properties:
                     type: String
                     description: |
                       The id of the relevant artifact in the recipe.
-                    # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                     min_version: 'beta'
+                    # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                   - name: 'localPath'
                     type: String
                     description: |
                       The absolute path of the file on the local filesystem.
-                    # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                     min_version: 'beta'
+                    # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
               - name: 'scriptRun'
                 type: NestedObject
                 description: |
                   Runs commands in a shell.
-                # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 min_version: 'beta'
+                # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 properties:
                   - name: 'script'
                     type: String
@@ -666,8 +669,8 @@ properties:
                 type: NestedObject
                 description: |
                   Copies a file onto the instance.
-                # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 min_version: 'beta'
+                # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 properties:
                   - name: 'artifactId'
                     type: String
@@ -703,7 +706,6 @@ properties:
                 type: NestedObject
                 description: |
                   Extracts an archive into the specified directory.
-                # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 min_version: 'beta'
                 properties:
                   - name: 'artifactId'
@@ -735,7 +737,6 @@ properties:
                 type: NestedObject
                 description: |
                   Installs an MSI file.
-                # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 min_version: 'beta'
                 properties:
                   - name: 'artifactId'
@@ -764,7 +765,6 @@ properties:
                 type: NestedObject
                 description: |
                   Installs a deb file via dpkg.
-                # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 min_version: 'beta'
                 properties:
                   - name: 'artifactId'
@@ -777,7 +777,6 @@ properties:
                 type: NestedObject
                 description: |
                   Installs an rpm file via the rpm utility.
-                # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 min_version: 'beta'
                 properties:
                   - name: 'artifactId'
@@ -790,7 +789,6 @@ properties:
                 type: NestedObject
                 description: |
                   Executes an artifact or local file.
-                # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 min_version: 'beta'
                 properties:
                   - name: 'args'
@@ -812,19 +810,16 @@ properties:
                     type: String
                     description: |
                       The id of the relevant artifact in the recipe.
-                    # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                     min_version: 'beta'
                   - name: 'localPath'
                     type: String
                     description: |
                       The absolute path of the file on the local filesystem.
-                    # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                     min_version: 'beta'
               - name: 'scriptRun'
                 type: NestedObject
                 description: |
                   Runs commands in a shell.
-                # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 min_version: 'beta'
                 properties:
                   - name: 'script'
