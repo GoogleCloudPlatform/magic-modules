@@ -229,6 +229,7 @@ resource "google_dataproc_cluster" "cluster" {
   cluster_config {
     gce_cluster_config {
       subnetwork = "%s"
+      internal_ip_only = false
     }
       
     # Keep the costs down with smallest config we can get away with
