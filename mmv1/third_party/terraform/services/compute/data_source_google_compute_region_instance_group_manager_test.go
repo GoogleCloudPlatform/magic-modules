@@ -45,7 +45,7 @@ func TestAccDataSourceGoogleComputeRegionInstanceGroupManager(t *testing.T) {
 	})
 }
 
-func testAccDataSourceGoogleComputeRegionInstanceGroupManager_basic1(context map[string]interface{}) string {
+func testAccDataSourceGoogleComputeRegionInstanceGroupManager_usingSelfLink(context map[string]interface{}) string {
 	return acctest.Nprintf(`
     resource "google_compute_health_check" "autohealing" {
         name                = "%{autoHealName}"
@@ -121,7 +121,7 @@ func testAccDataSourceGoogleComputeRegionInstanceGroupManager_basic1(context map
     }`, context)
 }
 
-func testAccDataSourceGoogleComputeRegionInstanceGroupManager_basic2(context map[string]interface{}) string {
+func testAccDataSourceGoogleComputeRegionInstanceGroupManager_usingNameAndRegion(context map[string]interface{}) string {
 	return acctest.Nprintf(`
     resource "google_compute_health_check" "autohealing" {
         name                = "%{autoHealName}"

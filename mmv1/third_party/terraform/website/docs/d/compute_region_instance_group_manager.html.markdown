@@ -13,7 +13,7 @@ and [API](https://cloud.google.com/compute/docs/reference/rest/v1/regionInstance
 ## Example Usage
 
 ```hcl
-data "google_compute_region_instance_group_manager" "igm1" {
+data "google_compute_region_instance_group_manager" "rigm" {
   name = "my-igm"
   region = "us-central1"
 }
@@ -23,11 +23,11 @@ data "google_compute_region_instance_group_manager" "igm1" {
 
 The following arguments are supported:
 
+* `self_link` - (Optional) The self link of the instance group. Either `name` or `self_link` must be provided.
+
 * `name` - (Optional) The name of the instance group. Either `name` or `self_link` must be provided.
 
 * `project` - (Optional) The ID of the project in which the resource belongs. If it is not provided, the provider project is used.
-
-* `self_link` - (Optional) The self link of the instance group. Either `name` or `self_link` must be provided.
 
 * `Region` - (Optional) The region where the managed instance group resides. If not provided, the provider region is used.
 
