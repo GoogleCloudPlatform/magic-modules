@@ -417,7 +417,7 @@ module Provider
 
       generate_product = false
 
-      if @go_yaml_files.length > 0
+      unless @go_yaml_files.empty?
         found = false
         @go_yaml_files.each do |f|
           no_ext = Pathname.new(f).sub_ext ''
@@ -434,11 +434,13 @@ module Provider
       data = build_object_data(pwd, object, output_folder, version_name)
       Dir.chdir output_folder
       Google::LOGGER.info "Generating #{object.name} rewrite yaml"
-      if @go_yaml_files.length > 0
+      # rubocop:disable Style/UnlessElse
+      unless @go_yaml_files.empty?
         generate_newyaml_temp(pwd, data.clone, generate_product)
       else
         generate_newyaml(pwd, data.clone)
       end
+      # rubocop:enable Style/UnlessElse
       Dir.chdir pwd
     end
 
