@@ -15,6 +15,7 @@ resource "google_dataproc_batch" "<%= ctx[:primary_resource_id] %>" {
 
     spark_sql_batch {
       query_file_uri = "gs://dataproc-examples/spark-sql/natality/cigarette_correlations.sql"
+      jar_file_uris    = "file:///usr/lib/spark/examples/jars/spark-examples.jar"
     }
 }
 

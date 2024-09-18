@@ -52,6 +52,24 @@ examples:
     ignore_read_extra:
       - 'runtime_config.0.properties'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'dataproc_batch_spark_full'
+    primary_resource_id: 'example_batch_spark'
+    primary_resource_name:
+      'fmt.Sprintf("tf-test-spark-batch%s", context["random_suffix"])'
+    test_env_vars:
+      project_name: :PROJECT_NAME
+    vars:
+      network_name: 'default'
+      prevent_destroy: 'true'
+      key_name: 'example-key'
+      keyring_name: 'example-keyring'
+      bucket_name: 'dataproc-bucket'
+    test_vars_overrides:
+      network_name: 'acctest.BootstrapNetWithFirewallForDataprocBatches(t, "dataproc-spark-test-network", "dataproc-spark-test-subnetwork")'
+      prevent_destroy: 'false'
+    ignore_read_extra:
+      - 'runtime_config.0.properties'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'dataproc_batch_sparksql'
     primary_resource_id: 'example_batch_sparsql'
     primary_resource_name:

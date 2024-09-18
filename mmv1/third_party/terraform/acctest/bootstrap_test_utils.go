@@ -929,6 +929,12 @@ func BootstrapSubnetWithFirewallForDataprocBatches(t *testing.T, testId string, 
 	return subnetworkName
 }
 
+func BootstrapNetWithFirewallForDataprocBatches(t *testing.T, testId string, subnetName string) string {
+	networkName := BootstrapSharedTestNetwork(t, testId)
+	BootstrapFirewallForDataprocSharedNetwork(t, subnetName, networkName)
+	return networkName
+}
+
 func BootstrapSubnetWithOverrides(t *testing.T, subnetName string, networkName string, subnetOptions map[string]interface{}) string {
 	projectID := envvar.GetTestProjectFromEnv()
 	region := envvar.GetTestRegionFromEnv()

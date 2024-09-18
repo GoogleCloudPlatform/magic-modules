@@ -15,6 +15,11 @@ resource "google_dataproc_batch" "<%= ctx[:primary_resource_id] %>" {
 
     pyspark_batch {
       main_python_file_uri = "gs://dataproc-examples/pyspark/hello-world/hello-world.py"
+      archive_uris     = ["archive-uri-1", "archive-uri-2"]
+      args             = ["10"]
+      file_uris        = ["file-uri-1", "file-uri-2"]
+      jar_file_uris    = "file:///usr/lib/spark/examples/jars/spark-examples.jar"
+      python_file_uris = ["pipelineparam--common_utils_py_fqn"]
     }
 }
 
