@@ -3,6 +3,7 @@ package dataprocmetastore_test
 import (
 	"fmt"
 	"testing"
+	"regexp"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -40,6 +41,36 @@ func TestAccDataprocMetastoreService_updateAndImport(t *testing.T) {
 	})
 }
 
+func TestAccDataprocMetastoreService_updateLocation_deletionProtection(t *testing.T) {
+        t.Parallel()
+
+        name := "tf-test-metastore-" + acctest.RandString(t, 10)
+        tier := [2]string{"DEVELOPER", "ENTERPRISE"}
+
+        acctest.VcrTest(t, resource.TestCase{
+                PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+                ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+                Steps: []resource.TestStep{
+                        {
+                                Config: testAccDataprocMetastoreService_updateLocation_deletionProtection(name, "us-central1", tier[0]),
+                        },
+                        {
+                                ResourceName:            "google_dataproc_metastore_service.my_metastore",
+                                ImportState:             true,
+                                ImportStateVerify:       true,
+                                ImportStateVerifyIgnore: []string{"deletion_protection"},
+                        },
+                        {
+                                Config: testAccDataprocMetastoreService_updateLocation_deletionProtection(name, "us-west2", tier[1]),
+                                ExpectError: regexp.MustCompile("deletion_protection"),
+                        },
+                        {
+                                Config: testAccDataprocMetastoreService_updateAndImport(name, tier[1]),
+                        },
+                },
+        })
+}
+
 func testAccDataprocMetastoreService_updateAndImport(name, tier string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_metastore_service" "my_metastore" {
@@ -53,6 +84,21 @@ resource "google_dataproc_metastore_service" "my_metastore" {
 	}
 }
 `, name, tier)
+}
+
+func testAccDataprocMetastoreService_updateLocation_deletionProtection(name, location, tier string) string {
+        return fmt.Sprintf(`
+resource "google_dataproc_metastore_service" "my_metastore" {
+        service_id = "%s"
+        location   = "%s"
+        tier       = "%s"
+        deletion_protection = false
+
+        hive_metastore_config {
+                version = "2.3.6"
+        }
+}
+`, name, location, tier)
 }
 
 func TestAccDataprocMetastoreService_dataprocMetastoreServiceScheduledBackupExampleUpdate(t *testing.T) {
