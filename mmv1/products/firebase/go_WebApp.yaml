@@ -56,8 +56,10 @@ identity:
   - name
 custom_code:
   custom_delete: 'templates/terraform/custom_delete/go/firebase_app_deletion_policy.tmpl'
-skip_sweeper: true
+# Sweeper skipped as this resource has customized deletion.
+exclude_sweeper: true
 examples:
+ # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14158
   - name: 'firebase_web_app_basic'
     primary_resource_id: 'basic'
     min_version: 'beta'

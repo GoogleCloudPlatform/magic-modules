@@ -43,6 +43,12 @@ examples:
       topic_name: 'example-topic'
       subscription_name: 'example-subscription'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'pubsub_subscription_pull_filter'
+    primary_resource_id: 'example'
+    vars:
+      topic_name: 'example-topic'
+      subscription_name: 'example-subscription'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'pubsub_subscription_dead_letter'
     primary_resource_id: 'example'
     vars:
@@ -357,7 +363,7 @@ properties:
       retain_acked_messages is true, then this also configures the retention
       of acknowledged messages, and thus configures how far back in time a
       subscriptions.seek can be done. Defaults to 7 days. Cannot be more
-      than 7 days (`"604800s"`) or less than 10 minutes (`"600s"`).
+      than 31 days (`"2678400s"`) or less than 10 minutes (`"600s"`).
 
       A duration in seconds with up to nine fractional digits, terminated
       by 's'. Example: `"600.5s"`.
@@ -396,7 +402,7 @@ properties:
     name: 'filter'
     required: false
     validation: !ruby/object:Provider::Terraform::Validation
-      regex: '^.{0,256}$'
+      regex: '^[\s\S]{0,256}$'
     description: |
       The subscription only delivers the messages that match the filter.
       Pub/Sub automatically acknowledges the messages that don't match the filter. You can filter messages

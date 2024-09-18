@@ -68,7 +68,8 @@ async:
     resource_inside_response: false
 custom_code:
   pre_update: 'templates/terraform/pre_update/go/netapp_storagepool.go.tmpl'
-skip_sweeper: true
+# Skipping the sweeper since we need to sweep multiple regions
+exclude_sweeper: true
 examples:
   - name: 'Storage_pool_create'
     primary_resource_id: 'test_pool'
@@ -172,3 +173,9 @@ properties:
       Specifies the replica zone for regional Flex pools. `zone` and `replica_zone` values can be swapped to initiate a
       [zone switch](https://cloud.google.com/netapp/volumes/docs/configure-and-use/storage-pools/edit-or-delete-storage-pool#switch_active_and_replica_zones).
     min_version: 'beta'
+  - name: 'allowAutoTiering'
+    type: Boolean
+    description: |
+      Optional. True if the storage pool supports Auto Tiering enabled volumes. Default is false.
+      Auto-tiering can be enabled after storage pool creation but it can't be disabled once enabled.
+    immutable: true

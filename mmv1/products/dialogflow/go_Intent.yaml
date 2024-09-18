@@ -35,13 +35,14 @@ timeouts:
 custom_code:
   post_create: 'templates/terraform/post_create/go/set_computed_name.tmpl'
   custom_import: 'templates/terraform/custom_import/go/self_link_as_name_set_project.go.tmpl'
-skip_sweeper: true
+# Skip sweeper gen since this is a child resource.
+exclude_sweeper: true
 examples:
   - name: 'dialogflow_intent_basic'
     primary_resource_id: 'basic_intent'
     vars:
       intent_name: 'basic-intent'
-    skip_test: true
+    exclude_test: true
   - name: 'dialogflow_intent_full'
     primary_resource_id: 'full_intent'
     vars:

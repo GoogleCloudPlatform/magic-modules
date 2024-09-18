@@ -36,7 +36,7 @@ timeouts:
 autogen_async: true
 custom_code:
   custom_import: 'templates/terraform/custom_import/go/apigee_target_server.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'apigee_target_server_test_basic'
     primary_resource_id: 'apigee_target_server'
@@ -47,13 +47,13 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
-    skip_test: true
+    exclude_test: true
   - name: 'apigee_target_server_test'
     primary_resource_id: 'apigee_target_server'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
-    skip_docs: true
+    exclude_docs: true
 parameters:
   - name: 'envId'
     type: String

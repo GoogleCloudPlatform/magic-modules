@@ -34,14 +34,14 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 iam_policy:
-  skip_import_test: true
+  exclude_import_test: true
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'name'
   example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
 custom_code:
   custom_import: 'templates/terraform/custom_import/go/service_directory_service.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'service_directory_service_basic'
     primary_resource_id: 'example'

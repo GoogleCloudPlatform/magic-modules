@@ -59,7 +59,7 @@
 	StateFunc: {{ .StateFunc }},
 {{ end -}}
   Description: `{{ replace .GetDescription "`" "'" -1 -}}
-{{- if and (eq .Type "Array") (eq .ItemType.Type "Enum") (not .Output) (not .ItemType.SkipDocsValues) -}}
+{{- if and (eq .Type "Array") (eq .ItemType.Type "Enum") (not .Output) (not .ItemType.ExcludeDocsValues) -}}
   {{- if .ItemType.DefaultValue -}}
 Default value: {{ .ItemType.DefaultValue -}}
   {{- end -}}

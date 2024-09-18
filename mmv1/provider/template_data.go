@@ -168,6 +168,15 @@ func (td *TemplateData) GenerateSweeperFile(filePath string, resource api.Resour
 	td.GenerateFile(filePath, templatePath, resource, false, templates...)
 }
 
+func (td *TemplateData) GenerateTGCResourceFile(filePath string, resource api.Resource) {
+	templatePath := "templates/tgc/resource_converter.go.tmpl"
+	templates := []string{
+		templatePath,
+		"templates/terraform/expand_property_method.go.tmpl",
+	}
+	td.GenerateFile(filePath, templatePath, resource, true, templates...)
+}
+
 func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, goFormat bool, templates ...string) {
 	// log.Printf("Generating %s", filePath)
 
@@ -175,12 +184,12 @@ func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, g
 
 	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).ParseFiles(templates...)
 	if err != nil {
-		glog.Exit(err)
+		glog.Exit(fmt.Sprintf("error parsing %s for filepath %s ", templateFileName, filePath), err)
 	}
 
 	contents := bytes.Buffer{}
 	if err = tmpl.ExecuteTemplate(&contents, templateFileName, input); err != nil {
-		glog.Exit(err)
+		glog.Exit(fmt.Sprintf("error executing %s for filepath %s ", templateFileName, filePath), err)
 	}
 
 	sourceByte := contents.Bytes()

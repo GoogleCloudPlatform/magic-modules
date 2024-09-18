@@ -1,0 +1,21 @@
+resource "google_dataproc_metastore_service" "{{$.PrimaryResourceId}}" {
+    service_id          = "{{index $.Vars "metastore_service_name"}}"
+    location            = "us-central1"
+    port                = 9080
+    tier                = "DEVELOPER"
+    deletion_protection = "{{index $.Vars "deletion_protection"}}"
+  
+    maintenance_window {
+      hour_of_day = 2
+      day_of_week = "SUNDAY"
+    }
+  
+    hive_metastore_config {
+      version = "2.3.6"
+    }
+  
+    labels = {
+      env = "test"
+    }
+  }
+  

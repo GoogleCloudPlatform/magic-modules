@@ -32,7 +32,7 @@ self_link: 'projects/{{project}}/config'
 create_url: 'projects/{{project}}/identityPlatform:initializeAuth'
 update_verb: 'PATCH'
 update_mask: true
-skip_delete: true
+exclude_delete: true
 import_format:
   - 'projects/{{project}}/config'
   - 'projects/{{project}}'
@@ -43,7 +43,7 @@ timeouts:
   delete_minutes: 20
 custom_code:
   custom_create: 'templates/terraform/custom_create/go/identity_platform_config.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'identity_platform_config_basic'
     primary_resource_id: 'default'
@@ -53,7 +53,9 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
       billing_acct: 'BILLING_ACCT'
+        # Resource creation race
     test_vars_overrides:
+      # Set quota start time for the following day.
       'quota_start_time': 'time.Now().AddDate(0, 0, 1).Format(time.RFC3339)'
     ignore_read_extra:
       - 'client.0.api_key'
@@ -69,7 +71,7 @@ examples:
     ignore_read_extra:
       - 'client.0.api_key'
       - 'client.0.firebase_subdomain'
-    skip_docs: true
+    exclude_docs: true
 parameters:
 properties:
   - name: 'name'

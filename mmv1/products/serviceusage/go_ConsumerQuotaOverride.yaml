@@ -61,7 +61,7 @@ nested_query:
   modify_by_patch: false
 custom_code:
   test_check_destroy: 'templates/terraform/custom_check_destroy/go/consumer_quota_override.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'consumer_quota_override'
     primary_resource_id: 'override'
@@ -77,7 +77,7 @@ examples:
       project_id: 'quota'
     test_env_vars:
       org_id: 'ORG_ID'
-    skip_docs: true
+    exclude_docs: true
   - name: 'region_consumer_quota_override'
     primary_resource_id: 'override'
     min_version: 'beta'

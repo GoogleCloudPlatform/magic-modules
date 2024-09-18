@@ -719,7 +719,8 @@ properties:
                   name: 'surrogateType'
                   description: |
                     Message for detecting output from deidentification transformations that support reversing.
-                  properties: []  # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/InspectConfig#SurrogateType
+                  properties:
+                    []  # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/InspectConfig#SurrogateType
                   # The fields below are necessary to include the "surrogateType" in the payload
                   send_empty_value: true
                   allow_empty_object: true

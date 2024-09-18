@@ -28,7 +28,7 @@ base_url: 'organizations/{{organization}}/sources'
 self_link: '{{name}}'
 update_verb: 'PATCH'
 update_mask: true
-skip_delete: true
+exclude_delete: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -52,7 +52,8 @@ examples:
       source_display_name: 'My Source'
     test_env_vars:
       org_id: 'ORG_ID'
-    skip_test: true
+      # resource can't be destroyed, so checkdestroy fails unnecessarily
+    exclude_test: true
 parameters:
   - name: 'organization'
     type: String

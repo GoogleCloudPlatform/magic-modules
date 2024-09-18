@@ -39,9 +39,9 @@ var vcuEnvironmentVariables = [...]string{
 }
 
 var (
-	//go:embed vcr_cassettes_update_replaying.tmpl
+	//go:embed templates/vcr/vcr_cassettes_update_replaying.tmpl
 	replayingTmplText string
-	//go:embed vcr_cassettes_update_recording.tmpl
+	//go:embed templates/vcr/vcr_cassettes_update_recording.tmpl
 	recordingTmplText string
 )
 
@@ -90,7 +90,7 @@ var vcrCassetteUpdateCmd = &cobra.Command{
 		}
 		ctlr := source.NewController(env["GOPATH"], "hashicorp", env["GITHUB_TOKEN_CLASSIC"], rnr)
 
-		vt, err := vcr.NewTester(env, rnr)
+		vt, err := vcr.NewTester(env, "", "ci-vcr-cassettes", rnr)
 		if err != nil {
 			return fmt.Errorf("error creating VCR tester: %w", err)
 		}

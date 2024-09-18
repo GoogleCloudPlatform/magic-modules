@@ -44,7 +44,8 @@ examples:
     vars:
       note_name: 'attestation-note'
       attestor: 'attestor'
-    skip_test: true
+    # Occurrence requires custom logic for signing payloads.
+    exclude_test: true
 parameters:
 properties:
   - name: 'name'

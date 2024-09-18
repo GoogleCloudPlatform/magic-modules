@@ -25,6 +25,7 @@ references:
 docs:
 id_format: '{{name}}'
 base_url: 'projects/{{project}}/metrics'
+# The % in self_link indicates that the name value should be URL-encoded.
 self_link: 'projects/{{project}}/metrics/{{%name}}'
 mutex: 'customMetric/{{project}}'
 import_format:

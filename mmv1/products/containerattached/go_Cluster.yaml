@@ -355,3 +355,17 @@ properties:
             description: |
               Namespace of the kubernetes secret containing the proxy config.
             required: true
+  - name: 'securityPostureConfig'
+    type: NestedObject
+    description: |
+      Enable/Disable Security Posture API features for the cluster.
+    default_from_api: true
+    properties:
+      - name: 'vulnerabilityMode'
+        type: Enum
+        description: |
+          Sets the mode of the Kubernetes security posture API's workload vulnerability scanning.
+        required: true
+        enum_values:
+          - 'VULNERABILITY_DISABLED'
+          - 'VULNERABILITY_ENTERPRISE'

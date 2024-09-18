@@ -42,7 +42,7 @@ examples:
     primary_resource_name: 'fmt.Sprintf("tf-test-dataproc-policy%s", context["random_suffix"])'
     vars:
       name: 'dataproc-policy'
-    skip_docs: true
+    exclude_docs: true
   - name: 'dataproc_autoscaling_policy'
     primary_resource_id: 'asp'
     vars:

@@ -56,7 +56,8 @@ identity:
   - name
 custom_code:
   custom_delete: 'templates/terraform/custom_delete/go/firebase_app_deletion_policy.tmpl'
-skip_sweeper: true
+# Sweeper skipped as this resource has customized deletion.
+exclude_sweeper: true
 examples:
   - name: 'firebase_android_app_basic'
     primary_resource_id: 'basic'

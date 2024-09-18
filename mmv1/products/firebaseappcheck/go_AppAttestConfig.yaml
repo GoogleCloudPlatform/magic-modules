@@ -28,7 +28,7 @@ create_url: 'projects/{{project}}/apps/{{app_id}}/appAttestConfig?updateMask=tok
 create_verb: 'PATCH'
 update_verb: 'PATCH'
 update_mask: true
-skip_delete: true
+exclude_delete: true
 import_format:
   - 'projects/{{project}}/apps/{{app_id}}/appAttestConfig'
   - '{{project}}/{{app_id}}'
@@ -43,17 +43,20 @@ examples:
     primary_resource_id: 'default'
     min_version: 'beta'
     vars:
+      # Don't add random suffix
       team_id: '9987654321'
       bundle_id: 'bundle.id.appattest'
     test_env_vars:
       project_id: 'PROJECT_NAME'
     test_vars_overrides:
       'team_id': '"9987654321"'
+    # Need the time_sleep resource
     external_providers: ["random", "time"]
   - name: 'firebase_app_check_app_attest_config_full'
     primary_resource_id: 'default'
     min_version: 'beta'
     vars:
+      # Don't add random suffix
       team_id: '9987654321'
       bundle_id: 'bundle.id.appattest'
       token_ttl: '7200s'
@@ -62,6 +65,7 @@ examples:
     test_vars_overrides:
       'team_id': '"9987654321"'
       'token_ttl': '"7200s"'
+    # Need the time_sleep resource
     external_providers: ["random", "time"]
 parameters:
   - name: 'app_id'
