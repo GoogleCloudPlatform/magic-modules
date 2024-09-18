@@ -62,6 +62,12 @@ examples:
       instance_name: 'my-instance'
       client_id: 'my-client-id'
       client_secret: 'my-client-secret'
+  - name: 'looker_instance_fips'
+    primary_resource_id: 'looker-instance'
+    vars:
+      instance_name: 'my-instance-fips'
+      client_id: 'my-client-id'
+      client_secret: 'my-client-secret'
   - name: 'looker_instance_enterprise_full'
     primary_resource_id: 'looker-instance'
     vars:
@@ -260,6 +266,10 @@ properties:
           Full name and version of the CMEK key currently in use to encrypt Looker data.
         output: true
   # Encryption Config  Object - End
+  - name: 'fipsEnabled'
+    type: Boolean
+    description: |
+      FIPS 140-2 Encryption enablement for Looker (Google Cloud Core).
   - name: 'ingressPrivateIp'
     type: String
     description: |
