@@ -5,6 +5,7 @@ resource "google_healthcare_pipeline_job" "<%= ctx[:primary_resource_id] %>" {
   disable_lineage = true
   reconciliation_pipeline_job {
     merge_config {
+      description = "sample description for reconciliation rules"
       whistle_config_source {
         uri = "gs://${google_storage_bucket.bucket.name}/${google_storage_bucket_object.merge_file.name}"
         import_uri_prefix = "gs://${google_storage_bucket.bucket.name}"

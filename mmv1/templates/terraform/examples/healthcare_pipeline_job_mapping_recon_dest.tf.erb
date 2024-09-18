@@ -1,11 +1,30 @@
+resource "google_healthcare_pipeline_job" "recon" {
+  name  = "<%= ctx[:vars]['recon_pipeline_name'] %>"
+  location = "us-central1"
+  dataset = google_healthcare_dataset.dataset.id
+  disable_lineage = true
+  reconciliation_pipeline_job {
+    merge_config {
+      description = "sample description for reconciliation rules"
+      whistle_config_source {
+        uri = "gs://${google_storage_bucket.bucket.name}/${google_storage_bucket_object.merge_file.name}"
+        import_uri_prefix = "gs://${google_storage_bucket.bucket.name}"
+      }
+    }
+    matching_uri_prefix = "gs://${google_storage_bucket.bucket.name}"
+    fhir_store_destination = "${google_healthcare_dataset.dataset.id}/fhirStores/${google_healthcare_fhir_store.dest_fhirstore.name}"
+  }
+}
+
 resource "google_healthcare_pipeline_job" "<%= ctx[:primary_resource_id] %>" {
+  depends_on = [google_healthcare_pipeline_job.recon]
   name  = "<%= ctx[:vars]['pipeline_name'] %>"
   location = "us-central1"
   dataset = google_healthcare_dataset.dataset.id
   disable_lineage = true
   labels = {
     example_label_key = "example_label_value"
-  }  
+  }
   mapping_pipeline_job {
     mapping_config {
       whistle_config_source {
@@ -18,7 +37,7 @@ resource "google_healthcare_pipeline_job" "<%= ctx[:primary_resource_id] %>" {
       fhir_store = "${google_healthcare_dataset.dataset.id}/fhirStores/${google_healthcare_fhir_store.source_fhirstore.name}"
       description = "example description for streaming fhirstore"
     }
-    fhir_store_destination = "${google_healthcare_dataset.dataset.id}/fhirStores/${google_healthcare_fhir_store.dest_fhirstore.name}"
+    reconciliation_destination = true
   }
 }
 
@@ -51,6 +70,12 @@ resource "google_storage_bucket" "bucket" {
 
 resource "google_storage_bucket_object" "mapping_file" {
   name    = "mapping.wstl"
+  content = " "
+  bucket  = google_storage_bucket.bucket.name
+}
+
+resource "google_storage_bucket_object" "merge_file" {
+  name    = "merge.wstl"
   content = " "
   bucket  = google_storage_bucket.bucket.name
 }
