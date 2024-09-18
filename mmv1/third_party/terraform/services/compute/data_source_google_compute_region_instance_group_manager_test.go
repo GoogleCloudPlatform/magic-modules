@@ -28,14 +28,14 @@ func TestAccDataSourceGoogleComputeRegionInstanceGroupManager(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceGoogleComputeRegionInstanceGroupManager_basic1(context),
+				Config: testAccDataSourceGoogleComputeRegionInstanceGroupManager_usingSelfLink(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.google_compute_region_instance_group_manager.data_source", "project", envvar.GetTestProjectFromEnv()),
 					resource.TestCheckResourceAttr("data.google_compute_region_instance_group_manager.data_source", "region", regionName),
 					resource.TestCheckResourceAttr("data.google_compute_region_instance_group_manager.data_source", "name", igmName)),
 			},
 			{
-				Config: testAccDataSourceGoogleComputeRegionInstanceGroupManager_basic2(context),
+				Config: testAccDataSourceGoogleComputeRegionInstanceGroupManager_usingNameAndRegion(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.google_compute_region_instance_group_manager.data_source", "project", envvar.GetTestProjectFromEnv()),
 					resource.TestCheckResourceAttr("data.google_compute_region_instance_group_manager.data_source", "region", regionName),
