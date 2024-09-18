@@ -38,6 +38,8 @@ In addition to the arguments listed above, the following computed attributes are
 
 * `annotations` - Custom metadata about the regional secret.
 
+* `version_aliases` - Mapping from version alias to version name.
+
 * `topics` -
   A list of up to 10 Pub/Sub topics to which messages are published when control plane operations are called on the regional secret or its versions.
   Structure is [documented below](#nested_topics).

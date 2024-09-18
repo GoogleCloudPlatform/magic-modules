@@ -154,6 +154,7 @@ func flattenSecretManagerRegionalRegionalSecretsSecrets(v interface{}, d *schema
 			"labels":                      flattenSecretManagerRegionalRegionalSecretEffectiveLabels(original["labels"], d, config),
 			"effective_labels":            flattenSecretManagerRegionalRegionalSecretEffectiveLabels(original["labels"], d, config),
 			"terraform_labels":            flattenSecretManagerRegionalRegionalSecretEffectiveLabels(original["labels"], d, config),
+			"version_aliases":             flattenSecretManagerRegionalRegionalSecretVersionAliases(original["versionAliases"], d, config),
 			"rotation":                    flattenSecretManagerRegionalRegionalSecretRotation(original["rotation"], d, config),
 			"topics":                      flattenSecretManagerRegionalRegionalSecretTopics(original["topics"], d, config),
 			"version_destroy_ttl":         flattenSecretManagerRegionalRegionalSecretVersionDestroyTtl(original["versionDestroyTtl"], d, config),
@@ -163,8 +164,6 @@ func flattenSecretManagerRegionalRegionalSecretsSecrets(v interface{}, d *schema
 			"project":                     getDataFromName(original["name"], 1),
 			"location":                    getDataFromName(original["name"], 3),
 			"secret_id":                   getDataFromName(original["name"], 5),
-			// TODO : Add versionAliases field support once google_secret_manager_regional_secret_version is added
-			// "version_aliases":             flattenSecretManagerRegionalSecretVersionAliases(original["versionAliases"], d, config),
 		})
 	}
 	return transformed
