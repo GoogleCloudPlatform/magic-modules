@@ -747,6 +747,7 @@ properties:
   - name: 'iap'
     type: NestedObject
     description: Settings for enabling Cloud Identity Aware Proxy
+    default_from_api: true
     send_empty_value: true
     properties:
       - name: 'enabled'

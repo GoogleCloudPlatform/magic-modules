@@ -25,7 +25,7 @@ references:
 docs:
 base_url: 'projects/{{project}}/global/interconnects'
 self_link: 'projects/{{project}}/global/interconnects/{{name}}'
-immutable: true
+update_verb: 'PATCH'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -376,6 +376,7 @@ properties:
     description: |
       Indicates that this is a Cross-Cloud Interconnect. This field specifies the location outside
       of Google's network that the interconnect is connected to.
+    immutable: true
   - name: 'requestedFeatures'
     type: Array
     description: |
@@ -384,6 +385,7 @@ properties:
       specified, the default value is false, which allocates non-MACsec capable ports first if
       available). Note that MACSEC is still technically allowed for compatibility reasons, but it
       does not work with the API, and will be removed in an upcoming major version.
+    immutable: true
     item_type:
       type: Enum
       description: |
