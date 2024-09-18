@@ -38,7 +38,7 @@ timeouts:
   delete_minutes: 20
 custom_code:
   constants: 'templates/terraform/constants/go/bigquery_dataset.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'bigquery_dataset_basic'
     primary_resource_id: 'dataset'
@@ -50,14 +50,14 @@ examples:
     vars:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
-    skip_docs: true
+    exclude_docs: true
   - name: 'bigquery_dataset_cmek'
     primary_resource_id: 'dataset'
     vars:
       dataset_id: 'example_dataset'
       key_name: 'example-key'
       keyring_name: 'example-keyring'
-    skip_test: true
+    exclude_test: true
   - name: 'bigquery_dataset_authorized_dataset'
     primary_resource_id: 'dataset'
     vars:
@@ -77,23 +77,23 @@ examples:
     vars:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
-    skip_docs: true
+    exclude_docs: true
   - name: 'bigquery_dataset_default_collation_set'
     primary_resource_id: 'dataset'
     vars:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
-    skip_docs: true
+    exclude_docs: true
   - name: 'bigquery_dataset_external_reference_aws_test'
     primary_resource_id: 'dataset'
     vars:
       dataset_id: 'example_dataset'
-    skip_docs: true
+    exclude_docs: true
   - name: 'bigquery_dataset_external_reference_aws'
     primary_resource_id: 'dataset'
     vars:
       dataset_id: 'example_dataset'
-    skip_test: true
+    exclude_test: true
   - name: 'bigquery_dataset_resource_tags'
     primary_resource_id: 'dataset'
     primary_resource_name: 'fmt.Sprintf("tf_test_dataset%s", context["random_suffix"])'
@@ -103,7 +103,7 @@ examples:
       tag_value1: 'tag_value1'
       tag_key2: 'tag_key2'
       tag_value2: 'tag_value2'
-    skip_docs: true
+    exclude_docs: true
 virtual_fields:
   - name: 'delete_contents_on_destroy'
     description: |

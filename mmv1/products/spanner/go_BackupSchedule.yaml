@@ -1,0 +1,153 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'BackupSchedule'
+description: |
+  A backup schedule for a Cloud Spanner Database.
+  This resource is owned by the database it is backing up, and is deleted along with the database.
+  The actual backups are not though.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/spanner/docs/backup'
+  api: 'https://cloud.google.com/spanner/docs/reference/rest/v1/projects.instances.databases.backupSchedules'
+docs:
+  warning: |
+    This resource creates a Spanner Backup Schedule on a project that already has
+    a Spanner database.
+    This resource is owned by the database it is backing up, and is deleted along
+    with the database. The actual backups are not though.
+id_format: 'projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules/{{name}}'
+base_url: 'projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules'
+self_link: 'projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules/{{name}}'
+create_url: 'projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules?backup_schedule_id={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules/{{name}}'
+  - '{{project}}/{{instance}}/{{database}}/{{name}}'
+  - '{{instance}}/{{database}}/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  encoder: 'templates/terraform/encoders/go/spanner_schedule_backup.go.tmpl'
+  decoder: 'templates/terraform/decoders/go/spanner_schedule_backup.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/go/spanner_schedule_backup.go.tmpl'
+examples:
+  - name: 'spanner_backup_schedule_daily_full'
+    primary_resource_id: 'full-backup'
+    vars:
+      name: 'backup-schedule-id'
+      instance_name: 'instance-id'
+      database_name: 'database-id'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+  - name: 'spanner_backup_schedule_daily_incremental'
+    primary_resource_id: 'incremental-backup'
+    vars:
+      name: 'backup-schedule-id'
+      instance_name: 'instance-id'
+      database_name: 'database-id'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+parameters:
+  - name: 'instance'
+    type: ResourceRef
+    description: 'The instance to create the database on.'
+    url_param_only: true
+    required: true
+    immutable: true
+    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    resource: 'Instance'
+    imports: 'name'
+  - name: 'database'
+    type: ResourceRef
+    description: 'The database to create the backup schedule on.'
+    url_param_only: true
+    required: true
+    immutable: true
+    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    resource: 'Database'
+    imports: 'name'
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      A unique identifier for the backup schedule, which cannot be changed after
+      the backup schedule is created. Values are of the form [a-z][-a-z0-9]*[a-z0-9].
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    validation:
+      regex: '^[a-z][a-z0-9_\-]*[a-z0-9]$'
+  - name: 'retentionDuration'
+    type: String
+    description: |
+      At what relative time in the future, compared to its creation time, the backup should be deleted, e.g. keep backups for 7 days.
+      A duration in seconds with up to nine fractional digits, ending with 's'. Example: '3.5s'.
+      You can set this to a value up to 366 days.
+    required: true
+  - name: 'spec'
+    type: NestedObject
+    description: |
+      Defines specifications of the backup schedule.
+    send_empty_value: true
+    allow_empty_object: true
+    properties:
+      - name: 'cronSpec'
+        type: NestedObject
+        description: |
+          Cron style schedule specification..
+        properties:
+          - name: 'text'
+            type: String
+            description: |
+              Textual representation of the crontab. User can customize the
+              backup frequency and the backup version time using the cron
+              expression. The version time must be in UTC timzeone.
+              The backup will contain an externally consistent copy of the
+              database at the version time. Allowed frequencies are 12 hour, 1 day,
+              1 week and 1 month. Examples of valid cron specifications:
+                0 2/12 * * * : every 12 hours at (2, 14) hours past midnight in UTC.
+                0 2,14 * * * : every 12 hours at (2,14) hours past midnight in UTC.
+                0 2 * * *    : once a day at 2 past midnight in UTC.
+                0 2 * * 0    : once a week every Sunday at 2 past midnight in UTC.
+                0 2 8 * *    : once a month on 8th day at 2 past midnight in UTC.
+  - name: 'fullBackupSpec'
+    type: NestedObject
+    description: |
+      The schedule creates only full backups..
+    immutable: true
+    send_empty_value: true
+    allow_empty_object: true
+    exactly_one_of:
+      - 'fullBackupSpec'
+      - 'incrementalBackupSpec'
+    properties:
+      []
+  - name: 'incrementalBackupSpec'
+    type: NestedObject
+    description: |
+      The schedule creates incremental backup chains.
+    immutable: true
+    send_empty_value: true
+    allow_empty_object: true
+    exactly_one_of:
+      - 'fullBackupSpec'
+      - 'incrementalBackupSpec'
+    properties:
+      []

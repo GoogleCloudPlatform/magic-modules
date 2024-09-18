@@ -42,7 +42,7 @@ async:
   actions: ['create']
 collection_url_key: 'ingressRules'
 custom_code:
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'app_engine_firewall_rule_basic'
     primary_resource_id: 'rule'

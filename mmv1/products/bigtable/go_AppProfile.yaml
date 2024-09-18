@@ -39,7 +39,7 @@ custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/go/bigtable_app_profile.go.tmpl'
   encoder: 'templates/terraform/encoders/go/bigtable_app_profile.go.tmpl'
   pre_update: 'templates/terraform/pre_update/go/bigtable_app_profile.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'bigtable_app_profile_anycluster'
     primary_resource_id: 'ap'
@@ -51,6 +51,7 @@ examples:
       'deletion_protection': 'false'
     ignore_read_extra:
       - 'ignore_warnings'
+    # bigtable instance does not use the shared HTTP client, this test creates an instance
     skip_vcr: true
   - name: 'bigtable_app_profile_singlecluster'
     primary_resource_id: 'ap'
@@ -62,6 +63,7 @@ examples:
       'deletion_protection': 'false'
     ignore_read_extra:
       - 'ignore_warnings'
+    # bigtable instance does not use the shared HTTP client, this test creates an instance
     skip_vcr: true
   - name: 'bigtable_app_profile_multicluster'
     primary_resource_id: 'ap'
@@ -73,6 +75,7 @@ examples:
       'deletion_protection': 'false'
     ignore_read_extra:
       - 'ignore_warnings'
+    # bigtable instance does not use the shared HTTP client, this test creates an instance
     skip_vcr: true
   - name: 'bigtable_app_profile_priority'
     primary_resource_id: 'ap'
@@ -84,6 +87,7 @@ examples:
       'deletion_protection': 'false'
     ignore_read_extra:
       - 'ignore_warnings'
+    # bigtable instance does not use the shared HTTP client, this test creates an instance
     skip_vcr: true
 parameters:
   - name: 'appProfileId'

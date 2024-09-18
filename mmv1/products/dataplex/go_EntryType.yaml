@@ -47,7 +47,7 @@ async:
     path: 'error'
     message: 'message'
 iam_policy:
-  skip_import_test: true
+  exclude_import_test: true
   method_name_separator: ':'
   parent_resource_attribute: 'entry_type_id'
   example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'

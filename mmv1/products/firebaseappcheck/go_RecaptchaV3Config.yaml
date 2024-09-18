@@ -27,7 +27,7 @@ create_url: 'projects/{{project}}/apps/{{app_id}}/recaptchaV3Config?updateMask=t
 create_verb: 'PATCH'
 update_verb: 'PATCH'
 update_mask: true
-skip_delete: true
+exclude_delete: true
 import_format:
   - 'projects/{{project}}/apps/{{app_id}}/recaptchaV3Config'
   - '{{project}}/{{app_id}}'
@@ -42,13 +42,16 @@ examples:
     primary_resource_id: 'default'
     min_version: 'beta'
     vars:
+      # Don't add random suffix
       token_ttl: '7200s'
+      # A valid secret, but is actually unusable
       site_secret: '6Lf9YnQpAAAAAC3-MHmdAllTbPwTZxpUw5d34YzX'
     test_env_vars:
       project_id: 'PROJECT_NAME'
     test_vars_overrides:
       'token_ttl': '"7200s"'
       'site_secret': '"6Lf9YnQpAAAAAC3-MHmdAllTbPwTZxpUw5d34YzX"'
+    # Need the time_sleep resource
     external_providers: ["random", "time"]
 parameters:
   - name: 'app_id'

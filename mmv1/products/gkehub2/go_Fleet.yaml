@@ -53,7 +53,7 @@ custom_code:
 examples:
   - name: 'gkehub_fleet_basic'
     primary_resource_id: 'default'
-    skip_test: true
+    exclude_test: true
 parameters:
 properties:
   - name: 'displayName'

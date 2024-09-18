@@ -30,6 +30,14 @@ var version = flag.String("version", "", "optional version name. If specified, t
 
 var product = flag.String("product", "", "optional product name. If specified, the resources under the specific product will be generated. Otherwise, resources under all products will be generated.")
 
+var resourceToGenerate = flag.String("resource", "", "optional resource name. Limits generation to the specified resource within a particular product.")
+
+var doNotGenerateCode = flag.Bool("no-code", false, "do not generate code")
+
+var doNotGenerateDocs = flag.Bool("no-docs", false, "do not generate docs")
+
+var forceProvider = flag.String("provider", "", "optional provider name. If specified, a non-default provider will be used.")
+
 // Example usage: --yaml
 var yamlMode = flag.Bool("yaml", false, "copy text over from ruby yaml to go yaml")
 
@@ -39,20 +47,25 @@ var templateMode = flag.Bool("template", false, "copy templates over from .erb t
 // Example usage: --handwritten
 var handwrittenMode = flag.Bool("handwritten", false, "copy handwritten files over from .erb to go .tmpl")
 
+var yamlTempMode = flag.Bool("yaml-temp", false, "copy text over from ruby yaml to go yaml in a temp file")
+
+var handwrittenTempFiles = flag.String("handwritten-temp", "", "copy specific handwritten files over from .erb to go .tmpl.temp comma separated")
+var templateTempFiles = flag.String("template-temp", "", "copy specific templates over from .erb to go .tmpl.temp comma separated")
+
 func main() {
 
 	flag.Parse()
 
-	if *yamlMode {
-		CopyAllDescriptions()
+	if *yamlMode || *yamlTempMode {
+		CopyAllDescriptions(*yamlTempMode)
 	}
 
-	if *templateMode {
-		convertTemplates()
+	if *templateMode || *templateTempFiles != "" {
+		convertTemplates(*templateTempFiles)
 	}
 
-	if *handwrittenMode {
-		convertAllHandwrittenFiles()
+	if *handwrittenMode || *handwrittenTempFiles != "" {
+		convertAllHandwrittenFiles(*handwrittenTempFiles)
 	}
 
 	if outputPath == nil || *outputPath == "" {
@@ -65,8 +78,8 @@ func main() {
 		*version = "ga"
 	}
 
-	var generateCode = true
-	var generateDocs = true
+	var generateCode = !*doNotGenerateCode
+	var generateDocs = !*doNotGenerateDocs
 	var productsToGenerate []string
 	var allProducts = false
 	if product == nil || *product == "" {
@@ -99,6 +112,7 @@ func main() {
 	startTime := time.Now()
 	log.Printf("Generating MM output to '%s'", *outputPath)
 	log.Printf("Using %s version", *version)
+	log.Printf("Using %s provider", *forceProvider)
 
 	// Building compute takes a long time and can't be parallelized within the product
 	// so lets build it first
@@ -109,7 +123,7 @@ func main() {
 		return false
 	})
 
-	var providerToGenerate *provider.Terraform
+	var providerToGenerate provider.Provider
 	var productsForVersion []*api.Product
 
 	ch := make(chan string, len(allProductFiles))
@@ -119,7 +133,7 @@ func main() {
 
 	for i := 0; i < len(allProductFiles); i++ {
 		wg.Add(1)
-		go GenerateProduct(ch, providerToGenerate, &productsForVersion, startTime, productsToGenerate, generateCode, generateDocs)
+		go GenerateProduct(ch, providerToGenerate, &productsForVersion, startTime, productsToGenerate, *resourceToGenerate, generateCode, generateDocs)
 	}
 	wg.Wait()
 
@@ -132,8 +146,7 @@ func main() {
 	// In order to only copy/compile files once per provider this must be called outside
 	// of the products loop. This will get called with the provider from the final iteration
 	// of the loop
-	providerToGenerate = provider.NewTerraform(productsForVersion[0], *version, startTime)
-
+	providerToGenerate = setProvider(*forceProvider, *version, productsForVersion[0], startTime)
 	providerToGenerate.CopyCommonFiles(*outputPath, generateCode, generateDocs)
 
 	log.Printf("Compiling common files for terraform")
@@ -144,7 +157,7 @@ func main() {
 	}
 }
 
-func GenerateProduct(productChannel chan string, providerToGenerate *provider.Terraform, productsForVersion *[]*api.Product, startTime time.Time, productsToGenerate []string, generateCode, generateDocs bool) {
+func GenerateProduct(productChannel chan string, providerToGenerate provider.Provider, productsForVersion *[]*api.Product, startTime time.Time, productsToGenerate []string, resourceToGenerate string, generateCode, generateDocs bool) {
 
 	defer wg.Done()
 	productName := <-productChannel
@@ -204,8 +217,7 @@ func GenerateProduct(productChannel chan string, providerToGenerate *provider.Te
 		productApi.Objects = resources
 		productApi.Validate()
 
-		// TODO rewrite: set other providers via flag
-		providerToGenerate = provider.NewTerraform(productApi, *version, startTime)
+		providerToGenerate = setProvider(*forceProvider, *version, productApi, startTime)
 
 		*productsForVersion = append(*productsForVersion, productApi)
 
@@ -215,6 +227,16 @@ func GenerateProduct(productChannel chan string, providerToGenerate *provider.Te
 		}
 
 		log.Printf("%s: Generating files", productName)
-		providerToGenerate.Generate(*outputPath, productName, generateCode, generateDocs)
+		providerToGenerate.Generate(*outputPath, productName, resourceToGenerate, generateCode, generateDocs)
+	}
+}
+
+// Sets provider via flag
+func setProvider(forceProvider, version string, productApi *api.Product, startTime time.Time) provider.Provider {
+	switch forceProvider {
+	case "tgc":
+		return provider.NewTerraformGoogleConversion(productApi, version, startTime)
+	default:
+		return provider.NewTerraform(productApi, version, startTime)
 	}
 }

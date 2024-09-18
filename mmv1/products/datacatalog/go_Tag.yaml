@@ -75,6 +75,7 @@ examples:
       force_delete: 'false'
     test_vars_overrides:
       'force_delete': 'true'
+    # Multiple fine-grained resources
     skip_vcr: true
   - name: 'data_catalog_entry_tag_false'
     primary_resource_id: 'basic_tag'
@@ -85,7 +86,8 @@ examples:
       force_delete: 'false'
     test_vars_overrides:
       'force_delete': 'true'
-    skip_docs: true
+ # omitting doc as it is almost identical to the case of data_catalog_entry_tag_basic
+    exclude_docs: true
 parameters:
   - name: 'parent'
     type: String

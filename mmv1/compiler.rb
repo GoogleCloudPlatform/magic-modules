@@ -46,6 +46,7 @@ types_to_generate = []
 version = 'ga'
 override_dir = nil
 openapi_generate = false
+go_yaml_files = []
 
 ARGV << '-h' if ARGV.empty?
 Google::LOGGER.level = Logger::INFO
@@ -97,6 +98,10 @@ OptionParser.new do |opt|
   end
   opt.on('--go-yaml', 'Generate MMv1 Go YAML from Ruby YAML') do
     go_yaml = true
+  end
+  opt.on('--go-yaml-files FILE[,FILE...]', Array, 'Generate temp Go YAML from files') do |f|
+    go_yaml = true
+    go_yaml_files = f
   end
 end.parse!
 # rubocop:enable Metrics/BlockLength
@@ -269,6 +274,8 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
     provider = \
       override_providers[force_provider].new(product_api, version, start_time)
   end
+
+  provider.go_yaml_files = go_yaml_files if go_yaml_files
 
   unless products_to_generate.include?(product_name)
     Google::LOGGER.info "#{product_name}: Not specified, skipping generation"

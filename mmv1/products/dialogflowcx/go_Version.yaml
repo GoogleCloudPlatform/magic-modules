@@ -57,7 +57,7 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/go/dialogflowcx_version.go.tmpl'
 custom_diff:
   - 'tpgresource.DefaultProviderProject'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'dialogflowcx_version_full'
     primary_resource_id: 'version_1'
@@ -67,7 +67,7 @@ examples:
     primary_resource_id: 'version_1'
     vars:
       agent_name: 'issue-12880'
-    skip_docs: true
+    exclude_docs: true
 parameters:
   - name: 'parent'
     type: String

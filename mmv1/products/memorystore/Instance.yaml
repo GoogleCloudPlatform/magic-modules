@@ -1,3 +1,16 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 ---
 !ruby/object:Api::Resource
 base_url: "projects/{{project}}/locations/{{location}}/instances"
@@ -62,6 +75,66 @@ examples:
       prevent_destroy: "false"
     oics_vars_overrides:
       prevent_destroy: "false"
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: name
+    base_url: "{{op_id}}"
+    wait_ms: 1000
+    timeouts:
+  result: !ruby/object:Api::OpAsync::Result
+    path: response
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: done
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: error
+    message: message
+virtual_fields:
+  - !ruby/object:Api::Type::Array
+    name: desired_psc_auto_connections
+    description: "Required. Immutable. User inputs for the auto-created
+      PSC connections. "
+    immutable: true
+    required: true
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: project_id
+          description:
+            "Required. The consumer project_id where the forwarding rule is
+            created from. "
+          required: true
+        - !ruby/object:Api::Type::String
+          name: network
+          description:
+            "Required. The consumer network where the IP address resides, in
+            the form of\nprojects/{project_id}/global/networks/{network_id}. "
+          required: true
+parameters:
+  - !ruby/object:Api::Type::String
+    name: location
+    description:
+      "Resource ID segment making up resource `name`. It identifies the resource
+      within its parent collection as described in https://google.aip.dev/122. See documentation
+      for resource type `memorystore.googleapis.com/CertificateAuthority`. "
+    url_param_only: true
+    required: true
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: instanceId
+    description:
+      "Required. The ID to use for the instance, which will become the final
+      component of\nthe instance's resource name.\n\nThis value is subject to the
+      following restrictions:\n\n* Must be 4-63 characters in length\n* Must begin with a letter
+      or digit\n* Must contain only lowercase letters, digits, and hyphens\n* Must not
+      end with a hyphen\n* Must be unique within a location "
+    url_param_only: true
+    required: true
+    immutable: true
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -85,8 +158,14 @@ properties:
       CREATING\nACTIVE\nUPDATING\nDELETING"
     output: true
   - !ruby/object:Api::Type::NestedObject
+    name: stateInfo
+    description: "Additional information about the state of the instance. "
+    output: true
     properties:
       - !ruby/object:Api::Type::NestedObject
+        name: updateInfo
+        description: "Represents information about instance with state UPDATING. "
+        output: true
         properties:
           - !ruby/object:Api::Type::Integer
             name: targetShardCount
@@ -98,12 +177,6 @@ properties:
               "Output only. Target number of replica nodes per shard for the
               instance. "
             output: true
-        name: updateInfo
-        description: "Represents information about instance with state UPDATING. "
-        output: true
-    name: stateInfo
-    description: "Additional information about the state of the instance. "
-    output: true
   - !ruby/object:Api::Type::String
     name: uid
     description: "Output only. System assigned, unique identifier for the instance. "
@@ -117,8 +190,8 @@ properties:
   - !ruby/object:Api::Type::String
     name: authorizationMode
     description:
-      "Optional. Immutable. Authorization mode of the instance. \n Possible
-      values:\n AUTH_DISABLED\nIAM_AUTH"
+      "Optional. Immutable. Authorization mode of the instance.
+      Possible values:\n AUTH_DISABLED\nIAM_AUTH"
     immutable: true
     default_from_api: true
   - !ruby/object:Api::Type::String
@@ -134,6 +207,10 @@ properties:
     required: true
   - !ruby/object:Api::Type::Array
     name: discoveryEndpoints
+    description:
+      "Output only. Endpoints clients can connect to the instance through.
+      Currently only one\ndiscovery endpoint is supported. "
+    output: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::String
@@ -152,10 +229,6 @@ properties:
             "Output only. The network where the IP address of the discovery
             endpoint will be\nreserved, in the form of\nprojects/{network_project}/global/networks/{network_id}. "
           output: true
-    description:
-      "Output only. Endpoints clients can connect to the instance through.
-      Currently only one\ndiscovery endpoint is supported. "
-    output: true
   - !ruby/object:Api::Type::String
     name: nodeType
     description:
@@ -164,6 +237,9 @@ properties:
     immutable: true
     default_from_api: true
   - !ruby/object:Api::Type::NestedObject
+    name: persistenceConfig
+    default_from_api: true
+    description: "Represents persistence configuration for a instance. "
     properties:
       - !ruby/object:Api::Type::Enum
         name: mode
@@ -174,6 +250,9 @@ properties:
           - :AOF
         default_from_api: true
       - !ruby/object:Api::Type::NestedObject
+        name: rdbConfig
+        description: "Configuration for RDB based persistence. "
+        default_from_api: true
         properties:
           - !ruby/object:Api::Type::String
             name: rdbSnapshotPeriod
@@ -188,21 +267,15 @@ properties:
               and to which future\nsnapshots will be aligned. If not provided, the current
               time will be\nused. "
             default_from_api: true
-        name: rdbConfig
-        description: "Configuration for RDB based persistence. "
-        default_from_api: true
       - !ruby/object:Api::Type::NestedObject
+        name: aofConfig
+        description: "Configuration for AOF based persistence. "
+        default_from_api: true
         properties:
           - !ruby/object:Api::Type::String
             name: appendFsync
             description: "Optional. The fsync mode. \n Possible values:\n NEVER\nEVERY_SEC\nALWAYS"
             default_from_api: true
-        name: aofConfig
-        description: "Configuration for AOF based persistence. "
-        default_from_api: true
-    name: persistenceConfig
-    default_from_api: true
-    description: "Represents persistence configuration for a instance. "
   - !ruby/object:Api::Type::String
     name: engineVersion
     description: "Optional. Immutable. Engine version of the instance. "
@@ -212,15 +285,19 @@ properties:
     name: engineConfigs
     description: "Optional. User-provided engine configurations for the instance. "
   - !ruby/object:Api::Type::NestedObject
+    name: nodeConfig
+    output: true
+    description: "Represents configuration for nodes of the instance. "
     properties:
       - !ruby/object:Api::Type::Double
         name: sizeGb
         description: "Output only. Memory size in GB of the node. "
         output: true
-    name: nodeConfig
-    output: true
-    description: "Represents configuration for nodes of the instance. "
   - !ruby/object:Api::Type::NestedObject
+    name: zoneDistributionConfig
+    immutable: true
+    default_from_api: true
+    description: "Zone distribution configuration for allocation of instance resources. "
     properties:
       - !ruby/object:Api::Type::String
         name: zone
@@ -237,16 +314,16 @@ properties:
         description:
           "Optional. Current zone distribution mode. Defaults to MULTI_ZONE.
           \n Possible values:\n MULTI_ZONE\nSINGLE_ZONE"
-    name: zoneDistributionConfig
-    immutable: true
-    default_from_api: true
-    description: "Zone distribution configuration for allocation of instance resources. "
   - !ruby/object:Api::Type::Boolean
     name: deletionProtectionEnabled
     description: "Optional. If set to true deletion of the instance will fail. "
     default_value: true
   - !ruby/object:Api::Type::Array
     name: pscAutoConnections
+    description:
+      "Output only. User inputs and resource details of the auto-created
+      PSC connections. "
+    output: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::String
@@ -277,67 +354,3 @@ properties:
             "Output only. The consumer network where the IP address resides, in
             the form of\nprojects/{project_id}/global/networks/{network_id}. "
           output: true
-    description:
-      "Output only. User inputs and resource details of the auto-created
-      PSC connections. "
-    output: true
-parameters:
-  - !ruby/object:Api::Type::String
-    name: location
-    description:
-      "Resource ID segment making up resource `name`. It identifies the resource
-      within its parent collection as described in https://google.aip.dev/122. See documentation
-      for resource type `memorystore.googleapis.com/CertificateAuthority`. "
-    url_param_only: true
-    required: true
-    immutable: true
-  - !ruby/object:Api::Type::String
-    name: instanceId
-    description:
-      "Required. The ID to use for the instance, which will become the final
-      component of\nthe instance's resource name.\n\nThis value is subject to the following
-      restrictions:\n\n* Must be 4-63 characters in length\n* Must begin with a letter
-      or digit\n* Must contain only lowercase letters, digits, and hyphens\n* Must not
-      end with a hyphen\n* Must be unique within a location "
-    url_param_only: true
-    required: true
-    immutable: true
-virtual_fields:
-  - !ruby/object:Api::Type::Array
-    name: desired_psc_auto_connections
-    item_type: !ruby/object:Api::Type::NestedObject
-      properties:
-        - !ruby/object:Api::Type::String
-          name: project_id
-          description:
-            "Required. The consumer project_id where the forwarding rule is
-            created from. "
-          required: true
-        - !ruby/object:Api::Type::String
-          name: network
-          description:
-            "Required. The consumer network where the IP address resides, in
-            the form of\nprojects/{project_id}/global/networks/{network_id}. "
-          required: true
-    description: "Required. Immutable. User inputs for the auto-created
-      PSC connections. "
-    immutable: true
-    required: true
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: name
-    base_url: "{{op_id}}"
-    wait_ms: 1000
-    timeouts:
-  result: !ruby/object:Api::OpAsync::Result
-    path: response
-    resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: done
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
-    path: error
-    message: message

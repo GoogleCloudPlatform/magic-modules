@@ -28,7 +28,7 @@ create_url: 'projects/{{project}}/apps/{{app_id}}/deviceCheckConfig?updateMask=t
 create_verb: 'PATCH'
 update_verb: 'PATCH'
 update_mask: true
-skip_delete: true
+exclude_delete: true
 import_format:
   - 'projects/{{project}}/apps/{{app_id}}/deviceCheckConfig'
   - '{{project}}/{{app_id}}'
@@ -51,9 +51,11 @@ examples:
     test_env_vars:
       project_id: 'PROJECT_NAME'
     test_vars_overrides:
+      # Don't add random suffix
       'private_key_path': '"test-fixtures/private-key-2.p8"'
       'team_id': '"9987654321"'
       'token_ttl': '"7200s"'
+    # Need the time_sleep resource
     external_providers: ["random", "time"]
 parameters:
   - name: 'app_id'

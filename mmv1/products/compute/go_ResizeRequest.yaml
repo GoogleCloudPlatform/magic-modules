@@ -23,19 +23,29 @@ description: |
   With Dynamic Workload Scheduler in Flex Start mode, you submit a GPU capacity request for your AI/ML jobs by indicating how many you need, a duration, and your preferred region. Dynamic Workload Scheduler intelligently persists the request; once the capacity becomes available, it automatically provisions your VMs enabling your workloads to run continuously for the entire duration of the capacity allocation.
 references:
   guides:
+    # Link to quickstart in the API's Guides section. For example:
+    # 'Create and connect to a database': 'https://cloud.google.com/alloydb/docs/quickstart/create-and-connect'
     'QUICKSTART_TITLE': 'https://cloud.google.com/compute/docs/instance-groups/create-resize-requests-mig'
+  # Link to the REST API reference for the resource. For example,
+  # https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.backups
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroupManagerResizeRequests'
 docs:
+### List Method ###
 base_url: 'projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/resizeRequests'
+### Get Method
 self_link: 'projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/resizeRequests/{{name}}'
 immutable: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+# Sets parameters for handling operations returned by the API.
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
+  # Overrides which API calls return operations. Default: ['create',
+  # 'update', 'delete']
+  # actions: ['create', 'update', 'delete']
   operation:
     base_url: '{{op_id}}'
     kind: 'compute#operation'
@@ -47,13 +57,22 @@ async:
   error:
     path: 'error/errors'
     message: 'message'
+### Update method ###
+# Resize requests are currently not update-able
+
+### Delete Method ###
+# Custom delete method to handle resize request cancellations vs. deletions.
+# If a resize request is in the ACCEPTED state, it must be canceled before it can be
+# deleted. If a resize request is NOT in the ACCEPTED state, it can be directly deleted.
 custom_code:
   custom_delete: 'templates/terraform/custom_delete/go/compute_mig_resize_request_delete.go.tmpl'
+# Examples for testing
 examples:
   - name: 'compute_mig_resize_request'
     primary_resource_id: 'a3_resize_request'
     vars:
       resize_request_name: 'a3-dws'
+# Resize request parameters injected via URL
 parameters:
   - name: 'zone'
     type: ResourceRef
@@ -73,6 +92,7 @@ parameters:
     required: true
     resource: 'InstanceGroupManager'
     imports: 'name'
+# Non-URL parameters including input and output parameters
 properties:
   - name: 'creationTimestamp'
     type: Time
@@ -124,6 +144,7 @@ properties:
       [Output only] Status of the request.
     output: true
     properties:
+      # Status.error
       - name: 'error'
         type: NestedObject
         description: |
@@ -252,8 +273,8 @@ properties:
                         type: String
                         description: |
                           The localized error message in the above locale.
-      # Status.lastAttempt
                         output: true
+      # Status.lastAttempt
       - name: 'lastAttempt'
         type: NestedObject
         description: |
@@ -388,6 +409,4 @@ properties:
                             type: String
                             description: |
                               The localized error message in the above locale.
-
-#Examples for testing
                             output: true

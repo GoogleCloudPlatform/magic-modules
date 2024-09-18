@@ -156,6 +156,22 @@ properties:
             The status of the connection from the consumer forwarding rule to
             this service attachment.
           output: true
+        - name: 'consumerNetwork'
+          type: String
+          description: |
+            The url of the consumer network.
+          output: true
+        - name: 'pscConnectionId'
+          type: String
+          description: |
+            The PSC connection id of the connected endpoint.
+          output: true
+        - name: 'propagatedConnectionCount'
+          type: Integer
+          description: |
+            The number of consumer Network Connectivity Center spokes that the connected Private Service Connect endpoint has propagated to.
+          min_version: 'beta'
+          output: true
   - name: 'targetService'
     type: String
     description: |
@@ -215,11 +231,13 @@ properties:
       properties:
         - name: 'projectIdOrNum'
           type: String
+          # TODO (laurensknoll): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
           description: |
             A project that is allowed to connect to this service attachment.
             Only one of project_id_or_num and network_url may be set.
         - name: 'networkUrl'
           type: String
+          # TODO (laurensknoll): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
           description: |
             The network that is allowed to connect to this service attachment.
             Only one of project_id_or_num and network_url may be set.
@@ -239,3 +257,15 @@ properties:
       If true, update will affect both PENDING and ACCEPTED/REJECTED PSC endpoints. For example, an ACCEPTED PSC endpoint will be moved to REJECTED if its project is added to the reject list.
     default_from_api: true
     send_empty_value: true
+  - name: 'propagatedConnectionLimit'
+    type: Integer
+    description: |
+      The number of consumer spokes that connected Private Service Connect endpoints can be propagated to through Network Connectivity Center.
+      This limit lets the service producer limit how many propagated Private Service Connect connections can be established to this service attachment from a single consumer.
+
+      If the connection preference of the service attachment is ACCEPT_MANUAL, the limit applies to each project or network that is listed in the consumer accept list.
+      If the connection preference of the service attachment is ACCEPT_AUTOMATIC, the limit applies to each project that contains a connected endpoint.
+
+      If unspecified, the default propagated connection limit is 250.
+    min_version: 'beta'
+    default_from_api: true

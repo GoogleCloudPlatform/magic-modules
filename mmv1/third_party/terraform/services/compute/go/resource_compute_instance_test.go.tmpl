@@ -8,7 +8,6 @@ import (
 	{{- if ne $.TargetVersionName "ga" }}
 	"google.golang.org/api/googleapi"
 	{{- end }}
-	"net/http"
 	"reflect"
 	"regexp"
 	"sort"
@@ -24,7 +23,6 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 
 {{ if eq $.TargetVersionName `ga` }}
@@ -333,6 +331,42 @@ func TestAccComputeInstance_resourceManagerTags(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance)),
+			},
+		},
+	})
+}
+
+func TestAccComputeInstance_diskResourcePolicies(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+		"instance_name": instanceName,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_diskResourcePoliciesOnePolicy(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
+				),
+			},
+			{
+				Config: testAccComputeInstance_diskResourcePoliciesOnePolicyUpdate(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
+				),
+			},
+			{
+				Config:      testAccComputeInstance_diskResourcePoliciesTwoPolicies(context),
+				ExpectError: regexp.MustCompile("Too many list items"),
 			},
 		},
 	})
@@ -2040,30 +2074,30 @@ func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 }
 
 func TestAccComputeInstance_confidentialHyperDiskBootDisk(t *testing.T) {
-	// Currently failing
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 	kms := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-hyperdisk-key1")
 
 	context_1 := map[string]interface{}{
-		"instance_name":         fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
-		"confidential_compute":  true,
-		"key_ring":              kms.KeyRing.Name,
-		"key_name":              kms.CryptoKey.Name,
-		"zone":                  "us-central1-a",
-		"machine_type":          "n2-standard-16",
-
+		"instance_name":                fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+		"confidential_compute":         true,
+		"key_ring":                     kms.KeyRing.Name,
+		"key_name":                     kms.CryptoKey.Name,
+		"zone":                         "us-central1-a",
+		"machine_type":                 "n2d-standard-16",
+		"confidential_instance_config": "confidential_instance_config { \n \t enable_confidential_compute = true \n }",
+		"min_cpu_platform":             "AMD Milan",
 	}
 
 	context_2 := map[string]interface{}{
-		"instance_name":         context_1["instance_name"],
-		"confidential_compute":  false,
-		"key_ring" :             context_1["key_ring"],
-		"key_name":              context_1["key_name"],
-		"zone":                  context_1["zone"],
-		"machine_type":          "c3d-standard-16",
+		"instance_name":                context_1["instance_name"],
+		"confidential_compute":         false,
+		"key_ring":                     context_1["key_ring"],
+		"key_name":                     context_1["key_name"],
+		"zone":                         context_1["zone"],
+		"machine_type":                 "c3d-standard-16",
+		"confidential_instance_config": "", //having enable_confidential_compute = false will cause permadiff.
+		"min_cpu_platform":             "AMD Genoa",
 	}
-
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -3326,11 +3360,11 @@ func TestAccComputeInstance_proactiveAttributionLabel(t *testing.T) {
 }
 
 {{ if ne $.TargetVersionName `ga` -}}
+const errorDeleteAccessConfigWithSecPolicy = "Cannot delete an access config with a security policy set. Please remove the security policy first"
+
 // The tests related to security_policy use network_edge_security_service resource
 // which can only exist one per region. Because of that, all the following tests must run serially.
 func TestAccComputeInstanceNetworkIntefaceWithSecurityPolicy(t *testing.T) {
-	// Consistently failing - https://github.com/hashicorp/terraform-provider-google/issues/17838
-	acctest.SkipIfVcr(t)
 	testCases := map[string]func(t *testing.T){
 		"two_access_config": testAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigs,
 		"two_nics_access_config_with_empty_nil_security_policy":   testAccComputeInstance_nic_securityPolicyCreateWithEmptyAndNullSecurityPolicies,
@@ -3513,11 +3547,7 @@ func testAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfi
 			},
 			{
 				Config: testAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfigsUpdateTwoPoliciesRemoveAccessConfig(suffix, policyName, policyName2, instanceName, "google_compute_region_security_policy.policyforinstance.self_link", "google_compute_region_security_policy.policyforinstance.self_link"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(
-						t, "google_compute_instance.foobar", &instance),
-					testAccCheckComputeInstanceNicAccessConfigHasSecurityPolicy(&instance, policyName),
-				),
+				ExpectError: regexp.MustCompile(errorDeleteAccessConfigWithSecPolicy),
 			},
 			{
 				ResourceName:      "google_compute_instance.foobar",
@@ -3623,11 +3653,7 @@ func testAccComputeInstance_nic_securityPolicyCreateWithAccessConfigUpdateAccess
 			},
 			{
 				Config: testAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsUpdateAccessConfig(suffix, policyName, instanceName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(
-						t, "google_compute_instance.foobar", &instance),
-					testAccCheckComputeInstanceNicAccessConfigHasSecurityPolicy(&instance, policyName),
-				),
+				ExpectError: regexp.MustCompile(errorDeleteAccessConfigWithSecPolicy),
 			},
 			{
 				ResourceName:      "google_compute_instance.foobar",
@@ -4974,6 +5000,156 @@ resource "google_compute_instance" "foobar" {
     resource_manager_tags = {
       "tagKeys/${google_tags_tag_key.key.name}"     = "tagValues/${google_tags_tag_value.value.name}"
       "tagKeys/${google_tags_tag_key.key_new.name}" = "tagValues/${google_tags_tag_value.value_new.name}"
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+}
+`, context)
+}
+
+func testAccComputeInstance_diskResourcePoliciesOnePolicy(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_resource_policy" "test-snapshot-policy" {
+  name    = "test-policy-%{random_suffix}"
+  snapshot_schedule_policy {
+    schedule {
+      hourly_schedule {
+        hours_in_cycle = 1
+        start_time     = "11:00"
+      }
+    }
+  }
+}
+
+resource "google_compute_resource_policy" "test-snapshot-policy2" {
+  name    = "test-policy2-%{random_suffix}"
+  snapshot_schedule_policy {
+    schedule {
+      hourly_schedule {
+        hours_in_cycle = 1
+        start_time     = "22:00"
+      }
+    }
+  }
+}
+
+resource "google_compute_instance" "foobar" {
+  name           = "%{instance_name}"
+  machine_type   = "e2-medium"
+  zone           = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+	  resource_policies = [google_compute_resource_policy.test-snapshot-policy.id]
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+}
+`, context)
+}
+
+func testAccComputeInstance_diskResourcePoliciesOnePolicyUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_resource_policy" "test-snapshot-policy" {
+  name    = "test-policy-%{random_suffix}"
+  snapshot_schedule_policy {
+    schedule {
+      hourly_schedule {
+        hours_in_cycle = 1
+        start_time     = "11:00"
+      }
+    }
+  }
+}
+
+resource "google_compute_resource_policy" "test-snapshot-policy2" {
+  name    = "test-policy2-%{random_suffix}"
+  snapshot_schedule_policy {
+    schedule {
+      hourly_schedule {
+        hours_in_cycle = 1
+        start_time     = "22:00"
+      }
+    }
+  }
+}
+
+resource "google_compute_instance" "foobar" {
+  name           = "%{instance_name}"
+  machine_type   = "e2-medium"
+  zone           = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+	  resource_policies = [google_compute_resource_policy.test-snapshot-policy2.id]
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+}
+`, context)
+}
+
+func testAccComputeInstance_diskResourcePoliciesTwoPolicies(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_resource_policy" "test-snapshot-policy" {
+  name    = "test-policy-%{random_suffix}"
+  snapshot_schedule_policy {
+    schedule {
+      hourly_schedule {
+        hours_in_cycle = 1
+        start_time     = "11:00"
+      }
+    }
+  }
+}
+
+resource "google_compute_resource_policy" "test-snapshot-policy2" {
+  name    = "test-policy2-%{random_suffix}"
+  snapshot_schedule_policy {
+    schedule {
+      hourly_schedule {
+        hours_in_cycle = 1
+        start_time     = "22:00"
+      }
+    }
+  }
+}
+
+resource "google_compute_instance" "foobar" {
+  name           = "%{instance_name}"
+  machine_type   = "e2-medium"
+  zone           = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+	  resource_policies = [google_compute_resource_policy.test-snapshot-policy2.id, google_compute_resource_policy.test-snapshot-policy.id]
+      image = data.google_compute_image.my_image.self_link
     }
   }
 
@@ -8287,10 +8463,18 @@ resource "google_kms_crypto_key_iam_member" "crypto_key" {
   member = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
 }
 
+resource "google_kms_crypto_key_iam_member" "crypto_key_2" {
+  crypto_key_id = "%{key_name}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member = "serviceAccount:service-${data.google_project.project.number}@compute-system.iam.gserviceaccount.com"
+}
+
 resource "google_compute_instance" "foobar" {
   name         = "%{instance_name}"
   machine_type = "%{machine_type}"
   zone         = "%{zone}"
+  %{confidential_instance_config}
+  min_cpu_platform = "%{min_cpu_platform}"
 
   boot_disk {
 
@@ -10258,24 +10442,17 @@ resource "google_compute_instance" "foobar" {
 }
 
 func TestAccComputeInstance_bootDisk_storagePoolSpecified(t *testing.T) {
-	// Currently failing
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	instanceName := fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10))
-	storagePoolName := fmt.Sprintf("tf-test-storage-pool-%s", acctest.RandString(t, 10))
-	storagePoolUrl := fmt.Sprintf("/projects/%s/zones/%s/storagePools/%s", envvar.GetTestProjectFromEnv(), envvar.GetTestZoneFromEnv(), storagePoolName)
+	storagePoolNameLong := acctest.BootstrapComputeStoragePool(t, "basic-1", "hyperdisk-balanced")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				PreConfig: setupTestingStoragePool_HyperdiskBalanced(t, storagePoolName),
-				Config:    testAccComputeInstance_bootDisk_storagePoolSpecified(instanceName, storagePoolUrl, envvar.GetTestZoneFromEnv()),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_compute_instance.foobar", "boot_disk.0.initialize_params.0.storage_pool", storagePoolName),
-				),
+				Config:    testAccComputeInstance_bootDisk_storagePoolSpecified(instanceName, storagePoolNameLong, envvar.GetTestZoneFromEnv()),
 			},
 			{
 				ResourceName:      "google_compute_instance.foobar",
@@ -10284,46 +10461,6 @@ func TestAccComputeInstance_bootDisk_storagePoolSpecified(t *testing.T) {
 			},
 		},
 	})
-
-	cleanupTestingStoragePool(t, storagePoolName)
-}
-
-func setupTestingStoragePool_HyperdiskBalanced(t *testing.T, storagePoolName string) func() {
-	return func() {
-		config := acctest.GoogleProviderConfig(t)
-		headers := make(http.Header)
-		project := envvar.GetTestProjectFromEnv()
-		zone := envvar.GetTestZoneFromEnv()
-		url := fmt.Sprintf("%sprojects/%s/zones/%s/storagePools", config.ComputeBasePath, project, zone)
-		storagePoolTypeUrl := fmt.Sprintf("/projects/%s/zones/%s/storagePoolTypes/hyperdisk-balanced", project, zone)
-		defaultTimeout := 20 * time.Minute
-		obj := make(map[string]interface{})
-		obj["name"] = storagePoolName
-		obj["poolProvisionedCapacityGb"] = 10240
-		obj["poolProvisionedIops"] = 10000
-		obj["poolProvisionedThroughput"] = 1024
-		obj["storagePoolType"] = storagePoolTypeUrl
-		obj["capacityProvisioningType"] = "ADVANCED"
-
-		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config:    config,
-			Method:    "POST",
-			Project:   project,
-			RawURL:    url,
-			UserAgent: config.UserAgent,
-			Body:      obj,
-			Timeout:   defaultTimeout,
-			Headers:   headers,
-		})
-		if err != nil {
-			t.Errorf("Error creating StoragePool: %s", err)
-		}
-
-		err = tpgcompute.ComputeOperationWaitTime(config, res, project, "Creating StoragePool", config.UserAgent, defaultTimeout)
-		if err != nil {
-			t.Errorf("Error waiting to create StoragePool: %s", err)
-		}
-	}
 }
 
 func testAccComputeInstance_bootDisk_storagePoolSpecified(instanceName, storagePoolUrl, zone string) string {

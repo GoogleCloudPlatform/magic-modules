@@ -228,8 +228,8 @@ properties:
         description: |
           An optional SHA1 checksum of the disk image before unpackaging.
           This is provided by the client when the disk image is created.
-      # TODO(alexstephen): Figure out cross-module ResourceRefs
         api_name: sha1Checksum
+      # TODO(alexstephen): Figure out cross-module ResourceRefs
       - name: 'source'
         type: String
         description: |

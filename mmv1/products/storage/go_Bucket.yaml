@@ -238,8 +238,8 @@ properties:
         - name: 'entityId'
           type: String
           description: 'The ID for the entity'
-        # | 'etag' is not applicable for state convergence.
           output: true
+        # | 'etag' is not applicable for state convergence.
         - name: 'generation'
           type: Integer
           description:
@@ -275,6 +275,7 @@ properties:
           enum_values:
             - 'OWNER'
             - 'READER'
+  # | 'etag' is not applicable for state convergence.
   - name: 'id'
     type: String
     description: |

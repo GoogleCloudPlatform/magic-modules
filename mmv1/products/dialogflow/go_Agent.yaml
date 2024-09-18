@@ -24,6 +24,7 @@ references:
     'Official Documentation': 'https://cloud.google.com/dialogflow/docs/'
   api: 'https://cloud.google.com/dialogflow/docs/reference/rest/v2/projects/agent'
 docs:
+# Only one agent per project, API does not have an agent ID
 id_format: '{{project}}'
 base_url: 'projects/{{project}}/agent'
 self_link: 'projects/{{project}}/agent'
@@ -35,7 +36,7 @@ timeouts:
   update_minutes: 40
   delete_minutes: 20
 custom_code:
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'dialogflow_agent_full'
     primary_resource_id: 'full_agent'

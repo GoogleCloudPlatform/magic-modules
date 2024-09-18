@@ -44,7 +44,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'storage_object_access_control_public_object'
     primary_resource_id: 'public_rule'
@@ -83,8 +83,8 @@ properties:
   - name: 'entityId'
     type: String
     description: 'The ID for the entity'
-  # | 'etag' is not applicable for state convergence.
     output: true
+  # | 'etag' is not applicable for state convergence.
   - name: 'generation'
     type: Integer
     description:
