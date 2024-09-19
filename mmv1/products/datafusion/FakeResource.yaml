@@ -37,7 +37,7 @@ timeouts: !ruby/object:Api::Timeouts
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: 'fake_example_test`
+    name: 'fake_example_test'
     primary_resource_id: 'zone'
     vars:
       instance_name: 'my-instance'
