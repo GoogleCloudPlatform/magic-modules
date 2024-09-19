@@ -52,6 +52,7 @@ async:
     message: 'message'
   include_project: true
 custom_code:
+# There is a handwritten sweeper that provides a list of locations to sweep
 exclude_sweeper: true
 error_abort_predicates:
 
@@ -66,7 +67,8 @@ examples:
       management_cluster_id: 'sample-mgmt-cluster'
     test_env_vars:
       region: 'REGION'
-    skip_test: true
+ # update tests will take care of create and update. PC and cluster creation is expensive and node reservation is required.
+    exclude_test: true
   - name: 'vmware_engine_cluster_full'
     primary_resource_id: 'vmw-ext-cluster'
     vars:
@@ -76,7 +78,8 @@ examples:
       management_cluster_id: 'sample-mgmt-cluster'
     test_env_vars:
       region: 'REGION'
-    skip_test: true
+ # update tests will take care of create and update. PC and cluster creation is expensive and node reservation is required.
+    exclude_test: true
 parameters:
   - name: 'parent'
     type: String

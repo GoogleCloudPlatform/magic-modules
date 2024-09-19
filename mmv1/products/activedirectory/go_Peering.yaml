@@ -58,8 +58,9 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
-    skip_test: true
-    skip_import_test: true
+      # skip the test until Active Directory setup issue got resolved
+    exclude_test: true
+    exclude_import_test: true
 parameters:
   - name: 'peeringId'
     type: String

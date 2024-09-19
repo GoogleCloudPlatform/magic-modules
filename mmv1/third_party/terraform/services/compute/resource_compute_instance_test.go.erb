@@ -3361,11 +3361,11 @@ func TestAccComputeInstance_proactiveAttributionLabel(t *testing.T) {
 }
 
 <% unless version == 'ga' -%>
+const errorDeleteAccessConfigWithSecPolicy = "Cannot delete an access config with a security policy set. Please remove the security policy first"
+
 // The tests related to security_policy use network_edge_security_service resource
 // which can only exist one per region. Because of that, all the following tests must run serially.
 func TestAccComputeInstanceNetworkIntefaceWithSecurityPolicy(t *testing.T) {
-	// Consistently failing - https://github.com/hashicorp/terraform-provider-google/issues/17838
-	acctest.SkipIfVcr(t)
 	testCases := map[string]func(t *testing.T){
 		"two_access_config": testAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigs,
 		"two_nics_access_config_with_empty_nil_security_policy":   testAccComputeInstance_nic_securityPolicyCreateWithEmptyAndNullSecurityPolicies,
@@ -3548,11 +3548,7 @@ func testAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfi
 			},
 			{
 				Config: testAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfigsUpdateTwoPoliciesRemoveAccessConfig(suffix, policyName, policyName2, instanceName, "google_compute_region_security_policy.policyforinstance.self_link", "google_compute_region_security_policy.policyforinstance.self_link"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(
-						t, "google_compute_instance.foobar", &instance),
-					testAccCheckComputeInstanceNicAccessConfigHasSecurityPolicy(&instance, policyName),
-				),
+				ExpectError: regexp.MustCompile(errorDeleteAccessConfigWithSecPolicy),
 			},
 			{
 				ResourceName:      "google_compute_instance.foobar",
@@ -3658,11 +3654,7 @@ func testAccComputeInstance_nic_securityPolicyCreateWithAccessConfigUpdateAccess
 			},
 			{
 				Config: testAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsUpdateAccessConfig(suffix, policyName, instanceName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(
-						t, "google_compute_instance.foobar", &instance),
-					testAccCheckComputeInstanceNicAccessConfigHasSecurityPolicy(&instance, policyName),
-				),
+				ExpectError: regexp.MustCompile(errorDeleteAccessConfigWithSecPolicy),
 			},
 			{
 				ResourceName:      "google_compute_instance.foobar",
@@ -8466,18 +8458,6 @@ data "google_compute_image" "my_image" {
 
 data "google_project" "project" {}
 
-resource "google_kms_crypto_key_iam_member" "crypto_key" {
-  crypto_key_id = "%{key_name}"
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
-}
-
-resource "google_kms_crypto_key_iam_member" "crypto_key_2" {
-  crypto_key_id = "%{key_name}"
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member = "serviceAccount:service-${data.google_project.project.number}@compute-system.iam.gserviceaccount.com"
-}
-
 resource "google_compute_instance" "foobar" {
   name         = "%{instance_name}"
   machine_type = "%{machine_type}"
@@ -8499,7 +8479,6 @@ resource "google_compute_instance" "foobar" {
   network_interface {
     network = "default"
   }
-  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
 
 }
 `, context)

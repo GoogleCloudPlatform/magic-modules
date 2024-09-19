@@ -65,6 +65,7 @@ custom_code:
   pre_create: 'templates/terraform/pre_create/go/alloydb_cluster.go.tmpl'
   pre_update: 'templates/terraform/pre_update/go/alloydb_cluster.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/go/alloydb_cluster.go.tmpl'
+# Skipping the sweeper because we need to force-delete clusters.
 exclude_sweeper: true
 examples:
   - name: 'alloydb_cluster_basic'
@@ -89,14 +90,14 @@ examples:
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
-    skip_test: true
+    exclude_test: true
   - name: 'alloydb_secondary_cluster_basic'
     primary_resource_id: 'secondary'
     vars:
       alloydb_primary_cluster_name: 'alloydb-primary-cluster'
       alloydb_primary_instance_name: 'alloydb-primary-instance'
       alloydb_secondary_cluster_name: 'alloydb-secondary-cluster'
-    skip_test: true
+    exclude_test: true
   - name: 'alloydb_secondary_cluster_basic_test'
     primary_resource_id: 'secondary'
     vars:
@@ -106,7 +107,7 @@ examples:
       network_name: 'alloydb-network'
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
-    skip_docs: true
+    exclude_docs: true
 virtual_fields:
   - name: 'deletion_policy'
     description: |

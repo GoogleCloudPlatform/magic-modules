@@ -76,7 +76,8 @@ examples:
     ignore_read_extra:
       - 'noop_on_destroy'
       - 'deployment.0.zip'
-    skip_test: true
+    # https://github.com/hashicorp/terraform-provider-google/issues/19040
+    exclude_test: true
 virtual_fields:
   - name: 'noop_on_destroy'
     description: |
@@ -328,6 +329,7 @@ properties:
             - 'REDIRECT_HTTP_RESPONSE_CODE_307'
         - name: 'script'
           type: NestedObject
+          # TODO (mbang): Exactly one of script, staticFiles, or apiEndpoint must be set
           description: |
             Executes a script to handle the requests that match this URL pattern.
             Only the auto value is supported for Node.js in the App Engine standard environment, for example "script:" "auto".
@@ -339,6 +341,7 @@ properties:
               required: true
         - name: 'staticFiles'
           type: NestedObject
+          # TODO (mbang): Exactly one of script, staticFiles, or apiEndpoint must be set
           description: |
             Files served directly to the user for a given URL, such as images, CSS stylesheets, or JavaScript source files.
             Static file handlers describe which files in the application directory are static files, and which URLs serve them.

@@ -51,7 +51,8 @@ exclude_sweeper: true
 examples:
   - name: 'cloudids_endpoint'
     primary_resource_id: 'example-endpoint'
-    skip_test: true
+    # skip_test set to true since the example is identical to what's in the _test.go file.
+    exclude_test: true
 parameters:
   - name: 'location'
     type: String

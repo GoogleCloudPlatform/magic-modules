@@ -47,9 +47,10 @@ async:
     message: 'message'
 custom_code:
 examples:
+  # Skip the vpnconnection test as we only have limited machine resources, and the vpn connection is not a critical feature.
   - name: 'edgecontainer_vpn_connection'
     primary_resource_id: 'default'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'name'
     type: String

@@ -40,9 +40,8 @@ import_format: ['{{name}}']
 skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name:
-      'cloud_identity_groups_basic'
-      # Has a handwritten test due to CloudIdentityGroup-related tests needing to run synchronously
+    name: 'cloud_identity_groups_basic'
+    # Has a handwritten test due to CloudIdentityGroup-related tests needing to run synchronously
     skip_test: true
     primary_resource_id: 'cloud_identity_group_basic'
     vars:

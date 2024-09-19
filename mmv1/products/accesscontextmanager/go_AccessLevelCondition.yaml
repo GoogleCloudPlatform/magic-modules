@@ -37,6 +37,11 @@ docs:
 id_format: '{{access_level}}'
 base_url: ''
 self_link: '{{access_level}}'
+# This is an unusual API, so we need to use a few fields to map the methods
+# to the right URL.
+# create_url is the Create URL
+# base_url is the Get and Delete and Patch URL. It is empty on purpose.
+# List won't work yet. It should share a URL with Create.
 create_url: '{{access_level}}'
 create_verb: 'PATCH'
 update_mask: true
@@ -45,6 +50,7 @@ immutable: true
 mutex: '{{access_level}}'
 import_format:
   - '{{access_level}}'
+ # no unique way to specify
 exclude_import: true
 timeouts:
   insert_minutes: 20
@@ -73,6 +79,7 @@ nested_query:
   modify_by_patch: true
 custom_code:
 exclude_tgc: true
+# Skipping the sweeper due to the non-standard base_url and because this is fine-grained under AccessLevel
 exclude_sweeper: true
 examples:
   - name: 'access_context_manager_access_level_condition_basic'
@@ -80,7 +87,7 @@ examples:
     vars:
       access_level_name: 'chromeos_no_lock'
       account_id: 'my-account-id'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'accessLevel'
     type: ResourceRef

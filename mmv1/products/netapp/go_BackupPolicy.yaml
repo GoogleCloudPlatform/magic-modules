@@ -46,6 +46,7 @@ async:
   result:
     resource_inside_response: false
 custom_code:
+# Skipping the sweeper since we need to sweep multiple regions
 exclude_sweeper: true
 examples:
   - name: 'netapp_backup_policy_full'

@@ -40,6 +40,7 @@ custom_code:
   post_create: 'templates/terraform/post_create/go/org_security_policy_rule.go.tmpl'
   post_delete: 'templates/terraform/post_create/go/org_security_policy_rule.go.tmpl'
   post_update: 'templates/terraform/post_create/go/org_security_policy_rule.go.tmpl'
+    # TODO: Remove once b/154369201 is closed.
   test_check_destroy: 'templates/terraform/custom_check_destroy/go/skip_delete_during_test.go.tmpl'
 examples:
   - name: 'organization_security_policy_rule_basic'
