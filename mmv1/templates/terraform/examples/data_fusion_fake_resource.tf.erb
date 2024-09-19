@@ -1,7 +1,6 @@
-resource "google_data_fusion_instance" "<%= ctx[:primary_resource_id] %>" {
+resource "google_data_fusion_fake_resource" "<%= ctx[:primary_resource_id] %>" {
   name   = "<%= ctx[:vars]["instance_name"] %>"
   region = "us-central1"
   type   = "BASIC"
-  fake_field = "test"
   <%= ctx[:vars]['prober_test_run'] %>
 }
