@@ -62,6 +62,7 @@ properties:
       \`projects/my-project/locations/global/logScopes/my-log-scope\`'
     required: true
     immutable: true
+    ignore_read: true
     diff_suppress_func: 'tpgresource.CompareResourceNames'
   - !ruby/object:Api::Type::Array
     # This has to be camelCase, even though it's snakeCase in proto definiation.
