@@ -35,15 +35,9 @@ examples:
       log_view_name_2: 'view2'
     test_env_vars:
       project: :PROJECT_NAME
-  # - !ruby/object:Provider::Terraform::Examples
-  #   name: 'logging_log_scope_long_name'
-  #   primary_resource_id: 'logging_log_scope'
-  #   test_env_vars:
-  #     project: :PROJECT_NAME
-  #   skip_docs: true
-# custom_code: !ruby/object:Provider::Terraform::CustomCode
-#   encoder: templates/terraform/encoders/logging_log_scope.go.erb
-#   pre_read: templates/terraform/pre_read/logging_log_scope.go.erb
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  encoder: templates/terraform/encoders/logging_log_scope.go.erb
+  # pre_read: templates/terraform/pre_read/logging_log_scope.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: parent
@@ -68,10 +62,10 @@ properties:
       \`projects/my-project/locations/global/logScopes/my-log-scope\`'
     required: true
     immutable: true
-    ignore_read: true
     diff_suppress_func: 'tpgresource.CompareResourceNames'
   - !ruby/object:Api::Type::Array
-    name: resource_names
+    # This has to be camelCase, even though it's snakeCase in proto definiation.
+    name: resourceNames
     item_type: Api::Type::String
     required: true
     description:
