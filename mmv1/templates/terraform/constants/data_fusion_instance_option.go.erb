@@ -17,7 +17,9 @@ func instanceOptionsDiffSuppress(k, old, new string, d *schema.ResourceData) boo
 		return true
 	}
 
-	testString := <%= "test" -%>
+	<% unless version == 'ga' -%>
+	testString = "test1"
+	<% end -%>
 
 	// For other keys, don't suppress diff.
 	return false
