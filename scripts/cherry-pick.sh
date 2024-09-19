@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+
+# Example command
+# sh scripts/cherry-pick <hash of a post-switchover commit>
+
 set -e
 safecommit=$1
 

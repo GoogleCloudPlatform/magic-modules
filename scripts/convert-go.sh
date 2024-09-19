@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+
+# Example command (in a pre-switchover commit)
+# sh scripts/convert-go.sh <provider output directory> <comma separated list of files that have changed in the PR> 
+
 set -e
 outputPath=$1
 files=$2
