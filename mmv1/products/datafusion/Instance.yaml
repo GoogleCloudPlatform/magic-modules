@@ -48,7 +48,7 @@ examples:
     test_vars_overrides:
       # Mark for testing to avoid service networking connection usage that is not cleaned up
       prober_test_run: '`options = { prober_test_run = "true" }`'
-    exclude_test: true
+    skip_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'data_fusion_instance_full'
     primary_resource_id: 'extended_instance'
