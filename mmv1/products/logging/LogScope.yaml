@@ -24,7 +24,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/logging/docs/apis'
   api: 'https://cloud.google.com/logging/docs/reference/v2/rest/v2/projects.locations.logScopes'
-description: 'Describes a group of resources to read log entries from' 
+description: 'Describes a group of resources to read log entries from'
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'logging_log_scope_basic'
