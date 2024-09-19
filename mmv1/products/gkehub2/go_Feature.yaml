@@ -57,57 +57,58 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/features/{{name}}'
     - '{{name}}'
 custom_code:
+# Skip sweeper gen since this is a child resource.
 exclude_sweeper: true
 legacy_long_form_project: true
 examples:
   - name: 'gkehub_feature_multi_cluster_ingress'
     primary_resource_id: 'feature'
     primary_resource_name: 'fmt.Sprint("multiclusteringress")'
-    skip_test: true
+    exclude_test: true
   - name: 'gkehub_feature_multi_cluster_service_discovery'
     primary_resource_id: 'feature'
     primary_resource_name: 'fmt.Sprint("multiclusterservicediscovery")'
-    skip_test: true
+    exclude_test: true
   - name: 'gkehub_feature_anthos_service_mesh'
     primary_resource_id: 'feature'
     primary_resource_name: 'fmt.Sprint("servicemesh")'
-    skip_test: true
+    exclude_test: true
   - name: 'enable_fleet_observability_for_default_logs_with_COPY'
     primary_resource_id: 'feature'
     primary_resource_name: 'fmt.Sprint("fleetobservability")'
-    skip_test: true
+    exclude_test: true
   - name: 'enable_fleet_observability_for_scope_logs_with_MOVE'
     primary_resource_id: 'feature'
     primary_resource_name: 'fmt.Sprint("fleetobservability")'
-    skip_test: true
+    exclude_test: true
   - name: 'enable_fleet_observability_for_both_default_and_scope_logs'
     primary_resource_id: 'feature'
     primary_resource_name: 'fmt.Sprint("fleetobservability")'
-    skip_test: true
+    exclude_test: true
   - name: 'enable_fleet_default_member_config_service_mesh'
     primary_resource_id: 'feature'
     primary_resource_name: 'fmt.Sprintf("servicemesh")'
-    skip_test: true
+    exclude_test: true
   - name: 'enable_fleet_default_member_config_configmanagement'
     primary_resource_id: 'feature'
     primary_resource_name: 'fmt.Sprintf("configmanagement")'
-    skip_test: true
+    exclude_test: true
   - name: 'enable_fleet_default_member_config_policycontroller'
     primary_resource_id: 'feature'
     primary_resource_name: 'fmt.Sprintf("policycontroller")'
-    skip_test: true
+    exclude_test: true
   - name: 'enable_fleet_default_member_config_policycontroller_full'
     primary_resource_id: 'feature'
     primary_resource_name: 'fmt.Sprintf("policycontroller")'
-    skip_test: true
+    exclude_test: true
   - name: 'enable_fleet_default_member_config_policycontroller_minimal'
     primary_resource_id: 'feature'
     primary_resource_name: 'fmt.Sprintf("policycontroller")'
-    skip_test: true
+    exclude_test: true
   - name: 'gkehub_feature_clusterupgrade'
     primary_resource_id: 'feature'
     primary_resource_name: 'fmt.Sprint("clusterupgrade")'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'location'
     type: String

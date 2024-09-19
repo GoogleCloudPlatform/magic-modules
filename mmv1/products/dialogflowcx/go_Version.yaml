@@ -67,7 +67,7 @@ examples:
     primary_resource_id: 'version_1'
     vars:
       agent_name: 'issue-12880'
-    skip_docs: true
+    exclude_docs: true
 parameters:
   - name: 'parent'
     type: String

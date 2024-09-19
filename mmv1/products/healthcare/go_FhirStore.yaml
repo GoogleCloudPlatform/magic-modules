@@ -37,7 +37,7 @@ timeouts:
 custom_code:
   decoder: 'templates/terraform/decoders/go/long_name_to_self_link.go.tmpl'
   custom_import: 'templates/terraform/custom_import/go/healthcare_fhir_store.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'healthcare_fhir_store_basic'
     primary_resource_id: 'default'
@@ -60,7 +60,7 @@ examples:
       dataset_name: 'example-dataset'
       fhir_store_name: 'example-fhir-store'
       pubsub_topic: 'fhir-notifications'
-    skip_docs: true
+    exclude_docs: true
   - name: 'healthcare_fhir_store_notification_configs'
     primary_resource_id: 'default'
     vars:

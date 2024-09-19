@@ -252,7 +252,7 @@ type Resource struct {
 	StateUpgraders bool `yaml:"state_upgraders"`
 
 	// Do not apply the default attribution label
-	SkipAttributionLabel bool `yaml:"skip_attribution_label"`
+	ExcludeAttributionLabel bool `yaml:"exclude_attribution_label"`
 
 	// This block inserts the named function and its attribute into the
 	// resource schema -- the code for the migrate_state function must
@@ -267,12 +267,12 @@ type Resource struct {
 
 	// Set to true for resources that are unable to be read from the API, such as
 	// public ca external account keys
-	SkipRead bool `yaml:"skip_read"`
+	ExcludeRead bool `yaml:"exclude_read"`
 
 	// Set to true for resources that wish to disable automatic generation of default provider
 	// value customdiff functions
 	// TODO rewrite: 1 instance used
-	SkipDefaultCdiff bool `yaml:"skip_default_cdiff"`
+	ExcludeDefaultCdiff bool `yaml:"exclude_default_cdiff"`
 
 	// This enables resources that get their project via a reference to a different resource
 	// instead of a project field to use User Project Overrides
@@ -604,7 +604,7 @@ func (r *Resource) AddLabelsRelatedFields(props []*Type, parent *Type) []*Type {
 
 func (r *Resource) addLabelsFields(props []*Type, parent *Type, labels *Type) []*Type {
 	if parent == nil || parent.FlattenObject {
-		if r.SkipAttributionLabel {
+		if r.ExcludeAttributionLabel {
 			r.CustomDiff = append(r.CustomDiff, "tpgresource.SetLabelsDiffWithoutAttributionLabel")
 		} else {
 			r.CustomDiff = append(r.CustomDiff, "tpgresource.SetLabelsDiff")
@@ -1192,8 +1192,7 @@ func (r Resource) ExtractIdentifiers(url string) []string {
 	return result
 }
 
-// For example, "projects/{{project}}/schemas/{{name}}", "{{project}}/{{name}}", "{{name}}"
-func (r Resource) RawImportIdFormatsFromIam() []string {
+func (r Resource) IamImportFormats() []string {
 	var importFormat []string
 
 	if r.IamPolicy != nil {
@@ -1202,8 +1201,12 @@ func (r Resource) RawImportIdFormatsFromIam() []string {
 	if len(importFormat) == 0 {
 		importFormat = r.ImportFormat
 	}
+	return importFormat
+}
 
-	return ImportIdFormats(importFormat, r.Identity, r.BaseUrl)
+// For example, "projects/{{project}}/schemas/{{name}}", "{{project}}/{{name}}", "{{name}}"
+func (r Resource) RawImportIdFormatsFromIam() []string {
+	return ImportIdFormats(r.IamImportFormats(), r.Identity, r.BaseUrl)
 }
 
 // For example, projects/(?P<project>[^/]+)/schemas/(?P<schema>[^/]+)", "(?P<project>[^/]+)/(?P<schema>[^/]+)", "(?P<schema>[^/]+)
@@ -1291,7 +1294,7 @@ func (r Resource) IamAttributes() []string {
 // we can reuse that config to create a resource to test IAM resources with.
 func (r Resource) FirstTestExample() resource.Examples {
 	examples := google.Reject(r.Examples, func(e resource.Examples) bool {
-		return e.SkipTest
+		return e.ExcludeTest
 	})
 	examples = google.Reject(examples, func(e resource.Examples) bool {
 		return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(e.MinVersion)) < 0)
@@ -1302,7 +1305,7 @@ func (r Resource) FirstTestExample() resource.Examples {
 
 func (r Resource) ExamplePrimaryResourceId() string {
 	examples := google.Reject(r.Examples, func(e resource.Examples) bool {
-		return e.SkipTest
+		return e.ExcludeTest
 	})
 	examples = google.Reject(examples, func(e resource.Examples) bool {
 		return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(e.MinVersion)) < 0)
@@ -1580,7 +1583,7 @@ func (r Resource) IsExcluded() bool {
 
 func (r Resource) TestExamples() []resource.Examples {
 	return google.Reject(google.Reject(r.Examples, func(e resource.Examples) bool {
-		return e.SkipTest
+		return e.ExcludeTest
 	}), func(e resource.Examples) bool {
 		return e.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, e.MinVersion)
 	})
@@ -1600,4 +1603,102 @@ func (r Resource) StateUpgradersCount() []int {
 		nums = append(nums, i)
 	}
 	return nums
+}
+
+func (r Resource) CaiProductBaseUrl() string {
+	version := r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName)
+	baseUrl := version.CaiBaseUrl
+	if baseUrl == "" {
+		baseUrl = version.BaseUrl
+	}
+	return baseUrl
+}
+
+// Returns the Cai product backend name from the version base url
+// base_url: https://accessapproval.googleapis.com/v1/ -> accessapproval
+func (r Resource) CaiProductBackendName(caiProductBaseUrl string) string {
+	backendUrl := strings.Split(strings.Split(caiProductBaseUrl, "://")[1], ".googleapis.com")[0]
+	return strings.ToLower(backendUrl)
+}
+
+// Gets the Cai asset name template, which could include version
+// For example: //monitoring.googleapis.com/v3/projects/{{project}}/services/{{service_id}}
+func (r Resource) rawCaiAssetNameTemplate(productBackendName string) string {
+	caiBaseUrl := ""
+	if r.CaiBaseUrl != "" {
+		caiBaseUrl = fmt.Sprintf("%s/{{name}}", r.CaiBaseUrl)
+	}
+	if caiBaseUrl == "" {
+		caiBaseUrl = r.SelfLink
+	}
+	if caiBaseUrl == "" {
+		caiBaseUrl = fmt.Sprintf("%s/{{name}}", r.BaseUrl)
+	}
+	return fmt.Sprintf("//%s.googleapis.com/%s", productBackendName, caiBaseUrl)
+}
+
+// Gets the Cai asset name template, which doesn't include version
+// For example: //monitoring.googleapis.com/projects/{{project}}/services/{{service_id}}
+func (r Resource) CaiAssetNameTemplate(productBackendName string) string {
+	template := r.rawCaiAssetNameTemplate(productBackendName)
+	versionRegex, err := regexp.Compile(`\/(v\d[^\/]*)\/`)
+	if err != nil {
+		log.Fatalf("Cannot compile the regular expression: %v", err)
+	}
+
+	return versionRegex.ReplaceAllString(template, "/")
+}
+
+// Gets the Cai API version
+func (r Resource) CaiApiVersion(productBackendName, caiProductBaseUrl string) string {
+	template := r.rawCaiAssetNameTemplate(productBackendName)
+
+	versionRegex, err := regexp.Compile(`\/(v\d[^\/]*)\/`)
+	if err != nil {
+		log.Fatalf("Cannot compile the regular expression: %v", err)
+	}
+
+	apiVersion := strings.ReplaceAll(versionRegex.FindString(template), "/", "")
+	if apiVersion != "" {
+		return apiVersion
+	}
+
+	splits := strings.Split(caiProductBaseUrl, "/")
+	for i := 0; i < len(splits); i++ {
+		if splits[len(splits)-1-i] != "" {
+			return splits[len(splits)-1-i]
+		}
+	}
+	return ""
+}
+
+// For example: the uri "projects/{{project}}/schemas/{{name}}"
+// The paramerter is "schema" as "project" is not returned.
+func (r Resource) CaiIamResourceParams() []string {
+	resourceUri := strings.ReplaceAll(r.IamResourceUri(), "{{name}}", fmt.Sprintf("{{%s}}", r.IamParentResourceName()))
+
+	return google.Reject(r.ExtractIdentifiers(resourceUri), func(param string) bool {
+		return param == "project"
+	})
+}
+
+// Gets the Cai IAM asset name template
+// For example: //monitoring.googleapis.com/v3/projects/{{project}}/services/{{service_id}}
+func (r Resource) CaiIamAssetNameTemplate(productBackendName string) string {
+	iamImportFormat := r.IamImportFormats()
+	if len(iamImportFormat) > 0 {
+		name := strings.ReplaceAll(iamImportFormat[0], "{{name}}", fmt.Sprintf("{{%s}}", r.IamParentResourceName()))
+		name = strings.ReplaceAll(name, "%", "")
+		return fmt.Sprintf("//%s.googleapis.com/%s", productBackendName, name)
+	}
+
+	caiBaseUrl := r.CaiBaseUrl
+
+	if caiBaseUrl == "" {
+		caiBaseUrl = r.SelfLink
+	}
+	if caiBaseUrl == "" {
+		caiBaseUrl = r.BaseUrl
+	}
+	return fmt.Sprintf("//%s.googleapis.com/%s/{{%s}}", productBackendName, caiBaseUrl, r.IamParentResourceName())
 }

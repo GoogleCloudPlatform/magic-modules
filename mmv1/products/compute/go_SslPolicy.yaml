@@ -79,6 +79,7 @@ properties:
       character, which cannot be a dash.
     required: true
     immutable: true
+    # TODO: profile, minTlsVersion, enabledFeatures, customFeatures, fingerprint, warnings, kind
   - name: 'profile'
     type: Enum
     description: |

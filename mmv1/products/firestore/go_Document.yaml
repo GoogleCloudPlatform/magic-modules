@@ -95,8 +95,8 @@ properties:
     type: String
     description: |
       A relative path to the collection this document exists within
-    # This is a string instead of a NestedObject because fields can be deeply nested
     output: true
+    # This is a string instead of a NestedObject because fields can be deeply nested
   - name: 'fields'
     type: String
     description: |

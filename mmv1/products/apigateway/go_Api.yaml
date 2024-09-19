@@ -71,7 +71,7 @@ examples:
     min_version: 'beta'
     vars:
       api_id: 'my-api'
-    skip_docs: true
+    exclude_docs: true
 parameters:
   - name: 'apiId'
     type: String

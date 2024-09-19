@@ -43,7 +43,7 @@ iam_policy:
     - '{{%dataset}}/consentStores/{{name}}'
     - '{{name}}'
 custom_code:
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'healthcare_consent_store_basic'
     primary_resource_id: 'my-consent'

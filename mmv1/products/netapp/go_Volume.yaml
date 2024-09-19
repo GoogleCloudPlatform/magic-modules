@@ -287,6 +287,7 @@ properties:
     description: |-
       Used to create this volume from a snapshot (= cloning) or an backup.
     immutable: true
+    # This parameter is only used at CREATE. READs will omit it.
     ignore_read: true
     properties:
       - name: 'sourceSnapshot'
@@ -515,3 +516,29 @@ properties:
     description: |
       Optional. Flag indicating if the volume will have an IP address per node for volumes supporting multiple IP endpoints.
       Only the volume with largeCapacity will be allowed to have multiple endpoints.
+  - name: 'coldTierSizeGib'
+    type: String
+    description: |
+      Output only. Size of the volume cold tier data in GiB.
+    output: true
+  - name: 'tieringPolicy'
+    type: NestedObject
+    description: |-
+      Tiering policy for the volume.
+    update_mask_fields:
+      - 'tiering_policy.cooling_threshold_days'
+      - 'tiering_policy.tier_action'
+    properties:
+      - name: 'coolingThresholdDays'
+        type: Integer
+        description: |
+          Optional. Time in days to mark the volume's data block as cold and make it eligible for tiering, can be range from 7-183.
+          Default is 31.
+      - name: 'tierAction'
+        type: Enum
+        description: |
+          Optional. Flag indicating if the volume has tiering policy enable/pause. Default is PAUSED.
+        default_value: "PAUSED"
+        enum_values:
+          - 'ENABLED'
+          - 'PAUSED'

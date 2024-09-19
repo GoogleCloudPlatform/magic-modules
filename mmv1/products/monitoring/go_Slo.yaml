@@ -30,6 +30,7 @@ references:
 docs:
 id_format: '{{name}}'
 base_url: 'v3/projects/{{project}}/services/{{service}}/serviceLevelObjectives'
+# name = projects/{{project}}/services/{{service}}/serviceLevelObjectives/{{slo_id}}
 self_link: 'v3/{{name}}'
 create_url: 'v3/projects/{{project}}/services/{{service}}/serviceLevelObjectives?serviceLevelObjectiveId={{slo_id}}'
 update_verb: 'PATCH'
@@ -405,6 +406,8 @@ properties:
           - 'service_level_indicator.0.request_based_sli'
           - 'service_level_indicator.0.windows_based_sli'
         properties:
+          # NOTE: If adding properties to windowsBasedSli, remember to add to the
+          # custom updateMask fields in property overrides.
           - name: 'windowPeriod'
             type: String
             description: |
@@ -741,7 +744,6 @@ properties:
                       max value for the range (inclusive). If not given,
                       will be set to "infinity", defining an open range
                       ">= range.min"
-        # END window_criterion FIELDS
                     at_least_one_of:
                       - 'service_level_indicator.0.windows_based_sli.0.metric_sum_in_range.0.range.0.min'
                       - 'service_level_indicator.0.windows_based_sli.0.metric_sum_in_range.0.range.0.max'

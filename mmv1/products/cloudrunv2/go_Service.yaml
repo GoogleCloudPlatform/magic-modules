@@ -130,6 +130,7 @@ examples:
       cloud_run_service_name: 'cloudrun-service'
     ignore_read_extra:
       - 'deletion_protection'
+    # Currently failing
     skip_vcr: true
   - name: 'cloudrunv2_service_mount_nfs'
     primary_resource_id: 'default'
@@ -138,6 +139,7 @@ examples:
       cloud_run_service_name: 'cloudrun-service'
     ignore_read_extra:
       - 'deletion_protection'
+    # Currently failing
     skip_vcr: true
   - name: 'cloudrunv2_service_mesh'
     primary_resource_id: 'default'
@@ -576,6 +578,10 @@ properties:
                     HTTPGet specifies the http request to perform.
                   send_empty_value: true
                   allow_empty_object: true
+                  # exactly_one_of:
+                  #   - template.0.containers.0.startupProbe.0.httpGet
+                  #   - template.0.containers.0.startupProbe.0.tcpSocket
+                  #   - template.0.containers.0.startupProbe.0.grpc
                   properties:
                     - name: 'path'
                       type: String
@@ -704,6 +710,10 @@ properties:
                     TCPSocket specifies an action involving a TCP port. Exactly one of HTTPGet or TCPSocket must be specified.
                   send_empty_value: true
                   allow_empty_object: true
+                  # exactly_one_of:
+                  #   - template.0.containers.0.startupProbe.0.httpGet
+                  #   - template.0.containers.0.startupProbe.0.tcpSocket
+                  #   - template.0.containers.0.startupProbe.0.grpc
                   properties:
                     - name: 'port'
                       type: Integer
@@ -717,6 +727,10 @@ properties:
                     GRPC specifies an action involving a GRPC port.
                   send_empty_value: true
                   allow_empty_object: true
+                  # exactly_one_of:
+                  #   - template.0.containers.0.startupProbe.0.httpGet
+                  #   - template.0.containers.0.startupProbe.0.tcpSocket
+                  #   - template.0.containers.0.startupProbe.0.grpc
                   properties:
                     - name: 'port'
                       type: Integer
@@ -808,6 +822,11 @@ properties:
               description: |-
                 Ephemeral storage used as a shared volume.
               min_version: 'beta'
+              # exactly_one_of:
+              #   - template.0.volumes.0.secret
+              #   - template.0.volumes.0.cloudSqlInstance
+              #   - template.0.volumes.0.emptyDir
+              #   - template.0.volumes.0.gcs
               properties:
                 - name: 'medium'
                   type: Enum
