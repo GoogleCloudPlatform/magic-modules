@@ -56,6 +56,33 @@ examples:
       instance_name: "basic-instance"
       hub_name: "basic-hub1"
       spoke_name: "basic-spoke"
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'network_connectivity_spoke_vpn_tunnel_basic'
+    primary_resource_id: 'tunnel1'
+    vars:
+      network_name: "basic-network"
+      subnetwork_name: "basic-subnetwork"
+      gateway_name: "vpn-gateway"
+      external_gateway_name: "external-vpn-gateway"
+      router_name: "external-vpn-gateway"
+      vpn_tunnel_1_name: "tunnel1"
+      vpn_tunnel_2_name: "tunnel2"
+      router_interface_1_name: "router-interface1"
+      router_peer_1_name: "router-peer1"
+      router_interface_2_name: "router-interface2"
+      router_peer_2_name: "router-peer2"
+      hub_name: "basic-hub1"
+      vpn_tunnel_1_spoke_name: "vpn-tunnel-1-spoke"
+      vpn_tunnel_2_spoke_name: "vpn-tunnel-2-spoke"
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'network_connectivity_spoke_interconnect_attachment_basic'
+    primary_resource_id: 'primary'
+    vars:
+      hub_name: "basic-hub1"
+      network_name: "basic-network"
+      router_name: "external-vpn-gateway"
+      interconnect_attachment_name: "partner-interconnect1"
+      interconnect_attachment_spoke_name: "interconnect-attachment-spoke"
 description: "The NetworkConnectivity Spoke resource"
 parameters:
   - !ruby/object:Api::Type::String
@@ -114,6 +141,12 @@ properties:
         min_version: ga
         required: true
         immutable: true
+      - !ruby/object:Api::Type::Array
+        name: includeImportRanges
+        description: |
+          IP ranges allowed to be included during import from hub (does not control transit connectivity).
+          The only allowed value for now is "ALL_IPV4_RANGES".
+        item_type: Api::Type::String
   - !ruby/object:Api::Type::NestedObject
     name: linkedInterconnectAttachments
     description: A collection of VLAN attachment resources. These resources should be redundant attachments that all advertise the same prefixes to Google Cloud. Alternatively, in active/passive configurations, all attachments should be capable of advertising the same prefixes.
@@ -136,6 +169,12 @@ properties:
         min_version: ga
         required: true
         immutable: true
+      - !ruby/object:Api::Type::Array
+        name: includeImportRanges
+        description: |
+          IP ranges allowed to be included during import from hub (does not control transit connectivity).
+          The only allowed value for now is "ALL_IPV4_RANGES".
+        item_type: Api::Type::String
   - !ruby/object:Api::Type::NestedObject
     name: linkedRouterApplianceInstances
     description: The URIs of linked Router appliance resources
@@ -172,6 +211,12 @@ properties:
         min_version: ga
         required: true
         immutable: true
+      - !ruby/object:Api::Type::Array
+        name: includeImportRanges
+        description: |
+          IP ranges allowed to be included during import from hub (does not control transit connectivity).
+          The only allowed value for now is "ALL_IPV4_RANGES".
+        item_type: Api::Type::String
   - !ruby/object:Api::Type::NestedObject
     name: linkedVpcNetwork
     description: VPC network that is associated with the spoke.
