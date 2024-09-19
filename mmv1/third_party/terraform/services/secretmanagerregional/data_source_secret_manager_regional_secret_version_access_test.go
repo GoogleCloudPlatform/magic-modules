@@ -1,14 +1,12 @@
 package secretmanagerregional_test
 
 import (
-	"errors"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccDataSourceSecretManagerRegionalRegionalSecretVersionAccess_basicWithResourceReference(t *testing.T) {
@@ -24,7 +22,7 @@ func TestAccDataSourceSecretManagerRegionalRegionalSecretVersionAccess_basicWith
 			{
 				Config: testAccDataSourceSecretManagerRegionalRegionalSecretVersionAccess_basicWithResourceReference(randomString),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDataSourceSecretManagerRegionalRegionalSecretVersionAccess("data.google_secret_manager_regional_secret_version_access.basic-1", "1"),
+					testAccCheckDataSourceSecretManagerRegionalRegionalSecretVersion("data.google_secret_manager_regional_secret_version_access.basic-1", "1"),
 				),
 			},
 		},
@@ -44,7 +42,7 @@ func TestAccDataSourceSecretManagerRegionalRegionalSecretVersionAccess_basicWith
 			{
 				Config: testAccDataSourceSecretManagerRegionalRegionalSecretVersionAccess_basicWithSecretName(randomString),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDataSourceSecretManagerRegionalRegionalSecretVersionAccess("data.google_secret_manager_regional_secret_version_access.basic-2", "1"),
+					testAccCheckDataSourceSecretManagerRegionalRegionalSecretVersion("data.google_secret_manager_regional_secret_version_access.basic-2", "1"),
 				),
 			},
 		},
@@ -64,7 +62,7 @@ func TestAccDataSourceSecretManagerRegionalRegionalSecretVersionAccess_latest(t 
 			{
 				Config: testAccDataSourceSecretManagerRegionalRegionalSecretVersionAccess_latest(randomString),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDataSourceSecretManagerRegionalRegionalSecretVersionAccess("data.google_secret_manager_regional_secret_version_access.latest-1", "2"),
+					testAccCheckDataSourceSecretManagerRegionalRegionalSecretVersion("data.google_secret_manager_regional_secret_version_access.latest-1", "2"),
 				),
 			},
 		},
@@ -84,7 +82,7 @@ func TestAccDataSourceSecretManagerRegionalRegionalSecretVersionAccess_versionFi
 			{
 				Config: testAccDataSourceSecretManagerRegionalRegionalSecretVersionAccess_versionField(randomString),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDataSourceSecretManagerRegionalRegionalSecretVersionAccess("data.google_secret_manager_regional_secret_version_access.version-access", "1"),
+					testAccCheckDataSourceSecretManagerRegionalRegionalSecretVersion("data.google_secret_manager_regional_secret_version_access.version-access", "1"),
 				),
 			},
 		},
@@ -177,27 +175,4 @@ data "google_secret_manager_regional_secret_version_access" "version-access" {
   version = "1"
 }
 `, randomString)
-}
-
-func testAccCheckDataSourceSecretManagerRegionalRegionalSecretVersionAccess(n, expected string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("Can't find Regional Secret Version data source: %s", n)
-		}
-
-		if rs.Primary.ID == "" {
-			return errors.New("data source ID not set.")
-		}
-
-		version, ok := rs.Primary.Attributes["version"]
-		if !ok {
-			return errors.New("can't find 'version' attribute")
-		}
-
-		if version != expected {
-			return fmt.Errorf("expected %s, got %s, version not found", expected, version)
-		}
-		return nil
-	}
 }
