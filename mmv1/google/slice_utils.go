@@ -39,3 +39,19 @@ func Reject[T any](S []T, test func(T) bool) (ret []T) {
 func Concat[T any](S1 []T, S2 []T) (ret []T) {
 	return append(S1, S2...)
 }
+
+// difference returns the elements in `S1` that aren't in `S2`.
+func Diff(S1, S2 []string) []string {
+	var ret []string
+	mb := make(map[string]bool, len(S2))
+	for _, x := range S2 {
+		mb[x] = true
+	}
+
+	for _, x := range S1 {
+		if _, found := mb[x]; !found {
+			ret = append(ret, x)
+		}
+	}
+	return ret
+}
