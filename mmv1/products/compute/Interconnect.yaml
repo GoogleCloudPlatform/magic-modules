@@ -58,7 +58,7 @@ examples:
     skip_docs: true
     primary_resource_id: 'example-interconnect'
     vars:
-      interconnect_name: 'example-interconnect'    
+      interconnect_name: 'example-interconnect'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/interconnect.go.erb
 properties:
