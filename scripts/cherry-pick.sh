@@ -24,3 +24,6 @@ files=`git diff --name-only --diff-filter=A --cached`
 for file in $files; do
   mv $file ${file%".temp"}
 done
+
+# stage all changes
+git add .
