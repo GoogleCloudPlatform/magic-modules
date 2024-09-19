@@ -31,8 +31,8 @@ output "instance_file_share_name" {
 ```
 To create an instance with a tag
 
-```hcl
-resource "filestore_instnace" "my_instance" {
+```tf
+resource "filestore_instance" "my_instance" {
   name       = "My instance"
   instance_id = "your-instance-id"
   tags = {"tagKeys/281478409127147" : "tagValues/281479442205542"}
