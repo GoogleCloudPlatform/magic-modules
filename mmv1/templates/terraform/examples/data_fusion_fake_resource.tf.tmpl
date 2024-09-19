@@ -1,7 +1,6 @@
-resource "google_data_fusion_instance" "{{$.PrimaryResourceId}}" {
+resource "google_data_fusion_fake_resource" "{{$.PrimaryResourceId}}" {
   name   = "{{index $.Vars "instance_name"}}"
   region = "us-central1"
   type   = "BASIC"
-  fake_field = "test"
   {{index $.Vars "prober_test_run"}}
 }
