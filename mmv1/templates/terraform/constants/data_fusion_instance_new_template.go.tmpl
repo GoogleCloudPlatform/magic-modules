@@ -10,16 +10,11 @@ func instanceOptionsDiffSuppress(k, old, new string, d *schema.ResourceData) boo
 			return true
 		}
 	}
-	
 
 	// Let diff be determined by options (above)
 	if strings.Contains(k, "options.%") {
 		return true
 	}
-
-	{{ if ne $.TargetVersionName `ga` -}}
-	testString = "test"
-	{{- end }}
 
 	// For other keys, don't suppress diff.
 	return false
