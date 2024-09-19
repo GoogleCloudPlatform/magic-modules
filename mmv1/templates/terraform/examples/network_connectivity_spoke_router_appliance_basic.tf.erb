@@ -53,5 +53,6 @@ resource "google_network_connectivity_spoke" "primary" {
         ip_address = "10.0.0.2"
     }
     site_to_site_data_transfer = true
+    include_import_ranges = ["ALL_IPV4_RANGES"]
   }
 }
