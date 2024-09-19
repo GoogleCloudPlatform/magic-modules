@@ -177,6 +177,14 @@ func (td *TemplateData) GenerateTGCResourceFile(filePath string, resource api.Re
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }
 
+func (td *TemplateData) GenerateTGCIamResourceFile(filePath string, resource api.Resource) {
+	templatePath := "templates/tgc/resource_converter_iam.go.tmpl"
+	templates := []string{
+		templatePath,
+	}
+	td.GenerateFile(filePath, templatePath, resource, true, templates...)
+}
+
 func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, goFormat bool, templates ...string) {
 	// log.Printf("Generating %s", filePath)
 
