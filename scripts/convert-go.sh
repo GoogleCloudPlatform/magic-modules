@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+
+# Example command (in a pre-switchover commit)
+# sh scripts/convert-go.sh <provider output directory> <comma separated list of files that have changed in the PR> 
+
 set -e
 outputPath=$1
 files=$2
@@ -33,13 +37,21 @@ for i in "${file[@]}"; do
   fi
 done
 
-# run yaml conversion with given .yaml files
-bundle exec compiler.rb -e terraform -o $1 -v beta -a --go-yaml-files $yamlstring
-go run . --yaml-temp
+pushd mmv1
 
-# convert .erb files with given .erb files
-go run . --template-temp $erbstring
-go run . --handwritten-temp $erbstring
+if [[ $yamlstring != "" ]]; then
+  # run yaml conversion with given .yaml files
+  bundle exec compiler.rb -e terraform -o $1 -v beta -a --go-yaml-files $yamlstring
+  go run . --yaml-temp
+fi
+
+
+if [[ $erbstring != "" ]]; then
+  # convert .erb files with given .erb files
+  go run . --template-temp $erbstring
+  go run . --handwritten-temp $erbstring
+fi
+popd
 
 # add temporary file for all other files that do not need conversion
 for i in "${otherlist[@]}"
