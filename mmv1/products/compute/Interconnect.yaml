@@ -58,12 +58,6 @@ examples:
     skip_docs: true
     primary_resource_id: 'example-interconnect'
     vars:
-      interconnect_name: 'example-interconnect'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'compute_interconnect_cross_cloud_basic'
-    skip_docs: true
-    primary_resource_id: 'example-interconnect'
-    vars:
       interconnect_name: 'example-interconnect'    
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/interconnect.go.erb
@@ -95,7 +89,6 @@ properties:
       URL of the InterconnectLocation object that represents where this connection is to be provisioned.
     resource: 'InterconnectLocations'
     imports: 'selfLink'
-    required: true
     immutable: true
   - !ruby/object:Api::Type::Enum
     name: 'linkType'
