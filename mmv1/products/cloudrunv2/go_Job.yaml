@@ -507,6 +507,12 @@ properties:
                   description: |-
                     Ephemeral storage used as a shared volume.
                   min_version: 'beta'
+                  # exactly_one_of:
+                  #   - template.0.template.0.volumes.0.secret
+                  #   - template.0.template.0.volumes.0.cloudSqlInstance
+                  #   - template.0.template.0.volumes.0.emptyDir
+                  #   - template.0.volumes.0.gcs
+                  #   - template.0.volumes.0.nfs
                   properties:
                     - name: 'medium'
                       type: Enum
@@ -522,8 +528,13 @@ properties:
                 - name: 'gcs'
                   type: NestedObject
                   description: |-
-                    Cloud Storage bucket mounted as a volume using GCSFuse. This feature requires the launch stage to be set to ALPHA or BETA.
-                  min_version: 'beta'
+                    Cloud Storage bucket mounted as a volume using GCSFuse.
+                  # exactly_one_of:
+                  #   - template.0.volumes.0.secret
+                  #   - template.0.volumes.0.cloudSqlInstance
+                  #   - template.0.volumes.0.emptyDir
+                  #   - template.0.volumes.0.gcs
+                  #   - template.0.volumes.0.nfs
                   properties:
                     - name: 'bucket'
                       type: String
@@ -537,8 +548,13 @@ properties:
                 - name: 'nfs'
                   type: NestedObject
                   description: |-
-                    NFS share mounted as a volume. This feature requires the launch stage to be set to ALPHA or BETA.
-                  min_version: 'beta'
+                    NFS share mounted as a volume.
+                  # exactly_one_of:
+                  #   - template.0.volumes.0.secret
+                  #   - template.0.volumes.0.cloudSqlInstance
+                  #   - template.0.volumes.0.emptyDir
+                  #   - template.0.volumes.0.gcs
+                  #   - template.0.volumes.0.nfs
                   properties:
                     - name: 'server'
                       type: String

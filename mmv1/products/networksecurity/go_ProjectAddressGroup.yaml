@@ -15,6 +15,11 @@
 ---
 name: 'ProjectAddressGroup'
 legacy_name: 'google_network_security_address_group'
+# This resource is only used to generate IAM resources. They do not correspond to real
+# GCP resources, and should not be used to generate anything other than IAM support.
+# IAM resources for AddressGroup are moved to a separate configuration because the AddressGroup
+# resourcesupports both organization and project levels,
+# but IAM support exists only on the project level Address Groups
 description: |
   Only used to generate IAM resources for project level address groups
 exclude_resource: true
@@ -27,7 +32,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 iam_policy:
-  skip_import_test: true
+  exclude_import_test: true
   method_name_separator: ':'
   parent_resource_type: 'google_network_security_address_group'
   allowed_iam_role: 'roles/compute.networkAdmin'

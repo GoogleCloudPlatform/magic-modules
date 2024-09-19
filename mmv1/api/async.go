@@ -23,9 +23,6 @@ import (
 
 // Base class from which other Async classes can inherit.
 type Async struct {
-	// Embed YamlValidator object
-	// google.YamlValidator
-
 	// Describes an operation
 	Operation *Operation
 
@@ -40,7 +37,6 @@ type Async struct {
 	PollAsync `yaml:",inline"`
 }
 
-// def allow?(method)
 func (a Async) Allow(method string) bool {
 	return slices.Contains(a.Actions, strings.ToLower(method))
 }
@@ -56,9 +52,7 @@ type Operation struct {
 	OpAsyncOperation `yaml:",inline"`
 }
 
-// def initialize(path, base_url, wait_ms, timeouts)
 func NewOperation() *Operation {
-	//   super()
 	op := new(Operation)
 	op.Timeouts = NewTimeouts()
 	return op
@@ -86,14 +80,6 @@ type OpAsync struct {
 	IncludeProject bool `yaml:"include_project"`
 }
 
-// def initialize(operation, result, status, error)
-//   super()
-//   @operation = operation
-//   @result = result
-//   @status = status
-//   @error = error
-// end
-
 type OpAsyncOperation struct {
 	Kind string
 
@@ -107,19 +93,6 @@ type OpAsyncOperation struct {
 	FullUrl string `yaml:"full_url"`
 }
 
-// def validate
-//   super
-
-//   check :kind, type: String
-//   check :path, type: String
-//   check :base_url, type: String
-//   check :wait_ms, type: Integer
-
-//   check :full_url, type: String
-
-//   conflicts %i[base_url full_url]
-// end
-
 // Represents the results of an Operation request
 type OpAsyncResult struct {
 	ResourceInsideResponse bool `yaml:"resource_inside_response"`
@@ -127,30 +100,15 @@ type OpAsyncResult struct {
 	Path string
 }
 
-// def initialize(path = nil, resource_inside_response = nil)
-//   super()
-//   @path = path
-//   @resource_inside_response = resource_inside_response
-// end
-
 // Provides information to parse the result response to check operation
 // status
 type OpAsyncStatus struct {
-	// google.YamlValidator
-
 	Path string
 
 	Complete bool
 
 	Allowed []bool
 }
-
-// def initialize(path, complete, allowed)
-//   super()
-//   @path = path
-//   @complete = complete
-//   @allowed = allowed
-// end
 
 // Provides information on how to retrieve errors of the executed operations
 type OpAsyncError struct {
@@ -160,12 +118,6 @@ type OpAsyncError struct {
 
 	Message string
 }
-
-// def initialize(path, message)
-//   super()
-//   @path = path
-//   @message = message
-// end
 
 // Async implementation for polling in Terraform
 type PollAsync struct {
@@ -178,10 +130,6 @@ type PollAsync struct {
 	// Function to call for checking the Poll response for
 	// deleting a resource
 	CheckResponseFuncAbsence string `yaml:"check_response_func_absence"`
-
-	// Custom code to get a poll response, if needed.
-	// Will default to same logic as Read() to get current resource
-	CustomPollRead string `yaml:"custom_poll_read"`
 
 	// If true, will suppress errors from polling and default to the
 	// result of the final Read()

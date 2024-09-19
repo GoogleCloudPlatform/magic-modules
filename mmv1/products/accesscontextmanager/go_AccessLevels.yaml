@@ -13,6 +13,7 @@
 
 # Warning: This is a temporary file, and should not be edited directly
 ---
+# This is the plural of `AccessLevel`, any changes here should be made to `AccessLevel` as well
 name: 'AccessLevels'
 description: |
   Replace all existing Access Levels in an Access Policy with the Access Levels provided. This is done atomically.
@@ -57,15 +58,18 @@ async:
 custom_code:
   custom_delete: 'templates/terraform/custom_delete/go/replace_all_access_levels_empty_list.go.tmpl'
   custom_import: 'templates/terraform/custom_import/go/set_access_policy_parent_from_access_policy.go.tmpl'
-skip_sweeper: true
+# Skipping the sweeper due to the non-standard base_url
+exclude_sweeper: true
 examples:
   - name: 'access_context_manager_access_levels_basic'
     primary_resource_id: 'access-levels'
     vars:
       access_level_name1: 'chromeos_no_lock'
       access_level_name2: 'mac_no_lock'
-    skip_test: true
+    exclude_test: true
 parameters:
+  # Parent is a path parameter that _cannot_ be read or sent in the request at all.
+  # This must be done at the provider level.
   - name: 'parent'
     type: String
     description: |
@@ -121,6 +125,8 @@ properties:
               enum_values:
                 - 'AND'
                 - 'OR'
+            # All of the false defaults below here are omitted on purpose.
+            # Let's keep this as simple as possible, since they will all be set by the API.
             - name: 'conditions'
               type: Array
               description: |

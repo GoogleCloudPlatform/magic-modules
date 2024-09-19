@@ -27,7 +27,7 @@ create_url: 'projects/{{project}}/apps/{{app_id}}/recaptchaEnterpriseConfig?upda
 create_verb: 'PATCH'
 update_verb: 'PATCH'
 update_mask: true
-skip_delete: true
+exclude_delete: true
 import_format:
   - 'projects/{{project}}/apps/{{app_id}}/recaptchaEnterpriseConfig'
   - '{{project}}/{{app_id}}'
@@ -42,13 +42,16 @@ examples:
     primary_resource_id: 'default'
     min_version: 'beta'
     vars:
+      # Don't add random suffix
       token_ttl: '7200s'
+      # A valid key, but is actually unusable
       site_key: '6LdpMXIpAAAAANkwWQPgEdjEhal7ugkH9RK9ytuw'
     test_env_vars:
       project_id: 'PROJECT_NAME'
     test_vars_overrides:
       'token_ttl': '"7200s"'
       'site_key': '"6LdpMXIpAAAAANkwWQPgEdjEhal7ugkH9RK9ytuw"'
+    # Need the time_sleep resource
     external_providers: ["random", "time"]
 parameters:
   - name: 'app_id'

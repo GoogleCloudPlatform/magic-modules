@@ -44,7 +44,8 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-skip_sweeper: true
+# Skipping the sweeper since we need to sweep multiple regions
+exclude_sweeper: true
 examples:
   - name: 'netapp_active_directory_full'
     primary_resource_id: 'test_active_directory_full'
@@ -66,6 +67,7 @@ parameters:
     required: true
     immutable: true
 properties:
+  # Fields go here
   - name: 'createTime'
     type: String
     description: |

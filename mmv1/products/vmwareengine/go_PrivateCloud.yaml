@@ -68,7 +68,8 @@ examples:
       management_cluster_id: 'sample-mgmt-cluster'
     test_env_vars:
       region: 'REGION'
-    skip_test: true
+ # update tests will take care of create and update. PC creation is expensive and node reservation is required.
+    exclude_test: true
   - name: 'vmware_engine_private_cloud_full'
     primary_resource_id: 'vmw-engine-pc'
     vars:
@@ -77,7 +78,8 @@ examples:
       management_cluster_id: 'sample-mgmt-cluster'
     test_env_vars:
       region: 'REGION'
-    skip_test: true
+ # update tests will take care of create and update. PC creation is expensive and node reservation is required.
+    exclude_test: true
 virtual_fields:
   - name: 'deletion_delay_hours'
     description: |

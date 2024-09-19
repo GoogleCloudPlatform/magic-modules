@@ -23,11 +23,15 @@ references:
 docs:
 base_url: 'organizations/{{organization}}/settings'
 self_link: 'organizations/{{organization}}/settings'
+# Hardcode the updateMask since d.HasChanged does not work on create.
 create_url: 'organizations/{{organization}}/settings?updateMask=disableDefaultSink,storageLocation,kmsKeyName'
+# This is a singleton resource that already is created, so create
+# is really an update, and therefore should be PATCHed.
 create_verb: 'PATCH'
 update_url: 'organizations/{{organization}}/settings?updateMask=disableDefaultSink,storageLocation,kmsKeyName'
 update_verb: 'PATCH'
-skip_delete: true
+# This is a singleton resource that cannot be deleted, so skip delete.
+exclude_delete: true
 import_format:
   - 'organizations/{{organization}}/settings'
 timeouts:
@@ -42,7 +46,8 @@ examples:
       key_name: 'kms-key'
     test_env_vars:
       org_id: 'ORG_TARGET'
-    skip_test: true
+    # Covered by update test.
+    exclude_test: true
 parameters:
   - name: 'organization'
     type: String

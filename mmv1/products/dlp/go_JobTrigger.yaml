@@ -36,7 +36,8 @@ custom_code:
   update_encoder: 'templates/terraform/encoders/go/wrap_object.go.tmpl'
   decoder: 'templates/terraform/decoders/go/dlp_job_trigger.go.tmpl'
   custom_import: 'templates/terraform/custom_import/go/dlp_import.go.tmpl'
-skip_sweeper: true
+# Skip sweeper due to non-standard URL
+exclude_sweeper: true
 examples:
   - name: 'dlp_job_trigger_basic'
     primary_resource_id: 'basic'
@@ -62,14 +63,14 @@ examples:
       trigger: 'trigger'
     test_env_vars:
       project: 'PROJECT_NAME'
-    skip_docs: true
+    exclude_docs: true
   - name: 'dlp_job_trigger_scc_output'
     primary_resource_id: 'scc_output'
     vars:
       trigger: 'trigger'
     test_env_vars:
       project: 'PROJECT_NAME'
-    skip_docs: true
+    exclude_docs: true
   - name: 'dlp_job_trigger_job_notification_emails'
     primary_resource_id: 'job_notification_emails'
     test_env_vars:
@@ -725,9 +726,11 @@ properties:
                   type: NestedObject
                   description: |
                     Message for detecting output from deidentification transformations that support reversing.
+                  # The fields below are necessary to include the "surrogateType" in the payload
                   send_empty_value: true
                   allow_empty_object: true
                   properties:
+ # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/InspectConfig#SurrogateType
                     []
       - name: 'storageConfig'
         type: NestedObject
@@ -1061,6 +1064,15 @@ properties:
           properties:
             - name: 'saveFindings'
               type: NestedObject
+              # TODO: uncomment here once they are supported(github.com/hashicorp/terraform-plugin-sdk/issues/470)
+              # exactly_one_of:
+              #   - save_findings
+              #   - pub_sub
+              #   - publish_findings_to_cloud_data_catalog
+              #   - publish_summary_to_cscc
+              #   - job_notification_emails
+              #   - deidentify
+              #   - publish_to_stackdriver
               description: |
                 If set, the detailed findings will be persisted to the specified OutputStorageConfig. Only a single instance of this action can be specified. Compatible with: Inspect, Risk
               properties:
@@ -1110,6 +1122,15 @@ properties:
                         - 'ALL_COLUMNS'
             - name: 'pubSub'
               type: NestedObject
+              # TODO: uncomment here once they are supported(github.com/hashicorp/terraform-plugin-sdk/issues/470)
+              # exactly_one_of:
+              #   - save_findings
+              #   - pub_sub
+              #   - publish_findings_to_cloud_data_catalog
+              #   - publish_summary_to_cscc
+              #   - job_notification_emails
+              #   - deidentify
+              #   - publish_to_stackdriver
               description: |
                 Publish a message into a given Pub/Sub topic when the job completes.
               properties:
@@ -1123,6 +1144,15 @@ properties:
               description: |
                 Publish the result summary of a DlpJob to the Cloud Security Command Center.
               send_empty_value: true
+              # TODO: uncomment here once they are supported(github.com/hashicorp/terraform-plugin-sdk/issues/470)
+              # exactly_one_of:
+              #   - save_findings
+              #   - pub_sub
+              #   - publish_findings_to_cloud_data_catalog
+              #   - publish_summary_to_cscc
+              #   - job_notification_emails
+              #   - deidentify
+              #   - publish_to_stackdriver
               allow_empty_object: true
               properties:
                 []
@@ -1131,6 +1161,15 @@ properties:
               description: |
                 Publish findings of a DlpJob to Data Catalog.
               send_empty_value: true
+              # TODO: uncomment here once they are supported(github.com/hashicorp/terraform-plugin-sdk/issues/470)
+              # exactly_one_of:
+              #   - save_findings
+              #   - pub_sub
+              #   - publish_findings_to_cloud_data_catalog
+              #   - publish_summary_to_cscc
+              #   - job_notification_emails
+              #   - deidentify
+              #   - publish_to_stackdriver
               allow_empty_object: true
               properties:
                 []
@@ -1139,11 +1178,29 @@ properties:
               description: |
                 Sends an email when the job completes. The email goes to IAM project owners and technical Essential Contacts.
               send_empty_value: true
+              # TODO: uncomment here once they are supported(github.com/hashicorp/terraform-plugin-sdk/issues/470)
+              # exactly_one_of:
+              #   - save_findings
+              #   - pub_sub
+              #   - publish_findings_to_cloud_data_catalog
+              #   - publish_summary_to_cscc
+              #   - job_notification_emails
+              #   - deidentify
+              #   - publish_to_stackdriver
               allow_empty_object: true
               properties:
                 []
             - name: 'deidentify'
               type: NestedObject
+              # TODO: uncomment here once they are supported(github.com/hashicorp/terraform-plugin-sdk/issues/470)
+              # exactly_one_of:
+              #   - save_findings
+              #   - pub_sub
+              #   - publish_findings_to_cloud_data_catalog
+              #   - publish_summary_to_cscc
+              #   - job_notification_emails
+              #   - deidentify
+              #   - publish_to_stackdriver
               description: |
                 Create a de-identified copy of the requested table or files.
               properties:
@@ -1227,6 +1284,15 @@ properties:
               description: |
                 Enable Stackdriver metric dlp.googleapis.com/findingCount.
               send_empty_value: true
+              # TODO: uncomment here once they are supported(github.com/hashicorp/terraform-plugin-sdk/issues/470)
+              # exactly_one_of:
+              #   - save_findings
+              #   - pub_sub
+              #   - publish_findings_to_cloud_data_catalog
+              #   - publish_summary_to_cscc
+              #   - job_notification_emails
+              #   - deidentify
+              #   - publish_to_stackdriver
               allow_empty_object: true
               properties:
                 []

@@ -64,6 +64,11 @@ examples:
       ])"
     vars:
       instance_id: 'my-instance'
+      prevent_destroy: 'true'
+    test_vars_overrides:
+      prevent_destroy: 'false'
+    oics_vars_overrides:
+      prevent_destroy: 'false'
   - !ruby/object:Provider::Terraform::Examples
     name: 'secure_source_manager_instance_cmek'
     primary_resource_id: 'default'
@@ -74,6 +79,11 @@ examples:
       instance_id: 'my-instance'
       keyring_name: 'my-keyring'
       key_name: 'my-key'
+      prevent_destroy: 'true'
+    test_vars_overrides:
+      prevent_destroy: 'false'
+    oics_vars_overrides:
+      prevent_destroy: 'false'
   - !ruby/object:Provider::Terraform::Examples
     name: 'secure_source_manager_instance_private'
     external_providers: ["time"]
@@ -85,6 +95,11 @@ examples:
       instance_id: 'my-instance'
       ca_pool_id: 'ca-pool'
       root_ca_id: 'root-ca'
+      prevent_destroy: 'true'
+    test_vars_overrides:
+      prevent_destroy: 'false'
+    oics_vars_overrides:
+      prevent_destroy: 'false'
   - !ruby/object:Provider::Terraform::Examples
     name: 'secure_source_manager_instance_private_psc_backend'
     external_providers: ["time"]
@@ -104,6 +119,11 @@ examples:
       instance_id: 'my-instance'
       ca_pool_id: 'ca-pool'
       root_ca_id: 'root-ca'
+      prevent_destroy: 'true'
+    test_vars_overrides:
+      prevent_destroy: 'false'
+    oics_vars_overrides:
+      prevent_destroy: 'false'
   - !ruby/object:Provider::Terraform::Examples
     name: 'secure_source_manager_instance_private_psc_endpoint'
     external_providers: ["time"]
@@ -120,6 +140,11 @@ examples:
       instance_id: 'my-instance'
       ca_pool_id: 'ca-pool'
       root_ca_id: 'root-ca'
+      prevent_destroy: 'true'
+    test_vars_overrides:
+      prevent_destroy: 'false'
+    oics_vars_overrides:
+      prevent_destroy: 'false'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'

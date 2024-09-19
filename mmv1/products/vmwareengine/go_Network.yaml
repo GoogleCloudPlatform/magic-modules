@@ -46,7 +46,8 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-skip_sweeper: true
+# There is a handwritten sweeper that provides a list of locations to sweep
+exclude_sweeper: true
 examples:
   - name: 'vmware_engine_network_standard'
     primary_resource_id: 'vmw-engine-network'
@@ -59,7 +60,8 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     external_providers: ["random", "time"]
-    skip_test: true
+ # update tests will take care of create and update. Legacy network needs to be created on an isolated project.
+    exclude_test: true
 parameters:
   - name: 'location'
     type: String

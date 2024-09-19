@@ -84,8 +84,7 @@ properties:
     description: |
       A list of policy types that are activated for this taxonomy. If not set,
       defaults to an empty list.
-    item_type:
-      !ruby/object:Api::Type::Enum  # TOOD: should this be enum or string
+    item_type: !ruby/object:Api::Type::Enum  # TOOD: should this be enum or string
       name: 'policyType'
       description: 'Defines policy types where policy tag can be used for'
       values:

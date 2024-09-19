@@ -38,10 +38,6 @@ base_url: "projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_
 ### Get Method
 self_link: "projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/resizeRequests/{{name}}"
 
-### Create Method ###
-# Get method with a post
-create_verb: :POST
-
 ### Update method ###
 # Resize requests are currently not update-able
 
@@ -74,7 +70,13 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: "error/errors"
     message: "message"
-
+# Examples for testing
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "compute_mig_resize_request"
+    primary_resource_id: "a3_resize_request"
+    vars:
+      resize_request_name: a3-dws
 # Resize request parameters injected via URL
 parameters:
   - !ruby/object:Api::Type::ResourceRef
@@ -414,11 +416,3 @@ properties:
                             output: true
                             description: |
                               The localized error message in the above locale.
-
-#Examples for testing
-examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: "compute_mig_resize_request"
-    primary_resource_id: "a3_resize_request"
-    vars:
-      resize_request_name: a3-dws

@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'AutokeyConfig'
+# This resource is currently in public preview.
 description: |
   `AutokeyConfig` is a singleton resource used to configure the auto-provisioning
   flow of CryptoKeys for CMEK.
@@ -31,6 +32,8 @@ docs:
 id_format: 'folders/{{folder}}/autokeyConfig'
 base_url: 'folders/{{folder}}/autokeyConfig'
 self_link: 'folders/{{folder}}/autokeyConfig'
+# This is a singleton resource that is already created, so create
+# is really an update, and therefore should be PATCHed.
 create_url: 'folders/{{folder}}/autokeyConfig?updateMask=keyProject'
 create_verb: 'PATCH'
 update_url: 'folders/{{folder}}/autokeyConfig?updateMask=keyProject'
@@ -44,7 +47,14 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
+  constants: 'templates/terraform/constants/go/autokey_config_folder_diff.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/go/kms_autokey_config_folder.go.tmpl'
+  pre_read: 'templates/terraform/pre_read/go/kms_autokey_config_folder.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/go/kms_autokey_config_folder.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/go/kms_autokey_config_folder.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/go/kms_autokey_config.go.tmpl'
+# Using a handwritten sweeper because of pre_delete.
+exclude_sweeper: true
 examples:
   - name: 'kms_autokey_config_all'
     primary_resource_id: 'example-autokeyconfig'
@@ -56,6 +66,8 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     external_providers: ["random", "time"]
+    # Need the time_sleep resource
+    # Currently failing
     skip_vcr: true
 parameters:
   - name: 'folder'
@@ -66,6 +78,7 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
+    diff_suppress_func: 'folderPrefixSuppress'
 properties:
   - name: 'keyProject'
     type: String

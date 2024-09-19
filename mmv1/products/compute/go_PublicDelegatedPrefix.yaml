@@ -50,7 +50,9 @@ examples:
       prefixes_name: 'my-prefix'
     test_env_vars:
       desc: 'PAP_DESCRIPTION'
-    skip_test: true
+    # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
+    # resource_compute_public_advertised_prefix_test.go
+    exclude_test: true
 parameters:
 properties:
   - name: 'region'

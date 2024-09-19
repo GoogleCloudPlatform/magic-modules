@@ -25,7 +25,8 @@ docs:
 base_url: 'sites/{{site_id}}/versions'
 self_link: 'sites/{{site_id}}/versions/{{version_id}}'
 create_url: 'sites/{{site_id}}/versions'
-skip_delete: true
+exclude_delete: true
+ # not updatable
 immutable: true
 import_format:
   - 'sites/{{site_id}}/versions/{{version_id}}'
@@ -37,7 +38,7 @@ timeouts:
 custom_code:
   decoder: 'templates/terraform/decoders/go/firebasehosting_version.go.tmpl'
   post_create: 'templates/terraform/post_create/go/firebasehosting_version_immediate_finalize.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'firebasehosting_version_redirect'
     primary_resource_id: 'default'

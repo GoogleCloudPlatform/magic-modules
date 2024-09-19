@@ -13,6 +13,7 @@
 
 # Warning: This is a temporary file, and should not be edited directly
 ---
+# This is the singular of `AccessLevels`, any changes here should be made to `AccessLevels` as well
 name: 'AccessLevel'
 description: |
   An AccessLevel is a label that can be applied to requests to GCP services,
@@ -31,6 +32,11 @@ docs:
 id_format: '{{name}}'
 base_url: ''
 self_link: '{{name}}'
+# This is an unusual API, so we need to use a few fields to map the methods
+# to the right URL.
+# create_url is the Create URL
+# base_url is the Get and Delete and Patch URL. It is empty on purpose.
+# List won't work yet. It should share a URL with Create.
 create_url: '{{parent}}/accessLevels'
 update_verb: 'PATCH'
 update_mask: true
@@ -57,14 +63,17 @@ async:
 custom_code:
   encoder: 'templates/terraform/encoders/go/access_level_never_send_parent.go.tmpl'
   custom_import: 'templates/terraform/custom_import/go/set_access_policy_parent_from_self_link.go.tmpl'
-skip_sweeper: true
+# Skipping the sweeper due to the non-standard base_url
+exclude_sweeper: true
 examples:
   - name: 'access_context_manager_access_level_basic'
     primary_resource_id: 'access-level'
     vars:
       access_level_name: 'chromeos_no_lock'
-    skip_test: true
+    exclude_test: true
 parameters:
+  # Parent is a path parameter that _cannot_ be read or sent in the request at all.
+  # This must be done at the provider level.
   - name: 'parent'
     type: String
     description: |
@@ -111,6 +120,8 @@ properties:
         enum_values:
           - 'AND'
           - 'OR'
+      # All of the false defaults below here are omitted on purpose.
+      # Let's keep this as simple as possible, since they will all be set by the API.
       - name: 'conditions'
         type: Array
         description: |

@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'SecretManager'
+legacy_name: 'secret_manager'
 display_name: 'Secret Manager'
 versions:
   - name: 'ga'

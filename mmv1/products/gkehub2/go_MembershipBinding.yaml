@@ -50,7 +50,8 @@ async:
     path: 'error/errors'
     message: 'message'
 custom_code:
-skip_sweeper: true
+# Skip sweeper gen since this is a child resource.
+exclude_sweeper: true
 examples:
   - name: 'gkehub_membership_binding_basic'
     primary_resource_id: 'membership_binding'

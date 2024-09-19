@@ -72,6 +72,7 @@ examples:
       deletion_protection: 'true'
     test_vars_overrides:
       'deletion_protection': 'false'
+      # Multiple fine-grained resources
     skip_vcr: true
 parameters:
   - name: 'group'

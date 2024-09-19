@@ -130,6 +130,7 @@ examples:
       cloud_run_service_name: 'cloudrun-service'
     ignore_read_extra:
       - 'deletion_protection'
+    # Currently failing
     skip_vcr: true
   - name: 'cloudrunv2_service_mount_nfs'
     primary_resource_id: 'default'
@@ -138,7 +139,18 @@ examples:
       cloud_run_service_name: 'cloudrun-service'
     ignore_read_extra:
       - 'deletion_protection'
+    # Currently failing
     skip_vcr: true
+  - name: 'cloudrunv2_service_mesh'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-service-%s", context["random_suffix"])'
+    min_version: 'beta'
+    vars:
+      cloud_run_service_name: 'cloudrun-service'
+      mesh_name: 'network-services-mesh'
+    ignore_read_extra:
+      - 'deletion_protection'
+    external_providers: ["time"]
 virtual_fields:
   - name: 'deletion_protection'
     description: |
@@ -566,6 +578,10 @@ properties:
                     HTTPGet specifies the http request to perform.
                   send_empty_value: true
                   allow_empty_object: true
+                  # exactly_one_of:
+                  #   - template.0.containers.0.startupProbe.0.httpGet
+                  #   - template.0.containers.0.startupProbe.0.tcpSocket
+                  #   - template.0.containers.0.startupProbe.0.grpc
                   properties:
                     - name: 'path'
                       type: String
@@ -694,6 +710,10 @@ properties:
                     TCPSocket specifies an action involving a TCP port. Exactly one of HTTPGet or TCPSocket must be specified.
                   send_empty_value: true
                   allow_empty_object: true
+                  # exactly_one_of:
+                  #   - template.0.containers.0.startupProbe.0.httpGet
+                  #   - template.0.containers.0.startupProbe.0.tcpSocket
+                  #   - template.0.containers.0.startupProbe.0.grpc
                   properties:
                     - name: 'port'
                       type: Integer
@@ -707,6 +727,10 @@ properties:
                     GRPC specifies an action involving a GRPC port.
                   send_empty_value: true
                   allow_empty_object: true
+                  # exactly_one_of:
+                  #   - template.0.containers.0.startupProbe.0.httpGet
+                  #   - template.0.containers.0.startupProbe.0.tcpSocket
+                  #   - template.0.containers.0.startupProbe.0.grpc
                   properties:
                     - name: 'port'
                       type: Integer
@@ -798,6 +822,11 @@ properties:
               description: |-
                 Ephemeral storage used as a shared volume.
               min_version: 'beta'
+              # exactly_one_of:
+              #   - template.0.volumes.0.secret
+              #   - template.0.volumes.0.cloudSqlInstance
+              #   - template.0.volumes.0.emptyDir
+              #   - template.0.volumes.0.gcs
               properties:
                 - name: 'medium'
                   type: Enum
@@ -813,7 +842,7 @@ properties:
             - name: 'gcs'
               type: NestedObject
               description: |-
-                Cloud Storage bucket mounted as a volume using GCSFuse. This feature is only supported in the gen2 execution environment and requires launch-stage to be set to ALPHA or BETA.
+                Cloud Storage bucket mounted as a volume using GCSFuse. This feature is only supported in the gen2 execution environment.
               # exactly_one_of:
               #   - template.0.volumes.0.secret
               #   - template.0.volumes.0.cloudSqlInstance
@@ -865,6 +894,16 @@ properties:
         type: Boolean
         description: |-
           Enables session affinity. For more information, go to https://cloud.google.com/run/docs/configuring/session-affinity
+      - name: 'serviceMesh'
+        type: NestedObject
+        description: |-
+          Enables Cloud Service Mesh for this Revision.
+        min_version: 'beta'
+        properties:
+          - name: 'mesh'
+            type: String
+            description: |-
+              The Mesh resource name. For more information see https://cloud.google.com/service-mesh/docs/reference/network-services/rest/v1/projects.locations.meshes#resource:-mesh.
   - name: 'traffic'
     type: Array
     description: |-

@@ -31,15 +31,13 @@ import (
 )
 
 type TemplateData struct {
-	//     include Compile::Core
-
 	OutputFolder string
 	VersionName  string
 
 	TerraformResourceDirectory string
 	TerraformProviderModule    string
 
-	// TODO Q2: is this needed?
+	// TODO rewrite: is this needed?
 	//     # Information about the local environment
 	//     # (which formatters are enabled, start-time)
 	//     attr_accessor :env
@@ -170,6 +168,23 @@ func (td *TemplateData) GenerateSweeperFile(filePath string, resource api.Resour
 	td.GenerateFile(filePath, templatePath, resource, false, templates...)
 }
 
+func (td *TemplateData) GenerateTGCResourceFile(filePath string, resource api.Resource) {
+	templatePath := "templates/tgc/resource_converter.go.tmpl"
+	templates := []string{
+		templatePath,
+		"templates/terraform/expand_property_method.go.tmpl",
+	}
+	td.GenerateFile(filePath, templatePath, resource, true, templates...)
+}
+
+func (td *TemplateData) GenerateTGCIamResourceFile(filePath string, resource api.Resource) {
+	templatePath := "templates/tgc/resource_converter_iam.go.tmpl"
+	templates := []string{
+		templatePath,
+	}
+	td.GenerateFile(filePath, templatePath, resource, true, templates...)
+}
+
 func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, goFormat bool, templates ...string) {
 	// log.Printf("Generating %s", filePath)
 
@@ -177,12 +192,12 @@ func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, g
 
 	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).ParseFiles(templates...)
 	if err != nil {
-		glog.Exit(err)
+		glog.Exit(fmt.Sprintf("error parsing %s for filepath %s ", templateFileName, filePath), err)
 	}
 
 	contents := bytes.Buffer{}
 	if err = tmpl.ExecuteTemplate(&contents, templateFileName, input); err != nil {
-		glog.Exit(err)
+		glog.Exit(fmt.Sprintf("error executing %s for filepath %s ", templateFileName, filePath), err)
 	}
 
 	sourceByte := contents.Bytes()
@@ -208,88 +223,6 @@ func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, g
 		}
 	}
 }
-
-//     # path is the output name of the file
-//     # template is used to determine metadata about the file based on how it is
-//     # generated
-//     def format_output_file(path, template)
-//       return unless path.end_with?('.go') && @env[:goformat_enabled]
-
-//       run_formatter("gofmt -w -s #{path}")
-//       run_formatter("goimports -w #{path}") unless template.include?('third_party/terraform')
-//     end
-
-//     def run_formatter(command)
-//       output = %x(#{command} 2>&1)
-//       Google::LOGGER.error output unless $CHILD_STATUS.to_i.zero?
-//     end
-
-//     def relative_path(target, base)
-//       Pathname.new(target).relative_path_from(Pathname.new(base))
-//     end
-//   end
-
-//   # Responsible for compiling provider-level files, rather than product-specific ones
-//   class ProviderFileTemplate < Provider::FileTemplate
-//     # All the products that are being compiled with the provider on this run
-//     attr_accessor :products
-
-//     # Optional path to the directory where overrides reside. Used to locate files
-//     # outside of the MM root directory
-//     attr_accessor :override_path
-
-//     def initialize(output_folder, version, env, products, override_path = nil)
-//       super()
-
-//       @output_folder = output_folder
-//       @version = version
-//       @env = env
-//       @products = products
-//       @override_path = override_path
-//     end
-//   end
-
-//   # Responsible for generating a file in the context of a product
-//   # with a given set of parameters.
-//   class ProductFileTemplate < Provider::FileTemplate
-//     # The name of the resource
-//     attr_accessor :name
-//     # The resource itself.
-//     attr_accessor :object
-//     # The entire API object.
-//     attr_accessor :product
-
-//     class << self
-//       # Construct a new ProductFileTemplate based on a resource object
-//       def file_for_resource(output_folder, object, version, env)
-//         file_template = new(output_folder, object.name, object.__product, version, env)
-//         file_template.object = object
-//         file_template
-//       end
-//     end
-
-//     def initialize(output_folder, name, product, version, env)
-//       super()
-
-//       @name = name
-//       @product = product
-//       @output_folder = output_folder
-//       @version = version
-//       @env = env
-//     end
-//   end
-// end
-
-//    def import_path
-//      case @target_version_name
-//      when 'ga'
-//        "#{TERRAFORM_PROVIDER_GA}/#{RESOURCE_DIRECTORY_GA}"
-//      when 'beta'
-//        "#{TERRAFORM_PROVIDER_BETA}/#{RESOURCE_DIRECTORY_BETA}"
-//      else
-//        "#{TERRAFORM_PROVIDER_PRIVATE}/#{RESOURCE_DIRECTORY_PRIVATE}"
-//      end
-//    end
 
 func (td *TemplateData) ImportPath() string {
 	if td.VersionName == GA_VERSION {

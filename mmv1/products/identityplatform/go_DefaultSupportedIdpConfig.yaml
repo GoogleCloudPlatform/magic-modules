@@ -36,7 +36,9 @@ custom_code:
 examples:
   - name: 'identity_platform_default_supported_idp_config_basic'
     primary_resource_id: 'idp_config'
-    skip_test: true
+      # Skip test due to operating on singleton and the handwritten update test handles this
+      # If we could spin up a project and enable identity platform we could test this separately
+    exclude_test: true
 parameters:
 properties:
   - name: 'name'

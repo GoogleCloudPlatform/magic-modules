@@ -59,7 +59,8 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
       project: 'PROJECT_NAME'
-    skip_test: true
+ # update tests will take care of create and update. Firewall endpoint creation is too long.
+    exclude_test: true
 parameters:
   - name: 'name'
     type: String

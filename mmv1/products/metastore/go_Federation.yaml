@@ -43,7 +43,7 @@ async:
     path: 'error'
     message: 'message'
 iam_policy:
-  skip_import_test: true
+  exclude_import_test: true
   method_name_separator: ':'
   parent_resource_attribute: 'federation_id'
   example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
@@ -58,14 +58,12 @@ examples:
     vars:
       federation_id: 'metastore-fed'
       service_id: 'metastore-service'
-    skip_test: true
   - name: 'dataproc_metastore_federation_bigquery'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-metastore-fed%s", context["random_suffix"])'
     vars:
       federation_id: 'metastore-fed'
       service_id: 'metastore-service'
-    skip_test: true
 parameters:
   - name: 'federationId'
     type: String

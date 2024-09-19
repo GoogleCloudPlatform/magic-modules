@@ -25,7 +25,8 @@ docs:
 base_url: 'sites/{{site_id}}/channels/{{channel_id}}/releases'
 self_link: 'sites/{{site_id}}/channels/{{channel_id}}/releases/{{release_id}}'
 create_url: 'sites/{{site_id}}/channels/{{channel_id}}/releases?versionName={{version_name}}'
-skip_delete: true
+exclude_delete: true
+ # not updatable
 immutable: true
 import_format:
   - 'sites/{{site_id}}/releases/{{release_id}}'
@@ -39,7 +40,7 @@ timeouts:
 custom_code:
   decoder: 'templates/terraform/decoders/go/firebasehosting_release.go.tmpl'
   post_create: 'templates/terraform/post_create/go/firebasehosting_release.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'firebasehosting_release_in_site'
     primary_resource_id: 'default'

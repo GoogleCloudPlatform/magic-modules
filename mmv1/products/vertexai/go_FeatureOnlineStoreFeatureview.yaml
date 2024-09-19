@@ -70,6 +70,7 @@ examples:
     min_version: 'beta'
     vars:
       name: 'example_feature_view_vector_search'
+    # currently failing
     skip_vcr: true
 parameters:
   - name: 'featureOnlineStore'

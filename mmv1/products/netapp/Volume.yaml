@@ -494,3 +494,38 @@ properties:
       Specifies the replica zone for regional volume.
     output: true
     min_version: beta
+  - !ruby/object:Api::Type::Boolean
+    name: 'largeCapacity'
+    description: |
+      Optional. Flag indicating if the volume will be a large capacity volume or a regular volume.
+  - !ruby/object:Api::Type::Boolean
+    name: 'multipleEndpoints'
+    description: |
+      Optional. Flag indicating if the volume will have an IP address per node for volumes supporting multiple IP endpoints.
+      Only the volume with largeCapacity will be allowed to have multiple endpoints.
+  - !ruby/object:Api::Type::String
+    name: 'coldTierSizeGib'
+    description: |
+      Output only. Size of the volume cold tier data in GiB.
+    output: true
+  - !ruby/object:Api::Type::NestedObject
+    name: tieringPolicy
+    description: |-
+      Tiering policy for the volume.
+    update_mask_fields:
+      - 'tiering_policy.cooling_threshold_days'
+      - 'tiering_policy.tier_action'
+    properties:
+      - !ruby/object:Api::Type::Integer
+        name: 'coolingThresholdDays'
+        description: |
+          Optional. Time in days to mark the volume's data block as cold and make it eligible for tiering, can be range from 7-183.
+          Default is 31.
+      - !ruby/object:Api::Type::Enum
+        name: 'tierAction'
+        description: |
+          Optional. Flag indicating if the volume has tiering policy enable/pause. Default is PAUSED.
+        values:
+          - :ENABLED
+          - :PAUSED
+        default_value: :PAUSED

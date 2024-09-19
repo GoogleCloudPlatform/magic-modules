@@ -19,8 +19,6 @@ import "log"
 // a list of resources or single object within the parent.
 // e.g. Fine-grained resources
 type NestedQuery struct {
-	// google.YamlValidator
-
 	// A list of keys to traverse in order.
 	// i.e. backendBucket --> cdnPolicy.signedUrlKeyNames
 	// should be ["cdnPolicy", "signedUrlKeyNames"]

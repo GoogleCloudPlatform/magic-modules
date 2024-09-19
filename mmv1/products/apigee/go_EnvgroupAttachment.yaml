@@ -49,20 +49,23 @@ async:
     message: 'message'
 custom_code:
   custom_import: 'templates/terraform/custom_import/go/apigee_environment_group_attachment.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'apigee_environment_group_attachment_basic'
+      # This is a more verbose version of the above that creates all
+      # the resources needed for the acceptance test.
     vars:
       project_id: 'my-project'
       envgroup_name: 'my-envgroup'
       environment_name: 'my-environment'
-    skip_test: true
+    exclude_test: true
   - name: 'apigee_environment_group_attachment_basic_test'
     primary_resource_id: 'apigee_environment_group_attachment'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
-    skip_docs: true
+    exclude_docs: true
+      # Resource creation race
     skip_vcr: true
 parameters:
   - name: 'envgroupId'

@@ -54,7 +54,7 @@ examples:
       managementserver_name: 'ms-console'
     test_env_vars:
       project: 'PROJECT_NAME'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'location'
     type: String
@@ -104,6 +104,7 @@ properties:
           default_value: "PRIVATE_SERVICE_ACCESS"
           enum_values:
             - 'PRIVATE_SERVICE_ACCESS'
+  ## outputs
   - name: 'oauth2ClientId'
     type: String
     description: |

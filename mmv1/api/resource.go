@@ -27,8 +27,11 @@ import (
 )
 
 type Resource struct {
-	// Embed NamedObject
-	NamedObject `yaml:",inline"`
+	Name string
+
+	// original value of :name before the provider override happens
+	// same as :name if not overridden in provider
+	ApiName string `yaml:"api_name"`
 
 	// [Required] A description of the resource that's surfaced in provider
 	// documentation.
@@ -222,7 +225,7 @@ type Resource struct {
 	ExcludeTgc bool `yaml:"exclude_tgc"`
 
 	// If true, skip sweeper generation for this resource
-	SkipSweeper bool `yaml:"skip_sweeper"`
+	ExcludeSweeper bool `yaml:"exclude_sweeper"`
 
 	// Override sweeper settings
 	Sweeper resource.Sweeper
@@ -249,7 +252,7 @@ type Resource struct {
 	StateUpgraders bool `yaml:"state_upgraders"`
 
 	// Do not apply the default attribution label
-	SkipAttributionLabel bool `yaml:"skip_attribution_label"`
+	ExcludeAttributionLabel bool `yaml:"exclude_attribution_label"`
 
 	// This block inserts the named function and its attribute into the
 	// resource schema -- the code for the migrate_state function must
@@ -260,16 +263,16 @@ type Resource struct {
 
 	// Set to true for resources that are unable to be deleted, such as KMS keyrings or project
 	// level resources such as firebase project
-	SkipDelete bool `yaml:"skip_delete"`
+	ExcludeDelete bool `yaml:"exclude_delete"`
 
 	// Set to true for resources that are unable to be read from the API, such as
 	// public ca external account keys
-	SkipRead bool `yaml:"skip_read"`
+	ExcludeRead bool `yaml:"exclude_read"`
 
 	// Set to true for resources that wish to disable automatic generation of default provider
 	// value customdiff functions
 	// TODO rewrite: 1 instance used
-	SkipDefaultCdiff bool `yaml:"skip_default_cdiff"`
+	ExcludeDefaultCdiff bool `yaml:"exclude_default_cdiff"`
 
 	// This enables resources that get their project via a reference to a different resource
 	// instead of a project field to use User Project Overrides
@@ -349,9 +352,19 @@ func (r *Resource) SetDefault(product *Product) {
 	for _, property := range r.AllProperties() {
 		property.SetDefault(r)
 	}
+	for _, vf := range r.VirtualFields {
+		vf.SetDefault(r)
+	}
+	if r.IamPolicy != nil && r.IamPolicy.MinVersion == "" {
+		r.IamPolicy.MinVersion = r.MinVersion
+	}
 }
 
 func (r *Resource) Validate() {
+	if r.Name == "" {
+		log.Fatalf("Missing `name` for resource")
+	}
+
 	if r.NestedQuery != nil && r.NestedQuery.IsListOfIds && len(r.Identity) != 1 {
 		log.Fatalf("`is_list_of_ids: true` implies resource has exactly one `identity` property")
 	}
@@ -423,26 +436,26 @@ func (r *Resource) Validate() {
 
 // Returns all properties and parameters including the ones that are
 // excluded. This is used for PropertyOverride validation
-
-// TODO: remove the ruby function name
-// def all_properties
 func (r Resource) AllProperties() []*Type {
 	return google.Concat(r.Properties, r.Parameters)
 }
 
-// def properties_with_excluded
+func (r Resource) AllPropertiesInVersion() []*Type {
+	return google.Reject(google.Concat(r.Properties, r.Parameters), func(p *Type) bool {
+		return p.Exclude
+	})
+}
+
 func (r Resource) PropertiesWithExcluded() []*Type {
 	return r.Properties
 }
 
-// def properties
 func (r Resource) UserProperites() []*Type {
 	return google.Reject(r.Properties, func(p *Type) bool {
 		return p.Exclude
 	})
 }
 
-// def parameters
 func (r Resource) UserParameters() []*Type {
 	return google.Reject(r.Parameters, func(p *Type) bool {
 		return p.Exclude
@@ -452,20 +465,16 @@ func (r Resource) UserParameters() []*Type {
 // Return the user-facing properties in client tools; this ends up meaning
 // both properties and parameters but without any that are excluded due to
 // version mismatches or manual exclusion
-
-// def all_user_properties
 func (r Resource) AllUserProperties() []*Type {
 	return google.Concat(r.UserProperites(), r.UserParameters())
 }
 
-// def required_properties
 func (r Resource) RequiredProperties() []*Type {
 	return google.Select(r.AllUserProperties(), func(p *Type) bool {
 		return p.Required
 	})
 }
 
-// def all_nested_properties(props)
 func (r Resource) AllNestedProperties(props []*Type) []*Type {
 	nested := props
 	for _, prop := range props {
@@ -477,7 +486,6 @@ func (r Resource) AllNestedProperties(props []*Type) []*Type {
 	return nested
 }
 
-// sensitive_props
 func (r Resource) SensitiveProps() []*Type {
 	props := r.AllNestedProperties(r.RootProperties())
 	return google.Select(props, func(p *Type) bool {
@@ -499,8 +507,6 @@ func (r Resource) SensitivePropsToString() string {
 // Fingerprints aren't *really" settable properties, but they behave like one.
 // At Create, they have no value but they can just be read in anyways, and after a Read
 // they will need to be set in every Update.
-
-// def settable_properties
 func (r Resource) SettableProperties() []*Type {
 	props := make([]*Type, 0)
 
@@ -530,8 +536,6 @@ func (r Resource) UnorderedListProperties() []*Type {
 }
 
 // Properties that will be returned in the API body
-
-// def gettable_properties
 func (r Resource) GettableProperties() []*Type {
 	return google.Reject(r.AllUserProperties(), func(v *Type) bool {
 		return v.UrlParamOnly
@@ -540,8 +544,6 @@ func (r Resource) GettableProperties() []*Type {
 
 // Returns the list of top-level properties once any nested objects with flatten_object
 // set to true have been collapsed
-
-// def root_properties
 func (r Resource) RootProperties() []*Type {
 	props := make([]*Type, 0)
 
@@ -557,8 +559,6 @@ func (r Resource) RootProperties() []*Type {
 
 // Return the product-level async object, or the resource-specific one
 // if one exists.
-
-// def async
 func (r Resource) GetAsync() *Async {
 	if r.Async != nil {
 		return r.Async
@@ -569,8 +569,6 @@ func (r Resource) GetAsync() *Async {
 
 // Return the resource-specific identity properties, or a best guess of the
 // `name` value for the resource.
-
-// def identity
 func (r Resource) GetIdentity() []*Type {
 	props := r.AllUserProperties()
 
@@ -591,7 +589,6 @@ func (r Resource) GetIdentity() []*Type {
 	})
 }
 
-// def add_labels_related_fields(props, parent)
 func (r *Resource) AddLabelsRelatedFields(props []*Type, parent *Type) []*Type {
 	for _, p := range props {
 		if p.IsA("KeyValueLabels") {
@@ -605,10 +602,9 @@ func (r *Resource) AddLabelsRelatedFields(props []*Type, parent *Type) []*Type {
 	return props
 }
 
-// def add_labels_fields(props, parent, labels)
 func (r *Resource) addLabelsFields(props []*Type, parent *Type, labels *Type) []*Type {
 	if parent == nil || parent.FlattenObject {
-		if r.SkipAttributionLabel {
+		if r.ExcludeAttributionLabel {
 			r.CustomDiff = append(r.CustomDiff, "tpgresource.SetLabelsDiffWithoutAttributionLabel")
 		} else {
 			r.CustomDiff = append(r.CustomDiff, "tpgresource.SetLabelsDiff")
@@ -641,7 +637,6 @@ func (r *Resource) HasLabelsField() bool {
 	return false
 }
 
-// def add_annotations_fields(props, parent, annotations)
 func (r *Resource) addAnnotationsFields(props []*Type, parent *Type, annotations *Type) []*Type {
 
 	// The effective_annotations field is used to write to API,
@@ -660,7 +655,6 @@ func (r *Resource) addAnnotationsFields(props []*Type, parent *Type, annotations
 	return props
 }
 
-// def build_effective_labels_field(name, labels)
 func buildEffectiveLabelsField(name string, labels *Type) *Type {
 	description := fmt.Sprintf("All of %s (key/value pairs) present on the resource in GCP, "+
 		"including the %s configured through Terraform, other clients and services.", name, name)
@@ -681,7 +675,6 @@ func buildEffectiveLabelsField(name string, labels *Type) *Type {
 	return NewProperty(n, name, options)
 }
 
-// def build_terraform_labels_field(name, parent, labels)
 func buildTerraformLabelsField(name string, parent *Type, labels *Type) *Type {
 	description := fmt.Sprintf("The combination of %s configured directly on the resource\n"+
 		" and default %s configured on the provider.", name, name)
@@ -705,8 +698,7 @@ func buildTerraformLabelsField(name string, parent *Type, labels *Type) *Type {
 	return NewProperty(n, name, options)
 }
 
-// // Check if the resource has root "labels" field
-// def root_labels?
+// Check if the resource has root "labels" field
 func (r Resource) RootLabels() bool {
 	for _, p := range r.RootProperties() {
 		if p.IsA("KeyValueLabels") {
@@ -716,8 +708,7 @@ func (r Resource) RootLabels() bool {
 	return false
 }
 
-// // Return labels fields that should be added to ImportStateVerifyIgnore
-// def ignore_read_labels_fields(props)
+// Return labels fields that should be added to ImportStateVerifyIgnore
 func (r Resource) IgnoreReadLabelsFields(props []*Type) []string {
 	fields := make([]string, 0)
 	for _, p := range props {
@@ -732,7 +723,6 @@ func (r Resource) IgnoreReadLabelsFields(props []*Type) []string {
 	return fields
 }
 
-// def get_labels_field_note(title)
 func getLabelsFieldNote(title string) string {
 	return fmt.Sprintf(
 		"**Note**: This field is non-authoritative, and will only manage the %s present "+
@@ -748,8 +738,6 @@ func (r Resource) StateMigrationFile() string {
 // ====================
 // Version-related methods
 // ====================
-
-// def min_version
 func (r Resource) MinVersionObj() *product.Version {
 	if r.MinVersion != "" {
 		return r.ProductMetadata.versionObj(r.MinVersion)
@@ -758,7 +746,6 @@ func (r Resource) MinVersionObj() *product.Version {
 	}
 }
 
-// def not_in_version?(version)
 func (r Resource) NotInVersion(version *product.Version) bool {
 	return version.CompareTo(r.MinVersionObj()) < 0
 }
@@ -766,8 +753,6 @@ func (r Resource) NotInVersion(version *product.Version) bool {
 // Recurses through all nested properties and parameters and changes their
 // 'exclude' instance variable if the property is at a version below the
 // one that is passed in.
-
-// def exclude_if_not_in_version!(version)
 func (r *Resource) ExcludeIfNotInVersion(version *product.Version) {
 	if !r.Exclude {
 		r.Exclude = r.NotInVersion(version)
@@ -795,8 +780,6 @@ func (r *Resource) ExcludeIfNotInVersion(version *product.Version) {
 // product.base_url + resource.base_url + '/name'
 // In newer resources there is much less standardisation in terms of value.
 // Generally for them though, it's the product.base_url + resource.name
-
-// def self_link_url
 func (r Resource) SelfLinkUrl() string {
 	s := []string{r.ProductMetadata.BaseUrl, r.SelfLinkUri()}
 	return strings.Join(s, "")
@@ -805,8 +788,6 @@ func (r Resource) SelfLinkUrl() string {
 // Returns the partial uri / relative path of a resource. In newer resources,
 // this is the name. This fn is named self_link_uri for consistency, but
 // could otherwise be considered to be "path"
-
-// def self_link_uri
 func (r Resource) SelfLinkUri() string {
 	// If the terms in this are not snake-cased, this will require
 	// an override in Terraform.
@@ -817,18 +798,15 @@ func (r Resource) SelfLinkUri() string {
 	return strings.Join([]string{r.BaseUrl, "{{name}}"}, "/")
 }
 
-// def collection_url
 func (r Resource) CollectionUrl() string {
 	s := []string{r.ProductMetadata.BaseUrl, r.collectionUri()}
 	return strings.Join(s, "")
 }
 
-// def collection_uri
 func (r Resource) collectionUri() string {
 	return r.BaseUrl
 }
 
-// def create_uri
 func (r Resource) CreateUri() string {
 	if r.CreateUrl != "" {
 		return r.CreateUrl
@@ -841,7 +819,6 @@ func (r Resource) CreateUri() string {
 	return r.SelfLinkUri()
 }
 
-// def update_uri
 func (r Resource) UpdateUri() string {
 	if r.UpdateUrl != "" {
 		return r.UpdateUrl
@@ -850,7 +827,6 @@ func (r Resource) UpdateUri() string {
 	return r.SelfLinkUri()
 }
 
-// def delete_uri
 func (r Resource) DeleteUri() string {
 	if r.DeleteUrl != "" {
 		return r.DeleteUrl
@@ -859,22 +835,18 @@ func (r Resource) DeleteUri() string {
 	return r.SelfLinkUri()
 }
 
-// def resource_name
 func (r Resource) ResourceName() string {
 	return fmt.Sprintf("%s%s", r.ProductMetadata.Name, r.Name)
 }
 
 // Filter the properties to keep only the ones don't have custom update
 // method and group them by update url & verb.
-
-// def properties_without_custom_update(properties)
 func propertiesWithoutCustomUpdate(properties []*Type) []*Type {
 	return google.Select(properties, func(p *Type) bool {
 		return p.UpdateUrl == "" || p.UpdateVerb == "" || p.UpdateVerb == "NOOP"
 	})
 }
 
-// def update_body_properties
 func (r Resource) UpdateBodyProperties() []*Type {
 	updateProp := propertiesWithoutCustomUpdate(r.SettableProperties())
 	if r.UpdateVerb == "PATCH" {
@@ -887,8 +859,6 @@ func (r Resource) UpdateBodyProperties() []*Type {
 
 // Handwritten TF Operation objects will be shaped like accessContextManager
 // while the Google Go Client will have a name like accesscontextmanager
-
-// def client_name_pascal
 func (r Resource) ClientNamePascal() string {
 	clientName := r.ProductMetadata.ClientName
 	if clientName == "" {
@@ -904,8 +874,6 @@ func (r Resource) PackageName() string {
 
 // In order of preference, use TF override,
 // general defined timeouts, or default Timeouts
-
-// def timeouts
 func (r Resource) GetTimeouts() *Timeouts {
 	timeoutsFiltered := r.Timeouts
 	if timeoutsFiltered == nil {
@@ -921,7 +889,6 @@ func (r Resource) GetTimeouts() *Timeouts {
 	return timeoutsFiltered
 }
 
-// def project?
 func (r Resource) HasProject() bool {
 	return strings.Contains(r.BaseUrl, "{{project}}") || strings.Contains(r.CreateUrl, "{{project}}")
 }
@@ -930,7 +897,6 @@ func (r Resource) IncludeProjectForOperation() bool {
 	return strings.Contains(r.BaseUrl, "{{project}}") || (r.GetAsync().IsA("OpAsync") && r.GetAsync().IncludeProject)
 }
 
-// def region?
 func (r Resource) HasRegion() bool {
 	found := false
 	for _, p := range r.Parameters {
@@ -942,7 +908,6 @@ func (r Resource) HasRegion() bool {
 	return found && strings.Contains(r.BaseUrl, "{{region}}")
 }
 
-// def zone?
 func (r Resource) HasZone() bool {
 	found := false
 	for _, p := range r.Parameters {
@@ -954,13 +919,14 @@ func (r Resource) HasZone() bool {
 	return found && strings.Contains(r.BaseUrl, "{{zone}}")
 }
 
-// resource functions needed for template that previously existed in terraform.go but due to how files are being inherited here it was easier to put in here
+// resource functions needed for template that previously existed in terraform.go
+// but due to how files are being inherited here it was easier to put in here
 // taken wholesale from tpgtools
 func (r Resource) Updatable() bool {
 	if !r.Immutable {
 		return true
 	}
-	for _, p := range r.AllProperties() {
+	for _, p := range r.AllPropertiesInVersion() {
 		if p.UpdateUrl != "" {
 			return true
 		}
@@ -975,8 +941,6 @@ func (r Resource) Updatable() bool {
 // Prints a dot notation path to where the field is nested within the parent
 // object when called on a property. eg: parent.meta.label.foo
 // Redefined on Resource to terminate the calls up the parent chain.
-
-// def lineage
 func (r Resource) Lineage() string {
 	return r.Name
 }
@@ -1128,7 +1092,6 @@ func (r *Resource) SetCompiler(t string) {
 // Returns the id format of an object, or self_link_uri if none is explicitly defined
 // We prefer the long name of a resource as the id so that users can reference
 // resources in a standard way, and most APIs accept short name, long name or self_link
-// def id_format(object)
 func (r Resource) GetIdFormat() string {
 	idFormat := r.IdFormat
 	if idFormat == "" {
@@ -1141,7 +1104,6 @@ func (r Resource) GetIdFormat() string {
 // Template Methods
 // ====================
 // Functions used to create slices of resource properties that could not otherwise be called from within generating templates.
-
 func (r Resource) ReadProperties() []*Type {
 	return google.Reject(r.GettableProperties(), func(p *Type) bool {
 		return p.IgnoreRead
@@ -1221,7 +1183,6 @@ func (r Resource) IamResourceUriStringQualifiers() string {
 
 // For example, for the url "projects/{{project}}/schemas/{{schema}}",
 // the identifiers are "project", "schema".
-// def extract_identifiers(url)
 func (r Resource) ExtractIdentifiers(url string) []string {
 	matches := regexp.MustCompile(`\{\{%?(\w+)\}\}`).FindAllStringSubmatch(url, -1)
 	var result []string
@@ -1231,8 +1192,7 @@ func (r Resource) ExtractIdentifiers(url string) []string {
 	return result
 }
 
-// For example, "projects/{{project}}/schemas/{{name}}", "{{project}}/{{name}}", "{{name}}"
-func (r Resource) RawImportIdFormatsFromIam() []string {
+func (r Resource) IamImportFormats() []string {
 	var importFormat []string
 
 	if r.IamPolicy != nil {
@@ -1241,8 +1201,12 @@ func (r Resource) RawImportIdFormatsFromIam() []string {
 	if len(importFormat) == 0 {
 		importFormat = r.ImportFormat
 	}
+	return importFormat
+}
 
-	return ImportIdFormats(importFormat, r.Identity, r.BaseUrl)
+// For example, "projects/{{project}}/schemas/{{name}}", "{{project}}/{{name}}", "{{name}}"
+func (r Resource) RawImportIdFormatsFromIam() []string {
+	return ImportIdFormats(r.IamImportFormats(), r.Identity, r.BaseUrl)
 }
 
 // For example, projects/(?P<project>[^/]+)/schemas/(?P<schema>[^/]+)", "(?P<project>[^/]+)/(?P<schema>[^/]+)", "(?P<schema>[^/]+)
@@ -1330,7 +1294,7 @@ func (r Resource) IamAttributes() []string {
 // we can reuse that config to create a resource to test IAM resources with.
 func (r Resource) FirstTestExample() resource.Examples {
 	examples := google.Reject(r.Examples, func(e resource.Examples) bool {
-		return e.SkipTest
+		return e.ExcludeTest
 	})
 	examples = google.Reject(examples, func(e resource.Examples) bool {
 		return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(e.MinVersion)) < 0)
@@ -1341,7 +1305,7 @@ func (r Resource) FirstTestExample() resource.Examples {
 
 func (r Resource) ExamplePrimaryResourceId() string {
 	examples := google.Reject(r.Examples, func(e resource.Examples) bool {
-		return e.SkipTest
+		return e.ExcludeTest
 	})
 	examples = google.Reject(examples, func(e resource.Examples) bool {
 		return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(e.MinVersion)) < 0)
@@ -1545,7 +1509,6 @@ type UpdateGroup struct {
 	FingerprintName string
 }
 
-// def properties_without_custom_update(properties)
 func (r Resource) propertiesWithCustomUpdate(properties []*Type) []*Type {
 	return google.Reject(properties, func(p *Type) bool {
 		return p.UpdateUrl == "" || p.UpdateVerb == "" || p.UpdateVerb == "NOOP" ||
@@ -1620,7 +1583,7 @@ func (r Resource) IsExcluded() bool {
 
 func (r Resource) TestExamples() []resource.Examples {
 	return google.Reject(google.Reject(r.Examples, func(e resource.Examples) bool {
-		return e.SkipTest
+		return e.ExcludeTest
 	}), func(e resource.Examples) bool {
 		return e.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, e.MinVersion)
 	})
@@ -1640,4 +1603,102 @@ func (r Resource) StateUpgradersCount() []int {
 		nums = append(nums, i)
 	}
 	return nums
+}
+
+func (r Resource) CaiProductBaseUrl() string {
+	version := r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName)
+	baseUrl := version.CaiBaseUrl
+	if baseUrl == "" {
+		baseUrl = version.BaseUrl
+	}
+	return baseUrl
+}
+
+// Returns the Cai product backend name from the version base url
+// base_url: https://accessapproval.googleapis.com/v1/ -> accessapproval
+func (r Resource) CaiProductBackendName(caiProductBaseUrl string) string {
+	backendUrl := strings.Split(strings.Split(caiProductBaseUrl, "://")[1], ".googleapis.com")[0]
+	return strings.ToLower(backendUrl)
+}
+
+// Gets the Cai asset name template, which could include version
+// For example: //monitoring.googleapis.com/v3/projects/{{project}}/services/{{service_id}}
+func (r Resource) rawCaiAssetNameTemplate(productBackendName string) string {
+	caiBaseUrl := ""
+	if r.CaiBaseUrl != "" {
+		caiBaseUrl = fmt.Sprintf("%s/{{name}}", r.CaiBaseUrl)
+	}
+	if caiBaseUrl == "" {
+		caiBaseUrl = r.SelfLink
+	}
+	if caiBaseUrl == "" {
+		caiBaseUrl = fmt.Sprintf("%s/{{name}}", r.BaseUrl)
+	}
+	return fmt.Sprintf("//%s.googleapis.com/%s", productBackendName, caiBaseUrl)
+}
+
+// Gets the Cai asset name template, which doesn't include version
+// For example: //monitoring.googleapis.com/projects/{{project}}/services/{{service_id}}
+func (r Resource) CaiAssetNameTemplate(productBackendName string) string {
+	template := r.rawCaiAssetNameTemplate(productBackendName)
+	versionRegex, err := regexp.Compile(`\/(v\d[^\/]*)\/`)
+	if err != nil {
+		log.Fatalf("Cannot compile the regular expression: %v", err)
+	}
+
+	return versionRegex.ReplaceAllString(template, "/")
+}
+
+// Gets the Cai API version
+func (r Resource) CaiApiVersion(productBackendName, caiProductBaseUrl string) string {
+	template := r.rawCaiAssetNameTemplate(productBackendName)
+
+	versionRegex, err := regexp.Compile(`\/(v\d[^\/]*)\/`)
+	if err != nil {
+		log.Fatalf("Cannot compile the regular expression: %v", err)
+	}
+
+	apiVersion := strings.ReplaceAll(versionRegex.FindString(template), "/", "")
+	if apiVersion != "" {
+		return apiVersion
+	}
+
+	splits := strings.Split(caiProductBaseUrl, "/")
+	for i := 0; i < len(splits); i++ {
+		if splits[len(splits)-1-i] != "" {
+			return splits[len(splits)-1-i]
+		}
+	}
+	return ""
+}
+
+// For example: the uri "projects/{{project}}/schemas/{{name}}"
+// The paramerter is "schema" as "project" is not returned.
+func (r Resource) CaiIamResourceParams() []string {
+	resourceUri := strings.ReplaceAll(r.IamResourceUri(), "{{name}}", fmt.Sprintf("{{%s}}", r.IamParentResourceName()))
+
+	return google.Reject(r.ExtractIdentifiers(resourceUri), func(param string) bool {
+		return param == "project"
+	})
+}
+
+// Gets the Cai IAM asset name template
+// For example: //monitoring.googleapis.com/v3/projects/{{project}}/services/{{service_id}}
+func (r Resource) CaiIamAssetNameTemplate(productBackendName string) string {
+	iamImportFormat := r.IamImportFormats()
+	if len(iamImportFormat) > 0 {
+		name := strings.ReplaceAll(iamImportFormat[0], "{{name}}", fmt.Sprintf("{{%s}}", r.IamParentResourceName()))
+		name = strings.ReplaceAll(name, "%", "")
+		return fmt.Sprintf("//%s.googleapis.com/%s", productBackendName, name)
+	}
+
+	caiBaseUrl := r.CaiBaseUrl
+
+	if caiBaseUrl == "" {
+		caiBaseUrl = r.SelfLink
+	}
+	if caiBaseUrl == "" {
+		caiBaseUrl = r.BaseUrl
+	}
+	return fmt.Sprintf("//%s.googleapis.com/%s/{{%s}}", productBackendName, caiBaseUrl, r.IamParentResourceName())
 }

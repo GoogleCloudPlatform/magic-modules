@@ -16,7 +16,8 @@
 name: 'Datascan'
 description: |
   Represents a user-visible job which provides the insights for the related data source.
-skip_attribution_label: true
+# User-provided label cannot start with goog-
+exclude_attribution_label: true
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/dataplex/docs'

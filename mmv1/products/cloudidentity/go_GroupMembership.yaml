@@ -40,7 +40,7 @@ custom_code:
   post_create: 'templates/terraform/post_create/go/set_computed_name.tmpl'
   custom_update: 'templates/terraform/custom_update/go/cloud_identity_group_membership.go.tmpl'
   post_import: 'templates/terraform/post_import/go/cloud_identity_group_membership.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 read_error_transform: 'transformCloudIdentityGroupMembershipReadError'
 examples:
   - name: 'cloud_identity_group_membership'
@@ -50,7 +50,8 @@ examples:
     test_env_vars:
       org_domain: 'ORG_DOMAIN'
       cust_id: 'CUST_ID'
-    skip_test: true
+    # Has a handwritten test due to CloudIdentityGroup-related tests needing to run synchronously
+    exclude_test: true
   - name: 'cloud_identity_group_membership_user'
     primary_resource_id: 'cloud_identity_group_membership_basic'
     vars:
@@ -59,7 +60,8 @@ examples:
       org_domain: 'ORG_DOMAIN'
       cust_id: 'CUST_ID'
       identity_user: 'IDENTITY_USER'
-    skip_test: true
+    # Has a handwritten test due to CloudIdentityGroup-related tests needing to run synchronously
+    exclude_test: true
 parameters:
   - name: 'group'
     type: ResourceRef

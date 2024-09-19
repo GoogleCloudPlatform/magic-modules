@@ -32,7 +32,7 @@ docs:
 id_format: '{{name}}'
 base_url: 'projects/{{project}}/brands'
 self_link: '{{name}}'
-skip_delete: true
+exclude_delete: true
 immutable: true
 import_format:
   - 'projects/{{project_number}}/brands/{{brand_id}}'
@@ -61,7 +61,7 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
       org_domain: 'ORG_DOMAIN'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'name'
     type: String

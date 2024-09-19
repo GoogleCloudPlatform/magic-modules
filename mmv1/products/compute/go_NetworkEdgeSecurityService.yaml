@@ -49,7 +49,8 @@ async:
     path: 'error/errors'
     message: 'message'
 custom_code:
-skip_sweeper: true
+# Skipping the sweeper since we need to sweep multiple regions
+exclude_sweeper: true
 examples:
   - name: 'compute_network_edge_security_service_basic'
     primary_resource_id: 'default'

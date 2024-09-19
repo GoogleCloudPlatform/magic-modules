@@ -28,7 +28,7 @@ create_url: '{{parent}}/locations/global/quotaPreferences?quotaPreferenceId={{na
 update_url: '{{parent}}/locations/global/quotaPreferences/{{name}}?ignoreSafetyChecks={{ignore_safety_checks}}'
 update_verb: 'PATCH'
 update_mask: true
-skip_delete: true
+exclude_delete: true
 import_format:
   - '{{%parent}}/locations/global/quotaPreferences/{{name}}'
 timeouts:
@@ -43,7 +43,7 @@ examples:
       name: 'compute_googleapis_com-CPUS-per-project_us-east1'
     test_env_vars:
       project: 'PROJECT_NAME'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'parent'
     type: String
@@ -66,7 +66,6 @@ properties:
     type: String
     description: |
       The resource name of the quota preference. Required except in the CREATE requests.
-    pattern: '{{parent}}/locations/global/quotaPreferences/{{name}}'
     default_from_api: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
