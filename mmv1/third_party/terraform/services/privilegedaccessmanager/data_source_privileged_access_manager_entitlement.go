@@ -22,7 +22,7 @@ func DataSourceGooglePrivilegedAccessManagerEntitlement() *schema.Resource {
 func dataSourceGooglePrivilegedAccessManagerEntitlementRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 
-	id, err := tpgresource.ReplaceVars(d, config, "{{parent}}/entitlements/{{entitlement_id}}")
+	id, err := tpgresource.ReplaceVars(d, config, "{{parent}}/locations/{{location}}/entitlements/{{entitlement_id}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
