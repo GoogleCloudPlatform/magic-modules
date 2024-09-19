@@ -56,7 +56,11 @@ func dataSourceSecretManagerRegionalRegionalSecretVersionAccessRead(d *schema.Re
 	}
 
 	secretRegex := regexp.MustCompile("projects/(.+)/locations/(.+)/secrets/(.+)$")
-	parts := secretRegex.FindStringSubmatch(d.Get("secret").(string))
+	dSecret, ok := d.Get("secret").(string)
+	if !ok {
+		return fmt.Errorf("wrong type for secret field (%T), expected string", d.Get("secret"))
+	}
+	parts := secretRegex.FindStringSubmatch(dSecret)
 
 	var project string
 
@@ -64,30 +68,34 @@ func dataSourceSecretManagerRegionalRegionalSecretVersionAccessRead(d *schema.Re
 	if len(parts) == 4 {
 		// Stores value of project to set in state
 		project = parts[1]
-		if d.Get("project").(string) != "" && d.Get("project").(string) != parts[1] {
-			return fmt.Errorf("The project set on this secret version (%s) is not equal to the project where this secret exists (%s).", d.Get("project").(string), project)
+		if dProject, ok := d.Get("project").(string); !ok {
+			return fmt.Errorf("wrong type for project (%T), expected string", d.Get("project"))
+		} else if dProject != "" && dProject != project {
+			return fmt.Errorf("project field value (%s) does not match project of secret (%s).", d.Get("project").(string), project)
 		}
-		if d.Get("location").(string) != "" && d.Get("location").(string) != parts[2] {
-			return fmt.Errorf("The location set on this secret version (%s) is not equal to the location where this secret exists (%s).", d.Get("location").(string), parts[2])
+		if dLocation, ok := d.Get("location").(string); !ok {
+			return fmt.Errorf("wrong type for location (%T), expected string", d.Get("location"))
+		} else if dLocation != "" && dLocation != parts[2] {
+			return fmt.Errorf("location field value (%s) does not match location of secret (%s).", dLocation, parts[2])
 		}
 		if err := d.Set("location", parts[2]); err != nil {
-			return fmt.Errorf("Error setting location: %s", err)
+			return fmt.Errorf("error setting location: %s", err)
 		}
 		if err := d.Set("secret", parts[3]); err != nil {
-			return fmt.Errorf("Error setting secret: %s", err)
+			return fmt.Errorf("error setting secret: %s", err)
 		}
 	} else { // if secret name is provided in the secret field
 		// Stores value of project to set in state
 		project, err = tpgresource.GetProject(d, config)
 		if err != nil {
-			return fmt.Errorf("Error fetching project for Secret: %s", err)
+			return fmt.Errorf("error fetching project for Secret: %s", err)
 		}
-		if d.Get("location").(string) == "" {
-			return fmt.Errorf("Location must be set when providing only secret name")
+		if dLocation, ok := d.Get("location").(string); ok && dLocation == "" {
+			return fmt.Errorf("location must be set when providing only secret name")
 		}
 	}
 	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("Error setting project: %s", err)
+		return fmt.Errorf("error setting project: %s", err)
 	}
 
 	var url string
@@ -116,34 +124,38 @@ func dataSourceSecretManagerRegionalRegionalSecretVersionAccessRead(d *schema.Re
 	})
 
 	if err != nil {
-		return fmt.Errorf("Error retrieving available secret manager regional secret version access: %s", err.Error())
+		return fmt.Errorf("error retrieving available secret manager regional secret version access: %s", err.Error())
 	}
 
-	if err := d.Set("name", resp["name"].(string)); err != nil {
-		return fmt.Errorf("Error setting name: %s", err)
+	nameValue, ok := resp["name"]
+	if !ok {
+		return fmt.Errorf("read response didn't contain critical fields. Read may not have succeeded.")
+	}
+	if err := d.Set("name", nameValue.(string)); err != nil {
+		return fmt.Errorf("error setting name: %s", err)
 	}
 
 	secretVersionRegex := regexp.MustCompile("projects/(.+)/locations/(.+)/secrets/(.+)/versions/(.+)$")
-	parts = secretVersionRegex.FindStringSubmatch(resp["name"].(string))
+	parts = secretVersionRegex.FindStringSubmatch(nameValue.(string))
 	if len(parts) != 5 {
-		return fmt.Errorf("secret name, %s, does not match format, projects/{{project}}/locations/{{location}}/secrets/{{secret}}/versions/{{version}}", resp["name"].(string))
+		return fmt.Errorf("secret name, %s, does not match format, projects/{{project}}/locations/{{location}}/secrets/{{secret}}/versions/{{version}}", nameValue.(string))
 	}
 
 	log.Printf("[DEBUG] Received Google SecretManager Version: %q", parts[3])
 
 	if err := d.Set("version", parts[4]); err != nil {
-		return fmt.Errorf("Error setting version: %s", err)
+		return fmt.Errorf("error setting version: %s", err)
 	}
 
 	data := resp["payload"].(map[string]interface{})
 	secretData, err := base64.StdEncoding.DecodeString(data["data"].(string))
 	if err != nil {
-		return fmt.Errorf("Error decoding secret manager regional secret version data: %s", err.Error())
+		return fmt.Errorf("error decoding secret manager regional secret version data: %s", err.Error())
 	}
 	if err := d.Set("secret_data", string(secretData)); err != nil {
-		return fmt.Errorf("Error setting secret_data: %s", err)
+		return fmt.Errorf("error setting secret_data: %s", err)
 	}
 
-	d.SetId(resp["name"].(string))
+	d.SetId(nameValue.(string))
 	return nil
 }
