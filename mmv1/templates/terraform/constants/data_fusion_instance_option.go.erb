@@ -17,7 +17,7 @@ func instanceOptionsDiffSuppress(k, old, new string, d *schema.ResourceData) boo
 		return true
 	}
 
-	testString := "<%= prefix -%>"
+	testString := <%= "test" -%>
 
 	// For other keys, don't suppress diff.
 	return false
