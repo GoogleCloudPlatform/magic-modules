@@ -98,7 +98,7 @@ examples:
       - 'gce_setup.0.boot_disk.0.disk_type'
       - 'gce_setup.0.data_disks.0.disk_type'
 timeouts: !ruby/object:Api::Timeouts
-  insert_minutes: 10
+  insert_minutes: 20
   update_minutes: 20
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/workbench_instance.go
