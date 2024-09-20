@@ -347,7 +347,7 @@ func retrieveListOfManuallyDefinedTestsFromFile(file string) []string {
 }
 
 func (tgc TerraformGoogleConversion) CopyCommonFiles(outputFolder string, generateCode, generateDocs bool) {
-	log.Printf("Copying common files.")
+	log.Printf("Copying common files for tgc.")
 
 	if !generateCode {
 		return
