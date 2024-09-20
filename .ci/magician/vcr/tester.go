@@ -131,34 +131,35 @@ func (vt *Tester) SetRepoPath(version provider.Version, repoPath string) {
 
 // Fetch the cassettes for the current version if not already fetched.
 // Should be run from the base dir.
-func (vt *Tester) FetchCassettes(version provider.Version, baseBranch, prNumber string) error {
+func (vt *Tester) FetchCassettes(version provider.Version, baseBranch, head string) error {
 	_, ok := vt.cassettePaths[version]
 	if ok {
 		return nil
 	}
 	cassettePath := filepath.Join(vt.baseDir, "cassettes", version.String())
 	vt.rnr.Mkdir(cassettePath)
+	var fetchError error
 	if baseBranch != "FEATURE-BRANCH-major-release-6.0.0" {
 		// pull main cassettes (major release uses branch specific casssettes as primary ones)
 		bucketPath := fmt.Sprintf("gs://%s/%sfixtures/*", vt.cassetteBucket, version.BucketPath())
 		if err := vt.fetchBucketPath(bucketPath, cassettePath); err != nil {
-			fmt.Println("Error fetching cassettes: ", err)
+			fetchError = fmt.Errorf("error fetching bucket path %s: %v", bucketPath, err)
 		}
 	}
 	if baseBranch != "main" {
 		bucketPath := fmt.Sprintf("gs://%s/%srefs/branches/%s/fixtures/*", vt.cassetteBucket, version.BucketPath(), baseBranch)
 		if err := vt.fetchBucketPath(bucketPath, cassettePath); err != nil {
-			fmt.Println("Error fetching cassettes: ", err)
+			fetchError = fmt.Errorf("error fetching bucket path %s: %v", bucketPath, err)
 		}
 	}
-	if prNumber != "" {
-		bucketPath := fmt.Sprintf("gs://%s/%srefs/heads/auto-pr-%s/fixtures/*", vt.cassetteBucket, version.BucketPath(), prNumber)
+	if head != "" {
+		bucketPath := fmt.Sprintf("gs://ci-vcr-cassettes/%srefs/heads/%s/fixtures/*", version.BucketPath(), head)
 		if err := vt.fetchBucketPath(bucketPath, cassettePath); err != nil {
-			fmt.Println("Error fetching cassettes: ", err)
+			fetchError = fmt.Errorf("error fetching bucket path %s: %v", bucketPath, err)
 		}
 	}
 	vt.cassettePaths[version] = cassettePath
-	return nil
+	return fetchError
 }
 
 func (vt *Tester) fetchBucketPath(bucketPath, cassettePath string) error {
@@ -166,7 +167,7 @@ func (vt *Tester) fetchBucketPath(bucketPath, cassettePath string) error {
 	args := []string{"-m", "-q", "cp", bucketPath, cassettePath}
 	fmt.Println("Fetching cassettes:\n", "gsutil", strings.Join(args, " "))
 	if _, err := vt.rnr.Run("gsutil", args, nil); err != nil {
-		return err
+		return fmt.Errorf("error running gsutil: %v", err)
 	}
 	return nil
 }

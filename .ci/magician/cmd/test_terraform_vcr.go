@@ -180,7 +180,12 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 	}
 	fmt.Println("Running tests: Go files or test fixtures changed")
 
-	if err := vt.FetchCassettes(provider.Beta, baseBranch, prNumber); err != nil {
+	var head string
+	if prNumber != "" {
+		head = "auto-pr-" + prNumber
+	}
+
+	if err := vt.FetchCassettes(provider.Beta, baseBranch, head); err != nil {
 		return fmt.Errorf("error fetching cassettes: %w", err)
 	}
 
