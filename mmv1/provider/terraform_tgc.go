@@ -181,7 +181,7 @@ func (tgc *TerraformGoogleConversion) generateCaiIamResources(products []*api.Pr
 }
 
 func (tgc TerraformGoogleConversion) CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string) {
-	log.Printf("Compiling common files.")
+	log.Printf("Compiling common files for tgc.")
 
 	tgc.generateCaiIamResources(products)
 	tgc.NonDefinedTests = retrieveFullManifestOfNonDefinedTests()
