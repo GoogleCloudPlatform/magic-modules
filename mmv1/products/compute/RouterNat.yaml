@@ -110,6 +110,7 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: 'templates/terraform/constants/router_nat.go.erb'
   pre_create: 'templates/terraform/constants/router_nat_validate_action_active_range.go.erb'
   pre_update: 'templates/terraform/constants/router_nat_validate_action_active_range.go.erb'
+  encoder: 'templates/terraform/encoders/router_nat_set_initial_nat_ips.go.erb'
 custom_diff: [
   'resourceComputeRouterNatDrainNatIpsCustomDiff',
 ]
@@ -154,6 +155,25 @@ properties:
       - :MANUAL_ONLY
       - :AUTO_ONLY
   - !ruby/object:Api::Type::Array
+    name: 'initialNatIps'
+    description: |
+      Self-links of NAT IPs to be used as initial value for creation alongside a RouterNatAddress resource.
+      Conflicts with natIps and drainNatIps. Only valid if natIpAllocateOption is set to MANUAL_ONLY.
+    immutable: true
+    ignore_read: true
+    conflicts:
+      - natIps
+      - drainNatIps
+    send_empty_value: true
+    is_set: true
+    set_hash_func: computeRouterNatIPsHash
+    item_type: !ruby/object:Api::Type::ResourceRef
+      name: 'address'
+      resource: 'Address'
+      imports: 'selfLink'
+      description: 'A reference to an address associated with this NAT'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
+  - !ruby/object:Api::Type::Array
     name: 'natIps'
     description: |
       Self-links of NAT IPs. Only valid if natIpAllocateOption
@@ -170,6 +190,7 @@ properties:
       imports: 'selfLink'
       description: 'A reference to an address associated with this NAT'
     custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
+    default_from_api: true
   - !ruby/object:Api::Type::Array
     name: 'drainNatIps'
     description: |
@@ -183,6 +204,7 @@ properties:
       imports: 'selfLink'
       description: 'A reference to an address associated with this NAT'
     custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
+    default_from_api: true
   - !ruby/object:Api::Type::Enum
     name: 'sourceSubnetworkIpRangesToNat'
     required: true
