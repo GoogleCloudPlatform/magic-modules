@@ -149,7 +149,6 @@ func main() {
 	providerToGenerate = setProvider(*forceProvider, *version, productsForVersion[0], startTime)
 	providerToGenerate.CopyCommonFiles(*outputPath, generateCode, generateDocs)
 
-	log.Printf("Compiling common files for terraform")
 	if generateCode {
 		providerToGenerate.CompileCommonFiles(*outputPath, productsForVersion, "")
 
@@ -236,6 +235,8 @@ func setProvider(forceProvider, version string, productApi *api.Product, startTi
 	switch forceProvider {
 	case "tgc":
 		return provider.NewTerraformGoogleConversion(productApi, version, startTime)
+	case "tgc_cai2hcl":
+		return provider.NewCaiToTerraformConversion(productApi, version, startTime)
 	default:
 		return provider.NewTerraform(productApi, version, startTime)
 	}
