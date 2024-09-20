@@ -5,17 +5,11 @@ import (
 	"fmt"
 	"log"
 	"maps"
-{{ if ne $.TargetVersionName `ga` -}}
-	"net/http"
-{{- end }}
 	"os"
 	"strings"
 	"testing"
 	"time"
 
-{{ if ne $.TargetVersionName `ga` -}}
-	tpgfirebase "github.com/hashicorp/terraform-provider-google/google/services/firebase"
-{{- end }}
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/services/privateca"
@@ -1301,39 +1295,6 @@ func SetupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 	if err != nil {
 		return "", err
 	}
-	time.Sleep(1 * time.Minute)
-
-{{ if ne $.TargetVersionName `ga` -}}
-	// For Firebase test only
-	// After project-2 is created and the firebase API is enabled, 
-	// we need to make the GCP project a Firebase project.
-	// Using google_firebase_project in the acceptance test wasn't sufficient.
-	if service == "firebase" {
-		url := fmt.Sprintf("%sprojects/%s:addFirebase", config.FirebaseBasePath, p2)
-		obj := make(map[string]interface{})
-		headers := make(http.Header)
-		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config:    config,
-			Method:    "POST",
-			Project:   pid, // project-1
-			RawURL:    url,
-			UserAgent: config.UserAgent,
-			Body:      obj,
-			Timeout:   5 * time.Minute,
-			Headers:   headers,
-		})
-		if err != nil {
-			return "", fmt.Errorf("Error enabling Firebase in project %s: %s", p2, err)
-		}
-		err = tpgfirebase.FirebaseOperationWaitTime(
-			config, res, p2, fmt.Sprintf("firebase to be enabled in project %s", p2), config.UserAgent,
-			5*time.Minute)
-		if err != nil {
-			return "", fmt.Errorf("Error waiting for firebase to be enabled in project %s: %s", p2, err)
-		}
-		time.Sleep(1 * time.Minute)
-	}
-{{- end }}
 
 	// Enable the test runner to create service accounts and get an access token on behalf of
 	// the project 1 service account
@@ -1406,6 +1367,21 @@ func SetupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 
 		bindings = tpgiamresource.MergeBindings(append(bindings, proj2CryptoKeyBinding))
 	}
+
+
+{{ if ne $.TargetVersionName `ga` -}}
+	// For Firebase test only
+	if service == "firebase" {
+		// Additional permissions besides roles/serviceusage.serviceUsageConsumer and roles/firebase.admin are needed
+		// https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects/addFirebase
+		proj2ServiceUsageBinding := &cloudresourcemanager.Binding{
+			Members: []string{fmt.Sprintf("serviceAccount:%s", sa1.Email)},
+			Role:    "roles/serviceusage.serviceUsageAdmin",
+		}
+
+		bindings = tpgiamresource.MergeBindings(append(bindings, proj2ServiceUsageBinding))
+	}
+{{- end }}
 
 	p, err = rmService.Projects.GetIamPolicy(p2,
 		&cloudresourcemanager.GetIamPolicyRequest{
