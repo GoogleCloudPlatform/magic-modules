@@ -28,7 +28,7 @@ func ProviderName(t Provider) string {
 	return reflect.TypeOf(t).Name()
 }
 
-func ImportPathFromVersion(t Provider, v string) string {
+func ImportPathFromVersion(v string) string {
 	var tpg, dir string
 	switch v {
 	case "ga":
