@@ -16,6 +16,8 @@
 package provider
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -60,7 +62,7 @@ func NewTerraformGoogleConversion(product *api.Product, versionName string, star
 	t.Product.SetPropertiesBasedOnVersion(&t.Version)
 	for _, r := range t.Product.Objects {
 		r.SetCompiler(ProviderName(t))
-		r.ImportPath = ImportPathFromVersion(t, versionName)
+		r.ImportPath = ImportPathFromVersion(versionName)
 	}
 
 	return t
@@ -155,7 +157,7 @@ func (tgc TerraformGoogleConversion) GenerateIamPolicy(object api.Resource, temp
 }
 
 // Generates the list of resources
-func (tgc TerraformGoogleConversion) generateCaiIamResources(products []*api.Product) {
+func (tgc *TerraformGoogleConversion) generateCaiIamResources(products []*api.Product) {
 	for _, productDefinition := range products {
 		service := strings.ToLower(productDefinition.Name)
 		for _, object := range productDefinition.Objects {
@@ -179,7 +181,7 @@ func (tgc TerraformGoogleConversion) generateCaiIamResources(products []*api.Pro
 }
 
 func (tgc TerraformGoogleConversion) CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string) {
-	log.Printf("Compiling common files.")
+	log.Printf("Compiling common files for tgc.")
 
 	tgc.generateCaiIamResources(products)
 	tgc.NonDefinedTests = retrieveFullManifestOfNonDefinedTests()
@@ -199,24 +201,15 @@ func (tgc TerraformGoogleConversion) CompileCommonFiles(outputFolder string, pro
 	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName)
 	tgc.CompileFileList(outputFolder, testSource, *templateData, products)
 
-	// compile_file_list(
-	//   output_folder,
-	//   [
-	// 	['converters/google/resources/services/compute/compute_instance_helpers.go',
-	// 	 'third_party/terraform/services/compute/compute_instance_helpers.go.erb'],
-	// 	['converters/google/resources/resource_converters.go',
-	// 	 'templates/tgc/resource_converters.go.erb'],
-	// 	['converters/google/resources/services/kms/iam_kms_key_ring.go',
-	// 	 'third_party/terraform/services/kms/iam_kms_key_ring.go.erb'],
-	// 	['converters/google/resources/services/kms/iam_kms_crypto_key.go',
-	// 	 'third_party/terraform/services/kms/iam_kms_crypto_key.go.erb'],
-	// 	['converters/google/resources/services/compute/metadata.go',
-	// 	 'third_party/terraform/services/compute/metadata.go.erb'],
-	// 	['converters/google/resources/services/compute/compute_instance.go',
-	// 	 'third_party/tgc/compute_instance.go.erb']
-	//   ],
-	//   file_template
-	// )
+	resourceConverters := map[string]string{
+		"converters/google/resources/services/compute/compute_instance_helpers.go": "third_party/terraform/services/compute/go/compute_instance_helpers.go.tmpl",
+		"converters/google/resources/resource_converters.go":                       "third_party/tgc/resource_converters.go.tmpl",
+		"converters/google/resources/services/kms/iam_kms_key_ring.go":             "third_party/terraform/services/kms/go/iam_kms_key_ring.go.tmpl",
+		"converters/google/resources/services/kms/iam_kms_crypto_key.go":           "third_party/terraform/services/kms/go/iam_kms_crypto_key.go.tmpl",
+		"converters/google/resources/services/compute/metadata.go":                 "third_party/terraform/services/compute/go/metadata.go.tmpl",
+		"converters/google/resources/services/compute/compute_instance.go":         "third_party/tgc/services/compute/compute_instance.go.tmpl",
+	}
+	tgc.CompileFileList(outputFolder, resourceConverters, *templateData, products)
 }
 
 func (tgc TerraformGoogleConversion) CompileFileList(outputFolder string, files map[string]string, fileTemplate TemplateData, products []*api.Product) {
@@ -238,7 +231,7 @@ func (tgc TerraformGoogleConversion) CompileFileList(outputFolder string, files 
 		formatFile := filepath.Ext(targetFile) == ".go"
 
 		fileTemplate.GenerateFile(targetFile, source, tgc, formatFile, templates...)
-		// tgc.replaceImportPath(outputFolder, target)
+		tgc.replaceImportPath(outputFolder, target)
 	}
 }
 
@@ -289,16 +282,32 @@ func retrieveFullListOfTestFiles() []string {
 	return testFiles
 }
 
+// Gets all of files in the folder third_party/tgc/tests/data
+func retrieveFullListOfTestTilesWithLocation() map[string]string {
+	testFiles := make(map[string]string)
+	files := retrieveFullListOfTestFiles()
+	for _, file := range files {
+		target := fmt.Sprintf("testdata/templates/%s", file)
+		source := fmt.Sprintf("third_party/tgc/tests/data/%s", file)
+		testFiles[target] = source
+	}
+	return testFiles
+}
+
 func retrieveTestSourceCodeWithLocation(suffix string) map[string]string {
 	var fileNames []string
-	path := "third_party/tgc/tests/source/go"
+	var path string
+	if suffix == ".tmpl" {
+		path = "third_party/tgc/tests/source/go"
+	} else {
+		path = "third_party/tgc/tests/source"
+	}
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	for _, file := range files {
-		log.Printf("ext %s", filepath.Ext(file.Name()))
 		if filepath.Ext(file.Name()) == suffix {
 			fileNames = append(fileNames, file.Name())
 		}
@@ -338,5 +347,139 @@ func retrieveListOfManuallyDefinedTestsFromFile(file string) []string {
 }
 
 func (tgc TerraformGoogleConversion) CopyCommonFiles(outputFolder string, generateCode, generateDocs bool) {
+	log.Printf("Copying common files.")
 
+	if !generateCode {
+		return
+	}
+
+	tgc.CopyFileList(outputFolder, retrieveFullListOfTestTilesWithLocation())
+	tgc.CopyFileList(outputFolder, retrieveTestSourceCodeWithLocation(".go"))
+
+	resourceConverters := map[string]string{
+		"converters/google/resources/cai/constants.go":                             "third_party/tgc/cai/constants.go",
+		"converters/google/resources/constants.go":                                 "third_party/tgc/constants.go",
+		"converters/google/resources/cai.go":                                       "third_party/tgc/cai.go",
+		"converters/google/resources/cai/cai.go":                                   "third_party/tgc/cai/cai.go",
+		"converters/google/resources/cai/cai_test.go":                              "third_party/tgc/cai/cai_test.go",
+		"converters/google/resources/org_policy_policy.go":                         "third_party/tgc/org_policy_policy.go",
+		"converters/google/resources/getconfig.go":                                 "third_party/tgc/getconfig.go",
+		"converters/google/resources/folder.go":                                    "third_party/tgc/folder.go",
+		"converters/google/resources/getconfig_test.go":                            "third_party/tgc/getconfig_test.go",
+		"converters/google/resources/cai/json_map.go":                              "third_party/tgc/cai/json_map.go",
+		"converters/google/resources/project.go":                                   "third_party/tgc/project.go",
+		"converters/google/resources/sql_database_instance.go":                     "third_party/tgc/sql_database_instance.go",
+		"converters/google/resources/storage_bucket.go":                            "third_party/tgc/storage_bucket.go",
+		"converters/google/resources/cloudfunctions_function.go":                   "third_party/tgc/cloudfunctions_function.go",
+		"converters/google/resources/cloudfunctions_cloud_function.go":             "third_party/tgc/cloudfunctions_cloud_function.go",
+		"converters/google/resources/bigquery_table.go":                            "third_party/tgc/bigquery_table.go",
+		"converters/google/resources/bigtable_cluster.go":                          "third_party/tgc/bigtable_cluster.go",
+		"converters/google/resources/bigtable_instance.go":                         "third_party/tgc/bigtable_instance.go",
+		"converters/google/resources/cai/iam_helpers.go":                           "third_party/tgc/cai/iam_helpers.go",
+		"converters/google/resources/cai/iam_helpers_test.go":                      "third_party/tgc/cai/iam_helpers_test.go",
+		"converters/google/resources/services/resourcemanager/organization_iam.go": "third_party/tgc/organization_iam.go",
+		"converters/google/resources/services/resourcemanager/project_iam.go":      "third_party/tgc/project_iam.go",
+		"converters/google/resources/project_organization_policy.go":               "third_party/tgc/project_organization_policy.go",
+		"converters/google/resources/folder_organization_policy.go":                "third_party/tgc/folder_organization_policy.go",
+		"converters/google/resources/services/resourcemanager/folder_iam.go":       "third_party/tgc/folder_iam.go",
+		"converters/google/resources/container.go":                                 "third_party/tgc/container.go",
+		"converters/google/resources/project_service.go":                           "third_party/tgc/project_service.go",
+		"converters/google/resources/services/monitoring/monitoring_slo_helper.go": "third_party/tgc/monitoring_slo_helper.go",
+		"converters/google/resources/service_account.go":                           "third_party/tgc/service_account.go",
+		"converters/google/resources/services/compute/image.go":                    "third_party/terraform/services/compute/image.go",
+		"converters/google/resources/services/compute/disk_type.go":                "third_party/terraform/services/compute/disk_type.go",
+		"converters/google/resources/services/kms/kms_utils.go":                    "third_party/terraform/services/kms/kms_utils.go",
+		"converters/google/resources/services/sourcerepo/source_repo_utils.go":     "third_party/terraform/services/sourcerepo/source_repo_utils.go",
+		"converters/google/resources/services/pubsub/pubsub_utils.go":              "third_party/terraform/services/pubsub/pubsub_utils.go",
+		"converters/google/resources/services/resourcemanager/iam_organization.go": "third_party/terraform/services/resourcemanager/iam_organization.go",
+		"converters/google/resources/services/resourcemanager/iam_folder.go":       "third_party/terraform/services/resourcemanager/iam_folder.go",
+		"converters/google/resources/services/resourcemanager/iam_project.go":      "third_party/terraform/services/resourcemanager/iam_project.go",
+		"converters/google/resources/services/privateca/privateca_utils.go":        "third_party/terraform/services/privateca/privateca_utils.go",
+		"converters/google/resources/services/bigquery/iam_bigquery_dataset.go":    "third_party/terraform/services/bigquery/iam_bigquery_dataset.go",
+		"converters/google/resources/services/bigquery/bigquery_dataset_iam.go":    "third_party/tgc/bigquery_dataset_iam.go",
+		"converters/google/resources/compute_security_policy.go":                   "third_party/tgc/compute_security_policy.go",
+		"converters/google/resources/kms_key_ring_iam.go":                          "third_party/tgc/kms_key_ring_iam.go",
+		"converters/google/resources/kms_crypto_key_iam.go":                        "third_party/tgc/kms_crypto_key_iam.go",
+		"converters/google/resources/project_iam_custom_role.go":                   "third_party/tgc/project_iam_custom_role.go",
+		"converters/google/resources/organization_iam_custom_role.go":              "third_party/tgc/organization_iam_custom_role.go",
+		"converters/google/resources/services/pubsub/iam_pubsub_subscription.go":   "third_party/terraform/services/pubsub/iam_pubsub_subscription.go",
+		"converters/google/resources/services/pubsub/pubsub_subscription_iam.go":   "third_party/tgc/pubsub_subscription_iam.go",
+		"converters/google/resources/services/spanner/iam_spanner_database.go":     "third_party/terraform/services/spanner/iam_spanner_database.go",
+		"converters/google/resources/services/spanner/spanner_database_iam.go":     "third_party/tgc/spanner_database_iam.go",
+		"converters/google/resources/services/spanner/iam_spanner_instance.go":     "third_party/terraform/services/spanner/iam_spanner_instance.go",
+		"converters/google/resources/services/spanner/spanner_instance_iam.go":     "third_party/tgc/spanner_instance_iam.go",
+		"converters/google/resources/storage_bucket_iam.go":                        "third_party/tgc/storage_bucket_iam.go",
+		"converters/google/resources/organization_policy.go":                       "third_party/tgc/organization_policy.go",
+		"converters/google/resources/iam_storage_bucket.go":                        "third_party/tgc/iam_storage_bucket.go",
+		"ancestrymanager/ancestrymanager.go":                                       "third_party/tgc/ancestrymanager/ancestrymanager.go",
+		"ancestrymanager/ancestrymanager_test.go":                                  "third_party/tgc/ancestrymanager/ancestrymanager_test.go",
+		"ancestrymanager/ancestryutil.go":                                          "third_party/tgc/ancestrymanager/ancestryutil.go",
+		"ancestrymanager/ancestryutil_test.go":                                     "third_party/tgc/ancestrymanager/ancestryutil_test.go",
+		"converters/google/convert.go":                                             "third_party/tgc/convert.go",
+		"converters/google/convert_test.go":                                        "third_party/tgc/convert_test.go",
+		"converters/google/resources/compute_instance_group.go":                    "third_party/tgc/compute_instance_group.go",
+		"converters/google/resources/job.go":                                       "third_party/tgc/job.go",
+		"converters/google/resources/service_account_key.go":                       "third_party/tgc/service_account_key.go",
+		"converters/google/resources/compute_target_pool.go":                       "third_party/tgc/compute_target_pool.go",
+		"converters/google/resources/dataproc_cluster.go":                          "third_party/tgc/dataproc_cluster.go",
+		"converters/google/resources/composer_environment.go":                      "third_party/tgc/composer_environment.go",
+		"converters/google/resources/commitment.go":                                "third_party/tgc/commitment.go",
+		"converters/google/resources/firebase_project.go":                          "third_party/tgc/firebase_project.go",
+		"converters/google/resources/appengine_application.go":                     "third_party/tgc/appengine_application.go",
+		"converters/google/resources/apikeys_key.go":                               "third_party/tgc/apikeys_key.go",
+		"converters/google/resources/logging_folder_bucket_config.go":              "third_party/tgc/logging_folder_bucket_config.go",
+		"converters/google/resources/logging_organization_bucket_config.go":        "third_party/tgc/logging_organization_bucket_config.go",
+		"converters/google/resources/logging_project_bucket_config.go":             "third_party/tgc/logging_project_bucket_config.go",
+		"converters/google/resources/logging_billing_account_bucket_config.go":     "third_party/tgc/logging_billing_account_bucket_config.go",
+		"converters/google/resources/appengine_standard_version.go":                "third_party/tgc/appengine_standard_version.go",
+	}
+	tgc.CopyFileList(outputFolder, resourceConverters)
+}
+
+func (tgc TerraformGoogleConversion) CopyFileList(outputFolder string, files map[string]string) {
+	for target, source := range files {
+		targetFile := filepath.Join(outputFolder, target)
+		targetDir := filepath.Dir(targetFile)
+
+		if err := os.MkdirAll(targetDir, os.ModePerm); err != nil {
+			log.Println(fmt.Errorf("error creating output directory %v: %v", targetDir, err))
+		}
+		// If we've modified a file since starting an MM run, it's a reasonable
+		// assumption that it was this run that modified it.
+		if info, err := os.Stat(targetFile); !errors.Is(err, os.ErrNotExist) && tgc.StartTime.Before(info.ModTime()) {
+			log.Fatalf("%s was already modified during this run at %s", targetFile, info.ModTime().String())
+		}
+
+		sourceByte, err := os.ReadFile(source)
+		if err != nil {
+			log.Fatalf("Cannot read source file %s while copying: %s", source, err)
+		}
+
+		err = os.WriteFile(targetFile, sourceByte, 0644)
+		if err != nil {
+			log.Fatalf("Cannot write target file %s while copying: %s", target, err)
+		}
+
+		// Replace import path based on version (beta/alpha)
+		if filepath.Ext(target) == ".go" || filepath.Ext(target) == ".mod" {
+			tgc.replaceImportPath(outputFolder, target)
+		}
+	}
+}
+
+func (tgc TerraformGoogleConversion) replaceImportPath(outputFolder, target string) {
+	// Replace import paths to reference the resources dir instead of the google provider
+	targetFile := filepath.Join(outputFolder, target)
+	sourceByte, err := os.ReadFile(targetFile)
+	if err != nil {
+		log.Fatalf("Cannot read file %s to replace import path: %s", targetFile, err)
+	}
+
+	// replace google to google-beta
+	gaImportPath := ImportPathFromVersion("ga")
+	sourceByte = bytes.Replace(sourceByte, []byte(gaImportPath), []byte(TERRAFORM_PROVIDER_BETA+"/"+RESOURCE_DIRECTORY_BETA), -1)
+	err = os.WriteFile(targetFile, sourceByte, 0644)
+	if err != nil {
+		log.Fatalf("Cannot write file %s to replace import path: %s", target, err)
+	}
 }
