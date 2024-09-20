@@ -42,13 +42,13 @@ examples:
   - name: 'bigquery_reservation_capacity_commitment_basic'
     primary_resource_id: 'commitment'
     external_providers: ["random", "time"]
-    skip_docs: true
+    exclude_docs: true
   - name: 'bigquery_reservation_capacity_commitment_no_id'
     primary_resource_id: 'commitment'
     external_providers: ["random", "time"]
-    skip_docs: true
+    exclude_docs: true
   - name: 'bigquery_reservation_capacity_commitment_docs'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'capacityCommitmentId'
     type: String

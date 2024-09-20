@@ -24,7 +24,9 @@ docs:
 base_url: 'instances'
 self_link: '{{org_id}}/instances/{{name}}'
 create_url: '{{org_id}}/instances'
-immutable: true
+update_verb: 'PATCH'
+update_mask: true
+immutable: false
 mutex: '{{org_id}}/apigeeInstances'
 import_format:
   - '{{org_id}}/instances/{{name}}'
@@ -57,54 +59,67 @@ examples:
   - name: 'apigee_instance_basic'
     vars:
       instance_name: 'my-instance-name'
-    skip_test: true
+    exclude_test: true
+      # This is a more verbose version of the above that creates all
+      # the resources needed for the acceptance test.
   - name: 'apigee_instance_basic_test'
     primary_resource_id: 'apigee_instance'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
-    skip_docs: true
+    exclude_docs: true
+      # Resource creation race
     skip_vcr: true
   - name: 'apigee_instance_cidr_range'
     vars:
       instance_name: 'my-instance-name'
-    skip_test: true
+    exclude_test: true
+      # This is a more verbose version of the above that creates all
+      # the resources needed for the acceptance test.
   - name: 'apigee_instance_cidr_range_test'
     primary_resource_id: 'apigee_instance'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
-    skip_docs: true
+    exclude_docs: true
+      # Resource creation race
     skip_vcr: true
   - name: 'apigee_instance_ip_range'
     vars:
       instance_name: 'my-instance-name'
-    skip_test: true
+    exclude_test: true
+      # This is a more verbose version of the above that creates all
+      # the resources needed for the acceptance test.
   - name: 'apigee_instance_ip_range_test'
     primary_resource_id: 'apigee_instance'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
-    skip_docs: true
+    exclude_docs: true
+      # Resource creation race
     skip_vcr: true
   - name: 'apigee_instance_full'
     vars:
       instance_name: 'my-instance-name'
-    skip_test: true
+    exclude_test: true
+      # This is a more verbose version of the above that creates all
+      # the resources needed for the acceptance test.
   - name: 'apigee_instance_full_test'
     primary_resource_id: 'apigee_instance'
     min_version: 'beta'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
-    skip_docs: true
+    exclude_docs: true
+      # Resource creation race
     skip_vcr: true
   - name: 'apigee_instance_service_attachment_basic_test'
     primary_resource_id: 'apigee_instance'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
-    skip_docs: true
+    exclude_docs: true
+      # Resource creation race
     skip_vcr: true
 parameters:
   - name: 'orgId'
@@ -121,16 +136,19 @@ properties:
     description: |
       Resource ID of the instance.
     required: true
+    immutable: true
   - name: 'location'
     type: String
     description: |
       Required. Compute Engine location where the instance resides.
     required: true
+    immutable: true
   - name: 'peeringCidrRange'
     type: String
     description: |
       The size of the CIDR block range that will be reserved by the instance. For valid values,
       see [CidrRange](https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances#CidrRange) on the documentation.
+    immutable: true
     default_from_api: true
   - name: 'ipRange'
     type: String
@@ -142,15 +160,18 @@ properties:
       available /22 CIDR block from Service Networking. The customer should use this CIDR block
       for configuring their firewall needs to allow traffic from Apigee.
       Input format: "a.b.c.d/22"
+    immutable: true
     ignore_read: true
   - name: 'description'
     type: String
     description: |
       Description of the instance.
+    immutable: true
   - name: 'displayName'
     type: String
     description: |
       Display name of the instance.
+    immutable: true
   - name: 'diskEncryptionKeyName'
     type: String
     description: |

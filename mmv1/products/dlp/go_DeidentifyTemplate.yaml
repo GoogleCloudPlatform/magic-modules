@@ -36,6 +36,7 @@ custom_code:
   update_encoder: 'templates/terraform/encoders/go/wrap_object.go.tmpl'
   decoder: 'templates/terraform/decoders/go/dlp_template_id.go.tmpl'
   custom_import: 'templates/terraform/custom_import/go/dlp_import.go.tmpl'
+# Skip sweeper due to non-standard URL
 exclude_sweeper: true
 examples:
   - name: 'dlp_deidentify_template_basic'
@@ -46,7 +47,7 @@ examples:
     primary_resource_id: 'basic'
     test_env_vars:
       project: 'PROJECT_NAME'
-    skip_docs: true
+    exclude_docs: true
   - name: 'dlp_deidentify_template_image_transformations'
     primary_resource_id: 'basic'
     test_env_vars:
@@ -57,7 +58,7 @@ examples:
       name: 'my-template'
     test_env_vars:
       project: 'PROJECT_NAME'
-    skip_docs: true
+    exclude_docs: true
 parameters:
   - name: 'parent'
     type: String
@@ -187,18 +188,22 @@ properties:
                   description:
                     Apply transformation to all findings not specified in other
                     ImageTransformation's selectedInfoTypes.
+                    # The fields below are necessary to include the "allInfoTypes" transformation in the payload
                   send_empty_value: true
                   allow_empty_object: true
                   properties:
+ # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/projects.deidentifyTemplates#allinfotypes
                     []
                 - name: 'allText'
                   type: NestedObject
                   description:
                     Apply transformation to all text that doesn't match an
                     infoType.
+                    # The fields below are necessary to include the "allText" transformation in the payload
                   send_empty_value: true
                   allow_empty_object: true
                   properties:
+ # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/projects.deidentifyTemplates#alltext
                     []
       - name: 'infoTypeTransformations'
         type: NestedObject
@@ -613,10 +618,15 @@ properties:
                           description: |
                             Common alphabets.
                           enum_values:
+ # Unused.
                             - 'FFX_COMMON_NATIVE_ALPHABET_UNSPECIFIED'
+ # [0-9] (radix of 10)
                             - 'NUMERIC'
+ # [0-9A-F] (radix of 16)
                             - 'HEXADECIMAL'
+ # [0-9A-Z] (radix of 36)
                             - 'UPPER_CASE_ALPHA_NUMERIC'
+ # [0-9A-Za-z] (radix of 62)
                             - 'ALPHA_NUMERIC'
                         - name: 'customAlphabet'
                           type: String
@@ -1036,19 +1046,28 @@ properties:
                           type: Enum
                           description: The part of the time to keep.
                           enum_values:
+ # [0-9999]
                             - 'YEAR'
+ # [1-12]
                             - 'MONTH'
+ # [1-31]
                             - 'DAY_OF_MONTH'
+ # [1-7]
                             - 'DAY_OF_WEEK'
+ # [1-53]
                             - 'WEEK_OF_YEAR'
+ # [0-23]
                             - 'HOUR_OF_DAY'
                     - name: 'redactConfig'
                       type: NestedObject
                       description: |
                         Redact a given value. For example, if used with an InfoTypeTransformation transforming PHONE_NUMBER, and input 'My phone number is 206-555-0123', the output would be 'My phone number is '.
+                      # The fields below are necessary to include the "redactConfig" transformation in the payload
+                      # A side-effect is null values when the field is unused, see: https://github.com/hashicorp/terraform-provider-google/issues/13201
                       send_empty_value: true
                       allow_empty_object: true
                       properties:
+ # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/projects.deidentifyTemplates#redactconfig
                         []
                     - name: 'cryptoHashConfig'
                       type: NestedObject
@@ -1227,6 +1246,7 @@ properties:
                                             description: |
                                               Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
                                             validation:
+ # "An API may choose to allow the value "24:00:00" for scenarios like business closing time."
                                               function: 'validation.IntBetween(0, 24)'
                                           - name: 'minutes'
                                             type: Integer
@@ -1243,6 +1263,7 @@ properties:
                                               API may allow the value 60 if it
                                               allows leap-seconds.
                                             validation:
+ # "An API may allow the value 60 if it allows leap-seconds."
                                               function: 'validation.IntBetween(0, 60)'
                                           - name: 'nanos'
                                             type: Integer
@@ -1341,6 +1362,7 @@ properties:
                                   description: |
                                     Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
                                   validation:
+ # "An API may choose to allow the value "24:00:00" for scenarios like business closing time."
                                     function: 'validation.IntBetween(0, 24)'
                                 - name: 'minutes'
                                   type: Integer
@@ -1356,6 +1378,7 @@ properties:
                                     normally be from 0 to 59. An API may allow
                                     the value 60 if it allows leap-seconds.
                                   validation:
+ # "An API may allow the value 60 if it allows leap-seconds."
                                     function: 'validation.IntBetween(0, 60)'
                                 - name: 'nanos'
                                   type: Integer
@@ -1407,9 +1430,12 @@ properties:
                       type: NestedObject
                       description: |
                         Redact a given value. For example, if used with an InfoTypeTransformation transforming PHONE_NUMBER, and input 'My phone number is 206-555-0123', the output would be 'My phone number is '.
+                      # The fields below are necessary to include the "redactConfig" transformation in the payload
+                      # A side-effect is null values when the field is unused, see: https://github.com/hashicorp/terraform-provider-google/issues/13201
                       send_empty_value: true
                       allow_empty_object: true
                       properties:
+ # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/projects.deidentifyTemplates#redactconfig
                         []
                     - name: 'characterMaskConfig'
                       type: NestedObject
@@ -2314,6 +2340,7 @@ properties:
                               required: true
                               item_type:
                                 type: String
+                # infoTypeTransformations inside the recordTransformations
                 - name: 'infoTypeTransformations'
                   type: NestedObject
                   description: |
@@ -2466,9 +2493,12 @@ properties:
                                 type: NestedObject
                                 description: |
                                   Redact a given value. For example, if used with an InfoTypeTransformation transforming PHONE_NUMBER, and input 'My phone number is 206-555-0123', the output would be 'My phone number is '.
+                                # The fields below are necessary to include the "redactConfig" transformation in the payload
+                                # A side-effect is null values when the field is unused, see: https://github.com/hashicorp/terraform-provider-google/issues/13201
                                 send_empty_value: true
                                 allow_empty_object: true
                                 properties:
+ # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/projects.deidentifyTemplates#redactconfig
                                   []
                               - name: 'characterMaskConfig'
                                 type: NestedObject
@@ -2638,9 +2668,13 @@ properties:
                                     description: |
                                       Common alphabets. Only one of this, `custom_alphabet` or `radix` must be specified.
                                     enum_values:
+ # [0-9] (radix of 10)
                                       - 'NUMERIC'
+ # [0-9A-F] (radix of 16)
                                       - 'HEXADECIMAL'
+ # [0-9A-Z] (radix of 36)
                                       - 'UPPER_CASE_ALPHA_NUMERIC'
+ # [0-9A-Za-z] (radix of 62)
                                       - 'ALPHA_NUMERIC'
                                   - name: 'customAlphabet'
                                     type: String
@@ -2991,9 +3025,12 @@ properties:
                                 type: NestedObject
                                 description: |
                                   Replace each matching finding with the name of the info type.
+                                # The fields below are necessary to include the "replaceWithInfoTypeConfig" transformation in the payload
+                                # A side-effect is null values when the field is unused, see: https://github.com/hashicorp/terraform-provider-google/issues/13201
                                 send_empty_value: true
                                 allow_empty_object: true
                                 properties:
+ # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/projects.deidentifyTemplates#DeidentifyTemplate.ReplaceWithInfoTypeConfig
                                   []
                               - name: 'timePartConfig'
                                 type: NestedObject
@@ -3006,11 +3043,17 @@ properties:
                                     description: The part of the time to keep.
                                     required: true
                                     enum_values:
+ # [0-9999]
                                       - 'YEAR'
+ # [1-12]
                                       - 'MONTH'
+ # [1-31]
                                       - 'DAY_OF_MONTH'
+ # [1-7]
                                       - 'DAY_OF_WEEK'
+ # [1-53]
                                       - 'WEEK_OF_YEAR'
+ # [0-23]
                                       - 'HOUR_OF_DAY'
                               - name: 'cryptoHashConfig'
                                 type: NestedObject

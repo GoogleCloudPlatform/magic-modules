@@ -63,6 +63,8 @@ custom_code:
   post_update: 'templates/terraform/post_update/go/notebooks_instance.go.tmpl'
 schema_version: 1
 state_upgraders: true
+# This resource should not be removed until the 2025 major release or later.
+# Check instance availability first before fully removing.
 deprecation_message: '`google_notebook_instance` is deprecated and will be removed in a future major release. Use `google_workbench_instance` instead.'
 examples:
   - name: 'notebook_instance_basic'
@@ -131,6 +133,11 @@ properties:
     description: |
       A reference to a machine type which defines VM kind.
     required: true
+    # Machine Type is updatable, but requires the instance to be stopped, just like
+    # for compute instances.
+    # TODO: Implement allow_stopping_for_update here and for acceleratorConfig
+    # update_verb: :PATCH
+    # update_url: 'projects/{{project}}/locations/{{location}}/instances/{{name}}:setMachineType'
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
   - name: 'postStartupScript'

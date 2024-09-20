@@ -30,6 +30,9 @@ nested_query: !ruby/object:Api::Resource::NestedQuery
     - nats
 description: |
   A NAT service created in a router.
+
+  ~> **Note:** Recreating a `google_compute_address` that is being used by `google_compute_router_nat` will give a `resourceInUseByAnotherResource` error.
+  Use `lifecycle.create_before_destroy` on this address resource to avoid this type of error as shown in the Manual Ips example.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Google Cloud Router': 'https://cloud.google.com/router/docs/'
@@ -107,6 +110,7 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: 'templates/terraform/constants/router_nat.go.erb'
   pre_create: 'templates/terraform/constants/router_nat_validate_action_active_range.go.erb'
   pre_update: 'templates/terraform/constants/router_nat_validate_action_active_range.go.erb'
+  encoder: 'templates/terraform/encoders/router_nat_set_initial_nat_ips.go.erb'
 custom_diff: [
   'resourceComputeRouterNatDrainNatIpsCustomDiff',
 ]
@@ -151,10 +155,15 @@ properties:
       - :MANUAL_ONLY
       - :AUTO_ONLY
   - !ruby/object:Api::Type::Array
-    name: 'natIps'
+    name: 'initialNatIps'
     description: |
-      Self-links of NAT IPs. Only valid if natIpAllocateOption
-      is set to MANUAL_ONLY.
+      Self-links of NAT IPs to be used as initial value for creation alongside a RouterNatAddress resource.
+      Conflicts with natIps and drainNatIps. Only valid if natIpAllocateOption is set to MANUAL_ONLY.
+    immutable: true
+    ignore_read: true
+    conflicts:
+      - natIps
+      - drainNatIps
     send_empty_value: true
     is_set: true
     set_hash_func: computeRouterNatIPsHash
@@ -164,6 +173,24 @@ properties:
       imports: 'selfLink'
       description: 'A reference to an address associated with this NAT'
     custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
+  - !ruby/object:Api::Type::Array
+    name: 'natIps'
+    description: |
+      Self-links of NAT IPs. Only valid if natIpAllocateOption
+      is set to MANUAL_ONLY.
+      If this field is used alongside with a count created list of address resources `google_compute_address.foobar.*.self_link`,
+      the access level resource for the address resource must have a `lifecycle` block with `create_before_destroy = true` so
+      the number of resources can be increased/decreased without triggering the `resourceInUseByAnotherResource` error.
+    send_empty_value: true
+    is_set: true
+    set_hash_func: computeRouterNatIPsHash
+    item_type: !ruby/object:Api::Type::ResourceRef
+      name: 'address'
+      resource: 'Address'
+      imports: 'selfLink'
+      description: 'A reference to an address associated with this NAT'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
+    default_from_api: true
   - !ruby/object:Api::Type::Array
     name: 'drainNatIps'
     description: |
@@ -177,6 +204,7 @@ properties:
       imports: 'selfLink'
       description: 'A reference to an address associated with this NAT'
     custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
+    default_from_api: true
   - !ruby/object:Api::Type::Enum
     name: 'sourceSubnetworkIpRangesToNat'
     required: true

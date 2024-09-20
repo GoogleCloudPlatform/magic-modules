@@ -88,11 +88,13 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: 'Set of label tags associated with the EdgeCache resource.'
+ # default from api
   - name: 'disableQuic'
     type: Boolean
     description: |
       HTTP/3 (IETF QUIC) and Google QUIC are enabled by default.
     default_from_api: true
+ # default from api
   - name: 'disableHttp2'
     type: Boolean
     description: |
@@ -101,6 +103,7 @@ properties:
       HTTP/2 (h2) is enabled by default and recommended for performance. HTTP/2 improves connection re-use and reduces connection setup overhead by sending multiple streams over the same connection.
 
       Some legacy HTTP clients may have issues with HTTP/2 connections due to broken HTTP/2 implementations. Setting this to true will prevent HTTP/2 from being advertised and negotiated.
+ # default from api
   - name: 'requireTls'
     type: Boolean
     description: |
@@ -241,6 +244,7 @@ properties:
                     item_type:
                       type: NestedObject
                       properties:
+ # default from api
                         - name: 'ignoreCase'
                           type: Boolean
                           description: |
@@ -275,6 +279,7 @@ properties:
                                 type: String
                                 description: |
                                   The value of the header must end with the contents of suffixMatch.
+ # default from api
                               - name: 'invertMatch'
                                 type: Boolean
                                 description: |
@@ -326,11 +331,11 @@ properties:
                           type: String
                           description: |
                             For satisfying the matchRule condition, the path of the request must exactly match the value specified in fullPathMatch after removing any query parameters and anchor that may be part of the original URL.
+                    min_size: 1
+                    max_size: 5
                           # TODO: (scottsuarez) conflicts also won't work for array path matchers yet, uncomment here once supported.
                           # conflicts:
                           #   - Routing.PathMatcher.RouteRule.prefixMatch
-                    min_size: 1
-                    max_size: 5
                   - name: 'headerAction'
                     type: NestedObject
                     description: |
@@ -354,6 +359,7 @@ properties:
                               description: |
                                 The value of the header to add.
                               required: true
+ # default from api
                             - name: 'replace'
                               type: Boolean
                               description: |
@@ -430,6 +436,7 @@ properties:
                         description: |
                           The policy to use for defining caching and signed request behaviour for requests that match this route.
                         properties:
+ # default from api
                           - name: 'cacheMode'
                             type: Enum
                             description: |
@@ -455,6 +462,7 @@ properties:
 
                               When the cache mode is set to "USE_ORIGIN_HEADERS" or "BYPASS_CACHE", you must omit this field.
                               A duration in seconds terminated by 's'. Example: "3s".
+ # defalt from api
                           - name: 'defaultTtl'
                             type: String
                             description: |
@@ -474,6 +482,7 @@ properties:
 
                               A duration in seconds terminated by 's'. Example: "3s".
                             default_from_api: true
+ # defalt from api
                           - name: 'maxTtl'
                             type: String
                             description: |
@@ -497,6 +506,7 @@ properties:
                             description: |
                               Defines the request parameters that contribute to the cache key.
                             properties:
+ # default from api
                               - name: 'includeProtocol'
                                 type: Boolean
                                 description: |
@@ -512,6 +522,7 @@ properties:
                                   excludeQueryParameters. If neither includeQueryParameters nor
                                   excludeQueryParameters is set, the entire query string will be
                                   included.
+ # default from api
                               - name: 'excludeHost'
                                 type: Boolean
                                 description: |
@@ -587,6 +598,7 @@ properties:
                               - TTLs must be >= 0 (where 0 is "always revalidate") and <= 86400s (1 day)
 
                               Note that when specifying an explicit negativeCachingPolicy, you should take care to specify a cache TTL for all response codes that you wish to cache. The CDNPolicy will not apply any default negative caching when a policy exists.
+ # default from api
                           - name: 'signedRequestMode'
                             type: Enum
                             description: |
@@ -600,6 +612,7 @@ properties:
                               - 'DISABLED'
                               - 'REQUIRE_SIGNATURES'
                               - 'REQUIRE_TOKENS'
+ # resource ref, EdgeCacheKeyset?
                           - name: 'signedRequestKeyset'
                             type: String
                             description: |
@@ -842,6 +855,7 @@ properties:
                           The prefix that replaces the prefixMatch specified in the routeRule, retaining the remaining portion of the URL before redirecting the request.
 
                           prefixRedirect cannot be supplied together with pathRedirect. Supply one alone or neither. If neither is supplied, the path of the original request will be used for the redirect.
+ # default from api
                       - name: 'redirectResponseCode'
                         type: Enum
                         description: |
@@ -861,6 +875,7 @@ properties:
                           - 'SEE_OTHER'
                           - 'TEMPORARY_REDIRECT'
                           - 'PERMANENT_REDIRECT'
+ # default from api
                       - name: 'httpsRedirect'
                         type: Boolean
                         description: |
@@ -868,6 +883,7 @@ properties:
 
                           This can only be set if there is at least one (1) edgeSslCertificate set on the service.
                         default_from_api: true
+ # default from api
                       - name: 'stripQuery'
                         type: Boolean
                         description: |
@@ -882,6 +898,7 @@ properties:
     description: |
       Specifies the logging options for the traffic served by this service. If logging is enabled, logs will be exported to Cloud Logging.
     properties:
+ # default from api
       - name: 'enable'
         type: Boolean
         description: |

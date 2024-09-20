@@ -21,8 +21,7 @@ update_verb: :PATCH
 update_mask: true
 description: |
   AddressGroup is a resource that specifies how a collection of IP/DNS used in Firewall Policy.
-references:
-  !ruby/object:Api::Resource::ReferenceLinks  # TODO(diogoesteves): change the url to GA once it is available.
+references: !ruby/object:Api::Resource::ReferenceLinks  # TODO(diogoesteves): change the url to GA once it is available.
   guides:
     "Use AddressGroups": "https://cloud.google.com/vpc/docs/use-address-groups-firewall-policies"
   api: "https://cloud.google.com/traffic-director/docs/reference/network-security/rest/v1beta1/organizations.locations.addressGroups"

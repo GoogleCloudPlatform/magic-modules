@@ -47,6 +47,13 @@ examples:
       client_id: 'my-client-id'
       client_secret: 'my-client-secret'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'looker_instance_fips'
+    primary_resource_id: 'looker-instance'
+    vars:
+      instance_name: 'my-instance-fips'
+      client_id: 'my-client-id'
+      client_secret: 'my-client-secret'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'looker_instance_enterprise_full'
     primary_resource_id: 'looker-instance'
     vars:
@@ -82,6 +89,13 @@ examples:
       client_id: 'my-client-id'
       client_secret: 'my-client-secret'
       custom_domain: 'my-custom-domain'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'looker_instance_psc'
+    primary_resource_id: 'looker-instance'
+    vars:
+      instance_name: 'my-instance'
+      client_id: 'my-client-id'
+      client_secret: 'my-client-secret'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'region'
@@ -249,6 +263,10 @@ properties:
         description: |
           Full name and version of the CMEK key currently in use to encrypt Looker data.
   # Encryption Config  Object - End
+  - !ruby/object:Api::Type::Boolean
+    name: fipsEnabled
+    description: |
+      FIPS 140-2 Encryption enablement for Looker (Google Cloud Core).
   - !ruby/object:Api::Type::String
     name: ingressPrivateIp
     description: |
@@ -381,6 +399,55 @@ properties:
     description: |
       Whether private IP is enabled on the Looker instance.
     default_value: false
+  # PscConfig Object
+  - !ruby/object:Api::Type::NestedObject
+    name: pscConfig
+    description: |
+      Information for Private Service Connect (PSC) setup for a Looker instance.
+    update_mask_fields:
+      - 'psc_config.allowed_vpcs'
+      - 'psc_config.service_attachments'
+    properties:
+      - !ruby/object:Api::Type::Array
+        name: 'allowedVpcs'
+        item_type: Api::Type::String
+        description: |
+          List of VPCs that are allowed ingress into the Looker instance.
+      - !ruby/object:Api::Type::String
+        name: 'lookerServiceAttachmentUri'
+        description: |
+          URI of the Looker service attachment.
+        output: true
+      - !ruby/object:Api::Type::Array
+        name: 'serviceAttachments'
+        description: |
+          List of egress service attachment configurations.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Enum
+              name: connectionStatus
+              description: |
+                Status of the service attachment connection.
+              output: true
+              values:
+                - :ACCEPTED
+                - :PENDING
+                - :REJECTED
+                - :NEEDS_ATTENTION
+                - :CLOSED
+            - !ruby/object:Api::Type::String
+              name: localFqdn
+              description: |
+                Fully qualified domain name that will be used in the private DNS record created for the service attachment.
+            - !ruby/object:Api::Type::String
+              name: targetServiceAttachmentUri
+              description: |
+                URI of the service attachment to connect to.
+  # PscConfig Object - End
+  - !ruby/object:Api::Type::Boolean
+    name: pscEnabled
+    description: |
+      Whether Public Service Connect (PSC) is enabled on the Looker instance
   - !ruby/object:Api::Type::Boolean
     name: publicIpEnabled
     description: |

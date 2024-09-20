@@ -69,6 +69,14 @@ examples:
       cloud_run_service_name: 'cloudrun-srv'
     test_env_vars:
       project: 'PROJECT_NAME'
+  - name: 'cloud_run_service_gpu'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
+    min_version: 'beta'
+    vars:
+      cloud_run_service_name: 'cloudrun-srv'
+    test_env_vars:
+      project: 'PROJECT_NAME'
   - name: 'cloud_run_service_sql'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
@@ -96,7 +104,7 @@ examples:
       project: 'PROJECT_NAME'
     ignore_read_extra:
       - 'autogenerate_revision_name'
-    skip_docs: true
+    exclude_docs: true
   - name: 'cloud_run_service_secret_environment_variables'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
@@ -107,7 +115,7 @@ examples:
       project: 'PROJECT_NAME'
     ignore_read_extra:
       - 'autogenerate_revision_name'
-    skip_docs: true
+    exclude_docs: true
   - name: 'cloud_run_service_secret_volumes'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
@@ -118,7 +126,7 @@ examples:
       project: 'PROJECT_NAME'
     ignore_read_extra:
       - 'autogenerate_revision_name'
-    skip_docs: true
+    exclude_docs: true
   - name: 'cloud_run_service_probes'
     primary_resource_id: 'default'
     vars:
@@ -157,6 +165,7 @@ properties:
       Is required when creating resources. Name is primarily intended
       for creation idempotence and configuration definition. Cannot be updated.
       More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+    # This is a convenience field as terraform expects `name` to be a top level property
     url_param_only: true
     required: true
     immutable: true
@@ -736,7 +745,13 @@ properties:
                                 The name of the service to place in the gRPC HealthCheckRequest
                                 (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
                                 If this is not specified, the default behavior is defined by gRPC.
-
+              - name: 'nodeSelector'
+                type: KeyValuePairs
+                description: |-
+                  Node Selector describes the hardware requirements of the resources.
+                  Use the following node selector keys to configure features on a Revision:
+                    - `run.googleapis.com/accelerator` sets the [type of GPU](https://cloud.google.com/run/docs/configuring/services/gpu) required by the Revision to run.
+                min_version: 'beta'
               - name: 'containerConcurrency'
                 type: Integer
                 description: |-

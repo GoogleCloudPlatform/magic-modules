@@ -79,6 +79,7 @@ examples:
     primary_resource_id: 'job'
     vars:
       job_id: 'job_load'
+ # Keep small(er) to avoid downstream acctest having too-long a bucket name
       bucket_name: 'bq-geojson'
     test_env_vars:
       project: 'PROJECT_NAME'
@@ -100,7 +101,8 @@ examples:
       - 'etag'
       - 'load.0.destination_table.0.table_id'
       - 'status.0.state'
-    skip_docs: true
+ # there are a lot of examples for this resource, so omitting some that are similar to others
+    exclude_docs: true
   - name: 'bigquery_job_copy'
     primary_resource_id: 'job'
     vars:
@@ -128,7 +130,8 @@ examples:
       - 'copy.0.source_tables.0.table_id'
       - 'copy.0.source_tables.1.table_id'
       - 'status.0.state'
-    skip_docs: true
+ # there are a lot of examples for this resource, so omitting some that are similar to others
+    exclude_docs: true
   - name: 'bigquery_job_extract'
     primary_resource_id: 'job'
     vars:
@@ -146,7 +149,8 @@ examples:
       - 'etag'
       - 'extract.0.source_table.0.table_id'
       - 'status.0.state'
-    skip_docs: true
+ # there are a lot of examples for this resource, so omitting some that are similar to others
+    exclude_docs: true
 parameters:
 properties:
   - name: 'user_email'
@@ -225,11 +229,13 @@ properties:
               properties:
                 - name: 'resourceUri'
                   type: String
+                  # TODO (mbang): exactly_one_of: resourceUri, inlineCode
                   description:
                     'A code resource to load from a Google Cloud Storage URI
                     (gs://bucket/path).'
                 - name: 'inlineCode'
                   type: String
+                  # TODO (mbang): exactly_one_of: resourceUri, inlineCode
                   description: |
                     An inline resource that contains code for a user-defined function (UDF).
                     Providing a inline code resource is equivalent to providing a URI for a file containing the same code.
