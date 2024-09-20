@@ -156,7 +156,7 @@ func getOrCreateServiceAccount(config *transport_tpg.Config, project, serviceAcc
 
 	sa, err := config.NewIamClient(config.UserAgent).Projects.ServiceAccounts.Get(name).Do()
 	if err != nil && !transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
-		return nil, err
+		return nil, fmt.Errorf("encountered a non-404 error when looking for bootstrapped service account %s: %w", name, err)
 	}
 
 	if sa == nil {
@@ -171,7 +171,7 @@ func getOrCreateServiceAccount(config *transport_tpg.Config, project, serviceAcc
 		}
 		sa, err = config.NewIamClient(config.UserAgent).Projects.ServiceAccounts.Create("projects/"+project, r).Do()
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error when creating bootstrapped service account %s: %w", name, err)
 		}
 	}
 
