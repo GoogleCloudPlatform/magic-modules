@@ -43,6 +43,7 @@ iam_policy:
     - '{{%dataset}}/consentStores/{{name}}'
     - '{{name}}'
 custom_code:
+# Skipping the sweeper since this is a fine-grained resource under dataset
 exclude_sweeper: true
 examples:
   - name: 'healthcare_consent_store_basic'
