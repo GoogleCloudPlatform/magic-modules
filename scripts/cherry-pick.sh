@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+
+# Example command
+# sh scripts/cherry-pick <hash of a post-switchover commit>
+
 set -e
 safecommit=$1
 
@@ -20,3 +24,6 @@ files=`git diff --name-only --diff-filter=A --cached`
 for file in $files; do
   mv $file ${file%".temp"}
 done
+
+# stage all changes
+git add .
