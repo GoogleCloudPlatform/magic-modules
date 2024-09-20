@@ -199,6 +199,7 @@ service/compute-managed:
   - google_compute_region_instance_group_manager.*
   - google_compute_per_instance_config.*
   - google_compute_region_per_instance_config.*
+  - google_compute_resize_request.*
 service/compute-nat:
   resources:
   - google_compute_router_nat
@@ -351,6 +352,7 @@ service/firestore-controlplane:
   - google_firestore_database
 service/firestore-dataplane:
   resources:
+  - google_datastore_index
   - google_firestore_document
   - google_firestore_field
   - google_firestore_index
