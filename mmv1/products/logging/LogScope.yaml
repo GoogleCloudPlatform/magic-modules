@@ -19,7 +19,6 @@ self_link: '{{parent}}/locations/{{location}}/logScopes/{{name}}'
 import_format: ['{{%parent}}/locations/{{location}}/logScopes/{{name}}']
 update_verb: :PATCH
 update_mask: true
-# min_version: beta
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/logging/docs/apis'
@@ -37,7 +36,6 @@ examples:
       project: :PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/logging_log_scope.go.erb
-  # pre_read: templates/terraform/pre_read/logging_log_scope.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: parent
