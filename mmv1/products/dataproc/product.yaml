@@ -18,7 +18,5 @@ display_name: 'Dataproc'
 versions:
   - name: 'ga'
     base_url: 'https://dataproc.googleapis.com/v1/'
-  - name: 'beta'
-    base_url: 'https://dataproc.googleapis.com/v1beta2/'
 scopes:
   - 'https://www.googleapis.com/auth/cloud-identity'
