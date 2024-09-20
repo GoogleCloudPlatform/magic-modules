@@ -143,19 +143,19 @@ func (vt *Tester) FetchCassettes(version provider.Version, baseBranch, head stri
 	vt.rnr.Mkdir(cassettePath)
 	if baseBranch != "FEATURE-BRANCH-major-release-6.0.0" {
 		// pull main cassettes (major release uses branch specific casssettes as primary ones)
-		bucketPath := fmt.Sprintf("gs://ci-vcr-cassettes/%sfixtures/*", version.BucketPath())
+		bucketPath := fmt.Sprintf("gs://%s/%sfixtures/*", vt.cassetteBucket, version.BucketPath())
 		if err := vt.fetchBucketPath(bucketPath, cassettePath); err != nil {
 			fmt.Println("Error fetching cassettes: ", err)
 		}
 	}
 	if baseBranch != "main" {
-		bucketPath := fmt.Sprintf("gs://ci-vcr-cassettes/%srefs/branches/%s/fixtures/*", version.BucketPath(), baseBranch)
+		bucketPath := fmt.Sprintf("gs://%s/%srefs/branches/%s/fixtures/*", vt.cassetteBucket, version.BucketPath(), baseBranch)
 		if err := vt.fetchBucketPath(bucketPath, cassettePath); err != nil {
 			fmt.Println("Error fetching cassettes: ", err)
 		}
 	}
 	if head != "" {
-		bucketPath := fmt.Sprintf("gs://ci-vcr-cassettes/%srefs/heads/%s/fixtures/*", version.BucketPath(), head)
+		bucketPath := fmt.Sprintf("gs://%s/%srefs/heads/%s/fixtures/*", vt.cassetteBucket, version.BucketPath(), head)
 		if err := vt.fetchBucketPath(bucketPath, cassettePath); err != nil {
 			fmt.Println("Error fetching cassettes: ", err)
 		}
@@ -194,34 +194,34 @@ type RunOptions struct {
 
 // Run the vcr tests in the given mode and provider version and return the result.
 // This will overwrite any existing logs for the given mode and version.
-func (vt *Tester) Run(opt RunOptions) (Result, error) {
-	logPath, err := vt.getLogPath(opt.Mode, opt.Version)
+func (vt *Tester) Run(opts RunOptions) (Result, error) {
+	logPath, err := vt.getLogPath(opts.Mode, opts.Version)
 	if err != nil {
 		return Result{}, err
 	}
 
-	repoPath, ok := vt.repoPaths[opt.Version]
+	repoPath, ok := vt.repoPaths[opts.Version]
 	if !ok {
-		return Result{}, fmt.Errorf("no repo cloned for version %s in %v", opt.Version, vt.repoPaths)
+		return Result{}, fmt.Errorf("no repo cloned for version %s in %v", opts.Version, vt.repoPaths)
 	}
 	if err := vt.rnr.PushDir(repoPath); err != nil {
 		return Result{}, err
 	}
-	if len(opt.TestDirs) == 0 {
+	if len(opts.TestDirs) == 0 {
 		var err error
-		opt.TestDirs, err = vt.googleTestDirectory()
+		opts.TestDirs, err = vt.googleTestDirectory()
 		if err != nil {
 			return Result{}, err
 		}
 
 	}
 
-	cassettePath := filepath.Join(vt.baseDir, "cassettes", opt.Version.String())
-	switch opt.Mode {
+	cassettePath := filepath.Join(vt.baseDir, "cassettes", opts.Version.String())
+	switch opts.Mode {
 	case Replaying:
-		cassettePath, ok = vt.cassettePaths[opt.Version]
+		cassettePath, ok = vt.cassettePaths[opts.Version]
 		if !ok {
-			return Result{}, fmt.Errorf("cassettes not fetched for version %s", opt.Version)
+			return Result{}, fmt.Errorf("cassettes not fetched for version %s", opts.Version)
 		}
 	case Recording:
 		if err := vt.rnr.RemoveAll(cassettePath); err != nil {
@@ -230,11 +230,11 @@ func (vt *Tester) Run(opt RunOptions) (Result, error) {
 		if err := vt.rnr.Mkdir(cassettePath); err != nil {
 			return Result{}, fmt.Errorf("error creating cassette dir: %v", err)
 		}
-		vt.cassettePaths[opt.Version] = cassettePath
+		vt.cassettePaths[opts.Version] = cassettePath
 	}
 
 	args := []string{"test"}
-	args = append(args, opt.TestDirs...)
+	args = append(args, opts.TestDirs...)
 	args = append(args,
 		"-parallel",
 		strconv.Itoa(accTestParallelism),
@@ -247,11 +247,11 @@ func (vt *Tester) Run(opt RunOptions) (Result, error) {
 	)
 	env := map[string]string{
 		"VCR_PATH":                       cassettePath,
-		"VCR_MODE":                       opt.Mode.Upper(),
+		"VCR_MODE":                       opts.Mode.Upper(),
 		"ACCTEST_PARALLELISM":            strconv.Itoa(accTestParallelism),
 		"GOOGLE_CREDENTIALS":             vt.env["SA_KEY"],
 		"GOOGLE_APPLICATION_CREDENTIALS": filepath.Join(vt.baseDir, vt.saKeyPath),
-		"GOOGLE_TEST_DIRECTORY":          strings.Join(opt.TestDirs, " "),
+		"GOOGLE_TEST_DIRECTORY":          strings.Join(opts.TestDirs, " "),
 		"TF_LOG":                         "DEBUG",
 		"TF_LOG_SDK_FRAMEWORK":           "INFO",
 		"TF_LOG_PATH_MASK":               filepath.Join(logPath, "%s.log"),
@@ -277,14 +277,14 @@ func (vt *Tester) Run(opt RunOptions) (Result, error) {
 	output, testErr := vt.rnr.Run("go", args, env)
 	if testErr != nil {
 		// Use error as output for log.
-		output = fmt.Sprintf("Error %s tests:\n%v", opt.Mode.Lower(), testErr)
+		output = fmt.Sprintf("Error %s tests:\n%v", opts.Mode.Lower(), testErr)
 	}
 	// Leave repo directory.
 	if err := vt.rnr.PopDir(); err != nil {
 		return Result{}, err
 	}
 
-	logFileName := filepath.Join(vt.baseDir, "testlogs", fmt.Sprintf("%s_test.log", opt.Mode.Lower()))
+	logFileName := filepath.Join(vt.baseDir, "testlogs", fmt.Sprintf("%s_test.log", opts.Mode.Lower()))
 	// Write output (or error) to test log.
 	// Append to existing log file.
 	allOutput, _ := vt.rnr.ReadFile(logFileName)
