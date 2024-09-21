@@ -73,7 +73,9 @@ examples:
     min_version: 'beta'
     vars:
       sec_policy_name: 'policyfornetworkmatch'
-    skip_test: true
+    # it needs to run synchronously because a region can have only one google_compute_network_edge_security_service.
+    # there is a robust handwritten test which covers this scenario.
+    exclude_test: true
 parameters:
   - name: 'region'
     type: String

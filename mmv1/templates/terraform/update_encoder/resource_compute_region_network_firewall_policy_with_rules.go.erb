@@ -1,0 +1,15 @@
+config := meta.(*transport_tpg.Config)
+
+predefinedRulesProp, err := expandComputeRegionNetworkFirewallPolicyWithRulesRule(d.Get("predefined_rules"), d, config)
+if err != nil {
+  return nil, err
+}
+
+rules := obj["rules"].([]interface{})
+obj["rules"] = append(rules, predefinedRulesProp)
+
+return obj, nil
+
+
+
+

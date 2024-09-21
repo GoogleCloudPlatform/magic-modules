@@ -54,15 +54,16 @@ examples:
       'dns_name': '"m-z.gcp.tfacc.hashicorptest.com."'
     ignore_read_extra:
       - 'force_destroy'
-    skip_docs: true
+    exclude_docs: true
   - name: 'dns_record_set_basic'
     primary_resource_id: 'parent-zone'
     vars:
       sample_zone: 'sample-zone'
-    skip_docs: true
+    exclude_docs: true
   - name: 'dns_managed_zone_basic'
     primary_resource_id: 'example-zone'
     external_providers: ["random", "time"]
+      # Randomness from random provider
     skip_vcr: true
   - name: 'dns_managed_zone_private'
     primary_resource_id: 'private-zone'
@@ -81,14 +82,14 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
-    skip_docs: true
+    exclude_docs: true
   - name: 'dns_managed_zone_private_forwarding'
     primary_resource_id: 'private-zone'
     vars:
       zone_name: 'private-zone'
       network_1_name: 'network-1'
       network_2_name: 'network-2'
-    skip_test: true
+    exclude_test: true
   - name: 'dns_managed_zone_private_gke'
     primary_resource_id: 'private-zone-gke'
     vars:
@@ -312,6 +313,8 @@ properties:
         item_type:
           type: NestedObject
           properties:
+            # TODO(drebes): Make 'networkUrl' a ResourceRef once cross-module references
+            # are possible.
             - name: 'networkUrl'
               type: String
               description: |
@@ -372,6 +375,8 @@ properties:
         description: 'The network with which to peer.'
         required: true
         properties:
+          # TODO(drebes): Make 'networkUrl' a ResourceRef once cross-module references
+          # are possible.
           - name: 'networkUrl'
             type: String
             description: |

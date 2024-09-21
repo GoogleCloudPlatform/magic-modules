@@ -1,0 +1,11 @@
+resource "google_logging_log_scope" "<%= ctx[:primary_resource_id] %>" {
+    parent         = "projects/<%= ctx[:test_env_vars]['project'] %>"
+    location       = "global"
+    name           = "projects/<%= ctx[:test_env_vars]['project'] %>/locations/global/logScopes/<%= ctx[:vars]['log_scope_name'] %>"
+    resource_names = [
+        "projects/<%= ctx[:test_env_vars]['project'] %>",
+        "projects/<%= ctx[:test_env_vars]['project'] %>/locations/global/buckets/_Default/views/<%= ctx[:vars]['log_view_name_1'] %>",
+        "projects/<%= ctx[:test_env_vars]['project'] %>/locations/global/buckets/_Default/views/<%= ctx[:vars]['log_view_name_2'] %>"
+    ]
+    description    = "A log scope configured with Terraform"
+}

@@ -135,7 +135,7 @@ type Type struct {
 
 	EnumValues []string `yaml:"enum_values"`
 
-	SkipDocsValues bool `yaml:"skip_docs_values"`
+	ExcludeDocsValues bool `yaml:"exclude_docs_values"`
 
 	// ====================
 	// Array Fields
@@ -422,7 +422,8 @@ func (t *Type) GetPrefix() string {
 	if t.Prefix == "" {
 		if t.ParentMetadata == nil {
 			nestedPrefix := ""
-			if t.ResourceMetadata.NestedQuery != nil {
+			// TODO: Use the nestedPrefix for tgc provider to be consistent with terraform provider
+			if t.ResourceMetadata.NestedQuery != nil && t.ResourceMetadata.Compiler != "terraformgoogleconversion-codegen" {
 				nestedPrefix = "Nested"
 			}
 

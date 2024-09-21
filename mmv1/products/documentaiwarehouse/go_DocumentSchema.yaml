@@ -34,7 +34,8 @@ custom_code:
 examples:
   - name: 'document_ai_warehouse_document_schema_text'
     primary_resource_id: 'example_text'
-    skip_test: true
+    # docs only, testing is done in an update test
+    exclude_test: true
 parameters:
   - name: 'project_number'
     type: String
@@ -128,6 +129,7 @@ properties:
                 type: String
                 description: |
                   The Doc AI processor type name.
+        # select any one of the property types (integer, float, text, property, enum, dateTime, map, timestamp)
         - name: 'integerTypeOptions'
           type: NestedObject
           description: |

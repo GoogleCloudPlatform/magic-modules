@@ -60,7 +60,7 @@ examples:
     vars:
       name: 'workflow'
       account_id: 'my-account'
-    skip_import_test: true
+    exclude_import_test: true
 parameters:
   - name: 'region'
     type: String
