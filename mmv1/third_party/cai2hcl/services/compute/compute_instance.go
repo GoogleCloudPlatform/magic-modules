@@ -211,7 +211,8 @@ func convertScheduling(sched *compute.Scheduling) []map[string]interface{} {
 		"preemptible":         sched.Preemptible,
 		"on_host_maintenance": sched.OnHostMaintenance,
 		// node_affinities are not converted into cai
-		"node_affinities": convertSchedulingNodeAffinity(sched.NodeAffinities),
+		"node_affinities":     convertSchedulingNodeAffinity(sched.NodeAffinities),
+		"availability_domain": sched.AvailabilityDomain,
 	}
 	if sched.MinNodeCpus > 0 {
 		data["min_node_cpus"] = sched.MinNodeCpus
