@@ -1,0 +1,31 @@
+log.Printf("[DEBUG] Post-create for RegionNetworkFirewallPolicyWithRules %q", d.Id())
+
+url, err = tpgresource.ReplaceVarsForId(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/firewallPolicies/{{"{{"}}name{{"}}"}}")
+if err != nil {
+  return err
+}
+
+headers = make(http.Header)
+res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+  Config:    config,
+	Method:    "GET",
+	Project:   billingProject,
+	RawURL:    url,
+	UserAgent: userAgent,
+	Headers:   headers,
+})
+if err != nil {
+ return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ComputeRegionNetworkFirewallPolicyWithRules %q", d.Id()))
+}
+
+if err := d.Set("fingerprint", flattenComputeRegionNetworkFirewallPolicyWithRulesFingerprint(res["fingerprint"], d, config)); err != nil {
+  return fmt.Errorf("Error reading RegionNetworkFirewallPolicyWithRules: %s", err)
+}
+
+res, err = resourceComputeRegionNetworkFirewallPolicyWithRulesDecoder(d, meta, res)
+if err != nil {
+  return err
+}
+
+log.Printf("[DEBUG] Updating RegionNetworkFirewallPolicyWithRules %q", d.Id())
+return resourceComputeRegionNetworkFirewallPolicyWithRulesUpdate(d, meta)

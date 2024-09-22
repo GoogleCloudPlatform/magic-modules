@@ -1,7 +1,7 @@
-{{/* TODO rewrite: if hc_downstream */ -}}
+{{- if ne $.Compiler "terraformgoogleconversion-codegen" }}
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
-
+{{ end }}
 // ----------------------------------------------------------------------------
 //
 //     ***     AUTO GENERATED CODE    ***    Type: MMv1     ***

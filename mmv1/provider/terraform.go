@@ -63,7 +63,7 @@ func NewTerraform(product *api.Product, versionName string, startTime time.Time)
 	t.Product.SetPropertiesBasedOnVersion(&t.Version)
 	for _, r := range t.Product.Objects {
 		r.SetCompiler(ProviderName(t))
-		r.ImportPath = ImportPathFromVersion(t, versionName)
+		r.ImportPath = ImportPathFromVersion(versionName)
 	}
 
 	return t
@@ -557,8 +557,8 @@ func (t Terraform) replaceImportPath(outputFolder, target string) {
 
 	data := string(sourceByte)
 
-	gaImportPath := ImportPathFromVersion(t, "ga")
-	betaImportPath := ImportPathFromVersion(t, "beta")
+	gaImportPath := ImportPathFromVersion("ga")
+	betaImportPath := ImportPathFromVersion("beta")
 
 	if strings.Contains(data, betaImportPath) {
 		log.Fatalf("Importing a package from module %s is not allowed in file %s. Please import a package from module %s.", betaImportPath, filepath.Base(target), gaImportPath)
