@@ -6845,8 +6845,13 @@ func containerClusterAutopilotCustomizeDiff(_ context.Context, d *schema.Resourc
 		if err := d.SetNew("networking_mode", "VPC_NATIVE"); err != nil {
 			return err
 		}
-	}
-	return nil
+  }
+  // Additive VPC Scope DNS domain is supported in Autopilot but only on creation.
+  // If additive_vpc_scope_dns_domain is changed and enable_autopilot is true, force recreation.
+  if d.HasChange("dns_config.0.additive_vpc_scope_dns_domain") && d.Get("enable_autopilot").(bool) {
+    return d.ForceNew("dns_config.0.additive_vpc_scope_dns_domain")
+  }
+  return nil
 }
 
 // node_version only applies to the default node pool, so it should conflict with remove_default_node_pool = true
