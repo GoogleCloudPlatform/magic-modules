@@ -86,6 +86,8 @@ examples:
       deletion_protection: 'true'
     test_vars_overrides:
       'deletion_protection': 'false'
+    oics_vars_overrides:
+      'deletion_protection': 'false'
     ignore_read_extra:
       - 'autogenerate_revision_name'
   - name: 'cloud_run_service_noauth'
