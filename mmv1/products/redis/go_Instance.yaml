@@ -54,6 +54,8 @@ examples:
       prevent_destroy: 'true'
     test_vars_overrides:
       'prevent_destroy': 'false'
+    oics_vars_overrides:
+      'prevent_destroy': 'false'
   - name: 'redis_instance_full'
     primary_resource_id: 'cache'
     vars:
@@ -62,6 +64,8 @@ examples:
       prevent_destroy: 'true'
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedTestNetwork(t, "redis-full")'
+      'prevent_destroy': 'false'
+    oics_vars_overrides:
       'prevent_destroy': 'false'
   - name: 'redis_instance_full_with_persistence_config'
     primary_resource_id: 'cache-persis'
@@ -72,6 +76,8 @@ examples:
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedTestNetwork(t, "redis-full-persis")'
       'prevent_destroy': 'false'
+    oics_vars_overrides:
+      'prevent_destroy': 'false'
   - name: 'redis_instance_private_service'
     primary_resource_id: 'cache'
     vars:
@@ -80,6 +86,8 @@ examples:
       network_name: 'redis-test-network'
       prevent_destroy: 'true'
     test_vars_overrides:
+      'prevent_destroy': 'false'
+    oics_vars_overrides:
       'prevent_destroy': 'false'
     exclude_test: true
   - name: 'redis_instance_private_service_test'
@@ -91,6 +99,8 @@ examples:
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
       'prevent_destroy': 'false'
+    oics_vars_overrides:
+      'prevent_destroy': 'false'
     exclude_docs: true
   - name: 'redis_instance_mrr'
     primary_resource_id: 'cache'
@@ -101,6 +111,8 @@ examples:
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedTestNetwork(t, "redis-mrr")'
       'prevent_destroy': 'false'
+    oics_vars_overrides:
+      'prevent_destroy': 'false'
   - name: 'redis_instance_cmek'
     primary_resource_id: 'cache'
     vars:
@@ -109,6 +121,8 @@ examples:
       prevent_destroy: 'true'
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedTestNetwork(t, "redis-cmek")'
+      'prevent_destroy': 'false'
+    oics_vars_overrides:
       'prevent_destroy': 'false'
     exclude_test: true
 parameters:
