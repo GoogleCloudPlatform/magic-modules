@@ -11,8 +11,8 @@ Most custom code attributes are strings that contain a path to a template file r
 
 ```yaml
 custom_code:
-  # References mmv1/templates/terraform/custom_delete/go/resource_name_custom_delete.go.tmpl
-  custom_delete: templates/terraform/custom_delete/go/resource_name_custom_delete.go.tmpl
+  # References mmv1/templates/terraform/custom_delete/resource_name_custom_delete.go.tmpl
+  custom_delete: templates/terraform/custom_delete/resource_name_custom_delete.go.tmpl
 ```
 
 By convention, the template files are stored in a directory matching the type of custom code, and the name of the file includes the resource (and, if relevant, field) impacted by the custom code. Like handwritten resource and test code, custom code is written as go templates which render go code.
@@ -25,7 +25,7 @@ The following sections describe types of custom code in more detail.
 
 ```yaml
 custom_code:
-  constants: templates/terraform/constants/go/PRODUCT_RESOURCE.go.tmpl
+  constants: templates/terraform/constants/PRODUCT_RESOURCE.go.tmpl
 ```
 
 Use `custom_code.constants` to inject top-level code in a resource file. This is useful for anything that should be referenced from other parts of the resource, such as:
@@ -55,7 +55,7 @@ These are described in more detail in the following sections.
 ```yaml
 - name: 'FIELD'
   type: String
-  custom_expand: 'templates/terraform/custom_expand/go/PRODUCT_RESOURCE_FIELD.go.tmpl'
+  custom_expand: 'templates/terraform/custom_expand/PRODUCT_RESOURCE_FIELD.go.tmpl'
 ```
 
 Set `custom_expand` on a field to inject code that modifies the value to send to the API for that field. Custom expanders run _before_ any [`encoder` or `update_encoder`]({{< ref "#encoder" >}}). The referenced file must include the function signature for the expander. For example:
@@ -82,8 +82,8 @@ The function returns a final value that will be sent to the API.
 
 ```yaml
 custom_code:
-  encoder: templates/terraform/encoder/go/PRODUCT_RESOURCE.go.tmpl
-  update_encoder: templates/terraform/update_encoder/go/PRODUCT_RESOURCE.go.tmpl
+  encoder: templates/terraform/encoder/PRODUCT_RESOURCE.go.tmpl
+  update_encoder: templates/terraform/update_encoder/PRODUCT_RESOURCE.go.tmpl
 ```
 
 Use `custom_code.encoder` to inject code that modifies the data that will be sent in the API request. This is useful if the API expects the data to be in a significantly different structure than Terraform does - for example, if the API expects the entire object to be nested under a key, or a particular field must never be sent to the API. The encoder will run _after_ any [`custom_expand`]({{< ref "#custom_expand" >}}) code.
@@ -111,7 +111,7 @@ If the Create and Update methods for the resource need different logic, set `cus
 
 ```yaml
 custom_code:
-  decoder: templates/terraform/decoder/go/PRODUCT_RESOURCE.go.tmpl
+  decoder: templates/terraform/decoder/PRODUCT_RESOURCE.go.tmpl
 ```
 
 
@@ -138,7 +138,7 @@ The function returns data that will be set in Terraform state and an optional er
 ```yaml
 - name: 'FIELD'
   type: String
-  custom_flatten: 'templates/terraform/custom_flatten/go/PRODUCT_RESOURCE_FIELD.go.tmpl'
+  custom_flatten: 'templates/terraform/custom_flatten/PRODUCT_RESOURCE_FIELD.go.tmpl'
 ```
 
 Set `custom_flatten` on a field to inject code that modifies the value returned by the API prior to storing it in Terraform state. Custom flatteners run _after_ any [`decoder`]({{< ref "#encoder" >}}). The referenced file must include the function signature for the flattener. For example:
@@ -164,18 +164,18 @@ The function returns a final value that will be stored in Terraform state for th
 
 ```yaml
 custom_code:
-  pre_create: templates/terraform/pre_create/go/PRODUCT_RESOURCE.go.tmpl
-  post_create: templates/terraform/post_create/go/PRODUCT_RESOURCE.go.tmpl
+  pre_create: templates/terraform/pre_create/PRODUCT_RESOURCE.go.tmpl
+  post_create: templates/terraform/post_create/PRODUCT_RESOURCE.go.tmpl
 
-  pre_read: templates/terraform/pre_read/go/PRODUCT_RESOURCE.go.tmpl
+  pre_read: templates/terraform/pre_read/PRODUCT_RESOURCE.go.tmpl
 
-  pre_update: templates/terraform/pre_update/go/PRODUCT_RESOURCE.go.tmpl
-  post_update: templates/terraform/post_update/go/PRODUCT_RESOURCE.go.tmpl
+  pre_update: templates/terraform/pre_update/PRODUCT_RESOURCE.go.tmpl
+  post_update: templates/terraform/post_update/PRODUCT_RESOURCE.go.tmpl
 
-  pre_delete: templates/terraform/pre_delete/go/PRODUCT_RESOURCE.go.tmpl
-  post_delete: templates/terraform/post_delete/go/PRODUCT_RESOURCE.go.tmpl
+  pre_delete: templates/terraform/pre_delete/PRODUCT_RESOURCE.go.tmpl
+  post_delete: templates/terraform/post_delete/PRODUCT_RESOURCE.go.tmpl
 
-  post_import: templates/terraform/post_import/go/PRODUCT_RESOURCE.go.tmpl
+  post_import: templates/terraform/post_import/PRODUCT_RESOURCE.go.tmpl
 ```
 
 CRUD operations can be modified with pre/post hooks. This code will be injected directly into the relevant CRUD method as close as possible to the related API call and will have access to any variables that are present when it runs. `pre_create` and `pre_update` run after any [`encoder`]({{< ref "#encoder" >}}). Some example use cases:
@@ -188,7 +188,7 @@ CRUD operations can be modified with pre/post hooks. This code will be injected 
 
 ```yaml
 custom_code:
-  post_create_failure: templates/terraform/post_create_failure/go/PRODUCT_RESOURCE.go.tmpl
+  post_create_failure: templates/terraform/post_create_failure/PRODUCT_RESOURCE.go.tmpl
 ```
 
 Use `custom_code.post_create_failure` to inject code that runs if a Create request to the API returns an error.
@@ -210,10 +210,10 @@ The parameters the function receives are:
 
 ```yaml
 custom_code:
-  custom_create: templates/terraform/custom_create/go/PRODUCT_RESOURCE.go.tmpl
-  custom_update: templates/terraform/custom_update/go/PRODUCT_RESOURCE.go.tmpl
-  custom_delete: templates/terraform/custom_delete/go/PRODUCT_RESOURCE.go.tmpl
-  custom_import: templates/terraform/custom_import/go/PRODUCT_RESOURCE.go.tmpl
+  custom_create: templates/terraform/custom_create/PRODUCT_RESOURCE.go.tmpl
+  custom_update: templates/terraform/custom_update/PRODUCT_RESOURCE.go.tmpl
+  custom_delete: templates/terraform/custom_delete/PRODUCT_RESOURCE.go.tmpl
+  custom_import: templates/terraform/custom_import/PRODUCT_RESOURCE.go.tmpl
 ```
 
 Custom methods replace the entire contents of the Create, Update, Delete, or Import methods. For example:
