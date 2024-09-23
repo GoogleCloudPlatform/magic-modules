@@ -27,13 +27,13 @@ The solution we've implemented includes:
 * [Updates to TeamCity](https://github.com/GoogleCloudPlatform/magic-modules/pull/10785) so that any builds triggered by the nightly cron at **4am UTC** check out the `nightly-test` branch 
 
 <p align="center">
-<img src="https://github.com/user-attachments/assets/acf538b9-9888-40d8-925d-775c48e9654a">
+<img src="./docs/images/clock-timings-of-branch-making-and-usage.png">
 </p>
 
 This diagram shows what happens if a new PR was merged to main at 4am when the nightly test builds start running:
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/76646535-01e9-4ea4-9963-89b58887a318">
+  <img src="./docs/images/gha-branch-renaming.png">
 </p>
 
 ## What this means for you
