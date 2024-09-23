@@ -30,11 +30,6 @@ If you are familiar with Docker or Podman, you may want to use the experimental 
 {{< /hint >}}
 
 1. [Install git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
-1. [Install rbenv](https://github.com/rbenv/rbenv#installation), ensuring you follow **both** steps 1 and 2. 
-1. Use rbenv to install ruby 3.1.0
-   ```bash
-   rbenv install 3.1.0
-   ```
 1. [Install go](https://go.dev/doc/install)
 1. Add the following values to your environment settings such as `.bashrc`:
    ```bash
@@ -63,8 +58,6 @@ If you are familiar with Docker or Podman, you may want to use the experimental 
    Expected output if everything is installed properly:
  
    ```
-   Check for ruby in path...
-      found!
    Check for go in path...
       found!
    Check for goimports in path...
@@ -81,8 +74,8 @@ If you are familiar with Docker or Podman, you may want to use the experimental 
 
 1. In your cloned magic-modules repository, edit `mmv1/products/bigqueryanalyticshub/DataExchange.yaml` to change the description for the `displayName` field:
    ```yaml
-   - !ruby/object:Api::Type::NestedObject
-     name: 'displayName'
+   - name: 'displayName'
+     type: NestedObject
      description: |
        UPDATED_DESCRIPTION
    ```

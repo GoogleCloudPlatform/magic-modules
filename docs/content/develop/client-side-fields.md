@@ -21,8 +21,8 @@ Instead of adding the field in `parameters` or `properties`, use a section calle
 Example:
 ```yaml
 virtual_fields:
-  - !ruby/object:Api::Type::Boolean
-    name: 'deletion_protection'
+  - name: 'deletion_protection'
+    type: Boolean
     default_value: true
     description: |
       Whether Terraform will be prevented from destroying the CertificateAuthority.
