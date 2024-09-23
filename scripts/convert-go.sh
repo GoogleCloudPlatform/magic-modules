@@ -43,6 +43,11 @@ if [[ $yamlstring != "" ]]; then
   # run yaml conversion with given .yaml files
   bundle exec compiler.rb -e terraform -o $1 -v beta -a --go-yaml-files $yamlstring
   go run . --yaml-temp
+  for i in `find . -name "*.temp" -type f`; do
+    echo "removing go/ paths in ${i}"
+    perl -pi -e 's/go\///g' $i
+  done
+
 fi
 
 
