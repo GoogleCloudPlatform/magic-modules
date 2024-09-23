@@ -7,7 +7,7 @@ weight: 50
 
 This document describes how to promote an existing resource or field that uses MMv1 and/or handwritten code from the `google-beta` provider to the `google` (also known as "GA") provider.
 
-Handwritten code (including `custom_code`) commonly uses "version guards" in the form of `<% unless version == 'ga' -%>...<% end -%>` to wrap code that is beta-specific, which need to be removed during promotion.
+Handwritten code (including `custom_code`) commonly uses "version guards" in the form of `{{- if ne $.TargetVersionName "ga" -}}...{{- end }}` to wrap code that is beta-specific, which need to be removed during promotion.
 
 For more information about types of resources and the generation process overall, see [How Magic Modules works]({{< ref "/get-started/how-magic-modules-works.md" >}}).
 
@@ -28,10 +28,10 @@ For more information about types of resources and the generation process overall
 
 {{< tabs "resources" >}}
 {{< tab "MMv1" >}}
-1. Remove `min_version: beta` from the resource's or field's configuration in `ResourceName.yaml`.
+1. Remove `min_version: 'beta'` from the resource's or field's configuration in `ResourceName.yaml`.
 2. If necessary, remove version guards from resource-level `custom_code`.
-3. Add `min_version: beta` on any fields or subfields that should not be promoted.
-4. If necessary, add `<% unless version == 'ga' -%>...<% end -%>` version guards to resource-level `custom_code` that should not be promoted.
+3. Add `min_version: 'beta'` on any fields or subfields that should not be promoted.
+4. If necessary, add `{{- if ne $.TargetVersionName "ga" -}}...{{- end }} ` version guards to resource-level `custom_code` that should not be promoted.
 {{< /tab >}}
 {{< tab "Handwritten" >}}
 1. Remove version guards from the resource's implementation for any functionality being promoted. Be sure to check:
@@ -40,7 +40,7 @@ For more information about types of resources and the generation process overall
    - For top-level fields, the resource's `Create`, `Update`, and `Read` methods
    - For other fields, expanders and flatteners
    - Any other resource-specific code
-2. Add `<% unless version == 'ga' -%>...<% end -%>` version guards to any parts of the resource or field implementation that should not be promoted. Be sure to check:
+2. Add `{{- if ne $.TargetVersionName "ga" -}}...{{- end }}` version guards to any parts of the resource or field implementation that should not be promoted. Be sure to check:
    - The resource schema
    - For top-level fields, the resource's `Create`, `Update`, and `Read` methods
    - For other fields, expanders and flatteners
