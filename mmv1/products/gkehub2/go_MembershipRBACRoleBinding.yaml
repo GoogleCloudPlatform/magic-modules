@@ -68,6 +68,8 @@ examples:
       'deletion_protection': 'false'
       'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
       'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+    oics_vars_overrides:
+      'deletion_protection': 'false'
 parameters:
   - name: 'membership_id'
     type: String
