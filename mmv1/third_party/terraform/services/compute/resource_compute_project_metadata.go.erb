@@ -26,7 +26,7 @@ func ResourceComputeProjectMetadata() *schema.Resource {
 		Update: resourceComputeProjectMetadataCreateOrUpdate,
 		Delete: resourceComputeProjectMetadataDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: resourceComputeProjectMetadataItemImportState,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -140,6 +140,25 @@ func resourceComputeProjectMetadataDelete(d *schema.ResourceData, meta interface
 	}
 
 	return resourceComputeProjectMetadataRead(d, meta)
+}
+
+func resourceComputeProjectMetadataItemImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	config := meta.(*transport_tpg.Config)
+	if err := tpgresource.ParseImportId([]string{
+		"projects/(?P<project>[^/]+)/meta-data/(?P<key>[^/]+)",
+		"(?P<key>[^/]+)",
+	}, d, config); err != nil {
+		return nil, err
+	}
+
+	// Replace import id for the resource id
+	id, err := tpgresource.ReplaceVars(d, config, "{{key}}")
+	if err != nil {
+		return nil, fmt.Errorf("Error constructing id: %s", err)
+	}
+	d.SetId(id)
+
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceComputeProjectMetadataSet(projectID, userAgent string, config *transport_tpg.Config, md *compute.Metadata, timeout time.Duration) error {
