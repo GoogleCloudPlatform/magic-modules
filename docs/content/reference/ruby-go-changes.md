@@ -48,9 +48,9 @@ Old Ruby template
 
 New Go template
 ```go
-{{ if ne $.TargetVersionName "ga" -}}
+{{- if ne $.TargetVersionName "ga" }}
 // Go code here
-{{ end -}}
+{{- end }}
 ```
 
 #### Example `.tf.erb` variables
