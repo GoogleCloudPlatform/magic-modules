@@ -273,6 +273,7 @@ properties:
     name: 'deletionProtectionReason'
     description: |
       The reason for enabling deletion protection.
+  - !ruby/object:Api::Type::KeyValuePairs
   - name: 'tags'
     type: KeyValuePairs
     description: |
