@@ -308,7 +308,7 @@ func TestAccBigQueryBigLakeManagedTable(t *testing.T) {
 				ResourceName:      "google_bigquery_table.test",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"}
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
