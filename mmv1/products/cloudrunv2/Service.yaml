@@ -322,7 +322,6 @@ properties:
     item_type: Api::Type::String
   - !ruby/object:Api::Type::NestedObject
     name: 'scaling'
-    min_version: beta
     description: |
       Scaling settings that apply to the whole service
     properties:
