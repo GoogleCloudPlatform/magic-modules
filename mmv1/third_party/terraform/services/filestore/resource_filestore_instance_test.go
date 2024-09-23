@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/filestore"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -234,6 +235,57 @@ func TestAccFilestoreInstance_deletionProtection_update(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestAccFilestoreInstance_tags(t *testing.T) {
+	t.Parallel()
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	org := envvar.GetTestOrgFromEnv(t)
+	tagKey := acctest.BootstrapSharedTestTagKey(t, "filestore-instances-tagkey")
+	tagValue := acctest.BootstrapSharedTestTagValue(t, "filestore-instances-tagvalue", tagKey)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckFilestoreInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFileInstanceTags(name, map[string]string{org + "/" + tagKey: tagValue}),
+			},
+			{
+				ResourceName:            "google_filestore_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"zone", "location", "networks.0.reserved_ip_range", "tags"},
+			},
+		},
+	})
+}
+
+func testAccFileInstanceTags(name string, tags map[string]string) string {
+	r := fmt.Sprintf(`
+resource "google_filestore_instance" "instance" {
+  name = "tf-instance-%s"
+  zone = "us-central1-b"
+  tier = "BASIC_HDD"
+  file_shares {
+    capacity_gb = 1024
+    name        = "share1"
+  }
+  networks {
+    network           = "default"
+    modes             = ["MODE_IPV4"]
+    reserved_ip_range = "172.19.31.8/29"
+  }
+tags = {`, name)
+
+	l := ""
+	for key, value := range tags {
+		l += fmt.Sprintf("%q = %q\n", key, value)
+	}
+
+	l += fmt.Sprintf("}\n}")
+	return r + l
 }
 
 func testAccFilestoreInstance_deletionProtection_create(name, location, tier string) string {
