@@ -62,6 +62,8 @@ examples:
       deletion_protection: 'true'
     test_vars_overrides:
       'deletion_protection': 'false'
+    oics_vars_overrides:
+      'deletion_protection': 'false'
     ignore_read_extra:
  # password removed
       - 'cloud_sql.0.credential'
@@ -76,6 +78,8 @@ examples:
       connection_id: 'my-connection'
       deletion_protection: 'true'
     test_vars_overrides:
+      'deletion_protection': 'false'
+    oics_vars_overrides:
       'deletion_protection': 'false'
     ignore_read_extra:
  # password removed
@@ -125,6 +129,8 @@ examples:
       'deletion_protection': 'false'
       'kms_key_name': 'acctest.BootstrapKMSKey(t).CryptoKey.Name'
       'policyChanged': 'acctest.BootstrapPSARole(t, "bq-", "bigquery-encryption", "roles/cloudkms.cryptoKeyEncrypterDecrypter")'
+    oics_vars_overrides:
+      'deletion_protection': 'false'
     ignore_read_extra:
  # password removed
       - 'cloud_sql.0.credential'

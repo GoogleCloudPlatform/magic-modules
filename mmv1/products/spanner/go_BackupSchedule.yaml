@@ -56,6 +56,8 @@ examples:
       deletion_protection: 'true'
     test_vars_overrides:
       'deletion_protection': 'false'
+    oics_vars_overrides:
+      'deletion_protection': 'false'
   - name: 'spanner_backup_schedule_daily_incremental'
     primary_resource_id: 'incremental-backup'
     vars:
@@ -64,6 +66,8 @@ examples:
       database_name: 'database-id'
       deletion_protection: 'true'
     test_vars_overrides:
+      'deletion_protection': 'false'
+    oics_vars_overrides:
       'deletion_protection': 'false'
 parameters:
   - name: 'instance'

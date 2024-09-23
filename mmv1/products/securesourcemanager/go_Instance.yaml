@@ -68,6 +68,8 @@ examples:
       prevent_destroy: 'true'
     test_vars_overrides:
       'prevent_destroy': 'false'
+    oics_vars_overrides:
+      'prevent_destroy': 'false'
   - name: 'secure_source_manager_instance_cmek'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
@@ -78,6 +80,8 @@ examples:
       prevent_destroy: 'true'
     test_vars_overrides:
       'prevent_destroy': 'false'
+    oics_vars_overrides:
+      'prevent_destroy': 'false'
   - name: 'secure_source_manager_instance_private'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
@@ -87,6 +91,8 @@ examples:
       root_ca_id: 'root-ca'
       prevent_destroy: 'true'
     test_vars_overrides:
+      'prevent_destroy': 'false'
+    oics_vars_overrides:
       'prevent_destroy': 'false'
     external_providers: ["time"]
   - name: 'secure_source_manager_instance_private_psc_backend'
@@ -107,6 +113,8 @@ examples:
       prevent_destroy: 'true'
     test_vars_overrides:
       'prevent_destroy': 'false'
+    oics_vars_overrides:
+      'prevent_destroy': 'false'
     external_providers: ["time"]
   - name: 'secure_source_manager_instance_private_psc_endpoint'
     primary_resource_id: 'default'
@@ -122,6 +130,8 @@ examples:
       root_ca_id: 'root-ca'
       prevent_destroy: 'true'
     test_vars_overrides:
+      'prevent_destroy': 'false'
+    oics_vars_overrides:
       'prevent_destroy': 'false'
     external_providers: ["time"]
 parameters:

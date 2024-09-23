@@ -57,6 +57,8 @@ examples:
       force_delete: 'false'
     test_vars_overrides:
       'force_delete': 'true'
+    oics_vars_overrides:
+      'force_delete': 'true'
 parameters:
   - name: 'region'
     type: String

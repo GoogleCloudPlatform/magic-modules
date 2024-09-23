@@ -62,6 +62,8 @@ examples:
       prevent_destroy: 'true'
     test_vars_overrides:
       'prevent_destroy': 'false'
+    oics_vars_overrides:
+      'prevent_destroy': 'false'
   - name: 'secure_source_manager_repository_initial_config'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-my-repository%s", context["random_suffix"])'
@@ -70,6 +72,8 @@ examples:
       instance_id: 'my-instance'
       prevent_destroy: 'true'
     test_vars_overrides:
+      'prevent_destroy': 'false'
+    oics_vars_overrides:
       'prevent_destroy': 'false'
 parameters:
   - name: 'location'

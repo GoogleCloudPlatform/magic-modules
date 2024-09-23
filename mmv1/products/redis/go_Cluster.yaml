@@ -50,6 +50,8 @@ examples:
       deletion_protection_enabled: 'true'
     test_vars_overrides:
       'deletion_protection_enabled': 'false'
+    oics_vars_overrides:
+      'deletion_protection_enabled': 'false'
   - name: 'redis_cluster_ha_single_zone'
     primary_resource_id: 'cluster-ha-single-zone'
     vars:
@@ -59,6 +61,8 @@ examples:
       network_name: 'mynetwork'
       deletion_protection_enabled: 'true'
     test_vars_overrides:
+      'deletion_protection_enabled': 'false'
+    oics_vars_overrides:
       'deletion_protection_enabled': 'false'
 parameters:
   - name: 'name'

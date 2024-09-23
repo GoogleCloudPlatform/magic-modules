@@ -72,6 +72,8 @@ examples:
       deletion_protection: 'true'
     test_vars_overrides:
       'deletion_protection': 'false'
+    oics_vars_overrides:
+      'deletion_protection': 'false'
   - name: 'dataproc_metastore_service_cmek_test'
     primary_resource_id: 'default'
     vars:

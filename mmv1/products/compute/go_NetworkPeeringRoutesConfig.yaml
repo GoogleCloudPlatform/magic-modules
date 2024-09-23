@@ -79,6 +79,8 @@ examples:
       deletion_protection: 'true'
     test_vars_overrides:
       'deletion_protection': 'false'
+    oics_vars_overrides:
+      'deletion_protection': 'false'
     # currently failing
     skip_vcr: true
 parameters:

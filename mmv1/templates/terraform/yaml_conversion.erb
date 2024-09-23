@@ -531,6 +531,14 @@ examples:
 <%        end -%>
 <%      end -%>
 <%      end -%>
+<%      unless example.oics_vars_overrides.nil? -%>
+<%      unless example.oics_vars_overrides.empty? -%>
+    oics_vars_overrides:
+<%         example.oics_vars_overrides.each do |vname, val| -%>
+      '<%= vname -%>': '<%= val %>'
+<%        end -%>
+<%      end -%>
+<%      end -%>
 <%      unless example.ignore_read_extra.empty? -%>
     ignore_read_extra:
 <%        example.ignore_read_extra.each do |irextra| -%>

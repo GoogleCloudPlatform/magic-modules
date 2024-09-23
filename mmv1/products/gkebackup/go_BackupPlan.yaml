@@ -68,6 +68,8 @@ examples:
       'deletion_protection': 'false'
       'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
       'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+    oics_vars_overrides:
+      'deletion_protection': 'false'
   - name: 'gkebackup_backupplan_autopilot'
     primary_resource_id: 'autopilot'
     vars:
@@ -80,6 +82,8 @@ examples:
       'deletion_protection': 'false'
       'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
       'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+    oics_vars_overrides:
+      'deletion_protection': 'false'
   - name: 'gkebackup_backupplan_cmek'
     primary_resource_id: 'cmek'
     vars:
@@ -95,6 +99,8 @@ examples:
       'deletion_protection': 'false'
       'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
       'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+    oics_vars_overrides:
+      'deletion_protection': 'false'
   - name: 'gkebackup_backupplan_full'
     primary_resource_id: 'full'
     vars:
@@ -109,6 +115,8 @@ examples:
       'deletion_protection': 'false'
       'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
       'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+    oics_vars_overrides:
+      'deletion_protection': 'false'
   - name: 'gkebackup_backupplan_permissive'
     primary_resource_id: 'permissive'
     vars:
@@ -123,6 +131,8 @@ examples:
       'deletion_protection': 'false'
       'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
       'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+    oics_vars_overrides:
+      'deletion_protection': 'false'
   - name: 'gkebackup_backupplan_rpo_daily_window'
     primary_resource_id: 'rpo_daily_window'
     vars:
@@ -137,6 +147,8 @@ examples:
       'deletion_protection': 'false'
       'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
       'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+    oics_vars_overrides:
+      'deletion_protection': 'false'
   - name: 'gkebackup_backupplan_rpo_weekly_window'
     primary_resource_id: 'rpo_weekly_window'
     vars:
@@ -151,6 +163,8 @@ examples:
       'deletion_protection': 'false'
       'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
       'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+    oics_vars_overrides:
+      'deletion_protection': 'false'
 parameters:
   - name: 'location'
     type: String

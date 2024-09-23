@@ -65,6 +65,9 @@ examples:
     test_vars_overrides:
       'provider_name': '"google-beta.us-central1"'
       'provider_alias': '"alias  = \"us-central1\""'
+    oics_vars_overrides:
+      'provider_name': 'google-beta'
+      'provider_alias': ''
   - name: 'autoscaler_basic'
     primary_resource_id: 'foobar'
     vars:
