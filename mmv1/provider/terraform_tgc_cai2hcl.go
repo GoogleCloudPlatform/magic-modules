@@ -46,7 +46,7 @@ func NewCaiToTerraformConversion(product *api.Product, versionName string, start
 	t.Product.SetPropertiesBasedOnVersion(&t.Version)
 	for _, r := range t.Product.Objects {
 		r.SetCompiler(ProviderName(t))
-		r.ImportPath = ImportPathFromVersion(t, versionName)
+		r.ImportPath = ImportPathFromVersion(versionName)
 	}
 
 	return t
