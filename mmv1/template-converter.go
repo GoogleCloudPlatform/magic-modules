@@ -62,8 +62,14 @@ func convertTemplate(folder, tempFileTargets string) int {
 			continue
 		}
 		if len(tempSlice) > 1 {
-			// log.Printf("%s", filePath)
-			if !slices.Contains(tempSlice, filePath) {
+			found := false
+			for _, targetFile := range tempSlice {
+				parts := strings.Split(targetFile, "mmv1/")
+				if filePath == parts[len(parts)-1] {
+					found = true
+				}
+			}
+			if !found {
 				continue
 			}
 			log.Printf("continuing with template temp target %s", filePath)
@@ -149,7 +155,14 @@ func convertHandwrittenFiles(folder, handwrittenTempFiles string) int {
 			continue
 		}
 		if len(tempSlice) > 1 {
-			if !slices.Contains(tempSlice, filePath) {
+			found := false
+			for _, targetFile := range tempSlice {
+				parts := strings.Split(targetFile, "mmv1/")
+				if filePath == parts[len(parts)-1] {
+					found = true
+				}
+			}
+			if !found {
 				continue
 			}
 			log.Printf("continuing with handwritten temp target %s", filePath)
