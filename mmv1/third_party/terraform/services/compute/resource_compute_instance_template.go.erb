@@ -39,6 +39,7 @@ var (
 		"scheduling.0.on_instance_stop_action",
 <% unless version == 'ga' -%>
 		"scheduling.0.maintenance_interval",
+		"scheduling.0.host_error_timeout_seconds",
 <% end -%>
 		"scheduling.0.local_ssd_recovery_timeout",
 	}
@@ -761,6 +762,13 @@ be from 0 to 999,999,999 inclusive.`,
 							},
 						},
 <% unless version == 'ga' -%>
+						"host_error_timeout_seconds": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							ForceNew:    true,
+							Description: `Specify the time in seconds for host error detection, the value must be within the range of [90, 330] with the increment of 30, if unset, the default behavior of host error recovery will be used.`,
+						},
+						
 						"maintenance_interval" : {
 							Type:        schema.TypeString,
 							Optional:    true,
