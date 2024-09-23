@@ -3,6 +3,8 @@ The provider crashed while running the VCR tests in REPLAYING mode
 {{- else}}
 #################################
 Tests Analytics
+#################################
+
 Total tests: {{add (add (len .ReplayingResult.PassedTests) (len .ReplayingResult.SkippedTests)) (len .ReplayingResult.FailedTests) }}
 Passed tests: {{len .ReplayingResult.PassedTests}}
 Skipped tests: {{len .ReplayingResult.SkippedTests}}
@@ -15,7 +17,7 @@ Affected tests list:
 {{- end}}
 {{if .ReplayingErr}}
 #################################
-Errors occurred during REPLAYING mode.
+Errors occurred during REPLAYING mode: {{.ReplayingErr}}.
 #################################
 {{- end}}
 {{if .AllReplayingPassed}}
