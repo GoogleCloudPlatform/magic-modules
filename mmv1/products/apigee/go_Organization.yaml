@@ -53,6 +53,8 @@ custom_code:
 examples:
   - name: 'apigee_organization_cloud_basic'
     exclude_test: true
+  # This is a more verbose version of the above that creates all
+  # the resources needed for the acceptance test.
   - name: 'apigee_organization_cloud_basic_test'
     primary_resource_id: 'org'
     test_env_vars:
@@ -61,9 +63,12 @@ examples:
     ignore_read_extra:
       - 'properties'
     exclude_docs: true
+    # Resource creation race
     skip_vcr: true
   - name: 'apigee_organization_cloud_basic_disable_vpc_peering'
     exclude_test: true
+  # This is a more verbose version of the above that creates all
+  # the resources needed for the acceptance test.
   - name: 'apigee_organization_cloud_basic_disable_vpc_peering_test'
     primary_resource_id: 'org'
     test_env_vars:
@@ -72,9 +77,14 @@ examples:
     ignore_read_extra:
       - 'properties'
     exclude_docs: true
+    # Resource creation race
     skip_vcr: true
   - name: 'apigee_organization_cloud_full'
     exclude_test: true
+  # This is a more verbose version of the above that creates all
+  # the resources needed for the acceptance test. While all Apigee
+  # resources in this test are in the GA API, we depend on a service
+  # identity resource which is only available in the beta provider.
   - name: 'apigee_organization_cloud_full_test'
     primary_resource_id: 'org'
     min_version: 'beta'
@@ -84,9 +94,14 @@ examples:
     ignore_read_extra:
       - 'properties'
     exclude_docs: true
+    # Resource creation race
     skip_vcr: true
   - name: 'apigee_organization_cloud_full_disable_vpc_peering'
     exclude_test: true
+  # This is a more verbose version of the above that creates all
+  # the resources needed for the acceptance test. While all Apigee
+  # resources in this test are in the GA API, we depend on a service
+  # identity resource which is only available in the beta provider.
   - name: 'apigee_organization_cloud_full_disable_vpc_peering_test'
     primary_resource_id: 'org'
     min_version: 'beta'
@@ -96,6 +111,7 @@ examples:
     ignore_read_extra:
       - 'properties'
     exclude_docs: true
+    # Resource creation race
     skip_vcr: true
   - name: 'apigee_organization_retention_test'
     primary_resource_id: 'org'
@@ -104,6 +120,7 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
+    # Resource creation race
     skip_vcr: true
   - name: 'apigee_organization_drz_test'
     primary_resource_id: 'org'
@@ -112,6 +129,7 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
+      # Resource creation race
     skip_vcr: true
 parameters:
   - name: 'projectId'

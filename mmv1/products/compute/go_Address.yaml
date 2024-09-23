@@ -78,7 +78,9 @@ examples:
     primary_resource_id: 'internal_with_shared_loadbalancer_vip'
     vars:
       address_name: 'my-internal-address'
+ # It is almost identical to internal_with_gce_endpoint
     exclude_docs: true
+  # TODO(rileykarson): Remove this example when instance is supported
   - name: 'instance_with_ip'
     primary_resource_id: 'static'
     vars:

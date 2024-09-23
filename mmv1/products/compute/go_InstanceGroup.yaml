@@ -63,6 +63,7 @@ properties:
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
+  # 'fingerprint' not applicable to state convergence.
   - name: 'id'
     type: Integer
     description: 'A unique identifier for this instance group.'

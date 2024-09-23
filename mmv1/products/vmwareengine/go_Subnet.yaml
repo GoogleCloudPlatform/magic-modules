@@ -62,6 +62,7 @@ examples:
       subnet_id: 'service-1'
     test_env_vars:
       region: 'REGION'
+ # update tests will take care of read and update. Parent PC creation is expensive and node reservation is required.
     exclude_test: true
 parameters:
   - name: 'parent'

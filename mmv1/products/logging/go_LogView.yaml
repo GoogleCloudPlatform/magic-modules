@@ -45,6 +45,7 @@ iam_policy:
 custom_code:
   encoder: 'templates/terraform/encoders/go/logging_log_view.go.tmpl'
   pre_read: 'templates/terraform/pre_read/go/logging_log_view.go.tmpl'
+# Skipping sweeper since this is a child resource.
 exclude_sweeper: true
 examples:
   - name: 'logging_log_view_basic'
@@ -74,6 +75,7 @@ parameters:
     url_param_only: true
     immutable: true
     default_from_api: true
+ # Make this a String for now since we don't have a good way to reference multiple resources.
   - name: 'bucket'
     type: String
     description: The bucket of the resource

@@ -64,6 +64,7 @@ examples:
       name: 'example_feature_online_store_beta_bigtable'
     ignore_read_extra:
       - 'force_destroy'
+    # currently failing
     skip_vcr: true
 virtual_fields:
   - name: 'force_destroy'
@@ -138,6 +139,7 @@ properties:
     type: NestedObject
     description:
       Settings for the Optimized store that will be created to serve featureValues for all FeatureViews under this FeatureOnlineStore
+      # The fields below are necessary to include the "Optimized" transformation in the payload
     send_empty_value: true
     allow_empty_object: true
     conflicts:
@@ -146,6 +148,7 @@ properties:
       - 'bigtable'
       - 'optimized'
     properties:
+ # Meant to be an empty object with no properties - see here : https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.featureOnlineStores#Optimized
       []
   - name: 'dedicatedServingEndpoint'
     type: NestedObject

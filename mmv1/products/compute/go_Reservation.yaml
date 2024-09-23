@@ -69,6 +69,7 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
+      # Resource creation race
     skip_vcr: true
 parameters:
   - name: 'zone'
@@ -116,6 +117,8 @@ properties:
       consume this reservation. Otherwise, it can be consumed by VMs with
       affinity for any reservation. Defaults to false.
     immutable: true
+    # Not a hard API default, but this should help avoid a unset/true/false
+    # trinary.
     default_value: false
   - name: 'status'
     type: String

@@ -38,6 +38,7 @@ module Provider
     attr_accessor :resource_count
     attr_accessor :iam_resource_count
     attr_accessor :resources_for_version
+    attr_accessor :go_yaml_files
 
     TERRAFORM_PROVIDER_GA = 'github.com/hashicorp/terraform-provider-google'.freeze
     TERRAFORM_PROVIDER_BETA = 'github.com/hashicorp/terraform-provider-google-beta'.freeze
@@ -71,6 +72,7 @@ module Provider
       @resource_count = 0
       @iam_resource_count = 0
       @resources_for_version = []
+      @go_yaml_files = []
     end
 
     # This provides the ProductFileTemplate class with access to a provider.
@@ -413,11 +415,32 @@ module Provider
       # skip healthcare - exceptional case will be done manually
       return if (output_folder.include? 'healthcare') || (output_folder.include? 'memorystore')
 
+      generate_product = false
+
+      unless @go_yaml_files.empty?
+        found = false
+        @go_yaml_files.each do |f|
+          no_ext = Pathname.new(f).sub_ext ''
+          parts = no_ext.each_filename.to_a
+          target_product = "#{parts[-3]}/#{parts[-2]}"
+          target_resource = parts[-1]
+          generate_product = true if target_resource == 'product'
+          found = true if output_folder == target_product && object.name == target_resource
+        end
+        return unless found
+      end
+
       pwd = Dir.pwd
       data = build_object_data(pwd, object, output_folder, version_name)
       Dir.chdir output_folder
       Google::LOGGER.info "Generating #{object.name} rewrite yaml"
-      generate_newyaml(pwd, data.clone)
+      # rubocop:disable Style/UnlessElse
+      unless @go_yaml_files.empty?
+        generate_newyaml_temp(pwd, data.clone, generate_product)
+      else
+        generate_newyaml(pwd, data.clone)
+      end
+      # rubocop:enable Style/UnlessElse
       Dir.chdir pwd
     end
 
@@ -432,6 +455,19 @@ module Provider
                       'go_product.yaml',
                       self)
       end
+    end
+
+    def generate_newyaml_temp(pwd, data, generate_product)
+      data.generate(pwd,
+                    '/templates/terraform/yaml_conversion.erb',
+                    "#{data.object.name}.yaml.temp",
+                    self)
+      return unless generate_product
+
+      data.generate(pwd,
+                    '/templates/terraform/product_yaml_conversion.erb',
+                    'product.yaml.temp',
+                    self)
     end
 
     def build_env

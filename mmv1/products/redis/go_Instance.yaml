@@ -112,6 +112,7 @@ examples:
       'prevent_destroy': 'false'
     exclude_test: true
 parameters:
+  # TODO: resourceref?
   - name: 'region'
     type: String
     description: |
@@ -425,6 +426,8 @@ properties:
       unique and non-overlapping with existing subnets in an authorized
       network.
     immutable: true
+    # In some situations the returned IP range may not match the sent value
+    # but will be a subset of the range.
     ignore_read: true
     default_from_api: true
   - name: 'tier'

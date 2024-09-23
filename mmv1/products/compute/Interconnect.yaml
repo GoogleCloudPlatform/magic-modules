@@ -23,7 +23,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/interconnects'
 base_url: 'projects/{{project}}/global/interconnects'
 self_link: 'projects/{{project}}/global/interconnects/{{name}}'
-immutable: true
+update_verb: :PATCH
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
@@ -359,6 +359,17 @@ properties:
                 traffic if the MKA session cannot be established. By default, the Interconnect
                 connection is configured with a must-secure security policy that drops all traffic
                 if the MKA session cannot be established with your router.
+              deprecation_message: >-
+                `failOpen` is deprecated and will be removed in a future major release. Use
+                other `failOpen` instead.
+      - !ruby/object:Api::Type::Boolean
+        name: 'failOpen'
+        description: |
+          If set to true, the Interconnect connection is configured with a should-secure
+          MACsec security policy, that allows the Google router to fallback to cleartext
+          traffic if the MKA session cannot be established. By default, the Interconnect
+          connection is configured with a must-secure security policy that drops all traffic
+          if the MKA session cannot be established with your router.
   - !ruby/object:Api::Type::Boolean
     name: 'macsecEnabled'
     description: |
@@ -366,11 +377,13 @@ properties:
       MACsec enablement fails if the MACsec object is not specified.
   - !ruby/object:Api::Type::String
     name: 'remoteLocation'
+    immutable: true
     description: |
       Indicates that this is a Cross-Cloud Interconnect. This field specifies the location outside
       of Google's network that the interconnect is connected to.
   - !ruby/object:Api::Type::Array
     name: 'requestedFeatures'
+    immutable: true
     description: |
       interconnects.list of features requested for this Interconnect connection. Options: IF_MACSEC (
       If specified then the connection is created on MACsec capable hardware ports. If not

@@ -140,6 +140,7 @@ properties:
             Name of the field.
         - name: 'order'
           type: Enum
+          # TODO (mbang): Exactly one of order, arrayConfig, or vectorConfig must be set
           description: |
             Indicates that this field supports ordering by the specified order or comparing using =, <, <=, >, >=.
             Only one of `order`, `arrayConfig`, and `vectorConfig` can be specified.
@@ -148,6 +149,7 @@ properties:
             - 'DESCENDING'
         - name: 'arrayConfig'
           type: Enum
+          # TODO (mbang): Exactly one of order, arrayConfig, or vectorConfig must be set
           description: |
             Indicates that this field supports operations on arrayValues. Only one of `order`, `arrayConfig`, and
             `vectorConfig` can be specified.
@@ -155,6 +157,7 @@ properties:
             - 'CONTAINS'
         - name: 'vectorConfig'
           type: NestedObject
+          # TODO (mbang): Exactly one of order, arrayConfig, or vectorConfig must be set
           description: |
             Indicates that this field supports vector search operations. Only one of `order`, `arrayConfig`, and
             `vectorConfig` can be specified. Vector Fields should come after the field path `__name__`.
@@ -171,5 +174,7 @@ properties:
               send_empty_value: true
               allow_empty_object: true
               properties:
+ # Meant to be an empty object with no properties.
                 []
+    # Single field indexes _exist_, but the API only lets us manage composite ones.
     min_size: 2

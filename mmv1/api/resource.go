@@ -1192,8 +1192,7 @@ func (r Resource) ExtractIdentifiers(url string) []string {
 	return result
 }
 
-// For example, "projects/{{project}}/schemas/{{name}}", "{{project}}/{{name}}", "{{name}}"
-func (r Resource) RawImportIdFormatsFromIam() []string {
+func (r Resource) IamImportFormats() []string {
 	var importFormat []string
 
 	if r.IamPolicy != nil {
@@ -1202,8 +1201,12 @@ func (r Resource) RawImportIdFormatsFromIam() []string {
 	if len(importFormat) == 0 {
 		importFormat = r.ImportFormat
 	}
+	return importFormat
+}
 
-	return ImportIdFormats(importFormat, r.Identity, r.BaseUrl)
+// For example, "projects/{{project}}/schemas/{{name}}", "{{project}}/{{name}}", "{{name}}"
+func (r Resource) RawImportIdFormatsFromIam() []string {
+	return ImportIdFormats(r.IamImportFormats(), r.Identity, r.BaseUrl)
 }
 
 // For example, projects/(?P<project>[^/]+)/schemas/(?P<schema>[^/]+)", "(?P<project>[^/]+)/(?P<schema>[^/]+)", "(?P<schema>[^/]+)
@@ -1600,4 +1603,102 @@ func (r Resource) StateUpgradersCount() []int {
 		nums = append(nums, i)
 	}
 	return nums
+}
+
+func (r Resource) CaiProductBaseUrl() string {
+	version := r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName)
+	baseUrl := version.CaiBaseUrl
+	if baseUrl == "" {
+		baseUrl = version.BaseUrl
+	}
+	return baseUrl
+}
+
+// Returns the Cai product backend name from the version base url
+// base_url: https://accessapproval.googleapis.com/v1/ -> accessapproval
+func (r Resource) CaiProductBackendName(caiProductBaseUrl string) string {
+	backendUrl := strings.Split(strings.Split(caiProductBaseUrl, "://")[1], ".googleapis.com")[0]
+	return strings.ToLower(backendUrl)
+}
+
+// Gets the Cai asset name template, which could include version
+// For example: //monitoring.googleapis.com/v3/projects/{{project}}/services/{{service_id}}
+func (r Resource) rawCaiAssetNameTemplate(productBackendName string) string {
+	caiBaseUrl := ""
+	if r.CaiBaseUrl != "" {
+		caiBaseUrl = fmt.Sprintf("%s/{{name}}", r.CaiBaseUrl)
+	}
+	if caiBaseUrl == "" {
+		caiBaseUrl = r.SelfLink
+	}
+	if caiBaseUrl == "" {
+		caiBaseUrl = fmt.Sprintf("%s/{{name}}", r.BaseUrl)
+	}
+	return fmt.Sprintf("//%s.googleapis.com/%s", productBackendName, caiBaseUrl)
+}
+
+// Gets the Cai asset name template, which doesn't include version
+// For example: //monitoring.googleapis.com/projects/{{project}}/services/{{service_id}}
+func (r Resource) CaiAssetNameTemplate(productBackendName string) string {
+	template := r.rawCaiAssetNameTemplate(productBackendName)
+	versionRegex, err := regexp.Compile(`\/(v\d[^\/]*)\/`)
+	if err != nil {
+		log.Fatalf("Cannot compile the regular expression: %v", err)
+	}
+
+	return versionRegex.ReplaceAllString(template, "/")
+}
+
+// Gets the Cai API version
+func (r Resource) CaiApiVersion(productBackendName, caiProductBaseUrl string) string {
+	template := r.rawCaiAssetNameTemplate(productBackendName)
+
+	versionRegex, err := regexp.Compile(`\/(v\d[^\/]*)\/`)
+	if err != nil {
+		log.Fatalf("Cannot compile the regular expression: %v", err)
+	}
+
+	apiVersion := strings.ReplaceAll(versionRegex.FindString(template), "/", "")
+	if apiVersion != "" {
+		return apiVersion
+	}
+
+	splits := strings.Split(caiProductBaseUrl, "/")
+	for i := 0; i < len(splits); i++ {
+		if splits[len(splits)-1-i] != "" {
+			return splits[len(splits)-1-i]
+		}
+	}
+	return ""
+}
+
+// For example: the uri "projects/{{project}}/schemas/{{name}}"
+// The paramerter is "schema" as "project" is not returned.
+func (r Resource) CaiIamResourceParams() []string {
+	resourceUri := strings.ReplaceAll(r.IamResourceUri(), "{{name}}", fmt.Sprintf("{{%s}}", r.IamParentResourceName()))
+
+	return google.Reject(r.ExtractIdentifiers(resourceUri), func(param string) bool {
+		return param == "project"
+	})
+}
+
+// Gets the Cai IAM asset name template
+// For example: //monitoring.googleapis.com/v3/projects/{{project}}/services/{{service_id}}
+func (r Resource) CaiIamAssetNameTemplate(productBackendName string) string {
+	iamImportFormat := r.IamImportFormats()
+	if len(iamImportFormat) > 0 {
+		name := strings.ReplaceAll(iamImportFormat[0], "{{name}}", fmt.Sprintf("{{%s}}", r.IamParentResourceName()))
+		name = strings.ReplaceAll(name, "%", "")
+		return fmt.Sprintf("//%s.googleapis.com/%s", productBackendName, name)
+	}
+
+	caiBaseUrl := r.CaiBaseUrl
+
+	if caiBaseUrl == "" {
+		caiBaseUrl = r.SelfLink
+	}
+	if caiBaseUrl == "" {
+		caiBaseUrl = r.BaseUrl
+	}
+	return fmt.Sprintf("//%s.googleapis.com/%s/{{%s}}", productBackendName, caiBaseUrl, r.IamParentResourceName())
 }
