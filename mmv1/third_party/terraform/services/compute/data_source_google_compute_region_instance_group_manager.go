@@ -23,7 +23,7 @@ func DataSourceGoogleComputeRegionInstanceGroupManager() *schema.Resource {
 func dataSourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 	if selfLink, ok := d.Get("self_link").(string); ok {
-		parsed, err := tpgresource.ParseRegionalInstanceGroupManagersFieldValue(selfLink.(string), d, config)
+		parsed, err := tpgresource.ParseRegionalInstanceGroupManagersFieldValue(selfLink, d, config)
 		if err != nil {
 			return fmt.Errorf("InstanceGroup name, region or project could not be parsed from %s", selfLink)
 		}
@@ -37,7 +37,7 @@ func dataSourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, met
 			return fmt.Errorf("Error setting project: %s", err)
 		}
 		d.SetId(fmt.Sprintf("projects/%s/regions/%s/instanceGroupManagers/%s", parsed.Project, parsed.Region, parsed.Name))
-	} else if name, ok := d.GetOk("name"); ok {
+	} else if name, ok := d.Get("name").(string); ok {
 		region, err := tpgresource.GetRegion(d, config)
 		if err != nil {
 			return err
@@ -46,7 +46,7 @@ func dataSourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, met
 		if err != nil {
 			return err
 		}
-		d.SetId(fmt.Sprintf("projects/%s/regions/%s/instanceGroupManagers/%s", project, region, name.(string)))
+		d.SetId(fmt.Sprintf("projects/%s/regions/%s/instanceGroupManagers/%s", project, region, name))
 	} else {
 		return errors.New("Must provide either `self_link` or `region/name`")
 	}
