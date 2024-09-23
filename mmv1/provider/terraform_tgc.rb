@@ -119,6 +119,10 @@ module Provider
 
     def retrieve_test_source_files(path, suffix)
       files = Dir["#{path}**#{suffix}"]
+      files = files.reject do |file|
+        file.end_with?('/go')
+      end
+
       files = files.map { |file| file.split(path)[-1] }
       files.sort
     end
