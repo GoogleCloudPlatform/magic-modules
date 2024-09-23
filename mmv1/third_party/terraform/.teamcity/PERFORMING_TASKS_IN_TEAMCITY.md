@@ -39,14 +39,17 @@ Google Cloud/
 
 ### Looking at nightly test results
 
-A CRON trigger causes all acceptance tests for the GA and Beta providers to run overnight, Mon-Sun. These tests use the `nightly-test` branches of hashicorp/terraform-provider-google(-beta) repos that are created by checking out of `main` every night through the [`TeamCity - nightly` Github Action](https://github.com/hashicorp/terraform-provider-google/actions/workflows/teamcity-nightly-workflow.yaml). (A separate branch is necessary in order to ensure that all tests are ran on the same commit. Services are separated in their own builds and are sent into an agent queue. Depending on the timing of the queue a build could potentially have a different commit from the rest if `main` received a commit prior to exiting.) 
+What is the `nightly-test` branch?:
+* A branch created by the [`TeamCity - nightly` Github Action](https://github.com/hashicorp/terraform-provider-google/actions/workflows/teamcity-nightly-workflow.yaml) as a way to select a recent commit on main that all tests should run on
+* The branch is recreated each night
+* If we use the main branch directly instead: Services are separated in their own builds and are sent into an agent queue. Depending on the timing of the queue a build could potentially have a different commit from the rest if `main` received a commit prior to exiting.
 
 The tests interact fully with Google APIs and are used to identify any breaking changes introduced by either a recent PR or a change in the API itself.
 
 You can find the builds for nightly tests at:
 
-* [Google > Nightly Tests](https://hashicorp.teamcity.com/project/TerraformProviders_GoogleCloud_GOOGLE_NIGHTLYTESTS?mode=builds#all-projects)
-* [Google Beta > Nightly Tests](https://hashicorp.teamcity.com/project/TerraformProviders_GoogleCloud_GOOGLE_BETA_NIGHTLYTESTS#all-projects)
+* [Google > Nightly Tests](https://hashicorp.teamcity.com/project/TerraformProviders_GoogleCloud_GOOGLE_NIGHTLYTESTS?branch=refs%2Fheads%2Fnightly-test&mode=builds#all-projects)
+* [Google Beta > Nightly Tests](https://hashicorp.teamcity.com/project/TerraformProviders_GoogleCloud_GOOGLE_NIGHTLYTESTS?branch=refs%2Fheads%2Fnightly-test&mode=builds#all-projects)
 
 These projects contain a build configuration per service package.
 
