@@ -22,7 +22,7 @@ func DataSourceGoogleComputeRegionInstanceGroupManager() *schema.Resource {
 
 func dataSourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	if selfLink, ok := d.GetOk("self_link"); ok {
+	if selfLink, ok := d.Get("self_link").(string); ok {
 		parsed, err := tpgresource.ParseRegionalInstanceGroupManagersFieldValue(selfLink.(string), d, config)
 		if err != nil {
 			return fmt.Errorf("InstanceGroup name, region or project could not be parsed from %s", selfLink)
