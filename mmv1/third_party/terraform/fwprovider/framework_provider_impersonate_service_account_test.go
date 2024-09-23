@@ -15,7 +15,7 @@ func TestAccFwProvider_impersonate_service_account(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
 		// Configuring the provider using inputs
 		"config takes precedence over environment variables":                                                       testAccFwProvider_impersonate_service_account_configPrecedenceOverEnvironmentVariables,
-		"when impersonate_service_account is unset in the config, environment variables are used in a given order": testAccFwProvider_impersonate_service_account_precedenceOrderEnvironmentVariables, // GOOGLE_CREDENTIALS, GOOGLE_CLOUD_KEYFILE_JSON, GCLOUD_KEYFILE_JSON, GOOGLE_APPLICATION_CREDENTIALS
+		"when impersonate_service_account is unset in the config, environment variables are used in a given order": testAccFwProvider_impersonate_service_account_precedenceOrderEnvironmentVariables, // GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
 
 		// Schema-level validation
 		"when impersonate_service_account is set to an empty string in the config the value isn't ignored and results in an error": testAccFwProvider_impersonate_service_account_emptyStringValidation,
