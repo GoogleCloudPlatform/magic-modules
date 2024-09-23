@@ -25,7 +25,7 @@ func dataSourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, met
 	if selfLink, ok := d.Get("self_link").(string); ok && selfLink != "" {
 		parsed, err := tpgresource.ParseRegionalInstanceGroupManagersFieldValue(selfLink, d, config)
 		if err != nil {
-			return fmt.Errorf("InstanceGroup name, region or project could not be parsed from %s", selfLink)
+			return fmt.Errorf("InstanceGroup name, region or project could not be parsed from %s: %v", selfLink, err)
 		}
 		if err := d.Set("name", parsed.Name); err != nil {
 			return fmt.Errorf("Error setting name: %s", err)
