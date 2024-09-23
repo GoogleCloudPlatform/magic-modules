@@ -37,7 +37,7 @@ func dataSourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, met
 			return fmt.Errorf("Error setting project: %s", err)
 		}
 		d.SetId(fmt.Sprintf("projects/%s/regions/%s/instanceGroupManagers/%s", parsed.Project, parsed.Region, parsed.Name))
-	} else if name, ok := d.Get("name").(string); ok {
+	} else if name, ok := d.Get("name").(string); ok && name != "" {
 		region, err := tpgresource.GetRegion(d, config)
 		if err != nil {
 			return err
