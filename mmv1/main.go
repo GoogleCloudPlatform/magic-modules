@@ -1,12 +1,14 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"log"
 	"os"
 	"path"
 	"path/filepath"
+	"reflect"
 	"sort"
 	"strings"
 	"sync"
@@ -27,6 +29,8 @@ var outputPath = flag.String("output", "", "path to output generated files to")
 
 // Example usage: --version beta
 var version = flag.String("version", "", "optional version name. If specified, this version is preferred for resource generation when applicable")
+
+var overrideDirectory = flag.String("override", "", "directory containing yaml overrides")
 
 var product = flag.String("product", "", "optional product name. If specified, the resources under the specific product will be generated. Otherwise, resources under all products will be generated.")
 
@@ -93,13 +97,43 @@ func main() {
 
 	files, err := filepath.Glob("products/**/product.yaml")
 	if err != nil {
-		return
+		panic(err)
 	}
 	for _, filePath := range files {
 		dir := filepath.Dir(filePath)
 		allProductFiles = append(allProductFiles, fmt.Sprintf("products/%s", filepath.Base(dir)))
 	}
-	// TODO rewrite: override directory
+
+	if *overrideDirectory != "" {
+		log.Printf("Using override directory %s", *overrideDirectory)
+
+		// Normalize override dir to a path that is relative to the magic-modules directory
+		// This is needed for templates that concatenate pwd + override dir + path
+		if filepath.IsAbs(*overrideDirectory) {
+			wd, err := os.Getwd()
+			if err != nil {
+				panic(err)
+			}
+			*overrideDirectory, err = filepath.Rel(wd, *overrideDirectory)
+			log.Printf("Override directory normalized to relative path %s", *overrideDirectory)
+		}
+
+		overrideFiles, err := filepath.Glob(fmt.Sprintf("%s/products/**/product.yaml", *overrideDirectory))
+		if err != nil {
+			panic(err)
+		}
+		for _, filePath := range overrideFiles {
+			product, err := filepath.Rel(*overrideDirectory, filePath)
+			if err != nil {
+				panic(err)
+			}
+			dir := filepath.Dir(product)
+			productFile := fmt.Sprintf("products/%s", filepath.Base(dir))
+			if !slices.Contains(allProductFiles, productFile) {
+				allProductFiles = append(allProductFiles, productFile)
+			}
+		}
+	}
 
 	if allProducts {
 		productsToGenerate = allProductFiles
@@ -133,7 +167,7 @@ func main() {
 
 	for i := 0; i < len(allProductFiles); i++ {
 		wg.Add(1)
-		go GenerateProduct(ch, providerToGenerate, &productsForVersion, startTime, productsToGenerate, *resourceToGenerate, generateCode, generateDocs)
+		go GenerateProduct(ch, providerToGenerate, &productsForVersion, startTime, productsToGenerate, *resourceToGenerate, *overrideDirectory, generateCode, generateDocs)
 	}
 	wg.Wait()
 
@@ -156,48 +190,116 @@ func main() {
 	}
 }
 
-func GenerateProduct(productChannel chan string, providerToGenerate provider.Provider, productsForVersion *[]*api.Product, startTime time.Time, productsToGenerate []string, resourceToGenerate string, generateCode, generateDocs bool) {
+func GenerateProduct(productChannel chan string, providerToGenerate provider.Provider, productsForVersion *[]*api.Product, startTime time.Time, productsToGenerate []string, resourceToGenerate, overrideDirectory string, generateCode, generateDocs bool) {
 
 	defer wg.Done()
 	productName := <-productChannel
 
 	productYamlPath := path.Join(productName, "go_product.yaml")
 
-	// TODO rewrite: uncomment the error check that if the product.yaml exists for each product
-	// after Go-converted product.yaml files are complete for all products
-	// if _, err := os.Stat(productYamlPath); errors.Is(err, os.ErrNotExist) {
-	// 	log.Fatalf("%s does not contain a product.yaml file", productName)
-	// }
+	var productOverridePath string
+	if overrideDirectory != "" {
+		productOverridePath = filepath.Join(overrideDirectory, productName, "go_product.yaml")
+	}
 
-	// TODO rewrite: product overrides
+	_, baseProductErr := os.Stat(productYamlPath)
+	baseProductExists := !errors.Is(baseProductErr, os.ErrNotExist)
 
-	if _, err := os.Stat(productYamlPath); err == nil {
-		var resources []*api.Resource = make([]*api.Resource, 0)
+	_, overrideProductErr := os.Stat(productOverridePath)
+	overrideProductExists := !errors.Is(overrideProductErr, os.ErrNotExist)
 
-		productApi := &api.Product{}
-		api.Compile(productYamlPath, productApi)
+	if !(baseProductExists || overrideProductExists) {
+		log.Fatalf("%s does not contain a product.yaml file", productName)
+	}
 
-		if !productApi.ExistsAtVersionOrLower(*version) {
-			log.Printf("%s does not have a '%s' version, skipping", productName, *version)
-			return
+	productApi := &api.Product{}
+
+	if overrideProductExists {
+		if baseProductExists {
+			api.Compile(productYamlPath, productApi, overrideDirectory)
+			overrideApiProduct := &api.Product{}
+			api.Compile(productOverridePath, overrideApiProduct, overrideDirectory)
+
+			api.Merge(reflect.ValueOf(productApi), reflect.ValueOf(*overrideApiProduct))
+		} else {
+			api.Compile(productOverridePath, productApi, overrideDirectory)
+		}
+	} else {
+		api.Compile(productYamlPath, productApi, overrideDirectory)
+	}
+
+	var resources []*api.Resource = make([]*api.Resource, 0)
+
+	if !productApi.ExistsAtVersionOrLower(*version) {
+		log.Printf("%s does not have a '%s' version, skipping", productName, *version)
+		return
+	}
+
+	resourceFiles, err := filepath.Glob(fmt.Sprintf("%s/*", productName))
+	if err != nil {
+		log.Fatalf("Cannot get resources files: %v", err)
+	}
+	// Base resource loop
+	for _, resourceYamlPath := range resourceFiles {
+		if filepath.Base(resourceYamlPath) == "product.yaml" || filepath.Ext(resourceYamlPath) != ".yaml" {
+			continue
 		}
 
-		resourceFiles, err := filepath.Glob(fmt.Sprintf("%s/*", productName))
+		// Prepend "go_" to the Go yaml files' name to distinguish with the ruby yaml files
+		if filepath.Base(resourceYamlPath) == "go_product.yaml" || !strings.HasPrefix(filepath.Base(resourceYamlPath), "go_") {
+			continue
+		}
+
+		if overrideDirectory != "" {
+			// skip if resource will be merged in the override loop
+			resourceOverridePath := filepath.Join(overrideDirectory, resourceYamlPath)
+			_, overrideResourceErr := os.Stat(resourceOverridePath)
+			overrideResourceExists := !errors.Is(overrideResourceErr, os.ErrNotExist)
+			if overrideResourceExists {
+				continue
+			}
+		}
+
+		resource := &api.Resource{}
+		api.Compile(resourceYamlPath, resource, overrideDirectory)
+
+		resource.TargetVersionName = *version
+		resource.Properties = resource.AddLabelsRelatedFields(resource.PropertiesWithExcluded(), nil)
+		resource.SetDefault(productApi)
+		resource.Validate()
+		resources = append(resources, resource)
+	}
+
+	// Override Resource Loop
+	if overrideDirectory != "" {
+		productOverrideDir := filepath.Dir(productOverridePath)
+		overrideFiles, err := filepath.Glob(fmt.Sprintf("%s/*", productOverrideDir))
 		if err != nil {
-			log.Fatalf("Cannot get resources files: %v", err)
+			log.Fatalf("Cannot get override files: %v", err)
 		}
-		for _, resourceYamlPath := range resourceFiles {
-			if filepath.Base(resourceYamlPath) == "product.yaml" || filepath.Ext(resourceYamlPath) != ".yaml" {
+		for _, overrideYamlPath := range overrideFiles {
+			if filepath.Base(overrideYamlPath) == "product.yaml" || filepath.Ext(overrideYamlPath) != ".yaml" {
 				continue
 			}
 
 			// Prepend "go_" to the Go yaml files' name to distinguish with the ruby yaml files
-			if filepath.Base(resourceYamlPath) == "go_product.yaml" || !strings.HasPrefix(filepath.Base(resourceYamlPath), "go_") {
+			if filepath.Base(overrideYamlPath) == "go_product.yaml" || !strings.HasPrefix(filepath.Base(overrideYamlPath), "go_") {
 				continue
 			}
 
 			resource := &api.Resource{}
-			api.Compile(resourceYamlPath, resource)
+
+			baseResourcePath := filepath.Join(productName, filepath.Base(overrideYamlPath))
+			_, baseResourceErr := os.Stat(baseResourcePath)
+			baseResourceExists := !errors.Is(baseResourceErr, os.ErrNotExist)
+			if baseResourceExists {
+				api.Compile(baseResourcePath, resource, overrideDirectory)
+				overrideResource := &api.Resource{}
+				api.Compile(overrideYamlPath, overrideResource, overrideDirectory)
+				api.Merge(reflect.ValueOf(resource), reflect.ValueOf(*overrideResource))
+			} else {
+				api.Compile(overrideYamlPath, resource, overrideDirectory)
+			}
 
 			resource.TargetVersionName = *version
 			resource.Properties = resource.AddLabelsRelatedFields(resource.PropertiesWithExcluded(), nil)
@@ -213,21 +315,22 @@ func GenerateProduct(productChannel chan string, providerToGenerate provider.Pro
 			return resources[i].Name < resources[j].Name
 		})
 
-		productApi.Objects = resources
-		productApi.Validate()
-
-		providerToGenerate = setProvider(*forceProvider, *version, productApi, startTime)
-
-		*productsForVersion = append(*productsForVersion, productApi)
-
-		if !slices.Contains(productsToGenerate, productName) {
-			log.Printf("%s not specified, skipping generation", productName)
-			return
-		}
-
-		log.Printf("%s: Generating files", productName)
-		providerToGenerate.Generate(*outputPath, productName, resourceToGenerate, generateCode, generateDocs)
 	}
+
+	productApi.Objects = resources
+	productApi.Validate()
+
+	providerToGenerate = setProvider(*forceProvider, *version, productApi, startTime)
+
+	*productsForVersion = append(*productsForVersion, productApi)
+
+	if !slices.Contains(productsToGenerate, productName) {
+		log.Printf("%s not specified, skipping generation", productName)
+		return
+	}
+
+	log.Printf("%s: Generating files", productName)
+	providerToGenerate.Generate(*outputPath, productName, resourceToGenerate, generateCode, generateDocs)
 }
 
 // Sets provider via flag
@@ -237,6 +340,8 @@ func setProvider(forceProvider, version string, productApi *api.Product, startTi
 		return provider.NewTerraformGoogleConversion(productApi, version, startTime)
 	case "tgc_cai2hcl":
 		return provider.NewCaiToTerraformConversion(productApi, version, startTime)
+	case "oics":
+		return provider.NewTerraformOiCS(productApi, version, startTime)
 	default:
 		return provider.NewTerraform(productApi, version, startTime)
 	}
