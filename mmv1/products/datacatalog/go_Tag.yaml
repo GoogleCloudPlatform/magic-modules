@@ -56,6 +56,8 @@ examples:
       force_delete: 'false'
     test_vars_overrides:
       'force_delete': 'true'
+    oics_vars_overrides:
+      'force_delete': 'true'
   - name: 'data_catalog_entry_group_tag'
     primary_resource_id: 'entry_group_tag'
     vars:
@@ -66,6 +68,8 @@ examples:
       force_delete: 'false'
     test_vars_overrides:
       'force_delete': 'true'
+    oics_vars_overrides:
+      'force_delete': 'true'
   - name: 'data_catalog_entry_tag_full'
     primary_resource_id: 'basic_tag'
     vars:
@@ -74,6 +78,8 @@ examples:
       tag_template_id: 'my_template'
       force_delete: 'false'
     test_vars_overrides:
+      'force_delete': 'true'
+    oics_vars_overrides:
       'force_delete': 'true'
     # Multiple fine-grained resources
     skip_vcr: true
@@ -85,6 +91,8 @@ examples:
       tag_template_id: 'my_template'
       force_delete: 'false'
     test_vars_overrides:
+      'force_delete': 'true'
+    oics_vars_overrides:
       'force_delete': 'true'
  # omitting doc as it is almost identical to the case of data_catalog_entry_tag_basic
     exclude_docs: true
