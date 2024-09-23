@@ -305,9 +305,9 @@ func TestAccBigQueryBigLakeManagedTable(t *testing.T) {
 				Config: testAccBigLakeManagedTable(bucketName, connectionID, datasetID, tableID, TEST_SIMPLE_CSV_SCHEMA),
 			},
 			{
-				ResourceName:      "google_bigquery_table.test",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
