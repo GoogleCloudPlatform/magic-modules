@@ -274,3 +274,11 @@ properties:
       The field is ignored (both PUT & PATCH) when empty.
     ignore_read: true
     immutable: true
+  - !ruby/object:Api::Type::Boolean
+    name: 'deletionProtectionEnabled'
+    description: |
+      Indicates whether the instance is protected against deletion.
+  - !ruby/object:Api::Type::String
+    name: 'deletionProtectionReason'
+    description: |
+      The reason for enabling deletion protection.

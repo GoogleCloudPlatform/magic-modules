@@ -192,12 +192,14 @@ resource "google_filestore_instance" "instance" {
 `, name)
 }
 
-func TestAccFilestoreInstance_tags(t *testing.T) {
+func TestAccFilestoreInstance_deletionProtection_update(t *testing.T) {
 	t.Parallel()
-        name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
-        org := envvar.GetTestOrgFromEnv(t)
-	tagKey := acctest.BootstrapSharedTestTagKey(t, "filestore-instances-tagkey")
-	tagValue := acctest.BootstrapSharedTestTagValue(t, "filestore-instances-tagvalue", tagKey)
+
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	location := "us-central1-a"
+	tier := "ZONAL"
+
+	deletionProtection := true
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -205,13 +207,31 @@ func TestAccFilestoreInstance_tags(t *testing.T) {
 		CheckDestroy:             testAccCheckFilestoreInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFileInstanceTags(name, map[string]string{org + "/" + tagKey: tagValue}),
+				Config: testAccFilestoreInstance_deletionProtection_create(name, location, tier),
 			},
 			{
 				ResourceName:            "google_filestore_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zone", "location", "networks.0.reserved_ip_range", "tags"},
+				ImportStateVerifyIgnore: []string{"zone"},
+			},
+			{
+				Config: testAccFilestoreInstance_deletionProtection_update(name, location, tier, deletionProtection),
+			},
+			{
+				ResourceName:            "google_filestore_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"zone"},
+			},
+			{
+				Config: testAccFilestoreInstance_deletionProtection_update(name, location, tier, !deletionProtection),
+			},
+			{
+				ResourceName:            "google_filestore_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"zone"},
 			},
 		},
 	})
@@ -243,4 +263,53 @@ tags = {`, name)
 
 	l += fmt.Sprintf("}\n}")
 	return r + l
+
+func testAccFilestoreInstance_deletionProtection_create(name, location, tier string) string {
+	return fmt.Sprintf(`
+resource "google_filestore_instance" "instance" {
+  name        = "%s"
+  zone        = "%s"
+  tier        = "%s"
+  description = "An instance created during testing."
+
+  file_shares {
+    capacity_gb = 1024
+    name        = "share"
+  }
+
+  networks {
+    network = "default"
+		modes   = ["MODE_IPV4"]
+  }
+}
+`, name, location, tier)
+}
+
+func testAccFilestoreInstance_deletionProtection_update(name, location, tier string, deletionProtection bool) string {
+	deletionProtectionReason := ""
+	if deletionProtection {
+		deletionProtectionReason = "A reason for deletion protection"
+	}
+
+	return fmt.Sprintf(`
+resource "google_filestore_instance" "instance" {
+  name        = "%s"
+  zone        = "%s"
+  tier        = "%s"
+  description = "An instance created during testing."
+
+  file_shares {
+    capacity_gb = 1024
+    name        = "share"
+  }
+
+  networks {
+    network = "default"
+		modes   = ["MODE_IPV4"]
+  }
+
+	deletion_protection_enabled = %t
+	deletion_protection_reason = "%s"
+}
+`, name, location, tier, deletionProtection, deletionProtectionReason)
 }
