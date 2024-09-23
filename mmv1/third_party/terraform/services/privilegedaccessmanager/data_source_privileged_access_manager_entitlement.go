@@ -12,6 +12,7 @@ func DataSourceGooglePrivilegedAccessManagerEntitlement() *schema.Resource {
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourcePrivilegedAccessManagerEntitlement().Schema)
 	tpgresource.AddOptionalFieldsToSchema(dsSchema, "entitlement_id")
 	tpgresource.AddOptionalFieldsToSchema(dsSchema, "parent")
+	tpgresource.AddOptionalFieldsToSchema(dsSchema, "location")
 
 	return &schema.Resource{
 		Read:   dataSourceGooglePrivilegedAccessManagerEntitlementRead,

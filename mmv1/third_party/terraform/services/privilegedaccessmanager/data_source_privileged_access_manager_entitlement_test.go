@@ -84,6 +84,7 @@ resource "google_privileged_access_manager_entitlement" "tfentitlement" {
 data "google_privileged_access_manager_entitlement" "tfentitlement" {
   entitlement_id     = google_privileged_access_manager_entitlement.tfentitlement.entitlement_id
   parent  = google_privileged_access_manager_entitlement.tfentitlement.parent
+  location = google_privileged_access_manager_entitlement.tfentitlement.location
 }
 `, context)
 }
@@ -119,6 +120,7 @@ resource "google_privileged_access_manager_entitlement" "tfentitlement" {
 data "google_privileged_access_manager_entitlement" "tfentitlement" {
   entitlement_id     = google_privileged_access_manager_entitlement.tfentitlement.entitlement_id
   parent  = google_privileged_access_manager_entitlement.tfentitlement.parent
+  location = google_privileged_access_manager_entitlement.tfentitlement.location
 }
 `, context)
 }
