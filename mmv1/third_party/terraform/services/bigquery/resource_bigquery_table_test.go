@@ -308,6 +308,7 @@ func TestAccBigQueryBigLakeManagedTable(t *testing.T) {
 				ResourceName:      "google_bigquery_table.test",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"}
 			},
 		},
 	})
@@ -321,11 +322,6 @@ func testAccBigLakeManagedTable(bucketName, connectionID, datasetID, tableID, sc
 		  location      = "US"
 		  force_destroy = true
 		  uniform_bucket_level_access = true
-		}
-		resource "google_storage_bucket_object" "test" {
-			name = "data/"
-			content = " " 
-			bucket = google_storage_bucket.test.name
 		}
 		resource "google_bigquery_connection" "test" {
 			connection_id = "%s"
@@ -355,8 +351,7 @@ func testAccBigLakeManagedTable(bucketName, connectionID, datasetID, tableID, sc
 			schema = jsonencode(%s)
 		
 			depends_on = [
-			  google_project_iam_member.test,
-			  google_storage_bucket_object.test,
+			  google_project_iam_member.test
 			]
 		}
 		`, bucketName, connectionID, datasetID, tableID, schema)
