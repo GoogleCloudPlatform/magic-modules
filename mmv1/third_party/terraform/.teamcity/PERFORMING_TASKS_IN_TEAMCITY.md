@@ -89,8 +89,8 @@ To do this you should:
 When reviewing a PR you may need to run acceptance tests using the code shown in the Diff Report, present in branches in the modular-magician/terraform-provider-google(-beta) repositories.
 
 To do this you should navigate to either of these projects and run a custom build:
-* [`Google > Upstream MM Testing`](https://hashicorp.teamcity.com/project/TerraformProviders_GoogleCloud_GOOGLE_MMUPSTREAMTESTS#all-projects)
-* [`Google Beta > Upstream MM Testing`](https://hashicorp.teamcity.com/project/TerraformProviders_GoogleCloud_GOOGLE_BETA_MMUPSTREAMTESTS#all-projects)
+* [`Google > Upstream MM Testing`](https://hashicorp.teamcity.com/project/TerraformProviders_GoogleCloud_GOOGLE_MMUPSTREAMTESTS?branch=refs%2Fheads%2Fnightly-test&mode=builds#all-projects)
+* [`Google Beta > Upstream MM Testing`](https://hashicorp.teamcity.com/project/TerraformProviders_GoogleCloud_GOOGLE_BETA_MMUPSTREAMTESTS?branch=refs%2Fheads%2Fnightly-test&mode=builds#all-projects)
 
 Builds in these projects will test the code present in the Modular Magician's forks and will run tests against the VCR testing project in GCP.
 
