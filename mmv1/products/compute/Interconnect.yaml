@@ -142,7 +142,8 @@ properties:
     name: 'customerName'
     description: |
       Customer name, to put in the Letter of Authorization as the party authorized to request a
-      crossconnect. Required for Dedicated and Partner Interconnect.
+      crossconnect. This field is required for Dedicated and Partner Interconnect, should not be specified
+      for cross-cloud interconnect.
     immutable: true
   - !ruby/object:Api::Type::Enum
     name: 'operationalStatus'
