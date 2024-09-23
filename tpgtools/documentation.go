@@ -39,10 +39,6 @@ func mergeResource(res *Resource, resources map[Version][]*Resource, version *Ve
 	ga, gaExists := resourceAcrossVersions[GA_VERSION]
 	beta, betaExists := resourceAcrossVersions[BETA_VERSION]
 	alpha, alphaExists := resourceAcrossVersions[ALPHA_VERSION]
-	private, privateExists := resourceAcrossVersions[PRIVATE_VERSION]
-	if privateExists {
-		return private
-	}
 	if alphaExists {
 		return alpha
 	}

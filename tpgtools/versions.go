@@ -38,14 +38,12 @@ const (
 	GA = iota
 	BETA
 	ALPHA
-	PRIVATE
 )
 
 var GA_VERSION = Version{V: "ga", Order: GA, SerializationSuffix: ""}
 var BETA_VERSION = Version{V: "beta", Order: BETA, SerializationSuffix: "Beta"}
 var ALPHA_VERSION = Version{V: "alpha", Order: ALPHA, SerializationSuffix: "Alpha"}
-var PRIVATE_VERSION = Version{V: "private", Order: PRIVATE, SerializationSuffix: "Private"}
 
 func allVersions() []Version {
-	return []Version{GA_VERSION, BETA_VERSION, ALPHA_VERSION, PRIVATE_VERSION}
+	return []Version{GA_VERSION, BETA_VERSION, ALPHA_VERSION}
 }
