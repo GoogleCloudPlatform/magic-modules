@@ -359,6 +359,17 @@ properties:
                 traffic if the MKA session cannot be established. By default, the Interconnect
                 connection is configured with a must-secure security policy that drops all traffic
                 if the MKA session cannot be established with your router.
+              deprecation_message: >-
+                `failOpen` is deprecated and will be removed in a future major release. Use
+                other `failOpen` instead.
+      - !ruby/object:Api::Type::Boolean
+        name: 'failOpen'
+        description: |
+          If set to true, the Interconnect connection is configured with a should-secure
+          MACsec security policy, that allows the Google router to fallback to cleartext
+          traffic if the MKA session cannot be established. By default, the Interconnect
+          connection is configured with a must-secure security policy that drops all traffic
+          if the MKA session cannot be established with your router.
   - !ruby/object:Api::Type::Boolean
     name: 'macsecEnabled'
     description: |
