@@ -211,11 +211,6 @@ provider "google" {
 }
 
 data "google_provider_config_sdk" "default" {}
-
-output "user_project_override" {
-  value = data.google_provider_config_sdk.default.user_project_override
-  sensitive = true
-}
 `, context)
 	return v
 }
@@ -227,11 +222,6 @@ provider "google" {
 }
 
 data "google_provider_config_sdk" "default" {}
-
-output "user_project_override" {
-  value = data.google_provider_config_sdk.default.user_project_override
-  sensitive = true
-}
 `, context)
 }
 
@@ -240,11 +230,6 @@ output "user_project_override" {
 func testAccSdkProvider_user_project_overrideInEnvsOnly(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_provider_config_sdk" "default" {}
-
-output "user_project_override" {
-  value = data.google_provider_config_sdk.default.user_project_override
-  sensitive = true
-}
 `, context)
 }
 
