@@ -331,17 +331,29 @@ type Resource struct {
 }
 
 func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {
-	r.CreateVerb = "POST"
-	r.ReadVerb = "GET"
-	r.DeleteVerb = "DELETE"
-	r.UpdateVerb = "PUT"
-
 	type resourceAlias Resource
 	aliasObj := (*resourceAlias)(r)
 
 	err := unmarshal(aliasObj)
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (r *Resource) SetDefault(product *Product) {
+	if r.CreateVerb == "" {
+		r.CreateVerb = "POST"
+	}
+	if r.ReadVerb == "" {
+		r.ReadVerb = "GET"
+	}
+	if r.DeleteVerb == "" {
+		r.DeleteVerb = "DELETE"
+	}
+	if r.UpdateVerb == "" {
+		r.UpdateVerb = "PUT"
 	}
 
 	if r.ApiName == "" {
@@ -360,10 +372,6 @@ func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {
 		}
 	}
 
-	return nil
-}
-
-func (r *Resource) SetDefault(product *Product) {
 	r.ProductMetadata = product
 	for _, property := range r.AllProperties() {
 		property.SetDefault(r)
@@ -374,6 +382,10 @@ func (r *Resource) SetDefault(product *Product) {
 	if r.IamPolicy != nil && r.IamPolicy.MinVersion == "" {
 		r.IamPolicy.MinVersion = r.MinVersion
 	}
+	if r.Timeouts == nil {
+		r.Timeouts = NewTimeouts()
+	}
+
 }
 
 func (r *Resource) Validate() {
