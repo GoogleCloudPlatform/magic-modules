@@ -37,6 +37,12 @@ type Type struct {
 
 	DefaultValue interface{} `yaml:"default_value"`
 
+	// Expected to follow the format as follows:
+	//
+	//	description: |
+	//		This is a description of a field.
+	//		If it comprises multiple lines, it must continue to be indented.
+	//
 	Description string
 
 	Exclude bool

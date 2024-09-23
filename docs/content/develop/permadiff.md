@@ -86,7 +86,7 @@ Use a flattener to store the default value in state if the response has an empty
 Use the standard `default_if_empty` flattener.
 
 ```yaml
-custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
+custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
 ```
 {{< /tab >}}
 {{< tab "Handwritten" >}}
@@ -118,10 +118,10 @@ The `tpgresource` package in each provider supplies diff suppress functions for 
 {{< tab "MMv1" >}}
 ```yaml
 # Use a built-in function
-diff_suppress_func: tpgresource.CaseDiffSuppress
+diff_suppress_func: 'tpgresource.CaseDiffSuppress'
 
 # Reference a resource-specific function
-diff_suppress_func: resourceNameFieldNameDiffSuppress
+diff_suppress_func: 'resourceNameFieldNameDiffSuppress'
 ```
 
 Define resource-specific functions in a [`custom_code.constants`](https://googlecloudplatform.github.io/magic-modules/develop/custom-code/#add-reusable-variables-and-functions) file.
@@ -185,7 +185,7 @@ ignore_read: true
 For nested fields, `ignore_read` is [not currently supported](https://github.com/hashicorp/terraform-provider-google/issues/12410), so this must be implemented with a [custom flattener]({{< ref "/develop/custom-code#custom_flatten" >}}). You will also need to add the field to `ignore_read_extra` on any examples that are used to generate tests; this will cause tests to ignore the field when checking that the values in the API match the user's configuration.
 
 ```go
-func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
     // We want to ignore read on this field, but cannot because it is nested
     return d.Get("path.0.to.0.nested.0.field")
 }
@@ -193,7 +193,6 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
 
 ```yaml
 examples:
- - !ruby/object:Provider::Terraform::Examples
    # example configuration
    ignore_read_extra:
      - "path.0.to.0.nested.0.field"
@@ -234,7 +233,7 @@ For an Array of unique string values (or nested objects with unique string ident
 Add a [custom flattener]({{< ref "/develop/custom-code#custom_flatten" >}}) for the field.
 
 ```go
-func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
     configValue := d.Get("path.0.to.0.parent_field.0.nested_field").([]string)
 
     sorted, err := tpgresource.SortStringsByConfigOrder(configValue, v.([]string))

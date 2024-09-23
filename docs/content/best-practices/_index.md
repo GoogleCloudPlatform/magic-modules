@@ -67,8 +67,8 @@ When adding a new `labels` field, please make the changes below to support the n
 1. Use the type `KeyValueLabels` for the standard resource `labels` field. The standard resource `labels` field could be the top level `labels` field or the nested `labels` field inside the top level `metadata` field. Don't add `default_from_api: true` to this field or don't use this type for other `labels` fields in the resource. `KeyValueLabels` will add all of changes required for the new model automatically.
 
 ```yaml
-- !ruby/object:Api::Type::KeyValueLabels
-   name: 'labels'
+ - name: 'labels'
+   type: KeyValueLabels
    description: |
    The labels associated with this dataset. You can use these to
    organize and group your datasets.
@@ -155,9 +155,10 @@ When adding a new `annotations` field, please make the changes below below to su
 1. Use the type `KeyValueAnnotations` for the standard resource `annotations` field. The standard resource `annotations` field could be the top level `annotations` field or the nested `annotations` field inside the top level `metadata` field. Don't add `default_from_api: true` to this field or don't use this type for other `annotations` fields in the resource. `KeyValueAnnotations` will add all of changes required for the new model automatically.
 
 ```yaml
-- !ruby/object:Api::Type::KeyValueAnnotations
-   name: 'annotations'
-   description: 'Client-specified annotations. This is distinct from labels.'
+- name: 'annotations'
+  type: KeyValueAnnotations
+  description: |
+   Client-specified annotations. This is distinct from labels.
 ```
 2. In the handwritten acceptance tests, add `annotations` to `ImportStateVerifyIgnore` if `annotations` field is in the configuration.
 
