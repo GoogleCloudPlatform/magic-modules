@@ -243,3 +243,23 @@ func resizeWorkbenchInstanceDisk(config *transport_tpg.Config, d *schema.Resourc
 	return nil
 }
 <% end -%>
+
+// mergeLabels takes two maps of labels and returns a new map with the labels merged.
+// If a key exists in old_labels but not in new_labels, it is added to the new map with an empty value.
+func mergeLabels(oldLabels, newLabels map[string]string) map[string]string {
+	modifiedLabels := make(map[string]string)
+
+	// Add all labels from newLabels to modifiedLabels
+	for k, v := range newLabels {
+		modifiedLabels[k] = v
+	}
+
+	// Add any keys from oldLabels that are not in newLabels with an empty value
+	for k := range oldLabels {
+		if _, ok := newLabels[k]; !ok {
+			modifiedLabels[k] = ""
+		}
+	}
+
+	return modifiedLabels
+}

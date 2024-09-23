@@ -34,6 +34,14 @@ if err != nil {
     return err
 }
 
+if d.HasChange("effective_labels") {
+  old_labels_interface, new_labels_interface := d.GetChange("effective_labels")
+  old_labels = old_labels_interface.(map[string]string)
+  new_labels = new_labels_interface.(map[string]string)
+  obj["labels"] = mergeLabels(old_labels,new_labels)
+  log.Printf("[DEBUG] d get change: %v, %v", old_labels, new_labels)
+}
+
 name := d.Get("name").(string)
 if stopInstance{
   state := d.Get("state").(string)
