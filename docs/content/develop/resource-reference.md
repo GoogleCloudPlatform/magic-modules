@@ -302,7 +302,7 @@ mutex: 'alloydb/instance/{{name}}'
 
 ### `virtual_fields`
 
-Contains a list of [virtual_fields]({{< ref "/develop/client-side-fields/" >}}). By convention,
+Contains a list of [virtual_fields]({{< ref "/develop/client-side-fields" >}}). By convention,
 these should be fields that do not get sent to the API, and are instead used to modify
 the behavior of a Terraform resource such as `deletion_protection`.
 
