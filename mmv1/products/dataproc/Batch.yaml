@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Warning: This is a temporary file, and should not be edited directly
+# Warning: This is a temporary file, and should not be edited directly test
 ---
 name: 'Batch'
 description: |
@@ -44,8 +44,8 @@ async:
     resource_inside_response: false
 collection_url_key: 'batches'
 custom_code:
-  constants: 'templates/terraform/constants/go/cloud_dataproc_batch.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/cloud_dataproc_batch.go.tmpl'
+  constants: 'templates/terraform/constants/cloud_dataproc_batch.go'
+  decoder: 'templates/terraform/decoders/cloud_dataproc_batch.go.tmpl'
 examples:
   - name: 'dataproc_batch_spark'
     primary_resource_id: 'example_batch_spark'
