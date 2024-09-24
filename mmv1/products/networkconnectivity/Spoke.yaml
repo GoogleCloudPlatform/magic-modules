@@ -59,6 +59,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'network_connectivity_spoke_vpn_tunnel_basic'
     primary_resource_id: 'tunnel1'
+    skip_vcr: true # Failing in replaying mode (https://github.com/hashicorp/terraform-provider-google/issues/19592)
     vars:
       network_name: "basic-network"
       subnetwork_name: "basic-subnetwork"
