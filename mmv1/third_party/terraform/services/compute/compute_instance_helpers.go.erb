@@ -167,6 +167,13 @@ func expandScheduling(v interface{}) (*compute.Scheduling, error) {
 <% unless version == 'ga' -%>
 	if v, ok := original["host_error_timeout_seconds"]; ok {
 		scheduling.HostErrorTimeoutSeconds = int64(v.(int))
+		//host_error_timeout_seconds doesn't get removed correctly due to an API bug on instances.SetScheduling.
+		//We need to set it to NullFields as a workaround because nil is rounded to 0
+		if v == 0 || v == nil {
+			scheduling.NullFields = append(scheduling.NullFields, "HostErrorTimeoutSeconds")
+		} else {
+			scheduling.ForceSendFields = append(scheduling.ForceSendFields, "HostErrorTimeoutSeconds")
+		}
 	}
 
 	if v, ok := original["maintenance_interval"]; ok {
