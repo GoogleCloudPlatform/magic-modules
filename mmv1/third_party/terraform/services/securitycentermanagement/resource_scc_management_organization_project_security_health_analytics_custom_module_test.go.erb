@@ -26,7 +26,7 @@ func testAccSecurityCenterManagementProjectSecurityHealthAnalyticsCustomModule(t
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckSecurityCenterManagementProjectSecurityHealthAnalyticsCustomModuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -60,6 +60,7 @@ func testAccSecurityCenterManagementProjectSecurityHealthAnalyticsCustomModule(t
 func testAccCheckSecurityCenterManagementProjectSecurityHealthAnalyticsCustomModule_sccProjectCustomModuleBasicExample(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_scc_management_project_security_health_analytics_custom_module" "example" {
+	provider = google-beta
 	display_name = "tf_test_basic_custom_module%{random_suffix}"
 	enablement_state = "ENABLED"
 	location = "%{location}"
@@ -83,6 +84,7 @@ resource "google_scc_management_project_security_health_analytics_custom_module"
 func testAccCheckSecurityCenterManagementProjectSecurityHealthAnalyticsCustomModule_sccProjectCustomModuleFullExample(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_scc_management_project_security_health_analytics_custom_module" "example" {
+	provider = google-beta
 	display_name = "tf_test_full_custom_module%{random_suffix}"
 	enablement_state = "ENABLED"
 	location = "%{location}"
@@ -120,6 +122,7 @@ resource "google_scc_management_project_security_health_analytics_custom_module"
 func testAccCheckSecurityCenterManagementProjectSecurityHealthAnalyticsCustomModule_sccProjectCustomModuleUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_scc_management_project_security_health_analytics_custom_module" "example" {
+	provider = google-beta
 	location = "%{location}"
 	display_name = "full_custom_module"
 	enablement_state = "DISABLED"

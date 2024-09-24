@@ -1,6 +1,7 @@
 <% autogen_exception -%>
 
 package securitycentermanagement_test
+<% unless version == 'ga' -%>
 
 import (
 	"fmt"
@@ -72,7 +73,6 @@ func testAccSecurityCenterManagementOrganizationEventThreatDetectionCustomModule
 
 func testAccSecurityCenterManagementOrganizationEventThreatDetectionCustomModule__sccOrganizationCustomModuleExample(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-<% unless version == 'ga' -%>
 resource "google_scc_management_organization_event_threat_detection_custom_module" "example" {
 	provider = google-beta
 
@@ -93,13 +93,11 @@ resource "google_scc_management_organization_event_threat_detection_custom_modul
 			  ]}
             EOF
 }
-<% end -%>
 `, context)
 }
 
 func testAccSecurityCenterManagementOrganizationEventThreatDetectionCustomModule_sccOrganizationCustomModuleUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-<% unless version == 'ga' -%>
 resource "google_scc_management_organization_event_threat_detection_custom_module" "example" {
 	provider = google-beta
 	
@@ -119,7 +117,6 @@ resource "google_scc_management_organization_event_threat_detection_custom_modul
 			  ]}
             EOF
 }
-<% end -%>
 `, context)
 }
 
@@ -164,3 +161,4 @@ func testAccSecurityCenterManagementOrganizationEventThreatDetectionCustomModule
 		return nil
 	}
 }
+<% end -%>

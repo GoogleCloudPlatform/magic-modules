@@ -28,7 +28,7 @@ func testAccSecurityCenterManagementOrganizationSecurityHealthAnalyticsCustomMod
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckSecurityCenterManagementOrganizationSecurityHealthAnalyticsCustomModuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -65,6 +65,7 @@ func testAccSecurityCenterManagementOrganizationSecurityHealthAnalyticsCustomMod
 func testAccSecurityCenterManagementOrganizationSecurityHealthAnalyticsCustomModule_sccOrganizationCustomModuleBasicExample(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_scc_management_organization_security_health_analytics_custom_module" "example" {
+	provider = google-beta
 	organization = "%{org_id}"
 	location = "%{location}"
 	display_name = "tf_test_basic_custom_module%{random_suffix}"
@@ -89,6 +90,7 @@ resource "google_scc_management_organization_security_health_analytics_custom_mo
 func testAccSecurityCenterManagementOrganizationSecurityHealthAnalyticsCustomModule_sccOrganizationCustomModuleFullExample(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_scc_management_organization_security_health_analytics_custom_module" "example" {
+	provider = google-beta
 	organization = "%{org_id}"
 	location = "%{location}"
 	display_name = "tf_test_full_custom_module%{random_suffix}"
@@ -127,6 +129,7 @@ resource "google_scc_management_organization_security_health_analytics_custom_mo
 func testAccSecurityCenterManagementOrganizationSecurityHealthAnalyticsCustomModule_sccOrganizationCustomModuleUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_scc_management_organization_security_health_analytics_custom_module" "example" {
+	provider = google-beta
 	organization = "%{org_id}"
 	location = "%{location}"
 	display_name = "tf_test_full_custom_module%{random_suffix}"
