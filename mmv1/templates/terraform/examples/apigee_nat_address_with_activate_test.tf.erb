@@ -61,5 +61,6 @@ resource "google_apigee_instance" "apigee_instance" {
 
 resource "google_apigee_nat_address" "<%= ctx[:primary_resource_id] %>" {
   name        = "tf-test%{random_suffix}"
+  activate    = true
   instance_id = google_apigee_instance.apigee_instance.id
 }
