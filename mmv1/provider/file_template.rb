@@ -36,7 +36,6 @@ module Provider
     # Once the file's contents are written, set the proper [chmod] mode and
     # format the file with a language-appropriate formatter.
     def generate(pwd, template, path, provider)
-
       # You're looking at some magic here!
       # This is how variables are made available in templates; we iterate
       # through each key:value pair in this object, and we set them
