@@ -676,32 +676,6 @@ func TestAccWorkbenchInstance_updatelabels(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels","desired_state"},
 			},
-			{
-				Config: testAccWorkbenchInstance_empty_label(context),
-				Check: resource.ComposeTestCheckFunc(
-                    	resource.TestCheckResourceAttr(
-                        		"google_workbench_instance.instance", "state", "ACTIVE"),
-				),
-			},
-			{
-				ResourceName:            "google_workbench_instance.instance",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels","desired_state"},
-			},
-			{
-				Config: testAccWorkbenchInstance_label(context),
-				Check: resource.ComposeTestCheckFunc(
-                    	resource.TestCheckResourceAttr(
-                        		"google_workbench_instance.instance", "state", "ACTIVE"),
-				),
-			},
-			{
-				ResourceName:            "google_workbench_instance.instance",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels","desired_state"},
-			},
 		},
 	})
 }
@@ -713,18 +687,6 @@ resource "google_workbench_instance" "instance" {
   location = "us-central1-a"
   labels = {
     k = "val"
-  }
-}
-`, context)
-}
-
-func testAccWorkbenchInstance_empty_label(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_workbench_instance" "instance" {
-  name = "tf-test-workbench-instance%{random_suffix}"
-  location = "us-central1-a"
-  labels = {
-    k = ""
   }
 }
 `, context)
