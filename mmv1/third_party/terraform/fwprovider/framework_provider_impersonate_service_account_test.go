@@ -126,10 +126,6 @@ provider "google" {
 
 data "google_provider_config_plugin_framework" "default" {}
 
-output "impersonate_service_account" {
-  value = data.google_provider_config_plugin_framework.default.impersonate_service_account
-  sensitive = true
-}
 `, context)
 }
 
@@ -139,9 +135,5 @@ func testAccFwProvider_impersonate_service_account_inEnvsOnly(context map[string
 	return acctest.Nprintf(`
 data "google_provider_config_plugin_framework" "default" {}
 
-output "impersonate_service_account" {
-  value = data.google_provider_config_plugin_framework.default.impersonate_service_account
-  sensitive = true
-}
 `, context)
 }
