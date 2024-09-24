@@ -51,6 +51,7 @@ resource "google_network_services_gateway" "{{$.PrimaryResourceId}}" {
   location                             = "us-central1"
   addresses                            = ["10.128.0.99"]
   type                                 = "SECURE_WEB_GATEWAY"
+  routing_mode                         = "EXPLICIT_ROUTING_MODE"
   ports                                = [443]
   scope                                = "{{index $.Vars "scope_1"}}"
   certificate_urls                     = [google_certificate_manager_certificate.default.id]
