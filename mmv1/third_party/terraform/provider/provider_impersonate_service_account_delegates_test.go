@@ -171,7 +171,6 @@ provider "google" {
   impersonate_service_account = google_service_account.default_2.email
   impersonate_service_account_delegates = [
     google_service_account.default_1.email,
-    google_service_account.default_2.email,
   ]
 }
 
