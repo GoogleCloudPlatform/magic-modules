@@ -154,6 +154,13 @@ resource "google_container_aws_node_pool" "primary" {
   management {
     auto_repair = true
   }
+  
+  "kubeletConfig": {
+    "cpuManagerPolicy": "none",
+    "cpuCfsQuota": true,
+    "cpuCfsQuotaPeriod": "100ms",
+    "podPidsLimit": 1024
+  },
 
   annotations = {
     label-one = "value-one"
