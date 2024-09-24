@@ -1,7 +1,7 @@
 data "google_project" "project" {}
 
-resource "google_compute_interconnect" "{{$.PrimaryResourceId}}" {
-  name                 = "{{index $.Vars "interconnect_name"}}"
+resource "google_compute_interconnect" "<%= ctx[:primary_resource_id] %>" {
+  name                 = "<%= ctx[:vars]['interconnect_name'] %>"
   customer_name        = "internal_customer" # Special customer only available for Google testing.
   interconnect_type    = "DEDICATED"
   link_type            = "LINK_TYPE_ETHERNET_10G_LR"
