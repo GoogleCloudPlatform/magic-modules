@@ -1,4 +1,6 @@
+<% autogen_exception -%>
 package securitycentermanagement_test
+<% unless version == 'ga' -%>
 
 import (
 	"fmt"
@@ -9,64 +11,59 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 // Custom Module tests cannot be run in parallel without running into 409 Conflict reponses.
 // Run them as individual steps of an update test instead.
-func testAccSecurityCenterManagementOrganizationSecurityHealthAnalyticsCustomModule(t *testing.T) {
+func testAccSecurityCenterManagementProjectSecurityHealthAnalyticsCustomModule(t *testing.T) {
 
 	context := map[string]interface{}{
-		"org_id":        envvar.GetTestOrgFromEnv(t),
-		"location":      "global",
 		"random_suffix": acctest.RandString(t, 10),
+		"location":      "global",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckSecurityCenterManagementOrganizationSecurityHealthAnalyticsCustomModuleDestroyProducer(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckSecurityCenterManagementProjectSecurityHealthAnalyticsCustomModuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSecurityCenterManagementOrganizationSecurityHealthAnalyticsCustomModule_sccOrganizationCustomModuleBasicExample(context),
+				Config: testAccCheckSecurityCenterManagementProjectSecurityHealthAnalyticsCustomModule_sccProjectCustomModuleBasicExample(context),
 			},
 			{
-				ResourceName:            "google_scc_management_organization_security_health_analytics_custom_module.example",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"organization", "location"},
+				ResourceName:      "google_scc_management_project_security_health_analytics_custom_module.example",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
-				Config: testAccSecurityCenterManagementOrganizationSecurityHealthAnalyticsCustomModule_sccOrganizationCustomModuleFullExample(context),
+				Config: testAccCheckSecurityCenterManagementProjectSecurityHealthAnalyticsCustomModule_sccProjectCustomModuleFullExample(context),
 			},
 			{
-				ResourceName:            "google_scc_management_organization_security_health_analytics_custom_module.example",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"organization", "location"},
+				ResourceName:      "google_scc_management_project_security_health_analytics_custom_module.example",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
-				Config: testAccSecurityCenterManagementOrganizationSecurityHealthAnalyticsCustomModule_sccOrganizationCustomModuleUpdate(context),
+				Config: testAccCheckSecurityCenterManagementProjectSecurityHealthAnalyticsCustomModule_sccProjectCustomModuleUpdate(context),
 			},
 			{
-				ResourceName:            "google_scc_management_organization_security_health_analytics_custom_module.example",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"organization", "location"},
+				ResourceName:      "google_scc_management_project_security_health_analytics_custom_module.example",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
 }
 
-func testAccSecurityCenterManagementOrganizationSecurityHealthAnalyticsCustomModule_sccOrganizationCustomModuleBasicExample(context map[string]interface{}) string {
+func testAccCheckSecurityCenterManagementProjectSecurityHealthAnalyticsCustomModule_sccProjectCustomModuleBasicExample(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_scc_management_organization_security_health_analytics_custom_module" "example" {
-	organization = "%{org_id}"
-	location = "%{location}"
+resource "google_scc_management_project_security_health_analytics_custom_module" "example" {
+	provider = google-beta
 	display_name = "tf_test_basic_custom_module%{random_suffix}"
 	enablement_state = "ENABLED"
+	location = "%{location}"
 	custom_config {
 		predicate {
 			expression = "resource.rotationPeriod > duration(\"2592000s\")"
@@ -84,13 +81,13 @@ resource "google_scc_management_organization_security_health_analytics_custom_mo
 `, context)
 }
 
-func testAccSecurityCenterManagementOrganizationSecurityHealthAnalyticsCustomModule_sccOrganizationCustomModuleFullExample(context map[string]interface{}) string {
+func testAccCheckSecurityCenterManagementProjectSecurityHealthAnalyticsCustomModule_sccProjectCustomModuleFullExample(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_scc_management_organization_security_health_analytics_custom_module" "example" {
-	organization = "%{org_id}"
-	location = "%{location}"
+resource "google_scc_management_project_security_health_analytics_custom_module" "example" {
+	provider = google-beta
 	display_name = "tf_test_full_custom_module%{random_suffix}"
 	enablement_state = "ENABLED"
+	location = "%{location}"
 	custom_config {
 		predicate {
 			expression = "resource.rotationPeriod > duration(\"2592000s\")"
@@ -122,12 +119,12 @@ resource "google_scc_management_organization_security_health_analytics_custom_mo
 `, context)
 }
 
-func testAccSecurityCenterManagementOrganizationSecurityHealthAnalyticsCustomModule_sccOrganizationCustomModuleUpdate(context map[string]interface{}) string {
+func testAccCheckSecurityCenterManagementProjectSecurityHealthAnalyticsCustomModule_sccProjectCustomModuleUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_scc_management_organization_security_health_analytics_custom_module" "example" {
-	organization = "%{org_id}"
+resource "google_scc_management_project_security_health_analytics_custom_module" "example" {
+	provider = google-beta
 	location = "%{location}"
-	display_name = "tf_test_full_custom_module%{random_suffix}"
+	display_name = "full_custom_module"
 	enablement_state = "DISABLED"
 	custom_config {
 		predicate {
@@ -160,10 +157,10 @@ resource "google_scc_management_organization_security_health_analytics_custom_mo
 `, context)
 }
 
-func testAccCheckSecurityCenterManagementOrganizationSecurityHealthAnalyticsCustomModuleDestroyProducer(t *testing.T) func(s *terraform.State) error {
+func testAccCheckSecurityCenterManagementProjectSecurityHealthAnalyticsCustomModuleDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for name, rs := range s.RootModule().Resources {
-			if rs.Type != "google_scc_management_organization_security_health_analytics_custom_module" {
+			if rs.Type != "google_scc_management_project_security_health_analytics_custom_module" {
 				continue
 			}
 			if strings.HasPrefix(name, "data.") {
@@ -175,8 +172,7 @@ func testAccCheckSecurityCenterManagementOrganizationSecurityHealthAnalyticsCust
 			location := rs.Primary.Attributes["location"]
 
 			url, err := tpgresource.ReplaceVarsForTest(config, rs, fmt.Sprintf(
-				"{{SecurityCenterBasePath}}organizations/{{organization}}/locations/%s/securityHealthAnalyticsCustomModules/{{name}}", location))
-
+				"{{SecurityCenterBasePath}}projects/{{project}}/locations/%s/securityHealthAnalyticsCustomModules/{{name}}", location))
 			if err != nil {
 				return err
 			}
@@ -195,10 +191,12 @@ func testAccCheckSecurityCenterManagementOrganizationSecurityHealthAnalyticsCust
 				UserAgent: config.UserAgent,
 			})
 			if err == nil {
-				return fmt.Errorf("SecurityCenterManagementOrganizationSecurityHealthAnalyticsCustomModule still exists at %s", url)
+				return fmt.Errorf("SecurityCenterManagementProjectSecurityHealthAnalyticsCustomModule still exists at %s", url)
 			}
 		}
 
 		return nil
 	}
 }
+
+<% end -%>
