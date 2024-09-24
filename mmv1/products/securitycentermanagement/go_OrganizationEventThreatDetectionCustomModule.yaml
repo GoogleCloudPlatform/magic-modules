@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'OrganizationEventThreatDetectionCustomModule'
+api_resource_type: EventThreatDetectionCustomModule
 description: |
   Represents an instance of an Event Threat Detection custom module, including
   its full module name, display name, enablement state, and last updated time.

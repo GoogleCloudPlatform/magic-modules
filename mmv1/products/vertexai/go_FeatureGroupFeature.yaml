@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'FeatureGroupFeature'
+api_resource_type: Feature
 description: Vertex AI Feature Group Feature is feature metadata information.
 references:
   guides:

@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'VPCSCConfig'
+api_resource_type: VpcscConfig
 description: |-
   The Artifact Registry VPC SC config that applies to a Project.
 min_version: 'beta'

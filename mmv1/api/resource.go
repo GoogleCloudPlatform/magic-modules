@@ -328,6 +328,8 @@ type Resource struct {
 	Compiler string
 
 	ImportPath string
+
+	ApiResourceType string `yaml:"api_resource_type"`
 }
 
 func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {

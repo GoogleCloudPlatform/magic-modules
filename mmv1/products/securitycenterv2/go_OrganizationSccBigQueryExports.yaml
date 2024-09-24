@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'OrganizationSccBigQueryExports'
+api_resource_type: BigQueryExport
 description: |
   A Cloud Security Command Center (Cloud SCC) Big Query Export Config.
   It represents exporting Security Command Center data, including assets, findings, and security marks

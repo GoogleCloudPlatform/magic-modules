@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'OrganizationSource'
+api_resource_type: Source
 description: |
   A Cloud Security Command Center's (Cloud SCC) finding source. A finding
   source is an entity or a mechanism that can produce a finding. A source is

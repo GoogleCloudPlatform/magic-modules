@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'GenericService'
+api_resource_type: Service
 legacy_name: 'google_monitoring_service'
 description: |
   A Service is a discrete, autonomous, and network-accessible unit,

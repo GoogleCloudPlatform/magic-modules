@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'ChatEngine'
+api_resource_type: Engine
 description: |
   Vertex chat and Conversation Engine Chat type
 references:

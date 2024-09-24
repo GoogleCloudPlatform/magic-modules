@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'ProjectInfo'
+api_resource_type: ProjectBillingInfo
 description: |
   Billing information for a project.
 references:

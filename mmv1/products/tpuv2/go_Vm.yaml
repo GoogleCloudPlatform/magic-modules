@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'Vm'
+api_resource_type: Node
 description: |
   A Cloud TPU VM instance.
 min_version: 'beta'

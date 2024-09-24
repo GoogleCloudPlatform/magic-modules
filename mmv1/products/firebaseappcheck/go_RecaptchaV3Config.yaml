@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'RecaptchaV3Config'
+api_resource_type: RecaptchaConfig
 description: |
   An app's reCAPTCHA V3 configuration object.
 references:

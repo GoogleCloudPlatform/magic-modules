@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'AppleApp'
+api_resource_type: IosApp
 description: |
   A Google Cloud Firebase Apple application instance
 min_version: 'beta'

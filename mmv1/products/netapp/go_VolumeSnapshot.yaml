@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'VolumeSnapshot'
+api_resource_type: Snapshot
 description: |
   NetApp Volumes helps you manage your data usage with snapshots that can quickly restore lost data.
   Snapshots are point-in-time versions of your volume's content. They are resources of volumes and are

@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'ServiceConfig'
+api_resource_type: Service
 description: The enforcement configuration for a service supported by App Check.
 references:
   guides:

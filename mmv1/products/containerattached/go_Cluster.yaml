@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'Cluster'
+api_resource_type: AttachedCluster
 description: |
   An Anthos cluster running on customer owned infrastructure.
 references:

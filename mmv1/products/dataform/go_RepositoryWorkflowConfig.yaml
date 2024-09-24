@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'RepositoryWorkflowConfig'
+api_resource_type: WorkflowConfig
 description: |-
   A resource represents a Dataform workflow configuration
 min_version: 'beta'

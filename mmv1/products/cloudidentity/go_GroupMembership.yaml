@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'GroupMembership'
+api_resource_type: Membership
 description: |
   A Membership defines a relationship between a Group and an entity belonging to that Group, referred to as a "member".
 references:

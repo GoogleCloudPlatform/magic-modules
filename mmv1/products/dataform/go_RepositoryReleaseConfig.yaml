@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'RepositoryReleaseConfig'
+api_resource_type: ReleaseConfig
 description: |-
   A resource represents a Dataform release configuration
 min_version: 'beta'

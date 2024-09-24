@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'function'
+api_resource_type: Function
 description: |
   A Cloud Function that contains user computation executed in response to an event.
 references:

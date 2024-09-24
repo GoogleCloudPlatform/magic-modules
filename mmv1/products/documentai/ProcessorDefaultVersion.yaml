@@ -13,6 +13,7 @@
 
 --- !ruby/object:Api::Resource
 name: 'ProcessorDefaultVersion'
+api_resource_type: Processor
 immutable: true
 base_url: '{{processor}}'
 create_url: '{{processor}}:setDefaultProcessorVersion'
