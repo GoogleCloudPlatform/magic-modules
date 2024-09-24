@@ -1491,13 +1491,25 @@ func TestAccComputeInstance_hostErrorTimeoutSecconds(t *testing.T) {
 	context_1 := map[string]interface{}{
 		"instance_name":          fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
 		"zone":                   "us-central1-a",
-		"host_error_timeout_sec": 90,
+		"host_error_timeout_sec": "host_error_timeout_seconds = 90",
 	}
 
 	context_2 := map[string]interface{}{
 		"instance_name":          context_1["instance_name"],
 		"zone":                   context_1["zone"],
-		"host_error_timeout_sec": 120,
+		"host_error_timeout_sec": "host_error_timeout_seconds = 120",
+	}
+
+	context_3 := map[string]interface{}{
+		"instance_name":          context_1["instance_name"],
+		"zone":                   context_1["zone"],
+		"host_error_timeout_sec": "host_error_timeout_seconds = null",
+	}
+
+	context_4 := map[string]interface{}{
+		"instance_name":          context_1["instance_name"],
+		"zone":                   context_1["zone"],
+		"host_error_timeout_sec": "host_error_timeout_seconds = 0",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1521,6 +1533,22 @@ func TestAccComputeInstance_hostErrorTimeoutSecconds(t *testing.T) {
 				),
 			},
 			computeInstanceImportStep(context_2["zone"].(string), context_2["instance_name"].(string), []string{}),
+			{
+				Config: testAccComputeInstance_hostErrorTimeoutSeconds(context_3),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "scheduling.0.host_error_timeout_seconds", "0"),
+				),
+			},
+			computeInstanceImportStep(context_3["zone"].(string), context_3["instance_name"].(string), []string{}),
+			{
+				Config: testAccComputeInstance_hostErrorTimeoutSeconds(context_4),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "scheduling.0.host_error_timeout_seconds", "0"),
+				),
+			},
+			computeInstanceImportStep(context_4["zone"].(string), context_4["instance_name"].(string), []string{}),
 		},
 	})
 }
@@ -8240,7 +8268,8 @@ resource "google_compute_instance" "foobar" {
     network = "default"
   }
   scheduling {
-    host_error_timeout_seconds = %{host_error_timeout_sec}
+    %{host_error_timeout_sec}
+	automatic_restart = true
   }
 }`, context)
 }
