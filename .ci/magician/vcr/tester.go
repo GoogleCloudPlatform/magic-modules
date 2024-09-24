@@ -50,10 +50,10 @@ type logKey struct {
 type Tester struct {
 	env            map[string]string           // shared environment variables for running tests
 	rnr            ExecRunner                  // for running commands and manipulating files
+	cassetteBucket string                      // gcs bucket to store cassettes
+	logBucket      string                      // gcs bucket to store logs
 	baseDir        string                      // the directory in which this tester was created
 	saKeyPath      string                      // where sa_key.json is relative to baseDir
-	logBucket      string                      // gcs bucket to store logs
-	cassetteBucket string                      // gcs bucket to store cassettes
 	cassettePaths  map[provider.Version]string // where cassettes are relative to baseDir by version
 	logPaths       map[logKey]string           // where logs are relative to baseDir by version and mode
 	repoPaths      map[provider.Version]string // relative paths of already cloned repos by version
@@ -107,7 +107,7 @@ var safeToLog = map[string]bool{
 } // true if shown, false if hidden (default false)
 
 // Create a new tester in the current working directory and write the service account key file.
-func NewTester(env map[string]string, logBucket, cassetteBucket string, rnr ExecRunner) (*Tester, error) {
+func NewTester(env map[string]string, cassetteBucket, logBucket string, rnr ExecRunner) (*Tester, error) {
 	var saKeyPath string
 	if saKeyVal, ok := env["SA_KEY"]; ok {
 		saKeyPath = "sa_key.json"
@@ -118,10 +118,10 @@ func NewTester(env map[string]string, logBucket, cassetteBucket string, rnr Exec
 	return &Tester{
 		env:            env,
 		rnr:            rnr,
+		cassetteBucket: cassetteBucket,
+		logBucket:      logBucket,
 		baseDir:        rnr.GetCWD(),
 		saKeyPath:      saKeyPath,
-		logBucket:      logBucket,
-		cassetteBucket: cassetteBucket,
 		cassettePaths:  make(map[provider.Version]string, provider.NumVersions),
 		logPaths:       make(map[logKey]string, provider.NumVersions*numModes),
 		repoPaths:      make(map[provider.Version]string, provider.NumVersions),
@@ -194,34 +194,34 @@ type RunOptions struct {
 
 // Run the vcr tests in the given mode and provider version and return the result.
 // This will overwrite any existing logs for the given mode and version.
-func (vt *Tester) Run(opts RunOptions) (Result, error) {
-	logPath, err := vt.getLogPath(opts.Mode, opts.Version)
+func (vt *Tester) Run(opt RunOptions) (Result, error) {
+	logPath, err := vt.getLogPath(opt.Mode, opt.Version)
 	if err != nil {
 		return Result{}, err
 	}
 
-	repoPath, ok := vt.repoPaths[opts.Version]
+	repoPath, ok := vt.repoPaths[opt.Version]
 	if !ok {
-		return Result{}, fmt.Errorf("no repo cloned for version %s in %v", opts.Version, vt.repoPaths)
+		return Result{}, fmt.Errorf("no repo cloned for version %s in %v", opt.Version, vt.repoPaths)
 	}
 	if err := vt.rnr.PushDir(repoPath); err != nil {
 		return Result{}, err
 	}
-	if len(opts.TestDirs) == 0 {
+	if len(opt.TestDirs) == 0 {
 		var err error
-		opts.TestDirs, err = vt.googleTestDirectory()
+		opt.TestDirs, err = vt.googleTestDirectory()
 		if err != nil {
 			return Result{}, err
 		}
 
 	}
 
-	cassettePath := filepath.Join(vt.baseDir, "cassettes", opts.Version.String())
-	switch opts.Mode {
+	cassettePath := filepath.Join(vt.baseDir, "cassettes", opt.Version.String())
+	switch opt.Mode {
 	case Replaying:
-		cassettePath, ok = vt.cassettePaths[opts.Version]
+		cassettePath, ok = vt.cassettePaths[opt.Version]
 		if !ok {
-			return Result{}, fmt.Errorf("cassettes not fetched for version %s", opts.Version)
+			return Result{}, fmt.Errorf("cassettes not fetched for version %s", opt.Version)
 		}
 	case Recording:
 		if err := vt.rnr.RemoveAll(cassettePath); err != nil {
@@ -230,11 +230,11 @@ func (vt *Tester) Run(opts RunOptions) (Result, error) {
 		if err := vt.rnr.Mkdir(cassettePath); err != nil {
 			return Result{}, fmt.Errorf("error creating cassette dir: %v", err)
 		}
-		vt.cassettePaths[opts.Version] = cassettePath
+		vt.cassettePaths[opt.Version] = cassettePath
 	}
 
 	args := []string{"test"}
-	args = append(args, opts.TestDirs...)
+	args = append(args, opt.TestDirs...)
 	args = append(args,
 		"-parallel",
 		strconv.Itoa(accTestParallelism),
@@ -247,11 +247,11 @@ func (vt *Tester) Run(opts RunOptions) (Result, error) {
 	)
 	env := map[string]string{
 		"VCR_PATH":                       cassettePath,
-		"VCR_MODE":                       opts.Mode.Upper(),
+		"VCR_MODE":                       opt.Mode.Upper(),
 		"ACCTEST_PARALLELISM":            strconv.Itoa(accTestParallelism),
 		"GOOGLE_CREDENTIALS":             vt.env["SA_KEY"],
 		"GOOGLE_APPLICATION_CREDENTIALS": filepath.Join(vt.baseDir, vt.saKeyPath),
-		"GOOGLE_TEST_DIRECTORY":          strings.Join(opts.TestDirs, " "),
+		"GOOGLE_TEST_DIRECTORY":          strings.Join(opt.TestDirs, " "),
 		"TF_LOG":                         "DEBUG",
 		"TF_LOG_SDK_FRAMEWORK":           "INFO",
 		"TF_LOG_PATH_MASK":               filepath.Join(logPath, "%s.log"),
@@ -277,14 +277,14 @@ func (vt *Tester) Run(opts RunOptions) (Result, error) {
 	output, testErr := vt.rnr.Run("go", args, env)
 	if testErr != nil {
 		// Use error as output for log.
-		output = fmt.Sprintf("Error %s tests:\n%v", opts.Mode.Lower(), testErr)
+		output = fmt.Sprintf("Error %s tests:\n%v", opt.Mode.Lower(), testErr)
 	}
 	// Leave repo directory.
 	if err := vt.rnr.PopDir(); err != nil {
 		return Result{}, err
 	}
 
-	logFileName := filepath.Join(vt.baseDir, "testlogs", fmt.Sprintf("%s_test.log", opts.Mode.Lower()))
+	logFileName := filepath.Join(vt.baseDir, "testlogs", fmt.Sprintf("%s_test.log", opt.Mode.Lower()))
 	// Write output (or error) to test log.
 	// Append to existing log file.
 	allOutput, _ := vt.rnr.ReadFile(logFileName)

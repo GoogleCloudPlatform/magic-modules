@@ -73,9 +73,6 @@ type withReplayFailedTests struct {
 type withoutReplayFailedTests struct {
 	ReplayingErr error
 	PRNumber     string
-	Head         string
-	Version      provider.Version
-	LogBucket    string
 	BuildID      string
 }
 
@@ -86,9 +83,6 @@ type recordReplay struct {
 	RecordingErr                  error
 	AllRecordingPassed            bool
 	PRNumber                      string
-	Head                          string
-	Version                       provider.Version
-	LogBucket                     string
 	BuildID                       string
 }
 
@@ -126,7 +120,7 @@ var testTerraformVCRCmd = &cobra.Command{
 		}
 		ctlr := source.NewController(env["GOPATH"], "modular-magician", env["GITHUB_TOKEN_DOWNSTREAMS"], rnr)
 
-		vt, err := vcr.NewTester(env, "ci-vcr-logs", "ci-vcr-cassettes", rnr)
+		vt, err := vcr.NewTester(env, "ci-vcr-cassettes", "ci-vcr-logs", rnr)
 		if err != nil {
 			return fmt.Errorf("error creating VCR tester: %w", err)
 		}
@@ -326,9 +320,6 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 			HasTerminatedTests:            hasTerminatedTests,
 			AllRecordingPassed:            allRecordingPassed,
 			PRNumber:                      prNumber,
-			Head:                          newBranch,
-			Version:                       provider.Beta,
-			LogBucket:                     "ci-vcr-logs",
 			BuildID:                       buildID,
 		}
 		recordReplayComment, err := formatRecordReplay(recordReplayData)
@@ -343,9 +334,6 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		withoutReplayFailedTestsData := withoutReplayFailedTests{
 			ReplayingErr: replayingErr,
 			PRNumber:     prNumber,
-			Head:         newBranch,
-			Version:      provider.Beta,
-			LogBucket:    "ci-vcr-logs",
 			BuildID:      buildID,
 		}
 		withoutReplayFailedTestsComment, err := formatWithoutReplayFailedTests(withoutReplayFailedTestsData)
