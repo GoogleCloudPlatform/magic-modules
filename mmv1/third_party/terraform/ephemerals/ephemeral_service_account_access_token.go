@@ -5,7 +5,9 @@ package ephemeral
 import (
 	"context"
 	"fmt"
+	"strings"
 
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -13,6 +15,11 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/iamcredentials/v1"
+)
+
+var (
+	// _ ephemeral.EphemeralResourceWithConfigure = googleEphemeralServiceAccountAccessToken{}
+	_ ephemeral.EphemeralResource = &googleEphemeralServiceAccountAccessToken{}
 )
 
 func GoogleEphemeralServiceAccountAccessToken(m interface{}) ephemeral.EphemeralResource {
@@ -83,9 +90,10 @@ func (p *googleEphemeralServiceAccountAccessToken) Open(ctx context.Context, req
 		Scope:     tpgresource.CanonicalizeServiceScopes(StringSet(ScopesSetValue)),
 	}
 
-	at, err := service.Projects.ServiceAccounts.GenerateAccessToken(name, tokenRequest).Do()
+	_, err := service.Projects.ServiceAccounts.GenerateAccessToken(name, tokenRequest).Do()
 	if err != nil {
-		return err
+		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Couldnt generate token", err.Error()))
+		return
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
