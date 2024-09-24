@@ -149,11 +149,11 @@ resource "google_container_aws_node_pool" "primary" {
     auto_repair = false
   }
   
-  "kubeletConfig": {
-    "cpuManagerPolicy": "none",
-    "cpuCfsQuota": true,
-    "cpuCfsQuotaPeriod": "100ms",
-    "podPidsLimit": 1024
+  "kubelet_config": {
+    "cpu_manager_policy": "none",
+    "cpu_cfs_quota": true,
+    "cpu_cfs_quota_period": "100ms",
+    "pod_pids_limit": 1024
   },
 
   project = "{{project}}"
