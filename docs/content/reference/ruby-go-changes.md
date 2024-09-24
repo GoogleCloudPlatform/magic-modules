@@ -81,7 +81,7 @@ resource "google_pubsub_topic" "{{$.PrimaryResourceId}}" {
 }
 ```
 
-## Advanced: MMv1-specifc generator command
+## Advanced: MMv1-specific generator command
 
 Most contributors should use the make commands referenced in [make-commands](https://googlecloudplatform.github.io/magic-modules/reference/make-commands/) reference page to generate the downstream `google` and `google-beta` providers. The input for these commands have not changed, and have already been correctly switched over to use the new Go engine.
 
