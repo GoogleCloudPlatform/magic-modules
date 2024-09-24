@@ -13,9 +13,16 @@ import (
 // It is a counterpart to TestAccSdkProvider_billing_project
 func TestAccFwProvider_billing_project(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
-		"config takes precedence over environment variables":                                                           testAccSdkProvider_billing_project_configPrecedenceOverEnvironmentVariables,
-		"when billing_project is unset in the config, environment variables are used in a given order":                 testAccSdkProvider_billing_project_precedenceOrderEnvironmentVariables, // GOOGLE_BILLING_PROJECT
+		// Configuring the provider using inputs
+		"config takes precedence over environment variables":                                           testAccSdkProvider_billing_project_configPrecedenceOverEnvironmentVariables,
+		"when billing_project is unset in the config, environment variables are used in a given order": testAccSdkProvider_billing_project_precedenceOrderEnvironmentVariables, // GOOGLE_BILLING_PROJECT
+
+		// Schema-level validation
 		"when billing_project is set to an empty string in the config the value isn't ignored and results in an error": testAccSdkProvider_billing_project_emptyStringValidation,
+
+		// Usage
+
+		//TODO
 	}
 
 	for name, tc := range testCases {
