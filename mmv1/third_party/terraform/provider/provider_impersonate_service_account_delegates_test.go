@@ -130,19 +130,20 @@ func testAccSdkProvider_impersonate_service_account_delegates_testViaFailure_1(c
 
 	// This test config sets up the ability to use impersonate_service_account_delegates
 	//    The 'base service account' is the service account that credentials supplied via ENVs is linked to.
-	//    The 'delegate service account' is google_service_account.default_1
-	//        The base SA is given roles/iam.serviceAccountTokenCreator on the delegate SA via google_service_account_iam_member.token_1
-	//    The 'target service account' is google_service_account.default_2
-	//        The delegate SA is given roles/iam.serviceAccountTokenCreator on the target SA via google_service_account_iam_member.token_2
+	//    The 'delegate service account' is google_service_account.delegate
+	//        The base SA is given roles/iam.serviceAccountTokenCreator on the delegate SA via google_service_account_iam_member.base_create_delegate_token
+	//    The 'target service account' is google_service_account.target
+	//        The delegate SA is given roles/iam.serviceAccountTokenCreator on the target SA via google_service_account_iam_member.delegate_create_target_token
 
 	return acctest.Nprintf(`
-// This will succeed due to the Terraform identity having necessary permissions
+// This will succeed due to the Terraform identity/base service account having necessary permissions
 resource "google_pubsub_topic" "ok" {
   name = "tf-test-%{random_suffix}-ok"
 }
 
-//  Create a first service account and ensure the Terraform identity can make tokens for it
-resource "google_service_account" "default_1" {
+//  Create a delegate service account and ensure the Terraform identity/base service account
+//  can make tokens for it
+resource "google_service_account" "delegate" {
   account_id   = "tf-test-%{random_suffix}-1"
   display_name = "Acceptance test impersonated service account"
 }
@@ -150,22 +151,22 @@ resource "google_service_account" "default_1" {
 data "google_client_openid_userinfo" "me" {
 }
 
-resource "google_service_account_iam_member" "token_1" {
-  service_account_id = google_service_account.default_1.name
+resource "google_service_account_iam_member" "base_create_delegate_token" {
+  service_account_id = google_service_account.delegate.name
   role               = "roles/iam.serviceAccountTokenCreator"
   member             = "serviceAccount:${data.google_client_openid_userinfo.me.email}"
 }
 
 //  Create a second service account and ensure the first service account can make tokens for it
-resource "google_service_account" "default_2" {
+resource "google_service_account" "target" {
   account_id   = "tf-test-%{random_suffix}-2"
   display_name = "Acceptance test impersonated service account"
 }
 
-resource "google_service_account_iam_member" "token_2" {
-  service_account_id = google_service_account.default_2.name
+resource "google_service_account_iam_member" "delegate_create_target_token" {
+  service_account_id = google_service_account.target.name
   role               = "roles/iam.serviceAccountTokenCreator"
-  member             = "serviceAccount:${google_service_account.default_1.email}"
+  member             = "serviceAccount:${google_service_account.delegate.email}"
 }
 `, context)
 }
@@ -181,9 +182,9 @@ func testAccSdkProvider_impersonate_service_account_delegates_testViaFailure_2(c
 	return testAccSdkProvider_impersonate_service_account_delegates_testViaFailure_1(context) + acctest.Nprintf(`
 provider "google" {
   alias = "impersonation"
-  impersonate_service_account = google_service_account.default_2.email
+  impersonate_service_account = google_service_account.target.email
   impersonate_service_account_delegates = [
-    google_service_account.default_1.email,
+    google_service_account.delegate.email,
   ]
 }
 
