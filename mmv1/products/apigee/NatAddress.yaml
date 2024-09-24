@@ -34,15 +34,13 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
-immutable: true
+immutable: false
 description: |
   Apigee NAT (network address translation) address. A NAT address is a static external IP address used for Internet egress traffic. This is not avaible for Apigee hybrid.
-  Apigee NAT addresses are not automatically activated because they might require explicit allow entries on the target systems first. See https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.natAddresses/activate
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Provisioning NAT IPs': 'https://cloud.google.com/apigee/docs/api-platform/security/nat-provisioning'
   api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.natAddresses'
-
 autogen_async: true
 import_format:
   ['{{instance_id}}/natAddresses/{{name}}', '{{instance_id}}/{{name}}']
@@ -66,10 +64,23 @@ examples:
       true
       # Resource creation race
     skip_vcr: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'apigee_nat_address_with_activate'
+    vars:
+      nat_address_name: 'my-nat-address'
+      nat_address_activate: 'true'
+    skip_test:
+      true
 timeouts: !ruby/object:Api::Timeouts
   insert_minutes: 30
+  update_minutes: 30
   delete_minutes: 30
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/apigee_nat_address.go.erb
+  encoder: templates/terraform/encoders/apigee_nat_address.go.erb
+  decoder: templates/terraform/decoders/apigee_nat_address.go.erb
+  custom_update: templates/terraform/custom_update/apigee_nat_address.go.erb
+  post_create: templates/terraform/post_create/apigee_nat_address.go.erb
   custom_import: templates/terraform/custom_import/apigee_nat_address.go.erb
 parameters:
   - !ruby/object:Api::Type::String
@@ -78,6 +89,7 @@ parameters:
       The Apigee instance associated with the Apigee environment,
       in the format `organizations/{{org_name}}/instances/{{instance_name}}`.
     required: true
+    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
@@ -85,6 +97,13 @@ properties:
     description: |
       Resource ID of the NAT address.
     required: true
+    immutable: true
+  - !ruby/object:Api::Type::Boolean
+    name: 'activate'
+    description: |
+      Flag that specifies whether the reserved NAT address should be activate.
+    required: false
+    default_value: false
   - !ruby/object:Api::Type::String
     name: 'ipAddress'
     description: |

@@ -37,8 +37,14 @@ type Resource struct {
 	// documentation.
 	Description string
 
-	// [Required] (Api::Resource::ReferenceLinks) Reference links provided in
-	// downstream documentation.
+	// [Required] Reference links provided in
+	// downstream documentation. Expected to follow the format as follows:
+	//
+	//	references:
+	//  	guides:
+    //			'Guide name': 'official_documentation_url'
+  	//		api: 'rest_api_reference_url/version'
+	//
 	References resource.ReferenceLinks
 
 	// [Required] The GCP "relative URI" of a resource, relative to the product
@@ -179,6 +185,13 @@ type Resource struct {
 	// Leading a token with `%`
 	// i.e. {{%parent}}/resource/{{resource}}
 	// will allow that token to hold multiple /'s.
+	//
+	// Expected to be formatted as follows:
+	//
+	//	import_format:
+	//		- example_import_one
+    //		- example_import_two
+	//
 	ImportFormat []string `yaml:"import_format"`
 
 	CustomCode resource.CustomCode `yaml:"custom_code"`
@@ -197,22 +210,6 @@ type Resource struct {
 	// Examples in documentation. Backed by generated tests, and have
 	// corresponding OiCS walkthroughs.
 	Examples []resource.Examples
-
-	// Virtual fields are Terraform-only fields that control Terraform's
-	// behaviour. They don't map to underlying API fields (although they
-	// may map to parameters), and will require custom code to be added to
-	// control them.
-	//
-	// Virtual fields are similar to url_param_only fields in that they create
-	// a schema entry which is not read from or submitted to the API. However
-	// virtual fields are meant to provide toggles for Terraform-specific behavior in a resource
-	// (eg: delete_contents_on_destroy) whereas url_param_only fields _should_
-	// be used for url construction.
-	//
-	// Both are resource level fields and do not make sense, and are also not
-	// supported, for nested fields. Nested fields that shouldn't be included
-	// in API payloads are better handled with custom expand/encoder logic.
-	VirtualFields []*Type `yaml:"virtual_fields"`
 
 	// If true, generates product operation handling logic.
 	AutogenAsync bool `yaml:"autogen_async"`
@@ -299,9 +296,28 @@ type Resource struct {
 
 	Async *Async
 
-	Properties []*Type
+	// The three groups of []*Type fields are expected to be strictly ordered within a yaml file
+	// in the sequence of Virtual Fields -> Parameters -> Properties
+
+	// Virtual fields are Terraform-only fields that control Terraform's
+	// behaviour. They don't map to underlying API fields (although they
+	// may map to parameters), and will require custom code to be added to
+	// control them.
+	//
+	// Virtual fields are similar to url_param_only fields in that they create
+	// a schema entry which is not read from or submitted to the API. However
+	// virtual fields are meant to provide toggles for Terraform-specific behavior in a resource
+	// (eg: delete_contents_on_destroy) whereas url_param_only fields _should_
+	// be used for url construction.
+	//
+	// Both are resource level fields and do not make sense, and are also not
+	// supported, for nested fields. Nested fields that shouldn't be included
+	// in API payloads are better handled with custom expand/encoder logic.
+	VirtualFields []*Type `yaml:"virtual_fields"`
 
 	Parameters []*Type
+
+	Properties []*Type
 
 	ProductMetadata *Product
 
@@ -315,17 +331,29 @@ type Resource struct {
 }
 
 func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {
-	r.CreateVerb = "POST"
-	r.ReadVerb = "GET"
-	r.DeleteVerb = "DELETE"
-	r.UpdateVerb = "PUT"
-
 	type resourceAlias Resource
 	aliasObj := (*resourceAlias)(r)
 
 	err := unmarshal(aliasObj)
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (r *Resource) SetDefault(product *Product) {
+	if r.CreateVerb == "" {
+		r.CreateVerb = "POST"
+	}
+	if r.ReadVerb == "" {
+		r.ReadVerb = "GET"
+	}
+	if r.DeleteVerb == "" {
+		r.DeleteVerb = "DELETE"
+	}
+	if r.UpdateVerb == "" {
+		r.UpdateVerb = "PUT"
 	}
 
 	if r.ApiName == "" {
@@ -344,10 +372,6 @@ func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {
 		}
 	}
 
-	return nil
-}
-
-func (r *Resource) SetDefault(product *Product) {
 	r.ProductMetadata = product
 	for _, property := range r.AllProperties() {
 		property.SetDefault(r)
@@ -358,6 +382,10 @@ func (r *Resource) SetDefault(product *Product) {
 	if r.IamPolicy != nil && r.IamPolicy.MinVersion == "" {
 		r.IamPolicy.MinVersion = r.MinVersion
 	}
+	if r.Timeouts == nil {
+		r.Timeouts = NewTimeouts()
+	}
+
 }
 
 func (r *Resource) Validate() {
@@ -1192,8 +1220,7 @@ func (r Resource) ExtractIdentifiers(url string) []string {
 	return result
 }
 
-// For example, "projects/{{project}}/schemas/{{name}}", "{{project}}/{{name}}", "{{name}}"
-func (r Resource) RawImportIdFormatsFromIam() []string {
+func (r Resource) IamImportFormats() []string {
 	var importFormat []string
 
 	if r.IamPolicy != nil {
@@ -1202,8 +1229,12 @@ func (r Resource) RawImportIdFormatsFromIam() []string {
 	if len(importFormat) == 0 {
 		importFormat = r.ImportFormat
 	}
+	return importFormat
+}
 
-	return ImportIdFormats(importFormat, r.Identity, r.BaseUrl)
+// For example, "projects/{{project}}/schemas/{{name}}", "{{project}}/{{name}}", "{{name}}"
+func (r Resource) RawImportIdFormatsFromIam() []string {
+	return ImportIdFormats(r.IamImportFormats(), r.Identity, r.BaseUrl)
 }
 
 // For example, projects/(?P<project>[^/]+)/schemas/(?P<schema>[^/]+)", "(?P<project>[^/]+)/(?P<schema>[^/]+)", "(?P<schema>[^/]+)
@@ -1667,4 +1698,35 @@ func (r Resource) CaiApiVersion(productBackendName, caiProductBaseUrl string) st
 		}
 	}
 	return ""
+}
+
+// For example: the uri "projects/{{project}}/schemas/{{name}}"
+// The paramerter is "schema" as "project" is not returned.
+func (r Resource) CaiIamResourceParams() []string {
+	resourceUri := strings.ReplaceAll(r.IamResourceUri(), "{{name}}", fmt.Sprintf("{{%s}}", r.IamParentResourceName()))
+
+	return google.Reject(r.ExtractIdentifiers(resourceUri), func(param string) bool {
+		return param == "project"
+	})
+}
+
+// Gets the Cai IAM asset name template
+// For example: //monitoring.googleapis.com/v3/projects/{{project}}/services/{{service_id}}
+func (r Resource) CaiIamAssetNameTemplate(productBackendName string) string {
+	iamImportFormat := r.IamImportFormats()
+	if len(iamImportFormat) > 0 {
+		name := strings.ReplaceAll(iamImportFormat[0], "{{name}}", fmt.Sprintf("{{%s}}", r.IamParentResourceName()))
+		name = strings.ReplaceAll(name, "%", "")
+		return fmt.Sprintf("//%s.googleapis.com/%s", productBackendName, name)
+	}
+
+	caiBaseUrl := r.CaiBaseUrl
+
+	if caiBaseUrl == "" {
+		caiBaseUrl = r.SelfLink
+	}
+	if caiBaseUrl == "" {
+		caiBaseUrl = r.BaseUrl
+	}
+	return fmt.Sprintf("//%s.googleapis.com/%s/{{%s}}", productBackendName, caiBaseUrl, r.IamParentResourceName())
 }

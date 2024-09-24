@@ -63,7 +63,7 @@ func NewTerraform(product *api.Product, versionName string, startTime time.Time)
 	t.Product.SetPropertiesBasedOnVersion(&t.Version)
 	for _, r := range t.Product.Objects {
 		r.SetCompiler(ProviderName(t))
-		r.ImportPath = ImportPathFromVersion(t, versionName)
+		r.ImportPath = ImportPathFromVersion(versionName)
 	}
 
 	return t
@@ -238,8 +238,10 @@ func (t *Terraform) GenerateIamDocumentation(object api.Resource, templateData T
 func (t *Terraform) FolderName() string {
 	if t.TargetVersionName == "ga" {
 		return "google"
+	} else if t.TargetVersionName == "beta" {
+		return "google-beta"
 	}
-	return "google-beta"
+	return "google-private"
 }
 
 func (t *Terraform) FullResourceName(object api.Resource) string {
@@ -557,8 +559,8 @@ func (t Terraform) replaceImportPath(outputFolder, target string) {
 
 	data := string(sourceByte)
 
-	gaImportPath := ImportPathFromVersion(t, "ga")
-	betaImportPath := ImportPathFromVersion(t, "beta")
+	gaImportPath := ImportPathFromVersion("ga")
+	betaImportPath := ImportPathFromVersion("beta")
 
 	if strings.Contains(data, betaImportPath) {
 		log.Fatalf("Importing a package from module %s is not allowed in file %s. Please import a package from module %s.", betaImportPath, filepath.Base(target), gaImportPath)
@@ -670,7 +672,7 @@ func (t *Terraform) generateResourcesForVersion(products []*api.Product) {
 			if iamPolicy != nil && !iamPolicy.Exclude {
 				t.IAMResourceCount += 3
 
-				if !(iamPolicy.MinVersion != "" && iamPolicy.MinVersion < t.TargetVersionName) {
+				if slices.Index(product.ORDER, iamPolicy.MinVersion) <= slices.Index(product.ORDER, t.TargetVersionName) {
 					iamClassName = fmt.Sprintf("%s.%s", service, object.ResourceName())
 				}
 			}

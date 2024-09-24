@@ -81,6 +81,8 @@ examples:
       deletion_protection: 'true'
     test_vars_overrides:
       'deletion_protection': 'false'
+    oics_vars_overrides:
+      'deletion_protection': 'false'
     ignore_read_extra:
       - 'deletion_protection'
   - name: 'cloudrunv2_service_vpcaccess'
@@ -96,6 +98,14 @@ examples:
   - name: 'cloudrunv2_service_directvpc'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
+    vars:
+      cloud_run_service_name: 'cloudrun-service'
+    ignore_read_extra:
+      - 'deletion_protection'
+  - name: 'cloudrunv2_service_gpu'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
+    min_version: 'beta'
     vars:
       cloud_run_service_name: 'cloudrun-service'
     ignore_read_extra:
@@ -495,7 +505,7 @@ properties:
                 - name: 'limits'
                   type: KeyValuePairs
                   description: |-
-                    Only memory and CPU are supported. Use key `cpu` for CPU limit and `memory` for memory limit. Note: The only supported values for CPU are '1', '2', '4', and '8'. Setting 4 CPU requires at least 2Gi of memory. The values of the map is string form of the 'quantity' k8s type: https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
+                    Only memory, CPU, and nvidia.com/gpu are supported. Use key `cpu` for CPU limit, `memory` for memory limit, `nvidia.com/gpu` for gpu limit. Note: The only supported values for CPU are '1', '2', '4', and '8'. Setting 4 CPU requires at least 2Gi of memory. The values of the map is string form of the 'quantity' k8s type: https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
                   default_from_api: true
                 - name: 'cpuIdle'
                   type: Boolean
@@ -904,6 +914,16 @@ properties:
             type: String
             description: |-
               The Mesh resource name. For more information see https://cloud.google.com/service-mesh/docs/reference/network-services/rest/v1/projects.locations.meshes#resource:-mesh.
+      - name: 'nodeSelector'
+        type: NestedObject
+        description: Node Selector describes the hardware requirements of the resources.
+        min_version: 'beta'
+        properties:
+          - name: 'accelerator'
+            type: String
+            description:
+              The GPU to attach to an instance. See https://cloud.google.com/run/docs/configuring/services/gpu for configuring GPU.
+            required: true
   - name: 'traffic'
     type: Array
     description: |-

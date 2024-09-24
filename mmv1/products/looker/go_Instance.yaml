@@ -62,6 +62,12 @@ examples:
       instance_name: 'my-instance'
       client_id: 'my-client-id'
       client_secret: 'my-client-secret'
+  - name: 'looker_instance_fips'
+    primary_resource_id: 'looker-instance'
+    vars:
+      instance_name: 'my-instance-fips'
+      client_id: 'my-client-id'
+      client_secret: 'my-client-secret'
   - name: 'looker_instance_enterprise_full'
     primary_resource_id: 'looker-instance'
     vars:
@@ -95,6 +101,12 @@ examples:
       client_id: 'my-client-id'
       client_secret: 'my-client-secret'
       custom_domain: 'my-custom-domain'
+  - name: 'looker_instance_psc'
+    primary_resource_id: 'looker-instance'
+    vars:
+      instance_name: 'my-instance'
+      client_id: 'my-client-id'
+      client_secret: 'my-client-secret'
 parameters:
   - name: 'region'
     type: String
@@ -260,6 +272,10 @@ properties:
           Full name and version of the CMEK key currently in use to encrypt Looker data.
         output: true
   # Encryption Config  Object - End
+  - name: 'fipsEnabled'
+    type: Boolean
+    description: |
+      FIPS 140-2 Encryption enablement for Looker (Google Cloud Core).
   - name: 'ingressPrivateIp'
     type: String
     description: |
@@ -391,6 +407,57 @@ properties:
     description: |
       Whether private IP is enabled on the Looker instance.
     default_value: false
+  # PscConfig Object
+  - name: 'pscConfig'
+    type: NestedObject
+    description: |
+      Information for Private Service Connect (PSC) setup for a Looker instance.
+    update_mask_fields:
+      - 'psc_config.allowed_vpcs'
+      - 'psc_config.service_attachments'
+    properties:
+      - name: 'allowedVpcs'
+        type: Array
+        description: |
+          List of VPCs that are allowed ingress into the Looker instance.
+        item_type:
+          type: String
+      - name: 'lookerServiceAttachmentUri'
+        type: String
+        description: |
+          URI of the Looker service attachment.
+        output: true
+      - name: 'serviceAttachments'
+        type: Array
+        description: |
+          List of egress service attachment configurations.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'connectionStatus'
+              type: Enum
+              description: |
+                Status of the service attachment connection.
+              output: true
+              enum_values:
+                - 'ACCEPTED'
+                - 'PENDING'
+                - 'REJECTED'
+                - 'NEEDS_ATTENTION'
+                - 'CLOSED'
+            - name: 'localFqdn'
+              type: String
+              description: |
+                Fully qualified domain name that will be used in the private DNS record created for the service attachment.
+            - name: 'targetServiceAttachmentUri'
+              type: String
+              description: |
+                URI of the service attachment to connect to.
+  # PscConfig Object - End
+  - name: 'pscEnabled'
+    type: Boolean
+    description: |
+      Whether Public Service Connect (PSC) is enabled on the Looker instance
   - name: 'publicIpEnabled'
     type: Boolean
     description: |
