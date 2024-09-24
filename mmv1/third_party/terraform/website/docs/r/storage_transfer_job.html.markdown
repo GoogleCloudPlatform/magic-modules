@@ -61,6 +61,17 @@ resource "google_storage_transfer_job" "s3-bucket-nightly-backup" {
     }
     transfer_options {
       delete_objects_unique_in_sink = false
+      metadata_options {
+        symlink = "SYMLINK_PRESERVE"
+        mode = "MODE_PRESERVE"
+        gid = "GID_NUMBER"
+        uid = "UID_NUMBER"
+        acl = "ACL_PRESERVE"
+        storage_class = "STORAGE_CLASS_UNSPECIFIED"
+        time_created = "TIME_CREATED_UNSPECIFIED"
+        kms_key = "KMS_KEY_UNSPECIFIED"
+        temporary_hold = "TEMPORARY_HOLD_SKIP"
+      }
     }
     aws_s3_data_source {
       bucket_name = var.aws_s3_bucket
@@ -198,6 +209,21 @@ A duration in seconds with up to nine fractional digits, terminated by 's'. Exam
 * `delete_objects_from_source_after_transfer` - (Optional) Whether objects should be deleted from the source after they are transferred to the sink. Note that this option and `delete_objects_unique_in_sink` are mutually exclusive.
 
 * `overwrite_when` - (Optional) When to overwrite objects that already exist in the sink. If not set, overwrite behavior is determined by `overwrite_objects_already_existing_in_sink`. Possible values: ALWAYS, DIFFERENT, NEVER.
+
+* `metadata_options` - (Optional) Metadata options represents the selected metadata options for a transfer job. Structure [documented below](#nested_metadata_options).
+
+<a name="nested_metadata_options"></a>The `metadata_options` block supports:
+
+* `symlink` - (Optional) Specifies how symlinks should be handled by the transfer. By default, symlinks are not preserved. Only applicable to transfers involving POSIX file systems, and ignored for other transfers.
+* `mode` - (Optional) Specifies how each file's mode attribute should be handled by the transfer. By default, mode is not preserved. Only applicable to transfers involving POSIX file systems, and ignored for other transfers.
+* `gid` - (Optional) Specifies how each file's POSIX group ID (GID) attribute should be handled by the transfer. By default, GID is not preserved. Only applicable to transfers involving POSIX file systems, and ignored for other transfers.
+* `uid` - (Optional) Specifies how each file's POSIX user ID (UID) attribute should be handled by the transfer. By default, UID is not preserved. Only applicable to transfers involving POSIX file systems, and ignored for other transfers.
+* `acl` - (Optional) Specifies how each object's ACLs should be preserved for transfers between Google Cloud Storage buckets. If unspecified, the default behavior is the same as ACL_DESTINATION_BUCKET_DEFAULT.
+* `storage_class` - (Optional) Specifies the storage class to set on objects being transferred to Google Cloud Storage buckets. If unspecified, the default behavior is the same as STORAGE_CLASS_DESTINATION_BUCKET_DEFAULT.
+* `temporary_hold` - (Optional) Specifies how each object's temporary hold status should be preserved for transfers between Google Cloud Storage buckets. If unspecified, the default behavior is the same as TEMPORARY_HOLD_PRESERVE.
+* `kms_key` - (Optional) Specifies how each object's Cloud KMS customer-managed encryption key (CMEK) is preserved for transfers between Google Cloud Storage buckets. If unspecified, the default behavior is the same as KMS_KEY_DESTINATION_BUCKET_DEFAULT.
+* `time_created` - (Optional) Specifies how each object's timeCreated metadata is preserved for transfers. If unspecified, the default behavior is the same as TIME_CREATED_SKIP. This option is supported for transfers to Cloud Storage from Cloud Storage, Amazon S3, Microsoft Azure, and S3-compatible storage.
+
 
 <a name="nested_gcs_data_sink"></a>The `gcs_data_sink` block supports:
 
