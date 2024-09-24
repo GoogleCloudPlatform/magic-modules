@@ -186,7 +186,6 @@ func DetectMissingDocs(schemaDiff diff.SchemaDiff, repoPath string) (map[string]
 			if !isNewField(fieldDiff) {
 				continue
 			}
-			// presume all fields can be arguments
 			if isAttribute(fieldDiff) {
 				if !attributesInDoc[field] {
 					missingDocFields[resource] = append(missingDocFields[resource], MissingDocField{Field: field, Section: "Attributes Reference"})
