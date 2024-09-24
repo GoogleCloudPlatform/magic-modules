@@ -1852,7 +1852,6 @@ func TestAccContainerCluster_withAdvancedMachineFeaturesInNodePool(t *testing.T)
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccContainerCluster_withNodePoolDefaults(t *testing.T) {
 	t.Parallel()
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
@@ -1907,10 +1906,9 @@ func TestAccContainerCluster_withNodePoolDefaults(t *testing.T) {
 					ImportStateVerify:       true,
 					ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
-},
+		},
 	})
 }
-<% end -%>
 
 func TestAccContainerCluster_withNodeConfigScopeAlias(t *testing.T) {
 	t.Parallel()
@@ -6943,7 +6941,6 @@ resource "google_container_cluster" "with_advanced_machine_features_in_node_pool
 `, clusterName, nodePoolName, nvEnabled, networkName, subnetworkName)
 }
 
-<% unless version == 'ga' -%>
 func testAccContainerCluster_withNodePoolDefaults(clusterName, enabled, networkName, subnetworkName string) string {
         return fmt.Sprintf(`
 resource "google_container_cluster" "with_node_pool_defaults" {
@@ -6960,11 +6957,10 @@ resource "google_container_cluster" "with_node_pool_defaults" {
   }
   deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
 }
 `, clusterName, enabled, networkName, subnetworkName)
 }
-<% end -%>
 
 func testAccContainerCluster_withNodeConfigUpdate(clusterName, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
