@@ -36,6 +36,7 @@ timeouts:
   delete_minutes: 20
 autogen_async: true
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
@@ -57,8 +58,9 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
-    skip_test: true
-    skip_import_test: true
+      # skip the test until Active Directory setup issue got resolved
+    exclude_test: true
+    exclude_import_test: true
 parameters:
   - name: 'peeringId'
     type: String
@@ -78,7 +80,6 @@ properties:
     type: KeyValueLabels
     description: 'Resource labels that can contain user-provided metadata'
     min_version: 'beta'
-    immutable: false
   - name: 'authorizedNetwork'
     type: String
     description: |

@@ -47,7 +47,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 1000
@@ -80,6 +80,10 @@ examples:
       project: 'PROJECT_NAME'
 parameters:
 properties:
+  # TODO(nelsonjr): [nice to have] Make the format here simpler to use, in
+  # the form of # 22/tcp, [12345-23456]/tcp. It requires a conversion
+  # function to the # final JSON format expected by the API for this
+  # proposal to work.
   - name: 'allow'
     type: Array
     description: |
@@ -95,6 +99,8 @@ properties:
     item_type:
       type: NestedObject
       properties:
+        # IPProtocol has to be string, instead of Enum because user can
+        # specify the protocol by number as well.
         - name: 'protocol'
           type: String
           description: |
@@ -113,7 +119,7 @@ properties:
             either an integer or a range. If not specified, this rule
             applies to connections through any port.
 
-            Example inputs include: ["22"], ["80","443"], and
+            Example inputs include: [22], [80, 443], and
             ["12345-12349"].
           item_type:
             type: String
@@ -135,6 +141,8 @@ properties:
     item_type:
       type: NestedObject
       properties:
+        # IPProtocol has to be string, instead of Enum because user can
+        # specify the protocol by number as well.
         - name: 'protocol'
           type: String
           description: |
@@ -153,7 +161,7 @@ properties:
             either an integer or a range. If not specified, this rule
             applies to connections through any port.
 
-            Example inputs include: ["22"], ["80","443"], and
+            Example inputs include: [22], [80, 443], and
             ["12345-12349"].
           item_type:
             type: String

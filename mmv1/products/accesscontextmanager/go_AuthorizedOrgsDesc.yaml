@@ -44,6 +44,7 @@ timeouts:
   delete_minutes: 20
 autogen_async: true
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
@@ -60,11 +61,12 @@ custom_code:
   post_create: 'templates/terraform/post_create/go/sleep_2_min.go.tmpl'
   pre_update: 'templates/terraform/update_mask.go.tmpl'
   custom_import: 'templates/terraform/custom_import/go/set_access_policy_parent_from_self_link.go.tmpl'
-skip_sweeper: true
+# Skipping the sweeper due to the non-standard base_url
+exclude_sweeper: true
 examples:
   - name: 'access_context_manager_authorized_orgs_desc_basic'
     primary_resource_id: 'authorized-orgs-desc'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'parent'
     type: String

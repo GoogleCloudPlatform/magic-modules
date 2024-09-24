@@ -37,7 +37,7 @@ custom_code:
   pre_update: 'templates/terraform/pre_create/go/dialogflow_set_location.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/go/dialogflowcx_set_location_skip_default_obj.go.tmpl'
   custom_import: 'templates/terraform/custom_import/go/dialogflowcx_flow.go.tmpl'
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'dialogflowcx_flow_basic'
     primary_resource_id: 'basic_flow'
@@ -52,7 +52,7 @@ examples:
     primary_resource_id: 'default_start_flow'
     vars:
       agent_name: 'dialogflowcx-agent'
-    skip_docs: true
+    exclude_docs: true
 virtual_fields:
   - name: 'is_default_start_flow'
     description: |
@@ -159,8 +159,8 @@ properties:
                         type: Boolean
                         description: |
                           Whether the playback of this message can be interrupted by the end user's speech and the client can then starts the next Dialogflow request.
-                  # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
                         output: true
+                  # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
                   - name: 'payload'
                     type: String
                     description: |
@@ -179,6 +179,7 @@ properties:
                       * In the entryFulfillment of a Page if entering the page indicates that the conversation succeeded.
                       * In a webhook response when you determine that you handled the customer issue.
                     properties:
+                      # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
                       - name: 'metadata'
                         type: String
                         description: |
@@ -215,6 +216,7 @@ properties:
                       * In the entryFulfillment of a Page if entering the page indicates something went extremely wrong in the conversation.
                       * In a webhook response when you determine that the customer issue can only be handled by a human.
                     properties:
+                      # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
                       - name: 'metadata'
                         type: String
                         description: |
@@ -288,6 +290,7 @@ properties:
               item_type:
                 type: NestedObject
                 properties:
+                  # This object has a recursive schema so we use a string instead of a NestedObject
                   - name: 'cases'
                     type: String
                     description: |
@@ -359,7 +362,6 @@ properties:
                         type: Boolean
                         description: |
                           Whether the playback of this message can be interrupted by the end user's speech and the client can then starts the next Dialogflow request.
-                  # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
                         output: true
                   - name: 'payload'
                     type: String

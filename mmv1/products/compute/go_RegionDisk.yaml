@@ -47,7 +47,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 1000
@@ -130,6 +130,7 @@ parameters:
           The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
           encryption key that protects this resource.
         output: true
+        # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
       - name: 'kmsKeyName'
         type: String
         description: |
@@ -215,7 +216,6 @@ properties:
     type: KeyValueLabels
     description: |
       Labels to apply to this disk.  A list of key->value pairs.
-    immutable: false
     update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}/setLabels'
     update_verb: 'POST'
   - name: 'name'
@@ -296,6 +296,8 @@ properties:
     description: |
       Specifies the disk interface to use for attaching this disk, which is either SCSI or NVME. The default is SCSI.
     min_version: 'beta'
+    # interface is removed using url_param_only to preserve schema definition
+    # and prevent sending or reading in API requests
     url_param_only: true
     diff_suppress_func: 'AlwaysDiffSuppress'
     default_value: "SCSI"

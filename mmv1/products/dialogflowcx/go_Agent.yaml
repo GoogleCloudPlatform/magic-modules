@@ -32,7 +32,7 @@ timeouts:
   update_minutes: 40
   delete_minutes: 20
 custom_code:
-skip_sweeper: true
+exclude_sweeper: true
 examples:
   - name: 'dialogflowcx_agent_full'
     primary_resource_id: 'full_agent'
@@ -170,6 +170,7 @@ properties:
         type: NestedObject
         description: |
           Settings of integration with GitHub.
+ # accessToken comes from config, no response
         custom_flatten: 'templates/terraform/custom_flatten/go/dialogflowcx_agent_git_integration_settings_github_settings.go.tmpl'
         properties:
           - name: 'displayName'
@@ -202,6 +203,7 @@ properties:
       Settings related to speech synthesizing.
     allow_empty_object: true
     properties:
+      # This is a map of language -> some settings. List of languages is large and constantly expanding so we use a string instead of a NestedObject with 100 properties.
       - name: 'synthesizeSpeechConfigs'
         type: String
         description: |

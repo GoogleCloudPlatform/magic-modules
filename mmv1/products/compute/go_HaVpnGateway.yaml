@@ -36,7 +36,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 1000
@@ -68,8 +68,9 @@ examples:
       ha_vpn_gateway2_name: 'ha-vpn-2'
       network2_name: 'network2'
       router2_name: 'ha-vpn-router2'
-    skip_test: true
-    skip_docs: true
+    exclude_test: true
+    exclude_docs: true
+      # Multiple fine-grained resources
     skip_vcr: true
   - name: 'compute_ha_vpn_gateway_encrypted_interconnect'
     primary_resource_id: 'vpn-gateway'
@@ -81,7 +82,8 @@ examples:
       address2_name: 'test-address2'
       router_name: 'test-router'
       network_name: 'test-network'
-    skip_test: true
+      # TODO: https://github.com/hashicorp/terraform-provider-google/issues/11504
+    exclude_test: true
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -132,6 +134,17 @@ properties:
     enum_values:
       - 'IPV4_ONLY'
       - 'IPV4_IPV6'
+      - 'IPV6_ONLY'
+  - name: 'gatewayIpVersion'
+    type: Enum
+    description: |
+      The IP family of the gateway IPs for the HA-VPN gateway interfaces. If not specified, IPV4 will be used.
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
+    default_value: "IPV4"
+    enum_values:
+      - 'IPV4'
+      - 'IPV6'
   - name: 'vpnInterfaces'
     type: Array
     description: |

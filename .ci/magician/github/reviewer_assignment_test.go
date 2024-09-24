@@ -24,6 +24,9 @@ import (
 )
 
 func TestChooseCoreReviewers(t *testing.T) {
+	if len(AvailableReviewers()) < 2 {
+		t.Fatalf("not enough available reviewers (%v) to test (need at least 2)", AvailableReviewers())
+	}
 	firstCoreReviewer := AvailableReviewers()[0]
 	secondCoreReviewer := AvailableReviewers()[1]
 	cases := map[string]struct {

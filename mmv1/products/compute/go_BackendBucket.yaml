@@ -38,7 +38,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 1000
@@ -72,7 +72,7 @@ examples:
     vars:
       backend_bucket_name: 'image-backend-bucket-full'
       bucket_name: 'image-store-bucket-full'
-    skip_docs: true
+    exclude_docs: true
   - name: 'backend_bucket_security_policy'
     primary_resource_id: 'image_backend'
     vars:
@@ -98,19 +98,19 @@ examples:
       http_lb_proxy: 'http-lb-proxy'
       http_lb: 'http-lb'
       cat_backend_bucket: 'cat-backend-bucket'
-    skip_docs: true
+    exclude_docs: true
   - name: 'backend_bucket_bypass_cache'
     primary_resource_id: 'image_backend'
     vars:
       backend_bucket_name: 'image-backend-bucket'
       bucket_name: 'image-store-bucket'
-    skip_docs: true
+    exclude_docs: true
   - name: 'backend_bucket_coalescing'
     primary_resource_id: 'image_backend'
     vars:
       backend_bucket_name: 'image-backend-bucket'
       bucket_name: 'image-store-bucket'
-    skip_docs: true
+    exclude_docs: true
 parameters:
 properties:
   - name: 'bucketName'

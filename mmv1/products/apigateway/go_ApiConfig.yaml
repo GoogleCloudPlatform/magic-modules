@@ -53,7 +53,7 @@ async:
 identity:
   - apiConfigId
 iam_policy:
-  skip_import_test: true
+  exclude_import_test: true
   method_name_separator: ':'
   allowed_iam_role: 'roles/apigateway.viewer'
   parent_resource_attribute: 'api_config'
@@ -70,6 +70,7 @@ custom_code:
 examples:
   - name: 'apigateway_api_config_basic'
     primary_resource_id: 'api_cfg'
+    # Need to pass 2 ids into a Sprintf - parent resource id also needed to identify primary resource
     primary_resource_name: 'fmt.Sprintf("tf-test-my-api%s", context["random_suffix"]), fmt.Sprintf("tf-test-my-config%s", context["random_suffix"])'
     min_version: 'beta'
     vars:
@@ -82,7 +83,7 @@ examples:
     vars:
       api_id: 'my-api'
       config_id: 'my-config'
-    skip_docs: true
+    exclude_docs: true
   - name: 'apigateway_api_config_grpc'
     primary_resource_id: 'api_cfg'
     primary_resource_name: 'fmt.Sprintf("tf-test-my-api%s", context["random_suffix"])'
@@ -98,7 +99,7 @@ examples:
     vars:
       api_id: 'my-api'
       config_id: 'my-config'
-    skip_docs: true
+    exclude_docs: true
 parameters:
   - name: 'api'
     type: String
@@ -139,7 +140,6 @@ properties:
     description: |
       Resource labels to represent user-provided metadata.
     min_version: 'beta'
-    immutable: false
   - name: 'gatewayConfig'
     type: NestedObject
     description: |

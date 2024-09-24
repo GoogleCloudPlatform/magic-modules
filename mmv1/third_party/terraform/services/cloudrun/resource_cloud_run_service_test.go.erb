@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccCloudRunService_cloudRunServiceUpdate(t *testing.T) {
@@ -630,6 +630,7 @@ provider "google" {
   default_labels = {
     default_key1 = "default_value1"
   }
+  add_terraform_attribution_label = false
 }
 
 resource "google_cloud_run_service" "default" {
@@ -669,6 +670,7 @@ provider "google" {
   default_labels = {
     default_key1 = "default_value1"
   }
+  add_terraform_attribution_label = false
 }
 
 resource "google_cloud_run_service" "default" {
@@ -710,6 +712,7 @@ provider "google" {
     default_key1 = "default_value1"
     env          = "foo"
   }
+  add_terraform_attribution_label = false
 }
 
 resource "google_cloud_run_service" "default" {
@@ -1310,9 +1313,119 @@ resource "google_cloud_run_service" "default" {
 `, context)
 }
 
-<% unless version == 'ga' -%>
 
 func TestAccCloudRunService_csiVolume(t *testing.T) {
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	project := envvar.GetTestProjectFromEnv()
+	name := "tftest-cloudrun-" + acctest.RandString(t, 6)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config:  testAccCloudRunService_cloudRunServiceWithNoVolume(name, project),
+			},
+			{
+				ResourceName:            "google_cloud_run_service.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "metadata.0.annotations", "metadata.0.labels", "metadata.0.terraform_labels", "status.0.conditions"},
+			},
+			{
+				Config: testAccCloudRunService_cloudRunServiceUpdateWithGcsVolume(name, project,),
+			},
+			{
+				ResourceName:            "google_cloud_run_service.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "metadata.0.annotations", "metadata.0.labels", "metadata.0.terraform_labels", "status.0.conditions"},
+                              },
+                        },
+      })
+    }
+
+
+func testAccCloudRunService_cloudRunServiceWithNoVolume(name, project string) string {
+	return fmt.Sprintf(`
+resource "google_cloud_run_service" "default" {
+  name     = "%s"
+  location = "us-central1"
+
+  metadata {
+    namespace = "%s"
+    annotations = {
+      generated-by = "magic-modules"
+    }
+  }
+
+  template {
+    spec {
+      containers {
+        image = "gcr.io/cloudrun/hello"
+      }
+    }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      metadata.0.annotations,
+    ]
+  }
+}
+`, name, project)
+}
+
+
+func testAccCloudRunService_cloudRunServiceUpdateWithGcsVolume(name, project string) string {
+	return fmt.Sprintf(`
+resource "google_cloud_run_service" "default" {
+  name     = "%s"
+  location = "us-central1"
+
+  metadata {
+    namespace = "%s"
+    annotations = {
+      generated-by = "magic-modules"
+    }
+  }
+
+  template {
+    metadata {
+      annotations = {
+        "run.googleapis.com/execution-environment" = "gen2"
+      }
+    }
+    spec {
+      containers {
+        image = "gcr.io/cloudrun/hello"
+        volume_mounts {
+          name = "vol1"
+          mount_path = "/mnt/vol1"
+        }
+      }
+      volumes {
+        name = "vol1"
+        csi {
+          driver = "gcsfuse.run.googleapis.com"
+          read_only = true
+          volume_attributes = {
+            bucketName = "gcp-public-data-landsat"
+          }
+        }
+      }
+    }
+  }
+
+}
+`, name, project)
+}
+
+  <% unless version == 'ga' -%>
+
+func TestAccCloudRunService_emptyDirVolume(t *testing.T) {
 	t.Parallel()
 
 	project := envvar.GetTestProjectFromEnv()
@@ -1331,15 +1444,6 @@ func TestAccCloudRunService_csiVolume(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "metadata.0.annotations", "metadata.0.labels", "metadata.0.terraform_labels", "status.0.conditions"},
 			},
-			{
-				Config: testAccCloudRunService_cloudRunServiceUpdateWithGcsVolume(name, project,),
-			},
-			{
-				ResourceName:            "google_cloud_run_service.default",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "metadata.0.annotations", "metadata.0.labels", "metadata.0.terraform_labels", "status.0.conditions"},
-                              },
                         },
       })
     }
@@ -1376,17 +1480,89 @@ resource "google_cloud_run_service" "default" {
     }
   }
 
-  lifecycle {
-    ignore_changes = [
-      metadata.0.annotations,
-    ]
+}
+`, name, project)
+}
+  <% end -%>
+
+<% unless version == 'ga' -%>
+func TestAccCloudRunService_resourcesRequirements(t *testing.T) {
+       t.Parallel()
+
+       project := envvar.GetTestProjectFromEnv()
+       name := "tftest-cloudrun-" + acctest.RandString(t, 6)
+
+       acctest.VcrTest(t, resource.TestCase{
+               PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+               ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+               Steps: []resource.TestStep{
+                       {
+                               Config: testAccCloudRunV2Service_cloudrunServiceWithoutGpu(name, project),
+                       },
+                       {
+                               ResourceName:            "google_cloud_run_service.default",
+                               ImportState:             true,
+                               ImportStateVerify:       true,
+                               ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "metadata.0.annotations", "metadata.0.labels", "metadata.0.terraform_labels", "status.0.conditions"},
+                       },
+                       {
+                               Config: testAccCloudRunV2Service_cloudrunServiceWithGpu(name, project),
+                       },
+                       {
+                               ResourceName:            "google_cloud_run_service.default",
+                               ImportState:             true,
+                               ImportStateVerify:       true,
+                               ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "metadata.0.annotations", "metadata.0.labels", "metadata.0.terraform_labels", "status.0.conditions"},
+                       },
+                       {
+                               Config: testAccCloudRunV2Service_cloudrunServiceWithoutGpu(name, project),
+                       },
+                       {
+                               ResourceName:            "google_cloud_run_service.default",
+                               ImportState:             true,
+                               ImportStateVerify:       true,
+                               ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "metadata.0.annotations", "metadata.0.labels", "metadata.0.terraform_labels", "status.0.conditions"},
+                       },
+    },
+  })
+}
+
+func testAccCloudRunV2Service_cloudrunServiceWithoutGpu(name, project string) string {
+       return fmt.Sprintf(`
+resource "google_cloud_run_service" "default" {
+  provider = google-beta
+  name     = "%s"
+  location = "us-central1"
+
+  metadata {
+    namespace = "%s"
+  }
+
+  template {
+    metadata {
+      annotations = {
+        "autoscaling.knative.dev/maxScale": "1"
+        "run.googleapis.com/cpu-throttling": "false"
+      }
+    }
+    spec {
+      containers {
+        image = "gcr.io/cloudrun/hello"
+        resources {
+          limits = {
+            "cpu" = "4"
+            "memory" = "16Gi"
+          }
+        }
+      }
+    }
   }
 }
 `, name, project)
 }
 
-func testAccCloudRunService_cloudRunServiceUpdateWithGcsVolume(name, project string) string {
-	return fmt.Sprintf(`
+func testAccCloudRunV2Service_cloudrunServiceWithGpu(name, project string) string {
+       return fmt.Sprintf(`
 resource "google_cloud_run_service" "default" {
   provider = google-beta
   name     = "%s"
@@ -1395,7 +1571,6 @@ resource "google_cloud_run_service" "default" {
   metadata {
     namespace = "%s"
     annotations = {
-      generated-by = "magic-modules"
       "run.googleapis.com/launch-stage" = "BETA"
     }
   }
@@ -1403,37 +1578,27 @@ resource "google_cloud_run_service" "default" {
   template {
     metadata {
       annotations = {
-        "run.googleapis.com/execution-environment" = "gen2"
+        "autoscaling.knative.dev/maxScale": "1"
+        "run.googleapis.com/cpu-throttling": "false"
       }
     }
     spec {
       containers {
         image = "gcr.io/cloudrun/hello"
-        volume_mounts {
-          name = "vol1"
-          mount_path = "/mnt/vol1"
-        }
-      }
-      volumes {
-        name = "vol1"
-        csi {
-          driver = "gcsfuse.run.googleapis.com"
-          read_only = true
-          volume_attributes = {
-            bucketName = "gcp-public-data-landsat"
+        resources {
+          limits = {
+            "cpu" = "4"
+            "memory" = "16Gi"
+            "nvidia.com/gpu" = "1"
           }
         }
       }
+      node_selector = {
+        "run.googleapis.com/accelerator" = "nvidia-l4"
+      }
     }
-  }
-
-  lifecycle {
-    ignore_changes = [
-      metadata.0.annotations,
-    ]
   }
 }
 `, name, project)
 }
-
 <% end -%>

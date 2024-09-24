@@ -1,0 +1,17 @@
+// The generated code sets the wrong masks for the following fields.
+newUpdateMask := []string{}
+if d.HasChange("spec.0.cron_spec.0.text") {
+    newUpdateMask = append(newUpdateMask, "spec.cron_spec.text")
+}
+// Pull out any other set fields from the generated mask.
+for _, mask := range updateMask {
+    if mask == "spec" {
+        continue
+    }
+    newUpdateMask = append(newUpdateMask, mask)
+}
+// Overwrite the previously set mask.
+url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(newUpdateMask, ",")})
+if err != nil {
+    return err
+}

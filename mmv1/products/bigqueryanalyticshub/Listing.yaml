@@ -52,7 +52,7 @@ examples:
     vars:
       data_exchange_id: 'my_data_exchange'
       listing_id: 'my_listing'
-      description: 'example data exchange'
+      desc: 'example data exchange'
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_analyticshub_listing_restricted'
     primary_resource_id: 'listing'
@@ -65,7 +65,20 @@ examples:
     vars:
       data_exchange_id: 'my_data_exchange'
       listing_id: 'my_listing'
-      description: 'example data exchange'
+      desc: 'example data exchange'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'bigquery_analyticshub_listing_dcr'
+    primary_resource_id: 'listing'
+    primary_resource_name: "fmt.Sprintf(\"tf_test_my_data_exchange%s\",
+      context[\"\
+      random_suffix\"]), fmt.Sprintf(\"tf_test_my_listing%s\",
+      context[\"random_suffix\"\
+      ])"
+    region_override: 'US'
+    vars:
+      data_exchange_id: 'dcr_data_exchange'
+      listing_id: 'dcr_listing'
+      desc: 'example dcr data exchange'
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -151,14 +164,28 @@ properties:
     name: bigqueryDataset
     description: Shared dataset i.e. BigQuery dataset source.
     required: true
+    immutable: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'dataset'
+        immutable: true
         description:
           Resource name of the dataset source for this listing. e.g.
           projects/myproject/datasets/123
         required: true
         diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+      - !ruby/object:Api::Type::Array
+        name: selectedResources
+        description: Resource in this dataset that is selectively shared. This field is required for data clean room exchanges.
+        immutable: true
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'table'
+              immutable: true
+              diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+              description: |
+                Format: For table: projects/{projectId}/datasets/{datasetId}/tables/{tableId} Example:"projects/test_project/datasets/test_dataset/tables/test_table"
   - !ruby/object:Api::Type::NestedObject
     name: restrictedExportConfig
     description: If set, restricted export configuration will be propagated and enforced on the linked dataset.
@@ -167,6 +194,11 @@ properties:
         name: 'enabled'
         description:
           If true, enable restricted export.
+      - !ruby/object:Api::Type::Boolean
+        name: 'restrictDirectTableAccess'
+        output: true
+        description:
+          If true, restrict direct table access(read api/tabledata.list) on linked table.
       - !ruby/object:Api::Type::Boolean
         name: 'restrictQueryResult'
         description:

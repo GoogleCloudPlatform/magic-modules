@@ -54,6 +54,17 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
+    name: 'cloud_run_service_gpu'
+    min_version: 'beta'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
+      context[\"random_suffix\"\
+      ])"
+    vars:
+      cloud_run_service_name: 'cloudrun-srv'
+    test_env_vars:
+      project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
     name: 'cloud_run_service_sql'
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
@@ -284,8 +295,8 @@ properties:
                 name: 'annotations'
                 description: |-
                   Annotations is a key value map stored with a resource that
-                  may be set by external tools to store and retrieve arbitrary metadata. More
-                  info: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations
+                  may be set by external tools to store and retrieve arbitrary metadata.
+                  More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations
 
                   **Note**: The Cloud Run API may add additional annotations that were not provided in your config.
                   If terraform plan shows a diff where a server-side annotation is added, you can add it to your config
@@ -743,16 +754,19 @@ properties:
                                 The name of the service to place in the gRPC HealthCheckRequest
                                 (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
                                 If this is not specified, the default behavior is defined by gRPC.
-
+              - !ruby/object:Api::Type::KeyValuePairs
+                name: nodeSelector
+                min_version: beta
+                description: |-
+                  Node Selector describes the hardware requirements of the resources.
+                  Use the following node selector keys to configure features on a Revision:
+                    - `run.googleapis.com/accelerator` sets the [type of GPU](https://cloud.google.com/run/docs/configuring/services/gpu) required by the Revision to run.
               - !ruby/object:Api::Type::Integer
                 name: containerConcurrency
                 description: |-
                   ContainerConcurrency specifies the maximum allowed in-flight (concurrent)
-                  requests per container of the Revision. Values are:
-                  - `0` thread-safe, the system should manage the max concurrency. This is
-                      the default value.
-                  - `1` not-thread-safe. Single concurrency
-                  - `2-N` thread-safe, max concurrency of N
+                  requests per container of the Revision. If not specified or 0, defaults to 80 when
+                  requested CPU >= 1 and defaults to 1 when requested CPU < 1.
                 default_from_api: true
               - !ruby/object:Api::Type::Integer
                 name: timeoutSeconds
@@ -854,7 +868,6 @@ properties:
                       name: csi
                       description: |-
                         A filesystem specified by the Container Storage Interface (CSI).
-                      min_version: beta
                       properties:
                         - !ruby/object:Api::Type::String
                           name: 'driver'
@@ -862,8 +875,7 @@ properties:
                           description: |-
                             Unique name representing the type of file system to be created. Cloud Run supports the following values:
                               * gcsfuse.run.googleapis.com: Mount a Google Cloud Storage bucket using GCSFuse. This driver requires the
-                                run.googleapis.com/execution-environment annotation to be set to "gen2" and
-                                run.googleapis.com/launch-stage set to "BETA" or "ALPHA".
+                                run.googleapis.com/execution-environment annotation to be unset or set to "gen2"
                         - !ruby/object:Api::Type::Boolean
                           name: 'readOnly'
                           default_from_api: true
@@ -879,9 +891,7 @@ properties:
                       name: nfs
                       description: |-
                         A filesystem backed by a Network File System share. This filesystem requires the
-                        run.googleapis.com/execution-environment annotation to be set to "gen2" and
-                        run.googleapis.com/launch-stage set to "BETA" or "ALPHA".
-                      min_version: beta
+                        run.googleapis.com/execution-environment annotation to be unset or set to "gen2"
                       properties:
                         - !ruby/object:Api::Type::String
                           name: server
@@ -1063,8 +1073,8 @@ properties:
         name: 'annotations'
         description: |-
           Annotations is a key value map stored with a resource that
-          may be set by external tools to store and retrieve arbitrary metadata. More
-          info: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations
+          may be set by external tools to store and retrieve arbitrary metadata.
+          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations
 
           **Note**: The Cloud Run API may add additional annotations that were not provided in your config.
           If terraform plan shows a diff where a server-side annotation is added, you can add it to your config

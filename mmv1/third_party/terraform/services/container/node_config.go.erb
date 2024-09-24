@@ -78,6 +78,18 @@ func schemaContainerdConfig() *schema.Schema {
 	}
 }
 
+// Note: this is a bool internally, but implementing as an enum internally to
+// make it easier to accept API level defaults.
+func schemaInsecureKubeletReadonlyPortEnabled() *schema.Schema {
+	return &schema.Schema{
+		Type:         schema.TypeString,
+		Optional:     true,
+		Computed:     true,
+		Description:  "Controls whether the kubelet read-only port is enabled. It is strongly recommended to set this to `FALSE`. Possible values: `TRUE`, `FALSE`.",
+		ValidateFunc: validation.StringInSlice([]string{"FALSE","TRUE"}, false),
+	}
+}
+
 func schemaLoggingVariant() *schema.Schema {
 	return &schema.Schema{
 		Type: schema.TypeString,
@@ -88,24 +100,23 @@ func schemaLoggingVariant() *schema.Schema {
 	}
 }
 
-func schemaGcfsConfig(forceNew bool) *schema.Schema {
-        return &schema.Schema{
-                Type:     schema.TypeList,
-		Optional: true,
-		MaxItems: 1,
+func schemaGcfsConfig() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Optional:    true,
+		Computed:    true,
+		MaxItems:    1,
 		Description: `GCFS configuration for this node.`,
-		ForceNew: forceNew,
-		Elem: &schema.Resource{
+		Elem:        &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"enabled": {
 					Type:        schema.TypeBool,
 					Required:    true,
-					ForceNew:    forceNew,
 					Description: `Whether or not GCFS is enabled`,
 				},
 			},
 		},
-        }
+	}
 }
 
 func schemaNodeConfig() *schema.Schema {
@@ -139,9 +150,6 @@ func schemaNodeConfig() *schema.Schema {
 					Optional: true,
 					Computed: true,
 					ForceNew: true,
-					// Legacy config mode allows removing GPU's from an existing resource
-					// See https://www.terraform.io/docs/configuration/attr-as-blocks.html
-					ConfigMode: schema.SchemaConfigModeAttr,
 					Description: `List of the type and count of accelerator cards attached to the instance.`,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
@@ -162,8 +170,8 @@ func schemaNodeConfig() *schema.Schema {
 								Type:         schema.TypeList,
 								MaxItems:     1,
 								Optional:     true,
+								Computed:     true,
 								ForceNew:     true,
-								ConfigMode: schema.SchemaConfigModeAttr,
 								Description:  `Configuration for auto installation of GPU driver.`,
 								Elem: &schema.Resource{
 									Schema: map[string]*schema.Schema{
@@ -188,7 +196,6 @@ func schemaNodeConfig() *schema.Schema {
 								MaxItems:     1,
 								Optional:     true,
 								ForceNew:     true,
-								ConfigMode: schema.SchemaConfigModeAttr,
 								Description:  `Configuration for GPU sharing.`,
 								Elem: &schema.Resource{
 									Schema: map[string]*schema.Schema{
@@ -332,7 +339,7 @@ func schemaNodeConfig() *schema.Schema {
 					},
 				},
 
-				"gcfs_config": schemaGcfsConfig(true),
+				"gcfs_config": schemaGcfsConfig(),
 
 				"gvnic": {
 					Type:     schema.TypeList,
@@ -453,6 +460,14 @@ func schemaNodeConfig() *schema.Schema {
 					Optional: true,
 					Elem:     &schema.Schema{Type: schema.TypeString},
 					Description: `The list of instance tags applied to all nodes.`,
+				},
+
+				"storage_pools": {
+					Type:     schema.TypeList,
+					ForceNew: true,
+					Optional: true,
+					Elem:     &schema.Schema{Type: schema.TypeString},
+					Description: `The list of Storage Pools where boot disks are provisioned.`,
 				},
 
 				"shielded_instance_config": {
@@ -587,9 +602,9 @@ func schemaNodeConfig() *schema.Schema {
 						Schema: map[string]*schema.Schema{
 							"cpu_manager_policy": {
 								Type:         schema.TypeString,
-								Required:     true,
+								Optional:     true,
 								ValidateFunc: validation.StringInSlice([]string{"static", "none", ""}, false),
-								Description: `Control the CPU management policy on the node.`,
+								Description:  `Control the CPU management policy on the node.`,
 							},
 							"cpu_cfs_quota": {
 								Type:     schema.TypeBool,
@@ -601,6 +616,7 @@ func schemaNodeConfig() *schema.Schema {
 								Optional: true,
 								Description: `Set the CPU CFS quota period value 'cpu.cfs_period_us'.`,
 							},
+							"insecure_kubelet_readonly_port_enabled": schemaInsecureKubeletReadonlyPortEnabled(),
 							"pod_pids_limit": {
 								Type:        schema.TypeInt,
 								Optional:    true,
@@ -630,6 +646,26 @@ func schemaNodeConfig() *schema.Schema {
 								ValidateFunc:     validation.StringInSlice([]string{"CGROUP_MODE_UNSPECIFIED", "CGROUP_MODE_V1", "CGROUP_MODE_V2"}, false),
 								Description:      `cgroupMode specifies the cgroup mode to be used on the node.`,
 								DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("CGROUP_MODE_UNSPECIFIED"),
+							},
+							"hugepages_config": {
+								Type:     schema.TypeList,
+								Optional: true,
+								MaxItems: 1,
+								Description: `Amounts for 2M and 1G hugepages.`,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"hugepage_size_2m": {
+											Type:        schema.TypeInt,
+											Optional:    true,
+											Description: `Amount of 2M hugepages.`,
+										},
+										"hugepage_size_1g": {
+											Type:        schema.TypeInt,
+											Optional:    true,
+											Description: `Amount of 1G hugepages.`,
+										},
+									},
+								},
 							},
 						},
 					},
@@ -772,8 +808,24 @@ func schemaNodeConfig() *schema.Schema {
 	}
 }
 
+// Separate since this currently only supports a single value -- a subset of
+// the overall NodeKubeletConfig
+func schemaNodePoolAutoConfigNodeKubeletConfig() *schema.Schema {
+  return &schema.Schema{
+		Type:        schema.TypeList,
+		Optional:    true,
+		MaxItems:    1,
+		Description: `Node kubelet configs.`,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"insecure_kubelet_readonly_port_enabled": schemaInsecureKubeletReadonlyPortEnabled(),
+			},
+		},
+	}
+}
+
 func expandNodeConfigDefaults(configured interface{}) *container.NodeConfigDefaults {
-        configs := configured.([]interface{})
+	configs := configured.([]interface{})
 	if len(configs) == 0 || configs[0] == nil {
 		return nil
 	}
@@ -781,6 +833,11 @@ func expandNodeConfigDefaults(configured interface{}) *container.NodeConfigDefau
 
 	nodeConfigDefaults := &container.NodeConfigDefaults{}
 	nodeConfigDefaults.ContainerdConfig = expandContainerdConfig(config["containerd_config"])
+	if v, ok := config["insecure_kubelet_readonly_port_enabled"]; ok {
+		nodeConfigDefaults.NodeKubeletConfig = &container.NodeKubeletConfig{
+			InsecureKubeletReadonlyPortEnabled: expandInsecureKubeletReadonlyPortEnabled(v),
+		}
+	}
 	if variant, ok := config["logging_variant"]; ok {
 		nodeConfigDefaults.LoggingConfig = &container.NodePoolLoggingConfig{
 			VariantConfig: &container.LoggingVariantConfig{
@@ -789,14 +846,14 @@ func expandNodeConfigDefaults(configured interface{}) *container.NodeConfigDefau
 		}
 	}
 <% unless version == "ga" -%>
-        if v, ok := config["gcfs_config"]; ok && len(v.([]interface{})) > 0 {
-                gcfsConfig := v.([]interface{})[0].(map[string]interface{})
+	if v, ok := config["gcfs_config"]; ok && len(v.([]interface{})) > 0 {
+		gcfsConfig := v.([]interface{})[0].(map[string]interface{})
 		nodeConfigDefaults.GcfsConfig = &container.GcfsConfig{
 			Enabled: gcfsConfig["enabled"].(bool),
 		}
 	}
 <% end -%>
-        return nodeConfigDefaults
+	return nodeConfigDefaults
 }
 
 func expandNodeConfig(v interface{}) *container.NodeConfig {
@@ -1010,6 +1067,16 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 		nc.Tags = tags
 	}
 
+	if v, ok := nodeConfig["storage_pools"]; ok {
+		spList := v.([]interface{})
+		storagePools := []string{}
+		for _, v := range spList {
+			if v != nil {
+				storagePools = append(storagePools, v.(string))
+			}
+		}
+		nc.StoragePools = storagePools
+	}
 	if v, ok := nodeConfig["shielded_instance_config"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
 		nc.ShieldedInstanceConfig = &container.ShieldedInstanceConfig{
@@ -1103,6 +1170,10 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 }
 
 func expandResourceManagerTags(v interface{}) *container.ResourceManagerTags {
+	if v == nil {
+		return nil
+	}
+
 	rmts := make(map[string]string)
 
 	if v != nil {
@@ -1134,6 +1205,13 @@ func expandWorkloadMetadataConfig(v interface{}) *container.WorkloadMetadataConf
 	return wmc
 }
 
+func expandInsecureKubeletReadonlyPortEnabled(v interface{}) bool {
+	if v == "TRUE" {
+		return true
+	}
+	return false
+}
+
 func expandKubeletConfig(v interface{}) *container.NodeKubeletConfig {
 	if v == nil {
 		return nil
@@ -1153,6 +1231,10 @@ func expandKubeletConfig(v interface{}) *container.NodeKubeletConfig {
 	}
 	if cpuCfsQuotaPeriod, ok := cfg["cpu_cfs_quota_period"]; ok {
 		kConfig.CpuCfsQuotaPeriod = cpuCfsQuotaPeriod.(string)
+	}
+	if insecureKubeletReadonlyPortEnabled, ok := cfg["insecure_kubelet_readonly_port_enabled"]; ok {
+		kConfig.InsecureKubeletReadonlyPortEnabled = expandInsecureKubeletReadonlyPortEnabled(insecureKubeletReadonlyPortEnabled)
+		kConfig.ForceSendFields = append(kConfig.ForceSendFields, "InsecureKubeletReadonlyPortEnabled")
 	}
 	if podPidsLimit, ok := cfg["pod_pids_limit"]; ok {
 		kConfig.PodPidsLimit = int64(podPidsLimit.(int))
@@ -1183,6 +1265,10 @@ func expandLinuxNodeConfig(v interface{}) *container.LinuxNodeConfig {
 		linuxNodeConfig.CgroupMode = cgroupMode
 	}
 
+	if v, ok := cfg["hugepages_config"]; ok {
+		linuxNodeConfig.Hugepages = expandHugepagesConfig(v)
+	}
+
 	return linuxNodeConfig
 }
 
@@ -1205,6 +1291,32 @@ func expandCgroupMode(cfg map[string]interface{}) string {
 	}
 
 	return cgroupMode.(string)
+}
+
+func expandHugepagesConfig(v interface{}) *container.HugepagesConfig {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	if ls[0] == nil {
+		return &container.HugepagesConfig{}
+	}
+	cfg := ls[0].(map[string]interface{})
+
+	hugepagesConfig := &container.HugepagesConfig{}
+
+	if v, ok := cfg["hugepage_size_2m"]; ok {
+		hugepagesConfig.HugepageSize2m = int64(v.(int))
+	}
+
+	if v, ok := cfg["hugepage_size_1g"]; ok {
+		hugepagesConfig.HugepageSize1g = int64(v.(int))
+	}
+
+	return hugepagesConfig
 }
 
 func expandContainerdConfig(v interface{}) *container.ContainerdConfig {
@@ -1362,6 +1474,8 @@ func flattenNodeConfigDefaults(c *container.NodeConfigDefaults) []map[string]int
 
 	result[0]["containerd_config"] = flattenContainerdConfig(c.ContainerdConfig)
 
+	result[0]["insecure_kubelet_readonly_port_enabled"] = flattenInsecureKubeletReadonlyPortEnabled(c.NodeKubeletConfig)
+
 	result[0]["logging_variant"] = flattenLoggingVariant(c.LoggingConfig)
 
 <% unless version == 'ga' -%>
@@ -1412,6 +1526,7 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 		"tags":                     c.Tags,
 		"preemptible":              c.Preemptible,
 		"secondary_boot_disks":     flattenSecondaryBootDisks(c.SecondaryBootDisks),
+		"storage_pools":            c.StoragePools,
 		"spot":                     c.Spot,
 		"min_cpu_platform":         c.MinCpuPlatform,
 		"shielded_instance_config": flattenShieldedInstanceConfig(c.ShieldedInstanceConfig),
@@ -1442,6 +1557,10 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 }
 
 func flattenResourceManagerTags(c *container.ResourceManagerTags) map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+
 	rmt := make(map[string]interface{})
 
 	if c != nil {
@@ -1547,6 +1666,14 @@ func flattenSecondaryBootDisks(c []*container.SecondaryBootDisk) []map[string]in
 		}
 	}
 	return result
+}
+
+func flattenInsecureKubeletReadonlyPortEnabled(c *container.NodeKubeletConfig) string {
+	// Convert bool from the API to the enum values used internally
+	if c != nil && c.InsecureKubeletReadonlyPortEnabled {
+		return "TRUE"
+	}
+	return "FALSE"
 }
 
 func flattenLoggingVariant(c *container.NodePoolLoggingConfig) string {
@@ -1698,10 +1825,21 @@ func flattenKubeletConfig(c *container.NodeKubeletConfig) []map[string]interface
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"cpu_cfs_quota":        c.CpuCfsQuota,
-			"cpu_cfs_quota_period": c.CpuCfsQuotaPeriod,
-			"cpu_manager_policy":   c.CpuManagerPolicy,
-			"pod_pids_limit":       c.PodPidsLimit,
+			"cpu_cfs_quota":                          c.CpuCfsQuota,
+			"cpu_cfs_quota_period":                   c.CpuCfsQuotaPeriod,
+			"cpu_manager_policy":                     c.CpuManagerPolicy,
+			"insecure_kubelet_readonly_port_enabled": flattenInsecureKubeletReadonlyPortEnabled(c),
+			"pod_pids_limit":                         c.PodPidsLimit,
+		})
+	}
+	return result
+}
+
+func flattenNodePoolAutoConfigNodeKubeletConfig(c *container.NodeKubeletConfig) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"insecure_kubelet_readonly_port_enabled": flattenInsecureKubeletReadonlyPortEnabled(c),
 		})
 	}
 	return result
@@ -1711,8 +1849,20 @@ func flattenLinuxNodeConfig(c *container.LinuxNodeConfig) []map[string]interface
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"sysctls":     c.Sysctls,
-			"cgroup_mode": c.CgroupMode,
+			"sysctls":          c.Sysctls,
+			"cgroup_mode":      c.CgroupMode,
+			"hugepages_config": flattenHugepagesConfig(c.Hugepages),
+		})
+	}
+	return result
+}
+
+func flattenHugepagesConfig(c *container.HugepagesConfig) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"hugepage_size_2m": c.HugepageSize2m,
+			"hugepage_size_1g": c.HugepageSize1g,
 		})
 	}
 	return result

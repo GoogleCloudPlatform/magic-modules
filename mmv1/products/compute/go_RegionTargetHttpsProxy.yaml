@@ -33,7 +33,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 1000
@@ -45,6 +45,9 @@ async:
     message: 'message'
 custom_code:
   encoder: 'templates/terraform/encoders/go/compute_region_target_https_proxy.go.tmpl'
+  # update_encoder is usually the same as encoder by default. This resource is an uncommon case where the whole resource
+  # is marked to be immutable, but we have a field specific update that overrides it (e.g certifiacteManagerCertificates).
+  # This causes the encoder logic to not be applied during update.
   update_encoder: 'templates/terraform/encoders/go/compute_region_target_https_proxy.go.tmpl'
   decoder: 'templates/terraform/decoders/go/compute_region_target_https_proxy.go.tmpl'
 examples:
@@ -52,6 +55,14 @@ examples:
     primary_resource_id: 'default'
     vars:
       region_target_https_proxy_name: 'test-proxy'
+      region_ssl_certificate_name: 'my-certificate'
+      region_url_map_name: 'url-map'
+      region_backend_service_name: 'backend-service'
+      region_health_check_name: 'http-health-check'
+  - name: 'region_target_https_proxy_http_keep_alive_timeout'
+    primary_resource_id: 'default'
+    vars:
+      region_target_https_proxy_name: 'test-http-keep-alive-timeout-proxy'
       region_ssl_certificate_name: 'my-certificate'
       region_url_map_name: 'url-map'
       region_backend_service_name: 'backend-service'
@@ -113,6 +124,25 @@ properties:
       character, which cannot be a dash.
     required: true
     immutable: true
+  # This field is present in the schema but as of 2019 Sep 23 attempting to set it fails with
+  # a 400 "QUIC override is supported only with global TargetHttpsProxy". jamessynge@ said in an
+  # email sent on 2019 Sep 20 that support for this "is probably far in the future."
+  # - !ruby/object:Api::Type::Enum
+  #   name: 'quicOverride'
+  #   description: |
+  #     Specifies the QUIC override policy for this resource. This determines
+  #     whether the load balancer will attempt to negotiate QUIC with clients
+  #     or not. Can specify one of NONE, ENABLE, or DISABLE. If NONE is
+  #     specified, uses the QUIC policy with no user overrides, which is
+  #     equivalent to DISABLE. Not specifying this field is equivalent to
+  #     specifying NONE.
+  #   values:
+  #     - :NONE
+  #     - :ENABLE
+  #     - :DISABLE
+  #   update_verb: :POST
+  #   update_url:
+  #     'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setQuicOverride'
   - name: 'certificateManagerCertificates'
     type: Array
     description: |
@@ -168,6 +198,14 @@ properties:
     custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
     resource: 'RegionUrlMap'
     imports: 'selfLink'
+  - name: 'httpKeepAliveTimeoutSec'
+    type: Integer
+    description: |
+      Specifies how long to keep a connection open, after completing a response,
+      while there is no matching traffic (in seconds). If an HTTP keepalive is
+      not specified, a default value (600 seconds) will be used. For Regioanl
+      HTTP(S) load balancer, the minimum allowed value is 5 seconds and the
+      maximum allowed value is 600 seconds.
   - name: 'serverTlsPolicy'
     type: ResourceRef
     description: |
@@ -180,5 +218,14 @@ properties:
       INTERNAL_SELF_MANAGED and which with EXTERNAL, EXTERNAL_MANAGED
       loadBalancingScheme consult ServerTlsPolicy documentation.
       If left blank, communications are not encrypted.
+
+      If you remove this field from your configuration at the same time as
+      deleting or recreating a referenced ServerTlsPolicy resource, you will
+      receive a resourceInUseByAnotherResource error. Use lifecycle.create_before_destroy
+      within the ServerTlsPolicy resource to avoid this.
+    update_url: 'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}'
+    update_verb: 'PATCH'
+    update_id: 'serverTlsPolicy'
+    fingerprint_name: 'fingerprint'
     resource: 'SslPolicy'
     imports: 'selfLink'

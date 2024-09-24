@@ -16,25 +16,21 @@ package resource
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"net/url"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 	"text/template"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/golang/glog"
-	"gopkg.in/yaml.v3"
 )
 
 // Generates configs to be shown as examples in docs and outputted as tests
 // from a shared template
 type Examples struct {
-	// google.YamlValidator
-
-	// include Compile::Core
-	// include Google::GolangUtils
-
 	// The name of the example in lower snake_case.
 	// Generally takes the form of the resource name followed by some detail
 	// about the specific test. For example, "address_with_subnetwork".
@@ -126,13 +122,13 @@ type Examples struct {
 	IgnoreReadExtra []string `yaml:"ignore_read_extra"`
 
 	// Whether to skip generating tests for this resource
-	SkipTest bool `yaml:"skip_test"`
+	ExcludeTest bool `yaml:"exclude_test"`
 
 	// Whether to skip generating docs for this example
-	SkipDocs bool `yaml:"skip_docs"`
+	ExcludeDocs bool `yaml:"exclude_docs"`
 
 	// Whether to skip import tests for this example
-	SkipImportTest bool `yaml:"skip_import_test"`
+	ExcludeImportTest bool `yaml:"exclude_import_test"`
 
 	// The name of the primary resource for use in IAM tests. IAM tests need
 	// a reference to the primary resource to create IAM policies for
@@ -160,22 +156,52 @@ type Examples struct {
 
 	DocumentationHCLText string
 	TestHCLText          string
+	OicsHCLText          string
 }
 
 // Set default value for fields
-func (e *Examples) UnmarshalYAML(n *yaml.Node) error {
+func (e *Examples) UnmarshalYAML(unmarshal func(any) error) error {
 	type exampleAlias Examples
 	aliasObj := (*exampleAlias)(e)
 
-	err := n.Decode(&aliasObj)
+	err := unmarshal(aliasObj)
 	if err != nil {
 		return err
 	}
 
-	e.ConfigPath = fmt.Sprintf("templates/terraform/examples/go/%s.tf.tmpl", e.Name)
+	if e.ConfigPath == "" {
+		e.ConfigPath = fmt.Sprintf("templates/terraform/examples/go/%s.tf.tmpl", e.Name)
+	}
 	e.SetHCLText()
 
 	return nil
+}
+
+func (e *Examples) Validate(rName string) {
+	if e.Name == "" {
+		log.Fatalf("Missing `name` for one example in resource %s", rName)
+	}
+	e.ValidateExternalProviders()
+}
+
+func (e *Examples) ValidateExternalProviders() {
+	// Official providers supported by HashiCorp
+	// https://registry.terraform.io/search/providers?namespace=hashicorp&tier=official
+	HASHICORP_PROVIDERS := []string{"aws", "random", "null", "template", "azurerm", "kubernetes", "local",
+		"external", "time", "vault", "archive", "tls", "helm", "azuread", "http", "cloudinit", "tfe", "dns",
+		"consul", "vsphere", "nomad", "awscc", "googleworkspace", "hcp", "boundary", "ad", "azurestack", "opc",
+		"oraclepaas", "hcs", "salesforce"}
+
+	var unallowedProviders []string
+	for _, p := range e.ExternalProviders {
+		if !slices.Contains(HASHICORP_PROVIDERS, p) {
+			unallowedProviders = append(unallowedProviders, p)
+		}
+	}
+
+	if len(unallowedProviders) > 0 {
+		log.Fatalf("Providers %#v are not allowed. Only providers published by HashiCorp are allowed.", unallowedProviders)
+	}
 }
 
 // Executes example templates for documentation and tests
@@ -290,9 +316,6 @@ func ExecuteTemplate(e any, templatePath string, appendNewline bool) string {
 
 func (e *Examples) OiCSLink() string {
 	v := url.Values{}
-	// TODO Q2: Values.Encode() sorts the values by key alphabetically. This will produce
-	//			diffs for every URL when we convert to using this function. We should sort the
-	// 			Ruby-version query alphabetically beforehand to remove these diffs.
 	v.Add("cloudshell_git_repo", "https://github.com/terraform-google-modules/docs-examples.git")
 	v.Add("cloudshell_working_dir", e.Name)
 	v.Add("cloudshell_image", "gcr.io/cloudshell-images/cloudshell:latest")
@@ -338,40 +361,35 @@ func SubstituteTestPaths(config string) string {
 	return config
 }
 
-// func (e *Examples) validate() {
-// super
-// check :name, type: String, required: true
-// check :primary_resource_id, type: String
-// check :min_version, type: String
-// check :vars, type: Hash
-// check :test_env_vars, type: Hash
-// check :test_vars_overrides, type: Hash
-// check :ignore_read_extra, type: Array, item_type: String, default: []
-// check :primary_resource_name, type: String
-// check :skip_test, type: TrueClass
-// check :skip_import_test, type: TrueClass
-// check :skip_docs, type: TrueClass
-// check :config_path, type: String, default: "templates/terraform/examples///{name}.tf.erb"
-// check :skip_vcr, type: TrueClass
-// }
+// Executes example templates for documentation and tests
+func (e *Examples) SetOiCSHCLText() {
+	originalVars := e.Vars
+	originalTestEnvVars := e.TestEnvVars
 
-// TODO
-// validate_external_providers
+	// // Remove region tags
+	re1 := regexp.MustCompile(`# \[[a-zA-Z_ ]+\]\n`)
+	re2 := regexp.MustCompile(`\n# \[[a-zA-Z_ ]+\]`)
 
-// func (e *Examples) merge(other) {
-// result = self.class.new
-// instance_variables.each do |v|
-//   result.instance_variable_set(v, instance_variable_get(v))
-// end
+	testVars := make(map[string]string)
+	for key, value := range originalVars {
+		testVars[key] = fmt.Sprintf("%s-${local.name_suffix}", value)
+	}
 
-// other.instance_variables.each do |v|
-//   if other.instance_variable_get(v).instance_of?(Array)
-//     result.instance_variable_set(v, deep_merge(result.instance_variable_get(v),
-//                                                other.instance_variable_get(v)))
-//   else
-//     result.instance_variable_set(v, other.instance_variable_get(v))
-//   end
-// end
+	// Apply overrides from YAML
+	for key, value := range e.OicsVarsOverrides {
+		testVars[key] = value
+	}
 
-// result
-// }
+	e.Vars = testVars
+	e.OicsHCLText = ExecuteTemplate(e, e.ConfigPath, true)
+	e.OicsHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(e.OicsHCLText, "\n")
+
+	// Remove region tags
+	e.OicsHCLText = re1.ReplaceAllString(e.OicsHCLText, "")
+	e.OicsHCLText = re2.ReplaceAllString(e.OicsHCLText, "")
+	e.OicsHCLText = SubstituteExamplePaths(e.OicsHCLText)
+
+	// Reset the example
+	e.Vars = originalVars
+	e.TestEnvVars = originalTestEnvVars
+}

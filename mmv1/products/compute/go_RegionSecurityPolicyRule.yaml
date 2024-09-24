@@ -41,7 +41,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 1000
@@ -73,7 +73,9 @@ examples:
     min_version: 'beta'
     vars:
       sec_policy_name: 'policyfornetworkmatch'
-    skip_test: true
+    # it needs to run synchronously because a region can have only one google_compute_network_edge_security_service.
+    # there is a robust handwritten test which covers this scenario.
+    exclude_test: true
 parameters:
   - name: 'region'
     type: String

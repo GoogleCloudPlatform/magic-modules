@@ -16,6 +16,9 @@
 name: 'RouterNat'
 description: |
   A NAT service created in a router.
+
+  ~> **Note:** Recreating a `google_compute_address` that is being used by `google_compute_router_nat` will give a `resourceInUseByAnotherResource` error.
+  Use `lifecycle.create_before_destroy` on this address resource to avoid this type of error as shown in the Manual Ips example.
 references:
   guides:
     'Google Cloud Router': 'https://cloud.google.com/router/docs/'
@@ -39,7 +42,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/regions/{{regions}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 1000
@@ -65,6 +68,10 @@ custom_diff:
   - 'resourceComputeRouterNatDrainNatIpsCustomDiff'
 exclude_tgc: true
 examples:
+  # These examples are not used to autogenerate tests, as fine-grained
+  # resources do not fit the normal test flow - we need to test deletion
+  # in a test step while parent resource still exists vs in CheckDestroy
+  # when all resources have been deleted.
   - name: 'router_nat_basic'
     primary_resource_id: 'nat'
     vars:
@@ -72,7 +79,7 @@ examples:
       nat_name: 'my-router-nat'
       network_name: 'my-network'
       subnet_name: 'my-subnetwork'
-    skip_test: true
+    exclude_test: true
   - name: 'router_nat_manual_ips'
     primary_resource_id: 'nat_manual'
     vars:
@@ -81,7 +88,7 @@ examples:
       network_name: 'my-network'
       subnet_name: 'my-subnetwork'
       address_name: 'nat-manual-ip'
-    skip_test: true
+    exclude_test: true
   - name: 'router_nat_rules'
     primary_resource_id: 'nat_rules'
     vars:
@@ -92,7 +99,7 @@ examples:
       address_name1: 'nat-address1'
       address_name2: 'nat-address2'
       address_name3: 'nat-address3'
-    skip_test: true
+    exclude_test: true
   - name: 'router_nat_private'
     primary_resource_id: 'nat_type'
     min_version: 'beta'
@@ -103,7 +110,7 @@ examples:
       subnet_name: 'my-subnetwork'
       hub_name: 'my-hub'
       spoke_name: 'my-spoke'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'router'
     type: ResourceRef
@@ -149,6 +156,9 @@ properties:
     description: |
       Self-links of NAT IPs. Only valid if natIpAllocateOption
       is set to MANUAL_ONLY.
+      If this field is used alongside with a count created list of address resources `google_compute_address.foobar.*.self_link`,
+      the access level resource for the address resource must have a `lifecycle` block with `create_before_destroy = true` so
+      the number of resources can be increased/decreased without triggering the `resourceInUseByAnotherResource` error.
     is_set: true
     send_empty_value: true
     set_hash_func: computeRouterNatIPsHash

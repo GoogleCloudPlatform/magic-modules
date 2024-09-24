@@ -19,7 +19,7 @@ id_format: projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/topi
 import_format:
   - projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/topics/{{topic_id}}
 name: Topic
-description: An Apache Kafka for BigQuery topic. Apache Kafka is a trademark owned by the Apache Software Foundation.
+description: A Managed Service for Apache Kafka topic. Apache Kafka is a trademark owned by the Apache Software Foundation.
 min_version: beta
 update_verb: :PATCH
 update_mask: true
@@ -31,6 +31,30 @@ examples:
     vars:
       cluster_id: "my-cluster"
       topic_id: "my-topic"
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  post_create: templates/terraform/post_create/sleep.go.erb
+parameters:
+  - !ruby/object:Api::Type::String
+    name: location
+    description: "ID of the location of the Kafka resource. See
+      https://cloud.google.com/managed-kafka/docs/locations for a list of
+      supported locations."
+    url_param_only: true
+    required: true
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: cluster
+    description: "The cluster name."
+    url_param_only: true
+    required: true
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: topicId
+    description: "The ID to use for the topic, which will become the final
+      component of the topic's name. This value is structured like: `my-topic-name`."
+    url_param_only: true
+    required: true
+    immutable: true
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -51,27 +75,5 @@ properties:
   - !ruby/object:Api::Type::KeyValuePairs
     name: configs
     description: "Configuration for the topic that are overridden from the cluster
-      defaults. The key of the map is a Kafka topic property name, for
-      example: `cleanup.policy=compact`, `compression.type=producer`."
-parameters:
-  - !ruby/object:Api::Type::String
-    name: location
-    description: "ID of the location of the Apache Kafka for BigQuery resource. See
-      https://cloud.google.com/managed-kafka/docs/locations for a list of
-      supported locations."
-    url_param_only: true
-    required: true
-    immutable: true
-  - !ruby/object:Api::Type::String
-    name: cluster
-    description: "The cluster name."
-    url_param_only: true
-    required: true
-    immutable: true
-  - !ruby/object:Api::Type::String
-    name: topicId
-    description: "The ID to use for the topic, which will become the final
-      component of the topic's name. This value is structured like: `my-topic-name`."
-    url_param_only: true
-    required: true
-    immutable: true
+      defaults. The key of the map is a Kafka topic property name,
+      for example: `cleanup.policy=compact`, `compression.type=producer`."

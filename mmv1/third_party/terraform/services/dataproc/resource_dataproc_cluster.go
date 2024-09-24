@@ -187,7 +187,8 @@ func ResourceDataprocCluster() *schema.Resource {
 
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
-			tpgresource.SetLabelsDiff,
+			// User labels are not supported in Dataproc Virtual Cluster
+			tpgresource.SetLabelsDiffWithoutAttributionLabel,
 		),
 
 		SchemaVersion: 1,
@@ -2890,6 +2891,9 @@ func flattenSecurityConfig(d *schema.ResourceData, sc *dataproc.SecurityConfig) 
 }
 
 func flattenKerberosConfig(d *schema.ResourceData, kfg *dataproc.KerberosConfig) []map[string]interface{} {
+	if kfg == nil {
+		return nil
+	}
 	data := map[string]interface{}{
 		"enable_kerberos":                       kfg.EnableKerberos,
 		"root_principal_password_uri":           kfg.RootPrincipalPasswordUri,

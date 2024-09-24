@@ -32,7 +32,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 1000
@@ -53,12 +53,13 @@ examples:
       external_gateway_name: 'external-gateway'
       global_address_name: 'global-address'
       router_name: 'ha-vpn-router1'
+      # Multiple fine-grained resources
     skip_vcr: true
   - name: 'only_external_vpn_gateway_full'
     primary_resource_id: 'external_gateway'
     vars:
       external_gateway_name: 'external-gateway'
-    skip_docs: true
+    exclude_docs: true
 parameters:
 properties:
   - name: 'description'
@@ -67,7 +68,6 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: 'Labels for the external VPN gateway resource.'
-    immutable: false
     update_url: 'projects/{{project}}/global/externalVpnGateways/{{name}}/setLabels'
     update_verb: 'POST'
   - name: 'labelFingerprint'

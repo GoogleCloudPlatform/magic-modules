@@ -46,6 +46,7 @@ types_to_generate = []
 version = 'ga'
 override_dir = nil
 openapi_generate = false
+go_yaml_files = []
 
 ARGV << '-h' if ARGV.empty?
 Google::LOGGER.level = Logger::INFO
@@ -98,6 +99,10 @@ OptionParser.new do |opt|
   opt.on('--go-yaml', 'Generate MMv1 Go YAML from Ruby YAML') do
     go_yaml = true
   end
+  opt.on('--go-yaml-files FILE[,FILE...]', Array, 'Generate temp Go YAML from files') do |f|
+    go_yaml = true
+    go_yaml_files = f
+  end
 end.parse!
 # rubocop:enable Metrics/BlockLength
 
@@ -105,7 +110,8 @@ raise 'Cannot use -p/--products and -a/--all simultaneously' \
   if products_to_generate && all_products
 raise 'Either -p/--products OR -a/--all must be present' \
   if products_to_generate.nil? && !all_products
-raise 'Option -o/--output is a required parameter' if output_path.nil?
+raise 'Option -o/--output is a required parameter' \
+  if output_path.nil? && !openapi_generate
 raise 'Option -e/--engine is a required parameter' if provider_name.nil?
 
 if openapi_generate
@@ -268,6 +274,8 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
     provider = \
       override_providers[force_provider].new(product_api, version, start_time)
   end
+
+  provider.go_yaml_files = go_yaml_files if go_yaml_files
 
   unless products_to_generate.include?(product_name)
     Google::LOGGER.info "#{product_name}: Not specified, skipping generation"

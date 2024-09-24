@@ -47,7 +47,6 @@ import (
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
     "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
     "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -107,7 +106,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{-       end }}
         },
 {{- end }}
-{{- if or (and (or $.HasProject $.HasRegion $.HasZone) (not $.SkipDefaultCdiff)) $.CustomDiff }}
+{{- if or (and (or $.HasProject $.HasRegion $.HasZone) (not $.ExcludeDefaultCdiff)) $.CustomDiff }}
         CustomizeDiff: customdiff.All(
 {{-   if $.UnorderedListProperties }}
 {{-     range $prop := $.UnorderedListProperties }}
@@ -119,19 +118,19 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
         {{ $cdiff }},
 {{- end}}
 {{- end}}
-{{- if and ($.HasProject) (not $.SkipDefaultCdiff) }}
+{{- if and ($.HasProject) (not $.ExcludeDefaultCdiff) }}
             tpgresource.DefaultProviderProject,
 {{- end -}}
-{{if and ($.HasRegion) (not $.SkipDefaultCdiff)  }}
+{{if and ($.HasRegion) (not $.ExcludeDefaultCdiff)  }}
             tpgresource.DefaultProviderRegion,
 {{- end -}}
-{{if and ($.HasZone) (not $.SkipDefaultCdiff)  }}
+{{if and ($.HasZone) (not $.ExcludeDefaultCdiff)  }}
             tpgresource.DefaultProviderZone,
 {{- end }}
         ),
 {{- end}}
 
-{{- if $.DeprecationMessage }}
+{{ if $.DeprecationMessage }}
         DeprecationMessage: "{{ $.DeprecationMessage -}}",
 {{- end}}
 
@@ -139,21 +138,9 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 			{{- range $prop := $.OrderProperties $.AllUserProperties }}
 {{template "SchemaFields" $prop -}}
 			{{- end }}
-{{- if $.VirtualFields -}}
-{{-   range $field := $.VirtualFields }}
-            "{{ $field.Name -}}": {
-                Type: {{ $field.TFType $field.Type -}},
-                Optional: true,
-{{-      if $field.Immutable }}
-                ForceNew: true,
-{{-     end}}
-{{-      if not (eq $field.DefaultValue nil) }}
-                Default:  {{ $field.GoLiteral $field.DefaultValue -}},
-{{-     end}}
-                Description: `{{ replace $field.GetDescription "`" "'" -1 -}}`,
-            },
-{{-   end}}
-{{- end}}
+            {{- range $prop := $.VirtualFields }}
+{{template "SchemaFields" $prop -}}
+            {{- end }}
 {{- if $.CustomCode.ExtraSchemaEntry }} 
     {{ $.CustomTemplate $.CustomCode.ExtraSchemaEntry false -}}
 {{- end}}
@@ -165,7 +152,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
                 ForceNew: true,
             },
 {{- end}}
-{{if $.HasSelfLink -}}
+{{- if $.HasSelfLink }}
             "self_link": {
                 Type:     schema.TypeString,
                 Computed: true,
@@ -291,15 +278,15 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
         Body: obj,
         Timeout: d.Timeout(schema.TimeoutCreate),
         Headers: headers,
-{{if $.ErrorRetryPredicates -}}
+{{- if $.ErrorRetryPredicates }}
         ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
 {{- end}}
-{{- if $.ErrorAbortPredicates -}}
+{{- if $.ErrorAbortPredicates }}
         ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{ join $.ErrorAbortPredicates "," -}}{{"}"}},
 {{- end}}
     })
     if err != nil {
-{{- if and ($.CustomCode.PostCreateFailure) ($.GetAsync) -}}
+{{- if and ($.CustomCode.PostCreateFailure) (not $.GetAsync) -}}
         resource{{ $.ResourceName -}}PostCreateFailure(d, meta)
 {{- end}}
         return fmt.Errorf("Error creating {{ $.Name -}}: %s", err)
@@ -390,7 +377,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     if err != nil {
 {{if $.CustomCode.PostCreateFailure -}}
         resource{{ $.ResourceName -}}PostCreateFailure(d, meta)
-{{- end}}
+{{ end}}
 {{-          if not $.TaintResourceOnFailedCreate -}}
         // The resource didn't actually create
         d.SetId("")
@@ -433,9 +420,6 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{if and ($.GetAsync) ($.GetAsync.IsA "PollAsync")}}
 func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interface{}) transport_tpg.PollReadFunc {
     return func() (map[string]interface{}, error) {
-{{if $.GetAsync.CustomPollRead -}}
-//TODO custom poll read
-{{    else -}}
         config := meta.(*transport_tpg.Config)
 
 
@@ -484,7 +468,7 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
 {{if $.ErrorRetryPredicates -}}
             ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
 {{- end}}
-{{- if $.ErrorAbortPredicates -}}
+{{- if $.ErrorAbortPredicates }}
             ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorAbortPredicates "," -}}{{"}"}},
 {{- end}}
         })
@@ -515,14 +499,13 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
         if res == nil {
             return nil, tpgresource.Fake404("decoded", "{{ $.ResourceName }}")
         }
-{{- end }}
+{{ end }}
         return res, nil
-{{    end  -}}
     }
 }
 {{  end }}
 func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{}) error {
-{{if $.SkipRead -}}
+{{if $.ExcludeRead -}}
   // This resource could not be read from the API.
   return nil
 {{  else  -}}
@@ -573,10 +556,10 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         RawURL: url,
         UserAgent: userAgent,
         Headers: headers,
-{{if $.ErrorRetryPredicates -}}
+{{- if $.ErrorRetryPredicates }}
         ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
 {{- end}}
-{{- if $.ErrorAbortPredicates -}}
+{{- if $.ErrorAbortPredicates }}
         ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorAbortPredicates "," -}}{{"}"}},
 {{- end}}
     })
@@ -620,7 +603,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 
   // Explicitly set virtual fields to default values if unset
 {{- range $prop := $.VirtualFields }}
-{{      if not (eq $prop.DefaultValue nil) -}}
+{{-      if not (eq $prop.DefaultValue nil) }}
     if _, ok := d.GetOkExists("{{ $prop.Name -}}"); !ok {
         if err := d.Set("{{ $prop.Name -}}", {{ $prop.GoLiteral $prop.DefaultValue -}}); err != nil {
             return fmt.Errorf("Error setting {{ $prop.Name -}}: %s", err)
@@ -778,7 +761,7 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
     }
 {{-                 end}}
 {{-             end}}
-{{              if $.SupportsIndirectUserProjectOverride -}}
+{{-              if $.SupportsIndirectUserProjectOverride -}}
     if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
         billingProject = parts[1]
     }
@@ -802,10 +785,10 @@ if len(updateMask) > 0 {
         Body: obj,
         Timeout: d.Timeout(schema.TimeoutUpdate),
 		Headers:   headers,
-{{              if $.ErrorRetryPredicates -}}
+{{-              if $.ErrorRetryPredicates }}
         ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
 {{-             end}}
-{{-             if $.ErrorAbortPredicates -}}
+{{-             if $.ErrorAbortPredicates }}
         ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorAbortPredicates "," -}}{{"}"}},
 {{-             end}}
     })
@@ -1017,7 +1000,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
 {{- if and ($.GetAsync) (and (and ($.GetAsync.IsA "OpAsync") $.GetAsync.IncludeProject) ($.GetAsync.Allow "delete")) }}
     var project string
 {{- end }}
-{{- if $.SkipDelete }}
+{{- if $.ExcludeDelete }}
     log.Printf("[WARNING] {{ $.ProductMetadata.Name }}{{" "}}{{ $.Name }} resources" +
     " cannot be deleted from Google Cloud. The resource %s will be removed from Terraform" +
     " state, but will still be present on Google Cloud.", d.Id())
@@ -1173,7 +1156,7 @@ func resource{{ $.ResourceName }}Import(d *schema.ResourceData, meta interface{}
             {{- end }}
         {{- end }}
         {{- if $.CustomCode.PostImport }}
-            {{- $.CustomTemplate $.CustomCode.PostImport false -}}
+            {{ $.CustomTemplate $.CustomCode.PostImport false -}}
         {{- end }}
 
     return []*schema.ResourceData{d}, nil
@@ -1211,10 +1194,11 @@ func resource{{ $.ResourceName -}}Decoder(d *schema.ResourceData, meta interface
 }
 {{- end }}
 {{- if $.CustomCode.PostCreateFailure }}
-func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta interface{}) {
     {{- $.CustomTemplate $.CustomCode.PostCreateFailure false -}}
 }
 {{- end }}
 {{- if and $.SchemaVersion $.StateUpgraders }}
+
     {{ $.CustomTemplate $.StateMigrationFile false -}}
 {{- end }}

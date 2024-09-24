@@ -13,6 +13,7 @@
 
 # Warning: This is a temporary file, and should not be edited directly
 ---
+ # This is the plural of `ServicePerimeter`, any changes here should be made to `ServicePerimeter` as well
 name: 'ServicePerimeters'
 description: |
   Replace all existing Service Perimeters in an Access Policy with the Service Perimeters provided. This is done atomically.
@@ -36,6 +37,7 @@ timeouts:
   delete_minutes: 20
 autogen_async: true
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
@@ -50,15 +52,18 @@ async:
 custom_code:
   custom_delete: 'templates/terraform/custom_delete/go/replace_all_service_perimeters_empty_list.go.tmpl'
   custom_import: 'templates/terraform/custom_import/go/set_access_policy_parent_from_access_policy.go.tmpl'
-skip_sweeper: true
+# Skipping the sweeper due to the non-standard base_url
+exclude_sweeper: true
 examples:
   - name: 'access_context_manager_service_perimeters_basic'
     primary_resource_id: 'service-perimeter'
     vars:
       access_level_name: 'chromeos_no_lock'
       service_perimeter_name: 'restrict_storage'
-    skip_test: true
+    exclude_test: true
 parameters:
+  # Parent is a path parameter that _cannot_ be read or sent in the request at all.
+  # This must be done at the provider level.
   - name: 'parent'
     type: String
     description: |
@@ -142,13 +147,13 @@ properties:
                 A list of GCP resources that are inside of the service perimeter.
                 Currently only projects are allowed.
                 Format: projects/{project_number}
+              is_set: true
               # TODO: (mbang) won't work for arrays yet, uncomment here once they are supported.
               # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
               # at_least_one_of:
               #   - status.0.resources
               #   - status.0.access_levels
               #   - status.0.restricted_services
-              is_set: true
               item_type:
                 type: String
             - name: 'accessLevels'
@@ -164,13 +169,13 @@ properties:
                 be empty.
 
                 Format: accessPolicies/{policy_id}/accessLevels/{access_level_name}
+              is_set: true
               # TODO: (mbang) won't work for arrays yet, uncomment here once they are supported.
               # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
               # at_least_one_of:
-              #   - status.0.resources
-              #   - status.0.access_levels
-              #   - status.0.restricted_services
-              is_set: true
+              #   - spec.0.resources
+              #   - spec.0.access_levels
+              #   - spec.0.restricted_services
               item_type:
                 type: String
             - name: 'restrictedServices'
@@ -181,13 +186,13 @@ properties:
                 `storage.googleapis.com` is specified, access to the storage
                 buckets inside the perimeter must meet the perimeter's access
                 restrictions.
+              is_set: true
               # TODO: (mbang) won't work for arrays yet, uncomment here once they are supported.
               # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
               # at_least_one_of:
-              #   - status.0.resources
-              #   - status.0.access_levels
-              #   - status.0.restricted_services
-              is_set: true
+              #   - spec.0.resources
+              #   - spec.0.access_levels
+              #   - spec.0.restricted_services
               item_type:
                 type: String
             - name: 'vpcAccessibleServices'
@@ -476,12 +481,6 @@ properties:
                 be empty.
 
                 Format: accessPolicies/{policy_id}/accessLevels/{access_level_name}
-              # TODO: (mbang) won't work for arrays yet, uncomment here once they are supported.
-              # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
-              # at_least_one_of:
-              #   - spec.0.resources
-              #   - spec.0.access_levels
-              #   - spec.0.restricted_services
               is_set: true
               item_type:
                 type: String
@@ -493,12 +492,6 @@ properties:
                 `storage.googleapis.com` is specified, access to the storage
                 buckets inside the perimeter must meet the perimeter's access
                 restrictions.
-              # TODO: (mbang) won't work for arrays yet, uncomment here once they are supported.
-              # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
-              # at_least_one_of:
-              #   - spec.0.resources
-              #   - spec.0.access_levels
-              #   - spec.0.restricted_services
               is_set: true
               item_type:
                 type: String

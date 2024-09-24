@@ -45,7 +45,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -71,8 +71,10 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/subnetwork.erb
   extra_schema_entry: templates/terraform/extra_schema_entry/subnetwork.erb
+  post_update: templates/terraform/post_update/compute_subnetwork.go.erb
 custom_diff: [
   'customdiff.ForceNewIfChange("ip_cidr_range", IsShrinkageIpCidr)',
+  'sendSecondaryIpRangeIfEmptyDiff',
 ]
 examples:
   - !ruby/object:Provider::Terraform::Examples
@@ -123,6 +125,30 @@ examples:
     vars:
       subnetwork_name: 'subnet-cidr-overlap'
       network_name: 'net-cidr-overlap'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'subnetwork_reserved_internal_range'
+    min_version: beta
+    primary_resource_id: 'subnetwork-reserved-internal-range'
+    vars:
+      subnetwork_name: 'subnetwork-reserved-internal-range'
+      network_name: 'network-reserved-internal-range'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'subnetwork_reserved_secondary_range'
+    min_version: beta
+    primary_resource_id: 'subnetwork-reserved-secondary-range'
+    vars:
+      subnetwork_name: 'subnetwork-reserved-secondary-range'
+      network_name: 'network-reserved-secondary-range'
+virtual_fields:
+  - !ruby/object:Api::Type::Boolean
+    name: 'send_secondary_ip_range_if_empty'
+    description: |
+      Controls the removal behavior of secondary_ip_range.
+      When false, removing secondary_ip_range from config will not produce a diff as
+      the provider will default to the API's value.
+      When true, the provider will treat removing secondary_ip_range as sending an
+      empty list of secondary IP ranges to the API.
+      Defaults to false.
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -142,16 +168,25 @@ properties:
     output: true
   - !ruby/object:Api::Type::String
     name: 'ipCidrRange'
+    default_from_api: true
     description: |
       The range of internal addresses that are owned by this subnetwork.
       Provide this property when you create the subnetwork. For example,
       10.0.0.0/8 or 192.168.0.0/16. Ranges must be unique and
       non-overlapping within a network. Only IPv4 is supported.
-    required: true
+      Field is optional when `reserved_internal_range` is defined, otherwise required.
+    required: false
     update_verb: :POST
     update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}/expandIpCidrRange'
     validation: !ruby/object:Provider::Terraform::Validation
       function: 'verify.ValidateIpCidrRange'
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'reservedInternalRange'
+    description: |
+      The ID of the reserved internal range. Must be prefixed with `networkconnectivity.googleapis.com`
+      E.g. `networkconnectivity.googleapis.com/projects/{project}/locations/global/internalRanges/{rangeId}`
+    resource: 'InternalRange'
+    imports: 'selfLink'
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
@@ -179,13 +214,13 @@ properties:
     name: 'purpose'
     immutable: true
     description: |
-      The purpose of the resource. This field can be either `PRIVATE_RFC_1918`, `REGIONAL_MANAGED_PROXY`, `GLOBAL_MANAGED_PROXY`, `PRIVATE_SERVICE_CONNECT` or `PRIVATE_NAT`([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
+      The purpose of the resource. This field can be either `PRIVATE`, `REGIONAL_MANAGED_PROXY`, `GLOBAL_MANAGED_PROXY`, `PRIVATE_SERVICE_CONNECT` or `PRIVATE_NAT`([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
       A subnet with purpose set to `REGIONAL_MANAGED_PROXY` is a user-created subnetwork that is reserved for regional Envoy-based load balancers.
       A subnetwork in a given region with purpose set to `GLOBAL_MANAGED_PROXY` is a proxy-only subnet and is shared between all the cross-regional Envoy-based load balancers.
       A subnetwork with purpose set to `PRIVATE_SERVICE_CONNECT` reserves the subnet for hosting a Private Service Connect published service.
       A subnetwork with purpose set to `PRIVATE_NAT` is used as source range for Private NAT gateways.
       Note that `REGIONAL_MANAGED_PROXY` is the preferred setting for all regional Envoy load balancers.
-      If unspecified, the purpose defaults to `PRIVATE_RFC_1918`.
+      If unspecified, the purpose defaults to `PRIVATE`.
     default_from_api: true
   - !ruby/object:Api::Type::Enum
     name: 'role'
@@ -207,7 +242,6 @@ properties:
     api_name: secondaryIpRanges
     unordered_list: true
     default_from_api: true
-    schema_config_mode_attr: true
     send_empty_value: true
     description: |
       An array of configurations for secondary IP ranges for VM instances
@@ -216,10 +250,8 @@ properties:
       to either primary or secondary ranges.
 
       **Note**: This field uses [attr-as-block mode](https://www.terraform.io/docs/configuration/attr-as-blocks.html) to avoid
-      breaking users during the 0.12 upgrade. To explicitly send a list
-      of zero objects you must use the following syntax:
-      `example=[]`
-      For more details about this behavior, see [this section](https://www.terraform.io/docs/configuration/attr-as-blocks.html#defining-a-fixed-object-collection-value).
+      breaking users during the 0.12 upgrade. To explicitly send a list of zero objects,
+      set `send_secondary_ip_range_if_empty = true`
     update_verb: :PATCH
     update_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
     update_id: 'secondaryIpRanges'
@@ -238,7 +270,8 @@ properties:
             must be unique within the subnetwork.
         - !ruby/object:Api::Type::String
           name: 'ipCidrRange'
-          required: true
+          required: false
+          default_from_api: true
           validation: !ruby/object:Provider::Terraform::Validation
             function: 'verify.ValidateIpCidrRange'
           description: |
@@ -246,6 +279,14 @@ properties:
             range. Provide this property when you create the subnetwork.
             Ranges must be unique and non-overlapping with all primary and
             secondary IP ranges within a network. Only IPv4 is supported.
+            Field is optional when `reserved_internal_range` is defined, otherwise required.
+        - !ruby/object:Api::Type::ResourceRef
+          name: 'reservedInternalRange'
+          description: |
+            The ID of the reserved internal range. Must be prefixed with `networkconnectivity.googleapis.com`
+            E.g. `networkconnectivity.googleapis.com/projects/{project}/locations/global/internalRanges/{rangeId}`
+          resource: 'InternalRange'
+          imports: 'selfLink'
   - !ruby/object:Api::Type::Boolean
     name: 'privateIpGoogleAccess'
     description: |

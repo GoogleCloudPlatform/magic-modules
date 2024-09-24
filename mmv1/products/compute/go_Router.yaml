@@ -24,6 +24,9 @@ references:
 docs:
 base_url: 'projects/{{project}}/regions/{{region}}/routers'
 has_self_link: true
+# Since Terraform has separate resources for router, router interface, and
+# router peer, calling PUT on the router will delete the interface and peer.
+# Use patch instead.
 update_verb: 'PATCH'
 mutex: 'router/{{region}}/{{name}}'
 timeouts:
@@ -34,7 +37,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 1000
@@ -104,6 +107,13 @@ properties:
       A reference to the network to which this router belongs.
     required: true
     immutable: true
+  # TODO: Figure out the story for interfaces/bgpPeers. Right
+  # now in Terraform we have three separate resources: router,
+  # router_interface, and router_peer. Decide whether we want to keep that
+  # pattern for the other providers, keep it unique for Terraform, or add
+  # these fields to the Terraform resource (and then within that, decide
+  # whether to deprecate router_interface and router_peer or leave them
+  # alone).
     custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
     resource: 'Network'
     imports: 'selfLink'
@@ -142,6 +152,7 @@ properties:
 
           This enum field has the one valid value: ALL_SUBNETS
         send_empty_value: true
+ # TODO(#324): enum?
         item_type:
           type: String
       - name: 'advertisedIpRanges'

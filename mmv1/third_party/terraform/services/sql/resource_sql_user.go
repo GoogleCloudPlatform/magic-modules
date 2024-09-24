@@ -348,10 +348,13 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	for _, currentUser := range users.Items {
+		var username string
 		if !(strings.Contains(databaseInstance.DatabaseVersion, "POSTGRES") || currentUser.Type == "CLOUD_IAM_GROUP") {
-			name = strings.Split(name, "@")[0]
+			username = strings.Split(name, "@")[0]
+		} else {
+			username = name
 		}
-		if currentUser.Name == name {
+		if currentUser.Name == username {
 			// Host can only be empty for postgres instances,
 			// so don't compare the host if the API host is empty.
 			if host == "" || currentUser.Host == host {
@@ -568,6 +571,19 @@ func resourceSqlUserImporter(d *schema.ResourceData, meta interface{}) ([]*schem
 			return nil, fmt.Errorf("Error setting host: %s", err)
 		}
 		if err := d.Set("name", parts[3]); err != nil {
+			return nil, fmt.Errorf("Error setting name: %s", err)
+		}
+	} else if len(parts) == 5 {
+		if err := d.Set("project", parts[0]); err != nil {
+			return nil, fmt.Errorf("Error setting project: %s", err)
+		}
+		if err := d.Set("instance", parts[1]); err != nil {
+			return nil, fmt.Errorf("Error setting instance: %s", err)
+		}
+		if err := d.Set("host", fmt.Sprintf("%s/%s", parts[2], parts[3])); err != nil {
+			return nil, fmt.Errorf("Error setting host: %s", err)
+		}
+		if err := d.Set("name", parts[4]); err != nil {
 			return nil, fmt.Errorf("Error setting name: %s", err)
 		}
 	} else {

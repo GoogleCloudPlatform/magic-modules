@@ -37,7 +37,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 1000
@@ -150,8 +150,6 @@ properties:
 
             See the [Backend Services Overview](https://cloud.google.com/load-balancing/docs/backend-service#balancing-mode)
             for an explanation of load balancing modes.
-
-            From version 6.0.0 default value will be UTILIZATION to match default GCP value.
           default_value: "UTILIZATION"
           enum_values:
             - 'UTILIZATION'
@@ -744,18 +742,21 @@ properties:
   - name: 'iap'
     type: NestedObject
     description: Settings for enabling Cloud Identity Aware Proxy
+    default_from_api: true
     send_empty_value: true
     properties:
+      - name: 'enabled'
+        type: Boolean
+        description: Whether the serving infrastructure will authenticate and authorize all incoming requests.
+        required: true
       - name: 'oauth2ClientId'
         type: String
         description: |
           OAuth2 Client ID for IAP
-        required: true
       - name: 'oauth2ClientSecret'
         type: String
         description: |
           OAuth2 Client Secret for IAP
-        required: true
         ignore_read: true
         sensitive: true
         send_empty_value: true
@@ -774,6 +775,9 @@ properties:
       [Choosing a load balancer](https://cloud.google.com/load-balancing/docs/backend-service).
     immutable: true
     default_value: "EXTERNAL"
+    # If you're modifying this value, it probably means Global ILB is now
+    # an option. If that's the case, all of the documentation is based on
+    # this resource supporting external load balancing only.
     enum_values:
       - 'EXTERNAL'
       - 'INTERNAL_SELF_MANAGED'
@@ -810,7 +814,8 @@ properties:
                   Maglev, refer to https://ai.google/research/pubs/pub44824
 
       * `WEIGHTED_MAGLEV`: Per-instance weighted Load Balancing via health check
-                           reported weights. If set, the Backend Service must
+                           reported weights. Only applicable to loadBalancingScheme
+                           EXTERNAL. If set, the Backend Service must
                            configure a non legacy HTTP-based Health Check, and
                            health check replies are expected to contain
                            non-standard HTTP response header field
@@ -822,7 +827,7 @@ properties:
                            UNAVAILABLE_WEIGHT. Otherwise, Load Balancing remains
                            equal-weight.
 
-      This field is applicable to either:
+      locality_lb_policy is applicable to either:
 
       * A regional backend service with the service_protocol set to HTTP, HTTPS, or HTTP2,
         and loadBalancingScheme set to INTERNAL_MANAGED.
@@ -831,7 +836,7 @@ properties:
         Load Balancing). Only MAGLEV and WEIGHTED_MAGLEV values are possible for External
         Network Load Balancing. The default is MAGLEV.
 
-      If session_affinity is not NONE, and this field is not set to MAGLEV, WEIGHTED_MAGLEV,
+      If session_affinity is not NONE, and locality_lb_policy is not set to MAGLEV, WEIGHTED_MAGLEV,
       or RING_HASH, session affinity settings will not take effect.
 
       Only ROUND_ROBIN and RING_HASH are supported when the backend service is referenced
@@ -960,9 +965,6 @@ properties:
       Settings controlling eviction of unhealthy hosts from the load balancing pool.
       Applicable backend service types can be a global backend service with the
       loadBalancingScheme set to INTERNAL_SELF_MANAGED or EXTERNAL_MANAGED.
-
-      From version 6.0.0 outlierDetection default terraform values will be removed to match default GCP value.
-      Default values are enforce by GCP without providing them.
     properties:
       - name: 'baseEjectionTime'
         type: NestedObject
@@ -1013,7 +1015,6 @@ properties:
           - 'outlier_detection.0.success_rate_minimum_hosts'
           - 'outlier_detection.0.success_rate_request_volume'
           - 'outlier_detection.0.success_rate_stdev_factor'
-        default_value: 5
       - name: 'consecutiveGatewayFailure'
         type: Integer
         description: |
@@ -1032,7 +1033,6 @@ properties:
           - 'outlier_detection.0.success_rate_minimum_hosts'
           - 'outlier_detection.0.success_rate_request_volume'
           - 'outlier_detection.0.success_rate_stdev_factor'
-        default_value: 5
       - name: 'enforcingConsecutiveErrors'
         type: Integer
         description: |
@@ -1051,7 +1051,6 @@ properties:
           - 'outlier_detection.0.success_rate_minimum_hosts'
           - 'outlier_detection.0.success_rate_request_volume'
           - 'outlier_detection.0.success_rate_stdev_factor'
-        default_value: 100
       - name: 'enforcingConsecutiveGatewayFailure'
         type: Integer
         description: |
@@ -1070,7 +1069,6 @@ properties:
           - 'outlier_detection.0.success_rate_minimum_hosts'
           - 'outlier_detection.0.success_rate_request_volume'
           - 'outlier_detection.0.success_rate_stdev_factor'
-        default_value: 0
       - name: 'enforcingSuccessRate'
         type: Integer
         description: |
@@ -1089,7 +1087,6 @@ properties:
           - 'outlier_detection.0.success_rate_minimum_hosts'
           - 'outlier_detection.0.success_rate_request_volume'
           - 'outlier_detection.0.success_rate_stdev_factor'
-        default_value: 100
       - name: 'interval'
         type: NestedObject
         description: |
@@ -1137,7 +1134,6 @@ properties:
           - 'outlier_detection.0.success_rate_minimum_hosts'
           - 'outlier_detection.0.success_rate_request_volume'
           - 'outlier_detection.0.success_rate_stdev_factor'
-        default_value: 10
       - name: 'successRateMinimumHosts'
         type: Integer
         description: |
@@ -1157,7 +1153,6 @@ properties:
           - 'outlier_detection.0.success_rate_minimum_hosts'
           - 'outlier_detection.0.success_rate_request_volume'
           - 'outlier_detection.0.success_rate_stdev_factor'
-        default_value: 5
       - name: 'successRateRequestVolume'
         type: Integer
         description: |
@@ -1178,7 +1173,6 @@ properties:
           - 'outlier_detection.0.success_rate_minimum_hosts'
           - 'outlier_detection.0.success_rate_request_volume'
           - 'outlier_detection.0.success_rate_stdev_factor'
-        default_value: 100
       - name: 'successRateStdevFactor'
         type: Integer
         description: |
@@ -1188,7 +1182,6 @@ properties:
           success rate: mean - (stdev * success_rate_stdev_factor). This factor is divided
           by a thousand to get a double. That is, if the desired factor is 1.9, the
           runtime value should be 1900. Defaults to 1900.
-  # 'port' is deprecated
         at_least_one_of:
           - 'outlier_detection.0.base_ejection_time'
           - 'outlier_detection.0.consecutive_errors'
@@ -1201,7 +1194,7 @@ properties:
           - 'outlier_detection.0.success_rate_minimum_hosts'
           - 'outlier_detection.0.success_rate_request_volume'
           - 'outlier_detection.0.success_rate_stdev_factor'
-        default_value: 1900
+  # 'port' is deprecated
   - name: 'portName'
     type: String
     description: |
@@ -1217,6 +1210,7 @@ properties:
       types and may result in errors if used with the GA API. **NOTE**: With protocol “UNSPECIFIED”,
       the backend service can be used by Layer 4 Internal Load Balancing or Network Load Balancing
       with TCP/UDP/L3_DEFAULT Forwarding Rule protocol.
+    # TODO: make a ResourceRef to Security Policy
     default_from_api: true
     enum_values:
       - 'HTTP'
@@ -1250,9 +1244,8 @@ properties:
           ClientTlsPolicy is a resource that specifies how a client should authenticate
           connections to backends of a service. This resource itself does not affect
           configuration unless it is attached to a backend service resource.
-        required: true
-        custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
-        resource: 'Region'
+        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+        resource: 'ClientTlsPolicy'
         imports: 'name'
       - name: 'subjectAltNames'
         type: Array
@@ -1260,9 +1253,35 @@ properties:
           A list of alternate names to verify the subject identity in the certificate.
           If specified, the client will verify that the server certificate's subject
           alt name matches one of the specified values.
-        required: true
         item_type:
           type: String
+      - name: 'awsV4Authentication'
+        type: NestedObject
+        description: |
+          The configuration needed to generate a signature for access to private storage buckets that support AWS's Signature Version 4 for authentication.
+          Allowed only for INTERNET_IP_PORT and INTERNET_FQDN_PORT NEG backends.
+        properties:
+          - name: 'accessKeyId'
+            type: String
+            description: |
+              The identifier of an access key used for s3 bucket authentication.
+          - name: 'accessKey'
+            type: String
+            description: |
+              The access key used for s3 bucket authentication.
+              Required for updating or creating a backend that uses AWS v4 signature authentication, but will not be returned as part of the configuration when queried with a REST API GET request.
+            ignore_read: true
+            sensitive: true
+            send_empty_value: true
+          - name: 'accessKeyVersion'
+            type: String
+            description: |
+              The optional version identifier for the access key. You can use this to keep track of different iterations of your access key.
+          - name: 'originRegion'
+            type: String
+            description: |
+              The name of the cloud region of your origin. This is a free-form field with the name of the region your cloud uses to host your origin.
+              For example, "us-east-1" for AWS or "us-ashburn-1" for OCI.
   - name: 'sessionAffinity'
     type: Enum
     description: |

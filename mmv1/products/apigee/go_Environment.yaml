@@ -52,6 +52,7 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'env_id'
   base_url: '{{org_id}}/environments/{{name}}'
+  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
   self_link: '{{org_id}}/environments/{{name}}'
   import_format:
     - '{{%org_id}}/environments/{{name}}'
@@ -62,14 +63,17 @@ examples:
   - name: 'apigee_environment_basic'
     vars:
       environment_name: 'my-environment'
-    skip_test: true
+    exclude_test: true
+      # This is a more verbose version of the above that creates all
+      # the resources needed for the acceptance test.
   - name: 'apigee_environment_basic_test'
     primary_resource_id: 'apigee_environment'
     primary_resource_name: 'fmt.Sprintf("organizations/tf-test%s", context["random_suffix"]), fmt.Sprintf("tf-test%s", context["random_suffix"])'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
-    skip_docs: true
+    exclude_docs: true
+      # Resource creation race
     skip_vcr: true
   - name: 'apigee_environment_basic_deployment_apiproxy_type_test'
     primary_resource_id: 'apigee_environment'
@@ -77,7 +81,8 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
-    skip_docs: true
+    exclude_docs: true
+      # Resource creation race
     skip_vcr: true
   - name: 'apigee_environment_patch_update_test'
     primary_resource_id: 'apigee_environment'
@@ -86,7 +91,8 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
-    skip_docs: true
+    exclude_docs: true
+      # Resource creation race
     skip_vcr: true
 parameters:
   - name: 'orgId'

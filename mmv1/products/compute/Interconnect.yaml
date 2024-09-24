@@ -23,12 +23,12 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/interconnects'
 base_url: 'projects/{{project}}/global/interconnects'
 self_link: 'projects/{{project}}/global/interconnects/{{name}}'
-immutable: true
+update_verb: :PATCH
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 10000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -59,6 +59,8 @@ examples:
     primary_resource_id: 'example-interconnect'
     vars:
       interconnect_name: 'example-interconnect'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/interconnect.go.erb
 properties:
   - !ruby/object:Api::Type::String
     name: 'description'
@@ -120,6 +122,7 @@ properties:
       - :IT_PRIVATE
     required: true
     immutable: true
+    diff_suppress_func: InterconnectTypeDiffSuppress
   - !ruby/object:Api::Type::Boolean
     name: 'adminEnabled'
     send_empty_value: true
@@ -356,6 +359,17 @@ properties:
                 traffic if the MKA session cannot be established. By default, the Interconnect
                 connection is configured with a must-secure security policy that drops all traffic
                 if the MKA session cannot be established with your router.
+              deprecation_message: >-
+                `failOpen` is deprecated and will be removed in a future major release. Use
+                other `failOpen` instead.
+      - !ruby/object:Api::Type::Boolean
+        name: 'failOpen'
+        description: |
+          If set to true, the Interconnect connection is configured with a should-secure
+          MACsec security policy, that allows the Google router to fallback to cleartext
+          traffic if the MKA session cannot be established. By default, the Interconnect
+          connection is configured with a must-secure security policy that drops all traffic
+          if the MKA session cannot be established with your router.
   - !ruby/object:Api::Type::Boolean
     name: 'macsecEnabled'
     description: |
@@ -363,22 +377,26 @@ properties:
       MACsec enablement fails if the MACsec object is not specified.
   - !ruby/object:Api::Type::String
     name: 'remoteLocation'
+    immutable: true
     description: |
       Indicates that this is a Cross-Cloud Interconnect. This field specifies the location outside
       of Google's network that the interconnect is connected to.
   - !ruby/object:Api::Type::Array
     name: 'requestedFeatures'
+    immutable: true
     description: |
-      interconnects.list of features requested for this Interconnect connection. Options: MACSEC (
+      interconnects.list of features requested for this Interconnect connection. Options: IF_MACSEC (
       If specified then the connection is created on MACsec capable hardware ports. If not
       specified, the default value is false, which allocates non-MACsec capable ports first if
-      available).
+      available). Note that MACSEC is still technically allowed for compatibility reasons, but it
+      does not work with the API, and will be removed in an upcoming major version.
     item_type: !ruby/object:Api::Type::Enum
       name: 'requestedFeatures'
       description: |
         interconnects.list of features requested for this Interconnect connection
       values:
         - :MACSEC
+        - :IF_MACSEC
   - !ruby/object:Api::Type::Array
     name: 'availableFeatures'
     description: |
@@ -387,9 +405,4 @@ properties:
       ports. If not present then the Interconnect connection is provisioned on non-MACsec capable
       ports and MACsec isn't supported and enabling MACsec fails).
     output: true
-    item_type: !ruby/object:Api::Type::Enum
-      name: 'availableFeatures'
-      description: |
-        interconnects.list of features available for this Interconnect connection,
-      values:
-        - :MACSEC
+    item_type: Api::Type::String

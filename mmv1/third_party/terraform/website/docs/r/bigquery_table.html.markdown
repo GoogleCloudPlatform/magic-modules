@@ -104,6 +104,8 @@ The following arguments are supported:
     By defining these properties, the data source can then be queried as
     if it were a standard BigQuery table. Structure is [documented below](#nested_external_data_configuration).
 
+* `biglake_configuration` - (Optional) Specifies the configuration of a BigLake managed table. Structure is [documented below](#nested_biglake_configuration)
+
 * `friendly_name` - (Optional) A descriptive name for the table.
 
 * `max_staleness`: (Optional) The maximum staleness of data that could be
@@ -174,16 +176,19 @@ The following arguments are supported:
     `CREATE MATERIALIZED VIEW mv1 AS REPLICA OF src_mv`.
     Structure is [documented below](#nested_table_replication_info).
 
-* `resource_tags` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
-    This field is in beta. The tags attached to this table. Tag keys are
+* `resource_tags` - (Optional) The tags attached to this table. Tag keys are
     globally unique. Tag key is expected to be in the namespaced format, for
     example "123456789012/environment" where 123456789012 is the ID of the
     parent organization or project resource for this tag key. Tag value is
     expected to be the short name, for example "Production".
 
-* `allow_resource_tags_on_deletion` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
-    This field is in beta. If set to true, it allows table deletion when there
-    are still resource tags attached. The default value is false.
+* `allow_resource_tags_on_deletion` - (Optional) If set to true, it allows table
+    deletion when there are still resource tags attached. The default value is
+    false.
+
+    ~>**Warning:** `allow_resource_tags_on_deletion` is deprecated and will be
+      removed in a future major release. The default behavior will be allowing
+      the presence of resource tags on deletion after the next major release.
 
 <a name="nested_external_data_configuration"></a>The `external_data_configuration` block supports:
 
@@ -488,6 +493,20 @@ The following arguments are supported:
 
 * `replication_interval_ms` (Optional) - The interval at which the source
     materialized view is polled for updates. The default is 300000.
+
+<a name="nested_biglake_configuration"></a>The `biglake_configuration` block supports:
+
+* `connection_id` - (Required) The connection specifying the credentials to be used to
+    read and write to external storage, such as Cloud Storage. The connection_id can
+    have the form "&lt;project\_id&gt;.&lt;location\_id&gt;.&lt;connection\_id&gt;" or
+    projects/&lt;project\_id&gt;/locations/&lt;location\_id&gt;/connections/&lt;connection\_id&gt;".
+
+* `storage_uri` - (Required) The fully qualified location prefix of the external folder where table data
+  is stored. The '*' wildcard character is not allowed. The URI should be in the format "gs://bucket/path_to_table/"
+
+* `file_format` - (Required) The file format the table data is stored in.
+
+* `table_format` - (Required) The table format the metadata only snapshots are stored in.
 
 ## Attributes Reference
 

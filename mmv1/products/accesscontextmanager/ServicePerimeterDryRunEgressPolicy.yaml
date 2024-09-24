@@ -1,0 +1,163 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+--- !ruby/object:Api::Resource
+name: 'ServicePerimeterDryRunEgressPolicy'
+create_url: '{{perimeter}}'
+base_url: ''
+self_link: '{{perimeter}}'
+create_verb: :PATCH
+delete_verb: :PATCH
+update_mask: true
+immutable: true
+identity:
+  - egressFrom
+  - egressTo
+nested_query: !ruby/object:Api::Resource::NestedQuery
+  modify_by_patch: true
+  is_list_of_ids: false
+  keys:
+    - spec
+    - egressPolicies
+references: !ruby/object:Api::Resource::ReferenceLinks
+  api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.servicePerimeters#egresspolicy'
+description: |
+  Manage a single EgressPolicy in the spec (dry-run) configuration for a service perimeter.
+  EgressPolicies match requests based on egressFrom and egressTo stanzas.
+  For an EgressPolicy to match, both egressFrom and egressTo stanzas must be matched.
+  If an EgressPolicy matches a request, the request is allowed to span the ServicePerimeter
+  boundary. For example, an EgressPolicy can be used to allow VMs on networks
+  within the ServicePerimeter to access a defined set of projects outside the
+  perimeter in certain contexts (e.g. to read data from a Cloud Storage bucket
+  or query against a BigQuery dataset).
+
+  ~> **Note:** By default, updates to this resource will remove the EgressPolicy from the
+  from the perimeter and add it back in a non-atomic manner. To ensure that the new EgressPolicy
+  is added before the old one is removed, add a `lifecycle` block with `create_before_destroy = true` to this resource.
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'access_context_manager_service_perimeter_dry_run_egress_policy'
+    skip_test: true
+autogen_async: true
+exclude_tgc: true
+# Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter
+skip_sweeper: true
+exclude_import: true
+id_format: '{{perimeter}}'
+import_format: ['{{perimeter}}']
+mutex: '{{perimeter}}'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_import: templates/terraform/custom_import/access_context_manager_service_perimeter_ingress_policy.go.erb
+  pre_update: templates/terraform/pre_create/access_context_manager_dry_run_resource.go.erb
+  pre_create: templates/terraform/pre_create/access_context_manager_dry_run_resource.go.erb
+  pre_delete: templates/terraform/pre_create/access_context_manager_dry_run_resource.go.erb
+parameters:
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'perimeter'
+    resource: 'ServicePerimeter'
+    imports: 'name'
+    description: |
+      The name of the Service Perimeter to add this resource to.
+    required: true
+    url_param_only: true
+properties:
+  - !ruby/object:Api::Type::NestedObject
+    name: 'egressFrom'
+    description: |
+      Defines conditions on the source of a request causing this `EgressPolicy` to apply.
+    properties:
+      - !ruby/object:Api::Type::Enum
+        name: 'identityType'
+        description: |
+          Specifies the type of identities that are allowed access to outside the
+          perimeter. If left unspecified, then members of `identities` field will
+          be allowed access.
+        values:
+          - :ANY_IDENTITY
+          - :ANY_USER_ACCOUNT
+          - :ANY_SERVICE_ACCOUNT
+      - !ruby/object:Api::Type::Array
+        name: 'identities'
+        description: |
+          A list of identities that are allowed access through this `EgressPolicy`.
+          Should be in the format of email address. The email address should
+          represent individual user or service account only.
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::Array
+        name: 'sources'
+        description: 'Sources that this EgressPolicy authorizes access from.'
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'accessLevel'
+              description: 'An AccessLevel resource name that allows resources outside the ServicePerimeter to be accessed from the inside.'
+      - !ruby/object:Api::Type::Enum
+        name: 'sourceRestriction'
+        description: 'Whether to enforce traffic restrictions based on `sources` field. If the `sources` field is non-empty, then this field must be set to `SOURCE_RESTRICTION_ENABLED`.'
+        values:
+          - :SOURCE_RESTRICTION_ENABLED
+          - :SOURCE_RESTRICTION_DISABLED
+  - !ruby/object:Api::Type::NestedObject
+    name: 'egressTo'
+    description: |
+      Defines the conditions on the `ApiOperation` and destination resources that
+      cause this `EgressPolicy` to apply.
+    properties:
+      - !ruby/object:Api::Type::Array
+        name: 'resources'
+        item_type: Api::Type::String
+        description: |
+          A list of resources, currently only projects in the form
+          `projects/<projectnumber>`, that match this to stanza. A request matches
+          if it contains a resource in this list. If * is specified for resources,
+          then this `EgressTo` rule will authorize access to all resources outside
+          the perimeter.
+      - !ruby/object:Api::Type::Array
+        name: 'externalResources'
+        item_type: Api::Type::String
+        description: |
+          A list of external resources that are allowed to be accessed. A request
+          matches if it contains an external resource in this list (Example:
+          s3://bucket/path). Currently '*' is not allowed.
+      - !ruby/object:Api::Type::Array
+        name: 'operations'
+        description: |
+          A list of `ApiOperations` that this egress rule applies to. A request matches
+          if it contains an operation/service in this list.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'serviceName'
+              description: |
+                The name of the API whose methods or permissions the `IngressPolicy` or
+                `EgressPolicy` want to allow. A single `ApiOperation` with serviceName
+                field set to `*` will allow all methods AND permissions for all services.
+            - !ruby/object:Api::Type::Array
+              name: 'methodSelectors'
+              description: |
+                API methods or permissions to allow. Method or permission must belong
+                to the service specified by `serviceName` field. A single MethodSelector
+                entry with `*` specified for the `method` field will allow all methods
+                AND permissions for the service specified in `serviceName`.
+              item_type: !ruby/object:Api::Type::NestedObject
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: 'method'
+                    description: |
+                      Value for `method` should be a valid method name for the corresponding
+                      `serviceName` in `ApiOperation`. If `*` used as value for method,
+                      then ALL methods and permissions are allowed.
+                  - !ruby/object:Api::Type::String
+                    name: 'permission'
+                    description: |
+                      Value for permission should be a valid Cloud IAM permission for the
+                      corresponding `serviceName` in `ApiOperation`.

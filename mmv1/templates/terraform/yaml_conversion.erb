@@ -39,6 +39,9 @@ exclude: <%= object.exclude %>
 <%  unless object.readonly.nil? -%>
 readonly: <%= object.readonly %>
 <%  end -%>
+<%  unless !object.skip_attribution_label -%>
+exclude_attribution_label: <%= object.skip_attribution_label %>
+<%  end -%>
 <%
 #references blocks
 -%>
@@ -115,7 +118,7 @@ read_verb: '<%= object.read_verb.to_s %>'
 read_query_params: '<%= object.read_query_params %>'
 <%  end -%>
 <%  unless !object.skip_read -%>
-skip_read: <%= object.skip_read %>
+exclude_read: <%= object.skip_read %>
 <%  end -%>
 <%  unless object.delete_url.nil? -%>
 delete_url: '<%= object.delete_url %>'
@@ -124,7 +127,7 @@ delete_url: '<%= object.delete_url %>'
 delete_verb: '<%= object.delete_verb.to_s %>'
 <%  end -%>
 <%  unless !object.skip_delete -%>
-skip_delete: <%= object.skip_delete %>
+exclude_delete: <%= object.skip_delete %>
 <%  end -%>
 <%  unless object.immutable.nil? -%>
 immutable: <%= object.immutable %>
@@ -284,7 +287,7 @@ iam_policy:
   exclude_tgc: <%= object.iam_policy.exclude_tgc %>
 <%    end -%>
 <%    unless !object.iam_policy.skip_import_test -%>
-  skip_import_test: <%= object.iam_policy.skip_import_test %>
+  exclude_import_test: <%= object.iam_policy.skip_import_test %>
 <%    end -%>
 <%    unless object.iam_policy.method_name_separator == '/' -%>
   method_name_separator: '<%= object.iam_policy.method_name_separator %>'
@@ -330,6 +333,9 @@ iam_policy:
 <%    end -%>
 <%    unless object.iam_policy.self_link.nil? -%>
   self_link: '<%= object.iam_policy.self_link %>'
+<%    end -%>
+<%    unless object.iam_policy.custom_diff_suppress.nil? -%>
+  custom_diff_suppress: '<%= object.convert_go_file(object.iam_policy.custom_diff_suppress ) %>'
 <%    end -%>
 <%    unless object.iam_policy.import_format.nil? -%>
   import_format:
@@ -406,10 +412,13 @@ custom_code:
 <%    unless object.custom_code.test_check_destroy.nil? -%>
   test_check_destroy: '<%= object.convert_go_file( object.custom_code.test_check_destroy )%>'
 <%    end -%>
+<%    unless object.custom_code.post_create_failure.nil? -%>
+  post_create_failure: '<%= object.convert_go_file( object.custom_code.post_create_failure )%>'
+<%    end -%>
 <%  end -%>
 <% 
 custom_diff = object.custom_diff.reject {
-  |cdiff| cdiff == "tpgresource.SetLabelsDiff" || cdiff == "tpgresource.SetMetadataLabelsDiff" || cdiff == "tpgresource.SetAnnotationsDiff" || cdiff == "tpgresource.SetMetadataAnnotationsDiff"
+  |cdiff| cdiff == "tpgresource.SetLabelsDiff" ||  cdiff == "tpgresource.SetLabelsDiffWithoutAttributionLabel" || cdiff == "tpgresource.SetMetadataLabelsDiff" || cdiff == "tpgresource.SetAnnotationsDiff" || cdiff == "tpgresource.SetMetadataAnnotationsDiff"
 }
 -%>
 <%  unless custom_diff.empty? -%>
@@ -419,7 +428,7 @@ custom_diff:
 <%    end -%>
 <%  end -%>
 <%  unless !object.skip_default_cdiff -%>
-skip_default_cdiff: <%= object.skip_default_cdiff %>
+exclude_default_cdiff: <%= object.skip_default_cdiff %>
 <%  end -%>
 <%
 #terraform overrides
@@ -431,7 +440,11 @@ filename_override: '<%= object.filename_override %>'
 exclude_tgc: <%= object.exclude_tgc %>
 <%  end -%>
 <%  unless !object.skip_sweeper -%>
-skip_sweeper: <%= object.skip_sweeper %>
+exclude_sweeper: <%= object.skip_sweeper %>
+<%  end -%>
+<%    if !object.sweeper.nil? && !object.sweeper.sweepable_identifier_field.nil? -%>
+sweeper:
+  sweepable_identifier_field: <%= object.sweeper.sweepable_identifier_field %>
 <%  end -%>
 <%  unless object.error_retry_predicates.nil? -%>
 error_retry_predicates:
@@ -480,7 +493,7 @@ examples:
 <%    object.examples.each do |example| -%>
   - name: '<%= example.name %>'
 <%      unless example.config_path == "templates/terraform/examples/#{example.name}.tf.erb" -%>
-    config_path: '<%= example.config_path %>'
+    config_path: '<%= object.convert_go_file(example.config_path) %>'
 <%      end -%>
 <%      unless example.primary_resource_id.nil? -%>
     primary_resource_id: '<%= example.primary_resource_id %>'
@@ -490,6 +503,9 @@ examples:
 <%      end -%>
 <%      unless example.min_version.nil? -%>
     min_version: '<%= example.min_version %>'
+<%      end -%>
+<%      unless example.region_override.nil? -%>
+    region_override: '<%= example.region_override %>'
 <%      end -%>
 <%      unless example.vars.nil? -%>
 <%      unless example.vars.empty? -%>
@@ -515,6 +531,14 @@ examples:
 <%        end -%>
 <%      end -%>
 <%      end -%>
+<%      unless example.oics_vars_overrides.nil? -%>
+<%      unless example.oics_vars_overrides.empty? -%>
+    oics_vars_overrides:
+<%         example.oics_vars_overrides.each do |vname, val| -%>
+      '<%= vname -%>': '<%= val %>'
+<%        end -%>
+<%      end -%>
+<%      end -%>
 <%      unless example.ignore_read_extra.empty? -%>
     ignore_read_extra:
 <%        example.ignore_read_extra.each do |irextra| -%>
@@ -525,13 +549,13 @@ examples:
     external_providers: <%= example.external_providers %>
 <%      end -%>
 <%      unless example.skip_test.nil? -%>
-    skip_test: <%= example.skip_test %>
+    exclude_test: <%= example.skip_test %>
 <%      end -%>
 <%      unless example.skip_import_test.nil? -%>
-    skip_import_test: <%= example.skip_import_test %>
+    exclude_import_test: <%= example.skip_import_test %>
 <%      end -%>
 <%      unless example.skip_docs.nil? -%>
-    skip_docs: <%= example.skip_docs %>
+    exclude_docs: <%= example.skip_docs %>
 <%      end -%>
 <%      unless example.skip_vcr.nil? -%>
     skip_vcr: <%= example.skip_vcr %>

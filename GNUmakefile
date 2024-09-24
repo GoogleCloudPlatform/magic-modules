@@ -95,6 +95,11 @@ tgc:
 		bundle exec compiler -e terraform -f tgc -v beta -o $(OUTPUT_PATH)/tfplan2cai $(mmv1_compile);\
 		bundle exec compiler -e terraform -f tgc_cai2hcl -v beta -o $(OUTPUT_PATH)/cai2hcl $(mmv1_compile);\
 
+tgc-go:
+	cd mmv1;\
+		go run . --version beta --provider  tgc --output $(OUTPUT_PATH)/tfplan2cai;\
+		go run . --version beta --provider  tgc_cai2hcl --output $(OUTPUT_PATH)/cai2hcl;\
+
 tf-oics:
 	cd mmv1;\
 		bundle;\

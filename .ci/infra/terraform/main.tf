@@ -153,6 +153,12 @@ resource "google_organization_iam_member" "sa_storage_admin" {
   member = google_service_account.sa.member
 }
 
+resource "google_organization_iam_member" "sa_securitycenter_bigquery_exports_editor" {
+  org_id = data.google_organization.org.org_id
+  role   = "roles/securitycenter.bigQueryExportsEditor"
+  member = google_service_account.sa.member
+}
+
 resource "google_billing_account_iam_member" "sa_master_billing_admin" {
   billing_account_id = data.google_billing_account.master_acct.id
   role               = "roles/billing.admin"
@@ -279,6 +285,7 @@ module "project-services" {
     "looker.googleapis.com",
     "managedidentities.googleapis.com",
     "memcache.googleapis.com",
+    "memorystore.googleapis.com",
     "metastore.googleapis.com",
     "migrationcenter.googleapis.com",
     "ml.googleapis.com",
@@ -321,6 +328,7 @@ module "project-services" {
     "servicenetworking.googleapis.com",
     "serviceusage.googleapis.com",
     "sourcerepo.googleapis.com",
+    "speech.googleapis.com",
     "spanner.googleapis.com",
     "sql-component.googleapis.com",
     "sqladmin.googleapis.com",
@@ -334,6 +342,7 @@ module "project-services" {
     "testing.googleapis.com",
     "tpu.googleapis.com",
     "trafficdirector.googleapis.com",
+    "transcoder.googleapis.com",
     "vmwareengine.googleapis.com",
     "vpcaccess.googleapis.com",
     "websecurityscanner.googleapis.com",
@@ -414,6 +423,21 @@ resource "google_project_iam_member" "aiplatform_agent_encrypter_decrypter" {
   member  = "serviceAccount:service-${google_project.proj.number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
 }
 
+# TestAccComputeInstance_confidentialHyperDiskBootDisk
+resource "google_project_iam_member" "compute_default_sa_encrypter_decrypter" {
+  project = google_project.proj.project_id
+  role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member  = "serviceAccount:${google_project.proj.number}-compute@developer.gserviceaccount.com"
+}
+
+# TestAccComputeInstance_confidentialHyperDiskBootDisk
+resource "google_project_iam_member" "compute_agent_encrypter_decrypter" {
+  project = google_project.proj.project_id
+  role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member  = "serviceAccount:service-${google_project.proj.number}@compute-system.iam.gserviceaccount.com"
+}
+
+
 data "google_organization" "org2" {
   organization = var.org2_id
 }
@@ -440,34 +464,6 @@ resource "google_organization_iam_member" "sa_org2_resource_settings_admin" {
   org_id = data.google_organization.org2.org_id
   role   = "roles/resourcesettings.admin"
   member = google_service_account.sa.member
-}
-
-resource "google_project" "firestore_proj" {
-  name            = var.firestore_project_id
-  project_id      = var.firestore_project_id
-  org_id          = data.google_organization.org.org_id
-  billing_account = var.billing_account_id
-}
-
-module "firestore-project-services" {
-  source  = "terraform-google-modules/project-factory/google//modules/project_services"
-  version = "~> 14.1"
-
-  project_id = google_project.firestore_proj.project_id
-
-  activate_apis = [
-    "firestore.googleapis.com",
-  ]
-}
-
-resource "google_firestore_database" "firestore_db" {
-  provider = google-beta
-  depends_on = [module.firestore-project-services]
-
-  project     = google_project.firestore_proj.project_id
-  name        = "(default)"
-  location_id = "nam5"
-  type        = "FIRESTORE_NATIVE"
 }
 
 output "service_account" {

@@ -14,11 +14,37 @@ resource "google_secret_manager_secret_version" "secret_version" {
   secret_data = "<%= ctx[:vars]['data'] %>"
 }
 
+resource "google_kms_key_ring" "keyring" {
+  provider = google-beta
+  
+  name     = "<%= ctx[:vars]['key_ring_name'] %>"
+  location = "us-central1"
+}
+
+resource "google_kms_crypto_key" "example_key" {
+  provider = google-beta
+  
+  name            = "<%= ctx[:vars]['crypto_key_name'] %>"
+  key_ring        = google_kms_key_ring.keyring.id
+}
+
+resource "google_kms_crypto_key_iam_binding" "crypto_key_binding" {
+  provider = google-beta
+
+  crypto_key_id = google_kms_crypto_key.example_key.id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+
+  members = [
+    "serviceAccount:service-${data.google_project.project.number}@gcp-sa-dataform.iam.gserviceaccount.com",
+  ]
+}
+
 resource "google_dataform_repository" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
   name = "<%= ctx[:vars]['dataform_repository_name'] %>"
   display_name = "<%= ctx[:vars]['dataform_repository_name'] %>"
   npmrc_environment_variables_secret_version = google_secret_manager_secret_version.secret_version.id
+  kms_key_name = google_kms_crypto_key.example_key.id
 
   labels = {
     label_foo1 = "label-bar1"
@@ -35,4 +61,8 @@ resource "google_dataform_repository" "<%= ctx[:primary_resource_id] %>" {
     schema_suffix = "_suffix"
     table_prefix = "prefix_"
   }
+
+  depends_on = [
+    google_kms_crypto_key_iam_binding.crypto_key_binding
+  ]
 }

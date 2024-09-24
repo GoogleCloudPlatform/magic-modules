@@ -33,7 +33,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 1000
@@ -45,11 +45,17 @@ async:
     message: 'message'
 collection_url_key: 'items'
 custom_code:
+  constants: 'templates/terraform/constants/go/compute_resource_policy.go.tmpl'
 examples:
   - name: 'resource_policy_basic'
     primary_resource_id: 'foo'
     vars:
       name: 'gce-policy'
+  - name: 'resource_policy_hourly_format'
+    primary_resource_id: 'foo'
+    vars:
+      name: 'gce-policy'
+    exclude_docs: true
   - name: 'resource_policy_full'
     primary_resource_id: 'bar'
     vars:
@@ -138,6 +144,7 @@ properties:
                   It must be in an hourly format "HH:MM",
                   where HH : [00-23] and MM : [00] GMT. eg: 21:00
                 required: true
+                diff_suppress_func: 'HourlyFormatSuppressDiff'
                 validation:
                   function: 'verify.ValidateHourlyOnly'
           - name: 'dailySchedule'
@@ -161,6 +168,7 @@ properties:
                   00:00, 04:00, 08:00, 12:00, 16:00, or 20:00. For example,
                   both 13:00-5 and 08:00 are valid.
                 required: true
+                diff_suppress_func: 'HourlyFormatSuppressDiff'
                 validation:
                   function: 'verify.ValidateHourlyOnly'
           - name: 'weeklySchedule'

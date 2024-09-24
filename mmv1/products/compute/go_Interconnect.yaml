@@ -25,7 +25,7 @@ references:
 docs:
 base_url: 'projects/{{project}}/global/interconnects'
 self_link: 'projects/{{project}}/global/interconnects/{{name}}'
-immutable: true
+update_verb: 'PATCH'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -34,7 +34,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 10000
@@ -45,6 +45,7 @@ async:
     path: 'error/errors'
     message: 'message'
 custom_code:
+  constants: 'templates/terraform/constants/go/interconnect.go.tmpl'
 examples:
   - name: 'compute_interconnect_basic'
     primary_resource_id: 'example-interconnect'
@@ -54,12 +55,12 @@ examples:
       deletion_protection: 'true'
     test_vars_overrides:
       'deletion_protection': 'false'
-    skip_test: true
+    exclude_test: true
   - name: 'compute_interconnect_basic_test'
     primary_resource_id: 'example-interconnect'
     vars:
       interconnect_name: 'example-interconnect'
-    skip_docs: true
+    exclude_docs: true
 parameters:
 properties:
   - name: 'description'
@@ -118,6 +119,7 @@ properties:
         - DEDICATED: A dedicated physical interconnection with the customer.
     required: true
     immutable: true
+    diff_suppress_func: 'InterconnectTypeDiffSuppress'
     enum_values:
       - 'DEDICATED'
       - 'PARTNER'
@@ -292,7 +294,6 @@ properties:
     description: |
       Labels for this resource. These can only be added or modified by the setLabels
       method. Each label key/value pair must comply with RFC1035. Label values may be empty.
-    immutable: false
   - name: 'labelFingerprint'
     type: Fingerprint
     description: |
@@ -375,19 +376,23 @@ properties:
     description: |
       Indicates that this is a Cross-Cloud Interconnect. This field specifies the location outside
       of Google's network that the interconnect is connected to.
+    immutable: true
   - name: 'requestedFeatures'
     type: Array
     description: |
-      interconnects.list of features requested for this Interconnect connection. Options: MACSEC (
+      interconnects.list of features requested for this Interconnect connection. Options: IF_MACSEC (
       If specified then the connection is created on MACsec capable hardware ports. If not
       specified, the default value is false, which allocates non-MACsec capable ports first if
-      available).
+      available). Note that MACSEC is still technically allowed for compatibility reasons, but it
+      does not work with the API, and will be removed in an upcoming major version.
+    immutable: true
     item_type:
       type: Enum
       description: |
         interconnects.list of features requested for this Interconnect connection
       enum_values:
         - 'MACSEC'
+        - 'IF_MACSEC'
   - name: 'availableFeatures'
     type: Array
     description: |
@@ -397,8 +402,4 @@ properties:
       ports and MACsec isn't supported and enabling MACsec fails).
     output: true
     item_type:
-      type: Enum
-      description: |
-        interconnects.list of features available for this Interconnect connection,
-      enum_values:
-        - 'MACSEC'
+      type: String

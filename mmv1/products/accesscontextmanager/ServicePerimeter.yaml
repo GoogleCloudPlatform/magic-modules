@@ -11,8 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This is the singular of `ServicePerimeters`, any changes here should be made to `ServicePerimeters` as well
 --- !ruby/object:Api::Resource
+# This is the singular of `ServicePerimeters`, any changes here should be made to `ServicePerimeters` as well
 name: 'ServicePerimeter'
 # This is an unusual API, so we need to use a few fields to map the methods
 # to the right URL.
@@ -265,7 +265,10 @@ properties:
                         description: |
                           A Google Cloud resource that is allowed to ingress the perimeter.
                           Requests from these resources will be allowed to access perimeter data.
-                          Currently only projects are allowed. Format `projects/{project_number}`
+                          Currently only projects and VPCs are allowed.
+                          Project format: `projects/{projectNumber}`
+                          VPC network format:
+                          `//compute.googleapis.com/projects/{PROJECT_ID}/global/networks/{NAME}`.
                           The project may be in any Google Cloud organization, not just the
                           organization that the perimeter is defined in. `*` is not allowed, the case
                           of allowing all Google Cloud resources only is not supported.

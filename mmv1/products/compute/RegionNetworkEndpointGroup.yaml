@@ -34,7 +34,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -106,7 +106,6 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'region_network_endpoint_group_portmap'
     primary_resource_id: 'region_network_endpoint_group_portmap'
-    min_version: 'beta'
     vars:
       network_name: 'network'
       subnetwork_name: 'subnetwork'

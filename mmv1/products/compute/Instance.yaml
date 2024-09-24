@@ -24,7 +24,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -232,6 +232,15 @@ properties:
                     customer-supplied encryption key that protects this
                     resource.
                   output: true
+            - !ruby/object:Api::Type::String
+              name: 'storagePool'
+              required: false
+              immutable: true
+              description: |
+                The URL of the storage pool in which the new disk is created.
+                For example:
+                * https://www.googleapis.com/compute/v1/projects/{project}/zones/{zone}/storagePools/{storagePool}
+                * /projects/{project}/zones/{zone}/storagePools/{storagePool}
         - !ruby/object:Api::Type::Enum
           name: 'interface'
           description: |
@@ -614,11 +623,13 @@ properties:
         name: 'confidentialInstanceType'
         description: |
           The confidential computing technology the instance uses.
-          SEV is an AMD feature. One of the following values: SEV, SEV_SNP.
-          If SEV_SNP, min_cpu_platform = "AMD Milan" is currently required.
+          SEV is an AMD feature. TDX is an Intel feature. One of the following
+          values is required: SEV, SEV_SNP, TDX. If SEV_SNP, min_cpu_platform =
+          "AMD Milan" is currently required. TDX is only available in beta.
         values:
           - :SEV
           - :SEV_SNP
+          - :TDX
         at_least_one_of:
           - confidential_instance_config.0.enable_confidential_compute
           - confidential_instance_config.0.confidential_instance_type
@@ -635,7 +646,6 @@ properties:
     # This is incorrect because you can make actions on the Instance (start, stop)
     # In an idempotent world, the best way to express these actions is to
     # change the status value.
-    output: false
     values:
       - :PROVISIONING
       - :STAGING

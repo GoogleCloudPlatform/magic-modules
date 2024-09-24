@@ -33,6 +33,13 @@ import (
 )
 
 type FrameworkProviderConfig struct {
+	// Temporary, as we'll replace use of FrameworkProviderConfig with transport_tpg.Config soon
+	// transport_tpg.Config has a the fields below, hence these changes are needed
+	Credentials                types.String
+	AccessToken                types.String
+	ImpersonateServiceAccount  types.String
+	// End temporary
+
 	BillingProject             types.String
 	Client                     *http.Client
 	Context                    context.Context
@@ -48,6 +55,7 @@ type FrameworkProviderConfig struct {
 	UniverseDomain             types.String
 	UserAgent                  string
 	UserProjectOverride        types.Bool
+	DefaultLabels              types.Map
 
 	// paths for client setup
 	<% products.each do |product| -%>
@@ -96,15 +104,23 @@ func (p *FrameworkProviderConfig) LoadAndValidateFramework(ctx context.Context, 
 	p.<%= product[:definitions].name -%>BasePath = data.<%= product[:definitions].name -%>CustomEndpoint.ValueString()
 	<% end -%>
 
+	// Temporary
+	p.Credentials = data.Credentials
+	p.AccessToken = data.AccessToken
+	p.ImpersonateServiceAccount = data.ImpersonateServiceAccount
+	// End temporary
+
+	// Copy values from the ProviderModel struct containing data about the provider configuration (present only when responsing to ConfigureProvider rpc calls)
+	// to the FrameworkProviderConfig struct that will be passed and available to all resources/data sources
 	p.Context = ctx
 	p.BillingProject = data.BillingProject
+	p.DefaultLabels = data.DefaultLabels
 	p.Project = data.Project
 	p.Region = GetRegionFromRegionSelfLink(data.Region)
 	p.Scopes = data.Scopes
 	p.Zone = data.Zone
 	p.UserProjectOverride = data.UserProjectOverride
 	p.PollInterval = 10 * time.Second
-	p.Project = data.Project
 	p.UniverseDomain = data.UniverseDomain
 	p.RequestBatcherServiceUsage = transport_tpg.NewRequestBatcher("Service Usage", ctx, batchingConfig)
 	p.RequestBatcherIam = transport_tpg.NewRequestBatcher("IAM", ctx, batchingConfig)
@@ -615,6 +631,10 @@ func GetCredentials(ctx context.Context, data fwmodels.ProviderModel, initialCre
 		contents, _, err := verify.PathOrContents(data.Credentials.ValueString())
 		if err != nil {
 			diags.AddError(fmt.Sprintf("error loading credentials: %s", err), err.Error())
+			return googleoauth.Credentials{}
+		}
+		if len(contents) == 0 {
+			diags.AddError("error loading credentials", "provided credentials are empty")
 			return googleoauth.Credentials{}
 		}
 

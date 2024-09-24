@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/services/filestore"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func testResourceFilestoreInstanceStateDataV0() map[string]interface{} {
@@ -164,7 +164,7 @@ resource "google_filestore_instance" "instance" {
   networks {
     network           = "default"
     modes             = ["MODE_IPV4"]
-    reserved_ip_range = "172.19.30.0/29"
+    reserved_ip_range = "172.19.31.0/29"
   }
 }
 `, name)
@@ -185,8 +185,103 @@ resource "google_filestore_instance" "instance" {
   networks {
     network           = "default"
     modes             = ["MODE_IPV4"]
-    reserved_ip_range = "172.19.31.0/29"
+    reserved_ip_range = "172.19.31.8/29"
   }
 }
 `, name)
+}
+
+func TestAccFilestoreInstance_deletionProtection_update(t *testing.T) {
+	t.Parallel()
+
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	location := "us-central1-a"
+	tier := "ZONAL"
+
+	deletionProtection := true
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckFilestoreInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFilestoreInstance_deletionProtection_create(name, location, tier),
+			},
+			{
+				ResourceName:            "google_filestore_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"zone"},
+			},
+			{
+				Config: testAccFilestoreInstance_deletionProtection_update(name, location, tier, deletionProtection),
+			},
+			{
+				ResourceName:            "google_filestore_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"zone"},
+			},
+			{
+				Config: testAccFilestoreInstance_deletionProtection_update(name, location, tier, !deletionProtection),
+			},
+			{
+				ResourceName:            "google_filestore_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"zone"},
+			},
+		},
+	})
+}
+
+func testAccFilestoreInstance_deletionProtection_create(name, location, tier string) string {
+	return fmt.Sprintf(`
+resource "google_filestore_instance" "instance" {
+  name        = "%s"
+  zone        = "%s"
+  tier        = "%s"
+  description = "An instance created during testing."
+
+  file_shares {
+    capacity_gb = 1024
+    name        = "share"
+  }
+
+  networks {
+    network = "default"
+		modes   = ["MODE_IPV4"]
+  }
+}
+`, name, location, tier)
+}
+
+func testAccFilestoreInstance_deletionProtection_update(name, location, tier string, deletionProtection bool) string {
+	deletionProtectionReason := ""
+	if deletionProtection {
+		deletionProtectionReason = "A reason for deletion protection"
+	}
+
+	return fmt.Sprintf(`
+resource "google_filestore_instance" "instance" {
+  name        = "%s"
+  zone        = "%s"
+  tier        = "%s"
+  description = "An instance created during testing."
+
+  file_shares {
+    capacity_gb = 1024
+    name        = "share"
+  }
+
+  networks {
+    network = "default"
+		modes   = ["MODE_IPV4"]
+  }
+
+	deletion_protection_enabled = %t
+	deletion_protection_reason = "%s"
+}
+`, name, location, tier, deletionProtection, deletionProtectionReason)
 }

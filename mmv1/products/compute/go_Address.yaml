@@ -46,7 +46,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 1000
@@ -78,7 +78,9 @@ examples:
     primary_resource_id: 'internal_with_shared_loadbalancer_vip'
     vars:
       address_name: 'my-internal-address'
-    skip_docs: true
+ # It is almost identical to internal_with_gce_endpoint
+    exclude_docs: true
+  # TODO(rileykarson): Remove this example when instance is supported
   - name: 'instance_with_ip'
     primary_resource_id: 'static'
     vars:
@@ -192,7 +194,6 @@ properties:
     type: KeyValueLabels
     description: |
       Labels to apply to this address.  A list of key->value pairs.
-    immutable: false
     update_url: 'projects/{{project}}/regions/{{region}}/addresses/{{name}}/setLabels'
     update_verb: 'POST'
   - name: 'labelFingerprint'

@@ -65,7 +65,8 @@ custom_code:
   pre_create: 'templates/terraform/pre_create/go/alloydb_cluster.go.tmpl'
   pre_update: 'templates/terraform/pre_update/go/alloydb_cluster.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/go/alloydb_cluster.go.tmpl'
-skip_sweeper: true
+# Skipping the sweeper because we need to force-delete clusters.
+exclude_sweeper: true
 examples:
   - name: 'alloydb_cluster_basic'
     primary_resource_id: 'default'
@@ -89,14 +90,14 @@ examples:
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
-    skip_test: true
+    exclude_test: true
   - name: 'alloydb_secondary_cluster_basic'
     primary_resource_id: 'secondary'
     vars:
       alloydb_primary_cluster_name: 'alloydb-primary-cluster'
       alloydb_primary_instance_name: 'alloydb-primary-instance'
       alloydb_secondary_cluster_name: 'alloydb-secondary-cluster'
-    skip_test: true
+    exclude_test: true
   - name: 'alloydb_secondary_cluster_basic_test'
     primary_resource_id: 'secondary'
     vars:
@@ -106,14 +107,15 @@ examples:
       network_name: 'alloydb-network'
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
-    skip_docs: true
+    exclude_docs: true
 virtual_fields:
   - name: 'deletion_policy'
     description: |
       Policy to determine if the cluster should be deleted forcefully.
       Deleting a cluster forcefully, deletes the cluster and all its associated instances within the cluster.
       Deleting a Secondary cluster with a secondary instance REQUIRES setting deletion_policy = "FORCE" otherwise an error is returned. This is needed as there is no support to delete just the secondary instance, and the only way to delete secondary instance is to delete the associated secondary cluster forcefully which also deletes the secondary instance.
-    type: Enum
+      Possible values: DEFAULT, FORCE
+    type: String
     default_value: "DEFAULT"
 parameters:
   - name: 'clusterId'
@@ -144,7 +146,6 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: 'User-defined labels for the alloydb cluster.'
-    immutable: false
   - name: 'encryptionConfig'
     type: NestedObject
     description: |
@@ -216,19 +217,6 @@ properties:
             output: true
             item_type:
               type: String
-  - name: 'network'
-    type: String
-    description: |
-      The relative resource name of the VPC network on which the instance can be accessed. It is specified in the following form:
-
-      "projects/{projectNumber}/global/networks/{network_id}".
-    default_from_api: true
-    exactly_one_of:
-      - 'network'
-      - 'network_config.0.network'
-      - 'psc_config.0.psc_enabled'
-    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
-    deprecation_message: '`network` is deprecated and will be removed in a future major release. Instead, use `network_config` to define the network configuration.'
   - name: 'networkConfig'
     type: NestedObject
     description: |
@@ -241,7 +229,6 @@ properties:
           The resource link for the VPC network in which cluster resources are created and from which they are accessible via Private IP. The network must belong to the same project as the cluster.
           It is specified in the form: "projects/{projectNumber}/global/networks/{network_id}".
         exactly_one_of:
-          - 'network'
           - 'network_config.0.network'
           - 'psc_config.0.psc_enabled'
         diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
@@ -568,3 +555,33 @@ properties:
                   type: Integer
                   description: |
                     Fractions of seconds in nanoseconds. Currently, only the value 0 is supported.
+  - name: 'subscriptionType'
+    type: Enum
+    description: |
+      The subscrition type of cluster.
+    default_from_api: true
+    enum_values:
+      - 'TRIAL'
+      - 'STANDARD'
+  - name: 'trialMetadata'
+    type: NestedObject
+    description: |
+      Contains information and all metadata related to TRIAL clusters.
+    output: true
+    properties:
+      - name: 'startTime'
+        type: String
+        description: |
+          Start time of the trial cluster.
+      - name: 'endTime'
+        type: String
+        description: |
+          End time of the trial cluster.
+      - name: 'upgradeTime'
+        type: String
+        description: |
+          Upgrade time of the trial cluster to standard cluster.
+      - name: 'graceEndTime'
+        type: String
+        description: |
+          Grace end time of the trial cluster.

@@ -32,7 +32,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 1000
@@ -50,7 +50,9 @@ examples:
       prefixes_name: 'my-prefix'
     test_env_vars:
       desc: 'PAP_DESCRIPTION'
-    skip_test: true
+    # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
+    # resource_compute_public_advertised_prefix_test.go
+    exclude_test: true
 parameters:
 properties:
   - name: 'description'
@@ -76,3 +78,8 @@ properties:
       The IPv4 address range, in CIDR format, represented by this public
       advertised prefix.
     required: true
+  - name: 'sharedSecret'
+    type: String
+    description: |
+      Output Only. The shared secret to be used for reverse DNS verification.
+    output: true

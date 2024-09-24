@@ -1,0 +1,734 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'VmwareCluster'
+description: 'A Google VMware User Cluster.'
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/vmwareClusters/{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/vmwareClusters'
+self_link: 'projects/{{project}}/locations/{{location}}/vmwareClusters/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/vmwareClusters?vmware_cluster_id={{name}}'
+update_url: 'projects/{{project}}/locations/{{location}}/vmwareClusters/{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+delete_url: 'projects/{{project}}/locations/{{location}}/vmwareClusters/{{name}}?force=true'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/vmwareClusters/{{name}}'
+timeouts:
+  insert_minutes: 60
+  update_minutes: 60
+  delete_minutes: 60
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    kind: 'gkeonprem#operation'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+taint_resource_on_failed_create: true
+examples:
+  - name: 'gkeonprem_vmware_cluster_basic'
+    primary_resource_id: 'cluster-basic'
+    vars:
+      name: 'cluster-basic'
+    test_env_vars:
+      project: 'fake-backend-360322'
+  - name: 'gkeonprem_vmware_cluster_f5lb'
+    primary_resource_id: 'cluster-f5lb'
+    vars:
+      name: 'cluster-f5lb'
+    test_env_vars:
+      project: 'fake-backend-360322'
+  - name: 'gkeonprem_vmware_cluster_manuallb'
+    primary_resource_id: 'cluster-manuallb'
+    vars:
+      name: 'cluster-manuallb'
+    test_env_vars:
+      project: 'fake-backend-360322'
+parameters:
+  - name: 'name'
+    type: String
+    description: The VMware cluster name.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'location'
+    type: String
+    description: The location of the resource.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'adminClusterMembership'
+    type: String
+    description: |
+      The admin cluster this VMware User Cluster belongs to.
+      This is the full resource name of the admin cluster's hub membership.
+      In the future, references to other resource types might be allowed if
+      admin clusters are modeled as their own resources.
+    required: true
+    immutable: true
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+  - name: 'description'
+    type: String
+    description: |
+      A human readable description of this VMware User Cluster.
+  - name: 'onPremVersion'
+    type: String
+    description: |
+      The Anthos clusters on the VMware version for your user cluster.
+    required: true
+  - name: 'annotations'
+    type: KeyValueAnnotations
+    description: |
+      Annotations on the VMware User Cluster.
+      This field has the same restrictions as Kubernetes annotations.
+      The total size of all keys and values combined is limited to 256k.
+      Key can have 2 segments: prefix (optional) and name (required),
+      separated by a slash (/).
+      Prefix must be a DNS subdomain.
+      Name must be 63 characters or less, begin and end with alphanumerics,
+      with dashes (-), underscores (_), dots (.), and alphanumerics between.
+  - name: 'controlPlaneNode'
+    type: NestedObject
+    description: |
+      VMware User Cluster control plane nodes must have either 1 or 3 replicas.
+    required: true
+    properties:
+      - name: 'cpus'
+        type: Integer
+        description: |
+          The number of CPUs for each admin cluster node that serve as control planes
+          for this VMware User Cluster. (default: 4 CPUs)
+        default_value: 4
+      - name: 'memory'
+        type: Integer
+        description: |
+          The megabytes of memory for each admin cluster node that serves as a
+          control plane for this VMware User Cluster (default: 8192 MB memory).
+        default_value: 8192
+      - name: 'replicas'
+        type: Integer
+        description: |
+          The number of control plane nodes for this VMware User Cluster.
+          (default: 1 replica).
+        default_value: 1
+      - name: 'autoResizeConfig'
+        type: NestedObject
+        description: |
+          AutoResizeConfig provides auto resizing configurations.
+        default_from_api: true
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            description: |
+              Whether to enable control plane node auto resizing.
+            required: true
+      - name: 'vsphereConfig'
+        type: NestedObject
+        description: Vsphere-specific config.
+        output: true
+        properties:
+          - name: 'datastore'
+            type: String
+            description: The Vsphere datastore used by the Control Plane Node.
+            output: true
+          - name: 'storagePolicyName'
+            type: String
+            description: |
+              The Vsphere storage policy used by the control plane Node.
+            output: true
+  - name: 'antiAffinityGroups'
+    type: NestedObject
+    description: |
+      AAGConfig specifies whether to spread VMware User Cluster nodes across at
+      least three physical hosts in the datacenter.
+    default_from_api: true
+    properties:
+      - name: 'aagConfigDisabled'
+        type: Boolean
+        description: |
+          Spread nodes across at least three physical hosts (requires at least three
+          hosts).
+          Enabled by default.
+        required: true
+  - name: 'storage'
+    type: NestedObject
+    description: Storage configuration.
+    default_from_api: true
+    properties:
+      - name: 'vsphereCsiDisabled'
+        type: Boolean
+        description: |
+          Whether or not to deploy vSphere CSI components in the VMware User Cluster.
+          Enabled by default.
+        required: true
+  - name: 'networkConfig'
+    type: NestedObject
+    description: The VMware User Cluster network configuration.
+    properties:
+      - name: 'serviceAddressCidrBlocks'
+        type: Array
+        description: |
+          All services in the cluster are assigned an RFC1918 IPv4 address
+          from these ranges. Only a single range is supported.. This field
+          cannot be changed after creation.
+        required: true
+        item_type:
+          type: String
+      - name: 'podAddressCidrBlocks'
+        type: Array
+        description: |
+          All pods in the cluster are assigned an RFC1918 IPv4 address from these ranges.
+          Only a single range is supported. This field cannot be changed after creation.
+        required: true
+        item_type:
+          type: String
+      - name: 'staticIpConfig'
+        type: NestedObject
+        description: Configuration settings for a static IP configuration.
+        exactly_one_of:
+          - 'network_config.0.static_ip_config'
+          - 'network_config.0.dhcp_ip_config'
+        properties:
+          - name: 'ipBlocks'
+            type: Array
+            description:
+              Represents the configuration values for static IP allocation to
+              nodes.
+            required: true
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'netmask'
+                  type: String
+                  description: The netmask used by the VMware User Cluster.
+                  required: true
+                - name: 'gateway'
+                  type: String
+                  description:
+                    The network gateway used by the VMware User Cluster.
+                  required: true
+                - name: 'ips'
+                  type: Array
+                  description:
+                    The node's network configurations used by the VMware User
+                    Cluster.
+                  required: true
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: 'ip'
+                        type: String
+                        description:
+                          IP could be an IP address (like 1.2.3.4) or a CIDR
+                          (like 1.2.3.0/24).
+                        required: true
+                      - name: 'hostname'
+                        type: String
+                        description:
+                          Hostname of the machine. VM's name will be used if
+                          this field is empty.
+                        default_from_api: true
+      - name: 'dhcpIpConfig'
+        type: NestedObject
+        description: Configuration settings for a DHCP IP configuration.
+        default_from_api: true
+        exactly_one_of:
+          - 'network_config.0.static_ip_config'
+          - 'network_config.0.dhcp_ip_config'
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            description: |
+              enabled is a flag to mark if DHCP IP allocation is
+              used for VMware user clusters.
+            required: true
+      - name: 'vcenterNetwork'
+        type: String
+        description:
+          vcenter_network specifies vCenter network name. Inherited from the
+          admin cluster.
+        immutable: true
+        default_from_api: true
+      - name: 'hostConfig'
+        type: NestedObject
+        description:
+          Represents common network settings irrespective of the host's IP
+          address.
+        default_from_api: true
+        properties:
+          - name: 'dnsServers'
+            type: Array
+            description: DNS servers.
+            item_type:
+              type: String
+          - name: 'ntpServers'
+            type: Array
+            description: NTP servers.
+            item_type:
+              type: String
+          - name: 'dnsSearchDomains'
+            type: Array
+            description: DNS search domains.
+            item_type:
+              type: String
+      - name: 'controlPlaneV2Config'
+        type: NestedObject
+        description: Configuration for control plane V2 mode.
+        properties:
+          - name: 'controlPlaneIpBlock'
+            type: NestedObject
+            description: Static IP addresses for the control plane nodes.
+            properties:
+              - name: 'netmask'
+                type: String
+                description: The netmask used by the VMware User Cluster.
+              - name: 'gateway'
+                type: String
+                description:
+                  The network gateway used by the VMware User Cluster.
+              - name: 'ips'
+                type: Array
+                description:
+                  The node's network configurations used by the VMware User
+                  Cluster.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: 'ip'
+                      type: String
+                      description:
+                        IP could be an IP address (like 1.2.3.4) or a CIDR (like
+                        1.2.3.0/24).
+                    - name: 'hostname'
+                      type: String
+                      description:
+                        Hostname of the machine. VM's name will be used if this
+                        field is empty.
+                      default_from_api: true
+  - name: 'loadBalancer'
+    type: NestedObject
+    description: Load Balancer configuration.
+    properties:
+      - name: 'vipConfig'
+        type: NestedObject
+        description: The VIPs used by the load balancer.
+        properties:
+          - name: 'controlPlaneVip'
+            type: String
+            description:
+              The VIP which you previously set aside for the Kubernetes API of
+              this cluster.
+          - name: 'ingressVip'
+            type: String
+            description:
+              The VIP which you previously set aside for ingress traffic into
+              this cluster.
+      - name: 'f5Config'
+        type: NestedObject
+        description: Configuration for F5 Big IP typed load balancers.
+        exactly_one_of:
+          - 'loadBalancer.0.f5_config'
+          - 'loadBalancer.0.manual_lb_config'
+          - 'loadBalancer.0.metal_lb_config'
+        properties:
+          - name: 'address'
+            type: String
+            description: The load balancer's IP address.
+          - name: 'partition'
+            type: String
+            description: |
+              he preexisting partition to be used by the load balancer. T
+              his partition is usually created for the admin cluster for example:
+              'my-f5-admin-partition'.
+          - name: 'snatPool'
+            type: String
+            description: The pool name. Only necessary, if using SNAT.
+            default_from_api: true
+      - name: 'manualLbConfig'
+        type: NestedObject
+        description: Manually configured load balancers.
+        exactly_one_of:
+          - 'loadBalancer.0.f5_config'
+          - 'loadBalancer.0.manual_lb_config'
+          - 'loadBalancer.0.metal_lb_config'
+        properties:
+          - name: 'ingressHttpNodePort'
+            type: Integer
+            description: |
+              NodePort for ingress service's http. The ingress service in the admin
+              cluster is implemented as a Service of type NodePort (ex. 32527).
+            default_from_api: true
+          - name: 'ingressHttpsNodePort'
+            type: Integer
+            description: |
+              NodePort for ingress service's https. The ingress service in the admin
+              cluster is implemented as a Service of type NodePort (ex. 30139).
+            default_from_api: true
+          - name: 'controlPlaneNodePort'
+            type: Integer
+            description: |
+              NodePort for control plane service. The Kubernetes API server in the admin
+              cluster is implemented as a Service of type NodePort (ex. 30968).
+            default_from_api: true
+          - name: 'konnectivityServerNodePort'
+            type: Integer
+            description: |
+              NodePort for konnectivity server service running as a sidecar in each
+              kube-apiserver pod (ex. 30564).
+            default_from_api: true
+      - name: 'metalLbConfig'
+        type: NestedObject
+        description: Configuration for MetalLB typed load balancers.
+        exactly_one_of:
+          - 'loadBalancer.0.f5_config'
+          - 'loadBalancer.0.manual_lb_config'
+          - 'loadBalancer.0.metal_lb_config'
+        properties:
+          - name: 'addressPools'
+            type: Array
+            description: |
+              AddressPools is a list of non-overlapping IP pools used by load balancer
+              typed services. All addresses must be routable to load balancer nodes.
+              IngressVIP must be included in the pools.
+            required: true
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'pool'
+                  type: String
+                  description: |
+                    The name of the address pool.
+                  required: true
+                - name: 'addresses'
+                  type: Array
+                  description: |
+                    The addresses that are part of this pool. Each address
+                    must be either in the CIDR form (1.2.3.0/24) or range
+                    form (1.2.3.1-1.2.3.5).
+                  required: true
+                  item_type:
+                    type: String
+                - name: 'avoidBuggyIps'
+                  type: Boolean
+                  description: |
+                    If true, avoid using IPs ending in .0 or .255.
+                    This avoids buggy consumer devices mistakenly dropping IPv4 traffic for
+                    those special IP addresses.
+                  default_from_api: true
+                - name: 'manualAssign'
+                  type: Boolean
+                  description: |
+                    If true, prevent IP addresses from being automatically assigned.
+                  default_from_api: true
+  - name: 'dataplaneV2'
+    type: NestedObject
+    description:
+      VmwareDataplaneV2Config specifies configuration for Dataplane V2.
+    default_from_api: true
+    properties:
+      - name: 'dataplaneV2Enabled'
+        type: Boolean
+        description: Enables Dataplane V2.
+      - name: 'windowsDataplaneV2Enabled'
+        type: Boolean
+        description: Enable Dataplane V2 for clusters with Windows nodes.
+      - name: 'advancedNetworking'
+        type: Boolean
+        description:
+          Enable advanced networking which requires dataplane_v2_enabled to be
+          set true.
+  - name: 'vmTrackingEnabled'
+    type: Boolean
+    description: Enable VM tracking.
+    default_from_api: true
+  - name: 'autoRepairConfig'
+    type: NestedObject
+    description: Configuration for auto repairing.
+    default_from_api: true
+    properties:
+      - name: 'enabled'
+        type: Boolean
+        description: Whether auto repair is enabled.
+        required: true
+  - name: 'authorization'
+    type: NestedObject
+    description: RBAC policy that will be applied and managed by GKE On-Prem.
+    properties:
+      - name: 'adminUsers'
+        type: Array
+        description: |
+          Users that will be granted the cluster-admin role on the cluster, providing
+          full access to the cluster.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'username'
+              type: String
+              description: The name of the user, e.g. `my-gcp-id@gmail.com`.
+              required: true
+  - name: 'validationCheck'
+    type: NestedObject
+    description:
+      ValidationCheck represents the result of the preflight check job.
+    output: true
+    properties:
+      - name: 'options'
+        type: Enum
+        description: Options used for the validation check.
+        output: true
+        enum_values:
+          - 'OPTIONS_UNSPECIFIED'
+          - 'SKIP_VALIDATION_CHECK_BLOCKING'
+          - 'SKIP_VALIDATION_ALL'
+      - name: 'status'
+        type: NestedObject
+        description: |
+          Specifies the detailed validation check status
+        output: true
+        properties:
+          - name: 'result'
+            type: Array
+            description:
+              Individual checks which failed as part of the Preflight check
+              execution.
+            output: true
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'options'
+                  type: Enum
+                  description: Options used for the validation check.
+                  output: true
+                  enum_values:
+                    - 'STATE_UNKNOWN'
+                    - 'STATE_FAILURE'
+                    - 'STATE_SKIPPED'
+                    - 'STATE_UNKNOWN'
+                    - 'STATE_FATAL'
+                    - 'STATE_WARNING'
+                - name: 'description'
+                  type: String
+                  description: |
+                    The description of the validation check.
+                  output: true
+                - name: 'category'
+                  type: String
+                  description: |
+                    The category of the validation.
+                  output: true
+                - name: 'reason'
+                  type: String
+                  description: |
+                    A human-readable message of the check failure.
+                  output: true
+                - name: 'details'
+                  type: String
+                  description: |
+                    Detailed failure information, which might be unformatted.
+                  output: true
+      - name: 'scenario'
+        type: Enum
+        description: The scenario when the preflight checks were run..
+        output: true
+        enum_values:
+          - 'SCENARIO_UNSPECIFIED'
+          - 'CREATE'
+          - 'UPDATE'
+  - name: 'enableControlPlaneV2'
+    type: Boolean
+    description: Enable control plane V2. Default to false.
+  - name: 'disableBundledIngress'
+    type: Boolean
+    description: Disable bundled ingress.
+  - name: 'upgradePolicy'
+    type: NestedObject
+    description: Specifies upgrade policy for the cluster.
+    properties:
+      - name: 'controlPlaneOnly'
+        type: Boolean
+        description: |
+          Controls whether the upgrade applies to the control plane only.
+  - name: 'uid'
+    type: String
+    description: |
+      The unique identifier of the VMware User Cluster.
+    output: true
+  - name: 'state'
+    type: Enum
+    description: The current state of this cluster.
+    output: true
+    enum_values:
+      - 'STATE_UNSPECIFIED'
+      - 'PROVISIONING'
+      - 'RUNNING'
+      - 'RECONCILING'
+      - 'STOPPING'
+      - 'ERROR'
+      - 'DEGRADED'
+  - name: 'endpoint'
+    type: String
+    description: |
+      The DNS name of VMware User Cluster's API server.
+    output: true
+  - name: 'reconciling'
+    type: Boolean
+    description: |
+      If set, there are currently changes in flight to the VMware User Cluster.
+    output: true
+  - name: 'createTime'
+    type: Time
+    description: |
+      The time at which VMware User Cluster was created.
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      The time at which VMware User Cluster was last updated.
+    output: true
+  - name: 'deleteTime'
+    type: Time
+    description: |
+      The time at which VMware User Cluster was deleted.
+    output: true
+  - name: 'localName'
+    type: String
+    description: |
+      The object name of the VMware OnPremUserCluster custom resource on the
+      associated admin cluster. This field is used to support conflicting
+      names when enrolling existing clusters to the API. When used as a part of
+      cluster enrollment, this field will differ from the ID in the resource
+      name. For new clusters, this field will match the user provided cluster ID
+      and be visible in the last component of the resource name. It is not
+      modifiable.
+
+      All users should use this name to access their cluster using gkectl or
+      kubectl and should expect to see the local name when viewing admin
+      cluster controller logs.
+    output: true
+  - name: 'etag'
+    type: String
+    description: |
+      This checksum is computed by the server based on the value of other
+      fields, and may be sent on update and delete requests to ensure the
+      client has an up-to-date value before proceeding.
+      Allows clients to perform consistent read-modify-writes
+      through optimistic concurrency control.
+    output: true
+  - name: 'fleet'
+    type: NestedObject
+    description: Fleet configuration for the cluster.
+    output: true
+    properties:
+      - name: 'membership'
+        type: String
+        description: |
+          The name of the managed Hub Membership resource associated to this cluster.
+          Membership names are formatted as
+          `projects/<project-number>/locations/<location>/memberships/<cluster-id>`.
+        output: true
+  - name: 'vcenter'
+    type: NestedObject
+    description: |
+      VmwareVCenterConfig specifies vCenter config for the user cluster.
+      Inherited from the admin cluster.
+    properties:
+      - name: 'resourcePool'
+        type: String
+        description: The name of the vCenter resource pool for the user cluster.
+      - name: 'datastore'
+        type: String
+        description: The name of the vCenter datastore for the user cluster.
+      - name: 'datacenter'
+        type: String
+        description: The name of the vCenter datacenter for the user cluster.
+      - name: 'cluster'
+        type: String
+        description: The name of the vCenter cluster for the user cluster.
+      - name: 'folder'
+        type: String
+        description: The name of the vCenter folder for the user cluster.
+      - name: 'caCertData'
+        type: String
+        description:
+          Contains the vCenter CA certificate public key for SSL verification.
+      - name: 'address'
+        type: String
+        description: The vCenter IP address.
+        output: true
+      - name: 'storagePolicyName'
+        type: String
+        description: The name of the vCenter storage policy for the user cluster.
+  - name: 'status'
+    type: NestedObject
+    description: ResourceStatus representing detailed cluster state.
+    output: true
+    properties:
+      - name: 'errorMessage'
+        type: String
+        description: |
+          Human-friendly representation of the error message from the user cluster
+          controller. The error message can be temporary as the user cluster
+          controller creates a cluster or node pool. If the error message persists
+          for a longer period of time, it can be used to surface error message to
+          indicate real problems requiring user intervention.
+        output: true
+      - name: 'conditions'
+        type: Array
+        description: |
+          ResourceConditions provide a standard mechanism for higher-level status reporting from user cluster controller.
+        output: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'type'
+              type: String
+              description: |
+                Type of the condition.
+                (e.g., ClusterRunning, NodePoolRunning or ServerSidePreflightReady)
+              output: true
+            - name: 'reason'
+              type: String
+              description: |
+                Machine-readable message indicating details about last transition.
+              output: true
+            - name: 'message'
+              type: String
+              description: |
+                Human-readable message indicating details about last transition.
+              output: true
+            - name: 'lastTransitionTime'
+              type: Time
+              description: |
+                Last time the condition transit from one status to another.
+              output: true
+            - name: 'state'
+              type: Enum
+              description: The lifecycle state of the condition.
+              output: true
+              enum_values:
+                - 'STATE_UNSPECIFIED'
+                - 'STATE_TRUE'
+                - 'STATE_FALSE'
+                - 'STATE_UNKNOWN'

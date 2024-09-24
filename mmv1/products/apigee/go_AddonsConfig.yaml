@@ -50,15 +50,15 @@ custom_code:
   test_check_destroy: 'templates/terraform/custom_check_destroy/go/apigee_addons_override.go.tmpl'
 examples:
   - name: 'apigee_addons_basic'
-    skip_test: true
+    exclude_test: true
   - name: 'apigee_addons_full'
-    skip_test: true
+    exclude_test: true
   - name: 'apigee_addons_test'
     primary_resource_id: 'apigee_org_addons'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
-    skip_docs: true
+    exclude_docs: true
 parameters:
   - name: 'org'
     type: String

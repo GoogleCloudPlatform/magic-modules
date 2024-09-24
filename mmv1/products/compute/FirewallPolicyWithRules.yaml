@@ -1,0 +1,452 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the License);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: FirewallPolicyWithRules
+min_version: beta
+base_url: 'locations/global/firewallPolicies?parentId={{parent}}'
+self_link: 'locations/global/firewallPolicies/{{policy_id}}'
+create_url: 'locations/global/firewallPolicies?parentId={{parent}}'
+update_verb: :PATCH
+description: |
+  The Compute FirewallPolicy with rules resource. It declaratively manges all
+  rules in the firewall policy.
+id_format: 'locations/global/firewallPolicies/{{policy_id}}'
+import_format: ['locations/global/firewallPolicies/{{policy_id}}']
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'compute_firewall_policy_with_rules_full'
+    primary_resource_id: 'firewall-policy-with-rules'
+    vars:
+      policy_name: 'tf-fw-org-policy-with-rules'
+      address_group_name: 'tf-address-group'
+      security_profile_group_name: 'tf-security-profile-group'
+      security_profile_name: 'tf-security-profile'
+    test_env_vars:
+      org_id: :ORG_ID
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/resource_compute_firewall_policy_with_rules.go.erb
+  encoder: templates/terraform/encoders/resource_compute_firewall_policy_with_rules.go.erb
+  update_encoder: templates/terraform/update_encoder/resource_compute_firewall_policy_with_rules.go.erb
+  decoder: templates/terraform/decoders/resource_compute_firewall_policy_with_rules.go.erb
+  post_create: templates/terraform/post_create/resource_compute_firewall_policy_with_rules.go.erb
+  post_update: templates/terraform/post_update/resource_compute_firewall_policy_with_rules.go.erb
+  post_delete: templates/terraform/post_delete/resource_compute_firewall_policy_with_rules.go.erb
+parameters:
+  - !ruby/object:Api::Type::String
+    name: parent
+    description: |
+      The parent of this FirewallPolicy in the Cloud Resource Hierarchy.
+      Format: organizations/{organization_id} or folders/{folder_id}
+    required: true
+    immutable: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: creationTimestamp
+    description: Creation timestamp in RFC3339 text format.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: shortName
+    description: A textual name of the security policy.
+    immutable: true
+    required: true
+  - !ruby/object:Api::Type::String
+    name: policyId
+    description: The unique identifier for the resource. This identifier is defined by the server.
+    output: true
+    api_name: id
+  - !ruby/object:Api::Type::String
+    name: description
+    description: An optional description of this resource.
+  - !ruby/object:Api::Type::Array
+    name: 'rule'
+    api_name: 'rules'
+    description: A list of firewall policy rules.
+    required: true
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'description'
+          description: |
+            A description of the rule.
+        - !ruby/object:Api::Type::String
+          name: 'ruleName'
+          description: |
+            An optional name for the rule. This field is not a unique identifier
+            and can be updated.
+        - !ruby/object:Api::Type::Integer
+          name: 'priority'
+          description: |
+            An integer indicating the priority of a rule in the list. The priority must be a value
+            between 0 and 2147483647. Rules are evaluated from highest to lowest priority where 0 is the
+            highest priority and 2147483647 is the lowest priority.
+          required: true
+        - !ruby/object:Api::Type::NestedObject
+          name: 'match'
+          description:
+            A match condition that incoming traffic is evaluated against. If it
+            evaluates to true, the corresponding 'action' is enforced.
+          required: true
+          properties:
+            - !ruby/object:Api::Type::Array
+              name: 'srcIpRanges'
+              description: |
+                Source IP address range in CIDR format. Required for
+                INGRESS rules.
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::Array
+              name: 'destIpRanges'
+              description: |
+                Destination IP address range in CIDR format. Required for
+                EGRESS rules.
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::Array
+              item_type: Api::Type::String
+              name: 'srcAddressGroups'
+              description: |
+                Address groups which should be matched against the traffic source.
+                Maximum number of source address groups is 10.
+            - !ruby/object:Api::Type::Array
+              item_type: Api::Type::String
+              name: 'destAddressGroups'
+              description: |
+                Address groups which should be matched against the traffic destination.
+                Maximum number of destination address groups is 10.
+            - !ruby/object:Api::Type::Array
+              item_type: Api::Type::String
+              name: 'srcFqdns'
+              description: |
+                Fully Qualified Domain Name (FQDN) which should be matched against
+                traffic source. Maximum number of source fqdn allowed is 100.
+            - !ruby/object:Api::Type::Array
+              item_type: Api::Type::String
+              name: 'destFqdns'
+              description: |
+                Fully Qualified Domain Name (FQDN) which should be matched against
+                traffic destination. Maximum number of destination fqdn allowed is 100.
+            - !ruby/object:Api::Type::Array
+              item_type: Api::Type::String
+              name: 'srcRegionCodes'
+              description: |
+                Region codes whose IP addresses will be used to match for source
+                of traffic. Should be specified as 2 letter country code defined as per
+                ISO 3166 alpha-2 country codes. ex."US"
+                Maximum number of source region codes allowed is 5000.
+            - !ruby/object:Api::Type::Array
+              item_type: Api::Type::String
+              name: 'destRegionCodes'
+              description: |
+                Region codes whose IP addresses will be used to match for destination
+                of traffic. Should be specified as 2 letter country code defined as per
+                ISO 3166 alpha-2 country codes. ex."US"
+                Maximum number of destination region codes allowed is 5000.
+            - !ruby/object:Api::Type::Array
+              item_type: Api::Type::String
+              name: 'srcThreatIntelligences'
+              description: |
+                Names of Network Threat Intelligence lists.
+                The IPs in these lists will be matched against traffic source.
+            - !ruby/object:Api::Type::Array
+              item_type: Api::Type::String
+              name: 'destThreatIntelligences'
+              description: |
+                Names of Network Threat Intelligence lists.
+                The IPs in these lists will be matched against traffic destination.
+            - !ruby/object:Api::Type::Array
+              name: 'layer4Config'
+              api_name: 'layer4Configs'
+              description: |
+                Pairs of IP protocols and ports that the rule should match.
+              required: true
+              item_type: !ruby/object:Api::Type::NestedObject
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: 'ipProtocol'
+                    description: |
+                      The IP protocol to which this rule applies. The protocol
+                      type is required when creating a firewall rule.
+                      This value can either be one of the following well
+                      known protocol strings (tcp, udp, icmp, esp, ah, ipip, sctp),
+                      or the IP protocol number.
+                    required: true
+                  - !ruby/object:Api::Type::Array
+                    item_type: Api::Type::String
+                    name: 'ports'
+                    description: |
+                      An optional list of ports to which this rule applies. This field
+                      is only applicable for UDP or TCP protocol. Each entry must be
+                      either an integer or a range. If not specified, this rule
+                      applies to connections through any port.
+                      Example inputs include: ["22"], ["80","443"], and
+                      ["12345-12349"].
+        - !ruby/object:Api::Type::String
+          name: 'action'
+          description: |
+            The Action to perform when the client connection triggers the rule. Can currently be either
+            "allow", "deny", "apply_security_profile_group" or "goto_next".
+          required: true
+        - !ruby/object:Api::Type::Enum
+          name: 'direction'
+          description: |
+            The direction in which this rule applies. If unspecified an INGRESS rule is created.
+          values:
+            - :INGRESS
+            - :EGRESS
+        - !ruby/object:Api::Type::Boolean
+          name: 'enableLogging'
+          description: |
+            Denotes whether to enable logging for a particular rule.
+            If logging is enabled, logs will be exported to the
+            configured export destination in Stackdriver.
+          send_empty_value: true
+        - !ruby/object:Api::Type::Array
+          name: 'targetServiceAccounts'
+          description: |
+            A list of service accounts indicating the sets of
+            instances that are applied with this rule.
+          item_type: Api::Type::String
+        - !ruby/object:Api::Type::String
+          name: 'securityProfileGroup'
+          description: |
+            A fully-qualified URL of a SecurityProfile resource instance.
+            Example:
+            https://networksecurity.googleapis.com/v1/projects/{project}/locations/{location}/securityProfileGroups/my-security-profile-group
+            Must be specified if action is 'apply_security_profile_group'.
+        - !ruby/object:Api::Type::Boolean
+          name: 'tlsInspect'
+          description: |
+            Boolean flag indicating if the traffic should be TLS decrypted.
+            It can be set only if action = 'apply_security_profile_group' and cannot be set for other actions.
+        - !ruby/object:Api::Type::Array
+          name: 'targetResources'
+          item_type: Api::Type::String
+          description: |
+            A list of network resource URLs to which this rule applies.
+            This field allows you to control which network's VMs get
+            this rule. If this field is left blank, all VMs
+            within the organization will receive the rule.
+        - !ruby/object:Api::Type::Boolean
+          name: 'disabled'
+          description: |
+            Denotes whether the firewall policy rule is disabled. When set to true,
+            the firewall policy rule is not enforced and traffic behaves as if it did
+            not exist. If this is unspecified, the firewall policy rule will be
+            enabled.
+  - !ruby/object:Api::Type::Array
+    name: 'predefinedRules'
+    description: A list of pre-define firewall policy rules.
+    output: true
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'description'
+          output: true
+          description: |
+            A description of the rule.
+        - !ruby/object:Api::Type::String
+          name: 'ruleName'
+          output: true
+          description: |
+            An optional name for the rule. This field is not a unique identifier
+            and can be updated.
+        - !ruby/object:Api::Type::Integer
+          name: 'priority'
+          output: true
+          description: |
+            An integer indicating the priority of a rule in the list. The priority must be a value
+            between 0 and 2147483647. Rules are evaluated from highest to lowest priority where 0 is the
+            highest priority and 2147483647 is the lowest priority.
+        - !ruby/object:Api::Type::NestedObject
+          name: 'match'
+          output: true
+          description:
+            A match condition that incoming traffic is evaluated against. If it
+            evaluates to true, the corresponding 'action' is enforced.
+          properties:
+            - !ruby/object:Api::Type::Array
+              name: 'srcIpRanges'
+              output: true
+              description: |
+                Source IP address range in CIDR format. Required for
+                INGRESS rules.
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::Array
+              name: 'destIpRanges'
+              output: true
+              description: |
+                Destination IP address range in CIDR format. Required for
+                EGRESS rules.
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::Array
+              item_type: Api::Type::String
+              name: 'srcAddressGroups'
+              output: true
+              description: |
+                Address groups which should be matched against the traffic source.
+                Maximum number of source address groups is 10.
+            - !ruby/object:Api::Type::Array
+              item_type: Api::Type::String
+              name: 'destAddressGroups'
+              output: true
+              description: |
+                Address groups which should be matched against the traffic destination.
+                Maximum number of destination address groups is 10.
+            - !ruby/object:Api::Type::Array
+              item_type: Api::Type::String
+              name: 'srcFqdns'
+              output: true
+              description: |
+                Fully Qualified Domain Name (FQDN) which should be matched against
+                traffic source. Maximum number of source fqdn allowed is 100.
+            - !ruby/object:Api::Type::Array
+              item_type: Api::Type::String
+              name: 'destFqdns'
+              output: true
+              description: |
+                Fully Qualified Domain Name (FQDN) which should be matched against
+                traffic destination. Maximum number of destination fqdn allowed is 100.
+            - !ruby/object:Api::Type::Array
+              item_type: Api::Type::String
+              name: 'srcRegionCodes'
+              output: true
+              description: |
+                Region codes whose IP addresses will be used to match for source
+                of traffic. Should be specified as 2 letter country code defined as per
+                ISO 3166 alpha-2 country codes. ex."US"
+                Maximum number of source region codes allowed is 5000.
+            - !ruby/object:Api::Type::Array
+              item_type: Api::Type::String
+              name: 'destRegionCodes'
+              output: true
+              description: |
+                Region codes whose IP addresses will be used to match for destination
+                of traffic. Should be specified as 2 letter country code defined as per
+                ISO 3166 alpha-2 country codes. ex."US"
+                Maximum number of destination region codes allowed is 5000.
+            - !ruby/object:Api::Type::Array
+              item_type: Api::Type::String
+              name: 'srcThreatIntelligences'
+              output: true
+              description: |
+                Names of Network Threat Intelligence lists.
+                The IPs in these lists will be matched against traffic source.
+            - !ruby/object:Api::Type::Array
+              item_type: Api::Type::String
+              name: 'destThreatIntelligences'
+              output: true
+              description: |
+                Names of Network Threat Intelligence lists.
+                The IPs in these lists will be matched against traffic destination.
+            - !ruby/object:Api::Type::Array
+              name: 'layer4Config'
+              api_name: 'layer4Configs'
+              output: true
+              description: |
+                Pairs of IP protocols and ports that the rule should match.
+              item_type: !ruby/object:Api::Type::NestedObject
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: 'ipProtocol'
+                    output: true
+                    description: |
+                      The IP protocol to which this rule applies. The protocol
+                      type is required when creating a firewall rule.
+                      This value can either be one of the following well
+                      known protocol strings (tcp, udp, icmp, esp, ah, ipip, sctp),
+                      or the IP protocol number.
+                  - !ruby/object:Api::Type::Array
+                    item_type: Api::Type::String
+                    name: 'ports'
+                    output: true
+                    description: |
+                      An optional list of ports to which this rule applies. This field
+                      is only applicable for UDP or TCP protocol. Each entry must be
+                      either an integer or a range. If not specified, this rule
+                      applies to connections through any port.
+                      Example inputs include: ["22"], ["80","443"], and
+                      ["12345-12349"].
+        - !ruby/object:Api::Type::String
+          name: 'action'
+          output: true
+          description: |
+            The Action to perform when the client connection triggers the rule. Can currently be either
+            "allow", "deny", "apply_security_profile_group" or "goto_next".
+        - !ruby/object:Api::Type::Enum
+          name: 'direction'
+          output: true
+          description: |
+            The direction in which this rule applies. If unspecified an INGRESS rule is created.
+          values:
+            - :INGRESS
+            - :EGRESS
+        - !ruby/object:Api::Type::Boolean
+          name: 'enableLogging'
+          output: true
+          description: |
+            Denotes whether to enable logging for a particular rule.
+            If logging is enabled, logs will be exported to the
+            configured export destination in Stackdriver.
+        - !ruby/object:Api::Type::Array
+          name: 'targetServiceAccounts'
+          output: true
+          description: |
+            A list of service accounts indicating the sets of
+            instances that are applied with this rule.
+          item_type: Api::Type::String
+        - !ruby/object:Api::Type::String
+          name: 'securityProfileGroup'
+          output: true
+          description: |
+            A fully-qualified URL of a SecurityProfile resource instance.
+            Example:
+            https://networksecurity.googleapis.com/v1/projects/{project}/locations/{location}/securityProfileGroups/my-security-profile-group
+            Must be specified if action is 'apply_security_profile_group'.
+        - !ruby/object:Api::Type::Boolean
+          name: 'tlsInspect'
+          output: true
+          description: |
+            Boolean flag indicating if the traffic should be TLS decrypted.
+            It can be set only if action = 'apply_security_profile_group' and cannot be set for other actions.
+        - !ruby/object:Api::Type::Array
+          name: 'targetResources'
+          output: true
+          item_type: Api::Type::String
+          description: |
+            A list of network resource URLs to which this rule applies.
+            This field allows you to control which network's VMs get
+            this rule. If this field is left blank, all VMs
+            within the organization will receive the rule.
+        - !ruby/object:Api::Type::Boolean
+          name: 'disabled'
+          output: true
+          description: |
+            Denotes whether the firewall policy rule is disabled. When set to true,
+            the firewall policy rule is not enforced and traffic behaves as if it did
+            not exist. If this is unspecified, the firewall policy rule will be
+            enabled.
+  - !ruby/object:Api::Type::Fingerprint
+    name: fingerprint
+    description: Fingerprint of the resource. This field is used internally during updates of this resource.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: selfLink
+    description: Server-defined URL for the resource.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: selfLinkWithId
+    description: Server-defined URL for this resource with the resource id.
+    output: true
+  - !ruby/object:Api::Type::Integer
+    name: ruleTupleCount
+    description: Total count of all firewall policy rule tuples. A firewall policy can not exceed a set number of tuples.
+    output: true

@@ -97,8 +97,6 @@ properties:
       A unique identifier for the instance, which cannot be changed after
       the instance is created. The name must be between 6 and 30 characters
       in length.
-
-
       If not provided, a random string starting with `tf-` will be selected.
     immutable: true
     required: true
@@ -241,3 +239,14 @@ properties:
               Specifies the target storage utilization percentage that the autoscaler
               should be trying to achieve for the instance.
               This number is on a scale from 0 (no utilization) to 100 (full utilization).
+
+  - !ruby/object:Api::Type::Enum
+    name: 'edition'
+    description: |
+      The edition selected for this instance. Different editions provide different capabilities at different price points.
+    default_from_api: true
+    values:
+      - :EDITION_UNSPECIFIED
+      - :STANDARD
+      - :ENTERPRISE
+      - :ENTERPRISE_PLUS

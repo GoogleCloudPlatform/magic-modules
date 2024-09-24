@@ -3,7 +3,7 @@ package compute_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
@@ -27,7 +27,7 @@ func TestAccComputeInstanceSettings_update(t *testing.T) {
 				ResourceName:            "google_compute_instance_settings.gce_instance_settings",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zone"},
+				ImportStateVerifyIgnore: []string{"zone", "fingerprint"},
 			},
 			{
 				Config: testAccComputeInstanceSettings_update(context),
@@ -36,7 +36,7 @@ func TestAccComputeInstanceSettings_update(t *testing.T) {
 				ResourceName:            "google_compute_instance_settings.gce_instance_settings",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zone"},
+				ImportStateVerifyIgnore: []string{"zone", "fingerprint"},
 			},
 			{
 				Config: testAccComputeInstanceSettings_delete(context),
@@ -45,7 +45,7 @@ func TestAccComputeInstanceSettings_update(t *testing.T) {
 				ResourceName:            "google_compute_instance_settings.gce_instance_settings",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zone"},
+				ImportStateVerifyIgnore: []string{"zone", "fingerprint"},
 			},
 		},
 	})

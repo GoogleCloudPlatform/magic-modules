@@ -48,7 +48,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 1000
@@ -175,7 +175,6 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: Labels to apply to this Image.
-    immutable: false
     update_url: 'projects/{{project}}/global/images/{{name}}/setLabels'
     update_verb: 'POST'
   - name: 'labelFingerprint'
@@ -229,8 +228,8 @@ properties:
         description: |
           An optional SHA1 checksum of the disk image before unpackaging.
           This is provided by the client when the disk image is created.
-      # TODO(alexstephen): Figure out cross-module ResourceRefs
         api_name: sha1Checksum
+      # TODO(alexstephen): Figure out cross-module ResourceRefs
       - name: 'source'
         type: String
         description: |

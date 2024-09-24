@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -30,8 +30,11 @@ func TestAccDataSourceSecretManagerSecrets_basic(t *testing.T) {
 						"data.google_secret_manager_secrets.foo",
 						"google_secret_manager_secret.foo",
 						map[string]struct{}{
-							"id":      {},
-							"project": {},
+							"id":               {},
+							"project":          {},
+							"effective_labels": {},
+							"labels":           {},
+							"terraform_labels": {},
 						},
 					),
 				),
@@ -42,6 +45,10 @@ func TestAccDataSourceSecretManagerSecrets_basic(t *testing.T) {
 
 func testAccDataSourceSecretManagerSecrets_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+provider "google" {
+  add_terraform_attribution_label = false
+}
+
 resource "google_secret_manager_secret" "foo" {
   secret_id = "tf-test-secret-%{random_suffix}"
 
@@ -82,8 +89,11 @@ func TestAccDataSourceSecretManagerSecrets_filter(t *testing.T) {
 						"google_secret_manager_secret.foo",
 						"google_secret_manager_secret.bar",
 						map[string]struct{}{
-							"id":      {},
-							"project": {},
+							"id":               {},
+							"project":          {},
+							"effective_labels": {},
+							"labels":           {},
+							"terraform_labels": {},
 						},
 					),
 				),
@@ -94,6 +104,10 @@ func TestAccDataSourceSecretManagerSecrets_filter(t *testing.T) {
 
 func testAccDataSourceSecretManagerSecrets_filter(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+provider "google" {
+  add_terraform_attribution_label = false
+}
+
 resource "google_secret_manager_secret" "foo" {
   secret_id = "tf-test-secret-%{random_suffix}"
 

@@ -33,7 +33,7 @@ privateCloudPollRead := func(d *schema.ResourceData, meta interface{}) transport
         }
     }
 
-err = transport_tpg.PollingWaitTime(privateCloudPollRead(d, meta), transport_tpg.PollCheckForAbsence, "Deleting {{$.Name}}", d.Timeout(schema.TimeoutDelete), 10)
+err = transport_tpg.PollingWaitTime(privateCloudPollRead(d, meta), pollCheckForPrivateCloudAbsence, "Deleting {{$.Name}}", d.Timeout(schema.TimeoutDelete), 10)
 if err != nil {
     return fmt.Errorf("Error waiting to delete PrivateCloud: %s", err)
 }

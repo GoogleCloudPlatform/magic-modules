@@ -30,7 +30,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 1000
@@ -79,9 +79,9 @@ properties:
   - name: 'deletionProtection'
     type: Boolean
     description: Whether the resource should be protected against deletion.
+    update_url: '/projects/{{project}}/zones/{{zone}}/instances/{resourceId}/setDeletionProtection'
     # The code for this update is custom because MM doesn't support
     # sending empty bodies + the new option as a request parameter.
-    update_url: '/projects/{{project}}/zones/{{zone}}/instances/{resourceId}/setDeletionProtection'
     update_verb: 'POST'
   - name: 'disks'
     type: Array
@@ -234,6 +234,15 @@ properties:
                     customer-supplied encryption key that protects this
                     resource.
                   output: true
+            - name: 'storagePool'
+              type: String
+              description: |
+                The URL of the storage pool in which the new disk is created.
+                For example:
+                * https://www.googleapis.com/compute/v1/projects/{project}/zones/{zone}/storagePools/{storagePool}
+                * /projects/{project}/zones/{zone}/storagePools/{storagePool}
+              required: false
+              immutable: true
         - name: 'interface'
           type: Enum
           description: |
@@ -245,6 +254,9 @@ properties:
           enum_values:
             - 'SCSI'
             - 'NVME'
+        # Ignoring kind - It's a constant and we don't need it.
+        # TODO(alexstephen): Place in licenses - it's a Array of
+        # ResourceRefs
         - name: 'mode'
           type: Enum
           description: |
@@ -254,6 +266,7 @@ properties:
           enum_values:
             - 'READ_WRITE'
             - 'READ_ONLY'
+        # This is the name, not selfLink of a disk.
         - name: 'source'
           type: ResourceRef
           description: |
@@ -327,9 +340,28 @@ properties:
     type: KeyValueLabels
     description: |
       Labels to apply to this instance.  A list of key->value pairs.
-    immutable: false
     update_url: 'projects/{{project}}/zones/{{zone}}/instances/{{name}}/setLabels'
     update_verb: 'POST'
+  # TODO(nelsonjr): Implement updating metadata *after* resource is created.
+
+  # Expose instance 'metadata' as a simple name/value pair hash. However the API
+  # defines metadata as a NestedObject with the following layout:
+  #
+  # metadata {
+  #   fingerprint: 'hash-of-last-metadata'
+  #   items: [
+  #     {
+  #       key: 'metadata1-key'
+  #       value: 'metadata1-value'
+  #     },
+  #     ...
+  #   ]
+  # }
+  #
+  # Fingerprint is an optimistic locking mechanism for updates, which requires
+  # adding the 'fingerprint' of the last metadata to allow update.
+  #
+  # To comply with the API please add an encoder: and decoder: to the provider.
   - name: 'metadata'
     type: KeyValuePairs
     description: |
@@ -341,6 +373,7 @@ properties:
     description: 'A reference to a machine type which defines VM kind.'
     update_url: 'projects/{{project}}/zones/{{zone}}/instances/{{name}}/setMachineType'
     update_verb: 'POST'
+    # TODO(alexstephen): Add metadata
     custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
     resource: 'MachineType'
     imports: 'selfLink'
@@ -380,6 +413,7 @@ properties:
           item_type:
             type: NestedObject
             properties:
+              # 'kind' is not needed for object convergence
               - name: 'name'
                 type: String
                 description: |
@@ -562,9 +596,9 @@ properties:
     type: NestedObject
     description:
       Configuration for various parameters related to shielded instances.
+    update_url: 'projects/{{project}}/instances/{{name}}/updateShieldedInstanceConfig'
     # The code for this update method is custom because MM does not support
     # sending just the nested properties
-    update_url: 'projects/{{project}}/instances/{{name}}/updateShieldedInstanceConfig'
     update_verb: 'PATCH'
     properties:
       - name: 'enableSecureBoot'
@@ -600,14 +634,16 @@ properties:
         type: Enum
         description: |
           The confidential computing technology the instance uses.
-          SEV is an AMD feature. One of the following values: SEV, SEV_SNP.
-          If SEV_SNP, min_cpu_platform = "AMD Milan" is currently required.
+          SEV is an AMD feature. TDX is an Intel feature. One of the following
+          values is required: SEV, SEV_SNP, TDX. If SEV_SNP, min_cpu_platform =
+          "AMD Milan" is currently required. TDX is only available in beta.
         at_least_one_of:
           - 'confidential_instance_config.0.enable_confidential_compute'
           - 'confidential_instance_config.0.confidential_instance_type'
         enum_values:
           - 'SEV'
           - 'SEV_SNP'
+          - 'TDX'
   - name: 'status'
     type: Enum
     description: |
@@ -642,6 +678,7 @@ properties:
       by the setTags method. Each tag within the list must comply with
       RFC1035.
     properties:
+      # TODO(alexstephen) Investigate bytes type
       - name: 'fingerprint'
         type: String
         description: |

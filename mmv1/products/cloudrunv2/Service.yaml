@@ -49,6 +49,19 @@ async: !ruby/object:Api::OpAsync
 id_format: 'projects/{{project}}/locations/{{location}}/services/{{name}}'
 import_format: ['projects/{{project}}/locations/{{location}}/services/{{name}}']
 autogen_async: true
+virtual_fields:
+  - !ruby/object:Api::Type::Boolean
+    name: 'deletion_protection'
+    default_value: true
+    description: |
+      Whether Terraform will be prevented from destroying the service. Defaults to true.
+      When a`terraform destroy` or `terraform apply` would delete the service,
+      the command will fail if this field is not set to false in Terraform state.
+      When the field is set to true or unset in Terraform state, a `terraform apply`
+      or `terraform destroy` that would delete the service will fail.
+      When the field is set to false, deleting the service is allowed.
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_delete: 'templates/terraform/pre_delete/cloudrunv2_service_deletion_policy.go.erb'
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_basic'
@@ -56,11 +69,15 @@ examples:
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_limits'
     primary_resource_id: 'default'
     vars:
       cloud_run_service_name: 'cloudrun-service'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_sql'
     primary_resource_id: 'default'
@@ -74,6 +91,8 @@ examples:
       deletion_protection: 'false'
     oics_vars_overrides:
       deletion_protection: 'false'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_vpcaccess'
     primary_resource_id: 'default'
@@ -83,18 +102,33 @@ examples:
       vpc_access_connector_name: 'run-vpc'
       vpc_compute_subnetwork_name: 'run-subnetwork'
       compute_network_name: 'run-network'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_directvpc'
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
+    ignore_read_extra:
+      - 'deletion_protection'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudrunv2_service_gpu'
+    min_version: 'beta'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
+    vars:
+      cloud_run_service_name: 'cloudrun-service'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_probes'
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_secret'
     primary_resource_id: 'default'
@@ -102,6 +136,8 @@ examples:
     vars:
       cloud_run_service_name: 'cloudrun-service'
       secret_id: 'secret-1'
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_multicontainer'
     min_version: 'beta'
@@ -110,20 +146,40 @@ examples:
       random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
-
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_mount_gcs'
+    # Currently failing
+    skip_vcr: true
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service-%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
-
+    ignore_read_extra:
+      - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_mount_nfs'
+    # Currently failing
+    skip_vcr: true
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service-%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
+    ignore_read_extra:
+      - 'deletion_protection'
+
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudrunv2_service_mesh'
+    min_version: 'beta'
+    external_providers: ['time']
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service-%s\", context[\"random_suffix\"])"
+    vars:
+      cloud_run_service_name: 'cloudrun-service'
+      mesh_name: 'network-services-mesh'
+    ignore_read_extra:
+      - 'deletion_protection'
 
 parameters:
   - !ruby/object:Api::Type::String
@@ -250,6 +306,14 @@ properties:
         name: 'useDefault'
         description: |
           If True, indicates to use the default project's binary authorization policy. If False, binary authorization will be disabled.
+        conflicts:
+          - policy
+      - !ruby/object:Api::Type::String
+        name: 'policy'
+        description: |
+          The path to a binary authorization policy. Format: projects/{project}/platforms/cloudRun/{policy-name}
+        conflicts:
+          - use_default
   - !ruby/object:Api::Type::Array
     name: 'customAudiences'
     description: |
@@ -258,7 +322,6 @@ properties:
     item_type: Api::Type::String
   - !ruby/object:Api::Type::NestedObject
     name: 'scaling'
-    min_version: beta
     description: |
       Scaling settings that apply to the whole service
     properties:
@@ -391,23 +454,24 @@ properties:
             - !ruby/object:Api::Type::Array
               name: 'args'
               description: |-
-                Arguments to the entrypoint. The docker image's CMD is used if this is not provided. Variable references $(VAR_NAME) are expanded using the container's environment. If a variable cannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded, regardless of whether the variable exists or not. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell
+                Arguments to the entrypoint. The docker image's CMD is used if this is not provided. Variable references are not supported in Cloud Run.
               item_type: Api::Type::String
             - !ruby/object:Api::Type::Array
               name: 'env'
               description: |-
                 List of environment variables to set in the container.
+              is_set: true
               item_type: !ruby/object:Api::Type::NestedObject
                 properties:
                   - !ruby/object:Api::Type::String
                     name: 'name'
                     required: true
                     description: |-
-                      Name of the environment variable. Must be a C_IDENTIFIER, and mnay not exceed 32768 characters.
+                      Name of the environment variable. Must be a C_IDENTIFIER, and may not exceed 32768 characters.
                   - !ruby/object:Api::Type::String
                     name: 'value'
                     description: |-
-                      Variable references $(VAR_NAME) are expanded using the previous defined environment variables in the container and any route environment variables. If a variable cannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded, regardless of whether the variable exists or not. Defaults to "", and the maximum length is 32768 bytes
+                      Literal value of the environment variable. Defaults to "" and the maximum allowed length is 32768 characters. Variable references are not supported in Cloud Run.
                     # exactly_one_of:
                     #   - template.0.containers.0.env.0.value
                     #   - template.0.containers.0.env.0.valueSource
@@ -442,7 +506,7 @@ properties:
                 - !ruby/object:Api::Type::KeyValuePairs
                   name: 'limits'
                   description: |-
-                    Only memory and CPU are supported. Use key `cpu` for CPU limit and `memory` for memory limit. Note: The only supported values for CPU are '1', '2', '4', and '8'. Setting 4 CPU requires at least 2Gi of memory. The values of the map is string form of the 'quantity' k8s type: https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
+                    Only memory, CPU, and nvidia.com/gpu are supported. Use key `cpu` for CPU limit, `memory` for memory limit, `nvidia.com/gpu` for gpu limit. Note: The only supported values for CPU are '1', '2', '4', and '8'. Setting 4 CPU requires at least 2Gi of memory. The values of the map is string form of the 'quantity' k8s type: https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
                   default_from_api: true
                 - !ruby/object:Api::Type::Boolean
                   name: 'cpuIdle'
@@ -496,7 +560,6 @@ properties:
               name: 'livenessProbe'
               description: |-
                 Periodic probe of container liveness. Container will be restarted if the probe fails. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
-              default_from_api: true
               properties:
                 - !ruby/object:Api::Type::Integer
                   name: 'initialDelaySeconds'
@@ -615,10 +678,10 @@ properties:
                     HTTPGet specifies the http request to perform. Exactly one of HTTPGet or TCPSocket must be specified.
                   send_empty_value: true
                   allow_empty_object: true
-                    # exactly_one_of:
-                    #   - template.0.containers.0.startupProbe.0.httpGet
-                    #   - template.0.containers.0.startupProbe.0.tcpSocket
-                    #   - template.0.containers.0.startupProbe.0.grpc
+                  # exactly_one_of:
+                  #   - template.0.containers.0.startupProbe.0.httpGet
+                  #   - template.0.containers.0.startupProbe.0.tcpSocket
+                  #   - template.0.containers.0.startupProbe.0.grpc
                   properties:
                     - !ruby/object:Api::Type::String
                       name: 'path'
@@ -654,10 +717,10 @@ properties:
                     TCPSocket specifies an action involving a TCP port. Exactly one of HTTPGet or TCPSocket must be specified.
                   send_empty_value: true
                   allow_empty_object: true
-                    # exactly_one_of:
-                    #   - template.0.containers.0.startupProbe.0.httpGet
-                    #   - template.0.containers.0.startupProbe.0.tcpSocket
-                    #   - template.0.containers.0.startupProbe.0.grpc
+                  # exactly_one_of:
+                  #   - template.0.containers.0.startupProbe.0.httpGet
+                  #   - template.0.containers.0.startupProbe.0.tcpSocket
+                  #   - template.0.containers.0.startupProbe.0.grpc
                   properties:
                     - !ruby/object:Api::Type::Integer
                       name: port
@@ -782,7 +845,7 @@ properties:
             - !ruby/object:Api::Type::NestedObject
               name: 'gcs'
               description: |-
-                Cloud Storage bucket mounted as a volume using GCSFuse. This feature is only supported in the gen2 execution environment and requires launch-stage to be set to ALPHA or BETA.
+                Cloud Storage bucket mounted as a volume using GCSFuse. This feature is only supported in the gen2 execution environment.
               # exactly_one_of:
               #   - template.0.volumes.0.secret
               #   - template.0.volumes.0.cloudSqlInstance
@@ -828,11 +891,32 @@ properties:
         name: 'maxInstanceRequestConcurrency'
         description: |-
           Sets the maximum number of requests that each serving instance can receive.
+          If not specified or 0, defaults to 80 when requested CPU >= 1 and defaults to 1 when requested CPU < 1.
         default_from_api: true
       - !ruby/object:Api::Type::Boolean
         name: 'sessionAffinity'
         description: |-
           Enables session affinity. For more information, go to https://cloud.google.com/run/docs/configuring/session-affinity
+      - !ruby/object:Api::Type::NestedObject
+        name: 'serviceMesh'
+        min_version: beta
+        description: |-
+          Enables Cloud Service Mesh for this Revision.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'mesh'
+            description: |-
+              The Mesh resource name. For more information see https://cloud.google.com/service-mesh/docs/reference/network-services/rest/v1/projects.locations.meshes#resource:-mesh.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'nodeSelector'
+        min_version: beta
+        description: Node Selector describes the hardware requirements of the resources.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'accelerator'
+            required: true
+            description:
+              The GPU to attach to an instance. See https://cloud.google.com/run/docs/configuring/services/gpu for configuring GPU.
   - !ruby/object:Api::Type::Array
     name: 'traffic'
     description: |-

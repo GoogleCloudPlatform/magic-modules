@@ -27,7 +27,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -54,6 +54,15 @@ examples:
     primary_resource_id: 'default'
     vars:
       region_target_https_proxy_name: 'test-proxy'
+      region_ssl_certificate_name: 'my-certificate'
+      region_url_map_name: 'url-map'
+      region_backend_service_name: 'backend-service'
+      region_health_check_name: 'http-health-check'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'region_target_https_proxy_http_keep_alive_timeout'
+    primary_resource_id: 'default'
+    vars:
+      region_target_https_proxy_name: 'test-http-keep-alive-timeout-proxy'
       region_ssl_certificate_name: 'my-certificate'
       region_url_map_name: 'url-map'
       region_backend_service_name: 'backend-service'
@@ -190,6 +199,14 @@ properties:
     update_verb: :POST
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
     update_url: 'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setUrlMap'
+  - !ruby/object:Api::Type::Integer
+    name: 'httpKeepAliveTimeoutSec'
+    description: |
+      Specifies how long to keep a connection open, after completing a response,
+      while there is no matching traffic (in seconds). If an HTTP keepalive is
+      not specified, a default value (600 seconds) will be used. For Regioanl
+      HTTP(S) load balancer, the minimum allowed value is 5 seconds and the
+      maximum allowed value is 600 seconds.
   - !ruby/object:Api::Type::ResourceRef
     name: 'serverTlsPolicy'
     resource: 'SslPolicy'
@@ -204,3 +221,13 @@ properties:
       INTERNAL_SELF_MANAGED and which with EXTERNAL, EXTERNAL_MANAGED
       loadBalancingScheme consult ServerTlsPolicy documentation.
       If left blank, communications are not encrypted.
+
+      If you remove this field from your configuration at the same time as
+      deleting or recreating a referenced ServerTlsPolicy resource, you will
+      receive a resourceInUseByAnotherResource error. Use lifecycle.create_before_destroy
+      within the ServerTlsPolicy resource to avoid this.
+    update_id: 'serverTlsPolicy'
+    fingerprint_name: 'fingerprint'
+    update_verb: :PATCH
+    update_url:
+      'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}'

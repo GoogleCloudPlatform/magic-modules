@@ -30,7 +30,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 1000
@@ -59,7 +59,7 @@ examples:
       interconnect_attachment_name: 'on-prem-attachment'
       router_name: 'router-1'
       network_name: 'network-1'
-    skip_docs: true
+    exclude_docs: true
   - name: 'compute_interconnect_attachment_ipsec_encryption'
     primary_resource_id: 'ipsec-encrypted-interconnect-attachment'
     vars:

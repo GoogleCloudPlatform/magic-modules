@@ -1,0 +1,30 @@
+{
+    "organization": "{{org_id}}",
+    "location": "europe-west8",
+    "displayName": "{{display}}",
+    "complianceRegime": "ASSURED_WORKLOADS_FOR_PARTNERS",
+    "billingAccount": "billingAccounts/{{billing_account}}",
+    "partnerServicesBillingAccount": "billingAccounts/01BF3F-2C6DE5-30C607",
+    "labels": {
+      "label-one": "value-one"
+    },
+    "partner": "SOVEREIGN_CONTROLS_BY_PSN",
+    "partnerPermissions": {
+      "dataLogsViewer": true,
+      "serviceAccessApprover": true,
+      "assuredWorkloadsMonitoring": true
+    },
+    "violationNotificationsEnabled": true,
+    "resourceSettings": [
+      {
+        "resourceType": "CONSUMER_FOLDER"
+      },
+      {
+        "resourceType": "ENCRYPTION_KEYS_PROJECT"
+      },
+      {
+        "resourceId": "{{ring}}",
+        "resourceType": "KEYRING"
+      }
+    ]
+  }

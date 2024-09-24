@@ -37,7 +37,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 1000
@@ -58,11 +58,16 @@ examples:
       instance_template_name: 'my-instance-template'
       target_pool_name: 'my-target-pool'
       igm_name: 'my-igm'
+        # Add test_vars_overrides and oics_vars_overrides to fix the failing test,
+        # which is caused by upgradting terraform-plugin-sdk to 2.24.0.
       provider_name: 'google-beta'
       provider_alias: ''
     test_vars_overrides:
       'provider_name': '"google-beta.us-central1"'
       'provider_alias': '"alias  = \"us-central1\""'
+    oics_vars_overrides:
+      'provider_name': 'google-beta'
+      'provider_alias': ''
   - name: 'autoscaler_basic'
     primary_resource_id: 'foobar'
     vars:
@@ -383,6 +388,7 @@ properties:
         key_description: |
           A name for the schedule.
         value_type:
+          name: scalingSchedule
           type: NestedObject
           properties:
             - name: 'minRequiredReplicas'

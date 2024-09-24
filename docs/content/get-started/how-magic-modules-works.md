@@ -34,7 +34,7 @@ MMv1-based files start with the following header:
 
 ### Handwritten
 
-Handwritten resources and datasources are technically part of MMv1; however, they are not generated from YAML configurations. Instead, they are written as Go code with minimal ruby "version guards" to exclude beta-only features from the `google` provider.
+Handwritten resources and datasources are technically part of MMv1; however, they are not generated from YAML configurations. Instead, they are written as Go code with minimal go template "version guards" to exclude beta-only features from the `google` provider.
 
 Handwritten resources and datasources can be grouped by "service", which generally corresponds to the API subdomain the resource or datasource interacts with.
 

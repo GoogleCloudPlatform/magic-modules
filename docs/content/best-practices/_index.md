@@ -19,7 +19,7 @@ Some fields or resources may be possible to update in place, but only under spec
 
 In complex cases, it is better to mark the field `ForceNew` to ensure that users can apply their configurations successfully.
 
-### Mitigating data loss risk via deletion_protection
+### Mitigating data loss risk via deletion_protection {#deletion_protection}
 
 Some resources, such as databases, have a significant risk of unrecoverable data loss if the resource is accidentally deleted due to a change to a ForceNew field. For these resources, the best practice is to add a `deletion_protection` field that defaults to `true`, which prevents the resource from being deleted if enabled. Although it is a small breaking change, for users, the benefits of `deletion_protection` defaulting to `true` outweigh the cost.
 
@@ -30,17 +30,19 @@ A resource can have up to two `deletion_protection` fields (with different names
 
 Resources that do not have a significant risk of unrecoverable data loss or similar critical concern will not be given `deletion_protection` fields.
 
+See [Client-side fields]({{< ref "/develop/client-side-fields" >}}) for information about adding `deletion_protection` fields.
+
 {{< hint info >}}
 **Note:** The previous best practice was a field called `force_delete` that defaulted to `false`. This is still present on some resources for backwards-compatibility reasons, but `deletion_protection` is preferred going forward.
 {{< /hint >}}
 
-## Deletion policy
+## Deletion policy {#deletion_policy}
 
 Some resources need to let users control the actions taken add deletion time. For these resources, the best practice is to add a `deletion_policy` enum field that defaults to an empty string and allows special values that control the deletion behavior.
 
 One common example is `ABANDON`, which is useful if the resource is safe to delete from Terraform but could cause problems if deleted from the API - for example, `google_bigtable_gc_policy` deletion can fail in replicated instances. `ABANDON` indicates that attempts to delete the resource should remove it from state without actually deleting it.
 
-See [magic-modules#13107](https://github.com/hashicorp/terraform-provider-google/pull/13107) for an example of adding a `deletion_policy` field to an existing resource.
+See [Client-side fields]({{< ref "/develop/client-side-fields" >}}) for information about adding `deletion_policy` fields.
 
 ## Add labels and annotations support
 
@@ -65,8 +67,8 @@ When adding a new `labels` field, please make the changes below to support the n
 1. Use the type `KeyValueLabels` for the standard resource `labels` field. The standard resource `labels` field could be the top level `labels` field or the nested `labels` field inside the top level `metadata` field. Don't add `default_from_api: true` to this field or don't use this type for other `labels` fields in the resource. `KeyValueLabels` will add all of changes required for the new model automatically.
 
 ```yaml
-- !ruby/object:Api::Type::KeyValueLabels
-   name: 'labels'
+ - name: 'labels'
+   type: KeyValueLabels
    description: |
    The labels associated with this dataset. You can use these to
    organize and group your datasets.
@@ -153,9 +155,10 @@ When adding a new `annotations` field, please make the changes below below to su
 1. Use the type `KeyValueAnnotations` for the standard resource `annotations` field. The standard resource `annotations` field could be the top level `annotations` field or the nested `annotations` field inside the top level `metadata` field. Don't add `default_from_api: true` to this field or don't use this type for other `annotations` fields in the resource. `KeyValueAnnotations` will add all of changes required for the new model automatically.
 
 ```yaml
-- !ruby/object:Api::Type::KeyValueAnnotations
-   name: 'annotations'
-   description: 'Client-specified annotations. This is distinct from labels.'
+- name: 'annotations'
+  type: KeyValueAnnotations
+  description: |
+   Client-specified annotations. This is distinct from labels.
 ```
 2. In the handwritten acceptance tests, add `annotations` to `ImportStateVerifyIgnore` if `annotations` field is in the configuration.
 
@@ -190,27 +193,3 @@ if err := tpgresource.SetDataSourceAnnotations(d); err != nil {
 7. In the handwritten acceptance tests, add `annotations` to `ImportStateVerifyIgnore`.
 8. In the corresponding data source, after the resource read method, call the function `tpgresource.SetDataSourceAnnotations(d)` to make `annotations` have all of the labels on the resource.
 9. Add the documentation for these annotation-related fields.
-
-## Update `go.mod`
-
-The Magic Modules repository does not contain a complete Go module, preventing the use of automated tooling like `go get` from that repository. To add or update provider dependencies, use standard Go tooling to update an individual provider and copy the results to the upstream files in Magic Modules. The providers share the same go.mod and go.sum contents so either can be used to generate the changes.
-
-Below are the steps you can follow to make the change:
-
-1. Navigate to the local `google` provider directory:
-```bash
-cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
-``` 
-2. Open the [`go.mod`](https://github.com/hashicorp/terraform-provider-google/blob/main/go.mod) file and add the new entries or modify the versions of existing entries as needed
-3. Update dependencies using either of the following methods
-   * run the following commands to update all dependencies: 
-   ```bash
-   go get
-   go mod tidy
-   ```
-   * Alternatively, update a specific package to a desired version:
-   ```bash
-   go get google.golang.org/api@v0.105.0 
-   go mod tidy
-   ```
-4. Copy the contents of the updated `go.mod` and `go.sum` file into [`mmv1/third_party/terraform/go.mod.erb`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/go.mod.erb) and [`mmv1/third_party/terraform/go.sum`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/go.sum) in the `magic-modules` respectively. Ensure `<% autogen_exception -%>` is still at the top of the file afterwards

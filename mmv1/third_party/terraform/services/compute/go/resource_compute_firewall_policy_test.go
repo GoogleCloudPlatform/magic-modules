@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccComputeFirewallPolicy_update(t *testing.T) {
@@ -54,6 +54,7 @@ func testAccComputeFirewallPolicy_basic(org, policyName, folderName string) stri
 resource "google_folder" "folder" {
   display_name = "%s"
   parent       = "%s"
+  deletion_protection = false
 }
 
 resource "google_compute_firewall_policy" "default" {
@@ -69,6 +70,7 @@ func testAccComputeFirewallPolicy_update(org, policyName, folderName string) str
 resource "google_folder" "folder" {
   display_name = "%s"
   parent       = "%s"
+  deletion_protection = false
 }
 
 resource "google_compute_firewall_policy" "default" {

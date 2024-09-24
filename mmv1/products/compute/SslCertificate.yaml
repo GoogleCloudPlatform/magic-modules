@@ -30,7 +30,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -47,7 +47,13 @@ async: !ruby/object:Api::OpAsync
 docs: !ruby/object:Provider::Terraform::Docs
   optional_properties: |
     * `name_prefix` - (Optional) Creates a unique name beginning with the
-     specified prefix. Conflicts with `name`.
+     specified prefix. Conflicts with `name`. Max length is 54 characters.
+     Prefixes with lengths longer than 37 characters will use a shortened
+     UUID that will be more prone to collisions.
+     Resulting name for a `name_prefix` <= 37 characters:
+     `name_prefix` + YYYYmmddHHSSssss + 8 digit incremental counter
+     Resulting name for a `name_prefix` 38 - 54 characters:
+     `name_prefix` + YYmmdd + 3 digit incremental counter
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'ssl_certificate_basic'

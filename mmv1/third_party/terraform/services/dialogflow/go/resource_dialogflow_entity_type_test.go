@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccDialogflowEntityType_update(t *testing.T) {
@@ -49,6 +49,7 @@ func testAccDialogflowEntityType_full1(context map[string]interface{}) string {
 		project_id = "tf-test-dialogflow-%{random_suffix}"
 		org_id     = "%{org_id}"
 		billing_account = "%{billing_account}"
+		deletion_policy = "DELETE"
 	}
 
 	resource "google_project_service" "agent_project" {
@@ -100,6 +101,7 @@ func testAccDialogflowEntityType_full2(context map[string]interface{}) string {
 		project_id = "tf-test-dialogflow-%{random_suffix}"
 		org_id     = "%{org_id}"
 		billing_account = "%{billing_account}"
+		deletion_policy = "DELETE"
 	}
 
 	resource "google_project_service" "agent_project" {

@@ -10,7 +10,6 @@ import (
 
 	<% if version == 'ga' -%>
 	"github.com/hashicorp/terraform-provider-google/google/services/composer"
-	"github.com/hashicorp/terraform-provider-google/google/services/siteverification"
 	<% end -%>
 	"github.com/hashicorp/terraform-provider-google/google/services/container"
 	"github.com/hashicorp/terraform-provider-google/google/services/containeraws"
@@ -29,6 +28,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_alloydb_locations":                         alloydb.DataSourceAlloydbLocations(),
 	"google_alloydb_supported_database_flags":          alloydb.DataSourceAlloydbSupportedDatabaseFlags(),
 	"google_artifact_registry_docker_image":            artifactregistry.DataSourceArtifactRegistryDockerImage(),
+        "google_artifact_registry_locations":               artifactregistry.DataSourceGoogleArtifactRegistryLocations(),
 	"google_artifact_registry_repository":              artifactregistry.DataSourceArtifactRegistryRepository(),
 	"google_apphub_discovered_workload":		    apphub.DataSourceApphubDiscoveredWorkload(),
 	"google_app_engine_default_service_account":        appengine.DataSourceGoogleAppEngineDefaultServiceAccount(),
@@ -41,8 +41,10 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_beyondcorp_app_connector":                  beyondcorp.DataSourceGoogleBeyondcorpAppConnector(),
 	"google_beyondcorp_app_gateway":                    beyondcorp.DataSourceGoogleBeyondcorpAppGateway(),
 	"google_billing_account":                           billing.DataSourceGoogleBillingAccount(),
+	"google_bigquery_tables":          								  bigquery.DataSourceGoogleBigQueryTables(),
 	"google_bigquery_dataset":          								bigquery.DataSourceGoogleBigqueryDataset(),
 	"google_bigquery_default_service_account":          bigquery.DataSourceGoogleBigqueryDefaultServiceAccount(),
+	"google_certificate_manager_certificates":          certificatemanager.DataSourceGoogleCertificateManagerCertificates(),
 	"google_certificate_manager_certificate_map":       certificatemanager.DataSourceGoogleCertificateManagerCertificateMap(),
 	"google_cloudbuild_trigger":                        cloudbuild.DataSourceGoogleCloudBuildTrigger(),
 	"google_cloudfunctions_function":                   cloudfunctions.DataSourceGoogleCloudFunctionsFunction(),
@@ -53,6 +55,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_cloud_asset_search_all_resources":          cloudasset.DataSourceGoogleCloudAssetSearchAllResources(),
 	"google_cloud_identity_groups":                     cloudidentity.DataSourceGoogleCloudIdentityGroups(),
 	"google_cloud_identity_group_memberships":          cloudidentity.DataSourceGoogleCloudIdentityGroupMemberships(),
+	"google_cloud_identity_group_transitive_memberships":  cloudidentity.DataSourceGoogleCloudIdentityGroupTransitiveMemberships(),
 	"google_cloud_identity_group_lookup":               cloudidentity.DataSourceGoogleCloudIdentityGroupLookup(),
 	"google_cloud_quotas_quota_info":                   cloudquotas.DataSourceGoogleCloudQuotasQuotaInfo(),
 	"google_cloud_quotas_quota_infos":                  cloudquotas.DataSourceGoogleCloudQuotasQuotaInfos(),
@@ -94,6 +97,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_compute_regions":                           compute.DataSourceGoogleComputeRegions(),
 	"google_compute_region_disk":                       compute.DataSourceGoogleComputeRegionDisk(),
 	"google_compute_region_instance_group":             compute.DataSourceGoogleComputeRegionInstanceGroup(),
+	"google_compute_region_instance_group_manager":     compute.DataSourceGoogleComputeRegionInstanceGroupManager(),
 	"google_compute_region_instance_template":          compute.DataSourceGoogleComputeRegionInstanceTemplate(),
 	"google_compute_region_network_endpoint_group":     compute.DataSourceGoogleComputeRegionNetworkEndpointGroup(),
 	"google_compute_region_ssl_certificate":            compute.DataSourceGoogleRegionComputeSslCertificate(),
@@ -137,6 +141,8 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_kms_crypto_key":                            kms.DataSourceGoogleKmsCryptoKey(),
 	"google_kms_crypto_keys":                           kms.DataSourceGoogleKmsCryptoKeys(),
 	"google_kms_crypto_key_version":                    kms.DataSourceGoogleKmsCryptoKeyVersion(),
+	"google_kms_crypto_key_latest_version":             kms.DataSourceGoogleKmsLatestCryptoKeyVersion(),
+	"google_kms_crypto_key_versions":                    kms.DataSourceGoogleKmsCryptoKeyVersions(),
 	"google_kms_key_ring":                              kms.DataSourceGoogleKmsKeyRing(),
 	"google_kms_key_rings":                              kms.DataSourceGoogleKmsKeyRings(),
 	"google_kms_secret":                                kms.DataSourceGoogleKmsSecret(),
@@ -165,6 +171,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_netblock_ip_ranges":                        resourcemanager.DataSourceGoogleNetblockIpRanges(),
 	"google_organization":                              resourcemanager.DataSourceGoogleOrganization(),
 	"google_privateca_certificate_authority":           privateca.DataSourcePrivatecaCertificateAuthority(),
+	"google_privileged_access_manager_entitlement":     privilegedaccessmanager.DataSourceGooglePrivilegedAccessManagerEntitlement(),
 	"google_project":                                   resourcemanager.DataSourceGoogleProject(),
 	"google_projects":                                  resourcemanager.DataSourceGoogleProjects(),
 	"google_project_organization_policy":               resourcemanager.DataSourceGoogleProjectOrganizationPolicy(),
@@ -175,6 +182,10 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_runtimeconfig_config":                      runtimeconfig.DataSourceGoogleRuntimeconfigConfig(),
 	"google_runtimeconfig_variable":                    runtimeconfig.DataSourceGoogleRuntimeconfigVariable(),
 	<% end -%>
+	"google_secret_manager_regional_secret_version_access": secretmanagerregional.DataSourceSecretManagerRegionalRegionalSecretVersionAccess(),
+	"google_secret_manager_regional_secret_version":    secretmanagerregional.DataSourceSecretManagerRegionalRegionalSecretVersion(),
+	"google_secret_manager_regional_secret":            secretmanagerregional.DataSourceSecretManagerRegionalRegionalSecret(),
+	"google_secret_manager_regional_secrets":           secretmanagerregional.DataSourceSecretManagerRegionalRegionalSecrets(),
 	"google_secret_manager_secret":                     secretmanager.DataSourceSecretManagerSecret(),
 	"google_secret_manager_secrets":                    secretmanager.DataSourceSecretManagerSecrets(),
 	"google_secret_manager_secret_version":             secretmanager.DataSourceSecretManagerSecretVersion(),
@@ -226,7 +237,6 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_vmwareengine_private_cloud":                vmwareengine.DataSourceVmwareenginePrivateCloud(),
 	"google_vmwareengine_subnet":                       vmwareengine.DataSourceVmwareengineSubnet(),
 	"google_vmwareengine_vcenter_credentials":          vmwareengine.DataSourceVmwareengineVcenterCredentials(),
-
 	// ####### END handwritten datasources ###########
 }
 
@@ -393,7 +403,7 @@ var handwrittenIAMResources = map[string]*schema.Resource{
 	"google_bigtable_table_iam_member":             tpgiamresource.ResourceIamMember(bigtable.IamBigtableTableSchema, bigtable.NewBigtableTableUpdater, bigtable.BigtableTableIdParseFunc),
 	"google_bigtable_table_iam_policy":             tpgiamresource.ResourceIamPolicy(bigtable.IamBigtableTableSchema, bigtable.NewBigtableTableUpdater, bigtable.BigtableTableIdParseFunc),
 	"google_bigquery_dataset_iam_binding":          tpgiamresource.ResourceIamBinding(bigquery.IamBigqueryDatasetSchema, bigquery.NewBigqueryDatasetIamUpdater, bigquery.BigqueryDatasetIdParseFunc),
-	"google_bigquery_dataset_iam_member":           tpgiamresource.ResourceIamMember(bigquery.IamBigqueryDatasetSchema, bigquery.NewBigqueryDatasetIamUpdater, bigquery.BigqueryDatasetIdParseFunc),
+	"google_bigquery_dataset_iam_member":           tpgiamresource.ResourceIamMember(bigquery.IamMemberBigqueryDatasetSchema, bigquery.NewBigqueryDatasetIamMemberUpdater, bigquery.BigqueryDatasetIdParseFunc),
 	"google_bigquery_dataset_iam_policy":           tpgiamresource.ResourceIamPolicy(bigquery.IamBigqueryDatasetSchema, bigquery.NewBigqueryDatasetIamUpdater, bigquery.BigqueryDatasetIdParseFunc),
 	"google_billing_account_iam_binding":           tpgiamresource.ResourceIamBinding(billing.IamBillingAccountSchema, billing.NewBillingAccountIamUpdater, billing.BillingAccountIdParseFunc),
 	"google_billing_account_iam_member":            tpgiamresource.ResourceIamMember(billing.IamBillingAccountSchema, billing.NewBillingAccountIamUpdater, billing.BillingAccountIdParseFunc),

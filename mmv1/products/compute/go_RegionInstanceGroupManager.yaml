@@ -36,7 +36,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 1000
@@ -146,6 +146,7 @@ properties:
       An optional description of this resource. Provide this property when
       you create the resource.
     immutable: true
+  # fingerprint ignored as it is an internal locking detail
   - name: 'id'
     type: Integer
     description: 'A unique identifier for this resource'
@@ -164,6 +165,7 @@ properties:
       group. The group uses this template to create all new instances in the
       managed instance group.
     required: true
+  # kind is internal transport detail
     custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
     resource: 'InstanceTemplate'
     imports: 'selfLink'
@@ -173,6 +175,7 @@ properties:
       The name of the managed instance group. The name must be 1-63
       characters long, and comply with RFC1035.
     required: true
+  # TODO(nelsonjr): Make namedPorts a NameValue(name[string], port[integer])
   - name: 'namedPorts'
     type: Array
     description:

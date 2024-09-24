@@ -27,7 +27,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -47,6 +47,14 @@ examples:
     primary_resource_id: 'default'
     vars:
       region_target_http_proxy_name: 'test-proxy'
+      region_url_map_name: 'url-map'
+      region_backend_service_name: 'backend-service'
+      region_health_check_name: 'http-health-check'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'region_target_http_proxy_http_keep_alive_timeout'
+    primary_resource_id: 'default'
+    vars:
+      region_target_http_proxy_name: 'test-http-keep-alive-timeout-proxy'
       region_url_map_name: 'url-map'
       region_backend_service_name: 'backend-service'
       region_health_check_name: 'http-health-check'
@@ -104,3 +112,11 @@ properties:
     update_verb: :POST
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
     update_url: 'projects/{{project}}/regions/{{region}}/targetHttpProxies/{{name}}/setUrlMap'
+  - !ruby/object:Api::Type::Integer
+    name: 'httpKeepAliveTimeoutSec'
+    description: |
+      Specifies how long to keep a connection open, after completing a response,
+      while there is no matching traffic (in seconds). If an HTTP keepalive is
+      not specified, a default value (600 seconds) will be used. For Regional
+      HTTP(S) load balancer, the minimum allowed value is 5 seconds and the
+      maximum allowed value is 600 seconds.

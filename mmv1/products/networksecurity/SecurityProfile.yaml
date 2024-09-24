@@ -22,7 +22,7 @@ description: |
   A security profile defines the behavior associated to a profile type.
 references:
   !ruby/object:Api::Resource::ReferenceLinks
-  api: 'https://cloud.google.com/firewall/docs/reference/network-security/rest/v1/projects.locations.securityProfiles'
+  api: 'https://cloud.google.com/firewall/docs/reference/network-security/rest/v1/organizations.locations.securityProfiles'
   guides:
     'Create and manage security profiles': 'https://cloud.google.com/firewall/docs/configure-security-profiles'
 async: !ruby/object:Api::OpAsync

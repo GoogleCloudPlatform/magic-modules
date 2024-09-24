@@ -32,7 +32,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 1000
@@ -108,8 +108,9 @@ examples:
     ignore_read_extra:
       - 'metadata'
       - 'metadata_startup_script'
-    skip_test: true
-    skip_docs: true
+ # Very similar to external_http_lb_mig_backend_custom_header
+    exclude_test: true
+    exclude_docs: true
   - name: 'url_map_path_template_match'
     primary_resource_id: 'urlmap'
     vars:
@@ -303,6 +304,12 @@ properties:
         - name: 'defaultService'
           type: ResourceRef
           description: The backend service or backend bucket to use when none of the given paths match.
+          # TODO: (mbang) won't work for array path matchers yet, uncomment here once they are supported.
+          # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
+          # exactly_one_of:
+          #   - path_matchers.0.default_service
+          #   - path_matchers.0.default_url_redirect
+          #   - path_matchers.0.default_route_action.0.weighted_backend_services
           custom_expand: 'templates/terraform/custom_expand/go/reference_to_backend.tmpl'
           resource: 'BackendService'
           imports: 'selfLink'
@@ -937,7 +944,7 @@ properties:
                       - 'PERMANENT_REDIRECT'
                       - 'SEE_OTHER'
                       - 'TEMPORARY_REDIRECT'
-                    skip_docs_values: true
+                    exclude_docs_values: true
                   - name: 'stripQuery'
                     type: Boolean
                     description: |
@@ -1677,7 +1684,7 @@ properties:
                       - 'PERMANENT_REDIRECT'
                       - 'SEE_OTHER'
                       - 'TEMPORARY_REDIRECT'
-                    skip_docs_values: true
+                    exclude_docs_values: true
                   - name: 'stripQuery'
                     type: Boolean
                     description: |
@@ -1687,6 +1694,12 @@ properties:
                     default_value: false
         - name: 'defaultUrlRedirect'
           type: NestedObject
+          # TODO: (mbang) won't work for array path matchers yet, uncomment here once they are supported.
+          # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
+          # exactly_one_of:
+          #   - path_matchers.0.default_service
+          #   - path_matchers.0.default_url_redirect
+          #   - path_matchers.0.default_route_action.0.weighted_backend_services
           description: |
             When none of the specified hostRules match, the request is redirected to a URL specified
             by defaultUrlRedirect. If defaultUrlRedirect is specified, defaultService or
@@ -1743,7 +1756,7 @@ properties:
                 - 'PERMANENT_REDIRECT'
                 - 'SEE_OTHER'
                 - 'TEMPORARY_REDIRECT'
-              skip_docs_values: true
+              exclude_docs_values: true
             - name: 'stripQuery'
               type: Boolean
               description: |
@@ -1754,6 +1767,9 @@ properties:
               required: true
         - name: 'defaultRouteAction'
           type: NestedObject
+          # TODO: (mbang) conflicts also won't work for array path matchers yet, uncomment here once supported.
+          # conflicts:
+          #   - path_matcher.path_matcher.default_url_redirect
           description: |
             defaultRouteAction takes effect when none of the pathRules or routeRules match. The load balancer performs
             advanced routing actions like URL rewrites, header transformations, etc. prior to forwarding the request
@@ -1764,6 +1780,12 @@ properties:
           properties:
             - name: 'weightedBackendServices'
               type: Array
+              # TODO: (mbang) won't work for array path matchers yet, uncomment here once they are supported.
+              # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
+              # exactly_one_of:
+              #   - path_matchers.0.default_service
+              #   - path_matchers.0.default_url_redirect
+              #   - path_matchers.0.default_route_action.0.weighted_backend_services
               description: |
                 A list of weighted backend services to send traffic to when a route match occurs.
                 The weights determine the fraction of traffic that flows to their corresponding backend service.
@@ -2237,7 +2259,7 @@ properties:
           - 'PERMANENT_REDIRECT'
           - 'SEE_OTHER'
           - 'TEMPORARY_REDIRECT'
-        skip_docs_values: true
+        exclude_docs_values: true
       - name: 'stripQuery'
         type: Boolean
         description: |

@@ -79,7 +79,7 @@ examples:
       dataset_id: 'dataset_id'
       connection_id: 'connection_id'
       routine_id: 'routine_id'
-    skip_test: true
+    exclude_test: true
 parameters:
 properties:
   - name: 'routineReference'
@@ -158,6 +158,9 @@ properties:
             - 'IN'
             - 'OUT'
             - 'INOUT'
+        # This is a string instead of a NestedObject because schemas contain ColumnSchemas,
+        # which can contain nested StandardSqlDataType.
+        # We'll have people provide the json blob for the schema instead.
         - name: 'dataType'
           type: String
           description: |

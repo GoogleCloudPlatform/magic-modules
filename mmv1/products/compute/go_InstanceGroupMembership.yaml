@@ -50,7 +50,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 1000
@@ -78,7 +78,7 @@ examples:
       network_name: 'network'
       instance_group_name: 'instance-group'
       instance_name: 'instance'
-    skip_test: true
+    exclude_test: true
 parameters:
   - name: 'zone'
     type: ResourceRef

@@ -11,8 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
-!ruby/object:Api::Resource # API resource name
+--- !ruby/object:Api::Resource
+# API resource name
 name: "kmsconfig"
 description: |
   NetApp Volumes always encrypts your data at rest using volume-specific keys.
@@ -31,6 +31,8 @@ create_url: projects/{{project}}/locations/{{location}}/kmsConfigs?kmsConfigId={
 update_url: projects/{{project}}/locations/{{location}}/kmsConfigs/{{name}}
 update_verb: :PATCH
 update_mask: true
+# Skipping the sweeper since we need to sweep multiple regions
+skip_sweeper: true
 autogen_async: true
 
 async: !ruby/object:Api::OpAsync
@@ -53,7 +55,8 @@ parameters:
     url_param_only: true
     description: |
       Name of the policy location. CMEK policies apply to the whole region.
-  - !ruby/object:Api::Type::String # OK: This needs to be 'name' IMHO
+  - !ruby/object:Api::Type::String
+    # OK: This needs to be 'name' IMHO
     name: "name"
     description: |
       Name of the CMEK policy.

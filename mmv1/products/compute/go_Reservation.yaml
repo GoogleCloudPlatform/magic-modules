@@ -41,7 +41,7 @@ async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
     wait_ms: 1000
@@ -68,7 +68,8 @@ examples:
       project: 'PROJECT_NAME'
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
-    skip_docs: true
+    exclude_docs: true
+      # Resource creation race
     skip_vcr: true
 parameters:
   - name: 'zone'
@@ -116,6 +117,8 @@ properties:
       consume this reservation. Otherwise, it can be consumed by VMs with
       affinity for any reservation. Defaults to false.
     immutable: true
+    # Not a hard API default, but this should help avoid a unset/true/false
+    # trinary.
     default_value: false
   - name: 'status'
     type: String
@@ -146,6 +149,7 @@ properties:
         key_description: |
           The project id/number which is deleting or adding to the project list.
         value_type:
+          name: projectConfig
           type: NestedObject
           properties:
             - name: 'projectId'

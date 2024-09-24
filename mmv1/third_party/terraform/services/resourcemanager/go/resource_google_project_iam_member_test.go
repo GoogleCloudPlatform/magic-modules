@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func projectIamMemberImportStep(resourceName, pid, role, member string) resource.TestStep {
@@ -198,6 +198,7 @@ resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
   org_id     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_iam_member" "acceptance" {
@@ -214,6 +215,7 @@ resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
   org_id     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_iam_member" "acceptance" {
@@ -236,6 +238,7 @@ resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
   org_id     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_iam_member" "acceptance" {
