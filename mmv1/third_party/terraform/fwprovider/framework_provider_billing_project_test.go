@@ -21,8 +21,9 @@ func TestAccFwProvider_billing_project(t *testing.T) {
 		"when billing_project is set to an empty string in the config the value isn't ignored and results in an error": testAccSdkProvider_billing_project_emptyStringValidation,
 
 		// Usage
-
 		//TODO
+		// 1) Usage alone
+		// 2) Usage in combination with user_project_override
 	}
 
 	for name, tc := range testCases {
