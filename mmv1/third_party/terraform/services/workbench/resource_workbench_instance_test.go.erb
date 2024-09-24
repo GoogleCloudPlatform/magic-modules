@@ -640,8 +640,8 @@ func TestAccWorkbenchInstance_updatelabels(t *testing.T) {
 			{
 				Config: testAccWorkbenchInstance_label(context),
 				Check: resource.ComposeTestCheckFunc(
-                    	resource.TestCheckResourceAttr(
-                        		"google_workbench_instance.instance", "state", "ACTIVE"),
+						resource.TestCheckResourceAttr(
+							"google_workbench_instance.instance", "state", "ACTIVE"),
 				),
 			},
 			{
@@ -653,8 +653,8 @@ func TestAccWorkbenchInstance_updatelabels(t *testing.T) {
 			{
 				Config: testAccWorkbenchInstance_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-                    	resource.TestCheckResourceAttr(
-                        		"google_workbench_instance.instance", "state", "ACTIVE"),
+						resource.TestCheckResourceAttr(
+							"google_workbench_instance.instance", "state", "ACTIVE"),
 				),
 			},
 			{
@@ -666,8 +666,8 @@ func TestAccWorkbenchInstance_updatelabels(t *testing.T) {
 			{
 				Config: testAccWorkbenchInstance_label(context),
 				Check: resource.ComposeTestCheckFunc(
-                    	resource.TestCheckResourceAttr(
-                        		"google_workbench_instance.instance", "state", "ACTIVE"),
+						resource.TestCheckResourceAttr(
+							"google_workbench_instance.instance", "state", "ACTIVE"),
 				),
 			},
 			{
