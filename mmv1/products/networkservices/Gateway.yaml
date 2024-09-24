@@ -207,10 +207,9 @@ properties:
   - !ruby/object:Api::Type::Enum
     name: 'routingMode'
     immutable: true
-    default_from_api: true
-    diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("EXPLICIT_ROUTING_MODE")'
     description: |
       Optional. The routing mode of the Gateway. This field is configurable only for gateways of type SECURE_WEB_GATEWAY. This field is required for gateways of type SECURE_WEB_GATEWAY.
+    custom_flatten: 'templates/terraform/custom_flatten/network_services_gateway_routing_mode.go.erb'
     values:
       - :EXPLICIT_ROUTING_MODE
       - :NEXT_HOP_ROUTING_MODE
