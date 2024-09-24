@@ -50,8 +50,8 @@ type logKey struct {
 type Tester struct {
 	env            map[string]string           // shared environment variables for running tests
 	rnr            ExecRunner                  // for running commands and manipulating files
-	cassetteBucket string                      // gcs bucket to store cassettes
-	logBucket      string                      // gcs bucket to store logs
+	cassetteBucket string                      // name of GCS bucket to store cassettes
+	logBucket      string                      // name of GCS bucket to store logs
 	baseDir        string                      // the directory in which this tester was created
 	saKeyPath      string                      // where sa_key.json is relative to baseDir
 	cassettePaths  map[provider.Version]string // where cassettes are relative to baseDir by version
