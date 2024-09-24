@@ -70,6 +70,7 @@ func testAccSecurityCenterManagementFolderSecurityHealthAnalyticsCustomModule(t 
 func testAccSecurityCenterManagementFolderSecurityHealthAnalyticsCustomModule_sccFolderCustomModuleBasicExample(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_folder" "folder" {
+  provider = google-beta
   parent       = "organizations/%{org_id}"
   display_name = "tf-test-folder-name%{random_suffix}"
   deletion_protection = false
@@ -110,6 +111,7 @@ resource "google_scc_management_folder_security_health_analytics_custom_module" 
 func testAccSecurityCenterManagementFolderSecurityHealthAnalyticsCustomModule_sccFolderCustomModuleFullExample(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_folder" "folder" {
+  provider = google-beta
   parent       = "organizations/%{org_id}"
   display_name = "tf-test-folder-name%{random_suffix}"
   deletion_protection = false
@@ -155,6 +157,7 @@ resource "google_scc_management_folder_security_health_analytics_custom_module" 
 func testAccSecurityCenterManagementFolderSecurityHealthAnalyticsCustomModule_sccFolderCustomModuleUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_folder" "folder" {
+  provider = google-beta
   parent       = "organizations/%{org_id}"
   display_name = "tf-test-folder-name%{random_suffix}"
   deletion_protection = false
