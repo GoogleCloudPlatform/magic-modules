@@ -87,6 +87,7 @@ properties:
     name: 'location'
     description: |
       URL of the InterconnectLocation object that represents where this connection is to be provisioned.
+      Specifies the location inside Google's Networks, should not be passed in case of cross-cloud interconnect.
     resource: 'InterconnectLocations'
     imports: 'selfLink'
     immutable: true
