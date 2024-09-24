@@ -127,6 +127,14 @@ resource "google_pubsub_topic" "example" {
 }
 
 func testAccSdkProvider_impersonate_service_account_delegates_testViaFailure_1(context map[string]interface{}) string {
+
+	// This test config sets up the ability to use impersonate_service_account_delegates
+	//    The 'base service account' is the service account that credentials supplied via ENVs is linked to.
+	//    The 'delegate service account' is google_service_account.default_1
+	//        The base SA is given roles/iam.serviceAccountTokenCreator on the delegate SA via google_service_account_iam_member.token_1
+	//    The 'target service account' is google_service_account.default_2
+	//        The delegate SA is given roles/iam.serviceAccountTokenCreator on the target SA via google_service_account_iam_member.token_2
+
 	return acctest.Nprintf(`
 // This will succeed due to the Terraform identity having necessary permissions
 resource "google_pubsub_topic" "ok" {
@@ -163,9 +171,14 @@ resource "google_service_account_iam_member" "token_2" {
 }
 
 func testAccSdkProvider_impersonate_service_account_delegates_testViaFailure_2(context map[string]interface{}) string {
-	return testAccSdkProvider_impersonate_service_account_delegates_testViaFailure_1(context) + acctest.Nprintf(`
+	// See comments in testAccSdkProvider_impersonate_service_account_delegates_testViaFailure_1, about how the config
+	// sets up the ability to use impersonate_service_account_delegates.
 
-// Use impersonate_service_account_delegates
+	// Here in testAccSdkProvider_impersonate_service_account_delegates_testViaFailure_2 we:
+	//    Pass the base service account to google.impersonation implicitly via `credentials` (ENVs in the test environment)
+	//    Set the target service account as `impersonate_service_account`
+	//    Set the delegate service account(s) in `impersonate_service_account_delegates`
+	return testAccSdkProvider_impersonate_service_account_delegates_testViaFailure_1(context) + acctest.Nprintf(`
 provider "google" {
   alias = "impersonation"
   impersonate_service_account = google_service_account.default_2.email
