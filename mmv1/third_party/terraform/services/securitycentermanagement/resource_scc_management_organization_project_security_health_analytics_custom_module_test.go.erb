@@ -1,4 +1,6 @@
+<% autogen_exception -%>
 package securitycentermanagement_test
+<% unless version == 'ga' -%>
 
 import (
 	"fmt"
@@ -193,3 +195,5 @@ func testAccCheckSecurityCenterManagementProjectSecurityHealthAnalyticsCustomMod
 		return nil
 	}
 }
+
+<% end -%>

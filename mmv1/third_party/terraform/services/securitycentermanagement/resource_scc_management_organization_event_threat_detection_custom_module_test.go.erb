@@ -34,8 +34,8 @@ func TestAccSecurityCenterManagement(t *testing.T) {
 
 func testAccSecurityCenterManagementOrganizationEventThreatDetectionCustomModule(t *testing.T) {
 
-<%# Comment explaining the beta-only status due to concurrent modification issues (Error 409). %>
-<%# This is being marked as beta-only. See the bug link: <https://b.corp.google.com/issues/358692342> %>
+	<%# Comment explaining the beta-only status due to concurrent modification issues (Error 409). %>
+	<%# This is being marked as beta-only. See the bug link: <https://b.corp.google.com/issues/358692342> %>
 
 	context := map[string]interface{}{
 		"org_id":        envvar.GetTestOrgFromEnv(t),
@@ -93,8 +93,6 @@ resource "google_scc_management_organization_event_threat_detection_custom_modul
 			  ]}
             EOF
 }
-<% else -%>
-# GA version doesn't support this field
 <% end -%>
 `, context)
 }
@@ -121,8 +119,6 @@ resource "google_scc_management_organization_event_threat_detection_custom_modul
 			  ]}
             EOF
 }
-<% else -%>
-# GA version doesn't support this field
 <% end -%>
 `, context)
 }
