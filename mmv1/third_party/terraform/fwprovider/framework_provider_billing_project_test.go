@@ -136,11 +136,6 @@ provider "google" {
 }
 
 data "google_provider_config_plugin_framework" "default" {}
-
-output "billing_project" {
-  value = data.google_provider_config_plugin_framework.default.billing_project
-  sensitive = true
-}
 `, context)
 }
 
@@ -149,10 +144,5 @@ output "billing_project" {
 func testAccSdkProvider_billing_projectInEnvsOnly(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_provider_config_plugin_framework" "default" {}
-
-output "billing_project" {
-  value = data.google_provider_config_plugin_framework.default.billing_project
-  sensitive = true
-}
 `, context)
 }
