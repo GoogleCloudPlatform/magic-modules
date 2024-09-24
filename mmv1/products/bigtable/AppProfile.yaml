@@ -138,6 +138,12 @@ properties:
       consistency to improve availability.
     custom_expand: 'templates/terraform/custom_expand/bigtable_app_profile_routing.erb'
     custom_flatten: 'templates/terraform/custom_flatten/bigtable_app_profile_routing.erb'
+  - !ruby/object:Api::Type::Boolean
+    name: 'rowAffinity'
+    description: |
+      Must be used with multi-cluster routing. If true, then this app profile will use row affinity sticky routing. With row affinity, Bigtable will route single row key requests based on the row key, rather than randomly. Instead, each row key will be assigned to a cluster by Cloud Bigtable, and will stick to that cluster. Choosing this option improves read-your-writes consistency for most requests under most circumstances, without sacrificing availability. Consistency is not guaranteed, as requests may still fail over between clusters in the event of errors or latency.
+    conflicts:
+      - single_cluster_routing
   - !ruby/object:Api::Type::NestedObject
     name: 'singleClusterRouting'
     exactly_one_of:
