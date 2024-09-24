@@ -96,6 +96,7 @@ virtual_fields:
       When deleting a gateway of type 'SECURE_WEB_GATEWAY', this boolean option will also delete auto generated router by the gateway creation.
       If there is no other gateway of type 'SECURE_WEB_GATEWAY' remaining for that region and network it will be deleted.
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_create: 'templates/terraform/pre_create/network_services_gateway.go.erb'
   post_delete: 'templates/terraform/post_delete/network_services_gateway.go.erb'
   pre_update: 'templates/terraform/pre_update/network_services_gateway.erb'
   constants: 'templates/terraform/constants/network_services_gateway.go.erb'
