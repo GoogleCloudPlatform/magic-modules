@@ -150,7 +150,7 @@ resource "google_container_aws_node_pool" "primary" {
     auto_repair = true
   }
 
-  kubelet_config" {
+  kubelet_config {
     cpu_manager_policy: "none",
     cpu_cfs_quota: true,
     cpu_cfs_quota_period: "100ms",
