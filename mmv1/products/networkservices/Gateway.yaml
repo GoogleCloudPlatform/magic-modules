@@ -208,7 +208,7 @@ properties:
     name: 'routingMode'
     immutable: true
     description: |
-      Optional. The routing mode of the Gateway. This field is configurable only for gateways of type SECURE_WEB_GATEWAY. This field is required for gateways of type SECURE_WEB_GATEWAY.
+      The routing mode of the Gateway. This field is configurable only for gateways of type SECURE_WEB_GATEWAY. This field is required for gateways of type SECURE_WEB_GATEWAY.
     custom_flatten: 'templates/terraform/custom_flatten/network_services_gateway_routing_mode.go.erb'
     values:
       - :EXPLICIT_ROUTING_MODE
