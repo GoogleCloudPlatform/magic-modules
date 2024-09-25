@@ -1,4 +1,4 @@
-resource "google_bigquery_dataset_access" "<%= ctx[:primary_resource_id] %>" {
+resource "google_bigquery_dataset_access" "{{$.PrimaryResourceId}}" {
   dataset_id    = google_bigquery_dataset.private.dataset_id
   dataset {
     dataset{
@@ -10,9 +10,9 @@ resource "google_bigquery_dataset_access" "<%= ctx[:primary_resource_id] %>" {
 }
 
 resource "google_bigquery_dataset" "private" {
-  dataset_id = "<%= ctx[:vars]['private'] %>"
+  dataset_id = "{{index $.Vars "private"}}"
 }
 
 resource "google_bigquery_dataset" "public" {
-  dataset_id = "<%= ctx[:vars]['public'] %>"
+  dataset_id = "{{index $.Vars "public"}}"
 }

@@ -2,10 +2,10 @@ data "google_monitoring_app_engine_service" "default" {
   module_id = "default"
 }
 
-resource "google_monitoring_slo" "<%= ctx[:primary_resource_id] -%>" {
+resource "google_monitoring_slo" "{{$.PrimaryResourceId}}" {
   service = data.google_monitoring_app_engine_service.default.service_id
 
-  slo_id = "<%= ctx[:vars]['slo_id'] -%>"
+  slo_id = "{{index $.Vars "slo_id"}}"
   display_name = "Terraform Test SLO for App Engine"
 
   goal = 0.9

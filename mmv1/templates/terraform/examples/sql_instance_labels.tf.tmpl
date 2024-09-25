@@ -1,5 +1,5 @@
 resource "google_sql_database_instance" "mysql_instance_labels" {
-  name             = "<%= ctx[:vars]['mysql_instance_labels'] %>"
+  name             = "{{index $.Vars "mysql_instance_labels"}}"
   region           = "us-central1"
   database_version = "MYSQL_8_0"
   settings {
@@ -13,7 +13,7 @@ resource "google_sql_database_instance" "mysql_instance_labels" {
 }
 
 resource "google_sql_database_instance" "postgres_instance_labels" {
-  name             = "<%= ctx[:vars]['postgres_instance_labels'] %>"
+  name             = "{{index $.Vars "postgres_instance_labels"}}"
   region           = "us-central1"
   database_version = "POSTGRES_14"
   settings {
@@ -26,8 +26,8 @@ resource "google_sql_database_instance" "postgres_instance_labels" {
   deletion_protection = "false"
 }
 
-resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
-  name             = "<%= ctx[:vars]['sqlserver_instance_labels'] %>"
+resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
+  name             = "{{index $.Vars "sqlserver_instance_labels"}}"
   region           = "us-central1"
   database_version = "SQLSERVER_2019_STANDARD"
   root_password    = "INSERT-PASSWORD-HERE"

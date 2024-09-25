@@ -1,5 +1,5 @@
-resource "google_data_loss_prevention_stored_info_type" "<%= ctx[:primary_resource_id] %>" {
-	parent = "projects/<%= ctx[:test_env_vars]['project'] %>"
+resource "google_data_loss_prevention_stored_info_type" "{{$.PrimaryResourceId}}" {
+	parent = "projects/{{index $.TestEnvVars "project"}}"
 	description = "Description"
 	display_name = "Displayname"
 
@@ -14,13 +14,13 @@ resource "google_data_loss_prevention_stored_info_type" "<%= ctx[:primary_resour
 }
 
 resource "google_storage_bucket" "bucket" {
-  name          = "<%= ctx[:vars]['bucket_name'] %>"
+  name          = "{{index $.Vars "bucket_name"}}"
   location      = "US"
   force_destroy = true
 }
 
 resource "google_storage_bucket_object" "object" {
-  name   = "<%= ctx[:vars]['object_name'] %>"
+  name   = "{{index $.Vars "object_name"}}"
   bucket = google_storage_bucket.bucket.name
   source = "./test-fixtures/words.txt"
 }

@@ -1,6 +1,6 @@
-resource "google_compute_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
+resource "google_compute_forwarding_rule" "{{$.PrimaryResourceId}}" {
   provider        = google-beta
-  name            = "<%= ctx[:vars]['forwarding_rule_name'] %>"
+  name            = "{{index $.Vars "forwarding_rule_name"}}"
   backend_service = google_compute_region_backend_service.service.id
   ip_protocol     = "L3_DEFAULT"
   all_ports       = true
@@ -9,7 +9,7 @@ resource "google_compute_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
 resource "google_compute_region_backend_service" "service" {
   provider              = google-beta
   region                = "us-central1"
-  name                  = "<%= ctx[:vars]['service_name'] %>"
+  name                  = "{{index $.Vars "service_name"}}"
   health_checks         = [google_compute_region_health_check.health_check.id]
   protocol              = "UNSPECIFIED"
   load_balancing_scheme = "EXTERNAL"
@@ -17,7 +17,7 @@ resource "google_compute_region_backend_service" "service" {
 
 resource "google_compute_region_health_check" "health_check" {
   provider           = google-beta
-  name               = "<%= ctx[:vars]['health_check_name'] %>"
+  name               = "{{index $.Vars "health_check_name"}}"
   region             = "us-central1"
 
   tcp_health_check {

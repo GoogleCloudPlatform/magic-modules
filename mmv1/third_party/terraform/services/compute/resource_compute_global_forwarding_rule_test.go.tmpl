@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package compute_test
 
 import (
@@ -87,7 +86,7 @@ func TestAccComputeGlobalForwardingRule_ipv6(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeGlobalForwardingRule_labels(t *testing.T) {
 	t.Parallel()
 
@@ -123,9 +122,9 @@ func TestAccComputeGlobalForwardingRule_labels(t *testing.T) {
 		},
 	})
 }
-<% end -%>
+{{- end }}
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeGlobalForwardingRule_internalLoadBalancing(t *testing.T) {
 	t.Parallel()
 
@@ -163,7 +162,7 @@ func TestAccComputeGlobalForwardingRule_internalLoadBalancing(t *testing.T) {
 		},
 	})
 }
-<% end -%>
+{{- end }}
 
 func TestUnitComputeGlobalForwardingRule_PortRangeDiffSuppress(t *testing.T) {
 	cases := map[string]struct {
@@ -361,7 +360,7 @@ resource "google_compute_url_map" "url_map" {
 `, fr, targetProxy, proxy, proxy2, backend, hc, urlmap)
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeGlobalForwardingRule_labels(fr, proxy, backend, hc, urlmap string) string {
 	return fmt.Sprintf(`
 resource "google_compute_global_forwarding_rule" "forwarding_rule" {
@@ -416,9 +415,9 @@ resource "google_compute_url_map" "urlmap" {
 }
 `, fr, proxy, backend, hc, urlmap)
 }
-<% end -%>
+{{- end }}
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeGlobalForwardingRule_labelsUpdated(fr, proxy, backend, hc, urlmap string) string {
 	return fmt.Sprintf(`
 resource "google_compute_global_forwarding_rule" "forwarding_rule" {
@@ -473,7 +472,7 @@ resource "google_compute_url_map" "urlmap" {
 }
 `, fr, proxy, backend, hc, urlmap)
 }
-<% end -%>
+{{- end }}
 
 func testAccComputeGlobalForwardingRule_ipv6(fr, proxy, backend, hc, urlmap string) string {
 	return fmt.Sprintf(`
@@ -528,7 +527,7 @@ resource "google_compute_url_map" "urlmap" {
 `, fr, proxy, backend, hc, urlmap)
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeGlobalForwardingRule_internalLoadBalancing(fr, proxy, backend, hc, urlmap, igm, it string) string {
 	return fmt.Sprintf(`
 resource "google_compute_global_forwarding_rule" "forwarding_rule" {
@@ -751,4 +750,4 @@ resource "google_compute_instance_template" "instance_template" {
 }
 `, fr, proxy, backend, hc, urlmap, igm, it)
 }
-<% end -%>
+{{- end }}

@@ -1,5 +1,5 @@
-resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]['instance_name'] %>"
+resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "instance_name"}}"
   location = "us-central1-a"
   gce_setup {
     machine_type = "n1-standard-1" // cant be e2 because of accelerator

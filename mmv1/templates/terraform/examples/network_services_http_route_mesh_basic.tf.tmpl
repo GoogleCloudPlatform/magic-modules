@@ -1,22 +1,22 @@
-resource "google_network_services_mesh" "<%= ctx[:primary_resource_id] %>" {
+resource "google_network_services_mesh" "{{$.PrimaryResourceId}}" {
   provider    = google-beta
-  name        = "<%= ctx[:vars]['resource_name'] %>"
+  name        = "{{index $.Vars "resource_name"}}"
   labels      = {
     foo = "bar"
   }
   description = "my description"
 }
 
-resource "google_network_services_http_route" "<%= ctx[:primary_resource_id] %>" {
+resource "google_network_services_http_route" "{{$.PrimaryResourceId}}" {
   provider               = google-beta
-  name                   = "<%= ctx[:vars]['resource_name'] %>"
+  name                   = "{{index $.Vars "resource_name"}}"
   labels                 = {
     foo = "bar"
   }
   description             = "my description"
   hostnames               = ["example"]
   meshes = [
-    google_network_services_mesh.<%= ctx[:primary_resource_id] %>.id
+    google_network_services_mesh.{{$.PrimaryResourceId}}.id
   ]
   rules                   {
     matches {

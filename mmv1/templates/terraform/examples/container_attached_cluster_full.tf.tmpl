@@ -7,7 +7,7 @@ data "google_container_attached_versions" "versions" {
 }
 
 resource "google_container_attached_cluster" "primary" {
-  name     = "<%= ctx[:vars]['name'] %>"
+  name     = "{{index $.Vars "name"}}"
   project = data.google_project.project.project_id
   location = "us-west1"
   description = "Test cluster"

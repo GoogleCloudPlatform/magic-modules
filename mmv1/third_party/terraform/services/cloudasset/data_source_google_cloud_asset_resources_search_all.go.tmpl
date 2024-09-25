@@ -1,7 +1,6 @@
-<% autogen_exception -%>
 package cloudasset
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 import (
 	"fmt"
 
@@ -210,4 +209,4 @@ func vflattenDatasourceGoogleCloudAssetResourcesSearchAllList(v interface{}) []m
 	return results
 }
 
-<% end -%>
+{{ end }}

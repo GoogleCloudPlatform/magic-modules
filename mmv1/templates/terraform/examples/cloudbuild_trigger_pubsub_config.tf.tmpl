@@ -1,11 +1,11 @@
 
 resource "google_pubsub_topic" "mytopic" {
-  name = "<%= ctx[:vars]['pubsub_topic_name'] %>"
+  name = "{{index $.Vars "pubsub_topic_name"}}"
 }
 
-resource "google_cloudbuild_trigger" "<%= ctx[:primary_resource_id] %>" {
+resource "google_cloudbuild_trigger" "{{$.PrimaryResourceId}}" {
   location    = "us-central1"
-  name        = "<%= ctx[:vars]['cloudbuild_trigger_name'] %>"
+  name        = "{{index $.Vars "cloudbuild_trigger_name"}}"
   description = "acceptance test example pubsub build trigger"
 
   pubsub_config {

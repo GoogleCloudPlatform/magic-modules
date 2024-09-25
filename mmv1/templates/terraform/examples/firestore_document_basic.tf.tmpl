@@ -1,7 +1,7 @@
 resource "google_project" "project" {
-  project_id = "<%= ctx[:vars]['project_id'] %>"
-  name       = "<%= ctx[:vars]['project_id'] %>"
-  org_id     = "<%= ctx[:test_env_vars]['org_id'] %>"
+  project_id = "{{index $.Vars "project_id"}}"
+  name       = "{{index $.Vars "project_id"}}"
+  org_id     = "{{index $.TestEnvVars "org_id"}}"
   deletion_policy = "DELETE"
 }
 
@@ -28,10 +28,10 @@ resource "google_firestore_database" "database" {
   depends_on = [google_project_service.firestore]
 }
 
-resource "google_firestore_document" "<%= ctx[:primary_resource_id] %>" {
+resource "google_firestore_document" "{{$.PrimaryResourceId}}" {
   project     = google_project.project.project_id
   database    = google_firestore_database.database.name
   collection  = "somenewcollection"
-  document_id = "<%= ctx[:vars]['document_id'] %>"
+  document_id = "{{index $.Vars "document_id"}}"
   fields      = "{\"something\":{\"mapValue\":{\"fields\":{\"akey\":{\"stringValue\":\"avalue\"}}}}}"
 }

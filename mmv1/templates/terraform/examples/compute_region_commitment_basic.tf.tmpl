@@ -1,5 +1,5 @@
 resource "google_compute_region_commitment" "foobar" {
-  name = "<%= ctx[:vars]['region_commitment_name'] %>"
+  name = "{{index $.Vars "region_commitment_name"}}"
   plan = "THIRTY_SIX_MONTH"
   resources {
       type = "VCPU"

@@ -1,6 +1,6 @@
-resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
+resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
   database_version = "MYSQL_8_0"
-  name             = "<%= ctx[:vars]['mysql_instance'] %>"
+  name             = "{{index $.Vars "mysql_instance"}}"
   region           = "us-central1"
   settings {
     database_flags {
@@ -18,5 +18,5 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
     disk_type             = "PD_SSD"
     tier         = "db-n1-standard-2"
   }
-  deletion_protection = "<%= ctx[:vars]['deletion_protection'] %>"
+  deletion_protection = "{{index $.Vars "deletion_protection"}}"
 }

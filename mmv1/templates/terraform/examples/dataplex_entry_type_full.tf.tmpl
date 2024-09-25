@@ -1,7 +1,7 @@
-resource "google_dataplex_aspect_type" "<%= ctx[:primary_resource_id] %>" {
+resource "google_dataplex_aspect_type" "{{$.PrimaryResourceId}}" {
   aspect_type_id         = "tf-test-aspect-type%{random_suffix}"
   location     = "us-central1"
-  project      = "<%= ctx[:test_env_vars]['project_name'] %>"
+  project      = "{{index $.TestEnvVars "project_name"}}"
 
   metadata_template = <<EOF
 {
@@ -31,9 +31,9 @@ resource "google_dataplex_aspect_type" "<%= ctx[:primary_resource_id] %>" {
 EOF
 }
 
-resource "google_dataplex_entry_type" "<%= ctx[:primary_resource_id] %>" {
-  entry_type_id = "<%= ctx[:vars]['entry_type_name'] %>"
-  project = "<%= ctx[:test_env_vars]['project_name'] %>"
+resource "google_dataplex_entry_type" "{{$.PrimaryResourceId}}" {
+  entry_type_id = "{{index $.Vars "entry_type_name"}}"
+  project = "{{index $.TestEnvVars "project_name"}}"
   location = "us-central1"
 
   labels = { "tag": "test-tf" }
@@ -45,6 +45,6 @@ resource "google_dataplex_entry_type" "<%= ctx[:primary_resource_id] %>" {
   system = "CloudSQL"
   
   required_aspects {
-    type = google_dataplex_aspect_type.<%= ctx[:primary_resource_id] %>.name
+    type = google_dataplex_aspect_type.{{$.PrimaryResourceId}}.name
   }
 }

@@ -1,5 +1,5 @@
 
-resource "google_compute_instance_settings" "<%= ctx[:primary_resource_id] %>" {
+resource "google_compute_instance_settings" "{{$.PrimaryResourceId}}" {
   zone = "us-east7-b"
   metadata {
     items = {

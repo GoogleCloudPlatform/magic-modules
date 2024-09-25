@@ -1,7 +1,6 @@
-<% autogen_exception -%>
 package runtimeconfig_test
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 
 import (
 	"fmt"
@@ -48,4 +47,4 @@ func testAccRuntimeconfigDatasourceVariable(suffix string, name string, text str
 `, suffix, suffix, name, text)
 }
 
-<% end -%>
+{{ end }}

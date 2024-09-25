@@ -1,5 +1,5 @@
-resource "google_compute_region_backend_service" "<%= ctx[:primary_resource_id] %>" {
-  name                  = "<%= ctx[:vars]['region_backend_service_name'] %>"
+resource "google_compute_region_backend_service" "{{$.PrimaryResourceId}}" {
+  name                  = "{{index $.Vars "region_backend_service_name"}}"
   region                = "us-central1"
   protocol              = "HTTP"
   load_balancing_scheme = "EXTERNAL"

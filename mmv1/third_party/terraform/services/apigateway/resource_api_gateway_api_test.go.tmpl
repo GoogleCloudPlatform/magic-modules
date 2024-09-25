@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package apigateway_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
@@ -44,4 +43,4 @@ resource "google_api_gateway_api" "api" {
 `, context)
 }
 
-<% end -%>
+{{ end }}

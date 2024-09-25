@@ -1,11 +1,11 @@
 resource "google_compute_network" "default" {
   provider = google-beta
-  name = "<%= ctx[:vars]['network_name'] %>"
+  name = "{{index $.Vars "network_name"}}"
 }
 
 resource "google_compute_global_address" "private_ip_address" {
   provider = google-beta
-  name          = "<%= ctx[:vars]['network_name'] %>"
+  name          = "{{index $.Vars "network_name"}}"
   address_type  = "INTERNAL"
   purpose       = "VPC_PEERING"
   prefix_length = 20
@@ -19,10 +19,10 @@ resource "google_service_networking_connection" "default" {
   reserved_peering_ranges = [google_compute_global_address.private_ip_address.name]
 }
 
-resource "google_backup_dr_management_server" "<%= ctx[:primary_resource_id] %>" {
+resource "google_backup_dr_management_server" "{{$.PrimaryResourceId}}" {
   provider = google-beta
   location = "us-central1"
-  name     = "<%= ctx[:vars]['managementserver_name'] %>"
+  name     = "{{index $.Vars "managementserver_name"}}"
   type     = "BACKUP_RESTORE" 
   networks {
     network      = google_compute_network.default.id

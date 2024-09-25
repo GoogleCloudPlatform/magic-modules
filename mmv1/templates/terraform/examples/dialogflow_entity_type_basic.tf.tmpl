@@ -4,9 +4,9 @@ resource "google_dialogflow_agent" "basic_agent" {
   time_zone = "America/New_York"
 }
 
-resource "google_dialogflow_entity_type" "<%= ctx[:primary_resource_id] %>" {
+resource "google_dialogflow_entity_type" "{{$.PrimaryResourceId}}" {
   depends_on = [google_dialogflow_agent.basic_agent]
-  display_name = "<%= ctx[:vars]["entity_type_name"] %>"
+  display_name = "{{index $.Vars "entity_type_name"}}"
   kind = "KIND_MAP"
   entities {
     value = "value1"

@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package transport
 
 import (
@@ -37,31 +36,31 @@ import (
 	"google.golang.org/api/certificatemanager/v1"
 	"google.golang.org/api/cloudbilling/v1"
 	"google.golang.org/api/cloudbuild/v1"
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 	cloudidentity "google.golang.org/api/cloudidentity/v1beta1"
-<% else -%>
+{{- else }}
 	"google.golang.org/api/cloudidentity/v1"
-<% end -%>
+{{- end }}
 	"google.golang.org/api/cloudfunctions/v1"
 	"google.golang.org/api/cloudiot/v1"
 	"google.golang.org/api/cloudkms/v1"
 	"google.golang.org/api/cloudresourcemanager/v1"
 	resourceManagerV3 "google.golang.org/api/cloudresourcemanager/v3"
-<% if version == "ga" -%>
+{{- if eq $.TargetVersionName "ga" }}
 	"google.golang.org/api/composer/v1"
-<% else -%>
+{{- else }}
 	"google.golang.org/api/composer/v1beta1"
-<% end -%>
-<% if version == "ga" -%>
+{{- end }}
+{{- if eq $.TargetVersionName "ga" }}
 	"google.golang.org/api/compute/v1"
-<% else -%>
+{{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
-<% end -%>
-<% if version == 'ga' -%>
+{{- end }}
+{{- if eq $.TargetVersionName "ga" }}
 	"google.golang.org/api/container/v1"
-<% else -%>
+{{- else }}
 	container "google.golang.org/api/container/v1beta1"
-<% end -%>
+{{- end }}
 	dataflow "google.golang.org/api/dataflow/v1b3"
 	"google.golang.org/api/dataproc/v1"
 	"google.golang.org/api/dns/v1"
@@ -71,9 +70,9 @@ import (
 	cloudlogging "google.golang.org/api/logging/v2"
 	"google.golang.org/api/pubsub/v1"
 	runadminv2 "google.golang.org/api/run/v2"
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 	runtimeconfig "google.golang.org/api/runtimeconfig/v1beta1"
-<% end -%>
+{{- end }}
 	"google.golang.org/api/servicemanagement/v1"
 	"google.golang.org/api/servicenetworking/v1"
 	"google.golang.org/api/serviceusage/v1"
@@ -206,9 +205,9 @@ type Config struct {
 
 	tokenSource oauth2.TokenSource
 
-	<% products.each do |product| -%>
-	<%= product[:definitions].name -%>BasePath string
-	<% end -%>
+	{{ range $product := $.Products }}
+	{{ $product.Name }}BasePath string
+	{{- end }}
 
 	CloudBillingBasePath string
 	ContainerBasePath string
@@ -228,9 +227,9 @@ type Config struct {
 	RequestBatcherIam          *RequestBatcher
 }
 
-<% products.each do |product| -%>
-const <%= product[:definitions].name -%>BasePathKey = "<%= product[:definitions].name -%>"
-<% end -%>
+{{- range $product := $.Products }}
+const {{ $product.Name }}BasePathKey = "{{ $product.Name }}"
+{{- end }}
 const CloudBillingBasePathKey = "CloudBilling"
 const ContainerBasePathKey = "Container"
 const DataflowBasePathKey = "Dataflow"
@@ -244,23 +243,23 @@ const TagsLocationBasePathKey = "TagsLocation"
 
 // Generated product base paths
 var DefaultBasePaths = map[string]string{
-<% products.each do |product| -%>
-	<%= product[:definitions].name -%>BasePathKey : "<%= product[:definitions].base_url -%>",
-<% end -%>
+{{- range $product := $.Products }}
+	{{ $product.Name }}BasePathKey : "{{ $product.BaseUrl }}",
+{{- end }}
 	CloudBillingBasePathKey : "https://cloudbilling.googleapis.com/v1/",
-<% if version == "ga" -%>
+{{- if eq $.TargetVersionName "ga" }}
 	ContainerBasePathKey : "https://container.googleapis.com/v1/",
-<% else -%>
+{{- else }}
 	ContainerBasePathKey : "https://container.googleapis.com/v1beta1/",
-<% end -%>
+{{- end }}
 	DataflowBasePathKey : "https://dataflow.googleapis.com/v1b3/",
 	IAMBasePathKey : "https://iam.googleapis.com/v1/",
 	IamCredentialsBasePathKey : "https://iamcredentials.googleapis.com/v1/",
 	ResourceManagerV3BasePathKey : "https://cloudresourcemanager.googleapis.com/v3/",
 	BigtableAdminBasePathKey : "https://bigtableadmin.googleapis.com/v2/",
-	ContainerAwsBasePathKey:  "https://{{location}}-gkemulticloud.googleapis.com/v1/",
-	ContainerAzureBasePathKey: "https://{{location}}-gkemulticloud.googleapis.com/v1/",
-	TagsLocationBasePathKey: "https://{{location}}-cloudresourcemanager.googleapis.com/v3/",
+	ContainerAwsBasePathKey:  "https://{{"{{"}}location{{"}}"}}-gkemulticloud.googleapis.com/v1/",
+	ContainerAzureBasePathKey: "https://{{"{{"}}location{{"}}"}}-gkemulticloud.googleapis.com/v1/",
+	TagsLocationBasePathKey: "https://{{"{{"}}location{{"}}"}}-cloudresourcemanager.googleapis.com/v3/",
 }
 
 var DefaultClientScopes = []string{
@@ -335,13 +334,13 @@ func HandleSDKDefaults(d *schema.ResourceData) error {
 
 func SetEndpointDefaults(d *schema.ResourceData) error {
 	// Generated Products
-	<% products.each do |product| -%>
-	if d.Get("<%= product[:definitions].name.underscore -%>_custom_endpoint") == "" {
-		d.Set("<%= product[:definitions].name.underscore -%>_custom_endpoint", MultiEnvDefault([]string{
-			"GOOGLE_<%= product[:definitions].name.underscore.upcase -%>_CUSTOM_ENDPOINT",
-		}, DefaultBasePaths[<%= product[:definitions].name -%>BasePathKey]))
+	{{- range $product := $.Products }}
+	if d.Get("{{ underscore $product.Name }}_custom_endpoint") == "" {
+		d.Set("{{ underscore $product.Name }}_custom_endpoint", MultiEnvDefault([]string{
+			"GOOGLE_{{ upper (underscore $product.Name) }}_CUSTOM_ENDPOINT",
+		}, DefaultBasePaths[{{ $product.Name }}BasePathKey]))
 	}
-	<% end -%>
+	{{- end }}
 
 	if d.Get(CloudBillingCustomEndpointEntryKey) == "" {
 		d.Set(CloudBillingCustomEndpointEntryKey, MultiEnvDefault([]string{
@@ -379,13 +378,13 @@ func SetEndpointDefaults(d *schema.ResourceData) error {
 		}, DefaultBasePaths[ResourceManagerV3BasePathKey]))
 	}
 
-	<% unless version == "ga" -%>
+	{{ if ne $.TargetVersionName `ga` -}}
 	if d.Get(RuntimeConfigCustomEndpointEntryKey) == "" {
 		d.Set(RuntimeConfigCustomEndpointEntryKey, MultiEnvDefault([]string{
 			"GOOGLE_RUNTIMECONFIG_CUSTOM_ENDPOINT",
 		}, DefaultBasePaths[RuntimeConfigBasePathKey]))
 	}
-	<% end -%>
+	{{- end }}
 
 	if d.Get(IAMCustomEndpointEntryKey) == "" {
 		d.Set(IAMCustomEndpointEntryKey, MultiEnvDefault([]string{
@@ -802,7 +801,7 @@ func (c *Config) NewResourceManagerV3Client(userAgent string) *resourceManagerV3
 	return clientResourceManagerV3
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func(c *Config) NewRuntimeconfigClient(userAgent string) *runtimeconfig.Service {
 	runtimeConfigClientBasePath := RemoveBasePathVersion(c.RuntimeConfigBasePath)
 	log.Printf("[INFO] Instantiating Google Cloud Runtimeconfig client for path %s", runtimeConfigClientBasePath)
@@ -816,7 +815,7 @@ func(c *Config) NewRuntimeconfigClient(userAgent string) *runtimeconfig.Service 
 
 	return clientRuntimeconfig
 }
-<% end -%>
+{{- end }}
 
 func (c *Config) NewIamClient(userAgent string) *iam.Service {
 	iamClientBasePath := RemoveBasePathVersion(c.IAMBasePath)
@@ -1262,20 +1261,20 @@ func (c *Config) GetCredentials(clientScopes []string, initialCredentialsOnly bo
 	return *creds, nil
 }
 
-// Remove the `/{{version}}/` from a base path if present.
+// Remove the `/{{"{{"}}version{{"}}"}}/` from a base path if present.
 func RemoveBasePathVersion(url string) string {
 	re := regexp.MustCompile(`(?P<base>http[s]://.*)(?P<version>/[^/]+?/$)`)
 	return re.ReplaceAllString(url, "$1/")
 }
 
 // For a consumer of config.go that isn't a full fledged provider and doesn't
-// have its own endpoint mechanism such as sweepers, init {{service}}BasePath
+// have its own endpoint mechanism such as sweepers, init {{"{{"}}service{{"}}"}}BasePath
 // values to a default. After using this, you should call config.LoadAndValidate.
 func ConfigureBasePaths(c *Config) {
 	// Generated Products
-	<% products.map.each do |product| -%>
-	c.<%= product[:definitions].name -%>BasePath = DefaultBasePaths[<%= product[:definitions].name -%>BasePathKey]
-	<% end -%>
+	{{- range $product := $.Products }}
+	c.{{ $product.Name }}BasePath = DefaultBasePaths[{{ $product.Name }}BasePathKey]
+	{{- end }}
 
 	// Handwritten Products / Versioned / Atypical Entries
 	c.CloudBillingBasePath = DefaultBasePaths[CloudBillingBasePathKey]

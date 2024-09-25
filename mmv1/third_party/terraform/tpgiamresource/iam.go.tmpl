@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 // Utils for modifying IAM policies for resources across GCP
 package tpgiamresource
 
@@ -152,7 +151,7 @@ func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModify
 			time.Sleep(backoff)
 			backoff = backoff * 2
 			if backoff > 30*time.Second {
-				return errwrap.Wrapf(fmt.Sprintf("Error applying IAM policy to %s: Too many conflicts.  Latest error: {{err}}", updater.DescribeResource()), err)
+				return errwrap.Wrapf(fmt.Sprintf("Error applying IAM policy to %s: Too many conflicts.  Latest error: {{"{{"}}err{{"}}"}}", updater.DescribeResource()), err)
 			}
 			continue
 		}
@@ -181,7 +180,7 @@ func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModify
 		}
 
 		log.Printf("[DEBUG]: not retrying IAM policy for %s. error: %v", updater.DescribeResource(), err)
-		return errwrap.Wrapf(fmt.Sprintf("Error applying IAM policy for %s: {{err}}", updater.DescribeResource()), err)
+		return errwrap.Wrapf(fmt.Sprintf("Error applying IAM policy for %s: {{"{{"}}err{{"}}"}}", updater.DescribeResource()), err)
 	}
 	log.Printf("[DEBUG]: Set policy for %s", updater.DescribeResource())
 	return nil
@@ -485,11 +484,11 @@ func IamWithDeprecationMessage(message string) func(s *IamSettings) {
 }
 
 func IamWithGAResourceDeprecation() func (s *IamSettings) {
-	<% if version == 'ga' -%>
+	{{- if eq $.TargetVersionName "ga" }}
 	return IamWithDeprecationMessage("This resource has been deprecated in the google (GA) provider, and will only be available in the google-beta provider in a future release.")
-	<% else -%>
+	{{- else }}
 	return IamWithDeprecationMessage("")
-	<% end -%>
+	{{- end }}
 }
 
 func IamWithBatching (s *IamSettings) {

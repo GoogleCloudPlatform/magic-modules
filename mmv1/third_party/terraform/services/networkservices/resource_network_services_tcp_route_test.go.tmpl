@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package networkservices_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -120,4 +119,4 @@ resource "google_network_services_tcp_route" "foobar" {
 `, tcpServiceName, tcpHealthCheckName, tcpRouteName)
 }
 
-<% end -%>
+{{ end }}

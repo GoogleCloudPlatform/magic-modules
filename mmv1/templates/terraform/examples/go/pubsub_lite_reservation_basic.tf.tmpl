@@ -1,8 +1,0 @@
-resource "google_pubsub_lite_reservation" "{{$.PrimaryResourceId}}" {
-  name = "{{index $.Vars "reservation_name"}}"
-  project = data.google_project.project.number
-  throughput_capacity = 2
-}
-
-data "google_project" "project" {
-}

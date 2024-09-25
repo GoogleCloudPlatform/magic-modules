@@ -1,5 +1,5 @@
 resource "google_compute_health_check" "https-health-check" {
-  name        = "<%= ctx[:vars]['health_check_name'] %>"
+  name        = "{{index $.Vars "health_check_name"}}"
   description = "Health check via https"
 
   timeout_sec         = 1

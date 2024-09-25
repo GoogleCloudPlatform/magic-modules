@@ -43,7 +43,7 @@ resource "google_apigee_instance_attachment" "apigee_instance_attachment" {
   environment  = google_apigee_environment.apigee_environment.name
 }
 
-resource "google_apigee_environment_keyvaluemaps" "<%= ctx[:primary_resource_id] %>" {
+resource "google_apigee_environment_keyvaluemaps" "{{$.PrimaryResourceId}}" {
   env_id    = google_apigee_environment.apigee_environment.id
   name      = "tf-test-env-kvms"
   depends_on = [

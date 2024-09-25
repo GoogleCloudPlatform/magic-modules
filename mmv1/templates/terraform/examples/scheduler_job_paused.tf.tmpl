@@ -1,6 +1,6 @@
 resource "google_cloud_scheduler_job" "job" {
   paused           = true
-  name             = "<%= ctx[:vars]['job_name'] %>"
+  name             = "{{index $.Vars "job_name"}}"
   description      = "test http job with updated fields"
   schedule         = "*/8 * * * *"
   time_zone        = "America/New_York"

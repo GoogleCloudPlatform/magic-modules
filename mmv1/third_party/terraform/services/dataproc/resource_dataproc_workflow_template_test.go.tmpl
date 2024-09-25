@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package dataproc_test
 
 import (
@@ -210,7 +209,7 @@ func funcAccTestDataprocWorkflowTemplateCheckDestroy(t *testing.T) func(s *terra
 
       config := acctest.GoogleProviderConfig(t)
 
-      url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{DataprocBasePath}}projects/{{project}}/locations/{{location}}/workflowTemplates/{{name}}")
+      url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}DataprocBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/workflowTemplates/{{"{{"}}name{{"}}"}}")
       if err != nil {
         return err
       }

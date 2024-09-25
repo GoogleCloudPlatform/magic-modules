@@ -7,7 +7,7 @@ if parts := regexp.MustCompile(`locations\/([^\/]*)\/`).FindStringSubmatch(d.Get
 	return fmt.Errorf(
 		"Saw %s when the parent is expected to contains location %s",
 		d.Get("parent"),
-		"projects/{{project}}/locations/{{location}}/...",
+		"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/...",
 	)
 }
 

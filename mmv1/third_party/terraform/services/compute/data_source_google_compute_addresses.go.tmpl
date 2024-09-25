@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package compute
 
 import (
@@ -11,11 +10,11 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-<% if version == "ga" -%>
+{{- if eq $.TargetVersionName "ga" }}
 	"google.golang.org/api/compute/v1"
-<% else -%>
+{{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
-<% end -%>
+{{- end }}
 )
 
 func DataSourceGoogleComputeAddresses() *schema.Resource {
@@ -60,7 +59,7 @@ func DataSourceGoogleComputeAddresses() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 						"labels": {
 							Type: schema.TypeMap,
 							Elem: &schema.Schema{
@@ -69,7 +68,7 @@ func DataSourceGoogleComputeAddresses() *schema.Resource {
                             Description: `Labels attached to this address`,
 							Computed:    true,
 						},
-<% end -%>
+{{- end }}
 					},
 				},
 			},
@@ -181,9 +180,9 @@ func generateTfAddress(address *compute.Address) map[string]interface{} {
 		"region":       regionFromUrl(address.Region),
 		"status":       address.Status,
 		"self_link":    address.SelfLink,
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 		"labels":       address.Labels,
-<% end -%>
+{{- end }}
 	}
 }
 

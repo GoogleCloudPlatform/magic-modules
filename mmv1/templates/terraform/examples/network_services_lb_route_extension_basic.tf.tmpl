@@ -1,13 +1,13 @@
 # Internal HTTP load balancer with a managed instance group backend
 # VPC network
 resource "google_compute_network" "ilb_network" {
-  name                    = "<%= ctx[:vars]['ilb_network_name'] %>"
+  name                    = "{{index $.Vars "ilb_network_name"}}"
   auto_create_subnetworks = false
 }
 
 # proxy-only subnet
 resource "google_compute_subnetwork" "proxy_subnet" {
-  name          = "<%= ctx[:vars]['proxy_subnet_name'] %>"
+  name          = "{{index $.Vars "proxy_subnet_name"}}"
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-west1"
   purpose       = "REGIONAL_MANAGED_PROXY"
@@ -17,7 +17,7 @@ resource "google_compute_subnetwork" "proxy_subnet" {
 
 # backend subnet
 resource "google_compute_subnetwork" "ilb_subnet" {
-  name          = "<%= ctx[:vars]['backend_subnet_name'] %>"
+  name          = "{{index $.Vars "backend_subnet_name"}}"
   ip_cidr_range = "10.0.1.0/24"
   region        = "us-west1"
   network       = google_compute_network.ilb_network.id
@@ -29,7 +29,7 @@ resource "google_compute_subnetwork" "ilb_subnet" {
 
 # forwarding rule
 resource "google_compute_forwarding_rule" "default" {
-  name                  = "<%= ctx[:vars]['forwarding_rule_name'] %>"
+  name                  = "{{index $.Vars "forwarding_rule_name"}}"
   region                = "us-west1"
   ip_protocol           = "TCP"
   load_balancing_scheme = "INTERNAL_MANAGED"
@@ -46,7 +46,7 @@ resource "google_compute_forwarding_rule" "default" {
 
 # HTTP target proxy
 resource "google_compute_region_target_http_proxy" "default" {
-  name     = "<%= ctx[:vars]['target_http_proxy_name'] %>"
+  name     = "{{index $.Vars "target_http_proxy_name"}}"
   region   = "us-west1"
   url_map  = google_compute_region_url_map.default.id
 }
@@ -70,7 +70,7 @@ resource "google_compute_region_url_map" "default" {
 
 # backend service
 resource "google_compute_region_backend_service" "default" {
-  name                  = "<%= ctx[:vars]['backend_service_name'] %>"
+  name                  = "{{index $.Vars "backend_service_name"}}"
   region                = "us-west1"
   protocol              = "HTTP"
   load_balancing_scheme = "INTERNAL_MANAGED"
@@ -86,7 +86,7 @@ resource "google_compute_region_backend_service" "default" {
 
 # instance template
 resource "google_compute_instance_template" "instance_template" {
-  name         = "<%= ctx[:vars]['mig_template_name'] %>"
+  name         = "{{index $.Vars "mig_template_name"}}"
   machine_type = "e2-small"
   tags         = ["http-server"]
 
@@ -136,7 +136,7 @@ resource "google_compute_instance_template" "instance_template" {
 
 # health check
 resource "google_compute_region_health_check" "default" {
-  name     = "<%= ctx[:vars]['hc_name'] %>"
+  name     = "{{index $.Vars "hc_name"}}"
   region   = "us-west1"
 
   http_health_check {
@@ -146,7 +146,7 @@ resource "google_compute_region_health_check" "default" {
 
 # MIG
 resource "google_compute_region_instance_group_manager" "mig" {
-  name     = "<%= ctx[:vars]['mig_name'] %>"
+  name     = "{{index $.Vars "mig_name"}}"
   region   = "us-west1"
 
   base_instance_name = "vm"
@@ -160,7 +160,7 @@ resource "google_compute_region_instance_group_manager" "mig" {
 
 # allow all access from IAP and health check ranges
 resource "google_compute_firewall" "fw_iap" {
-  name          = "<%= ctx[:vars]['fw_allow_iap_hc_name'] %>"
+  name          = "{{index $.Vars "fw_allow_iap_hc_name"}}"
   direction     = "INGRESS"
   network       = google_compute_network.ilb_network.id
   source_ranges = ["130.211.0.0/22", "35.191.0.0/16", "35.235.240.0/20"]
@@ -172,7 +172,7 @@ resource "google_compute_firewall" "fw_iap" {
 
 # allow http from proxy subnet to backends
 resource "google_compute_firewall" "fw_ilb_to_backends" {
-  name          = "<%= ctx[:vars]['fw_allow_ilb_to_backends_name'] %>"
+  name          = "{{index $.Vars "fw_allow_ilb_to_backends_name"}}"
   direction     = "INGRESS"
   network       = google_compute_network.ilb_network.id
   source_ranges = ["10.0.0.0/24"]
@@ -188,8 +188,8 @@ resource "google_compute_firewall" "fw_ilb_to_backends" {
   ]
 }
 
-resource "google_network_services_lb_route_extension" "<%= ctx[:primary_resource_id] %>" {
-  name                  = "<%= ctx[:vars]['lb_route_extension_name'] %>"
+resource "google_network_services_lb_route_extension" "{{$.PrimaryResourceId}}" {
+  name                  = "{{index $.Vars "lb_route_extension_name"}}"
   description           = "my route extension"
   location              = "us-west1"
   load_balancing_scheme = "INTERNAL_MANAGED"
@@ -220,7 +220,7 @@ resource "google_network_services_lb_route_extension" "<%= ctx[:primary_resource
 
 # test instance
 resource "google_compute_instance" "vm_test" {
-  name         = "<%= ctx[:vars]['vm_test_name'] %>"
+  name         = "{{index $.Vars "vm_test_name"}}"
   zone         = "us-west1-b"
   machine_type = "e2-small"
 
@@ -238,7 +238,7 @@ resource "google_compute_instance" "vm_test" {
 
 # Route Extension Backend Instance
 resource "google_compute_instance" "callouts_instance" {
-  name         = "<%= ctx[:vars]['callouts_instance_name'] %>"
+  name         = "{{index $.Vars "callouts_instance_name"}}"
   zone         = "us-west1-a"
   machine_type = "e2-small"
 
@@ -293,7 +293,7 @@ resource "google_compute_instance" "callouts_instance" {
 
 // callouts instance group
 resource "google_compute_instance_group" "callouts_instance_group" {
-  name        = "<%= ctx[:vars]['callouts_instance_group'] %>"
+  name        = "{{index $.Vars "callouts_instance_group"}}"
   description = "Terraform test instance group"
   zone        = "us-west1-a"
 
@@ -314,7 +314,7 @@ resource "google_compute_instance_group" "callouts_instance_group" {
 
 # callout health check
 resource "google_compute_region_health_check" "callouts_health_check" {
-  name     = "<%= ctx[:vars]['callouts_hc_name'] %>"
+  name     = "{{index $.Vars "callouts_hc_name"}}"
   region   = "us-west1"
 
   http_health_check {
@@ -328,7 +328,7 @@ resource "google_compute_region_health_check" "callouts_health_check" {
 
 # callout backend service
 resource "google_compute_region_backend_service" "callouts_backend" {
-  name                  = "<%= ctx[:vars]['callouts_backend_name'] %>"
+  name                  = "{{index $.Vars "callouts_backend_name"}}"
   region                = "us-west1"
   protocol              = "HTTP2"
   load_balancing_scheme = "INTERNAL_MANAGED"

@@ -1,5 +1,5 @@
-resource "google_cloudbuild_trigger" "<%= ctx[:primary_resource_id] %>" {
-  name        = "<%= ctx[:vars]['cloudbuild_trigger_name'] %>"
+resource "google_cloudbuild_trigger" "{{$.PrimaryResourceId}}" {
+  name        = "{{index $.Vars "cloudbuild_trigger_name"}}"
   location    = "us-central1"
 
   github {

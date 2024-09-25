@@ -1,6 +1,6 @@
-resource "google_network_security_security_profile" "<%= ctx[:primary_resource_id] %>" {
-  name        = "<%= ctx[:vars]['resource_name'] %>"
-  parent      = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"
+resource "google_network_security_security_profile" "{{$.PrimaryResourceId}}" {
+  name        = "{{index $.Vars "resource_name"}}"
+  parent      = "organizations/{{index $.TestEnvVars "org_id"}}"
   description = "my description"
   type        = "THREAT_PREVENTION"
 

@@ -1,6 +1,6 @@
-resource "google_bigquery_analytics_hub_data_exchange" "<%= ctx[:primary_resource_id] %>" {
+resource "google_bigquery_analytics_hub_data_exchange" "{{$.PrimaryResourceId}}" {
   location         = "US"
-  data_exchange_id = "<%= ctx[:vars]['data_exchange_id'] %>"
-  display_name     = "<%= ctx[:vars]['data_exchange_id'] %>"
-  description      = "<%= ctx[:vars]['desc'] %>"
+  data_exchange_id = "{{index $.Vars "data_exchange_id"}}"
+  display_name     = "{{index $.Vars "data_exchange_id"}}"
+  description      = "{{index $.Vars "desc"}}"
 }

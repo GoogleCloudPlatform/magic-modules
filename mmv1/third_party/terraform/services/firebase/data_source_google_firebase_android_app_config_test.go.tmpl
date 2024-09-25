@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package firebase_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 import (
 	"fmt"
 	"testing"
@@ -68,4 +67,4 @@ func testAccDataSourceFirebaseAndroidAppConfigCheck(datasourceName string) resou
 		return nil
 	}
 }
-<% end -%>
+{{- end }}

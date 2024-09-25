@@ -1,5 +1,5 @@
 resource "google_gkeonprem_vmware_cluster" "default-full" {
-  name = "<%= ctx[:vars]['cluster'] %>"
+  name = "{{index $.Vars "cluster"}}"
   location = "us-west1"
   admin_cluster_membership = "projects/870316890899/locations/global/memberships/gkeonprem-terraform-test"
   description = "test cluster"
@@ -36,8 +36,8 @@ resource "google_gkeonprem_vmware_cluster" "default-full" {
   }
 }
 
-resource "google_gkeonprem_vmware_node_pool" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]['name'] %>"
+resource "google_gkeonprem_vmware_node_pool" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "name"}}"
   location = "us-west1"
   vmware_cluster = google_gkeonprem_vmware_cluster.default-full.name
   annotations = {}

@@ -2,7 +2,7 @@ data "google_project" "project" {
 }
 
 resource "google_sql_database_instance" "cloudsqldb" {
-  name             = "<%= ctx[:vars]["sqldb"] %>"
+  name             = "{{index $.Vars "sqldb"}}"
   database_version = "MYSQL_5_7"
   settings {
     tier = "db-n1-standard-1"
@@ -12,26 +12,26 @@ resource "google_sql_database_instance" "cloudsqldb" {
 }
 
 resource "google_sql_ssl_cert" "sql_client_cert" {
-  common_name = "<%= ctx[:vars]["sqldb_cert"] %>"
+  common_name = "{{index $.Vars "sqldb_cert"}}"
   instance    = google_sql_database_instance.cloudsqldb.name
   
   depends_on = [google_sql_database_instance.cloudsqldb]
 }
 
 resource "google_sql_user" "sqldb_user" {
-  name     = "<%= ctx[:vars]["sqldb_user"] %>"
+  name     = "{{index $.Vars "sqldb_user"}}"
   instance = google_sql_database_instance.cloudsqldb.name
-  password = "<%= ctx[:vars]["sqldb_pass"] %>"
+  password = "{{index $.Vars "sqldb_pass"}}"
   
   depends_on = [google_sql_ssl_cert.sql_client_cert]
 }
 
 
 
-resource "google_database_migration_service_connection_profile" "<%= ctx[:primary_resource_id] %>" {
+resource "google_database_migration_service_connection_profile" "{{$.PrimaryResourceId}}" {
   location              = "us-central1"
-  connection_profile_id = "<%= ctx[:vars]["from_profile"] %>"
-  display_name          = "<%= ctx[:vars]["from_profile"] %>_display"
+  connection_profile_id = "{{index $.Vars "from_profile"}}"
+  display_name          = "{{index $.Vars "from_profile"}}_display"
   labels = { 
     foo = "bar"
   }
@@ -45,17 +45,17 @@ resource "google_database_migration_service_connection_profile" "<%= ctx[:primar
       client_certificate = google_sql_ssl_cert.sql_client_cert.cert
       ca_certificate     = google_sql_ssl_cert.sql_client_cert.server_ca_cert
     }
-    cloud_sql_id = "<%= ctx[:vars]["sqldb"] %>"
+    cloud_sql_id = "{{index $.Vars "sqldb"}}"
   }
 
   depends_on = [google_sql_user.sqldb_user]
 }
 
 
-resource "google_database_migration_service_connection_profile" "<%= ctx[:primary_resource_id] %>_destination" {
+resource "google_database_migration_service_connection_profile" "{{$.PrimaryResourceId}}_destination" {
   location              = "us-central1"
-  connection_profile_id = "<%= ctx[:vars]["to_profile"] %>"
-  display_name          = "<%= ctx[:vars]["to_profile"] %>_displayname"
+  connection_profile_id = "{{index $.Vars "to_profile"}}"
+  display_name          = "{{index $.Vars "to_profile"}}_displayname"
   labels = { 
     foo = "bar"
   }
@@ -77,9 +77,9 @@ resource "google_database_migration_service_connection_profile" "<%= ctx[:primar
       data_disk_type        = "PD_HDD"
       data_disk_size_gb     = "11"
       zone                  = "us-central1-b"
-      source_id             = "projects/${data.google_project.project.project_id}/locations/us-central1/connectionProfiles/<%= ctx[:vars]["from_profile"] %>"
+      source_id             = "projects/${data.google_project.project.project_id}/locations/us-central1/connectionProfiles/{{index $.Vars "from_profile"}}"
       root_password         = "testpasscloudsql"
     }
   }
-  depends_on = [google_database_migration_service_connection_profile.<%= ctx[:primary_resource_id] %>]
+  depends_on = [google_database_migration_service_connection_profile.{{$.PrimaryResourceId}}]
 }

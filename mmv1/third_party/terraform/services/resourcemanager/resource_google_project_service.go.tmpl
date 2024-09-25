@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package resourcemanager
 
 import (
@@ -6,9 +5,9 @@ import (
     "log"
     "strings"
     "time"
-	<% unless version == 'ga' -%>
+	{{- if ne $.TargetVersionName "ga" }}
     "regexp"
-	<% end -%>
+	{{- end }}
 
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -52,7 +51,7 @@ var bannedProjectServices = []string{"bigquery-json.googleapis.com"}
 
 // map from old -> new names of services that have been renamed
 // these should be removed during major provider versions. comment here with
-// "DEPRECATED FOR {{version}} next to entries slated for removal in {{version}}
+// "DEPRECATED FOR {{"{{"}}version{{"}}"}} next to entries slated for removal in {{"{{"}}version{{"}}"}}
 // upon removal, we should disallow the old name from being used even if it's
 // not gone from the underlying API yet
 var RenamedServices = map[string]string{}
@@ -127,13 +126,13 @@ func ResourceGoogleProjectService() *schema.Resource {
 				Optional: true,
 				Default:  true,
 			},
-      <% unless version == 'ga' -%>
+      {{- if ne $.TargetVersionName "ga" }}
 			"check_if_service_has_usage_on_destroy": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 			},
-      <% end -%>
+      {{- end }}
 		},
 		UseJSONNumber: true,
 	}
@@ -267,12 +266,12 @@ func resourceGoogleProjectServiceDelete(d *schema.ResourceData, meta interface{}
 
 	service := d.Get("service").(string)
 	disableDependencies := d.Get("disable_dependent_services").(bool)
-	<% unless version == 'ga' -%>
+	{{- if ne $.TargetVersionName "ga" }}
 	checkUsage := d.Get("check_if_service_has_usage_on_destroy").(bool)
 	err = disableServiceUsageProjectService(service, project, d, config, disableDependencies,checkUsage)
-	<% else -%>
+	{{- else }}
 	err = disableServiceUsageProjectService(service, project, d, config, disableDependencies)
-	<% end -%>
+	{{- end }}
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Project Service %s", d.Id()))
 	}
@@ -288,11 +287,11 @@ func resourceGoogleProjectServiceUpdate(d *schema.ResourceData, meta interface{}
 }
 
 // Disables a project service.
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 func disableServiceUsageProjectService(service, project string, d *schema.ResourceData, config *transport_tpg.Config, disableDependentServices bool, checkUsage bool) error {
-<% else -%>
+{{- else }}
 func disableServiceUsageProjectService(service, project string, d *schema.ResourceData, config *transport_tpg.Config, disableDependentServices bool) error {
-<% end -%>
+{{- end }}
 	err := transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
 			billingProject := project
@@ -301,17 +300,17 @@ func disableServiceUsageProjectService(service, project string, d *schema.Resour
 				return err
 			}
 			name := fmt.Sprintf("projects/%s/services/%s", project, service)
-		  <% unless version == 'ga' -%>
+		  {{- if ne $.TargetVersionName "ga" }}
 			checkIfServiceHasUsage := "SKIP"
 			if checkUsage {
 				checkIfServiceHasUsage = "CHECK"
 			}
-		  <% end -%>
+		  {{- end }}
 			servicesDisableCall := config.NewServiceUsageClient(userAgent).Services.Disable(name, &serviceusage.DisableServiceRequest{
 				DisableDependentServices: disableDependentServices,
-				<% unless version == 'ga' -%>
+				{{- if ne $.TargetVersionName "ga" }}
 				CheckIfServiceHasUsage: checkIfServiceHasUsage,
-				<% end -%>
+				{{- end }}
 			})
 			if config.UserProjectOverride {
 				// err == nil indicates that the billing_project value was found
@@ -335,11 +334,11 @@ func disableServiceUsageProjectService(service, project string, d *schema.Resour
 		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.ServiceUsageServiceBeingActivated},
 	})
 	if err != nil {
-		<% unless version == 'ga' -%>
+		{{- if ne $.TargetVersionName "ga" }}
 		if res, _ := regexp.MatchString("COMMON_SU_SERVICE_HAS_USAGE", err.Error()); res {
 		return fmt.Errorf("Error disabling service %q for project %q: %v", service, project, strings.Replace(err.Error(), "check_if_service_has_usage=SKIP", "check_if_service_has_usage_on_destroy=false", -1))
 		 }
-		<% end -%>
+		{{- end }}
 		return fmt.Errorf("Error disabling service %q for project %q: %v", service, project, err)
 	}
 	return nil

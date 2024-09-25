@@ -1,6 +1,0 @@
-// Store the name as ID
-d.SetId(res["name"].(string))
-
-if err = d.Set("release_id", tpgresource.GetResourceNameFromSelfLink(res["name"].(string))); err != nil {
-    return fmt.Errorf("Error setting release_id: %s", err)
-}

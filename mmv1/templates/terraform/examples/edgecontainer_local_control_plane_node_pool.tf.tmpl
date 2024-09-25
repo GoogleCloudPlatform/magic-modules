@@ -1,5 +1,5 @@
-resource "google_edgecontainer_cluster" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]['edgecontainer_cluster_name'] %>"
+resource "google_edgecontainer_cluster" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "edgecontainer_cluster_name"}}"
   location = "us-central1"
 
   authorization {
@@ -29,7 +29,7 @@ resource "google_edgecontainer_cluster" "<%= ctx[:primary_resource_id] %>" {
   }
 }
 
-resource "google_edgecontainer_node_pool" "<%= ctx[:primary_resource_id] %>" {
+resource "google_edgecontainer_node_pool" "{{$.PrimaryResourceId}}" {
   name = "nodepool-1"
   cluster = google_edgecontainer_cluster.cluster.name
   location = "us-central1"

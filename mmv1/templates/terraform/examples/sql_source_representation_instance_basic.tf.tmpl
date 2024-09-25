@@ -1,5 +1,5 @@
-resource "google_sql_source_representation_instance" "<%= ctx[:primary_resource_id] %>" {
-  name               = "<%= ctx[:vars]['name'] %>"
+resource "google_sql_source_representation_instance" "{{$.PrimaryResourceId}}" {
+  name               = "{{index $.Vars "name"}}"
   region             = "us-central1"
   database_version   = "MYSQL_8_0"
   host               = "10.20.30.40"

@@ -1,8 +1,8 @@
 resource "google_project" "project" {
-  project_id      = "<%= ctx[:vars]['project_id'] %>"
-  name            = "<%= ctx[:vars]['project_id'] %>"
-  org_id          = "<%= ctx[:test_env_vars]['org_id'] %>"
-  billing_account = "<%= ctx[:test_env_vars]['billing_account'] %>"
+  project_id      = "{{index $.Vars "project_id"}}"
+  name            = "{{index $.Vars "project_id"}}"
+  org_id          = "{{index $.TestEnvVars "org_id"}}"
+  billing_account = "{{index $.TestEnvVars "billing_account"}}"
   deletion_policy = "DELETE"
 }
 
@@ -11,7 +11,7 @@ resource "google_project_service" "compute" {
   service = "compute.googleapis.com"
 }
 
-resource "google_compute_project_cloud_armor_tier" "<%= ctx[:primary_resource_id] %>" {
+resource "google_compute_project_cloud_armor_tier" "{{$.PrimaryResourceId}}" {
   project          = google_project.project.project_id  
   cloud_armor_tier = "CA_STANDARD"
   depends_on       = [google_project_service.compute]

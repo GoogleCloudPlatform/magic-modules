@@ -1,5 +1,5 @@
 resource "google_cloud_scheduler_job" "job" {
-  name             = "<%= ctx[:vars]['job_name'] %>"
+  name             = "{{index $.Vars "job_name"}}"
   schedule         = "*/4 * * * *"
   description      = "test app engine job"
   time_zone        = "Europe/London"

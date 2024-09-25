@@ -1,5 +1,5 @@
-resource "google_looker_instance" "<%= ctx[:primary_resource_id] %>" {
-  name               = "<%= ctx[:vars]["instance_name"] %>"
+resource "google_looker_instance" "{{$.PrimaryResourceId}}" {
+  name               = "{{index $.Vars "instance_name"}}"
   platform_edition   = "LOOKER_CORE_STANDARD_ANNUAL"
   region             = "us-central1"
   public_ip_enabled  = true
@@ -34,7 +34,7 @@ resource "google_looker_instance" "<%= ctx[:primary_resource_id] %>" {
     }
   }
   oauth_config {
-    client_id = "<%= ctx[:vars]["client_id"] %>"
-    client_secret = "<%= ctx[:vars]["client_secret"] %>"
+    client_id = "{{index $.Vars "client_id"}}"
+    client_secret = "{{index $.Vars "client_secret"}}"
   }  
 }

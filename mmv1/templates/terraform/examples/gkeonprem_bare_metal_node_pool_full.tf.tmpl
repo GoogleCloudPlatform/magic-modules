@@ -1,5 +1,5 @@
 resource "google_gkeonprem_bare_metal_cluster" "default-full" {
-  name = "<%= ctx[:vars]['cluster'] %>"
+  name = "{{index $.Vars "cluster"}}"
   location = "us-west1"
   admin_cluster_membership = "projects/870316890899/locations/global/memberships/gkeonprem-terraform-test"
   bare_metal_version = "1.12.3"
@@ -68,8 +68,8 @@ resource "google_gkeonprem_bare_metal_cluster" "default-full" {
   }
 }
 
-resource "google_gkeonprem_bare_metal_node_pool" "<%= ctx[:primary_resource_id] %>" {
-  name =  "<%= ctx[:vars]['name'] %>"
+resource "google_gkeonprem_bare_metal_node_pool" "{{$.PrimaryResourceId}}" {
+  name =  "{{index $.Vars "name"}}"
   display_name = "test-name"
   bare_metal_cluster =  google_gkeonprem_bare_metal_cluster.default-full.name
   location = "us-west1"

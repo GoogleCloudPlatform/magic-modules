@@ -1,6 +1,6 @@
-resource "google_dataplex_aspect_type" "<%= ctx[:primary_resource_id] %>" {
-  aspect_type_id = "<%= ctx[:vars]['aspect_type_name'] %>"
-  project = "<%= ctx[:test_env_vars]['project_name'] %>"
+resource "google_dataplex_aspect_type" "{{$.PrimaryResourceId}}" {
+  aspect_type_id = "{{index $.Vars "aspect_type_name"}}"
+  project = "{{index $.TestEnvVars "project_name"}}"
   location = "us-central1"
 
   metadata_template = <<EOF

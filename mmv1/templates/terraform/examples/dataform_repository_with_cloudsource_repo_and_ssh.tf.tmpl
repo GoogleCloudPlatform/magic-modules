@@ -1,11 +1,11 @@
 resource "google_sourcerepo_repository" "git_repository" {
   provider = google-beta
-  name = "<%= ctx[:vars]['git_repository_name'] %>"
+  name = "{{index $.Vars "git_repository_name"}}"
 }
 
 resource "google_secret_manager_secret" "secret" {
   provider = google-beta
-  secret_id = "<%= ctx[:vars]['secret_name'] %>"
+  secret_id = "{{index $.Vars "secret_name"}}"
 
   replication {
     auto {}
@@ -16,12 +16,12 @@ resource "google_secret_manager_secret_version" "secret_version" {
   provider = google-beta
   secret = google_secret_manager_secret.secret.id
 
-  secret_data = "<%= ctx[:vars]['data'] %>"
+  secret_data = "{{index $.Vars "data"}}"
 }
 
-resource "google_dataform_repository" "<%= ctx[:primary_resource_id] %>" {
+resource "google_dataform_repository" "{{$.PrimaryResourceId}}" {
   provider = google-beta
-  name = "<%= ctx[:vars]['dataform_repository_name'] %>"
+  name = "{{index $.Vars "dataform_repository_name"}}"
 
   git_remote_settings {
       url = google_sourcerepo_repository.git_repository.url

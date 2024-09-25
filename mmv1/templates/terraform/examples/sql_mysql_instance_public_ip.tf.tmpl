@@ -1,6 +1,6 @@
-resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
+resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
   database_version = "MYSQL_5_7"
-  name             = "<%= ctx[:vars]['mysql_public_ip_instance_name'] %>"
+  name             = "{{index $.Vars "mysql_public_ip_instance_name"}}"
   region           = "asia-southeast2"
   settings {
     availability_type = "ZONAL"
@@ -18,5 +18,5 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
     }
     tier = "db-custom-4-26624"
   }
-  deletion_protection =  "<%= ctx[:vars]['deletion_protection'] %>"
+  deletion_protection =  "{{index $.Vars "deletion_protection"}}"
 }

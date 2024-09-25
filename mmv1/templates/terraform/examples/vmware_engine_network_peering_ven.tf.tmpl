@@ -8,8 +8,8 @@ resource "google_vmwareengine_network" "network-peering-peer-nw" {
    location          = "global"
    type              = "STANDARD"
 }
-resource "google_vmwareengine_network_peering" "<%= ctx[:primary_resource_id] %>" {
-    name = "<%= ctx[:vars]['name'] %>"
+resource "google_vmwareengine_network_peering" "{{$.PrimaryResourceId}}" {
+    name = "{{index $.Vars "name"}}"
     description = "Sample description"
     vmware_engine_network = google_vmwareengine_network.network-peering-nw.id
     peer_network = google_vmwareengine_network.network-peering-peer-nw.id

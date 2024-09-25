@@ -1,17 +1,17 @@
 resource "google_compute_network" "default" {
-  name                    = "<%= ctx[:vars]['network_name'] %>"
+  name                    = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  name          = "<%= ctx[:vars]['subnet_name'] %>"
+  name          = "{{index $.Vars "subnet_name"}}"
   ip_cidr_range = "10.0.1.0/24"
   region        = "us-central1"
   network       = google_compute_network.default.id
 }
 
 resource "google_compute_health_check" "hc" {
-  name               = "<%= ctx[:vars]['health_check_name'] %>"
+  name               = "{{index $.Vars "health_check_name"}}"
   check_interval_sec = 1
   timeout_sec        = 1
 
@@ -21,13 +21,13 @@ resource "google_compute_health_check" "hc" {
 }
 
 resource "google_compute_region_backend_service" "backend" {
-  name          = "<%= ctx[:vars]['backend_name'] %>"
+  name          = "{{index $.Vars "backend_name"}}"
   region        = "us-central1"
   health_checks = [google_compute_health_check.hc.id]
 }
 
 resource "google_compute_forwarding_rule" "default" {
-  name     = "<%= ctx[:vars]['forwarding_rule_name'] %>"
+  name     = "{{index $.Vars "forwarding_rule_name"}}"
   region   = "us-central1"
 
   load_balancing_scheme = "INTERNAL"
@@ -37,8 +37,8 @@ resource "google_compute_forwarding_rule" "default" {
   subnetwork            = google_compute_subnetwork.default.name
 }
 
-resource "google_compute_route" "<%= ctx[:primary_resource_id] %>" {
-  name         = "<%= ctx[:vars]['route_name'] %>"
+resource "google_compute_route" "{{$.PrimaryResourceId}}" {
+  name         = "{{index $.Vars "route_name"}}"
   dest_range   = "0.0.0.0/0"
   network      = google_compute_network.default.name
   next_hop_ilb = google_compute_forwarding_rule.default.id

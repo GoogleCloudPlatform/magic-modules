@@ -1,11 +1,11 @@
 resource "google_compute_ha_vpn_gateway" "ha_gateway" {
   region   = "us-central1"
-  name     = "<%= ctx[:vars]['ha_vpn_gateway_name'] %>"
+  name     = "{{index $.Vars "ha_vpn_gateway_name"}}"
   network  = google_compute_network.network.id
 }
 
-resource "google_compute_external_vpn_gateway" "<%= ctx[:primary_resource_id] %>" {
-  name            = "<%= ctx[:vars]['external_gateway_name'] %>"
+resource "google_compute_external_vpn_gateway" "{{$.PrimaryResourceId}}" {
+  name            = "{{index $.Vars "external_gateway_name"}}"
   redundancy_type = "SINGLE_IP_INTERNALLY_REDUNDANT"
   description     = "An externally managed VPN gateway"
   interface {
@@ -15,7 +15,7 @@ resource "google_compute_external_vpn_gateway" "<%= ctx[:primary_resource_id] %>
 }
 
 resource "google_compute_network" "network" {
-  name                    = "<%= ctx[:vars]['network_name'] %>"
+  name                    = "{{index $.Vars "network_name"}}"
   routing_mode            = "GLOBAL"
   auto_create_subnetworks = false
 }
@@ -35,7 +35,7 @@ resource "google_compute_subnetwork" "network_subnet2" {
 }
 
 resource "google_compute_router" "router1" {
-  name     = "<%= ctx[:vars]['router_name'] %>"
+  name     = "{{index $.Vars "router_name"}}"
   network  = google_compute_network.network.name
   bgp {
     asn = 64514

@@ -1,13 +1,13 @@
 resource "google_compute_network" "default" {
   provider                = google-beta
-  name                    = "<%= ctx[:vars]['network_name'] %>"
+  name                    = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = false
   routing_mode            = "REGIONAL"
 }
       
 resource "google_compute_subnetwork" "default" {
   provider                   = google-beta
-  name                       = "<%= ctx[:vars]['subnetname_name'] %>"
+  name                       = "{{index $.Vars "subnetname_name"}}"
   ip_cidr_range              = "10.1.2.0/24"
   network                    = google_compute_network.default.id
   private_ipv6_google_access = "DISABLE_GOOGLE_ACCESS"
@@ -24,7 +24,7 @@ data "google_compute_image" "vmimage" {
 
 resource "google_compute_instance" "target-vm" {
   provider     = google-beta
-  name         = "<%= ctx[:vars]['instance_name'] %>"
+  name         = "{{index $.Vars "instance_name"}}"
   machine_type = "e2-medium"
   zone         = "southamerica-west1-a"
 
@@ -62,16 +62,16 @@ resource "google_compute_network_edge_security_service" "edge_sec_service" {
 
 resource "google_compute_region_security_policy" "regionsecuritypolicy" {
   provider    = google-beta
-  name        = "<%= ctx[:vars]['region_sec_policy'] %>"
+  name        = "{{index $.Vars "region_sec_policy"}}"
   region      = "southamerica-west1"
   description = "basic security policy for target instance"
   type        = "CLOUD_ARMOR_NETWORK"
   depends_on  = [google_compute_network_edge_security_service.edge_sec_service]
 }
 
-resource "google_compute_target_instance" "<%= ctx[:primary_resource_id] %>" {
+resource "google_compute_target_instance" "{{$.PrimaryResourceId}}" {
   provider        = google-beta
-  name            = "<%= ctx[:vars]['target_name'] %>"
+  name            = "{{index $.Vars "target_name"}}"
   zone            = "southamerica-west1-a"
   instance        = google_compute_instance.target-vm.id
   security_policy = google_compute_region_security_policy.regionsecuritypolicy.self_link

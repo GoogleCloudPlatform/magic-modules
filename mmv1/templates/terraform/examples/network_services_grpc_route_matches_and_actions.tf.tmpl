@@ -1,6 +1,6 @@
-resource "google_network_services_grpc_route" "<%= ctx[:primary_resource_id] %>" {
+resource "google_network_services_grpc_route" "{{$.PrimaryResourceId}}" {
   provider               = google-beta
-  name                   = "<%= ctx[:vars]['resource_name'] %>"
+  name                   = "{{index $.Vars "resource_name"}}"
   labels                 = {
     foo = "bar"
   }

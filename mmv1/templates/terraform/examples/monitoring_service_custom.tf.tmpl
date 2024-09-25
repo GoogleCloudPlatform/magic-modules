@@ -1,9 +1,9 @@
-resource "google_monitoring_custom_service" "<%= ctx[:primary_resource_id] -%>" {
-  service_id = "<%= ctx[:vars]['service_id'] -%>"
-  display_name = "My Custom Service <%= ctx[:vars]['service_id'] -%>"
+resource "google_monitoring_custom_service" "{{$.PrimaryResourceId}}" {
+  service_id = "{{index $.Vars "service_id"}}"
+  display_name = "My Custom Service {{index $.Vars "service_id"}}"
 
   telemetry {
-  	resource_name = "<%= ctx[:vars]['resource_name'] -%>"
+  	resource_name = "{{index $.Vars "resource_name"}}"
   }
 
   user_labels = {

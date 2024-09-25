@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package firebasehosting_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
@@ -194,4 +193,4 @@ resource "google_firebase_hosting_channel" "update" {
 `, context)
 }
 
-<% end -%>
+{{ end }}

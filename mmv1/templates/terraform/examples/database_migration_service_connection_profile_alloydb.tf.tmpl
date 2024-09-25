@@ -2,11 +2,11 @@ data "google_project" "project" {
 }
 
 resource "google_compute_network" "default" {
-  name = "<%= ctx[:vars]['network_name'] %>"
+  name = "{{index $.Vars "network_name"}}"
 }
 
 resource "google_compute_global_address" "private_ip_alloc" {
-  name          =  "<%= ctx[:vars]['global_address_name'] %>"
+  name          =  "{{index $.Vars "global_address_name"}}"
   address_type  = "INTERNAL"
   purpose       = "VPC_PEERING"
   prefix_length = 16
@@ -20,10 +20,10 @@ resource "google_service_networking_connection" "vpc_connection" {
 }
 
 
-resource "google_database_migration_service_connection_profile" "<%= ctx[:primary_resource_id] %>" {
+resource "google_database_migration_service_connection_profile" "{{$.PrimaryResourceId}}" {
   location = "us-central1"
-  connection_profile_id = "<%= ctx[:vars]["profile"] %>"
-  display_name = "<%= ctx[:vars]["profile"] %>_display"
+  connection_profile_id = "{{index $.Vars "profile"}}"
+  display_name = "{{index $.Vars "profile"}}_display"
   labels = { 
     foo = "bar" 
   }

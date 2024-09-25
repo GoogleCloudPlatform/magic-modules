@@ -1,5 +1,5 @@
 resource "google_bigtable_instance" "instance" {
-  name = "<%= ctx[:vars]['instance_name'] %>"
+  name = "{{index $.Vars "instance_name"}}"
   cluster {
     cluster_id   = "cluster-1"
     zone         = "us-central1-a"
@@ -19,12 +19,12 @@ resource "google_bigtable_instance" "instance" {
     storage_type = "HDD"
   }
 
-  deletion_protection  = "<%= ctx[:vars]['deletion_protection'] %>"
+  deletion_protection  = "{{index $.Vars "deletion_protection"}}"
 }
 
 resource "google_bigtable_app_profile" "ap" {
   instance       = google_bigtable_instance.instance.name
-  app_profile_id = "<%= ctx[:vars]['app_profile_name'] %>"
+  app_profile_id = "{{index $.Vars "app_profile_name"}}"
 
   // Requests will be routed to any of the 3 clusters.
   multi_cluster_routing_use_any = true

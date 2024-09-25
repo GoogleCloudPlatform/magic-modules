@@ -1,5 +1,5 @@
-resource "google_binary_authorization_attestor" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]["attestor_name"] %>"
+resource "google_binary_authorization_attestor" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "attestor_name"}}"
   attestation_authority_note {
     note_reference = google_container_analysis_note.note.name
     public_keys {
@@ -17,7 +17,7 @@ data "google_kms_crypto_key_version" "version" {
 }
 
 resource "google_container_analysis_note" "note" {
-  name = "<%= ctx[:vars]["note_name"] %>"
+  name = "{{index $.Vars "note_name"}}"
   attestation_authority {
     hint {
       human_readable_name = "Attestor Note"
@@ -26,7 +26,7 @@ resource "google_container_analysis_note" "note" {
 }
 
 resource "google_kms_crypto_key" "crypto-key" {
-  name     = "<%= ctx[:vars]["key_name"] %>"
+  name     = "{{index $.Vars "key_name"}}"
   key_ring = google_kms_key_ring.keyring.id
   purpose  = "ASYMMETRIC_SIGN"
 
@@ -40,6 +40,6 @@ resource "google_kms_crypto_key" "crypto-key" {
 }
 
 resource "google_kms_key_ring" "keyring" {
-  name     = "<%= ctx[:vars]["keyring_name"] %>"
+  name     = "{{index $.Vars "keyring_name"}}"
   location = "global"
 }

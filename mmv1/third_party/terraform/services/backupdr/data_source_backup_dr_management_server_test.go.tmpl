@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package backupdr_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
@@ -49,7 +48,7 @@ func testAccCheckBackupDRManagementServerDestroyProducer(t *testing.T) func(s *t
 
 			config := acctest.GoogleProviderConfig(t)
 
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{BackupDRBasePath}}projects/{{project}}/locations/{{location}}/managementServers/{{name}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}BackupDRBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/managementServers/{{"{{"}}name{{"}}"}}")
 			if err != nil {
 				return err
 			}
@@ -99,4 +98,4 @@ data "google_backup_dr_management_server" "foo" {
 }
 `, context)
 }
-<% end -%>
+{{- end }}

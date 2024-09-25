@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package compute_test
 
 import (
@@ -157,7 +156,7 @@ func TestAccComputeHealthCheck_tcpAndSsl_shouldFail(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeHealthCheck_logConfigDisabled(t *testing.T) {
 	t.Parallel()
 
@@ -180,7 +179,7 @@ func TestAccComputeHealthCheck_logConfigDisabled(t *testing.T) {
 	})
 }
 
-<% end -%>
+{{ end }}
 
 func testAccComputeHealthCheck_tcp(hckName string) string {
 	return fmt.Sprintf(`
@@ -363,7 +362,7 @@ resource "google_compute_health_check" "foobar" {
 `, hckName)
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeHealthCheck_logConfigDisabled(hckName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_health_check" "foobar" {
@@ -382,7 +381,7 @@ resource "google_compute_health_check" "foobar" {
 }
 `, hckName)
 }
-<% end -%>
+{{- end }}
 
 
 func TestAccComputeHealthCheck_srcRegions_update(t *testing.T) {

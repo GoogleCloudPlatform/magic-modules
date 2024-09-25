@@ -1,6 +1,6 @@
-resource "google_vertex_ai_feature_online_store" "<%= ctx[:primary_resource_id] %>" {
+resource "google_vertex_ai_feature_online_store" "{{$.PrimaryResourceId}}" {
   provider = google-beta
-  name     = "<%= ctx[:vars]['name'] %>"
+  name     = "{{index $.Vars "name"}}"
   labels = {
     foo = "bar"
   }

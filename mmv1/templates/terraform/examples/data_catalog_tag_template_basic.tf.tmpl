@@ -1,5 +1,5 @@
-resource "google_data_catalog_tag_template" "<%= ctx[:primary_resource_id] %>" {
-  tag_template_id = "<%= ctx[:vars]['tag_template_id'] %>"
+resource "google_data_catalog_tag_template" "{{$.PrimaryResourceId}}" {
+  tag_template_id = "{{index $.Vars "tag_template_id"}}"
   region = "us-central1"
   display_name = "Demo Tag Template"
 
@@ -38,5 +38,5 @@ resource "google_data_catalog_tag_template" "<%= ctx[:primary_resource_id] %>" {
     }
   }
 
-  force_delete = "<%= ctx[:vars]['force_delete'] %>"
+  force_delete = "{{index $.Vars "force_delete"}}"
 }

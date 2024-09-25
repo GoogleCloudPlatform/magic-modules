@@ -1,17 +1,17 @@
 resource "google_storage_bucket" "test" {
-  name                        = "<%= ctx[:vars]['job_id'] %>_bucket"
+  name                        = "{{index $.Vars "job_id"}}_bucket"
   location                    = "US"
   uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_object" "test" {
-  name   =  "<%= ctx[:vars]['job_id'] %>_bucket_object"
+  name   =  "{{index $.Vars "job_id"}}_bucket_object"
   source = "./test-fixtures/test.parquet.gzip"
   bucket = google_storage_bucket.test.name
 }
 
 resource "google_bigquery_dataset" "test" {
-  dataset_id                  = "<%= ctx[:vars]['job_id'] %>_dataset"
+  dataset_id                  = "{{index $.Vars "job_id"}}_dataset"
   friendly_name               = "test"
   description                 = "This is a test description"
   location                    = "US"
@@ -19,12 +19,12 @@ resource "google_bigquery_dataset" "test" {
 
 resource "google_bigquery_table" "test" {
   deletion_protection = false
-  table_id            = "<%= ctx[:vars]['job_id'] %>_table"
+  table_id            = "{{index $.Vars "job_id"}}_table"
   dataset_id          = google_bigquery_dataset.test.dataset_id
 }
 
-resource "google_bigquery_job" "<%= ctx[:primary_resource_id] %>" {
-  job_id = "<%= ctx[:vars]['job_id'] %>"
+resource "google_bigquery_job" "{{$.PrimaryResourceId}}" {
+  job_id = "{{index $.Vars "job_id"}}"
 
   labels = {
     "my_job" ="load"

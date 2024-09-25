@@ -1,4 +1,4 @@
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 // security_policy isn't set by Create
 if v, ok := d.GetOkExists("security_policy"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, securityPolicyProp)) {
   obj := make(map[string]interface{})
@@ -8,7 +8,7 @@ if v, ok := d.GetOkExists("security_policy"); !tpgresource.IsEmptyValue(reflect.
   }
   obj["security_policy"] = securityPolicyProp
 
-  url, err := tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/zones/{{zone}}/targetInstances/{{name}}/setSecurityPolicy")
+  url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/targetInstances/{{"{{"}}name{{"}}"}}/setSecurityPolicy")
   if err != nil {
     return err
   }
@@ -31,4 +31,4 @@ if v, ok := d.GetOkExists("security_policy"); !tpgresource.IsEmptyValue(reflect.
     return err
   }
 }
-<% end -%>
+{{- end }}

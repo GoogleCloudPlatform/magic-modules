@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package fwtransport
 
 import (
@@ -6,9 +5,9 @@ import (
 	"strings"
 
 	"google.golang.org/api/dns/v1"
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 	firebase "google.golang.org/api/firebase/v1beta1"
-<% end -%>
+{{- end }}
 	"google.golang.org/api/option"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -38,7 +37,7 @@ func (p *FrameworkProviderConfig) NewDnsClient(userAgent string, diags *diag.Dia
 	return clientDns
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func (p *FrameworkProviderConfig) NewFirebaseClient(userAgent string, diags *diag.Diagnostics) *firebase.Service {
 	firebaseClientBasePath := transport_tpg.RemoveBasePathVersion(p.FirebaseBasePath)
 	firebaseClientBasePath = strings.ReplaceAll(firebaseClientBasePath, "/firebase/", "")
@@ -53,4 +52,4 @@ func (p *FrameworkProviderConfig) NewFirebaseClient(userAgent string, diags *dia
 
 	return clientFirebase
 }
-<% end -%>
+{{- end }}

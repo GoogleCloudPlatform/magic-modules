@@ -1,17 +1,17 @@
 resource "google_compute_network" "default" {
-  name                    = "<%= ctx[:vars]['network_name'] %>"
+  name                    = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  name          = "<%= ctx[:vars]['subnetwork_name'] %>"
+  name          = "{{index $.Vars "subnetwork_name"}}"
   ip_cidr_range = "10.0.0.0/16"
   region        = "us-central1"
   network       = google_compute_network.default.id
 }
 
 resource "google_compute_region_network_endpoint_group" default {
-  name                  = "<%= ctx[:vars]['neg_name'] %>"
+  name                  = "{{index $.Vars "neg_name"}}"
   region                = "us-central1"
   network               = google_compute_network.default.id
   subnetwork            = google_compute_subnetwork.default.id
@@ -19,7 +19,7 @@ resource "google_compute_region_network_endpoint_group" default {
   network_endpoint_type = "GCE_VM_IP_PORTMAP"
 }
 
-resource "google_compute_region_network_endpoint" "<%= ctx[:primary_resource_id] %>" {
+resource "google_compute_region_network_endpoint" "{{$.PrimaryResourceId}}" {
   region_network_endpoint_group = google_compute_region_network_endpoint_group.default.name
   region = "us-central1"
   instance   = google_compute_instance.default.self_link
@@ -34,7 +34,7 @@ data "google_compute_image" "my_image" {
 }
 
 resource "google_compute_instance" "default" {
-  name         = "<%= ctx[:vars]['instance_name'] %>"
+  name         = "{{index $.Vars "instance_name"}}"
   machine_type = "e2-medium"
   zone = "us-central1-a"
 

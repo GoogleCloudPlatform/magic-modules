@@ -8,7 +8,7 @@
 	obj = make(map[string]interface{})
 	obj["status"] = "FINALIZED"
 
-	url, err = tpgresource.ReplaceVars(d, config, "{{FirebaseHostingBasePath}}{{name}}")
+	url, err = tpgresource.ReplaceVars(d, config, "{{"{{"}}FirebaseHostingBasePath{{"}}"}}{{"{{"}}name{{"}}"}}")
 	if err != nil {
 		return err
 	}

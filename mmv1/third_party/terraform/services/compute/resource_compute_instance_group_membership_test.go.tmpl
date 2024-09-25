@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package compute_test
 import (
   "fmt"
@@ -189,11 +188,11 @@ func testAccCheckComputeInstanceGroupMembershipDestroyed(t *testing.T, instanceG
 func testAccComputeInstanceGroupMembershipListMembership(t *testing.T, instanceGroupId string) (map[string]struct{}, error) {
   config := acctest.GoogleProviderConfig(t)
 
-  <% if version == 'ga' -%>
+  {{ if eq $.TargetVersionName `ga` }}
   url := fmt.Sprintf("https://www.googleapis.com/compute/v1/%s/listInstances", instanceGroupId)
-  <% else -%>
+  {{- else }}
   url := fmt.Sprintf("https://www.googleapis.com/compute/beta/%s/listInstances", instanceGroupId)
-  <% end -%>
+  {{- end }}
   res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
     Config: config,
     Method: "POST",

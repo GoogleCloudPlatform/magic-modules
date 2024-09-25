@@ -1,19 +1,19 @@
-resource "google_storage_bucket" "<%= ctx[:primary_resource_id] %>" {
-  name  = "<%= ctx[:vars]['bucket_name'] %>"
+resource "google_storage_bucket" "{{$.PrimaryResourceId}}" {
+  name  = "{{index $.Vars "bucket_name"}}"
   location = "US"
   uniform_bucket_level_access = true
 }
 
-resource "google_pubsub_topic" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]['topic_name'] %>"
+resource "google_pubsub_topic" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "topic_name"}}"
 }
 
-resource "google_pubsub_subscription" "<%= ctx[:primary_resource_id] %>" {
-  name  = "<%= ctx[:vars]['subscription_name'] %>"
-  topic = google_pubsub_topic.<%= ctx[:primary_resource_id] %>.id
+resource "google_pubsub_subscription" "{{$.PrimaryResourceId}}" {
+  name  = "{{index $.Vars "subscription_name"}}"
+  topic = google_pubsub_topic.{{$.PrimaryResourceId}}.id
 
   cloud_storage_config {
-    bucket = google_storage_bucket.<%= ctx[:primary_resource_id] %>.name
+    bucket = google_storage_bucket.{{$.PrimaryResourceId}}.name
 
     filename_prefix = "pre-"
     filename_suffix = "-%{random_suffix}"
@@ -24,7 +24,7 @@ resource "google_pubsub_subscription" "<%= ctx[:primary_resource_id] %>" {
     max_messages = 1000
   }
   depends_on = [
-    google_storage_bucket.<%= ctx[:primary_resource_id] %>,
+    google_storage_bucket.{{$.PrimaryResourceId}},
     google_storage_bucket_iam_member.admin,
   ]
 }
@@ -33,7 +33,7 @@ data "google_project" "project" {
 }
 
 resource "google_storage_bucket_iam_member" "admin" {
-  bucket = google_storage_bucket.<%= ctx[:primary_resource_id] %>.name
+  bucket = google_storage_bucket.{{$.PrimaryResourceId}}.name
   role   = "roles/storage.admin"
   member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
 }

@@ -1,7 +1,6 @@
-<% autogen_exception -%>
 package runtimeconfig
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 import (
 	"fmt"
 	"regexp"
@@ -181,7 +180,7 @@ func resourceRuntimeconfigConfigImport(d *schema.ResourceData, meta interface{})
 	}
 
 	// Replace import id for the resource id
-	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/configs/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}"}}/configs/{{"{{"}}name{{"}}"}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -205,4 +204,4 @@ func resourceRuntimeconfigParseFullName(fullName string) (project, name string, 
 	}
 	return matches[1], matches[2], nil
 }
-<% end %>
+{{- end }}

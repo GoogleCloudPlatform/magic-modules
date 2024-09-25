@@ -31,14 +31,14 @@ if err != nil {
   return err
 }
 
-lockName, err := tpgresource.ReplaceVars(d, config, "router/{{region}}/{{router}}")
+lockName, err := tpgresource.ReplaceVars(d, config, "router/{{"{{"}}region{{"}}"}}/{{"{{"}}router{{"}}"}}")
 if err != nil {
   return err
 }
 transport_tpg.MutexStore.Lock(lockName)
 defer transport_tpg.MutexStore.Unlock(lockName)
 
-url, err := tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/routers/{{router}}")
+url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/routers/{{"{{"}}router{{"}}"}}")
 if err != nil {
   return err
 }
@@ -72,7 +72,7 @@ if err != nil {
 }
 
 // Store the ID now
-id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/regions/{{region}}/routers/{{router}}/{{router_nat}}")
+id, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/routers/{{"{{"}}router{{"}}"}}/{{"{{"}}router_nat{{"}}"}}")
 if err != nil {
   return fmt.Errorf("Error constructing id: %s", err)
 }

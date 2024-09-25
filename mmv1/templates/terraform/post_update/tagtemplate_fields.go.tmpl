@@ -80,7 +80,7 @@ for name, change := range vals {
 
     // if we have old and new values, but are not equal, update with the new state
     if !reflect.DeepEqual(changeOldProp, changeNewProp) {
-        url1, err := tpgresource.ReplaceVars(d, config, "{{DataCatalogBasePath}}{{name}}/fields/"+name)
+        url1, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}DataCatalogBasePath{{"}}"}}{{"{{"}}name{{"}}"}}/fields/"+name)
         if err != nil {
             return err
         }

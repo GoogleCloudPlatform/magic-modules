@@ -1,5 +1,5 @@
-resource "google_notebooks_environment" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]["environment_name"] %>"
+resource "google_notebooks_environment" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "environment_name"}}"
   location = "us-west1-a"  
   container_image {
     repository = "gcr.io/deeplearning-platform-release/base-cpu"

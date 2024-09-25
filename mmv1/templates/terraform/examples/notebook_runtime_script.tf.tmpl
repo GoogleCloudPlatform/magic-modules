@@ -1,5 +1,5 @@
-resource "google_notebooks_runtime" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]["runtime_name"] %>"
+resource "google_notebooks_runtime" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "runtime_name"}}"
   location = "us-central1"
   access_config {
     access_type = "SINGLE_USER"

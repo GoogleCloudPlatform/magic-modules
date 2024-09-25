@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package resourcemanager_test
 
 import (
@@ -38,21 +37,21 @@ func TestAccProjectService_basic(t *testing.T) {
 				ResourceName:            "google_project_service.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-			  <% unless version == "ga" -%>
+			  {{- if ne $.TargetVersionName "ga" }}
 			  ImportStateVerifyIgnore: []string{"disable_on_destroy", "check_if_service_has_usage_on_destroy"},
-			  <% else -%>
+			  {{- else }}
 			  ImportStateVerifyIgnore: []string{"disable_on_destroy"},
-			  <% end -%>
+			  {{- end }}
 			},
 			{
 				ResourceName:            "google_project_service.test2",
 				ImportState:             true,
 				ImportStateVerify:       true,
-			  <% unless version == "ga" -%>
+			  {{- if ne $.TargetVersionName "ga" }}
 			  ImportStateVerifyIgnore: []string{"disable_on_destroy", "project", "check_if_service_has_usage_on_destroy"},
-			  <% else -%>
+			  {{- else }}
 			  ImportStateVerifyIgnore: []string{"disable_on_destroy", "project"},
-			  <% end -%>
+			  {{- end }}
 			},
 			// Use a separate TestStep rather than a CheckDestroy because we need the project to still exist.
 			{
@@ -100,11 +99,11 @@ func TestAccProjectService_disableDependentServices(t *testing.T) {
 				ResourceName:            "google_project_service.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-			  <% unless version == "ga" -%>
+			  {{- if ne $.TargetVersionName "ga" }}
 			  ImportStateVerifyIgnore: []string{"disable_on_destroy", "check_if_service_has_usage_on_destroy"},
-			  <% else -%>
+			  {{- else }}
 			  ImportStateVerifyIgnore: []string{"disable_on_destroy"},
-			  <% end -%>
+			  {{- end }}
 			},
 			{
 				Config:      testAccProjectService_dependencyRemoved(services, pid, org, billingId),
@@ -117,11 +116,11 @@ func TestAccProjectService_disableDependentServices(t *testing.T) {
 				ResourceName:            "google_project_service.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-			  <% unless version == "ga" -%>
+			  {{- if ne $.TargetVersionName "ga" }}
 			  ImportStateVerifyIgnore: []string{"disable_on_destroy", "check_if_service_has_usage_on_destroy"},
-			  <% else -%>
+			  {{- else }}
 			  ImportStateVerifyIgnore: []string{"disable_on_destroy"},
-			  <% end -%>
+			  {{- end }}
 			},
 			{
 				Config:             testAccProjectService_dependencyRemoved(services, pid, org, billingId),
@@ -181,11 +180,11 @@ func TestAccProjectService_renamedService(t *testing.T) {
 				ResourceName:            "google_project_service.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				<% unless version == "ga" -%>
+				{{- if ne $.TargetVersionName "ga" }}
 				ImportStateVerifyIgnore: []string{"disable_on_destroy", "check_if_service_has_usage_on_destroy", "disable_dependent_services"},
-				<% else -%>
+				{{- else }}
 				ImportStateVerifyIgnore: []string{"disable_on_destroy", "disable_dependent_services"},
-				<% end -%>
+				{{- end }}
 			},
 		},
 	})
@@ -218,7 +217,7 @@ func testAccCheckProjectService(t *testing.T, services []string, pid string, exp
 	}
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccProjectService_checkUsageOfServices(t *testing.T) {
 	t.Parallel()
 
@@ -237,11 +236,11 @@ func TestAccProjectService_checkUsageOfServices(t *testing.T) {
 				ResourceName:            "google_project_service.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				<% unless version == "ga" -%>
+				{{- if ne $.TargetVersionName "ga" }}
 				ImportStateVerifyIgnore: []string{"disable_on_destroy", "check_if_service_has_usage_on_destroy", "disable_dependent_services"},
-				<% else -%>
+				{{- else }}
 				ImportStateVerifyIgnore: []string{"disable_on_destroy", "disable_dependent_services"},
-				<% end -%>
+				{{- end }}
 			},
 			{
 				Config: testAccProjectService_checkUsage(services, pid, org, "true"),
@@ -249,7 +248,7 @@ func TestAccProjectService_checkUsageOfServices(t *testing.T) {
 		},
 	})
 }
-<% end -%>
+{{- end }}
 
 func testAccProjectService_basic(services []string, pid, org string) string {
 	return fmt.Sprintf(`
@@ -384,7 +383,7 @@ resource "google_project_service" "test" {
 `, pid, pid, org, service)
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccProjectService_checkUsage(service string, pid, org string, checkIfServiceHasUsage string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
@@ -404,4 +403,4 @@ resource "google_project_service" "test" {
 }
 `, pid, pid, org, service, checkIfServiceHasUsage)
 }
-<% end -%>
+{{- end }}

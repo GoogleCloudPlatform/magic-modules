@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package cloudfunctions_test
 
 import (
@@ -270,7 +269,7 @@ func TestAccCloudFunctionsFunction_bucket(t *testing.T) {
 	})
 }
 
-<% unless version == "ga" -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccCloudFunctionsFunction_dockerRepository(t *testing.T) {
 	t.Parallel()
 	funcResourceName := "google_cloudfunctions_function.function"
@@ -297,9 +296,9 @@ func TestAccCloudFunctionsFunction_dockerRepository(t *testing.T) {
 		},
 	})
 }
-<% end -%>
+{{- end }}
 
-<% unless version == "ga" -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccCloudFunctionsFunction_cmek(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
@@ -329,7 +328,7 @@ func TestAccCloudFunctionsFunction_cmek(t *testing.T) {
 		},
 	})
 }
-<% end -%>
+{{- end }}
 
 func TestAccCloudFunctionsFunction_firestore(t *testing.T) {
 	// Currently failing
@@ -1078,7 +1077,7 @@ resource "google_cloudfunctions_function" "function" {
 `, projectNumber, networkName, vpcConnectorName, vpcConnectorName, vpcIp, bucketName, zipFilePath, functionName, vpcConnectorName)
 }
 
-<% unless version == "ga" -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccCloudFunctionsFunction_docker_repository(arRepoName, functionName, bucketName, zipFilePath string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {
@@ -1125,9 +1124,9 @@ resource "google_cloudfunctions_function" "function" {
 }
 `, arRepoName, bucketName, zipFilePath, functionName)
 }
-<% end -%>
+{{- end }}
 
-<% unless version == "ga" -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccCloudFunctionsFunction_cmek(kmsKey, arRepoName, functionName, bucketName, zipFilePath string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {
@@ -1209,7 +1208,7 @@ resource "google_cloudfunctions_function" "function" {
 }
 `, kmsKey, kmsKey, kmsKey, arRepoName, kmsKey, bucketName, zipFilePath, functionName, kmsKey)
 }
-<% end -%>
+{{- end }}
 
 func testAccCloudFunctionsFunction_secretEnvVar(secretName, versionName, bucketName, functionName, versionNumber, zipFilePath, accountId string) string {
 	return fmt.Sprintf(`

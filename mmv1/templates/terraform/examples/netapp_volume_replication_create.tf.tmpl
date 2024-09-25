@@ -1,10 +1,10 @@
 
 data "google_compute_network" "default" {
-  name = "<%= ctx[:vars]['network_name'] %>"
+  name = "{{index $.Vars "network_name"}}"
 }
 
 resource "google_netapp_storage_pool" "source_pool" {
-  name          = "<%= ctx[:vars]['source_pool_name'] %>"
+  name          = "{{index $.Vars "source_pool_name"}}"
   location      = "us-central1"
   service_level = "PREMIUM"
   capacity_gib  = 2048
@@ -12,7 +12,7 @@ resource "google_netapp_storage_pool" "source_pool" {
 }
 
 resource "google_netapp_storage_pool" "destination_pool" {
-  name          = "<%= ctx[:vars]['destination_pool_name'] %>"
+  name          = "{{index $.Vars "destination_pool_name"}}"
   location      = "us-west2"
   service_level = "PREMIUM"
   capacity_gib  = 2048
@@ -21,9 +21,9 @@ resource "google_netapp_storage_pool" "destination_pool" {
 
 resource "google_netapp_volume" "source_volume" {
   location     = google_netapp_storage_pool.source_pool.location
-  name         = "<%= ctx[:vars]['volume_name'] %>"
+  name         = "{{index $.Vars "volume_name"}}"
   capacity_gib = 100
-  share_name   = "<%= ctx[:vars]['volume_name'] %>"
+  share_name   = "{{index $.Vars "volume_name"}}"
   storage_pool = google_netapp_storage_pool.source_pool.name
   protocols = [
     "NFSV3"
@@ -31,19 +31,19 @@ resource "google_netapp_volume" "source_volume" {
   deletion_policy = "FORCE"
 }
 
-resource "google_netapp_volume_replication" "<%= ctx[:primary_resource_id] %>" {
+resource "google_netapp_volume_replication" "{{$.PrimaryResourceId}}" {
   depends_on           = [google_netapp_volume.source_volume]
   location             = google_netapp_volume.source_volume.location
   volume_name          = google_netapp_volume.source_volume.name
-  name                 = "<%= ctx[:vars]['replication_name'] %>"
+  name                 = "{{index $.Vars "replication_name"}}"
   replication_schedule = "EVERY_10_MINUTES"
   description          = "This is a replication resource"
   destination_volume_parameters {
     storage_pool = google_netapp_storage_pool.destination_pool.id
-    volume_id    = "<%= ctx[:vars]['destination_volume'] %>"
+    volume_id    = "{{index $.Vars "destination_volume"}}"
     # Keeping the share_name of source and destination the same
     # simplifies implementing client failover concepts
-    share_name  = "<%= ctx[:vars]['volume_name'] %>"
+    share_name  = "{{index $.Vars "volume_name"}}"
     description = "This is a replicated volume"
   }
   # WARNING: Setting delete_destination_volume to true, will delete the

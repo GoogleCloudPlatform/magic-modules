@@ -1,11 +1,11 @@
 resource "google_compute_region_target_tcp_proxy" "default" {
-  name            = "<%= ctx[:vars]['region_target_tcp_proxy_name'] %>"
+  name            = "{{index $.Vars "region_target_tcp_proxy_name"}}"
   region          = "europe-west4"
   backend_service = google_compute_region_backend_service.default.id
 }
 
 resource "google_compute_region_backend_service" "default" {
-  name        = "<%= ctx[:vars]['region_backend_service_name'] %>"
+  name        = "{{index $.Vars "region_backend_service_name"}}"
   protocol    = "TCP"
   timeout_sec = 10
   region      = "europe-west4"
@@ -15,7 +15,7 @@ resource "google_compute_region_backend_service" "default" {
 }
 
 resource "google_compute_region_health_check" "default" {
-  name               = "<%= ctx[:vars]['health_check_name'] %>"
+  name               = "{{index $.Vars "health_check_name"}}"
   region             = "europe-west4"
   timeout_sec        = 1
   check_interval_sec = 1

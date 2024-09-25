@@ -1,5 +1,5 @@
-resource "google_redis_instance" "<%= ctx[:primary_resource_id] %>" {
-  name           = "<%= ctx[:vars]['instance_name'] %>"
+resource "google_redis_instance" "{{$.PrimaryResourceId}}" {
+  name           = "{{index $.Vars "instance_name"}}"
   tier           = "STANDARD_HA"
   memory_size_gb = 1
   location_id             = "us-central1-a"
@@ -11,6 +11,6 @@ resource "google_redis_instance" "<%= ctx[:primary_resource_id] %>" {
   }
 
   lifecycle {
-    prevent_destroy = <%= ctx[:vars]['prevent_destroy'] %>
+    prevent_destroy = {{index $.Vars "prevent_destroy"}}
   }
 }

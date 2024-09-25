@@ -6,10 +6,10 @@ data "google_tpu_v2_accelerator_types" "available" {
   provider = google-beta
 }
 
-resource "google_tpu_v2_vm" "<%= ctx[:primary_resource_id] %>" {
+resource "google_tpu_v2_vm" "{{$.PrimaryResourceId}}" {
   provider = google-beta
 
-  name = "<%= ctx[:vars]["vm_name"] %>"
+  name = "{{index $.Vars "vm_name"}}"
   zone = "us-central1-c"
   description = "Text description of the TPU."
 
@@ -65,7 +65,7 @@ resource "google_tpu_v2_vm" "<%= ctx[:primary_resource_id] %>" {
 resource "google_compute_subnetwork" "subnet" {
   provider = google-beta
 
-  name          = "<%= ctx[:vars]['subnet_name'] %>"
+  name          = "{{index $.Vars "subnet_name"}}"
   ip_cidr_range = "10.0.0.0/16"
   region        = "us-central1"
   network       = google_compute_network.network.id
@@ -74,21 +74,21 @@ resource "google_compute_subnetwork" "subnet" {
 resource "google_compute_network" "network" {
   provider = google-beta
 
-  name                    = "<%= ctx[:vars]['network_name'] %>"
+  name                    = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = false
 }
 
 resource "google_service_account" "sa" {
   provider = google-beta
 
-  account_id   = "<%= ctx[:vars]['sa_id'] %>"
+  account_id   = "{{index $.Vars "sa_id"}}"
   display_name = "Test TPU VM"
 }
 
 resource "google_compute_disk" "disk" {
   provider = google-beta
 
-  name  = "<%= ctx[:vars]['disk_name'] %>"
+  name  = "{{index $.Vars "disk_name"}}"
   image = "debian-cloud/debian-11"
   size  = 10
   type  = "pd-ssd"

@@ -1,10 +1,10 @@
 resource "google_firebase_apple_app" "default" {
   provider = google-beta
 
-  project      = "<%= ctx[:test_env_vars]['project_id'] %>"
+  project      = "{{index $.TestEnvVars "project_id"}}"
   display_name = "Apple app"
-  bundle_id    = "<%= ctx[:vars]['bundle_id'] %>"
-  team_id      = "<%= ctx[:vars]['team_id'] %>"
+  bundle_id    = "{{index $.Vars "bundle_id"}}"
+  team_id      = "{{index $.Vars "team_id"}}"
 }
 
 # It takes a while for App Check to recognize the new app
@@ -17,11 +17,11 @@ resource "time_sleep" "wait_30s" {
 resource "google_firebase_app_check_device_check_config" "default" {
   provider = google-beta
 
-  project     = "<%= ctx[:test_env_vars]['project_id'] %>"
+  project     = "{{index $.TestEnvVars "project_id"}}"
   app_id      = google_firebase_apple_app.default.app_id
-  token_ttl   = "<%= ctx[:vars]['token_ttl'] %>"
-  key_id      = "<%= ctx[:vars]['key_id'] %>"
-  private_key = file("<%= ctx[:vars]['private_key_path'] %>")
+  token_ttl   = "{{index $.Vars "token_ttl"}}"
+  key_id      = "{{index $.Vars "key_id"}}"
+  private_key = file("{{index $.Vars "private_key_path"}}")
 
   depends_on = [time_sleep.wait_30s]
 

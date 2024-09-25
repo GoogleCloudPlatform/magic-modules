@@ -1,5 +1,5 @@
-resource "google_edgecontainer_cluster" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]['edgecontainer_cluster_name'] %>"
+resource "google_edgecontainer_cluster" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "edgecontainer_cluster_name"}}"
   location = "us-central1"
 
   authorization {

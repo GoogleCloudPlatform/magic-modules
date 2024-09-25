@@ -1,13 +1,13 @@
 resource "google_iam_workforce_pool" "pool" {
-  workforce_pool_id = "<%= ctx[:vars]["workforce_pool_id"] %>"
-  parent            = "organizations/<%= ctx[:test_env_vars]["org_id"] %>"
+  workforce_pool_id = "{{index $.Vars "workforce_pool_id"}}"
+  parent            = "organizations/{{index $.TestEnvVars "org_id"}}"
   location          = "global"
 }
 
-resource "google_iam_workforce_pool_provider" "<%= ctx[:primary_resource_id] %>" {
+resource "google_iam_workforce_pool_provider" "{{$.PrimaryResourceId}}" {
   workforce_pool_id  = google_iam_workforce_pool.pool.workforce_pool_id
   location           = google_iam_workforce_pool.pool.location
-  provider_id        = "<%= ctx[:vars]["provider_id"] %>"
+  provider_id        = "{{index $.Vars "provider_id"}}"
   attribute_mapping  = {
     "google.subject" = "assertion.sub"
   }

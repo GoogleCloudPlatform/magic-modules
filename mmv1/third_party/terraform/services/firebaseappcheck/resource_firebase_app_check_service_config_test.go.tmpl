@@ -1,8 +1,7 @@
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
-<% autogen_exception -%>
 package firebaseappcheck_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
@@ -136,4 +135,4 @@ resource "google_firebase_app_check_service_config" "default" {
 }
 `, context)
 }
-<% end -%>
+{{- end }}

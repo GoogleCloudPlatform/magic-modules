@@ -1,5 +1,5 @@
-resource "google_netapp_active_directory" "<%= ctx[:primary_resource_id] %>" {
-    name = "<%= ctx[:vars]['active_directory_full_name'] %>"
+resource "google_netapp_active_directory" "{{$.PrimaryResourceId}}" {
+    name = "{{index $.Vars "active_directory_full_name"}}"
     location = "us-central1"
     domain = "ad.internal"
     dns = "172.30.64.3"

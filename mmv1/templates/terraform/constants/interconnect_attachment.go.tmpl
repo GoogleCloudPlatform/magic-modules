@@ -1,4 +1,4 @@
-<% unless compiler == "terraformgoogleconversion-codegen" -%>
+{{- if ne $.Compiler "terraformgoogleconversion-codegen" }}
 // waitForAttachmentToBeProvisioned waits for an attachment to leave the
 // "UNPROVISIONED" state, to indicate that it's either ready or awaiting partner
 // activity.
@@ -17,4 +17,4 @@ func waitForAttachmentToBeProvisioned(d *schema.ResourceData, config *transport_
 		return nil
 	})
 }
-<% end -%>
+{{- end }}

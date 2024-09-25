@@ -1,4 +1,4 @@
-resource "google_document_ai_warehouse_location" "<%= ctx[:primary_resource_id] %>" {
+resource "google_document_ai_warehouse_location" "{{$.PrimaryResourceId}}" {
     location = "us"
     project_number = data.google_project.project.number
     access_control_mode = "ACL_MODE_DOCUMENT_LEVEL_ACCESS_CONTROL_GCI"

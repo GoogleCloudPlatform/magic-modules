@@ -1,8 +1,8 @@
 
-resource "google_compute_reservation" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]['gce_reservation_local'] %>"
+resource "google_compute_reservation" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "gce_reservation_local"}}"
   zone = "us-central1-c"
-  project = "<%= ctx[:test_env_vars]['project'] %>"
+  project = "{{index $.TestEnvVars "project"}}"
 
   share_settings {
     share_type = "LOCAL"

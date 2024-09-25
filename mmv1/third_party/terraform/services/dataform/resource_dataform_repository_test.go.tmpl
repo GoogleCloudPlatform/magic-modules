@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package dataform_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
@@ -126,4 +125,4 @@ resource "google_dataform_repository" "dataform_repository" {
 }
 `, context)
 }
-<% end -%>
+{{- end }}

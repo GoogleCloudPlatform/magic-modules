@@ -1,5 +1,5 @@
-resource "google_monitoring_uptime_check_config" "<%= ctx[:primary_resource_id] %>" {
-  display_name = "<%= ctx[:vars]["display_name"] %>"
+resource "google_monitoring_uptime_check_config" "{{$.PrimaryResourceId}}" {
+  display_name = "{{index $.Vars "display_name"}}"
   timeout      = "60s"
   user_labels  = {
     example-key = "example-value"
@@ -20,7 +20,7 @@ resource "google_monitoring_uptime_check_config" "<%= ctx[:primary_resource_id] 
   monitored_resource {
     type = "uptime_url"
     labels = {
-      project_id = "<%= ctx[:test_env_vars]["project_id"] %>"
+      project_id = "{{index $.TestEnvVars "project_id"}}"
       host       = "192.168.1.1"
     }
   }

@@ -10,7 +10,7 @@ if len(stringParts) != 4 {
 	return nil, fmt.Errorf(
 			"Saw %s when the name is expected to have shape %s",
 			d.Get("name"),
-			"organizations/{{organization}}/sources/{{source}}",
+			"organizations/{{"{{"}}organization{{"}}"}}/sources/{{"{{"}}source{{"}}"}}",
 		)
 }
 

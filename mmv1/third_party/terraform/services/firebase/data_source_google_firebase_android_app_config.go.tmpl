@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package firebase
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"context"
@@ -151,4 +150,4 @@ func (d *GoogleFirebaseAndroidAppConfigDataSource) Read(ctx context.Context, req
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
-<% end -%>
+{{- end }}

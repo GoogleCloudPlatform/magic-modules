@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package networkservices_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -58,4 +57,4 @@ func testAccNetworkServicesServiceBinding_create(serviceNamespace string, servic
 `, serviceNamespace, serviceName, serviceBindingName)
 }
 
-<% end -%>
+{{ end }}

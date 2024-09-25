@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package dns_test
 
 import (
@@ -200,7 +199,7 @@ func TestAccDNSManagedZone_cloudLoggingConfigUpdate(t *testing.T) {
 	})
 }
 
-<% unless version.nil? || version == 'ga' -%>
+{{ if not (or (eq $.TargetVersionName ``) (eq $.TargetVersionName `ga`)) }}
 func TestAccDNSManagedZone_reverseLookup(t *testing.T) {
 	t.Parallel()
 
@@ -222,7 +221,7 @@ func TestAccDNSManagedZone_reverseLookup(t *testing.T) {
 		},
 	})
 }
-<% end -%>
+{{- end }}
 
 func TestAccDNSManagedZone_forceDestroy(t *testing.T) {
 	//t.Parallel()
@@ -532,7 +531,7 @@ resource "google_dns_managed_zone" "foobar" {
 `, suffix, suffix, enableCloudLogging)
 }
 
-<% unless version.nil? || version == 'ga' -%>
+{{ if not (or (eq $.TargetVersionName ``) (eq $.TargetVersionName `ga`)) }}
 func testAccDnsManagedZone_reverseLookup(suffix string) string {
 	return fmt.Sprintf(`
 resource "google_dns_managed_zone" "reverse" {
@@ -550,7 +549,7 @@ resource "google_compute_network" "network-1" {
 }
 `, suffix, suffix)
 }
-<% end -%>
+{{- end }}
 
 func TestDnsManagedZoneImport_parseImportId(t *testing.T) {
 	zoneRegexes := []string{

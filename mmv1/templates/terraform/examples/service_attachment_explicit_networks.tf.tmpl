@@ -1,5 +1,5 @@
-resource "google_compute_service_attachment" "<%= ctx[:primary_resource_id] %>" {
-  name        = "<%= ctx[:vars]['service_attachment_name'] %>"
+resource "google_compute_service_attachment" "{{$.PrimaryResourceId}}" {
+  name        = "{{index $.Vars "service_attachment_name"}}"
   region      = "us-west2"
   description = "A service attachment configured with Terraform"
 
@@ -16,19 +16,19 @@ resource "google_compute_service_attachment" "<%= ctx[:primary_resource_id] %>" 
 }
 
 resource "google_compute_network" "psc_ilb_consumer_network" {
-  name                    = "<%= ctx[:vars]['consumer_network_name'] %>"
+  name                    = "{{index $.Vars "consumer_network_name"}}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "psc_ilb_consumer_subnetwork" {
-  name          = "<%= ctx[:vars]['consumer_network_name'] %>"
+  name          = "{{index $.Vars "consumer_network_name"}}"
   ip_cidr_range = "10.0.0.0/16"
   region        = "us-west2"
   network       = google_compute_network.psc_ilb_consumer_network.id
 }
 
 resource "google_compute_address" "psc_ilb_consumer_address" {
-  name   = "<%= ctx[:vars]['consumer_address_name'] %>"
+  name   = "{{index $.Vars "consumer_address_name"}}"
   region = "us-west2"
 
   subnetwork   = google_compute_subnetwork.psc_ilb_consumer_subnetwork.id
@@ -36,7 +36,7 @@ resource "google_compute_address" "psc_ilb_consumer_address" {
 }
 
 resource "google_compute_forwarding_rule" "psc_ilb_consumer" {
-  name   = "<%= ctx[:vars]['consumer_forwarding_rule_name'] %>"
+  name   = "{{index $.Vars "consumer_forwarding_rule_name"}}"
   region = "us-west2"
 
   target                = google_compute_service_attachment.psc_ilb_service_attachment.id
@@ -47,7 +47,7 @@ resource "google_compute_forwarding_rule" "psc_ilb_consumer" {
 }
 
 resource "google_compute_forwarding_rule" "psc_ilb_target_service" {
-  name   = "<%= ctx[:vars]['producer_forwarding_rule_name'] %>"
+  name   = "{{index $.Vars "producer_forwarding_rule_name"}}"
   region = "us-west2"
 
   load_balancing_scheme = "INTERNAL"
@@ -58,14 +58,14 @@ resource "google_compute_forwarding_rule" "psc_ilb_target_service" {
 }
 
 resource "google_compute_region_backend_service" "producer_service_backend" {
-  name   = "<%= ctx[:vars]['producer_service_name'] %>"
+  name   = "{{index $.Vars "producer_service_name"}}"
   region = "us-west2"
 
   health_checks = [google_compute_health_check.producer_service_health_check.id]
 }
 
 resource "google_compute_health_check" "producer_service_health_check" {
-  name = "<%= ctx[:vars]['producer_health_check_name'] %>"
+  name = "{{index $.Vars "producer_health_check_name"}}"
 
   check_interval_sec = 1
   timeout_sec        = 1
@@ -75,12 +75,12 @@ resource "google_compute_health_check" "producer_service_health_check" {
 }
 
 resource "google_compute_network" "psc_ilb_network" {
-  name = "<%= ctx[:vars]['network_name'] %>"
+  name = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "psc_ilb_producer_subnetwork" {
-  name   = "<%= ctx[:vars]['producer_subnetwork_name'] %>"
+  name   = "{{index $.Vars "producer_subnetwork_name"}}"
   region = "us-west2"
 
   network       = google_compute_network.psc_ilb_network.id
@@ -88,7 +88,7 @@ resource "google_compute_subnetwork" "psc_ilb_producer_subnetwork" {
 }
 
 resource "google_compute_subnetwork" "psc_ilb_nat" {
-  name   = "<%= ctx[:vars]['nat_subnetwork_name'] %>"
+  name   = "{{index $.Vars "nat_subnetwork_name"}}"
   region = "us-west2"
 
   network       = google_compute_network.psc_ilb_network.id

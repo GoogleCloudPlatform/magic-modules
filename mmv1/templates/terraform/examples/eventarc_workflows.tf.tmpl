@@ -29,7 +29,7 @@ resource "google_project_service" "workflows" {
 # Create a service account for Eventarc trigger and Workflows
 resource "google_service_account" "eventarc_workflows_service_account" {
   provider = google-beta
-  account_id   = "<%= ctx[:vars]['service_account'] %>"
+  account_id   = "{{index $.Vars "service_account"}}"
   display_name = "Eventarc Workflows Service Account"
 }
 
@@ -58,7 +58,7 @@ resource "google_project_iam_member" "project_binding_workflows" {
 
 # Define and deploy a workflow
 resource "google_workflows_workflow" "workflows_example" {
-  name            = "<%= ctx[:vars]['pubsub_workflow_tf'] %>"
+  name            = "{{index $.Vars "pubsub_workflow_tf"}}"
   provider = google-beta
   region          = "us-central1"
   description     = "A sample workflow"
@@ -72,8 +72,8 @@ google_service_account.eventarc_workflows_service_account]
 
 
 # Create an Eventarc trigger routing Pub/Sub events to Workflows
-resource "google_eventarc_trigger" "<%= ctx[:primary_resource_id] %>" {
-  name     = "<%= ctx[:vars]['trigger_pubsub_workflow_tf'] %>"
+resource "google_eventarc_trigger" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.Vars "trigger_pubsub_workflow_tf"}}"
   provider = google-beta
   location = "us-central1"
   matching_criteria {

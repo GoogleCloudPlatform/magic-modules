@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 
 package compute_test
 
@@ -19,14 +18,14 @@ import (
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
-<% if version == "ga" -%>
+{{ if eq $.TargetVersionName `ga` }}
 	"google.golang.org/api/compute/v1"
-<% else -%>
+{{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
-<% end -%>
-<% unless version == 'ga' -%>
+{{- end }}
+{{- if ne $.TargetVersionName "ga" }}
 	"google.golang.org/api/googleapi"
-<% end -%>
+{{- end }}
 )
 
 func TestAccComputeRegionInstanceTemplate_basic(t *testing.T) {
@@ -715,7 +714,7 @@ func TestAccComputeRegionInstanceTemplate_ConfidentialInstanceConfigMain(t *test
 					testAccCheckComputeRegionInstanceTemplateHasConfidentialInstanceConfig(&instanceTemplate2, false, "SEV_SNP"),
 				),
 			},
-			<% unless version == "ga" -%>
+			{{- if ne $.TargetVersionName "ga" }}
 			{
 				Config: testAccComputeRegionInstanceTemplateConfidentialInstanceConfigEnableTdx(acctest.RandString(t, 10), "TDX"),
 				Check: resource.ComposeTestCheckFunc(
@@ -723,7 +722,7 @@ func TestAccComputeRegionInstanceTemplate_ConfidentialInstanceConfigMain(t *test
 					testAccCheckComputeRegionInstanceTemplateHasConfidentialInstanceConfig(&instanceTemplate, false, "TDX"),
 				),
 			},
-			<% end -%>
+			{{- end }}
 		},
 	})
 }
@@ -748,7 +747,7 @@ func TestAccComputeRegionInstanceTemplate_AdvancedMachineFeatures(t *testing.T) 
 	})
 }
 
-<% unless version == "ga" -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeRegionInstanceTemplate_enableDisplay(t *testing.T) {
 	t.Parallel()
 
@@ -769,9 +768,9 @@ func TestAccComputeRegionInstanceTemplate_enableDisplay(t *testing.T) {
 	})
 }
 
-<% end -%>
+{{ end }}
 
-<% unless version == "ga" -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeRegionInstanceTemplate_maintenance_interval(t *testing.T) {
 	t.Parallel()
 
@@ -807,7 +806,7 @@ func TestAccComputeRegionInstanceTemplate_maintenance_interval(t *testing.T) {
 		},
 	})
 }
-<% end -%>
+{{- end }}
 
 func TestAccComputeRegionInstanceTemplate_invalidDiskType(t *testing.T) {
 	t.Parallel()
@@ -1133,7 +1132,7 @@ func TestAccComputeRegionInstanceTemplate_localSsdRecoveryTimeout(t *testing.T) 
 	})
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeRegionalInstanceTemplate_partnerMetadata(t *testing.T) {
 	t.Parallel()
 
@@ -1167,7 +1166,7 @@ func TestAccComputeRegionalInstanceTemplate_partnerMetadata(t *testing.T) {
 	})
 
 }
-<% end -%>
+{{- end }}
 
 func TestAccComputeRegionInstanceTemplate_sourceSnapshotEncryptionKey(t *testing.T) {
 	t.Parallel()
@@ -1276,7 +1275,7 @@ func testAccCheckComputeRegionInstanceTemplateDestroyProducer(t *testing.T) func
 			splits := strings.Split(rs.Primary.ID, "/")
 			name := splits[len(splits)-1]
 
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/instanceTemplates/"+name)
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/instanceTemplates/"+name)
 			if err != nil {
 				return err
 			}
@@ -1328,19 +1327,19 @@ func testAccCheckComputeRegionInstanceTemplateExistsInProject(t *testing.T, n, p
 		splits := strings.Split(rs.Primary.ID, "/")
 		templateName := splits[len(splits)-1]
 
-		url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/instanceTemplates/"+templateName)
+		url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/instanceTemplates/"+templateName)
 
 		billingProject := ""
 
 		if config.BillingProject != "" {
 			billingProject = config.BillingProject
 		}
-		<% unless version == 'ga' -%>
+		{{- if ne $.TargetVersionName "ga" }}
 		url, err = transport_tpg.AddQueryParams(url, map[string]string{"view": "FULL"})
 		if err != nil {
 			return err
 		}
-		<% end -%>
+		{{- end }}
 
 		found, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config: config,
@@ -1438,7 +1437,7 @@ func testAccCheckComputeRegionInstanceTemplateSubnetwork(instanceTemplate *compu
 	}
 }
 
-<% unless version == "ga" -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccCheckComputeRegionInstanceTemplateMaintenanceInterval(instanceTemplate *compute.InstanceTemplate, maintenance_interval string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if instanceTemplate.Properties.Scheduling.MaintenanceInterval != maintenance_interval {
@@ -1447,7 +1446,7 @@ func testAccCheckComputeRegionInstanceTemplateMaintenanceInterval(instanceTempla
 		return nil
 	}
 }
-<% end -%>
+{{- end }}
 
 func testAccCheckComputeRegionInstanceTemplateTag(instanceTemplate *compute.InstanceTemplate, n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -1512,7 +1511,7 @@ func testAccCheckComputeRegionInstanceTemplateLocalSsdRecoveryTimeout(instanceTe
 	}
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccCheckComputeRegionalInstanceTemplatePartnerMetadata(instanceTemplate *compute.InstanceTemplate, expectedPartnerMetadata map[string]compute.StructuredEntries) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if instanceTemplate == nil {
@@ -1540,7 +1539,7 @@ func testAccCheckComputeRegionalInstanceTemplatePartnerMetadata(instanceTemplate
 
 	}
 }
-<% end -%>
+{{- end }}
 
 func testAccCheckComputeRegionInstanceTemplateAutomaticRestart(instanceTemplate *compute.InstanceTemplate, automaticRestart bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -2560,7 +2559,7 @@ resource "google_compute_region_instance_template" "foobar" {
 `, i, i, i)
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeRegionInstanceTemplate_maintenance_interval(suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -2605,7 +2604,7 @@ resource "google_compute_region_instance_template" "foobar" {
 }
 `, suffix)
 }
-<% end -%>
+{{- end }}
 
 
 func testAccComputeRegionInstanceTemplate_guestAccelerator(i string, count uint8) string {
@@ -2983,7 +2982,7 @@ resource "google_compute_region_instance_template" "foobar4" {
 `, suffix, minCpuPlatform, confidentialInstanceType, suffix, minCpuPlatform, confidentialInstanceType)
 }
 
-<% unless version == "ga" -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeRegionInstanceTemplateConfidentialInstanceConfigEnableTdx(suffix string, confidentialInstanceType string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image3" {
@@ -3017,7 +3016,7 @@ resource "google_compute_region_instance_template" "foobar5" {
 }
 `, suffix, confidentialInstanceType)
 }
-<% end -%>
+{{- end }}
 
 func testAccComputeRegionInstanceTemplateAdvancedMachineFeatures(suffix string) string {
 	return fmt.Sprintf(`
@@ -3055,7 +3054,7 @@ resource "google_compute_region_instance_template" "foobar" {
 `, suffix)
 }
 
-<% unless version == "ga" -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeRegionInstanceTemplate_enableDisplay(suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -3081,7 +3080,7 @@ resource "google_compute_region_instance_template" "foobar" {
 `, suffix)
 }
 
-<% end -%>
+{{ end }}
 
 func testAccComputeRegionInstanceTemplate_invalidDiskType(suffix string) string {
 	return fmt.Sprintf(`
@@ -3539,7 +3538,7 @@ resource "google_compute_region_instance_template" "foobar" {
 `, suffix)
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeRegionalInstanceTemplate_partnerMetadata(suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -3582,7 +3581,7 @@ resource "google_compute_region_instance_template" "foobar" {
 }
 `, suffix)
 }
-<% end -%>
+{{- end }}
 
 func testAccComputeRegionInstanceTemplate_sourceSnapshotEncryptionKey(context map[string]interface{}) string {
 	return acctest.Nprintf(`

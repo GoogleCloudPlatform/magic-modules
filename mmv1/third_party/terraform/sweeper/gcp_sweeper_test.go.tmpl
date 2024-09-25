@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 
 package sweeper_test
 
@@ -7,9 +6,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
-<% products.each do |product| -%>
-	_ "github.com/hashicorp/terraform-provider-google/google/services/<%= product[:definitions].name.downcase -%>"
-<% end -%>
+{{- range $product := $.Products }}
+	_ "github.com/hashicorp/terraform-provider-google/google/services/{{ lower $product.Name }}"
+{{- end }}
 
 	// Manually add the services for DCL resource and handwritten resource sweepers if they are not in the above list
 	_ "github.com/hashicorp/terraform-provider-google/google/services/apikeys"

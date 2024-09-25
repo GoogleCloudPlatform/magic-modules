@@ -12,7 +12,7 @@ if d.HasChange("connected_repositories") {
 	removeRepos := oReposSet.Difference(nReposSet).List()
 	createRepos := nReposSet.Difference(oReposSet).List()
 
-	url, err = tpgresource.ReplaceVars(d, config, "{{CloudBuildBasePath}}projects/{{project}}/locations/{{location}}/bitbucketServerConfigs/{{config_id}}:removeBitbucketServerConnectedRepository")
+	url, err = tpgresource.ReplaceVars(d, config, "{{"{{"}}CloudBuildBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/bitbucketServerConfigs/{{"{{"}}config_id{{"}}"}}:removeBitbucketServerConnectedRepository")
 	if err != nil {
 		return err
 	}
@@ -37,7 +37,7 @@ if d.HasChange("connected_repositories") {
 
 	// if repos to create, prepare and send batchCreate request
 	if len(createRepos) > 0 {
-		parent, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/bitbucketServerConfigs/{{config_id}}")
+		parent, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/bitbucketServerConfigs/{{"{{"}}config_id{{"}}"}}")
 		if err != nil {
 			return fmt.Errorf("Error constructing id: %s", err)
 		}
@@ -56,7 +56,7 @@ if d.HasChange("connected_repositories") {
 		obj = make(map[string]interface{})
 		obj["requests"] = requests
 
-		url, err = tpgresource.ReplaceVars(d, config, "{{CloudBuildBasePath}}projects/{{project}}/locations/{{location}}/bitbucketServerConfigs/{{config_id}}/connectedRepositories:batchCreate")
+		url, err = tpgresource.ReplaceVars(d, config, "{{"{{"}}CloudBuildBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/bitbucketServerConfigs/{{"{{"}}config_id{{"}}"}}/connectedRepositories:batchCreate")
 		if err != nil {
 			return err
 		}

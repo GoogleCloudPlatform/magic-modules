@@ -1,6 +1,6 @@
-resource "google_service_directory_namespace" "<%= ctx[:primary_resource_id] %>" {
+resource "google_service_directory_namespace" "{{$.PrimaryResourceId}}" {
   provider     = google-beta
-  namespace_id = "<%= ctx[:vars]["namespace_id"] %>"
+  namespace_id = "{{index $.Vars "namespace_id"}}"
   location     = "us-central1"
 
   labels = {

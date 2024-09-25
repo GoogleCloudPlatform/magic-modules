@@ -1,10 +1,10 @@
-resource "google_compute_target_http_proxy" "<%= ctx[:primary_resource_id] %>" {
-  name    = "<%= ctx[:vars]['target_http_proxy_name'] %>"
+resource "google_compute_target_http_proxy" "{{$.PrimaryResourceId}}" {
+  name    = "{{index $.Vars "target_http_proxy_name"}}"
   url_map = google_compute_url_map.default.id
 }
 
 resource "google_compute_url_map" "default" {
-  name            = "<%= ctx[:vars]['url_map_name'] %>"
+  name            = "{{index $.Vars "url_map_name"}}"
   default_url_redirect {
     https_redirect = true
     strip_query    = false

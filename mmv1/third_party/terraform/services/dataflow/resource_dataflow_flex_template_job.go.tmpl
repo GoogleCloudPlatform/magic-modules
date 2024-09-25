@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package dataflow
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"context"
@@ -841,4 +840,4 @@ func dataflowFlexJobTypeParameterOverride(ename, pname string, d *schema.Resourc
 	return nil
 }
 
-<% end -%>
+{{ end }}

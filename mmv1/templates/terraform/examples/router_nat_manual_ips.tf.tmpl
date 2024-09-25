@@ -1,23 +1,23 @@
 resource "google_compute_network" "net" {
-  name = "<%= ctx[:vars]['network_name'] %>"
+  name = "{{index $.Vars "network_name"}}"
 }
 
 resource "google_compute_subnetwork" "subnet" {
-  name          = "<%= ctx[:vars]['subnet_name'] %>"
+  name          = "{{index $.Vars "subnet_name"}}"
   network       = google_compute_network.net.id
   ip_cidr_range = "10.0.0.0/16"
   region        = "us-central1"
 }
 
 resource "google_compute_router" "router" {
-  name    = "<%= ctx[:vars]['router_name'] %>"
+  name    = "{{index $.Vars "router_name"}}"
   region  = google_compute_subnetwork.subnet.region
   network = google_compute_network.net.id
 }
 
 resource "google_compute_address" "address" {
   count  = 2
-  name   = "<%= ctx[:vars]['address_name'] %>-${count.index}"
+  name   = "{{index $.Vars "address_name"}}-${count.index}"
   region = google_compute_subnetwork.subnet.region
 
   lifecycle {
@@ -25,8 +25,8 @@ resource "google_compute_address" "address" {
   }
 }
 
-resource "google_compute_router_nat" "<%= ctx[:primary_resource_id] %>" {
-  name   = "<%= ctx[:vars]['nat_name'] %>"
+resource "google_compute_router_nat" "{{$.PrimaryResourceId}}" {
+  name   = "{{index $.Vars "nat_name"}}"
   router = google_compute_router.router.name
   region = google_compute_router.router.region
 

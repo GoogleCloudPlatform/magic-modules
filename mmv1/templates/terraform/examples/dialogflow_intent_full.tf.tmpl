@@ -1,7 +1,7 @@
 resource "google_project" "agent_project" {
-  project_id = "<%= ctx[:vars]['project_id'] %>"
-  name = "<%= ctx[:vars]['project_id'] %>"
-  org_id = "<%= ctx[:test_env_vars]['org_id'] %>"
+  project_id = "{{index $.Vars "project_id"}}"
+  name = "{{index $.Vars "project_id"}}"
+  org_id = "{{index $.TestEnvVars "org_id"}}"
   deletion_policy = "DELETE"
 }
 
@@ -12,7 +12,7 @@ resource "google_project_service" "agent_project" {
 }
 
 resource "google_service_account" "dialogflow_service_account" {
-  account_id = "<%= ctx[:vars]['account_id'] %>"
+  account_id = "{{index $.Vars "account_id"}}"
 }
 
 resource "google_project_iam_member" "agent_create" {
@@ -28,10 +28,10 @@ resource "google_dialogflow_agent" "basic_agent" {
   time_zone = "America/New_York"
 }
 
-resource "google_dialogflow_intent" "<%= ctx[:primary_resource_id] %>" {
+resource "google_dialogflow_intent" "{{$.PrimaryResourceId}}" {
   project = google_project.agent_project.project_id
   depends_on = [google_dialogflow_agent.basic_agent]
-  display_name = "<%= ctx[:vars]["intent_name"] %>"
+  display_name = "{{index $.Vars "intent_name"}}"
   webhook_state = "WEBHOOK_STATE_ENABLED"
   priority = 1
   is_fallback = false

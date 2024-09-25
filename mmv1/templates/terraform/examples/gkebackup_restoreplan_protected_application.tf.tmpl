@@ -1,22 +1,22 @@
 resource "google_container_cluster" "primary" {
-  name               = "<%= ctx[:vars]['name'] %>-cluster"
+  name               = "{{index $.Vars "name"}}-cluster"
   location           = "us-central1"
   initial_node_count = 1
   workload_identity_config {
-    workload_pool = "<%= ctx[:test_env_vars]['project'] %>.svc.id.goog"
+    workload_pool = "{{index $.TestEnvVars "project"}}.svc.id.goog"
   }
   addons_config {
     gke_backup_agent_config {
       enabled = true
     }
   }
-  deletion_protection  = "<%= ctx[:vars]['deletion_protection'] %>"
-  network       = "<%= ctx[:vars]['network_name'] %>"
-  subnetwork    = "<%= ctx[:vars]['subnetwork_name'] %>"
+  deletion_protection  = "{{index $.Vars "deletion_protection"}}"
+  network       = "{{index $.Vars "network_name"}}"
+  subnetwork    = "{{index $.Vars "subnetwork_name"}}"
 }
 
 resource "google_gke_backup_backup_plan" "basic" {
-  name = "<%= ctx[:vars]['name'] %>"
+  name = "{{index $.Vars "name"}}"
   cluster = google_container_cluster.primary.id
   location = "us-central1"
   backup_config {
@@ -27,7 +27,7 @@ resource "google_gke_backup_backup_plan" "basic" {
 }
 
 resource "google_gke_backup_restore_plan" "rollback_app" {
-  name = "<%= ctx[:vars]['name'] %>-rp"
+  name = "{{index $.Vars "name"}}-rp"
   location = "us-central1"
   backup_plan = google_gke_backup_backup_plan.basic.id
   cluster = google_container_cluster.primary.id

@@ -1,5 +1,5 @@
 resource "google_alloydb_cluster" "primary" {
-  cluster_id = "<%= ctx[:vars]['alloydb_primary_cluster_name'] %>"
+  cluster_id = "{{index $.Vars "alloydb_primary_cluster_name"}}"
   location   = "us-central1"
   network_config {
     network = google_compute_network.default.id
@@ -8,7 +8,7 @@ resource "google_alloydb_cluster" "primary" {
 
 resource "google_alloydb_instance" "primary" {
   cluster       = google_alloydb_cluster.primary.name
-  instance_id   = "<%= ctx[:vars]['alloydb_primary_instance_name'] %>"
+  instance_id   = "{{index $.Vars "alloydb_primary_instance_name"}}"
   instance_type = "PRIMARY"
 
   machine_config {
@@ -19,7 +19,7 @@ resource "google_alloydb_instance" "primary" {
 }
 
 resource "google_alloydb_cluster" "secondary" {
-  cluster_id   = "<%= ctx[:vars]['alloydb_secondary_cluster_name'] %>"
+  cluster_id   = "{{index $.Vars "alloydb_secondary_cluster_name"}}"
   location     = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
@@ -46,9 +46,9 @@ resource "google_alloydb_cluster" "secondary" {
   depends_on = [google_alloydb_instance.primary]
 }
 
-resource "google_alloydb_instance" "<%= ctx[:primary_resource_id] %>" {
+resource "google_alloydb_instance" "{{$.PrimaryResourceId}}" {
   cluster       = google_alloydb_cluster.secondary.name
-  instance_id   = "<%= ctx[:vars]['alloydb_secondary_instance_name'] %>"
+  instance_id   = "{{index $.Vars "alloydb_secondary_instance_name"}}"
   instance_type = google_alloydb_cluster.secondary.cluster_type
 
   machine_config {
@@ -61,11 +61,11 @@ resource "google_alloydb_instance" "<%= ctx[:primary_resource_id] %>" {
 data "google_project" "project" {}
 
 resource "google_compute_network" "default" {
-  name = "<%= ctx[:vars]['network_name'] %>"
+  name = "{{index $.Vars "network_name"}}"
 }
 
 resource "google_compute_global_address" "private_ip_alloc" {
-  name          =  "<%= ctx[:vars]['alloydb_secondary_instance_name'] %>"
+  name          =  "{{index $.Vars "alloydb_secondary_instance_name"}}"
   address_type  = "INTERNAL"
   purpose       = "VPC_PEERING"
   prefix_length = 16

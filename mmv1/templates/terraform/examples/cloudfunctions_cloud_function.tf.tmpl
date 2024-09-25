@@ -1,16 +1,16 @@
 resource "google_storage_bucket" "bucket" {
-  name     = "<%= ctx[:vars]['bucket_name'] %>"
+  name     = "{{index $.Vars "bucket_name"}}"
   location = "US"
 }
 
 resource "google_storage_bucket_object" "archive" {
   name   = "index.zip"
   bucket = google_storage_bucket.bucket.name
-  source = "<%= ctx[:vars]['zip_path'] %>"
+  source = "{{index $.Vars "zip_path"}}"
 }
 
-resource "google_cloudfunctions_function" "<%= ctx[:primary_resource_id] %>" {
-  name        = "<%= ctx[:vars]['function_name'] %>"
+resource "google_cloudfunctions_function" "{{$.PrimaryResourceId}}" {
+  name        = "{{index $.Vars "function_name"}}"
   description = "My function"
   runtime     = "nodejs10"
 

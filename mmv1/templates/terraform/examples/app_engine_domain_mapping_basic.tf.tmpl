@@ -1,4 +1,4 @@
-resource "google_app_engine_domain_mapping" "<%= ctx[:primary_resource_id] %>" {
+resource "google_app_engine_domain_mapping" "{{$.PrimaryResourceId}}" {
   domain_name = "verified-domain.com"
 
   ssl_settings {

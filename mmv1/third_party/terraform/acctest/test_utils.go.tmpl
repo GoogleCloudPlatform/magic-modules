@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 
 package acctest
 
@@ -148,13 +147,13 @@ func ProtoV5ProviderFactories(t *testing.T) map[string]func() (tfprotov5.Provide
 // normal beta tests should continue to use ProtoV5ProviderFactories
 func ProtoV5ProviderBetaFactories(t *testing.T) map[string]func() (tfprotov5.ProviderServer, error) {
 	return map[string]func() (tfprotov5.ProviderServer, error){
-<%# Add a google-#{version} provider for each version that is supported by this version. This allows us to run google-beta tests within a google-alpha provider.  -%>
-<% Api::Product::Version::ORDER[1..Api::Product::Version::ORDER.index(version)].each do |aliased_version| -%>
-		"google-<%= aliased_version -%>": func() (tfprotov5.ProviderServer, error) {
+{{/* Add a google-#{version} provider for each version that is supported by this version. This allows us to run google-beta tests within a google-alpha provider.  */ -}}
+{{ range $aliasedVersion := $.SupportedProviderVersions -}}
+		"google-{{ $aliasedVersion }}": func() (tfprotov5.ProviderServer, error) {
 			provider, err := MuxedProviders(t.Name())
 			return provider(), err
 		},
-<% end -%>
+{{- end }}
 	}
 }
 

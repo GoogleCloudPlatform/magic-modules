@@ -15,8 +15,8 @@ resource "tls_cert_request" "example" {
   }
 }
 
-resource "google_privateca_ca_pool" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]['my_ca_pool'] %>"
+resource "google_privateca_ca_pool" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "my_ca_pool"}}"
   location = "us-central1"
   tier = "ENTERPRISE"
   project = "project-id"
@@ -90,6 +90,6 @@ resource "google_privateca_certificate" "default" {
   project = "project-id"
   location = "us-central1"
   lifetime = "860s"
-  name = "<%= ctx[:vars]['my_certificate'] %>"
+  name = "{{index $.Vars "my_certificate"}}"
   pem_csr = tls_cert_request.example.cert_request_pem
 }

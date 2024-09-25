@@ -1,5 +1,0 @@
-resource "google_runtimeconfig_config" "{{$.PrimaryResourceId}}" {
-  provider    = google-beta
-  name        = "{{index $.Vars "config_name"}}"
-  description = "Runtime configuration values for my service"
-}

@@ -1,4 +1,4 @@
-resource "google_monitoring_notification_channel" "<%= ctx[:primary_resource_id] %>" {
+resource "google_monitoring_notification_channel" "{{$.PrimaryResourceId}}" {
   display_name = "Test Slack Channel"
   type         = "slack"
   labels = {

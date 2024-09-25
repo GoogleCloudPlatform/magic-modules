@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package firebaseappcheck_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
@@ -60,4 +59,4 @@ func TestAccFirebaseAppCheckDeviceCheckConfig_firebaseAppCheckDeviceCheckConfigU
 		},
 	})
 }
-<% end -%>
+{{- end }}

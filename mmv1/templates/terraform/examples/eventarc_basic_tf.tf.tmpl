@@ -18,9 +18,9 @@ resource "google_project_service" "eventarc" {
 }
 
 # Deploy Cloud Run service
-resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
+resource "google_cloud_run_service" "{{$.PrimaryResourceId}}" {
   provider = google-beta
-  name     = "<%= ctx[:vars]['cloudrun_hello_tf'] %>"
+  name     = "{{index $.Vars "cloudrun_hello_tf"}}"
   location = "us-east1"
 
   template {
@@ -49,9 +49,9 @@ resource "google_cloud_run_service_iam_member" "allUsers" {
 }
       
 # Create a Pub/Sub trigger
-resource "google_eventarc_trigger" "<%= ctx[:vars]['trigger_pubsub_tf'] %>" {
+resource "google_eventarc_trigger" "{{index $.Vars "trigger_pubsub_tf"}}" {
   provider = google-beta
-  name     = "<%= ctx[:vars]['trigger_pubsub_tf'] %>"
+  name     = "{{index $.Vars "trigger_pubsub_tf"}}"
   location = google_cloud_run_service.default.location
   matching_criteria {
     attribute = "type"   
@@ -77,9 +77,9 @@ resource "google_project_iam_member" "project" {
 }
     
 # Create an AuditLog for Cloud Storage trigger
-resource "google_eventarc_trigger" "<%= ctx[:vars]['trigger_auditlog_tf'] %>" {
+resource "google_eventarc_trigger" "{{index $.Vars "trigger_auditlog_tf"}}" {
   provider = google-beta
-  name     = "<%= ctx[:vars]['trigger_auditlog_tf'] %>"
+  name     = "{{index $.Vars "trigger_auditlog_tf"}}"
   location = google_cloud_run_service.default.location
   project  = data.google_project.project.id
   matching_criteria {

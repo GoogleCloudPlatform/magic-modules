@@ -10,10 +10,10 @@ log.Printf("[DEBUG] Preparing to create new Database. Any extra DDL statements w
 
 delete(obj, "name")
 delete(obj, "instance")
-<%# These are added back in post-create, but do not remove for Validator. %>
-<% unless compiler == "terraformgoogleconversion-codegen" -%>
+{{/* These are added back in post-create, but do not remove for Validator. */}}
+{{- if ne $.Compiler "terraformgoogleconversion-codegen" }}
 delete(obj, "versionRetentionPeriod")
 delete(obj, "extraStatements")
 delete(obj, "enableDropProtection")
-<% end -%>
+{{- end }}
 return obj, nil

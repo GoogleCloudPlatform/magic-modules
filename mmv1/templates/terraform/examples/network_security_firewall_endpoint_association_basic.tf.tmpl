@@ -3,23 +3,23 @@ resource "google_compute_network" "foobar" {
   auto_create_subnetworks = false
 }
 
-resource "google_network_security_firewall_endpoint" "<%= ctx[:primary_resource_id] %>" {
-  name               = "<%= ctx[:vars]['resource_name_prefix'] %>"
-  parent             = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"
+resource "google_network_security_firewall_endpoint" "{{$.PrimaryResourceId}}" {
+  name               = "{{index $.Vars "resource_name_prefix"}}"
+  parent             = "organizations/{{index $.TestEnvVars "org_id"}}"
   location           = "us-central1-a"
-  billing_project_id = "<%= ctx[:test_env_vars]['project'] %>"
+  billing_project_id = "{{index $.TestEnvVars "project"}}"
 
   labels = {
     foo = "bar"
   }
 }
 
-resource "google_network_security_firewall_endpoint_association" "<%= ctx[:primary_resource_id] %>_association" {
-  name              = "<%= ctx[:vars]['resource_name_prefix'] %>-association"
-  parent            = "projects/<%= ctx[:test_env_vars]['project'] %>"
+resource "google_network_security_firewall_endpoint_association" "{{$.PrimaryResourceId}}_association" {
+  name              = "{{index $.Vars "resource_name_prefix"}}-association"
+  parent            = "projects/{{index $.TestEnvVars "project"}}"
   location          = "us-central1-a"
   network           = google_compute_network.foobar.id
-  firewall_endpoint = google_network_security_firewall_endpoint.<%= ctx[:primary_resource_id] %>.id
+  firewall_endpoint = google_network_security_firewall_endpoint.{{$.PrimaryResourceId}}.id
   disabled          = false
 
   labels = {

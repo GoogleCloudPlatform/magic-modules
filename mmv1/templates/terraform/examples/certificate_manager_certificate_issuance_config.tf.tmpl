@@ -1,5 +1,5 @@
-resource "google_certificate_manager_certificate_issuance_config" "<%= ctx[:primary_resource_id] %>" {
-  name    = "<%= ctx[:vars]["issuance_config_name"] %>"
+resource "google_certificate_manager_certificate_issuance_config" "{{$.PrimaryResourceId}}" {
+  name    = "{{index $.Vars "issuance_config_name"}}"
   description = "sample description for the certificate issuanceConfigs"
   certificate_authority_config {
     certificate_authority_service_config {
@@ -15,7 +15,7 @@ resource "google_certificate_manager_certificate_issuance_config" "<%= ctx[:prim
 }
   
 resource "google_privateca_ca_pool" "pool" {
-  name     = "<%= ctx[:vars]["pool_name"] %>"
+  name     = "{{index $.Vars "pool_name"}}"
   location = "us-central1"
   tier     = "ENTERPRISE"
 }
@@ -23,7 +23,7 @@ resource "google_privateca_ca_pool" "pool" {
 resource "google_privateca_certificate_authority" "ca_authority" {
   location = "us-central1"
   pool = google_privateca_ca_pool.pool.name
-  certificate_authority_id = "<%= ctx[:vars]["ca_name"] %>"
+  certificate_authority_id = "{{index $.Vars "ca_name"}}"
   config {
     subject_config {
       subject {

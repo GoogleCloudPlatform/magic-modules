@@ -1,12 +1,12 @@
 resource "google_compute_region_target_http_proxy" "default" {
   region  = "us-central1"
-  name    = "<%= ctx[:vars]['region_target_http_proxy_name'] %>"
+  name    = "{{index $.Vars "region_target_http_proxy_name"}}"
   url_map = google_compute_region_url_map.default.id
 }
 
 resource "google_compute_region_url_map" "default" {
   region          = "us-central1"
-  name            = "<%= ctx[:vars]['region_url_map_name'] %>"
+  name            = "{{index $.Vars "region_url_map_name"}}"
   default_service = google_compute_region_backend_service.default.id
 
   host_rule {
@@ -27,7 +27,7 @@ resource "google_compute_region_url_map" "default" {
 
 resource "google_compute_region_backend_service" "default" {
   region                = "us-central1"
-  name                  = "<%= ctx[:vars]['region_backend_service_name'] %>"
+  name                  = "{{index $.Vars "region_backend_service_name"}}"
   protocol              = "HTTP"
   timeout_sec           = 10
   load_balancing_scheme = "INTERNAL_MANAGED"
@@ -37,7 +37,7 @@ resource "google_compute_region_backend_service" "default" {
 
 resource "google_compute_region_health_check" "default" {
   region = "us-central1"
-  name   = "<%= ctx[:vars]['region_health_check_name'] %>"
+  name   = "{{index $.Vars "region_health_check_name"}}"
   http_health_check {
     port = 80
   }

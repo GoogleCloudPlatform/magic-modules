@@ -1,7 +1,7 @@
-resource "google_datastream_private_connection" "<%= ctx[:primary_resource_id] %>" {
+resource "google_datastream_private_connection" "{{$.PrimaryResourceId}}" {
 	display_name          = "Connection profile"
 	location              = "us-central1"
-	private_connection_id = "<%= ctx[:vars]['private_connection_id'] %>"
+	private_connection_id = "{{index $.Vars "private_connection_id"}}"
 
 	labels = {
 		key = "value"
@@ -14,5 +14,5 @@ resource "google_datastream_private_connection" "<%= ctx[:primary_resource_id] %
 }
 
 resource "google_compute_network" "default" {
-  name = "<%= ctx[:vars]['network_name'] %>"
+  name = "{{index $.Vars "network_name"}}"
 }

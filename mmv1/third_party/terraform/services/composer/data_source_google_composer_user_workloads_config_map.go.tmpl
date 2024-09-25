@@ -1,7 +1,6 @@
-<% autogen_exception -%>
 package composer
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 import (
 	"fmt"
 
@@ -28,7 +27,7 @@ func DataSourceGoogleComposerUserWorkloadsConfigMap() *schema.Resource {
 func dataSourceGoogleComposerUserWorkloadsConfigMapRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 
-	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{region}}/environments/{{environment}}/userWorkloadsConfigMaps/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}region{{"}}"}}/environments/{{"{{"}}environment{{"}}"}}/userWorkloadsConfigMaps/{{"{{"}}name{{"}}"}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -49,4 +48,4 @@ func dataSourceGoogleComposerUserWorkloadsConfigMapRead(d *schema.ResourceData, 
 
 	return nil
 }
-<% end -%>
+{{- end }}

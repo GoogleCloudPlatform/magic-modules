@@ -3,7 +3,7 @@ resource "google_gke_hub_scope" "scope" {
 }
 
 
-resource "google_gke_hub_namespace" "<%= ctx[:primary_resource_id] %>" { 
+resource "google_gke_hub_namespace" "{{$.PrimaryResourceId}}" { 
   scope_namespace_id = "tf-test-namespace%{random_suffix}"
   scope_id = google_gke_hub_scope.scope.scope_id
   scope = google_gke_hub_scope.scope.name

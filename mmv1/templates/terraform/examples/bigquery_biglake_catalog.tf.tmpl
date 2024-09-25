@@ -1,4 +1,4 @@
-resource "google_biglake_catalog" "<%= ctx[:primary_resource_id] %>"  {
-    name = "<%= ctx[:vars]['name'] %>"
+resource "google_biglake_catalog" "{{$.PrimaryResourceId}}"  {
+    name = "{{index $.Vars "name"}}"
     location = "US"
 }

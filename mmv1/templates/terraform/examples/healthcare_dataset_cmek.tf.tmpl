@@ -1,7 +1,7 @@
 data "google_project" "project" {}
 
 resource "google_healthcare_dataset" "default" {
-  name      = "<%= ctx[:vars]['dataset_name'] %>"
+  name      = "{{index $.Vars "dataset_name"}}"
   location  = "us-central1"
   time_zone = "UTC"
 
@@ -15,13 +15,13 @@ resource "google_healthcare_dataset" "default" {
 }
 
 resource "google_kms_crypto_key" "crypto_key" {
-  name     = "<%= ctx[:vars]['key_name'] %>"
+  name     = "{{index $.Vars "key_name"}}"
   key_ring = google_kms_key_ring.key_ring.id
   purpose  = "ENCRYPT_DECRYPT"
 }
 
 resource "google_kms_key_ring" "key_ring" {
-  name     = "<%= ctx[:vars]['keyring_name'] %>"
+  name     = "{{index $.Vars "keyring_name"}}"
   location = "us-central1"
 }
 

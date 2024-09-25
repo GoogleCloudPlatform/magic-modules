@@ -1,5 +1,5 @@
-resource "google_certificate_manager_certificate" "<%= ctx[:primary_resource_id] %>" {
-  name        = "<%= ctx[:vars]['cert_name'] %>"
+resource "google_certificate_manager_certificate" "{{$.PrimaryResourceId}}" {
+  name        = "{{index $.Vars "cert_name"}}"
   description = "The default cert"
   scope       = "ALL_REGIONS"
   managed {
@@ -16,14 +16,14 @@ resource "google_certificate_manager_certificate" "<%= ctx[:primary_resource_id]
 
 
 resource "google_certificate_manager_dns_authorization" "instance" {
-  name        = "<%= ctx[:vars]['dns_auth_name'] %>"
+  name        = "{{index $.Vars "dns_auth_name"}}"
   description = "The default dnss"
-  domain      = "<%= ctx[:vars]['dns_auth_subdomain'] %>.hashicorptest.com"
+  domain      = "{{index $.Vars "dns_auth_subdomain"}}.hashicorptest.com"
 }
 
 resource "google_certificate_manager_dns_authorization" "instance2" {
-  name        = "<%= ctx[:vars]['dns_auth_name2'] %>"
+  name        = "{{index $.Vars "dns_auth_name2"}}"
   description = "The default dnss"
-  domain      = "<%= ctx[:vars]['dns_auth_subdomain2'] %>.hashicorptest.com"
+  domain      = "{{index $.Vars "dns_auth_subdomain2"}}.hashicorptest.com"
 }
 

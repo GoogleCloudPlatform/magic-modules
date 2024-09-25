@@ -1,10 +1,10 @@
 
-resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
-  name     = "<%= ctx[:vars]['cloud_run_service_name'] %>"
+resource "google_cloud_run_service" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.Vars "cloud_run_service_name"}}"
   location = "us-central1"
 
   metadata {
-    namespace = "<%= ctx[:test_env_vars]['namespace'] %>"
+    namespace = "{{index $.TestEnvVars "namespace"}}"
   }
 
   template {
@@ -16,15 +16,15 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
   }
 }
 
-resource "google_cloud_run_domain_mapping" "<%= ctx[:primary_resource_id] %>" {
+resource "google_cloud_run_domain_mapping" "{{$.PrimaryResourceId}}" {
   location = "us-central1"
   name     = "verified-domain.com"
 
   metadata {
-    namespace = "<%= ctx[:test_env_vars]['namespace'] %>"
+    namespace = "{{index $.TestEnvVars "namespace"}}"
   }
 
   spec {
-    route_name = google_cloud_run_service.<%= ctx[:primary_resource_id] %>.name
+    route_name = google_cloud_run_service.{{$.PrimaryResourceId}}.name
   }
 }

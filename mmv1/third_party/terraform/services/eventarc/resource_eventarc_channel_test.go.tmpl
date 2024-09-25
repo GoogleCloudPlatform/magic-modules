@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package eventarc_test
 
 import (
@@ -12,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 
 	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
-	eventarc "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc<%= dcl_version(version) -%>"
+	eventarc "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc{{ $.DCLVersion }}"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"

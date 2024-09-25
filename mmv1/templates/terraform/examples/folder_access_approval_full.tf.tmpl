@@ -1,10 +1,10 @@
 resource "google_folder" "my_folder" {
-  display_name = "<%= ctx[:vars]['folder_name'] %>"
-  parent       = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"
+  display_name = "{{index $.Vars "folder_name"}}"
+  parent       = "organizations/{{index $.TestEnvVars "org_id"}}"
   deletion_protection = false
 }
 
-resource "google_folder_access_approval_settings" "<%= ctx[:primary_resource_id] %>" {
+resource "google_folder_access_approval_settings" "{{$.PrimaryResourceId}}" {
   folder_id           = google_folder.my_folder.folder_id
   notification_emails = ["testuser@example.com", "example.user@example.com"]
 

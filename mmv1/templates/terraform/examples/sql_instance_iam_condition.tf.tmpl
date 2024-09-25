@@ -25,13 +25,13 @@ resource "google_project_iam_policy" "project" {
   policy_data = data.google_iam_policy.sql_iam_policy.policy_data
 }
 
-resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
-  name             = "<%= ctx[:vars]['mysql_instance_iam_condition'] %>"
+resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
+  name             = "{{index $.Vars "mysql_instance_iam_condition"}}"
   provider         = google-beta
   region           = "us-central1"
   database_version = "MYSQL_8_0"
   settings {
     tier = "db-n1-standard-2"
   }
-  deletion_protection =  "<%= ctx[:vars]['deletion_protection'] %>"
+  deletion_protection =  "{{index $.Vars "deletion_protection"}}"
 }

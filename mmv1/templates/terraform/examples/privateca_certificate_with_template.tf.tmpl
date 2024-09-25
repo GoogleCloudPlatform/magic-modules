@@ -1,12 +1,12 @@
 resource "google_privateca_ca_pool" "default" {
   location = "us-central1"
-  name = "<%= ctx[:vars]["ca_pool_id"] %>"
+  name = "{{index $.Vars "ca_pool_id"}}"
   tier = "ENTERPRISE"
 }
 
 resource "google_privateca_certificate_template" "default" {
   location    = "us-central1"
-  name = "<%= ctx[:vars]["certificate_template_name"] %>"
+  name = "{{index $.Vars "certificate_template_name"}}"
   description = "An updated sample certificate template"
 
   identity_constraints {
@@ -121,11 +121,11 @@ resource "google_privateca_certificate_authority" "default" {
 }
 
 
-resource "google_privateca_certificate" "<%= ctx[:primary_resource_id] %>" {
+resource "google_privateca_certificate" "{{$.PrimaryResourceId}}" {
   location = "us-central1"
   pool = google_privateca_ca_pool.default.name
   certificate_authority = google_privateca_certificate_authority.default.certificate_authority_id
-  name = "<%= ctx[:vars]["certificate_name"] %>"
+  name = "{{index $.Vars "certificate_name"}}"
   lifetime = "860s"
   pem_csr = file("test-fixtures/rsa_csr.pem")
   certificate_template = google_privateca_certificate_template.default.id

@@ -1,5 +1,5 @@
 resource "google_compute_resource_policy" "hourly" {
-  name   = "<%= ctx[:vars]['name'] %>"
+  name   = "{{index $.Vars "name"}}"
   region = "us-central1"
   description = "chain name snapshot"
   snapshot_schedule_policy {

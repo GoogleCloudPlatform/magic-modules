@@ -1,6 +1,6 @@
 resource "google_compute_global_address" "default" {
   provider      = google-beta
-  name          = "<%= ctx[:vars]['global_address_name'] %>"
+  name          = "{{index $.Vars "global_address_name"}}"
   address_type  = "INTERNAL"
   purpose       = "PRIVATE_SERVICE_CONNECT"
   network       = google_compute_network.network.id
@@ -9,6 +9,6 @@ resource "google_compute_global_address" "default" {
 
 resource "google_compute_network" "network" {
   provider      = google-beta
-  name          = "<%= ctx[:vars]['network_name'] %>"
+  name          = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = false
 }

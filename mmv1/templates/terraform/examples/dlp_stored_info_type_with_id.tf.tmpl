@@ -1,8 +1,8 @@
-resource "google_data_loss_prevention_stored_info_type" "<%= ctx[:primary_resource_id] %>" {
-  parent = "projects/<%= ctx[:test_env_vars]['project'] %>"
+resource "google_data_loss_prevention_stored_info_type" "{{$.PrimaryResourceId}}" {
+  parent = "projects/{{index $.TestEnvVars "project"}}"
   description = "Description"
   display_name = "Displayname"
-  stored_info_type_id = "<%= ctx[:vars]['name'] %>"
+  stored_info_type_id = "{{index $.Vars "name"}}"
 
   regex {
     pattern = "patient"

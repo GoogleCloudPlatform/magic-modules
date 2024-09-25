@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package transport
 
 import (
@@ -59,14 +58,14 @@ var ResourceManagerV3CustomEndpointEntry = &schema.Schema{
 	ValidateFunc: ValidateCustomEndpoint,
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 var RuntimeConfigCustomEndpointEntryKey = "runtimeconfig_custom_endpoint"
 var RuntimeConfigCustomEndpointEntry = &schema.Schema{
 	Type:         schema.TypeString,
 	Optional:     true,
 	ValidateFunc: ValidateCustomEndpoint,
 }
-<% end -%>
+{{- end }}
 
 var ServiceNetworkingCustomEndpointEntryKey = "service_networking_custom_endpoint"
 var ServiceNetworkingCustomEndpointEntry = &schema.Schema{

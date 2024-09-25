@@ -1,7 +1,5 @@
-<% autogen_exception -%>
 package main
 
-<% provider_name = version.nil? || version == 'ga' ? 'google' : 'google-' + version -%>
 
 import (
 	"flag"
@@ -12,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	googleOld "github.com/hashicorp/terraform-provider-clean-<%= provider_name -%>/<%= provider_name -%>/provider"
+	googleOld "github.com/hashicorp/terraform-provider-clean-{{ $.ProviderFromVersion }}/{{ $.ProviderFromVersion }}/provider"
 	// "github.com/hashicorp/terraform-provider-google/google/provider" will be replaced with corresponding package based on the version when generating the provider package
 	google "github.com/hashicorp/terraform-provider-google/google/provider"
 )

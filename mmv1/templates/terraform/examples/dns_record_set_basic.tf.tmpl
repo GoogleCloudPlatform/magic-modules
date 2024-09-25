@@ -1,12 +1,12 @@
-resource "google_dns_managed_zone" "<%= ctx[:primary_resource_id] %>" {
-  name        = "<%= ctx[:vars]['sample_zone'] %>"
-  dns_name    = "<%= ctx[:vars]['sample_zone'] %>.hashicorptest.com."
+resource "google_dns_managed_zone" "{{$.PrimaryResourceId}}" {
+  name        = "{{index $.Vars "sample_zone"}}"
+  dns_name    = "{{index $.Vars "sample_zone"}}.hashicorptest.com."
   description = "Test Description"
 }
 
 resource "google_dns_record_set" "default" {
   managed_zone = google_dns_managed_zone.parent-zone.name
-  name         = "test-record.<%= ctx[:vars]['sample_zone'] %>.hashicorptest.com."
+  name         = "test-record.{{index $.Vars "sample_zone"}}.hashicorptest.com."
   type         = "A"
   rrdatas      = ["10.0.0.1", "10.1.0.1"]
   ttl          = 86400

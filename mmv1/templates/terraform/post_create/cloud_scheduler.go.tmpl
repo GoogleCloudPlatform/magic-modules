@@ -5,7 +5,7 @@ if paused, pausedOk := d.GetOk("paused"); pausedOk && paused.(bool) {
 	logSuccessMsg = "Job state has been set to PAUSED"
 }
 
-linkTmpl := fmt.Sprintf("{{CloudSchedulerBasePath}}projects/{{project}}/locations/{{region}}/jobs/{{name}}:%s", endpoint)
+linkTmpl := fmt.Sprintf("{{"{{"}}CloudSchedulerBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}region{{"}}"}}/jobs/{{"{{"}}name{{"}}"}}:%s", endpoint)
 url, err = tpgresource.ReplaceVars(d, config, linkTmpl)
 if err != nil {
 	return err

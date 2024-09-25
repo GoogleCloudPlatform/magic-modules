@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package compute
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -12,11 +11,11 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
-<% if version == "ga" -%>
+{{ if eq $.TargetVersionName `ga` }}
 	"google.golang.org/api/compute/v1"
-<% else -%>
+{{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
-<% end -%>
+{{- end }}
 )
 
 func ResourceComputeInstanceFromMachineImage() *schema.Resource {
@@ -269,6 +268,6 @@ func adjustInstanceFromMachineImageDisks(d *schema.ResourceData, config *transpo
 	return disks, nil
 }
 
-<% else %>
+{{- else }}
 // Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
-<% end -%>
+{{- end }}

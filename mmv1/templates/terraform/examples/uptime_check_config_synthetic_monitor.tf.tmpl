@@ -1,5 +1,5 @@
 resource "google_storage_bucket" "bucket" {
-  name     = "<%= ctx[:test_env_vars]["project_id"] %>-<%= ctx[:vars]['bucket_name'] %>"  # Every bucket name must be globally unique
+  name     = "{{index $.TestEnvVars "project_id"}}-{{index $.Vars "bucket_name"}}"  # Every bucket name must be globally unique
   location = "US"
   uniform_bucket_level_access = true
 }
@@ -7,11 +7,11 @@ resource "google_storage_bucket" "bucket" {
 resource "google_storage_bucket_object" "object" {
   name   = "function-source.zip"
   bucket = google_storage_bucket.bucket.name
-  source = "<%= ctx[:vars]['zip_path'] %>"  # Add path to the zipped function source code
+  source = "{{index $.Vars "zip_path"}}"  # Add path to the zipped function source code
 }
  
 resource "google_cloudfunctions2_function" "function" {
-  name = "<%= ctx[:vars]['function_name'] %>"
+  name = "{{index $.Vars "function_name"}}"
   location = "us-central1"
  
   build_config {
@@ -32,8 +32,8 @@ resource "google_cloudfunctions2_function" "function" {
   }
 }
 
-resource "google_monitoring_uptime_check_config" "<%= ctx[:primary_resource_id] %>" {
-  display_name = "<%= ctx[:vars]["display_name"] %>"
+resource "google_monitoring_uptime_check_config" "{{$.PrimaryResourceId}}" {
+  display_name = "{{index $.Vars "display_name"}}"
   timeout = "60s"
 
   synthetic_monitor {

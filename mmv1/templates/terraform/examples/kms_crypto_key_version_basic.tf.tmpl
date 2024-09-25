@@ -9,6 +9,6 @@ resource "google_kms_crypto_key" "cryptokey" {
   rotation_period = "7776000s"
 }
 
-resource "google_kms_crypto_key_version" "<%= ctx[:primary_resource_id] %>" {
+resource "google_kms_crypto_key_version" "{{$.PrimaryResourceId}}" {
   crypto_key = google_kms_crypto_key.cryptokey.id
 }

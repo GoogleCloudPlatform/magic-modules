@@ -1,5 +1,5 @@
-resource "google_integration_connectors_endpoint_attachment" "<%= ctx[:primary_resource_id] %>" {
-  name     = "<%= ctx[:vars]['endpoint_attachment_name'] %>"
+resource "google_integration_connectors_endpoint_attachment" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.Vars "endpoint_attachment_name"}}"
   location = "us-central1"
   description = "tf created description"
   service_attachment = "projects/connectors-example/regions/us-central1/serviceAttachments/test"

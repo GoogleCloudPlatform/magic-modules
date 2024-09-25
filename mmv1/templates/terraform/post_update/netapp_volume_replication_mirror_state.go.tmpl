@@ -53,7 +53,7 @@ if d.Get("replication_enabled").(bool) == true {
 
 if do_change {
 	// We need to send STOP/RESUME API calls
-	rawurl, err := tpgresource.ReplaceVars(d, config, "{{NetappBasePath}}projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/replications/{{name}}:"+action)
+	rawurl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}NetappBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/volumes/{{"{{"}}volume_name{{"}}"}}/replications/{{"{{"}}name{{"}}"}}:"+action)
 	if err != nil {
 		return err
 	}

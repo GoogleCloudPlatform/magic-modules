@@ -1,9 +1,9 @@
 locals {
-  project = "<%= ctx[:test_env_vars]['project'] %>" # Google Cloud Platform Project ID
+  project = "{{index $.TestEnvVars "project"}}" # Google Cloud Platform Project ID
 }
 
 resource "google_storage_bucket" "bucket" {
-  name     = "${local.project}-<%= ctx[:vars]['bucket_name'] %>"  # Every bucket name must be globally unique
+  name     = "${local.project}-{{index $.Vars "bucket_name"}}"  # Every bucket name must be globally unique
   location = "US"
   uniform_bucket_level_access = true
 }
@@ -20,18 +20,18 @@ EOF
 resource "google_bigquery_table" "foo" {
   deletion_protection = false
   dataset_id = google_bigquery_dataset.bar.dataset_id
-  table_id   = "<%= ctx[:vars]['job_id'] %>_table"
+  table_id   = "{{index $.Vars "job_id"}}_table"
 }
 
 resource "google_bigquery_dataset" "bar" {
-  dataset_id                  = "<%= ctx[:vars]['job_id'] %>_dataset"
+  dataset_id                  = "{{index $.Vars "job_id"}}_dataset"
   friendly_name               = "test"
   description                 = "This is a test description"
   location                    = "US"
 }
 
-resource "google_bigquery_job" "<%= ctx[:primary_resource_id] %>" {
-  job_id     = "<%= ctx[:vars]['job_id'] %>"
+resource "google_bigquery_job" "{{$.PrimaryResourceId}}" {
+  job_id     = "{{index $.Vars "job_id"}}"
 
   labels = {
     "my_job" = "load"

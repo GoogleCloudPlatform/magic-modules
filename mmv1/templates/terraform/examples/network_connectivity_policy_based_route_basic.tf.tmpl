@@ -1,5 +1,5 @@
-resource "google_network_connectivity_policy_based_route" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]['pbr_name'] %>"
+resource "google_network_connectivity_policy_based_route" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "pbr_name"}}"
   network = google_compute_network.my_network.id
   filter {
     protocol_version = "IPV4"
@@ -8,6 +8,6 @@ resource "google_network_connectivity_policy_based_route" "<%= ctx[:primary_reso
 }
 
 resource "google_compute_network" "my_network" {
-  name                    = "<%= ctx[:vars]['network_name'] %>"
+  name                    = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = false
 }

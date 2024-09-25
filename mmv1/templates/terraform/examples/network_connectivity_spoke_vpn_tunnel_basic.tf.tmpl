@@ -1,5 +1,5 @@
 resource "google_network_connectivity_hub" "basic_hub" {
-  name        = "<%= ctx[:vars]['hub_name'] %>"
+  name        = "{{index $.Vars "hub_name"}}"
   description = "A sample hub"
   labels = {
     label-two = "value-one"
@@ -7,24 +7,24 @@ resource "google_network_connectivity_hub" "basic_hub" {
 }
 
 resource "google_compute_network" "network" {
-  name                    = "<%= ctx[:vars]['network_name'] %>"
+  name                    = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "subnetwork" {
-  name          = "<%= ctx[:vars]['subnetwork_name'] %>"
+  name          = "{{index $.Vars "subnetwork_name"}}"
   ip_cidr_range = "10.0.0.0/28"
   region        = "us-central1"
   network       = google_compute_network.network.self_link
 }
 
 resource "google_compute_ha_vpn_gateway" "gateway" {
-  name    = "<%= ctx[:vars]['gateway_name'] %>"
+  name    = "{{index $.Vars "gateway_name"}}"
   network = google_compute_network.network.id
 }
 
 resource "google_compute_external_vpn_gateway" "external_vpn_gw" {
-  name            = "<%= ctx[:vars]['external_gateway_name'] %>"
+  name            = "{{index $.Vars "external_gateway_name"}}"
   redundancy_type = "SINGLE_IP_INTERNALLY_REDUNDANT"
   description     = "An externally managed VPN gateway"
   interface {
@@ -34,7 +34,7 @@ resource "google_compute_external_vpn_gateway" "external_vpn_gw" {
 }
 
 resource "google_compute_router" "router" {
-  name    = "<%= ctx[:vars]['router_name'] %>"
+  name    = "{{index $.Vars "router_name"}}"
   region  = "us-central1"
   network = google_compute_network.network.name
   bgp {
@@ -43,7 +43,7 @@ resource "google_compute_router" "router" {
 }
 
 resource "google_compute_vpn_tunnel" "tunnel1" {
-  name                            = "<%= ctx[:vars]['vpn_tunnel_1_name'] %>"
+  name                            = "{{index $.Vars "vpn_tunnel_1_name"}}"
   region                          = "us-central1"
   vpn_gateway                     = google_compute_ha_vpn_gateway.gateway.id
   peer_external_gateway           = google_compute_external_vpn_gateway.external_vpn_gw.id
@@ -54,7 +54,7 @@ resource "google_compute_vpn_tunnel" "tunnel1" {
 }
 
 resource "google_compute_vpn_tunnel" "tunnel2" {
-  name                            = "<%= ctx[:vars]['vpn_tunnel_2_name'] %>"
+  name                            = "{{index $.Vars "vpn_tunnel_2_name"}}"
   region                          = "us-central1"
   vpn_gateway                     = google_compute_ha_vpn_gateway.gateway.id
   peer_external_gateway           = google_compute_external_vpn_gateway.external_vpn_gw.id
@@ -65,7 +65,7 @@ resource "google_compute_vpn_tunnel" "tunnel2" {
 }
 
 resource "google_compute_router_interface" "router_interface1" {
-  name       = "<%= ctx[:vars]['router_interface_1_name'] %>"
+  name       = "{{index $.Vars "router_interface_1_name"}}"
   router     = google_compute_router.router.name
   region     = "us-central1"
   ip_range   = "169.254.0.1/30"
@@ -73,7 +73,7 @@ resource "google_compute_router_interface" "router_interface1" {
 }
 
 resource "google_compute_router_peer" "router_peer1" {
-  name                      = "<%= ctx[:vars]['router_peer_1_name'] %>"
+  name                      = "{{index $.Vars "router_peer_1_name"}}"
   router                    = google_compute_router.router.name
   region                    = "us-central1"
   peer_ip_address           = "169.254.0.2"
@@ -83,7 +83,7 @@ resource "google_compute_router_peer" "router_peer1" {
 }
 
 resource "google_compute_router_interface" "router_interface2" {
-  name       = "<%= ctx[:vars]['router_interface_2_name'] %>"
+  name       = "{{index $.Vars "router_interface_2_name"}}"
   router     = google_compute_router.router.name
   region     = "us-central1"
   ip_range   = "169.254.1.1/30"
@@ -91,7 +91,7 @@ resource "google_compute_router_interface" "router_interface2" {
 }
 
 resource "google_compute_router_peer" "router_peer2" {
-  name                      = "<%= ctx[:vars]['router_peer_2_name'] %>"
+  name                      = "{{index $.Vars "router_peer_2_name"}}"
   router                    = google_compute_router.router.name
   region                    = "us-central1"
   peer_ip_address           = "169.254.1.2"
@@ -100,8 +100,8 @@ resource "google_compute_router_peer" "router_peer2" {
   interface                 = google_compute_router_interface.router_interface2.name
 }
 
-resource "google_network_connectivity_spoke" "<%= ctx[:primary_resource_id] %>" {
-  name        = "<%= ctx[:vars]['vpn_tunnel_1_spoke_name'] %>"
+resource "google_network_connectivity_spoke" "{{$.PrimaryResourceId}}" {
+  name        = "{{index $.Vars "vpn_tunnel_1_spoke_name"}}"
   location    = "us-central1"
   description = "A sample spoke with a linked VPN Tunnel"
   labels = {
@@ -116,7 +116,7 @@ resource "google_network_connectivity_spoke" "<%= ctx[:primary_resource_id] %>" 
 }
 
 resource "google_network_connectivity_spoke" "tunnel2" {
-  name        = "<%= ctx[:vars]['vpn_tunnel_2_spoke_name'] %>"
+  name        = "{{index $.Vars "vpn_tunnel_2_spoke_name"}}"
   location    = "us-central1"
   description = "A sample spoke with a linked VPN Tunnel"
   labels = {

@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package workstations_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
@@ -149,4 +148,4 @@ resource "google_compute_subnetwork" "default" {
 }
 `, context)
 }
-<% end -%>
+{{- end }}

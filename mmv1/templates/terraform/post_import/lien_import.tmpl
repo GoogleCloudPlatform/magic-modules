@@ -1,4 +1,4 @@
-parent, err := tpgresource.ReplaceVars(d, config, "projects/{{parent}}")
+parent, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}parent{{"}}"}}")
 if err != nil {
 		return nil, err
 }

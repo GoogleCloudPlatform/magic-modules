@@ -1,5 +1,5 @@
 resource "google_secret_manager_secret" "secret-basic" {
-  secret_id = "<%= ctx[:vars]['secret_name'] %>"
+  secret_id = "{{index $.Vars "secret_name"}}"
 
   replication {
     auto {}
@@ -12,8 +12,8 @@ resource "google_secret_manager_secret_version" "secret-version-basic" {
   secret_data = "secret-data"
 }
 
-resource "google_network_services_edge_cache_origin" "<%= ctx[:primary_resource_id] %>" {
-  name           = "<%= ctx[:vars]['resource_name'] %>"
+resource "google_network_services_edge_cache_origin" "{{$.PrimaryResourceId}}" {
+  name           = "{{index $.Vars "resource_name"}}"
   origin_address = "gs://media-edge-default"
   description    = "The default bucket for V4 authentication"
   aws_v4_authentication {

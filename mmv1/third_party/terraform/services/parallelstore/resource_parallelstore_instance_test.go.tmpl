@@ -15,11 +15,10 @@
 //
 // ----------------------------------------------------------------------------
 
-<% autogen_exception -%>
 
 package parallelstore_test
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 import (
 	"testing"
 
@@ -154,4 +153,4 @@ resource "google_service_networking_connection" "default" {
 `, context)
 }
 
-<% end -%>
+{{ end }}

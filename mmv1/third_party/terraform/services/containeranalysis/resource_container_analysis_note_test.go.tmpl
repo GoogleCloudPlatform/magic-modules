@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package containeranalysis_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -75,6 +74,6 @@ resource "google_container_analysis_note" "note" {
 }
 `, name, readableName)
 }
-<% else %>
+{{- else }}
 // Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
-<% end -%>
+{{- end }}

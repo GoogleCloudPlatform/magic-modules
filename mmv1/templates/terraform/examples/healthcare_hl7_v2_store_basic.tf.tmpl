@@ -1,5 +1,5 @@
 resource "google_healthcare_hl7_v2_store" "store" {
-  name    = "<%= ctx[:vars]['hl7_v2_store_name'] %>"
+  name    = "{{index $.Vars "hl7_v2_store_name"}}"
   dataset = google_healthcare_dataset.dataset.id
   reject_duplicate_message = true
 
@@ -13,10 +13,10 @@ resource "google_healthcare_hl7_v2_store" "store" {
 }
 
 resource "google_pubsub_topic" "topic" {
-  name     = "<%= ctx[:vars]['pubsub_topic']%>"
+  name     = "{{index $.Vars "pubsub_topic"}}"
 }
 
 resource "google_healthcare_dataset" "dataset" {
-  name     = "<%= ctx[:vars]['dataset_name'] %>"
+  name     = "{{index $.Vars "dataset_name"}}"
   location = "us-central1"
 }

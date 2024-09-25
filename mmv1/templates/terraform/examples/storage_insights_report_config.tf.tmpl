@@ -1,7 +1,7 @@
 data "google_project" "project" {
 }
 
-resource "google_storage_insights_report_config" "<%= ctx[:primary_resource_id] %>" {
+resource "google_storage_insights_report_config" "{{$.PrimaryResourceId}}" {
   display_name = "Test Report Config"
   location = "us-central1"
   frequency_options {
@@ -39,7 +39,7 @@ resource "google_storage_insights_report_config" "<%= ctx[:primary_resource_id] 
 }
 
 resource "google_storage_bucket" "report_bucket" {
-  name                        = "<%= ctx[:vars]['bucket_name'] %>"
+  name                        = "{{index $.Vars "bucket_name"}}"
   location                    = "us-central1"
   force_destroy               = true
   uniform_bucket_level_access = true

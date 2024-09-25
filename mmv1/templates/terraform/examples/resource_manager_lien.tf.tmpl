@@ -1,4 +1,4 @@
-resource "google_resource_manager_lien" "<%= ctx[:primary_resource_id] %>" {
+resource "google_resource_manager_lien" "{{$.PrimaryResourceId}}" {
   parent       = "projects/${google_project.project.number}"
   restrictions = ["resourcemanager.projects.delete"]
   origin       = "machine-readable-explanation"
@@ -6,7 +6,7 @@ resource "google_resource_manager_lien" "<%= ctx[:primary_resource_id] %>" {
 }
 
 resource "google_project" "project" {
-  project_id = "<%= ctx[:vars]["project_id"] %>"
+  project_id = "{{index $.Vars "project_id"}}"
   name       = "A very important project!"
   deletion_policy = "DELETE"
 }

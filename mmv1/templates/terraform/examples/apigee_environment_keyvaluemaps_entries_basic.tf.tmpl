@@ -54,7 +54,7 @@ resource "google_apigee_environment_keyvaluemaps" "apigee_environment_keyvaluema
   ]
 }
 
-resource "google_apigee_environment_keyvaluemaps_entries" "<%= ctx[:primary_resource_id] %>" {
+resource "google_apigee_environment_keyvaluemaps_entries" "{{$.PrimaryResourceId}}" {
   env_keyvaluemap_id = google_apigee_environment_keyvaluemaps.apigee_environment_keyvaluemaps.id
   name           = "testName"
   value          = "testValue"

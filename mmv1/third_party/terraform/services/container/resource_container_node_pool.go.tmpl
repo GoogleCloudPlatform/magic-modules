@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package container
 
 import (
@@ -18,11 +17,11 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 
-<% if version == "ga" -%>
+{{ if eq $.TargetVersionName `ga` }}
 	"google.golang.org/api/container/v1"
-<% else -%>
+{{- else }}
 	container "google.golang.org/api/container/v1beta1"
-<% end -%>
+{{- end }}
 )
 
 var clusterIdRegex = regexp.MustCompile("projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/clusters/(?P<name>[^/]+)")
@@ -892,7 +891,7 @@ func resourceContainerNodePoolStateImporter(d *schema.ResourceData, meta interfa
 		return nil, err
 	}
 
-	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/clusters/{{"{{"}}cluster{{"}}"}}/nodePools/{{"{{"}}name{{"}}"}}")
 	if err != nil {
 		return nil, err
 	}

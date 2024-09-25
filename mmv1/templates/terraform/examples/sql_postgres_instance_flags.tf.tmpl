@@ -1,5 +1,5 @@
-resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
-  name             = "<%= ctx[:vars]['postgres_instance'] %>"
+resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
+  name             = "{{index $.Vars "postgres_instance"}}"
   region           = "us-central1"
   database_version = "POSTGRES_14"
   settings {
@@ -13,5 +13,5 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
     }
     tier = "db-custom-2-7680"
   }
-  deletion_protection = "<%= ctx[:vars]['deletion_protection'] %>"
+  deletion_protection = "{{index $.Vars "deletion_protection"}}"
 }

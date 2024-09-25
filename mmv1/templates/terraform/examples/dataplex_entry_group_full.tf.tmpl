@@ -1,6 +1,6 @@
-resource "google_dataplex_entry_group" "<%= ctx[:primary_resource_id] %>" {
-  entry_group_id = "<%= ctx[:vars]['entry_group_name'] %>"
-  project = "<%= ctx[:test_env_vars]['project_name'] %>"
+resource "google_dataplex_entry_group" "{{$.PrimaryResourceId}}" {
+  entry_group_id = "{{index $.Vars "entry_group_name"}}"
+  project = "{{index $.TestEnvVars "project_name"}}"
   location = "us-central1"
 
   labels = { "tag": "test-tf" }

@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package networksecurity_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
   "testing"
@@ -378,4 +377,4 @@ resource "google_network_security_tls_inspection_policy" "default" {
 `, context)
 }
 
-<% end -%>
+{{ end }}

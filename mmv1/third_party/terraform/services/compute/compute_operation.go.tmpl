@@ -1,12 +1,11 @@
-<% autogen_exception -%>
 package compute
 
 import (
 	"bytes"
 	"context"
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 	"encoding/json"
-<% end -%>
+{{- end }}
 	"errors"
 	"fmt"
   "io"
@@ -16,11 +15,11 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
-<% if version == "ga" -%>
+{{ if eq $.TargetVersionName `ga` }}
 	"google.golang.org/api/compute/v1"
-<% else -%>
+{{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
-<% end -%>
+{{- end }}
 )
 
 type ComputeOperationWaiter struct {
@@ -28,9 +27,9 @@ type ComputeOperationWaiter struct {
 	Op      *compute.Operation
 	Context context.Context
 	Project string
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 	Parent  string
-<% end -%>
+{{- end }}
 }
 
 func (w *ComputeOperationWaiter) State() string {
@@ -87,10 +86,10 @@ func (w *ComputeOperationWaiter) QueryOp() (interface{}, error) {
 	} else if w.Op.Region != "" {
 		region := tpgresource.GetResourceNameFromSelfLink(w.Op.Region)
 		return w.Service.RegionOperations.Get(w.Project, region, w.Op.Name).Do()
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 	} else if w.Parent != "" {
 		return w.Service.GlobalOrganizationOperations.Get(w.Op.Name).ParentId(w.Parent).Do()
-<% end -%>
+{{- end }}
 	}
 	return w.Service.GlobalOperations.Get(w.Project, w.Op.Name).Do()
 }
@@ -131,7 +130,7 @@ func ComputeOperationWaitTime(config *transport_tpg.Config, res interface{}, pro
 	return tpgresource.OperationWait(w, activity, timeout, config.PollInterval)
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func ComputeOrgOperationWaitTimeWithResponse(config *transport_tpg.Config, res interface{}, response *map[string]interface{}, parent, activity, userAgent string, timeout time.Duration) error {
 	op := &compute.Operation{}
 	err := tpgresource.Convert(res, op)
@@ -158,7 +157,7 @@ func ComputeOrgOperationWaitTimeWithResponse(config *transport_tpg.Config, res i
 	return json.Unmarshal(e, response)
 }
 
-<% end -%>
+{{ end }}
 
 // ComputeOperationError wraps compute.OperationError and implements the
 // error interface so it can be returned.

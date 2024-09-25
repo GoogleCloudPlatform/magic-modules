@@ -1,5 +1,5 @@
-resource "google_network_connectivity_policy_based_route" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]['pbr_name'] %>"
+resource "google_network_connectivity_policy_based_route" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "pbr_name"}}"
   description = "My routing policy"
   network = google_compute_network.my_network.id
   priority = 2302
@@ -22,7 +22,7 @@ resource "google_network_connectivity_policy_based_route" "<%= ctx[:primary_reso
 }
 
 resource "google_compute_network" "my_network" {
-  name                    = "<%= ctx[:vars]['network_name'] %>"
+  name                    = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = false
 }
 
@@ -30,5 +30,5 @@ resource "google_compute_network" "my_network" {
 # load balancer for brevity. Consult https://cloud.google.com/load-balancing/docs/internal
 # to set one up.
 resource "google_compute_global_address" "ilb" {
-  name = "<%= ctx[:vars]['ilb_name'] %>"
+  name = "{{index $.Vars "ilb_name"}}"
 }

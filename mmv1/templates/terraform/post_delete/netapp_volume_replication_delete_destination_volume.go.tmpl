@@ -3,7 +3,7 @@
 if d.Get("delete_destination_volume").(bool) == true {
 	log.Printf("[DEBUG] delete_destination_volume is true. Deleting destination volume %v", d.Get("destination_volume"))
 	destination_volume := d.Get("destination_volume").(string)
-	del_url, err := tpgresource.ReplaceVars(d, config, "{{NetappBasePath}}"+destination_volume+"?force=true")
+	del_url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}NetappBasePath{{"}}"}}"+destination_volume+"?force=true")
 	if err != nil {
 		return err
 	}

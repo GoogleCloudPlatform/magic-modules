@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package backupdr
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -61,7 +60,7 @@ func dataSourceGoogleCloudBackupDRServiceRead(d *schema.ResourceData, meta inter
 		return err
 	}
 	billingProject := project
-	url, err := tpgresource.ReplaceVars(d, config, "{{BackupDRBasePath}}projects/{{project}}/locations/{{location}}/managementServers")
+	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}BackupDRBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/managementServers")
 	if err != nil {
 		return err
 	}
@@ -102,4 +101,4 @@ func dataSourceGoogleCloudBackupDRServiceRead(d *schema.ResourceData, meta inter
 	d.Set("name", name)
 	return nil
 }
-<% end -%>
+{{- end }}

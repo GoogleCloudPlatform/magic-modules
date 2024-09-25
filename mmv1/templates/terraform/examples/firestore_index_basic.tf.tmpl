@@ -1,6 +1,6 @@
 resource "google_firestore_database" "database" {
-  project     = "<%= ctx[:test_env_vars]['project_id'] %>"
-  name        = "<%= ctx[:vars]['database_id'] %>"
+  project     = "{{index $.TestEnvVars "project_id"}}"
+  name        = "{{index $.Vars "database_id"}}"
   location_id = "nam5"
   type        = "FIRESTORE_NATIVE"
 
@@ -8,8 +8,8 @@ resource "google_firestore_database" "database" {
   deletion_policy         = "DELETE"
 }
 
-resource "google_firestore_index" "<%= ctx[:primary_resource_id] %>" {
-  project     = "<%= ctx[:test_env_vars]['project_id'] %>"
+resource "google_firestore_index" "{{$.PrimaryResourceId}}" {
+  project     = "{{index $.TestEnvVars "project_id"}}"
   database   = google_firestore_database.database.name
   collection = "atestcollection"
 

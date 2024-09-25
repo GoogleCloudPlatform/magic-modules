@@ -1,5 +1,5 @@
-resource "google_compute_backend_bucket" "<%= ctx[:primary_resource_id] %>" {
-  name        = "<%= ctx[:vars]['backend_bucket_name'] %>"
+resource "google_compute_backend_bucket" "{{$.PrimaryResourceId}}" {
+  name        = "{{index $.Vars "backend_bucket_name"}}"
   description = "Contains beautiful images"
   bucket_name = google_storage_bucket.image_bucket.name
   enable_cdn  = true
@@ -11,6 +11,6 @@ resource "google_compute_backend_bucket" "<%= ctx[:primary_resource_id] %>" {
 }
 
 resource "google_storage_bucket" "image_bucket" {
-  name     = "<%= ctx[:vars]['backend_bucket_name'] %>"
+  name     = "{{index $.Vars "backend_bucket_name"}}"
   location = "EU"
 }

@@ -1,5 +1,5 @@
 resource "google_secret_manager_secret" "secret-basic" {
-  secret_id = "<%= ctx[:vars]['secret_name'] %>"
+  secret_id = "{{index $.Vars "secret_name"}}"
 
   replication {
     auto {}
@@ -12,8 +12,8 @@ resource "google_secret_manager_secret_version" "secret-version-basic" {
   secret_data = "secret-data"
 }
 
-resource "google_network_services_edge_cache_keyset" "<%= ctx[:primary_resource_id] %>" {
-  name        = "<%= ctx[:vars]['resource_name'] %>"
+resource "google_network_services_edge_cache_keyset" "{{$.PrimaryResourceId}}" {
+  name        = "{{index $.Vars "resource_name"}}"
   description = "The default keyset"
   public_key {
     id      = "my-public-key"

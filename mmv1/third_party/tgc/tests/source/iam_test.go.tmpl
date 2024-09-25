@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package test
 
 import (
@@ -21,12 +20,12 @@ func TestIAMFetchFullResource(t *testing.T) {
 	cases := []struct {
 		name string
 	}{
-	<% @tests.each do |test| -%>
-  <% if test.end_with?("iam_binding") || test.end_with?("iam_member") -%>
-		  {name: "<%= test -%>"},
-  <% end -%>
-	<% end -%>
-	}
+{{- range $test := $.Tests }}
+{{-   if or (hasSuffix $test "iam_binding") (hasSuffix $test "iam_member") }}
+		  {name: "{{ $test }}"},
+{{-   end }}
+{{- end }}
+		}
 
 	converters := resources.ResourceConverters()
 	schema := provider.Provider()

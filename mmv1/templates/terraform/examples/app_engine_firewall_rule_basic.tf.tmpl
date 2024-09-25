@@ -1,8 +1,8 @@
 resource "google_project" "my_project" {
   name       = "tf-test-project"
-  project_id = "<%= ctx[:vars]['project_id'] %>"
-  org_id     = "<%= ctx[:test_env_vars]['org_id'] %>"
-  billing_account = "<%= ctx[:test_env_vars]['billing_account'] %>"
+  project_id = "{{index $.Vars "project_id"}}"
+  org_id     = "{{index $.TestEnvVars "org_id"}}"
+  billing_account = "{{index $.TestEnvVars "billing_account"}}"
   deletion_policy = "DELETE"
 }
 

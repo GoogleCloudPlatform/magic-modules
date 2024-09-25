@@ -1,5 +1,5 @@
-resource "google_dialogflow_agent" "<%= ctx[:primary_resource_id] %>" {
-  display_name = "<%= ctx[:vars]["agent_name"] %>"
+resource "google_dialogflow_agent" "{{$.PrimaryResourceId}}" {
+  display_name = "{{index $.Vars "agent_name"}}"
   default_language_code = "en"
   supported_language_codes = ["fr","de","es"]
   time_zone = "America/New_York"

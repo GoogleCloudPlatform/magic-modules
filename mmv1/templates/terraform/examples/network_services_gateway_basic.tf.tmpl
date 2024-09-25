@@ -1,5 +1,5 @@
-resource "google_network_services_gateway" "<%= ctx[:primary_resource_id] %>" {
-  name     = "<%= ctx[:vars]['resource_name'] %>"
+resource "google_network_services_gateway" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.Vars "resource_name"}}"
   scope    = "default-scope-basic"
   type     = "OPEN_MESH"
   ports    = [443]

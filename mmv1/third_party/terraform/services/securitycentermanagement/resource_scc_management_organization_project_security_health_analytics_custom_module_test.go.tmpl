@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package securitycentermanagement_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -172,7 +171,7 @@ func testAccCheckSecurityCenterManagementProjectSecurityHealthAnalyticsCustomMod
 			location := rs.Primary.Attributes["location"]
 
 			url, err := tpgresource.ReplaceVarsForTest(config, rs, fmt.Sprintf(
-				"{{SecurityCenterBasePath}}projects/{{project}}/locations/%s/securityHealthAnalyticsCustomModules/{{name}}", location))
+				"{{"{{"}}SecurityCenterBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/%s/securityHealthAnalyticsCustomModules/{{"{{"}}name{{"}}"}}", location))
 			if err != nil {
 				return err
 			}
@@ -199,4 +198,4 @@ func testAccCheckSecurityCenterManagementProjectSecurityHealthAnalyticsCustomMod
 	}
 }
 
-<% end -%>
+{{ end }}

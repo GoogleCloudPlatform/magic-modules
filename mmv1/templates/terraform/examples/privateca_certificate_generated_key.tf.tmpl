@@ -47,7 +47,7 @@ resource "tls_private_key" "cert_key" {
   algorithm = "RSA"
 }
 
-resource "google_privateca_certificate" "<%= ctx[:primary_resource_id] %>" {
+resource "google_privateca_certificate" "{{$.PrimaryResourceId}}" {
   location = "us-central1"
   pool = google_privateca_ca_pool.default.name
   certificate_authority = google_privateca_certificate_authority.default.certificate_authority_id

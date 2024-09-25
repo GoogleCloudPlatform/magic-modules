@@ -7,11 +7,11 @@
 // config, add an additional network resource or change
 // this from "data"to "resource"
 data "google_compute_network" "memcache_network" {
-  name = "<%= ctx[:vars]['network_name'] %>"
+  name = "{{index $.Vars "network_name"}}"
 }
 
-resource "google_memcache_instance" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]["instance_name"] %>"
+resource "google_memcache_instance" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "instance_name"}}"
   authorized_network = data.google_compute_network.memcache_network.id
 
   labels = {

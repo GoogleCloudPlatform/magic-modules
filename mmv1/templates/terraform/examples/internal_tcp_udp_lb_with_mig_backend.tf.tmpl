@@ -2,14 +2,14 @@
 
 # VPC
 resource "google_compute_network" "ilb_network" {
-  name                    = "<%= ctx[:vars]['ilb_network_name'] %>"
+  name                    = "{{index $.Vars "ilb_network_name"}}"
   provider                = google-beta
   auto_create_subnetworks = false
 }
 
 # backed subnet
 resource "google_compute_subnetwork" "ilb_subnet" {
-  name          = "<%= ctx[:vars]['backend_subnet_name'] %>"
+  name          = "{{index $.Vars "backend_subnet_name"}}"
   provider      = google-beta
   ip_cidr_range = "10.0.1.0/24"
   region        = "europe-west1"
@@ -17,8 +17,8 @@ resource "google_compute_subnetwork" "ilb_subnet" {
 }
 
 # forwarding rule
-resource "google_compute_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
-  name                  = "<%= ctx[:vars]['forwarding_rule_name'] %>"
+resource "google_compute_forwarding_rule" "{{$.PrimaryResourceId}}" {
+  name                  = "{{index $.Vars "forwarding_rule_name"}}"
   backend_service       = google_compute_region_backend_service.default.id
   provider              = google-beta
   region                = "europe-west1"
@@ -32,7 +32,7 @@ resource "google_compute_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
 
 # backend service
 resource "google_compute_region_backend_service" "default" {
-  name                  = "<%= ctx[:vars]['backend_service_name'] %>"
+  name                  = "{{index $.Vars "backend_service_name"}}"
   provider              = google-beta
   region                = "europe-west1"
   protocol              = "TCP"
@@ -46,7 +46,7 @@ resource "google_compute_region_backend_service" "default" {
 
 # instance template
 resource "google_compute_instance_template" "instance_template" {
-  name         = "<%= ctx[:vars]['mig_template_name'] %>"
+  name         = "{{index $.Vars "mig_template_name"}}"
   provider     = google-beta
   machine_type = "e2-small"
   tags         = ["allow-ssh","allow-health-check"]
@@ -94,7 +94,7 @@ resource "google_compute_instance_template" "instance_template" {
 
 # health check
 resource "google_compute_region_health_check" "default" {
-  name     = "<%= ctx[:vars]['hc_name'] %>"
+  name     = "{{index $.Vars "hc_name"}}"
   provider = google-beta
   region   = "europe-west1"
   http_health_check {
@@ -104,7 +104,7 @@ resource "google_compute_region_health_check" "default" {
 
 # MIG
 resource "google_compute_region_instance_group_manager" "mig" {
-  name     = "<%= ctx[:vars]['mig_name'] %>"
+  name     = "{{index $.Vars "mig_name"}}"
   provider = google-beta
   region   = "europe-west1"
   version {
@@ -117,7 +117,7 @@ resource "google_compute_region_instance_group_manager" "mig" {
 
 # allow all access from health check ranges
 resource "google_compute_firewall" "fw_hc" {
-  name          = "<%= ctx[:vars]['fw_allow_hc_name'] %>"
+  name          = "{{index $.Vars "fw_allow_hc_name"}}"
   provider      = google-beta
   direction     = "INGRESS"
   network       = google_compute_network.ilb_network.id
@@ -130,7 +130,7 @@ resource "google_compute_firewall" "fw_hc" {
 
 # allow communication within the subnet 
 resource "google_compute_firewall" "fw_ilb_to_backends" {
-  name          = "<%= ctx[:vars]['fw_allow_ilb_to_backends_name'] %>"
+  name          = "{{index $.Vars "fw_allow_ilb_to_backends_name"}}"
   provider      = google-beta
   direction     = "INGRESS"
   network       = google_compute_network.ilb_network.id
@@ -148,7 +148,7 @@ resource "google_compute_firewall" "fw_ilb_to_backends" {
 
 # allow SSH
 resource "google_compute_firewall" "fw_ilb_ssh" {
-  name          = "<%= ctx[:vars]['fw_allow_ilb_ssh_name'] %>"
+  name          = "{{index $.Vars "fw_allow_ilb_ssh_name"}}"
   provider      = google-beta
   direction     = "INGRESS"
   network       = google_compute_network.ilb_network.id
@@ -162,7 +162,7 @@ resource "google_compute_firewall" "fw_ilb_ssh" {
 
 # test instance
 resource "google_compute_instance" "vm_test" {
-  name         = "<%= ctx[:vars]['vm_test_name'] %>"
+  name         = "{{index $.Vars "vm_test_name"}}"
   provider     = google-beta
   zone         = "europe-west1-b"
   machine_type = "e2-small"

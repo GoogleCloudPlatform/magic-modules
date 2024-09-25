@@ -2,14 +2,14 @@
 
 # VPC network
 resource "google_compute_network" "gilb_network" {
-  name                    = "<%= ctx[:vars]['gilb_network_name'] %>"
+  name                    = "{{index $.Vars "gilb_network_name"}}"
   provider                = google-beta
   auto_create_subnetworks = false
 }
 
 # proxy-only subnet
 resource "google_compute_subnetwork" "proxy_subnet" {
-  name          = "<%= ctx[:vars]['proxy_subnet_name'] %>"
+  name          = "{{index $.Vars "proxy_subnet_name"}}"
   provider      = google-beta
   ip_cidr_range = "10.0.0.0/24"
   region        = "europe-west1"
@@ -20,7 +20,7 @@ resource "google_compute_subnetwork" "proxy_subnet" {
 
 # backend subnet
 resource "google_compute_subnetwork" "gilb_subnet" {
-  name          = "<%= ctx[:vars]['backend_subnet_name'] %>"
+  name          = "{{index $.Vars "backend_subnet_name"}}"
   provider      = google-beta
   ip_cidr_range = "10.0.1.0/24"
   region        = "europe-west1"
@@ -28,8 +28,8 @@ resource "google_compute_subnetwork" "gilb_subnet" {
 }
 
 # forwarding rule
-resource "google_compute_global_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
-  name                  = "<%= ctx[:vars]['forwarding_rule_name'] %>"
+resource "google_compute_global_forwarding_rule" "{{$.PrimaryResourceId}}" {
+  name                  = "{{index $.Vars "forwarding_rule_name"}}"
   provider              = google-beta
   depends_on            = [google_compute_subnetwork.proxy_subnet]
   ip_protocol           = "TCP"
@@ -42,21 +42,21 @@ resource "google_compute_global_forwarding_rule" "<%= ctx[:primary_resource_id] 
 
 # HTTP target proxy
 resource "google_compute_target_http_proxy" "default" {
-  name     = "<%= ctx[:vars]['target_http_proxy_name'] %>"
+  name     = "{{index $.Vars "target_http_proxy_name"}}"
   provider = google-beta
   url_map  = google_compute_url_map.default.id
 }
 
 # URL map
 resource "google_compute_url_map" "default" {
-  name            = "<%= ctx[:vars]['url_map_name'] %>"
+  name            = "{{index $.Vars "url_map_name"}}"
   provider        = google-beta
   default_service = google_compute_backend_service.default.id
 }
 
 # backend service
 resource "google_compute_backend_service" "default" {
-  name                  = "<%= ctx[:vars]['backend_service_name'] %>"
+  name                  = "{{index $.Vars "backend_service_name"}}"
   provider              = google-beta
   protocol              = "HTTP"
   load_balancing_scheme = "INTERNAL_MANAGED"
@@ -71,7 +71,7 @@ resource "google_compute_backend_service" "default" {
 
 # instance template
 resource "google_compute_instance_template" "instance_template" {
-  name         = "<%= ctx[:vars]['mig_template_name'] %>"
+  name         = "{{index $.Vars "mig_template_name"}}"
   provider     = google-beta
   machine_type = "e2-small"
   tags         = ["http-server"]
@@ -119,7 +119,7 @@ resource "google_compute_instance_template" "instance_template" {
 
 # health check
 resource "google_compute_health_check" "default" {
-  name     = "<%= ctx[:vars]['hc_name'] %>"
+  name     = "{{index $.Vars "hc_name"}}"
   provider = google-beta
   http_health_check {
     port_specification = "USE_SERVING_PORT"
@@ -128,7 +128,7 @@ resource "google_compute_health_check" "default" {
 
 # MIG
 resource "google_compute_instance_group_manager" "mig" {
-  name     = "<%= ctx[:vars]['mig_name'] %>"
+  name     = "{{index $.Vars "mig_name"}}"
   provider = google-beta
   zone = "europe-west1-b"
   version {
@@ -141,7 +141,7 @@ resource "google_compute_instance_group_manager" "mig" {
 
 # allow all access from IAP and health check ranges
 resource "google_compute_firewall" "fw-iap" {
-  name          = "<%= ctx[:vars]['fw_allow_iap_hc_name'] %>"
+  name          = "{{index $.Vars "fw_allow_iap_hc_name"}}"
   provider      = google-beta
   direction     = "INGRESS"
   network       = google_compute_network.gilb_network.id
@@ -153,7 +153,7 @@ resource "google_compute_firewall" "fw-iap" {
 
 # allow http from proxy subnet to backends
 resource "google_compute_firewall" "fw-gilb-to-backends" {
-  name          = "<%= ctx[:vars]['fw_allow_gilb_to_backends_name'] %>"
+  name          = "{{index $.Vars "fw_allow_gilb_to_backends_name"}}"
   provider      = google-beta
   direction     = "INGRESS"
   network       = google_compute_network.gilb_network.id
@@ -167,7 +167,7 @@ resource "google_compute_firewall" "fw-gilb-to-backends" {
 
 # test instance
 resource "google_compute_instance" "vm-test" {
-  name         = "<%= ctx[:vars]['vm_test_name'] %>"
+  name         = "{{index $.Vars "vm_test_name"}}"
   provider     = google-beta
   zone         = "europe-west1-b"
   machine_type = "e2-small"

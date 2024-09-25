@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package compute_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -11,14 +10,14 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
-<% if version == "ga" -%>
+{{ if eq $.TargetVersionName `ga` }}
 	"google.golang.org/api/compute/v1"
-<% else -%>
+{{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
-<% end -%>
-<% unless version == 'ga' -%>
+{{- end }}
+{{- if ne $.TargetVersionName "ga" }}
 	"google.golang.org/api/googleapi"
-<% end -%>
+{{- end }}
 )
 
 func TestAccComputeInstanceFromMachineImage_basic(t *testing.T) {
@@ -49,7 +48,7 @@ func TestAccComputeInstanceFromMachineImage_basic(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeInstanceFromMachineImage_maxRunDuration(t *testing.T) {
 	t.Parallel()
 
@@ -82,7 +81,7 @@ func TestAccComputeInstanceFromMachineImage_maxRunDuration(t *testing.T) {
 		},
 	})
 }
-<% end -%>
+{{- end }}
 
 func TestAccComputeInstanceFromMachineImage_localSsdRecoveryTimeout(t *testing.T) {
 	t.Parallel()
@@ -138,7 +137,7 @@ func TestAccComputeInstanceFromMachineImageWithOverride_localSsdRecoveryTimeout(
 	})
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeInstanceFromMachineImageWithOverride_partnerMetadata(t *testing.T) {
 	t.Parallel()
 
@@ -167,7 +166,7 @@ func TestAccComputeInstanceFromMachineImageWithOverride_partnerMetadata(t *testi
 		},
 	})
 }
-<% end -%>
+{{- end }}
 
 func TestAccComputeInstanceFromMachineImage_overrideMetadataDotStartupScript(t *testing.T) {
 	t.Parallel()
@@ -271,7 +270,7 @@ func TestAccComputeInstanceFromMachineImage_confidentialInstanceConfigMain(t *te
 					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance, false, "SEV_SNP"),
 				),
 			},
-			<% unless version == "ga" -%>
+			{{- if ne $.TargetVersionName "ga" }}
 			{
 				Config: testAccComputeInstanceFromMachineImage_ConfidentialInstanceConfigTdx(fmt.Sprintf("tf-test-tdx-%s", acctest.RandString(t, 10)), fmt.Sprintf("tf-test-tdx-generated-%s", acctest.RandString(t, 10)), "TDX"),
 				Check: resource.ComposeTestCheckFunc(
@@ -283,7 +282,7 @@ func TestAccComputeInstanceFromMachineImage_confidentialInstanceConfigMain(t *te
 				),
 
 			},
-			<% end -%>
+			{{- end }}
 		},
 	})
 }
@@ -595,7 +594,7 @@ resource "google_compute_instance_from_machine_image" "foobar4" {
 `, instance, confidentialInstanceType, instance, newInstance, confidentialInstanceType)
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeInstanceFromMachineImage_ConfidentialInstanceConfigTdx(instance string, newInstance string, confidentialInstanceType string) string {
 	return fmt.Sprintf(`
 resource "google_compute_instance" "vm5" {
@@ -652,9 +651,9 @@ resource "google_compute_instance_from_machine_image" "foobar5" {
 }
 `, instance, confidentialInstanceType, instance, newInstance, confidentialInstanceType)
 }
-<% end -%>
+{{- end }}
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeInstanceFromMachineImage_maxRunDuration(instance, newInstance string) string {
 	return fmt.Sprintf(`
 resource "google_compute_instance" "vm" {
@@ -714,7 +713,7 @@ resource "google_compute_instance_from_machine_image" "foobar" {
 }
 `, instance, instance, newInstance)
 }
-<% end -%>
+{{- end }}
 
 
 func testAccComputeInstanceFromMachineImage_localSsdRecoveryTimeout(instance, newInstance string) string {
@@ -829,7 +828,7 @@ resource "google_compute_instance_from_machine_image" "foobar" {
 `, instance, instance, newInstance)
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeInstanceFromMachineImageWithOverride_partnerMetadata(instance, newInstance string) string {
 	return fmt.Sprintf(`
 resource "google_compute_instance" "vm" {
@@ -899,7 +898,7 @@ resource "google_compute_instance_from_machine_image" "foobar" {
 }
 `, instance, instance, newInstance)
 }
-<% end -%>
+{{- end }}
 
 func testAccComputeInstanceFromMachineImage_overrideMetadataDotStartupScript(instanceName, generatedInstanceName string) string {
 	return fmt.Sprintf(`
@@ -1036,6 +1035,6 @@ resource "google_compute_instance_from_machine_image" "foobar" {
 `, projectID, projectID, org, billingId, instance, instance, newInstance)
 }
 
-<% else %>
+{{- else }}
 // Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
-<% end -%>
+{{- end }}

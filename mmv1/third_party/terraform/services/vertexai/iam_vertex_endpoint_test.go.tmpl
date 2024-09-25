@@ -1,7 +1,6 @@
-<% autogen_exception -%>
 package vertexai_test
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 
 import (
 	"fmt"
@@ -361,4 +360,4 @@ endpoint = google_vertex_ai_endpoint.endpoint.name
 `, context)
 }
 
-<% end -%>
+{{ end }}

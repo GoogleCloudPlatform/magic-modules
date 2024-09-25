@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package networksecurity_test
 
 import (
@@ -92,7 +91,7 @@ func testAccCheckNetworkSecurityFirewallEndpointDestroyProducer(t *testing.T) fu
 
 			config := acctest.GoogleProviderConfig(t)
 
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{NetworkSecurityBasePath}}{{parent}}/locations/{{location}}/firewallEndpoints/{{name}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}NetworkSecurityBasePath{{"}}"}}{{"{{"}}parent{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/firewallEndpoints/{{"{{"}}name{{"}}"}}")
 			if err != nil {
 				return err
 			}

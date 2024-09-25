@@ -4,7 +4,7 @@
 # https://cloud.google.com/eventarc/docs/path-patterns
 
 resource "google_storage_bucket" "source-bucket" {
-  name     = "<%= ctx[:vars]['bucket_name_source'] %>"
+  name     = "{{index $.Vars "bucket_name_source"}}"
   location = "US"
   uniform_bucket_level_access = true
 }
@@ -12,11 +12,11 @@ resource "google_storage_bucket" "source-bucket" {
 resource "google_storage_bucket_object" "object" {
   name   = "function-source.zip"
   bucket = google_storage_bucket.source-bucket.name
-  source = "<%= ctx[:vars]['zip_path'] %>"  # Add path to the zipped function source code
+  source = "{{index $.Vars "zip_path"}}"  # Add path to the zipped function source code
 }
 
 resource "google_service_account" "account" {
-  account_id   = "<%= ctx[:vars]['service_account'] %>"
+  account_id   = "{{index $.Vars "service_account"}}"
   display_name = "Test Service Account - used for both the cloud function and eventarc trigger in the test"
 }
 
@@ -24,38 +24,38 @@ resource "google_service_account" "account" {
 # Here we use Audit Logs to monitor the bucket so path patterns can be used in the example of
 # google_cloudfunctions2_function below (Audit Log events have path pattern support)
 resource "google_storage_bucket" "audit-log-bucket" {
-  name     = "<%= ctx[:vars]['bucket_name_auditlogs'] %>"
+  name     = "{{index $.Vars "bucket_name_auditlogs"}}"
   location = "us-central1"  # The trigger must be in the same location as the bucket
   uniform_bucket_level_access = true
 }
 
 # Permissions on the service account used by the function and Eventarc trigger
 resource "google_project_iam_member" "invoking" {
-  project = "<%= ctx[:test_env_vars]['project'] %>"
+  project = "{{index $.TestEnvVars "project"}}"
   role    = "roles/run.invoker"
   member  = "serviceAccount:${google_service_account.account.email}"
 }
 
 resource "google_project_iam_member" "event-receiving" {
-  project = "<%= ctx[:test_env_vars]['project'] %>"
+  project = "{{index $.TestEnvVars "project"}}"
   role    = "roles/eventarc.eventReceiver"
   member  = "serviceAccount:${google_service_account.account.email}"
   depends_on = [google_project_iam_member.invoking]
 }
 
 resource "google_project_iam_member" "artifactregistry-reader" {
-  project = "<%= ctx[:test_env_vars]['project'] %>"
+  project = "{{index $.TestEnvVars "project"}}"
   role     = "roles/artifactregistry.reader"
   member   = "serviceAccount:${google_service_account.account.email}"
   depends_on = [google_project_iam_member.event-receiving]
 }
 
-resource "google_cloudfunctions2_function" "<%= ctx[:primary_resource_id] %>" {
+resource "google_cloudfunctions2_function" "{{$.PrimaryResourceId}}" {
   depends_on = [
     google_project_iam_member.event-receiving,
     google_project_iam_member.artifactregistry-reader,
   ]
-  name = "<%= ctx[:vars]['function_name'] %>"
+  name = "{{index $.Vars "function_name"}}"
   location = "us-central1"
   description = "a new function"
  

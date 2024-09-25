@@ -1,6 +1,4 @@
-<% autogen_exception -%>
 #!/bin/bash
-<% provider_name = version.nil? || version == 'ga' ? 'google' : 'google-' + version -%>
 set -e
 set -x
 if [ -z "$1" ]; then
@@ -9,13 +7,13 @@ if [ -z "$1" ]; then
 fi
 
 function cleanup() {
-  go mod edit -dropreplace=github.com/hashicorp/terraform-provider-clean-<%= provider_name %>
-  go mod edit -droprequire=github.com/hashicorp/terraform-provider-clean-<%= provider_name %>
+  go mod edit -dropreplace=github.com/hashicorp/terraform-provider-clean-{{ $.ProviderFromVersion }}
+  go mod edit -droprequire=github.com/hashicorp/terraform-provider-clean-{{ $.ProviderFromVersion }}
 }
 
 trap cleanup EXIT
-if [[ -d ~/go/src/github.com/hashicorp/terraform-provider-clean-<%= provider_name %> ]]; then
-  pushd ~/go/src/github.com/hashicorp/terraform-provider-clean-<%= provider_name %>
+if [[ -d ~/go/src/github.com/hashicorp/terraform-provider-clean-{{ $.ProviderFromVersion }} ]]; then
+  pushd ~/go/src/github.com/hashicorp/terraform-provider-clean-{{ $.ProviderFromVersion }}
   git clean -fdx
   git reset --hard
   git checkout main
@@ -23,10 +21,10 @@ if [[ -d ~/go/src/github.com/hashicorp/terraform-provider-clean-<%= provider_nam
   popd
 else
   mkdir -p ~/go/src/github.com/hashicorp
-  git clone https://github.com/hashicorp/terraform-provider-<%= provider_name %> ~/go/src/github.com/hashicorp/terraform-provider-clean-<%= provider_name %>
+  git clone https://github.com/hashicorp/terraform-provider-{{ $.ProviderFromVersion }} ~/go/src/github.com/hashicorp/terraform-provider-clean-{{ $.ProviderFromVersion }}
 fi
 
 
-go mod edit -require=github.com/hashicorp/terraform-provider-clean-<%= provider_name -%>@v0.0.0
-go mod edit -replace github.com/hashicorp/terraform-provider-clean-<%= provider_name -%>=$(realpath ~/go/src/github.com/hashicorp/terraform-provider-clean-<%= provider_name -%>)
+go mod edit -require=github.com/hashicorp/terraform-provider-clean-{{ $.ProviderFromVersion }}@v0.0.0
+go mod edit -replace github.com/hashicorp/terraform-provider-clean-{{ $.ProviderFromVersion }}=$(realpath ~/go/src/github.com/hashicorp/terraform-provider-clean-{{ $.ProviderFromVersion }})
 go run scripts/diff.go --resource $1 --verbose

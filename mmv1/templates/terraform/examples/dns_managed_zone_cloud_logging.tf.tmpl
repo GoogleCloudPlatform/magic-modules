@@ -1,5 +1,5 @@
-resource "google_dns_managed_zone" "<%= ctx[:primary_resource_id] %>" {
-  name        = "<%= ctx[:vars]['zone_name'] %>"
+resource "google_dns_managed_zone" "{{$.PrimaryResourceId}}" {
+  name        = "{{index $.Vars "zone_name"}}"
   dns_name    = "services.example.com."
   description = "Example cloud logging enabled DNS zone"
   labels = {

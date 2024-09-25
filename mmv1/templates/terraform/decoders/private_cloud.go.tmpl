@@ -5,7 +5,7 @@ if err != nil {
   return nil, err
 }
 
-url, err := tpgresource.ReplaceVars(d, config, "{{VmwareengineBasePath}}projects/{{project}}/locations/{{location}}/privateClouds/{{name}}/clusters")
+url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}VmwareengineBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/privateClouds/{{"{{"}}name{{"}}"}}/clusters")
 if err != nil {
 	return nil, err
 }

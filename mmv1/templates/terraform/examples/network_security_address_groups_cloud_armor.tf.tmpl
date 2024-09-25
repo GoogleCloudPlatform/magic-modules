@@ -1,7 +1,7 @@
-resource "google_network_security_address_group" "<%= ctx[:primary_resource_id] %>" {
+resource "google_network_security_address_group" "{{$.PrimaryResourceId}}" {
   provider    = google-beta
-  name        = "<%= ctx[:vars]['resource_name'] %>"
-  parent      = "projects/<%= ctx[:test_env_vars]['project'] %>"
+  name        = "{{index $.Vars "resource_name"}}"
+  parent      = "projects/{{index $.TestEnvVars "project"}}"
   location    = "global"
   type        = "IPV4"
   capacity    = "100"

@@ -1,6 +1,6 @@
-resource "google_cloudbuild_trigger" "<%= ctx[:primary_resource_id] %>" {
+resource "google_cloudbuild_trigger" "{{$.PrimaryResourceId}}" {
   location = "us-central1"
-  name     = "<%= ctx[:primary_resource_id] %>"
+  name     = "{{$.PrimaryResourceId}}"
   filename = "cloudbuild.yaml"
 
   github {

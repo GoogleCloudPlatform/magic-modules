@@ -1,11 +1,11 @@
 resource "google_network_security_gateway_security_policy" "default" {
-  name        = "<%= ctx[:vars]['gateway_security_policy_id'] %>"
+  name        = "{{index $.Vars "gateway_security_policy_id"}}"
   location    = "us-central1"
   description = "gateway security policy created to be used as reference by the rule."
 }
 
-resource "google_network_security_gateway_security_policy_rule" "<%= ctx[:primary_resource_id] %>" {
-  name                    = "<%= ctx[:vars]['resource_name'] %>"
+resource "google_network_security_gateway_security_policy_rule" "{{$.PrimaryResourceId}}" {
+  name                    = "{{index $.Vars "resource_name"}}"
   location                = "us-central1"
   gateway_security_policy = google_network_security_gateway_security_policy.default.name
   enabled                 = true  

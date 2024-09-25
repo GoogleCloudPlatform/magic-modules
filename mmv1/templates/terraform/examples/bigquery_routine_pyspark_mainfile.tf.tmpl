@@ -1,16 +1,16 @@
 resource "google_bigquery_dataset" "test" {
-  dataset_id = "<%= ctx[:vars]['dataset_id'] %>"
+  dataset_id = "{{index $.Vars "dataset_id"}}"
 }
 
 resource "google_bigquery_connection" "test" {
-  connection_id = "<%= ctx[:vars]['connection_id'] %>"
+  connection_id = "{{index $.Vars "connection_id"}}"
   location      = "US"
   spark { }
 }
 
-resource "google_bigquery_routine" "<%= ctx[:primary_resource_id] %>" {
+resource "google_bigquery_routine" "{{$.PrimaryResourceId}}" {
   dataset_id      = google_bigquery_dataset.test.dataset_id
-  routine_id      = "<%= ctx[:vars]['routine_id'] %>"
+  routine_id      = "{{index $.Vars "routine_id"}}"
   routine_type    = "PROCEDURE"
   language        = "PYTHON"
   definition_body = ""

@@ -1,7 +1,7 @@
 resource "google_folder" "security_policy_target" {
   provider     = google-beta
   display_name = "tf-test-secpol-%{random_suffix}"
-  parent       = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"
+  parent       = "organizations/{{index $.TestEnvVars "org_id"}}"
   deletion_protection = false
 }
 
@@ -11,9 +11,9 @@ resource "google_compute_organization_security_policy" "policy" {
   parent       = google_folder.security_policy_target.name
 }
 
-resource "google_compute_organization_security_policy_rule" "<%= ctx[:primary_resource_id] %>" {
+resource "google_compute_organization_security_policy_rule" "{{$.PrimaryResourceId}}" {
   provider = google-beta
-  policy_id = google_compute_organization_security_policy.<%= ctx[:primary_resource_id] %>.id
+  policy_id = google_compute_organization_security_policy.{{$.PrimaryResourceId}}.id
   action = "allow"
 
   direction = "INGRESS"
@@ -33,9 +33,9 @@ resource "google_compute_organization_security_policy_rule" "<%= ctx[:primary_re
   priority = 100
 }
 
-resource "google_compute_organization_security_policy_association" "<%= ctx[:primary_resource_id] %>" {
+resource "google_compute_organization_security_policy_association" "{{$.PrimaryResourceId}}" {
   provider = google-beta
   name          = "tf-test%{random_suffix}"
-  attachment_id = google_compute_organization_security_policy.<%= ctx[:primary_resource_id] %>.parent
-  policy_id     = google_compute_organization_security_policy.<%= ctx[:primary_resource_id] %>.id
+  attachment_id = google_compute_organization_security_policy.{{$.PrimaryResourceId}}.parent
+  policy_id     = google_compute_organization_security_policy.{{$.PrimaryResourceId}}.id
 }

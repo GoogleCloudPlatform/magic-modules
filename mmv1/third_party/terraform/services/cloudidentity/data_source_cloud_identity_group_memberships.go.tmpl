@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package cloudidentity
 
 import (
@@ -9,11 +8,11 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 	cloudidentity "google.golang.org/api/cloudidentity/v1beta1"
-<% else -%>
+{{- else }}
 	"google.golang.org/api/cloudidentity/v1"
-<% end -%>
+{{- end }}
 )
 
 func DataSourceGoogleCloudIdentityGroupMemberships() *schema.Resource {
@@ -75,9 +74,9 @@ func dataSourceGoogleCloudIdentityGroupMembershipsRead(d *schema.ResourceData, m
 				"name":                 member.Name,
 				"type":                 member.Type,
 				"roles":                flattenCloudIdentityGroupMembershipsRoles(member.Roles),
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 				"member_key":           flattenCloudIdentityGroupsEntityKey(member.MemberKey),
-<% end -%>
+{{- end }}
 				"preferred_member_key": flattenCloudIdentityGroupsEntityKey(member.PreferredMemberKey),
 			})
 		}

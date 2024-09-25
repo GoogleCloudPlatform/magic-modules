@@ -1,9 +1,9 @@
 locals {
-  project = "<%= ctx[:test_env_vars]['project'] %>" # Google Cloud Platform Project ID
+  project = "{{index $.TestEnvVars "project"}}" # Google Cloud Platform Project ID
 }
 
 resource "google_service_account" "account" {
-  account_id = "<%= ctx[:vars]['service_account'] %>"
+  account_id = "{{index $.Vars "service_account"}}"
   display_name = "Test Service Account"
 }
 
@@ -26,7 +26,7 @@ resource "google_project_iam_member" "storage_object_admin" {
 }
 
 resource "google_storage_bucket" "bucket" {
-  name     = "${local.project}-<%= ctx[:vars]['bucket_name'] %>"  # Every bucket name must be globally unique
+  name     = "${local.project}-{{index $.Vars "bucket_name"}}"  # Every bucket name must be globally unique
   location = "US"
   uniform_bucket_level_access = true
 }
@@ -34,7 +34,7 @@ resource "google_storage_bucket" "bucket" {
 resource "google_storage_bucket_object" "object" {
   name   = "function-source.zip"
   bucket = google_storage_bucket.bucket.name
-  source = "<%= ctx[:vars]['zip_path'] %>"  # Add path to the zipped function source code
+  source = "{{index $.Vars "zip_path"}}"  # Add path to the zipped function source code
 }
 
 # builder permissions need to stablize before it can pull the source zip
@@ -48,8 +48,8 @@ resource "time_sleep" "wait_60s" {
   ]
 }
  
-resource "google_cloudfunctions2_function" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]['function'] %>"
+resource "google_cloudfunctions2_function" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "function"}}"
   location = "us-central1"
   description = "a new function"
  

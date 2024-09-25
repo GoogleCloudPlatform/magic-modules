@@ -1,18 +1,18 @@
 resource "google_compute_network" "network" {
-  name                    = "<%= ctx[:vars]['network_name'] %>"
+  name                    = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = false
 }
 
 resource "google_network_connectivity_hub" "basic_hub" {
-  name        = "<%= ctx[:vars]['hub_name'] %>"
+  name        = "{{index $.Vars "hub_name"}}"
   description = "A sample hub"
   labels = {
     label-two = "value-one"
   }
 }
 
-resource "google_network_connectivity_spoke" "<%= ctx[:primary_resource_id] %>"  {
-  name = "<%= ctx[:vars]['spoke_name'] %>"
+resource "google_network_connectivity_spoke" "{{$.PrimaryResourceId}}"  {
+  name = "{{index $.Vars "spoke_name"}}"
   location = "global"
   description = "A sample spoke with a linked router appliance instance"
   labels = {

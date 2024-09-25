@@ -1,12 +1,11 @@
-<% autogen_exception -%>
 package compute
 
 import (
-<% if version == "ga" -%>
+{{- if eq $.TargetVersionName "ga" }}
 	"google.golang.org/api/compute/v1"
-<% else -%>
+{{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
-<% end -%>
+{{- end }}
 )
 
 // Incredibly hacky way of getting a reference to an SPR of the right type into

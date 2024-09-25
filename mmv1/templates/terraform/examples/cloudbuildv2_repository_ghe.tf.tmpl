@@ -1,5 +1,5 @@
-resource "google_cloudbuildv2_repository" "<%= ctx[:primary_resource_id] %>" {
-  name              = "<%= ctx[:vars]['repository_name'] %>"
+resource "google_cloudbuildv2_repository" "{{$.PrimaryResourceId}}" {
+  name              = "{{index $.Vars "repository_name"}}"
   parent_connection = google_cloudbuildv2_connection.ghe_complete.name
   remote_uri        = "https://ghe.proctor-staging-test.com/proctorteam/regional_test.git"
   location          = "us-central1"
@@ -10,7 +10,7 @@ resource "google_cloudbuildv2_repository" "<%= ctx[:primary_resource_id] %>" {
 
 resource "google_cloudbuildv2_connection" "ghe_complete" {
   location = "us-central1"
-  name     = "<%= ctx[:vars]['connection_name'] %>"
+  name     = "{{index $.Vars "connection_name"}}"
 
   github_enterprise_config {
     host_uri                      = "https://ghe.proctor-staging-test.com"

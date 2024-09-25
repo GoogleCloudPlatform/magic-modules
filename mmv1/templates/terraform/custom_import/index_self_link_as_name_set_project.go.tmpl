@@ -11,7 +11,7 @@
 		return nil, fmt.Errorf(
 				"Saw %s when the name is expected to have shape %s",
 				d.Get("name"),
-				"projects/{{project}}/databases/{{database}}/collectionGroups/{{collection}}/indexes/{{server_generated_id}}",
+				"projects/{{"{{"}}project{{"}}"}}/databases/{{"{{"}}database{{"}}"}}/collectionGroups/{{"{{"}}collection{{"}}"}}/indexes/{{"{{"}}server_generated_id{{"}}"}}",
 			)
 	}
 

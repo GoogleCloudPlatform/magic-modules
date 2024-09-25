@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package firebase
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 import (
 	"fmt"
 
@@ -47,4 +46,4 @@ func dataSourceGoogleFirebaseAndroidAppRead(d *schema.ResourceData, meta interfa
 	}
 	return nil
 }
-<% end -%>
+{{- end }}

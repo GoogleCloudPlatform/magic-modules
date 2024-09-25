@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package fwtransport
 
 import (
@@ -58,9 +57,9 @@ type FrameworkProviderConfig struct {
 	DefaultLabels              types.Map
 
 	// paths for client setup
-	<% products.each do |product| -%>
-	<%= product[:definitions].name -%>BasePath string
-	<% end -%>
+	{{- range $product := $.Products }}
+	{{ $product.Name }}BasePath string
+	{{- end }}
 }
 
 // LoadAndValidateFramework handles the bulk of configuring the provider
@@ -76,7 +75,7 @@ func (p *FrameworkProviderConfig) LoadAndValidateFramework(ctx context.Context, 
 	p.Context = ctx
 
 	// Handle User Agent string
-	p.UserAgent = CompileUserAgentString(ctx, "terraform-provider-google<%= "-" + version unless version == 'ga'  -%>", tfVersion, providerversion)
+	p.UserAgent = CompileUserAgentString(ctx, "terraform-provider-google{{- if ne $.TargetVersionName "ga" -}}-{{$.TargetVersionName}}{{- end }}", tfVersion, providerversion)
 	// opt in extension for adding to the User-Agent header
 	if ext := os.Getenv("GOOGLE_TERRAFORM_USERAGENT_EXTENSION"); ext != "" {
 		ua := p.UserAgent
@@ -100,9 +99,9 @@ func (p *FrameworkProviderConfig) LoadAndValidateFramework(ctx context.Context, 
 
 	// Setup Base Paths for clients
 	// Generated products
-	<% products.map.each do |product| -%>
-	p.<%= product[:definitions].name -%>BasePath = data.<%= product[:definitions].name -%>CustomEndpoint.ValueString()
-	<% end -%>
+	{{- range $product := $.Products }}
+	p.{{ $product.Name }}BasePath = data.{{ $product.Name }}CustomEndpoint.ValueString()
+	{{- end }}
 
 	// Temporary
 	p.Credentials = data.Credentials
@@ -238,16 +237,16 @@ func (p *FrameworkProviderConfig) HandleDefaults(ctx context.Context, data *fwmo
 	}
 
 	// Generated Products
-<% products.each do |product| -%>
-	if data.<%= product[:definitions].name -%>CustomEndpoint.IsNull() {
+{{- range $product := $.Products }}
+	if data.{{ $product.Name }}CustomEndpoint.IsNull() {
 		customEndpoint := transport_tpg.MultiEnvDefault([]string{
-			"GOOGLE_<%= product[:definitions].name.underscore.upcase -%>_CUSTOM_ENDPOINT",
-		}, transport_tpg.DefaultBasePaths[transport_tpg.<%= product[:definitions].name -%>BasePathKey])
+			"GOOGLE_{{ upper (underscore $product.Name) }}_CUSTOM_ENDPOINT",
+		}, transport_tpg.DefaultBasePaths[transport_tpg.{{ $product.Name }}BasePathKey])
 		if customEndpoint != nil {
-			data.<%= product[:definitions].name -%>CustomEndpoint = types.StringValue(customEndpoint.(string))
+			data.{{ $product.Name }}CustomEndpoint = types.StringValue(customEndpoint.(string))
 		}
 	}
-<% end -%>
+{{- end }}
 
 	// Handwritten Products / Versioned / Atypical Entries
 	if data.CloudBillingCustomEndpoint.IsNull() {
@@ -304,7 +303,7 @@ func (p *FrameworkProviderConfig) HandleDefaults(ctx context.Context, data *fwmo
 		}
 	}
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 	if data.RuntimeConfigCustomEndpoint.IsNull() {
 		customEndpoint := transport_tpg.MultiEnvDefault([]string{
 			"GOOGLE_RUNTIMECONFIG_CUSTOM_ENDPOINT",
@@ -313,7 +312,7 @@ func (p *FrameworkProviderConfig) HandleDefaults(ctx context.Context, data *fwmo
 			data.RuntimeConfigCustomEndpoint = types.StringValue(customEndpoint.(string))
 		}
 	}
-<% end -%>
+{{- end }}
 
 	if data.IAMCustomEndpoint.IsNull() {
 		customEndpoint := transport_tpg.MultiEnvDefault([]string{

@@ -1,5 +1,5 @@
-resource "google_compute_health_check" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]['health_check_name'] %>"
+resource "google_compute_health_check" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "health_check_name"}}"
   check_interval_sec = 30
 
   https_health_check {

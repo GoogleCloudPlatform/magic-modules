@@ -8,7 +8,7 @@ resource "google_compute_region_backend_service" "default" {
   }
 
   region      = "us-central1"
-  name        = "<%= ctx[:vars]['region_backend_service_name'] %>"
+  name        = "{{index $.Vars "region_backend_service_name"}}"
   protocol    = "HTTP"
   timeout_sec = 10
 
@@ -22,7 +22,7 @@ data "google_compute_image" "debian_image" {
 
 resource "google_compute_region_instance_group_manager" "rigm" {
   region   = "us-central1"
-  name     = "<%= ctx[:vars]['rigm_name'] %>"
+  name     = "{{index $.Vars "rigm_name"}}"
   version {
     instance_template = google_compute_instance_template.instance_template.id
     name              = "primary"
@@ -32,7 +32,7 @@ resource "google_compute_region_instance_group_manager" "rigm" {
 }
 
 resource "google_compute_instance_template" "instance_template" {
-  name         = "template-<%= ctx[:vars]['region_backend_service_name'] %>"
+  name         = "template-{{index $.Vars "region_backend_service_name"}}"
   machine_type = "e2-medium"
 
   network_interface {
@@ -51,20 +51,20 @@ resource "google_compute_instance_template" "instance_template" {
 
 resource "google_compute_region_health_check" "default" {
   region = "us-central1"
-  name   = "<%= ctx[:vars]['region_health_check_name'] %>"
+  name   = "{{index $.Vars "region_health_check_name"}}"
   http_health_check {
     port_specification = "USE_SERVING_PORT"
   }
 }
 
 resource "google_compute_network" "default" {
-  name                    = "<%= ctx[:vars]['network_name'] %>"
+  name                    = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = false
   routing_mode            = "REGIONAL"
 }
 
 resource "google_compute_subnetwork" "default" {
-  name          = "<%= ctx[:vars]['network_name'] %>-default"
+  name          = "{{index $.Vars "network_name"}}-default"
   ip_cidr_range = "10.1.2.0/24"
   region        = "us-central1"
   network       = google_compute_network.default.id

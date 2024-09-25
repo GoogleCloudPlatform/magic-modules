@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package networkservices_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -108,4 +107,4 @@ func testAccNetworkServicesTlsRoute_update(tlsServiceName string, tlsHealthCheck
 `, tlsServiceName, tlsHealthCheckName, tlsRouteName)
 }
 
-<% end -%>
+{{ end }}

@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package provider
 
 import (
@@ -144,13 +143,13 @@ func Provider() *schema.Provider {
 			},
 
 			// Generated Products
-			<% products.each do |product| -%>
-			"<%= product[:definitions].name.underscore -%>_custom_endpoint": {
+			{{- range $product := $.Products }}
+			"{{ underscore $product.Name }}_custom_endpoint": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: transport_tpg.ValidateCustomEndpoint,
 			},
-			<% end -%>
+			{{- end }}
 
 			// Handwritten Products / Versioned / Atypical Entries
 			transport_tpg.CloudBillingCustomEndpointEntryKey:           transport_tpg.CloudBillingCustomEndpointEntry,
@@ -159,9 +158,9 @@ func Provider() *schema.Provider {
 			transport_tpg.DataflowCustomEndpointEntryKey:               transport_tpg.DataflowCustomEndpointEntry,
 			transport_tpg.IamCredentialsCustomEndpointEntryKey:         transport_tpg.IamCredentialsCustomEndpointEntry,
 			transport_tpg.ResourceManagerV3CustomEndpointEntryKey:      transport_tpg.ResourceManagerV3CustomEndpointEntry,
-			<% unless version == "ga" -%>
+			{{- if ne $.TargetVersionName "ga" }}
 			transport_tpg.RuntimeConfigCustomEndpointEntryKey:          transport_tpg.RuntimeConfigCustomEndpointEntry,
-			<% end -%>
+			{{- end }}
 			transport_tpg.IAMCustomEndpointEntryKey:                    transport_tpg.IAMCustomEndpointEntry,
 			transport_tpg.ServiceNetworkingCustomEndpointEntryKey:      transport_tpg.ServiceNetworkingCustomEndpointEntry,
 			transport_tpg.TagsLocationCustomEndpointEntryKey:           transport_tpg.TagsLocationCustomEndpointEntry,
@@ -230,11 +229,11 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		Zone:                d.Get("zone").(string),
 		UserProjectOverride: d.Get("user_project_override").(bool),
 		BillingProject:      d.Get("billing_project").(string),
-<% if version.nil? || version == 'ga' -%>
+{{- if or (eq $.TargetVersionName "") (eq $.TargetVersionName "ga") }}
 		UserAgent: p.UserAgent("terraform-provider-google", version.ProviderVersion),
-<% else -%>
-		UserAgent: p.UserAgent("terraform-provider-google-<%= version -%>", version.ProviderVersion),
-<% end -%>
+{{- else }}
+		UserAgent: p.UserAgent("terraform-provider-google-{{ $.TargetVersionName }}", version.ProviderVersion),
+{{- end }}
 	}
 
 	// opt in extension for adding to the User-Agent header
@@ -349,9 +348,9 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	config.BatchingConfig = batchCfg
 
 	// Generated products
-	<% products.map.each do |product| -%>
-	config.<%= product[:definitions].name -%>BasePath = d.Get("<%= product[:definitions].name.underscore -%>_custom_endpoint").(string)
-	<% end -%>
+	{{- range $product := $.Products }}
+	config.{{ $product.Name }}BasePath = d.Get("{{ underscore $product.Name }}_custom_endpoint").(string)
+	{{- end }}
 
 	// Handwritten Products / Versioned / Atypical Entries
 	config.CloudBillingBasePath = d.Get(transport_tpg.CloudBillingCustomEndpointEntryKey).(string)
@@ -360,9 +359,9 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	config.DataflowBasePath = d.Get(transport_tpg.DataflowCustomEndpointEntryKey).(string)
 	config.IamCredentialsBasePath = d.Get(transport_tpg.IamCredentialsCustomEndpointEntryKey).(string)
 	config.ResourceManagerV3BasePath = d.Get(transport_tpg.ResourceManagerV3CustomEndpointEntryKey).(string)
-	<% unless version == "ga" -%>
+	{{- if ne $.TargetVersionName "ga" }}
 	config.RuntimeConfigBasePath = d.Get(transport_tpg.RuntimeConfigCustomEndpointEntryKey).(string)
-	<% end -%>
+	{{- end }}
 	config.IAMBasePath = d.Get(transport_tpg.IAMCustomEndpointEntryKey).(string)
 	config.ServiceUsageBasePath = d.Get(transport_tpg.ServiceUsageCustomEndpointEntryKey).(string)
 	config.BigtableAdminBasePath = d.Get(transport_tpg.BigtableAdminCustomEndpointEntryKey).(string)

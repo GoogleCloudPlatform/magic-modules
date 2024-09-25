@@ -4,7 +4,7 @@ data "google_compute_image" "my_image" {
 }
 
 resource "google_compute_instance_template" "igm-basic" {
-  name           = "<%= ctx[:vars]['template_name'] %>"
+  name           = "{{index $.Vars "template_name"}}"
   machine_type   = "e2-medium"
   can_ip_forward = false
   tags           = ["foo", "bar"]
@@ -26,7 +26,7 @@ resource "google_compute_instance_template" "igm-basic" {
 
 resource "google_compute_instance_group_manager" "igm-no-tp" {
   description = "Terraform test instance group manager"
-  name        = "<%= ctx[:vars]['igm_name'] %>"
+  name        = "{{index $.Vars "igm_name"}}"
 
   version {
     name              = "prod"
@@ -39,7 +39,7 @@ resource "google_compute_instance_group_manager" "igm-no-tp" {
 }
 
 resource "google_compute_disk" "default" {
-  name  = "<%= ctx[:vars]['disk_name'] %>"
+  name  = "{{index $.Vars "disk_name"}}"
   type  = "pd-ssd"
   zone  = google_compute_instance_group_manager.igm.zone
   image = "debian-11-bullseye-v20220719"

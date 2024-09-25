@@ -1,4 +1,4 @@
-resource "google_dataplex_lake" "<%= ctx[:primary_resource_id] %>" {
+resource "google_dataplex_lake" "{{$.PrimaryResourceId}}" {
   location     = "us-central1"
   name         = "tf-test-lake%{random_suffix}"
   description  = "Test Lake"
@@ -8,17 +8,17 @@ resource "google_dataplex_lake" "<%= ctx[:primary_resource_id] %>" {
     my-lake = "exists"
   }
 
-  project = "<%= ctx[:test_env_vars]['project_name'] %>"
+  project = "{{index $.TestEnvVars "project_name"}}"
 }
 
 
-resource "google_dataplex_zone" "<%= ctx[:primary_resource_id] %>" {
+resource "google_dataplex_zone" "{{$.PrimaryResourceId}}" {
   name          = "tf-test-zone%{random_suffix}"
   discovery_spec {
     enabled = false
   }
 
-  lake     = google_dataplex_lake.<%= ctx[:primary_resource_id] %>.name
+  lake     = google_dataplex_lake.{{$.PrimaryResourceId}}.name
   location = "us-central1"
 
   resource_spec {
@@ -29,6 +29,6 @@ resource "google_dataplex_zone" "<%= ctx[:primary_resource_id] %>" {
   description  = "Test Zone"
   display_name = "Test Zone"
   labels       = {}
-  project      = "<%= ctx[:test_env_vars]['project_name'] %>"
+  project      = "{{index $.TestEnvVars "project_name"}}"
 }
 

@@ -1,5 +1,5 @@
-resource "google_kms_ekm_connection" "<%= ctx[:primary_resource_id] %>" {
-  name            	= "<%= ctx[:vars]['ekmconnection_name'] %>"
+resource "google_kms_ekm_connection" "{{$.PrimaryResourceId}}" {
+  name            	= "{{index $.Vars "ekmconnection_name"}}"
   location		= "us-central1"
   key_management_mode 	= "MANUAL"
   service_resolvers  	{

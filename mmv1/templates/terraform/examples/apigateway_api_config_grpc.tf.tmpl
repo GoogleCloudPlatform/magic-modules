@@ -1,12 +1,12 @@
-resource "google_api_gateway_api" "<%= ctx[:primary_resource_id] %>" {
+resource "google_api_gateway_api" "{{$.PrimaryResourceId}}" {
   provider = google-beta
-  api_id = "<%= ctx[:vars]['api_id'] %>"
+  api_id = "{{index $.Vars "api_id"}}"
 }
 
-resource "google_api_gateway_api_config" "<%= ctx[:primary_resource_id] %>" {
+resource "google_api_gateway_api_config" "{{$.PrimaryResourceId}}" {
   provider = google-beta
-  api = google_api_gateway_api.<%= ctx[:primary_resource_id] %>.api_id
-  api_config_id = "<%= ctx[:vars]['config_id'] %>"
+  api = google_api_gateway_api.{{$.PrimaryResourceId}}.api_id
+  api_config_id = "{{index $.Vars "config_id"}}"
 
   grpc_services {
     file_descriptor_set {
@@ -19,7 +19,7 @@ resource "google_api_gateway_api_config" "<%= ctx[:primary_resource_id] %>" {
     contents = base64encode(<<-EOF
       type: google.api.Service
       config_version: 3
-      name: ${google_api_gateway_api.<%= ctx[:primary_resource_id] %>.managed_service}
+      name: ${google_api_gateway_api.{{$.PrimaryResourceId}}.managed_service}
       title: gRPC API example
       apis:
         - name: endpoints.examples.bookstore.Bookstore

@@ -1,29 +1,29 @@
 resource "google_compute_network" "my_network" {
-  name = "<%= ctx[:vars]['network_name'] %>"
+  name = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "my_subnetwork" {
-  name   = "<%= ctx[:vars]['network_name'] %>"
+  name   = "{{index $.Vars "network_name"}}"
   network = google_compute_network.my_network.id
   region = "us-central1"
   ip_cidr_range = "10.0.1.0/24"
 }
 
 resource "google_compute_address" "static" {
-  name = "<%= ctx[:vars]['network_name'] %>"
+  name = "{{index $.Vars "network_name"}}"
 }
 
 resource "google_service_account_iam_binding" "act_as_permission" {
-  service_account_id = "projects/<%= ctx[:test_env_vars]['project_id'] %>/serviceAccounts/<%= ctx[:test_env_vars]['service_account'] %>"
+  service_account_id = "projects/{{index $.TestEnvVars "project_id"}}/serviceAccounts/{{index $.TestEnvVars "service_account"}}"
   role               = "roles/iam.serviceAccountUser"
   members = [
     "user:example@example.com",
   ]
 }
 
-resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]['instance_name'] %>"
+resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "instance_name"}}"
   location = "us-central1-a"
 
   gce_setup {
@@ -42,21 +42,21 @@ resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
     disable_public_ip = false
 
     service_accounts {
-      email = "<%= ctx[:test_env_vars]['service_account'] %>"
+      email = "{{index $.TestEnvVars "service_account"}}"
     }
 
     boot_disk {
       disk_size_gb  = 310
       disk_type = "PD_SSD"
       disk_encryption = "CMEK"
-      kms_key = "<%= ctx[:vars]['key_name'] %>"
+      kms_key = "{{index $.Vars "key_name"}}"
     }
 
     data_disks {
       disk_size_gb  = 330
       disk_type = "PD_SSD"
       disk_encryption = "CMEK"
-      kms_key = "<%= ctx[:vars]['key_name'] %>"
+      kms_key = "{{index $.Vars "key_name"}}"
     }
 
     network_interfaces {

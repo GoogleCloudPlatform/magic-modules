@@ -7,7 +7,7 @@ if parts := regexp.MustCompile(`locations\/([^\/]*)\/`).FindStringSubmatch(d.Get
     return fmt.Errorf(
         "Saw %s when the parent is expected to contains location %s",
         d.Get("parent"),
-        "projects/{{project}}/locations/{{location}}/...",
+        "projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/...",
     )
 }
 
@@ -30,13 +30,13 @@ if isDefaultStartFlow || isDefaultWelcomeIntent || isDefaultNegativeIntent {
 
     // Store the ID
     d.Set("name", defaultObjName)
-    id, err := tpgresource.ReplaceVars(d, config, "<%= id_format(object) -%>")
+    id, err := tpgresource.ReplaceVars(d, config, "{{$.GetIdFormat}}")
     if err != nil {
         return fmt.Errorf("Error constructing id: %s", err)
     }
     d.SetId(id)
 
     // and defer to the Update method:
-    log.Printf("[DEBUG] Updating default <%= object.resource_name -%>")
-    return resource<%= object.resource_name -%>Update(d, meta)
+    log.Printf("[DEBUG] Updating default {{$.ResourceName}}")
+    return resource{{$.ResourceName}}Update(d, meta)
 }

@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package compute_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
@@ -167,4 +166,4 @@ resource "google_compute_region_security_policy" "regionSecPolicy" {
 }
 `, context)
 }
-<% end -%>
+{{- end }}

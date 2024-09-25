@@ -1,5 +1,5 @@
 resource "google_compute_subnetwork" "network-with-private-secondary-ip-ranges" {
-  name          = "<%= ctx[:vars]['subnetwork_name'] %>"
+  name          = "{{index $.Vars "subnetwork_name"}}"
   ip_cidr_range = "10.2.0.0/16"
   region        = "us-central1"
   network       = google_compute_network.custom-test.id
@@ -10,6 +10,6 @@ resource "google_compute_subnetwork" "network-with-private-secondary-ip-ranges" 
 }
 
 resource "google_compute_network" "custom-test" {
-  name                    = "<%= ctx[:vars]['network_name'] %>"
+  name                    = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = false
 }

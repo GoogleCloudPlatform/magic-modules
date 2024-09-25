@@ -1,12 +1,12 @@
 
 resource "google_healthcare_dataset" "dataset" {
   location = "us-central1"
-  name     = "<%= ctx[:vars]['dataset_id'] %>"
+  name     = "{{index $.Vars "dataset_id"}}"
 }
 
-resource "google_healthcare_consent_store" "<%= ctx[:primary_resource_id] %>" {
+resource "google_healthcare_consent_store" "{{$.PrimaryResourceId}}" {
   dataset = google_healthcare_dataset.dataset.id
-  name    = "<%= ctx[:vars]['consent_id'] %>"
+  name    = "{{index $.Vars "consent_id"}}"
 
   enable_consent_create_on_update = true
   default_consent_ttl             = "90000s"

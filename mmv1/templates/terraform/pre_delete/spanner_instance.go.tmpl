@@ -1,6 +1,6 @@
 
 if d.Get("force_destroy").(bool) {
-	backupsUrl, err := tpgresource.ReplaceVars(d, config, "{{SpannerBasePath}}projects/{{project}}/instances/{{name}}/backups")
+	backupsUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}SpannerBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/backups")
 	if err != nil {
 		return err
 	}

@@ -1,6 +1,6 @@
 resource "google_compute_global_network_endpoint_group" "external_proxy" {
   provider = google-beta
-  name                  = "<%= ctx[:vars]['neg_name'] %>"
+  name                  = "{{index $.Vars "neg_name"}}"
   network_endpoint_type = "INTERNET_FQDN_PORT"
   default_port          = "443"
 }
@@ -12,9 +12,9 @@ resource "google_compute_global_network_endpoint" "proxy" {
   port                          = google_compute_global_network_endpoint_group.external_proxy.default_port
 }
 
-resource "google_compute_backend_service" "<%= ctx[:primary_resource_id] %>" {
+resource "google_compute_backend_service" "{{$.PrimaryResourceId}}" {
   provider = google-beta
-  name                            = "<%= ctx[:vars]['backend_service_name'] %>"
+  name                            = "{{index $.Vars "backend_service_name"}}"
   enable_cdn                      = true
   timeout_sec                     = 10
   connection_draining_timeout_sec = 10

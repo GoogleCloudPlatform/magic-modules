@@ -4,7 +4,7 @@ if v, ok := d.GetOkExists("management_cluster"); !tpgresource.IsEmptyValue(refle
 }
 
 mgmtMap := mgmtClusterProp.(map[string]interface{})
-parentUrl, err := tpgresource.ReplaceVars(d, config, "{{VmwareengineBasePath}}projects/{{project}}/locations/{{location}}/privateClouds/{{name}}")
+parentUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}VmwareengineBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/privateClouds/{{"{{"}}name{{"}}"}}")
 if err != nil {
   return err
 }

@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package redis_test
-<% unless version == "ga" -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -360,4 +359,4 @@ resource "google_compute_network" "producer_net" {
 `, params.name, params.replicaCount, params.shardCount, params.nodeType, params.deletionProtectionEnabled, strBuilder.String(), zoneDistributionConfigBlock, maintenancePolicyBlock, params.name, params.name, params.name)
 }
 
-<% end -%>
+{{ end }}

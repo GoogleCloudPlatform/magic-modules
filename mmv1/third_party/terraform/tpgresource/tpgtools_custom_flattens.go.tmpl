@@ -1,9 +1,8 @@
-<% autogen_exception -%>
 package tpgresource
 
 import (
-	containeraws "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/containeraws<%= dcl_version(version) -%>"
-	containerazure "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/containerazure<%= dcl_version(version) -%>"
+	containeraws "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/containeraws{{ $.DCLVersion }}"
+	containerazure "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/containerazure{{ $.DCLVersion }}"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"

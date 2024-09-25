@@ -1,7 +1,6 @@
-<% autogen_exception -%>
 
 package securitycentermanagement_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -35,8 +34,8 @@ func TestAccSecurityCenterManagement(t *testing.T) {
 
 func testAccSecurityCenterManagementOrganizationEventThreatDetectionCustomModule(t *testing.T) {
 
-	<%# Comment explaining the beta-only status due to concurrent modification issues (Error 409). %>
-	<%# This is being marked as beta-only. See the bug link: <https://b.corp.google.com/issues/358692342> %>
+	{{/* Comment explaining the beta-only status due to concurrent modification issues (Error 409). */}}
+	{{/* This is being marked as beta-only. See the bug link: <https://b.corp.google.com/issues/358692342> */}}
 
 	context := map[string]interface{}{
 		"org_id":        envvar.GetTestOrgFromEnv(t),
@@ -134,7 +133,7 @@ func testAccSecurityCenterManagementOrganizationEventThreatDetectionCustomModule
 
 			location := rs.Primary.Attributes["location"]
 
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, fmt.Sprintf("{{SecurityCenterBasePath}}organizations/{{organization}}/locations/%s/eventThreatDetectionCustomModules/{{name}}", location))
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, fmt.Sprintf("{{"{{"}}SecurityCenterBasePath{{"}}"}}organizations/{{"{{"}}organization{{"}}"}}/locations/%s/eventThreatDetectionCustomModules/{{"{{"}}name{{"}}"}}", location))
 
 			if err != nil {
 				return err
@@ -161,4 +160,4 @@ func testAccSecurityCenterManagementOrganizationEventThreatDetectionCustomModule
 		return nil
 	}
 }
-<% end -%>
+{{- end }}

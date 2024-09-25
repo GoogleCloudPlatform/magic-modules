@@ -2,7 +2,7 @@ data "google_project" "project" {
 }
 
 resource "google_sql_database_instance" "source_csql" {
-  name             = "<%= ctx[:vars]["source_csql"] %>"
+  name             = "{{index $.Vars "source_csql"}}"
   database_version = "POSTGRES_15"
   settings {
     tier = "db-custom-2-13312"
@@ -12,24 +12,24 @@ resource "google_sql_database_instance" "source_csql" {
 }
 
 resource "google_sql_ssl_cert" "source_sql_client_cert" {
-  common_name = "<%= ctx[:vars]["source_sqldb_cert"] %>"
+  common_name = "{{index $.Vars "source_sqldb_cert"}}"
   instance    = google_sql_database_instance.source_csql.name
 
   depends_on = [google_sql_database_instance.source_csql]
 }
 
 resource "google_sql_user" "source_sqldb_user" {
-  name     = "<%= ctx[:vars]["source_sqldb_user"] %>"
+  name     = "{{index $.Vars "source_sqldb_user"}}"
   instance = google_sql_database_instance.source_csql.name
-  password = "<%= ctx[:vars]["source_sqldb_pass"] %>"
+  password = "{{index $.Vars "source_sqldb_pass"}}"
 
   depends_on = [google_sql_ssl_cert.source_sql_client_cert]
 }
 
 resource "google_database_migration_service_connection_profile" "source_cp" {
   location              = "us-central1"
-  connection_profile_id = "<%= ctx[:vars]["source_cp"] %>"
-  display_name          = "<%= ctx[:vars]["source_cp"] %>_display"
+  connection_profile_id = "{{index $.Vars "source_cp"}}"
+  display_name          = "{{index $.Vars "source_cp"}}_display"
   labels = {
     foo = "bar"
   }
@@ -43,14 +43,14 @@ resource "google_database_migration_service_connection_profile" "source_cp" {
       client_certificate = google_sql_ssl_cert.source_sql_client_cert.cert
       ca_certificate     = google_sql_ssl_cert.source_sql_client_cert.server_ca_cert
     }
-    cloud_sql_id = "<%= ctx[:vars]["source_csql"] %>"
+    cloud_sql_id = "{{index $.Vars "source_csql"}}"
   }
 
   depends_on = [google_sql_user.source_sqldb_user]
 }
 
 resource "google_sql_database_instance" "destination_csql" {
-  name             = "<%= ctx[:vars]["destination_csql"] %>"
+  name             = "{{index $.Vars "destination_csql"}}"
   database_version = "POSTGRES_15"
   settings {
     tier = "db-custom-2-13312"
@@ -61,21 +61,21 @@ resource "google_sql_database_instance" "destination_csql" {
 
 resource "google_database_migration_service_connection_profile" "destination_cp" {
   location              = "us-central1"
-  connection_profile_id = "<%= ctx[:vars]["destination_cp"] %>"
-  display_name          = "<%= ctx[:vars]["destination_cp"] %>_display"
+  connection_profile_id = "{{index $.Vars "destination_cp"}}"
+  display_name          = "{{index $.Vars "destination_cp"}}_display"
   labels = {
     foo = "bar"
   }
   postgresql {
-    cloud_sql_id = "<%= ctx[:vars]["destination_csql"] %>"
+    cloud_sql_id = "{{index $.Vars "destination_csql"}}"
   }
   depends_on = [google_sql_database_instance.destination_csql]
 }
 
-resource "google_database_migration_service_migration_job" "<%= ctx[:primary_resource_id] %>" {
+resource "google_database_migration_service_migration_job" "{{$.PrimaryResourceId}}" {
   location              = "us-central1"
-  migration_job_id = "<%= ctx[:vars]["migration_id"] %>"
-  display_name = "<%= ctx[:vars]["migration_id"] %>_display"
+  migration_job_id = "{{index $.Vars "migration_id"}}"
+  display_name = "{{index $.Vars "migration_id"}}_display"
   labels = {
     foo = "bar"
   }

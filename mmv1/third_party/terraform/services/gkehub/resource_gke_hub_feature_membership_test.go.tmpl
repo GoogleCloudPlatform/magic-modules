@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package gkehub_test
 
 import (
@@ -8,7 +7,7 @@ import (
 	"testing"
 
 	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
-	gkehub "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/gkehub<%= dcl_version(version) -%>"
+	gkehub "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/gkehub{{ $.DCLVersion }}"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
@@ -401,9 +400,9 @@ resource "google_gke_hub_membership" "membership" {
       resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"
     }
   }
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
   description = "test resource."
-<% end -%>
+{{- end }}
 }
 
 resource "google_gke_hub_feature" "feature" {
@@ -467,9 +466,9 @@ resource "google_gke_hub_membership" "membership" {
       resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"
     }
   }
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
   description = "test resource."
-<% end -%>
+{{- end }}
 }
 
 resource "google_gke_hub_feature" "feature" {
@@ -534,9 +533,9 @@ resource "google_gke_hub_membership" "membership" {
       resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"
     }
   }
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
   description = "test resource."
-<% end -%>
+{{- end }}
 }
 
 resource "google_gke_hub_feature" "feature" {
@@ -834,9 +833,9 @@ resource "google_gke_hub_membership" "membership" {
       resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"
     }
   }
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
   description = "test resource."
-<% end -%>
+{{- end }}
 }
 
 resource "google_gke_hub_feature" "feature" {
@@ -887,9 +886,9 @@ resource "google_gke_hub_membership" "membership" {
       resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"
     }
   }
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
   description = "test resource."
-<% end -%>
+{{- end }}
 }
 
 resource "google_gke_hub_feature" "feature" {
@@ -939,9 +938,9 @@ resource "google_gke_hub_membership" "membership" {
       resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"
     }
   }
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
   description = "test resource."
-<% end -%>
+{{- end }}
 }
 
 resource "google_gke_hub_feature" "feature" {
@@ -1219,9 +1218,9 @@ resource "google_gke_hub_membership" "membership" {
       resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"
     }
   }
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
   description = "test resource."
-<% end -%>
+{{- end }}
 }
 
 resource "google_gke_hub_membership" "membership_second" {
@@ -1232,9 +1231,9 @@ resource "google_gke_hub_membership" "membership_second" {
       resource_link = "//container.googleapis.com/${google_container_cluster.secondary.id}"
     }
   }
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
   description = "test resource."
-<% end -%>
+{{- end }}
 }
 
 resource "google_gke_hub_membership" "membership_third" {
@@ -1245,9 +1244,9 @@ resource "google_gke_hub_membership" "membership_third" {
       resource_link = "//container.googleapis.com/${google_container_cluster.tertiary.id}"
     }
   }
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
   description = "test resource."
-<% end -%>
+{{- end }}
 }
 
 resource "google_gke_hub_membership" "membership_fourth" {
@@ -1258,9 +1257,9 @@ resource "google_gke_hub_membership" "membership_fourth" {
       resource_link = "//container.googleapis.com/${google_container_cluster.quarternary.id}"
     }
   }
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
   description = "test resource."
-<% end -%>
+{{- end }}
 }
 `, context)
 }
@@ -1293,9 +1292,9 @@ resource "google_gke_hub_membership" "membership_acmoci" {
       resource_link = "//container.googleapis.com/${google_container_cluster.container_acmoci.id}"
     }
   }
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
   description = "test resource."
-<% end -%>
+{{- end }}
 }
 `, context)
 }
@@ -1414,7 +1413,7 @@ func testAccCheckGKEHubFeatureDestroyProducer(t *testing.T) func(s *terraform.St
 
 			config := acctest.GoogleProviderConfig(t)
 
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{GKEHub2BasePath}}projects/{{project}}/locations/{{location}}/features/{{name}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}GKEHub2BasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/features/{{"{{"}}name{{"}}"}}")
 			if err != nil {
 				return err
 			}

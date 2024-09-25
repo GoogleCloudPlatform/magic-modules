@@ -1,7 +1,7 @@
 resource "google_datastream_connection_profile" "source" {
     display_name          = "Postgresql Source"
     location              = "us-central1"
-    connection_profile_id = "<%= ctx[:vars]['source_connection_profile_id'] %>"
+    connection_profile_id = "{{index $.Vars "source_connection_profile_id"}}"
 
     postgresql_profile {
         hostname = "hostname"
@@ -15,15 +15,15 @@ resource "google_datastream_connection_profile" "source" {
 resource "google_datastream_connection_profile" "destination" {
     display_name          = "BigQuery Destination"
     location              = "us-central1"
-    connection_profile_id = "<%= ctx[:vars]['destination_connection_profile_id'] %>"
+    connection_profile_id = "{{index $.Vars "destination_connection_profile_id"}}"
 
     bigquery_profile {}
 }
 
-resource "google_datastream_stream" "<%= ctx[:primary_resource_id] %>"  {
+resource "google_datastream_stream" "{{$.PrimaryResourceId}}"  {
     display_name = "Postgres to BigQuery"
     location     = "us-central1"
-    stream_id    = "<%= ctx[:vars]['stream_id'] %>"
+    stream_id    = "{{index $.Vars "stream_id"}}"
     desired_state = "RUNNING"
 
     source_config {

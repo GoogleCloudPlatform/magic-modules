@@ -1,30 +1,30 @@
 resource "google_alloydb_instance" "default" {
   cluster       = google_alloydb_cluster.default.name
-  instance_id   = "<%= ctx[:vars]['alloydb_instance_name'] %>"
+  instance_id   = "{{index $.Vars "alloydb_instance_name"}}"
   instance_type = "PRIMARY"
 
   depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 resource "google_alloydb_cluster" "default" {
-  cluster_id = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
+  cluster_id = "{{index $.Vars "alloydb_cluster_name"}}"
   location   = "us-central1"
   network_config {
     network = data.google_compute_network.default.id
   }
   initial_user {
-    password = "<%= ctx[:vars]['alloydb_cluster_pass'] %>"
+    password = "{{index $.Vars "alloydb_cluster_pass"}}"
   }
 }
 
 data "google_project" "project" {}
 
 resource "google_compute_network" "default" {
-  name = "<%= ctx[:vars]['network_name'] %>"
+  name = "{{index $.Vars "network_name"}}"
 }
 
 resource "google_compute_global_address" "private_ip_alloc" {
-  name          = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
+  name          = "{{index $.Vars "alloydb_cluster_name"}}"
   address_type  = "INTERNAL"
   purpose       = "VPC_PEERING"
   prefix_length = 16
@@ -37,12 +37,12 @@ resource "google_service_networking_connection" "vpc_connection" {
   reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 }
 
-resource "google_alloydb_user" "<%= ctx[:primary_resource_id] %>" {
+resource "google_alloydb_user" "{{$.PrimaryResourceId}}" {
   cluster = google_alloydb_cluster.default.name
-  user_id = "<%= ctx[:vars]['alloydb_user_name'] %>"
+  user_id = "{{index $.Vars "alloydb_user_name"}}"
   user_type = "ALLOYDB_BUILT_IN"
 
-  password = "<%= ctx[:vars]['alloydb_user_pass'] %>"
+  password = "{{index $.Vars "alloydb_user_pass"}}"
   database_roles = ["alloydbsuperuser"]
   depends_on = [google_alloydb_instance.default]
 }

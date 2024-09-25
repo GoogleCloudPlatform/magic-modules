@@ -1,5 +1,5 @@
-resource "google_data_catalog_taxonomy" "<%= ctx[:primary_resource_id] %>" {
-  display_name =  "<%= ctx[:vars]['display_name'] %>"
+resource "google_data_catalog_taxonomy" "{{$.PrimaryResourceId}}" {
+  display_name =  "{{index $.Vars "display_name"}}"
   description = "A collection of policy tags"
   activated_policy_types = ["FINE_GRAINED_ACCESS_CONTROL"]
 }

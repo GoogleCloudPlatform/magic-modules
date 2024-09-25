@@ -4,8 +4,8 @@ data "google_project" "test_project" {
 resource "google_project" "project" {
   project_id      = "tf-test%{random_suffix}"
   name            = "tf-test%{random_suffix}"
-  org_id          = "<%= ctx[:test_env_vars]['org_id'] %>"
-  billing_account = "<%= ctx[:test_env_vars]['billing_account'] %>"
+  org_id          = "{{index $.TestEnvVars "org_id"}}"
+  billing_account = "{{index $.TestEnvVars "billing_account"}}"
   deletion_policy = "DELETE"
 }
 
@@ -42,7 +42,7 @@ resource "google_bigquery_dataset_iam_member" "viewer" {
 }
 
 resource "google_vertex_ai_feature_online_store" "featureonlinestore" {
-  name     = "<%= ctx[:vars]['name'] %>"
+  name     = "{{index $.Vars "name"}}"
   project  = google_project.project.project_id
   labels = {
     foo = "bar"
@@ -59,7 +59,7 @@ resource "google_vertex_ai_feature_online_store" "featureonlinestore" {
 }
 
 resource "google_bigquery_dataset" "sample_dataset" {
-  dataset_id                  = "<%= ctx[:vars]['name'] %>"
+  dataset_id                  = "{{index $.Vars "name"}}"
   friendly_name               = "test"
   description                 = "This is a test description"
   location                    = "US"
@@ -68,7 +68,7 @@ resource "google_bigquery_dataset" "sample_dataset" {
 resource "google_bigquery_table" "sample_table" {
   deletion_protection = false
   dataset_id = google_bigquery_dataset.sample_dataset.dataset_id
-  table_id   = "<%= ctx[:vars]['name'] %>"
+  table_id   = "{{index $.Vars "name"}}"
 
   schema = <<EOF
 [
@@ -78,7 +78,7 @@ resource "google_bigquery_table" "sample_table" {
         "mode": "NULLABLE"
     },
     {
-        "name": "<%= ctx[:vars]['name'] %>",
+        "name": "{{index $.Vars "name"}}",
         "type": "STRING",
         "mode": "NULLABLE"
     },
@@ -92,7 +92,7 @@ EOF
 }
 
 resource "google_vertex_ai_feature_group" "sample_feature_group" {
-  name = "<%= ctx[:vars]['name'] %>"
+  name = "{{index $.Vars "name"}}"
   description = "A sample feature group"
   region = "us-central1"
   labels = {
@@ -110,7 +110,7 @@ resource "google_vertex_ai_feature_group" "sample_feature_group" {
 
 
 resource "google_vertex_ai_feature_group_feature" "sample_feature" {
-  name = "<%= ctx[:vars]['name'] %>"
+  name = "{{index $.Vars "name"}}"
   region = "us-central1"
   feature_group = google_vertex_ai_feature_group.sample_feature_group.name
   description = "A sample feature"
@@ -120,8 +120,8 @@ resource "google_vertex_ai_feature_group_feature" "sample_feature" {
 }
 
 
-resource "google_vertex_ai_feature_online_store_featureview" "<%= ctx[:primary_resource_id] %>" {
-  name                 = "<%= ctx[:vars]['name'] %>"
+resource "google_vertex_ai_feature_online_store_featureview" "{{$.PrimaryResourceId}}" {
+  name                 = "{{index $.Vars "name"}}"
   project              = google_project.project.project_id
   region               = "us-central1"
   feature_online_store = google_vertex_ai_feature_online_store.featureonlinestore.name

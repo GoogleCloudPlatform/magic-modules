@@ -1,6 +1,6 @@
 resource "google_healthcare_hl7_v2_store" "store" {
   provider = google-beta
-  name    = "<%= ctx[:vars]['hl7_v2_store_name'] %>"
+  name    = "{{index $.Vars "hl7_v2_store_name"}}"
   dataset = google_healthcare_dataset.dataset.id
 
   parser_config {
@@ -12,6 +12,6 @@ resource "google_healthcare_hl7_v2_store" "store" {
 
 resource "google_healthcare_dataset" "dataset" {
   provider = google-beta
-  name     = "<%= ctx[:vars]['dataset_name'] %>"
+  name     = "{{index $.Vars "dataset_name"}}"
   location = "us-central1"
 }

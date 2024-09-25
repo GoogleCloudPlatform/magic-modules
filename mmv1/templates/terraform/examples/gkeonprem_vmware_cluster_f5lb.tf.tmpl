@@ -1,5 +1,5 @@
-resource "google_gkeonprem_vmware_cluster" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]['name'] %>"
+resource "google_gkeonprem_vmware_cluster" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "name"}}"
   location = "us-west1"
   admin_cluster_membership = "projects/870316890899/locations/global/memberships/gkeonprem-terraform-test"
   description = "test cluster"

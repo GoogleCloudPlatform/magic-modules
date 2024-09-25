@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package firebaseextensions_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
@@ -147,4 +146,4 @@ resource "google_firebase_extensions_instance" "resize_image" {
 `, context)
 }
 
-<% end -%>
+{{ end }}

@@ -1,6 +1,0 @@
-// Labels cannot be set in a create for PSC forwarding rules, so remove it from the CREATE request.
-if targetProp != nil && strings.Contains(targetProp.(string), "/serviceAttachments/") {
-  if _, ok := obj["labels"]; ok {
-    delete(obj, "labels")
-  }
-}

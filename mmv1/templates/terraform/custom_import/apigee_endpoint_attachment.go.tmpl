@@ -7,7 +7,7 @@ if err := tpgresource.ParseImportId([]string{"(?P<name>.+)"}, d, config); err !=
 
 nameParts := strings.Split(d.Get("name").(string), "/")
 if len(nameParts) == 4 {
-	// `organizations/{{org_name}}/endpointAttachment/{{endpoint_attachment_id}}`
+	// `organizations/{{"{{"}}org_name{{"}}"}}/endpointAttachment/{{"{{"}}endpoint_attachment_id{{"}}"}}`
 	orgId := fmt.Sprintf("organizations/%s", nameParts[1])
 	if err := d.Set("org_id", orgId); err != nil {
 		return nil, fmt.Errorf("Error setting org_id: %s", err)
@@ -19,11 +19,11 @@ if len(nameParts) == 4 {
 	return nil, fmt.Errorf(
 		"Saw %s when the name is expected to have shape %s",
 		d.Get("name"),
-		"organizations/{{org_name}}/environments/{{name}}")
+		"organizations/{{"{{"}}org_name{{"}}"}}/environments/{{"{{"}}name{{"}}"}}")
 }
 
 // Replace import id for the resource id
-id, err := tpgresource.ReplaceVars(d, config, "{{name}}")
+id, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}name{{"}}"}}")
 if err != nil {
 	return nil, fmt.Errorf("Error constructing id: %s", err)
 }

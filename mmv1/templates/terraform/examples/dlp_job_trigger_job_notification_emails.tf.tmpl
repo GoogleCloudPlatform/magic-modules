@@ -1,5 +1,5 @@
-resource "google_data_loss_prevention_job_trigger" "<%= ctx[:primary_resource_id] %>" {
-  parent       = "projects/<%= ctx[:test_env_vars]['project'] %>"
+resource "google_data_loss_prevention_job_trigger" "{{$.PrimaryResourceId}}" {
+  parent       = "projects/{{index $.TestEnvVars "project"}}"
   description  = "Description for the job_trigger created by terraform"
   display_name = "TerraformDisplayName"
   

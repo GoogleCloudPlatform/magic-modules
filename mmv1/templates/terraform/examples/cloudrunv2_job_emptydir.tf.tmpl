@@ -1,6 +1,6 @@
-resource "google_cloud_run_v2_job" "<%= ctx[:primary_resource_id] %>" {
+resource "google_cloud_run_v2_job" "{{$.PrimaryResourceId}}" {
   provider = google-beta
-  name     = "<%= ctx[:vars]['cloud_run_job_name'] %>"
+  name     = "{{index $.Vars "cloud_run_job_name"}}"
   location = "us-central1"
   deletion_protection = false
   launch_stage = "BETA"

@@ -1,5 +1,0 @@
-func resourceOrgpolicyPolicyRulesConditionExpressionDiffSuppress(_, old, new string, d *schema.ResourceData) bool {
-	oldReplaced := strings.ReplaceAll(strings.ReplaceAll(old, "Labels", "TagId"), "label", "tag")
-	newReplaced := strings.ReplaceAll(strings.ReplaceAll(new, "Labels", "TagId"), "label", "tag")
-	return oldReplaced == newReplaced
-}

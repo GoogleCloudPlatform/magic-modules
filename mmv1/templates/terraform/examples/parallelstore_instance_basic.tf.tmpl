@@ -1,5 +1,5 @@
-resource "google_parallelstore_instance" "<%= ctx[:primary_resource_id] %>" {
-  instance_id = "<%= ctx[:vars]['name'] %>"
+resource "google_parallelstore_instance" "{{$.PrimaryResourceId}}" {
+  instance_id = "{{index $.Vars "name"}}"
   location = "us-central1-a"
   description = "test instance"
   capacity_gib = 12000
@@ -14,7 +14,7 @@ resource "google_parallelstore_instance" "<%= ctx[:primary_resource_id] %>" {
 }
 
 resource "google_compute_network" "network" {
-  name                    = "<%= ctx[:vars]['network_name'] %>"
+  name                    = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = true
   mtu = 8896
   provider = google-beta
@@ -22,7 +22,7 @@ resource "google_compute_network" "network" {
 
 # Create an IP address
 resource "google_compute_global_address" "private_ip_alloc" {
-  name          = "<%= ctx[:vars]['address_name'] %>"
+  name          = "{{index $.Vars "address_name"}}"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
   prefix_length = 24

@@ -1,5 +1,5 @@
 resource "google_dialogflow_cx_agent" "agent" {
-  display_name = "<%= ctx[:vars]["agent_name"] %>"
+  display_name = "{{index $.Vars "agent_name"}}"
   location = "us-central1"
   default_language_code = "en"
   supported_language_codes = ["fr","de","es"]
@@ -12,7 +12,7 @@ resource "google_dialogflow_cx_agent" "agent" {
 }
 
 
-resource "google_dialogflow_cx_version" "<%= ctx[:primary_resource_id] %>" {
+resource "google_dialogflow_cx_version" "{{$.PrimaryResourceId}}" {
   parent       = google_dialogflow_cx_agent.agent.start_flow
   display_name = "1.0.0"
   description  = "version 1.0.0"

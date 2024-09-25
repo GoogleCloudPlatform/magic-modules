@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package servicedirectory_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -34,14 +33,14 @@ func TestAccServiceDirectoryEndpoint_serviceDirectoryEndpointUpdateExample(t *te
 			},
 			{
 				ResourceName:      "google_service_directory_endpoint.example",
-				// {{project}}/{{location}}/{{namespace_id}}/{{service_id}}/{{endpoint_id}}
+				// {{"{{"}}project{{"}}"}}/{{"{{"}}location{{"}}"}}/{{"{{"}}namespace_id{{"}}"}}/{{"{{"}}service_id{{"}}"}}/{{"{{"}}endpoint_id{{"}}"}}
 				ImportStateId:     fmt.Sprintf("%s/%s/%s/%s/%s", project, location, testId, testId, testId),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
 				ResourceName:      "google_service_directory_endpoint.example",
-				// {{location}}/{{namespace_id}}/{{service_id}}/{{endpoint_id}}
+				// {{"{{"}}location{{"}}"}}/{{"{{"}}namespace_id{{"}}"}}/{{"{{"}}service_id{{"}}"}}/{{"{{"}}endpoint_id{{"}}"}}
 				ImportStateId:     fmt.Sprintf("%s/%s/%s/%s", location, testId, testId, testId),
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -103,4 +102,4 @@ resource "google_service_directory_endpoint" "example" {
 }
 `, testId, location, testId, testId)
 }
-<% end -%>
+{{- end }}

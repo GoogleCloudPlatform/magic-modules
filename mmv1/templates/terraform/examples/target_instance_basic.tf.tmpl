@@ -1,5 +1,5 @@
-resource "google_compute_target_instance" "<%= ctx[:primary_resource_id] %>" {
-  name     = "<%= ctx[:vars]['target_name'] %>"
+resource "google_compute_target_instance" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.Vars "target_name"}}"
   instance = google_compute_instance.target-vm.id
 }
 
@@ -9,7 +9,7 @@ data "google_compute_image" "vmimage" {
 }
 
 resource "google_compute_instance" "target-vm" {
-  name         = "<%= ctx[:vars]['instance_name'] %>"
+  name         = "{{index $.Vars "instance_name"}}"
   machine_type = "e2-medium"
   zone         = "us-central1-a"
 

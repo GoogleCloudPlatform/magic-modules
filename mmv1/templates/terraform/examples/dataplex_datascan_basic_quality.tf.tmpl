@@ -1,6 +1,6 @@
-resource "google_dataplex_datascan" "<%= ctx[:primary_resource_id] %>" {
+resource "google_dataplex_datascan" "{{$.PrimaryResourceId}}" {
   location     = "us-central1"
-  data_scan_id = "<%= ctx[:vars]['datascan_name'] %>"
+  data_scan_id = "{{index $.Vars "datascan_name"}}"
 
   data {
     resource = "//bigquery.googleapis.com/projects/bigquery-public-data/datasets/samples/tables/shakespeare"
@@ -23,5 +23,5 @@ resource "google_dataplex_datascan" "<%= ctx[:primary_resource_id] %>" {
     }
   }
 
-  project = "<%= ctx[:test_env_vars]['project_name'] %>"
+  project = "{{index $.TestEnvVars "project_name"}}"
 }

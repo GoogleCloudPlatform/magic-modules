@@ -1,5 +1,5 @@
-resource "google_network_connectivity_internal_range" "<%= ctx[:primary_resource_id] %>" {
-  name    = "<%= ctx[:vars]['internal_range_name'] %>"
+resource "google_network_connectivity_internal_range" "{{$.PrimaryResourceId}}" {
+  name    = "{{index $.Vars "internal_range_name"}}"
   network = google_compute_network.default.id
   usage   = "FOR_VPC"
   peering = "FOR_SELF"
@@ -10,6 +10,6 @@ resource "google_network_connectivity_internal_range" "<%= ctx[:primary_resource
 }
 
 resource "google_compute_network" "default" {
-  name                    = "<%= ctx[:vars]['network_name'] %>"
+  name                    = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = false
 }

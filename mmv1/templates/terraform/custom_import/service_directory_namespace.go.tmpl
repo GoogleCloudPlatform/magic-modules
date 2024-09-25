@@ -7,7 +7,7 @@ if err := tpgresource.ParseImportId([]string{"(?P<name>.+)"}, d, config); err !=
 
 nameParts := strings.Split(d.Get("name").(string), "/")
 if len(nameParts) == 6 {
-	// `projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}`
+	// `projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/namespaces/{{"{{"}}namespace_id{{"}}"}}`
 	if err := d.Set("project", nameParts[1]); err != nil {
 		return nil, fmt.Errorf("Error setting project: %s", err)
 	}
@@ -18,7 +18,7 @@ if len(nameParts) == 6 {
 		return nil, fmt.Errorf("Error setting namespace_id: %s", err)
 	}
 } else if len(nameParts) == 3 {
-	// `{{project}}/{{location}}/{{namespace_id}}`
+	// `{{"{{"}}project{{"}}"}}/{{"{{"}}location{{"}}"}}/{{"{{"}}namespace_id{{"}}"}}`
 	if err := d.Set("project", nameParts[0]); err != nil {
 		return nil, fmt.Errorf("Error setting project: %s", err)
 	}
@@ -34,7 +34,7 @@ if len(nameParts) == 6 {
 	}
 	d.SetId(id)
 } else if len(nameParts) == 2 {
-	// `{{location}}/{{namespace_id}}`
+	// `{{"{{"}}location{{"}}"}}/{{"{{"}}namespace_id{{"}}"}}`
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 			return nil, err
@@ -57,8 +57,8 @@ if len(nameParts) == 6 {
 	return nil, fmt.Errorf(
 		"Saw %s when the name is expected to have shape %s, %s or %s",
 		d.Get("name"),
-		"projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}",
-		"{{project}}/{{location}}/{{namespace_id}}",
-		"{{location}}/{{namespace_id}}")
+		"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/namespaces/{{"{{"}}namespace_id{{"}}"}}",
+		"{{"{{"}}project{{"}}"}}/{{"{{"}}location{{"}}"}}/{{"{{"}}namespace_id{{"}}"}}",
+		"{{"{{"}}location{{"}}"}}/{{"{{"}}namespace_id{{"}}"}}")
 }
 return []*schema.ResourceData{d}, nil

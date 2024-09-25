@@ -1,11 +1,11 @@
-resource "google_cloud_identity_group" "<%= ctx[:primary_resource_id] %>" {
-  display_name         = "<%= ctx[:vars]['id_group'] %>"
+resource "google_cloud_identity_group" "{{$.PrimaryResourceId}}" {
+  display_name         = "{{index $.Vars "id_group"}}"
   initial_group_config = "WITH_INITIAL_OWNER"
 
-  parent = "customers/<%= ctx[:test_env_vars]['cust_id'] %>"
+  parent = "customers/{{index $.TestEnvVars "cust_id"}}"
 
   group_key {
-  	id = "<%= ctx[:vars]['id_group'] %>@<%= ctx[:test_env_vars]['org_domain'] %>"
+  	id = "{{index $.Vars "id_group"}}@{{index $.TestEnvVars "org_domain"}}"
   }
 
   labels = {

@@ -2,7 +2,7 @@ data "google_project" "test_project" {
 }
 
 resource "google_kms_key_ring" "keyring" {
-  name     = "<%= ctx[:vars]['key_ring_name'] %>"
+  name     = "{{index $.Vars "key_ring_name"}}"
   location = "us-east1"
 }
 
@@ -17,11 +17,11 @@ resource "google_kms_crypto_key_version" "test_key" {
 }
 
 resource "google_service_account" "service_account" {
-  account_id   = "<%= ctx[:vars]['service_account_id'] %>"
+  account_id   = "{{index $.Vars "service_account_id"}}"
   display_name = "Service Account"
 }
 
-resource "google_integrations_client" "<%= ctx[:primary_resource_id] %>" {
+resource "google_integrations_client" "{{$.PrimaryResourceId}}" {
   location = "us-east1"
   create_sample_integrations = true
   run_as_service_account = google_service_account.service_account.email

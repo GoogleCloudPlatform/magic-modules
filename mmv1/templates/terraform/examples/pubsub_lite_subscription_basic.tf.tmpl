@@ -1,5 +1,5 @@
-resource "google_pubsub_lite_topic" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]['topic_name'] %>"
+resource "google_pubsub_lite_topic" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "topic_name"}}"
   project = data.google_project.project.number
   partition_config {
     count = 1
@@ -14,9 +14,9 @@ resource "google_pubsub_lite_topic" "<%= ctx[:primary_resource_id] %>" {
   }
 }
 
-resource "google_pubsub_lite_subscription" "<%= ctx[:primary_resource_id] %>" {
-  name  = "<%= ctx[:vars]['subscription_name'] %>"
-  topic = google_pubsub_lite_topic.<%= ctx[:primary_resource_id] %>.name
+resource "google_pubsub_lite_subscription" "{{$.PrimaryResourceId}}" {
+  name  = "{{index $.Vars "subscription_name"}}"
+  topic = google_pubsub_lite_topic.{{$.PrimaryResourceId}}.name
   delivery_config {
     delivery_requirement = "DELIVER_AFTER_STORED"
   }

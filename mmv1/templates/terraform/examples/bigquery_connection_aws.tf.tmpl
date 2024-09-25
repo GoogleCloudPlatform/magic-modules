@@ -1,11 +1,11 @@
-resource "google_bigquery_connection" "<%= ctx[:primary_resource_id] %>" {
-   connection_id = "<%= ctx[:vars]['connection_id'] %>"
+resource "google_bigquery_connection" "{{$.PrimaryResourceId}}" {
+   connection_id = "{{index $.Vars "connection_id"}}"
    location      = "aws-us-east-1"
    friendly_name = "👋"
    description   = "a riveting description"
    aws { 
       access_role {
-         iam_role_id =  "<%= ctx[:vars]['iam_role_id'] %>"
+         iam_role_id =  "{{index $.Vars "iam_role_id"}}"
       }
    }
 }

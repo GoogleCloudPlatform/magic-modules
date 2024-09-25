@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package servicedirectory_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -34,14 +33,14 @@ func TestAccServiceDirectoryNamespace_serviceDirectoryNamespaceUpdateExample(t *
 			},
 			{
 				ResourceName:      "google_service_directory_namespace.example",
-				// {{project}}/{{location}}/{{namespace_id}}
+				// {{"{{"}}project{{"}}"}}/{{"{{"}}location{{"}}"}}/{{"{{"}}namespace_id{{"}}"}}
 				ImportStateId:     fmt.Sprintf("%s/%s/%s", project, location, testId),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
 				ResourceName:      "google_service_directory_namespace.example",
-				// {{location}}/{{namespace_id}}
+				// {{"{{"}}location{{"}}"}}/{{"{{"}}namespace_id{{"}}"}}
 				ImportStateId:     fmt.Sprintf("%s/%s", location, testId),
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -81,4 +80,4 @@ resource "google_service_directory_namespace" "example" {
 }
 `, testId, location)
 }
-<% end -%>
+{{- end }}

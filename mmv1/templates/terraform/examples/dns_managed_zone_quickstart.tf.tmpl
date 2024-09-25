@@ -1,6 +1,6 @@
 # to setup a web-server
 resource "google_compute_instance" "default" {
-  name         = "<%= ctx[:vars]['dns_compute_instance'] %>"
+  name         = "{{index $.Vars "dns_compute_instance"}}"
   machine_type = "g1-small"
   zone         = "us-central1-b"
 
@@ -25,7 +25,7 @@ resource "google_compute_instance" "default" {
 
 # to allow http traffic
 resource "google_compute_firewall" "default" {
-  name     = "<%= ctx[:vars]['allow_http_traffic'] %>"
+  name     = "{{index $.Vars "allow_http_traffic"}}"
   network  = "default"
   allow {
     ports    = ["80"]
@@ -35,9 +35,9 @@ resource "google_compute_firewall" "default" {
 }
 
 # to create a DNS zone
-resource "google_dns_managed_zone" "<%= ctx[:primary_resource_id] %>" {
-  name          = "<%= ctx[:vars]['example_zone_googlecloudexample'] %>"
-  dns_name      = "<%= ctx[:vars]['dns_name'] %>"
+resource "google_dns_managed_zone" "{{$.PrimaryResourceId}}" {
+  name          = "{{index $.Vars "example_zone_googlecloudexample"}}"
+  dns_name      = "{{index $.Vars "dns_name"}}"
   description   = "Example DNS zone"
   force_destroy = "true"
 }

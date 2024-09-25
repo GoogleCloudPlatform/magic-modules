@@ -1,5 +1,5 @@
-resource "google_deployment_manager_deployment" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]['deployment_name'] %>"
+resource "google_deployment_manager_deployment" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "deployment_name"}}"
   target {
     config {
       content = <<EOF

@@ -10,7 +10,7 @@ if err != nil {
 }
 billingProject = project
 
-url, err := tpgresource.ReplaceVars(d, config, "{{FirestoreBasePath}}{{name}}")
+url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}FirestoreBasePath{{"}}"}}{{"{{"}}name{{"}}"}}")
 if err != nil {
 	return err
 }

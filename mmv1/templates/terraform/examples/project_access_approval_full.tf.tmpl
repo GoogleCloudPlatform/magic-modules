@@ -1,5 +1,5 @@
-resource "google_project_access_approval_settings" "<%= ctx[:primary_resource_id] %>" {
-  project_id          = "<%= ctx[:test_env_vars]['project'] %>"
+resource "google_project_access_approval_settings" "{{$.PrimaryResourceId}}" {
+  project_id          = "{{index $.TestEnvVars "project"}}"
   notification_emails = ["testuser@example.com", "example.user@example.com"]
 
   enrolled_services {

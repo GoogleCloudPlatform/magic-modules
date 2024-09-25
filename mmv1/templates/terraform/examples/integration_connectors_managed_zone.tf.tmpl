@@ -1,8 +1,8 @@
 resource "google_project" "target_project" {
   project_id      = "tf-test%{random_suffix}"
   name            = "tf-test%{random_suffix}"
-  org_id          = "<%= ctx[:test_env_vars]['org_id'] %>"
-  billing_account = "<%= ctx[:test_env_vars]['billing_account'] %>"
+  org_id          = "{{index $.TestEnvVars "org_id"}}"
+  billing_account = "{{index $.TestEnvVars "billing_account"}}"
   deletion_policy = "DELETE"
 }
 
@@ -45,8 +45,8 @@ resource "google_dns_managed_zone" "zone" {
 data "google_project" "test_project" {
 }
 
-resource "google_integration_connectors_managed_zone" "<%= ctx[:primary_resource_id] %>" {
-  name     = "<%= ctx[:vars]['managed_zone_name'] %>"
+resource "google_integration_connectors_managed_zone" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.Vars "managed_zone_name"}}"
   description = "tf created description"
   labels = {
     intent = "example"

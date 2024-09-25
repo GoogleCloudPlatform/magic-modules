@@ -1,5 +1,5 @@
-resource "google_beyondcorp_app_gateway" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]['app_gateway_name'] %>"
+resource "google_beyondcorp_app_gateway" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "app_gateway_name"}}"
   type = "TCP_PROXY"
   region = "us-central1"
   host_type = "GCP_REGIONAL_MIG"

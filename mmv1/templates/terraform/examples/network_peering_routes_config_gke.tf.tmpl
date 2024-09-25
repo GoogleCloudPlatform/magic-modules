@@ -1,4 +1,4 @@
-resource "google_compute_network_peering_routes_config" "<%= ctx[:primary_resource_id] %>" {
+resource "google_compute_network_peering_routes_config" "{{$.PrimaryResourceId}}" {
   peering = google_container_cluster.private_cluster.private_cluster_config[0].peering_name
   network = google_compute_network.container_network.name
 
@@ -7,12 +7,12 @@ resource "google_compute_network_peering_routes_config" "<%= ctx[:primary_resour
 }
 
 resource "google_compute_network" "container_network" {
-  name                    = "<%= ctx[:vars]['network_name'] %>"
+  name                    = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "container_subnetwork" {
-  name                     = "<%= ctx[:vars]['subnetwork_name'] %>"
+  name                     = "{{index $.Vars "subnetwork_name"}}"
   region                   = "us-central1"
   network                  = google_compute_network.container_network.name
   ip_cidr_range            = "10.0.36.0/24"
@@ -30,7 +30,7 @@ resource "google_compute_subnetwork" "container_subnetwork" {
 }
 
 resource "google_container_cluster" "private_cluster" {
-  name               = "<%= ctx[:vars]['gke_cluster_name'] %>"
+  name               = "{{index $.Vars "gke_cluster_name"}}"
   location           = "us-central1-a"
   initial_node_count = 1
 
@@ -49,5 +49,5 @@ resource "google_container_cluster" "private_cluster" {
     cluster_secondary_range_name  = google_compute_subnetwork.container_subnetwork.secondary_ip_range[0].range_name
     services_secondary_range_name = google_compute_subnetwork.container_subnetwork.secondary_ip_range[1].range_name
   }
-  deletion_protection  = "<%= ctx[:vars]['deletion_protection'] %>"
+  deletion_protection  = "{{index $.Vars "deletion_protection"}}"
 }

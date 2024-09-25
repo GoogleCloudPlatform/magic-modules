@@ -1,7 +1,6 @@
-<% autogen_exception -%>
 package iambeta_test
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -99,4 +98,4 @@ resource "google_iam_workload_identity_pool" "my_pool" {
 }
 `, suffix)
 }
-<% end -%>
+{{- end }}

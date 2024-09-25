@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package cloudidentity_test
 
 import (
@@ -28,10 +27,10 @@ func TestAccCloudIdentityGroup(t *testing.T) {
 		"membership_import": testAccCloudIdentityGroupMembership_importTest,
 		"membership_dne":    testAccCloudIdentityGroupMembership_membershipDoesNotExistTest,
 		"membership_user":   testAccCloudIdentityGroupMembership_cloudIdentityGroupMembershipUserExampleTest,
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 		"membership_with_member_key":      testAccCloudIdentityGroupMembership_cloudIdentityGroupMembershipWithMemberKeyTest,
 		"membership_user_with_member_key": testAccCloudIdentityGroupMembership_cloudIdentityGroupMembershipUserWithMemberKeyTest,
-<% end -%>
+{{- end }}
 		"data_source_basic":                       testAccDataSourceCloudIdentityGroups_basicTest,
 		"data_source_membership_basic":            testAccDataSourceCloudIdentityGroupMemberships_basicTest,
 		"data_source_transitive_membership_basic": testAccDataSourceCloudIdentityGroupTransitiveMemberships_basicTest,
@@ -152,7 +151,7 @@ func testAccCheckCloudIdentityGroupDestroyProducer(t *testing.T) func(s *terrafo
 
 			config := acctest.GoogleProviderConfig(t)
 
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{CloudIdentityBasePath}}{{name}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}CloudIdentityBasePath{{"}}"}}{{"{{"}}name{{"}}"}}")
 			if err != nil {
 				return err
 			}

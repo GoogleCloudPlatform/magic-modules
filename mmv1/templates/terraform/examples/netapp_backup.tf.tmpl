@@ -1,9 +1,9 @@
 data "google_compute_network" "default" {
-  name = "<%= ctx[:vars]['network_name'] %>"
+  name = "{{index $.Vars "network_name"}}"
 }
 
 resource "google_netapp_storage_pool" "default" {
-  name = "<%= ctx[:vars]['pool_name'] %>"
+  name = "{{index $.Vars "pool_name"}}"
   location = "us-central1"
   service_level = "PREMIUM"
   capacity_gib = "2048"
@@ -11,10 +11,10 @@ resource "google_netapp_storage_pool" "default" {
 }
 
 resource "google_netapp_volume" "default" {
-  name = "<%= ctx[:vars]['volume_name'] %>"
+  name = "{{index $.Vars "volume_name"}}"
   location = google_netapp_storage_pool.default.location
   capacity_gib = "100"
-  share_name = "<%= ctx[:vars]['volume_name'] %>"
+  share_name = "{{index $.Vars "volume_name"}}"
   storage_pool = google_netapp_storage_pool.default.name
   protocols = ["NFSV3"]
   deletion_policy = "FORCE"
@@ -24,12 +24,12 @@ resource "google_netapp_volume" "default" {
 }
 
 resource "google_netapp_backup_vault" "default" {
-  name = "<%= ctx[:vars]['backup_vault_name'] %>"
+  name = "{{index $.Vars "backup_vault_name"}}"
   location = google_netapp_storage_pool.default.location
 }
 
-resource "google_netapp_backup" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]['backup_name'] %>"
+resource "google_netapp_backup" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "backup_name"}}"
   location = google_netapp_backup_vault.default.location
   vault_name = google_netapp_backup_vault.default.name
   source_volume = google_netapp_volume.default.id

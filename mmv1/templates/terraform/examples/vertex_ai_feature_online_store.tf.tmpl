@@ -1,5 +1,5 @@
-resource "google_vertex_ai_feature_online_store" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]['name'] %>"
+resource "google_vertex_ai_feature_online_store" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "name"}}"
   labels = {
     foo = "bar"
   }

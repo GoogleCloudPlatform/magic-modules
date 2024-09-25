@@ -1,5 +1,5 @@
-resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
-  name             = "<%= ctx[:vars]['postgres_pvp_instance_name'] %>"
+resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
+  name             = "{{index $.Vars "postgres_pvp_instance_name"}}"
   region           = "asia-northeast1"
   database_version = "POSTGRES_14"
   root_password = "abcABC123!"
@@ -14,5 +14,5 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
       enable_password_policy = true
     }
   }
-  deletion_protection =  "<%= ctx[:vars]['deletion_protection'] %>"
+  deletion_protection =  "{{index $.Vars "deletion_protection"}}"
 }

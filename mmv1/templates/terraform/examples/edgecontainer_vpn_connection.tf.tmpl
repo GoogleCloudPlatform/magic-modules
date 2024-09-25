@@ -26,7 +26,7 @@ resource "google_edgecontainer_node_pool" "node_pool" {
   node_count = 3
 }
 
-resource "google_edgecontainer_vpn_connection" "<%= ctx[:primary_resource_id] %>" {
+resource "google_edgecontainer_vpn_connection" "{{$.PrimaryResourceId}}" {
   depends_on = [google_edgecontainer_node_pool.node_pool]
   name = "vpn-connection-1"
   location = "us-central1"

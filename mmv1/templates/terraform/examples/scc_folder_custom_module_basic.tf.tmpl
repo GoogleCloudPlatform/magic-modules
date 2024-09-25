@@ -1,12 +1,12 @@
 resource "google_folder" "folder" {
-  parent       = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"
-  display_name = "<%= ctx[:vars]['folder_display_name'] %>"
+  parent       = "organizations/{{index $.TestEnvVars "org_id"}}"
+  display_name = "{{index $.Vars "folder_display_name"}}"
   deletion_protection = false
 }
 
-resource "google_scc_folder_custom_module" "<%= ctx[:primary_resource_id] %>" {
+resource "google_scc_folder_custom_module" "{{$.PrimaryResourceId}}" {
   folder = google_folder.folder.folder_id
-  display_name = "<%= ctx[:vars]['display_name'] %>"
+  display_name = "{{index $.Vars "display_name"}}"
   enablement_state = "ENABLED"
   custom_config {
     predicate {

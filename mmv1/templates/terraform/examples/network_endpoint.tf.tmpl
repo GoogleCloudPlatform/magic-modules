@@ -1,4 +1,4 @@
-resource "google_compute_network_endpoint" "<%= ctx[:primary_resource_id] %>" {
+resource "google_compute_network_endpoint" "{{$.PrimaryResourceId}}" {
   network_endpoint_group = google_compute_network_endpoint_group.neg.name
 
   instance   = google_compute_instance.endpoint-instance.name
@@ -12,7 +12,7 @@ data "google_compute_image" "my_image" {
 }
 
 resource "google_compute_instance" "endpoint-instance" {
-  name         = "<%= ctx[:vars]['instance_name'] %>"
+  name         = "{{index $.Vars "instance_name"}}"
   machine_type = "e2-medium"
 
   boot_disk {
@@ -29,7 +29,7 @@ resource "google_compute_instance" "endpoint-instance" {
 }
 
 resource "google_compute_network_endpoint_group" "group" {
-  name         = "<%= ctx[:vars]['neg_name'] %>"
+  name         = "{{index $.Vars "neg_name"}}"
   network      = google_compute_network.default.id
   subnetwork   = google_compute_subnetwork.default.id
   default_port = "90"
@@ -37,12 +37,12 @@ resource "google_compute_network_endpoint_group" "group" {
 }
 
 resource "google_compute_network" "default" {
-  name                    = "<%= ctx[:vars]['network_name'] %>"
+  name                    = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  name          = "<%= ctx[:vars]['subnetwork_name'] %>"
+  name          = "{{index $.Vars "subnetwork_name"}}"
   ip_cidr_range = "10.0.0.1/16"
   region        = "us-central1"
   network       = google_compute_network.default.id

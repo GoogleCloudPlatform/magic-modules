@@ -3,13 +3,13 @@
 
 # VPC network
 resource "google_compute_network" "default" {
-  name                    = "<%= ctx[:vars]['l7_ilb_network'] %>"
+  name                    = "{{index $.Vars "l7_ilb_network"}}"
   auto_create_subnetworks = false
 }
 
 # Proxy-only subnet
 resource "google_compute_subnetwork" "proxy_subnet" {
-  name          = "<%= ctx[:vars]['l7_ilb_proxy_subnet'] %>"
+  name          = "{{index $.Vars "l7_ilb_proxy_subnet"}}"
   ip_cidr_range = "10.0.0.0/24"
   region        = "europe-west1"
   purpose       = "REGIONAL_MANAGED_PROXY"
@@ -19,7 +19,7 @@ resource "google_compute_subnetwork" "proxy_subnet" {
 
 # Backend subnet
 resource "google_compute_subnetwork" "default" {
-  name          = "<%= ctx[:vars]['l7_ilb_subnet'] %>"
+  name          = "{{index $.Vars "l7_ilb_subnet"}}"
   ip_cidr_range = "10.0.1.0/24"
   region        = "europe-west1"
   network       = google_compute_network.default.id
@@ -27,7 +27,7 @@ resource "google_compute_subnetwork" "default" {
 
 # Reserved internal address
 resource "google_compute_address" "default" {
-  name         = "<%= ctx[:vars]['l7_ilb_ip'] %>"
+  name         = "{{index $.Vars "l7_ilb_ip"}}"
   provider     = google-beta
   subnetwork   = google_compute_subnetwork.default.id
   address_type = "INTERNAL"
@@ -38,7 +38,7 @@ resource "google_compute_address" "default" {
 
 # Regional forwarding rule
 resource "google_compute_forwarding_rule" "default" {
-  name                  = "<%= ctx[:vars]['l7_ilb_forwarding_rule'] %>"
+  name                  = "{{index $.Vars "l7_ilb_forwarding_rule"}}"
   region                = "europe-west1"
   depends_on            = [google_compute_subnetwork.proxy_subnet]
   ip_protocol           = "TCP"
@@ -95,7 +95,7 @@ resource "google_compute_region_ssl_certificate" "default" {
 
 # Regional target HTTPS proxy
 resource "google_compute_region_target_https_proxy" "default" {
-  name             = "<%= ctx[:vars]['l7_ilb_target_https_proxy'] %>"
+  name             = "{{index $.Vars "l7_ilb_target_https_proxy"}}"
   region           = "europe-west1"
   url_map          = google_compute_region_url_map.https_lb.id
   ssl_certificates = [google_compute_region_ssl_certificate.default.self_link]
@@ -103,14 +103,14 @@ resource "google_compute_region_target_https_proxy" "default" {
 
 # Regional URL map
 resource "google_compute_region_url_map" "https_lb" {
-  name            = "<%= ctx[:vars]['l7_ilb_regional_url_map'] %>"
+  name            = "{{index $.Vars "l7_ilb_regional_url_map"}}"
   region          = "europe-west1"
   default_service = google_compute_region_backend_service.default.id
 }
 
 # Regional backend service
 resource "google_compute_region_backend_service" "default" {
-  name                  = "<%= ctx[:vars]['l7_ilb_backend_service'] %>"
+  name                  = "{{index $.Vars "l7_ilb_backend_service"}}"
   region                = "europe-west1"
   protocol              = "HTTP"
   port_name             = "http-server"
@@ -126,7 +126,7 @@ resource "google_compute_region_backend_service" "default" {
 
 # Instance template
 resource "google_compute_instance_template" "default" {
-  name         = "<%= ctx[:vars]['l7_ilb_mig_template'] %>"
+  name         = "{{index $.Vars "l7_ilb_mig_template"}}"
   machine_type = "e2-small"
   tags         = ["http-server"]
   network_interface {
@@ -172,7 +172,7 @@ resource "google_compute_instance_template" "default" {
 
 # Regional health check
 resource "google_compute_region_health_check" "default" {
-  name   = "<%= ctx[:vars]['l7_ilb_hc'] %>"
+  name   = "{{index $.Vars "l7_ilb_hc"}}"
   region = "europe-west1"
   http_health_check {
     port_specification = "USE_SERVING_PORT"
@@ -181,7 +181,7 @@ resource "google_compute_region_health_check" "default" {
 
 # Regional MIG
 resource "google_compute_region_instance_group_manager" "default" {
-  name   = "<%= ctx[:vars]['l7_ilb_mig1'] %>"
+  name   = "{{index $.Vars "l7_ilb_mig1"}}"
   region = "europe-west1"
   version {
     instance_template = google_compute_instance_template.default.id
@@ -197,7 +197,7 @@ resource "google_compute_region_instance_group_manager" "default" {
 
 # Allow all access to health check ranges
 resource "google_compute_firewall" "default" {
-  name          = "<%= ctx[:vars]['l7_ilb_fw_allow_hc'] %>"
+  name          = "{{index $.Vars "l7_ilb_fw_allow_hc"}}"
   direction     = "INGRESS"
   network       = google_compute_network.default.id
   source_ranges = ["130.211.0.0/22", "35.191.0.0/16", "35.235.240.0/20"]
@@ -208,7 +208,7 @@ resource "google_compute_firewall" "default" {
 
 # Allow http from proxy subnet to backends
 resource "google_compute_firewall" "backends" {
-  name          = "<%= ctx[:vars]['l7_ilb_fw_allow_ilb_to_backends'] %>"
+  name          = "{{index $.Vars "l7_ilb_fw_allow_ilb_to_backends"}}"
   direction     = "INGRESS"
   network       = google_compute_network.default.id
   source_ranges = ["10.0.0.0/24"]
@@ -221,7 +221,7 @@ resource "google_compute_firewall" "backends" {
 
 # Test instance
 resource "google_compute_instance" "default" {
-  name         = "<%= ctx[:vars]['l7_ilb_test_vm'] %>"
+  name         = "{{index $.Vars "l7_ilb_test_vm"}}"
   zone         = "europe-west1-b"
   machine_type = "e2-small"
   network_interface {
@@ -239,7 +239,7 @@ resource "google_compute_instance" "default" {
 
 # Regional forwarding rule
 resource "google_compute_forwarding_rule" "redirect" {
-  name                  = "<%= ctx[:vars]['l7_ilb_redirect'] %>"
+  name                  = "{{index $.Vars "l7_ilb_redirect"}}"
   region                = "europe-west1"
   ip_protocol           = "TCP"
   ip_address            = google_compute_address.default.address # Same as HTTPS load balancer
@@ -253,14 +253,14 @@ resource "google_compute_forwarding_rule" "redirect" {
 
 # Regional HTTP proxy
 resource "google_compute_region_target_http_proxy" "default" {
-  name    = "<%= ctx[:vars]['l7_ilb_target_http_proxy'] %>"
+  name    = "{{index $.Vars "l7_ilb_target_http_proxy"}}"
   region  = "europe-west1"
   url_map = google_compute_region_url_map.redirect.id
 }
 
 # Regional URL map
-resource "google_compute_region_url_map" "<%= ctx[:primary_resource_id] %>" {
-  name            = "<%= ctx[:vars]['l7_ilb_redirect_url_map'] %>"
+resource "google_compute_region_url_map" "{{$.PrimaryResourceId}}" {
+  name            = "{{index $.Vars "l7_ilb_redirect_url_map"}}"
   region          = "europe-west1"
   default_service = google_compute_region_backend_service.default.id
   host_rule {

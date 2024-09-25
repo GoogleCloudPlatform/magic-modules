@@ -4,7 +4,7 @@ resource "google_dialogflow_agent" "basic_agent" {
   time_zone = "America/New_York"
 }
 
-resource "google_dialogflow_intent" "<%= ctx[:primary_resource_id] %>" {
+resource "google_dialogflow_intent" "{{$.PrimaryResourceId}}" {
   depends_on = [google_dialogflow_agent.basic_agent]
-  display_name = "<%= ctx[:vars]["intent_name"] %>"
+  display_name = "{{index $.Vars "intent_name"}}"
 }

@@ -10,8 +10,8 @@ if len(nameParts) != 4 && len(nameParts) != 2 {
 	return nil, fmt.Errorf(
 			"Saw %s when the name is expected to have either shape %s or %s",
 			d.Get("name"),
-			"projects/{{project}}/brands/{{name}}",
-			"{{project}}/{{name}}",
+			"projects/{{"{{"}}project{{"}}"}}/brands/{{"{{"}}name{{"}}"}}",
+			"{{"{{"}}project{{"}}"}}/{{"{{"}}name{{"}}"}}",
 		)
 }
 

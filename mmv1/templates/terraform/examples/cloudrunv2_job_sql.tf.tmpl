@@ -1,5 +1,5 @@
-resource "google_cloud_run_v2_job" "<%= ctx[:primary_resource_id] %>" {
-  name     = "<%= ctx[:vars]['cloud_run_job_name'] %>"
+resource "google_cloud_run_v2_job" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.Vars "cloud_run_job_name"}}"
   location = "us-central1"
   deletion_protection = false
   template {
@@ -40,7 +40,7 @@ data "google_project" "project" {
 }
 
 resource "google_secret_manager_secret" "secret" {
-  secret_id = "<%= ctx[:vars]['secret_id'] %>"
+  secret_id = "{{index $.Vars "secret_id"}}"
   replication {
     auto {}
   }
@@ -59,12 +59,12 @@ resource "google_secret_manager_secret_iam_member" "secret-access" {
 }
 
 resource "google_sql_database_instance" "instance" {
-  name             = "<%= ctx[:vars]['cloud_run_sql_name'] %>"
+  name             = "{{index $.Vars "cloud_run_sql_name"}}"
   region           = "us-central1"
   database_version = "MYSQL_5_7"
   settings {
     tier = "db-f1-micro"
   }
 
-  deletion_protection  = "<%= ctx[:vars]['deletion_protection'] %>"
+  deletion_protection  = "{{index $.Vars "deletion_protection"}}"
 }

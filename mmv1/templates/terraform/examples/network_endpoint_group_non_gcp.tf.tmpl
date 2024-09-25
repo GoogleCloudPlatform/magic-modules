@@ -1,5 +1,5 @@
-resource "google_compute_network_endpoint_group" "<%= ctx[:primary_resource_id] %>" {
-  name                  = "<%= ctx[:vars]['neg_name'] %>"
+resource "google_compute_network_endpoint_group" "{{$.PrimaryResourceId}}" {
+  name                  = "{{index $.Vars "neg_name"}}"
   network               = google_compute_network.default.id
   default_port          = "90"
   zone                  = "us-central1-a"
@@ -7,11 +7,11 @@ resource "google_compute_network_endpoint_group" "<%= ctx[:primary_resource_id] 
 }
 
 resource "google_compute_network_endpoint" "default-endpoint" {
-  network_endpoint_group = google_compute_network_endpoint_group.<%= ctx[:primary_resource_id] %>.name
-  port = google_compute_network_endpoint_group.<%= ctx[:primary_resource_id] %>.default_port
+  network_endpoint_group = google_compute_network_endpoint_group.{{$.PrimaryResourceId}}.name
+  port = google_compute_network_endpoint_group.{{$.PrimaryResourceId}}.default_port
   ip_address = "127.0.0.1"
 }
 
 resource "google_compute_network" "default" {
-  name = "<%= ctx[:vars]['network_name'] %>"
+  name = "{{index $.Vars "network_name"}}"
 }

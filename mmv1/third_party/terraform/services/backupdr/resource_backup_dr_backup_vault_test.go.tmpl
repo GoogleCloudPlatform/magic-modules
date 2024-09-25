@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package backupdr_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -95,4 +94,4 @@ resource "google_backup_dr_backup_vault" "backup-vault-test" {
 }
 `, context)
 }
-<% end -%>
+{{- end }}

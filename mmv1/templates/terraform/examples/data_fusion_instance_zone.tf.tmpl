@@ -1,5 +1,5 @@
-resource "google_data_fusion_instance" "<%= ctx[:primary_resource_id] %>" {
-  name   = "<%= ctx[:vars]["instance_name"] %>"
+resource "google_data_fusion_instance" "{{$.PrimaryResourceId}}" {
+  name   = "{{index $.Vars "instance_name"}}"
   region = "us-central1"
   zone   = "us-central1-a"
   type   = "DEVELOPER"

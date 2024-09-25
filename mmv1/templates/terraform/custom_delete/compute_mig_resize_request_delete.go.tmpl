@@ -6,7 +6,7 @@ if err != nil {
 
 // Get cancel url
 var cancelUrl string
-cancelUrl, err = tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/resizeRequests/{{name}}/cancel")
+cancelUrl, err = tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instanceGroupManagers/{{"{{"}}instance_group_manager{{"}}"}}/resizeRequests/{{"{{"}}name{{"}}"}}/cancel")
 
 if err != nil {
 	return err
@@ -14,7 +14,7 @@ if err != nil {
 
 // Get delete url
 var deleteUrl string
-deleteUrl, err = tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/resizeRequests/{{name}}")
+deleteUrl, err = tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instanceGroupManagers/{{"{{"}}instance_group_manager{{"}}"}}/resizeRequests/{{"{{"}}name{{"}}"}}")
 if err != nil {
 	return err
 }
