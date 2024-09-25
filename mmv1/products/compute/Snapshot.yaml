@@ -60,13 +60,13 @@ async:
 collection_url_key: 'items'
 iam_policy:
   parent_resource_attribute: 'name'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/global/snapshots/{{name}}'
     - '{{name}}'
 custom_code:
-  decoder: 'templates/terraform/decoders/go/snapshot.go.tmpl'
-  pre_create: 'templates/terraform/pre_create/go/compute_snapshot_precreate_url.go.tmpl'
+  decoder: 'templates/terraform/decoders/snapshot.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/compute_snapshot_precreate_url.go.tmpl'
 examples:
   - name: 'snapshot_basic'
     primary_resource_id: 'snapshot'
@@ -89,7 +89,7 @@ parameters:
     immutable: true
     # ignore_read in providers - this is only used in Create
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Disk'
     imports: 'name'
   - name: 'zone'
@@ -99,7 +99,7 @@ parameters:
     immutable: true
     ignore_read: true
     default_from_api: true
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Zone'
     imports: 'name'
   - name: 'snapshotEncryptionKey'
@@ -126,7 +126,7 @@ parameters:
           RFC 4648 base64 to either encrypt or decrypt this resource.
         ignore_read: true
         sensitive: true
-        custom_flatten: 'templates/terraform/custom_flatten/go/compute_snapshot_snapshot_encryption_raw_key.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/compute_snapshot_snapshot_encryption_raw_key.go.tmpl'
       - name: 'sha256'
         type: String
         description: |
@@ -229,7 +229,7 @@ properties:
       Windows image).  snapshotEncryptionKey nested object Encrypts the
       snapshot using a customer-supplied encryption key.
     output: true
-    custom_expand: 'templates/terraform/custom_expand/go/array_resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
     item_type:
       name: 'license'
       type: ResourceRef

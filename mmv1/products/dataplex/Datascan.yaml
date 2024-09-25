@@ -57,7 +57,7 @@ async:
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'data_scan_id'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/dataScans/{{data_scan_id}}'
     - '{{data_scan_id}}'

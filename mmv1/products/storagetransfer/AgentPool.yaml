@@ -29,10 +29,10 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  constants: 'templates/terraform/constants/go/agent_pool.go.tmpl'
-  post_create: 'templates/terraform/post_create/go/agent_pool.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/go/agent_pool.go.tmpl'
-  post_import: 'templates/terraform/post_import/go/agent_pool.go.tmpl'
+  constants: 'templates/terraform/constants/agent_pool.go.tmpl'
+  post_create: 'templates/terraform/post_create/agent_pool.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/agent_pool.go.tmpl'
+  post_import: 'templates/terraform/post_import/agent_pool.go.tmpl'
 examples:
   - name: 'agent_pool_basic'
     primary_resource_id: 'example'

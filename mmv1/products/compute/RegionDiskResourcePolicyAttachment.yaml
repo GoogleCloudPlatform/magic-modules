@@ -52,9 +52,9 @@ nested_query:
   is_list_of_ids: true
   modify_by_patch: false
 custom_code:
-  encoder: 'templates/terraform/encoders/go/compute_region_disk_resource_policies_attachment.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/compute_disk_resource_policies_attachment.go.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/go/compute_region_disk_resource_policies_attachment.go.tmpl'
+  encoder: 'templates/terraform/encoders/compute_region_disk_resource_policies_attachment.go.tmpl'
+  decoder: 'templates/terraform/decoders/compute_disk_resource_policies_attachment.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/compute_region_disk_resource_policies_attachment.go.tmpl'
 examples:
   - name: 'region_disk_resource_policy_attachment_basic'
     primary_resource_id: 'attachment'

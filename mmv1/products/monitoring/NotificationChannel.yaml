@@ -49,11 +49,11 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  constants: 'templates/terraform/constants/go/monitoring_notification_channel.go.tmpl'
-  encoder: 'templates/terraform/encoders/go/monitoring_notification_channel.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/monitoring_notification_channel.go.tmpl'
-  post_create: 'templates/terraform/post_create/go/set_computed_name.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/self_link_as_name_set_project.go.tmpl'
+  constants: 'templates/terraform/constants/monitoring_notification_channel.go.tmpl'
+  encoder: 'templates/terraform/encoders/monitoring_notification_channel.go.tmpl'
+  decoder: 'templates/terraform/decoders/monitoring_notification_channel.go.tmpl'
+  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
+  custom_import: 'templates/terraform/custom_import/self_link_as_name_set_project.go.tmpl'
 custom_diff:
   - 'sensitiveLabelCustomizeDiff'
 error_retry_predicates:

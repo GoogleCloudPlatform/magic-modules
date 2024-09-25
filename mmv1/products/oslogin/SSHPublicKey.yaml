@@ -33,8 +33,8 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  pre_create: 'templates/terraform/pre_create/go/os_login_ssh_public_key.go.tmpl'
-  post_create: 'templates/terraform/post_create/go/sshkeyfingerprint.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/os_login_ssh_public_key.go.tmpl'
+  post_create: 'templates/terraform/post_create/sshkeyfingerprint.go.tmpl'
 # Skip sweeper since due to URL containing user ID
 exclude_sweeper: true
 examples:

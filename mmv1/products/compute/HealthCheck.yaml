@@ -57,8 +57,8 @@ async:
     message: 'message'
 collection_url_key: 'items'
 custom_code:
-  constants: 'templates/terraform/constants/go/health_check.tmpl'
-  encoder: 'templates/terraform/encoders/go/health_check_type.tmpl'
+  constants: 'templates/terraform/constants/health_check.tmpl'
+  encoder: 'templates/terraform/encoders/health_check_type.tmpl'
 custom_diff:
   - 'healthCheckCustomizeDiff'
 examples:
@@ -874,7 +874,7 @@ properties:
     description: |
       Configure logging on this health check.
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/health_check_log_config.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/health_check_log_config.go.tmpl'
     properties:
       - name: 'enable'
         type: Boolean

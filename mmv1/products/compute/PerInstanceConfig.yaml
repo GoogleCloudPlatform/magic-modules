@@ -57,10 +57,10 @@ nested_query:
   is_list_of_ids: false
   modify_by_patch: false
 custom_code:
-  encoder: 'templates/terraform/encoders/go/compute_per_instance_config.go.tmpl'
-  update_encoder: 'templates/terraform/update_encoder/go/compute_per_instance_config.go.tmpl'
-  post_update: 'templates/terraform/post_update/go/compute_per_instance_config.go.tmpl'
-  custom_delete: 'templates/terraform/custom_delete/go/per_instance_config.go.tmpl'
+  encoder: 'templates/terraform/encoders/compute_per_instance_config.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/compute_per_instance_config.go.tmpl'
+  post_update: 'templates/terraform/post_update/compute_per_instance_config.go.tmpl'
+  custom_delete: 'templates/terraform/custom_delete/per_instance_config.go.tmpl'
 exclude_tgc: true
 examples:
   - name: 'stateful_igm'
@@ -150,8 +150,8 @@ properties:
           Stateful disks for the instance.
         api_name: disks
         is_set: true
-        custom_flatten: 'templates/terraform/custom_flatten/go/preserved_state_disks.go.tmpl'
-        custom_expand: 'templates/terraform/custom_expand/go/preserved_state_disks.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/preserved_state_disks.go.tmpl'
+        custom_expand: 'templates/terraform/custom_expand/preserved_state_disks.go.tmpl'
         item_type:
           type: NestedObject
           properties:
@@ -213,7 +213,7 @@ properties:
                   type: ResourceRef
                   description: |
                     The URL of the reservation for this IP address.
-                  custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+                  custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
                   resource: 'Address'
                   imports: 'selfLink'
       - name: 'externalIp'
@@ -243,6 +243,6 @@ properties:
                   type: ResourceRef
                   description: |
                     The URL of the reservation for this IP address.
-                  custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+                  custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
                   resource: 'Address'
                   imports: 'selfLink'

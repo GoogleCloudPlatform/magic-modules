@@ -31,11 +31,11 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  constants: 'templates/terraform/constants/go/scheduler.tmpl'
-  encoder: 'templates/terraform/encoders/go/cloud_scheduler.go.tmpl'
-  update_encoder: 'templates/terraform/update_encoder/go/cloud_scheduler.go.tmpl'
-  post_create: 'templates/terraform/post_create/go/cloud_scheduler.go.tmpl'
-  post_update: 'templates/terraform/post_update/go/cloud_scheduler.go.tmpl'
+  constants: 'templates/terraform/constants/scheduler.tmpl'
+  encoder: 'templates/terraform/encoders/cloud_scheduler.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/cloud_scheduler.go.tmpl'
+  post_create: 'templates/terraform/post_create/cloud_scheduler.go.tmpl'
+  post_update: 'templates/terraform/post_update/cloud_scheduler.go.tmpl'
 custom_diff:
   - 'validateAuthHeaders'
 examples:
@@ -84,8 +84,8 @@ properties:
       The name of the job.
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/shortname_to_url.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.tmpl'
   - name: 'description'
     type: String
     description: |
@@ -115,7 +115,7 @@ properties:
       Sets the job to a paused state. Jobs default to being enabled when this property is not set.
     required: false
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/cloud_scheduler_paused.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/cloud_scheduler_paused.go.tmpl'
   - name: 'attemptDeadline'
     type: String
     description: |
@@ -263,7 +263,7 @@ properties:
         description: |
           App Engine Routing setting for the job.
         required: false
-        custom_flatten: 'templates/terraform/custom_flatten/go/cloudscheduler_job_appenginerouting.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/cloudscheduler_job_appenginerouting.go.tmpl'
         properties:
           - name: 'service'
             type: String
@@ -322,7 +322,7 @@ properties:
           This map contains the header field names and values.
           Headers can be set when the job is created.
         required: false
-        custom_flatten: 'templates/terraform/custom_flatten/go/http_headers.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/http_headers.tmpl'
         validation:
           function: 'validateHttpHeaders()'
   - name: 'httpTarget'
@@ -364,7 +364,7 @@ properties:
           This map contains the header field names and values.
           Repeated headers are not supported, but a header value can contain commas.
         required: false
-        custom_flatten: 'templates/terraform/custom_flatten/go/http_headers.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/http_headers.tmpl'
         validation:
           function: 'validateHttpHeaders()'
       - name: 'oauthToken'

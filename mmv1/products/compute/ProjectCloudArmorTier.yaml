@@ -48,7 +48,7 @@ async:
     path: 'error/errors'
     message: 'message'
 custom_code:
-  custom_delete: 'templates/terraform/custom_delete/go/only_remove_from_state.go.tmpl'
+  custom_delete: 'templates/terraform/custom_delete/only_remove_from_state.go.tmpl'
 examples:
   - name: 'compute_project_cloud_armor_tier_basic'
     primary_resource_id: 'cloud_armor_tier_config'

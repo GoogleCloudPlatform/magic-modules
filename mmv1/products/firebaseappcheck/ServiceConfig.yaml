@@ -36,7 +36,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  test_check_destroy: 'templates/terraform/custom_check_destroy/go/firebase_app_check_service_config.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/firebase_app_check_service_config.go.tmpl'
 examples:
   - name: 'firebase_app_check_service_config_off'
     primary_resource_id: 'default'

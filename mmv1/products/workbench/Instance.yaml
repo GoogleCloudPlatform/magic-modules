@@ -45,15 +45,15 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
     - '{{name}}'
 custom_code:
-  constants: 'templates/terraform/constants/go/workbench_instance.go.tmpl'
-  post_create: 'templates/terraform/post_create/go/workbench_instance.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/go/workbench_instance.go.tmpl'
-  post_update: 'templates/terraform/post_update/go/workbench_instance.go.tmpl'
+  constants: 'templates/terraform/constants/workbench_instance.go.tmpl'
+  post_create: 'templates/terraform/post_create/workbench_instance.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/workbench_instance.go.tmpl'
+  post_update: 'templates/terraform/post_update/workbench_instance.go.tmpl'
 examples:
   - name: 'workbench_instance_basic'
     primary_resource_id: 'instance'
@@ -129,7 +129,7 @@ properties:
     url_param_only: true
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'gceSetup'
     type: NestedObject
     description: |
@@ -142,7 +142,7 @@ properties:
           Optional. The machine type of the VM instance. https://cloud.google.com/compute/docs/machine-resource
         default_from_api: true
         diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-        custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
       - name: 'acceleratorConfigs'
         type: Array
         description: |
@@ -233,7 +233,7 @@ properties:
         default_from_api: true
         conflicts:
           - gce_setup.0.container_image
-        custom_flatten: 'templates/terraform/custom_flatten/go/workbench_instance_vm_image_flatten.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/workbench_instance_vm_image_flatten.go.tmpl'
         properties:
           - name: 'project'
             type: String
@@ -288,7 +288,7 @@ properties:
               Optional. Indicates the type of the disk.
             immutable: true
             default_from_api: true
-            custom_flatten: 'templates/terraform/custom_flatten/go/workbench_instance_boot_disk_type_flatten.go.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/workbench_instance_boot_disk_type_flatten.go.tmpl'
             enum_values:
               - 'PD_STANDARD'
               - 'PD_SSD'
@@ -332,7 +332,7 @@ properties:
               description: |
                 Optional. Input only. Indicates the type of the disk.
               immutable: true
-              custom_flatten: 'templates/terraform/custom_flatten/go/workbench_instance_data_disk_type_flatten.go.tmpl'
+              custom_flatten: 'templates/terraform/custom_flatten/workbench_instance_data_disk_type_flatten.go.tmpl'
               enum_values:
                 - 'PD_STANDARD'
                 - 'PD_SSD'

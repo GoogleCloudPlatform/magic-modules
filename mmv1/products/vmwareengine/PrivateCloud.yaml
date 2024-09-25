@@ -48,13 +48,13 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  constants: 'templates/terraform/constants/go/vmwareengine_private_cloud.go.tmpl'
-  update_encoder: 'templates/terraform/update_encoder/go/private_cloud.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/private_cloud.go.tmpl'
-  pre_create: 'templates/terraform/pre_create/go/vmwareengine_private_cloud.go.tmpl'
-  post_delete: 'templates/terraform/post_delete/go/private_cloud.go.tmpl'
-  post_update: 'templates/terraform/post_update/go/private_cloud.go.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/go/vmwareengine_private_cloud.go.tmpl'
+  constants: 'templates/terraform/constants/vmwareengine_private_cloud.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/private_cloud.go.tmpl'
+  decoder: 'templates/terraform/decoders/private_cloud.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/vmwareengine_private_cloud.go.tmpl'
+  post_delete: 'templates/terraform/post_delete/private_cloud.go.tmpl'
+  post_update: 'templates/terraform/post_update/private_cloud.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/vmwareengine_private_cloud.go.tmpl'
 error_abort_predicates:
 
   - 'transport_tpg.Is429QuotaError'

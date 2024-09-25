@@ -39,8 +39,8 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  encoder: 'templates/terraform/encoders/go/monitoring_service.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/self_link_as_name.tmpl'
+  encoder: 'templates/terraform/encoders/monitoring_service.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
 error_retry_predicates:
 
   - 'transport_tpg.IsMonitoringConcurrentEditError'
@@ -59,7 +59,7 @@ parameters:
     api_name: name
     immutable: true
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
     validation:
       regex: '^[a-zA-Z0-9\-_:.]+$'
 properties:

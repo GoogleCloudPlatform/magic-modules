@@ -40,10 +40,10 @@ nested_query:
   is_list_of_ids: false
   modify_by_patch: false
 custom_code:
-  decoder: 'templates/terraform/decoders/go/avoid_meaningless_project_update.tmpl'
-  post_create: 'templates/terraform/post_create/go/lien.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/go/modify_delete_url.tmpl'
-  post_import: 'templates/terraform/post_import/go/lien_import.tmpl'
+  decoder: 'templates/terraform/decoders/avoid_meaningless_project_update.tmpl'
+  post_create: 'templates/terraform/post_create/lien.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/modify_delete_url.tmpl'
+  post_import: 'templates/terraform/post_import/lien_import.tmpl'
 examples:
   - name: 'resource_manager_lien'
     primary_resource_id: 'lien'
@@ -77,7 +77,7 @@ properties:
     type: String
     description: A system-generated unique identifier for this Lien.
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'reason'
     type: String
     description: |

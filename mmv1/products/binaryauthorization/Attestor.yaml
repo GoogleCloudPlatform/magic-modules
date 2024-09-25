@@ -31,9 +31,9 @@ timeouts:
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'attestor'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
 custom_code:
-  constants: 'templates/terraform/constants/go/binaryauthorization_attestor.go.tmpl'
+  constants: 'templates/terraform/constants/binaryauthorization_attestor.go.tmpl'
 examples:
   - name: 'binary_authorization_attestor_basic'
     primary_resource_id: 'attestor'
@@ -57,8 +57,8 @@ properties:
       The resource name.
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/shortname_to_url.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.tmpl'
   - name: 'description'
     type: String
     description: |
@@ -84,7 +84,7 @@ properties:
         required: true
         immutable: true
         diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-        custom_expand: 'templates/terraform/custom_expand/go/container_analysis_note.tmpl'
+        custom_expand: 'templates/terraform/custom_expand/container_analysis_note.tmpl'
       - name: 'publicKeys'
         type: Array
         description: |

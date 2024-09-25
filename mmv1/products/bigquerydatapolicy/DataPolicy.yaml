@@ -37,7 +37,7 @@ iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'data_policy_id'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/dataPolicies/{{data_policy_id}}'
     - '{{data_policy_id}}'
@@ -82,7 +82,7 @@ properties:
       Policy tag resource name, in the format of projects/{project_number}/locations/{locationId}/taxonomies/{taxonomyId}/policyTags/{policyTag_id}.
     required: true
     diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
-    custom_flatten: 'templates/terraform/custom_flatten/go/bigquery_datapolicy_policy_tag_location_to_lower_case.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/bigquery_datapolicy_policy_tag_location_to_lower_case.go.tmpl'
   - name: 'dataPolicyType'
     type: Enum
     description: |

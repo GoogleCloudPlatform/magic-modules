@@ -42,10 +42,10 @@ async:
   result:
     resource_inside_response: true
 custom_code:
-  constants: 'templates/terraform/constants/go/spanner_instance_config.go.tmpl'
-  encoder: 'templates/terraform/encoders/go/spanner_instance_config.go.tmpl'
-  update_encoder: 'templates/terraform/update_encoder/go/spanner_instance_config_update.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/spanner_instance_config.go.tmpl'
+  constants: 'templates/terraform/constants/spanner_instance_config.go.tmpl'
+  encoder: 'templates/terraform/encoders/spanner_instance_config.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/spanner_instance_config_update.go.tmpl'
+  decoder: 'templates/terraform/decoders/spanner_instance_config.go.tmpl'
 exclude_tgc: true
 # Sweeper skipped as this resource has customized deletion.
 exclude_sweeper: true
@@ -79,8 +79,8 @@ properties:
       baseConfig must refer to a configuration of type GOOGLE_MANAGED in the same project as this configuration.
     immutable: true
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/spanner_instance_config.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/spanner_instance_config.go.tmpl'
   - name: 'configType'
     type: String
     description: |

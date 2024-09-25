@@ -50,7 +50,7 @@ async:
     path: 'error/errors'
     message: 'message'
 custom_code:
-  decoder: 'templates/terraform/decoders/go/unwrap_route_policy_resource.go.tmpl'
+  decoder: 'templates/terraform/decoders/unwrap_route_policy_resource.go.tmpl'
 examples:
   - name: 'router_route_policy_export'
     primary_resource_id: 'rp-export'
@@ -85,7 +85,7 @@ parameters:
     required: false
     immutable: true
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
     resource: 'Region'
     imports: 'name'
   - name: 'name'

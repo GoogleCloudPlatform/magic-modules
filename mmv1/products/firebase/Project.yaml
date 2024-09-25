@@ -55,8 +55,8 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  constants: 'templates/terraform/constants/go/firebase_project.go.tmpl'
-  pre_create: 'templates/terraform/pre_create/go/firebase_project.go.tmpl'
+  constants: 'templates/terraform/constants/firebase_project.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/firebase_project.go.tmpl'
 exclude_sweeper: true
 examples:
   - name: 'firebase_project_basic'

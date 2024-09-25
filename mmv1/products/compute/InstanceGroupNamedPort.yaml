@@ -60,7 +60,7 @@ nested_query:
   is_list_of_ids: false
   modify_by_patch: true
 custom_code:
-  encoder: 'templates/terraform/encoders/go/normalize_group.go.tmpl'
+  encoder: 'templates/terraform/encoders/normalize_group.go.tmpl'
 examples:
   - name: 'instance_group_named_port_gke'
     primary_resource_id: 'my_port'

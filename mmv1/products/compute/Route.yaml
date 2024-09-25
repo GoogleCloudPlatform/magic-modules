@@ -72,9 +72,9 @@ async:
     message: 'message'
 collection_url_key: 'items'
 custom_code:
-  extra_schema_entry: 'templates/terraform/extra_schema_entry/go/route.tmpl'
-  constants: 'templates/terraform/constants/go/compute_route.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/route.tmpl'
+  extra_schema_entry: 'templates/terraform/extra_schema_entry/route.tmpl'
+  constants: 'templates/terraform/constants/compute_route.go.tmpl'
+  decoder: 'templates/terraform/decoders/route.tmpl'
 error_retry_predicates:
 
   - 'transport_tpg.IsPeeringOperationInProgress'
@@ -135,7 +135,7 @@ properties:
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Network'
     imports: 'selfLink'
   - name: 'priority'
@@ -156,7 +156,7 @@ properties:
     description: 'A list of instance tags to which this route applies.'
     is_set: true
     immutable: true
-    custom_expand: 'templates/terraform/custom_expand/go/set_to_list.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/set_to_list.tmpl'
     item_type:
       type: String
   - name: 'nextHopGateway'
@@ -177,7 +177,7 @@ properties:
       - 'next_hop_vpn_tunnel'
       - 'next_hop_ilb'
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_expand: 'templates/terraform/custom_expand/go/route_gateway.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/route_gateway.tmpl'
   - name: 'nextHopInstance'
     type: ResourceRef
     description: |
@@ -194,7 +194,7 @@ properties:
       - 'next_hop_ip'
       - 'next_hop_vpn_tunnel'
       - 'next_hop_ilb'
-    custom_expand: 'templates/terraform/custom_expand/go/route_instance.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/route_instance.tmpl'
     resource: 'Instance'
     imports: 'selfLink'
   - name: 'nextHopIp'
@@ -220,7 +220,7 @@ properties:
       - 'next_hop_ip'
       - 'next_hop_vpn_tunnel'
       - 'next_hop_ilb'
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'VpnTunnel'
     imports: 'selfLink'
   - name: 'nextHopNetwork'

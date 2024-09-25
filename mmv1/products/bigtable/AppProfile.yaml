@@ -35,9 +35,9 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  extra_schema_entry: 'templates/terraform/extra_schema_entry/go/bigtable_app_profile.go.tmpl'
-  encoder: 'templates/terraform/encoders/go/bigtable_app_profile.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/go/bigtable_app_profile.go.tmpl'
+  extra_schema_entry: 'templates/terraform/extra_schema_entry/bigtable_app_profile.go.tmpl'
+  encoder: 'templates/terraform/encoders/bigtable_app_profile.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/bigtable_app_profile.go.tmpl'
 exclude_sweeper: true
 examples:
   - name: 'bigtable_app_profile_anycluster'
@@ -137,8 +137,8 @@ properties:
     exactly_one_of:
       - 'single_cluster_routing'
       - 'multi_cluster_routing_use_any'
-    custom_flatten: 'templates/terraform/custom_flatten/go/bigtable_app_profile_routing.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/bigtable_app_profile_routing.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/bigtable_app_profile_routing.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/bigtable_app_profile_routing.tmpl'
   - name: 'singleClusterRouting'
     type: NestedObject
     description: |

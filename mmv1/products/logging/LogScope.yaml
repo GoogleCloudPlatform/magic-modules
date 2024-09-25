@@ -31,7 +31,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  encoder: 'templates/terraform/encoders/go/logging_log_scope.go.tmpl'
+  encoder: 'templates/terraform/encoders/logging_log_scope.go.tmpl'
 examples:
   - name: 'logging_log_scope_basic'
     primary_resource_id: 'logging_log_scope'

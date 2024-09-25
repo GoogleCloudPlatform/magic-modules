@@ -34,9 +34,9 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  encoder: 'templates/terraform/encoders/go/containeranalysis_occurrence.go.tmpl'
-  update_encoder: 'templates/terraform/update_encoder/go/containeranalysis_occurrence.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/containeranalysis_occurrence.go.tmpl'
+  encoder: 'templates/terraform/encoders/containeranalysis_occurrence.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/containeranalysis_occurrence.go.tmpl'
+  decoder: 'templates/terraform/decoders/containeranalysis_occurrence.go.tmpl'
 examples:
   - name: 'container_analysis_occurrence_kms'
     primary_resource_id: 'occurrence'
@@ -52,7 +52,7 @@ properties:
     description: |
       The name of the occurrence.
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'resourceUri'
     type: String
     description: |

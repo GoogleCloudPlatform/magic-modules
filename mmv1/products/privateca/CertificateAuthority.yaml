@@ -52,14 +52,14 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  constants: 'templates/terraform/constants/go/privateca_certificate_authority.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/treat_deleted_state_as_gone.go.tmpl'
-  pre_create: 'templates/terraform/pre_create/go/privateca_certificate_authority.go.tmpl'
-  post_create: 'templates/terraform/post_create/go/privateca_certificate_authority.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/go/privateca_certificate_authority.go.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/go/privateca_authority_disable.go.tmpl'
-  post_import: 'templates/terraform/post_import/go/privateca_import.go.tmpl'
-  test_check_destroy: 'templates/terraform/custom_check_destroy/go/privateca_certificate_authority.go.tmpl'
+  constants: 'templates/terraform/constants/privateca_certificate_authority.go.tmpl'
+  decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/privateca_certificate_authority.go.tmpl'
+  post_create: 'templates/terraform/post_create/privateca_certificate_authority.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/privateca_certificate_authority.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/privateca_authority_disable.go.tmpl'
+  post_import: 'templates/terraform/post_import/privateca_import.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/privateca_certificate_authority.go.tmpl'
 custom_diff:
   - 'resourcePrivateCaCACustomDiff'
 examples:
@@ -231,8 +231,8 @@ properties:
           Describes how some of the technical X.509 fields in a certificate should be populated.
         required: true
         immutable: true
-        custom_flatten: 'templates/terraform/custom_flatten/go/privateca_certificate_509_config.go.tmpl'
-        custom_expand: 'templates/terraform/custom_expand/go/privateca_certificate_509_config.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/privateca_certificate_509_config.go.tmpl'
+        custom_expand: 'templates/terraform/custom_expand/privateca_certificate_509_config.go.tmpl'
         properties:
           - name: 'additionalExtensions'
             type: Array
@@ -699,7 +699,7 @@ properties:
           - 'subordinate_config.0.pem_issuer_chain'
         diff_suppress_func: 'tpgresource.CompareResourceNames'
         # certificateAuthority is not included in the response since the sub-CA is activated via specifing pemIssuerChain
-        custom_flatten: 'templates/terraform/custom_flatten/go/privateca_certificate_authority_subordinate_config_certificate_authority.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/privateca_certificate_authority_subordinate_config_certificate_authority.go.tmpl'
       - name: 'pemIssuerChain'
         type: NestedObject
         description: |

@@ -50,7 +50,7 @@ async:
     path: 'error/errors'
     message: 'message'
 custom_code:
-  test_check_destroy: 'templates/terraform/custom_check_destroy/go/skip_delete_during_test.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
 examples:
   - name: 'app_engine_service_network_settings'
     primary_resource_id: 'internalapp'

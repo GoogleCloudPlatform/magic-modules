@@ -66,10 +66,10 @@ nested_query:
   is_list_of_ids: false
   modify_by_patch: false
 custom_code:
-  encoder: 'templates/terraform/encoders/go/compute_network_endpoint.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/unwrap_resource.go.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/go/compute_network_endpoint.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/compute_network_endpoint.go.tmpl'
+  encoder: 'templates/terraform/encoders/compute_network_endpoint.go.tmpl'
+  decoder: 'templates/terraform/decoders/unwrap_resource.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/compute_network_endpoint.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/compute_network_endpoint.go.tmpl'
 exclude_tgc: true
 examples:
   - name: 'network_endpoint'
@@ -112,7 +112,7 @@ properties:
       The name for a specific VM instance that the IP address belongs to.
       This is required for network endpoints of type GCE_VM_IP_PORT.
       The instance must be in the same zone of network endpoint group.
-    custom_expand: 'templates/terraform/custom_expand/go/resource_from_self_link.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.tmpl'
     resource: 'Instance'
     imports: 'name'
   - name: 'port'
@@ -121,7 +121,7 @@ properties:
       Port number of network endpoint.
       **Note** `port` is required unless the Network Endpoint Group is created
       with the type of `GCE_VM_IP`
-    custom_flatten: 'templates/terraform/custom_flatten/go/float64_to_int.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/float64_to_int.go.tmpl'
   - name: 'ipAddress'
     type: String
     description: |

@@ -39,7 +39,7 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-  encoder: 'templates/terraform/encoders/go/alloydb_backup.tmpl'
+  encoder: 'templates/terraform/encoders/alloydb_backup.tmpl'
 examples:
   - name: 'alloydb_backup_basic'
     primary_resource_id: 'default'

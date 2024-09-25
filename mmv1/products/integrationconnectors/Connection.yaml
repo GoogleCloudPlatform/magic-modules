@@ -48,10 +48,10 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  constants: 'templates/terraform/constants/go/integration_connectors_connection.go.tmpl'
-  post_create: 'templates/terraform/post_create/go/integration_connectors_connection.go.tmpl'
-  post_update: 'templates/terraform/post_update/go/integration_connectors_connection.go.tmpl'
-  post_import: 'templates/terraform/post_import/go/integration_connectors_connection.go.tmpl'
+  constants: 'templates/terraform/constants/integration_connectors_connection.go.tmpl'
+  post_create: 'templates/terraform/post_create/integration_connectors_connection.go.tmpl'
+  post_update: 'templates/terraform/post_update/integration_connectors_connection.go.tmpl'
+  post_import: 'templates/terraform/post_import/integration_connectors_connection.go.tmpl'
 examples:
   - name: 'integration_connectors_connection_basic'
     primary_resource_id: 'pubsubconnection'

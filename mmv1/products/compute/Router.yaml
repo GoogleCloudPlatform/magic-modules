@@ -48,7 +48,7 @@ async:
     message: 'message'
 collection_url_key: 'items'
 custom_code:
-  constants: 'templates/terraform/constants/go/router.go.tmpl'
+  constants: 'templates/terraform/constants/router.go.tmpl'
 custom_diff:
   - 'resourceComputeRouterCustomDiff'
 examples:
@@ -73,8 +73,8 @@ parameters:
     required: false
     immutable: true
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Region'
     imports: 'name'
 properties:
@@ -113,7 +113,7 @@ properties:
   # these fields to the Terraform resource (and then within that, decide
   # whether to deprecate router_interface and router_peer or leave them
   # alone).
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Network'
     imports: 'selfLink'
   - name: 'bgp'
@@ -163,7 +163,7 @@ properties:
           ranges will be advertised in addition to any specified groups.
           Leave this field blank to advertise no custom IP ranges.
         send_empty_value: true
-        custom_flatten: 'templates/terraform/custom_flatten/go/compute_router_range.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/compute_router_range.go.tmpl'
         item_type:
           type: NestedObject
           properties:

@@ -47,7 +47,7 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-  pre_delete: 'templates/terraform/pre_delete/go/netapp_volume_force_delete.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/netapp_volume_force_delete.go.tmpl'
 examples:
   - name: 'netapp_volume_basic'
     primary_resource_id: 'test_volume'

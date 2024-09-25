@@ -46,7 +46,7 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  encoder: 'templates/terraform/encoders/go/logging_linked_dataset.go.tmpl'
+  encoder: 'templates/terraform/encoders/logging_linked_dataset.go.tmpl'
 # Skip sweeper gen since this is a child resource.
 exclude_sweeper: true
 examples:

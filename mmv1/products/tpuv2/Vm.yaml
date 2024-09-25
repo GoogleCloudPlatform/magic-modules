@@ -46,7 +46,7 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  constants: 'templates/terraform/constants/go/tpu_vm.go.tmpl'
+  constants: 'templates/terraform/constants/tpu_vm.go.tmpl'
 custom_diff:
   - 'acceleratorTypeCustomizeDiff'
 examples:
@@ -84,7 +84,7 @@ properties:
     min_version: 'beta'
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'runtimeVersion'
     type: String
     description: |

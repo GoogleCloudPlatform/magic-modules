@@ -45,8 +45,8 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  custom_import: 'templates/terraform/custom_import/go/apigee_addons.go.tmpl'
-  test_check_destroy: 'templates/terraform/custom_check_destroy/go/apigee_addons_override.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/apigee_addons.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/apigee_addons_override.go.tmpl'
 examples:
   - name: 'apigee_addons_basic'
     exclude_test: true

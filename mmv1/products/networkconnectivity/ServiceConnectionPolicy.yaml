@@ -50,7 +50,7 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  update_encoder: 'templates/terraform/encoders/go/service_connection_policy.go.tmpl'
+  update_encoder: 'templates/terraform/encoders/service_connection_policy.go.tmpl'
 examples:
   - name: 'network_connectivity_policy_basic'
     primary_resource_id: 'default'

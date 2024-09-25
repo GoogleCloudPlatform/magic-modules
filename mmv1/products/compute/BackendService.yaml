@@ -51,14 +51,14 @@ iam_policy:
   allowed_iam_role: 'roles/compute.admin'
   parent_resource_attribute: 'name'
   iam_conditions_request_type: 'QUERY_PARAM'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   min_version: 'beta'
 custom_code:
-  constants: 'templates/terraform/constants/go/backend_service.go.tmpl'
-  encoder: 'templates/terraform/encoders/go/backend_service.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/backend_service.go.tmpl'
-  post_create: 'templates/terraform/post_create/go/compute_backend_service_security_policy.go.tmpl'
-  post_update: 'templates/terraform/post_create/go/compute_backend_service_security_policy.go.tmpl'
+  constants: 'templates/terraform/constants/backend_service.go.tmpl'
+  encoder: 'templates/terraform/encoders/backend_service.go.tmpl'
+  decoder: 'templates/terraform/decoders/backend_service.go.tmpl'
+  post_create: 'templates/terraform/post_create/compute_backend_service_security_policy.go.tmpl'
+  post_update: 'templates/terraform/post_create/compute_backend_service_security_policy.go.tmpl'
 schema_version: 1
 examples:
   - name: 'backend_service_basic'
@@ -193,7 +193,7 @@ properties:
             partial URL.
           required: true
           diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
-          custom_flatten: 'templates/terraform/custom_flatten/go/guard_self_link.go.tmpl'
+          custom_flatten: 'templates/terraform/custom_flatten/guard_self_link.go.tmpl'
         - name: 'maxConnections'
           type: Integer
           description: |
@@ -726,7 +726,7 @@ properties:
       For internal load balancing, a URL to a HealthCheck resource must be specified instead.
     is_set: true
     set_hash_func: 'tpgresource.SelfLinkRelativePathHash'
-    custom_flatten: 'templates/terraform/custom_flatten/go/guard_self_link_array.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/guard_self_link_array.go.tmpl'
     item_type:
       type: String
     min_size: 1

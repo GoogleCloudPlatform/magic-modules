@@ -45,7 +45,7 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  custom_import: 'templates/terraform/custom_import/go/set_id_name_with_slashes.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/set_id_name_with_slashes.go.tmpl'
 exclude_tgc: true
 examples:
   - name: 'access_context_manager_gcp_user_access_binding_basic'

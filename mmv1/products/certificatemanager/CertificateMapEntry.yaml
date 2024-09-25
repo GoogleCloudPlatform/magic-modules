@@ -60,8 +60,8 @@ parameters:
       'projects/*/locations/*/certificateMaps/*/certificateMapEntries/*'
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/resource_from_self_link.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.tmpl'
   - name: 'map'
     type: ResourceRef
     description: |
@@ -69,8 +69,8 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/resource_from_self_link.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.tmpl'
     resource: 'CertificateMap'
     imports: 'name'
 properties:

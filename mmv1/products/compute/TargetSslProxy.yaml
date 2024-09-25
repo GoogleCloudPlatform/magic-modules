@@ -100,7 +100,7 @@ properties:
     required: true
     update_url: 'projects/{{project}}/global/targetSslProxies/{{name}}/setBackendService'
     update_verb: 'POST'
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'BackendService'
     imports: 'selfLink'
   - name: 'sslCertificates'
@@ -114,7 +114,7 @@ properties:
     exactly_one_of:
       - 'sslCertificates'
       - 'certificateMap'
-    custom_expand: 'templates/terraform/custom_expand/go/array_resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
     item_type:
       name: 'sslCertificate'
       type: ResourceRef
@@ -140,6 +140,6 @@ properties:
       resource will not have any SSL policy configured.
     update_url: 'projects/{{project}}/global/targetSslProxies/{{name}}/setSslPolicy'
     update_verb: 'POST'
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'SslPolicy'
     imports: 'selfLink'
