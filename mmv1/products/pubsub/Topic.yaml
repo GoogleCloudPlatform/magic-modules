@@ -83,6 +83,10 @@ examples:
     primary_resource_id: 'example'
     vars:
       topic_name: 'example-topic'
+  - name: 'pubsub_topic_ingestion_cloud_storage'
+    primary_resource_id: 'example'
+    vars:
+      topic_name: 'example-topic'
 parameters:
 properties:
   - name: 'name'
@@ -166,6 +170,9 @@ properties:
         type: NestedObject
         description: |
           Settings for ingestion from Amazon Kinesis Data Streams.
+        exactly_one_of:
+          - 'aws_kinesis'
+          - 'cloud_storage'
         properties:
           - name: 'streamArn'
             type: String
@@ -194,3 +201,100 @@ properties:
               role). The `awsRoleArn` must be set up with `accounts.google.com:sub`
               equals to this service account number.
             required: true
+      - name: 'cloudStorage'
+        type: NestedObject
+        description: Settings for ingestion from Cloud Storage.
+        exactly_one_of:
+          - 'aws_kinesis'
+          - 'cloud_storage'
+        properties:
+          - name: 'bucket'
+            type: String
+            description: |
+              Cloud Storage bucket. The bucket name must be without any
+              prefix like "gs://". See the bucket naming requirements:
+              https://cloud.google.com/storage/docs/buckets#naming.
+            required: true
+          - name: 'textFormat'
+            type: NestedObject
+            description: |
+              Configuration for reading Cloud Storage data in text format. Each line of
+              text as specified by the delimiter will be set to the `data` field of a
+              Pub/Sub message.
+            exactly_one_of:
+              - 'text_format'
+              - 'avro_format'
+              - 'pubsub_avro_format'
+            properties:
+              - name: 'delimiter'
+                type: String
+                description: |
+                  The delimiter to use when using the 'text' format. Each line of text as
+                  specified by the delimiter will be set to the 'data' field of a Pub/Sub
+                  message. When unset, '\n' is used.
+                required: false
+                default_value: "\n"
+          - name: 'avroFormat'
+            type: NestedObject
+            description: |
+              Configuration for reading Cloud Storage data in Avro binary format. The
+              bytes of each object will be set to the `data` field of a Pub/Sub message.
+            send_empty_value: true
+            allow_empty_object: true
+            exactly_one_of:
+              - 'text_format'
+              - 'avro_format'
+              - 'pubsub_avro_format'
+            properties:
+ # Meant to be an empty object with no properties.
+              []
+          - name: 'pubsubAvroFormat'
+            type: NestedObject
+            description: |
+              Configuration for reading Cloud Storage data written via Cloud Storage
+              subscriptions(See https://cloud.google.com/pubsub/docs/cloudstorage). The
+              data and attributes fields of the originally exported Pub/Sub message
+              will be restored when publishing.
+            send_empty_value: true
+            allow_empty_object: true
+            exactly_one_of:
+              - 'text_format'
+              - 'avro_format'
+              - 'pubsub_avro_format'
+            properties:
+ # Meant to be an empty object with no properties.
+              []
+          - name: 'minimumObjectCreateTime'
+            type: String
+            description: |
+              The timestamp set in RFC3339 text format. If set, only objects with a
+              larger or equal timestamp will be ingested. Unset by default, meaning
+              all objects will be ingested.
+            required: false
+          - name: 'matchGlob'
+            type: String
+            description: |
+              Glob pattern used to match objects that will be ingested. If unset, all
+              objects will be ingested. See the supported patterns:
+              https://cloud.google.com/storage/docs/json_api/v1/objects/list#list-objects-and-prefixes-using-glob
+            required: false
+      - name: 'platformLogsSettings'
+        type: NestedObject
+        description: |
+          Settings for Platform Logs regarding ingestion to Pub/Sub. If unset,
+          no Platform Logs will be generated.'
+        required: false
+        properties:
+          - name: 'severity'
+            type: Enum
+            description: |
+              The minimum severity level of Platform Logs that will be written. If unspecified,
+              no Platform Logs will be written.
+            default_value: "SEVERITY_UNSPECIFIED"
+            enum_values:
+              - 'SEVERITY_UNSPECIFIED'
+              - 'DISABLED'
+              - 'DEBUG'
+              - 'INFO'
+              - 'WARNING'
+              - 'ERROR'
