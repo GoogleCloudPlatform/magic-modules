@@ -11,16 +11,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Product
-name: SecretManagerRegional
-display_name: Secret Manager
-legacy_name: secret_manager
+---
+name: 'SecretManagerRegional'
+legacy_name: 'secret_manager'
+display_name: 'Secret Manager'
 versions:
-  - !ruby/object:Api::Product::Version
-    name: ga
-    base_url: https://secretmanager.{{location}}.rep.googleapis.com/v1/
-  - !ruby/object:Api::Product::Version
-    name: beta
-    base_url: https://secretmanager.{{location}}.rep.googleapis.com/v1/
+  - name: 'ga'
+    base_url: 'https://secretmanager.{{location}}.rep.googleapis.com/v1/'
+  - name: 'beta'
+    base_url: 'https://secretmanager.{{location}}.rep.googleapis.com/v1/'
 scopes:
-  - https://www.googleapis.com/auth/cloud-platform
+  - 'https://www.googleapis.com/auth/cloud-platform'
