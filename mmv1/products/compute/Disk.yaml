@@ -60,16 +60,16 @@ collection_url_key: 'items'
 iam_policy:
   parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/zones/{{zone}}/disks/{{name}}'
     - '{{name}}'
 custom_code:
-  constants: 'templates/terraform/constants/go/disk.tmpl'
-  encoder: 'templates/terraform/encoders/go/disk.tmpl'
-  update_encoder: 'templates/terraform/update_encoder/go/hyper_disk.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/disk.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/go/detach_disk.tmpl'
+  constants: 'templates/terraform/constants/disk.tmpl'
+  encoder: 'templates/terraform/encoders/disk.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/hyper_disk.go.tmpl'
+  decoder: 'templates/terraform/decoders/disk.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/detach_disk.tmpl'
 custom_diff:
   - 'customdiff.ForceNewIfChange("size", IsDiskShrinkage)'
   - 'hyperDiskIopsUpdateDiffSupress'
@@ -96,8 +96,8 @@ parameters:
     description: 'A reference to the zone where the disk resides.'
     required: false
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Zone'
     imports: 'name'
   - name: 'sourceImageEncryptionKey'
@@ -207,7 +207,7 @@ parameters:
       * `global/snapshots/snapshot`
       * `snapshot`
     api_name: sourceSnapshot
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Snapshot'
     imports: 'selfLink'
   - name: 'sourceSnapshotEncryptionKey'
@@ -326,7 +326,7 @@ properties:
       Links to the users of the disk (attached instances) in form:
       project/zones/zone/instances/instance
     output: true
-    custom_expand: 'templates/terraform/custom_expand/go/array_resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
     item_type:
       name: 'user'
       type: ResourceRef
@@ -385,8 +385,8 @@ properties:
       URL of the disk type resource describing which disk type to use to
       create the disk. Provide this when creating the disk.
     diff_suppress_func: 'tpgresource.CompareResourceNames'
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     default_value: "pd-standard"
     resource: 'DiskType'
     imports: 'selfLink'
@@ -417,7 +417,7 @@ properties:
       to allow for updating the resource policy attached to the disk.
     min_version: 'beta'
     default_from_api: true
-    custom_expand: 'templates/terraform/custom_expand/go/array_resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
     item_type:
       name: 'resourcePolicy'
       type: ResourceRef
@@ -486,7 +486,7 @@ properties:
     description: Any applicable license URI.
     immutable: true
     default_from_api: true
-    custom_expand: 'templates/terraform/custom_expand/go/array_resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
     item_type:
       name: 'license'
       type: ResourceRef
@@ -503,7 +503,7 @@ properties:
     required: false
     immutable: true
     diff_suppress_func: 'tpgresource.CompareResourceNames'
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'accessMode'
     type: String
     description: |

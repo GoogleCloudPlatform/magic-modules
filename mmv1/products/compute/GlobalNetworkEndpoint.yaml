@@ -60,10 +60,10 @@ nested_query:
   is_list_of_ids: false
   modify_by_patch: false
 custom_code:
-  encoder: 'templates/terraform/encoders/go/compute_global_network_endpoint.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/network_endpoint.go.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/go/compute_global_network_endpoint.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/compute_global_network_endpoint.go.tmpl'
+  encoder: 'templates/terraform/encoders/compute_global_network_endpoint.go.tmpl'
+  decoder: 'templates/terraform/decoders/network_endpoint.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/compute_global_network_endpoint.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/compute_global_network_endpoint.go.tmpl'
 exclude_tgc: true
 examples:
   - name: 'global_network_endpoint'
@@ -92,7 +92,7 @@ properties:
     description: |
       Port number of the external endpoint.
     required: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/float64_to_int.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/float64_to_int.go.tmpl'
     validation:
       function: 'validation.IntAtLeast(1)'
   - name: 'ipAddress'

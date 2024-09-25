@@ -33,10 +33,10 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  pre_create: 'templates/terraform/pre_create/go/integrations_auth_config.go.tmpl'
-  post_create: 'templates/terraform/post_create/go/set_computed_name.tmpl'
-  pre_update: 'templates/terraform/pre_update/go/integrations_auth_config.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/self_link_as_name.tmpl'
+  pre_create: 'templates/terraform/pre_create/integrations_auth_config.go.tmpl'
+  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
+  pre_update: 'templates/terraform/pre_update/integrations_auth_config.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
 examples:
   - name: 'integrations_auth_config_basic'
     primary_resource_id: 'basic_example'

@@ -55,10 +55,10 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  encoder: 'templates/terraform/encoders/go/firestore_field.go.tmpl'
-  custom_delete: 'templates/terraform/custom_delete/go/firestore_field_delete.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/firestore_field.go.tmpl'
-  test_check_destroy: 'templates/terraform/custom_check_destroy/go/firestore_field.go.tmpl'
+  encoder: 'templates/terraform/encoders/firestore_field.go.tmpl'
+  custom_delete: 'templates/terraform/custom_delete/firestore_field_delete.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/firestore_field.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/firestore_field.go.tmpl'
 # Sweeper skipped as this resource has customized deletion.
 exclude_sweeper: true
 error_retry_predicates:
@@ -129,8 +129,8 @@ properties:
       indexes specified. Configuring the index configuration with an empty block disables all indexes on
       the field.
     send_empty_value: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/firestore_field_index_config.go.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/firestore_field_index_config.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/firestore_field_index_config.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/firestore_field_index_config.go.tmpl'
     properties:
       - name: 'indexes'
         type: Array
@@ -177,7 +177,7 @@ properties:
     description: |
        The TTL configuration for this Field. If set to an empty block (i.e. `ttl_config {}`), a TTL policy is configured based on the field. If unset, a TTL policy is not configured (or will be disabled upon updating the resource).
     send_empty_value: true
-    custom_expand: 'templates/terraform/custom_expand/go/empty_object_if_set.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/empty_object_if_set.go.tmpl'
     properties:
       - name: 'state'
         type: Enum

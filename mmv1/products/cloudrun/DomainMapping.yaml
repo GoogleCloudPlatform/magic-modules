@@ -39,9 +39,9 @@ async:
   target_occurrences: 1
   actions: ['create', 'update']
 custom_code:
-  constants: 'templates/terraform/constants/go/cloud_run_domain_mapping.go.tmpl'
-  encoder: 'templates/terraform/encoders/go/cloud_run_domain_mapping.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/cloud_run.go.tmpl'
+  constants: 'templates/terraform/constants/cloud_run_domain_mapping.go.tmpl'
+  encoder: 'templates/terraform/encoders/cloud_run_domain_mapping.go.tmpl'
+  decoder: 'templates/terraform/decoders/cloud_run.go.tmpl'
 custom_diff:
   - 'hasMetadata'
 error_retry_predicates:
@@ -152,7 +152,7 @@ properties:
           It is recommended that the user leaves this empty to receive an error
           warning about a potential conflict and only set it once the respective UI
           has given such a warning.
-        custom_flatten: 'templates/terraform/custom_flatten/go/cloudrun_ignore_force_override.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/cloudrun_ignore_force_override.go.tmpl'
       - name: 'routeName'
         type: String
         description: |-
@@ -160,7 +160,7 @@ properties:
           The route must exist.
         required: true
         diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-        custom_expand: 'templates/terraform/custom_expand/go/resource_from_self_link.go.tmpl'
+        custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.tmpl'
       - name: 'certificateMode'
         type: Enum
         description: The mode of the certificate.
@@ -216,7 +216,7 @@ properties:
           In Cloud Run the namespace must be equal to either the
           project ID or project number.
         required: true
-        custom_flatten: 'templates/terraform/custom_flatten/go/set_to_project.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/set_to_project.go.tmpl'
       - name: 'annotations'
         type: KeyValueAnnotations
         description: |-

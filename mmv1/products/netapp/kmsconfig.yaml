@@ -51,7 +51,7 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-  post_create: 'templates/terraform/post_create/go/KMS_Verify.go.tmpl'
+  post_create: 'templates/terraform/post_create/KMS_Verify.go.tmpl'
 # Skipping the sweeper since we need to sweep multiple regions
 exclude_sweeper: true
 examples:

@@ -42,10 +42,10 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  constants: 'templates/terraform/constants/go/apphub_service_project.go.tmpl'
+  constants: 'templates/terraform/constants/apphub_service_project.go.tmpl'
 examples:
   - name: 'service_project_attachment_basic'
-    config_path: 'templates/terraform/examples/go/apphub_service_project_attachment_basic.tf.tmpl'
+    config_path: 'templates/terraform/examples/apphub_service_project_attachment_basic.tf.tmpl'
     primary_resource_id: 'example'
     vars:
       service_project_attachment_id: 'project-1'
@@ -54,7 +54,7 @@ examples:
       host_project: 'PROJECT_NAME'
     external_providers: ["random", "time"]
   - name: 'service_project_attachment_full'
-    config_path: 'templates/terraform/examples/go/apphub_service_project_attachment_full.tf.tmpl'
+    config_path: 'templates/terraform/examples/apphub_service_project_attachment_full.tf.tmpl'
     primary_resource_id: 'example2'
     vars:
       service_project_attachment_id: 'project-1'
@@ -85,8 +85,8 @@ properties:
       are accepted. As output, this field will contain project number."
     immutable: true
     diff_suppress_func: 'ServiceProjectDiffSuppress'
-    custom_flatten: 'templates/terraform/custom_flatten/go/apphub_service_project.go.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/apphub_service_project.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/apphub_service_project.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/apphub_service_project.go.tmpl'
   - name: 'createTime'
     type: String
     description: 'Output only. Create time.'

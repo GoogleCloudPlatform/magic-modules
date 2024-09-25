@@ -33,12 +33,12 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  constants: 'templates/terraform/constants/go/bigquery_data_transfer.go.tmpl'
-  encoder: 'templates/terraform/encoders/go/bigquery_data_transfer.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/bigquery_data_transfer.go.tmpl'
-  post_create: 'templates/terraform/post_create/go/set_computed_name.tmpl'
-  pre_update: 'templates/terraform/pre_update/go/bigquerydatatransfer_config.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/bigquery_data_transfer_self_link_as_name_set_location.go.tmpl'
+  constants: 'templates/terraform/constants/bigquery_data_transfer.go.tmpl'
+  encoder: 'templates/terraform/encoders/bigquery_data_transfer.go.tmpl'
+  decoder: 'templates/terraform/decoders/bigquery_data_transfer.go.tmpl'
+  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
+  pre_update: 'templates/terraform/pre_update/bigquerydatatransfer_config.tmpl'
+  custom_import: 'templates/terraform/custom_import/bigquery_data_transfer_self_link_as_name_set_location.go.tmpl'
 custom_diff:
   - 'sensitiveParamCustomizeDiff'
   - 'paramsCustomizeDiff'
@@ -207,7 +207,7 @@ properties:
 
       **NOTE** : If you are attempting to update a parameter that cannot be updated (due to api limitations) [please force recreation of the resource](https://www.terraform.io/cli/state/taint#forcing-re-creation-of-resources).
     required: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/json_to_string_map.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/json_to_string_map.go.tmpl'
   - name: 'sensitiveParams'
     type: NestedObject
     description: |

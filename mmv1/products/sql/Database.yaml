@@ -47,7 +47,7 @@ async:
     message: 'message'
 collection_url_key: 'items'
 custom_code:
-  pre_delete: 'templates/terraform/pre_delete/go/sql_database_deletion_policy.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/sql_database_deletion_policy.tmpl'
 # Sweeper skipped as this resource has customized deletion.
 exclude_sweeper: true
 read_error_transform: 'transformSQLDatabaseReadError'

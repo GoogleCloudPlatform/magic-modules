@@ -90,8 +90,8 @@ parameters:
       The region this gateway should sit in.
     required: false
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Region'
     imports: 'name'
 properties:
@@ -119,7 +119,7 @@ properties:
       The network this VPN gateway is accepting traffic for.
     required: true
     immutable: true
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Network'
     imports: 'selfLink'
   - name: 'stackType'
@@ -128,7 +128,7 @@ properties:
       The stack type for this VPN gateway to identify the IP protocols that are enabled.
       If not specified, IPV4_ONLY will be used.
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
     default_value: "IPV4_ONLY"
     enum_values:
       - 'IPV4_ONLY'
@@ -139,7 +139,7 @@ properties:
     description: |
       The IP family of the gateway IPs for the HA-VPN gateway interfaces. If not specified, IPV4 will be used.
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
     default_value: "IPV4"
     enum_values:
       - 'IPV4'
@@ -170,6 +170,6 @@ properties:
 
             Not currently available publicly.
           immutable: true
-          custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+          custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
           resource: 'InterconnectAttachment'
           imports: 'selfLink'

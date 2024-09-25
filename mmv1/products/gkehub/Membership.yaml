@@ -51,12 +51,12 @@ async:
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'membership_id'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}'
     - '{{membership_id}}'
 custom_code:
-  constants: 'templates/terraform/constants/go/gke_hub_membership_diff.go.tmpl'
+  constants: 'templates/terraform/constants/gke_hub_membership_diff.go.tmpl'
 # Skip sweeper gen since this is a child resource.
 exclude_sweeper: true
 schema_version: 1
@@ -162,7 +162,7 @@ properties:
             required: true
             immutable: true
             diff_suppress_func: 'suppressGkeHubEndpointSelfLinkDiff'
-            custom_expand: 'templates/terraform/custom_expand/go/gke_hub_membership.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/gke_hub_membership.tmpl'
   - name: 'authority'
     type: NestedObject
     description: |

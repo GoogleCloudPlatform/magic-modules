@@ -46,7 +46,7 @@ iam_policy:
   method_name_separator: ':'
   allowed_iam_role: 'roles/securesourcemanager.repoAdmin'
   parent_resource_attribute: 'repository_id'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}'
     - '{{repository_id}}'

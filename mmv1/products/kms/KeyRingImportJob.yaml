@@ -40,7 +40,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  custom_import: 'templates/terraform/custom_import/go/kms_key_ring_import_job.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/kms_key_ring_import_job.go.tmpl'
 examples:
   - name: 'kms_key_ring_import_job'
     primary_resource_id: 'import-job'

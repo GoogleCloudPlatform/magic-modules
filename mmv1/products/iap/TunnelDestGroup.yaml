@@ -40,7 +40,7 @@ iam_policy:
   parent_resource_attribute: 'dest_group'
   iam_conditions_request_type: 'REQUEST_BODY'
   base_url: 'projects/{{project}}/iap_tunnel/locations/{{region}}/destGroups/{{dest_group}}'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/iap_tunnel/locations/{{region}}/destGroups/{{dest_group}}'
     - '{{project}}/iap_tunnel/locations/{{region}}/destGroups/{{dest_group}}'

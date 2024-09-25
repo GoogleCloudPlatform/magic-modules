@@ -34,9 +34,9 @@ timeouts:
   delete_minutes: 1
 autogen_async: true
 custom_code:
-  decoder: 'templates/terraform/decoders/go/apigee_environment_keyvaluemaps.go.tmpl'
-  custom_create: 'templates/terraform/custom_create/go/apigee_environment_keyvaluemaps.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/apigee_environment_keyvaluemaps.go.tmpl'
+  decoder: 'templates/terraform/decoders/apigee_environment_keyvaluemaps.go.tmpl'
+  custom_create: 'templates/terraform/custom_create/apigee_environment_keyvaluemaps.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/apigee_environment_keyvaluemaps.go.tmpl'
 exclude_sweeper: true
 examples:
   - name: 'apigee_environment_keyvaluemaps_basic'

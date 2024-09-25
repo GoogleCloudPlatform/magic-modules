@@ -28,12 +28,12 @@ iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'name'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/queues/{{name}}'
     - '{{name}}'
 custom_code:
-  constants: 'templates/terraform/constants/go/cloud_tasks_retry_config_custom_diff.go.tmpl'
+  constants: 'templates/terraform/constants/cloud_tasks_retry_config_custom_diff.go.tmpl'
 examples:
   - name: 'queue_basic'
     primary_resource_id: 'default'
@@ -68,14 +68,14 @@ properties:
     type: String
     description: The queue name.
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/qualify_queue_name.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/qualify_queue_name.go.tmpl'
   - name: 'appEngineRoutingOverride'
     type: NestedObject
     description: |
       Overrides for task-level appEngineRouting. These settings apply only
       to App Engine tasks in this queue
-    custom_flatten: 'templates/terraform/custom_flatten/go/cloudtasks_queue_appenginerouting.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/cloudtasks_queue_appenginerouting.go.tmpl'
     properties:
       - name: 'service'
         type: String

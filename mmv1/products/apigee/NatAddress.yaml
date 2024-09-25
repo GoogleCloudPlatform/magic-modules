@@ -47,12 +47,12 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  constants: 'templates/terraform/constants/go/apigee_nat_address.go.tmpl'
-  encoder: 'templates/terraform/encoders/go/apigee_nat_address.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/apigee_nat_address.go.tmpl'
-  post_create: 'templates/terraform/post_create/go/apigee_nat_address.go.tmpl'
-  custom_update: 'templates/terraform/custom_update/go/apigee_nat_address.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/apigee_nat_address.go.tmpl'
+  constants: 'templates/terraform/constants/apigee_nat_address.go.tmpl'
+  encoder: 'templates/terraform/encoders/apigee_nat_address.go.tmpl'
+  decoder: 'templates/terraform/decoders/apigee_nat_address.go.tmpl'
+  post_create: 'templates/terraform/post_create/apigee_nat_address.go.tmpl'
+  custom_update: 'templates/terraform/custom_update/apigee_nat_address.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/apigee_nat_address.go.tmpl'
 exclude_sweeper: true
 examples:
   - name: 'apigee_nat_address_basic'

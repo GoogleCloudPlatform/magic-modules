@@ -68,8 +68,8 @@ properties:
       Name of the endpoint in the format projects/{project_id}/locations/{locationId}/endpoints/{endpointId}.
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/id_from_name.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/shortname_to_url.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.tmpl'
   - name: 'createTime'
     type: String
     description: |

@@ -35,8 +35,8 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  post_create: 'templates/terraform/post_create/go/set_computed_name.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/self_link_as_name.tmpl'
+  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
+  custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
 examples:
   - name: 'logging_metric_basic'
     primary_resource_id: 'logging_metric'
@@ -162,7 +162,7 @@ properties:
                 The type of data that can be assigned to the label.
               required: false
               immutable: true
-              custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
+              custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
               default_value: "STRING"
               enum_values:
                 - 'BOOL'

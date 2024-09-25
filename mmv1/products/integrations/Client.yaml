@@ -35,8 +35,8 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  decoder: 'templates/terraform/decoders/go/integrations_client.go.tmpl'
-  pre_create: 'templates/terraform/pre_create/go/integrations_client.go.tmpl'
+  decoder: 'templates/terraform/decoders/integrations_client.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/integrations_client.go.tmpl'
 examples:
   - name: 'integrations_client_basic'
     primary_resource_id: 'example'

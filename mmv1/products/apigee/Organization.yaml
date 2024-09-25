@@ -47,8 +47,8 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  encoder: 'templates/terraform/encoders/go/apigee_organization.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/apigee_organization.go.tmpl'
+  encoder: 'templates/terraform/encoders/apigee_organization.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/apigee_organization.go.tmpl'
 examples:
   - name: 'apigee_organization_cloud_basic'
     exclude_test: true
@@ -245,7 +245,7 @@ properties:
       - name: 'property'
         type: Array
         description: List of all properties in the object.
-        custom_flatten: 'templates/terraform/custom_flatten/go/apigee_organization_property.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/apigee_organization_property.go.tmpl'
         item_type:
           type: NestedObject
           properties:

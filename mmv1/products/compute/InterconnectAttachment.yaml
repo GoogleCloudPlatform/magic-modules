@@ -41,9 +41,9 @@ async:
     message: 'message'
 collection_url_key: 'items'
 custom_code:
-  constants: 'templates/terraform/constants/go/interconnect_attachment.go.tmpl'
-  post_create: 'templates/terraform/post_create/go/interconnect_attachment.go.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/go/interconnect_attachment.go.tmpl'
+  constants: 'templates/terraform/constants/interconnect_attachment.go.tmpl'
+  post_create: 'templates/terraform/post_create/interconnect_attachment.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/interconnect_attachment.go.tmpl'
 examples:
   - name: 'interconnect_attachment_basic'
     primary_resource_id: 'on_prem'
@@ -73,7 +73,7 @@ parameters:
       Region where the regional interconnect attachment resides.
     required: false
     default_from_api: true
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Region'
     imports: 'selfLink'
 properties:
@@ -114,7 +114,7 @@ properties:
       Maximum Transmission Unit (MTU), in bytes, of packets passing through
       this interconnect attachment. Currently, only 1440 and 1500 are allowed. If not specified, the value will default to 1440.
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/float64_to_int_to_string.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/float64_to_int_to_string.go.tmpl'
   - name: 'bandwidth'
     type: Enum
     description: |
@@ -214,7 +214,7 @@ properties:
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Router'
     imports: 'selfLink'
   - name: 'creationTimestamp'
@@ -275,7 +275,7 @@ properties:
       interconnect attachment, the HA VPN gateway's IP address will be
       allocated from regional external IP address pool.
     immutable: true
-    custom_expand: 'templates/terraform/custom_expand/go/array_resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
     item_type:
       name: 'ipsecInternalAddress'
       type: ResourceRef
@@ -299,7 +299,7 @@ properties:
       such a VLAN attachment. To use HA VPN over Cloud Interconnect, the VLAN
       attachment must be created with this option.
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
     default_value: "NONE"
     enum_values:
       - 'NONE'

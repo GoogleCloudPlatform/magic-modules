@@ -47,7 +47,7 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  custom_import: 'templates/terraform/custom_import/go/apigee_environment_group.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/apigee_environment_group.go.tmpl'
 examples:
   - name: 'apigee_environment_group_basic'
     vars:

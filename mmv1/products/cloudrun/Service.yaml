@@ -44,14 +44,14 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'service'
   base_url: 'v1/projects/{{project}}/locations/{{location}}/services/{{service}}'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/services/{{service}}'
     - '{{service}}'
 custom_code:
-  constants: 'templates/terraform/constants/go/cloud_run_service.go.tmpl'
-  encoder: 'templates/terraform/encoders/go/cloud_run_service.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/cloud_run.go.tmpl'
+  constants: 'templates/terraform/constants/cloud_run_service.go.tmpl'
+  encoder: 'templates/terraform/encoders/cloud_run_service.go.tmpl'
+  decoder: 'templates/terraform/decoders/cloud_run.go.tmpl'
 custom_diff:
   - 'revisionNameCustomizeDiff'
 error_retry_predicates:
@@ -276,7 +276,7 @@ properties:
                   In Cloud Run the namespace must be equal to either the
                   project ID or project number. It will default to the resource's project.
                 default_from_api: true
-                custom_expand: 'templates/terraform/custom_expand/go/default_to_project.go.tmpl'
+                custom_expand: 'templates/terraform/custom_expand/default_to_project.go.tmpl'
               - name: 'annotations'
                 type: KeyValuePairs
                 description: |-
@@ -330,7 +330,7 @@ properties:
                   Is required when creating resources. Name is primarily intended
                   for creation idempotence and configuration definition. Cannot be updated.
                 default_from_api: true
-                custom_expand: 'templates/terraform/custom_expand/go/cloud_run_service_revision_name.tmpl'
+                custom_expand: 'templates/terraform/custom_expand/cloud_run_service_revision_name.tmpl'
           - name: 'spec'
             type: NestedObject
             description:
@@ -1061,8 +1061,8 @@ properties:
           project ID or project number.
         required: false
         default_from_api: true
-        custom_flatten: 'templates/terraform/custom_flatten/go/set_to_project.go.tmpl'
-        custom_expand: 'templates/terraform/custom_expand/go/default_to_project.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/set_to_project.go.tmpl'
+        custom_expand: 'templates/terraform/custom_expand/default_to_project.go.tmpl'
       - name: 'annotations'
         type: KeyValueAnnotations
         description: |-

@@ -42,7 +42,7 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  custom_import: 'templates/terraform/custom_import/go/vertex_ai_tensorboard_import.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/vertex_ai_tensorboard_import.go.tmpl'
 examples:
   - name: 'vertex_ai_tensorboard'
     primary_resource_id: 'tensorboard'

@@ -65,12 +65,12 @@ async:
 identity:
   - networkEndpointGroup
 custom_code:
-  constants: 'templates/terraform/constants/go/network_endpoints.go.tmpl'
-  encoder: 'templates/terraform/encoders/go/compute_network_endpoints.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/network_endpoints.go.tmpl'
-  pre_create: 'templates/terraform/pre_create/go/network_endpoints.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/go/network_endpoints.go.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/go/compute_network_endpoints.go.tmpl'
+  constants: 'templates/terraform/constants/network_endpoints.go.tmpl'
+  encoder: 'templates/terraform/encoders/compute_network_endpoints.go.tmpl'
+  decoder: 'templates/terraform/decoders/network_endpoints.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/network_endpoints.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/network_endpoints.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/compute_network_endpoints.go.tmpl'
 exclude_tgc: true
 examples:
   - name: 'network_endpoints'
@@ -123,7 +123,7 @@ properties:
             The name for a specific VM instance that the IP address belongs to.
             This is required for network endpoints of type GCE_VM_IP_PORT.
             The instance must be in the same zone as the network endpoint group.
-          custom_expand: 'templates/terraform/custom_expand/go/resource_from_self_link.go.tmpl'
+          custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.tmpl'
           resource: 'Instance'
           imports: 'name'
         - name: 'port'
@@ -132,7 +132,7 @@ properties:
             Port number of network endpoint.
             **Note** `port` is required unless the Network Endpoint Group is created
             with the type of `GCE_VM_IP`
-          custom_flatten: 'templates/terraform/custom_flatten/go/float64_to_int.go.tmpl'
+          custom_flatten: 'templates/terraform/custom_flatten/float64_to_int.go.tmpl'
         - name: 'ipAddress'
           type: String
           description: |

@@ -55,8 +55,8 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  custom_delete: 'templates/terraform/custom_delete/go/replace_all_access_levels_empty_list.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/set_access_policy_parent_from_access_policy.go.tmpl'
+  custom_delete: 'templates/terraform/custom_delete/replace_all_access_levels_empty_list.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/set_access_policy_parent_from_access_policy.go.tmpl'
 # Skipping the sweeper due to the non-standard base_url
 exclude_sweeper: true
 examples:
@@ -119,7 +119,7 @@ properties:
                 conditions must be satisfied for the AccessLevel to be applied. If
                 OR is used, at least one Condition in conditions must be satisfied
                 for the AccessLevel to be applied.
-              custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
+              custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
               default_value: "AND"
               enum_values:
                 - 'AND'

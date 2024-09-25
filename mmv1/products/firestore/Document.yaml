@@ -41,8 +41,8 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  decoder: 'templates/terraform/decoders/go/firestore_document.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/firestore_document.go.tmpl'
+  decoder: 'templates/terraform/decoders/firestore_document.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/firestore_document.go.tmpl'
 exclude_sweeper: true
 examples:
   - name: 'firestore_document_basic'
@@ -102,8 +102,8 @@ properties:
       The document's [fields](https://cloud.google.com/firestore/docs/reference/rest/v1/projects.databases.documents) formated as a json string.
     required: true
     state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-    custom_flatten: 'templates/terraform/custom_flatten/go/json_schema.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/json_schema.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
     validation:
       function: 'validation.StringIsJSON'
   - name: 'createTime'

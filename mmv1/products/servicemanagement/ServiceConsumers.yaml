@@ -34,7 +34,7 @@ iam_policy:
   fetch_iam_policy_verb: 'POST'
   allowed_iam_role: 'roles/servicemanagement.serviceController'
   parent_resource_attribute: 'consumer_project'
-  example_config_body: 'templates/terraform/iam/example_config_body/go/service_management_consumer.tf.tmpl'
+  example_config_body: 'templates/terraform/iam/example_config_body/service_management_consumer.tf.tmpl'
 custom_code:
 examples:
   - name: 'endpoints_iam'

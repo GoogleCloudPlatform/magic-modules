@@ -58,9 +58,9 @@ nested_query:
   is_list_of_ids: false
   modify_by_patch: true
 custom_code:
-  extra_schema_entry: 'templates/terraform/extra_schema_entry/go/bigquery_dataset_access.go.tmpl'
-  constants: 'templates/terraform/constants/go/bigquery_dataset_access.go.tmpl'
-  post_create: 'templates/terraform/post_create/go/bigquery_dataset_access.go.tmpl'
+  extra_schema_entry: 'templates/terraform/extra_schema_entry/bigquery_dataset_access.go.tmpl'
+  constants: 'templates/terraform/constants/bigquery_dataset_access.go.tmpl'
+  post_create: 'templates/terraform/post_create/bigquery_dataset_access.go.tmpl'
 exclude_tgc: true
 exclude_sweeper: true
 error_retry_predicates:
@@ -117,7 +117,7 @@ properties:
       post-create. See
       [official docs](https://cloud.google.com/bigquery/docs/access-control).
     diff_suppress_func: 'resourceBigQueryDatasetAccessRoleDiffSuppress'
-    custom_expand: 'templates/terraform/custom_expand/go/bigquery_access_role.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/bigquery_access_role.go.tmpl'
   - name: 'userByEmail'
     type: String
     description: |
@@ -133,7 +133,7 @@ properties:
       - 'dataset'
       - 'routine'
     diff_suppress_func: 'resourceBigQueryDatasetAccessIamMemberDiffSuppress'
-    custom_expand: 'templates/terraform/custom_expand/go/string_to_lower_case.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/string_to_lower_case.go.tmpl'
   - name: 'groupByEmail'
     type: String
     description: An email address of a Google Group to grant access to.
@@ -147,7 +147,7 @@ properties:
       - 'dataset'
       - 'routine'
     diff_suppress_func: 'resourceBigQueryDatasetAccessIamMemberDiffSuppress'
-    custom_expand: 'templates/terraform/custom_expand/go/string_to_lower_case.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/string_to_lower_case.go.tmpl'
   - name: 'domain'
     type: String
     description: |

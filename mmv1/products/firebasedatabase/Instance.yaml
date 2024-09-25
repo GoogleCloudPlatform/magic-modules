@@ -31,12 +31,12 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  constants: 'templates/terraform/constants/go/firebase_database_instance.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/firebase_database_instance.go.tmpl'
-  post_create: 'templates/terraform/post_create/go/firebase_database_instance.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/go/firebase_database_instance.go.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/go/firebase_database_instance.go.tmpl'
-  test_check_destroy: 'templates/terraform/custom_check_destroy/go/firebase_database_instance.go.tmpl'
+  constants: 'templates/terraform/constants/firebase_database_instance.go.tmpl'
+  decoder: 'templates/terraform/decoders/firebase_database_instance.go.tmpl'
+  post_create: 'templates/terraform/post_create/firebase_database_instance.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/firebase_database_instance.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/firebase_database_instance.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/firebase_database_instance.go.tmpl'
 examples:
   - name: 'firebase_database_instance_basic'
     primary_resource_id: 'basic'

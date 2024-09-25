@@ -43,7 +43,7 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  encoder: 'templates/terraform/encoders/go/wrap_object_with_deployment_resource_pool_id.go.tmpl'
+  encoder: 'templates/terraform/encoders/wrap_object_with_deployment_resource_pool_id.go.tmpl'
 examples:
   - name: 'vertex_ai_deployment_resource_pool'
     primary_resource_id: 'deployment_resource_pool'
@@ -61,7 +61,7 @@ properties:
     description: The resource name of deployment resource pool. The maximum length is 63 characters, and valid characters are `/^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$/`.
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'dedicatedResources'
     type: NestedObject
     description: The underlying dedicated resources that the deployment resource pool uses.

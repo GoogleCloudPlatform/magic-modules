@@ -37,7 +37,7 @@ iam_policy:
   parent_resource_attribute: 'service'
   test_project_name: 'tf-test'
   iam_conditions_request_type: 'REQUEST_BODY'
-  example_config_body: 'templates/terraform/iam/example_config_body/go/app_engine_service.tf.tmpl'
+  example_config_body: 'templates/terraform/iam/example_config_body/app_engine_service.tf.tmpl'
 custom_code:
 exclude_tgc: true
 examples:

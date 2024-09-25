@@ -31,7 +31,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  encoder: 'templates/terraform/encoders/go/pubsub_lite.tmpl'
+  encoder: 'templates/terraform/encoders/pubsub_lite.tmpl'
 examples:
   - name: 'pubsub_lite_subscription_basic'
     primary_resource_id: 'example'
@@ -54,8 +54,8 @@ parameters:
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/resource_from_self_link.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.tmpl'
 properties:
   - name: 'topic'
     type: ResourceRef
@@ -64,7 +64,7 @@ properties:
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_expand: 'templates/terraform/custom_expand/go/computed_lite_subscription_topic.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/computed_lite_subscription_topic.tmpl'
     resource: 'Topic'
     imports: 'name'
   - name: 'deliveryConfig'

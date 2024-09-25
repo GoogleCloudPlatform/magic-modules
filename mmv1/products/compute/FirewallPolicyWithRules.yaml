@@ -30,13 +30,13 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  constants: 'templates/terraform/constants/go/resource_compute_firewall_policy_with_rules.go.tmpl'
-  encoder: 'templates/terraform/encoders/go/resource_compute_firewall_policy_with_rules.go.tmpl'
-  update_encoder: 'templates/terraform/update_encoder/go/resource_compute_firewall_policy_with_rules.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/resource_compute_firewall_policy_with_rules.go.tmpl'
-  post_create: 'templates/terraform/post_create/go/resource_compute_firewall_policy_with_rules.go.tmpl'
-  post_delete: 'templates/terraform/post_delete/go/resource_compute_firewall_policy_with_rules.go.tmpl'
-  post_update: 'templates/terraform/post_update/go/resource_compute_firewall_policy_with_rules.go.tmpl'
+  constants: 'templates/terraform/constants/resource_compute_firewall_policy_with_rules.go.tmpl'
+  encoder: 'templates/terraform/encoders/resource_compute_firewall_policy_with_rules.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/resource_compute_firewall_policy_with_rules.go.tmpl'
+  decoder: 'templates/terraform/decoders/resource_compute_firewall_policy_with_rules.go.tmpl'
+  post_create: 'templates/terraform/post_create/resource_compute_firewall_policy_with_rules.go.tmpl'
+  post_delete: 'templates/terraform/post_delete/resource_compute_firewall_policy_with_rules.go.tmpl'
+  post_update: 'templates/terraform/post_update/resource_compute_firewall_policy_with_rules.go.tmpl'
 examples:
   - name: 'compute_firewall_policy_with_rules_full'
     primary_resource_id: 'firewall-policy-with-rules'

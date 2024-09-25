@@ -48,10 +48,10 @@ async:
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'topic'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
 custom_code:
-  encoder: 'templates/terraform/encoders/go/no_send_name.go.tmpl'
-  update_encoder: 'templates/terraform/update_encoder/go/pubsub_topic.tmpl'
+  encoder: 'templates/terraform/encoders/no_send_name.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/pubsub_topic.tmpl'
 error_retry_predicates:
 
   - 'transport_tpg.PubsubTopicProjectNotReady'
@@ -91,8 +91,8 @@ properties:
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/resource_from_self_link.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.tmpl'
   - name: 'kmsKeyName'
     type: String
     description: |

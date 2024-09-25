@@ -56,9 +56,9 @@ async:
     message: 'message'
 collection_url_key: 'versions'
 custom_code:
-  encoder: 'templates/terraform/encoders/go/flex_app_version.go.tmpl'
-  custom_delete: 'templates/terraform/custom_delete/go/appversion_delete.go.tmpl'
-  test_check_destroy: 'templates/terraform/custom_check_destroy/go/skip_delete_during_test.go.tmpl'
+  encoder: 'templates/terraform/encoders/flex_app_version.go.tmpl'
+  custom_delete: 'templates/terraform/custom_delete/appversion_delete.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
 error_retry_predicates:
 
   - 'transport_tpg.IsAppEngineRetryableError'

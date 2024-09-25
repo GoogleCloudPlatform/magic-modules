@@ -50,8 +50,8 @@ async:
 identity:
   - name
 custom_code:
-  post_create: 'templates/terraform/post_create/go/set_computed_name.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/iap_brand.go.tmpl'
+  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
+  custom_import: 'templates/terraform/custom_import/iap_brand.go.tmpl'
 examples:
   - name: 'iap_brand'
     primary_resource_id: 'project_brand'

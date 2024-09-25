@@ -43,7 +43,7 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  constants: 'templates/terraform/constants/go/tpu_node.tmpl'
+  constants: 'templates/terraform/constants/tpu_node.tmpl'
 custom_diff:
   - 'tpuNodeCustomizeDiff'
 examples:
@@ -82,7 +82,7 @@ properties:
       The immutable name of the TPU.
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'description'
     type: String
     description: |

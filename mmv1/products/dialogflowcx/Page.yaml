@@ -31,11 +31,11 @@ timeouts:
   update_minutes: 40
   delete_minutes: 20
 custom_code:
-  pre_create: 'templates/terraform/pre_create/go/dialogflow_set_location.go.tmpl'
-  pre_read: 'templates/terraform/pre_create/go/dialogflow_set_location.go.tmpl'
-  pre_update: 'templates/terraform/pre_create/go/dialogflow_set_location.go.tmpl'
-  pre_delete: 'templates/terraform/pre_create/go/dialogflow_set_location.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/dialogflowcx_page.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
+  pre_read: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
+  pre_update: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
+  pre_delete: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/dialogflowcx_page.go.tmpl'
 exclude_sweeper: true
 examples:
   - name: 'dialogflowcx_page_full'
@@ -74,7 +74,7 @@ properties:
       The unique identifier of the page.
       Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>/pages/<Page ID>.
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'displayName'
     type: String
     description: |
@@ -120,8 +120,8 @@ properties:
               description: |
                 A custom, platform-specific payload.
               state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-              custom_flatten: 'templates/terraform/custom_flatten/go/json_schema.tmpl'
-              custom_expand: 'templates/terraform/custom_expand/go/json_schema.tmpl'
+              custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+              custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
               validation:
                 function: 'validation.StringIsJSON'
             - name: 'conversationSuccess'
@@ -139,8 +139,8 @@ properties:
                   description: |
                     Custom metadata. Dialogflow doesn't impose any structure on this.
                   state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                  custom_flatten: 'templates/terraform/custom_flatten/go/json_schema.tmpl'
-                  custom_expand: 'templates/terraform/custom_expand/go/json_schema.tmpl'
+                  custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                  custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
                   validation:
                     function: 'validation.StringIsJSON'
             - name: 'outputAudioText'
@@ -176,8 +176,8 @@ properties:
                   description: |
                     Custom metadata. Dialogflow doesn't impose any structure on this.
                   state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                  custom_flatten: 'templates/terraform/custom_flatten/go/json_schema.tmpl'
-                  custom_expand: 'templates/terraform/custom_expand/go/json_schema.tmpl'
+                  custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                  custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
                   validation:
                     function: 'validation.StringIsJSON'
             - name: 'playAudio'
@@ -233,8 +233,8 @@ properties:
               description: |
                 The new JSON-encoded value of the parameter. A null value clears the parameter.
               state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-              custom_flatten: 'templates/terraform/custom_flatten/go/json_schema.tmpl'
-              custom_expand: 'templates/terraform/custom_expand/go/json_value.tmpl'
+              custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+              custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
               validation:
                 function: 'validation.StringIsJSON'
       - name: 'conditionalCases'
@@ -251,8 +251,8 @@ properties:
                 A JSON encoded list of cascading if-else conditions. Cases are mutually exclusive. The first one with a matching condition is selected, all the rest ignored.
                 See [Case](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/Fulfillment#case) for the schema.
               state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-              custom_flatten: 'templates/terraform/custom_flatten/go/json_schema.tmpl'
-              custom_expand: 'templates/terraform/custom_expand/go/json_value.tmpl'
+              custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+              custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
               validation:
                 function: 'validation.StringIsJSON'
   - name: 'form'
@@ -328,8 +328,8 @@ properties:
                             description: |
                               A custom, platform-specific payload.
                             state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                            custom_flatten: 'templates/terraform/custom_flatten/go/json_schema.tmpl'
-                            custom_expand: 'templates/terraform/custom_expand/go/json_schema.tmpl'
+                            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                            custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
                             validation:
                               function: 'validation.StringIsJSON'
                           - name: 'conversationSuccess'
@@ -347,8 +347,8 @@ properties:
                                 description: |
                                   Custom metadata. Dialogflow doesn't impose any structure on this.
                                 state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                                custom_flatten: 'templates/terraform/custom_flatten/go/json_schema.tmpl'
-                                custom_expand: 'templates/terraform/custom_expand/go/json_schema.tmpl'
+                                custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                                custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
                                 validation:
                                   function: 'validation.StringIsJSON'
                           - name: 'outputAudioText'
@@ -384,8 +384,8 @@ properties:
                                 description: |
                                   Custom metadata. Dialogflow doesn't impose any structure on this.
                                 state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                                custom_flatten: 'templates/terraform/custom_flatten/go/json_schema.tmpl'
-                                custom_expand: 'templates/terraform/custom_expand/go/json_schema.tmpl'
+                                custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                                custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
                                 validation:
                                   function: 'validation.StringIsJSON'
                           - name: 'playAudio'
@@ -441,8 +441,8 @@ properties:
                             description: |
                               The new JSON-encoded value of the parameter. A null value clears the parameter.
                             state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                            custom_flatten: 'templates/terraform/custom_flatten/go/json_schema.tmpl'
-                            custom_expand: 'templates/terraform/custom_expand/go/json_value.tmpl'
+                            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
                             validation:
                               function: 'validation.StringIsJSON'
                     - name: 'conditionalCases'
@@ -459,8 +459,8 @@ properties:
                               A JSON encoded list of cascading if-else conditions. Cases are mutually exclusive. The first one with a matching condition is selected, all the rest ignored.
                               See [Case](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/Fulfillment#case) for the schema.
                             state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                            custom_flatten: 'templates/terraform/custom_flatten/go/json_schema.tmpl'
-                            custom_expand: 'templates/terraform/custom_expand/go/json_value.tmpl'
+                            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
                             validation:
                               function: 'validation.StringIsJSON'
                 - name: 'repromptEventHandlers'
@@ -527,8 +527,8 @@ properties:
                                   description: |
                                     A custom, platform-specific payload.
                                   state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                                  custom_flatten: 'templates/terraform/custom_flatten/go/json_schema.tmpl'
-                                  custom_expand: 'templates/terraform/custom_expand/go/json_schema.tmpl'
+                                  custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                                  custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
                                   validation:
                                     function: 'validation.StringIsJSON'
                                 - name: 'conversationSuccess'
@@ -546,8 +546,8 @@ properties:
                                       description: |
                                         Custom metadata. Dialogflow doesn't impose any structure on this.
                                       state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                                      custom_flatten: 'templates/terraform/custom_flatten/go/json_schema.tmpl'
-                                      custom_expand: 'templates/terraform/custom_expand/go/json_schema.tmpl'
+                                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                                      custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
                                       validation:
                                         function: 'validation.StringIsJSON'
                                 - name: 'outputAudioText'
@@ -583,8 +583,8 @@ properties:
                                       description: |
                                         Custom metadata. Dialogflow doesn't impose any structure on this.
                                       state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                                      custom_flatten: 'templates/terraform/custom_flatten/go/json_schema.tmpl'
-                                      custom_expand: 'templates/terraform/custom_expand/go/json_schema.tmpl'
+                                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                                      custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
                                       validation:
                                         function: 'validation.StringIsJSON'
                                 - name: 'playAudio'
@@ -640,8 +640,8 @@ properties:
                                   description: |
                                     The new JSON-encoded value of the parameter. A null value clears the parameter.
                                   state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                                  custom_flatten: 'templates/terraform/custom_flatten/go/json_schema.tmpl'
-                                  custom_expand: 'templates/terraform/custom_expand/go/json_value.tmpl'
+                                  custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                                  custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
                                   validation:
                                     function: 'validation.StringIsJSON'
                           - name: 'conditionalCases'
@@ -658,8 +658,8 @@ properties:
                                     A JSON encoded list of cascading if-else conditions. Cases are mutually exclusive. The first one with a matching condition is selected, all the rest ignored.
                                     See [Case](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/Fulfillment#case) for the schema.
                                   state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                                  custom_flatten: 'templates/terraform/custom_flatten/go/json_schema.tmpl'
-                                  custom_expand: 'templates/terraform/custom_expand/go/json_value.tmpl'
+                                  custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                                  custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
                                   validation:
                                     function: 'validation.StringIsJSON'
                       - name: 'targetPage'
@@ -678,8 +678,8 @@ properties:
               description: |
                 The default value of an optional parameter. If the parameter is required, the default value will be ignored.
               state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-              custom_flatten: 'templates/terraform/custom_flatten/go/json_schema.tmpl'
-              custom_expand: 'templates/terraform/custom_expand/go/json_value.tmpl'
+              custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+              custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
               validation:
                 function: 'validation.StringIsJSON'
             - name: 'redact'
@@ -790,8 +790,8 @@ properties:
                     description: |
                       A custom, platform-specific payload.
                     state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                    custom_flatten: 'templates/terraform/custom_flatten/go/json_schema.tmpl'
-                    custom_expand: 'templates/terraform/custom_expand/go/json_schema.tmpl'
+                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                    custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
                     validation:
                       function: 'validation.StringIsJSON'
                   - name: 'conversationSuccess'
@@ -809,8 +809,8 @@ properties:
                         description: |
                           Custom metadata. Dialogflow doesn't impose any structure on this.
                         state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                        custom_flatten: 'templates/terraform/custom_flatten/go/json_schema.tmpl'
-                        custom_expand: 'templates/terraform/custom_expand/go/json_schema.tmpl'
+                        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                        custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
                         validation:
                           function: 'validation.StringIsJSON'
                   - name: 'outputAudioText'
@@ -846,8 +846,8 @@ properties:
                         description: |
                           Custom metadata. Dialogflow doesn't impose any structure on this.
                         state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                        custom_flatten: 'templates/terraform/custom_flatten/go/json_schema.tmpl'
-                        custom_expand: 'templates/terraform/custom_expand/go/json_schema.tmpl'
+                        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                        custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
                         validation:
                           function: 'validation.StringIsJSON'
                   - name: 'playAudio'
@@ -903,8 +903,8 @@ properties:
                     description: |
                       The new JSON-encoded value of the parameter. A null value clears the parameter.
                     state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                    custom_flatten: 'templates/terraform/custom_flatten/go/json_schema.tmpl'
-                    custom_expand: 'templates/terraform/custom_expand/go/json_value.tmpl'
+                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                    custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
                     validation:
                       function: 'validation.StringIsJSON'
             - name: 'conditionalCases'
@@ -921,8 +921,8 @@ properties:
                       A JSON encoded list of cascading if-else conditions. Cases are mutually exclusive. The first one with a matching condition is selected, all the rest ignored.
                       See [Case](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/Fulfillment#case) for the schema.
                     state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                    custom_flatten: 'templates/terraform/custom_flatten/go/json_schema.tmpl'
-                    custom_expand: 'templates/terraform/custom_expand/go/json_value.tmpl'
+                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                    custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
                     validation:
                       function: 'validation.StringIsJSON'
         - name: 'targetPage'
@@ -988,8 +988,8 @@ properties:
                     description: |
                       A custom, platform-specific payload.
                     state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                    custom_flatten: 'templates/terraform/custom_flatten/go/json_schema.tmpl'
-                    custom_expand: 'templates/terraform/custom_expand/go/json_schema.tmpl'
+                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                    custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
                     validation:
                       function: 'validation.StringIsJSON'
                   - name: 'conversationSuccess'
@@ -1006,8 +1006,8 @@ properties:
                         description: |
                           Custom metadata. Dialogflow doesn't impose any structure on this.
                         state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                        custom_flatten: 'templates/terraform/custom_flatten/go/json_schema.tmpl'
-                        custom_expand: 'templates/terraform/custom_expand/go/json_schema.tmpl'
+                        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                        custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
                         validation:
                           function: 'validation.StringIsJSON'
                   - name: 'outputAudioText'
@@ -1042,8 +1042,8 @@ properties:
                         description: |
                           Custom metadata. Dialogflow doesn't impose any structure on this.
                         state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                        custom_flatten: 'templates/terraform/custom_flatten/go/json_schema.tmpl'
-                        custom_expand: 'templates/terraform/custom_expand/go/json_schema.tmpl'
+                        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                        custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
                         validation:
                           function: 'validation.StringIsJSON'
                   - name: 'playAudio'
@@ -1099,8 +1099,8 @@ properties:
                     description: |
                       The new JSON-encoded value of the parameter. A null value clears the parameter.
                     state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                    custom_flatten: 'templates/terraform/custom_flatten/go/json_schema.tmpl'
-                    custom_expand: 'templates/terraform/custom_expand/go/json_value.tmpl'
+                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                    custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
                     validation:
                       function: 'validation.StringIsJSON'
             - name: 'conditionalCases'
@@ -1116,8 +1116,8 @@ properties:
                       A JSON encoded list of cascading if-else conditions. Cases are mutually exclusive. The first one with a matching condition is selected, all the rest ignored.
                       See [Case](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/Fulfillment#case) for the schema.
                     state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                    custom_flatten: 'templates/terraform/custom_flatten/go/json_schema.tmpl'
-                    custom_expand: 'templates/terraform/custom_expand/go/json_value.tmpl'
+                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                    custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
                     validation:
                       function: 'validation.StringIsJSON'
         - name: 'targetPage'

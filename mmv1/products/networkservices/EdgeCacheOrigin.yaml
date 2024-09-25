@@ -182,7 +182,7 @@ properties:
     type: NestedObject
     description: |
       The connection and HTTP timeout configuration for this origin.
-    custom_flatten: 'templates/terraform/custom_flatten/go/network_services_timeout_mirror.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/network_services_timeout_mirror.go.tmpl'
     properties:
       - name: 'connectTimeout'
         type: String

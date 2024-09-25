@@ -53,7 +53,7 @@ parameters:
     type: ResourceRef
     description: 'The zone the managed instance group resides.'
     required: true
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Zone'
     imports: 'name'
 properties:
@@ -155,7 +155,7 @@ properties:
     type: ResourceRef
     description: 'The instance group being managed'
     output: true
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'InstanceGroup'
     imports: 'selfLink'
   - name: 'instanceTemplate'
@@ -166,7 +166,7 @@ properties:
       managed instance group.
     required: true
   # kind is internal transport detail
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'InstanceTemplate'
     imports: 'selfLink'
   - name: 'name'
@@ -199,7 +199,7 @@ properties:
       The region this managed instance group resides
       (for regional resources).
     output: true
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Region'
     imports: 'selfLink'
   - name: 'targetPools'
@@ -208,7 +208,7 @@ properties:
       TargetPool resources to which instances in the instanceGroup field are
       added. The target pools automatically apply to all of the instances in
       the managed instance group.
-    custom_expand: 'templates/terraform/custom_expand/go/array_resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
     item_type:
       name: 'targetPool'
       type: ResourceRef

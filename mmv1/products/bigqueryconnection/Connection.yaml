@@ -38,13 +38,13 @@ iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'connection_id'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/connections/{{connection_id}}'
     - '{{connection_id}}'
 custom_code:
-  encoder: 'templates/terraform/encoders/go/bigquery_connection.go.tmpl'
-  post_create: 'templates/terraform/post_create/go/bigquery_connection_id.go.tmpl'
+  encoder: 'templates/terraform/encoders/bigquery_connection.go.tmpl'
+  post_create: 'templates/terraform/post_create/bigquery_connection_id.go.tmpl'
 examples:
   - name: 'bigquery_connection_cloud_resource'
     primary_resource_id: 'connection'
@@ -148,7 +148,7 @@ properties:
     required: false
     immutable: true
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/id_from_name.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
   - name: 'location'
     type: String
     description: |-
@@ -203,7 +203,7 @@ properties:
         type: NestedObject
         description: Cloud SQL properties.
         required: true
-        custom_flatten: 'templates/terraform/custom_flatten/go/bigquery_connection_flatten.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/bigquery_connection_flatten.go.tmpl'
         properties:
           - name: 'username'
             type: String

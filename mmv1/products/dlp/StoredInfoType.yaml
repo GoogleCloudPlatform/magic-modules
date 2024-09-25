@@ -38,11 +38,11 @@ async:
   target_occurrences: 1
   actions: ['create']
 custom_code:
-  constants: 'templates/terraform/constants/go/dlp_stored_info_type.go.tmpl'
-  encoder: 'templates/terraform/encoders/go/dlp_stored_info_type.go.tmpl'
-  update_encoder: 'templates/terraform/update_encoder/go/dlp_stored_info_type.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/dlp_stored_info_type.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/dlp_import.go.tmpl'
+  constants: 'templates/terraform/constants/dlp_stored_info_type.go.tmpl'
+  encoder: 'templates/terraform/encoders/dlp_stored_info_type.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/dlp_stored_info_type.go.tmpl'
+  decoder: 'templates/terraform/decoders/dlp_stored_info_type.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/dlp_import.go.tmpl'
 custom_diff:
   - 'storedInfoTypeCustomizeDiff'
 # Skip sweeper due to non-standard URL
@@ -88,7 +88,7 @@ properties:
     description: |
       The resource name of the info type. Set by the server.
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'description'
     type: String
     description: |

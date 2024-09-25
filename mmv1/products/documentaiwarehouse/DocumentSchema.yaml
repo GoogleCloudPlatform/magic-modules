@@ -29,7 +29,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  custom_import: 'templates/terraform/custom_import/go/document_ai_warehouse_document_schema.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/document_ai_warehouse_document_schema.go.tmpl'
 examples:
   - name: 'document_ai_warehouse_document_schema_text'
     primary_resource_id: 'example_text'

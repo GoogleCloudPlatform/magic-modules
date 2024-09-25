@@ -39,7 +39,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  constants: 'templates/terraform/constants/go/billing_budget.tmpl'
+  constants: 'templates/terraform/constants/billing_budget.tmpl'
 schema_version: 1
 state_upgraders: true
 examples:
@@ -105,7 +105,7 @@ properties:
       implies the scope of a budget. Values are of the form
       billingAccounts/{billingAccountId}/budgets/{budgetId}.
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'displayName'
     type: String
     description: |
@@ -264,8 +264,8 @@ properties:
           - 'budget_filter.0.labels'
           - 'budget_filter.0.calendarPeriod'
           - 'budget_filter.0.customPeriod'
-        custom_flatten: 'templates/terraform/custom_flatten/go/billing_budget_budget_filter_labels.tmpl'
-        custom_expand: 'templates/terraform/custom_expand/go/billing_budget_budget_filter_labels.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/billing_budget_budget_filter_labels.tmpl'
+        custom_expand: 'templates/terraform/custom_expand/billing_budget_budget_filter_labels.tmpl'
       - name: 'calendarPeriod'
         type: Enum
         description: |
@@ -410,8 +410,8 @@ properties:
         exactly_one_of:
           - 'amount.0.specified_amount'
           - 'amount.0.last_period_amount'
-        custom_flatten: 'templates/terraform/custom_flatten/go/object_to_bool.go.tmpl'
-        custom_expand: 'templates/terraform/custom_expand/go/bool_to_object.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/object_to_bool.go.tmpl'
+        custom_expand: 'templates/terraform/custom_expand/bool_to_object.go.tmpl'
   - name: 'thresholdRules'
     type: Array
     description: |
@@ -467,7 +467,7 @@ properties:
           The schema version of the notification. Only "1.0" is
           accepted. It represents the JSON schema as defined in
           https://cloud.google.com/billing/docs/how-to/budgets#notification_format.
-        custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
         default_value: "1.0"
       - name: 'monitoringNotificationChannels'
         type: Array

@@ -62,7 +62,7 @@ iam_policy:
   allowed_iam_role: 'roles/compute.imageUser'
   parent_resource_attribute: 'image'
   iam_conditions_request_type: 'QUERY_PARAM'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
 custom_code:
 examples:
   - name: 'image_basic'
@@ -164,7 +164,7 @@ properties:
           KMS.
         api_name: kmsKeyName
         diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
-        custom_flatten: 'templates/terraform/custom_flatten/go/image_kms_key_name.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/image_kms_key_name.go.tmpl'
       - name: 'kmsKeyServiceAccount'
         type: String
         description: |
@@ -189,7 +189,7 @@ properties:
     type: Array
     description: Any applicable license URI.
     default_from_api: true
-    custom_expand: 'templates/terraform/custom_expand/go/array_resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
     item_type:
       name: 'license'
       type: ResourceRef
@@ -242,7 +242,7 @@ properties:
       The source disk to create this image based on.
       You must provide either this property or the
       rawDisk.source property but not both to create an image.
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Disk'
     imports: 'selfLink'
   - name: 'sourceImage'
@@ -255,7 +255,7 @@ properties:
       * This property
       * The rawDisk.source URL
       * The sourceDisk URL
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Image'
     imports: 'selfLink'
   - name: 'sourceSnapshot'
@@ -270,6 +270,6 @@ properties:
       * The sourceImage URL
       * The rawDisk.source URL
       * The sourceDisk URL
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Snapshot'
     imports: 'selfLink'

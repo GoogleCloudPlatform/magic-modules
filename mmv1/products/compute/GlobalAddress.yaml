@@ -45,8 +45,8 @@ async:
     message: 'message'
 collection_url_key: 'items'
 custom_code:
-  pre_create: 'templates/terraform/pre_create/go/compute_global_address.go.tmpl'
-  post_create: 'templates/terraform/post_create/go/labels.tmpl'
+  pre_create: 'templates/terraform/pre_create/compute_global_address.go.tmpl'
+  post_create: 'templates/terraform/post_create/labels.tmpl'
 examples:
   - name: 'global_address_basic'
     primary_resource_id: 'default'
@@ -147,6 +147,6 @@ properties:
       any reserved IP ranges referring to it.
 
       This should only be set when using an Internal address.
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Network'
     imports: 'selfLink'

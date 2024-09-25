@@ -52,9 +52,9 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  constants: 'templates/terraform/constants/go/network_services_gateway.go.tmpl'
-  post_delete: 'templates/terraform/post_delete/go/network_services_gateway.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/go/network_services_gateway.tmpl'
+  constants: 'templates/terraform/constants/network_services_gateway.go.tmpl'
+  post_delete: 'templates/terraform/post_delete/network_services_gateway.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/network_services_gateway.tmpl'
 examples:
   - name: 'network_services_gateway_basic'
     primary_resource_id: 'default'

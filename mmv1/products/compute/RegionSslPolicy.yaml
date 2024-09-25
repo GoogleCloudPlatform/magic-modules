@@ -45,7 +45,7 @@ async:
     message: 'message'
 collection_url_key: 'items'
 custom_code:
-  constants: 'templates/terraform/constants/go/region_ssl_policy.tmpl'
+  constants: 'templates/terraform/constants/region_ssl_policy.tmpl'
 custom_diff:
   - 'regionSslPolicyCustomizeDiff'
 parameters:
@@ -55,8 +55,8 @@ parameters:
       The region where the regional SSL policy resides.
     immutable: true
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Region'
     imports: 'name'
 properties:

@@ -35,8 +35,8 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  post_create: 'templates/terraform/post_create/go/iap_client.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/iap_client.go.tmpl'
+  post_create: 'templates/terraform/post_create/iap_client.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/iap_client.go.tmpl'
 exclude_sweeper: true
 error_retry_predicates:
 
@@ -56,7 +56,7 @@ parameters:
       Output only. Unique identifier of the OAuth client.
     api_name: name
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'brand'
     type: String
     description: |

@@ -42,9 +42,9 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  encoder: 'templates/terraform/encoders/go/spanner_schedule_backup.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/spanner_schedule_backup.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/go/spanner_schedule_backup.go.tmpl'
+  encoder: 'templates/terraform/encoders/spanner_schedule_backup.go.tmpl'
+  decoder: 'templates/terraform/decoders/spanner_schedule_backup.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/spanner_schedule_backup.go.tmpl'
 examples:
   - name: 'spanner_backup_schedule_daily_full'
     primary_resource_id: 'full-backup'
@@ -75,7 +75,7 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Instance'
     imports: 'name'
   - name: 'database'
@@ -84,7 +84,7 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Database'
     imports: 'name'
 properties:
@@ -94,7 +94,7 @@ properties:
       A unique identifier for the backup schedule, which cannot be changed after
       the backup schedule is created. Values are of the form [a-z][-a-z0-9]*[a-z0-9].
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
     validation:
       regex: '^[a-z][a-z0-9_\-]*[a-z0-9]$'
   - name: 'retentionDuration'

@@ -74,7 +74,7 @@ properties:
       If it is not provided, the provider region is used.
     required: false
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'network'
     type: NestedObject
     description: |
@@ -90,7 +90,7 @@ properties:
           The full self_link URL of the network where this rule is active.
         required: true
         immutable: true
-        custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+        custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
         resource: 'Network'
         imports: 'selfLink'
   - name: 'priority'
@@ -114,7 +114,7 @@ properties:
         type: ResourceRef
         description: The URL of the forwarding rule.
         required: true
-        custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+        custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
         resource: 'ForwardingRule'
         imports: 'selfLink'
   - name: 'filter'
@@ -167,7 +167,7 @@ properties:
               description:
                 The URL of the subnetwork where this rule should be active.
               required: true
-              custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+              custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
               resource: 'Subnetwork'
               imports: 'selfLink'
       - name: 'instances'
@@ -187,7 +187,7 @@ properties:
               description:
                 The URL of the instances where this rule should be active.
               required: true
-              custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+              custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
               resource: 'Instance'
               imports: 'selfLink'
       - name: 'tags'

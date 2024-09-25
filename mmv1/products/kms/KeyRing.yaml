@@ -38,8 +38,8 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  encoder: 'templates/terraform/encoders/go/send_nil_body.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/kms.go.tmpl'
+  encoder: 'templates/terraform/encoders/send_nil_body.go.tmpl'
+  decoder: 'templates/terraform/decoders/kms.go.tmpl'
 examples:
   - name: 'kms_key_ring_basic'
     primary_resource_id: 'example-keyring'

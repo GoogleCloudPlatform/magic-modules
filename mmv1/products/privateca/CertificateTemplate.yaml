@@ -49,7 +49,7 @@ iam_policy:
   allowed_iam_role: 'roles/privateca.templateUser'
   parent_resource_attribute: 'certificate_template'
   iam_conditions_request_type: 'QUERY_PARAM_NESTED'
-  example_config_body: 'templates/terraform/iam/example_config_body/go/privateca_certificate_template.tf.tmpl'
+  example_config_body: 'templates/terraform/iam/example_config_body/privateca_certificate_template.tf.tmpl'
 custom_code:
 legacy_long_form_project: true
 examples:

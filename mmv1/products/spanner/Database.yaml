@@ -56,13 +56,13 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  constants: 'templates/terraform/constants/go/spanner_database.go.tmpl'
-  encoder: 'templates/terraform/encoders/go/spanner_database.go.tmpl'
-  update_encoder: 'templates/terraform/update_encoder/go/spanner_database.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/spanner_database.go.tmpl'
-  post_create: 'templates/terraform/post_create/go/spanner_database.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/go/spanner_database.go.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/go/resource_spanner_database.go.tmpl'
+  constants: 'templates/terraform/constants/spanner_database.go.tmpl'
+  encoder: 'templates/terraform/encoders/spanner_database.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/spanner_database.go.tmpl'
+  decoder: 'templates/terraform/decoders/spanner_database.go.tmpl'
+  post_create: 'templates/terraform/post_create/spanner_database.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/spanner_database.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/resource_spanner_database.go.tmpl'
 custom_diff:
   - 'resourceSpannerDBDdlCustomDiff'
 # Sweeper skipped as this resource has customized deletion.
@@ -93,7 +93,7 @@ parameters:
     description: 'The instance to create the database on.'
     required: true
     immutable: true
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Instance'
     imports: 'name'
 properties:
@@ -107,7 +107,7 @@ properties:
       the instance is created. Values are of the form [a-z][-a-z0-9]*[a-z0-9].
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
     validation:
       regex: '^[a-z][a-z0-9_\-]*[a-z0-9]$'
   - name: 'versionRetentionPeriod'

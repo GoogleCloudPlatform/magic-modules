@@ -46,12 +46,12 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  constants: 'templates/terraform/constants/go/datastream_stream.go.tmpl'
-  encoder: 'templates/terraform/encoders/go/datastream_stream.go.tmpl'
-  post_create: 'templates/terraform/post_create/go/datastream_stream.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/go/datastream_stream.go.tmpl'
-  post_update: 'templates/terraform/post_update/go/datastream_stream.go.tmpl'
-  post_import: 'templates/terraform/post_import/go/datastream_stream.go.tmpl'
+  constants: 'templates/terraform/constants/datastream_stream.go.tmpl'
+  encoder: 'templates/terraform/encoders/datastream_stream.go.tmpl'
+  post_create: 'templates/terraform/post_create/datastream_stream.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/datastream_stream.go.tmpl'
+  post_update: 'templates/terraform/post_update/datastream_stream.go.tmpl'
+  post_import: 'templates/terraform/post_import/datastream_stream.go.tmpl'
 custom_diff:
   - 'resourceDatastreamStreamCustomDiff'
 examples:
@@ -1162,7 +1162,7 @@ properties:
                   {project}:{dataset_id}
                 required: true
                 diff_suppress_func: 'resourceDatastreamStreamDatabaseIdDiffSuppress'
-                custom_expand: 'templates/terraform/custom_expand/go/datastream_stream_dataset_id.go.tmpl'
+                custom_expand: 'templates/terraform/custom_expand/datastream_stream_dataset_id.go.tmpl'
           - name: 'sourceHierarchyDatasets'
             type: NestedObject
             description: |

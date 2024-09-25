@@ -97,6 +97,6 @@ properties:
     exactly_one_of:
       - 'json_schema'
     state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-    custom_flatten: 'templates/terraform/custom_flatten/go/discoveryengine_schema_json_schema.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/discoveryengine_schema_json_schema.go.tmpl'
     validation:
       function: 'validation.StringIsJSON'

@@ -79,7 +79,7 @@ properties:
     type: String
     description: The resource name of the Index.
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'displayName'
     type: String
     description: The display name of the Index. The name can be up to 128 characters long and can consist of any UTF-8 characters.
@@ -121,7 +121,7 @@ properties:
     default_from_api: true
     conflicts:
       - network
-    custom_flatten: 'templates/terraform/custom_flatten/go/vertex_ai_index_endpoint_private_service_connect_config.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/vertex_ai_index_endpoint_private_service_connect_config.go.tmpl'
     properties:
       - name: 'enablePrivateServiceConnect'
         type: Boolean
