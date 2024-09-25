@@ -49,9 +49,19 @@ iam_policy:
   import_format:
     - 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
     - '{{name}}'
+virtual_fields:
+  - !ruby/object:Api::Type::Boolean
+    name: 'deletion_protection'
+    default_value: false
+    description: |
+      Whether Terraform will be prevented from destroying the instance. Defaults to false.
+      When the field is set to true in Terraform state, a `terraform apply`
+      or `terraform destroy` that would delete the instance will fail.
+      When the field is set to false or unset, deleting the instance is allowed.
 custom_code:
   constants: 'templates/terraform/constants/go/data_fusion_instance_option.go.tmpl'
   pre_update: 'templates/terraform/pre_update/go/datafusion_instance_update.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/go/datafusion_instance.go.tmpl'
 examples:
   - name: 'data_fusion_instance_basic'
     primary_resource_id: 'basic_instance'
@@ -62,6 +72,8 @@ examples:
     test_vars_overrides:
       # Mark for testing to avoid service networking connection usage that is not cleaned up
       'prober_test_run': '`options = { prober_test_run = "true" }`'
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'data_fusion_instance_full'
     primary_resource_id: 'extended_instance'
     vars:

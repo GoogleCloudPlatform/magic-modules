@@ -3,6 +3,7 @@ package datafusion_test
 import (
 	"fmt"
 	"testing"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -24,7 +25,7 @@ func TestAccDataFusionInstance_update(t *testing.T) {
 				ResourceName:            "google_data_fusion_instance.foobar",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "deletion_protection"},
 			},
 			{
 				Config: testAccDataFusionInstance_updated(instanceName),
@@ -33,7 +34,7 @@ func TestAccDataFusionInstance_update(t *testing.T) {
 				ResourceName:            "google_data_fusion_instance.foobar",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "deletion_protection"},
 			},
 		},
 	})
@@ -45,6 +46,7 @@ resource "google_data_fusion_instance" "foobar" {
   name   = "%s"
   region = "us-central1"
   type   = "BASIC"
+  deletion_protection = true
   # See supported versions here https://cloud.google.com/data-fusion/docs/support/version-support-policy
   version = "6.9.1"
   # Mark for testing to avoid service networking connection usage that is not cleaned up
@@ -67,6 +69,7 @@ resource "google_data_fusion_instance" "foobar" {
   type                          = "DEVELOPER"
   enable_stackdriver_monitoring = true
   enable_stackdriver_logging    = true
+  deletion_protection = true
 
   labels = {
     label1 = "value1"
@@ -102,7 +105,7 @@ func TestAccDataFusionInstanceEnterprise_update(t *testing.T) {
 				ResourceName:            "google_data_fusion_instance.foobar",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "deletion_protection"},
 			},
 			{
 				Config: testAccDataFusionInstanceEnterprise_updated(instanceName),
@@ -111,7 +114,7 @@ func TestAccDataFusionInstanceEnterprise_update(t *testing.T) {
 				ResourceName:            "google_data_fusion_instance.foobar",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "deletion_protection"},
 			},
 		},
 	})
@@ -123,6 +126,7 @@ resource "google_data_fusion_instance" "foobar" {
   name   = "%s"
   region = "us-central1"
   type   = "ENTERPRISE"
+  deletion_protection = true
   # Mark for testing to avoid service networking connection usage that is not cleaned up
   options = {
   	prober_test_run = "true"
@@ -140,6 +144,7 @@ resource "google_data_fusion_instance" "foobar" {
   enable_stackdriver_monitoring = true
   enable_stackdriver_logging    = true
   enable_rbac                   = true
+  deletion_protection = true
 
   labels = {
     label1 = "value1"
@@ -178,7 +183,7 @@ func TestAccDataFusionInstanceVersion_dataFusionInstanceUpdate(t *testing.T) {
 				ResourceName:            "google_data_fusion_instance.basic_instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"region"},
+				ImportStateVerifyIgnore: []string{"region", "deletion_protection"},
 			},
 			{
 				Config: testAccDataFusionInstanceVersion_dataFusionInstanceUpdate(contextUpdate),
@@ -187,7 +192,7 @@ func TestAccDataFusionInstanceVersion_dataFusionInstanceUpdate(t *testing.T) {
 				ResourceName:            "google_data_fusion_instance.basic_instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"region"},
+				ImportStateVerifyIgnore: []string{"region", "deletion_protection"},
 			},
 		},
 	})
@@ -199,6 +204,7 @@ resource "google_data_fusion_instance" "basic_instance" {
   name   = "tf-test-my-instance%{random_suffix}"
   region = "us-central1"
   type   = "BASIC"
+  deletion_protection = true
   # Mark for testing to avoid service networking connection usage that is not cleaned up
   options = {
     prober_test_run = "true"
@@ -206,4 +212,62 @@ resource "google_data_fusion_instance" "basic_instance" {
   version = "%{version}"
 }
 `, context)
+}
+
+func TestAccDatafusionInstance_DeletionProtection(t *testing.T) {
+	t.Parallel()
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataFusionInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDatafusionInstanceDeletionProtection("us-central1"),
+			},
+			{
+				ResourceName:            "google_data_fusion_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "deletion_protection"},
+			},
+			{
+			        Config: testAccDatafusionInstanceDeletionProtectionFalse("us-central1"),
+			},
+			{
+				ResourceName:            "google_data_fusion_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "deletion_protection"},
+			},
+			{
+                                Config: testAccDatafusionInstanceDeletionProtection("us-west2"),
+                                ExpectError: regexp.MustCompile("deletion_protection"),
+                        },
+		},
+	})
+}
+
+func testAccDatafusionInstanceDeletionProtection(region string) string {
+
+	return fmt.Sprintf(`
+	resource "google_data_fusion_instance" "instance" {
+        name   = "my-instance"
+        region = "%s"
+        type   = "BASIC"
+	deletion_protection = true
+}
+`, region)
+}
+
+func testAccDatafusionInstanceDeletionProtectionFalse(region string) string {
+
+	return fmt.Sprintf(`
+	resource "google_data_fusion_instance" "instance" {
+        name   = "my-instance"
+        region = "%s"
+        type   = "BASIC"
+	deletion_protection = false
+}
+`, region)
 }
