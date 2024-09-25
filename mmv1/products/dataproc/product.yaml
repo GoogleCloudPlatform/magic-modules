@@ -11,13 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'Dataproc'
 display_name: 'Dataproc'
 versions:
   - name: 'ga'
     base_url: 'https://dataproc.googleapis.com/v1/'
-  - name: 'beta'
-    base_url: 'https://dataproc.googleapis.com/v1beta2/'
 scopes:
   - 'https://www.googleapis.com/auth/cloud-identity'
