@@ -416,4 +416,3 @@ that are derived from the API.
 
 `disable_ssh` field now defaults to true. To enable SSH, please set `disable_ssh` to false.
 
-## Resource: `metastore_service`
