@@ -316,7 +316,6 @@ properties:
     type: NestedObject
     description: |
       Scaling settings that apply to the whole service
-    min_version: 'beta'
     properties:
       - name: 'minInstanceCount'
         type: Integer
