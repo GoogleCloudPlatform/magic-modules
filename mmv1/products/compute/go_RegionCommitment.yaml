@@ -205,3 +205,8 @@ properties:
       If the field is set to true, the commitment will be automatically renewed for either
       one or three years according to the terms of the existing commitment.
     default_from_api: true
+  - name: 'existingReservations'
+    type: String
+    description: |
+      Specifies the already existing reservations to attach to the Commitment.
+    default_from_api: true
