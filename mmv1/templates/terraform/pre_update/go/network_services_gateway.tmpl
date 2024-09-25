@@ -3,6 +3,6 @@ if d.Get("type") == "SECURE_WEB_GATEWAY" {
     obj["type"] = d.Get("type")
 }
 
-if d.Get("type") == "SECURE_WEB_GATEWAY" && d.Get("routingMode") == nil {
+if obj["type"] == "SECURE_WEB_GATEWAY" && obj["routingMode"] == nil {
     return fmt.Errorf("Field routing_mode is required for Gateway of type SECURE_WEB_GATEWAY")
 }
