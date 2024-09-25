@@ -109,10 +109,10 @@
 '<%= dir -%>/functions/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/functions/<%= fname -%>'
 <% end -%>
 <%
-  Dir["third_party/terraform/ephemerals/*.go.erb"].each do |file_path|
+  Dir["third_party/terraform/ephemeral/*.go.erb"].each do |file_path|
     fname = file_path.split('/')[-1]
 -%>
-'<%= dir -%>/ephemerals/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/ephemerals/<%= fname -%>'
+'<%= dir -%>/ephemeral/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/ephemeral/<%= fname -%>'
 <% end -%>
 <%
   Dir["third_party/terraform/scripts/**/*.erb"].each do |file_path|

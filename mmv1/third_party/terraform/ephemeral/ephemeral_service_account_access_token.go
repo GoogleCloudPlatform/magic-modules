@@ -1,37 +1,57 @@
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
 package ephemeral
 
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/hashicorp/terraform-provider-google/google/fwtransport"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/iamcredentials/v1"
 )
 
 var (
-	// _ ephemeral.EphemeralResourceWithConfigure = googleEphemeralServiceAccountAccessToken{}
-	_ ephemeral.EphemeralResource = &googleEphemeralServiceAccountAccessToken{}
+	_ ephemeral.EphemeralResourceWithConfigure = &googleEphemeralServiceAccountAccessToken{}
+	_ ephemeral.EphemeralResource              = &googleEphemeralServiceAccountAccessToken{}
 )
 
-func GoogleEphemeralServiceAccountAccessToken(m interface{}) ephemeral.EphemeralResource {
-	return &googleEphemeralServiceAccountAccessToken{meta: m}
+func GoogleEphemeralServiceAccountAccessToken() ephemeral.EphemeralResource {
+	return &googleEphemeralServiceAccountAccessToken{}
 }
 
 type googleEphemeralServiceAccountAccessToken struct {
-	meta interface{}
+	providerConfig *fwtransport.FrameworkProviderConfig
 }
 
 func (p *googleEphemeralServiceAccountAccessToken) Metadata(ctx context.Context, req ephemeral.MetadataRequest, resp *ephemeral.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_service_account_access_access_token"
+}
+
+func (p *googleEphemeralServiceAccountAccessToken) Configure(ctx context.Context, req ephemeral.ConfigureRequest, resp *ephemeral.ConfigureResponse) {
+	// Prevent panic if the provider has not been configured.
+	if req.ProviderData == nil {
+		return
+	}
+
+	data, ok := req.ProviderData.(*fwtransport.FrameworkProviderConfig)
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Data Source Configure Type",
+			fmt.Sprintf("Expected *fwtransport.FrameworkProviderConfig, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+		)
+		return
+	}
+
+	// Required for accessing project, region, zone and tokenSource
+	p.providerConfig = data
 }
 
 type ephemeralServiceAccountAccessTokenModel struct {
@@ -72,8 +92,14 @@ func (p *googleEphemeralServiceAccountAccessToken) Schema(ctx context.Context, r
 }
 
 func (p *googleEphemeralServiceAccountAccessToken) Open(ctx context.Context, req ephemeral.OpenRequest, resp *ephemeral.OpenResponse) {
-	config := p.meta.(*transport_tpg.Config)
-	service := config.NewIamCredentialsClient(userAgent)
+	config := p.providerConfig
+	// userAgent, err := GenerateUserAgentString(config)
+	// if err != nil {
+	// 	resp.Diagnostics.Append(diag.NewErrorDiagnostic("Couldnt generate User Agent String", err.Error()))
+	// 	return
+	// }
+
+	service := config.NewIamCredentialsClient(config.UserAgent)
 	var data ephemeralServiceAccountAccessTokenModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 
@@ -90,11 +116,12 @@ func (p *googleEphemeralServiceAccountAccessToken) Open(ctx context.Context, req
 		Scope:     tpgresource.CanonicalizeServiceScopes(StringSet(ScopesSetValue)),
 	}
 
-	_, err := service.Projects.ServiceAccounts.GenerateAccessToken(name, tokenRequest).Do()
+	at, err := service.Projects.ServiceAccounts.GenerateAccessToken(name, tokenRequest).Do()
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Couldnt generate token", err.Error()))
 		return
 	}
+	data.AccessToken = basetypes.NewStringValue(at.AccessToken)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
@@ -108,17 +135,19 @@ func StringSet(d basetypes.SetValue) []string {
 	return StringSlice
 }
 
-func GenerateUserAgentString(currentUserAgent string) (string, error) {
-	var m transport_tpg.ProviderMeta
+// TODO: investigation will be needed to determine how to best approach generating
+// a userAgentString with module name
+// func GenerateUserAgentString(currentUserAgent string) (string, error) {
+// 	var m transport_tpg.ProviderMeta
 
-	err := d.GetProviderMeta(&m)
-	if err != nil {
-		return currentUserAgent, err
-	}
+// 	err := d.GetProviderMeta(&m)
+// 	if err != nil {
+// 		return currentUserAgent, err
+// 	}
 
-	if m.ModuleName != "" {
-		return strings.Join([]string{currentUserAgent, m.ModuleName}, " "), nil
-	}
+// 	if m.ModuleName != "" {
+// 		return strings.Join([]string{currentUserAgent, m.ModuleName}, " "), nil
+// 	}
 
-	return currentUserAgent, nil
-}
+// 	return currentUserAgent, nil
+// }
