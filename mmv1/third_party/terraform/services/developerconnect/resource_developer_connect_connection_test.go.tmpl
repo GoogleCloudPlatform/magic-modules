@@ -1,7 +1,6 @@
-<% autogen_exception -%>
 
 package developerconnect_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
@@ -81,4 +80,4 @@ resource "google_developer_connect_connection" "my-connection" {
 `, context)
 }
 
-<% end -%>
+{{ end }}

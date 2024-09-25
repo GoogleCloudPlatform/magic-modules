@@ -1,5 +1,5 @@
-resource "google_monitoring_alert_policy" "<%= ctx[:primary_resource_id] %>" {
-  display_name = "<%= ctx[:vars]["alert_policy_display_name"] %>"
+resource "google_monitoring_alert_policy" "{{$.PrimaryResourceId}}" {
+  display_name = "{{index $.Vars "alert_policy_display_name"}}"
   combiner     = "OR"
   conditions {
     display_name = "test condition"

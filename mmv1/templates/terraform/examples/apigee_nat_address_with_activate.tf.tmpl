@@ -69,7 +69,7 @@ resource "google_apigee_instance" "apigee_instance" {
 }
 
 resource "google_apigee_nat_address" "apigee-nat" {
-  name        = "<%= ctx[:vars]['nat_address_name'] %>"
-  activate    = "<%= ctx[:vars]['nat_address_activate'] %>"
+  name        = "{{index $.Vars "nat_address_name"}}"
+  activate    = "{{index $.Vars "nat_address_activate"}}"
   instance_id = google_apigee_instance.apigee_instance.id
 }

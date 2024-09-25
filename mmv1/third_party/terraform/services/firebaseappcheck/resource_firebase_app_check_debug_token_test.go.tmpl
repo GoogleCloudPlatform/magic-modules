@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package firebaseappcheck_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
@@ -85,4 +84,4 @@ resource "google_firebase_app_check_debug_token" "default" {
 }
 `, context)
 }
-<% end -%>
+{{- end }}

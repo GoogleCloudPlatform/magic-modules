@@ -1,18 +1,18 @@
 # Create Folder in GCP Organization
 resource "google_folder" "autokms_folder" {
   provider     = google-beta
-  display_name = "<%= ctx[:vars]["folder_name"] %>"
-  parent       = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"
+  display_name = "{{index $.Vars "folder_name"}}"
+  parent       = "organizations/{{index $.TestEnvVars "org_id"}}"
   deletion_protection = false
 }
 
 # Create the key project
 resource "google_project" "key_project" {
   provider        = google-beta
-  project_id      = "<%= ctx[:vars]["key_project_name"] %>"
-  name            = "<%= ctx[:vars]["key_project_name"] %>"
+  project_id      = "{{index $.Vars "key_project_name"}}"
+  name            = "{{index $.Vars "key_project_name"}}"
   folder_id       = google_folder.autokms_folder.folder_id
-  billing_account = "<%= ctx[:test_env_vars]['billing_account'] %>"
+  billing_account = "{{index $.TestEnvVars "billing_account"}}"
   depends_on      = [google_folder.autokms_folder]
   deletion_policy = "DELETE"
 }
@@ -62,7 +62,7 @@ resource "time_sleep" "wait_srv_acc_permissions" {
   depends_on      = [google_project_iam_member.autokey_project_admin]
 }
 
-resource "google_kms_autokey_config" "<%= ctx[:primary_resource_id] %>" {
+resource "google_kms_autokey_config" "{{$.PrimaryResourceId}}" {
   provider    = google-beta
   folder      = google_folder.autokms_folder.id
   key_project = "projects/${google_project.key_project.project_id}"
@@ -73,5 +73,5 @@ resource "google_kms_autokey_config" "<%= ctx[:primary_resource_id] %>" {
 # because setting the config takes a little to fully propagate.
 resource "time_sleep" "wait_autokey_propagation" {
   create_duration = "30s"
-  depends_on      = [google_kms_autokey_config.<%= ctx[:primary_resource_id] %>]
+  depends_on      = [google_kms_autokey_config.{{$.PrimaryResourceId}}]
 }

@@ -1,5 +1,5 @@
-resource "google_network_security_server_tls_policy" "<%= ctx[:primary_resource_id] %>" {
-  name                   = "<%= ctx[:vars]['resource_name'] %>"
+resource "google_network_security_server_tls_policy" "{{$.PrimaryResourceId}}" {
+  name                   = "{{index $.Vars "resource_name"}}"
   labels                 = {
     foo = "bar"
   }

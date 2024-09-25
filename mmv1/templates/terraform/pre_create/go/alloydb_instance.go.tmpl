@@ -1,5 +1,0 @@
-// Read the config and call createsecondary api if instance_type is SECONDARY
-
-if instanceType := d.Get("instance_type"); instanceType == "SECONDARY" {
-  url = strings.Replace(url, "instances?instanceId", "instances:createsecondary?instanceId", 1)
-}

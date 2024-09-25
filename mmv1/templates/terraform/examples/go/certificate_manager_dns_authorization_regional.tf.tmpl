@@ -1,7 +1,0 @@
-resource "google_certificate_manager_dns_authorization" "{{$.PrimaryResourceId}}" {
-  name        = "{{index $.Vars "dns_auth_name"}}"
-  location    = "us-central1"
-  description = "reginal dns"
-  type        = "PER_PROJECT_RECORD"
-  domain      = "{{index $.Vars "subdomain"}}.hashicorptest.com"
-}

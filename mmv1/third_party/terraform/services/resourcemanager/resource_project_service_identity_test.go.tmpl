@@ -1,7 +1,6 @@
-<% autogen_exception -%>
 package resourcemanager_test
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 import (
 	"fmt"
 	"strings"
@@ -65,4 +64,4 @@ resource "google_project_service_identity" "log_sa" {
 }
 `
 }
-<% end -%>
+{{- end }}

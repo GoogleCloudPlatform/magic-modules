@@ -1,7 +1,7 @@
 
 resource "google_privateca_ca_pool" "default" {
   location = "us-central1"
-  name = "<%= ctx[:vars]["ca_pool_id"] %>"
+  name = "{{index $.Vars "ca_pool_id"}}"
   tier = "ENTERPRISE"
 }
 
@@ -44,12 +44,12 @@ resource "google_privateca_certificate_authority" "default" {
   ignore_active_certificates_on_deletion = true
 }
 
-resource "google_privateca_certificate" "<%= ctx[:primary_resource_id] %>" {
+resource "google_privateca_certificate" "{{$.PrimaryResourceId}}" {
   location = "us-central1"
   pool = google_privateca_ca_pool.default.name
   certificate_authority = google_privateca_certificate_authority.default.certificate_authority_id
   lifetime = "86000s"
-  name = "<%= ctx[:vars]["certificate_name"] %>"
+  name = "{{index $.Vars "certificate_name"}}"
   config {
     subject_config  {
       subject {

@@ -1,6 +1,6 @@
-resource "google_cloudbuildv2_connection" "<%= ctx[:primary_resource_id] %>" {
+resource "google_cloudbuildv2_connection" "{{$.PrimaryResourceId}}" {
   location = "us-central1"
-  name = "<%= ctx[:vars]['connection_name'] %>"
+  name = "{{index $.Vars "connection_name"}}"
 
   github_config {
     app_installation_id = 0

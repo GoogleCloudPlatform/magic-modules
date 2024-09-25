@@ -1,32 +1,32 @@
 resource "google_tags_tag_key" "tag_key1" {
   provider   = google-beta
-  parent     = "organizations/<%= ctx[:vars]['org_id'] %>"
-  short_name = "<%= ctx[:vars]['key_short_name'] %>"
+  parent     = "organizations/{{index $.Vars "org_id"}}"
+  short_name = "{{index $.Vars "key_short_name"}}"
 }
 
 resource "google_tags_tag_value" "tag_value1" {
   provider   = google-beta
   parent     = "tagKeys/${google_tags_tag_key.tag_key1.name}"
-  short_name = "<%= ctx[:vars]['value_short_name'] %>"
+  short_name = "{{index $.Vars "value_short_name"}}"
 }
 
 resource "google_compute_network" "default" {
   provider                = google-beta
-  name                    = "<%= ctx[:vars]['workstation_cluster_name'] %>"
+  name                    = "{{index $.Vars "workstation_cluster_name"}}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
   provider      = google-beta
-  name          = "<%= ctx[:vars]['workstation_cluster_name'] %>"
+  name          = "{{index $.Vars "workstation_cluster_name"}}"
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-central1"
   network       = google_compute_network.default.name
 }
 
-resource "google_workstations_workstation_cluster" "<%= ctx[:primary_resource_id] %>" {
+resource "google_workstations_workstation_cluster" "{{$.PrimaryResourceId}}" {
   provider               = google-beta
-  workstation_cluster_id = "<%= ctx[:vars]['workstation_cluster_name'] %>"
+  workstation_cluster_id = "{{index $.Vars "workstation_cluster_name"}}"
   network                = google_compute_network.default.id
   subnetwork             = google_compute_subnetwork.default.id
   location               = "us-central1"
@@ -40,10 +40,10 @@ resource "google_workstations_workstation_cluster" "<%= ctx[:primary_resource_id
   }
 }
 
-resource "google_workstations_workstation_config" "<%= ctx[:primary_resource_id] %>" {
+resource "google_workstations_workstation_config" "{{$.PrimaryResourceId}}" {
   provider               = google-beta
-  workstation_config_id  = "<%= ctx[:vars]['workstation_config_name'] %>"
-  workstation_cluster_id = google_workstations_workstation_cluster.<%= ctx[:primary_resource_id] %>.workstation_cluster_id
+  workstation_config_id  = "{{index $.Vars "workstation_config_name"}}"
+  workstation_cluster_id = google_workstations_workstation_cluster.{{$.PrimaryResourceId}}.workstation_cluster_id
   location   		         = "us-central1"
 
   idle_timeout = "600s"

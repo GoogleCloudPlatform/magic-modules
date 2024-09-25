@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package dataproc_test
 
 import (
@@ -407,17 +406,17 @@ func testAccCheckDataprocJobCompletesSuccessfully(t *testing.T, n string, job *d
 			}
 			l, err := config.NewStorageClient(config.UserAgent).Objects.List(u[0]).Prefix(u[1]).Do()
 			if err != nil {
-				return errwrap.Wrapf("Job completed in ERROR state, found error when trying to list logs: {{err}}", err)
+				return errwrap.Wrapf("Job completed in ERROR state, found error when trying to list logs: {{"{{"}}err{{"}}"}}", err)
 			}
 			for _, item := range l.Items {
 				resp, err := config.NewStorageClient(config.UserAgent).Objects.Get(item.Bucket, item.Name).Download()
 				if err != nil {
-					return errwrap.Wrapf("Job completed in ERROR state, found error when trying to read logs: {{err}}", err)
+					return errwrap.Wrapf("Job completed in ERROR state, found error when trying to read logs: {{"{{"}}err{{"}}"}}", err)
 				}
 				defer resp.Body.Close()
 				body, err := ioutil.ReadAll(resp.Body)
 				if err != nil {
-					return errwrap.Wrapf("Job completed in ERROR state, found error when trying to read logs: {{err}}", err)
+					return errwrap.Wrapf("Job completed in ERROR state, found error when trying to read logs: {{"{{"}}err{{"}}"}}", err)
 				}
 				log.Printf("[ERROR] Job failed, driver logs:\n%s", body)
 			}

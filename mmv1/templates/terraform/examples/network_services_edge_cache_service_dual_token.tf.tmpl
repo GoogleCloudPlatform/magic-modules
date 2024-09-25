@@ -1,5 +1,5 @@
 resource "google_secret_manager_secret" "secret-basic" {
-  secret_id = "<%= ctx[:vars]['secret_name'] %>"
+  secret_id = "{{index $.Vars "secret_name"}}"
 
   replication {
     auto {}
@@ -13,7 +13,7 @@ resource "google_secret_manager_secret_version" "secret-version-basic" {
 }
 
 resource "google_network_services_edge_cache_keyset" "keyset" {
-  name        = "<%= ctx[:vars]['keyset_name'] %>"
+  name        = "{{index $.Vars "keyset_name"}}"
   description = "The default keyset"
   public_key {
     id      = "my-public-key"
@@ -25,13 +25,13 @@ resource "google_network_services_edge_cache_keyset" "keyset" {
 }
 
 resource "google_network_services_edge_cache_origin" "instance" {
-  name                 = "<%= ctx[:vars]['origin_name'] %>"
+  name                 = "{{index $.Vars "origin_name"}}"
   origin_address       = "gs://media-edge-default"
   description          = "The default bucket for media edge test"
 }
 
-resource "google_network_services_edge_cache_service" "<%= ctx[:primary_resource_id] %>" {
-  name                 = "<%= ctx[:vars]['service_name'] %>"
+resource "google_network_services_edge_cache_service" "{{$.PrimaryResourceId}}" {
+  name                 = "{{index $.Vars "service_name"}}"
   description          = "some description"
   routing {
     host_rule {

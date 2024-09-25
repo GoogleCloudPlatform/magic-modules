@@ -1,7 +1,6 @@
-<% autogen_exception -%>
 package notebooks_test
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 import (
 	"fmt"
 	"testing"
@@ -82,4 +81,4 @@ resource "google_notebooks_instance" "test" {
 }
 `, name)
 }
-<% end -%>
+{{- end }}

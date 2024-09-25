@@ -1,5 +1,5 @@
-resource "google_privateca_certificate_template" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]["name"] %>"
+resource "google_privateca_certificate_template" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "name"}}"
   location = "us-central1"
   description = "A sample certificate template"
 

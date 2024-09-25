@@ -1,5 +1,5 @@
-resource "google_vmwareengine_cluster" "<%= ctx[:primary_resource_id] %>" {
-  name     = "<%= ctx[:vars]['name'] %>"
+resource "google_vmwareengine_cluster" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.Vars "name"}}"
   parent   = google_vmwareengine_private_cloud.cluster-pc.id
   node_type_configs {
     node_type_id = "standard-72"
@@ -9,8 +9,8 @@ resource "google_vmwareengine_cluster" "<%= ctx[:primary_resource_id] %>" {
 }
 
 resource "google_vmwareengine_private_cloud" "cluster-pc" {
-  location    = "<%= ctx[:test_env_vars]['region'] %>-a"
-  name        = "<%= ctx[:vars]['private_cloud_id'] %>"
+  location    = "{{index $.TestEnvVars "region"}}-a"
+  name        = "{{index $.Vars "private_cloud_id"}}"
   description = "Sample test PC."
   network_config {
     management_cidr       = "192.168.30.0/24"
@@ -18,7 +18,7 @@ resource "google_vmwareengine_private_cloud" "cluster-pc" {
   }
 
   management_cluster {
-    cluster_id = "<%= ctx[:vars]['management_cluster_id'] %>"
+    cluster_id = "{{index $.Vars "management_cluster_id"}}"
     node_type_configs {
       node_type_id = "standard-72"
       node_count   = 3
@@ -28,7 +28,7 @@ resource "google_vmwareengine_private_cloud" "cluster-pc" {
 }
 
 resource "google_vmwareengine_network" "cluster-nw" {
-  name        = "<%= ctx[:vars]['network_id'] %>"
+  name        = "{{index $.Vars "network_id"}}"
   type        = "STANDARD"
   location    = "global"
   description = "PC network description."

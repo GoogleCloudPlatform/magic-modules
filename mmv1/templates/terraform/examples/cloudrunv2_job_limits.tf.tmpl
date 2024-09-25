@@ -1,5 +1,5 @@
-resource "google_cloud_run_v2_job" "<%= ctx[:primary_resource_id] %>" {
-  name     = "<%= ctx[:vars]['cloud_run_job_name'] %>"
+resource "google_cloud_run_v2_job" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.Vars "cloud_run_job_name"}}"
   location = "us-central1"
   deletion_protection = false
 

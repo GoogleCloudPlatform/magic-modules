@@ -1,11 +1,11 @@
-resource "google_apphub_application" "<%= ctx[:primary_resource_id] %>" {
+resource "google_apphub_application" "{{$.PrimaryResourceId}}" {
   location = "us-east1"
-  application_id = "<%= ctx[:vars]['application_id'] %>"
-  display_name = "<%= ctx[:vars]['display_name'] %>"
+  application_id = "{{index $.Vars "application_id"}}"
+  display_name = "{{index $.Vars "display_name"}}"
   scope {
     type = "REGIONAL"
   }
-  description = "<%= ctx[:vars]['desc'] %>"
+  description = "{{index $.Vars "desc"}}"
   attributes {
     environment {
       type = "STAGING"
@@ -14,16 +14,16 @@ resource "google_apphub_application" "<%= ctx[:primary_resource_id] %>" {
       type = "MISSION_CRITICAL"
 		}
 		business_owners {
-		  display_name =  "<%= ctx[:vars]['business_name'] %>"
-		  email        =  "<%= ctx[:vars]['business_email'] %>"
+		  display_name =  "{{index $.Vars "business_name"}}"
+		  email        =  "{{index $.Vars "business_email"}}"
 		}
 		developer_owners {
-		  display_name =  "<%= ctx[:vars]['developer_name'] %>"
-		  email        =  "<%= ctx[:vars]['developer_email'] %>"
+		  display_name =  "{{index $.Vars "developer_name"}}"
+		  email        =  "{{index $.Vars "developer_email"}}"
 		}
 		operator_owners {
-		  display_name =  "<%= ctx[:vars]['operator_name'] %>"
-		  email        =  "<%= ctx[:vars]['operator_email'] %>"
+		  display_name =  "{{index $.Vars "operator_name"}}"
+		  email        =  "{{index $.Vars "operator_email"}}"
 		}
   }
 }

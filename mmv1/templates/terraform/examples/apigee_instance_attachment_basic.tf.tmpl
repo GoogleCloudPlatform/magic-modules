@@ -1,8 +1,8 @@
 resource "google_project" "project" {
-  project_id      = "<%= ctx[:vars]['project_id'] %>"
-  name            = "<%= ctx[:vars]['project_id'] %>"
-  org_id          = "<%= ctx[:test_env_vars]['org_id'] %>"
-  billing_account = "<%= ctx[:test_env_vars]['billing_account'] %>"
+  project_id      = "{{index $.Vars "project_id"}}"
+  name            = "{{index $.Vars "project_id"}}"
+  org_id          = "{{index $.TestEnvVars "org_id"}}"
+  billing_account = "{{index $.TestEnvVars "billing_account"}}"
   deletion_policy = "DELETE"
 }
 
@@ -54,19 +54,19 @@ resource "google_apigee_organization" "apigee_org" {
 }
 
 resource "google_apigee_instance" "apigee_ins" {
-  name     = "<%= ctx[:vars]['instance_name'] %>"
+  name     = "{{index $.Vars "instance_name"}}"
   location = "us-central1"
   org_id   = google_apigee_organization.apigee_org.id
 }
 
 resource "google_apigee_environment" "apigee_env" {
   org_id   = google_apigee_organization.apigee_org.id
-  name         = "<%= ctx[:vars]['environment_name'] %>"
+  name         = "{{index $.Vars "environment_name"}}"
   description  = "Apigee Environment"
   display_name = "environment-1"
 }
 
-resource "google_apigee_instance_attachment" "<%= ctx[:primary_resource_id] %>" {
+resource "google_apigee_instance_attachment" "{{$.PrimaryResourceId}}" {
   instance_id  = google_apigee_instance.apigee_instance.id
   environment  = google_apigee_environment.apigee_env.name
 }

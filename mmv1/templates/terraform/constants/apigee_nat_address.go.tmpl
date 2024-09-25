@@ -1,4 +1,4 @@
-<% unless compiler == "terraformgoogleconversion-codegen" -%>
+{{- if ne $.Compiler "terraformgoogleconversion-codegen" }}
 // waitForNatAddressReady waits for an NatAddress to leave the
 // "CREATING" state and become "RESERVED", to indicate that it's ready.
 func waitForNatAddressReserved(d *schema.ResourceData, config *transport_tpg.Config, timeout time.Duration) error {
@@ -19,4 +19,4 @@ func waitForNatAddressReserved(d *schema.ResourceData, config *transport_tpg.Con
 		}
 	})
 }
-<% end -%>
+{{- end }}

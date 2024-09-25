@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package accesscontextmanager_test
 
 import (
@@ -75,7 +74,7 @@ func testAccCheckAccessContextManagerAccessLevelDestroyProducer(t *testing.T) fu
 
 			config := acctest.GoogleProviderConfig(t)
 
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{AccessContextManagerBasePath}}{{name}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}AccessContextManagerBasePath{{"}}"}}{{"{{"}}name{{"}}"}}")
 			if err != nil {
 				return err
 			}

@@ -1,6 +1,6 @@
-resource "google_api_gateway_api" "<%= ctx[:primary_resource_id] %>" {
+resource "google_api_gateway_api" "{{$.PrimaryResourceId}}" {
   provider = google-beta
-  api_id = "<%= ctx[:vars]['api_id'] %>"
+  api_id = "{{index $.Vars "api_id"}}"
   display_name = "MM Dev API"
   labels = {
     environment = "dev"

@@ -1,5 +1,5 @@
-resource "google_managed_kafka_cluster" "<%= ctx[:primary_resource_id] %>" {
-  cluster_id = "<%= ctx[:vars]['cluster_id'] %>"
+resource "google_managed_kafka_cluster" "{{$.PrimaryResourceId}}" {
+  cluster_id = "{{index $.Vars "cluster_id"}}"
   location = "us-central1"
   capacity_config {
     vcpu_count = 3

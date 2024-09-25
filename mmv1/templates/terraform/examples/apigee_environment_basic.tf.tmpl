@@ -26,7 +26,7 @@ resource "google_apigee_organization" "apigee_org" {
 }
 
 resource "google_apigee_environment" "env" {
-  name         = "<%= ctx[:vars]['environment_name'] %>"
+  name         = "{{index $.Vars "environment_name"}}"
   description  = "Apigee Environment"
   display_name = "environment-1"
   org_id       = google_apigee_organization.apigee_org.id

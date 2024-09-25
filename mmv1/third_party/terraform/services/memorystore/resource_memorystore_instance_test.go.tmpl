@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package memorystore_test
-<% unless version == "ga" -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -324,4 +323,4 @@ data "google_project" "project" {
 `, params.name, params.replicaCount, params.shardCount, params.nodeType, params.deletionProtectionEnabled, strBuilder.String(), zoneDistributionConfigBlock, persistenceBlock, lifecycleBlock, params.name, params.name, params.name)
 }
 
-<% end -%>
+{{ end }}

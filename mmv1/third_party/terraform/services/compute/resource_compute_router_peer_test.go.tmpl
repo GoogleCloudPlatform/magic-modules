@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package compute_test
 
 import (
@@ -160,7 +159,7 @@ func testAccCheckComputeRouterBgpPeerDestroyProducer(t *testing.T) func(s *terra
 
 			config := acctest.GoogleProviderConfig(t)
 
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/routers/{{router}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/routers/{{"{{"}}router{{"}}"}}")
 			if err != nil {
 				return err
 			}

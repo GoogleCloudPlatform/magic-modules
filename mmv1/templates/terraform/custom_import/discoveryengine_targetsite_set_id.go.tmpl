@@ -6,7 +6,7 @@ if err := tpgresource.ParseImportId([]string{
 }
 
 // Set name based on the components
-if err := d.Set("name", "projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/siteSearchEngine/targetSites/{{target_site_id}}"); err != nil {
+if err := d.Set("name", "projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/collections/default_collection/dataStores/{{"{{"}}data_store_id{{"}}"}}/siteSearchEngine/targetSites/{{"{{"}}target_site_id{{"}}"}}"); err != nil {
   return nil, fmt.Errorf("Error setting name: %s", err)
 }
 

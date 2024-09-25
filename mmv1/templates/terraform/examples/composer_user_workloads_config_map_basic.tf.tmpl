@@ -1,6 +1,6 @@
 resource "google_composer_environment" "environment" {
   provider = google-beta
-  name   = "<%= ctx[:vars]['environment_name'] %>"
+  name   = "{{index $.Vars "environment_name"}}"
   region = "us-central1"
   config {
     software_config {
@@ -9,9 +9,9 @@ resource "google_composer_environment" "environment" {
   }
 }
 
-resource "google_composer_user_workloads_config_map" "<%= ctx[:primary_resource_id] %>" {
+resource "google_composer_user_workloads_config_map" "{{$.PrimaryResourceId}}" {
   provider = google-beta
-  name = "<%= ctx[:vars]['config_map_name'] %>"
+  name = "{{index $.Vars "config_map_name"}}"
   region = "us-central1"
   environment = google_composer_environment.environment.name
   data = {

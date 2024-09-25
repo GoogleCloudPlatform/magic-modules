@@ -1,5 +1,5 @@
-resource "google_network_management_connectivity_test" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]['primary_resource_name'] %>"
+resource "google_network_management_connectivity_test" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "primary_resource_name"}}"
   source {
       ip_address = google_compute_address.source-addr.address
       project_id = google_compute_address.source-addr.project
@@ -17,18 +17,18 @@ resource "google_network_management_connectivity_test" "<%= ctx[:primary_resourc
 }
 
 resource "google_compute_network" "vpc" {
-  name = "<%= ctx[:vars]['network'] %>"
+  name = "{{index $.Vars "network"}}"
 }
 
 resource "google_compute_subnetwork" "subnet" {
-  name          = "<%= ctx[:vars]['network'] %>-subnet"
+  name          = "{{index $.Vars "network"}}-subnet"
   ip_cidr_range = "10.0.0.0/16"
   region        = "us-central1"
   network       = google_compute_network.vpc.id
 }
 
 resource "google_compute_address" "source-addr" {
-  name         = "<%= ctx[:vars]['source_addr'] %>"
+  name         = "{{index $.Vars "source_addr"}}"
   subnetwork   = google_compute_subnetwork.subnet.id
   address_type = "INTERNAL"
   address      = "10.0.42.42"
@@ -36,7 +36,7 @@ resource "google_compute_address" "source-addr" {
 }
 
 resource "google_compute_address" "dest-addr" {
-  name         = "<%= ctx[:vars]['dest_addr'] %>"
+  name         = "{{index $.Vars "dest_addr"}}"
   subnetwork   = google_compute_subnetwork.subnet.id
   address_type = "INTERNAL"
   address      = "10.0.43.43"

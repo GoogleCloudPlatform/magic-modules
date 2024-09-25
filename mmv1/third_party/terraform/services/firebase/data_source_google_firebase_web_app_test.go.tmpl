@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package firebase_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 import (
 	"testing"
 
@@ -56,4 +55,4 @@ data "google_firebase_web_app" "my_app_project" {
 }
 `, context)
 }
-<% end -%>
+{{- end }}

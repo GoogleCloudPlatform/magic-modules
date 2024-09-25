@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package compute_test
 
 import (
@@ -793,7 +792,7 @@ func TestAccComputeBackendService_trafficDirectorUpdateLbPolicies(t *testing.T) 
 	})
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeBackendService_trafficDirectorUpdateFull(t *testing.T) {
 	t.Parallel()
 
@@ -824,7 +823,7 @@ func TestAccComputeBackendService_trafficDirectorUpdateFull(t *testing.T) {
 		},
 	})
 }
-<% end -%>
+{{- end }}
 
 func TestAccComputeBackendService_withPrivateOriginAuth(t *testing.T) {
 	t.Parallel()
@@ -888,7 +887,7 @@ func TestAccComputeBackendService_withClientTlsPolicy(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeBackendService_regionNegBackend(t *testing.T) {
 	t.Parallel()
 
@@ -910,7 +909,7 @@ func TestAccComputeBackendService_regionNegBackend(t *testing.T) {
 		},
 	})
 }
-<% end -%>
+{{- end }}
 
 func testAccComputeBackendService_trafficDirectorBasic(serviceName, checkName string) string {
 	return fmt.Sprintf(`
@@ -1043,7 +1042,7 @@ resource "google_compute_health_check" "health_check" {
 `, serviceName, checkName)
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeBackendService_trafficDirectorFull(serviceName, checkName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_backend_service" "foobar" {
@@ -1076,9 +1075,9 @@ resource "google_compute_health_check" "health_check" {
 }
 `, serviceName, checkName)
 }
-<% end -%>
+{{- end }}
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeBackendService_trafficDirectorUpdateFull(serviceName, checkName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_backend_service" "foobar" {
@@ -1135,7 +1134,7 @@ resource "google_compute_health_check" "health_check" {
 }
 `, serviceName, checkName)
 }
-<% end -%>
+{{- end }}
 
 func testAccComputeBackendService_basic(serviceName, checkName string) string {
 	return fmt.Sprintf(`
@@ -1872,7 +1871,7 @@ resource "google_compute_http_health_check" "zero" {
 `, serviceName, checkName)
 }
 
-<%# This test is for import functionality. It can be removed and added to examples when this goes GA %>
+{{/* This test is for import functionality. It can be removed and added to examples when this goes GA */}}
 func testAccComputeBackendService_internalLoadBalancing(fr, proxy, backend, hc, urlmap string) string {
 	return fmt.Sprintf(`
 resource "google_compute_global_forwarding_rule" "forwarding_rule" {
@@ -2030,7 +2029,7 @@ resource "google_compute_http_health_check" "zero" {
 `, serviceName, compressionMode, checkName)
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeBackendService_regionNegBackend(suffix string) string {
 	return fmt.Sprintf(`
 resource "google_compute_backend_service" "backend" {
@@ -2072,7 +2071,7 @@ resource "google_cloud_run_service" "cloudrun_neg" {
 
 `, suffix, suffix, suffix)
 }
-<% end -%>
+{{- end }}
 
 func testAccComputeBackendService_withPrivateOriginAuth(randomSuffix string) string {
 	return fmt.Sprintf(`

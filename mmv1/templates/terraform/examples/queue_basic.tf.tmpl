@@ -1,4 +1,4 @@
 resource "google_cloud_tasks_queue" "default" {
-  name = "<%= ctx[:vars]['name'] %>"
+  name = "{{index $.Vars "name"}}"
   location = "us-central1"
 }

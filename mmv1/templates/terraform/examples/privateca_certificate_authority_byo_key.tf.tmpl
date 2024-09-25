@@ -3,27 +3,27 @@ resource "google_project_service_identity" "privateca_sa" {
 }
 
 resource "google_kms_crypto_key_iam_member" "privateca_sa_keyuser_signerverifier" {
-  crypto_key_id = "<%= ctx[:vars]['kms_key_name'] %>"
+  crypto_key_id = "{{index $.Vars "kms_key_name"}}"
   role          = "roles/cloudkms.signerVerifier"
 
   member = google_project_service_identity.privateca_sa.member
 }
 
 resource "google_kms_crypto_key_iam_member" "privateca_sa_keyuser_viewer" {
-  crypto_key_id = "<%= ctx[:vars]['kms_key_name'] %>"
+  crypto_key_id = "{{index $.Vars "kms_key_name"}}"
   role          = "roles/viewer"
   member = google_project_service_identity.privateca_sa.member
 }
 
-resource "google_privateca_certificate_authority" "<%= ctx[:primary_resource_id] %>" {
+resource "google_privateca_certificate_authority" "{{$.PrimaryResourceId}}" {
   // This example assumes this pool already exists.
   // Pools cannot be deleted in normal test circumstances, so we depend on static pools
-  pool = "<%= ctx[:vars]["pool_name"] %>"
-  certificate_authority_id = "<%= ctx[:vars]["certificate_authority_id"] %>"
-  location = "<%= ctx[:vars]["pool_location"] %>"
-  deletion_protection = "<%= ctx[:vars]["deletion_protection"] %>"
+  pool = "{{index $.Vars "pool_name"}}"
+  certificate_authority_id = "{{index $.Vars "certificate_authority_id"}}"
+  location = "{{index $.Vars "pool_location"}}"
+  deletion_protection = "{{index $.Vars "deletion_protection"}}"
   key_spec {
-    cloud_kms_key_version = "<%= ctx[:vars]['kms_key_name'] %>/cryptoKeyVersions/1"
+    cloud_kms_key_version = "{{index $.Vars "kms_key_name"}}/cryptoKeyVersions/1"
   }
 
   config  {

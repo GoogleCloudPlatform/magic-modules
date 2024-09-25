@@ -1,16 +1,15 @@
-<% autogen_exception -%>
 package compute_test
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 import (
 	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
-<% end -%>
+{{- end }}
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeRegionNetworkEndpointGroup_negWithServerlessDeployment(t *testing.T) {
 	t.Parallel()
 
@@ -35,9 +34,9 @@ func TestAccComputeRegionNetworkEndpointGroup_negWithServerlessDeployment(t *tes
 		},
 	})
 }
-<% end -%>
+{{- end }}
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeRegionNetworkEndpointGroup_negWithServerlessDeployment(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_api_gateway_api" "api_gw" {
@@ -76,4 +75,4 @@ resource "google_compute_region_network_endpoint_group" "test_neg" {
 }
 `, context)
 }
-<% end -%>
+{{- end }}

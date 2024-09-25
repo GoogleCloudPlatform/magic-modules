@@ -1,7 +1,0 @@
-chunkSize := 500 // API only accepts 500 endpoints at a time
-lastPage, err := networkEndpointsPaginatedMutate(d, obj["networkEndpoints"].([]interface{}), config, userAgent, url, project, billingProject, chunkSize, true)
-if err != nil {
-    // networkEndpointsPaginatedMutate already adds error description
-    return err
-}
-obj["networkEndpoints"] = lastPage

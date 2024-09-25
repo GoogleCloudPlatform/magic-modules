@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package dns_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -195,4 +194,4 @@ resource "google_dns_response_policy_rule" "example-response-policy-rule" {
 }
 `, suffix, suffix, suffix, network, suffix)
 }
-<% end -%>
+{{- end }}

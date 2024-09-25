@@ -1,5 +1,5 @@
-resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
-  name     = "<%= ctx[:vars]['cloud_run_service_name'] %>"
+resource "google_cloud_run_service" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.Vars "cloud_run_service_name"}}"
   location = "us-central1"
 
   template {
@@ -21,12 +21,12 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
 }
 
 resource "google_sql_database_instance" "instance" {
-  name             = "<%= ctx[:vars]['cloud_run_sql_name'] %>"
+  name             = "{{index $.Vars "cloud_run_sql_name"}}"
   region           = "us-east1"
   database_version = "MYSQL_5_7"
   settings {
     tier = "db-f1-micro"
   }
 
-  deletion_protection  = "<%= ctx[:vars]['deletion_protection'] %>"
+  deletion_protection  = "{{index $.Vars "deletion_protection"}}"
 }

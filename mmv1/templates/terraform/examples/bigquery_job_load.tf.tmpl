@@ -1,18 +1,18 @@
 resource "google_bigquery_table" "foo" {
   deletion_protection = false
   dataset_id = google_bigquery_dataset.bar.dataset_id
-  table_id   = "<%= ctx[:vars]['job_id'] %>_table"
+  table_id   = "{{index $.Vars "job_id"}}_table"
 }
 
 resource "google_bigquery_dataset" "bar" {
-  dataset_id                  = "<%= ctx[:vars]['job_id'] %>_dataset"
+  dataset_id                  = "{{index $.Vars "job_id"}}_dataset"
   friendly_name               = "test"
   description                 = "This is a test description"
   location                    = "US"
 }
 
-resource "google_bigquery_job" "<%= ctx[:primary_resource_id] %>" {
-  job_id     = "<%= ctx[:vars]['job_id'] %>"
+resource "google_bigquery_job" "{{$.PrimaryResourceId}}" {
+  job_id     = "{{index $.Vars "job_id"}}"
 
   labels = {
     "my_job" ="load"

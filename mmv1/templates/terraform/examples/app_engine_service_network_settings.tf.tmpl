@@ -1,5 +1,5 @@
 resource "google_storage_bucket" "bucket" {
-	name     = "<%= ctx[:vars]['bucket_name'] %>"
+	name     = "{{index $.Vars "bucket_name"}}"
   location = "US"
 }
 
@@ -28,7 +28,7 @@ resource "google_app_engine_standard_app_version" "internalapp" {
   }
 }
 
-resource "google_app_engine_service_network_settings" "<%= ctx[:primary_resource_id] %>" {
+resource "google_app_engine_service_network_settings" "{{$.PrimaryResourceId}}" {
   service = google_app_engine_standard_app_version.internalapp.service
   network_settings {
     ingress_traffic_allowed = "INGRESS_TRAFFIC_ALLOWED_INTERNAL_ONLY"

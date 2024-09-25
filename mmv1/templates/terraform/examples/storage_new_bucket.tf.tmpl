@@ -1,7 +1,7 @@
 # Create new storage bucket in the US multi-region
 # with coldline storage
-resource "google_storage_bucket" "<%= ctx[:primary_resource_id] %>" {
-  name          = "<%= ctx[:vars]['new_bucket'] %>"
+resource "google_storage_bucket" "{{$.PrimaryResourceId}}" {
+  name          = "{{index $.Vars "new_bucket"}}"
   location      = "US"
   storage_class = "COLDLINE"
 
@@ -14,7 +14,7 @@ resource "google_storage_bucket" "<%= ctx[:primary_resource_id] %>" {
 
 # The text object in Cloud Storage
 resource "google_storage_bucket_object" "default" {
-  name         = "<%= ctx[:vars]['new_object'] %>"
+  name         = "{{index $.Vars "new_object"}}"
 # Uncomment and add valid path to an object.
 #  source       = "/path/to/an/object"
   content      = "Data as string to be uploaded"

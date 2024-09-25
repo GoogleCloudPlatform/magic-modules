@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package dataflow
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"context"
@@ -202,4 +201,4 @@ func ResourceDataflowFlexTemplateJobStateUpgradeV0(_ context.Context, rawState m
 	return tpgresource.LabelsStateUpgrade(rawState, resourceDataflowJobGoogleLabelPrefix)
 }
 
-<% end -%>
+{{ end }}

@@ -10,7 +10,7 @@ if err := tpgresource.ParseImportId([]string{
 }
 
 // Replace import id for the resource id
-id, err := tpgresource.ReplaceVars(d, config, "{{project}}/{{zone}}/{{instance_group}}/{{instance}}")
+id, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}project{{"}}"}}/{{"{{"}}zone{{"}}"}}/{{"{{"}}instance_group{{"}}"}}/{{"{{"}}instance{{"}}"}}")
 if err != nil {
   return nil, fmt.Errorf("Error constructing id: %s", err)
 }

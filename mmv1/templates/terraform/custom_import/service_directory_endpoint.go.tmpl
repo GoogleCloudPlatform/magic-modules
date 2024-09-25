@@ -7,7 +7,7 @@ if err := tpgresource.ParseImportId([]string{"(?P<name>.+)"}, d, config); err !=
 
 nameParts := strings.Split(d.Get("name").(string), "/")
 if len(nameParts) == 10 {
-	// `projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}/services/{{service_id}}/endpoints/{{endpoint_id}}`
+	// `projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/namespaces/{{"{{"}}namespace_id{{"}}"}}/services/{{"{{"}}service_id{{"}}"}}/endpoints/{{"{{"}}endpoint_id{{"}}"}}`
 	if err := d.Set("service", fmt.Sprintf("projects/%s/locations/%s/namespaces/%s/services/%s", nameParts[1], nameParts[3], nameParts[5], nameParts[7])); err != nil {
 		return nil, fmt.Errorf("Error setting service: %s", err)
 	}
@@ -15,7 +15,7 @@ if len(nameParts) == 10 {
 		return nil, fmt.Errorf("Error setting endpoint_id: %s", err)
 	}
 } else if len(nameParts) == 5 {
-	// `{{project}}/{{location}}/{{namespace_id}}/{{service_id}}/{{endpoint_id}}`
+	// `{{"{{"}}project{{"}}"}}/{{"{{"}}location{{"}}"}}/{{"{{"}}namespace_id{{"}}"}}/{{"{{"}}service_id{{"}}"}}/{{"{{"}}endpoint_id{{"}}"}}`
 	if err := d.Set("service", fmt.Sprintf("projects/%s/locations/%s/namespaces/%s/services/%s", nameParts[0], nameParts[1], nameParts[2], nameParts[3])); err != nil {
 		return nil, fmt.Errorf("Error setting service: %s", err)
 	}
@@ -28,7 +28,7 @@ if len(nameParts) == 10 {
 	}
 	d.SetId(id)
 } else if len(nameParts) == 4 {
-	// `{{location}}/{{namespace_id}}/{{service_id}}/{{endpoint_id}}`
+	// `{{"{{"}}location{{"}}"}}/{{"{{"}}namespace_id{{"}}"}}/{{"{{"}}service_id{{"}}"}}/{{"{{"}}endpoint_id{{"}}"}}`
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 			return nil, err
@@ -48,8 +48,8 @@ if len(nameParts) == 10 {
 	return nil, fmt.Errorf(
 		"Saw %s when the name is expected to have shape %s, %s or %s",
 		d.Get("name"),
-		"projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}/services/{{service_id}}/endpoints/{{endpoint_id}}",
-		"{{project}}/{{location}}/{{namespace_id}}/{{service_id}}/{{endpoint_id}}",
-		"{{location}}/{{namespace_id}}/{{service_id}}/{{endpoint_id}}")
+		"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/namespaces/{{"{{"}}namespace_id{{"}}"}}/services/{{"{{"}}service_id{{"}}"}}/endpoints/{{"{{"}}endpoint_id{{"}}"}}",
+		"{{"{{"}}project{{"}}"}}/{{"{{"}}location{{"}}"}}/{{"{{"}}namespace_id{{"}}"}}/{{"{{"}}service_id{{"}}"}}/{{"{{"}}endpoint_id{{"}}"}}",
+		"{{"{{"}}location{{"}}"}}/{{"{{"}}namespace_id{{"}}"}}/{{"{{"}}service_id{{"}}"}}/{{"{{"}}endpoint_id{{"}}"}}")
 }
 return []*schema.ResourceData{d}, nil

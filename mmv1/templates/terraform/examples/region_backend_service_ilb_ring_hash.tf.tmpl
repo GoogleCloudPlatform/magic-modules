@@ -1,6 +1,6 @@
-resource "google_compute_region_backend_service" "<%= ctx[:primary_resource_id] %>" {
+resource "google_compute_region_backend_service" "{{$.PrimaryResourceId}}" {
   region = "us-central1"
-  name = "<%= ctx[:vars]['region_backend_service_name'] %>"
+  name = "{{index $.Vars "region_backend_service_name"}}"
   health_checks = [google_compute_health_check.health_check.id]
   load_balancing_scheme = "INTERNAL_MANAGED"
   locality_lb_policy = "RING_HASH"
@@ -24,7 +24,7 @@ resource "google_compute_region_backend_service" "<%= ctx[:primary_resource_id] 
 }
 
 resource "google_compute_health_check" "health_check" {
-  name               = "<%= ctx[:vars]['health_check_name'] %>"
+  name               = "{{index $.Vars "health_check_name"}}"
   http_health_check {
     port = 80
   }

@@ -1,4 +1,4 @@
-resource "google_compute_network_peering_routes_config" "<%= ctx[:primary_resource_id] %>" {
+resource "google_compute_network_peering_routes_config" "{{$.PrimaryResourceId}}" {
   peering = google_compute_network_peering.peering_primary.name
   network = google_compute_network.network_primary.name
 
@@ -7,7 +7,7 @@ resource "google_compute_network_peering_routes_config" "<%= ctx[:primary_resour
 }
 
 resource "google_compute_network_peering" "peering_primary" {
-  name         = "<%= ctx[:vars]['peering_primary_name'] %>"
+  name         = "{{index $.Vars "peering_primary_name"}}"
   network      = google_compute_network.network_primary.id
   peer_network = google_compute_network.network_secondary.id
 
@@ -16,17 +16,17 @@ resource "google_compute_network_peering" "peering_primary" {
 }
 
 resource "google_compute_network_peering" "peering_secondary" {
-  name         = "<%= ctx[:vars]['peering_secondary_name'] %>"
+  name         = "{{index $.Vars "peering_secondary_name"}}"
   network      = google_compute_network.network_secondary.id
   peer_network = google_compute_network.network_primary.id
 }
 
 resource "google_compute_network" "network_primary" {
-  name                    = "<%= ctx[:vars]['network_primary_name'] %>"
+  name                    = "{{index $.Vars "network_primary_name"}}"
   auto_create_subnetworks = "false"
 }
 
 resource "google_compute_network" "network_secondary" {
-  name                    = "<%= ctx[:vars]['network_secondary_name'] %>"
+  name                    = "{{index $.Vars "network_secondary_name"}}"
   auto_create_subnetworks = "false"
 }

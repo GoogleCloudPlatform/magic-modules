@@ -1,10 +1,10 @@
-resource "google_pubsub_topic" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]['topic_name'] %>"
+resource "google_pubsub_topic" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "topic_name"}}"
 }
 
-resource "google_pubsub_subscription" "<%= ctx[:primary_resource_id] %>" {
-  name  = "<%= ctx[:vars]['subscription_name'] %>"
-  topic = google_pubsub_topic.<%= ctx[:primary_resource_id] %>.id
+resource "google_pubsub_subscription" "{{$.PrimaryResourceId}}" {
+  name  = "{{index $.Vars "subscription_name"}}"
+  topic = google_pubsub_topic.{{$.PrimaryResourceId}}.id
 
   labels = {
     foo = "bar"

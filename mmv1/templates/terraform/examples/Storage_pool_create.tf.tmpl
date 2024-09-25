@@ -1,12 +1,12 @@
 # Create a network or use datasource to reference existing network
 resource "google_compute_network" "peering_network" {
-  name = "<%= ctx[:vars]['network_name'] %>"
+  name = "{{index $.Vars "network_name"}}"
 }
 
 # Reserve a CIDR for NetApp Volumes to use
 # When using shared-VPCs, this resource needs to be created in host project
 resource "google_compute_global_address" "private_ip_alloc" {
-  name          = "<%= ctx[:vars]['global_name'] %>"
+  name          = "{{index $.Vars "global_name"}}"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
   prefix_length = 16
@@ -33,8 +33,8 @@ resource "google_compute_network_peering_routes_config" "route_updates" {
 
 # Create a storage pool
 # Create this resource in the project which is expected to own the volumes
-resource "google_netapp_storage_pool" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]['pool_name'] %>"
+resource "google_netapp_storage_pool" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "pool_name"}}"
   # project = <your_project>
   location = "us-central1"
   service_level = "PREMIUM"

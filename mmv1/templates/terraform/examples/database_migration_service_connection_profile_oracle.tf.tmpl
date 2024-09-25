@@ -1,7 +1,7 @@
-resource "google_database_migration_service_connection_profile" "<%= ctx[:primary_resource_id] %>" {
+resource "google_database_migration_service_connection_profile" "{{$.PrimaryResourceId}}" {
   location = "us-central1"
-  connection_profile_id = "<%= ctx[:vars]["profile"] %>"
-  display_name = "<%= ctx[:vars]["profile"] %>_display"
+  connection_profile_id = "{{index $.Vars "profile"}}"
+  display_name = "{{index $.Vars "profile"}}_display"
   labels = { 
     foo = "bar" 
   }

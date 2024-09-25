@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package compute_test
-<% unless version == "ga" -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -148,4 +147,4 @@ resource "google_compute_disk_async_replication" "replication" {
 }	  
 `, region, primaryDisk, region, region, secondaryRegion, secondaryDisk, secondaryRegion, secondaryRegion)
 }
-<% end -%>
+{{- end }}

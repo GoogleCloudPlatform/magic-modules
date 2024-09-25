@@ -1,10 +1,10 @@
 resource "google_pubsub_topic" "scc_notification" {
-  name = "<%= ctx[:vars]['topic_name'] %>"
+  name = "{{index $.Vars "topic_name"}}"
 }
 
-resource "google_scc_notification_config" "<%= ctx[:primary_resource_id] %>" {
-  config_id    = "<%= ctx[:vars]['config_id'] %>"
-  organization = "<%= ctx[:test_env_vars]['org_id'] %>"
+resource "google_scc_notification_config" "{{$.PrimaryResourceId}}" {
+  config_id    = "{{index $.Vars "config_id"}}"
+  organization = "{{index $.TestEnvVars "org_id"}}"
   description  = "My custom Cloud Security Command Center Finding Notification Configuration"
   pubsub_topic =  google_pubsub_topic.scc_notification.id
 

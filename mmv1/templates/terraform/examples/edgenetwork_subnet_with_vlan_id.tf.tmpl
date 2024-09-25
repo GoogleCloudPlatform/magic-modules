@@ -1,8 +1,8 @@
 
-resource "google_edgenetwork_subnet" "<%= ctx[:primary_resource_id] %>" {
-  subnet_id   = "<%= ctx[:vars]['edgenetwork_subnet_id'] %>"
-  location    = "<%= ctx[:test_env_vars]['location'] %>"
-  zone        = "<%= ctx[:test_env_vars]['zone'] %>"
+resource "google_edgenetwork_subnet" "{{$.PrimaryResourceId}}" {
+  subnet_id   = "{{index $.Vars "edgenetwork_subnet_id"}}"
+  location    = "{{index $.TestEnvVars "location"}}"
+  zone        = "{{index $.TestEnvVars "zone"}}"
   description = "Example subnet with VLAN ID."
   network     = google_edgenetwork_network.example_network.id
   ipv6_cidr   = ["4444:4444:4444:4444::1/64"]
@@ -13,9 +13,9 @@ resource "google_edgenetwork_subnet" "<%= ctx[:primary_resource_id] %>" {
 }
 
 resource "google_edgenetwork_network" "example_network" {
-  network_id  = "<%= ctx[:vars]['edgenetwork_network_id'] %>"
-  location    = "<%= ctx[:test_env_vars]['location'] %>"
-  zone        = "<%= ctx[:test_env_vars]['zone'] %>"
+  network_id  = "{{index $.Vars "edgenetwork_network_id"}}"
+  location    = "{{index $.TestEnvVars "location"}}"
+  zone        = "{{index $.TestEnvVars "zone"}}"
   description = "Example network."
   mtu         = 9000
 }

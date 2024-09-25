@@ -1,4 +1,4 @@
-func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData) interface{} {
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData) interface{} {
   transformed := make(map[string]string)
 	data := v.(map[string]interface{})
 	for key := range data {

@@ -1,8 +1,8 @@
 resource "google_project" "project" {
-  project_id      = "<%= ctx[:vars]['project_id'] %>"
-  name            = "<%= ctx[:vars]['project_id'] %>"
-  org_id          = "<%= ctx[:test_env_vars]['org_id'] %>"
-  billing_account = "<%= ctx[:test_env_vars]['billing_account'] %>"
+  project_id      = "{{index $.Vars "project_id"}}"
+  name            = "{{index $.Vars "project_id"}}"
+  org_id          = "{{index $.TestEnvVars "org_id"}}"
+  billing_account = "{{index $.TestEnvVars "billing_account"}}"
   deletion_policy = "DELETE"
 }
 
@@ -20,7 +20,7 @@ resource "google_apigee_organization" "apigee_org" {
 }
 
 resource "google_service_account" "service_account" {
-  account_id   = "<%= ctx[:vars]['account_id'] %>"
+  account_id   = "{{index $.Vars "account_id"}}"
   display_name = "Service Account"
 }
 
@@ -30,7 +30,7 @@ resource "google_project_iam_member" "synchronizer-iam" {
   member = "serviceAccount:${google_service_account.service_account.email}"
 }
 
-resource "google_apigee_sync_authorization" "<%= ctx[:primary_resource_id] %>" {
+resource "google_apigee_sync_authorization" "{{$.PrimaryResourceId}}" {
   name       = google_apigee_organization.apigee_org.name
   identities = [
     "serviceAccount:${google_service_account.service_account.email}",

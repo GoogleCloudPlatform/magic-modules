@@ -1,13 +1,13 @@
 resource "google_compute_network" "net" {
   provider = google-beta
 
-  name     = "<%= ctx[:vars]['network_name'] %>"
+  name     = "{{index $.Vars "network_name"}}"
 }
 
 resource "google_compute_subnetwork" "subnet" {
   provider      = google-beta
 
-  name          = "<%= ctx[:vars]['subnet_name'] %>"
+  name          = "{{index $.Vars "subnet_name"}}"
   network       = google_compute_network.net.id
   ip_cidr_range = "10.0.0.0/16"
   region        = "us-central1"
@@ -17,7 +17,7 @@ resource "google_compute_subnetwork" "subnet" {
 resource "google_compute_router" "router" {
   provider = google-beta
 
-  name     = "<%= ctx[:vars]['router_name'] %>"
+  name     = "{{index $.Vars "router_name"}}"
   region   = google_compute_subnetwork.subnet.region
   network  = google_compute_network.net.id
 }
@@ -25,14 +25,14 @@ resource "google_compute_router" "router" {
 resource "google_network_connectivity_hub" "hub" {
   provider    = google-beta
 
-  name        = "<%= ctx[:vars]['hub_name'] %>"
+  name        = "{{index $.Vars "hub_name"}}"
   description = "vpc hub for inter vpc nat"
 }
 
 resource "google_network_connectivity_spoke" "spoke" {
   provider    = google-beta
 
-  name        = "<%= ctx[:vars]['spoke_name'] %>"
+  name        = "{{index $.Vars "spoke_name"}}"
   location    = "global"
   description = "vpc spoke for inter vpc nat"
   hub         =  google_network_connectivity_hub.hub.id
@@ -45,10 +45,10 @@ resource "google_network_connectivity_spoke" "spoke" {
   }
 }
 
-resource "google_compute_router_nat" "<%= ctx[:primary_resource_id] %>" {
+resource "google_compute_router_nat" "{{$.PrimaryResourceId}}" {
   provider                            = google-beta
 
-  name                                = "<%= ctx[:vars]['nat_name'] %>"
+  name                                = "{{index $.Vars "nat_name"}}"
   router                              = google_compute_router.router.name
   region                              = google_compute_router.router.region
   source_subnetwork_ip_ranges_to_nat  = "LIST_OF_SUBNETWORKS"
@@ -63,7 +63,7 @@ resource "google_compute_router_nat" "<%= ctx[:primary_resource_id] %>" {
   rules {
     rule_number = 100
     description = "rule for private nat"
-    match       = "nexthop.hub == \"//networkconnectivity.googleapis.com/projects/acm-test-proj-123/locations/global/hubs/<%= ctx[:vars]['hub_name'] %>\""
+    match       = "nexthop.hub == \"//networkconnectivity.googleapis.com/projects/acm-test-proj-123/locations/global/hubs/{{index $.Vars "hub_name"}}\""
     action {
       source_nat_active_ranges = [
         google_compute_subnetwork.subnet.self_link

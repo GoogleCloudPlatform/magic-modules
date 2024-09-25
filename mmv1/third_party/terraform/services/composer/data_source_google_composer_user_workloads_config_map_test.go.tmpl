@@ -1,7 +1,6 @@
-<% autogen_exception -%>
 package composer_test
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 import (
 	"fmt"
 	"testing"
@@ -57,4 +56,4 @@ data "google_composer_user_workloads_config_map" "test" {
 }
 `, context)
 }
-<% end -%>
+{{- end }}

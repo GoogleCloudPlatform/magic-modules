@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package networksecurity_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -80,5 +79,5 @@ func testAccNetworkSecurityAuthorizationPolicy_update(authorizationPolicyName st
 `, authorizationPolicyName)
 }
 
-<% end -%>
+{{ end }}
 

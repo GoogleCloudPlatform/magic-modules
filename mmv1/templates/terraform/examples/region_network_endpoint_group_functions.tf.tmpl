@@ -1,15 +1,15 @@
 // Cloud Functions Example
-resource "google_compute_region_network_endpoint_group" "<%= ctx[:primary_resource_id] %>" {
-  name                  = "<%= ctx[:vars]['neg_name'] %>"
+resource "google_compute_region_network_endpoint_group" "{{$.PrimaryResourceId}}" {
+  name                  = "{{index $.Vars "neg_name"}}"
   network_endpoint_type = "SERVERLESS"
   region                = "us-central1"
   cloud_function {
-    function = google_cloudfunctions_function.<%= ctx[:primary_resource_id] %>.name
+    function = google_cloudfunctions_function.{{$.PrimaryResourceId}}.name
   }
 }
 
-resource "google_cloudfunctions_function" "<%= ctx[:primary_resource_id] %>" {
-  name        = "<%= ctx[:vars]['neg_name'] %>"
+resource "google_cloudfunctions_function" "{{$.PrimaryResourceId}}" {
+  name        = "{{index $.Vars "neg_name"}}"
   description = "My function"
   runtime     = "nodejs10"
 
@@ -22,12 +22,12 @@ resource "google_cloudfunctions_function" "<%= ctx[:primary_resource_id] %>" {
 }
 
 resource "google_storage_bucket" "bucket" {
-  name     = "<%= ctx[:vars]['bucket_name'] %>"
+  name     = "{{index $.Vars "bucket_name"}}"
   location = "US"
 }
 
 resource "google_storage_bucket_object" "archive" { 
   name   = "index.zip"
   bucket = google_storage_bucket.bucket.name
-  source = "<%= ctx[:vars]['zip_path'] %>"
+  source = "{{index $.Vars "zip_path"}}"
 }

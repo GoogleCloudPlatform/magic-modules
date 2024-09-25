@@ -1,17 +1,17 @@
-resource "google_os_config_guest_policies" "<%= ctx[:primary_resource_id] %>" {
+resource "google_os_config_guest_policies" "{{$.PrimaryResourceId}}" {
   provider = google-beta
-  guest_policy_id = "<%= ctx[:vars]['guest_policy_id'] %>"
+  guest_policy_id = "{{index $.Vars "guest_policy_id"}}"
 
   assignment {
     zones = ["us-east1-b", "us-east1-d"]
   }
 
   recipes {
-    name          = "<%= ctx[:vars]['guest_policy_id'] %>-recipe"
+    name          = "{{index $.Vars "guest_policy_id"}}-recipe"
     desired_state = "INSTALLED"
 
     artifacts {
-      id = "<%= ctx[:vars]['guest_policy_id'] %>-artifact-id"
+      id = "{{index $.Vars "guest_policy_id"}}-artifact-id"
 
       gcs {
         bucket     = "my-bucket"
@@ -22,7 +22,7 @@ resource "google_os_config_guest_policies" "<%= ctx[:primary_resource_id] %>" {
 
     install_steps {
       msi_installation {
-        artifact_id = "<%= ctx[:vars]['guest_policy_id'] %>-artifact-id"
+        artifact_id = "{{index $.Vars "guest_policy_id"}}-artifact-id"
       }
     }
   }

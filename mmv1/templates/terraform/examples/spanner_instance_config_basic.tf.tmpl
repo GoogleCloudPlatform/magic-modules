@@ -1,5 +1,5 @@
-resource "google_spanner_instance_config" "<%= ctx[:primary_resource_id] %>" {
-  name          = "<%= ctx[:vars]['instance_config_name'] %>"
+resource "google_spanner_instance_config" "{{$.PrimaryResourceId}}" {
+  name          = "{{index $.Vars "instance_config_name"}}"
   display_name  = "Test Spanner Instance Config"
   base_config    = "nam11"
   replicas     {

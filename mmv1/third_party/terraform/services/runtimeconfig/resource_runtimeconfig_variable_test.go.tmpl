@@ -1,7 +1,6 @@
-<% autogen_exception -%>
 package runtimeconfig_test
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 
 import (
 	"fmt"
@@ -241,4 +240,4 @@ resource "google_runtimeconfig_variable" "foobar" {
 `, suffix, name, value)
 }
 
-<% end -%>
+{{ end }}

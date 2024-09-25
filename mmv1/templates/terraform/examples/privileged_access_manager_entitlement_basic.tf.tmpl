@@ -1,8 +1,8 @@
-resource "google_privileged_access_manager_entitlement" "<%= ctx[:primary_resource_id] %>" {
-    entitlement_id = "<%= ctx[:vars]['entitlement_id'] %>"
+resource "google_privileged_access_manager_entitlement" "{{$.PrimaryResourceId}}" {
+    entitlement_id = "{{index $.Vars "entitlement_id"}}"
     location = "global"
     max_request_duration = "43200s"
-    parent = "projects/<%= ctx[:test_env_vars]['project'] %>"
+    parent = "projects/{{index $.TestEnvVars "project"}}"
     requester_justification_config {    
         unstructured{}
     }
@@ -17,7 +17,7 @@ resource "google_privileged_access_manager_entitlement" "<%= ctx[:primary_resour
                 role = "roles/storage.admin"
                 condition_expression = "request.time < timestamp(\"2024-04-23T18:30:00.000Z\")"
             }
-            resource = "//cloudresourcemanager.googleapis.com/projects/<%= ctx[:test_env_vars]['project'] %>"
+            resource = "//cloudresourcemanager.googleapis.com/projects/{{index $.TestEnvVars "project"}}"
             resource_type = "cloudresourcemanager.googleapis.com/Project"
         }
     }

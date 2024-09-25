@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package compute_test
 
 import (
@@ -286,11 +285,11 @@ func testAccCheckComputeNetworkEndpointsWithAllEndpointsDestroyed(t *testing.T, 
 func testAccComputeNetworkEndpointsListEndpoints(t *testing.T, negId string) ([]interface{}, error) {
 	config := acctest.GoogleProviderConfig(t)
 
-	<% if version == 'ga' -%>
+	{{ if eq $.TargetVersionName `ga` }}
 	url := fmt.Sprintf("https://www.googleapis.com/compute/v1/%s/listNetworkEndpoints", negId)
-	<% else -%>
+	{{- else }}
 	url := fmt.Sprintf("https://www.googleapis.com/compute/beta/%s/listNetworkEndpoints", negId)
-	<% end -%>
+	{{- end }}
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "POST",

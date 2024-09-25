@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package vertexai
 
 import (
@@ -25,11 +24,11 @@ func (w *VertexAIOperationWaiter) QueryOp() (interface{}, error) {
 	region := tpgresource.GetRegionFromRegionalSelfLink(w.CommonOperationWaiter.Op.Name)
 
 	// Returns the proper get.
-<% if version == 'ga' -%>
+{{- if eq $.TargetVersionName "ga" }}
 	url := fmt.Sprintf("https://%s-aiplatform.googleapis.com/v1/%s", region, w.CommonOperationWaiter.Op.Name)
-<% else -%>
+{{- else }}
 	url := fmt.Sprintf("https://%s-aiplatform.googleapis.com/v1beta1/%s", region, w.CommonOperationWaiter.Op.Name)
-<% end -%>
+{{- end }}
 
 	return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config: w.Config,

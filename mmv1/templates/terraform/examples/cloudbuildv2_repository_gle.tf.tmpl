@@ -1,5 +1,5 @@
 resource "google_cloudbuildv2_repository" "primary" {
-  name              = "<%= ctx[:vars]['repository_name'] %>"
+  name              = "{{index $.Vars "repository_name"}}"
   parent_connection = google_cloudbuildv2_connection.gle.name
   remote_uri        = "https://gle-us-central1.gcb-test.com/proctor-test/smoketest.git"
   location          = "us-west1"
@@ -11,7 +11,7 @@ resource "google_cloudbuildv2_repository" "primary" {
 
 resource "google_cloudbuildv2_connection" "gle" {
   location = "us-west1"
-  name     = "<%= ctx[:vars]['connection_name'] %>"
+  name     = "{{index $.Vars "connection_name"}}"
 
   gitlab_config {
     authorizer_credential {

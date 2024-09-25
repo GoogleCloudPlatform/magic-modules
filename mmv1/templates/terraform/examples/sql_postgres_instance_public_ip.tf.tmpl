@@ -1,6 +1,6 @@
-resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
+resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
   database_version = "POSTGRES_14"
-  name             = "<%= ctx[:vars]['postgres_public_ip_instance_name'] %>"
+  name             = "{{index $.Vars "postgres_public_ip_instance_name"}}"
   region           = "asia-southeast2"
   settings {
     availability_type = "ZONAL"
@@ -16,5 +16,5 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
     }
     tier = "db-custom-2-7680"
   }
-  deletion_protection =  "<%= ctx[:vars]['deletion_protection'] %>"
+  deletion_protection =  "{{index $.Vars "deletion_protection"}}"
 }

@@ -18,7 +18,7 @@ resource "google_edgecontainer_cluster" "cluster" {
   }
 }
 
-resource "google_edgecontainer_node_pool" "<%= ctx[:primary_resource_id] %>" {
+resource "google_edgecontainer_node_pool" "{{$.PrimaryResourceId}}" {
   name = "nodepool-1"
   cluster = google_edgecontainer_cluster.cluster.name
   location = "us-central1"

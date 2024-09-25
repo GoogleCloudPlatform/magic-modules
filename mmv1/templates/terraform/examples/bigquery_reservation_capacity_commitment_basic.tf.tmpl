@@ -1,4 +1,4 @@
-resource "google_bigquery_capacity_commitment" "<%= ctx[:primary_resource_id] %>" {
+resource "google_bigquery_capacity_commitment" "{{$.PrimaryResourceId}}" {
   capacity_commitment_id = "capacity-tf-test%{random_suffix}"
 
   location   = "us-west2"
@@ -8,7 +8,7 @@ resource "google_bigquery_capacity_commitment" "<%= ctx[:primary_resource_id] %>
 }
 
 resource "time_sleep" "wait_61_seconds" {
-	depends_on = [google_bigquery_capacity_commitment.<%= ctx[:primary_resource_id] %>]
+	depends_on = [google_bigquery_capacity_commitment.{{$.PrimaryResourceId}}]
 
 	# Only needed for CI tests to be able to tear down the commitment once it's expired
   create_duration = "61s"

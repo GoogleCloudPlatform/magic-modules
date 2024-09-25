@@ -1,8 +1,8 @@
 resource "google_project" "default" {
-  project_id = "<%= ctx[:vars]['project_id'] %>"
-  name       = "<%= ctx[:vars]['project_id'] %>"
-  org_id     = "<%= ctx[:test_env_vars]['org_id'] %>"
-  billing_account =  "<%= ctx[:test_env_vars]['billing_acct'] -%>"
+  project_id = "{{index $.Vars "project_id"}}"
+  name       = "{{index $.Vars "project_id"}}"
+  org_id     = "{{index $.TestEnvVars "org_id"}}"
+  billing_account =  "{{index $.TestEnvVars "billing_acct"}}"
   deletion_policy = "DELETE"
   labels = {
     firebase = "enabled"
@@ -45,7 +45,7 @@ resource "google_identity_platform_config" "default" {
   blocking_functions {
     triggers {
       event_type = "beforeSignIn"
-      function_uri = "https://us-east1-<%= ctx[:vars]['project_id'] %>.cloudfunctions.net/before-sign-in"
+      function_uri = "https://us-east1-{{index $.Vars "project_id"}}.cloudfunctions.net/before-sign-in"
     }
     forward_inbound_credentials {
       refresh_token = true
@@ -56,13 +56,13 @@ resource "google_identity_platform_config" "default" {
   quota {
     sign_up_quota_config {
       quota = 1000
-      start_time = "<%= ctx[:vars]['quota_start_time'] %>"
+      start_time = "{{index $.Vars "quota_start_time"}}"
       quota_duration = "7200s"
     }
   }
   authorized_domains = [
     "localhost",
-    "<%= ctx[:vars]['project_id'] %>.firebaseapp.com",
-    "<%= ctx[:vars]['project_id'] %>.web.app",
+    "{{index $.Vars "project_id"}}.firebaseapp.com",
+    "{{index $.Vars "project_id"}}.web.app",
   ]
 }

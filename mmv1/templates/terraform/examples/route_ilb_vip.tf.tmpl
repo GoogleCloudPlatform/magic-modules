@@ -1,12 +1,12 @@
 resource "google_compute_network" "producer" {
   provider                = google-beta
-  name                    = "<%= ctx[:vars]['producer_name'] %>-vpc"
+  name                    = "{{index $.Vars "producer_name"}}-vpc"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "producer" {
   provider      = google-beta
-  name          = "<%= ctx[:vars]['producer_name'] %>-subnet"
+  name          = "{{index $.Vars "producer_name"}}-subnet"
   ip_cidr_range = "10.0.1.0/24"
   region        = "us-central1"
   network       = google_compute_network.producer.id
@@ -14,13 +14,13 @@ resource "google_compute_subnetwork" "producer" {
 
 resource "google_compute_network" "consumer" {
   provider                = google-beta
-  name                    = "<%= ctx[:vars]['consumer_name'] %>-vpc"
+  name                    = "{{index $.Vars "consumer_name"}}-vpc"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "consumer" {
   provider      = google-beta
-  name          = "<%= ctx[:vars]['consumer_name'] %>-subnet"
+  name          = "{{index $.Vars "consumer_name"}}-subnet"
   ip_cidr_range = "10.0.2.0/24"
   region        = "us-central1"
   network       = google_compute_network.consumer.id
@@ -28,21 +28,21 @@ resource "google_compute_subnetwork" "consumer" {
 
 resource "google_compute_network_peering" "peering1" {
   provider     = google-beta
-  name         = "peering-<%= ctx[:vars]['producer_name'] %>-to-<%= ctx[:vars]['consumer_name'] %>"
+  name         = "peering-{{index $.Vars "producer_name"}}-to-{{index $.Vars "consumer_name"}}"
   network      = google_compute_network.consumer.id
   peer_network = google_compute_network.producer.id
 }
 
 resource "google_compute_network_peering" "peering2" {
   provider     = google-beta
-  name         = "peering-<%= ctx[:vars]['consumer_name'] %>-to-<%= ctx[:vars]['producer_name'] %>"
+  name         = "peering-{{index $.Vars "consumer_name"}}-to-{{index $.Vars "producer_name"}}"
   network      = google_compute_network.producer.id
   peer_network = google_compute_network.consumer.id
 }
 
 resource "google_compute_health_check" "hc" {
   provider           = google-beta
-  name               = "<%= ctx[:vars]['health_check_name'] %>"
+  name               = "{{index $.Vars "health_check_name"}}"
   check_interval_sec = 1
   timeout_sec        = 1
 
@@ -53,14 +53,14 @@ resource "google_compute_health_check" "hc" {
 
 resource "google_compute_region_backend_service" "backend" {
   provider      = google-beta
-  name          = "<%= ctx[:vars]['backend_name'] %>"
+  name          = "{{index $.Vars "backend_name"}}"
   region        = "us-central1"
   health_checks = [google_compute_health_check.hc.id]
 }
 
 resource "google_compute_forwarding_rule" "default" {
   provider = google-beta
-  name     = "<%= ctx[:vars]['forwarding_rule_name'] %>"
+  name     = "{{index $.Vars "forwarding_rule_name"}}"
   region   = "us-central1"
 
   load_balancing_scheme = "INTERNAL"
@@ -70,9 +70,9 @@ resource "google_compute_forwarding_rule" "default" {
   subnetwork            = google_compute_subnetwork.producer.name
 }
 
-resource "google_compute_route" "<%= ctx[:primary_resource_id] %>" {
+resource "google_compute_route" "{{$.PrimaryResourceId}}" {
   provider     = google-beta
-  name         = "<%= ctx[:vars]['route_name'] %>"
+  name         = "{{index $.Vars "route_name"}}"
   dest_range   = "0.0.0.0/0"
   network      = google_compute_network.consumer.name
   next_hop_ilb = google_compute_forwarding_rule.default.ip_address

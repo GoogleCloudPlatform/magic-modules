@@ -1,5 +1,5 @@
 resource "google_sql_database_instance" "instance" {
-    name             = "<%= ctx[:vars]['database_instance_name'] %>"
+    name             = "{{index $.Vars "database_instance_name"}}"
     database_version = "POSTGRES_14"
     region           = "us-central1"
     settings {
@@ -30,7 +30,7 @@ resource "google_sql_database_instance" "instance" {
         }
     }
 
-    deletion_protection  = "<%= ctx[:vars]['deletion_protection'] %>"
+    deletion_protection  = "{{index $.Vars "deletion_protection"}}"
 }
 
 resource "google_sql_database" "db" {
@@ -49,10 +49,10 @@ resource "google_sql_user" "user" {
     password = random_password.pwd.result
 }
 
-resource "google_datastream_connection_profile" "<%= ctx[:primary_resource_id] %>" {
+resource "google_datastream_connection_profile" "{{$.PrimaryResourceId}}" {
     display_name          = "Connection profile"
     location              = "us-central1"
-    connection_profile_id = "<%= ctx[:vars]['connection_profile_id'] %>"
+    connection_profile_id = "{{index $.Vars "connection_profile_id"}}"
 
     postgresql_profile {
         hostname = google_sql_database_instance.instance.public_ip_address

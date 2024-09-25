@@ -1,4 +1,4 @@
-resource "google_dns_managed_zone" "<%= ctx[:primary_resource_id] %>" {
+resource "google_dns_managed_zone" "{{$.PrimaryResourceId}}" {
   name        = "example-zone"
   dns_name    = "example-${random_id.rnd.hex}.com."
   description = "Example DNS zone"

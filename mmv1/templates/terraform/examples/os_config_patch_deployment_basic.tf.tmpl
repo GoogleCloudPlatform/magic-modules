@@ -1,5 +1,5 @@
-resource "google_os_config_patch_deployment" "<%= ctx[:primary_resource_id] %>" {
-  patch_deployment_id = "<%= ctx[:vars]['patch_deployment_id'] %>"
+resource "google_os_config_patch_deployment" "{{$.PrimaryResourceId}}" {
+  patch_deployment_id = "{{index $.Vars "patch_deployment_id"}}"
 
   instance_filter {
     all = true

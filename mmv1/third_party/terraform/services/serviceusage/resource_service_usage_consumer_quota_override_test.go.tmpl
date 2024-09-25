@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package serviceusage_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"regexp"
@@ -54,4 +53,4 @@ resource "google_service_usage_consumer_quota_override" "override" {
 }
 `, context)
 }
-<% end -%>
+{{- end }}

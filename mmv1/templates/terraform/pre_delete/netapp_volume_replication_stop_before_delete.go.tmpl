@@ -3,7 +3,7 @@
 // FYI: Stopping a PREPARING mirror currently doesn't work. User have to wait until
 // mirror reaches MIRRORED.
 if d.Get("mirror_state") != "STOPPED" {
-	rawurl, err := tpgresource.ReplaceVars(d, config, "{{NetappBasePath}}projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/replications/{{name}}:stop")
+	rawurl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}NetappBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/volumes/{{"{{"}}volume_name{{"}}"}}/replications/{{"{{"}}name{{"}}"}}:stop")
 	if err != nil {
 		return err
 	}

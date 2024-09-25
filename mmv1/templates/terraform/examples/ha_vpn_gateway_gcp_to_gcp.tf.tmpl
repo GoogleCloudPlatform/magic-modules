@@ -1,23 +1,23 @@
-resource "google_compute_ha_vpn_gateway" "<%= ctx[:primary_resource_id] %>" {
+resource "google_compute_ha_vpn_gateway" "{{$.PrimaryResourceId}}" {
   region   = "us-central1"
-  name     = "<%= ctx[:vars]['ha_vpn_gateway1_name'] %>"
+  name     = "{{index $.Vars "ha_vpn_gateway1_name"}}"
   network  = google_compute_network.network1.id
 }
 
 resource "google_compute_ha_vpn_gateway" "ha_gateway2" {
   region   = "us-central1"
-  name     = "<%= ctx[:vars]['ha_vpn_gateway2_name'] %>"
+  name     = "{{index $.Vars "ha_vpn_gateway2_name"}}"
   network  = google_compute_network.network2.id
 }
 
 resource "google_compute_network" "network1" {
-  name                    = "<%= ctx[:vars]['network1_name'] %>"
+  name                    = "{{index $.Vars "network1_name"}}"
   routing_mode            = "GLOBAL"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_network" "network2" {
-  name                    = "<%= ctx[:vars]['network2_name'] %>"
+  name                    = "{{index $.Vars "network2_name"}}"
   routing_mode            = "GLOBAL"
   auto_create_subnetworks = false
 }
@@ -51,7 +51,7 @@ resource "google_compute_subnetwork" "network2_subnet2" {
 }
 
 resource "google_compute_router" "router1" {
-  name     = "<%= ctx[:vars]['router1_name'] %>"
+  name     = "{{index $.Vars "router1_name"}}"
   network  = google_compute_network.network1.name
   bgp {
     asn = 64514
@@ -59,7 +59,7 @@ resource "google_compute_router" "router1" {
 }
 
 resource "google_compute_router" "router2" {
-  name     = "<%= ctx[:vars]['router2_name'] %>"
+  name     = "{{index $.Vars "router2_name"}}"
   network  = google_compute_network.network2.name
   bgp {
     asn = 64515

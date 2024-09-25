@@ -7,7 +7,7 @@ if err := d.Set("name", tpgresource.GetResourceNameFromSelfLink(name.(string)));
 	return fmt.Errorf("Error setting name: %s", err)
 }
 // Store the ID now that we have set the computed name
-id, err = tpgresource.ReplaceVars(d, config, "projects/{{project}}/tenants/{{name}}")
+id, err = tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}"}}/tenants/{{"{{"}}name{{"}}"}}")
 if err != nil {
 	return fmt.Errorf("Error constructing id: %s", err)
 }

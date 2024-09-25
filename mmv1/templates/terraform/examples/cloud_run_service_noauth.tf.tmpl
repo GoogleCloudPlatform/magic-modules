@@ -1,6 +1,6 @@
 
-resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
-  name     = "<%= ctx[:vars]['cloud_run_service_name'] %>"
+resource "google_cloud_run_service" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.Vars "cloud_run_service_name"}}"
   location = "us-central1"
 
   template {
