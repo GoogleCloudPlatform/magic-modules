@@ -25,7 +25,7 @@ update_mask: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
 timeouts:
-  insert_minutes: 10
+  insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 autogen_async: true

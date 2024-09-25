@@ -83,6 +83,7 @@ properties:
       Policy tag resource name, in the format of projects/{project_number}/locations/{locationId}/taxonomies/{taxonomyId}/policyTags/{policyTag_id}.
     required: true
     diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+    custom_flatten: 'templates/terraform/custom_flatten/go/bigquery_datapolicy_policy_tag_location_to_lower_case.go.tmpl'
   - name: 'dataPolicyType'
     type: Enum
     description: |

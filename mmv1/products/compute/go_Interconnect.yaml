@@ -88,7 +88,7 @@ properties:
     type: ResourceRef
     description: |
       URL of the InterconnectLocation object that represents where this connection is to be provisioned.
-    required: true
+      Specifies the location inside Google's Networks, should not be passed in case of cross-cloud interconnect.
     immutable: true
     resource: 'InterconnectLocations'
     imports: 'selfLink'
@@ -144,8 +144,8 @@ properties:
     type: String
     description: |
       Customer name, to put in the Letter of Authorization as the party authorized to request a
-      crossconnect.
-    required: true
+      crossconnect. This field is required for Dedicated and Partner Interconnect, should not be specified
+      for cross-cloud interconnect.
     immutable: true
   - name: 'operationalStatus'
     type: Enum
@@ -366,6 +366,15 @@ properties:
                 traffic if the MKA session cannot be established. By default, the Interconnect
                 connection is configured with a must-secure security policy that drops all traffic
                 if the MKA session cannot be established with your router.
+              deprecation_message: '`failOpen` is deprecated and will be removed in a future major release. Use other `failOpen` instead.'
+      - name: 'failOpen'
+        type: Boolean
+        description: |
+          If set to true, the Interconnect connection is configured with a should-secure
+          MACsec security policy, that allows the Google router to fallback to cleartext
+          traffic if the MKA session cannot be established. By default, the Interconnect
+          connection is configured with a must-secure security policy that drops all traffic
+          if the MKA session cannot be established with your router.
   - name: 'macsecEnabled'
     type: Boolean
     description: |

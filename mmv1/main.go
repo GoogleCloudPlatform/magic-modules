@@ -158,20 +158,27 @@ func main() {
 	})
 
 	var providerToGenerate provider.Provider
-	var productsForVersion []*api.Product
 
-	ch := make(chan string, len(allProductFiles))
+	productFileChannel := make(chan string, len(allProductFiles))
+	productsForVersionChannel := make(chan *api.Product, len(allProductFiles))
 	for _, pf := range allProductFiles {
-		ch <- pf
+		productFileChannel <- pf
 	}
 
 	for i := 0; i < len(allProductFiles); i++ {
 		wg.Add(1)
-		go GenerateProduct(ch, providerToGenerate, &productsForVersion, startTime, productsToGenerate, *resourceToGenerate, *overrideDirectory, generateCode, generateDocs)
+		go GenerateProduct(productFileChannel, providerToGenerate, productsForVersionChannel, startTime, productsToGenerate, *resourceToGenerate, *overrideDirectory, generateCode, generateDocs)
 	}
 	wg.Wait()
 
-	close(ch)
+	close(productFileChannel)
+	close(productsForVersionChannel)
+
+	var productsForVersion []*api.Product
+
+	for p := range productsForVersionChannel {
+		productsForVersion = append(productsForVersion, p)
+	}
 
 	slices.SortFunc(productsForVersion, func(p1, p2 *api.Product) int {
 		return strings.Compare(strings.ToLower(p1.Name), strings.ToLower(p2.Name))
@@ -185,12 +192,10 @@ func main() {
 
 	if generateCode {
 		providerToGenerate.CompileCommonFiles(*outputPath, productsForVersion, "")
-
-		// TODO rewrite: product overrides
 	}
 }
 
-func GenerateProduct(productChannel chan string, providerToGenerate provider.Provider, productsForVersion *[]*api.Product, startTime time.Time, productsToGenerate []string, resourceToGenerate, overrideDirectory string, generateCode, generateDocs bool) {
+func GenerateProduct(productChannel chan string, providerToGenerate provider.Provider, productsForVersionChannel chan *api.Product, startTime time.Time, productsToGenerate []string, resourceToGenerate, overrideDirectory string, generateCode, generateDocs bool) {
 
 	defer wg.Done()
 	productName := <-productChannel
@@ -308,8 +313,6 @@ func GenerateProduct(productChannel chan string, providerToGenerate provider.Pro
 			resources = append(resources, resource)
 		}
 
-		// TODO rewrite: override resources
-
 		// Sort resources by name
 		sort.Slice(resources, func(i, j int) bool {
 			return resources[i].Name < resources[j].Name
@@ -322,7 +325,7 @@ func GenerateProduct(productChannel chan string, providerToGenerate provider.Pro
 
 	providerToGenerate = setProvider(*forceProvider, *version, productApi, startTime)
 
-	*productsForVersion = append(*productsForVersion, productApi)
+	productsForVersionChannel <- productApi
 
 	if !slices.Contains(productsToGenerate, productName) {
 		log.Printf("%s not specified, skipping generation", productName)
