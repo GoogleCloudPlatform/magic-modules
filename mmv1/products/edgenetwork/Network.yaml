@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,87 +11,105 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Network'
 description: |
   A Distributed Cloud Edge network, which provides L3 isolation within a zone.
-references: !ruby/object:Api::Resource::ReferenceLinks
-  api: 'https://cloud.google.com/distributed-cloud/edge/latest/docs/reference/network/rest/v1/projects.locations.zones.networks'
+references:
   guides:
     'Create and manage networks': 'https://cloud.google.com/distributed-cloud/edge/latest/docs/networks#api'
+  api: 'https://cloud.google.com/distributed-cloud/edge/latest/docs/reference/network/rest/v1/projects.locations.zones.networks'
+docs:
 base_url: 'projects/{{project}}/locations/{{location}}/zones/{{zone}}/networks'
 self_link: 'projects/{{project}}/locations/{{location}}/zones/{{zone}}/networks/{{network_id}}'
 create_url: 'projects/{{project}}/locations/{{location}}/zones/{{zone}}/networks?networkId={{network_id}}'
 immutable: true
-autogen_async: true
-timeouts: !ruby/object:Api::Timeouts
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/zones/{{zone}}/networks/{{network_id}}'
+  - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
   delete_minutes: 30
-import_format: ['projects/{{project}}/locations/{{location}}/zones/{{zone}}/networks/{{network_id}}', '{{name}}']
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'edgenetwork_network'
+  - name: 'edgenetwork_network'
     primary_resource_id: 'example_network'
-    skip_test: true
     vars:
       edgenetwork_network_id: 'example-network'
     test_env_vars:
-      location: :REGION
-      zone: :ZONE
+      location: 'REGION'
+      zone: 'ZONE'
+    exclude_test: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'location'
-    required: true
-    immutable: true
-    url_param_only: true
+  - name: 'location'
+    type: String
     description: |
       The Google Cloud region to which the target Distributed Cloud Edge zone belongs.
-  - !ruby/object:Api::Type::String
-    name: 'zone'
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
+  - name: 'zone'
+    type: String
     description: |
       The name of the target Distributed Cloud Edge zone.
-  - !ruby/object:Api::Type::String
-    name: 'network_id'
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
+  - name: 'network_id'
+    type: String
     description: |
       A unique ID that identifies this network.
+    url_param_only: true
+    required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    output: true
+  - name: 'name'
+    type: String
     description: |
       The canonical name of this resource, with format
       `projects/{{project}}/locations/{{location}}/zones/{{zone}}/networks/{{network_id}}`
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
-    required: false
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       Labels associated with this resource.
-  - !ruby/object:Api::Type::String
-    name: 'description'
     required: false
+  - name: 'description'
+    type: String
     description: |
       A free-text description of the resource. Max length 1024 characters.
-  - !ruby/object:Api::Type::String
-    name: 'createTime'
-    output: true
+    required: false
+  - name: 'createTime'
+    type: String
     description: |
       The time when the subnet was created.
       A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine
       fractional digits. Examples: `2014-10-02T15:01:23Z` and `2014-10-02T15:01:23.045123456Z`.
-  - !ruby/object:Api::Type::String
-    name: 'updateTime'
     output: true
+  - name: 'updateTime'
+    type: String
     description: |
       The time when the subnet was last updated.
       A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine
       fractional digits. Examples: `2014-10-02T15:01:23Z` and `2014-10-02T15:01:23.045123456Z`.
-  - !ruby/object:Api::Type::Integer
-    name: 'mtu'
-    default_value: 1500
+    output: true
+  - name: 'mtu'
+    type: Integer
     description: |
       IP (L3) MTU value of the network. Default value is `1500`. Possible values are: `1500`, `9000`.
+    default_value: 1500

@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,56 +11,58 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'TargetGrpcProxy'
 kind: 'compute#targetGrpcProxy'
-base_url: projects/{{project}}/global/targetGrpcProxies
-collection_url_key: 'items'
-update_verb: :PATCH
-has_self_link: true
 description: |
   Represents a Target gRPC Proxy resource. A target gRPC proxy is a component
   of load balancers intended for load balancing gRPC traffic. Global forwarding
   rules reference a target gRPC proxy. The Target gRPC Proxy references
   a URL map which specifies how traffic routes to gRPC backend services.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Using Target gRPC Proxies': 'https://cloud.google.com/traffic-director/docs/proxyless-overview'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/targetGrpcProxies'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+docs:
+base_url: 'projects/{{project}}/global/targetGrpcProxies'
+has_self_link: true
+update_verb: 'PATCH'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
-    base_url: '{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'targetLink'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'status'
-    complete: 'DONE'
-    allowed:
-      - 'PENDING'
-      - 'RUNNING'
-      - 'DONE'
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error/errors'
     message: 'message'
+collection_url_key: 'items'
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'target_grpc_proxy_basic'
+  - name: 'target_grpc_proxy_basic'
     primary_resource_id: 'default'
     vars:
       proxy_name: 'proxy'
       urlmap_name: 'urlmap'
       backend_name: 'backend'
       healthcheck_name: 'healthcheck'
+parameters:
 properties:
-  - !ruby/object:Api::Type::Time
-    name: 'creationTimestamp'
+  - name: 'creationTimestamp'
+    type: Time
     description: 'Creation timestamp in RFC3339 text format.'
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       Name of the resource. Provided by the client when the resource
       is created. The name must be 1-63 characters long, and comply
@@ -69,17 +71,17 @@ properties:
       means the first character must be a lowercase letter, and all
       following characters must be a dash, lowercase letter, or digit,
       except the last character, which cannot be a dash.
-    immutable: true
     required: true
-  - !ruby/object:Api::Type::String
-    name: 'description'
+    immutable: true
+  - name: 'description'
+    type: String
     description: 'An optional description of this resource.'
-  - !ruby/object:Api::Type::String
-    name: 'selfLinkWithId'
+  - name: 'selfLinkWithId'
+    type: String
     description: 'Server-defined URL with id for the resource.'
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'urlMap'
+  - name: 'urlMap'
+    type: String
     description: |
       URL to the UrlMap resource that defines the mapping from URL to
       the BackendService. The protocol field in the BackendService
@@ -88,9 +90,8 @@ properties:
     update_id: 'urlMap'
     fingerprint_name: 'fingerprint'
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-  - !ruby/object:Api::Type::Boolean
-    name: 'validateForProxyless'
-    immutable: true
+  - name: 'validateForProxyless'
+    type: Boolean
     description: |
       If true, indicates that the BackendServices referenced by
       the urlMap may be accessed by gRPC applications without using
@@ -102,8 +103,9 @@ properties:
       applications via a sidecar proxy. In this case, a gRPC application
       must not use "xds:///" scheme in the target URI of the service
       it is connecting to
-  - !ruby/object:Api::Type::Fingerprint
-    name: 'fingerprint'
+    immutable: true
+  - name: 'fingerprint'
+    type: Fingerprint
     description: |
       Fingerprint of this resource. A hash of the contents stored in
       this object. This field is used in optimistic locking. This field
@@ -112,3 +114,4 @@ properties:
       TargetGrpcProxy; otherwise, the request will fail with error
       412 conditionNotMet. To see the latest fingerprint, make a get()
       request to retrieve the TargetGrpcProxy. A base64-encoded string.
+    output: true
