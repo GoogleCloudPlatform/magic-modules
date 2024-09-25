@@ -21,4 +21,4 @@ versions:
     base_url: 'https://serviceusage.googleapis.com/v1beta1/'
 scopes:
   - 'https://www.googleapis.com/auth/cloud-platform'
-operation_retry: 'templates/terraform/operation_retry/service_usage.go'
+operation_retry: 'templates/terraform/operation_retry/service_usage.go.tmpl'
