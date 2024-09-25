@@ -52,13 +52,10 @@ virtual_fields:
     name: 'deletion_protection'
     default_value: false
     description: |
-      Whether Terraform will be prevented from destroying the instance. Defaults to true.
-      When a`terraform destroy` or `terraform apply` would delete the instance,
-      the command will fail if this field is not set to false in Terraform state.
-      When the field is set to true or unset in Terraform state, a `terraform apply`
+      Whether Terraform will be prevented from destroying the instance. Defaults to false.
+      When the field is set to true in Terraform state, a `terraform apply`
       or `terraform destroy` that would delete the instance will fail.
-      When the field is set to false, deleting the instance is allowed.
-custom_code:
+      When the field is set to false or unset, deleting the instance is allowed.
   constants: 'templates/terraform/constants/go/data_fusion_instance_option.go.tmpl'
   pre_update: 'templates/terraform/pre_update/go/datafusion_instance_update.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/go/datafusion_instance.go.tmpl'

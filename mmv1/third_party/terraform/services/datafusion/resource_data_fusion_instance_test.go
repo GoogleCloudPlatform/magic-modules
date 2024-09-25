@@ -46,7 +46,7 @@ resource "google_data_fusion_instance" "foobar" {
   name   = "%s"
   region = "us-central1"
   type   = "BASIC"
-  deletion_protection = false
+  deletion_protection = true
   # See supported versions here https://cloud.google.com/data-fusion/docs/support/version-support-policy
   version = "6.9.1"
   # Mark for testing to avoid service networking connection usage that is not cleaned up
@@ -69,7 +69,7 @@ resource "google_data_fusion_instance" "foobar" {
   type                          = "DEVELOPER"
   enable_stackdriver_monitoring = true
   enable_stackdriver_logging    = true
-  deletion_protection = false
+  deletion_protection = true
 
   labels = {
     label1 = "value1"
@@ -126,7 +126,7 @@ resource "google_data_fusion_instance" "foobar" {
   name   = "%s"
   region = "us-central1"
   type   = "ENTERPRISE"
-  deletion_protection = false
+  deletion_protection = true
   # Mark for testing to avoid service networking connection usage that is not cleaned up
   options = {
   	prober_test_run = "true"
@@ -144,7 +144,7 @@ resource "google_data_fusion_instance" "foobar" {
   enable_stackdriver_monitoring = true
   enable_stackdriver_logging    = true
   enable_rbac                   = true
-  deletion_protection = false
+  deletion_protection = true
 
   labels = {
     label1 = "value1"
@@ -204,7 +204,7 @@ resource "google_data_fusion_instance" "basic_instance" {
   name   = "tf-test-my-instance%{random_suffix}"
   region = "us-central1"
   type   = "BASIC"
-  deletion_protection = false
+  deletion_protection = true
   # Mark for testing to avoid service networking connection usage that is not cleaned up
   options = {
     prober_test_run = "true"
@@ -246,7 +246,7 @@ func testAccDatafusionInstanceDeletionProtection(region string) string {
         name   = "my-instance"
         region = "%s"
         type   = "BASIC"
-	deletion_protection = false
+	deletion_protection = true
 }
 `, region)
 }
