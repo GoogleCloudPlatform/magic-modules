@@ -13,9 +13,9 @@
 
 # Warning: This is a temporary file, and should not be edited directly
 ---
-name: 'Instance'
+name: 'FakeResource'
 description: |
-  Represents a Data Fusion instance.
+  Represents a Fake Resource
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/data-fusion/docs/'
@@ -50,60 +50,14 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
     - '{{name}}'
 custom_code:
-  constants: 'templates/terraform/constants/go/data_fusion_instance_option.go.tmpl'
+  constants: 'templates/terraform/constants/go/data_fusion_fake_resource_template.go.tmpl'
   pre_update: 'templates/terraform/pre_update/go/datafusion_instance_update.go.tmpl'
 examples:
-  - name: 'data_fusion_instance_basic'
-    primary_resource_id: 'basic_instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
-    vars:
-      instance_name: 'my-instance'
-      prober_test_run: ''
-    test_vars_overrides:
-      # Mark for testing to avoid service networking connection usage that is not cleaned up
-      'prober_test_run': '`options = { prober_test_run = "true" }`'
-    exclude_test: true
-  - name: 'data_fusion_instance_full'
-    primary_resource_id: 'extended_instance'
-    vars:
-      instance_name: 'my-instance'
-      ip_alloc: 'datafusion-ip-alloc'
-      network_name: 'datafusion-full-network'
-      prober_test_run: ''
-    test_vars_overrides:
-      # Mark for testing to avoid service networking connection usage that is not cleaned up
-      'prober_test_run': '`options = { prober_test_run = "true" }`'
-  - name: 'data_fusion_instance_psc'
-    primary_resource_id: 'psc_instance'
-    vars:
-      instance_name: 'psc-instance'
-      network_name: 'datafusion-psc-network'
-      subnet_name: 'datafusion-psc-subnet'
-      attachment_name: 'datafusion-psc-attachment'
-      prober_test_run: ''
-    test_vars_overrides:
-      # Mark for testing to avoid service networking connection usage that is not cleaned up
-      'prober_test_run': '`options = { prober_test_run = "true" }`'
-  - name: 'data_fusion_instance_cmek'
-    primary_resource_id: 'cmek'
-    vars:
-      instance_name: 'my-instance'
-  - name: 'data_fusion_instance_enterprise'
-    primary_resource_id: 'enterprise_instance'
-    vars:
-      instance_name: 'my-instance'
-      prober_test_run: ''
-    test_vars_overrides:
-      # Mark for testing to avoid service networking connection usage that is not cleaned up
-      'prober_test_run': '`options = { prober_test_run = "true" }`'
-  - name: 'data_fusion_instance_event'
-    primary_resource_id: 'event'
-    vars:
-      instance_name: 'my-instance'
-  - name: 'data_fusion_instance_zone'
+  - name: 'data_fusion_fake_resource'
     primary_resource_id: 'zone'
     vars:
       instance_name: 'my-instance'
+    exclude_test: true
 parameters:
   - name: 'region'
     type: String
@@ -128,10 +82,6 @@ properties:
     description: |
       An optional description of the instance.
     immutable: true
-  - name: 'fakeField'
-    type: String
-    description: |
-      A new fake field.
   - name: 'type'
     type: Enum
     description: |
