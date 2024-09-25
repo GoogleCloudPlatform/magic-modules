@@ -232,6 +232,15 @@ func TestAccDatafusionInstance_DeletionProtection(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "deletion_protection"},
 			},
 			{
+			        Config: testAccDatafusionInstanceDeletionProtectionFalse("us-central1"),
+			},
+			{
+				ResourceName:            "google_data_fusion_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "deletion_protection"},
+			},
+			{
                                 Config: testAccDatafusionInstanceDeletionProtection("us-west2"),
                                 ExpectError: regexp.MustCompile("deletion_protection"),
                         },
@@ -247,6 +256,18 @@ func testAccDatafusionInstanceDeletionProtection(region string) string {
         region = "%s"
         type   = "BASIC"
 	deletion_protection = true
+}
+`, region)
+}
+
+func testAccDatafusionInstanceDeletionProtectionFalse(region string) string {
+
+	return fmt.Sprintf(`
+	resource "google_data_fusion_instance" "instance" {
+        name   = "my-instance"
+        region = "%s"
+        type   = "BASIC"
+	deletion_protection = false
 }
 `, region)
 }
