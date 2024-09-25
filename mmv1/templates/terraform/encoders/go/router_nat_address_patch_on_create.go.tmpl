@@ -1,0 +1,33 @@
+currItems, err := resourceComputeRouterNatAddressListForPatch(d, meta)
+if err != nil {
+	return nil, err
+}
+
+idx, found, err := resourceComputeRouterNatAddressFindNestedObjectInList(d, meta, currItems)
+if err != nil {
+	return nil, err
+}
+
+// Merge new with existing item if item was already created (with the router nat resource).
+if found != nil {
+	// Merge new object into old.
+	for k, v := range obj {
+		found[k] = v
+	}
+	currItems[idx] = found
+
+	// Return list with new item added
+	resPatch := map[string]interface{}{
+		"nats": currItems,
+	}
+
+	return resPatch, nil
+}
+
+// Prevent creating a RouterNatAddress if no RouterNat has been found
+log.Printf("[WARNING] No RouterNat resource %+v found, preventing RouterNatAddress creation", obj)
+res := map[string]interface{}{
+	"nats": nil,
+}
+
+return res, nil
