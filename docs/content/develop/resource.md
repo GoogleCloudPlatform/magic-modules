@@ -62,13 +62,13 @@ For more information about types of resources and the generation process overall
    # See the License for the specific language governing permissions and
    # limitations under the License.
 
-   --- !ruby/object:Api::Resource
+   ---
    # API resource name
    name: 'ResourceName'
    # Resource description for the provider documentation.
    description: |
      RESOURCE_DESCRIPTION
-   references: !ruby/object:Api::Resource::ReferenceLinks
+   references:
      guides:
       # Link to quickstart in the API's Guides section. For example:
       # 'Create and connect to a database': 'https://cloud.google.com/alloydb/docs/quickstart/create-and-connect'
@@ -106,7 +106,7 @@ For more information about types of resources and the generation process overall
    # the field values from the resource at runtime.
    # update_url: 'projects/{{project}}/locations/{{location}}/resourcenames/{{name}}'
    # The HTTP verb used to update a resource. Allowed values: :POST, :PUT, :PATCH. Default: :PUT.
-   update_verb: :PATCH
+   update_verb: 'PATCH'
    # If true, the resource sets an `updateMask` query parameter listing modified
    # fields when updating the resource. If false, it does not.
    update_mask: true
@@ -115,23 +115,23 @@ For more information about types of resources and the generation process overall
    # the resource. If false, that code is not generated.
    autogen_async: true
    # Sets parameters for handling operations returned by the API.
-   async: !ruby/object:Api::OpAsync
+   async:
      # Overrides which API calls return operations. Default: ['create',
      # 'update', 'delete']
      # actions: ['create', 'update', 'delete']
-     operation: !ruby/object:Api::OpAsync::Operation
+     operation:
        base_url: '{{op_id}}'
 
    parameters:
-     - !ruby/object:Api::Type::String
-       name: 'location'
+     - name: 'location'
+       type: String
        required: true
        immutable: true
        url_param_only: true
        description: |
          LOCATION_DESCRIPTION
-     - !ruby/object:Api::Type::String
-       name: 'name'
+     - name: 'name'
+       type: String
        required: true
        immutable: true
        url_param_only: true
@@ -162,9 +162,8 @@ For more information about types of resources and the generation process overall
    - Remove the `Example` suffix from all test function names.
    - Remove the comments at the top of the file.
    - If beta-only fields are being tested, do the following:
-     - Change the file suffix to `.go.erb`
-     - Add `<% autogen_exception -%>` to the top of the file
-     - Wrap each beta-only test in a separate version guard: `<% unless version == 'ga' -%>...<% else -%>...<% end -%>`
+     - Change the file suffix to `.go.tmpl`
+     - Wrap each beta-only test in a separate version guard: `{{- if ne $.TargetVersionName "ga" -}}...{{- else }}...{{- end }}`
 5. Register the resource `handwrittenResources` in [`magic-modules/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.erb`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.erb)
    - Add a version guard for any beta-only resources.
 6. Optional: Complete other handwritten tasks that require the MMv1 configuration file.
@@ -189,8 +188,8 @@ additional work to implement.
 {{< tabs "MMv1 types" >}}
 {{< tab "Simple" >}}
 ```yaml
-- !ruby/object:Api::Type::String
-  name: 'API_FIELD_NAME'
+- name: 'API_FIELD_NAME'
+  type: String
   description: |
     MULTILINE_FIELD_DESCRIPTION
   min_version: beta
@@ -218,8 +217,8 @@ Replace `String` in the field type with one of the following options:
 {{< /tab >}}
 {{< tab "Enum" >}}
 ```yaml
-- !ruby/object:Api::Type::Enum
-  name: 'API_FIELD_NAME'
+- name: 'API_FIELD_NAME'
+  type: Enum
   description: |
     MULTILINE_FIELD_DESCRIPTION
   min_version: beta
@@ -232,15 +231,15 @@ Replace `String` in the field type with one of the following options:
   exactly_one_of:
     - field_one
     - nested_object.0.nested_field
-  values:
-    - :VALUE_ONE
-    - :VALUE_TWO
+  enum_values:
+    - 'VALUE_ONE'
+    - 'VALUE_TWO'
 ```
 {{< /tab >}}
 {{< tab "ResourceRef" >}}
 ```yaml
-- !ruby/object:Api::Type::ResourceRef
-  name: 'API_FIELD_NAME'
+- name: 'API_FIELD_NAME'
+  type: ResourceRef
   description: |
     MULTILINE_FIELD_DESCRIPTION
   min_version: beta
@@ -259,8 +258,8 @@ Replace `String` in the field type with one of the following options:
 {{< /tab >}}
 {{< tab "Array" >}}
 ```yaml
-- !ruby/object:Api::Type::Array
-  name: 'API_FIELD_NAME'
+- name: 'API_FIELD_NAME'
+  type: Array
   description: |
     MULTILINE_FIELD_DESCRIPTION
   min_version: beta
@@ -274,21 +273,23 @@ Replace `String` in the field type with one of the following options:
     - field_one
     - nested_object.0.nested_field
   # Array of primitives
-  item_type: Api::Type::String
+  item_type: 
+    type: String
 
   # Array of nested objects
-  item_type: !ruby/object:Api::Type::NestedObject
+  item_type: 
+    type: NestedObject
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'FIELD_NAME'
+      - name: 'FIELD_NAME'
+        type: String
         description: |
           MULTI_LINE_FIELD_DESCRIPTION
 ```
 {{< /tab >}}
 {{< tab "NestedObject" >}}
 ```yaml
-- !ruby/object:Api::Type::Array
-  name: 'API_FIELD_NAME'
+- name: 'API_FIELD_NAME'
+  type: NestedObject
   description: |
     MULTILINE_FIELD_DESCRIPTION
   min_version: beta
@@ -302,27 +303,29 @@ Replace `String` in the field type with one of the following options:
     - field_one
     - nested_object.0.nested_field
   properties:
-    - !ruby/object:Api::Type::String
-      name: 'FIELD_NAME'
+    - name: 'FIELD_NAME'
+      type: String
       description: |
         MULTI_LINE_FIELD_DESCRIPTION
 ```
 {{< /tab >}}
 {{< tab "Map" >}}
 ```yaml
-  - !ruby/object:Api::Type::Map
-    name: 'API_FIELD_NAME'
+  - name: 'API_FIELD_NAME'
+    type: Map
     description: |
       MULTILINE_FIELD_DESCRIPTION
-    key_name: KEY_NAME
+    key_name: 'KEY_NAME'
     key_description: |
       MULTILINE_KEY_FIELD_DESCRIPTION
-    value_type: !ruby/object:Api::Type::NestedObject
+    value_type:
+      name: mapObjectName
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'FIELD_NAME'
-          description: |
-            MULTI_LINE_FIELD_DESCRIPTION
+      - name: 'FIELD_NAME'
+        type: String
+        description: |
+          MULTI_LINE_FIELD_DESCRIPTION
 ```
 
 This type is only used for string -> complex type mappings, use "KeyValuePairs" for simple mappings. Complex maps can't be represented natively in Terraform, and this type is transformed into an associative array (TypeSet) with the key merged into the object alongside other top-level fields.
@@ -350,7 +353,7 @@ For `key_name` and `key_description`, provide a domain-appropriate name and desc
    - "Flatteners" convert API response data to Terraform resource data.
    - For top level fields, add a flattener. Call `d.Set()` on the flattened API response value to store it in Terraform state.
    - For other fields, add logic to the parent field's flattener to convert the value from the API response to the Terraform state value. Use a nested flattener for complex logic.
-4. If any of the added Go code (including any imports) is beta-only, change the file suffix to `.go.erb` and wrap the beta-only code in a version guard: `<% unless version == 'ga' -%>...<% else -%>...<% end -%>`.
+4. If any of the added Go code (including any imports) is beta-only, change the file suffix to `.go.tmpl` and wrap the beta-only code in a version guard: `{{- if ne $.TargetVersionName "ga" -}}...{{- else }}...{{- end }}`.
    - Add a new guard rather than adding the field to an existing guard; it is easier to read.
 {{< /tab >}}
 {{< /tabs >}}
@@ -367,30 +370,29 @@ IAM support for MMv1-generated resources is configured within the `ResourceName.
 1. Add the following top-level block to `ResourceName.yaml` directly above `parameters`.
 
 ```yaml
-iam_policy: !ruby/object:Api::Resource::IamPolicy
+iam_policy:
   # Name of the field on the terraform IAM resources which references
   # the parent resource. Update to match the parent resource's name.
   parent_resource_attribute: 'resource_name'
   # Character preceding setIamPolicy in the full URL for the API method.
   # Usually `:`
   method_name_separator: ':'
-  # HTTP method for getIamPolicy. Usually :POST.
-  fetch_iam_policy_verb: :POST
-  # Overrides the HTTP method for setIamPolicy. Default: :POST
-  # set_iam_policy_verb: :POST
+  # HTTP method for getIamPolicy. Usually 'POST'.
+  fetch_iam_policy_verb: 'POST'
+  # Overrides the HTTP method for setIamPolicy. Default: 'POST'
+  # set_iam_policy_verb: 'POST'
 
   # Must match the parent resource's `import_format` (or `self_link` if
   # `import_format` is unset), but with the `parent_resource_attribute`
   # value substituted for the final field.
-  import_format: [
-    'projects/{{project}}/locations/{{location}}/resourcenames/{{resource_name}}'
-  ]
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/resourcenames/{{resource_name}}'
 
   # If IAM conditions are supported, set this attribute to indicate how the
-  # conditions should be passed to the API. Allowed values: :QUERY_PARAM,
-  # :REQUEST_BODY, :QUERY_PARAM_NESTED. Note: :QUERY_PARAM_NESTED should
+  # conditions should be passed to the API. Allowed values: 'QUERY_PARAM',
+  # 'REQUEST_BODY', 'QUERY_PARAM_NESTED'. Note: 'QUERY_PARAM_NESTED' should
   # only be used if the query param field contains a `.`
-  # iam_conditions_request_type: :REQUEST_BODY
+  # iam_conditions_request_type: 'REQUEST_BODY'
 
   # Marks IAM support as beta-only
   # min_version: beta
@@ -427,10 +429,9 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
    - Replace all occurrences of `github.com/hashicorp/terraform-provider-google-beta/google-beta` with `github.com/hashicorp/terraform-provider-google/google`
    - Remove the comments at the top of the file.
    - If any of the added Go code is beta-only:
-     - Change the file suffix to `.go.erb`
-     - Add `<% autogen_exception -%>` to the top of the file
-     - Wrap each beta-only code block (including any imports) in a separate version guard: `<% unless version == 'ga' -%>...<% else -%>...<% end -%>`
-4. Register the binding, member, and policy resources `handwrittenIAMResources` in [`magic-modules/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.erb`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.erb)
+     - Change the file suffix to `.go.tmpl`
+     - Wrap each beta-only code block (including any imports) in a separate version guard: `{{- if ne $.TargetVersionName "ga" -}}...{{- else }}...{{- end }}`
+4. Register the binding, member, and policy resources `handwrittenIAMResources` in [`magic-modules/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.tmpl`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.tmpl)
    - Add a version guard for any beta-only resources.
 {{< /tab >}}
 {{< /tabs >}}

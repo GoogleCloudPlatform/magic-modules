@@ -24,62 +24,62 @@ func WorkbenchInstanceLabelsDiffSuppress(k, old, new string, d *schema.ResourceD
 
 
 var WorkbenchInstanceProvidedMetadata = []string{
-	"agent-health-check-interval-seconds",
-	"agent-health-check-path",
-	"container",
-	"cos-update-strategy",
-	"custom-container-image",
-	"custom-container-payload",
-	"data-disk-uri",
-	"dataproc-allow-custom-clusters",
-	"dataproc-cluster-name",
-	"dataproc-configs",
-	"dataproc-default-subnet",
-	"dataproc-locations-list",
-	"dataproc-machine-types-list",
-	"dataproc-notebooks-url",
-	"dataproc-region",
-	"dataproc-service-account",
-	"disable-check-xsrf",
-	"framework",
-	"gcs-data-bucket",
-	"generate-diagnostics-bucket",
-	"generate-diagnostics-file",
-	"generate-diagnostics-options",
-	"google-logging-enabled",
-	"image-url",
-	"install-monitoring-agent",
-	"install-nvidia-driver",
-	"installed-extensions",
-	"last_updated_diagnostics",
-	"notebooks-api",
-	"notebooks-api-version",
-	"notebooks-examples-location",
-	"notebooks-location",
-	"proxy-backend-id",
-	"proxy-byoid-url",
-	"proxy-mode",
-	"proxy-status",
-	"proxy-url",
-	"proxy-user-mail",
-	"report-container-health",
-	"report-event-url",
-	"report-notebook-metrics",
-	"report-system-health",
-	"report-system-status",
-	"restriction",
-	"serial-port-logging-enable",
-	"service-account-mode",
-	"shutdown-script",
-	"title",
-	"use-collaborative",
-	"user-data",
-	"version",
+    "agent-health-check-interval-seconds",
+    "agent-health-check-path",
+    "container",
+    "cos-update-strategy",
+    "custom-container-image",
+    "custom-container-payload",
+    "data-disk-uri",
+    "dataproc-allow-custom-clusters",
+    "dataproc-cluster-name",
+    "dataproc-configs",
+    "dataproc-default-subnet",
+    "dataproc-locations-list",
+    "dataproc-machine-types-list",
+    "dataproc-notebooks-url",
+    "dataproc-region",
+    "dataproc-service-account",
+    "disable-check-xsrf",
+    "framework",
+    "gcs-data-bucket",
+    "generate-diagnostics-bucket",
+    "generate-diagnostics-file",
+    "generate-diagnostics-options",
+    "google-logging-enabled",
+    "image-url",
+    "install-monitoring-agent",
+    "install-nvidia-driver",
+    "installed-extensions",
+    "last_updated_diagnostics",
+    "notebooks-api",
+    "notebooks-api-version",
+    "notebooks-examples-location",
+    "notebooks-location",
+    "proxy-backend-id",
+    "proxy-byoid-url",
+    "proxy-mode",
+    "proxy-status",
+    "proxy-url",
+    "proxy-user-mail",
+    "report-container-health",
+    "report-event-url",
+    "report-notebook-metrics",
+    "report-system-health",
+    "report-system-status",
+    "restriction",
+    "serial-port-logging-enable",
+    "service-account-mode",
+    "shutdown-script",
+    "title",
+    "use-collaborative",
+    "user-data",
+    "version",
 
-	"disable-swap-binaries",
-	"enable-guest-attributes",
-	"enable-oslogin",
-	"proxy-registration-url",
+    "disable-swap-binaries",
+    "enable-guest-attributes",
+    "enable-oslogin",
+    "proxy-registration-url",
 }
 
 func WorkbenchInstanceMetadataDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
@@ -186,7 +186,7 @@ func WorkbenchInstanceKmsDiffSuppress(_, old, new string, _ *schema.ResourceData
 	return false
 }
 
-{{ if ne $.Compiler "terraformgoogleconversion-codegen" }}
+{{- if ne $.Compiler "terraformgoogleconversion-codegen" }}
 func waitForWorkbenchOperation(config *transport_tpg.Config, d *schema.ResourceData, project string, billingProject string, userAgent string, response map[string]interface{}) error {
 	var opRes map[string]interface{}
 	err := WorkbenchOperationWaitTimeWithResponse(
@@ -241,5 +241,25 @@ func resizeWorkbenchInstanceDisk(config *transport_tpg.Config, d *schema.Resourc
 	}
 
 	return nil
+}
+
+// mergeLabels takes two maps of labels and returns a new map with the labels merged.
+// If a key exists in old_labels but not in new_labels, it is added to the new map with an empty value.
+func mergeLabels(oldLabels, newLabels map[string]interface{}) map[string]string {
+	modifiedLabels := make(map[string]string)
+
+	// Add all labels from newLabels to modifiedLabels
+	for k, v := range newLabels {
+		modifiedLabels[k] = v.(string)
+	}
+
+	// Add any keys from oldLabels that are not in newLabels with an empty value
+	for k := range oldLabels {
+		if _, ok := newLabels[k]; !ok {
+			modifiedLabels[k] = ""
+		}
+	}
+
+	return modifiedLabels
 }
 {{- end }}

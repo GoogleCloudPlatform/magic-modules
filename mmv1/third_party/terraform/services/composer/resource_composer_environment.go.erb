@@ -56,8 +56,8 @@ var (
 		"config.0.software_config.0.image_version",
 		"config.0.software_config.0.python_version",
 		"config.0.software_config.0.scheduler_count",
-<% unless version == "ga" -%>
 		"config.0.software_config.0.cloud_data_lineage_integration",
+<% unless version == "ga" -%>
 		"config.0.software_config.0.web_server_plugins_mode",
 <% end -%>
 	}
@@ -497,7 +497,6 @@ func ResourceComposerEnvironment() *schema.Resource {
 										Computed:     true,
 										Description:  `The number of schedulers for Airflow. This field is supported for Cloud Composer environments in versions composer-1.*.*-airflow-2.*.*.`,
 									},
-<% unless version == "ga" -%>
 									"cloud_data_lineage_integration": {
 										Type:        	schema.TypeList,
 										Optional:    	true,
@@ -515,6 +514,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 											},
 										},
 									},
+<% unless version == "ga" -%>
 									"web_server_plugins_mode": {
 										Type:         schema.TypeString,
 										Optional:     true,
@@ -1078,6 +1078,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 							Type:         schema.TypeString,
 							Required:     true,
 							ForceNew:     true,
+							DiffSuppressFunc: gscBucketNameDiffSuppress,
 							Description: `Optional. Name of an existing Cloud Storage bucket to be used by the environment.`,
 						},
 					},
@@ -1317,7 +1318,6 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 			}
 		}
 
-<% unless version == "ga" -%>
 		if d.HasChange("config.0.software_config.0.cloud_data_lineage_integration") {
 			patchObj := &composer.Environment{
 				Config: &composer.EnvironmentConfig{
@@ -1332,7 +1332,6 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 				return err
 			}
 		}
-<% end -%>
 
 		if d.HasChange("config.0.software_config.0.airflow_config_overrides") {
 			patchObj := &composer.Environment{
@@ -2001,8 +2000,8 @@ func flattenComposerEnvironmentConfigSoftwareConfig(softwareCfg *composer.Softwa
 	transformed["pypi_packages"] = softwareCfg.PypiPackages
 	transformed["env_variables"] = softwareCfg.EnvVariables
 	transformed["scheduler_count"] = softwareCfg.SchedulerCount
-<% unless version == "ga" -%>
 	transformed["cloud_data_lineage_integration"] = flattenComposerEnvironmentConfigSoftwareConfigCloudDataLineageIntegration(softwareCfg.CloudDataLineageIntegration)
+<% unless version == "ga" -%>
 	if softwareCfg.WebServerPluginsMode == "PLUGINS_DISABLED"{
 		transformed["web_server_plugins_mode"] = "DISABLED"
 	} else if softwareCfg.WebServerPluginsMode == "PLUGINS_ENABLED"{
@@ -2014,7 +2013,6 @@ func flattenComposerEnvironmentConfigSoftwareConfig(softwareCfg *composer.Softwa
 	return []interface{}{transformed}
 }
 
-<% unless version == "ga" -%>
 func flattenComposerEnvironmentConfigSoftwareConfigCloudDataLineageIntegration(cloudDataLineageIntegration *composer.CloudDataLineageIntegration) interface{} {
 	if cloudDataLineageIntegration == nil {
 		return nil
@@ -2025,7 +2023,6 @@ func flattenComposerEnvironmentConfigSoftwareConfigCloudDataLineageIntegration(c
 
 	return []interface{}{transformed}
 }
-<% end -%>
 
 func flattenComposerEnvironmentConfigMasterAuthorizedNetworksConfig(masterAuthNetsCfg *composer.MasterAuthorizedNetworksConfig) interface{} {
 	if masterAuthNetsCfg == nil {
@@ -2739,13 +2736,13 @@ func expandComposerEnvironmentConfigSoftwareConfig(v interface{}, d *schema.Reso
 	transformed.EnvVariables = expandComposerEnvironmentConfigSoftwareConfigStringMap(original, "env_variables")
 	transformed.SchedulerCount = int64(original["scheduler_count"].(int))
 
-<% unless version == "ga" -%>
 	transformedCloudDataLineageIntegration, err := expandComposerEnvironmentConfigSoftwareConfigCloudDataLineageIntegration(original["cloud_data_lineage_integration"], d, config)
 	if err != nil {
 		return nil, err
 	}
 	transformed.CloudDataLineageIntegration = transformedCloudDataLineageIntegration
 
+<% unless version == "ga" -%>
 	if original["web_server_plugins_mode"].(string) == "DISABLED"{
 		transformed.WebServerPluginsMode = "PLUGINS_DISABLED"
 	} else if original["web_server_plugins_mode"].(string) == "ENABLED"{
@@ -2766,7 +2763,6 @@ func expandComposerEnvironmentConfigSoftwareConfigStringMap(softwareConfig map[s
 	return map[string]string{}
 }
 
-<% unless version == "ga" -%>
 func expandComposerEnvironmentConfigSoftwareConfigCloudDataLineageIntegration(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) (*composer.CloudDataLineageIntegration, error) {
 	l := v.([]interface{})
 	if len(l) == 0 {
@@ -2780,7 +2776,6 @@ func expandComposerEnvironmentConfigSoftwareConfigCloudDataLineageIntegration(v 
 
 	return transformed, nil
 }
-<% end -%>
 
 func validateComposerEnvironmentPypiPackages(v interface{}, k string) (ws []string, errors []error) {
 	if v == nil {
@@ -3118,4 +3113,12 @@ func validateComposerInternalIpv4CidrBlock(v any, k string) (warns []string, err
 		errs = append(errs, fmt.Errorf("Composer Internal IPv4 CIDR range must have size /20"))
 	}
 	return
+}
+
+func gscBucketNameDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+  prefix := "gs://"
+  if prefix + old == new || old == prefix + new {
+    return true
+  }
+  return false
 }

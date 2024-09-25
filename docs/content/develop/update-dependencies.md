@@ -27,7 +27,7 @@ cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
    go get google.golang.org/api@v0.105.0 
    go mod tidy
    ```
-4. Copy the contents of the updated `go.mod` and `go.sum` file into [`mmv1/third_party/terraform/go.mod.erb`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/go.mod.erb) and [`mmv1/third_party/terraform/go.sum`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/go.sum) in the `magic-modules` respectively. Ensure `<% autogen_exception -%>` is still at the top of the file afterwards
+4. Copy the contents of the updated `go.mod` and `go.sum` file into [`mmv1/third_party/terraform/go.mod`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/go.mod.erb) and [`mmv1/third_party/terraform/go.sum`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/go.sum) in the `magic-modules` respectively.
 5. Create a pull request containing _only_ the dependency changes.
 6. Resolve any errors caused by the dependency upgrade.
 7. After the dependency pull request is merged, continue with a separate pull request for any additional changes that were blocked by the upgrade.

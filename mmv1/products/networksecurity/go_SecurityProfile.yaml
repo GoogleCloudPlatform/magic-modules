@@ -19,7 +19,7 @@ description: |
 references:
   guides:
     'Create and manage security profiles': 'https://cloud.google.com/firewall/docs/configure-security-profiles'
-  api: 'https://cloud.google.com/firewall/docs/reference/network-security/rest/v1/projects.locations.securityProfiles'
+  api: 'https://cloud.google.com/firewall/docs/reference/network-security/rest/v1/organizations.locations.securityProfiles'
 docs:
 base_url: '{{parent}}/locations/{{location}}/securityProfiles'
 self_link: '{{parent}}/locations/{{location}}/securityProfiles/{{name}}'

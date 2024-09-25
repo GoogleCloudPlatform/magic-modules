@@ -150,7 +150,7 @@ The following arguments are supported:
 * `description` - (Optional) A brief description of this resource.
 
 * `desired_status` - (Optional) Desired status of the instance. Either
-`"RUNNING"` or `"TERMINATED"`.
+`"RUNNING"`, `"SUSPENDED"` or `"TERMINATED"`.
 
 * `deletion_protection` - (Optional) Enable deletion protection on this instance. Defaults to false.
     **Note:** you must disable deletion protection before removing the resource (e.g., via `terraform destroy`), or the instance cannot be deleted and the Terraform run will not complete successfully.
@@ -493,6 +493,7 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `on_instance_stop_action` - (Optional) Specifies the action to be performed when the instance is terminated using `max_run_duration` and `STOP` `instance_termination_action`. Only support `true` `discard_local_ssd` at this point. Structure is [documented below](#nested_on_instance_stop_action).
 
+* `host_error_timeout_seconds` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Specifies the time in seconds for host error detection, the value must be within the range of [90, 330] with the increment of 30, if unset, the default behavior of host error recovery will be used.
 
 * `maintenance_interval` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Specifies the frequency of planned maintenance events. The accepted values are: `PERIODIC`.
 

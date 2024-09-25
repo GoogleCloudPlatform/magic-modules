@@ -228,7 +228,7 @@ func TestAccBigQueryTable_HivePartitioning(t *testing.T) {
 	})
 }
 
-func TestAccBigQueryTable_HivePartitioningCustomSchema(t *testing.T) {
+func TestAccBigQueryTable_HivePartitioningCustomSchema_update(t *testing.T) {
 	t.Parallel()
 	bucketName := acctest.TestBucketName(t)
 	resourceName := "google_bigquery_table.test"
@@ -241,13 +241,22 @@ func TestAccBigQueryTable_HivePartitioningCustomSchema(t *testing.T) {
 		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBigQueryTableHivePartitioningCustomSchema(bucketName, datasetID, tableID),
+				Config: testAccBigQueryTableHivePartitioningCustomSchema(bucketName, datasetID, tableID, "old-label"),
 			},
 			{
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"external_data_configuration.0.schema", "deletion_protection"},
+				ImportStateVerifyIgnore: []string{"external_data_configuration.0.schema", "labels", "deletion_protection"},
+			},
+			{
+				Config: testAccBigQueryTableHivePartitioningCustomSchema(bucketName, datasetID, tableID, "new-label"),
+			},
+			{
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"external_data_configuration.0.schema", "labels", "deletion_protection"},
 			},
 		},
 	})
@@ -295,6 +304,12 @@ func TestAccBigQueryBigLakeManagedTable(t *testing.T) {
 			{
 				Config: testAccBigLakeManagedTable(bucketName, connectionID, datasetID, tableID, TEST_SIMPLE_CSV_SCHEMA),
 			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
 		},
 	})
 }
@@ -314,13 +329,14 @@ func testAccBigLakeManagedTable(bucketName, connectionID, datasetID, tableID, sc
 			cloud_resource {}
 		}
 		resource "google_project_iam_member" "test" {
-			role = "roles/storage.objectViewer"
+			role = "roles/storage.objectAdmin"
 			project = data.google_project.project.id
 			member = "serviceAccount:${google_bigquery_connection.test.cloud_resource[0].service_account_id}"
 		}
 		resource "google_bigquery_dataset" "test" {
 		  dataset_id = "%s"
 		}
+
 		resource "google_bigquery_table" "test" {
 			deletion_protection = false
 			table_id   = "%s"
@@ -2129,7 +2145,7 @@ resource "google_bigquery_table" "test" {
 `, bucketName, datasetID, tableID)
 }
 
-func testAccBigQueryTableHivePartitioningCustomSchema(bucketName, datasetID, tableID string) string {
+func testAccBigQueryTableHivePartitioningCustomSchema(bucketName, datasetID, tableID, tableLabel string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "test" {
   name          = "%s"
@@ -2151,6 +2167,10 @@ resource "google_bigquery_table" "test" {
   deletion_protection = false
   table_id   = "%s"
   dataset_id = google_bigquery_dataset.test.dataset_id
+
+  labels = {
+    label = "%s"
+  }
 
   external_data_configuration {
     source_format = "NEWLINE_DELIMITED_JSON"
@@ -2178,7 +2198,7 @@ EOH
         }
   depends_on = ["google_storage_bucket_object.test"]
 }
-`, bucketName, datasetID, tableID)
+`, bucketName, datasetID, tableID, tableLabel)
 }
 
 func testAccBigQueryTableAvroPartitioning(bucketName, avroFilePath, datasetID, tableID string) string {

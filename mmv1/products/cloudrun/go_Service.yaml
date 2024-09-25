@@ -69,6 +69,14 @@ examples:
       cloud_run_service_name: 'cloudrun-srv'
     test_env_vars:
       project: 'PROJECT_NAME'
+  - name: 'cloud_run_service_gpu'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
+    min_version: 'beta'
+    vars:
+      cloud_run_service_name: 'cloudrun-srv'
+    test_env_vars:
+      project: 'PROJECT_NAME'
   - name: 'cloud_run_service_sql'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
@@ -77,6 +85,8 @@ examples:
       cloud_run_sql_name: 'cloudrun-sql'
       deletion_protection: 'true'
     test_vars_overrides:
+      'deletion_protection': 'false'
+    oics_vars_overrides:
       'deletion_protection': 'false'
     ignore_read_extra:
       - 'autogenerate_revision_name'
@@ -737,7 +747,13 @@ properties:
                                 The name of the service to place in the gRPC HealthCheckRequest
                                 (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
                                 If this is not specified, the default behavior is defined by gRPC.
-
+              - name: 'nodeSelector'
+                type: KeyValuePairs
+                description: |-
+                  Node Selector describes the hardware requirements of the resources.
+                  Use the following node selector keys to configure features on a Revision:
+                    - `run.googleapis.com/accelerator` sets the [type of GPU](https://cloud.google.com/run/docs/configuring/services/gpu) required by the Revision to run.
+                min_version: 'beta'
               - name: 'containerConcurrency'
                 type: Integer
                 description: |-
