@@ -1,5 +1,5 @@
-# Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -12,135 +12,140 @@
 # limitations under the License.
 
 ---
-!ruby/object:Api::Resource
-name: "Cluster"
-base_url: "{{parent}}/clusters"
-create_url: "{{parent}}/clusters?clusterId={{name}}"
-self_link: "{{parent}}/clusters/{{name}}"
-update_mask: true
-update_verb: :PATCH
-references: !ruby/object:Api::Resource::ReferenceLinks
-  api: "https://cloud.google.com/vmware-engine/docs/reference/rest/v1/projects.locations.privateClouds.clusters"
+name: 'Cluster'
 description: |
   A cluster in a private cloud.
-error_abort_predicates: ['transport_tpg.Is429QuotaError']
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: "name"
-    base_url: "{{op_id}}"
+references:
+  guides:
+  api: 'https://cloud.google.com/vmware-engine/docs/reference/rest/v1/projects.locations.privateClouds.clusters'
+docs:
+id_format: '{{parent}}/clusters/{{name}}'
+base_url: '{{parent}}/clusters'
+self_link: '{{parent}}/clusters/{{name}}'
+create_url: '{{parent}}/clusters?clusterId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - '{{%parent}}/clusters/{{name}}'
+timeouts:
+  insert_minutes: 210
+  update_minutes: 190
+  delete_minutes: 150
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 5000
-    timeouts: !ruby/object:Api::Timeouts
+    timeouts:
       insert_minutes: 210
       update_minutes: 190
       delete_minutes: 150
-  result: !ruby/object:Api::OpAsync::Result
-    path: "response"
-  status: !ruby/object:Api::OpAsync::Status
-    path: "done"
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
-    path: "error"
-    message: "message"
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
   include_project: true
-
-import_format: ["{{%parent}}/clusters/{{name}}"]
-id_format: "{{parent}}/clusters/{{name}}"
-autogen_async: true
+custom_code:
 # There is a handwritten sweeper that provides a list of locations to sweep
-skip_sweeper: true
+exclude_sweeper: true
+error_abort_predicates:
+
+  - 'transport_tpg.Is429QuotaError'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: "vmware_engine_cluster_basic"
-    primary_resource_id: "vmw-engine-ext-cluster"
-    skip_test: true   # update tests will take care of create and update. PC and cluster creation is expensive and node reservation is required.
+  - name: 'vmware_engine_cluster_basic'
+    primary_resource_id: 'vmw-engine-ext-cluster'
     vars:
-      name: "ext-cluster"
-      private_cloud_id: "sample-pc"
-      network_id: "pc-nw"
-      management_cluster_id: "sample-mgmt-cluster"
+      name: 'ext-cluster'
+      private_cloud_id: 'sample-pc'
+      network_id: 'pc-nw'
+      management_cluster_id: 'sample-mgmt-cluster'
     test_env_vars:
-      region: :REGION
-  - !ruby/object:Provider::Terraform::Examples
-    name: "vmware_engine_cluster_full"
-    primary_resource_id: "vmw-ext-cluster"
-    skip_test: true   # update tests will take care of create and update. PC and cluster creation is expensive and node reservation is required.
+      region: 'REGION'
+ # update tests will take care of create and update. PC and cluster creation is expensive and node reservation is required.
+    exclude_test: true
+  - name: 'vmware_engine_cluster_full'
+    primary_resource_id: 'vmw-ext-cluster'
     vars:
-      name: "ext-cluster"
-      private_cloud_id: "sample-pc"
-      network_id: "pc-nw"
-      management_cluster_id: "sample-mgmt-cluster"
+      name: 'ext-cluster'
+      private_cloud_id: 'sample-pc'
+      network_id: 'pc-nw'
+      management_cluster_id: 'sample-mgmt-cluster'
     test_env_vars:
-      region: :REGION
+      region: 'REGION'
+ # update tests will take care of create and update. PC and cluster creation is expensive and node reservation is required.
+    exclude_test: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: "parent"
-    immutable: true
-    required: true
-    url_param_only: true
+  - name: 'parent'
+    type: String
     description: |
       The resource name of the private cloud to create a new cluster in.
       Resource names are schemeless URIs that follow the conventions in https://cloud.google.com/apis/design/resource_names.
       For example: projects/my-project/locations/us-west1-a/privateClouds/my-cloud
-  - !ruby/object:Api::Type::String
-    name: "name"
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
+  - name: 'name'
+    type: String
     description: |
       The ID of the Cluster.
 
+    url_param_only: true
+    required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::Boolean
-    name: management
-    output: true
+  - name: 'management'
+    type: Boolean
     description: |
       True if the cluster is a management cluster; false otherwise.
       There can only be one management cluster in a private cloud and it has to be the first one.
 
-  - !ruby/object:Api::Type::String
-    name: "uid"
     output: true
+  - name: 'uid'
+    type: String
     description: |
       System-generated unique identifier for the resource.
 
-  - !ruby/object:Api::Type::Enum
-    name: "state"
+    output: true
+  - name: 'state'
+    type: Enum
     description: |
       State of the Cluster.
     output: true
-    values:
-      - :ACTIVE
-      - :CREATING
-      - :UPDATING
-      - :DELETING
-      - :REPAIRING
-
-  - !ruby/object:Api::Type::Map
-    name: "nodeTypeConfigs"
+    enum_values:
+      - 'ACTIVE'
+      - 'CREATING'
+      - 'UPDATING'
+      - 'DELETING'
+      - 'REPAIRING'
+  - name: 'nodeTypeConfigs'
+    type: Map
     description: |
       The map of cluster node types in this cluster,
       where the key is canonical identifier of the node type (corresponds to the NodeType).
-    key_name: "node_type_id"
+    update_mask_fields:
+      - 'nodeTypeConfigs.*.nodeCount'
+    key_name: 'node_type_id'
     key_description: |
       Canonical identifier of the NodeType.
-    value_type: !ruby/object:Api::Type::NestedObject
+    value_type:
       name: nodeTypeConfig
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::Integer
-          name: "nodeCount"
+        - name: 'nodeCount'
+          type: Integer
           description: |
             The number of nodes of this type in the cluster.
           required: true
-        - !ruby/object:Api::Type::Integer
-          name: "customCoreCount"
-          default_value: 0
+        - name: 'customCoreCount'
+          type: Integer
           description: |
             Customized number of cores available to each node of the type.
             This number must always be one of `nodeType.availableCustomCoreCounts`.
             If zero is provided max value from `nodeType.availableCustomCoreCounts` will be used.
             Once the customer is created then corecount cannot be changed.
-    update_mask_fields:
-      - "nodeTypeConfigs.*.nodeCount"
+          default_value: 0

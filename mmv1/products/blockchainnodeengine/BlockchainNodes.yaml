@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,211 +11,208 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'BlockchainNodes'
-base_url: projects/{{project}}/locations/{{location}}/blockchainNodes
-self_link: 'projects/{{project}}/locations/{{location}}/blockchainNodes/{{blockchain_node_id}}'
-import_format: ['projects/{{project}}/locations/{{location}}/blockchainNodes/{{blockchain_node_id}}']
-create_url: projects/{{project}}/locations/{{location}}/blockchainNodes?blockchain_node_id={{blockchain_node_id}}
 description: |
   A representation of a blockchain node.
-timeouts: !ruby/object:Api::Timeouts
-  insert_minutes: 45
-  delete_minutes: 35
-
-autogen_async: true
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
-    base_url: '{{op_id}}'
-    wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
-    path: 'response'
-    resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
-    path: 'error'
-    message: 'message'
-
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/blockchain-node-engine'
   api: 'https://cloud.google.com/blockchain-node-engine/docs/reference/rest/v1/projects.locations.blockchainNodes'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/blockchainNodes'
+self_link: 'projects/{{project}}/locations/{{location}}/blockchainNodes/{{blockchain_node_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/blockchainNodes?blockchain_node_id={{blockchain_node_id}}'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/blockchainNodes/{{blockchain_node_id}}'
+timeouts:
+  insert_minutes: 45
+  update_minutes: 20
+  delete_minutes: 35
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'blockchain_nodes_basic'
+  - name: 'blockchain_nodes_basic'
     primary_resource_id: 'default_node'
     vars:
       blockchain_node_id: 'blockchain_basic_node'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'blockchain_nodes_geth_details'
+  - name: 'blockchain_nodes_geth_details'
     primary_resource_id: 'default_node_geth'
     vars:
       blockchain_node_id: 'blockchain_geth_node'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: location
+  - name: 'location'
+    type: String
     description: |
       Location of Blockchain Node being created.
+    url_param_only: true
+    required: true
     immutable: true
-    required: true
-    url_param_only: true
-  - !ruby/object:Api::Type::String
-    name: blockchainNodeId
-    url_param_only: true
-    required: true
+  - name: 'blockchainNodeId'
+    type: String
     description: |
       ID of the requesting object.
+    url_param_only: true
+    required: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
-    output: true
+  - name: 'name'
+    type: String
     description: |
       The fully qualified name of the blockchain node. e.g. projects/my-project/locations/us-central1/blockchainNodes/my-node.
-  - !ruby/object:Api::Type::String
-    name: createTime
     output: true
+  - name: 'createTime'
+    type: String
     description: |
       The timestamp at which the blockchain node was first created.
-  - !ruby/object:Api::Type::String
-    name: updateTime
     output: true
+  - name: 'updateTime'
+    type: String
     description: |
       The timestamp at which the blockchain node was last updated.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: labels
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       User-provided key-value pairs
-  - !ruby/object:Api::Type::NestedObject
-    name: connectionInfo
-    output: true
+  - name: 'connectionInfo'
+    type: NestedObject
     description: |
       The connection information through which to interact with a blockchain node.
+    output: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: serviceAttachment
-        output: true
+      - name: 'serviceAttachment'
+        type: String
         description: |
           A service attachment that exposes a node, and has the following format: projects/{project}/regions/{region}/serviceAttachments/{service_attachment_name}
-      - !ruby/object:Api::Type::NestedObject
-        name: endpointInfo
         output: true
+      - name: 'endpointInfo'
+        type: NestedObject
         description: |
           The endpoint information through which to interact with a blockchain node.
+        output: true
         properties:
-          - !ruby/object:Api::Type::String
-            name: jsonRpcApiEndpoint
-            output: true
+          - name: 'jsonRpcApiEndpoint'
+            type: String
             description: |
               The assigned URL for the node JSON-RPC API endpoint.
-          - !ruby/object:Api::Type::String
-            name: websocketsApiEndpoint
             output: true
+          - name: 'websocketsApiEndpoint'
+            type: String
             description: |
               The assigned URL for the node WebSockets API endpoint.
-  - !ruby/object:Api::Type::NestedObject
-    name: ethereumDetails
+            output: true
+  - name: 'ethereumDetails'
+    type: NestedObject
     description: |
       User-provided key-value pairs
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: validatorConfig
+      - name: 'validatorConfig'
+        type: NestedObject
         description: |
           Configuration for validator-related parameters on the beacon client, and for any managed validator client.
         properties:
-          - !ruby/object:Api::Type::Array
-            name: mevRelayUrls
-            item_type: Api::Type::String
+          - name: 'mevRelayUrls'
+            type: Array
             description: |
               URLs for MEV-relay services to use for block building. When set, a managed MEV-boost service is configured on the beacon client.
-      - !ruby/object:Api::Type::NestedObject
-        name: gethDetails
+            item_type:
+              type: String
+      - name: 'gethDetails'
+        type: NestedObject
         description: |
           User-provided key-value pairs
         properties:
-          - !ruby/object:Api::Type::Enum
-            name: garbageCollectionMode
-            immutable: true
-            values:
-              - :FULL
-              - :ARCHIVE
+          - name: 'garbageCollectionMode'
+            type: Enum
             description: |
               Blockchain garbage collection modes. Only applicable when NodeType is FULL or ARCHIVE.
-      - !ruby/object:Api::Type::NestedObject
-        name: additionalEndpoints
-        output: true
+            immutable: true
+            enum_values:
+              - 'FULL'
+              - 'ARCHIVE'
+      - name: 'additionalEndpoints'
+        type: NestedObject
         description: |
           User-provided key-value pairs
+        output: true
         properties:
-          - !ruby/object:Api::Type::String
-            name: beaconApiEndpoint
-            output: true
+          - name: 'beaconApiEndpoint'
+            type: String
             description: |
               The assigned URL for the node's Beacon API endpoint.
-          - !ruby/object:Api::Type::String
-            name: beaconPrometheusMetricsApiEndpoint
             output: true
+          - name: 'beaconPrometheusMetricsApiEndpoint'
+            type: String
             description: |
               The assigned URL for the node's Beacon Prometheus metrics endpoint.
-          - !ruby/object:Api::Type::String
-            name: executionClientPrometheusMetricsApiEndpoint
             output: true
+          - name: 'executionClientPrometheusMetricsApiEndpoint'
+            type: String
             description: |
               The assigned URL for the node's execution client's Prometheus metrics endpoint.
-      - !ruby/object:Api::Type::Enum
-        name: network
-        immutable: true
-        values:
-          - :MAINNET
-          - :TESTNET_GOERLI_PRATER
-          - :TESTNET_SEPOLIA
+            output: true
+      - name: 'network'
+        type: Enum
         description: |
           The Ethereum environment being accessed.
-      - !ruby/object:Api::Type::Enum
-        name: nodeType
         immutable: true
-        values:
-          - :LIGHT
-          - :FULL
-          - :ARCHIVE
+        enum_values:
+          - 'MAINNET'
+          - 'TESTNET_GOERLI_PRATER'
+          - 'TESTNET_SEPOLIA'
+      - name: 'nodeType'
+        type: Enum
         description: |
           The type of Ethereum node.
-      - !ruby/object:Api::Type::Enum
-        name: executionClient
         immutable: true
-        values:
-          - :EXECUTION_CLIENT_UNSPECIFIED
-          - :GETH
-          - :ERIGON
+        enum_values:
+          - 'LIGHT'
+          - 'FULL'
+          - 'ARCHIVE'
+      - name: 'executionClient'
+        type: Enum
         description: |
           The execution client
-      - !ruby/object:Api::Type::Enum
-        name: consensusClient
         immutable: true
-        values:
-          - :CONSENSUS_CLIENT_UNSPECIFIED
-          - :LIGHTHOUSE
+        enum_values:
+          - 'EXECUTION_CLIENT_UNSPECIFIED'
+          - 'GETH'
+          - 'ERIGON'
+      - name: 'consensusClient'
+        type: Enum
         description: |
           The consensus client
-      - !ruby/object:Api::Type::Boolean
-        name: apiEnableAdmin
         immutable: true
+        enum_values:
+          - 'CONSENSUS_CLIENT_UNSPECIFIED'
+          - 'LIGHTHOUSE'
+      - name: 'apiEnableAdmin'
+        type: Boolean
         description: |
           Enables JSON-RPC access to functions in the admin namespace. Defaults to false.
-      - !ruby/object:Api::Type::Boolean
-        name: apiEnableDebug
         immutable: true
+      - name: 'apiEnableDebug'
+        type: Boolean
         description: |
           Enables JSON-RPC access to functions in the debug namespace. Defaults to false.
-  - !ruby/object:Api::Type::Enum
-    name: blockchainType
-    immutable: true
-    values:
-      - :ETHEREUM
+        immutable: true
+  - name: 'blockchainType'
+    type: Enum
     description: |
       User-provided key-value pairs
+    immutable: true
+    enum_values:
+      - 'ETHEREUM'

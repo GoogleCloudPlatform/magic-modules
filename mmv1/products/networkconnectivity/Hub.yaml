@@ -1,6 +1,5 @@
-!ruby/object:Api::Resource
-# Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -12,94 +11,94 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Hub
-legacy_long_form_project: true
-base_url: projects/{{project}}/locations/global/hubs
-create_url: projects/{{project}}/locations/global/hubs?hubId={{name}}
-self_link: projects/{{project}}/locations/global/hubs/{{name}}
-update_verb: :PATCH
-update_mask: true
-references: !ruby/object:Api::Resource::ReferenceLinks
+---
+name: 'Hub'
+description: The NetworkConnectivity Hub resource
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/network-connectivity/docs/network-connectivity-center/concepts/overview'
   api: 'https://cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1beta/projects.locations.global.hubs'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+docs:
+base_url: 'projects/{{project}}/locations/global/hubs'
+self_link: 'projects/{{project}}/locations/global/hubs/{{name}}'
+create_url: 'projects/{{project}}/locations/global/hubs?hubId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'targetLink'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'status'
-    complete: 'DONE'
-    allowed:
-      - 'PENDING'
-      - 'RUNNING'
-      - 'DONE'
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error/errors'
     message: 'message'
+custom_code:
+legacy_long_form_project: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'network_connectivity_hub_basic'
+  - name: 'network_connectivity_hub_basic'
     primary_resource_id: 'primary'
     vars:
-      resource_name: "basic"
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'network_connectivity_hub_with_export_psc'
+      resource_name: 'basic'
+  - name: 'network_connectivity_hub_with_export_psc'
     primary_resource_id: 'primary'
     vars:
-      resource_name: "basic"
-description: The NetworkConnectivity Hub resource
-parameters: []
+      resource_name: 'basic'
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description: 'Immutable. The name of the hub. Hub names must be unique. They use the following form: `projects/{project_number}/locations/global/hubs/{hub_id}`'
-    default_from_api: true
-    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     required: true
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: createTime
+    default_from_api: true
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+  - name: 'createTime'
+    type: String
     description: Output only. The time the hub was created.
     output: true
-  - !ruby/object:Api::Type::String
-    name: updateTime
+  - name: 'updateTime'
+    type: String
     description: Output only. The time the hub was last updated.
     output: true
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: labels
+  - name: 'labels'
+    type: KeyValueLabels
     description: Optional labels in key:value format. For more information about labels, see [Requirements for labels](https://cloud.google.com/resource-manager/docs/creating-managing-labels#requirements).
-  - !ruby/object:Api::Type::String
-    name: description
+  - name: 'description'
+    type: String
     description: An optional description of the hub.
-  - !ruby/object:Api::Type::String
-    name: uniqueId
+  - name: 'uniqueId'
+    type: String
     description: Output only. The Google-generated UUID for the hub. This value is unique across all hub resources. If a hub is deleted and another with the same name is created, the new hub is assigned a different unique_id.
     output: true
-  - !ruby/object:Api::Type::String
-    name: state
+  - name: 'state'
+    type: String
     description: Output only. The current lifecycle state of this hub.
     output: true
     exactly_one_of:
-      - STATE_UNSPECIFIED
-      - CREATING
-      - ACTIVE
-      - DELETING
-    default_value: null
-  - !ruby/object:Api::Type::Array
-    name: routingVpcs
+      - 'STATE_UNSPECIFIED'
+      - 'CREATING'
+      - 'ACTIVE'
+      - 'DELETING'
+  - name: 'routingVpcs'
+    type: Array
     description: The VPC network associated with this hub's spokes. All of the VPN tunnels, VLAN attachments, and router appliance instances referenced by this hub's spokes must belong to this VPC network. This field is read-only. Network Connectivity Center automatically populates it based on the set of spokes attached to the hub.
     output: true
-    item_type: !ruby/object:Api::Type::NestedObject
-      name: HubRoutingVpcs
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: uri
+        - name: 'uri'
+          type: String
           description: The URI of the VPC network.
-  - !ruby/object:Api::Type::Boolean
-    name: exportPsc
+  - name: 'exportPsc'
+    type: Boolean
     description: Whether Private Service Connect transitivity is enabled for the hub. If true, Private Service Connect endpoints in VPC spokes attached to the hub are made accessible to other VPC spokes attached to the hub. The default value is false.
     default_from_api: true

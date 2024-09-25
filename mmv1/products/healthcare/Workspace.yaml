@@ -11,63 +11,70 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Workspace'
 description: |
   A Data Mapper workspace is used to configure Data Mapper access, permissions and data sources for mapping clinical patient data to the FHIR standard.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Create and manage Data Mapper workspaces ': 'https://cloud.google.com/healthcare-api/healthcare-data-engine/docs/manage-workspaces'
   api: 'https://cloud.google.com/healthcare-api/healthcare-data-engine/docs/reference/rest/v1/projects.locations.datasets.dataMapperWorkspaces'
+docs:
+id_format: '{{dataset}}/dataMapperWorkspaces/{{name}}'
 base_url: '{{dataset}}/dataMapperWorkspaces?workspaceId={{name}}'
 self_link: '{{dataset}}/dataMapperWorkspaces/{{name}}'
 create_url: '{{dataset}}/dataMapperWorkspaces?workspaceId={{name}}'
-update_verb: :PATCH
+update_verb: 'PATCH'
 update_mask: true
-id_format: '{{dataset}}/dataMapperWorkspaces/{{name}}'
-import_format: ['{{%dataset}}/dataMapperWorkspaces/{{name}}']
-skip_sweeper: true
+import_format:
+  - '{{%dataset}}/dataMapperWorkspaces/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'healthcare_workspace_basic'
+  - name: 'healthcare_workspace_basic'
     primary_resource_id: 'default'
     vars:
       dataset_name: 'example-dataset'
       workspace_name: 'example-dm-workspace'
       source_project_id: 'example-data-source-project-id'
 parameters:
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'dataset'
+  - name: 'dataset'
+    type: ResourceRef
     description: |
       Identifies the dataset addressed by this request. Must be in the format
       'projects/{project}/locations/{location}/datasets/{dataset}'
+    url_param_only: true
     required: true
     immutable: true
     resource: 'Dataset'
     imports: 'selfLink'
-    url_param_only: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       The name of the workspace, in the format 'projects/{projectId}/locations/{location}/datasets/{datasetId}/dataMapperWorkspaces/{workspaceId}'
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-  - !ruby/object:Api::Type::NestedObject
-    name: 'settings'
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+  - name: 'settings'
+    type: NestedObject
     description: |
       Settings associated with this workspace.
     required: true
     properties:
-      - !ruby/object:Api::Type::Array
-        name: 'dataProjectIds'
+      - name: 'dataProjectIds'
+        type: Array
         description: |
           Project IDs for data projects hosted in a workspace.
         required: true
-        item_type: Api::Type::String
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+        item_type:
+          type: String
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       The user labels. An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }
     required: false

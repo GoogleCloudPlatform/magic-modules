@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,47 +11,50 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'SyncAuthorization'
-self_link: 'organizations/{{name}}:getSyncAuthorization'
-base_url: ''
-create_url: 'organizations/{{name}}:setSyncAuthorization'
-update_url: 'organizations/{{name}}:setSyncAuthorization'
-read_verb: :POST
-update_verb: :POST
 description: |
   Authorize the Synchronizer to download environment data from the control plane.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Enable Synchronizer access': 'https://cloud.google.com/apigee/docs/hybrid/v1.8/synchronizer-access#enable-synchronizer-access'
   api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations#getsyncauthorization'
-
+docs:
 id_format: 'organizations/{{name}}/syncAuthorization'
-import_format: ['organizations/{{name}}/syncAuthorization']
-skip_delete: true
+base_url: ''
+self_link: 'organizations/{{name}}:getSyncAuthorization'
+create_url: 'organizations/{{name}}:setSyncAuthorization'
+update_url: 'organizations/{{name}}:setSyncAuthorization'
+update_verb: 'POST'
+read_verb: 'POST'
+exclude_delete: true
+import_format:
+  - 'organizations/{{name}}/syncAuthorization'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'apigee_sync_authorization_basic_test'
+  - name: 'apigee_sync_authorization_basic_test'
     primary_resource_id: 'apigee_sync_authorization'
     vars:
       account_id: 'my-account'
       project_id: 'my-project'
     test_env_vars:
-      org_id: :ORG_ID
-      billing_account: :BILLING_ACCT
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    required: true
+  - name: 'name'
+    type: String
     description: |
       Name of the Apigee organization.
     url_param_only: true
+    required: true
     immutable: true
 properties:
-  - !ruby/object:Api::Type::Array
-    name: 'identities'
-    required: true
-    send_empty_value: true
+  - name: 'identities'
+    type: Array
     description: |
       Array of service accounts to grant access to control plane resources, each specified using the following format: `serviceAccount:service-account-name`.
 
@@ -60,9 +63,13 @@ properties:
       You might specify multiple service accounts, for example, if you have multiple environments and wish to assign a unique service account to each one.
 
       The service accounts must have **Apigee Synchronizer Manager** role. See also [Create service accounts](https://cloud.google.com/apigee/docs/hybrid/v1.8/sa-about#create-the-service-accounts).
-    item_type: Api::Type::String
-  - !ruby/object:Api::Type::Fingerprint
-    name: 'etag'
+    required: true
+    send_empty_value: true
+    item_type:
+      type: String
+  - name: 'etag'
+    type: Fingerprint
     description: |
       Entity tag (ETag) used for optimistic concurrency control as a way to help prevent simultaneous updates from overwriting each other.
       Used internally during updates.
+    output: true

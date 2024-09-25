@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,85 +11,88 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Instance'
-min_version: beta
-base_url: projects/{{project}}/instances/
-self_link: projects/{{project}}/instances/{{instance_id}}
-create_url: projects/{{project}}/instances?instanceId={{instance_id}}
 description: An Instance is an installation of an Extension into a user's project.
-references: !ruby/object:Api::Resource::ReferenceLinks
+min_version: 'beta'
+references:
   guides:
     'Official Documentation': 'https://firebase.google.com/products/extensions'
+docs:
+base_url: 'projects/{{project}}/instances/'
+self_link: 'projects/{{project}}/instances/{{instance_id}}'
+create_url: 'projects/{{project}}/instances?instanceId={{instance_id}}'
+update_verb: 'PATCH'
+update_mask: true
   # TODO: add API field once documentation is ready
 import_format:
-  [
-    'projects/{{project}}/instances/{{instance_id}}',
-    '{{project}}/{{instance_id}}',
-    '{{instance_id}}',
-  ]
-async: !ruby/object:Api::OpAsync
+  - 'projects/{{project}}/instances/{{instance_id}}'
+  - '{{project}}/{{instance_id}}'
+  - '{{instance_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
   actions: ['create', 'update', 'delete']
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
     resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
+  error:
     path: 'error'
     message: 'message'
-autogen_async: true
-update_verb: :PATCH
-update_mask: true
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'firebase_extentions_instance_resize_image'
-    min_version: 'beta'
+  - name: 'firebase_extentions_instance_resize_image'
     primary_resource_id: 'resize_image'
+    min_version: 'beta'
     vars:
       # using a hyphen "-"" because underscore is not a valid instance ID
       instance-id: 'storage-resize-images'
       bucket_id: 'bucket-id'
       service-account-id: 's-a'
     test_env_vars:
-      project_id: :PROJECT_NAME
+      project_id: 'PROJECT_NAME'
     test_vars_overrides:
-      location: '"us-central1"'
+      'location': '"us-central1"'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'instance_id'
+  - name: 'instance_id'
+    type: String
     description: |
       The ID to use for the Extension Instance, which will become the final
       component of the instance's name.
+    min_version: 'beta'
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description: |
       The fully-qualified resource name of the Extension Instance.
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::Time
-    name: createTime
+  - name: 'createTime'
+    type: Time
     description: The time at which the Extension Instance was created.
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::Time
-    name: updateTime
+  - name: 'updateTime'
+    type: Time
     description: The time at which the Extension Instance was updated.
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::NestedObject
-    name: config
+  - name: 'config'
+    type: NestedObject
     description: |
       The current Config of the Extension Instance.
+    min_version: 'beta'
     required: true
     update_mask_fields:
       - 'config.params'
@@ -99,60 +102,70 @@ properties:
       - 'config.allowed_event_types'
       - 'config.eventarc_channel'
     properties:
-      - !ruby/object:Api::Type::String
-        name: name
+      - name: 'name'
+        type: String
         description: The unique identifier for this configuration.
+        min_version: 'beta'
         output: true
-      - !ruby/object:Api::Type::Time
-        name: createTime
+      - name: 'createTime'
+        type: Time
         description: The time at which the Extension Instance Config was created.
+        min_version: 'beta'
         output: true
-      - !ruby/object:Api::Type::KeyValuePairs
-        name: params
+      - name: 'params'
+        type: KeyValuePairs
         description: |
           Environment variables that may be configured for the Extension
+        min_version: 'beta'
         required: true
-      - !ruby/object:Api::Type::KeyValuePairs
-        name: systemParams
+      - name: 'systemParams'
+        type: KeyValuePairs
         description: |
           Params whose values are only available at deployment time.
           Unlike other params, these will not be set as environment variables on
           functions. See a full list of system parameters at
           https://firebase.google.com/docs/extensions/publishers/parameters#system_parameters
+        min_version: 'beta'
         default_from_api: true
-      - !ruby/object:Api::Type::String
-        name: extensionRef
+      - name: 'extensionRef'
+        type: String
         description: The ref of the Extension from the Registry (e.g. publisher-id/awesome-extension)
+        min_version: 'beta'
         # Installing from an extensionRef is the only way for now
         required: true
         immutable: true
-      - !ruby/object:Api::Type::String
-        name: extensionVersion
+      - name: 'extensionVersion'
+        type: String
         description: |
           The version of the Extension from the Registry (e.g. 1.0.3). If left blank, latest is assumed.
+        min_version: 'beta'
         default_from_api: true
-      - !ruby/object:Api::Type::Array
-        item_type: Api::Type::String
-        name: allowedEventTypes
+      - name: 'allowedEventTypes'
+        type: Array
         description: |
           List of extension events selected by consumer that extension is allowed to
           emit, identified by their types.
-      - !ruby/object:Api::Type::String
-        name: eventarcChannel
+        min_version: 'beta'
+        item_type:
+          type: String
+      - name: 'eventarcChannel'
+        type: String
         description: |
           Fully qualified Eventarc resource name that consumers should use for event triggers.
+        min_version: 'beta'
         default_from_api: true
-      - !ruby/object:Api::Type::String
-        name: populatedPostinstallContent
+      - name: 'populatedPostinstallContent'
+        type: String
         description: |
           Postinstall instructions to be shown for this Extension, with
           template strings representing function and parameter values substituted
           with actual values. These strings include: ${param:FOO},
           ${function:myFunc.url},
           ${function:myFunc.name}, and ${function:myFunc.location}
+        min_version: 'beta'
         output: true
-  - !ruby/object:Api::Type::Enum
-    name: state
+  - name: 'state'
+    type: Enum
     description: |
       The current state of the Extension Instance.
         DEPLOYING:
@@ -169,86 +182,103 @@ properties:
         PAUSED:
           The Extension's resources have been removed from the project, but the
           Config remains so the Instance can be restored.
+    min_version: 'beta'
     output: true
-    values:
-      - :DEPLOYING
-      - :UNINSTALLING
-      - :ACTIVE
-      - :ERRORED
-      - :PAUSED
-  - !ruby/object:Api::Type::NestedObject
-    name: errorStatus
-    output: true
+    enum_values:
+      - 'DEPLOYING'
+      - 'UNINSTALLING'
+      - 'ACTIVE'
+      - 'ERRORED'
+      - 'PAUSED'
+  - name: 'errorStatus'
+    type: NestedObject
     description: |
       If this Instance has `state: ERRORED`, the error messages
       will be found here.
+    min_version: 'beta'
+    output: true
     properties:
-      - !ruby/object:Api::Type::Integer
-        name: 'code'
+      - name: 'code'
+        type: Integer
         description: |
           The status code, which should be an enum value of google.rpc.Code.
-      - !ruby/object:Api::Type::String
-        name: 'message'
+        min_version: 'beta'
+      - name: 'message'
+        type: String
         description: |
           A developer-facing error message, which should be in English.
-      - !ruby/object:Api::Type::Array
-        name: 'details'
+        min_version: 'beta'
+      - name: 'details'
+        type: Array
         description: |
           A list of messages that carry the error details.
-        item_type: Api::Type::KeyValuePairs
-  - !ruby/object:Api::Type::String
-    name: serviceAccountEmail
+        min_version: 'beta'
+        item_type:
+          type: KeyValuePairs
+  - name: 'serviceAccountEmail'
+    type: String
     description: |
       The email of the service account to be used at runtime by compute resources
       created for the operation of the Extension instance.
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::String
-    name: lastOperationName
-    output: true
+  - name: 'lastOperationName'
+    type: String
     description: |
       The name of the last operation that acted on this Extension
       Instance
-  - !ruby/object:Api::Type::String
-    name: lastOperationType
+    min_version: 'beta'
     output: true
+  - name: 'lastOperationType'
+    type: String
     description: |
       The type of the last operation that acted on the Extension Instance.
-  - !ruby/object:Api::Type::Fingerprint
-    name: etag
+    min_version: 'beta'
+    output: true
+  - name: 'etag'
+    type: Fingerprint
     description: |
       A weak etag that is computed by the server based on other configuration
       values and may be sent on update and delete requests to ensure the
       client has an up-to-date value before proceeding.
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::NestedObject
-    name: runtimeData
+  - name: 'runtimeData'
+    type: NestedObject
     description: Data set by the extension instance at runtime.
+    min_version: 'beta'
     output: true
     properties:
-      - !ruby/object:Api::Type::Time
-        name: stateUpdateTime
+      - name: 'stateUpdateTime'
+        type: Time
         description: The time of the last state update.
-      - !ruby/object:Api::Type::NestedObject
-        name: processingState
+        min_version: 'beta'
+      - name: 'processingState'
+        type: NestedObject
         description: The processing state for the extension instance
+        min_version: 'beta'
         properties:
-          - !ruby/object:Api::Type::String
-            name: state
+          - name: 'state'
+            type: String
             description: The processing state of the extension instance.
-          - !ruby/object:Api::Type::String
-            name: detailMessage
+            min_version: 'beta'
+          - name: 'detailMessage'
+            type: String
             description: |
               Details about the processing. e.g. This could include the type of
               processing in progress or it could list errors or failures.
               This information will be shown in the console on the detail page
               for the extension instance.
-      - !ruby/object:Api::Type::NestedObject
-        name: fatalError
+            min_version: 'beta'
+      - name: 'fatalError'
+        type: NestedObject
         description: The fatal error state for the extension instance
+        min_version: 'beta'
         properties:
-          - !ruby/object:Api::Type::String
-            name: errorMessage
+          - name: 'errorMessage'
+            type: String
             description: |
               The error message. This is set by the extension developer to give
               more detail on why the extension is unusable and must be re-installed
               or reconfigured.
+            min_version: 'beta'

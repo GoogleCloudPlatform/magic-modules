@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,43 +11,46 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Reservation'
 description: |
   A named resource representing a shared pool of capacity.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Managing Reservations': 'https://cloud.google.com/pubsub/lite/docs/reservations'
   api: 'https://cloud.google.com/pubsub/lite/docs/reference/rest/v1/admin.projects.locations.reservations'
-base_url: projects/{{project}}/locations/{{region}}/reservations
-create_url: projects/{{project}}/locations/{{region}}/reservations?reservationId={{name}}
-update_verb: :PATCH
+docs:
+base_url: 'projects/{{project}}/locations/{{region}}/reservations'
+create_url: 'projects/{{project}}/locations/{{region}}/reservations?reservationId={{name}}'
+update_url: 'projects/{{project}}/locations/{{region}}/reservations/{{name}}'
+update_verb: 'PATCH'
 update_mask: true
-update_url: projects/{{project}}/locations/{{region}}/reservations/{{name}}
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'pubsub_lite_reservation_basic'
+  - name: 'pubsub_lite_reservation_basic'
     primary_resource_id: 'example'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-example-reservation%s\",
-      context[\"\
-      random_suffix\"])"
+    primary_resource_name: 'fmt.Sprintf("tf-test-example-reservation%s", context["random_suffix"])'
     vars:
       reservation_name: 'example-reservation'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: region
+  - name: 'region'
+    type: String
     description: The region of the pubsub lite reservation.
     url_param_only: true
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: 'Name of the reservation.'
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
 properties:
-  - !ruby/object:Api::Type::Integer
-    name: 'throughputCapacity'
+  - name: 'throughputCapacity'
+    type: Integer
     description: |
       The reserved throughput capacity. Every unit of throughput capacity is
       equivalent to 1 MiB/s of published messages or 2 MiB/s of subscribed

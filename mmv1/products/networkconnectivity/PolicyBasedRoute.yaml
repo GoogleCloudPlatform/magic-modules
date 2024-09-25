@@ -1,191 +1,203 @@
-# Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the 'License');
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an 'AS IS' BASIS,
+# distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'PolicyBasedRoute'
-base_url: 'projects/{{project}}/locations/global/policyBasedRoutes'
-create_url: 'projects/{{project}}/locations/global/policyBasedRoutes?policyBasedRouteId={{name}}'
-self_link: 'projects/{{project}}/locations/global/policyBasedRoutes/{{name}}'
-immutable: true
 description:
   'Policy-based Routes are more powerful routes that route L4 network traffic based on not just destination IP, but also source IP, protocol and more. A Policy-based Route always take precedence when it conflicts with other types of routes.'
-references: !ruby/object:Api::Resource::ReferenceLinks
-  api: 'https://cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1/projects.locations.global.policyBasedRoutes'
+references:
   guides:
     'Use policy-based routes': 'https://cloud.google.com/vpc/docs/use-policy-based-routes#api'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+  api: 'https://cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1/projects.locations.global.policyBasedRoutes'
+docs:
+base_url: 'projects/{{project}}/locations/global/policyBasedRoutes'
+self_link: 'projects/{{project}}/locations/global/policyBasedRoutes/{{name}}'
+create_url: 'projects/{{project}}/locations/global/policyBasedRoutes?policyBasedRouteId={{name}}'
+immutable: true
+timeouts:
+  insert_minutes: 30
+  update_minutes: 30
+  delete_minutes: 30
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-    timeouts: !ruby/object:Api::Timeouts
+    timeouts:
       insert_minutes: 30
       update_minutes: 30
       delete_minutes: 30
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error'
     message: 'message'
-autogen_async: true
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'network_connectivity_policy_based_route_basic'
+  - name: 'network_connectivity_policy_based_route_basic'
     primary_resource_id: 'default'
     vars:
       pbr_name: 'my-pbr'
       network_name: 'my-network'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'network_connectivity_policy_based_route_full'
+  - name: 'network_connectivity_policy_based_route_full'
     primary_resource_id: 'default'
     vars:
       pbr_name: 'my-pbr'
       network_name: 'my-network'
       ilb_name: 'my-ilb'
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    required: true
-    url_param_only: true
+  - name: 'name'
+    type: String
     description: |
       The name of the policy based route.
-  - !ruby/object:Api::Type::String
-    name: 'description'
+    url_param_only: true
+    required: true
+  - name: 'description'
+    type: String
     description: |
       An optional description of this resource.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       User-defined labels.
-  - !ruby/object:Api::Type::String
-    name: 'network'
-    required: true
+  - name: 'network'
+    type: String
     description: |
       Fully-qualified URL of the network that this route applies to, for example: projects/my-project/global/networks/my-network.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'filter'
     required: true
+  - name: 'filter'
+    type: NestedObject
     description: |
       The filter to match L4 traffic.
+    required: true
     properties:
-      - !ruby/object:Api::Type::Enum
-        name: 'protocolVersion'
-        required: true
+      - name: 'protocolVersion'
+        type: Enum
         description: |
           Internet protocol versions this policy-based route applies to.
-        values:
-          - :IPV4
-      - !ruby/object:Api::Type::String  # probably could have been an enum, but it's a string in the API
-        name: 'ipProtocol'
-        default_value: "ALL"
+        required: true
+        enum_values:
+          - 'IPV4'
+ # probably could have been an enum, but it's a string in the API
+      - name: 'ipProtocol'
+        type: String
         description: |
           The IP protocol that this policy-based route applies to. Valid values are 'TCP', 'UDP', and 'ALL'. Default is 'ALL'.
-      - !ruby/object:Api::Type::String
-        name: 'srcRange'
-        default_value: "0.0.0.0/0"
+        default_value: "ALL"
+      - name: 'srcRange'
+        type: String
         description: |
           The source IP range of outgoing packets that this policy-based route applies to. Default is "0.0.0.0/0" if protocol version is IPv4.
-      - !ruby/object:Api::Type::String
-        name: 'destRange'
         default_value: "0.0.0.0/0"
+      - name: 'destRange'
+        type: String
         description: |
           The destination IP range of outgoing packets that this policy-based route applies to. Default is "0.0.0.0/0" if protocol version is IPv4.
-  - !ruby/object:Api::Type::Enum
-    name: 'nextHopOtherRoutes'
-    exactly_one_of:  # next_hop union
-      - next_hop_ilb_ip
-      - next_hop_other_routes
+        default_value: "0.0.0.0/0"
+  - name: 'nextHopOtherRoutes'
+    type: Enum
     description: |
       Other routes that will be referenced to determine the next hop of the packet.
-    values:
-      - :DEFAULT_ROUTING
-  - !ruby/object:Api::Type::String
-    name: 'nextHopIlbIp'
-    exactly_one_of:  # next_hop union
-      - next_hop_ilb_ip
-      - next_hop_other_routes
+ # next_hop union
+    exactly_one_of:
+      - 'next_hop_ilb_ip'
+      - 'next_hop_other_routes'
+    enum_values:
+      - 'DEFAULT_ROUTING'
+  - name: 'nextHopIlbIp'
+    type: String
     description: |
       The IP address of a global-access-enabled L4 ILB that is the next hop for matching packets.
-  - !ruby/object:Api::Type::Integer
-    name: 'priority'
-    default_value: 1000
+ # next_hop union
+    exactly_one_of:
+      - 'next_hop_ilb_ip'
+      - 'next_hop_other_routes'
+  - name: 'priority'
+    type: Integer
     description: |
       The priority of this policy-based route. Priority is used to break ties in cases where there are more than one matching policy-based routes found. In cases where multiple policy-based routes are matched, the one with the lowest-numbered priority value wins. The default value is 1000. The priority value must be from 1 to 65535, inclusive.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'virtualMachine'
-    conflicts:  # target union
-      - interconnect_attachment
+    default_value: 1000
+  - name: 'virtualMachine'
+    type: NestedObject
     description: |
       VM instances to which this policy-based route applies to.
+ # target union
+    conflicts:
+      - interconnect_attachment
     properties:
-      - !ruby/object:Api::Type::Array
-        name: 'tags'
-        required: true  # optional in API docs, but that doesn't make sense here
+      - name: 'tags'
+        type: Array
         description: |
           A list of VM instance tags that this policy-based route applies to. VM instances that have ANY of tags specified here will install this PBR.
-        item_type: Api::Type::String
-  - !ruby/object:Api::Type::NestedObject
-    name: 'interconnectAttachment'
-    conflicts:  # target union
-      - virtual_machine
+ # optional in API docs, but that doesn't make sense here
+        required: true
+        item_type:
+          type: String
+  - name: 'interconnectAttachment'
+    type: NestedObject
     description: |
       The interconnect attachments that this policy-based route applies to.
+ # target union
+    conflicts:
+      - virtual_machine
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'region'
-        required: true  # optional in API docs, but that doesn't make sense here
+      - name: 'region'
+        type: String
         description: |
           Cloud region to install this policy-based route on for Interconnect attachments. Use `all` to install it on all Interconnect attachments.
-  - !ruby/object:Api::Type::Time
-    name: 'createTime'
-    output: true
+ # optional in API docs, but that doesn't make sense here
+        required: true
+  - name: 'createTime'
+    type: Time
     description: |
       Time when the policy-based route was created.
-  - !ruby/object:Api::Type::Time
-    name: 'updateTime'
     output: true
+  - name: 'updateTime'
+    type: Time
     description: |
       Time when the policy-based route was created.
-  - !ruby/object:Api::Type::Time
-    name: 'kind'
     output: true
+  - name: 'kind'
+    type: Time
     description: |
       Type of this resource.
-  - !ruby/object:Api::Type::Array
-    name: 'warnings'
     output: true
+  - name: 'warnings'
+    type: Array
     description: |
        If potential misconfigurations are detected for this route, this field will be populated with warning messages.
-    item_type: !ruby/object:Api::Type::NestedObject
+    output: true
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String  # technically enum, but doesn't matter for output fields
-          name: 'code'
-          output: true
+ # technically enum, but doesn't matter for output fields
+        - name: 'code'
+          type: String
           description: |
             A warning code, if applicable.
-        - !ruby/object:Api::Type::KeyValuePairs
-          name: 'data'
           output: true
+        - name: 'data'
+          type: KeyValuePairs
           description: |
             Metadata about this warning in key: value format. The key should provides more detail on the warning being returned. For example, for warnings where there are no results in a list request for a particular zone, this key might be scope and the key value might be the zone name. Other examples might be a key indicating a deprecated resource and a suggested replacement.
-        - !ruby/object:Api::Type::String
-          name: 'warningMessage'
           output: true
+        - name: 'warningMessage'
+          type: String
           description: |
             A human-readable description of the warning code.
+          output: true

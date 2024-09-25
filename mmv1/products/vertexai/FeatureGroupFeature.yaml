@@ -11,96 +11,88 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
-name: FeatureGroupFeature
-base_url: 'projects/{{project}}/locations/{{region}}/featureGroups/{{feature_group}}/features'
-create_url: 'projects/{{project}}/locations/{{region}}/featureGroups/{{feature_group}}/features?featureId={{name}}'
-self_link: 'projects/{{project}}/locations/{{region}}/featureGroups/{{feature_group}}/features/{{name}}'
-update_verb: :PATCH
-update_mask: true
-create_verb: :POST
-references: !ruby/object:Api::Resource::ReferenceLinks
+---
+name: 'FeatureGroupFeature'
+description: Vertex AI Feature Group Feature is feature metadata information.
+references:
   guides:
     'Creating a Feature': 'https://cloud.google.com/vertex-ai/docs/featurestore/latest/create-feature'
   api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.featureGroups.features'
-async: !ruby/object:Api::OpAsync
-  actions:
-    - create
-    - delete
-    - update
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+docs:
+base_url: 'projects/{{project}}/locations/{{region}}/featureGroups/{{feature_group}}/features'
+self_link: 'projects/{{project}}/locations/{{region}}/featureGroups/{{feature_group}}/features/{{name}}'
+create_url: 'projects/{{project}}/locations/{{region}}/featureGroups/{{feature_group}}/features?featureId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{region}}/featureGroups/{{feature_group}}/features/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
     resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
+  error:
     path: 'error'
     message: 'message'
-description: Vertex AI Feature Group Feature is feature metadata information.
-import_format:
-  [
-    'projects/{{project}}/locations/{{region}}/featureGroups/{{feature_group}}/features/{{name}}'
-  ]
-autogen_async: false
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: vertex_ai_feature_group_feature
-    primary_resource_id: feature_group_feature
+  - name: 'vertex_ai_feature_group_feature'
+    primary_resource_id: 'feature_group_feature'
     vars:
-      job_id: job_load
-      name: example_feature
-      feature_group_name: example_feature_group
-  - !ruby/object:Provider::Terraform::Examples
-    name: vertex_ai_feature_group_feature_with_version_column_name
-    primary_resource_id: feature_group_feature
+      job_id: 'job_load'
+      name: 'example_feature'
+      feature_group_name: 'example_feature_group'
+  - name: 'vertex_ai_feature_group_feature_with_version_column_name'
+    primary_resource_id: 'feature_group_feature'
     vars:
-      job_id: job_load
-      name: example_feature
-      feature_group_name: example_feature_group
-    skip_docs: true
+      job_id: 'job_load'
+      name: 'example_feature'
+      feature_group_name: 'example_feature_group'
+    exclude_docs: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: featureGroup
+  - name: 'featureGroup'
+    type: String
     description: The name of the Feature Group.
     url_param_only: true
-    immutable: true
     required: true
-  - !ruby/object:Api::Type::String
-    name: 'region'
+    immutable: true
+  - name: 'region'
+    type: String
     description: The region for the resource. It should be the same as the feature group's region.
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description: The resource name of the Feature Group Feature.
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
-  - !ruby/object:Api::Type::String
-    name: createTime
-    output: true
+  - name: 'createTime'
+    type: String
     description: The timestamp of when the FeatureGroup was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-  - !ruby/object:Api::Type::String
-    name: updateTime
     output: true
+  - name: 'updateTime'
+    type: String
     description: The timestamp of when the FeatureGroup was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: labels
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
     description: The labels with user-defined metadata to organize your FeatureGroup.
-  - !ruby/object:Api::Type::String
-    name: description
+  - name: 'description'
+    type: String
     description: The description of the FeatureGroup.
-  - !ruby/object:Api::Type::String
-    name: versionColumnName
+  - name: 'versionColumnName'
+    type: String
     description: The name of the BigQuery Table/View column hosting data for this version. If no value is provided, will use featureId.
     default_from_api: true

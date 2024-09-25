@@ -11,154 +11,167 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
-base_url: projects/{{project}}/locations/{{location}}/clusters
-create_url: projects/{{project}}/locations/{{location}}/clusters?clusterId={{cluster_id}}
-self_link: projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}
-id_format: projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}
-import_format:
-  - projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}
-name: Cluster
+---
+name: 'Cluster'
 description: A Managed Service for Apache Kafka cluster. Apache Kafka is a trademark owned by the Apache Software Foundation.
-min_version: beta
-update_verb: :PATCH
+min_version: 'beta'
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/clusters'
+self_link: 'projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/clusters?clusterId={{cluster_id}}'
+update_verb: 'PATCH'
 update_mask: true
-autogen_async: true
-timeouts: !ruby/object:Api::Timeouts
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}'
+timeouts:
   insert_minutes: 60
   update_minutes: 30
   delete_minutes: 30
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: "managedkafka_cluster_basic"
-    primary_resource_id: "example"
-    min_version: beta
+  - name: 'managedkafka_cluster_basic'
+    primary_resource_id: 'example'
+    min_version: 'beta'
     vars:
       cluster_id: 'my-cluster'
       key_name: 'example-key'
       keyring_name: 'example-keyring'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'managedkafka_cluster_cmek'
+  - name: 'managedkafka_cluster_cmek'
     primary_resource_id: 'example'
-    min_version: beta
-    external_providers: ["time"]
+    min_version: 'beta'
     vars:
       cluster_id: 'my-cluster'
       key_name: 'example-key'
       key_ring_name: 'example-key-ring'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: name
-    base_url: "{{op_id}}"
-    wait_ms: 1000
-    timeouts:
-  result: !ruby/object:Api::OpAsync::Result
-    path: response
-    resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: done
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
-    path: error
-    message: message
+    external_providers: ["time"]
 parameters:
-  - !ruby/object:Api::Type::String
-    name: location
+  - name: 'location'
+    type: String
     description: "ID of the location of the Kafka resource. See
       https://cloud.google.com/managed-kafka/docs/locations for a list of
       supported locations."
+    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: clusterId
+  - name: 'clusterId'
+    type: String
     description: "The ID to use for the cluster, which will become the final
       component of the cluster's name. The ID must be 1-63 characters long, and match
       the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` to comply with RFC 1035. This
       value is structured like: `my-cluster-id`."
+    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
 properties:
-  - !ruby/object:Api::Type::NestedObject
-    name: gcpConfig
+  - name: 'gcpConfig'
+    type: NestedObject
     description: "Configuration properties for a Kafka cluster deployed to Google Cloud Platform."
+    min_version: 'beta'
     required: true
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: accessConfig
+      - name: 'accessConfig'
+        type: NestedObject
         description: "The configuration of access to the Kafka cluster."
+        min_version: 'beta'
         required: true
         properties:
-          - !ruby/object:Api::Type::Array
-            name: networkConfigs
+          - name: 'networkConfigs'
+            type: Array
             description: "Virtual Private Cloud (VPC) subnets where IP addresses for the Kafka
               cluster are allocated. To make the cluster available in a VPC, you must specify at least
               one subnet per network. You must specify between 1 and 10 subnets.
               Additional subnets may be specified with additional `network_configs` blocks."
+            min_version: 'beta'
             required: true
-            item_type: !ruby/object:Api::Type::NestedObject
+            item_type:
+              type: NestedObject
               properties:
-                - !ruby/object:Api::Type::String
-                  name: subnet
+                - name: 'subnet'
+                  type: String
                   description: "Name of the VPC subnet from which the cluster is accessible. Both broker and
                     bootstrap server IP addresses and DNS entries are automatically created
                     in the subnet. The subnet must be located in the same region as the
                     cluster. The project may differ. The name of the subnet must be
                     in the format `projects/PROJECT_ID/regions/REGION/subnetworks/SUBNET`."
+                  min_version: 'beta'
                   required: true
                   diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
-      - !ruby/object:Api::Type::String
-        name: kmsKey
+      - name: 'kmsKey'
+        type: String
         description: "The Cloud KMS Key name to use for encryption.
           The key must be located in the same region as the cluster and cannot be changed.
           Must be in the format `projects/PROJECT_ID/locations/LOCATION/keyRings/KEY_RING/cryptoKeys/KEY`."
+        min_version: 'beta'
         immutable: true
         diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description: "The name of the cluster. Structured like: `projects/PROJECT_ID/locations/LOCATION/clusters/CLUSTER_ID`."
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::String
-    name: createTime
+  - name: 'createTime'
+    type: String
     description: "The time when the cluster was created."
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::String
-    name: updateTime
+  - name: 'updateTime'
+    type: String
     description: "The time when the cluster was last updated."
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: labels
+  - name: 'labels'
+    type: KeyValueLabels
     description: "List of label KEY=VALUE pairs to add. Keys must start with a lowercase
         character and contain only hyphens (-), underscores (\_), lowercase
         characters, and numbers. Values must contain only hyphens (-),
         underscores (\_), lowercase characters, and numbers."
-  - !ruby/object:Api::Type::NestedObject
-    name: capacityConfig
+    min_version: 'beta'
+  - name: 'capacityConfig'
+    type: NestedObject
     description: "A capacity configuration of a Kafka cluster."
+    min_version: 'beta'
     required: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: vcpuCount
+      - name: 'vcpuCount'
+        type: String
         description: "The number of vCPUs to provision for the cluster. The minimum is 3."
+        min_version: 'beta'
         required: true
-      - !ruby/object:Api::Type::String
-        name: memoryBytes
+      - name: 'memoryBytes'
+        type: String
         description: "The memory to provision for the cluster in bytes. The value must be
           between 1 GiB and 8 GiB per vCPU. Ex. 1024Mi, 4Gi."
+        min_version: 'beta'
         required: true
-  - !ruby/object:Api::Type::NestedObject
-    name: rebalanceConfig
+  - name: 'rebalanceConfig'
+    type: NestedObject
     description: "Defines rebalancing behavior of a Kafka cluster."
+    min_version: 'beta'
     properties:
-      - !ruby/object:Api::Type::String
-        name: mode
+      - name: 'mode'
+        type: String
         description: "The rebalance behavior for the cluster. When not specified,
           defaults to `NO_REBALANCE`. Possible values: `MODE_UNSPECIFIED`, `NO_REBALANCE`, `AUTO_REBALANCE_ON_SCALE_UP`."
-  - !ruby/object:Api::Type::String
-    name: state
+        min_version: 'beta'
+  - name: 'state'
+    type: String
     description: "The current state of the cluster. Possible values: `STATE_UNSPECIFIED`, `CREATING`, `ACTIVE`, `DELETING`."
+    min_version: 'beta'
     output: true

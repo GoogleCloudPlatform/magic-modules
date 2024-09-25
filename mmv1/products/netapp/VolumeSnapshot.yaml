@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'VolumeSnapshot'
 description: |
   NetApp Volumes helps you manage your data usage with snapshots that can quickly restore lost data.
@@ -20,47 +20,34 @@ description: |
   time, snapshots usually consume more space as they get older.
   NetApp Volumes volumes use just-in-time copy-on-write so that unmodified files in snapshots don't
   consume any of the volume's capacity.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Documentation': 'https://cloud.google.com/netapp/volumes/docs/configure-and-use/volume-snapshots/overview'
   api: 'https://cloud.google.com/netapp/volumes/docs/reference/rest/v1/projects.locations.volumes.snapshots'
-base_url: projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/snapshots
-self_link: projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/snapshots/{{name}}
-create_url: projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/snapshots?snapshotId={{name}}
-update_url: projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/snapshots/{{name}}
-update_verb: :PATCH
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/snapshots'
+self_link: 'projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/snapshots/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/snapshots?snapshotId={{name}}'
+update_url: 'projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/snapshots/{{name}}'
+update_verb: 'PATCH'
 update_mask: true
-# Skipping the sweeper since we need to sweep multiple regions
-skip_sweeper: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
 autogen_async: true
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
-parameters:
-  - !ruby/object:Api::Type::String
-    name: 'location'
-    required: true
-    immutable: true
-    url_param_only: true
-    description: |
-      Name of the snapshot location. Snapshots are child resources of volumes and live in the same location.
-  - !ruby/object:Api::Type::String
-    name: 'volume_name'
-    description: |
-      The name of the volume to create the snapshot in.
-    required: true
-    immutable: true
-    url_param_only: true
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    description:
-      The name of the snapshot.
-    required: true
-    immutable: true
-    url_param_only: true
+  result:
+    resource_inside_response: false
+custom_code:
+# Skipping the sweeper since we need to sweep multiple regions
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'volume_snapshot_create'
+  - name: 'volume_snapshot_create'
     primary_resource_id: 'test_snapshot'
     vars:
       volume_name: 'test-volume'
@@ -68,18 +55,40 @@ examples:
       network_name: 'test-network'
       snap_name: 'testvolumesnap'
     test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      Name of the snapshot location. Snapshots are child resources of volumes and live in the same location.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'volume_name'
+    type: String
+    description: |
+      The name of the volume to create the snapshot in.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'name'
+    type: String
+    description:
+      The name of the snapshot.
+    url_param_only: true
+    required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: |
       Description for the snapshot.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       Labels as key value pairs. Example: `{ "owner": "Bob", "department": "finance", "purpose": "testing" }`.
-  - !ruby/object:Api::Type::Integer
-    name: 'usedBytes'
+  - name: 'usedBytes'
+    type: Integer
     description: |
       Storage used to store blocks unique to this snapshot.
     output: true

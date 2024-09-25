@@ -11,15 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'ProjectSccBigQueryExport'
-base_url: projects/{{project}}/bigQueryExports
-self_link: projects/{{project}}/bigQueryExports/{{big_query_export_id}}
-create_url: projects/{{project}}/bigQueryExports?bigQueryExportId={{big_query_export_id}}
-update_verb: :PATCH
-update_mask: true
-import_format:
-  - 'projects/{{project}}/bigQueryExports/{{big_query_export_id}}'
 description: |
   A Cloud Security Command Center (Cloud SCC) Big Query Export Config.
   It represents exporting Security Command Center data, including assets, findings, and security marks
@@ -27,81 +20,93 @@ description: |
   ~> **Note:** In order to use Cloud SCC resources, your organization must be enrolled
   in [SCC Standard/Premium](https://cloud.google.com/security-command-center/docs/quickstart-security-command-center).
   Without doing so, you may run into errors during resource creation.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/security-command-center/docs/how-to-analyze-findings-in-big-query'
   api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v1/projects.bigQueryExports'
+docs:
+base_url: 'projects/{{project}}/bigQueryExports'
+self_link: 'projects/{{project}}/bigQueryExports/{{big_query_export_id}}'
+create_url: 'projects/{{project}}/bigQueryExports?bigQueryExportId={{big_query_export_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/bigQueryExports/{{big_query_export_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'scc_project_big_query_export_config_basic'
+  - name: 'scc_project_big_query_export_config_basic'
     primary_resource_id: 'custom_big_query_export_config'
-    external_providers: ["random", "time"]
-    skip_test: true
     vars:
       big_query_export_id: 'my-export'
       dataset: 'my-dataset'
       dataset_id: 'my_dataset_id'
       name: 'my-export'
     test_env_vars:
-      org_id: :ORG_ID
-      project: :PROJECT_NAME
+      org_id: 'ORG_ID'
+      project: 'PROJECT_NAME'
     ignore_read_extra:
       - 'project'
+    external_providers: ["random", "time"]
+    exclude_test: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: bigQueryExportId
-    required: true
-    immutable: true
-    url_param_only: true
+  - name: 'bigQueryExportId'
+    type: String
     description: |
       This must be unique within the organization.
+    url_param_only: true
+    required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
-    output: true
+  - name: 'name'
+    type: String
     description: |
       The resource name of this export, in the format
       `projects/{{project}}/bigQueryExports/{{big_query_export_id}}`.
       This field is provided in responses, and is ignored when provided in create requests.
-  - !ruby/object:Api::Type::String
-    name: description
+    output: true
+  - name: 'description'
+    type: String
     description: |
       The description of the notification config (max of 1024 characters).
-    validation: !ruby/object:Provider::Terraform::Validation
+    validation:
       function: 'validation.StringLenBetween(0, 1024)'
-  - !ruby/object:Api::Type::String
-    name: dataset
+  - name: 'dataset'
+    type: String
     description: |
       The dataset to write findings' updates to.
       Its format is "projects/[projectId]/datasets/[bigquery_dataset_id]".
       BigQuery Dataset unique ID must contain only letters (a-z, A-Z), numbers (0-9), or underscores (_).
-  - !ruby/object:Api::Type::String
-    name: createTime
-    output: true
+  - name: 'createTime'
+    type: String
     description: |
       The time at which the BigQuery export was created. This field is set by the server and will be ignored if provided on export on creation.
       A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
       Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
-  - !ruby/object:Api::Type::String
-    name: updateTime
     output: true
+  - name: 'updateTime'
+    type: String
     description: |
       The most recent time at which the BigQuery export was updated. This field is set by the server and will be ignored if provided on export creation or update.
       A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
       Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
-  - !ruby/object:Api::Type::String
-    name: mostRecentEditor
     output: true
+  - name: 'mostRecentEditor'
+    type: String
     description: |
       Email address of the user who last edited the BigQuery export.
       This field is set by the server and will be ignored if provided on export creation or update.
-  - !ruby/object:Api::Type::String
-    name: principal
     output: true
+  - name: 'principal'
+    type: String
     description: |
       The service account that needs permission to create table and upload data to the BigQuery dataset.
-  - !ruby/object:Api::Type::String
-    name: filter
+    output: true
+  - name: 'filter'
+    type: String
     description: |
       Expression that defines the filter to apply across create/update
       events of findings. The

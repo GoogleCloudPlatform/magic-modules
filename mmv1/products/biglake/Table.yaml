@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,123 +12,126 @@
 # limitations under the License.
 
 ---
-!ruby/object:Api::Resource
-name: "Table"
+name: 'Table'
 description: |
   Represents a table.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
-    "Manage open source metadata with BigLake Metastore": "https://cloud.google.com/bigquery/docs/manage-open-source-metadata#create_tables"
-  api: "https://cloud.google.com/bigquery/docs/reference/biglake/rest/v1/projects.locations.catalogs.databases.tables"
-base_url: "{{database}}/tables"
-self_link: "{{database}}/tables/{{name}}"
-create_url: "{{database}}/tables?tableId={{name}}"
-id_format: "{{database}}/tables/{{name}}"
-import_format: ["{{%database}}/tables/{{name}}"]
-update_verb: :PATCH
+    'Manage open source metadata with BigLake Metastore': 'https://cloud.google.com/bigquery/docs/manage-open-source-metadata#create_tables'
+  api: 'https://cloud.google.com/bigquery/docs/reference/biglake/rest/v1/projects.locations.catalogs.databases.tables'
+docs:
+id_format: '{{database}}/tables/{{name}}'
+base_url: '{{database}}/tables'
+self_link: '{{database}}/tables/{{name}}'
+create_url: '{{database}}/tables?tableId={{name}}'
+update_verb: 'PATCH'
 update_mask: true
+import_format:
+  - '{{%database}}/tables/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: "biglake_table"
-    primary_resource_id: "table"
+  - name: 'biglake_table'
+    primary_resource_id: 'table'
     vars:
-      name: "my_table"
-      catalog: "my_catalog"
-      database: "my_database"
-      bucket: "my_bucket"
-
+      name: 'my_table'
+      catalog: 'my_catalog'
+      database: 'my_database'
+      bucket: 'my_bucket'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: "name"
-    required: true
-    immutable: true
-    url_param_only: true
+  - name: 'name'
+    type: String
     description: |
       Output only. The name of the Table. Format:
       projects/{project_id_or_number}/locations/{locationId}/catalogs/{catalogId}/databases/{databaseId}/tables/{tableId}
-  - !ruby/object:Api::Type::String
-    name: "database"
-    immutable: true
     url_param_only: true
+    required: true
+    immutable: true
+  - name: 'database'
+    type: String
     description: |
       The id of the parent database.
+    url_param_only: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: "createTime"
+  - name: 'createTime'
+    type: String
     description: |
       Output only. The creation time of the table. A timestamp in RFC3339 UTC
       "Zulu" format, with nanosecond resolution and up to nine fractional
       digits. Examples: "2014-10-02T15:01:23Z" and
       "2014-10-02T15:01:23.045123456Z".
     output: true
-  - !ruby/object:Api::Type::String
-    name: "updateTime"
+  - name: 'updateTime'
+    type: String
     description: |
       Output only. The last modification time of the table. A timestamp in
       RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine
       fractional digits. Examples: "2014-10-02T15:01:23Z" and
       "2014-10-02T15:01:23.045123456Z".
     output: true
-  - !ruby/object:Api::Type::String
-    name: "deleteTime"
+  - name: 'deleteTime'
+    type: String
     description: |
       Output only. The deletion time of the table. Only set after the
       table is deleted. A timestamp in RFC3339 UTC "Zulu" format, with
       nanosecond resolution and up to nine fractional digits. Examples:
       "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
     output: true
-  - !ruby/object:Api::Type::String
-    name: "expireTime"
+  - name: 'expireTime'
+    type: String
     description: |
       Output only. The time when this table is considered expired. Only set
       after the table is deleted. A timestamp in RFC3339 UTC "Zulu" format,
       with nanosecond resolution and up to nine fractional digits. Examples:
       "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
     output: true
-  - !ruby/object:Api::Type::String
-    name: "etag"
+  - name: 'etag'
+    type: String
     description: |
       The checksum of a table object computed by the server based on the value
       of other fields. It may be sent on update requests to ensure the client
       has an up-to-date value before proceeding. It is only checked for update
       table operations.
     output: true
-
-  - !ruby/object:Api::Type::Enum
-    name: "type"
+  - name: 'type'
+    type: Enum
     description: |
       The database type.
-    values:
-      - :HIVE
-  - !ruby/object:Api::Type::NestedObject
-    name: "hiveOptions"
+    enum_values:
+      - 'HIVE'
+  - name: 'hiveOptions'
+    type: NestedObject
     description: |
       Options of a Hive table.
     properties:
-      - !ruby/object:Api::Type::KeyValuePairs
-        name: "parameters"
+      - name: 'parameters'
+        type: KeyValuePairs
         description: |
           Stores user supplied Hive table parameters. An object containing a
           list of "key": value pairs.
           Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
-      - !ruby/object:Api::Type::String
-        name: "tableType"
+      - name: 'tableType'
+        type: String
         description: |
           Hive table type. For example, MANAGED_TABLE, EXTERNAL_TABLE.
-      - !ruby/object:Api::Type::NestedObject
-        name: "storageDescriptor"
+      - name: 'storageDescriptor'
+        type: NestedObject
         description: |
           Stores physical storage information on the data.
         properties:
-          - !ruby/object:Api::Type::String
-            name: "locationUri"
+          - name: 'locationUri'
+            type: String
             description: |
               Cloud Storage folder URI where the table data is stored, starting with "gs://".
-          - !ruby/object:Api::Type::String
-            name: "inputFormat"
+          - name: 'inputFormat'
+            type: String
             description: |
               The fully qualified Java class name of the input format.
-          - !ruby/object:Api::Type::String
-            name: "outputFormat"
+          - name: 'outputFormat'
+            type: String
             description: |
               The fully qualified Java class name of the output format.

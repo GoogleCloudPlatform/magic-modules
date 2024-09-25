@@ -11,46 +11,46 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'MigrationJob'
-self_link: 'projects/{{project}}/locations/{{location}}/migrationJobs/{{migration_job_id}}'
-import_format:
-  [
-    'projects/{{project}}/locations/{{location}}/migrationJobs/{{migration_job_id}}',
-  ]
-base_url: 'projects/{{project}}/locations/{{location}}/migrationJobs'
-create_url: 'projects/{{project}}/locations/{{location}}/migrationJobs?migrationJobId={{migration_job_id}}'
-update_verb: :PATCH
-update_mask: true
 description: 'A migration job definition.'
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Database Migration': 'https://cloud.google.com/database-migration/docs/'
   api: 'https://cloud.google.com/database-migration/docs/reference/rest/v1/projects.locations.migrationJobs/create'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/migrationJobs'
+self_link: 'projects/{{project}}/locations/{{location}}/migrationJobs/{{migration_job_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/migrationJobs?migrationJobId={{migration_job_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/migrationJobs/{{migration_job_id}}'
+timeouts:
+  insert_minutes: 60
+  update_minutes: 60
+  delete_minutes: 60
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-    timeouts: !ruby/object:Api::Timeouts
+    timeouts:
       insert_minutes: 60
       update_minutes: 60
       delete_minutes: 60
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error'
     message: 'message'
-autogen_async: true
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'database_migration_service_migration_job_mysql_to_mysql'
+  - name: 'database_migration_service_migration_job_mysql_to_mysql'
     primary_resource_id: 'mysqltomysql'
     vars:
       migration_id: 'my-migrationid'
@@ -61,8 +61,7 @@ examples:
       source_cp: 'source-cp'
       destination_csql: 'destination-csql'
       destination_cp: 'destination-cp'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'database_migration_service_migration_job_postgres_to_postgres'
+  - name: 'database_migration_service_migration_job_postgres_to_postgres'
     primary_resource_id: 'psqltopsql'
     vars:
       migration_id: 'my-migrationid'
@@ -73,8 +72,7 @@ examples:
       source_cp: 'source-cp'
       destination_csql: 'destination-csql'
       destination_cp: 'destination-cp'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'database_migration_service_migration_job_postgres_to_alloydb'
+  - name: 'database_migration_service_migration_job_postgres_to_alloydb'
     primary_resource_id: 'psqltoalloydb'
     vars:
       migration_id: 'my-migrationid'
@@ -86,200 +84,203 @@ examples:
       destination_alloydb: 'destination-alloydb'
       destination_cp: 'destination-cp'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'migrationJobId'
-    required: true
-    immutable: true
-    url_param_only: true
+  - name: 'migrationJobId'
+    type: String
     description: |
       The ID of the migration job.
-  - !ruby/object:Api::Type::String
-    name: 'location'
-    immutable: true
     url_param_only: true
+    required: true
+    immutable: true
+  - name: 'location'
+    type: String
     description: |
       The location where the migration job should reside.
+    url_param_only: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    output: true
+  - name: 'name'
+    type: String
     description: |
       The name of this migration job resource in the form of projects/{project}/locations/{location}/migrationJobs/{migrationJob}.
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
+    output: true
+  - name: 'displayName'
+    type: String
     description: |
       The migration job display name.
-  - !ruby/object:Api::Type::Time
-    name: 'createTime'
-    output: true
+  - name: 'createTime'
+    type: Time
     description: |
       Output only. The timestamp when the resource was created. A timestamp in RFC3339 UTC 'Zulu' format, accurate to nanoseconds. Example: '2014-10-02T15:01:23.045123456Z'.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       The resource labels for migration job to use to annotate any related underlying resources such as Compute Engine VMs.
-  - !ruby/object:Api::Type::Enum
-    name: 'state'
-    output: true
+  - name: 'state'
+    type: Enum
     description: |
       The current migration job state.
-    values:
-      - :DRAFT
-      - :NOT_STARTED
-      - :RUNNING
-      - :COMPLETED
-      - :STOPPED
-      - :FAILED
-  - !ruby/object:Api::Type::Enum
-    name: 'phase'
     output: true
+    enum_values:
+      - 'DRAFT'
+      - 'NOT_STARTED'
+      - 'RUNNING'
+      - 'COMPLETED'
+      - 'STOPPED'
+      - 'FAILED'
+  - name: 'phase'
+    type: Enum
     description: |
       The current migration job phase.
-    values:
-      - :FULL_DUMP
-      - :CDC
-      - :PROMOTE_IN_PROGRESS
-      - :WAITING_FOR_SOURCE_WRITES_TO_STOP
-      - :PREPARING_THE_DUMP
-      - :READY_FOR_PROMOTE
-  - !ruby/object:Api::Type::NestedObject
-    name: 'error'
+    output: true
+    enum_values:
+      - 'FULL_DUMP'
+      - 'CDC'
+      - 'PROMOTE_IN_PROGRESS'
+      - 'WAITING_FOR_SOURCE_WRITES_TO_STOP'
+      - 'PREPARING_THE_DUMP'
+      - 'READY_FOR_PROMOTE'
+  - name: 'error'
+    type: NestedObject
     description: |
       Output only. The error details in case of state FAILED.
     output: true
     properties:
-      - !ruby/object:Api::Type::Integer
-        name: 'code'
-        output: true
+      - name: 'code'
+        type: Integer
         description: |
           The status code, which should be an enum value of google.rpc.Code.
-      - !ruby/object:Api::Type::String
-        name: 'message'
         output: true
+      - name: 'message'
+        type: String
         description: |
           Human readable message indicating details about the current status.
-      - !ruby/object:Api::Type::Array
-        name: 'details'
+        output: true
+      - name: 'details'
+        type: Array
         description: |
           A list of messages that carry the error details.
-        item_type: Api::Type::KeyValuePairs
         output: true
-  - !ruby/object:Api::Type::Enum
-    name: 'type'
+        item_type:
+          type: KeyValuePairs
+  - name: 'type'
+    type: Enum
     description: |
       The type of the migration job.
-    immutable: true
     required: true
-    values:
-      - :ONE_TIME
-      - :CONTINUOUS
-  - !ruby/object:Api::Type::String
-    name: 'source'
     immutable: true
-    required: true
+    enum_values:
+      - 'ONE_TIME'
+      - 'CONTINUOUS'
+  - name: 'source'
+    type: String
     description: |
       The name of the source connection profile resource in the form of projects/{project}/locations/{location}/connectionProfiles/{sourceConnectionProfile}.
-  - !ruby/object:Api::Type::String
-    name: 'destination'
-    immutable: true
     required: true
+    immutable: true
+  - name: 'destination'
+    type: String
     description: |
       The name of the destination connection profile resource in the form of projects/{project}/locations/{location}/connectionProfiles/{destinationConnectionProfile}.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'dumpFlags'
+    required: true
+    immutable: true
+  - name: 'dumpFlags'
+    type: NestedObject
     description: |
       The initial dump flags.
     properties:
-      - !ruby/object:Api::Type::Array
-        name: 'dumpFlags'
+      - name: 'dumpFlags'
+        type: Array
         description: |
           A list of dump flags
-        item_type: !ruby/object:Api::Type::NestedObject
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::String
-              name: 'name'
+            - name: 'name'
+              type: String
               description: |
                 The name of the flag
-            - !ruby/object:Api::Type::String
-              name: 'value'
+            - name: 'value'
+              type: String
               description: |
                 The vale of the flag
-  - !ruby/object:Api::Type::NestedObject
-    name: 'performanceConfig'
+  - name: 'performanceConfig'
+    type: NestedObject
     description: |
       Data dump parallelism settings used by the migration.
     properties:
-      - !ruby/object:Api::Type::Enum
-        name: 'dumpParallelLevel'
+      - name: 'dumpParallelLevel'
+        type: Enum
         description: |
           Initial dump parallelism level.
-        values:
-          - :MIN
-          - :OPTIMAL
-          - :MAX
-  - !ruby/object:Api::Type::String
-    name: 'dumpPath'
+        enum_values:
+          - 'MIN'
+          - 'OPTIMAL'
+          - 'MAX'
+  - name: 'dumpPath'
+    type: String
     description: |
       The path to the dump file in Google Cloud Storage,
       in the format: (gs://[BUCKET_NAME]/[OBJECT_NAME]).
       This field and the "dump_flags" field are mutually exclusive.
-  - !ruby/object:Api::Type::Enum
-    name: 'dumpType'
+  - name: 'dumpType'
+    type: Enum
     description: |
       The type of the data dump. Supported for MySQL to CloudSQL for MySQL
       migrations only.
-    values:
-      - :LOGICAL
-      - :PHYSICAL
-  - !ruby/object:Api::Type::NestedObject
-    name: 'staticIpConnectivity'
+    enum_values:
+      - 'LOGICAL'
+      - 'PHYSICAL'
+  - name: 'staticIpConnectivity'
+    type: NestedObject
     description: |
       If set to an empty object (`{}`), the source database will allow incoming
       connections from the public IP of the destination database.
       You can retrieve the public IP of the Cloud SQL instance from the
       Cloud SQL console or using Cloud SQL APIs.
-    exactly_one_of:
-      - reverseSshConnectivity
-      - vpcPeeringConnectivity
-    allow_empty_object: true
     send_empty_value: true
-    properties: []
-  - !ruby/object:Api::Type::NestedObject
-    name: 'reverseSshConnectivity'
+    allow_empty_object: true
+    exactly_one_of:
+      - 'reverseSshConnectivity'
+      - 'vpcPeeringConnectivity'
+    properties:
+      []
+  - name: 'reverseSshConnectivity'
+    type: NestedObject
     description: |
       The details of the VPC network that the source database is located in.
     exactly_one_of:
-      - staticIpConnectivity
-      - vpcPeeringConnectivity
+      - 'staticIpConnectivity'
+      - 'vpcPeeringConnectivity'
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'vmIp'
+      - name: 'vmIp'
+        type: String
         description: |
           The IP of the virtual machine (Compute Engine) used as the bastion server
           for the SSH tunnel.
-      - !ruby/object:Api::Type::Integer
-        name: 'vmPort'
+      - name: 'vmPort'
+        type: Integer
         description: |
           The forwarding port of the virtual machine (Compute Engine) used as the
           bastion server for the SSH tunnel.
-      - !ruby/object:Api::Type::String
-        name: 'vm'
+      - name: 'vm'
+        type: String
         description: |
           The name of the virtual machine (Compute Engine) used as the bastion server
           for the SSH tunnel.
-      - !ruby/object:Api::Type::String
-        name: 'vpc'
+      - name: 'vpc'
+        type: String
         description: |
           The name of the VPC to peer with the Cloud SQL private network.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'vpcPeeringConnectivity'
+  - name: 'vpcPeeringConnectivity'
+    type: NestedObject
     description: |
       The details of the VPC network that the source database is located in.
     exactly_one_of:
-      - staticIpConnectivity
-      - reverseSshConnectivity
+      - 'staticIpConnectivity'
+      - 'reverseSshConnectivity'
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'vpc'
+      - name: 'vpc'
+        type: String
         description: |
           The name of the VPC network to peer with the Cloud SQL private network.

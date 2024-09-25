@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,72 +11,75 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'ExternalVpnGateway'
 kind: 'compute#externalVpnGateway'
-base_url: projects/{{project}}/global/externalVpnGateways
-collection_url_key: 'items'
-immutable: true
-has_self_link: true
 description: |
   Represents a VPN gateway managed outside of GCP.
-references: !ruby/object:Api::Resource::ReferenceLinks
-  api: https://cloud.google.com/compute/docs/reference/rest/v1/externalVpnGateways
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+references:
+  guides:
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/externalVpnGateways'
+docs:
+base_url: 'projects/{{project}}/global/externalVpnGateways'
+has_self_link: true
+immutable: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
-    base_url: '{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'targetLink'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'status'
-    complete: 'DONE'
-    allowed:
-      - 'PENDING'
-      - 'RUNNING'
-      - 'DONE'
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error/errors'
     message: 'message'
+collection_url_key: 'items'
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'external_vpn_gateway'
-    primary_resource_id:
-      'external_gateway'
-      # Multiple fine-grained resources
-    skip_vcr: true
+  - name: 'external_vpn_gateway'
+    primary_resource_id: 'external_gateway'
     vars:
       ha_vpn_gateway_name: 'ha-vpn'
       network_name: 'network-1'
       external_gateway_name: 'external-gateway'
       global_address_name: 'global-address'
       router_name: 'ha-vpn-router1'
-  - !ruby/object:Provider::Terraform::Examples
-    skip_docs: true
-    name: 'only_external_vpn_gateway_full'
+      # Multiple fine-grained resources
+    skip_vcr: true
+  - name: 'only_external_vpn_gateway_full'
     primary_resource_id: 'external_gateway'
     vars:
       external_gateway_name: 'external-gateway'
+    exclude_docs: true
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: 'An optional description of this resource.'
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+  - name: 'labels'
+    type: KeyValueLabels
     description: 'Labels for the external VPN gateway resource.'
-    update_verb: :POST
     update_url: 'projects/{{project}}/global/externalVpnGateways/{{name}}/setLabels'
-  - !ruby/object:Api::Type::Fingerprint
-    name: 'labelFingerprint'
+    update_verb: 'POST'
+  - name: 'labelFingerprint'
+    type: Fingerprint
     description: |
       The fingerprint used for optimistic locking of this resource.  Used
       internally during updates.
+    output: true
     update_url: 'projects/{{project}}/global/externalVpnGateways/{{name}}/setLabels'
-    update_verb: :POST
-  - !ruby/object:Api::Type::String
-    name: 'name'
+    update_verb: 'POST'
+    key_expander: ''
+  - name: 'name'
+    type: String
     description: |
       Name of the resource. Provided by the client when the resource is
       created. The name must be 1-63 characters long, and comply with
@@ -86,32 +89,33 @@ properties:
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
     required: true
-  - !ruby/object:Api::Type::Enum
-    name: 'redundancyType'
+  - name: 'redundancyType'
+    type: Enum
     description: |
       Indicates the redundancy type of this external VPN gateway
-    values:
-      - :FOUR_IPS_REDUNDANCY
-      - :SINGLE_IP_INTERNALLY_REDUNDANT
-      - :TWO_IPS_REDUNDANCY
-  - !ruby/object:Api::Type::Array
-    name: 'interface'
-    api_name: 'interfaces'
+    enum_values:
+      - 'FOUR_IPS_REDUNDANCY'
+      - 'SINGLE_IP_INTERNALLY_REDUNDANT'
+      - 'TWO_IPS_REDUNDANCY'
+  - name: 'interface'
+    type: Array
     description: |
       A list of interfaces on this external VPN gateway.
-    item_type: !ruby/object:Api::Type::NestedObject
+    api_name: interfaces
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::Integer
-          name: 'id'
-          send_empty_value: true
+        - name: 'id'
+          type: Integer
           description: |
             The numeric ID for this interface. Allowed values are based on the redundancy type
             of this external VPN gateway
             * `0 - SINGLE_IP_INTERNALLY_REDUNDANT`
             * `0, 1 - TWO_IPS_REDUNDANCY`
             * `0, 1, 2, 3 - FOUR_IPS_REDUNDANCY`
-        - !ruby/object:Api::Type::String
-          name: 'ipAddress'
+          send_empty_value: true
+        - name: 'ipAddress'
+          type: String
           description: |
             IP address of the interface in the external VPN gateway.
             Only IPv4 is supported. This IP address can be either from
