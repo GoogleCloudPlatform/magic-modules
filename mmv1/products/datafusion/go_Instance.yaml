@@ -56,6 +56,7 @@ virtual_fields:
       When the field is set to true in Terraform state, a `terraform apply`
       or `terraform destroy` that would delete the instance will fail.
       When the field is set to false or unset, deleting the instance is allowed.
+custom_code:
   constants: 'templates/terraform/constants/go/data_fusion_instance_option.go.tmpl'
   pre_update: 'templates/terraform/pre_update/go/datafusion_instance_update.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/go/datafusion_instance.go.tmpl'
