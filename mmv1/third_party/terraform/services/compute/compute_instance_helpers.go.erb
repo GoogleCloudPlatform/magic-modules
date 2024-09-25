@@ -165,6 +165,17 @@ func expandScheduling(v interface{}) (*compute.Scheduling, error) {
 		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "OnInstanceStopAction")
 	}
 <% unless version == 'ga' -%>
+	if v, ok := original["host_error_timeout_seconds"]; ok {
+		scheduling.HostErrorTimeoutSeconds = int64(v.(int))
+		//host_error_timeout_seconds doesn't get removed correctly due to an API bug on instances.SetScheduling.
+		//We need to set it to NullFields as a workaround because nil is rounded to 0
+		if v == 0 || v == nil {
+			scheduling.NullFields = append(scheduling.NullFields, "HostErrorTimeoutSeconds")
+		} else {
+			scheduling.ForceSendFields = append(scheduling.ForceSendFields, "HostErrorTimeoutSeconds")
+		}
+	}
+
 	if v, ok := original["maintenance_interval"]; ok {
 		scheduling.MaintenanceInterval = v.(string)
 	}
@@ -287,6 +298,10 @@ func flattenScheduling(resp *compute.Scheduling) []map[string]interface{} {
 	}
 
 <% unless version == 'ga' -%>
+	if resp.HostErrorTimeoutSeconds != 0 {
+		schedulingMap["host_error_timeout_seconds"] = resp.HostErrorTimeoutSeconds
+	}
+
 	if resp.MaintenanceInterval != "" {
 		schedulingMap["maintenance_interval"] = resp.MaintenanceInterval
 	}
@@ -737,6 +752,11 @@ func schedulingHasChangeWithoutReboot(d *schema.ResourceData) bool {
 	if oScheduling["instance_termination_action"] != newScheduling["instance_termination_action"] {
 			return true
 	}
+<% unless version == 'ga' -%>
+	if oScheduling["host_error_timeout_seconds"] != newScheduling["host_error_timeout_seconds"] {
+		return true
+	}
+<% end -%>
 
 	return false
 }

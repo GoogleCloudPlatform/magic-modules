@@ -836,7 +836,6 @@ func expandNodeConfigDefaults(configured interface{}) *container.NodeConfigDefau
 	if v, ok := config["insecure_kubelet_readonly_port_enabled"]; ok {
 		nodeConfigDefaults.NodeKubeletConfig = &container.NodeKubeletConfig{
 			InsecureKubeletReadonlyPortEnabled: expandInsecureKubeletReadonlyPortEnabled(v),
-			ForceSendFields: []string{"InsecureKubeletReadonlyPortEnabled"},
 		}
 	}
 	if variant, ok := config["logging_variant"]; ok {
@@ -846,14 +845,14 @@ func expandNodeConfigDefaults(configured interface{}) *container.NodeConfigDefau
 			},
 		}
 	}
-<% unless version == "ga" -%>
+
 	if v, ok := config["gcfs_config"]; ok && len(v.([]interface{})) > 0 {
 		gcfsConfig := v.([]interface{})[0].(map[string]interface{})
 		nodeConfigDefaults.GcfsConfig = &container.GcfsConfig{
 			Enabled: gcfsConfig["enabled"].(bool),
 		}
 	}
-<% end -%>
+
 	return nodeConfigDefaults
 }
 
@@ -1479,9 +1478,8 @@ func flattenNodeConfigDefaults(c *container.NodeConfigDefaults) []map[string]int
 
 	result[0]["logging_variant"] = flattenLoggingVariant(c.LoggingConfig)
 
-<% unless version == 'ga' -%>
 	result[0]["gcfs_config"] = flattenGcfsConfig(c.GcfsConfig)
-<% end -%>
+
 	return result
 }
 

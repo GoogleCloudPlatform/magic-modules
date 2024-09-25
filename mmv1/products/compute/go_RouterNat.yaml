@@ -62,6 +62,7 @@ nested_query:
   modify_by_patch: true
 custom_code:
   constants: 'templates/terraform/constants/go/router_nat.go.tmpl'
+  encoder: 'templates/terraform/encoders/go/router_nat_set_initial_nat_ips.go.tmpl'
   pre_create: 'templates/terraform/constants/go/router_nat_validate_action_active_range.go.tmpl'
   pre_update: 'templates/terraform/constants/go/router_nat_validate_action_active_range.go.tmpl'
 custom_diff:
@@ -151,6 +152,26 @@ properties:
     enum_values:
       - 'MANUAL_ONLY'
       - 'AUTO_ONLY'
+  - name: 'initialNatIps'
+    type: Array
+    description: |
+      Self-links of NAT IPs to be used as initial value for creation alongside a RouterNatAddress resource.
+      Conflicts with natIps and drainNatIps. Only valid if natIpAllocateOption is set to MANUAL_ONLY.
+    is_set: true
+    immutable: true
+    ignore_read: true
+    send_empty_value: true
+    conflicts:
+      - natIps
+      - drainNatIps
+    set_hash_func: computeRouterNatIPsHash
+    custom_expand: 'templates/terraform/custom_expand/go/array_resourceref_with_validation.go.tmpl'
+    item_type:
+      name: 'address'
+      type: ResourceRef
+      description: 'A reference to an address associated with this NAT'
+      resource: 'Address'
+      imports: 'selfLink'
   - name: 'natIps'
     type: Array
     description: |
@@ -160,6 +181,7 @@ properties:
       the access level resource for the address resource must have a `lifecycle` block with `create_before_destroy = true` so
       the number of resources can be increased/decreased without triggering the `resourceInUseByAnotherResource` error.
     is_set: true
+    default_from_api: true
     send_empty_value: true
     set_hash_func: computeRouterNatIPsHash
     custom_expand: 'templates/terraform/custom_expand/go/array_resourceref_with_validation.go.tmpl'
@@ -175,6 +197,7 @@ properties:
       A list of URLs of the IP resources to be drained. These IPs must be
       valid static external IPs that have been assigned to the NAT.
     is_set: true
+    default_from_api: true
     send_empty_value: true
     custom_expand: 'templates/terraform/custom_expand/go/array_resourceref_with_validation.go.tmpl'
     item_type:

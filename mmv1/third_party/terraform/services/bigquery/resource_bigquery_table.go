@@ -890,6 +890,53 @@ func ResourceBigQueryTable() *schema.Resource {
 				},
 			},
 
+			// BiglakeConfiguration [Optional] Specifies the configuration of a BigLake managed table.
+			"biglake_configuration": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				ForceNew:    true,
+				Description: "Specifies the configuration of a BigLake managed table.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						// ConnectionId: [Required] The connection specifying the credentials to be used to read
+						// and write to external storage, such as Cloud Storage. The connection_id can have the
+						// form "&lt;project\_id&gt;.&lt;location\_id&gt;.&lt;connection\_id&gt;" or
+						// "projects/&lt;project\_id&gt;/locations/&lt;location\_id&gt;/connections/&lt;connection\_id&gt;".
+						"connection_id": {
+							Type:             schema.TypeString,
+							Required:         true,
+							DiffSuppressFunc: bigQueryTableConnectionIdSuppress,
+							ForceNew:         true,
+							Description:      `The connection specifying the credentials to be used to read and write to external storage, such as Cloud Storage. The connection_id can have the form "&lt;project\_id&gt;.&lt;location\_id&gt;.&lt;connection\_id&gt;" or "projects/&lt;project\_id&gt;/locations/&lt;location\_id&gt;/connections/&lt;connection\_id&gt;".`,
+						},
+						// StorageUri: [Required] The fully qualified location prefix of the external folder where
+						// table data is stored. The '*' wildcard character is not allowed.
+						// The URI should be in the format "gs://bucket/path_to_table/"
+						"storage_uri": {
+							Type:        schema.TypeString,
+							Required:    true,
+							ForceNew:    true,
+							Description: `The fully qualified location prefix of the external folder where table data is stored. The '*' wildcard character is not allowed. The URI should be in the format "gs://bucket/path_to_table/"`,
+						},
+						// FileFormat: [Required] The file format the data is stored in.
+						"file_format": {
+							Type:        schema.TypeString,
+							Required:    true,
+							ForceNew:    true,
+							Description: "The file format the data is stored in.",
+						},
+						// TableFormat: [Required]
+						"table_format": {
+							Type:        schema.TypeString,
+							Required:    true,
+							ForceNew:    true,
+							Description: "The table format the metadata only snapshots are stored in.",
+						},
+					},
+				},
+			},
+
 			// FriendlyName: [Optional] A descriptive name for this table.
 			"friendly_name": {
 				Type:        schema.TypeString,
@@ -1451,6 +1498,14 @@ func resourceTable(d *schema.ResourceData, meta interface{}) (*bigquery.Table, e
 		table.ExternalDataConfiguration = externalDataConfiguration
 	}
 
+	if v, ok := d.GetOk("biglake_configuration"); ok {
+		biglakeConfiguration, err := expandBigLakeConfiguration(v)
+		if err != nil {
+			return nil, err
+		}
+		table.BiglakeConfiguration = biglakeConfiguration
+	}
+
 	if v, ok := d.GetOk("friendly_name"); ok {
 		table.FriendlyName = v.(string)
 	}
@@ -1741,6 +1796,17 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
+	if res.BiglakeConfiguration != nil {
+		bigLakeConfiguration, err := flattenBigLakeConfiguration(res.BiglakeConfiguration)
+		if err != nil {
+			return err
+		}
+
+		if err := d.Set("biglake_configuration", bigLakeConfiguration); err != nil {
+			return fmt.Errorf("Error setting biglake_configuration: %s", err)
+		}
+	}
+
 	if res.TimePartitioning != nil {
 		if err := d.Set("time_partitioning", flattenTimePartitioning(res.TimePartitioning, use_old_rpf)); err != nil {
 			return err
@@ -1846,6 +1912,11 @@ func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error
 	table, err := resourceTable(d, meta)
 	if err != nil {
 		return err
+	}
+
+	if table.ExternalDataConfiguration != nil && table.ExternalDataConfiguration.Schema != nil {
+		log.Printf("[INFO] Removing ExternalDataConfiguration.Schema when updating BigQuery table %s", d.Id())
+		table.ExternalDataConfiguration.Schema = nil
 	}
 
 	log.Printf("[INFO] Updating BigQuery table: %s", d.Id())
@@ -2697,6 +2768,41 @@ func flattenMaterializedView(mvd *bigquery.MaterializedViewDefinition) []map[str
 	result["allow_non_incremental_definition"] = mvd.AllowNonIncrementalDefinition
 
 	return []map[string]interface{}{result}
+}
+
+func flattenBigLakeConfiguration(blc *bigquery.BigLakeConfiguration) ([]map[string]interface{}, error) {
+	result := map[string]interface{}{}
+
+	result["connection_id"] = blc.ConnectionId
+	result["storage_uri"] = blc.StorageUri
+	result["file_format"] = blc.FileFormat
+	result["table_format"] = blc.TableFormat
+
+	return []map[string]interface{}{result}, nil
+}
+
+func expandBigLakeConfiguration(cfg interface{}) (*bigquery.BigLakeConfiguration, error) {
+	raw := cfg.([]interface{})[0].(map[string]interface{})
+
+	blc := &bigquery.BigLakeConfiguration{}
+
+	if v, ok := raw["connection_id"]; ok {
+		blc.ConnectionId = v.(string)
+	}
+
+	if v, ok := raw["storage_uri"]; ok {
+		blc.StorageUri = v.(string)
+	}
+
+	if v, ok := raw["file_format"]; ok {
+		blc.FileFormat = v.(string)
+	}
+
+	if v, ok := raw["table_format"]; ok {
+		blc.TableFormat = v.(string)
+	}
+
+	return blc, nil
 }
 
 func expandPrimaryKey(configured interface{}) *bigquery.TableConstraintsPrimaryKey {
