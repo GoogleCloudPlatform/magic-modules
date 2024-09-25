@@ -1,6 +1,6 @@
 config := acctest.GoogleProviderConfig(t)
 
-url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{StorageBasePath}}projects/{{project}}/hmacKeys/{{access_id}}")
+url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}StorageBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/hmacKeys/{{"{{"}}access_id{{"}}"}}")
 if err != nil {
   return err
 }

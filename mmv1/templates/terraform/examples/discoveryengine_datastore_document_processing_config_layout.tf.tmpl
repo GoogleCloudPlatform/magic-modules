@@ -1,6 +1,6 @@
 resource "google_discovery_engine_data_store" "document_processing_config_layout" {
   location                    = "global"
-  data_store_id               = "<%= ctx[:vars]['data_store_id'] %>"
+  data_store_id               = "{{index $.Vars "data_store_id"}}"
   display_name                = "tf-test-structured-datastore"
   industry_vertical           = "GENERIC"
   content_config              = "CONTENT_REQUIRED"

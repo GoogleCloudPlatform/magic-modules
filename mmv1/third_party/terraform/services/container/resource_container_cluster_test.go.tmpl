@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package container_test
 
 import (
@@ -456,7 +455,7 @@ func TestAccContainerCluster_withMultiNetworking(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccContainerCluster_withFQDNNetworkPolicy(t *testing.T) {
 	t.Parallel()
 
@@ -488,7 +487,7 @@ func TestAccContainerCluster_withFQDNNetworkPolicy(t *testing.T) {
 		},
 	})
 }
-<% end -%>
+{{- end }}
 
 func TestAccContainerCluster_withAdditiveVPC(t *testing.T) {
 	t.Parallel()
@@ -716,7 +715,7 @@ resource "google_container_cluster" "cluster" {
 `, clusterName)
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccContainerCluster_withFQDNNetworkPolicy(clusterName string, enabled bool) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "uscentral1a" {
@@ -777,7 +776,7 @@ resource "google_container_cluster" "cluster" {
 }
 `, clusterName, clusterName, enabled)
 }
-<% end -%>
+{{- end }}
 
 func TestAccContainerCluster_withNetworkPolicyEnabled(t *testing.T) {
 	t.Parallel()
@@ -974,7 +973,7 @@ func TestAccContainerCluster_withInvalidReleaseChannel(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccContainerCluster_withTelemetryEnabled(t *testing.T) {
 	t.Parallel()
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
@@ -1019,7 +1018,7 @@ func TestAccContainerCluster_withTelemetryEnabled(t *testing.T) {
 		},
 	})
 }
-<% end -%>
+{{- end }}
 
 func TestAccContainerCluster_withMasterAuthorizedNetworksConfig(t *testing.T) {
 	t.Parallel()
@@ -1264,7 +1263,7 @@ func TestAccContainerCluster_regionalWithNodeLocations(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccContainerCluster_withTpu(t *testing.T) {
 	t.Parallel()
 
@@ -1291,7 +1290,7 @@ func TestAccContainerCluster_withTpu(t *testing.T) {
 		},
 	})
 }
-<% end -%>
+{{- end }}
 
 func TestAccContainerCluster_withPrivateClusterConfigBasic(t *testing.T) {
 	t.Parallel()
@@ -2058,7 +2057,7 @@ func TestAccContainerCluster_withWorkloadMetadataConfig(t *testing.T) {
 	})
 }
 
-<% unless version.nil? || version == 'ga' -%>
+{{ if not (or (eq $.TargetVersionName ``) (eq $.TargetVersionName `ga`)) }}
 func TestAccContainerCluster_withSandboxConfig(t *testing.T) {
 	t.Parallel()
 
@@ -2115,7 +2114,7 @@ func TestAccContainerCluster_withSandboxConfig(t *testing.T) {
 		},
 	})
 }
-<% end -%>
+{{- end }}
 
 func TestAccContainerCluster_withBootDiskKmsKey(t *testing.T) {
 	t.Parallel()
@@ -3872,7 +3871,7 @@ func TestAccContainerCluster_withInvalidAutoscalingProfile(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 
 func TestAccContainerCluster_sharedVpc(t *testing.T) {
 	// Multiple fine-grained resources
@@ -4029,7 +4028,7 @@ func TestAccContainerCluster_withFlexiblePodCIDR(t *testing.T) {
 		},
 	})
 }
-<% end -%>
+{{- end }}
 
 func TestAccContainerCluster_nodeAutoprovisioningDefaultsDiskSizeGb(t *testing.T) {
 	t.Parallel()
@@ -4900,7 +4899,7 @@ func TestAccContainerCluster_withGatewayApiConfig(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccContainerCluster_withTPUConfig(t *testing.T) {
 	t.Parallel()
 
@@ -4958,7 +4957,7 @@ func TestAccContainerCluster_withProtectConfig(t *testing.T) {
 		},
 	})
 }
-<% end -%>
+{{- end }}
 
 func TestAccContainerCluster_withSecurityPostureConfig(t *testing.T) {
 	t.Parallel()
@@ -5060,7 +5059,7 @@ func TestAccContainerCluster_withFleetConfig(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccContainerCluster_withWorkloadALTSConfig(t *testing.T) {
 	t.Parallel()
 
@@ -5126,7 +5125,7 @@ func TestAccContainerCluster_withWorkloadALTSConfigAutopilot(t *testing.T) {
 		},
 	})
 }
-<% end -%>
+{{- end }}
 
 func testAccContainerCluster_withFleetConfig(name, projectID, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
@@ -5504,9 +5503,9 @@ resource "google_container_cluster" "primary" {
   binary_authorization {
     evaluation_mode = "PROJECT_SINGLETON_POLICY_ENFORCE"
   }
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
   enable_intranode_visibility = true
-<% end -%>
+{{- end }}
   deletion_protection = false
   network    = "%s"
   subnetwork    = "%s"
@@ -5542,9 +5541,9 @@ resource "google_container_cluster" "primary" {
   binary_authorization {
     evaluation_mode = "PROJECT_SINGLETON_POLICY_ENFORCE"
   }
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
   enable_intranode_visibility = true
-<% end -%>
+{{- end }}
   deletion_protection = false
   network    = "%s"
   subnetwork    = "%s"
@@ -5609,7 +5608,7 @@ resource "google_container_cluster" "primary" {
     ray_operator_config {
       enabled = false
     }
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
     istio_config {
       disabled = true
       auth     = "AUTH_MUTUAL_TLS"
@@ -5617,7 +5616,7 @@ resource "google_container_cluster" "primary" {
     kalm_config {
       enabled = false
     }
-<% end -%>
+{{- end }}
   }
   deletion_protection = false
   network    = "%s"
@@ -5688,7 +5687,7 @@ resource "google_container_cluster" "primary" {
         enabled = true
       }
     }
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
     istio_config {
       disabled = false
       auth     = "AUTH_NONE"
@@ -5696,7 +5695,7 @@ resource "google_container_cluster" "primary" {
     kalm_config {
       enabled = true
     }
-<% end -%>
+{{- end }}
 	}
   deletion_protection = false
   network    = "%s"
@@ -6047,7 +6046,7 @@ resource "google_container_cluster" "with_release_channel" {
 `, clusterName, channel, networkName, subnetworkName)
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccContainerCluster_withTelemetryEnabled(clusterName, telemetryType, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_cluster_telemetry" {
@@ -6064,7 +6063,7 @@ resource "google_container_cluster" "with_cluster_telemetry" {
 }
 `, clusterName, telemetryType, networkName, subnetworkName)
 }
-<% end -%>
+{{- end }}
 
 func testAccContainerCluster_removeNetworkPolicy(clusterName, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
@@ -6531,7 +6530,7 @@ resource "google_container_cluster" "with_node_locations" {
 `, clusterName, networkName, subnetworkName)
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccContainerCluster_withTpu(containerNetName string, clusterName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "container_network" {
@@ -6587,7 +6586,7 @@ resource "google_container_cluster" "with_tpu" {
 `, containerNetName, clusterName)
 }
 
-<% end -%>
+{{ end }}
 func testAccContainerCluster_withIntraNodeVisibility(clusterName, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_intranode_visibility" {
@@ -7221,7 +7220,7 @@ resource "google_container_cluster" "with_workload_metadata_config" {
 `, clusterName, networkName, subnetworkName)
 }
 
-<% unless version.nil? || version == 'ga' -%>
+{{ if not (or (eq $.TargetVersionName ``) (eq $.TargetVersionName `ga`)) }}
 func testAccContainerCluster_withSandboxConfig(clusterName, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
@@ -7306,7 +7305,7 @@ resource "google_container_cluster" "with_sandbox_config" {
 }
 `, clusterName, networkName, subnetworkName)
 }
-<% end -%>
+{{- end }}
 
 func testAccContainerCluster_withBootDiskKmsKey(clusterName, kmsKeyName, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
@@ -8939,7 +8938,7 @@ resource "google_container_cluster" "with_workload_identity_config" {
 }
 
 
-<% unless version.nil? || version == 'ga' -%>
+{{ if not (or (eq $.TargetVersionName ``) (eq $.TargetVersionName `ga`)) }}
 func testAccContainerCluster_sharedVpc(org, billingId, projectName, name string, suffix string) string {
 	return fmt.Sprintf(`
 resource "google_project" "host_project" {
@@ -9139,7 +9138,7 @@ resource "google_container_cluster" "with_flexible_cidr" {
 }
 `, containerNetName, clusterName)
 }
-<% end -%>
+{{- end }}
 
 func testAccContainerCluster_withInitialCIDR(containerNetName string, clusterName string) string {
 	return fmt.Sprintf(`
@@ -10171,7 +10170,7 @@ resource "google_container_cluster" "primary" {
 `, name, name, name, networkName, subnetworkName)
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccContainerCluster_withTPUConfig(network, cluster string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "container_network" {
@@ -10228,9 +10227,9 @@ resource "google_container_cluster" "with_tpu_config" {
 }
 `, network, cluster)
 }
-<% end -%>
+{{- end }}
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccContainerCluster_withProtectConfig(name, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
@@ -10270,7 +10269,7 @@ resource "google_container_cluster" "primary" {
 }
 `, name, networkName, subnetworkName)
 }
-<% end -%>
+{{- end }}
 
 
 func testAccContainerCluster_autopilot_minimal(name string) string {
@@ -10622,7 +10621,7 @@ resource "google_container_cluster" "without_confidential_boot_disk" {
 `, clusterName, npName, networkName, subnetworkName)
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccContainerCluster_withWorkloadALTSConfig(projectID, name, networkName, subnetworkName string, enable bool) string {
   return fmt.Sprintf(`
   data "google_project" "project" {
@@ -10683,7 +10682,7 @@ func testAccContainerCluster_withWorkloadALTSConfigAutopilot(projectID, name str
 `, projectID, name, enable)
 }
 
-<% end -%>
+{{ end }}
 
 func testAccContainerCluster_withAutopilotKubeletConfigBaseline(name string) string {
   return fmt.Sprintf(`

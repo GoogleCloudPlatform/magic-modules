@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package dataproc
 
 import (
@@ -97,15 +96,15 @@ func (u *DataprocJobIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Po
 		return nil, err
 	}
 
-<%# GetIamPolicy signature changes between beta and GA clients %>
+{{/* GetIamPolicy signature changes between beta and GA clients */}}
 	p, err := u.Config.NewDataprocClient(userAgent).Projects.Regions.Jobs.GetIamPolicy(u.GetResourceId(), req).Do()
 	if err != nil {
-		return nil, errwrap.Wrapf(fmt.Sprintf("Error retrieving IAM policy for %s: {{err}}", u.DescribeResource()), err)
+		return nil, errwrap.Wrapf(fmt.Sprintf("Error retrieving IAM policy for %s: {{"{{"}}err{{"}}"}}", u.DescribeResource()), err)
 	}
 
 	cloudResourcePolicy, err := dataprocToResourceManagerPolicy(p)
 	if err != nil {
-		return nil, errwrap.Wrapf(fmt.Sprintf("Invalid IAM policy for %s: {{err}}", u.DescribeResource()), err)
+		return nil, errwrap.Wrapf(fmt.Sprintf("Invalid IAM policy for %s: {{"{{"}}err{{"}}"}}", u.DescribeResource()), err)
 	}
 
 	return cloudResourcePolicy, nil
@@ -114,7 +113,7 @@ func (u *DataprocJobIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Po
 func (u *DataprocJobIamUpdater) SetResourceIamPolicy(policy *cloudresourcemanager.Policy) error {
 	dataprocPolicy, err := resourceManagerToDataprocPolicy(policy)
 	if err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Invalid IAM policy for %s: {{err}}", u.DescribeResource()), err)
+		return errwrap.Wrapf(fmt.Sprintf("Invalid IAM policy for %s: {{"{{"}}err{{"}}"}}", u.DescribeResource()), err)
 	}
 
 	userAgent, err :=  tpgresource.GenerateUserAgentString(u.d, u.Config.UserAgent)
@@ -125,7 +124,7 @@ func (u *DataprocJobIamUpdater) SetResourceIamPolicy(policy *cloudresourcemanage
 	req := &dataproc.SetIamPolicyRequest{Policy: dataprocPolicy}
 	_, err = u.Config.NewDataprocClient(userAgent).Projects.Regions.Jobs.SetIamPolicy(u.GetResourceId(), req).Do()
 	if err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Error setting IAM policy for %s: {{err}}", u.DescribeResource()), err)
+		return errwrap.Wrapf(fmt.Sprintf("Error setting IAM policy for %s: {{"{{"}}err{{"}}"}}", u.DescribeResource()), err)
 	}
 
 	return nil
@@ -147,7 +146,7 @@ func resourceManagerToDataprocPolicy(p *cloudresourcemanager.Policy) (*dataproc.
 	out := &dataproc.Policy{}
 	err := tpgresource.Convert(p, out)
 	if err != nil {
-		return nil, errwrap.Wrapf("Cannot convert a dataproc policy to a cloudresourcemanager policy: {{err}}", err)
+		return nil, errwrap.Wrapf("Cannot convert a dataproc policy to a cloudresourcemanager policy: {{"{{"}}err{{"}}"}}", err)
 	}
 	return out, nil
 }
@@ -156,7 +155,7 @@ func dataprocToResourceManagerPolicy(p *dataproc.Policy) (*cloudresourcemanager.
 	out := &cloudresourcemanager.Policy{}
 	err := tpgresource.Convert(p, out)
 	if err != nil {
-		return nil, errwrap.Wrapf("Cannot convert a cloudresourcemanager policy to a dataproc policy: {{err}}", err)
+		return nil, errwrap.Wrapf("Cannot convert a cloudresourcemanager policy to a dataproc policy: {{"{{"}}err{{"}}"}}", err)
 	}
 	return out, nil
 }

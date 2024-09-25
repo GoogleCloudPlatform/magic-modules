@@ -1,5 +1,5 @@
 resource "google_service_account" "custom_service_account" {
-  account_id   = "<%= ctx[:vars]['account_id'] %>"
+  account_id   = "{{index $.Vars "account_id"}}"
   display_name = "Custom Service Account"
 }
 
@@ -15,7 +15,7 @@ resource "google_project_iam_member" "storage_viewer" {
   member  = "serviceAccount:${google_service_account.custom_service_account.email}"
 }
 
-resource "google_app_engine_standard_app_version" "<%= ctx[:primary_resource_id] %>" {
+resource "google_app_engine_standard_app_version" "{{$.PrimaryResourceId}}" {
   version_id = "v1"
   service    = "myapp"
   runtime    = "nodejs20"
@@ -81,7 +81,7 @@ resource "google_app_engine_standard_app_version" "myapp_v2" {
 }
 
 resource "google_storage_bucket" "bucket" {
-  name     = "<%= ctx[:vars]['bucket_name'] %>"
+  name     = "{{index $.Vars "bucket_name"}}"
   location = "US"
 }
 

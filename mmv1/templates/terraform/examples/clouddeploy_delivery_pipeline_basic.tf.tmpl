@@ -1,5 +1,5 @@
-resource "google_clouddeploy_delivery_pipeline" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]['delivery_pipeline'] %>"
+resource "google_clouddeploy_delivery_pipeline" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "delivery_pipeline"}}"
   location = "us-central1"
   serial_pipeline  {
     stages {

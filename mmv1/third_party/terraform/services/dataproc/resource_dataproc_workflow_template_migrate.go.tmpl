@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package dataproc
 
 import (
@@ -1004,7 +1003,7 @@ func DataprocWorkflowTemplatePlacementManagedClusterConfigSchemaV0() *schema.Res
 				MaxItems:    1,
 				Elem:        DataprocWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigSchemaV0(),
 			},
-<% unless version == "ga" -%>
+{{- if ne $.TargetVersionName "ga" }}
 			"gke_cluster_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -1013,7 +1012,7 @@ func DataprocWorkflowTemplatePlacementManagedClusterConfigSchemaV0() *schema.Res
 				MaxItems:    1,
 				Elem:        DataprocWorkflowTemplatePlacementManagedClusterConfigGkeClusterConfigSchemaV0(),
 			},
-<% end -%>
+{{- end }}
 			"initialization_actions": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -1040,7 +1039,7 @@ func DataprocWorkflowTemplatePlacementManagedClusterConfigSchemaV0() *schema.Res
 				MaxItems:    1,
 				Elem:        DataprocWorkflowTemplatePlacementManagedClusterConfigMasterConfigSchemaV0(),
 			},
-<% unless version == "ga" -%>
+{{- if ne $.TargetVersionName "ga" }}
 			"metastore_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -1049,7 +1048,7 @@ func DataprocWorkflowTemplatePlacementManagedClusterConfigSchemaV0() *schema.Res
 				MaxItems:    1,
 				Elem:        DataprocWorkflowTemplatePlacementManagedClusterConfigMetastoreConfigSchemaV0(),
 			},
-<% end -%>
+{{- end }}
 			"secondary_worker_config": {
 				Type:        schema.TypeList,
 				Computed:    true,

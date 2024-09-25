@@ -1,14 +1,14 @@
 resource "google_container_cluster" "primary" {
-  name               = "<%= ctx[:vars]['cluster_name'] %>"
+  name               = "{{index $.Vars "cluster_name"}}"
   location           = "us-central1-a"
   initial_node_count = 1
-  deletion_protection  = "<%= ctx[:vars]['deletion_protection'] %>"
-  network       = "<%= ctx[:vars]['network_name'] %>"
-  subnetwork    = "<%= ctx[:vars]['subnetwork_name'] %>"
+  deletion_protection  = "{{index $.Vars "deletion_protection"}}"
+  network       = "{{index $.Vars "network_name"}}"
+  subnetwork    = "{{index $.Vars "subnetwork_name"}}"
 }
 
 resource "google_gke_hub_membership" "membership" {
-  membership_id = "<%= ctx[:vars]['name'] %>"
+  membership_id = "{{index $.Vars "name"}}"
   endpoint {
     gke_cluster {
       resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"

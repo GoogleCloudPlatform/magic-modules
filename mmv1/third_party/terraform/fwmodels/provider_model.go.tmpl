@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package fwmodels
 
 import (
@@ -27,9 +26,9 @@ type ProviderModel struct {
 	TerraformAttributionLabelAdditionStrategy types.String `tfsdk:"terraform_attribution_label_addition_strategy"`
 
 	// Generated Products
-<% products.each do |product| -%>
-	<%= product[:definitions].name -%>CustomEndpoint types.String `tfsdk:"<%= product[:definitions].name.underscore -%>_custom_endpoint"`
-<% end -%>
+{{- range $product := $.Products }}
+	{{ $product.Name }}CustomEndpoint types.String `tfsdk:"{{ underscore $product.Name }}_custom_endpoint"`
+{{- end }}
 
 	// Handwritten Products / Versioned / Atypical Entries
 	CloudBillingCustomEndpoint      types.String `tfsdk:"cloud_billing_custom_endpoint"`
@@ -37,9 +36,9 @@ type ProviderModel struct {
 	DataflowCustomEndpoint          types.String `tfsdk:"dataflow_custom_endpoint"`
 	IamCredentialsCustomEndpoint    types.String `tfsdk:"iam_credentials_custom_endpoint"`
 	ResourceManagerV3CustomEndpoint types.String `tfsdk:"resource_manager_v3_custom_endpoint"`
-<% unless version == "ga" -%>
+{{- if ne $.TargetVersionName "ga" }}
 	RuntimeconfigCustomEndpoint     types.String `tfsdk:"runtimeconfig_custom_endpoint"`
-<% end -%>
+{{- end }}
 	IAMCustomEndpoint               types.String `tfsdk:"iam_custom_endpoint"`
 	TagsLocationCustomEndpoint      types.String `tfsdk:"tags_location_custom_endpoint"`
 

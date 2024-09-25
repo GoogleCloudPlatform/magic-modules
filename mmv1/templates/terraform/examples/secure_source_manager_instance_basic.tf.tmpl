@@ -1,12 +1,12 @@
-resource "google_secure_source_manager_instance" "<%= ctx[:primary_resource_id] %>" {
+resource "google_secure_source_manager_instance" "{{$.PrimaryResourceId}}" {
     location = "us-central1"
-    instance_id = "<%= ctx[:vars]['instance_id'] %>"
+    instance_id = "{{index $.Vars "instance_id"}}"
     labels = {
       "foo" = "bar"
     }
 
     # Prevent accidental deletions.
     lifecycle {
-      prevent_destroy = "<%= ctx[:vars]['prevent_destroy'] %>"
+      prevent_destroy = "{{index $.Vars "prevent_destroy"}}"
     }
 }

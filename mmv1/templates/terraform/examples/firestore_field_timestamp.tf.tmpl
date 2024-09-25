@@ -1,15 +1,15 @@
 resource "google_firestore_database" "database" {
-  project     = "<%= ctx[:test_env_vars]['project_id'] %>"
-  name        = "<%= ctx[:vars]['database_id'] %>"
+  project     = "{{index $.TestEnvVars "project_id"}}"
+  name        = "{{index $.Vars "database_id"}}"
   location_id = "nam5"
   type        = "FIRESTORE_NATIVE"
 
-  delete_protection_state = "<%= ctx[:vars]['delete_protection_state'] %>"
+  delete_protection_state = "{{index $.Vars "delete_protection_state"}}"
   deletion_policy         = "DELETE"
 }
 
-resource "google_firestore_field" "<%= ctx[:primary_resource_id] %>" {
-  project    = "<%= ctx[:test_env_vars]['project_id'] %>"
+resource "google_firestore_field" "{{$.PrimaryResourceId}}" {
+  project    = "{{index $.TestEnvVars "project_id"}}"
   database   = google_firestore_database.database.name
   collection = "chatrooms"
   field      = "timestamp"

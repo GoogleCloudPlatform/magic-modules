@@ -1,21 +1,21 @@
 resource "google_compute_network" "default" {
     provider = google-beta
-    name = "<%= ctx[:vars]['network_name'] %>"
+    name = "{{index $.Vars "network_name"}}"
     auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
     provider = google-beta
-    name   = "<%= ctx[:vars]['subnetwork_name'] %>"
+    name   = "{{index $.Vars "subnetwork_name"}}"
     region = "us-central1"
 
     network       = google_compute_network.default.id
     ip_cidr_range = "10.0.0.0/16"
 }
 
-resource "google_compute_network_attachment" "<%= ctx[:primary_resource_id] %>" {
+resource "google_compute_network_attachment" "{{$.PrimaryResourceId}}" {
     provider = google-beta
-    name   = "<%= ctx[:vars]['resource_name'] %>"
+    name   = "{{index $.Vars "resource_name"}}"
     region = "us-central1"
     description = "my basic network attachment"
 
@@ -25,7 +25,7 @@ resource "google_compute_network_attachment" "<%= ctx[:primary_resource_id] %>" 
 
 resource "google_compute_instance" "default" {
     provider = google-beta
-    name         = "<%= ctx[:vars]['instance_name'] %>"
+    name         = "{{index $.Vars "instance_name"}}"
     zone         = "us-central1-a"
     machine_type = "e2-micro"
 

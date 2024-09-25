@@ -1,7 +1,6 @@
-<% autogen_exception -%>
 package runtimeconfig
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 
 import (
 	"fmt"
@@ -28,7 +27,7 @@ func DataSourceGoogleRuntimeconfigVariable() *schema.Resource {
 func dataSourceGoogleRuntimeconfigVariableRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 
-	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/configs/{{parent}}/variables/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}"}}/configs/{{"{{"}}parent{{"}}"}}/variables/{{"{{"}}name{{"}}"}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -44,4 +43,4 @@ func dataSourceGoogleRuntimeconfigVariableRead(d *schema.ResourceData, meta inte
 	return nil
 }
 
-<% end -%>
+{{ end }}

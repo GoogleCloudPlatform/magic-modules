@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package managedkafka_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
@@ -120,6 +119,6 @@ data "google_project" "project" {
 }
 `, context)
 }
-<% else %>
+{{- else }}
 // Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
-<% end -%>
+{{- end }}

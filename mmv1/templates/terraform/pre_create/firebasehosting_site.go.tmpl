@@ -1,7 +1,7 @@
 
 // Check if the Firebase hostng site already exits. Do an update if so.
 
-getUrl, err := tpgresource.ReplaceVars(d, config, "{{FirebaseHostingBasePath}}projects/{{project}}/sites/{{site_id}}")
+getUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}FirebaseHostingBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/sites/{{"{{"}}site_id{{"}}"}}")
 if err != nil {
 	return err
 }
@@ -18,7 +18,7 @@ if err == nil {
 	// Hosting site already exists
 	log.Printf("[DEBUG] Firebase hosting site already exists %s", d.Get("site_id"))
 	// Replace import id for the resource id
-	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/sites/{{site_id}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}"}}/sites/{{"{{"}}site_id{{"}}"}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}

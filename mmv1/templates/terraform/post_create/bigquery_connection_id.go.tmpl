@@ -7,7 +7,7 @@ if tpgresource.IsEmptyValue(reflect.ValueOf(d.Get("connection_id"))) {
 }
 
 // Reset id to make sure connection_id is not empty
-id2, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/connections/{{connection_id}}")
+id2, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/connections/{{"{{"}}connection_id{{"}}"}}")
 if err != nil {
 	return fmt.Errorf("Error constructing id: %s", err)
 }

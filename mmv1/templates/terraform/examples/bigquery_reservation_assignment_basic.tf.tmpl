@@ -1,13 +1,13 @@
 resource "google_bigquery_reservation" "basic" {
-  name  = "<%= ctx[:vars]['reservation_name'] %>"
-  project = "<%= ctx[:test_env_vars]['project'] %>"
+  name  = "{{index $.Vars "reservation_name"}}"
+  project = "{{index $.TestEnvVars "project"}}"
   location = "us-central1"
   slot_capacity = 0
   ignore_idle_slots = false
 }
 
-resource "google_bigquery_reservation_assignment" "<%= ctx[:primary_resource_id] %>" {
-  assignee  = "projects/<%= ctx[:test_env_vars]['project'] %>"
+resource "google_bigquery_reservation_assignment" "{{$.PrimaryResourceId}}" {
+  assignee  = "projects/{{index $.TestEnvVars "project"}}"
   job_type = "PIPELINE"
   reservation = google_bigquery_reservation.basic.id
 }

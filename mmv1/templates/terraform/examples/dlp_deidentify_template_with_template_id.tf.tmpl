@@ -1,6 +1,6 @@
-resource "google_data_loss_prevention_deidentify_template" "<%= ctx[:primary_resource_id] %>" {
-  parent = "projects/<%= ctx[:test_env_vars]['project'] %>"
-  template_id = "<%= ctx[:vars]['name'] %>"
+resource "google_data_loss_prevention_deidentify_template" "{{$.PrimaryResourceId}}" {
+  parent = "projects/{{index $.TestEnvVars "project"}}"
+  template_id = "{{index $.Vars "name"}}"
 
   deidentify_config {
     info_type_transformations {

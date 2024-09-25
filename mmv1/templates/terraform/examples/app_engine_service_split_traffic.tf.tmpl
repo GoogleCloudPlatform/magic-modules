@@ -1,5 +1,5 @@
 resource "google_storage_bucket" "bucket" {
-	name     = "<%= ctx[:vars]['bucket_name'] %>"
+	name     = "{{index $.Vars "bucket_name"}}"
   location = "US"
 }
 
@@ -47,7 +47,7 @@ resource "google_app_engine_standard_app_version" "liveapp_v2" {
   }
 }
 
-resource "google_app_engine_service_split_traffic" "<%= ctx[:primary_resource_id] %>" {
+resource "google_app_engine_service_split_traffic" "{{$.PrimaryResourceId}}" {
   service = google_app_engine_standard_app_version.liveapp_v2.service
 
   migrate_traffic = false

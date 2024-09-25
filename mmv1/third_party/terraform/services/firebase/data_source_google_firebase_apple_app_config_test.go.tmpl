@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package firebase_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 import (
 	"fmt"
 	"testing"
@@ -30,7 +29,7 @@ func TestAccDataSourceGoogleFirebaseAppleAppConfig(t *testing.T) {
 				ExternalProviders: map[string]resource.ExternalProvider{
 					"google": {
 						VersionConstraint: "4.58.0",
-						Source:            "hashicorp/google<%= "-" + version unless version == 'ga'  -%>",
+						Source:            "hashicorp/google{{- if ne $.TargetVersionName "ga" -}}-{{$.TargetVersionName}}{{- end }}",
 					},
 				},
 				Config: testAccDataSourceGoogleFirebaseAppleAppConfig(context),
@@ -83,4 +82,4 @@ func testAccDataSourceFirebaseAppleAppConfigCheck(datasourceName string) resourc
 		return nil
 	}
 }
-<% end -%>
+{{- end }}

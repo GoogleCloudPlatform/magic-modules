@@ -3,7 +3,7 @@ resource "google_kms_key_ring" "keyring" {
   location = "global"
 }
 
-resource "google_kms_crypto_key" "<%= ctx[:primary_resource_id] %>" {
+resource "google_kms_crypto_key" "{{$.PrimaryResourceId}}" {
   name     = "crypto-key-example"
   key_ring = google_kms_key_ring.keyring.id
   purpose  = "ASYMMETRIC_SIGN"

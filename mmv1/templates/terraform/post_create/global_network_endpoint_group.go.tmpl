@@ -13,7 +13,7 @@ wrappedReq := map[string]interface{}{
 	"networkEndpoints": []interface{}{endpointObj},
 }
 
-attachUrl, err := tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/global/networkEndpointGroups/{{name}}/attachNetworkEndpoints")
+attachUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/global/networkEndpointGroups/{{"{{"}}name{{"}}"}}/attachNetworkEndpoints")
 if err != nil {
 	return err
 }

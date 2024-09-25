@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package firebasedatabase_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
@@ -71,5 +70,5 @@ func TestAccFirebaseDatabaseInstance_firebaseDatabaseInstanceStateChange(t *test
 	})
 }
 
-<% end -%>
+{{ end }}
 

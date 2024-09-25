@@ -1,5 +1,5 @@
 resource "google_compute_autoscaler" "foobar" {
-  name   = "<%= ctx[:vars]['autoscaler_name'] %>"
+  name   = "{{index $.Vars "autoscaler_name"}}"
   zone   = "us-central1-f"
   target = google_compute_instance_group_manager.foobar.id
 
@@ -15,7 +15,7 @@ resource "google_compute_autoscaler" "foobar" {
 }
 
 resource "google_compute_instance_template" "foobar" {
-  name           = "<%= ctx[:vars]['instance_template_name'] %>"
+  name           = "{{index $.Vars "instance_template_name"}}"
   machine_type   = "e2-medium"
   can_ip_forward = false
 
@@ -39,11 +39,11 @@ resource "google_compute_instance_template" "foobar" {
 }
 
 resource "google_compute_target_pool" "foobar" {
-  name = "<%= ctx[:vars]['target_pool_name'] %>"
+  name = "{{index $.Vars "target_pool_name"}}"
 }
 
 resource "google_compute_instance_group_manager" "foobar" {
-  name = "<%= ctx[:vars]['igm_name'] %>"
+  name = "{{index $.Vars "igm_name"}}"
   zone = "us-central1-f"
 
   version {

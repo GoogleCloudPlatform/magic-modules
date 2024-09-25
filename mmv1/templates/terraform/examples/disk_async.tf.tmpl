@@ -1,5 +1,5 @@
 resource "google_compute_disk" "primary" {
-  name  = "<%= ctx[:vars]['disk_name'] %>"
+  name  = "{{index $.Vars "disk_name"}}"
   type  = "pd-ssd"
   zone  = "us-central1-a"
 
@@ -7,7 +7,7 @@ resource "google_compute_disk" "primary" {
 }
 
 resource "google_compute_disk" "secondary" {
-  name  = "<%= ctx[:vars]['secondary_disk_name'] %>"
+  name  = "{{index $.Vars "secondary_disk_name"}}"
   type  = "pd-ssd"
   zone  = "us-east1-c"
 

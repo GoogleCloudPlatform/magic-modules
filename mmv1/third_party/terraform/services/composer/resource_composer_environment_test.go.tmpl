@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package composer_test
 
 import (
@@ -1189,7 +1188,7 @@ func TestAccComposerEnvironment_customBucketWithUrl(t *testing.T) {
 	})
 }
 
-<% unless version == "ga" -%>
+{{ if ne $.TargetVersionName `ga` -}}
 // Checks Composer 3 environment creation with new fields.
 func TestAccComposerEnvironmentComposer3_basic(t *testing.T) {
 	t.Parallel()
@@ -1546,7 +1545,7 @@ func TestAccComposerEnvironmentComposer3_usesUnsupportedField_expectError(t *tes
 		},
 	})
 }
-<% end -%>
+{{- end }}
 
 func testAccComposerEnvironment_customBucket(bucketName, envName, network, subnetwork string) string {
 	return fmt.Sprintf(`
@@ -2619,7 +2618,7 @@ resource "google_composer_environment" "test" {
         FOO = "bar"
       }
     }
-<% unless version == "ga" -%>
+{{- if ne $.TargetVersionName "ga" }}
     web_server_config {
       machine_type = "composer-n1-webserver-4"
     }
@@ -2627,7 +2626,7 @@ resource "google_composer_environment" "test" {
     database_config {
       machine_type = "db-n1-standard-4"
     }
-<% end -%>
+{{- end }}
   }
 
   labels = {
@@ -2745,9 +2744,9 @@ resource "google_composer_environment" "test" {
       zone       = "us-central1-a"
 
       service_account = google_service_account.test.name
-<% unless version == "ga" -%>
+{{- if ne $.TargetVersionName "ga" }}
       max_pods_per_node = 33
-<% end -%>
+{{- end }}
       ip_allocation_policy {
         use_ip_aliases          = true
         cluster_ipv4_cidr_block = "10.0.0.0/16"
@@ -3226,7 +3225,7 @@ resource "google_project_iam_member" "composer-worker" {
 `, environment, network, subnetwork, serviceAccount)
 }
 
-<% unless version == "ga" -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComposerEnvironmentComposer2_empty(name, network, subnetwork string) string {
 	return fmt.Sprintf(`
 resource "google_composer_environment" "test" {
@@ -3566,7 +3565,7 @@ resource "google_compute_subnetwork" "test" {
 }
 `, name, networkAttachment, network, subnetwork)
 }
-<% end -%>
+{{- end }}
 
 // WARNING: This is not actually a check and is a terrible clean-up step because Composer Environments
 // have a bug that hasn't been fixed. Composer will add firewalls to non-default networks for environments

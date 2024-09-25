@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package compute_test
 
 import (
@@ -66,11 +65,11 @@ resource "google_compute_address" "address" {
 
   region = local.region
   name = "${local.address_name}-${local.region}-${count.index}"
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
   labels = {
 	mykey = "myvalue"
   }
-<% end -%>
+{{- end }}
 }
 
 resource "google_compute_address" "address_region_bis" {
@@ -78,11 +77,11 @@ resource "google_compute_address" "address_region_bis" {
 
   region = local.region_bis
   name = "${local.address_name}-${local.region_bis}-${count.index}"
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
   labels = {
 	mykey = "myvalue"
   }
-<% end -%>
+{{- end }}
 }
 
 data "google_compute_addresses" "regional_addresses" {
@@ -120,7 +119,7 @@ func (r expectedAddress) checkAddressMatch(index int, attrs map[string]string) (
 		return false, fmt.Errorf("Unexpected region: got %s expected %s", region, r.region)
 	}
 
-<% unless version == 'ga' -%> 
+{{ if ne $.TargetVersionName `ga` -}} 
 	map_label := fmt.Sprintf("addresses.%d.labels.mykey", index)
 	label_value, found := attrs[map_label]
 	if !found {
@@ -129,7 +128,7 @@ func (r expectedAddress) checkAddressMatch(index int, attrs map[string]string) (
 	if label_value != "myvalue" {
 		return false, fmt.Errorf("label value of 'mykey' not equal to 'myvalue' for %s, got %s", address_name, label_value)
 	}
-<% end -%>
+{{- end }}
 
 	return true, nil
 }

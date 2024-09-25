@@ -1,5 +1,5 @@
-resource "google_data_loss_prevention_discovery_config" "<%= ctx[:primary_resource_id] %>" {
-	parent = "organizations/<%= ctx[:test_env_vars]['organization'] %>/locations/us"
+resource "google_data_loss_prevention_discovery_config" "{{$.PrimaryResourceId}}" {
+	parent = "organizations/{{index $.TestEnvVars "organization"}}/locations/us"
     location = "us"
 
     targets {
@@ -10,7 +10,7 @@ resource "google_data_loss_prevention_discovery_config" "<%= ctx[:primary_resour
         }
     }
     org_config {
-        project_id = "<%= ctx[:test_env_vars]['project'] %>"
+        project_id = "{{index $.TestEnvVars "project"}}"
         location {
             folder_id = 123
         }
@@ -20,7 +20,7 @@ resource "google_data_loss_prevention_discovery_config" "<%= ctx[:primary_resour
 }
 
 resource "google_data_loss_prevention_inspect_template" "basic" {
-	parent = "projects/<%= ctx[:test_env_vars]['project'] %>"
+	parent = "projects/{{index $.TestEnvVars "project"}}"
 	description = "My description"
 	display_name = "display_name"
 

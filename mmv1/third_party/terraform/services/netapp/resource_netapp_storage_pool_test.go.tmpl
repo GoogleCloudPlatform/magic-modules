@@ -1,12 +1,11 @@
-<% autogen_exception -%>
 package netapp_test
 
 import (
 	"testing"
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 	"time"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-<% end -%>
+{{- end }}
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -198,7 +197,7 @@ resource "google_netapp_storage_pool" "test_pool" {
 `, context)
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccNetappStoragePool_FlexRegionalStoragePoolCreateExample_update(t *testing.T) {
 	context := map[string]interface{}{
 		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
@@ -328,4 +327,4 @@ data "google_compute_network" "default" {
 `, context)
 }
 
-<% end -%>
+{{ end }}

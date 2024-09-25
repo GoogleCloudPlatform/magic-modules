@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package healthcare_test
 
 import (
@@ -123,7 +122,7 @@ func TestAccHealthcareHl7V2Store_basic(t *testing.T) {
 }
 
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccHealthcareHl7V2Store_updateSchema(t *testing.T) {
 	t.Parallel()
 
@@ -155,7 +154,7 @@ func TestAccHealthcareHl7V2Store_updateSchema(t *testing.T) {
 		},
 	})
 }
-<% end -%>
+{{- end }}
 
 func testGoogleHealthcareHl7V2Store_basic(hl7_v2StoreName, datasetName string) string {
 	return fmt.Sprintf(`
@@ -203,7 +202,7 @@ resource "google_pubsub_topic" "topic" {
 `, hl7_v2StoreName, datasetName, pubsubTopic)
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testGoogleHealthcareHl7V2Store_basicSchema(hl7_v2StoreName, datasetName string) string {
 	return fmt.Sprintf(`
 resource "google_healthcare_hl7_v2_store" "default" {
@@ -256,7 +255,7 @@ resource "google_healthcare_dataset" "dataset" {
 }
 `, hl7_v2StoreName, datasetName)
 }
-<% end -%>
+{{- end }}
 
 func testAccCheckGoogleHealthcareHl7V2StoreUpdate(t *testing.T, pubsubTopic string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -269,7 +268,7 @@ func testAccCheckGoogleHealthcareHl7V2StoreUpdate(t *testing.T, pubsubTopic stri
 
 			config := acctest.GoogleProviderConfig(t)
 
-			gcpResourceUri, err := tpgresource.ReplaceVarsForTest(config, rs, "{{dataset}}/hl7V2Stores/{{name}}")
+			gcpResourceUri, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}dataset{{"}}"}}/hl7V2Stores/{{"{{"}}name{{"}}"}}")
 			if err != nil {
 				return err
 			}

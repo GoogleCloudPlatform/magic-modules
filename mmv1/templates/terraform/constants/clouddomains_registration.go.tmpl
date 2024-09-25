@@ -1,4 +1,4 @@
-<% unless compiler == "terraformgoogleconversion-codegen" -%>
+{{- if ne $.Compiler "terraformgoogleconversion-codegen" }}
 // waitForRegistrationActive waits for a registration to leave the
 // "REGISTRATION_PENDING" state and become "ACTIVE" or any other state.
 func waitForRegistrationActive(d *schema.ResourceData, config *transport_tpg.Config, timeout time.Duration) error {
@@ -19,4 +19,4 @@ func waitForRegistrationActive(d *schema.ResourceData, config *transport_tpg.Con
 		}
 	})
 }
-<% end -%>
+{{- end }}

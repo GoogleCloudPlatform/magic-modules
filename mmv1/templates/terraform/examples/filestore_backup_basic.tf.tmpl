@@ -1,5 +1,5 @@
 resource "google_filestore_instance" "instance" {
-  name     = "<%= ctx[:vars]["instance_name"] %>"
+  name     = "{{index $.Vars "instance_name"}}"
   location = "us-central1-b"
   tier     = "BASIC_HDD"
 
@@ -15,8 +15,8 @@ resource "google_filestore_instance" "instance" {
   }
 }
 
-resource "google_filestore_backup" "<%= ctx[:primary_resource_id] %>" {
-  name              = "<%= ctx[:vars]["backup_name"] %>"
+resource "google_filestore_backup" "{{$.PrimaryResourceId}}" {
+  name              = "{{index $.Vars "backup_name"}}"
   location          = "us-central1"
   description       = "This is a filestore backup for the test instance"
   source_instance   = google_filestore_instance.instance.id

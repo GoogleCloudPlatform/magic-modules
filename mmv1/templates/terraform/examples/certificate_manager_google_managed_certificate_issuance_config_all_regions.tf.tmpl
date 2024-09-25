@@ -1,5 +1,5 @@
-resource "google_certificate_manager_certificate" "<%= ctx[:primary_resource_id] %>" {
-  name        = "<%= ctx[:vars]['cert_name'] %>"
+resource "google_certificate_manager_certificate" "{{$.PrimaryResourceId}}" {
+  name        = "{{index $.Vars "cert_name"}}"
   description = "sample google managed all_regions certificate with issuance config for terraform"
   scope       = "ALL_REGIONS" 
   managed {
@@ -14,7 +14,7 @@ resource "google_certificate_manager_certificate" "<%= ctx[:primary_resource_id]
 
 # creating certificate_issuance_config to use it in the managed certificate
 resource "google_certificate_manager_certificate_issuance_config" "issuanceconfig" {
-  name    = "<%= ctx[:vars]["issuance_config_name"] %>"
+  name    = "{{index $.Vars "issuance_config_name"}}"
   description = "sample description for the certificate issuanceConfigs"
   certificate_authority_config {
     certificate_authority_service_config {
@@ -28,7 +28,7 @@ resource "google_certificate_manager_certificate_issuance_config" "issuanceconfi
 }
   
 resource "google_privateca_ca_pool" "pool" {
-  name     = "<%= ctx[:vars]["pool_name"] %>"
+  name     = "{{index $.Vars "pool_name"}}"
   location = "us-central1"
   tier     = "ENTERPRISE"
 }
@@ -36,7 +36,7 @@ resource "google_privateca_ca_pool" "pool" {
 resource "google_privateca_certificate_authority" "ca_authority" {
   location = "us-central1"
   pool = google_privateca_ca_pool.pool.name
-  certificate_authority_id = "<%= ctx[:vars]["ca_name"] %>"
+  certificate_authority_id = "{{index $.Vars "ca_name"}}"
   config {
     subject_config {
       subject {

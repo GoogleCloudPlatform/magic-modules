@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package compute
 
 import (
@@ -9,11 +8,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-<% if version == "ga" -%>
+{{- if eq $.TargetVersionName "ga" }}
 	"google.golang.org/api/compute/v1"
-<% else -%>
+{{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
-<% end -%>
+{{- end }}
 )
 
 func DataSourceGoogleComputeMachineTypes() *schema.Resource {
@@ -47,7 +46,7 @@ func DataSourceGoogleComputeMachineTypes() *schema.Resource {
 							Computed:    true,
 							Description: `The amount of physical memory available to the instance, defined in MB.`,
 						},
-						<% unless version == "ga" -%>
+						{{- if ne $.TargetVersionName "ga" }}
 						"bundled_local_ssds": {
 							Type: schema.TypeSet,
 							Computed: true,
@@ -67,7 +66,7 @@ func DataSourceGoogleComputeMachineTypes() *schema.Resource {
 								},
 							},
 						},
-						<% end -%>
+						{{- end }}
 						"deprecated": {
 							Type:        schema.TypeSet,
 							Computed:    true,
@@ -213,7 +212,7 @@ func flattenDatasourceGoogleComputeMachineTypesList(ctx context.Context, v []*co
 				"guest_accelerator_count": a.GuestAcceleratorCount,
 			}
 		}
-		<% unless version == "ga" -%>
+		{{- if ne $.TargetVersionName "ga" }}
 		var localSSDs []map[string]interface{}
 		if bls := mt.BundledLocalSsds; bls != nil {
 			localSSDs = []map[string]interface{}{
@@ -223,14 +222,14 @@ func flattenDatasourceGoogleComputeMachineTypesList(ctx context.Context, v []*co
 				},
 			}
 		}
-		<% end -%>
+		{{- end }}
 		machineType := map[string]interface{}{
 			"name":                             mt.Name,
 			"guest_cpus":                       mt.GuestCpus,
 			"memory_mb":                        mt.MemoryMb,
-			<% unless version == "ga" -%>
+			{{- if ne $.TargetVersionName "ga" }}
 			"bundled_local_ssds":               localSSDs,
-			<% end -%>
+			{{- end }}
 			"maximum_persistent_disks":         mt.MaximumPersistentDisks,
 			"maximum_persistent_disks_size_gb": mt.MaximumPersistentDisksSizeGb,
 			"description":                      mt.Description,

@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package compute_test
 
 import (
@@ -51,7 +50,7 @@ func TestAccComputeServiceAttachment_serviceAttachmentBasicExampleUpdate(t *test
 	})
 }
 
-<% unless version == "ga" -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeServiceAttachment_serviceAttachmentConnectedEndpointsOutput(t *testing.T) {
 	t.Parallel()
 
@@ -97,7 +96,7 @@ func TestAccComputeServiceAttachment_serviceAttachmentConnectedEndpointsOutput(t
 		},
 	})
 }
-<% end -%>
+{{- end }}
 
 func testAccComputeServiceAttachment_serviceAttachmentBasicExampleFork(context map[string]interface{}) string {
 	return acctest.Nprintf(`
@@ -281,7 +280,7 @@ resource "google_compute_subnetwork" "psc_ilb_nat" {
 `, context)
 }
 
-<% unless version == "ga" -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeServiceAttachment_serviceAttachmentBasicExampleConnectedEndpointsOutput(context map[string]interface{}, preventDestroy bool) string {
 	context["lifecycle_block"] = ""
 	if preventDestroy {
@@ -391,7 +390,7 @@ resource "google_compute_subnetwork" "psc_ilb_nat" {
 }
 `, context)
 }
-<% end -%>
+{{- end }}
 
 func TestAccComputeServiceAttachment_serviceAttachmentBasicExampleGateway(t *testing.T) {
 	t.Parallel()

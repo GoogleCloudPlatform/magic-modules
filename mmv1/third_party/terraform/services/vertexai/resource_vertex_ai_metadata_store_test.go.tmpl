@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package vertexai_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -63,7 +62,7 @@ func testAccCheckVertexAIMetadataStoreDestroyProducer(t *testing.T) func(s *terr
 
 			config := acctest.GoogleProviderConfig(t)
 
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{VertexAIBasePath}}{{name}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}VertexAIBasePath{{"}}"}}{{"{{"}}name{{"}}"}}")
 			if err != nil {
 				return err
 			}
@@ -91,4 +90,4 @@ func testAccCheckVertexAIMetadataStoreDestroyProducer(t *testing.T) func(s *terr
 }
 
 
-<% end -%>
+{{ end }}

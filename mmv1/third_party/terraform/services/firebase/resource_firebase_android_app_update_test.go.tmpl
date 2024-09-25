@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package firebase_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
@@ -83,4 +82,4 @@ resource "google_apikeys_key" "key2" {
 `, context)
 }
 
-<% end -%>
+{{ end }}

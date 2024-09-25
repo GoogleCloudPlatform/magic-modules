@@ -1,9 +1,9 @@
-resource "google_clouddeploy_automation" "<%= ctx[:primary_resource_id] %>" {
-  name     = "<%= ctx[:vars]['automation'] %>"
+resource "google_clouddeploy_automation" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.Vars "automation"}}"
   project = google_clouddeploy_delivery_pipeline.pipeline.project
   location = google_clouddeploy_delivery_pipeline.pipeline.location
   delivery_pipeline = google_clouddeploy_delivery_pipeline.pipeline.name
-  service_account = "<%= ctx[:test_env_vars]['service_account'] %>"
+  service_account = "{{index $.TestEnvVars "service_account"}}"
   selector {
     targets {
       id = "*"
@@ -18,7 +18,7 @@ resource "google_clouddeploy_automation" "<%= ctx[:primary_resource_id] %>" {
 }
 
 resource "google_clouddeploy_delivery_pipeline" "pipeline" {
-  name = "<%= ctx[:vars]['delivery_pipeline'] %>"
+  name = "{{index $.Vars "delivery_pipeline"}}"
   location = "us-central1"
   serial_pipeline  {
     stages {

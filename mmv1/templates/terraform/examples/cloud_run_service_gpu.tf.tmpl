@@ -1,6 +1,6 @@
-resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
+resource "google_cloud_run_service" "{{$.PrimaryResourceId}}" {
   provider = google-beta
-  name     = "<%= ctx[:vars]['cloud_run_service_name'] %>"
+  name     = "{{index $.Vars "cloud_run_service_name"}}"
   location = "us-central1"
 
   metadata {

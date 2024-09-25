@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package compute_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 import (
 	"testing"
 
@@ -210,5 +209,5 @@ resource "google_tags_tag_value" "secure_tag_value_1" {
 }
 `, context)
 }
-<% end -%>
+{{- end }}
 

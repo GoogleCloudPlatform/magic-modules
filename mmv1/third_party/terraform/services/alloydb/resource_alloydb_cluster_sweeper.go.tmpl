@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package alloydb
 
 import (
@@ -50,11 +49,11 @@ func testSweepAlloydbCluster(region string) error {
 	}
 
 	// manual patch: use aggregated list instead of sweeper-specific location. This will clear secondary clusters.
-<% unless version == 'ga' -%>
-	listTemplate := strings.Split("https://alloydb.googleapis.com/v1beta/projects/{{project}}/locations/-/clusters", "?")[0]
-<% else -%>
-	listTemplate := strings.Split("https://alloydb.googleapis.com/v1/projects/{{project}}/locations/-/clusters", "?")[0]
-<% end -%>
+{{- if ne $.TargetVersionName "ga" }}
+	listTemplate := strings.Split("https://alloydb.googleapis.com/v1beta/projects/{{"{{"}}project{{"}}"}}/locations/-/clusters", "?")[0]
+{{- else }}
+	listTemplate := strings.Split("https://alloydb.googleapis.com/v1/projects/{{"{{"}}project{{"}}"}}/locations/-/clusters", "?")[0]
+{{- end }}
 	listUrl, err := tpgresource.ReplaceVars(d, config, listTemplate)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] error preparing sweeper list url: %s", err)
@@ -97,11 +96,11 @@ func testSweepAlloydbCluster(region string) error {
 			continue
 		}
 
-		<% unless version == 'ga' -%>
+		{{ if ne $.TargetVersionName `ga` -}}
 		deleteTemplate := "https://alloydb.googleapis.com/v1beta/%s?force=true"
-		<% else -%>
+		{{- else }}
 		deleteTemplate := "https://alloydb.googleapis.com/v1/%s?force=true"
-		<% end -%>
+		{{- end }}
 		deleteUrl := fmt.Sprintf(deleteTemplate, name)
 
 		// Don't wait on operations as we may have a lot to delete

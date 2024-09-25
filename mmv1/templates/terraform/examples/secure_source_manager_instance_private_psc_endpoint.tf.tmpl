@@ -1,7 +1,7 @@
 data "google_project" "project" {}
 
 resource "google_privateca_ca_pool" "ca_pool" {
-  name     = "<%= ctx[:vars]['ca_pool_id'] %>"
+  name     = "{{index $.Vars "ca_pool_id"}}"
   location = "us-central1"
   tier     = "ENTERPRISE"
   publishing_options {
@@ -12,7 +12,7 @@ resource "google_privateca_ca_pool" "ca_pool" {
 
 resource "google_privateca_certificate_authority" "root_ca" {
   pool                     = google_privateca_ca_pool.ca_pool.name
-  certificate_authority_id = "<%= ctx[:vars]['root_ca_id'] %>"
+  certificate_authority_id = "{{index $.Vars "root_ca_id"}}"
   location                 = "us-central1"
   config {
     subject_config {
@@ -56,8 +56,8 @@ resource "google_privateca_ca_pool_iam_binding" "ca_pool_binding" {
 }
 
 // See https://cloud.google.com/secure-source-manager/docs/create-private-service-connect-instance#root-ca-api
-resource "google_secure_source_manager_instance" "<%= ctx[:primary_resource_id] %>" {
-  instance_id = "<%= ctx[:vars]['instance_id'] %>"
+resource "google_secure_source_manager_instance" "{{$.PrimaryResourceId}}" {
+  instance_id = "{{index $.Vars "instance_id"}}"
   location = "us-central1"
   private_config {
     is_private = true
@@ -66,7 +66,7 @@ resource "google_secure_source_manager_instance" "<%= ctx[:primary_resource_id] 
 
   # Prevent accidental deletions.
   lifecycle {
-    prevent_destroy = "<%= ctx[:vars]['prevent_destroy'] %>"
+    prevent_destroy = "{{index $.Vars "prevent_destroy"}}"
   }
 
   depends_on = [
@@ -84,12 +84,12 @@ resource "time_sleep" "wait_120_seconds" {
 
 // Connect SSM private instance with endpoint.
 resource "google_compute_network" "network" {
-  name = "<%= ctx[:vars]['network_id'] %>"
+  name = "{{index $.Vars "network_id"}}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "subnet" {
-  name = "<%= ctx[:vars]['subnet_id'] %>"
+  name = "{{index $.Vars "subnet_id"}}"
   region = "us-central1"
   network = google_compute_network.network.id
   ip_cidr_range = "10.0.60.0/24"
@@ -97,7 +97,7 @@ resource "google_compute_subnetwork" "subnet" {
 }
 
 resource "google_compute_address" "address" {
-  name = "<%= ctx[:vars]['address_id'] %>"
+  name = "{{index $.Vars "address_id"}}"
   region = "us-central1"
   address = "10.0.60.100"
   address_type = "INTERNAL"
@@ -105,18 +105,18 @@ resource "google_compute_address" "address" {
 }
 
 resource "google_compute_forwarding_rule" "fw_rule_service_attachment" {
-  name = "<%= ctx[:vars]['fw_rule_to_service_attachment_id'] %>"
+  name = "{{index $.Vars "fw_rule_to_service_attachment_id"}}"
   region = "us-central1"
 
   load_balancing_scheme = ""
   ip_address = google_compute_address.address.id
   network = google_compute_network.network.id
 
-  target = google_secure_source_manager_instance.<%= ctx[:primary_resource_id] %>.private_config.0.http_service_attachment
+  target = google_secure_source_manager_instance.{{$.PrimaryResourceId}}.private_config.0.http_service_attachment
 }
 
 resource "google_dns_managed_zone" "private_zone" {
-  name = "<%= ctx[:vars]['dns_zone_id'] %>"
+  name = "{{index $.Vars "dns_zone_id"}}"
   dns_name = "p.sourcemanager.dev."
   visibility = "private"
   private_visibility_config {
@@ -127,7 +127,7 @@ resource "google_dns_managed_zone" "private_zone" {
 }
 
 resource "google_dns_record_set" "ssm_instance_html_record" {
-  name = "${google_secure_source_manager_instance.<%= ctx[:primary_resource_id] %>.host_config.0.html}."
+  name = "${google_secure_source_manager_instance.{{$.PrimaryResourceId}}.host_config.0.html}."
   type = "A"
   ttl = 300
   managed_zone = google_dns_managed_zone.private_zone.name
@@ -135,7 +135,7 @@ resource "google_dns_record_set" "ssm_instance_html_record" {
 }
 
 resource "google_dns_record_set" "ssm_instance_api_record" {
-  name = "${google_secure_source_manager_instance.<%= ctx[:primary_resource_id] %>.host_config.0.api}."
+  name = "${google_secure_source_manager_instance.{{$.PrimaryResourceId}}.host_config.0.api}."
   type = "A"
   ttl = 300
   managed_zone = google_dns_managed_zone.private_zone.name
@@ -143,7 +143,7 @@ resource "google_dns_record_set" "ssm_instance_api_record" {
 }
 
 resource "google_dns_record_set" "ssm_instance_git_record" {
-  name = "${google_secure_source_manager_instance.<%= ctx[:primary_resource_id] %>.host_config.0.git_http}."
+  name = "${google_secure_source_manager_instance.{{$.PrimaryResourceId}}.host_config.0.git_http}."
   type = "A"
   ttl = 300
   managed_zone = google_dns_managed_zone.private_zone.name

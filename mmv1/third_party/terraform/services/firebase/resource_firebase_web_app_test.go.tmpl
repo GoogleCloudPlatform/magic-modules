@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package firebase_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -158,7 +157,7 @@ func testAccCheckFirebaseWebAppNotDestroyedProducer(t *testing.T) func(s *terraf
 
 			config := acctest.GoogleProviderConfig(t)
 
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{FirebaseBasePath}}{{name}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}FirebaseBasePath{{"}}"}}{{"{{"}}name{{"}}"}}")
 			if err != nil {
 				return err
 			}
@@ -185,4 +184,4 @@ func testAccCheckFirebaseWebAppNotDestroyedProducer(t *testing.T) func(s *terraf
 	}
 }
 
-<% end -%>
+{{ end }}

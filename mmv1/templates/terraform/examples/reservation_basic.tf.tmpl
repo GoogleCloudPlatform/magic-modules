@@ -1,5 +1,5 @@
-resource "google_compute_reservation" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]['reservation_name'] %>"
+resource "google_compute_reservation" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "reservation_name"}}"
   zone = "us-central1-a"
 
   specific_reservation {

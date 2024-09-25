@@ -1,14 +1,13 @@
-<% autogen_exception -%>
 package compute_test
 
 import (
-	<% unless version == 'ga' -%>
+	{{- if ne $.TargetVersionName "ga" }}
 	"encoding/json"
-	<% end -%>
+	{{- end }}
 	"fmt"
-	<% unless version == 'ga' -%>
+	{{- if ne $.TargetVersionName "ga" }}
 	"google.golang.org/api/googleapi"
-	<% end -%>
+	{{- end }}
 	"reflect"
 	"regexp"
 	"sort"
@@ -26,11 +25,11 @@ import (
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 
-<% if version == "ga" -%>
+{{ if eq $.TargetVersionName `ga` }}
 	"google.golang.org/api/compute/v1"
-<% else -%>
+{{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
-<% end -%>
+{{- end }}
 )
 
 func TestMinCpuPlatformDiffSuppress(t *testing.T) {
@@ -1483,7 +1482,7 @@ func TestAccComputeInstance_reservationAffinities(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeInstance_hostErrorTimeoutSecconds(t *testing.T) {
 	t.Parallel()
 	
@@ -1552,7 +1551,7 @@ func TestAccComputeInstance_hostErrorTimeoutSecconds(t *testing.T) {
 		},
 	})
 }
-<% end -%>
+{{- end }}
 
 func TestAccComputeInstance_subnet_auto(t *testing.T) {
 	t.Parallel()
@@ -2097,10 +2096,10 @@ func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 
 	var instance compute.Instance
 	var instance2 compute.Instance
-	<% unless version == "ga" -%>
+	{{- if ne $.TargetVersionName "ga" }}
 	var instance3 compute.Instance
 	var instance4 compute.Instance
-	<% end -%>
+	{{- end }}
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -2115,12 +2114,12 @@ func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance, true, "SEV"),
 					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar2", &instance2),
 					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance2, true, ""),
-					<% unless version == "ga" -%>
+					{{- if ne $.TargetVersionName "ga" }}
 					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar3", &instance3),
 					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance3, true, "SEV"),
 					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar4", &instance4),
 					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance4, true, ""),
-					<% end -%>
+					{{- end }}
 				),
 			},
 			{
@@ -2132,7 +2131,7 @@ func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance2, false, "SEV_SNP"),
 				),
 			},
-			<% unless version == "ga" -%>
+			{{- if ne $.TargetVersionName "ga" }}
 			{
 				Config: testAccComputeInstanceConfidentialInstanceConfigEnableTdx(instanceName, "TDX"),
 				Check: resource.ComposeTestCheckFunc(
@@ -2140,7 +2139,7 @@ func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance, false, "TDX"),
 				),
 			},
-			<% end -%>
+			{{- end }}
 		},
 	})
 }
@@ -3217,7 +3216,7 @@ func TestAccComputeInstance_localSsdRecoveryTimeout_update(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeInstance_partnerMetadata(t *testing.T) {
 	t.Parallel()
 
@@ -3317,7 +3316,7 @@ func TestAccComputeInstance_partnerMetadata_deletePartnerMetadata(t *testing.T) 
 		},
 	})
 }
-<% end -%>
+{{- end }}
 
 func TestAccComputeInstance_metadataStartupScript_update(t *testing.T) {
 	t.Parallel()
@@ -3477,7 +3476,7 @@ func TestAccComputeInstance_proactiveAttributionLabel(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 const errorDeleteAccessConfigWithSecPolicy = "Cannot delete an access config with a security policy set. Please remove the security policy first"
 
 // The tests related to security_policy use network_edge_security_service resource
@@ -3804,7 +3803,7 @@ func testAccComputeInstance_nic_securityPolicyCreateWithoutAccessConfig(t *testi
 	})
 }
 
-<% end -%>
+{{ end }}
 
 func testAccCheckComputeInstanceUpdateMachineType(t *testing.T, n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -3845,7 +3844,7 @@ func testAccCheckComputeInstanceUpdateMachineType(t *testing.T, n string) resour
 	}
 }
 
-<% unless version == "ga" -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeInstance_NetworkAttachment(t *testing.T) {
 	t.Parallel()
 	suffix := fmt.Sprintf("%s", acctest.RandString(t, 10))
@@ -3907,7 +3906,7 @@ func TestAccComputeInstance_NetworkAttachmentUpdate(t *testing.T) {
 		},
 	})
 }
-<% end -%>
+{{- end }}
 
 func TestAccComputeInstance_NicStackTypeUpdate(t *testing.T) {
 	t.Parallel()
@@ -3976,13 +3975,13 @@ func testAccCheckComputeInstanceExistsInProject(t *testing.T, n, p string, insta
 		}
 
 		config := acctest.GoogleProviderConfig(t)
-		<% if version == "ga" -%>
+		{{- if eq $.TargetVersionName "ga" }}
 		found, err := config.NewComputeClient(config.UserAgent).Instances.Get(
 			p, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"]).Do()
-		<% else -%>
+		{{- else }}
 		found, err := config.NewComputeClient(config.UserAgent).Instances.Get(
 			p, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"]).View("FULL").Do()
-		<% end -%>
+		{{- end }}
 		if err != nil {
 			return err
 		}
@@ -4136,7 +4135,7 @@ func testAccCheckComputeInstanceLocalSsdRecoveryTimeout(instance *compute.Instan
 	}
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccCheckComputeInstancePartnerMetadata(instance *compute.Instance, expectedPartnerMetadata map[string]compute.StructuredEntries) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if instance == nil {
@@ -4164,7 +4163,7 @@ func testAccCheckComputeInstancePartnerMetadata(instance *compute.Instance, expe
 
 	}
 }
-<% end -%>
+{{- end }}
 
 func testAccCheckComputeInstanceTerminationAction(instance *compute.Instance, instanceTerminationActionWant string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -4597,7 +4596,7 @@ func testAccCheckComputeInstanceHasMinCpuPlatform(instance *compute.Instance, mi
 	}
 }
 
-<% unless version == "ga" -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccCheckComputeInstanceHasNetworkAttachment(instance *compute.Instance, networkAttachmentName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, networkInterface := range instance.NetworkInterfaces {
@@ -4608,7 +4607,7 @@ func testAccCheckComputeInstanceHasNetworkAttachment(instance *compute.Instance,
 		return fmt.Errorf("Network Attachment %s, was not found in the instance template", networkAttachmentName)
 	}
 }
-<% end -%>
+{{- end }}
 
 func testAccCheckComputeInstanceHasMachineType(instance *compute.Instance, machineType string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -4737,7 +4736,7 @@ func testAccCheckComputeInstanceHasStatus(instance *compute.Instance, status str
 	}
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccCheckComputeInstanceNicAccessConfigHasSecurityPolicy(instance *compute.Instance, securityPolicy string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, networkInterface := range instance.NetworkInterfaces {
@@ -4778,7 +4777,7 @@ func testAccCheckComputeInstanceNicAccessConfigHasNoSecurityPolicy(instance *com
 		return nil
 	}
 }
-<% end -%>
+{{- end }}
 
 func testAccComputeInstance_basic(instance string) string {
 	return fmt.Sprintf(`
@@ -8245,7 +8244,7 @@ resource "google_compute_instance" "foobar" {
 }`, instanceName)
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeInstance_hostErrorTimeoutSeconds(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_image" "my_image" {
@@ -8273,7 +8272,7 @@ resource "google_compute_instance" "foobar" {
   }
 }`, context)
 }
-<% end -%>
+{{- end }}
 
 func testAccComputeInstance_shieldedVmConfig(instance string, enableSecureBoot bool, enableVtpm bool, enableIntegrityMonitoring bool) string {
 	return fmt.Sprintf(`
@@ -8366,7 +8365,7 @@ resource "google_compute_instance" "foobar2" {
 
 }
 
-<% unless version == "ga" -%>
+{{ if ne $.TargetVersionName `ga` -}}
 resource "google_compute_instance" "foobar3" {
   name         = "%s3"
   machine_type = "c3d-standard-4"
@@ -8418,9 +8417,9 @@ resource "google_compute_instance" "foobar4" {
 
 }
 `, instance, confidentialInstanceType, instance, instance, confidentialInstanceType, instance)
-<% else -%>
+{{- else }}
 `, instance, confidentialInstanceType, instance)
-<% end -%>
+{{- end }}
 }
 
 func testAccComputeInstanceConfidentialInstanceConfigNoEnable(instance string, minCpuPlatform, confidentialInstanceType string) string {
@@ -8486,7 +8485,7 @@ resource "google_compute_instance" "foobar6" {
 `, instance, minCpuPlatform, confidentialInstanceType, instance, minCpuPlatform, confidentialInstanceType)
 }
 
-<% unless version == "ga" -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeInstanceConfidentialInstanceConfigEnableTdx(instance string, confidentialInstanceType string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image3" {
@@ -8520,7 +8519,7 @@ resource "google_compute_instance" "foobar5" {
 }
 `, instance, confidentialInstanceType)
 }
-<% end -%>
+{{- end }}
 
 func testAccComputeInstance_attributionLabelCreate(instance, add, strategy string) string {
 	return fmt.Sprintf(`
@@ -9474,7 +9473,7 @@ resource "google_compute_instance" "foobar" {
 `, instance)
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeInstance_partnerMetadata_empty(instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -9534,7 +9533,7 @@ resource "google_compute_instance" "foobar" {
   }
 }`, instance)
 }
-<% end -%>
+{{- end }}
 
 func testAccComputeInstance_metadataStartupScript(instance, machineType, metadata string) string {
 	return fmt.Sprintf(`
@@ -9619,7 +9618,7 @@ resource "google_compute_disk" "debian" {
 `, instance, diskName, suffix, suffix, suffix)
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeInstance_nic_securityPolicyCreateWithOneNicAndTwoAccessConfigs(suffix, policy, instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -10416,9 +10415,9 @@ resource "google_compute_instance" "foobar" {
 `, suffix, suffix, suffix, suffix, suffix, suffix, suffix, policy, instance)
 }
 
-<% end -%>
+{{ end }}
 
-<% unless version == "ga" -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeInstance_networkAttachment(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_image" "my_image" {
@@ -10553,7 +10552,7 @@ resource "google_compute_instance" "foobar" {
 }
 `, suffix, suffix, suffix, region, suffix, region, suffix, region, suffix, region, suffix, region, networkAttachment)
 }
-<% end -%>
+{{- end }}
 
 func testAccComputeInstance_nicStackTypeUpdate(suffix, region, stack_type, instance string) string {
 	return fmt.Sprintf(`

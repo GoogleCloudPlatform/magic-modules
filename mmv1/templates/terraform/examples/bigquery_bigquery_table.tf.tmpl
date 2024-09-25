@@ -1,10 +1,10 @@
 resource "google_bigquery_dataset" "test" {
-  dataset_id = "<%= ctx[:vars]['dataset_id'] %>"
+  dataset_id = "{{index $.Vars "dataset_id"}}"
 }
 
 resource "google_bigquery_table" "test" {
   deletion_protection = false
-  table_id   = "<%= ctx[:vars]['table_id'] %>"
+  table_id   = "{{index $.Vars "table_id"}}"
   dataset_id = google_bigquery_dataset.test.dataset_id
   time_partitioning {
     type = "DAY"

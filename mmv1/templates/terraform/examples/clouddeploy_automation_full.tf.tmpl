@@ -1,8 +1,8 @@
-resource "google_clouddeploy_automation" "<%= ctx[:primary_resource_id] %>" {
-  name     = "<%= ctx[:vars]['automation'] %>"
+resource "google_clouddeploy_automation" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.Vars "automation"}}"
   location = "us-central1"
   delivery_pipeline = google_clouddeploy_delivery_pipeline.pipeline.name
-  service_account = "<%= ctx[:test_env_vars]['service_account'] %>"
+  service_account = "{{index $.TestEnvVars "service_account"}}"
   annotations = {
     my_first_annotation = "example-annotation-1"
     my_second_annotation = "example-annotation-2"
@@ -39,7 +39,7 @@ resource "google_clouddeploy_automation" "<%= ctx[:primary_resource_id] %>" {
 }
 
 resource "google_clouddeploy_delivery_pipeline" "pipeline" {
-  name = "<%= ctx[:vars]['delivery_pipeline'] %>"
+  name = "{{index $.Vars "delivery_pipeline"}}"
   location = "us-central1"
   serial_pipeline  {
     stages {

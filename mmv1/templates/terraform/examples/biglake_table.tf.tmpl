@@ -1,10 +1,10 @@
 resource "google_biglake_catalog" "catalog" {
-    name = "<%= ctx[:vars]['catalog'] %>"
+    name = "{{index $.Vars "catalog"}}"
     location = "US"
 }
 
 resource "google_storage_bucket" "bucket" {
-  name                        = "<%= ctx[:vars]['bucket'] %>"
+  name                        = "{{index $.Vars "bucket"}}"
   location                    = "US"
   force_destroy               = true
   uniform_bucket_level_access = true
@@ -24,7 +24,7 @@ resource "google_storage_bucket_object" "data_folder" {
 }
 
 resource "google_biglake_database" "database" {
-    name = "<%= ctx[:vars]['database'] %>"
+    name = "{{index $.Vars "database"}}"
     catalog = google_biglake_catalog.catalog.id
     type = "HIVE"
     hive_options {
@@ -35,8 +35,8 @@ resource "google_biglake_database" "database" {
     }
 }
 
-resource "google_biglake_table" "<%= ctx[:primary_resource_id] %>" {
-    name = "<%= ctx[:vars]['name'] %>"
+resource "google_biglake_table" "{{$.PrimaryResourceId}}" {
+    name = "{{index $.Vars "name"}}"
     database = google_biglake_database.database.id
     type = "HIVE"
     hive_options {

@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 
 package compute
 
@@ -17,11 +16,11 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 
-<% if version == "ga" -%>
+{{ if eq $.TargetVersionName `ga` }}
 	"google.golang.org/api/compute/v1"
-<% else -%>
+{{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
-<% end -%>
+{{- end }}
 )
 
 func ResourceComputeRegionInstanceTemplate() *schema.Resource {
@@ -331,14 +330,14 @@ Google Cloud KMS.`,
 				Description: `A brief description of this resource.`,
 			},
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 			"enable_display": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				ForceNew:    true,
 				Description: `Enable Virtual Displays on this instance. Note: allow_stopping_for_update must be set to true in order to update this field.`,
 			},
-<% end -%>
+{{- end }}
 
 			"instance_description": {
 				Type:        schema.TypeString,
@@ -354,7 +353,7 @@ Google Cloud KMS.`,
 				Description: `Metadata key/value pairs to make available from within instances created from this template.`,
 			},
 
-			<% unless version == 'ga' -%>
+			{{ if ne $.TargetVersionName `ga` -}}
 			"partner_metadata": {
 				Type:                  schema.TypeMap,
 				Optional:              true,
@@ -363,7 +362,7 @@ Google Cloud KMS.`,
 				Elem:                  &schema.Schema{Type: schema.TypeString},
 				Description:           `Partner Metadata Map made available within the instance.`,
 			},
-			<% end -%>
+			{{- end }}
 
 			"metadata_startup_script": {
 				Type:        schema.TypeString,
@@ -720,7 +719,7 @@ be from 0 to 999,999,999 inclusive.`,
 								},
 							},
 						},
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 						"host_error_timeout_seconds": {
 							Type:        schema.TypeInt,
 							Optional:    true,
@@ -734,7 +733,7 @@ be from 0 to 999,999,999 inclusive.`,
 							ForceNew:    true,
 							Description: `Specifies the frequency of planned maintenance events. The accepted values are: PERIODIC`,
 						},
-<% end -%>
+{{- end }}
 						"local_ssd_recovery_timeout" : {
 							Type:        schema.TypeList,
 							Optional:    true,
@@ -866,7 +865,7 @@ be from 0 to 999,999,999 inclusive.`,
 							Description: `Defines whether the instance should have confidential compute enabled. Field will be deprecated in a future release.`,
 							AtLeastOneOf: []string{"confidential_instance_config.0.enable_confidential_compute", "confidential_instance_config.0.confidential_instance_type"},
 						},
-						<% if version == "ga" -%>
+						{{- if eq $.TargetVersionName "ga" }}
 						"confidential_instance_type": {
 							Type:        schema.TypeString,
 							Optional:    true,
@@ -877,7 +876,7 @@ be from 0 to 999,999,999 inclusive.`,
 								If SEV_SNP, min_cpu_platform = "AMD Milan" is currently required.`,
 							AtLeastOneOf: []string{"confidential_instance_config.0.enable_confidential_compute", "confidential_instance_config.0.confidential_instance_type"},
 						},
-						<% else -%>
+						{{- else }}
 						"confidential_instance_type": {
 							Type:        schema.TypeString,
 							Optional:    true,
@@ -889,7 +888,7 @@ be from 0 to 999,999,999 inclusive.`,
 								"AMD Milan" is currently required.`,
 							AtLeastOneOf: []string{"confidential_instance_config.0.enable_confidential_compute", "confidential_instance_config.0.confidential_instance_type"},
 						},
-						<% end -%>
+						{{- end }}
 					},
 				},
 			},
@@ -1087,12 +1086,12 @@ func resourceComputeRegionInstanceTemplateCreate(d *schema.ResourceData, meta in
 		return err
 	}
 
-	<% unless version == 'ga' -%>
+	{{ if ne $.TargetVersionName `ga` -}}
 	PartnerMetadata, err := resourceInstancePartnerMetadata(d)
 	if err != nil {
 		return err
 	}
-	<% end -%>
+	{{- end }}
 
 	networks, err := expandNetworkInterfaces(d, config)
 	if err != nil {
@@ -1121,9 +1120,9 @@ func resourceComputeRegionInstanceTemplateCreate(d *schema.ResourceData, meta in
 		MinCpuPlatform:             d.Get("min_cpu_platform").(string),
 		Disks:                      disks,
 		Metadata:                   metadata,
-		<% unless version == 'ga' -%>
+		{{- if ne $.TargetVersionName "ga" }}
 		PartnerMetadata:            PartnerMetadata,
-		<% end -%>
+		{{- end }}
 		NetworkInterfaces:          networks,
 		NetworkPerformanceConfig:   networkPerformanceConfig,
 		Scheduling:                 scheduling,
@@ -1132,9 +1131,9 @@ func resourceComputeRegionInstanceTemplateCreate(d *schema.ResourceData, meta in
 		ConfidentialInstanceConfig: expandConfidentialInstanceConfig(d),
 		ShieldedInstanceConfig:     expandShieldedVmConfigs(d),
 		AdvancedMachineFeatures:    expandAdvancedMachineFeatures(d),
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 		DisplayDevice:              expandDisplayDevice(d),
-<% end -%>
+{{- end }}
 		ResourcePolicies:           resourcePolicies,
 		ReservationAffinity:        reservationAffinity,
 	}
@@ -1166,7 +1165,7 @@ func resourceComputeRegionInstanceTemplateCreate(d *schema.ResourceData, meta in
 	instanceTemplate["properties"] = instanceProperties
 	instanceTemplate["name"] = itName
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/instanceTemplates")
+	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/instanceTemplates")
 	if err != nil {
 		return err
 	}
@@ -1215,17 +1214,17 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 	splits := strings.Split(d.Id(), "/")
 	name := splits[len(splits)-1]
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/instanceTemplates/" + name)
+	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/instanceTemplates/" + name)
 	if err != nil {
 		return err
 	}
 
-	<% unless version == 'ga' -%>
+	{{ if ne $.TargetVersionName `ga` -}}
 	url, err = transport_tpg.AddQueryParams(url, map[string]string{"view": "FULL"})
 	if err != nil {
 		return err
 	}
-	<% end -%>
+	{{- end }}
 
 	instanceTemplate, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config: config,
@@ -1276,7 +1275,7 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 		}
 	}
 
-	<% unless version == 'ga' -%>
+	{{ if ne $.TargetVersionName `ga` -}}
 	if instanceProperties.PartnerMetadata != nil {
 		partnerMetadata, err := flattenPartnerMetadata(instanceProperties.PartnerMetadata)
 		if err != nil {
@@ -1286,7 +1285,7 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 			return fmt.Errorf("Error setting partner metadata: %s", err)
 		}
 	}
-	<% end -%>
+	{{- end }}
 
 	// Set the tags fingerprint if there is one.
 	if instanceProperties.Tags != nil {
@@ -1403,13 +1402,13 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 			return fmt.Errorf("Error setting advanced_machine_features: %s", err)
 		}
 	}
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 	if instanceProperties.DisplayDevice != nil {
 		if err = d.Set("enable_display", flattenEnableDisplay(instanceProperties.DisplayDevice)); err != nil {
 			return fmt.Errorf("Error setting enable_display: %s", err)
 		}
 	}
-<% end -%>
+{{- end }}
 
 	if instanceProperties.ResourcePolicies != nil {
 		if err = d.Set("resource_policies", instanceProperties.ResourcePolicies); err != nil {
@@ -1438,7 +1437,7 @@ func resourceComputeRegionInstanceTemplateDelete(d *schema.ResourceData, meta in
 		return err
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/instanceTemplates/{{name}}")
+	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/instanceTemplates/{{"{{"}}name{{"}}"}}")
 	if err != nil {
 		return err
 	}
@@ -1474,7 +1473,7 @@ func resourceComputeRegionInstanceTemplateImportState(d *schema.ResourceData, me
 	}
 
 	// Replace import id for the resource id
-	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/regions/{{region}}/instanceTemplates/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/instanceTemplates/{{"{{"}}name{{"}}"}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}

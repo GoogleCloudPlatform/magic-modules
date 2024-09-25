@@ -1,6 +1,6 @@
 // Forwarding rule for Internal Load Balancing
-resource "google_compute_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
-  name   = "<%= ctx[:vars]['forwarding_rule_name'] %>"
+resource "google_compute_forwarding_rule" "{{$.PrimaryResourceId}}" {
+  name   = "{{index $.Vars "forwarding_rule_name"}}"
   region = "us-central1"
 
   load_balancing_scheme = "INTERNAL"
@@ -12,13 +12,13 @@ resource "google_compute_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
 }
 
 resource "google_compute_region_backend_service" "backend" {
-  name          = "<%= ctx[:vars]['backend_name'] %>"
+  name          = "{{index $.Vars "backend_name"}}"
   region        = "us-central1"
   health_checks = [google_compute_health_check.hc.id]
 }
 
 resource "google_compute_health_check" "hc" {
-  name               = "check-<%= ctx[:vars]['backend_name'] %>"
+  name               = "check-{{index $.Vars "backend_name"}}"
   check_interval_sec = 1
   timeout_sec        = 1
 
@@ -28,13 +28,13 @@ resource "google_compute_health_check" "hc" {
 }
 
 resource "google_compute_network" "default" {
-  name                    = "<%= ctx[:vars]['network_name'] %>"
+  name                    = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = false
   enable_ula_internal_ipv6 = true
 }
 
 resource "google_compute_subnetwork" "default" {
-  name          = "<%= ctx[:vars]['subnet_name'] %>"
+  name          = "{{index $.Vars "subnet_name"}}"
   ip_cidr_range = "10.0.0.0/16"
   region        = "us-central1"
   stack_type       = "IPV4_IPV6"

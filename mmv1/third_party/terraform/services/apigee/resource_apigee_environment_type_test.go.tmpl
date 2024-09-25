@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package apigee_test
-<% unless version == 'ga' -%>
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
@@ -176,4 +175,4 @@ resource "google_apigee_environment" "apigee_environment" {
 `, context)
 }
 
-<% end -%>
+{{ end }}

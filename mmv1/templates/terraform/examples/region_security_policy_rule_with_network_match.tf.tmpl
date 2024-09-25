@@ -25,7 +25,7 @@ resource "google_compute_region_security_policy" "policynetworkmatch" {
   provider    = google-beta
 
   region      = "us-west2"
-  name        = "<%= ctx[:vars]['sec_policy_name'] %>"
+  name        = "{{index $.Vars "sec_policy_name"}}"
   description = "region security policy for network match"
   type        = "CLOUD_ARMOR_NETWORK"
   user_defined_fields {
@@ -38,7 +38,7 @@ resource "google_compute_region_security_policy" "policynetworkmatch" {
   depends_on  = [google_compute_network_edge_security_service.edge_sec_service]
 }
 
-resource "google_compute_region_security_policy_rule" "<%= ctx[:primary_resource_id] %>" {
+resource "google_compute_region_security_policy_rule" "{{$.PrimaryResourceId}}" {
   provider        = google-beta
 
   region          = "us-west2"

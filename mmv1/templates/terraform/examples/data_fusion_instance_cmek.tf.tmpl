@@ -1,5 +1,5 @@
-resource "google_data_fusion_instance" "<%= ctx[:primary_resource_id] %>" {
-  name   = "<%= ctx[:vars]["instance_name"] %>"
+resource "google_data_fusion_instance" "{{$.PrimaryResourceId}}" {
+  name   = "{{index $.Vars "instance_name"}}"
   region = "us-central1"
   type   = "BASIC"
 
@@ -11,12 +11,12 @@ resource "google_data_fusion_instance" "<%= ctx[:primary_resource_id] %>" {
 }
 
 resource "google_kms_crypto_key" "crypto_key" {
-  name     = "<%= ctx[:vars]['instance_name'] %>"
+  name     = "{{index $.Vars "instance_name"}}"
   key_ring = google_kms_key_ring.key_ring.id
 }
 
 resource "google_kms_key_ring" "key_ring" {
-  name     = "<%= ctx[:vars]['instance_name'] %>"
+  name     = "{{index $.Vars "instance_name"}}"
   location = "us-central1"
 }
 

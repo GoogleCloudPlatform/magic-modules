@@ -1,4 +1,4 @@
-url_kms_verify, err := tpgresource.ReplaceVars(d, config, "{{NetappBasePath}}projects/{{project}}/locations/{{location}}/kmsConfigs/{{name}}:verify")
+url_kms_verify, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}NetappBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/kmsConfigs/{{"{{"}}name{{"}}"}}:verify")
 	if err != nil {
 		return err
 	}

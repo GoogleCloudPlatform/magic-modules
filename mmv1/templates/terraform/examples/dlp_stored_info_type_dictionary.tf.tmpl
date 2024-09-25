@@ -1,5 +1,5 @@
-resource "google_data_loss_prevention_stored_info_type" "<%= ctx[:primary_resource_id] %>" {
-	parent = "projects/<%= ctx[:test_env_vars]['project'] %>"
+resource "google_data_loss_prevention_stored_info_type" "{{$.PrimaryResourceId}}" {
+	parent = "projects/{{index $.TestEnvVars "project"}}"
 	description = "Description"
 	display_name = "Displayname"
 

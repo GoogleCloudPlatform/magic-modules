@@ -1,4 +1,4 @@
-<% unless compiler == "terraformgoogleconversion-codegen" -%>
+{{- if ne $.Compiler "terraformgoogleconversion-codegen" }}
 
 func extractError(d *schema.ResourceData) error {
 	// Casts are not safe since the logic that populate it is type deterministic.
@@ -31,4 +31,4 @@ func waitForPrivateConnectionReady(d *schema.ResourceData, config *transport_tpg
 		}
 	})
 }
-<% end -%>
+{{- end }}

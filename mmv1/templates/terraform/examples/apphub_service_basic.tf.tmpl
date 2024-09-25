@@ -1,16 +1,16 @@
 resource "google_apphub_application" "application" {
   location = "us-central1"
-  application_id = "<%= ctx[:vars]['application_id'] %>"
+  application_id = "{{index $.Vars "application_id"}}"
   scope {
     type = "REGIONAL"
   }
 }
 
 resource "google_project" "service_project" {
-  project_id ="<%= ctx[:vars]['service_project_attachment_id'] %>"
+  project_id ="{{index $.Vars "service_project_attachment_id"}}"
   name = "Service Project"
-  org_id = "<%= ctx[:test_env_vars]['org_id'] %>"
-  billing_account = "<%= ctx[:test_env_vars]['billing_account'] %>"
+  org_id = "{{index $.TestEnvVars "org_id"}}"
+  billing_account = "{{index $.TestEnvVars "billing_account"}}"
   deletion_policy = "DELETE"
 }
 
@@ -44,7 +44,7 @@ resource "time_sleep" "wait_120s_for_resource_ingestion" {
   create_duration = "120s"
 }
 
-resource "google_apphub_service" "<%= ctx[:primary_resource_id] %>" {
+resource "google_apphub_service" "{{$.PrimaryResourceId}}" {
   location = "us-central1"
   application_id = google_apphub_application.application.application_id
   service_id = google_compute_forwarding_rule.forwarding_rule.name
@@ -57,7 +57,7 @@ resource "google_apphub_service" "<%= ctx[:primary_resource_id] %>" {
 
 # VPC network
 resource "google_compute_network" "ilb_network" {
-  name                    = "<%= ctx[:vars]['ilb_network'] %>"
+  name                    = "{{index $.Vars "ilb_network"}}"
   project                 = google_project.service_project.project_id
   auto_create_subnetworks = false
   depends_on = [time_sleep.wait_120s]
@@ -66,7 +66,7 @@ resource "google_compute_network" "ilb_network" {
 
 # backend subnet
 resource "google_compute_subnetwork" "ilb_subnet" {
-  name          = "<%= ctx[:vars]['ilb_subnet'] %>"
+  name          = "{{index $.Vars "ilb_subnet"}}"
   project       = google_project.service_project.project_id
   ip_cidr_range = "10.0.1.0/24"
   region        = "us-central1"
@@ -75,7 +75,7 @@ resource "google_compute_subnetwork" "ilb_subnet" {
 
 # forwarding rule
 resource "google_compute_forwarding_rule" "forwarding_rule" {
-  name                  ="<%= ctx[:vars]['forwarding_rule'] %>"
+  name                  ="{{index $.Vars "forwarding_rule"}}"
   project               = google_project.service_project.project_id
   region                = "us-central1"
   ip_version            = "IPV4"
@@ -90,7 +90,7 @@ resource "google_compute_forwarding_rule" "forwarding_rule" {
 
 # backend service
 resource "google_compute_region_backend_service" "backend" {
-  name                  = "<%= ctx[:vars]['backend_service'] %>"
+  name                  = "{{index $.Vars "backend_service"}}"
   project               = google_project.service_project.project_id
   region                = "us-central1"
   health_checks         = [google_compute_health_check.default.id]
@@ -98,7 +98,7 @@ resource "google_compute_region_backend_service" "backend" {
 
 # health check
 resource "google_compute_health_check" "default" {
-  name     = "<%= ctx[:vars]['health_check'] %>"
+  name     = "{{index $.Vars "health_check"}}"
   project  = google_project.service_project.project_id
   check_interval_sec = 1
   timeout_sec        = 1

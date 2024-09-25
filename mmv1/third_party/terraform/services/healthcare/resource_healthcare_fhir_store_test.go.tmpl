@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package healthcare_test
 
 import (
@@ -133,9 +132,9 @@ resource "google_healthcare_fhir_store" "default" {
   disable_resource_versioning   = false
   enable_history_import         = false
   version                       = "R4"
-<% unless version == "ga" -%>
+{{- if ne $.TargetVersionName "ga" }}
   enable_history_modifications = false
-<% end -%>
+{{- end }}
 }
 
 resource "google_healthcare_dataset" "dataset" {
@@ -160,9 +159,9 @@ resource "google_healthcare_fhir_store" "default" {
 	send_full_resource               = true
 	send_previous_resource_on_delete = true
   }
-<% unless version == "ga" -%>
+{{- if ne $.TargetVersionName "ga" }}
   enable_history_modifications = true
-<% end -%>
+{{- end }}
 
   labels = {
     label1 = "labelvalue1"
@@ -191,7 +190,7 @@ func testAccCheckGoogleHealthcareFhirStoreUpdate(t *testing.T, pubsubTopic strin
 
 			config := acctest.GoogleProviderConfig(t)
 
-			gcpResourceUri, err := tpgresource.ReplaceVarsForTest(config, rs, "{{dataset}}/fhirStores/{{name}}")
+			gcpResourceUri, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}dataset{{"}}"}}/fhirStores/{{"{{"}}name{{"}}"}}")
 			if err != nil {
 				return err
 			}

@@ -1,7 +1,7 @@
 resource "google_storage_bucket" "images" {
   provider                    = google-beta
-  project                     = "<%= ctx[:test_env_vars]['project_id'] %>"
-  name                        = "<%= ctx[:vars]['bucket_id'] %>"
+  project                     = "{{index $.TestEnvVars "project_id"}}"
+  name                        = "{{index $.Vars "bucket_id"}}"
   location                    = "US"
   uniform_bucket_level_access = true
 
@@ -11,8 +11,8 @@ resource "google_storage_bucket" "images" {
 
 resource "google_firebase_extensions_instance" "resize_image" {
   provider = google-beta
-  project  = "<%= ctx[:test_env_vars]['project_id'] %>"
-  instance_id = "<%= ctx[:vars]['instance-id'] %>"
+  project  = "{{index $.TestEnvVars "project_id"}}"
+  instance_id = "{{index $.Vars "instance-id"}}"
   config {
     extension_ref = "firebase/storage-resize-images"
     extension_version = "0.2.2"
@@ -31,7 +31,7 @@ resource "google_firebase_extensions_instance" "resize_image" {
     }
 
     system_params = {
-      "firebaseextensions.v1beta.function/location"                   = "<%= ctx[:vars]['location'] %>"
+      "firebaseextensions.v1beta.function/location"                   = "{{index $.Vars "location"}}"
       "firebaseextensions.v1beta.function/maxInstances"               = 3000
       "firebaseextensions.v1beta.function/minInstances"               = 0
       "firebaseextensions.v1beta.function/vpcConnectorEgressSettings" = "VPC_CONNECTOR_EGRESS_SETTINGS_UNSPECIFIED"
@@ -41,6 +41,6 @@ resource "google_firebase_extensions_instance" "resize_image" {
       "firebase.extensions.storage-resize-images.v1.onCompletion"
     ]
 
-    eventarc_channel = "projects/<%= ctx[:test_env_vars]['project_id'] %>/locations/<%= ctx[:vars]['location'] %>/channels/firebase"
+    eventarc_channel = "projects/{{index $.TestEnvVars "project_id"}}/locations/{{index $.Vars "location"}}/channels/firebase"
   }
 }

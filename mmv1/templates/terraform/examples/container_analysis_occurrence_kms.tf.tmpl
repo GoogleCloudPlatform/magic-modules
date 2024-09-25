@@ -1,5 +1,5 @@
 resource "google_binary_authorization_attestor" "attestor" {
-  name = "<%= ctx[:vars]["attestor"] %>"
+  name = "{{index $.Vars "attestor"}}"
   attestation_authority_note {
     note_reference = google_container_analysis_note.note.name
     public_keys {
@@ -13,7 +13,7 @@ resource "google_binary_authorization_attestor" "attestor" {
 }
 
 resource "google_container_analysis_note" "note" {
-  name = "<%= ctx[:vars]["note_name"] %>"
+  name = "{{index $.Vars "note_name"}}"
   attestation_authority {
     hint {
       human_readable_name = "Attestor Note"
@@ -35,7 +35,7 @@ data "google_kms_crypto_key_version" "version" {
   crypto_key = data.google_kms_crypto_key.crypto-key.id
 }
 
-resource "google_container_analysis_occurrence" "<%= ctx[:primary_resource_id] %>" {
+resource "google_container_analysis_occurrence" "{{$.PrimaryResourceId}}" {
   resource_uri = "gcr.io/my-project/my-image"
   note_name = google_container_analysis_note.note.id
 

@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package container_test
 
 import (
@@ -483,7 +482,7 @@ func TestAccContainerNodePool_withWorkloadIdentityConfig(t *testing.T) {
 	})
 }
 
-<% unless version.nil? || version == 'ga' -%>
+{{ if not (or (eq $.TargetVersionName ``) (eq $.TargetVersionName `ga`)) }}
 func TestAccContainerNodePool_withSandboxConfig(t *testing.T) {
 	t.Parallel()
 
@@ -512,7 +511,7 @@ func TestAccContainerNodePool_withSandboxConfig(t *testing.T) {
 		},
 	})
 }
-<% end -%>
+{{- end }}
 
 func TestAccContainerNodePool_withKubeletConfig(t *testing.T) {
 	t.Parallel()
@@ -870,7 +869,7 @@ resource "google_container_node_pool" "with_enable_private_nodes" {
 `, network, cluster, np, flag)
 }
 
-<% unless version.nil? || version == 'ga' -%>
+{{ if not (or (eq $.TargetVersionName ``) (eq $.TargetVersionName `ga`)) }}
 func TestAccContainerNodePool_withBootDiskKmsKey(t *testing.T) {
 	// Uses generated time-based rotation time
 	acctest.SkipIfVcr(t)
@@ -901,7 +900,7 @@ func TestAccContainerNodePool_withBootDiskKmsKey(t *testing.T) {
 		},
 	})
 }
-<% end -%>
+{{- end }}
 
 func TestAccContainerNodePool_withUpgradeSettings(t *testing.T) {
 	t.Parallel()
@@ -1486,7 +1485,7 @@ func TestAccContainerNodePool_withSoleTenantConfig(t *testing.T) {
 
 
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccContainerNodePool_ephemeralStorageConfig(t *testing.T) {
 	t.Parallel()
 
@@ -1538,7 +1537,7 @@ resource "google_container_node_pool" "np" {
 }
 `, cluster, networkName, subnetworkName, np)
 }
-<% end %>
+{{- end }}
 
 func TestAccContainerNodePool_ephemeralStorageLocalSsdConfig(t *testing.T) {
 	t.Parallel()
@@ -3117,7 +3116,7 @@ resource "google_container_node_pool" "with_workload_metadata_config" {
 `, projectID, cluster, networkName, subnetworkName, np)
 }
 
-<% unless version.nil? || version == 'ga' -%>
+{{ if not (or (eq $.TargetVersionName ``) (eq $.TargetVersionName `ga`)) }}
 func testAccContainerNodePool_withSandboxConfig(cluster, np, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
@@ -3159,7 +3158,7 @@ resource "google_container_node_pool" "with_sandbox_config" {
 }
 `, cluster, networkName, subnetworkName, np)
 }
-<% end -%>
+{{- end }}
 
 func testAccContainerNodePool_withKubeletConfig(cluster, np, policy, period, networkName, subnetworkName, insecureKubeletReadonlyPortEnabled string, quota bool, podPidsLimit int) string {
 	return fmt.Sprintf(`
@@ -3584,7 +3583,7 @@ resource "google_container_node_pool" "with_multi_nic" {
 `, network, network, network, network, network, network, cluster, np)
 }
 
-<% unless version.nil? || version == 'ga' -%>
+{{ if not (or (eq $.TargetVersionName ``) (eq $.TargetVersionName `ga`)) }}
 func testAccContainerNodePool_withBootDiskKmsKey(cluster, np, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
@@ -3629,7 +3628,7 @@ resource "google_container_node_pool" "with_boot_disk_kms_key" {
 }
 `, cluster, cluster, cluster, networkName, subnetworkName, np)
 }
-<% end -%>
+{{- end }}
 
 func makeUpgradeSettings(maxSurge int, maxUnavailable int, strategy string, nodePoolSoakDuration string, batchNodeCount int, batchPercentage float64, batchSoakDuration string) string {
 	if strategy == "BLUE_GREEN" {
@@ -4229,7 +4228,7 @@ resource "google_container_node_pool" "with_tpu_topology" {
 `, cluster, networkName, subnetworkName, np1, np2, tpuTopology)
 }
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccContainerNodePool_withHostMaintenancePolicy(t *testing.T) {
 	t.Parallel()
 
@@ -4282,7 +4281,7 @@ resource "google_container_node_pool" "np" {
 }
 `, cluster, np)
 }
-<% end -%>
+{{- end }}
 
 func TestAccContainerNodePool_withConfidentialBootDisk(t *testing.T) {
 	t.Parallel()

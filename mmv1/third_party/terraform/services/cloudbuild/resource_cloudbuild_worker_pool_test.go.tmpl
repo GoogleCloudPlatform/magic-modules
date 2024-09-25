@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package cloudbuild_test
 
 import (
@@ -222,7 +221,7 @@ func funcAccTestCloudbuildWorkerPoolCheckDestroy(t *testing.T) func(s *terraform
 
 			config := acctest.GoogleProviderConfig(t)
 
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{CloudBuildBasePath}}projects/{{project}}/locations/{{location}}/workerPools/{{name}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}CloudBuildBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/workerPools/{{"{{"}}name{{"}}"}}")
 			if err != nil {
 				return err
 			}

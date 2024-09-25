@@ -1,7 +1,7 @@
-resource "google_dns_managed_zone" "<%= ctx[:primary_resource_id] %>" {
+resource "google_dns_managed_zone" "{{$.PrimaryResourceId}}" {
   provider = google-beta
 
-  name        = "<%= ctx[:vars]['zone_name'] %>"
+  name        = "{{index $.Vars "zone_name"}}"
   dns_name    = "services.example.com."
   description = "Example private DNS Service Directory zone"
 
@@ -24,6 +24,6 @@ resource "google_service_directory_namespace" "example" {
 resource "google_compute_network" "network" {
   provider = google-beta
 
-  name                    = "<%= ctx[:vars]['network_name'] %>"
+  name                    = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = false
 }

@@ -1,6 +1,6 @@
 resource "google_folder" "my_folder" {
-  display_name = "<%= ctx[:vars]['folder_name'] %>"
-  parent       = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"
+  display_name = "{{index $.Vars "folder_name"}}"
+  parent       = "organizations/{{index $.TestEnvVars "org_id"}}"
   deletion_protection = false
 }
 
@@ -41,7 +41,7 @@ data "google_kms_crypto_key_version" "crypto_key_version" {
   crypto_key = google_kms_crypto_key.crypto_key.id
 }
 
-resource "google_folder_access_approval_settings" "<%= ctx[:primary_resource_id] %>" {
+resource "google_folder_access_approval_settings" "{{$.PrimaryResourceId}}" {
   folder_id           = google_folder.my_folder.folder_id
   active_key_version  = data.google_kms_crypto_key_version.crypto_key_version.name
 

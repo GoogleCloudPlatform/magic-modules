@@ -1,4 +1,4 @@
-resource "google_document_ai_warehouse_document_schema" "<%= ctx[:primary_resource_id] %>" {
+resource "google_document_ai_warehouse_document_schema" "{{$.PrimaryResourceId}}" {
   project_number     = data.google_project.project.number
   display_name       = "test-property-text"
   location           = "us"

@@ -1,8 +1,7 @@
-<% autogen_exception -%>
 
 package compute_test
 
-<% unless version == 'ga' -%>
+{{ if ne $.TargetVersionName `ga` -}}
 
 import (
 	"testing"
@@ -230,4 +229,4 @@ data "google_compute_region_instance_template" "default" {
 `, map[string]interface{}{"project": project, "suffix": suffix})
 }
 
-<% end -%>
+{{ end }}

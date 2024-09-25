@@ -1,12 +1,12 @@
-resource "google_api_gateway_api" "<%= ctx[:primary_resource_id] %>" {
+resource "google_api_gateway_api" "{{$.PrimaryResourceId}}" {
   provider = google-beta
-  api_id = "<%= ctx[:vars]['api_id'] %>"
+  api_id = "{{index $.Vars "api_id"}}"
 }
 
-resource "google_api_gateway_api_config" "<%= ctx[:primary_resource_id] %>" {
+resource "google_api_gateway_api_config" "{{$.PrimaryResourceId}}" {
   provider = google-beta
-  api = google_api_gateway_api.<%= ctx[:primary_resource_id] %>.api_id
-  api_config_id = "<%= ctx[:vars]['config_id'] %>"
+  api = google_api_gateway_api.{{$.PrimaryResourceId}}.api_id
+  api_config_id = "{{index $.Vars "config_id"}}"
 
   openapi_documents {
     document {
@@ -19,8 +19,8 @@ resource "google_api_gateway_api_config" "<%= ctx[:primary_resource_id] %>" {
   }
 }
 
-resource "google_api_gateway_gateway" "<%= ctx[:primary_resource_id] %>" {
+resource "google_api_gateway_gateway" "{{$.PrimaryResourceId}}" {
   provider = google-beta
-  api_config = google_api_gateway_api_config.<%= ctx[:primary_resource_id] %>.id
-  gateway_id = "<%= ctx[:vars]['gateway_id'] %>"
+  api_config = google_api_gateway_api_config.{{$.PrimaryResourceId}}.id
+  gateway_id = "{{index $.Vars "gateway_id"}}"
 }

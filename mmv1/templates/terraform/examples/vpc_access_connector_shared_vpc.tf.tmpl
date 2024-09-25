@@ -1,5 +1,5 @@
 resource "google_vpc_access_connector" "connector" {
-  name          = "<%= ctx[:vars]['name'] %>"
+  name          = "{{index $.Vars "name"}}"
   subnet {
     name = google_compute_subnetwork.custom_test.name
   }
@@ -9,8 +9,8 @@ resource "google_vpc_access_connector" "connector" {
 }
 
 resource "google_compute_subnetwork" "custom_test" {
-  name          = "<%= ctx[:vars]['name'] %>"
+  name          = "{{index $.Vars "name"}}"
   ip_cidr_range = "10.2.0.0/28"
   region        = "us-central1"
-  network       = "<%= ctx[:vars]['network_name'] %>"
+  network       = "{{index $.Vars "network_name"}}"
 }

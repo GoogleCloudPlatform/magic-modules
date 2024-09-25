@@ -1,5 +1,5 @@
-resource "google_compute_ha_vpn_gateway" "<%= ctx[:primary_resource_id] %>" {
-  name           = "<%= ctx[:vars]['ha_vpn_gateway_name'] %>"
+resource "google_compute_ha_vpn_gateway" "{{$.PrimaryResourceId}}" {
+  name           = "{{index $.Vars "ha_vpn_gateway_name"}}"
   network        = google_compute_network.network.id
   vpn_interfaces {
       id                      = 0
@@ -12,7 +12,7 @@ resource "google_compute_ha_vpn_gateway" "<%= ctx[:primary_resource_id] %>" {
 }
 
 resource "google_compute_interconnect_attachment" "attachment1" {
-  name                     = "<%= ctx[:vars]['interconnect_attachment1_name'] %>"
+  name                     = "{{index $.Vars "interconnect_attachment1_name"}}"
   edge_availability_domain = "AVAILABILITY_DOMAIN_1"
   type                     = "PARTNER"
   router                   = google_compute_router.router.id
@@ -23,7 +23,7 @@ resource "google_compute_interconnect_attachment" "attachment1" {
 }
 
 resource "google_compute_interconnect_attachment" "attachment2" {
-  name                     = "<%= ctx[:vars]['interconnect_attachment2_name'] %>"
+  name                     = "{{index $.Vars "interconnect_attachment2_name"}}"
   edge_availability_domain = "AVAILABILITY_DOMAIN_2"
   type                     = "PARTNER"
   router                   = google_compute_router.router.id
@@ -34,7 +34,7 @@ resource "google_compute_interconnect_attachment" "attachment2" {
 }
 
 resource "google_compute_address" "address1" {
-  name          = "<%= ctx[:vars]['address1_name'] %>"
+  name          = "{{index $.Vars "address1_name"}}"
   address_type  = "INTERNAL"
   purpose       = "IPSEC_INTERCONNECT"
   address       = "192.168.1.0"
@@ -43,7 +43,7 @@ resource "google_compute_address" "address1" {
 }
 
 resource "google_compute_address" "address2" {
-  name          = "<%= ctx[:vars]['address2_name'] %>"
+  name          = "{{index $.Vars "address2_name"}}"
   address_type  = "INTERNAL"
   purpose       = "IPSEC_INTERCONNECT"
   address       = "192.168.2.0"
@@ -52,7 +52,7 @@ resource "google_compute_address" "address2" {
 }
 
 resource "google_compute_router" "router" {
-  name                          = "<%= ctx[:vars]['router_name'] %>"
+  name                          = "{{index $.Vars "router_name"}}"
   network                       = google_compute_network.network.name
   encrypted_interconnect_router = true
   bgp {
@@ -61,6 +61,6 @@ resource "google_compute_router" "router" {
 }
 
 resource "google_compute_network" "network" {
-  name                    = "<%= ctx[:vars]['network_name'] %>"
+  name                    = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = false
 }

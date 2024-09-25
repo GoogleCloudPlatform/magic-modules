@@ -1,8 +1,8 @@
-resource "google_access_context_manager_access_levels" "<%= ctx[:primary_resource_id] %>" {
+resource "google_access_context_manager_access_levels" "{{$.PrimaryResourceId}}" {
   parent = "accessPolicies/${google_access_context_manager_access_policy.access-policy.name}"
   access_levels {
-    name   = "accessPolicies/${google_access_context_manager_access_policy.access-policy.name}/accessLevels/<%= ctx[:vars]['access_level_name1'] %>"
-    title  = "<%= ctx[:vars]['access_level_name1'] %>"
+    name   = "accessPolicies/${google_access_context_manager_access_policy.access-policy.name}/accessLevels/{{index $.Vars "access_level_name1"}}"
+    title  = "{{index $.Vars "access_level_name1"}}"
     basic {
       conditions {
         device_policy {
@@ -21,8 +21,8 @@ resource "google_access_context_manager_access_levels" "<%= ctx[:primary_resourc
   }
 
   access_levels {
-    name   = "accessPolicies/${google_access_context_manager_access_policy.access-policy.name}/accessLevels/<%= ctx[:vars]['access_level_name2'] %>"
-    title  = "<%= ctx[:vars]['access_level_name2'] %>"
+    name   = "accessPolicies/${google_access_context_manager_access_policy.access-policy.name}/accessLevels/{{index $.Vars "access_level_name2"}}"
+    title  = "{{index $.Vars "access_level_name2"}}"
     basic {
       conditions {
         device_policy {

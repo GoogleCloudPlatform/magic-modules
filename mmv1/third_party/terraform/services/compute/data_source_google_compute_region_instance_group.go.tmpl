@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package compute
 
 import (
@@ -11,11 +10,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"google.golang.org/api/googleapi"
-<% if version == "ga" -%>
+{{- if eq $.TargetVersionName "ga" }}
 	"google.golang.org/api/compute/v1"
-<% else -%>
+{{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
-<% end -%>
+{{- end }}
 )
 
 func DataSourceGoogleComputeRegionInstanceGroup() *schema.Resource {

@@ -1,5 +1,5 @@
 resource "google_dialogflow_cx_agent" "agent" {
-  display_name               = "<%= ctx[:vars]["agent_name"] %>"
+  display_name               = "{{index $.Vars "agent_name"}}"
   location                   = "global"
   default_language_code      = "en"
   supported_language_codes   = ["fr", "de", "es"]
@@ -52,7 +52,7 @@ resource "google_dialogflow_cx_intent" "intent" {
   }
 }
 
-resource "google_dialogflow_cx_test_case" "<%= ctx[:primary_resource_id] %>" {
+resource "google_dialogflow_cx_test_case" "{{$.PrimaryResourceId}}" {
   parent       = google_dialogflow_cx_agent.agent.id
   display_name = "MyTestCase"
   tags         = ["#tag1"]

@@ -1,4 +1,4 @@
-func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
         project, err := tpgresource.GetProject(d, config)
         if err != nil {
                 return nil, err
@@ -9,7 +9,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d t
 			return nil, err
 		}
 
-        url, err := tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/zones/{{zone}}/instanceSettings/{{name}}")
+        url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instanceSettings/{{"{{"}}name{{"}}"}}")
         if err != nil {
                 return nil, err
         }
