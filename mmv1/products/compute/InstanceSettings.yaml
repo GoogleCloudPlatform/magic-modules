@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,68 +11,70 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'InstanceSettings'
 kind: 'compute#instanceSettings'
-base_url: projects/{{project}}/zones/{{zone}}/instanceSettings
-self_link: projects/{{project}}/zones/{{zone}}/instanceSettings
 description: |
   Represents an Instance Settings resource. Instance settings are centralized configuration parameters that allow users to configure the default values for specific VM parameters that are normally set using GCE instance API methods.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Update Instance Settings': 'https://cloud.google.com/compute/docs/metadata/setting-custom-metadata#set-custom-project-zonal-metadata'
   api: 'https://cloud.google.com/compute/docs/reference/rest/beta/instanceSettings'
-create_verb: :PATCH
+docs:
+base_url: 'projects/{{project}}/zones/{{zone}}/instanceSettings'
+self_link: 'projects/{{project}}/zones/{{zone}}/instanceSettings'
 create_url: 'projects/{{project}}/zones/{{zone}}/instanceSettings?update_mask=*'
-update_verb: :PATCH
+create_verb: 'PATCH'
 update_url: 'projects/{{project}}/zones/{{zone}}/instanceSettings?update_mask=*'
-import_format: ['projects/{{project}}/zones/{{zone}}/instanceSettings']
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+update_verb: 'PATCH'
+import_format:
+  - 'projects/{{project}}/zones/{{zone}}/instanceSettings'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
-    base_url: '{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'targetLink'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'status'
-    complete: 'DONE'
-    allowed:
-      - 'PENDING'
-      - 'RUNNING'
-      - 'DONE'
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error/errors'
     message: 'message'
+custom_code:
+  custom_delete: 'templates/terraform/custom_delete/clear_instance_settings.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'instance_settings_basic'
+  - name: 'instance_settings_basic'
     primary_resource_id: 'gce_instance_settings'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_delete: templates/terraform/custom_delete/clear_instance_settings.go.erb
-  test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
 parameters:
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'zone'
-    resource: 'Zone'
-    imports: 'name'
+  - name: 'zone'
+    type: ResourceRef
     description: 'A reference to the zone where the machine resides.'
     required: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Zone'
+    imports: 'name'
 properties:
-  - !ruby/object:Api::Type::Fingerprint
-    name: 'fingerprint'
+  - name: 'fingerprint'
+    type: Fingerprint
     description: |
         The fingerprint used for optimistic locking of this resource.  Used
         internally during updates.
-    custom_expand: 'templates/terraform/custom_expand/compute_instance_settings_fingerprint.erb'
-  - !ruby/object:Api::Type::NestedObject
-    name: 'metadata'
+    output: true
+    custom_expand: 'templates/terraform/custom_expand/compute_instance_settings_fingerprint.tmpl'
+  - name: 'metadata'
+    type: NestedObject
     description: |
         The metadata key/value pairs assigned to all the instances in the corresponding scope.
     properties:
-      - !ruby/object:Api::Type::KeyValuePairs
-        name: 'items'
+      - name: 'items'
+        type: KeyValuePairs
         description: |
           A metadata key/value items map. The total size of all keys and values must be less than 512KB

@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,132 +11,132 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Federation'
-base_url: 'projects/{{project}}/locations/{{location}}/federations'
-create_url: 'projects/{{project}}/locations/{{location}}/federations?federationId={{federation_id}}'
-self_link: 'projects/{{project}}/locations/{{location}}/federations/{{federation_id}}'
-update_verb: :PATCH
-update_mask: true
 description: |
   A managed metastore federation.
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  skip_import_test: true
-  parent_resource_attribute: federation_id
-  method_name_separator: ':'
-  import_format:
-    [
-      'projects/{{project}}/locations/{{location}}/federations/{{federation_id}}',
-      '{{federation_id}}',
-    ]
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/federations'
+self_link: 'projects/{{project}}/locations/{{location}}/federations/{{federation_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/federations?federationId={{federation_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/federations/{{federation_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error'
     message: 'message'
-autogen_async: true
-import_format:
-  ['projects/{{project}}/locations/{{location}}/federations/{{federation_id}}']
+iam_policy:
+  exclude_import_test: true
+  method_name_separator: ':'
+  parent_resource_attribute: 'federation_id'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/federations/{{federation_id}}'
+    - '{{federation_id}}'
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'dataproc_metastore_federation_basic'
+  - name: 'dataproc_metastore_federation_basic'
     primary_resource_id: 'default'
-    primary_resource_name:
-      'fmt.Sprintf("tf-test-metastore-fed%s", context["random_suffix"])'
+    primary_resource_name: 'fmt.Sprintf("tf-test-metastore-fed%s", context["random_suffix"])'
     vars:
       federation_id: 'metastore-fed'
       service_id: 'metastore-service'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'dataproc_metastore_federation_bigquery'
+  - name: 'dataproc_metastore_federation_bigquery'
     primary_resource_id: 'default'
-    primary_resource_name:
-      'fmt.Sprintf("tf-test-metastore-fed%s", context["random_suffix"])'
+    primary_resource_name: 'fmt.Sprintf("tf-test-metastore-fed%s", context["random_suffix"])'
     vars:
       federation_id: 'metastore-fed'
       service_id: 'metastore-service'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'federationId'
-    required: true
-    immutable: true
-    url_param_only: true
+  - name: 'federationId'
+    type: String
     description: |
       The ID of the metastore federation. The id must contain only letters (a-z, A-Z), numbers (0-9), underscores (_),
       and hyphens (-). Cannot begin or end with underscore or hyphen. Must consist of between
       3 and 63 characters.
-  - !ruby/object:Api::Type::String
-    name: 'location'
     url_param_only: true
+    required: true
     immutable: true
+  - name: 'location'
+    type: String
     description: |
       The location where the metastore federation should reside.
+    url_param_only: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    output: true
+  - name: 'name'
+    type: String
     description: |
       The relative resource name of the metastore federation.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
-    description: 'User-defined labels for the metastore federation.'
-  - !ruby/object:Api::Type::String
-    name: 'endpointUri'
     output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: 'User-defined labels for the metastore federation.'
+  - name: 'endpointUri'
+    type: String
     description: |
       The URI of the endpoint used to access the metastore federation.
-  - !ruby/object:Api::Type::String
-    name: 'state'
     output: true
+  - name: 'state'
+    type: String
     description: |
       The current state of the metastore federation.
-  - !ruby/object:Api::Type::String
-    name: 'stateMessage'
     output: true
+  - name: 'stateMessage'
+    type: String
     description: |
       Additional information about the current state of the metastore federation, if available.
-  - !ruby/object:Api::Type::String
-    name: 'uid'
     output: true
+  - name: 'uid'
+    type: String
     description: |
       The globally unique resource identifier of the metastore federation.
-  - !ruby/object:Api::Type::String
-    name: 'version'
-    immutable: true
-    required: true
+    output: true
+  - name: 'version'
+    type: String
     description: |
       The Apache Hive metastore version of the federation. All backend metastore versions must be compatible with the federation version.
-  - !ruby/object:Api::Type::Map
-    name: 'backendMetastores'
+    required: true
+    immutable: true
+  - name: 'backendMetastores'
+    type: Map
     description: |
       A map from BackendMetastore rank to BackendMetastores from which the federation service serves metadata at query time. The map key represents the order in which BackendMetastores should be evaluated to resolve database names at query time and should be greater than or equal to zero. A BackendMetastore with a lower number will be evaluated before a BackendMetastore with a higher number.
     required: true
     key_name: 'rank'
     key_description: |
       represents the order in which BackendMetastores should be evaluated to resolve database names at query time and should be greater than or equal to zero.
-    value_type: !ruby/object:Api::Type::NestedObject
+    value_type:
+      name: backendMetastores
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'name'
-          required: true
+        - name: 'name'
+          type: String
           description: |
             The relative resource name of the metastore that is being federated. The formats of the relative resource names for the currently supported metastores are listed below: Dataplex: projects/{projectId}/locations/{location}/lakes/{lake_id} BigQuery: projects/{projectId} Dataproc Metastore: projects/{projectId}/locations/{location}/services/{serviceId}
-        - !ruby/object:Api::Type::Enum
-          name: 'metastoreType'
           required: true
+        - name: 'metastoreType'
+          type: Enum
           description: |
             The type of the backend metastore.
-          values:
-            - :METASTORE_TYPE_UNSPECIFIED
-            - :DATAPROC_METASTORE
-            - :BIGQUERY
+          required: true
+          enum_values:
+            - 'METASTORE_TYPE_UNSPECIFIED'
+            - 'DATAPROC_METASTORE'
+            - 'BIGQUERY'

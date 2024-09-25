@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,17 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Firewall'
 kind: 'compute#firewall'
-base_url: projects/{{project}}/global/firewalls
-collection_url_key: 'items'
-update_verb: :PATCH
-has_self_link: true
-references: !ruby/object:Api::Resource::ReferenceLinks
-  guides:
-    'Official Documentation': 'https://cloud.google.com/vpc/docs/firewalls'
-  api: 'https://cloud.google.com/compute/docs/reference/v1/firewalls'
 description: |
   Each network has its own firewall controlling access to and from the
   instances.
@@ -35,85 +27,91 @@ description: |
   outgoing traffic and a default "deny" for incoming traffic. For all
   networks except the default network, you must create any firewall rules
   you need.
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    kind: 'compute#operation'
-    path: 'name'
-    base_url: '{{op_id}}'
-    wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
-    path: 'targetLink'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'status'
-    complete: 'DONE'
-    allowed:
-      - 'PENDING'
-      - 'RUNNING'
-      - 'DONE'
-  error: !ruby/object:Api::OpAsync::Error
-    path: 'error/errors'
-    message: 'message'
-docs: !ruby/object:Provider::Terraform::Docs
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/vpc/docs/firewalls'
+  api: 'https://cloud.google.com/compute/docs/reference/v1/firewalls'
+docs:
   optional_properties: |
     * `enable_logging` - (Optional, Deprecated) This field denotes whether to enable logging for a particular firewall rule.
     If logging is enabled, logs will be exported to Stackdriver. Deprecated in favor of `log_config`
+base_url: 'projects/{{project}}/global/firewalls'
+has_self_link: true
+update_verb: 'PATCH'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    kind: 'compute#operation'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'targetLink'
+    resource_inside_response: false
+  error:
+    path: 'error/errors'
+    message: 'message'
+collection_url_key: 'items'
+custom_code:
+  extra_schema_entry: 'templates/terraform/extra_schema_entry/firewall.tmpl'
+  constants: 'templates/terraform/constants/firewall.tmpl'
+custom_diff:
+  - 'resourceComputeFirewallEnableLoggingCustomizeDiff'
+  - 'resourceComputeFirewallSourceFieldsCustomizeDiff'
+schema_version: 1
+migrate_state: 'resourceComputeFirewallMigrateState'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'firewall_basic'
+  - name: 'firewall_basic'
     primary_resource_id: 'default'
     vars:
       firewall_name: 'test-firewall'
       network_name: 'test-network'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'firewall_with_target_tags'
+  - name: 'firewall_with_target_tags'
     primary_resource_id: 'rules'
     vars:
       firewall_name: 'my-firewall-rule'
     test_env_vars:
-      project: :PROJECT_NAME
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/firewall.erb
-  extra_schema_entry: templates/terraform/extra_schema_entry/firewall.erb
-custom_diff: [
-  'resourceComputeFirewallEnableLoggingCustomizeDiff',
-  'resourceComputeFirewallSourceFieldsCustomizeDiff',
-]
-migrate_state: 'resourceComputeFirewallMigrateState'
-schema_version: 1
+      project: 'PROJECT_NAME'
+parameters:
 properties:
   # TODO(nelsonjr): [nice to have] Make the format here simpler to use, in
   # the form of # 22/tcp, [12345-23456]/tcp. It requires a conversion
   # function to the # final JSON format expected by the API for this
   # proposal to work.
-  - !ruby/object:Api::Type::Array
-    name: 'allow'
-    api_name: 'allowed'
-    is_set: true
-    set_hash_func: 'resourceComputeFirewallRuleHash'
+  - name: 'allow'
+    type: Array
     description: |
       The list of ALLOW rules specified by this firewall. Each rule
       specifies a protocol and port-range tuple that describes a permitted
       connection.
+    api_name: allowed
+    is_set: true
     exactly_one_of:
-      - allow
-      - deny
-    item_type: !ruby/object:Api::Type::NestedObject
+      - 'allow'
+      - 'deny'
+    set_hash_func: 'resourceComputeFirewallRuleHash'
+    item_type:
+      type: NestedObject
       properties:
         # IPProtocol has to be string, instead of Enum because user can
         # specify the protocol by number as well.
-        - !ruby/object:Api::Type::String
-          name: 'protocol'
+        - name: 'protocol'
+          type: String
           description: |
             The IP protocol to which this rule applies. The protocol type is
             required when creating a firewall rule. This value can either be
             one of the following well known protocol strings (tcp, udp,
             icmp, esp, ah, sctp, ipip, all), or the IP protocol number.
-          api_name: 'IPProtocol'
+          api_name: IPProtocol
           required: true
           diff_suppress_func: 'tpgresource.CaseDiffSuppress'
-        - !ruby/object:Api::Type::Array
-          item_type: Api::Type::String
-          name: 'ports'
+        - name: 'ports'
+          type: Array
           description: |
             An optional list of ports to which this rule applies. This field
             is only applicable for UDP or TCP protocol. Each entry must be
@@ -122,38 +120,40 @@ properties:
 
             Example inputs include: [22], [80, 443], and
             ["12345-12349"].
-  - !ruby/object:Api::Type::Time
-    name: 'creationTimestamp'
+          item_type:
+            type: String
+  - name: 'creationTimestamp'
+    type: Time
     description: 'Creation timestamp in RFC3339 text format.'
     output: true
-  - !ruby/object:Api::Type::Array
-    name: 'deny'
-    api_name: 'denied'
-    is_set: true
-    set_hash_func: 'resourceComputeFirewallRuleHash'
-    exactly_one_of:
-      - allow
-      - deny
+  - name: 'deny'
+    type: Array
     description: |
       The list of DENY rules specified by this firewall. Each rule specifies
       a protocol and port-range tuple that describes a denied connection.
-    item_type: !ruby/object:Api::Type::NestedObject
+    api_name: denied
+    is_set: true
+    exactly_one_of:
+      - 'allow'
+      - 'deny'
+    set_hash_func: 'resourceComputeFirewallRuleHash'
+    item_type:
+      type: NestedObject
       properties:
         # IPProtocol has to be string, instead of Enum because user can
         # specify the protocol by number as well.
-        - !ruby/object:Api::Type::String
-          name: 'protocol'
+        - name: 'protocol'
+          type: String
           description: |
             The IP protocol to which this rule applies. The protocol type is
             required when creating a firewall rule. This value can either be
             one of the following well known protocol strings (tcp, udp,
             icmp, esp, ah, sctp, ipip, all), or the IP protocol number.
-          api_name: 'IPProtocol'
-          diff_suppress_func: 'tpgresource.CaseDiffSuppress'
+          api_name: IPProtocol
           required: true
-        - !ruby/object:Api::Type::Array
-          item_type: Api::Type::String
-          name: 'ports'
+          diff_suppress_func: 'tpgresource.CaseDiffSuppress'
+        - name: 'ports'
+          type: Array
           description: |
             An optional list of ports to which this rule applies. This field
             is only applicable for UDP or TCP protocol. Each entry must be
@@ -162,62 +162,63 @@ properties:
 
             Example inputs include: [22], [80, 443], and
             ["12345-12349"].
-  - !ruby/object:Api::Type::String
-    name: 'description'
+          item_type:
+            type: String
+  - name: 'description'
+    type: String
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
     send_empty_value: true
-  - !ruby/object:Api::Type::Array
-    name: 'destinationRanges'
+  - name: 'destinationRanges'
+    type: Array
     description: |
       If destination ranges are specified, the firewall will apply only to
       traffic that has destination IP address in these ranges. These ranges
       must be expressed in CIDR format. IPv4 or IPv6 ranges are supported.
     is_set: true
     default_from_api: true
-    item_type: Api::Type::String
-  - !ruby/object:Api::Type::Enum
-    name: 'direction'
+    item_type:
+      type: String
+  - name: 'direction'
+    type: Enum
     description: |
       Direction of traffic to which this firewall applies; default is
       INGRESS. Note: For INGRESS traffic, one of `source_ranges`,
       `source_tags` or `source_service_accounts` is required.
-    values:
-      - :INGRESS
-      - :EGRESS
-    default_from_api: true
     immutable: true
-  - !ruby/object:Api::Type::Boolean
-    name: 'disabled'
+    default_from_api: true
+    enum_values:
+      - 'INGRESS'
+      - 'EGRESS'
+  - name: 'disabled'
+    type: Boolean
     description: |
       Denotes whether the firewall rule is disabled, i.e not applied to the
       network it is associated with. When set to true, the firewall rule is
       not enforced and the network behaves as if it did not exist. If this
       is unspecified, the firewall rule will be enabled.
     send_empty_value: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'logConfig'
+  - name: 'logConfig'
+    type: NestedObject
     description: |
       This field denotes the logging options for a particular firewall rule.
       If defined, logging is enabled, and logs will be exported to Cloud Logging.
     send_empty_value: true
-    custom_expand: 'templates/terraform/custom_expand/firewall_log_config.go.erb'
-    custom_flatten: 'templates/terraform/custom_flatten/firewall_log_config.go.erb'
     diff_suppress_func: 'diffSuppressEnableLogging'
+    custom_flatten: 'templates/terraform/custom_flatten/firewall_log_config.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/firewall_log_config.go.tmpl'
     properties:
-      - !ruby/object:Api::Type::Enum
-        name: 'metadata'
+      - name: 'metadata'
+        type: Enum
         description: |
           This field denotes whether to include or exclude metadata for firewall logs.
-        values:
-          - :EXCLUDE_ALL_METADATA
-          - :INCLUDE_ALL_METADATA
         required: true
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    required: true
-    immutable: true
+        enum_values:
+          - 'EXCLUDE_ALL_METADATA'
+          - 'INCLUDE_ALL_METADATA'
+  - name: 'name'
+    type: String
     description: |
       Name of the resource. Provided by the client when the resource is
       created. The name must be 1-63 characters long, and comply with
@@ -226,18 +227,20 @@ properties:
       first character must be a lowercase letter, and all following
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
-    validation: !ruby/object:Provider::Terraform::Validation
-      function: 'verify.ValidateGCEName'
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'network'
-    resource: 'Network'
-    imports: 'selfLink'
     required: true
+    immutable: true
+    validation:
+      function: 'verify.ValidateGCEName'
+  - name: 'network'
+    type: ResourceRef
     description: |
       The name or self_link of the network to attach this firewall to.
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
-  - !ruby/object:Api::Type::Integer
-    name: 'priority'
+    required: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Network'
+    imports: 'selfLink'
+  - name: 'priority'
+    type: Integer
     description: |
       Priority for this rule. This is an integer between 0 and 65535, both
       inclusive. When not specified, the value assumed is 1000. Relative
@@ -245,12 +248,12 @@ properties:
       priority implies higher precedence (eg, a rule with priority 0 has
       higher precedence than a rule with priority 1). DENY rules take
       precedence over ALLOW rules having equal priority.
-    default_value: 1000
     send_empty_value: true
-    validation: !ruby/object:Provider::Terraform::Validation
+    validation:
       function: 'validation.IntBetween(0, 65535)'
-  - !ruby/object:Api::Type::Array
-    name: 'sourceRanges'
+    default_value: 1000
+  - name: 'sourceRanges'
+    type: Array
     description: |
       If source ranges are specified, the firewall will apply only to
       traffic that has source IP address in these ranges. These ranges must
@@ -263,9 +266,10 @@ properties:
       `source_ranges`, `source_tags` or `source_service_accounts` is required.
     is_set: true
     diff_suppress_func: 'diffSuppressSourceRanges'
-    item_type: Api::Type::String
-  - !ruby/object:Api::Type::Array
-    name: 'sourceServiceAccounts'
+    item_type:
+      type: String
+  - name: 'sourceServiceAccounts'
+    type: Array
     description: |
       If source service accounts are specified, the firewall will apply only
       to traffic originating from an instance with a service account in this
@@ -279,14 +283,15 @@ properties:
       properties for the firewall to apply. sourceServiceAccounts cannot be
       used at the same time as sourceTags or targetTags. For INGRESS traffic,
       one of `source_ranges`, `source_tags` or `source_service_accounts` is required.
-    max_size: 10
+    is_set: true
     conflicts:
       - source_tags
       - target_tags
-    is_set: true
-    item_type: Api::Type::String
-  - !ruby/object:Api::Type::Array
-    name: 'sourceTags'
+    item_type:
+      type: String
+    max_size: 10
+  - name: 'sourceTags'
+    type: Array
     description: |
       If source tags are specified, the firewall will apply only to traffic
       with source IP that belongs to a tag listed in source tags. Source
@@ -298,13 +303,14 @@ properties:
       a tag listed in the sourceTags property. The connection does not need
       to match both properties for the firewall to apply. For INGRESS traffic,
       one of `source_ranges`, `source_tags` or `source_service_accounts` is required.
+    is_set: true
     conflicts:
       - source_service_accounts
       - target_service_accounts
-    is_set: true
-    item_type: Api::Type::String
-  - !ruby/object:Api::Type::Array
-    name: 'targetServiceAccounts'
+    item_type:
+      type: String
+  - name: 'targetServiceAccounts'
+    type: Array
     description: |
       A list of service accounts indicating sets of instances located in the
       network that may make network connections as specified in allowed[].
@@ -312,21 +318,23 @@ properties:
       sourceTags. If neither targetServiceAccounts nor targetTags are
       specified, the firewall rule applies to all instances on the specified
       network.
-    max_size: 10
+    is_set: true
     conflicts:
       - source_tags
       - target_tags
-    is_set: true
-    item_type: Api::Type::String
-  - !ruby/object:Api::Type::Array
-    name: 'targetTags'
+    item_type:
+      type: String
+    max_size: 10
+  - name: 'targetTags'
+    type: Array
     description: |
       A list of instance tags indicating sets of instances located in the
       network that may make network connections as specified in allowed[].
       If no targetTags are specified, the firewall rule applies to all
       instances on the specified network.
+    is_set: true
     conflicts:
       - source_service_accounts
       - target_service_accounts
-    is_set: true
-    item_type: Api::Type::String
+    item_type:
+      type: String

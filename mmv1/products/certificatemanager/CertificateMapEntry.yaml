@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,37 +11,38 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'CertificateMapEntry'
-base_url: 'projects/{{project}}/locations/global/certificateMaps/{{map}}/certificateMapEntries'
-create_url: 'projects/{{project}}/locations/global/certificateMaps/{{map}}/certificateMapEntries?certificateMapEntryId={{name}}'
-self_link: 'projects/{{project}}/locations/global/certificateMaps/{{map}}/certificateMapEntries/{{name}}'
-update_verb: :PATCH
-update_mask: true
 description: |
   CertificateMapEntry is a list of certificate configurations,
   that have been issued for a particular hostname
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+docs:
+base_url: 'projects/{{project}}/locations/global/certificateMaps/{{map}}/certificateMapEntries'
+self_link: 'projects/{{project}}/locations/global/certificateMaps/{{map}}/certificateMapEntries/{{name}}'
+create_url: 'projects/{{project}}/locations/global/certificateMaps/{{map}}/certificateMapEntries?certificateMapEntryId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'state'
-    complete: 'ACTIVE'
-    allowed:
-      - 'PENDING'
-      - 'ACTIVE'
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error'
     message: 'message'
-docs: !ruby/object:Provider::Terraform::Docs
-autogen_async: true
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'certificate_manager_certificate_map_entry_full'
+  - name: 'certificate_manager_certificate_map_entry_full'
     primary_resource_id: 'default'
     vars:
       dns_auth_name: 'dns-auth'
@@ -50,83 +51,83 @@ examples:
       dns_auth_subdomain2: 'subdomain2'
       cert_map_entry_name: 'cert-map-entry'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    required: true
-    immutable:
-      true
+  - name: 'name'
+    type: String
       # url_param_only: true
     description: |
       A user-defined name of the Certificate Map Entry. Certificate Map Entry
       names must be unique globally and match pattern
       'projects/*/locations/*/certificateMaps/*/certificateMapEntries/*'
-    custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'map'
     required: true
     immutable: true
-    url_param_only: true
-    imports: 'name'
-    resource: 'CertificateMap'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.tmpl'
+  - name: 'map'
+    type: ResourceRef
     description: |
       A map entry that is inputted into the cetrificate map
-    custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+    url_param_only: true
+    required: true
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.tmpl'
+    resource: 'CertificateMap'
+    imports: 'name'
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: |
       A human-readable description of the resource.
-  - !ruby/object:Api::Type::String
-    name: 'createTime'
-    output: true
+  - name: 'createTime'
+    type: String
     description: |
       Creation timestamp of a Certificate Map Entry. Timestamp in RFC3339 UTC "Zulu" format,
       with nanosecond resolution and up to nine fractional digits.
       Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
-  - !ruby/object:Api::Type::Time
-    name: 'updateTime'
+    output: true
+  - name: 'updateTime'
+    type: Time
     description: |
       Update timestamp of a Certificate Map Entry. Timestamp in RFC3339 UTC "Zulu" format,
       with nanosecond resolution and up to nine fractional digits.
       Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
     output: true
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       Set of labels associated with a Certificate Map Entry.
       An object containing a list of "key": value pairs.
       Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
-  - !ruby/object:Api::Type::Array
-    name: 'certificates'
-    required: true
+  - name: 'certificates'
+    type: Array
     description: |
       A set of Certificates defines for the given hostname.
       There can be defined up to fifteen certificates in each Certificate Map Entry.
       Each certificate must match pattern projects/*/locations/*/certificates/*.
-    diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
-    item_type: Api::Type::String
-  - !ruby/object:Api::Type::String
-    name: 'state'
-    output: true
+    required: true
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+    item_type:
+      type: String
+  - name: 'state'
+    type: String
     description: |
       A serving state of this Certificate Map Entry.
-  - !ruby/object:Api::Type::String
-    name: 'hostname'
-    immutable: true
+    output: true
+  - name: 'hostname'
+    type: String
     description: |
       A Hostname (FQDN, e.g. example.com) or a wildcard hostname expression (*.example.com)
       for a set of hostnames with common suffix. Used as Server Name Indication (SNI) for
       selecting a proper certificate.
-    exactly_one_of:
-      - hostname
-      - matcher
-  - !ruby/object:Api::Type::String
-    name: 'matcher'
     immutable: true
     exactly_one_of:
-      - hostname
-      - matcher
+      - 'hostname'
+      - 'matcher'
+  - name: 'matcher'
+    type: String
     description: |
       A predefined matcher for particular cases, other than SNI selection
+    immutable: true
+    exactly_one_of:
+      - 'hostname'
+      - 'matcher'

@@ -11,18 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'AutokeyConfig'
-base_url: 'folders/{{folder}}/autokeyConfig'
-self_link: 'folders/{{folder}}/autokeyConfig'
-# This is a singleton resource that is already created, so create
-# is really an update, and therefore should be PATCHed.
-create_url: 'folders/{{folder}}/autokeyConfig?updateMask=keyProject'
-create_verb: :PATCH
-update_url: 'folders/{{folder}}/autokeyConfig?updateMask=keyProject'
-update_verb: :PATCH
-delete_url: 'folders/{{folder}}/autokeyConfig?updateMask=keyProject'
-delete_verb: :PATCH
 # This resource is currently in public preview.
 description: |
   `AutokeyConfig` is a singleton resource used to configure the auto-provisioning
@@ -32,53 +22,67 @@ description: |
   ~> **Note:** AutokeyConfigs cannot be deleted from Google Cloud Platform.
   Destroying a Terraform-managed AutokeyConfig will remove it from state but
   *will not delete the resource from the project.*
-references: !ruby/object:Api::Resource::ReferenceLinks
+min_version: 'beta'
+references:
   guides:
     'Cloud KMS with Autokey': 'https://cloud.google.com/kms/docs/kms-with-autokey'
   api: 'https://cloud.google.com/kms/docs/reference/rest/v1/AutokeyConfig'
+docs:
 id_format: 'folders/{{folder}}/autokeyConfig'
-import_format: ['folders/{{folder}}/autokeyConfig']
-min_version: beta
+base_url: 'folders/{{folder}}/autokeyConfig'
+self_link: 'folders/{{folder}}/autokeyConfig'
+# This is a singleton resource that is already created, so create
+# is really an update, and therefore should be PATCHed.
+create_url: 'folders/{{folder}}/autokeyConfig?updateMask=keyProject'
+create_verb: 'PATCH'
+update_url: 'folders/{{folder}}/autokeyConfig?updateMask=keyProject'
+update_verb: 'PATCH'
+delete_url: 'folders/{{folder}}/autokeyConfig?updateMask=keyProject'
+delete_verb: 'PATCH'
+import_format:
+  - 'folders/{{folder}}/autokeyConfig'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  constants: 'templates/terraform/constants/autokey_config_folder_diff.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/kms_autokey_config_folder.go.tmpl'
+  pre_read: 'templates/terraform/pre_read/kms_autokey_config_folder.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/kms_autokey_config_folder.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/kms_autokey_config_folder.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/kms_autokey_config.go.tmpl'
 # Using a handwritten sweeper because of pre_delete.
-skip_sweeper: true
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/autokey_config_folder_diff.go.erb
-  pre_create: templates/terraform/pre_create/kms_autokey_config_folder.go.erb
-  pre_delete: templates/terraform/pre_delete/kms_autokey_config_folder.go.erb
-  pre_read: templates/terraform/pre_read/kms_autokey_config_folder.go.erb
-  pre_update: templates/terraform/pre_update/kms_autokey_config_folder.go.erb
-  test_check_destroy: templates/terraform/custom_check_destroy/kms_autokey_config.go.erb
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'kms_autokey_config_all'
+  - name: 'kms_autokey_config_all'
+    primary_resource_id: 'example-autokeyconfig'
+    min_version: 'beta'
+    vars:
+      folder_name: 'my-folder'
+      key_project_name: 'key-proj'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    external_providers: ["random", "time"]
     # Need the time_sleep resource
     # Currently failing
     skip_vcr: true
-    external_providers: ["random", "time"]
-    primary_resource_id:
-      'example-autokeyconfig'
-    min_version: beta
-    vars:
-      folder_name:
-        'my-folder'
-      key_project_name:
-        'key-proj'
-    test_env_vars:
-      org_id: :ORG_ID
-      billing_account: :BILLING_ACCT
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'folder'
-    required: true
-    immutable: true
-    url_param_only: true
-    diff_suppress_func: 'folderPrefixSuppress'
+  - name: 'folder'
+    type: String
     description: |
       The folder for which to retrieve config.
+    min_version: 'beta'
+    url_param_only: true
+    required: true
+    immutable: true
+    diff_suppress_func: 'folderPrefixSuppress'
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'keyProject'
+  - name: 'keyProject'
+    type: String
     description: |
       The target key project for a given folder where KMS Autokey will provision a
       CryptoKey for any new KeyHandle the Developer creates. Should have the form
       `projects/<project_id_or_number>`.
+    min_version: 'beta'

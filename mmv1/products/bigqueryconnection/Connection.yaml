@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,160 +11,146 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Connection'
-base_url: projects/{{project}}/locations/{{location}}/connections
-self_link: projects/{{project}}/locations/{{location}}/connections/{{connection_id}}
-create_url: projects/{{project}}/locations/{{location}}/connections?connectionId={{connection_id}}
-update_verb: :PATCH
-update_mask: true
 description: |
   A connection allows BigQuery connections to external data sources..
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Cloud SQL federated queries': 'https://cloud.google.com/bigquery/docs/cloud-sql-federated-queries'
   api: 'https://cloud.google.com/bigquery/docs/reference/bigqueryconnection/rest/v1/projects.locations.connections/create'
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  method_name_separator: ':'
-  fetch_iam_policy_verb: :POST
-  parent_resource_attribute: 'connection_id'
-  import_format:
-    [
-      'projects/{{project}}/locations/{{location}}/connections/{{connection_id}}',
-      '{{connection_id}}',
-    ]
+docs:
 id_format: 'projects/{{project}}/locations/{{location}}/connections/{{connection_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/connections'
+self_link: 'projects/{{project}}/locations/{{location}}/connections/{{connection_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/connections?connectionId={{connection_id}}'
+update_verb: 'PATCH'
+update_mask: true
 import_format:
-  [
-    'projects/{{project}}/locations/{{location}}/connections/{{connection_id}}',
-    '{{project}}/{{location}}/{{connection_id}}',
-    '{{location}}/{{connection_id}}',
-  ]
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  post_create: templates/terraform/post_create/bigquery_connection_id.go.erb
-  encoder: templates/terraform/encoders/bigquery_connection.go.erb
+  - 'projects/{{project}}/locations/{{location}}/connections/{{connection_id}}'
+  - '{{project}}/{{location}}/{{connection_id}}'
+  - '{{location}}/{{connection_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+iam_policy:
+  method_name_separator: ':'
+  fetch_iam_policy_verb: 'POST'
+  parent_resource_attribute: 'connection_id'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/connections/{{connection_id}}'
+    - '{{connection_id}}'
+custom_code:
+  encoder: 'templates/terraform/encoders/bigquery_connection.go.tmpl'
+  post_create: 'templates/terraform/post_create/bigquery_connection_id.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'bigquery_connection_cloud_resource'
-    external_providers: ["random", "time"]
-    region_override: 'US'
+  - name: 'bigquery_connection_cloud_resource'
     primary_resource_id: 'connection'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-my-connection%s\",
-      context[\"random_suffix\"\
-      ])"
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-connection%s", context["random_suffix"])'
+    region_override: 'US'
     vars:
       connection_id: 'my-connection'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'bigquery_connection_basic'
     external_providers: ["random", "time"]
-    primary_resource_id:
-      'connection'
-      # Random provider
-    skip_vcr: true
+  - name: 'bigquery_connection_basic'
+    primary_resource_id: 'connection'
     vars:
       database_instance_name: 'my-database-instance'
       username: 'user'
       deletion_protection: 'true'
     test_vars_overrides:
-      deletion_protection: 'false'
+      'deletion_protection': 'false'
     oics_vars_overrides:
-      deletion_protection: 'false'
+      'deletion_protection': 'false'
     ignore_read_extra:
-      - 'cloud_sql.0.credential'  # password removed
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'bigquery_connection_full'
+ # password removed
+      - 'cloud_sql.0.credential'
     external_providers: ["random", "time"]
-    primary_resource_id:
-      'connection'
       # Random provider
     skip_vcr: true
+  - name: 'bigquery_connection_full'
+    primary_resource_id: 'connection'
     vars:
       database_instance_name: 'my-database-instance'
       username: 'user'
       connection_id: 'my-connection'
       deletion_protection: 'true'
     test_vars_overrides:
-      deletion_protection: 'false'
+      'deletion_protection': 'false'
     oics_vars_overrides:
-      deletion_protection: 'false'
+      'deletion_protection': 'false'
     ignore_read_extra:
-      - 'cloud_sql.0.credential'  # password removed
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'bigquery_connection_aws'
+ # password removed
+      - 'cloud_sql.0.credential'
     external_providers: ["random", "time"]
+      # Random provider
+    skip_vcr: true
+  - name: 'bigquery_connection_aws'
     primary_resource_id: 'connection'
     vars:
       connection_id: 'my-connection'
       iam_role_id: 'arn:aws:iam::999999999999:role/omnirole'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'bigquery_connection_azure'
     external_providers: ["random", "time"]
+  - name: 'bigquery_connection_azure'
     primary_resource_id: 'connection'
     vars:
       connection_id: 'my-connection'
       customer_tenant_id: 'customer-tenant-id'
       federated_application_client_id: 'b43eeeee-eeee-eeee-eeee-a480155501ce'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'bigquery_connection_cloudspanner'
     external_providers: ["random", "time"]
+  - name: 'bigquery_connection_cloudspanner'
     primary_resource_id: 'connection'
     vars:
       connection_id: 'my-connection'
       database: 'projects/project/instances/instance/databases/database'
       database_role: 'database_role'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'bigquery_connection_cloudspanner_databoost'
     external_providers: ["random", "time"]
+  - name: 'bigquery_connection_cloudspanner_databoost'
     primary_resource_id: 'connection'
     vars:
       connection_id: 'my-connection'
       database: 'projects/project/instances/instance/databases/database'
-  - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_connection_spark"
-    region_override: "US"
-    primary_resource_id: "connection"
+    external_providers: ["random", "time"]
+  - name: 'bigquery_connection_spark'
+    primary_resource_id: 'connection'
+    region_override: 'US'
     vars:
-      connection_id: "my-connection"
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'bigquery_connection_kms'
-    primary_resource_id:
-      'bq-connection-cmek'
+      connection_id: 'my-connection'
+  - name: 'bigquery_connection_kms'
+    primary_resource_id: 'bq-connection-cmek'
     vars:
       database_instance_name: 'my-database-instance'
       username: 'user'
       deletion_protection: 'true'
       kms_key_name: 'projects/project/locations/us-central1/keyRings/us-central1/cryptoKeys/bq-key'
     test_vars_overrides:
-      deletion_protection: 'false'
-      kms_key_name: 'acctest.BootstrapKMSKey(t).CryptoKey.Name'
-      policyChanged:
-        "acctest.BootstrapPSARole(t, \"bq-\", \"bigquery-encryption\",
-        \"roles/cloudkms.cryptoKeyEncrypterDecrypter\"\
-        )"
+      'deletion_protection': 'false'
+      'kms_key_name': 'acctest.BootstrapKMSKey(t).CryptoKey.Name'
+      'policyChanged': 'acctest.BootstrapPSARole(t, "bq-", "bigquery-encryption", "roles/cloudkms.cryptoKeyEncrypterDecrypter")'
     oics_vars_overrides:
-      deletion_protection: 'false'
+      'deletion_protection': 'false'
     ignore_read_extra:
-      - 'cloud_sql.0.credential'  # password removed
+ # password removed
+      - 'cloud_sql.0.credential'
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description: |-
       The resource name of the connection in the form of:
       "projects/{project_id}/locations/{location_id}/connections/{connectionId}"
     output: true
-  - !ruby/object:Api::Type::String
-    name: connection_id
+  - name: 'connection_id'
+    type: String
     description: |
       Optional connection id that should be assigned to the created connection.
     required: false
     immutable: true
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.erb'
-  - !ruby/object:Api::Type::String
-    name: 'location'
-    required: false
-    immutable: true
-    url_param_only: true
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
+  - name: 'location'
+    type: String
     description: |-
       The geographic location where the connection should reside.
       Cloud SQL instance must be in the same location as the connection
@@ -173,259 +159,260 @@ properties:
       Spanner Connections same as spanner region
       AWS allowed regions are aws-us-east-1
       Azure allowed regions are azure-eastus2
-  - !ruby/object:Api::Type::String
-    name: 'friendlyName'
+    url_param_only: true
+    required: false
+    immutable: true
+  - name: 'friendlyName'
+    type: String
     description: A descriptive name for the connection
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: A descriptive description for the connection
-  - !ruby/object:Api::Type::Boolean
-    name: 'hasCredential'
-    output: true
+  - name: 'hasCredential'
+    type: Boolean
     description: |
       True if the connection has credential assigned.
-  - !ruby/object:Api::Type::String
-    name: 'kmsKeyName'
+    output: true
+  - name: 'kmsKeyName'
+    type: String
     description: |
       Optional. The Cloud KMS key that is used for encryption.
 
       Example: projects/[kms_project_id]/locations/[region]/keyRings/[key_region]/cryptoKeys/[key]
-  - !ruby/object:Api::Type::NestedObject
-    name: 'cloudSql'
+  - name: 'cloudSql'
+    type: NestedObject
     description: Connection properties specific to the Cloud SQL.
     exactly_one_of:
-      - cloud_sql
-      - aws
-      - azure
-      - cloud_spanner
-      - cloud_resource
-      - spark
+      - 'cloud_sql'
+      - 'aws'
+      - 'azure'
+      - 'cloud_spanner'
+      - 'cloud_resource'
+      - 'spark'
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'instanceId'
+      - name: 'instanceId'
+        type: String
         description:
           Cloud SQL instance ID in the form project:location:instance.
         required: true
-      - !ruby/object:Api::Type::String
-        name: 'database'
+      - name: 'database'
+        type: String
         description: Database name.
         required: true
-      - !ruby/object:Api::Type::NestedObject
-        name: credential
+      - name: 'credential'
+        type: NestedObject
         description: Cloud SQL properties.
         required: true
-        custom_flatten: 'templates/terraform/custom_flatten/bigquery_connection_flatten.go.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/bigquery_connection_flatten.go.tmpl'
         properties:
-          - !ruby/object:Api::Type::String
-            name: username
+          - name: 'username'
+            type: String
             description: Username for database.
             required: true
-          - !ruby/object:Api::Type::String
-            name: password
+          - name: 'password'
+            type: String
             description: Password for database.
             required: true
             sensitive: true
-      - !ruby/object:Api::Type::Enum
-        name: 'type'
+      - name: 'type'
+        type: Enum
         description: Type of the Cloud SQL database.
         required: true
-        values:
-          - :DATABASE_TYPE_UNSPECIFIED
-          - :POSTGRES
-          - :MYSQL
-      - !ruby/object:Api::Type::String
-        name: 'serviceAccountId'
+        enum_values:
+          - 'DATABASE_TYPE_UNSPECIFIED'
+          - 'POSTGRES'
+          - 'MYSQL'
+      - name: 'serviceAccountId'
+        type: String
         description:
           When the connection is used in the context of an operation in
           BigQuery, this service account will serve as the identity being used
           for connecting to the CloudSQL instance specified in this connection.
         output: true
-  - !ruby/object:Api::Type::NestedObject
-    name: aws
+  - name: 'aws'
+    type: NestedObject
     description: Connection properties specific to Amazon Web Services.
-    exactly_one_of:
-      - cloud_sql
-      - aws
-      - azure
-      - cloud_spanner
-      - cloud_resource
-      - spark
     update_mask_fields:
       - 'aws.access_role.iam_role_id'
+    exactly_one_of:
+      - 'cloud_sql'
+      - 'aws'
+      - 'azure'
+      - 'cloud_spanner'
+      - 'cloud_resource'
+      - 'spark'
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: accessRole
+      - name: 'accessRole'
+        type: NestedObject
         description:
           Authentication using Google owned service account to assume into
           customer's AWS IAM Role.
         required: true
         properties:
-          - !ruby/object:Api::Type::String
-            name: iamRoleId
+          - name: 'iamRoleId'
+            type: String
             description:
               The user’s AWS IAM Role that trusts the Google-owned AWS IAM user
               Connection.
             required: true
-          - !ruby/object:Api::Type::String
-            name: identity
+          - name: 'identity'
+            type: String
             description:
               A unique Google-owned and Google-generated identity for the
               Connection. This identity will be used to access the user's AWS
               IAM Role.
             output: true
-  - !ruby/object:Api::Type::NestedObject
-    name: azure
+  - name: 'azure'
+    type: NestedObject
     description: Container for connection properties specific to Azure.
-    exactly_one_of:
-      - cloud_sql
-      - aws
-      - azure
-      - cloud_spanner
-      - cloud_resource
-      - spark
     update_mask_fields:
       - 'azure.customer_tenant_id'
       - 'azure.federated_application_client_id'
+    exactly_one_of:
+      - 'cloud_sql'
+      - 'aws'
+      - 'azure'
+      - 'cloud_spanner'
+      - 'cloud_resource'
+      - 'spark'
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'application'
+      - name: 'application'
+        type: String
         description: The name of the Azure Active Directory Application.
         output: true
-      - !ruby/object:Api::Type::String
-        name: 'clientId'
-        output: true
+      - name: 'clientId'
+        type: String
         description: The client id of the Azure Active Directory Application.
-      - !ruby/object:Api::Type::String
-        name: 'objectId'
         output: true
+      - name: 'objectId'
+        type: String
         description: The object id of the Azure Active Directory Application.
-      - !ruby/object:Api::Type::String
-        name: 'customerTenantId'
+        output: true
+      - name: 'customerTenantId'
+        type: String
         description: The id of customer's directory that host the data.
         required: true
-      - !ruby/object:Api::Type::String
-        name: 'federatedApplicationClientId'
+      - name: 'federatedApplicationClientId'
+        type: String
         description:
           The Azure Application (client) ID where the federated credentials will
           be hosted.
-      - !ruby/object:Api::Type::String
-        name: 'redirectUri'
-        output: true
+      - name: 'redirectUri'
+        type: String
         description:
           The URL user will be redirected to after granting consent during
           connection setup.
-      - !ruby/object:Api::Type::String
-        name: 'identity'
+        output: true
+      - name: 'identity'
+        type: String
         description:
           A unique Google-owned and Google-generated identity for the
           Connection. This identity will be used to access the user's Azure
           Active Directory Application.
         output: true
-  - !ruby/object:Api::Type::NestedObject
-    name: cloudSpanner
+  - name: 'cloudSpanner'
+    type: NestedObject
     description: Connection properties specific to Cloud Spanner
     exactly_one_of:
-      - cloud_sql
-      - aws
-      - azure
-      - cloud_spanner
-      - cloud_resource
-      - spark
+      - 'cloud_sql'
+      - 'aws'
+      - 'azure'
+      - 'cloud_spanner'
+      - 'cloud_resource'
+      - 'spark'
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'database'
+      - name: 'database'
+        type: String
         description:
           Cloud Spanner database in the form `project/instance/database'.
         required: true
-      - !ruby/object:Api::Type::Boolean
-        name: 'useParallelism'
+      - name: 'useParallelism'
+        type: Boolean
         description:
           If parallelism should be used when reading from Cloud Spanner.
-      - !ruby/object:Api::Type::Integer
-        name: 'maxParallelism'
+      - name: 'maxParallelism'
+        type: Integer
         description:
           Allows setting max parallelism per query when executing on Spanner independent compute
           resources. If unspecified, default values of parallelism are chosen that are dependent on
           the Cloud Spanner instance configuration. `useParallelism` and `useDataBoost` must be set
           when setting max parallelism.
         required_with:
-          - cloudSpanner.0.useDataBoost
-          - cloudSpanner.0.useParallelism
-      - !ruby/object:Api::Type::Boolean
-        name: 'useDataBoost'
+          - 'cloudSpanner.0.useDataBoost'
+          - 'cloudSpanner.0.useParallelism'
+      - name: 'useDataBoost'
+        type: Boolean
         description:
           If set, the request will be executed via Spanner independent compute resources.
           `use_parallelism` must be set when using data boost.
         required_with:
-          - cloudSpanner.0.useParallelism
-      - !ruby/object:Api::Type::String
-        name: 'databaseRole'
+          - 'cloudSpanner.0.useParallelism'
+      - name: 'databaseRole'
+        type: String
         description:
           Cloud Spanner database role for fine-grained access control. The Cloud Spanner admin
           should have provisioned the database role with appropriate permissions, such as `SELECT`
           and `INSERT`. Other users should only use roles provided by their Cloud Spanner admins.
           The database role name must start with a letter, and can only contain letters, numbers,
           and underscores. For more details, see https://cloud.google.com/spanner/docs/fgac-about.
-        validation: !ruby/object:Provider::Terraform::Validation
+        validation:
           regex: '^[a-zA-Z][a-zA-Z0-9_]*$'
-      - !ruby/object:Api::Type::Boolean
-        name: 'useServerlessAnalytics'
+      - name: 'useServerlessAnalytics'
+        type: Boolean
         description:
           If the serverless analytics service should be used to read data from
           Cloud Spanner. `useParallelism` must be set when using serverless
           analytics.
-        deprecation_message: >-
-          `useServerlessAnalytics` is deprecated and will be removed in a future major release. Use
-          `useDataBoost` instead.
-  - !ruby/object:Api::Type::NestedObject
-    name: cloudResource
+        deprecation_message: '`useServerlessAnalytics` is deprecated and will be removed in a future major release. Use `useDataBoost` instead.'
+  - name: 'cloudResource'
+    type: NestedObject
     description:
       Container for connection properties for delegation of access to GCP
       resources.
-    exactly_one_of:
-      - cloud_sql
-      - aws
-      - azure
-      - cloud_spanner
-      - cloud_resource
-      - spark
     send_empty_value: true
+    exactly_one_of:
+      - 'cloud_sql'
+      - 'aws'
+      - 'azure'
+      - 'cloud_spanner'
+      - 'cloud_resource'
+      - 'spark'
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'serviceAccountId'
+      - name: 'serviceAccountId'
+        type: String
         description:
           The account ID of the service created for the purpose of this
           connection.
         output: true
-  - !ruby/object:Api::Type::NestedObject
-    name: spark
+  - name: 'spark'
+    type: NestedObject
     description: Container for connection properties to execute stored procedures for Apache Spark.
       resources.
-    exactly_one_of:
-      - cloud_sql
-      - aws
-      - azure
-      - cloud_spanner
-      - cloud_resource
-      - spark
     send_empty_value: true
+    exactly_one_of:
+      - 'cloud_sql'
+      - 'aws'
+      - 'azure'
+      - 'cloud_spanner'
+      - 'cloud_resource'
+      - 'spark'
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'serviceAccountId'
+      - name: 'serviceAccountId'
+        type: String
         description: The account ID of the service created for the purpose of this
           connection.
         output: true
-      - !ruby/object:Api::Type::NestedObject
-        name: metastoreServiceConfig
+      - name: 'metastoreServiceConfig'
+        type: NestedObject
         description: Dataproc Metastore Service configuration for the connection.
         properties:
-          - !ruby/object:Api::Type::String
-            name: metastoreService
+          - name: 'metastoreService'
+            type: String
             description: Resource name of an existing Dataproc Metastore service in the form of projects/[projectId]/locations/[region]/services/[serviceId].
-      - !ruby/object:Api::Type::NestedObject
-        name: sparkHistoryServerConfig
+      - name: 'sparkHistoryServerConfig'
+        type: NestedObject
         description: Spark History Server configuration for the connection.
         properties:
-          - !ruby/object:Api::Type::String
-            name: dataprocCluster
+          - name: 'dataprocCluster'
+            type: String
             description: Resource name of an existing Dataproc Cluster to act as a Spark History Server for the connection if the form of projects/[projectId]/regions/[region]/clusters/[cluster_name].

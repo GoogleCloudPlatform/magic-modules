@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,63 +11,63 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'SslPolicy'
 kind: 'compute#sslPolicy'
-base_url: projects/{{project}}/global/sslPolicies
-collection_url_key: 'items'
-update_verb: :PATCH
-has_self_link: true
 description: |
   Represents a SSL policy. SSL policies give you the ability to control the
   features of SSL that your SSL proxy or HTTPS load balancer negotiates.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Using SSL Policies': 'https://cloud.google.com/compute/docs/load-balancing/ssl-policies'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/sslPolicies'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+docs:
+base_url: 'projects/{{project}}/global/sslPolicies'
+has_self_link: true
+update_verb: 'PATCH'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
-    base_url: '{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'targetLink'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'status'
-    complete: 'DONE'
-    allowed:
-      - 'PENDING'
-      - 'RUNNING'
-      - 'DONE'
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error/errors'
     message: 'message'
+collection_url_key: 'items'
+custom_code:
+  constants: 'templates/terraform/constants/ssl_policy.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/ssl_policy.tmpl'
+custom_diff:
+  - 'sslPolicyCustomizeDiff'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'ssl_policy_basic'
+  - name: 'ssl_policy_basic'
     primary_resource_id: 'prod-ssl-policy'
     vars:
       production_ssl_policy_name: 'production-ssl-policy'
       nonprod_ssl_policy_name: 'nonprod-ssl-policy'
       custom_ssl_policy_name: 'custom-ssl-policy'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: 'templates/terraform/constants/ssl_policy.erb'
-  update_encoder: 'templates/terraform/update_encoder/ssl_policy.erb'
-custom_diff: [
-  'sslPolicyCustomizeDiff',
-]
+parameters:
 properties:
-  - !ruby/object:Api::Type::Time
-    name: 'creationTimestamp'
+  - name: 'creationTimestamp'
+    type: Time
     description: 'Creation timestamp in RFC3339 text format.'
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: 'An optional description of this resource.'
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       Name of the resource. Provided by the client when the resource is
       created. The name must be 1-63 characters long, and comply with
@@ -76,11 +76,11 @@ properties:
       first character must be a lowercase letter, and all following
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
-    immutable: true
     required: true
+    immutable: true
     # TODO: profile, minTlsVersion, enabledFeatures, customFeatures, fingerprint, warnings, kind
-  - !ruby/object:Api::Type::Enum
-    name: 'profile'
+  - name: 'profile'
+    type: Enum
     description: |
       Profile specifies the set of SSL features that can be used by the
       load balancer when negotiating SSL with clients. If using `CUSTOM`,
@@ -90,30 +90,31 @@ properties:
       See the [official documentation](https://cloud.google.com/compute/docs/load-balancing/ssl-policies#profilefeaturesupport)
       for information on what cipher suites each profile provides. If
       `CUSTOM` is used, the `custom_features` attribute **must be set**.
-    values:
-      - :COMPATIBLE
-      - :MODERN
-      - :RESTRICTED
-      - :CUSTOM
-    default_value: :COMPATIBLE
-  - !ruby/object:Api::Type::Enum
-    name: 'minTlsVersion'
+    default_value: "COMPATIBLE"
+    enum_values:
+      - 'COMPATIBLE'
+      - 'MODERN'
+      - 'RESTRICTED'
+      - 'CUSTOM'
+  - name: 'minTlsVersion'
+    type: Enum
     description: |
       The minimum version of SSL protocol that can be used by the clients
       to establish a connection with the load balancer.
-    values:
-      - :TLS_1_0
-      - :TLS_1_1
-      - :TLS_1_2
-    default_value: :TLS_1_0
-  - !ruby/object:Api::Type::Array
-    name: 'enabledFeatures'
+    default_value: "TLS_1_0"
+    enum_values:
+      - 'TLS_1_0'
+      - 'TLS_1_1'
+      - 'TLS_1_2'
+  - name: 'enabledFeatures'
+    type: Array
     description: 'The list of features enabled in the SSL policy.'
-    output: true
     is_set: true
-    item_type: Api::Type::String
-  - !ruby/object:Api::Type::Array
-    name: 'customFeatures'
+    output: true
+    item_type:
+      type: String
+  - name: 'customFeatures'
+    type: Array
     description: |
       Profile specifies the set of SSL features that can be used by the
       load balancer when negotiating SSL with clients. This can be one of
@@ -126,9 +127,10 @@ properties:
       *must* be present when using the `CUSTOM` profile. This argument
       *must not* be present when using any other profile.
     is_set: true
-    item_type: Api::Type::String
-  - !ruby/object:Api::Type::String
-    name: 'fingerprint'
+    item_type:
+      type: String
+  - name: 'fingerprint'
+    type: String
     description: |
       Fingerprint of this resource. A hash of the contents stored in this
       object. This field is used in optimistic locking.

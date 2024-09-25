@@ -1,7 +1,0 @@
-resource "google_firebase_database_instance" "basic" {
-  provider = google-beta
-  project  = "<%= ctx[:test_env_vars]['project_id'] %>"
-  region   = "us-central1"
-  instance_id = "<%= ctx[:vars]['instance_id'] %>"
-}
-

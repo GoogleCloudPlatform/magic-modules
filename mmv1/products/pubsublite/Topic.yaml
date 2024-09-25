@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,106 +11,107 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Topic'
 description: |
   A named resource to which messages are sent by publishers.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Managing Topics': 'https://cloud.google.com/pubsub/lite/docs/topics'
   api: 'https://cloud.google.com/pubsub/lite/docs/reference/rest/v1/admin.projects.locations.topics'
-base_url: projects/{{project}}/locations/{{zone}}/topics
-create_url: projects/{{project}}/locations/{{zone}}/topics?topicId={{name}}
-update_verb: :PATCH
+docs:
+base_url: 'projects/{{project}}/locations/{{zone}}/topics'
+create_url: 'projects/{{project}}/locations/{{zone}}/topics?topicId={{name}}'
+update_url: 'projects/{{project}}/locations/{{zone}}/topics/{{name}}'
+update_verb: 'PATCH'
 update_mask: true
-update_url: projects/{{project}}/locations/{{zone}}/topics/{{name}}
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  encoder: 'templates/terraform/encoders/pubsub_lite.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'pubsub_lite_topic_basic'
+  - name: 'pubsub_lite_topic_basic'
     primary_resource_id: 'example'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-example-topic%s\",
-      context[\"random_suffix\"\
-      ])"
+    primary_resource_name: 'fmt.Sprintf("tf-test-example-topic%s", context["random_suffix"])'
     vars:
       reservation_name: 'example-reservation'
       topic_name: 'example-topic'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  encoder:
-    templates/terraform/encoders/pubsub_lite.erb
     #   update_encoder: templates/terraform/update_encoder/pubsub_topic.erb
 parameters:
-  - !ruby/object:Api::Type::String
-    name: region
+  - name: 'region'
+    type: String
     description: The region of the pubsub lite topic.
     url_param_only: true
-  - !ruby/object:Api::Type::String
-    name: zone
+  - name: 'zone'
+    type: String
     description: The zone of the pubsub lite topic.
     url_param_only: true
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: 'Name of the topic.'
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.tmpl'
 properties:
-  - !ruby/object:Api::Type::NestedObject
-    name: 'partitionConfig'
+  - name: 'partitionConfig'
+    type: NestedObject
     description: |
       The settings for this topic's partitions.
     properties:
-      - !ruby/object:Api::Type::Integer
-        name: 'count'
+      - name: 'count'
+        type: Integer
         description: |
           The number of partitions in the topic. Must be at least 1.
         required: true
-      - !ruby/object:Api::Type::NestedObject
-        name: 'capacity'
+      - name: 'capacity'
+        type: NestedObject
         description: |
           The capacity configuration.
         properties:
-          - !ruby/object:Api::Type::Integer
-            name: 'publishMibPerSec'
+          - name: 'publishMibPerSec'
+            type: Integer
             description: |
               Subscribe throughput capacity per partition in MiB/s. Must be >= 4 and <= 16.
             required: true
-          - !ruby/object:Api::Type::Integer
-            name: 'subscribeMibPerSec'
+          - name: 'subscribeMibPerSec'
+            type: Integer
             description: |
               Publish throughput capacity per partition in MiB/s. Must be >= 4 and <= 16.
             required: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'retentionConfig'
+  - name: 'retentionConfig'
+    type: NestedObject
     description: |
       The settings for a topic's message retention.
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'perPartitionBytes'
+      - name: 'perPartitionBytes'
+        type: String
         description: |
           The provisioned storage, in bytes, per partition. If the number of bytes stored
           in any of the topic's partitions grows beyond this value, older messages will be
           dropped to make room for newer ones, regardless of the value of period.
         required: true
-      - !ruby/object:Api::Type::String
-        name: 'period'
+      - name: 'period'
+        type: String
         description: |
           How long a published message is retained. If unset, messages will be retained as
           long as the bytes retained for each partition is below perPartitionBytes. A
           duration in seconds with up to nine fractional digits, terminated by 's'.
           Example: "3.5s".
-  - !ruby/object:Api::Type::NestedObject
-    name: 'reservationConfig'
+  - name: 'reservationConfig'
+    type: NestedObject
     description: |
       The settings for this topic's Reservation usage.
     properties:
-      - !ruby/object:Api::Type::ResourceRef
-        name: 'throughputReservation'
-        resource: 'Reservation'
-        imports: 'name'
+      - name: 'throughputReservation'
+        type: ResourceRef
         description: |
           The Reservation to use for this topic's throughput capacity.
         diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-        custom_expand: templates/terraform/custom_expand/pubsublite_topic_reservation_config_throughput_reservation.go.erb
+        custom_expand: 'templates/terraform/custom_expand/pubsublite_topic_reservation_config_throughput_reservation.go.tmpl'
+        resource: 'Reservation'
+        imports: 'name'
