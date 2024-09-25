@@ -77,7 +77,7 @@ resource "google_dataproc_metastore_service" "my_metastore" {
 	service_id = "%s"
 	location   = "us-central1"
 	tier       = "%s"
-	deletion_protection = false
+	deletion_protection = true
 
 	hive_metastore_config {
 		version = "2.3.6"
@@ -92,7 +92,7 @@ resource "google_dataproc_metastore_service" "my_metastore" {
         service_id = "%s"
         location   = "%s"
         tier       = "%s"
-        deletion_protection = false
+        deletion_protection = true
 
         hive_metastore_config {
                 version = "2.3.6"

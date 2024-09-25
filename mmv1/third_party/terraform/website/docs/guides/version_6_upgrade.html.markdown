@@ -417,14 +417,3 @@ that are derived from the API.
 `disable_ssh` field now defaults to true. To enable SSH, please set `disable_ssh` to false.
 
 ## Resource: `metastore_service`
-
-### Service deletion now prevented by default with `deletion_protection`
-
-The field `deletion_protection` has been added with a default value of `true`. This field prevents
-Terraform from destroying or recreating the Service. In 6.0.0, existing services will have 
-`deletion_protection` set to `true` during the next refresh unless otherwise set in configuration.
-
-**`deletion_protection` does NOT prevent deletion outside of Terraform.**
-
-To disable deletion protection, explicitly set this field to `false` in configuration
-and then run `terraform apply` to apply the change.
