@@ -1,0 +1,18 @@
+resource "google_network_connectivity_hub" "basic_hub"  {
+ name        = "<%= ctx[:vars]['hub_name'] %>"
+ description = "A sample hub"
+ labels = {
+    label-one = "value-one"
+  }
+}
+
+resource "google_network_connectivity_group" "<%= ctx[:primary_resource_id] %>"  {
+ hub         = google_network_connectivity_hub.basic_hub.id
+ name        = "default"
+ auto_accept {
+    auto_accept_projects = [
+      "<%= ctx[:vars]['auto_accept_project_1_name'] %>", 
+      "<%= ctx[:vars]['auto_accept_project_2_name'] %>", 
+    ]
+  }
+}
