@@ -155,6 +155,7 @@ resource "google_network_services_gateway" "default" {
 
 	config += acctest.Nprintf(`
   type                                 = "SECURE_WEB_GATEWAY"
+  routing_mode                         = "EXPLICIT_ROUTING_MODE"
   ports                                = [443]
   scope                                = "tf-test-my-default-scope-%{random_suffix}"
   certificate_urls                     = [google_certificate_manager_certificate.default.id]
@@ -265,6 +266,7 @@ resource "google_network_services_gateway" "foobar" {
   location                             = "us-east1"
   addresses                            = ["10.128.0.99"]
   type                                 = "SECURE_WEB_GATEWAY"
+  routing_mode                         = "EXPLICIT_ROUTING_MODE"
   ports                                = [443]
   description                          = "my description"
   scope                                = "%s"
@@ -358,6 +360,7 @@ resource "google_network_services_gateway" "foobar" {
   location                             = "us-east1"
   addresses                            = ["10.128.0.99"]
   type                                 = "SECURE_WEB_GATEWAY"
+  routing_mode                         = "EXPLICIT_ROUTING_MODE"
   ports                                = [443]
   description                          = "updated description"
   scope                                = "%s"
@@ -467,6 +470,7 @@ resource "google_network_services_gateway" "gateway1" {
   location                             = "us-west1"
   addresses                            = ["10.128.0.99"]
   type                                 = "SECURE_WEB_GATEWAY"
+  routing_mode                         = "EXPLICIT_ROUTING_MODE"
   ports                                = [443]
   description                          = "gateway1_subnet1"
   scope                                = "%s"
@@ -492,6 +496,7 @@ resource "google_network_services_gateway" "gateway2" {
   location                             = "us-west1"
   addresses                            = ["10.142.0.99"]
   type                                 = "SECURE_WEB_GATEWAY"
+  routing_mode                         = "EXPLICIT_ROUTING_MODE"
   ports                                = [443]
   description                          = "gateway2_subnet2"
   scope                                = "%s"
@@ -561,6 +566,7 @@ resource "google_network_services_gateway" "gateway1" {
   location                             = "us-west1"
   addresses                            = ["10.128.0.99"]
   type                                 = "SECURE_WEB_GATEWAY"
+  routing_mode                         = "EXPLICIT_ROUTING_MODE"
   ports                                = [443]
   description                          = "gateway1_subnet1"
   scope                                = "%s"
@@ -683,6 +689,7 @@ resource "google_network_services_gateway" "gateway1" {
   location                             = "us-west2"
   addresses                            = ["10.128.0.99"]
   type                                 = "SECURE_WEB_GATEWAY"
+  routing_mode                         = "EXPLICIT_ROUTING_MODE"
   ports                                = [443]
   description                          = "gateway1_subnet1"
   scope                                = "%s"
@@ -723,6 +730,7 @@ resource "google_network_services_gateway" "gateway2" {
   location                             = "us-west2"
   addresses                            = ["10.142.0.99"]
   type                                 = "SECURE_WEB_GATEWAY"
+  routing_mode                         = "EXPLICIT_ROUTING_MODE"
   ports                                = [443]
   description                          = "gateway2_subnet2"
   scope                                = "%s"
@@ -792,6 +800,7 @@ resource "google_network_services_gateway" "gateway1" {
   location                             = "us-west2"
   addresses                            = ["10.128.0.99"]
   type                                 = "SECURE_WEB_GATEWAY"
+  routing_mode                         = "EXPLICIT_ROUTING_MODE"
   ports                                = [443]
   description                          = "gateway1_subnet1"
   scope                                = "%s"
@@ -904,6 +913,7 @@ resource "google_network_services_gateway" "foobar" {
   location                             = "us-central1"
   addresses                            = ["10.128.0.99"]
   type                                 = "SECURE_WEB_GATEWAY"
+  routing_mode                         = "EXPLICIT_ROUTING_MODE"
   ports                                = [443]
   description                          = "my description"
   gateway_security_policy              = google_network_security_gateway_security_policy.default.id

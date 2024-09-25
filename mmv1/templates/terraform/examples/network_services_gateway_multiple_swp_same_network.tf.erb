@@ -67,6 +67,7 @@ resource "google_network_services_gateway" "gateway2" {
   location                             = "us-south1"
   addresses                            = ["10.128.0.98"]
   type                                 = "SECURE_WEB_GATEWAY"
+  routing_mode                         = "EXPLICIT_ROUTING_MODE"
   ports                                = [443]
   scope                                = "<%= ctx[:vars]['scope_2'] %>"
   certificate_urls                     = [google_certificate_manager_certificate.default.id]
