@@ -415,4 +415,3 @@ that are derived from the API.
 ### `host.gce_instance.disable_ssh` now defaults to true
 
 `disable_ssh` field now defaults to true. To enable SSH, please set `disable_ssh` to false.
-
