@@ -67,20 +67,32 @@ resource "google_project" "my_project" {
   deletion_policy = "DELETE"
 }
 
-resource "google_app_engine_application" "app" {
-  project     = google_project.my_project.project_id
-  location_id = "us-central"
-}
-
-resource "google_project_service" "project" {
+resource "google_project_service" "gae" {
   project = google_project.my_project.project_id
   service = "appengine.googleapis.com"
 
   disable_dependent_services = false
 }
 
+resource "google_app_engine_application" "app" {
+  project     = google_project_service.gae.project
+  location_id = "us-central"
+}
+
+resource "google_service_account" "custom_service_account" {
+  project      = google_project_service.gae.project
+  account_id   = "tf-test-app-eng-%{random_suffix}"
+  display_name = "Service account for GAE acc test"
+}
+
+resource "google_project_iam_member" "storage_admin" {
+  project = google_project.my_project.project_id
+  role    = "roles/storage.admin"
+  member  = "serviceAccount:${google_service_account.custom_service_account.email}"
+}
+
 resource "google_app_engine_standard_app_version" "foo" {
-  project    = google_project_service.project.project
+  project    = google_project_service.gae.project
   version_id = "v1"
   service    = "default"
   runtime    = "python38"
@@ -155,12 +167,7 @@ resource "google_project" "my_project" {
   deletion_policy = "DELETE"
 }
 
-resource "google_app_engine_application" "app" {
-  project     = google_project.my_project.project_id
-  location_id = "us-central"
-}
-
-resource "google_project_service" "project" {
+resource "google_project_service" "gae" {
   project = google_project.my_project.project_id
   service = "appengine.googleapis.com"
 
@@ -183,6 +190,19 @@ resource "google_project_service" "vpcaccess_api" {
   depends_on = [time_sleep.wait_60_seconds]
 }
 
+resource "google_service_account" "custom_service_account" {
+  project      = google_project_service.gae.project
+  account_id   = "tf-test-app-eng-%{random_suffix}"
+  display_name = "Service account for GAE acc test"
+}
+
+resource "google_project_iam_member" "storage_admin" {
+  project = google_project.my_project.project_id
+  role    = "roles/storage.admin"
+  member  = "serviceAccount:${google_service_account.custom_service_account.email}"
+}
+
+
 resource "google_vpc_access_connector" "bar" {
   depends_on = [
     google_project_service.vpcaccess_api
@@ -196,8 +216,13 @@ resource "google_vpc_access_connector" "bar" {
   max_throughput = 300
 }
 
+resource "google_app_engine_application" "app" {
+  project     = google_project_service.gae.project
+  location_id = "us-central"
+}
+
 resource "google_app_engine_standard_app_version" "foo" {
-  project    = google_project_service.project.project
+  project    = google_project_service.gae.project
   version_id = "v1"
   service    = "default"
   runtime    = "python38"
@@ -277,20 +302,32 @@ resource "google_project" "my_project" {
   deletion_policy = "DELETE"
 }
 
-resource "google_app_engine_application" "app" {
-  project     = google_project.my_project.project_id
-  location_id = "us-central"
-}
-
-resource "google_project_service" "project" {
+resource "google_project_service" "gae" {
   project = google_project.my_project.project_id
   service = "appengine.googleapis.com"
 
   disable_dependent_services = false
 }
 
+resource "google_app_engine_application" "app" {
+  project     = google_project_service.gae.project
+  location_id = "us-central"
+}
+
+resource "google_service_account" "custom_service_account" {
+  project      = google_project_service.gae.project
+  account_id   = "tf-test-app-eng-%{random_suffix}"
+  display_name = "Service account for GAE acc test"
+}
+
+resource "google_project_iam_member" "storage_admin" {
+  project = google_project.my_project.project_id
+  role    = "roles/storage.admin"
+  member  = "serviceAccount:${google_service_account.custom_service_account.email}"
+}
+
 resource "google_app_engine_standard_app_version" "foo" {
-  project    = google_project_service.project.project
+  project    = google_project_service.gae.project
   version_id = "v1"
   service    = "default"
   runtime    = "python38"
