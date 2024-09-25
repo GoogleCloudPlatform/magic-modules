@@ -47,13 +47,13 @@ iam_policy:
   allowed_iam_role: 'roles/compute.admin'
   parent_resource_attribute: 'name'
   iam_conditions_request_type: 'QUERY_PARAM'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   min_version: 'beta'
 custom_code:
-  constants: 'templates/terraform/constants/go/region_backend_service.go.tmpl'
-  encoder: 'templates/terraform/encoders/go/region_backend_service.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/region_backend_service.go.tmpl'
-  post_create: 'templates/terraform/post_create/go/compute_region_backend_service_security_policy.go.tmpl'
+  constants: 'templates/terraform/constants/region_backend_service.go.tmpl'
+  encoder: 'templates/terraform/encoders/region_backend_service.go.tmpl'
+  decoder: 'templates/terraform/decoders/region_backend_service.go.tmpl'
+  post_create: 'templates/terraform/post_create/compute_region_backend_service_security_policy.go.tmpl'
 custom_diff:
   - 'customDiffRegionBackendService'
 schema_version: 1
@@ -117,8 +117,8 @@ parameters:
       If it is not provided, the provider region is used.
     required: false
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Region'
     imports: 'name'
 properties:
@@ -203,7 +203,7 @@ properties:
             partial URL.
           required: true
           diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
-          custom_flatten: 'templates/terraform/custom_flatten/go/guard_self_link.go.tmpl'
+          custom_flatten: 'templates/terraform/custom_flatten/guard_self_link.go.tmpl'
         - name: 'maxConnections'
           type: Integer
           description: |
@@ -731,7 +731,7 @@ properties:
       or serverless NEG as a backend.
     is_set: true
     set_hash_func: 'tpgresource.SelfLinkRelativePathHash'
-    custom_flatten: 'templates/terraform/custom_flatten/go/guard_self_link_array.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/guard_self_link_array.go.tmpl'
     item_type:
       type: String
     min_size: 1
@@ -1249,7 +1249,7 @@ properties:
     description: |
       The URL of the network to which this backend service belongs.
       This field can only be specified when the load balancing scheme is set to INTERNAL.
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Network'
     imports: 'selfLink'
   - name: 'subsetting'

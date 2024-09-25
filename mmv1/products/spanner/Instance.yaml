@@ -47,13 +47,13 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  constants: 'templates/terraform/constants/go/spanner_instance.go.tmpl'
-  encoder: 'templates/terraform/encoders/go/spanner_instance.go.tmpl'
-  update_encoder: 'templates/terraform/encoders/go/spanner_instance_update.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/spanner_instance.go.tmpl'
-  post_create: 'templates/terraform/post_create/go/sleep.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/go/spanner_instance.go.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/go/spanner_instance.go.tmpl'
+  constants: 'templates/terraform/constants/spanner_instance.go.tmpl'
+  encoder: 'templates/terraform/encoders/spanner_instance.go.tmpl'
+  update_encoder: 'templates/terraform/encoders/spanner_instance_update.go.tmpl'
+  decoder: 'templates/terraform/decoders/spanner_instance.go.tmpl'
+  post_create: 'templates/terraform/post_create/sleep.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/spanner_instance.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/spanner_instance.go.tmpl'
 examples:
   - name: 'spanner_instance_basic'
     primary_resource_id: 'example'
@@ -93,7 +93,7 @@ properties:
         # system, which is done in the encoder.  Consequently we have
         # to interpret "not set" as "use the name in state".
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
     validation:
       regex: '^[a-z][-a-z0-9]*[a-z0-9]$'
   - name: 'config'
@@ -107,7 +107,7 @@ properties:
       [Configuration section of the docs](https://cloud.google.com/spanner/docs/instances).
     required: true
     immutable: true
-    custom_expand: 'templates/terraform/custom_expand/go/spanner_instance_config.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/spanner_instance_config.go.tmpl'
     resource: 'InstanceConfig'
     imports: 'name'
   - name: 'displayName'

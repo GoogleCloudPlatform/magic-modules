@@ -46,11 +46,11 @@ async:
     message: 'message'
   include_project: true
 custom_code:
-  extra_schema_entry: 'templates/terraform/extra_schema_entry/go/vertex_ai_featurestore_entitytype_feature.go.tmpl'
-  encoder: 'templates/terraform/encoders/go/vertex_ai_featurestore_entitytype_feature.go.tmpl'
-  pre_create: 'templates/terraform/constants/go/vertex_ai_featurestore_entitytype_feature.go.tmpl'
-  pre_delete: 'templates/terraform/constants/go/vertex_ai_featurestore_entitytype_feature.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/vertex_ai_featurestore_entitytype_feature.go.tmpl'
+  extra_schema_entry: 'templates/terraform/extra_schema_entry/vertex_ai_featurestore_entitytype_feature.go.tmpl'
+  encoder: 'templates/terraform/encoders/vertex_ai_featurestore_entitytype_feature.go.tmpl'
+  pre_create: 'templates/terraform/constants/vertex_ai_featurestore_entitytype_feature.go.tmpl'
+  pre_delete: 'templates/terraform/constants/vertex_ai_featurestore_entitytype_feature.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/vertex_ai_featurestore_entitytype_feature.go.tmpl'
 examples:
   - name: 'vertex_ai_featurestore_entitytype_feature'
     primary_resource_id: 'feature'
@@ -84,7 +84,7 @@ properties:
       entity type.
     url_param_only: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'etag'
     type: String
     description: Used to perform consistent read-modify-write updates.

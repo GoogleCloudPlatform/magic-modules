@@ -57,7 +57,7 @@ async:
     message: 'message'
 collection_url_key: 'items'
 custom_code:
-  post_create: 'templates/terraform/post_create/go/labels.tmpl'
+  post_create: 'templates/terraform/post_create/labels.tmpl'
 examples:
   - name: 'address_basic'
     primary_resource_id: 'ip_address'
@@ -98,8 +98,8 @@ parameters:
       If it is not provided, the provider region is used.
     required: false
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Region'
     imports: 'name'
 properties:
@@ -115,7 +115,7 @@ properties:
     description: |
       The type of address to reserve.
       Note: if you set this argument's value as `INTERNAL` you need to leave the `network_tier` argument unset in that resource block.
-    custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
     default_value: "EXTERNAL"
     enum_values:
       - 'INTERNAL'
@@ -180,7 +180,7 @@ properties:
       This field can only be used with INTERNAL type with
       GCE_ENDPOINT/DNS_RESOLVER purposes.
     default_from_api: true
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Subnetwork'
     imports: 'selfLink'
   - name: 'users'
@@ -210,7 +210,7 @@ properties:
       The URL of the network in which to reserve the address. This field
       can only be used with INTERNAL type with the VPC_PEERING and
       IPSEC_INTERCONNECT purposes.
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Network'
     imports: 'selfLink'
   - name: 'prefixLength'

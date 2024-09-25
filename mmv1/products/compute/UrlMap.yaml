@@ -142,7 +142,7 @@ properties:
       - 'default_service'
       - 'default_url_redirect'
       - 'default_route_action.0.weighted_backend_services'
-    custom_expand: 'templates/terraform/custom_expand/go/reference_to_backend.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/reference_to_backend.tmpl'
     resource: 'BackendService'
     imports: 'selfLink'
   - name: 'description'
@@ -309,7 +309,7 @@ properties:
           #   - path_matchers.0.default_service
           #   - path_matchers.0.default_url_redirect
           #   - path_matchers.0.default_route_action.0.weighted_backend_services
-          custom_expand: 'templates/terraform/custom_expand/go/reference_to_backend.tmpl'
+          custom_expand: 'templates/terraform/custom_expand/reference_to_backend.tmpl'
           resource: 'BackendService'
           imports: 'selfLink'
         - name: 'description'
@@ -470,7 +470,7 @@ properties:
               - name: 'service'
                 type: ResourceRef
                 description: The backend service or backend bucket to use if any of the given paths match.
-                custom_expand: 'templates/terraform/custom_expand/go/reference_to_backend.tmpl'
+                custom_expand: 'templates/terraform/custom_expand/reference_to_backend.tmpl'
                 resource: 'BackendService'
                 imports: 'selfLink'
               - name: 'paths'
@@ -684,7 +684,7 @@ properties:
                         description: |
                           The BackendService resource being mirrored to.
                         required: true
-                        custom_expand: 'templates/terraform/custom_expand/go/reference_to_backend.tmpl'
+                        custom_expand: 'templates/terraform/custom_expand/reference_to_backend.tmpl'
                         resource: 'BackendService'
                         imports: 'selfLink'
                   - name: 'retryPolicy'
@@ -799,7 +799,7 @@ properties:
                             forwarding the request to backendService, the loadbalancer applies any relevant
                             headerActions specified as part of this backendServiceWeight.
                           required: true
-                          custom_expand: 'templates/terraform/custom_expand/go/reference_to_backend.tmpl'
+                          custom_expand: 'templates/terraform/custom_expand/reference_to_backend.tmpl'
                           resource: 'BackendService'
                           imports: 'selfLink'
                         - name: 'headerAction'
@@ -993,7 +993,7 @@ properties:
                   contain any weightedBackendService s. Conversely, if routeAction specifies any
                   weightedBackendServices, service must not be specified. Only one of urlRedirect,
                   service or routeAction.weightedBackendService must be set.
-                custom_expand: 'templates/terraform/custom_expand/go/reference_to_backend.tmpl'
+                custom_expand: 'templates/terraform/custom_expand/reference_to_backend.tmpl'
                 resource: 'BackendService'
                 imports: 'selfLink'
               - name: 'headerAction'
@@ -1414,7 +1414,7 @@ properties:
                         description: |
                           The BackendService resource being mirrored to.
                         required: true
-                        custom_expand: 'templates/terraform/custom_expand/go/reference_to_backend.tmpl'
+                        custom_expand: 'templates/terraform/custom_expand/reference_to_backend.tmpl'
                         resource: 'BackendService'
                         imports: 'selfLink'
                   - name: 'retryPolicy'
@@ -1549,7 +1549,7 @@ properties:
                             forwarding the request to backendService, the loadbalancer applies any relevant
                             headerActions specified as part of this backendServiceWeight.
                           required: true
-                          custom_expand: 'templates/terraform/custom_expand/go/reference_to_backend.tmpl'
+                          custom_expand: 'templates/terraform/custom_expand/reference_to_backend.tmpl'
                           resource: 'BackendService'
                           imports: 'selfLink'
                         - name: 'headerAction'
@@ -1803,7 +1803,7 @@ properties:
                       The full or partial URL to the default BackendService resource. Before forwarding the
                       request to backendService, the loadbalancer applies any relevant headerActions
                       specified as part of this backendServiceWeight.
-                    custom_expand: 'templates/terraform/custom_expand/go/reference_to_backend.tmpl'
+                    custom_expand: 'templates/terraform/custom_expand/reference_to_backend.tmpl'
                     resource: 'BackendService'
                     imports: 'selfLink'
                   - name: 'weight'
@@ -1985,7 +1985,7 @@ properties:
                   description: |
                     The full or partial URL to the BackendService resource being mirrored to.
                   required: true
-                  custom_expand: 'templates/terraform/custom_expand/go/reference_to_backend.tmpl'
+                  custom_expand: 'templates/terraform/custom_expand/reference_to_backend.tmpl'
                   resource: 'BackendService'
                   imports: 'selfLink'
             - name: 'corsPolicy'
@@ -2191,7 +2191,7 @@ properties:
           type: ResourceRef
           description: The backend service or backend bucket link that should be matched by this test.
           required: true
-          custom_expand: 'templates/terraform/custom_expand/go/reference_to_backend.tmpl'
+          custom_expand: 'templates/terraform/custom_expand/reference_to_backend.tmpl'
           resource: 'BackendService'
           imports: 'selfLink'
   - name: 'defaultUrlRedirect'
@@ -2311,7 +2311,7 @@ properties:
                 The full or partial URL to the default BackendService resource. Before forwarding the
                 request to backendService, the loadbalancer applies any relevant headerActions
                 specified as part of this backendServiceWeight.
-              custom_expand: 'templates/terraform/custom_expand/go/reference_to_backend.tmpl'
+              custom_expand: 'templates/terraform/custom_expand/reference_to_backend.tmpl'
               resource: 'BackendService'
               imports: 'selfLink'
             - name: 'weight'
@@ -2555,7 +2555,7 @@ properties:
             description: |
               The full or partial URL to the BackendService resource being mirrored to.
             required: true
-            custom_expand: 'templates/terraform/custom_expand/go/reference_to_backend.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/reference_to_backend.tmpl'
             resource: 'BackendService'
             imports: 'selfLink'
       - name: 'corsPolicy'

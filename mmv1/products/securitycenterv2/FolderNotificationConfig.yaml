@@ -38,7 +38,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  post_import: 'templates/terraform/post_import/go/scc_v2_folder_notification_config.go.tmpl'
+  post_import: 'templates/terraform/post_import/scc_v2_folder_notification_config.go.tmpl'
 examples:
   - name: 'scc_v2_folder_notification_config_basic'
     primary_resource_id: 'custom_notification_config'

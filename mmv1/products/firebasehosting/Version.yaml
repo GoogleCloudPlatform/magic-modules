@@ -35,8 +35,8 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  decoder: 'templates/terraform/decoders/go/firebasehosting_version.go.tmpl'
-  post_create: 'templates/terraform/post_create/go/firebasehosting_version_immediate_finalize.tmpl'
+  decoder: 'templates/terraform/decoders/firebasehosting_version.go.tmpl'
+  post_create: 'templates/terraform/post_create/firebasehosting_version_immediate_finalize.tmpl'
 exclude_sweeper: true
 examples:
   - name: 'firebasehosting_version_redirect'

@@ -39,11 +39,11 @@ async:
     path: 'error/errors'
     message: 'message'
 custom_code:
-  constants: 'templates/terraform/constants/go/resource_compute_region_network_firewall_policy_with_rules.go.tmpl'
-  encoder: 'templates/terraform/encoders/go/resource_compute_region_network_firewall_policy_with_rules.go.tmpl'
-  update_encoder: 'templates/terraform/update_encoder/go/resource_compute_region_network_firewall_policy_with_rules.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/resource_compute_region_network_firewall_policy_with_rules.go.tmpl'
-  post_create: 'templates/terraform/post_create/go/resource_compute_region_network_firewall_policy_with_rules.go.tmpl'
+  constants: 'templates/terraform/constants/resource_compute_region_network_firewall_policy_with_rules.go.tmpl'
+  encoder: 'templates/terraform/encoders/resource_compute_region_network_firewall_policy_with_rules.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/resource_compute_region_network_firewall_policy_with_rules.go.tmpl'
+  decoder: 'templates/terraform/decoders/resource_compute_region_network_firewall_policy_with_rules.go.tmpl'
+  post_create: 'templates/terraform/post_create/resource_compute_region_network_firewall_policy_with_rules.go.tmpl'
 legacy_long_form_project: true
 examples:
   - name: 'compute_region_network_firewall_policy_with_rules_full'

@@ -47,9 +47,9 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  constants: 'templates/terraform/constants/go/iam_workload_identity_pool.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/treat_deleted_state_as_gone.go.tmpl'
-  test_check_destroy: 'templates/terraform/custom_check_destroy/go/iam_workload_identity_pool.go.tmpl'
+  constants: 'templates/terraform/constants/iam_workload_identity_pool.go.tmpl'
+  decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/iam_workload_identity_pool.go.tmpl'
 examples:
   - name: 'iam_workload_identity_pool_basic'
     primary_resource_id: 'example'

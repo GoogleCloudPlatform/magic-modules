@@ -44,7 +44,7 @@ iam_policy:
   allowed_iam_role: 'roles/compute.osLogin'
   parent_resource_attribute: 'instance_name'
   iam_conditions_request_type: 'QUERY_PARAM'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
 custom_code:
 examples:
   - name: 'instance_basic'
@@ -57,7 +57,7 @@ parameters:
     type: ResourceRef
     description: 'A reference to the zone where the machine resides.'
     required: true
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Zone'
     imports: 'name'
 properties:
@@ -171,7 +171,7 @@ properties:
                 Reference to a disk type.
                 Specifies the disk type to use to create the instance.
                 If not specified, the default is pd-standard.
-              custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+              custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
               resource: 'DiskType'
               imports: 'selfLink'
             - name: 'sourceImage'
@@ -275,7 +275,7 @@ properties:
             If desired, you can also attach existing non-root
             persistent disks using this property. This field is only
             applicable for persistent disks.
-          custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+          custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
           resource: 'Disk'
           imports: 'selfLink'
         - name: 'type'
@@ -373,7 +373,7 @@ properties:
     update_url: 'projects/{{project}}/zones/{{zone}}/instances/{{name}}/setMachineType'
     update_verb: 'POST'
     # TODO(alexstephen): Add metadata
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'MachineType'
     imports: 'selfLink'
   - name: 'minCpuPlatform'
@@ -431,7 +431,7 @@ properties:
                   from a shared ephemeral IP address pool. If you specify a
                   static external IP address, it must live in the same
                   region as the zone of the instance.
-                custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+                custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
                 resource: 'Address'
                 imports: 'address'
               - name: 'type'
@@ -517,7 +517,7 @@ properties:
             the default network global/networks/default is used; if the network
             is not specified but the subnetwork is specified, the network is
             inferred.
-          custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+          custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
           resource: 'Network'
           imports: 'selfLink'
         - name: 'networkIP'
@@ -537,7 +537,7 @@ properties:
             the network is in custom subnet mode, then this field
             should be specified.
           # networkInterfaces.kind is not necessary for convergence.
-          custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+          custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
           resource: 'Subnetwork'
           imports: 'selfLink'
         - name: 'networkAttachment'

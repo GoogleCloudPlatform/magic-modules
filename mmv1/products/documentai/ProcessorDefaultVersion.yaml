@@ -30,10 +30,10 @@ timeouts:
 identity:
   - processor
 custom_code:
-  pre_create: 'templates/terraform/pre_create/go/document_ai_processor_default_version_interpolate_location.go.tmpl'
-  pre_read: 'templates/terraform/pre_create/go/document_ai_processor_default_version_interpolate_location.go.tmpl'
-  pre_update: 'templates/terraform/pre_create/go/document_ai_processor_default_version_interpolate_location.go.tmpl'
-  pre_delete: 'templates/terraform/pre_create/go/document_ai_processor_default_version_interpolate_location.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/document_ai_processor_default_version_interpolate_location.go.tmpl'
+  pre_read: 'templates/terraform/pre_create/document_ai_processor_default_version_interpolate_location.go.tmpl'
+  pre_update: 'templates/terraform/pre_create/document_ai_processor_default_version_interpolate_location.go.tmpl'
+  pre_delete: 'templates/terraform/pre_create/document_ai_processor_default_version_interpolate_location.go.tmpl'
 examples:
   - name: 'documentai_default_version'
     primary_resource_id: 'processor'

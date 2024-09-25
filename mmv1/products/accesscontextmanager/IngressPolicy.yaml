@@ -56,7 +56,7 @@ nested_query:
   is_list_of_ids: true
   modify_by_patch: true
 custom_code:
-  custom_import: 'templates/terraform/custom_import/go/access_context_manager_service_perimeter_ingress_policy.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/access_context_manager_service_perimeter_ingress_policy.go.tmpl'
 exclude_tgc: true
 # Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter/IngressPolicy
 exclude_sweeper: true

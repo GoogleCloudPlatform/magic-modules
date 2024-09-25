@@ -41,7 +41,7 @@ async:
   target_occurrences: 20
   actions: ['create', 'update', 'delete']
 custom_code:
-  custom_import: 'templates/terraform/custom_import/go/self_link_as_name.tmpl'
+  custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
 error_retry_predicates:
 
   - 'transport_tpg.IsMonitoringConcurrentEditError'
@@ -98,7 +98,7 @@ properties:
         - name: 'valueType'
           type: Enum
           description: The type of data that can be assigned to the label.
-          custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
+          custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
           default_value: "STRING"
           enum_values:
             - 'STRING'

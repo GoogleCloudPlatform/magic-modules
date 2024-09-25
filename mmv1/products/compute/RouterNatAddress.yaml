@@ -62,11 +62,11 @@ nested_query:
   modify_by_patch: true
 # ToDo: We use a custom code for CREATE since the generated code is erroneously not replacing the generated encoder with the custom one provided
 custom_code:
-  constants: 'templates/terraform/constants/go/router_nat_address.go.tmpl'
-  encoder: 'templates/terraform/encoders/go/router_nat_address_patch_on_create.go.tmpl'
-  update_encoder: 'templates/terraform/encoders/go/router_nat_address_update_skip_encoder.go.tmpl'
-  custom_create: 'templates/terraform/custom_create/go/router_nat_address_nested_query_create_encoder.go.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/go/compute_router_nat_address_delete_nat_ips_only.go.tmpl'
+  constants: 'templates/terraform/constants/router_nat_address.go.tmpl'
+  encoder: 'templates/terraform/encoders/router_nat_address_patch_on_create.go.tmpl'
+  update_encoder: 'templates/terraform/encoders/router_nat_address_update_skip_encoder.go.tmpl'
+  custom_create: 'templates/terraform/custom_create/router_nat_address_nested_query_create_encoder.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/compute_router_nat_address_delete_nat_ips_only.go.tmpl'
 custom_diff:
   - 'resourceComputeRouterNatAddressDrainNatIpsCustomDiff'
 exclude_tgc: true
@@ -106,7 +106,7 @@ parameters:
     required: false
     immutable: true
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
     resource: 'Region'
     imports: 'name'
 properties:
@@ -119,7 +119,7 @@ properties:
     required: true
     send_empty_value: true
     set_hash_func: computeRouterNatIPsHash
-    custom_expand: 'templates/terraform/custom_expand/go/array_resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
     item_type:
       name: 'address'
       type: ResourceRef
@@ -133,7 +133,7 @@ properties:
       valid static external IPs that have been assigned to the NAT.
     is_set: true
     send_empty_value: true
-    custom_expand: 'templates/terraform/custom_expand/go/array_resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
     item_type:
       name: 'address'
       type: ResourceRef

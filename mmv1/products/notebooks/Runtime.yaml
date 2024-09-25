@@ -56,13 +56,13 @@ iam_policy:
   parent_resource_attribute: 'runtime_name'
   # Sets the base url for base_url:GetIamPolicy and base_url:SetIamPolicy in function `qualifyRuntimeUrl`
   base_url: 'projects/{{project}}/locations/{{location}}/runtimes/{{runtime_name}}'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/runtimes/{{runtime_name}}'
     - '{{runtime_name}}'
 custom_code:
-  constants: 'templates/terraform/constants/go/notebooks_runtime.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/go/notebooks_runtime.go.tmpl'
+  constants: 'templates/terraform/constants/notebooks_runtime.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/notebooks_runtime.go.tmpl'
 examples:
   - name: 'notebook_runtime_basic'
     primary_resource_id: 'runtime'

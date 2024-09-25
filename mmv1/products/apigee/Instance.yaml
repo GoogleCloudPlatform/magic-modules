@@ -49,8 +49,8 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  constants: 'templates/terraform/constants/go/apigee_instance.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/apigee_instance.go.tmpl'
+  constants: 'templates/terraform/constants/apigee_instance.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/apigee_instance.go.tmpl'
 error_retry_predicates:
 
   - 'transport_tpg.IsApigeeRetryableError'

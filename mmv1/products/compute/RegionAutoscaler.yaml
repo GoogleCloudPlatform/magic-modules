@@ -65,7 +65,7 @@ parameters:
     immutable: true
     ignore_read: true
     default_from_api: true
-    custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Region'
     imports: 'name'
 properties:
@@ -247,7 +247,7 @@ properties:
               - NONE (default). No predictive method is used. The autoscaler scales the group to meet current demand based on real-time metrics.
 
               - OPTIMIZE_AVAILABILITY. Predictive autoscaling improves availability by monitoring daily and weekly load patterns and scaling out ahead of anticipated demand.
-            custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
             default_value: "NONE"
       - name: 'metric'
         type: Array

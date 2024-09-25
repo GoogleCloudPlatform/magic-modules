@@ -53,13 +53,13 @@ async:
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'cloud_function'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/functions/{{cloud_function}}'
     - '{{cloud_function}}'
 custom_code:
-  constants: 'templates/terraform/constants/go/cloudfunctions2_function.go.tmpl'
-  encoder: 'templates/terraform/encoders/go/cloudfunctions2_runtime_update_policy.go.tmpl'
+  constants: 'templates/terraform/constants/cloudfunctions2_function.go.tmpl'
+  encoder: 'templates/terraform/encoders/cloudfunctions2_runtime_update_policy.go.tmpl'
 taint_resource_on_failed_create: true
 examples:
   - name: 'cloudfunctions2_basic'
@@ -309,8 +309,8 @@ properties:
       be unique globally and match pattern `projects/*/locations/*/functions/*`.
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/shortname_to_url.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.tmpl'
   - name: 'description'
     type: String
     description: 'User-provided description of a function.'
@@ -378,19 +378,19 @@ properties:
               - name: 'bucket'
                 type: String
                 description: 'Google Cloud Storage bucket containing the source'
-                custom_flatten: 'templates/terraform/custom_flatten/go/cloudfunctions2_function_source_bucket.go.tmpl'
+                custom_flatten: 'templates/terraform/custom_flatten/cloudfunctions2_function_source_bucket.go.tmpl'
               - name: 'object'
                 type: String
                 description:
                   'Google Cloud Storage object containing the source.'
-                custom_flatten: 'templates/terraform/custom_flatten/go/cloudfunctions2_function_source_object.go.tmpl'
+                custom_flatten: 'templates/terraform/custom_flatten/cloudfunctions2_function_source_object.go.tmpl'
               - name: 'generation'
                 type: Integer
                 description: |
                   Google Cloud Storage generation for the object. If the generation
                   is omitted, the latest generation will be used.
                 default_from_api: true
-                custom_flatten: 'templates/terraform/custom_flatten/go/cloudfunctions2_function_source_generation.go.tmpl'
+                custom_flatten: 'templates/terraform/custom_flatten/cloudfunctions2_function_source_generation.go.tmpl'
           - name: 'repoSource'
             type: NestedObject
             description:

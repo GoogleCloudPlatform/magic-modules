@@ -44,10 +44,10 @@ async:
     message: 'message'
 collection_url_key: 'items'
 custom_code:
-  encoder: 'templates/terraform/encoders/go/compute_network.go.tmpl'
-  update_encoder: 'templates/terraform/update_encoder/go/compute_network.go.tmpl'
-  decoder: 'templates/terraform/decoders/go/compute_network.go.tmpl'
-  post_create: 'templates/terraform/post_create/go/compute_network_delete_default_route.tmpl'
+  encoder: 'templates/terraform/encoders/compute_network.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/compute_network.go.tmpl'
+  decoder: 'templates/terraform/decoders/compute_network.go.tmpl'
+  post_create: 'templates/terraform/post_create/compute_network_delete_default_route.tmpl'
 examples:
   - name: 'network_basic'
     primary_resource_id: 'vpc_network'

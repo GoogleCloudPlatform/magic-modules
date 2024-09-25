@@ -44,8 +44,8 @@ async:
   target_occurrences: 1
   actions: ['create']
 custom_code:
-  constants: 'templates/terraform/constants/go/bigquery_job.go.tmpl'
-  encoder: 'templates/terraform/encoders/go/bigquery_job.go.tmpl'
+  constants: 'templates/terraform/constants/bigquery_job.go.tmpl'
+  encoder: 'templates/terraform/encoders/bigquery_job.go.tmpl'
 schema_version: 1
 state_upgraders: true
 examples:
@@ -199,8 +199,8 @@ properties:
               This property must be set for large results that exceed the maximum response size.
               For queries that produce anonymous (cached) results, this field will be populated by BigQuery.
             default_from_api: true
-            custom_flatten: 'templates/terraform/custom_flatten/go/bigquery_table_ref_query_destinationtable.go.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/go/bigquery_table_ref.go.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/bigquery_table_ref_query_destinationtable.go.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/bigquery_table_ref.go.tmpl'
             properties:
               - name: 'projectId'
                 type: String
@@ -267,8 +267,8 @@ properties:
             type: NestedObject
             description: |
               Specifies the default dataset to use for unqualified table names in the query. Note that this does not alter behavior of unqualified dataset names.
-            custom_flatten: 'templates/terraform/custom_flatten/go/bigquery_dataset_ref.go.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/go/bigquery_dataset_ref.go.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/bigquery_dataset_ref.go.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/bigquery_dataset_ref.go.tmpl'
             properties:
               - name: 'datasetId'
                 type: String
@@ -344,7 +344,7 @@ properties:
             type: NestedObject
             description: |
               Custom encryption configuration (e.g., Cloud KMS keys)
-            custom_flatten: 'templates/terraform/custom_flatten/go/bigquery_kms_version.go.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/bigquery_kms_version.go.tmpl'
             properties:
               - name: 'kmsKeyName'
                 type: String
@@ -416,8 +416,8 @@ properties:
             description: |
               The destination table to load the data into.
             required: true
-            custom_flatten: 'templates/terraform/custom_flatten/go/bigquery_table_ref_load_destinationtable.go.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/go/bigquery_table_ref.go.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/bigquery_table_ref_load_destinationtable.go.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/bigquery_table_ref.go.tmpl'
             properties:
               - name: 'projectId'
                 type: String
@@ -598,7 +598,7 @@ properties:
             type: NestedObject
             description: |
               Custom encryption configuration (e.g., Cloud KMS keys)
-            custom_flatten: 'templates/terraform/custom_flatten/go/bigquery_kms_version.go.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/bigquery_kms_version.go.tmpl'
             properties:
               - name: 'kmsKeyName'
                 type: String
@@ -641,8 +641,8 @@ properties:
             description: |
               Source tables to copy.
             required: true
-            custom_flatten: 'templates/terraform/custom_flatten/go/bigquery_table_ref_copy_sourcetables.go.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/go/bigquery_table_ref_array.go.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/bigquery_table_ref_copy_sourcetables.go.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/bigquery_table_ref_array.go.tmpl'
             item_type:
               type: NestedObject
               properties:
@@ -666,8 +666,8 @@ properties:
           - name: 'destinationTable'
             type: NestedObject
             description: 'The destination table.'
-            custom_flatten: 'templates/terraform/custom_flatten/go/bigquery_table_ref_copy_destinationtable.go.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/go/bigquery_table_ref.go.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/bigquery_table_ref_copy_destinationtable.go.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/bigquery_table_ref.go.tmpl'
             properties:
               - name: 'projectId'
                 type: String
@@ -715,7 +715,7 @@ properties:
             type: NestedObject
             description: |
               Custom encryption configuration (e.g., Cloud KMS keys)
-            custom_flatten: 'templates/terraform/custom_flatten/go/bigquery_kms_version.go.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/bigquery_kms_version.go.tmpl'
             properties:
               - name: 'kmsKeyName'
                 type: String
@@ -779,8 +779,8 @@ properties:
             exactly_one_of:
               - 'configuration.0.extract.0.source_table'
               - 'configuration.0.extract.0.source_model'
-            custom_flatten: 'templates/terraform/custom_flatten/go/bigquery_table_ref_extract_sourcetable.go.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/go/bigquery_table_ref.go.tmpl'
+            custom_flatten: 'templates/terraform/custom_flatten/bigquery_table_ref_extract_sourcetable.go.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/bigquery_table_ref.go.tmpl'
             properties:
               - name: 'projectId'
                 type: String

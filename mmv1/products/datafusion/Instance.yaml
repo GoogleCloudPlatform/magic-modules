@@ -44,13 +44,13 @@ async:
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
     - '{{name}}'
 custom_code:
-  constants: 'templates/terraform/constants/go/data_fusion_instance_option.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/go/datafusion_instance_update.go.tmpl'
+  constants: 'templates/terraform/constants/data_fusion_instance_option.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/datafusion_instance_update.go.tmpl'
 examples:
   - name: 'data_fusion_instance_basic'
     primary_resource_id: 'basic_instance'
@@ -119,8 +119,8 @@ properties:
       The ID of the instance or a fully qualified identifier for the instance.
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/go/shortname_to_url.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.tmpl'
   - name: 'description'
     type: String
     description: |

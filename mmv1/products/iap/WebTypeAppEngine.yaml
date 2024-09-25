@@ -36,8 +36,8 @@ iam_policy:
   parent_resource_attribute: 'app_id'
   test_project_name: 'tf-test'
   iam_conditions_request_type: 'REQUEST_BODY'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
-  custom_diff_suppress: 'templates/terraform/iam/go/iap_web_appengine_diff_suppress.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  custom_diff_suppress: 'templates/terraform/iam/iap_web_appengine_diff_suppress.go.tmpl'
 custom_code:
 exclude_tgc: true
 examples:

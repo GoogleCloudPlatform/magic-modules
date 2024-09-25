@@ -52,9 +52,9 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  constants: 'templates/terraform/constants/go/clouddomains_registration.go.tmpl'
-  encoder: 'templates/terraform/encoders/go/clouddomains_registration.go.tmpl'
-  post_create: 'templates/terraform/post_create/go/clouddomains_registration.go.tmpl'
+  constants: 'templates/terraform/constants/clouddomains_registration.go.tmpl'
+  encoder: 'templates/terraform/encoders/clouddomains_registration.go.tmpl'
+  post_create: 'templates/terraform/post_create/clouddomains_registration.go.tmpl'
 examples:
   - name: 'clouddomains_registration_full'
     primary_resource_id: 'my_registration'
@@ -257,7 +257,7 @@ properties:
           avoid domain suspension.
         required: true
         # ignore read on phone and fax numbers. Need to use custom flatten because ignore_read doesn't work with nested fields
-        custom_flatten: 'templates/terraform/custom_flatten/go/clouddomains_ignore_numbers_registrant.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/clouddomains_ignore_numbers_registrant.go.tmpl'
         properties:
           - name: 'email'
             type: String
@@ -330,7 +330,7 @@ properties:
           avoid domain suspension.
         required: true
         # ignore read on phone and fax numbers. Need to use custom flatten because ignore_read doesn't work with nested fields
-        custom_flatten: 'templates/terraform/custom_flatten/go/clouddomains_ignore_numbers_admin.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/clouddomains_ignore_numbers_admin.go.tmpl'
         properties:
           - name: 'email'
             type: String
@@ -403,7 +403,7 @@ properties:
           avoid domain suspension.
         required: true
         # ignore read on phone and fax numbers. Need to use custom flatten because ignore_read doesn't work with nested fields
-        custom_flatten: 'templates/terraform/custom_flatten/go/clouddomains_ignore_numbers_technical.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/clouddomains_ignore_numbers_technical.go.tmpl'
         properties:
           - name: 'email'
             type: String

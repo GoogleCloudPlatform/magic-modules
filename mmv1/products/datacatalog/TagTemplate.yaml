@@ -37,15 +37,15 @@ iam_policy:
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'tag_template'
   base_url: 'projects/{{project}}/locations/{{region}}/tagTemplates/{{tag_template}}'
-  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{region}}/tagTemplates/{{tag_template}}'
     - '{{tag_template}}'
 custom_code:
-  constants: 'templates/terraform/constants/go/tagtemplate_fields.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/go/tagtemplate_fields.go.tmpl'
-  post_update: 'templates/terraform/post_update/go/tagtemplate_fields.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/go/data_catalog_tag_template.go.tmpl'
+  constants: 'templates/terraform/constants/tagtemplate_fields.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/tagtemplate_fields.go.tmpl'
+  post_update: 'templates/terraform/post_update/tagtemplate_fields.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/data_catalog_tag_template.go.tmpl'
 exclude_sweeper: true
 examples:
   - name: 'data_catalog_tag_template_basic'

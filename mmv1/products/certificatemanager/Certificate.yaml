@@ -43,7 +43,7 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  constants: 'templates/terraform/constants/go/cert_manager.tmpl'
+  constants: 'templates/terraform/constants/cert_manager.tmpl'
 schema_version: 1
 state_upgraders: true
 examples:
