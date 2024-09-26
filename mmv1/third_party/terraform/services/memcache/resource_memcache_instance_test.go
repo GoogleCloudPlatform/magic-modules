@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccMemcacheInstance_update(t *testing.T) {
@@ -96,4 +97,58 @@ data "google_compute_network" "memcache_network" {
   name = "%s"
 }
 `, name, network)
+}
+
+func TestAccMemcacheInstance_tags(t *testing.T) {
+	t.Parallel()
+
+        org := envvar.GetTestOrgFromEnv(t)
+        prefix := fmt.Sprintf("%d", acctest.RandInt(t))
+	name := fmt.Sprintf("tf-test-%s", prefix)
+	tagKey := acctest.BootstrapSharedTestTagKey(t, "memcache-instances-tagkey")
+	tagValue := acctest.BootstrapSharedTestTagValue(t, "memcache-instances-tagvalue", tagKey)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckMemcacheInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccMemcacheInstanceTags(prefix, name, map[string]string{org + "/" + tagKey: tagValue}),
+			},
+			{
+				ResourceName:            "google_memcache_instance.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"tags"},
+			},
+		},
+	})
+}
+
+func testAccMemcacheInstanceTags(prefix string, name string, tags map[string]string) string {
+
+	r := fmt.Sprintf(`
+  provider "google" {
+  project                 = "kshitij-memcached-test"
+  user_project_override   = true
+}
+	
+  resource "google_memcache_instance" "test" {
+  name = "%s"
+  region = "us-central1"
+  node_config {
+    cpu_count      = 1
+    memory_size_mb = 1024
+  }
+  node_count = 1
+	 tags = {`, name)
+
+	l := ""
+	for key, value := range tags {
+		l += fmt.Sprintf("%q = %q\n", key, value)
+	}
+
+	l += fmt.Sprintf("}\n}")
+	return r + l
 }
