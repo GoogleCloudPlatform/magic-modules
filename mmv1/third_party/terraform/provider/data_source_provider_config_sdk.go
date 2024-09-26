@@ -15,6 +15,11 @@ func DataSourceGoogleProviderConfigSdk() *schema.Resource {
 		Read:               dataSourceClientConfigRead,
 		Schema: map[string]*schema.Schema{
 			// Start of user inputs
+			"foobar": {
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
+			},
 			"access_token": {
 				Type:      schema.TypeString,
 				Computed:  true,
