@@ -16,8 +16,8 @@ legacy_long_form_project: true
 base_url: projects/{{project}}/locations/global/hubs/{{hub}}/groups
 create_url: projects/{{project}}/locations/global/hubs/{{hub}}/groups/{{name}}?updateMask=autoAccept.autoAcceptProjects
 self_link: projects/{{project}}/locations/global/hubs/{{hub}}/groups/{{name}}
-create_verb: :PATCH
-update_verb: :PATCH
+create_verb: 'PATCH'
+update_verb: 'PATCH'
 update_mask: true
 references:
   guides:
