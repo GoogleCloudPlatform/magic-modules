@@ -233,7 +233,7 @@ properties:
                   specified by the delimiter will be set to the 'data' field of a Pub/Sub
                   message. When unset, '\n' is used.
                 required: false
-                default_value: "\n"
+                default_value: "\\n"
           - name: 'avroFormat'
             type: NestedObject
             description: |
