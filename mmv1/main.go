@@ -30,7 +30,7 @@ var outputPath = flag.String("output", "", "path to output generated files to")
 // Example usage: --version beta
 var version = flag.String("version", "", "optional version name. If specified, this version is preferred for resource generation when applicable")
 
-var overrideDirectory = flag.String("override", "", "directory containing yaml overrides")
+var overrideDirectory = flag.String("overrides", "", "directory containing yaml overrides")
 
 var product = flag.String("product", "", "optional product name. If specified, the resources under the specific product will be generated. Otherwise, resources under all products will be generated.")
 
