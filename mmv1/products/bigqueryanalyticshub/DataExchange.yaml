@@ -83,7 +83,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: displayName
     description: |-
-      djpj terraform
+      Human-readable display name of the data exchange. The display name must contain only Unicode letters, numbers (0-9), underscores (_), dashes (-), spaces ( ), and must not start or end with spaces.
     required: true
   - !ruby/object:Api::Type::String
     name: description

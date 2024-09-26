@@ -18,7 +18,6 @@ import (
 
 // Fields that should be ignored in import tests because they aren't returned
 // from GCP (and thus can't be imported)
-// TODO remove cascdable_replica
 var ignoredReplicaConfigurationFields = []string{
 	"deletion_protection",
 	"root_password",
@@ -1262,12 +1261,14 @@ func testAccSqlDatabaseInstanceDestroyProducer(t *testing.T) func(s *terraform.S
 			if rs.Type != "google_sql_database_instance" {
 				continue
 			}
+
 			_, err := config.NewSqlAdminClient(config.UserAgent).Instances.Get(config.Project,
 				rs.Primary.Attributes["name"]).Do()
 			if err == nil {
 				return fmt.Errorf("Database Instance still exists")
 			}
 		}
+
 		return nil
 	}
 }
