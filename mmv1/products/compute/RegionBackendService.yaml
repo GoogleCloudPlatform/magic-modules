@@ -96,6 +96,12 @@ examples:
     vars:
       region_backend_service_name: 'region-service'
       health_check_name: 'rbs-health-check'
+  - name: 'region_backend_service_ilb_stateful_session_affinity'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      region_backend_service_name: 'region-service'
+      health_check_name: 'rbs-health-check'
   - name: 'region_backend_service_balancing_mode'
     primary_resource_id: 'default'
     vars:
@@ -1151,6 +1157,50 @@ properties:
       - 'HEADER_FIELD'
       - 'HTTP_COOKIE'
       - 'CLIENT_IP_NO_DESTINATION'
+      - 'STRONG_COOKIE_AFFINITY'
+  - name: 'strongSessionAffinityCookie'
+    type: NestedObject
+    description: |
+      Describes the HTTP cookie used for stateful session affinity. This field is applicable and required if the sessionAffinity is set to STRONG_COOKIE_AFFINITY.
+    properties:
+      - name: 'ttl'
+        type: NestedObject
+        description: |
+          Lifetime of the cookie.
+        at_least_one_of:
+          - 'http_cookie.0.ttl'
+          - 'http_cookie.0.name'
+          - 'http_cookie.0.path'
+        properties:
+          - name: 'seconds'
+            type: Integer
+            description: |
+              Span of time at a resolution of a second.
+              Must be from 0 to 315,576,000,000 inclusive.
+            required: true
+          - name: 'nanos'
+            type: Integer
+            description: |
+              Span of time that's a fraction of a second at nanosecond
+              resolution. Durations less than one second are represented
+              with a 0 seconds field and a positive nanos field. Must
+              be from 0 to 999,999,999 inclusive.
+      - name: 'name'
+        type: String
+        description: |
+          Name of the cookie.
+        at_least_one_of:
+          - 'http_cookie.0.ttl'
+          - 'http_cookie.0.name'
+          - 'http_cookie.0.path'
+      - name: 'path'
+        type: String
+        description: |
+          Path to set for the cookie.
+        at_least_one_of:
+          - 'http_cookie.0.ttl'
+          - 'http_cookie.0.name'
+          - 'http_cookie.0.path'
   - name: 'connectionTrackingPolicy'
     type: NestedObject
     description: |
