@@ -5253,6 +5253,124 @@ resource "google_container_cluster" "with_security_posture_config" {
 `, resource_name, networkName, subnetworkName)
 }
 
+func TestAccContainerCluster_WithCPAFeatures(t *testing.T) {
+	t.Parallel()
+
+	suffix := acctest.RandString(t, 10)
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", suffix)
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
+
+	// Bootstrap KMS keys and needed IAM role.
+	diskKey := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
+	signingKey := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
+	verificationKey := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
+	backupKey := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
+	// TODO(hanchiz): Use roles/container.cloudKmsKeyUser instead of roles/cloudkms.admin eventually.
+	if acctest.BootstrapPSARoles(t, "service-", "container-engine-robot", []string{"roles/cloudkms.admin", "roles/privateca.certificateManager"}) {
+		t.Fatal("Stopping the test because a role was added to the policy.")
+	}
+
+	context := map[string]interface{}{
+		"resource_name":      clusterName,
+		"networkName":        networkName,
+		"subnetworkName":     subnetworkName,
+		"disk_key":           diskKey.CryptoKey.Name,
+		"backup_key":         backupKey.CryptoKey.Name,
+		"signing_key":        signingKey.CryptoKey.Primary.Name,
+		"verification_key":   verificationKey.CryptoKey.Primary.Name,
+		"random_suffix":      suffix,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// We are only supporting CPA features on create for now.
+				Config: testAccContainerCluster_EnableCPAFeatures(context),
+			},
+			{
+				ResourceName:      "google_container_cluster.with_cpa_features",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func testAccContainerCluster_EnableCPAFeatures(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_privateca_ca_pool" "cluster_ca" {
+  name = "tf-test-cluster-ca-%{random_suffix}"
+  location = "us-central1"
+  tier = "ENTERPRISE"
+  publishing_options {
+    publish_ca_cert = true
+  }
+}
+
+resource "google_privateca_ca_pool" "etcd_api_ca" {
+  name = "tf-test-etcd-api-ca-%{random_suffix}"
+  location = "us-central1"
+  tier = "ENTERPRISE"
+  publishing_options {
+    publish_ca_cert = true
+  }
+}
+
+resource "google_privateca_ca_pool" "etcd_peer_ca" {
+  name = "tf-test-etcd-peer-%{random_suffix}"
+  location = "us-central1"
+  tier = "ENTERPRISE"
+  publishing_options {
+    publish_ca_cert = true
+  }
+}
+
+resource "google_privateca_ca_pool" "aggregation_ca" {
+  name = "tf-test-aggregation-ca-%{random_suffix}"
+  location = "us-central1"
+  tier = "ENTERPRISE"
+  publishing_options {
+    publish_ca_cert = true
+  }
+}
+
+resource "google_container_cluster" "with_cpa_features" {
+  name               = "%{resource_name}"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  user_managed_keys_config {
+		cluster_ca = google_privateca_ca_pool.cluster_ca.id
+		etcd_api_ca = google_privateca_ca_pool.etcd_api_ca.id
+		etcd_peer_ca = google_privateca_ca_pool.etcd_peer_ca.id
+		aggregation_ca = google_privateca_ca_pool.aggregation_ca.id
+		control_plane_disk_encryption_key = "%{disk_key}"
+		gkeops_etcd_backup_encryption_key = "%{backup_key}"
+		service_account_signing_keys = [
+			"%{signing_key}",
+		]
+		service_account_verification_keys = [
+			"%{signing_key}",
+			"%{verification_key}",
+		]
+  }
+  deletion_protection = false
+  network    = "%{networkName}"
+  subnetwork    = "%{subnetworkName}"
+	depends_on = [
+		google_privateca_ca_pool.cluster_ca,
+		google_privateca_ca_pool.etcd_api_ca,
+		google_privateca_ca_pool.etcd_peer_ca,
+		google_privateca_ca_pool.aggregation_ca,
+	]
+}
+`, context)
+}
+
 func TestAccContainerCluster_autopilot_minimal(t *testing.T) {
 	t.Parallel()
 
