@@ -1,5 +1,5 @@
-# Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -11,73 +11,80 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
-name: LogView
-base_url: '{{parent}}/locations/{{location}}/buckets/{{bucket}}/views'
-create_url: '{{parent}}/locations/{{location}}/buckets/{{bucket}}/views?viewId={{name}}'
-self_link: '{{parent}}/locations/{{location}}/buckets/{{bucket}}/views/{{name}}'
-import_format:
-  ['{{%parent}}/locations/{{location}}/buckets/{{bucket}}/views/{{name}}']
-update_verb: :PATCH
-update_mask: true
-references: !ruby/object:Api::Resource::ReferenceLinks
+---
+name: 'LogView'
+description: 'Describes a view over log entries in a bucket.'
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/logging/docs/apis'
   api: 'https://cloud.google.com/logging/docs/reference/v2/rest/v2/projects.locations.buckets.views'
-# Skipping sweeper since this is a child resource.
-skip_sweeper: true
-description: 'Describes a view over log entries in a bucket.'
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  skip_import_test: true
-  parent_resource_attribute: 'name'
-  import_format: ['{{%parent}}/locations/{{location}}/buckets/{{bucket}}/views/{{name}}', '{{name}}']
-  allowed_iam_role: 'roles/logging.admin'
+docs:
+base_url: '{{parent}}/locations/{{location}}/buckets/{{bucket}}/views'
+self_link: '{{parent}}/locations/{{location}}/buckets/{{bucket}}/views/{{name}}'
+create_url: '{{parent}}/locations/{{location}}/buckets/{{bucket}}/views?viewId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - '{{%parent}}/locations/{{location}}/buckets/{{bucket}}/views/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+iam_policy:
+  exclude_import_test: true
   method_name_separator: ':'
-  fetch_iam_policy_verb: :POST
-  iam_conditions_request_type: :REQUEST_BODY
+  fetch_iam_policy_verb: 'POST'
+  allowed_iam_role: 'roles/logging.admin'
+  parent_resource_attribute: 'name'
+  iam_conditions_request_type: 'REQUEST_BODY'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  import_format:
+    - '{{%parent}}/locations/{{location}}/buckets/{{bucket}}/views/{{name}}'
+    - '{{name}}'
+custom_code:
+  encoder: 'templates/terraform/encoders/logging_log_view.go.tmpl'
+  pre_read: 'templates/terraform/pre_read/logging_log_view.go.tmpl'
+# Skipping sweeper since this is a child resource.
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'logging_log_view_basic'
+  - name: 'logging_log_view_basic'
     primary_resource_id: 'logging_log_view'
     vars:
       log_view_name: 'my-view'
     test_env_vars:
-      project: :PROJECT_NAME
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'logging_log_view_long_name'
+      project: 'PROJECT_NAME'
+  - name: 'logging_log_view_long_name'
     primary_resource_id: 'logging_log_view'
     test_env_vars:
-      project: :PROJECT_NAME
-    skip_docs: true
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  encoder: templates/terraform/encoders/logging_log_view.go.erb
-  pre_read: templates/terraform/pre_read/logging_log_view.go.erb
+      project: 'PROJECT_NAME'
+    exclude_docs: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: parent
+  - name: 'parent'
+    type: String
     description: The parent of the resource.
     url_param_only: true
     immutable: true
     default_from_api: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-  - !ruby/object:Api::Type::String
-    name: location
+  - name: 'location'
+    type: String
     description:
       'The location of the resource. The supported locations are: global,
       us-central1, us-east1, us-west1, asia-east1, europe-west1.'
     url_param_only: true
     immutable: true
     default_from_api: true
-  - !ruby/object:Api::Type::String  # Make this a String for now since we don't have a good way to reference multiple resources.
-    name: bucket
+ # Make this a String for now since we don't have a good way to reference multiple resources.
+  - name: 'bucket'
+    type: String
     description: The bucket of the resource
     url_param_only: true
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareResourceNames'
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description:
       'The resource name of the view. For example:
       \`projects/my-project/locations/global/buckets/my-bucket/views/my-view\`'
@@ -85,19 +92,19 @@ properties:
     immutable: true
     ignore_read: true
     diff_suppress_func: 'tpgresource.CompareResourceNames'
-  - !ruby/object:Api::Type::String
-    name: description
+  - name: 'description'
+    type: String
     description: Describes this view.
-  - !ruby/object:Api::Type::String
-    name: createTime
+  - name: 'createTime'
+    type: String
     description: Output only. The creation timestamp of the view.
     output: true
-  - !ruby/object:Api::Type::String
-    name: updateTime
+  - name: 'updateTime'
+    type: String
     description: Output only. The last update timestamp of the view.
     output: true
-  - !ruby/object:Api::Type::String
-    name: filter
+  - name: 'filter'
+    type: String
     description:
       'Filter that restricts which log entries in a bucket are visible in this
       view. Filters are restricted to be a logical AND of ==/!= of any of

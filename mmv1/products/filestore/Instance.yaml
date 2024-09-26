@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,265 +11,286 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Instance'
-create_url: projects/{{project}}/locations/{{location}}/instances?instanceId={{name}}
-self_link: projects/{{project}}/locations/{{location}}/instances/{{name}}
-base_url: projects/{{project}}/locations/{{location}}/instances
-update_verb: :PATCH
-update_mask: true
 description: |
   A Google Cloud Filestore instance.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/filestore/docs/creating-instances'
     'Use with Kubernetes': 'https://cloud.google.com/filestore/docs/accessing-fileshares'
     'Copying Data In/Out': 'https://cloud.google.com/filestore/docs/copying-data'
   api: 'https://cloud.google.com/filestore/docs/reference/rest/v1beta1/projects.locations.instances/create'
-error_abort_predicates: ['transport_tpg.Is429QuotaError']
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/instances'
+self_link: 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/instances?instanceId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
 autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+  pre_create: 'templates/terraform/pre_create/filestore_instance.go.tmpl'
+error_abort_predicates:
+
+  - 'transport_tpg.Is429QuotaError'
 schema_version: 1
 state_upgraders: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'filestore_instance_basic'
+  - name: 'filestore_instance_basic'
     primary_resource_id: 'instance'
     vars:
       instance_name: 'test-instance'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'filestore_instance_full'
+  - name: 'filestore_instance_full'
     primary_resource_id: 'instance'
     vars:
       instance_name: 'test-instance'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'filestore_instance_protocol'
+  - name: 'filestore_instance_protocol'
     primary_resource_id: 'instance'
-    min_version: beta
+    min_version: 'beta'
     vars:
       instance_name: 'test-instance'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'filestore_instance_enterprise'
+  - name: 'filestore_instance_enterprise'
     primary_resource_id: 'instance'
+    vars:
+      instance_name: 'test-instance'
     # https://github.com/GoogleCloudPlatform/magic-modules/pull/5875#discussion_r844285335
-    skip_test: true
-    vars:
-      instance_name: 'test-instance'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  pre_create: templates/terraform/pre_create/filestore_instance.go.erb
+    exclude_test: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'zone'
+  - name: 'zone'
+    type: String
     description: |
       The name of the Filestore zone of the instance.
-    deprecation_message: '`zone` is deprecated and will be removed in a future major release. Use `location` instead.'
+    url_param_only: true
+    immutable: true
+    ignore_read: true
+    default_from_api: true
     exactly_one_of:
       - 'zone'
       - 'location'
-    immutable: true
-    url_param_only: true
-    ignore_read: true
-    default_from_api: true
-  - !ruby/object:Api::Type::String
-    name: 'location'
+    deprecation_message: '`zone` is deprecated and will be removed in a future major release. Use `location` instead.'
+  - name: 'location'
+    type: String
     description: |
       The name of the location of the instance. This can be a region for ENTERPRISE tier instances.
-    exactly_one_of:
-      - zone
-      - location
-    immutable: true
     url_param_only: true
+    immutable: true
     ignore_read: true
     default_from_api: true
+    exactly_one_of:
+      - 'zone'
+      - 'location'
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       The resource name of the instance.
-    required: true
     url_param_only: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-  - !ruby/object:Api::Type::String
-    name: 'description'
+    required: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'description'
+    type: String
     description: |
       A description of the instance.
-  - !ruby/object:Api::Type::Time
-    name: 'createTime'
+  - name: 'createTime'
+    type: Time
     description: Creation timestamp in RFC3339 text format.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'tier'
+  - name: 'tier'
+    type: String
     description: |
       The service tier of the instance.
       Possible values include: STANDARD, PREMIUM, BASIC_HDD, BASIC_SSD, HIGH_SCALE_SSD, ZONAL, REGIONAL and ENTERPRISE
     required: true
     immutable: true
-  - !ruby/object:Api::Type::Enum
-    name: 'protocol'
+  - name: 'protocol'
+    type: Enum
     description: |
       Either NFSv3, for using NFS version 3 as file sharing protocol,
       or NFSv4.1, for using NFS version 4.1 as file sharing protocol.
       NFSv4.1 can be used with HIGH_SCALE_SSD, ZONAL, REGIONAL and ENTERPRISE.
       The default is NFSv3.
-    default_value: :NFS_V3
     min_version: 'beta'
     immutable: true
-    values:
-      - :NFS_V3
-      - :NFS_V4_1
-    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
+    default_value: "NFS_V3"
+    enum_values:
+      - 'NFS_V3'
+      - 'NFS_V4_1'
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       Resource labels to represent user-provided metadata.
-  - !ruby/object:Api::Type::Array
-    name: 'fileShares'
-    required: true
+  - name: 'fileShares'
+    type: Array
     description: |
       File system shares on the instance. For this version, only a
       single file share is supported.
-    max_size: 1
-    item_type: !ruby/object:Api::Type::NestedObject
+    required: true
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'name'
+        - name: 'name'
+          type: String
           description: |
             The name of the fileshare (16 characters or less)
           required: true
           immutable: true
-        - !ruby/object:Api::Type::Integer
-          name: 'capacityGb'
+        - name: 'capacityGb'
+          type: Integer
           description: |
             File share capacity in GiB. This must be at least 1024 GiB
             for the standard tier, or 2560 GiB for the premium tier.
           required: true
-        - !ruby/object:Api::Type::String
-          name: 'sourceBackup'
+        - name: 'sourceBackup'
+          type: String
           description: |
             The resource name of the backup, in the format
             projects/{projectId}/locations/{locationId}/backups/{backupId},
             that this file share has been restored from.
           immutable: true
-        - !ruby/object:Api::Type::Array
-          name: 'nfsExportOptions'
+        - name: 'nfsExportOptions'
+          type: Array
           description: |
             Nfs Export Options. There is a limit of 10 export options per file share.
-          max_size: 10
-          item_type: !ruby/object:Api::Type::NestedObject
+          item_type:
+            type: NestedObject
             properties:
-              - !ruby/object:Api::Type::Array
-                name: 'ipRanges'
+              - name: 'ipRanges'
+                type: Array
                 description: |
                   List of either IPv4 addresses, or ranges in CIDR notation which may mount the file share.
                   Overlapping IP ranges are not allowed, both within and across NfsExportOptions. An error will be returned.
                   The limit is 64 IP ranges/addresses for each FileShareConfig among all NfsExportOptions.
-                item_type: Api::Type::String
-              - !ruby/object:Api::Type::Enum
-                name: 'accessMode'
+                item_type:
+                  type: String
+              - name: 'accessMode'
+                type: Enum
                 description: |
                   Either READ_ONLY, for allowing only read requests on the exported directory,
                   or READ_WRITE, for allowing both read and write requests. The default is READ_WRITE.
-                default_value: :READ_WRITE
-                values:
-                  - :READ_ONLY
-                  - :READ_WRITE
-              - !ruby/object:Api::Type::Enum
-                name: 'squashMode'
+                default_value: "READ_WRITE"
+                enum_values:
+                  - 'READ_ONLY'
+                  - 'READ_WRITE'
+              - name: 'squashMode'
+                type: Enum
                 description: |
                   Either NO_ROOT_SQUASH, for allowing root access on the exported directory, or ROOT_SQUASH,
                   for not allowing root access. The default is NO_ROOT_SQUASH.
-                default_value: :NO_ROOT_SQUASH
-                values:
-                  - :NO_ROOT_SQUASH
-                  - :ROOT_SQUASH
-              - !ruby/object:Api::Type::Integer
-                name: 'anonUid'
+                default_value: "NO_ROOT_SQUASH"
+                enum_values:
+                  - 'NO_ROOT_SQUASH'
+                  - 'ROOT_SQUASH'
+              - name: 'anonUid'
+                type: Integer
                 description: |
                   An integer representing the anonymous user id with a default value of 65534.
                   Anon_uid may only be set with squashMode of ROOT_SQUASH. An error will be returned
                   if this field is specified for other squashMode settings.
-              - !ruby/object:Api::Type::Integer
-                name: 'anonGid'
+              - name: 'anonGid'
+                type: Integer
                 description: |
                   An integer representing the anonymous group id with a default value of 65534.
                   Anon_gid may only be set with squashMode of ROOT_SQUASH. An error will be returned
                   if this field is specified for other squashMode settings.
-  - !ruby/object:Api::Type::Array
-    name: 'networks'
+          max_size: 10
+    max_size: 1
+  - name: 'networks'
+    type: Array
     description: |
       VPC networks to which the instance is connected. For this version,
       only a single network is supported.
     required: true
-    min_size: 1
     immutable: true
-    item_type: !ruby/object:Api::Type::NestedObject
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'network'
+        - name: 'network'
+          type: String
           description: |
             The name of the GCE VPC network to which the
             instance is connected.
           required: true
           immutable: true
           diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-        - !ruby/object:Api::Type::Array
-          name: 'modes'
+        - name: 'modes'
+          type: Array
           description: |
             IP versions for which the instance has
             IP addresses assigned.
           required: true
           immutable: true
-          item_type: !ruby/object:Api::Type::Enum
-            name: 'mode'
+          item_type:
+            type: Enum
             description: An IP version.
-            values:
-              - ADDRESS_MODE_UNSPECIFIED
-              - MODE_IPV4
-              - MODE_IPV6
-        - !ruby/object:Api::Type::String
-          name: 'reservedIpRange'
-          immutable: true
+            enum_values:
+              - 'ADDRESS_MODE_UNSPECIFIED'
+              - 'MODE_IPV4'
+              - 'MODE_IPV6'
+        - name: 'reservedIpRange'
+          type: String
           description: |
             A /29 CIDR block that identifies the range of IP
             addresses reserved for this instance.
+          immutable: true
           default_from_api: true
           # When using connectMode=PRIVATE_SERVICE_ACCESS, the returned value
           # won't match the sent value as the returned value is an IP range
           # from the provided named range.
-          custom_flatten: templates/terraform/custom_flatten/filestore_instance_networks_reserved_ip_range.go.erb
-        - !ruby/object:Api::Type::Array
-          name: 'ipAddresses'
+          custom_flatten: 'templates/terraform/custom_flatten/filestore_instance_networks_reserved_ip_range.go.tmpl'
+        - name: 'ipAddresses'
+          type: Array
           description: |
             A list of IPv4 or IPv6 addresses.
           output: true
-          item_type: Api::Type::String
-        - !ruby/object:Api::Type::Enum
-          name: 'connectMode'
+          item_type:
+            type: String
+        - name: 'connectMode'
+          type: Enum
           description: |
             The network connect mode of the Filestore instance.
             If not provided, the connect mode defaults to
             DIRECT_PEERING.
           immutable: true
-          default_value: :DIRECT_PEERING
-          values:
-            - :DIRECT_PEERING
-            - :PRIVATE_SERVICE_ACCESS
-          custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
-  - !ruby/object:Api::Type::String
-    name: 'etag'
+          custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
+          default_value: "DIRECT_PEERING"
+          enum_values:
+            - 'DIRECT_PEERING'
+            - 'PRIVATE_SERVICE_ACCESS'
+    min_size: 1
+  - name: 'etag'
+    type: String
     description: |
       Server-specified ETag for the instance resource to prevent
       simultaneous updates from overwriting each other.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'kmsKeyName'
-    immutable: true
+  - name: 'kmsKeyName'
+    type: String
     description: |
       KMS key name used for data encryption.
-  - !ruby/object:Api::Type::Boolean
-    name: 'deletionProtectionEnabled'
+    immutable: true
+  - name: 'deletionProtectionEnabled'
+    type: Boolean
     description: |
       Indicates whether the instance is protected against deletion.
-  - !ruby/object:Api::Type::String
-    name: 'deletionProtectionReason'
+  - name: 'deletionProtectionReason'
+    type: String
     description: |
       The reason for enabling deletion protection.

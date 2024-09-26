@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,8 +12,7 @@
 # limitations under the License.
 
 ---
-!ruby/object:Api::Resource
-name: "VolumeReplication"
+name: 'VolumeReplication'
 description: |
   Volume replication creates an asynchronous mirror of a volume in a different location. This capability
   lets you use the replicated volume for critical application activity in case of a location-wide outage
@@ -28,52 +27,57 @@ description: |
   destination volume is not a resource managed by Terraform.
 
   Reversing the replication direction is not supported through the provider.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
-    "Documentation": "https://cloud.google.com/netapp/volumes/docs/protect-data/about-volume-replication"
-  api: "https://cloud.google.com/netapp/volumes/docs/reference/rest/v1/projects.locations.volumes.replications"
-base_url: projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/replications
-self_link: projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/replications/{{name}}
-create_url: projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/replications?replicationId={{name}}
-update_url: projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/replications/{{name}}
-update_verb: :PATCH
+    'Documentation': 'https://cloud.google.com/netapp/volumes/docs/protect-data/about-volume-replication'
+  api: 'https://cloud.google.com/netapp/volumes/docs/reference/rest/v1/projects.locations.volumes.replications'
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/replications/{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/replications'
+self_link: 'projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/replications/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/replications?replicationId={{name}}'
+update_url: 'projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/replications/{{name}}'
+update_verb: 'PATCH'
 update_mask: true
-autogen_async: true
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    base_url: "{{op_id}}"
-id_format: "projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/replications/{{name}}"
 import_format:
-  [
-    "projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/replications/{{name}}",
-  ]
+  - 'projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/replications/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+custom_code:
+  constants: 'templates/terraform/constants/netapp_volume_replication.go.tmpl'
+  post_create: 'templates/terraform/post_create/netapp_volume_replication_post_create.go.tmpl'
+  post_delete: 'templates/terraform/post_delete/netapp_volume_replication_delete_destination_volume.go.tmpl'
+  post_update: 'templates/terraform/post_update/netapp_volume_replication_mirror_state.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/netapp_volume_replication_stop_before_delete.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: "netapp_volume_replication_create"
-    primary_resource_id: "test_replication"
+  - name: 'netapp_volume_replication_create'
+    primary_resource_id: 'test_replication'
     vars:
-      source_pool_name: "source-pool"
-      destination_pool_name: "destination-pool"
-      volume_name: "source-volume"
-      replication_name: "test-replication"
-      destination_volume: "destination-volume"
-      network_name: "test-network"
-    ignore_read_extra:
-      - "delete_destination_volume"
-      - "replication_enabled"
-      - "force_stopping"
-      - "wait_for_mirror"
+      source_pool_name: 'source-pool'
+      destination_pool_name: 'destination-pool'
+      volume_name: 'source-volume'
+      replication_name: 'test-replication'
+      destination_volume: 'destination-volume'
+      network_name: 'test-network'
     test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/netapp_volume_replication.go.erb
-  post_create: templates/terraform/post_create/netapp_volume_replication_post_create.go.erb
-  pre_delete: templates/terraform/pre_delete/netapp_volume_replication_stop_before_delete.go.erb
-  post_delete: templates/terraform/post_delete/netapp_volume_replication_delete_destination_volume.go.erb
-  post_update: templates/terraform/post_update/netapp_volume_replication_mirror_state.go.erb
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
+    ignore_read_extra:
+      - 'delete_destination_volume'
+      - 'replication_enabled'
+      - 'force_stopping'
+      - 'wait_for_mirror'
 virtual_fields:
-  - !ruby/object:Api::Type::Boolean
-    name: "delete_destination_volume"
+  - name: 'delete_destination_volume'
     description: |
       A destination volume is created as part of replication creation. The destination volume will not became
       under Terraform management unless you import it manually. If you delete the replication, this volume
@@ -82,208 +86,209 @@ virtual_fields:
       replication. If you reversed the replication direction, this will be your former source volume!
       For production use, it is recommended to keep this parameter false to avoid accidental volume
       deletion. Handle with care. Default is false.
+    type: Boolean
     default_value: false
-  - !ruby/object:Api::Type::Boolean
-    name: "replication_enabled"
+  - name: 'replication_enabled'
     description: |
       Set to false to stop/break the mirror. Stopping the mirror makes the destination volume read-write
       and act independently from the source volume.
       Set to true to enable/resume the mirror. WARNING: Resuming a mirror overwrites any changes
       done to the destination volume with the content of the source volume.
+    type: Boolean
     default_value: true
-  - !ruby/object:Api::Type::Boolean
-    name: "force_stopping"
+  - name: 'force_stopping'
     description: |
       Only replications with mirror_state=MIRRORED can be stopped. A replication in mirror_state=TRANSFERRING
       currently receives an update and stopping the update might be undesirable. Set this parameter to true
       to stop anyway. All data transferred to the destination will be discarded and content of destination
       volume will remain at the state of the last successful update. Default is false.
+    type: Boolean
     default_value: false
-  - !ruby/object:Api::Type::Boolean
-    name: "wait_for_mirror"
+  - name: 'wait_for_mirror'
     description: |
       Replication resource state is independent of mirror_state. With enough data, it can take many hours
       for mirror_state to reach MIRRORED. If you want Terraform to wait for the mirror to finish on
       create/stop/resume operations, set this parameter to true. Default is false.
+    type: Boolean
     default_value: false
 parameters:
-  - !ruby/object:Api::Type::String
-    name: "location"
-    required: true
-    immutable: true
-    url_param_only: true
+  - name: 'location'
+    type: String
     description: |
       Name of region for this resource. The resource needs to be created in the region of the destination volume.
-  - !ruby/object:Api::Type::String
-    name: "volumeName"
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'volumeName'
+    type: String
     description: The name of the existing source volume.
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
-  - !ruby/object:Api::Type::String
-    name: "name"
+  - name: 'name'
+    type: String
     description: The name of the replication. Needs to be unique per location.
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
 properties:
-  - !ruby/object:Api::Type::Enum
-    name: "state"
+  - name: 'state'
+    type: Enum
     description: |
       Indicates the state of replication resource. State of the mirror itself is indicated in mirrorState.
-    values:
-      - :STATE_UNSPECIFIED
-      - :CREATING
-      - :READY
-      - :UPDATING
-      - :DELETING
-      - :ERROR
     output: true
-  - !ruby/object:Api::Type::String
-    name: "stateDetails"
+    enum_values:
+      - 'STATE_UNSPECIFIED'
+      - 'CREATING'
+      - 'READY'
+      - 'UPDATING'
+      - 'DELETING'
+      - 'ERROR'
+  - name: 'stateDetails'
+    type: String
     description: |
       State details of the replication resource.
     output: true
-  - !ruby/object:Api::Type::Enum
-    name: "role"
+  - name: 'role'
+    type: Enum
     description: |
       Reverting a replication can swap source and destination volume roles. This field indicates if the `location` hosts
       the source or destination volume. For resume and revert and resume operations it is critical to understand
       which volume is the source volume, since it will overwrite changes done to the destination volume.
-    values:
-      - :REPLICATION_ROLE_UNSPECIFIED
-      - :SOURCE
-      - :DESTINATION
     output: true
-  - !ruby/object:Api::Type::Enum
-    name: "replicationSchedule"
+    enum_values:
+      - 'REPLICATION_ROLE_UNSPECIFIED'
+      - 'SOURCE'
+      - 'DESTINATION'
+  - name: 'replicationSchedule'
+    type: Enum
     description: |
       Specifies the replication interval.
-    values:
-      - :EVERY_10_MINUTES
-      - :HOURLY
-      - :DAILY
     required: true
-  - !ruby/object:Api::Type::Enum
-    name: "mirrorState"
+    enum_values:
+      - 'EVERY_10_MINUTES'
+      - 'HOURLY'
+      - 'DAILY'
+  - name: 'mirrorState'
+    type: Enum
     description: |
       Indicates the state of the mirror between source and destination volumes. Depending on the amount of data
       in your source volume, PREPARING phase can take hours or days. mirrorState = MIRRORED indicates your baseline
       transfer ended and destination volume became accessible read-only. TRANSFERRING means a MIRRORED volume
       currently receives an update. Updated every 5 minutes.
-    values:
-      - :MIRROR_STATE_UNSPECIFIED
-      - :PREPARING
-      - :MIRRORED
-      - :STOPPED
-      - :TRANSFERRING
-    custom_flatten: templates/terraform/custom_flatten/netapp_volume_replicaton_mirror_state.go.erb
     output: true
-  - !ruby/object:Api::Type::String
-    name: "createTime"
+    custom_flatten: 'templates/terraform/custom_flatten/netapp_volume_replicaton_mirror_state.go.tmpl'
+    enum_values:
+      - 'MIRROR_STATE_UNSPECIFIED'
+      - 'PREPARING'
+      - 'MIRRORED'
+      - 'STOPPED'
+      - 'TRANSFERRING'
+  - name: 'createTime'
+    type: String
     description: |
       Create time of the active directory. A timestamp in RFC3339 UTC "Zulu" format. Examples: "2023-06-22T09:13:01.617Z".
     output: true
-  - !ruby/object:Api::Type::String
-    name: "destinationVolume"
+  - name: 'destinationVolume'
+    type: String
     description: |
       Full resource name of destination volume with format: `projects/{{project}}/locations/{{location}}/volumes/{{volumeId}}`
     output: true
-  - !ruby/object:Api::Type::NestedObject
-    name: "transferStats"
+  - name: 'transferStats'
+    type: NestedObject
     description: |-
       Replication transfer statistics. All statistics are updated every 5 minutes.
     output: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: "transferBytes"
+      - name: 'transferBytes'
+        type: String
         description: |
           Cumulative bytes transferred so far for the replication relationship.
         output: true
-      - !ruby/object:Api::Type::String
-        name: "totalTransferDuration"
+      - name: 'totalTransferDuration'
+        type: String
         description: |
           Cumulative time taken across all transfers for the replication relationship.
         output: true
-      - !ruby/object:Api::Type::String
-        name: "lastTransferBytes"
+      - name: 'lastTransferBytes'
+        type: String
         description: |
           Size of last completed transfer in bytes.
         output: true
-      - !ruby/object:Api::Type::String
-        name: "lastTransferDuration"
+      - name: 'lastTransferDuration'
+        type: String
         description: |
           Time taken during last completed transfer.
         output: true
-      - !ruby/object:Api::Type::String
-        name: "lagDuration"
+      - name: 'lagDuration'
+        type: String
         description: |
           The elapsed time since the creation of the snapshot on the source volume that was last replicated
           to the destination volume. Lag time represents the difference in age of the destination volume
           data in relation to the source volume data.
         output: true
-      - !ruby/object:Api::Type::String
-        name: "updateTime"
+      - name: 'updateTime'
+        type: String
         description: |
           Time when progress was updated last. A timestamp in RFC3339 UTC "Zulu" format. Examples: "2023-06-22T09:13:01.617Z".
         output: true
-      - !ruby/object:Api::Type::String
-        name: "lastTransferEndTime"
+      - name: 'lastTransferEndTime'
+        type: String
         description: |
           Time when last transfer completed. A timestamp in RFC3339 UTC "Zulu" format. Examples: "2023-06-22T09:13:01.617Z".
         output: true
-      - !ruby/object:Api::Type::String
-        name: "lastTransferError"
+      - name: 'lastTransferError'
+        type: String
         description: |
           A message describing the cause of the last transfer failure.
         output: true
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: "labels"
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       Labels as key value pairs. Example: `{ "owner": "Bob", "department": "finance", "purpose": "testing" }`
-  - !ruby/object:Api::Type::NestedObject
-    name: "destinationVolumeParameters"
+  - name: 'destinationVolumeParameters'
+    type: NestedObject
     description: |-
       Destination volume parameters.
     # destinationVolumeParameters is only used on CREATE. Will not be returned on READ.
     ignore_read: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: "storagePool"
+      - name: 'storagePool'
+        type: String
         description: |
           Name of an existing storage pool for the destination volume with format: `projects/{{project}}/locations/{{location}}/storagePools/{{poolId}}`
-        immutable: true
         required: true
-      - !ruby/object:Api::Type::String
-        name: "volumeId"
+        immutable: true
+      - name: 'volumeId'
+        type: String
         description: |
           Name for the destination volume to be created. If not specified, the name of the source volume will be used.
         immutable: true
         default_from_api: true
-      - !ruby/object:Api::Type::String
-        name: "shareName"
+      - name: 'shareName'
+        type: String
         description: |
           Share name for destination volume. If not specified, name of source volume's share name will be used.
         immutable: true
         default_from_api: true
-      - !ruby/object:Api::Type::String
-        name: "description"
+      - name: 'description'
+        type: String
         description: |
           Description for the destination volume.
         immutable: true
-  - !ruby/object:Api::Type::String
-    name: "sourceVolume"
+  - name: 'sourceVolume'
+    type: String
     description: |
       Full resource name of source volume with format: `projects/{{project}}/locations/{{location}}/volumes/{{volumeId}}`
     output: true
-  - !ruby/object:Api::Type::Boolean
-    name: "healthy"
+  - name: 'healthy'
+    type: Boolean
     description: |
       Condition of the relationship. Can be one of the following:
         - true: The replication relationship is healthy. It has not missed the most recent scheduled transfer.
         - false: The replication relationship is not healthy. It has missed the most recent scheduled transfer.
     output: true
-  - !ruby/object:Api::Type::String
-    name: "description"
+  - name: 'description'
+    type: String
     description: |
       An description of this resource.

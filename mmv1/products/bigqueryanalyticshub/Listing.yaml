@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,195 +11,186 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Listing'
-base_url: projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings
-create_url: projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings?listing_id={{listing_id}}
-self_link: projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}
-update_verb: :PATCH
-update_mask: true
 description: A Bigquery Analytics Hub data exchange listing
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/bigquery/docs/analytics-hub-introduction'
   api: 'https://cloud.google.com/bigquery/docs/reference/analytics-hub/rest/v1/projects.locations.dataExchanges.listings'
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  method_name_separator: ':'
-  fetch_iam_policy_verb: :POST
-  parent_resource_attribute: 'listing_id'
-  import_format:
-    [
-      'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}',
-      '{{listing_id}}',
-    ]
-id_format: projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings'
+self_link: 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings?listing_id={{listing_id}}'
+update_verb: 'PATCH'
+update_mask: true
 import_format:
-  [
-    'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}',
-  ]
+  - 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+iam_policy:
+  method_name_separator: ':'
+  fetch_iam_policy_verb: 'POST'
+  parent_resource_attribute: 'listing_id'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}'
+    - '{{listing_id}}'
+custom_code:
 # Skipping the sweeper due to the non-standard base_url
-skip_sweeper: true
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'bigquery_analyticshub_listing_basic'
+  - name: 'bigquery_analyticshub_listing_basic'
     primary_resource_id: 'listing'
-    primary_resource_name: "fmt.Sprintf(\"tf_test_my_data_exchange%s\",
-      context[\"\
-      random_suffix\"]), fmt.Sprintf(\"tf_test_my_listing%s\",
-      context[\"random_suffix\"\
-      ])"
+    primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"]), fmt.Sprintf("tf_test_my_listing%s", context["random_suffix"])'
     region_override: 'US'
     vars:
       data_exchange_id: 'my_data_exchange'
       listing_id: 'my_listing'
       desc: 'example data exchange'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'bigquery_analyticshub_listing_restricted'
+  - name: 'bigquery_analyticshub_listing_restricted'
     primary_resource_id: 'listing'
-    primary_resource_name: "fmt.Sprintf(\"tf_test_my_data_exchange%s\",
-      context[\"\
-      random_suffix\"]), fmt.Sprintf(\"tf_test_my_listing%s\",
-      context[\"random_suffix\"\
-      ])"
+    primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"]), fmt.Sprintf("tf_test_my_listing%s", context["random_suffix"])'
     region_override: 'US'
     vars:
       data_exchange_id: 'my_data_exchange'
       listing_id: 'my_listing'
       desc: 'example data exchange'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'bigquery_analyticshub_listing_dcr'
+  - name: 'bigquery_analyticshub_listing_dcr'
     primary_resource_id: 'listing'
-    primary_resource_name: "fmt.Sprintf(\"tf_test_my_data_exchange%s\",
-      context[\"\
-      random_suffix\"]), fmt.Sprintf(\"tf_test_my_listing%s\",
-      context[\"random_suffix\"\
-      ])"
+    primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"]), fmt.Sprintf("tf_test_my_listing%s", context["random_suffix"])'
     region_override: 'US'
     vars:
       data_exchange_id: 'dcr_data_exchange'
       listing_id: 'dcr_listing'
       desc: 'example dcr data exchange'
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description: |-
       The resource name of the listing. e.g. "projects/myproject/locations/US/dataExchanges/123/listings/456"
     output: true
-  - !ruby/object:Api::Type::String
-    name: data_exchange_id
+  - name: 'data_exchange_id'
+    type: String
     description: |-
       The ID of the data exchange. Must contain only Unicode letters, numbers (0-9), underscores (_). Should not use characters that require URL-escaping, or characters outside of ASCII, spaces.
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
-  - !ruby/object:Api::Type::String
-    name: listing_id
+  - name: 'listing_id'
+    type: String
     description: |-
       The ID of the listing. Must contain only Unicode letters, numbers (0-9), underscores (_). Should not use characters that require URL-escaping, or characters outside of ASCII, spaces.
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
-  - !ruby/object:Api::Type::String
-    name: 'location'
+  - name: 'location'
+    type: String
     description: |
       The name of the location this data exchange listing.
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
-  - !ruby/object:Api::Type::String
-    name: displayName
+  - name: 'displayName'
+    type: String
     description: |-
       Human-readable display name of the listing. The display name must contain only Unicode letters, numbers (0-9), underscores (_), dashes (-), spaces ( ), ampersands (&) and can't start or end with spaces.
     required: true
-  - !ruby/object:Api::Type::String
-    name: description
+  - name: 'description'
+    type: String
     description: |-
       Short description of the listing. The description must not contain Unicode non-characters and C0 and C1 control codes except tabs (HT), new lines (LF), carriage returns (CR), and page breaks (FF).
-  - !ruby/object:Api::Type::String
-    name: primaryContact
+  - name: 'primaryContact'
+    type: String
     description: |-
       Email or URL of the primary point of contact of the listing.
-  - !ruby/object:Api::Type::String
-    name: documentation
+  - name: 'documentation'
+    type: String
     description: |-
       Documentation describing the listing.
-  - !ruby/object:Api::Type::String
-    name: icon
+  - name: 'icon'
+    type: String
     description: |-
       Base64 encoded image representing the listing.
-  - !ruby/object:Api::Type::String
-    name: requestAccess
+  - name: 'requestAccess'
+    type: String
     description: |-
       Email or URL of the request access of the listing. Subscribers can use this reference to request access.
-  - !ruby/object:Api::Type::NestedObject
-    name: dataProvider
+  - name: 'dataProvider'
+    type: NestedObject
     description: Details of the data provider who owns the source data.
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'name'
-        required: true
+      - name: 'name'
+        type: String
         description: Name of the data provider.
-      - !ruby/object:Api::Type::String
-        name: 'primaryContact'
+        required: true
+      - name: 'primaryContact'
+        type: String
         description: Email or URL of the data provider.
-  - !ruby/object:Api::Type::NestedObject
-    name: publisher
+  - name: 'publisher'
+    type: NestedObject
     description:
       Details of the publisher who owns the listing and who can share the source
       data.
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'name'
-        required: true
+      - name: 'name'
+        type: String
         description: Name of the listing publisher.
-      - !ruby/object:Api::Type::String
-        name: 'primaryContact'
+        required: true
+      - name: 'primaryContact'
+        type: String
         description: Email or URL of the listing publisher.
-  - !ruby/object:Api::Type::Array
-    name: 'categories'
+  - name: 'categories'
+    type: Array
     description: |
       Categories of the listing. Up to two categories are allowed.
-    item_type: Api::Type::String
-  - !ruby/object:Api::Type::NestedObject
-    name: bigqueryDataset
+    item_type:
+      type: String
+  - name: 'bigqueryDataset'
+    type: NestedObject
     description: Shared dataset i.e. BigQuery dataset source.
     required: true
     immutable: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'dataset'
-        immutable: true
+      - name: 'dataset'
+        type: String
         description:
           Resource name of the dataset source for this listing. e.g.
           projects/myproject/datasets/123
         required: true
+        immutable: true
         diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
-      - !ruby/object:Api::Type::Array
-        name: selectedResources
+      - name: 'selectedResources'
+        type: Array
         description: Resource in this dataset that is selectively shared. This field is required for data clean room exchanges.
         immutable: true
-        item_type: !ruby/object:Api::Type::NestedObject
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::String
-              name: 'table'
-              immutable: true
-              diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+            - name: 'table'
+              type: String
               description: |
                 Format: For table: projects/{projectId}/datasets/{datasetId}/tables/{tableId} Example:"projects/test_project/datasets/test_dataset/tables/test_table"
-  - !ruby/object:Api::Type::NestedObject
-    name: restrictedExportConfig
+              immutable: true
+              diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+  - name: 'restrictedExportConfig'
+    type: NestedObject
     description: If set, restricted export configuration will be propagated and enforced on the linked dataset.
     properties:
-      - !ruby/object:Api::Type::Boolean
-        name: 'enabled'
+      - name: 'enabled'
+        type: Boolean
         description:
           If true, enable restricted export.
-      - !ruby/object:Api::Type::Boolean
-        name: 'restrictDirectTableAccess'
-        output: true
+      - name: 'restrictDirectTableAccess'
+        type: Boolean
         description:
           If true, restrict direct table access(read api/tabledata.list) on linked table.
-      - !ruby/object:Api::Type::Boolean
-        name: 'restrictQueryResult'
+        output: true
+      - name: 'restrictQueryResult'
+        type: Boolean
         description:
           If true, restrict export of query result derived from restricted linked dataset table.

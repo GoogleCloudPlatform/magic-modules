@@ -58,6 +58,9 @@ resource "google_compute_interconnect" "example-interconnect" {
   macsec_enabled       = false
   noc_contact_email    = "user@example.com"
   requested_features   = ["IF_MACSEC"]
+  labels = {
+    mykey = "myvalue"
+  }
 }
 `, context)
 }
@@ -83,6 +86,10 @@ resource "google_compute_interconnect" "example-interconnect" {
       name = "test-key"
       start_time = "2023-07-01T21:00:01.000Z"
     }
+    fail_open = true
+  }
+  labels = {
+    mykey = "newvalue"
   }
 }
 `, context)

@@ -63,7 +63,7 @@ func NewTerraform(product *api.Product, versionName string, startTime time.Time)
 	t.Product.SetPropertiesBasedOnVersion(&t.Version)
 	for _, r := range t.Product.Objects {
 		r.SetCompiler(ProviderName(t))
-		r.ImportPath = ImportPathFromVersion(t, versionName)
+		r.ImportPath = ImportPathFromVersion(versionName)
 	}
 
 	return t
@@ -238,8 +238,10 @@ func (t *Terraform) GenerateIamDocumentation(object api.Resource, templateData T
 func (t *Terraform) FolderName() string {
 	if t.TargetVersionName == "ga" {
 		return "google"
+	} else if t.TargetVersionName == "beta" {
+		return "google-beta"
 	}
-	return "google-beta"
+	return "google-private"
 }
 
 func (t *Terraform) FullResourceName(object api.Resource) string {
@@ -268,7 +270,7 @@ func (t Terraform) CopyCommonFiles(outputFolder string, generateCode, generateDo
 	log.Printf("Copying common files for %s", ProviderName(t))
 
 	files := t.getCommonCopyFiles(t.TargetVersionName, generateCode, generateDocs)
-	t.CopyFileList(outputFolder, files)
+	t.CopyFileList(outputFolder, files, generateCode)
 }
 
 // To copy a new folder, add the folder to foldersCopiedToRootDir or foldersCopiedToGoogleDir.
@@ -314,9 +316,9 @@ func (t Terraform) getCommonCopyFiles(versionName string, generateCode, generate
 	// Case 3: When copy a single file, save the target as key and source as value to the map singleFiles
 	singleFiles := map[string]string{
 		"go.sum":                           "third_party/terraform/go.sum",
-		"go.mod":                           "third_party/terraform/go/go.mod",
+		"go.mod":                           "third_party/terraform/go.mod.tmpl",
 		".go-version":                      "third_party/terraform/.go-version",
-		"terraform-registry-manifest.json": "third_party/terraform/go/terraform-registry-manifest.json",
+		"terraform-registry-manifest.json": "third_party/terraform/terraform-registry-manifest.json.tmpl",
 	}
 	maps.Copy(commonCopyFiles, singleFiles)
 
@@ -326,8 +328,12 @@ func (t Terraform) getCommonCopyFiles(versionName string, generateCode, generate
 func (t Terraform) getCopyFilesInFolder(folderPath, targetDir string) map[string]string {
 	m := make(map[string]string, 0)
 	filepath.WalkDir(folderPath, func(path string, di fs.DirEntry, err error) error {
-		if !di.IsDir() && !strings.HasSuffix(di.Name(), ".tmpl") && !strings.HasSuffix(di.Name(), ".erb") {
-			fname := strings.TrimPrefix(strings.Replace(path, "/go/", "/", 1), "third_party/terraform/")
+		if !di.IsDir() && !strings.HasSuffix(di.Name(), ".tmpl") && !strings.HasSuffix(di.Name(), ".erb") { // Exception files
+			if di.Name() == "gha-branch-renaming.png" || di.Name() == "clock-timings-of-branch-making-and-usage.png" {
+				return nil
+			}
+
+			fname := strings.TrimPrefix(path, "third_party/terraform/")
 			target := fname
 			if targetDir != "." {
 				target = fmt.Sprintf("%s/%s", targetDir, fname)
@@ -340,7 +346,7 @@ func (t Terraform) getCopyFilesInFolder(folderPath, targetDir string) map[string
 	return m
 }
 
-func (t Terraform) CopyFileList(outputFolder string, files map[string]string) {
+func (t Terraform) CopyFileList(outputFolder string, files map[string]string, generateCode bool) {
 	for target, source := range files {
 		targetFile := filepath.Join(outputFolder, target)
 		targetDir := filepath.Dir(targetFile)
@@ -359,13 +365,20 @@ func (t Terraform) CopyFileList(outputFolder string, files map[string]string) {
 			log.Fatalf("Cannot read source file %s while copying: %s", source, err)
 		}
 
-		err = os.WriteFile(targetFile, sourceByte, 0644)
+		var permission fs.FileMode
+		if strings.HasSuffix(targetDir, "scripts") {
+			permission = 0755
+		} else {
+			permission = 0644
+		}
+
+		err = os.WriteFile(targetFile, sourceByte, permission)
 		if err != nil {
 			log.Fatalf("Cannot write target file %s while copying: %s", target, err)
 		}
 
 		// Replace import path based on version (beta/alpha)
-		if filepath.Ext(target) == ".go" || filepath.Ext(target) == ".mod" {
+		if filepath.Ext(target) == ".go" || (filepath.Ext(target) == ".mod" && generateCode) {
 			t.replaceImportPath(outputFolder, target)
 		}
 
@@ -411,10 +424,10 @@ func (t Terraform) getCommonCompileFiles(versionName string) map[string]string {
 
 	// Case 3: When compile a single file, save the target as key and source as value to the map singleFiles
 	singleFiles := map[string]string{
-		"main.go":                       "third_party/terraform/go/main.go.tmpl",
-		".goreleaser.yml":               "third_party/terraform/go/.goreleaser.yml.tmpl",
-		".release/release-metadata.hcl": "third_party/terraform/go/release-metadata.hcl.tmpl",
-		".copywrite.hcl":                "third_party/terraform/go/.copywrite.hcl.tmpl",
+		"main.go":                       "third_party/terraform/main.go.tmpl",
+		".goreleaser.yml":               "third_party/terraform/.goreleaser.yml.tmpl",
+		".release/release-metadata.hcl": "third_party/terraform/release-metadata.hcl.tmpl",
+		".copywrite.hcl":                "third_party/terraform/.copywrite.hcl.tmpl",
 	}
 	maps.Copy(commonCompileFiles, singleFiles)
 
@@ -425,7 +438,7 @@ func (t Terraform) getCompileFilesInFolder(folderPath, targetDir string) map[str
 	m := make(map[string]string, 0)
 	filepath.WalkDir(folderPath, func(path string, di fs.DirEntry, err error) error {
 		if !di.IsDir() && strings.HasSuffix(di.Name(), ".tmpl") {
-			fname := strings.TrimPrefix(strings.Replace(path, "/go/", "/", 1), "third_party/terraform/")
+			fname := strings.TrimPrefix(path, "third_party/terraform/")
 			fname = strings.TrimSuffix(fname, ".tmpl")
 			target := fname
 			if targetDir != "." {
@@ -557,8 +570,8 @@ func (t Terraform) replaceImportPath(outputFolder, target string) {
 
 	data := string(sourceByte)
 
-	gaImportPath := ImportPathFromVersion(t, "ga")
-	betaImportPath := ImportPathFromVersion(t, "beta")
+	gaImportPath := ImportPathFromVersion("ga")
+	betaImportPath := ImportPathFromVersion("beta")
 
 	if strings.Contains(data, betaImportPath) {
 		log.Fatalf("Importing a package from module %s is not allowed in file %s. Please import a package from module %s.", betaImportPath, filepath.Base(target), gaImportPath)
@@ -670,7 +683,7 @@ func (t *Terraform) generateResourcesForVersion(products []*api.Product) {
 			if iamPolicy != nil && !iamPolicy.Exclude {
 				t.IAMResourceCount += 3
 
-				if !(iamPolicy.MinVersion != "" && iamPolicy.MinVersion < t.TargetVersionName) {
+				if slices.Index(product.ORDER, iamPolicy.MinVersion) <= slices.Index(product.ORDER, t.TargetVersionName) {
 					iamClassName = fmt.Sprintf("%s.%s", service, object.ResourceName())
 				}
 			}

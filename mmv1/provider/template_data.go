@@ -46,6 +46,7 @@ type TemplateData struct {
 var GA_VERSION = "ga"
 var BETA_VERSION = "beta"
 var ALPHA_VERSION = "alpha"
+var PRIVATE_VERSION = "private"
 
 func NewTemplateData(outputFolder string, versionName string) *TemplateData {
 	td := TemplateData{OutputFolder: outputFolder, VersionName: versionName}
@@ -53,7 +54,7 @@ func NewTemplateData(outputFolder string, versionName string) *TemplateData {
 	if versionName == GA_VERSION {
 		td.TerraformResourceDirectory = "google"
 		td.TerraformProviderModule = "github.com/hashicorp/terraform-provider-google"
-	} else if versionName == ALPHA_VERSION {
+	} else if versionName == ALPHA_VERSION || versionName == PRIVATE_VERSION {
 		td.TerraformResourceDirectory = "google-private"
 		td.TerraformProviderModule = "internal/terraform-next"
 	} else {
@@ -71,7 +72,7 @@ func (td *TemplateData) GenerateResourceFile(filePath string, resource api.Resou
 		"templates/terraform/schema_property.go.tmpl",
 		"templates/terraform/schema_subresource.go.tmpl",
 		"templates/terraform/expand_resource_ref.tmpl",
-		"templates/terraform/custom_flatten/go/bigquery_table_ref.go.tmpl",
+		"templates/terraform/custom_flatten/bigquery_table_ref.go.tmpl",
 		"templates/terraform/flatten_property_method.go.tmpl",
 		"templates/terraform/expand_property_method.go.tmpl",
 		"templates/terraform/update_mask.go.tmpl",
@@ -155,7 +156,7 @@ func (td *TemplateData) GenerateIamPolicyTestFile(filePath string, resource api.
 	templates := []string{
 		templatePath,
 		"templates/terraform/env_var_context.go.tmpl",
-		"templates/terraform/iam/go/iam_context.go.tmpl",
+		"templates/terraform/iam/iam_context.go.tmpl",
 	}
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }
@@ -227,7 +228,7 @@ func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, g
 func (td *TemplateData) ImportPath() string {
 	if td.VersionName == GA_VERSION {
 		return "github.com/hashicorp/terraform-provider-google/google"
-	} else if td.VersionName == ALPHA_VERSION {
+	} else if td.VersionName == ALPHA_VERSION || td.VersionName == PRIVATE_VERSION {
 		return "internal/terraform-next/google-private"
 	}
 	return "github.com/hashicorp/terraform-provider-google-beta/google-beta"

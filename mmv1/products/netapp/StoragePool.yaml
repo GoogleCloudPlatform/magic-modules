@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'StoragePool'
 description: |
  Storage pools act as containers for volumes. All volumes in a storage pool share the following information:
@@ -37,135 +37,144 @@ description: |
  via Terraform by swapping the value of the `zone` and `replica_zone` parameters in your HCL code.
  Note : Regional FLEX storage pool are supported in beta provider currently.
 
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Quickstart documentation': 'https://cloud.google.com/netapp/volumes/docs/get-started/quickstarts/create-storage-pool'
     'Regional Flex zone switch': 'https://cloud.google.com/netapp/volumes/docs/configure-and-use/storage-pools/edit-or-delete-storage-pool#switch_active_and_replica_zones'
   api: 'https://cloud.google.com/netapp/volumes/docs/reference/rest/v1/projects.locations.storagePools'
-base_url: projects/{{project}}/locations/{{location}}/storagePools
-self_link: projects/{{project}}/locations/{{location}}/storagePools/{{name}}
-create_url: projects/{{project}}/locations/{{location}}/storagePools?storagePoolId={{name}}
-update_url: projects/{{project}}/locations/{{location}}/storagePools/{{name}}
-update_verb: :PATCH
-update_mask: true
-# Skipping the sweeper since we need to sweep multiple regions
-skip_sweeper: true
-delete_url: projects/{{project}}/locations/{{location}}/storagePools/{{name}}
-autogen_async: true
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    base_url: '{{op_id}}'
+docs:
 id_format: 'projects/{{project}}/locations/{{location}}/storagePools/{{name}}'
-import_format: ['projects/{{project}}/locations/{{location}}/storagePools/{{name}}']
-parameters:
-  - !ruby/object:Api::Type::String
-    name: 'location'
-    required: true
-    immutable: true
-    url_param_only: true
-    description: |
-      Name of the location. For zonal Flex pools specify a zone name, in all other cases a region name.
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    description:
-      The resource name of the storage pool. Needs to be unique per location/region.
-    required: true
-    immutable: true
-    url_param_only: true
+base_url: 'projects/{{project}}/locations/{{location}}/storagePools'
+self_link: 'projects/{{project}}/locations/{{location}}/storagePools/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/storagePools?storagePoolId={{name}}'
+update_url: 'projects/{{project}}/locations/{{location}}/storagePools/{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+delete_url: 'projects/{{project}}/locations/{{location}}/storagePools/{{name}}'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/storagePools/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+custom_code:
+  pre_update: 'templates/terraform/pre_update/netapp_storagepool.go.tmpl'
+# Skipping the sweeper since we need to sweep multiple regions
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'Storage_pool_create'
+  - name: 'Storage_pool_create'
     primary_resource_id: 'test_pool'
     vars:
       pool_name: 'test-pool'
       network_name: 'test-network'
       global_name: 'test-address'
-properties:
-  - !ruby/object:Api::Type::Enum
-    name: 'serviceLevel'
+parameters:
+  - name: 'location'
+    type: String
     description: |
-      Service level of the storage pool.
-    values:
-      - :PREMIUM
-      - :EXTREME
-      - :STANDARD
-      - :FLEX
+      Name of the location. For zonal Flex pools specify a zone name, in all other cases a region name.
+    url_param_only: true
     required: true
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: 'capacityGib'
+  - name: 'name'
+    type: String
+    description:
+      The resource name of the storage pool. Needs to be unique per location/region.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'serviceLevel'
+    type: Enum
+    description: |
+      Service level of the storage pool.
+    required: true
+    immutable: true
+    enum_values:
+      - 'PREMIUM'
+      - 'EXTREME'
+      - 'STANDARD'
+      - 'FLEX'
+  - name: 'capacityGib'
+    type: String
     description: |
       Capacity of the storage pool (in GiB).
     required: true
-  - !ruby/object:Api::Type::String
-    name: 'volumeCapacityGib'
+  - name: 'volumeCapacityGib'
+    type: String
     description: |
       Size allocated to volumes in the storage pool (in GiB).
     output: true
-  - !ruby/object:Api::Type::Integer
-    name: 'volumeCount'
+  - name: 'volumeCount'
+    type: Integer
     description: |
       Number of volume in the storage pool.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: |
       An optional description of this resource.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: labels
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       Labels as key value pairs. Example: `{ "owner": "Bob", "department": "finance", "purpose": "testing" }`.
-  - !ruby/object:Api::Type::String
-    name: 'network'
+  - name: 'network'
+    type: String
     description: |
       VPC network name with format: `projects/{{project}}/global/networks/{{network}}`
     required: true
     immutable: true
-    diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
-  - !ruby/object:Api::Type::String
-    name: 'activeDirectory'
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+  - name: 'activeDirectory'
+    type: String
     description: |
       Specifies the Active Directory policy to be used. Format: `projects/{{project}}/locations/{{location}}/activeDirectories/{{name}}`.
       The policy needs to be in the same location as the storage pool.
-  - !ruby/object:Api::Type::String
-    name: 'kmsConfig'
+  - name: 'kmsConfig'
+    type: String
     description: |
       Specifies the CMEK policy to be used for volume encryption. Format: `projects/{{project}}/locations/{{location}}/kmsConfigs/{{name}}`.
       The policy needs to be in the same location as the storage pool.
     immutable: true
-  - !ruby/object:Api::Type::Boolean
-    name: 'ldapEnabled'
+  - name: 'ldapEnabled'
+    type: Boolean
     description: |
       When enabled, the volumes uses Active Directory as LDAP name service for UID/GID lookups. Required to enable extended group support for NFSv3,
       using security identifiers for NFSv4.1 or principal names for kerberized NFSv4.1.
     immutable: true
-  - !ruby/object:Api::Type::Enum
-    name: 'encryptionType'
+  - name: 'encryptionType'
+    type: Enum
     description: |
       Reports if volumes in the pool are encrypted using a Google-managed encryption key or CMEK.
-    values:
-      - :ENCRYPTION_TYPE_UNSPECIFIED
-      - :SERVICE_MANAGED
-      - :CLOUD_KMS
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'zone'
+    enum_values:
+      - 'ENCRYPTION_TYPE_UNSPECIFIED'
+      - 'SERVICE_MANAGED'
+      - 'CLOUD_KMS'
+  - name: 'zone'
+    type: String
     description: |
       Specifies the active zone for regional Flex pools. `zone` and `replica_zone` values can be swapped to initiate a
       [zone switch](https://cloud.google.com/netapp/volumes/docs/configure-and-use/storage-pools/edit-or-delete-storage-pool#switch_active_and_replica_zones).
       If you want to create a zonal Flex pool, specify a zone name for `location` and omit `zone`.
-    min_version: beta
-  - !ruby/object:Api::Type::String
-    name: 'replicaZone'
+    min_version: 'beta'
+  - name: 'replicaZone'
+    type: String
     description: |
       Specifies the replica zone for regional Flex pools. `zone` and `replica_zone` values can be swapped to initiate a
       [zone switch](https://cloud.google.com/netapp/volumes/docs/configure-and-use/storage-pools/edit-or-delete-storage-pool#switch_active_and_replica_zones).
-    min_version: beta
-  - !ruby/object:Api::Type::Boolean
-    name: 'allowAutoTiering'
+    min_version: 'beta'
+  - name: 'allowAutoTiering'
+    type: Boolean
     description: |
       Optional. True if the storage pool supports Auto Tiering enabled volumes. Default is false.
       Auto-tiering can be enabled after storage pool creation but it can't be disabled once enabled.
     immutable: true
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  pre_update: templates/terraform/pre_update/netapp_storagepool.go.erb

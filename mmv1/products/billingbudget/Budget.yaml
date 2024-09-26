@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,21 +11,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
-name: Budget
-base_url: billingAccounts/{{billing_account}}/budgets
-self_link: 'billingAccounts/{{billing_account}}/budgets/{{name}}'
-update_verb: :PATCH
-update_mask: true
+---
+name: 'Budget'
 description: |
   Budget configuration for a billing account.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Creating a budget': 'https://cloud.google.com/billing/docs/how-to/budgets'
   api: 'https://cloud.google.com/billing/docs/reference/budget/rest/v1/billingAccounts.budgets'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/billing_budget.erb
-docs: !ruby/object:Provider::Terraform::Docs
+docs:
   warning: |
     If you are using User ADCs (Application Default Credentials) with this resource,
     you must specify a `billing_project` and set `user_project_override` to true
@@ -33,87 +27,91 @@ docs: !ruby/object:Provider::Terraform::Docs
     Your account must have the `serviceusage.services.use` permission on the
     `billing_project` you defined.
 id_format: 'billingAccounts/{{billing_account}}/budgets/{{name}}'
+base_url: 'billingAccounts/{{billing_account}}/budgets'
+self_link: 'billingAccounts/{{billing_account}}/budgets/{{name}}'
+update_verb: 'PATCH'
+update_mask: true
 import_format:
-  ['billingAccounts/{{billing_account}}/budgets/{{name}}', '{{name}}']
+  - 'billingAccounts/{{billing_account}}/budgets/{{name}}'
+  - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  constants: 'templates/terraform/constants/billing_budget.tmpl'
 schema_version: 1
 state_upgraders: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'billing_budget_basic'
+  - name: 'billing_budget_basic'
     primary_resource_id: 'budget'
     vars:
       display_name: 'Example Billing Budget'
     test_env_vars:
-      billing_acct: :MASTER_BILLING_ACCT
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'billing_budget_lastperiod'
+      billing_acct: 'MASTER_BILLING_ACCT'
+  - name: 'billing_budget_lastperiod'
     primary_resource_id: 'budget'
     vars:
       display_name: 'Example Billing Budget'
     test_env_vars:
-      billing_acct: :MASTER_BILLING_ACCT
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'billing_budget_filter'
+      billing_acct: 'MASTER_BILLING_ACCT'
+  - name: 'billing_budget_filter'
     primary_resource_id: 'budget'
     vars:
       display_name: 'Example Billing Budget'
     test_env_vars:
-      billing_acct: :MASTER_BILLING_ACCT
-      org_id: :ORG_ID
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'billing_budget_notify'
+      billing_acct: 'MASTER_BILLING_ACCT'
+      org_id: 'ORG_ID'
+  - name: 'billing_budget_notify'
     primary_resource_id: 'budget'
     vars:
       budget_name: 'Example Billing Budget'
       channel_name: 'Example Notification Channel'
     test_env_vars:
-      billing_acct: :MASTER_BILLING_ACCT
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'billing_budget_notify_project_recipient'
+      billing_acct: 'MASTER_BILLING_ACCT'
+  - name: 'billing_budget_notify_project_recipient'
     primary_resource_id: 'budget'
     vars:
       budget_name: 'Example Billing Budget'
     test_env_vars:
-      billing_acct: :MASTER_BILLING_ACCT
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'billing_budget_customperiod'
+      billing_acct: 'MASTER_BILLING_ACCT'
+  - name: 'billing_budget_customperiod'
     primary_resource_id: 'budget'
     vars:
       display_name: 'Example Billing Budget'
     test_env_vars:
-      billing_acct: :MASTER_BILLING_ACCT
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'billing_budget_optional'
+      billing_acct: 'MASTER_BILLING_ACCT'
+  - name: 'billing_budget_optional'
     primary_resource_id: 'budget'
-    skip_docs: true
     vars:
       display_name: 'Example Billing Budget'
       topic_name: 'example-topic'
     test_env_vars:
-      billing_acct: :MASTER_BILLING_ACCT
+      billing_acct: 'MASTER_BILLING_ACCT'
+    exclude_docs: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: billingAccount
+  - name: 'billingAccount'
+    type: String
     description: |
       ID of the billing account to set a budget on.
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description: |
       Resource name of the budget. The resource name
       implies the scope of a budget. Values are of the form
       billingAccounts/{billingAccountId}/budgets/{budgetId}.
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-  - !ruby/object:Api::Type::String
-    name: displayName
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'displayName'
+    type: String
     description: |
       User data for display name in UI. Must be <= 60 chars.
-  - !ruby/object:Api::Type::NestedObject
-    name: budgetFilter
+  - name: 'budgetFilter'
+    type: NestedObject
     description: |
       Filters that define which resources are used to compute the actual
       spend against the budget.
@@ -129,17 +127,8 @@ properties:
       - 'budgetFilter.creditTypes'
       - 'budgetFilter.subaccounts'
     properties:
-      - !ruby/object:Api::Type::Array
-        name: projects
-        at_least_one_of:
-          - budget_filter.0.projects
-          - budget_filter.0.resource_ancestors
-          - budget_filter.0.credit_types_treatment
-          - budget_filter.0.services
-          - budget_filter.0.subaccounts
-          - budget_filter.0.labels
-          - budget_filter.0.calendarPeriod
-          - budget_filter.0.customPeriod
+      - name: 'projects'
+        type: Array
         description: |
           A set of projects of the form projects/{project_number},
           specifying that usage from only this set of projects should be
@@ -147,46 +136,57 @@ properties:
           all usage for the billing account, regardless of which project
           the usage occurred on.
         is_set: true
-        item_type: Api::Type::String
-      - !ruby/object:Api::Type::Array
-        name: resourceAncestors
         at_least_one_of:
-          - budget_filter.0.projects
-          - budget_filter.0.resource_ancestors
-          - budget_filter.0.credit_types_treatment
-          - budget_filter.0.services
-          - budget_filter.0.subaccounts
-          - budget_filter.0.labels
-          - budget_filter.0.calendarPeriod
-          - budget_filter.0.customPeriod
+          - 'budget_filter.0.projects'
+          - 'budget_filter.0.resource_ancestors'
+          - 'budget_filter.0.credit_types_treatment'
+          - 'budget_filter.0.services'
+          - 'budget_filter.0.subaccounts'
+          - 'budget_filter.0.labels'
+          - 'budget_filter.0.calendarPeriod'
+          - 'budget_filter.0.customPeriod'
+        item_type:
+          type: String
+      - name: 'resourceAncestors'
+        type: Array
         description: |
           A set of folder and organization names of the form folders/{folderId} or organizations/{organizationId},
           specifying that usage from only this set of folders and organizations should be included in the budget.
           If omitted, the budget includes all usage that the billing account pays for. If the folder or organization
           contains projects that are paid for by a different Cloud Billing account, the budget doesn't apply to those projects.
         is_set: true
-        item_type: Api::Type::String
-      - !ruby/object:Api::Type::Enum
-        name: creditTypesTreatment
+        at_least_one_of:
+          - 'budget_filter.0.projects'
+          - 'budget_filter.0.resource_ancestors'
+          - 'budget_filter.0.credit_types_treatment'
+          - 'budget_filter.0.services'
+          - 'budget_filter.0.subaccounts'
+          - 'budget_filter.0.labels'
+          - 'budget_filter.0.calendarPeriod'
+          - 'budget_filter.0.customPeriod'
+        item_type:
+          type: String
+      - name: 'creditTypesTreatment'
+        type: Enum
         description: |
           Specifies how credits should be treated when determining spend
           for threshold calculations.
-        default_value: :INCLUDE_ALL_CREDITS
-        values:
-          - :INCLUDE_ALL_CREDITS
-          - :EXCLUDE_ALL_CREDITS
-          - :INCLUDE_SPECIFIED_CREDITS
         at_least_one_of:
-          - budget_filter.0.projects
-          - budget_filter.0.resource_ancestors
-          - budget_filter.0.credit_types_treatment
-          - budget_filter.0.services
-          - budget_filter.0.subaccounts
-          - budget_filter.0.labels
-          - budget_filter.0.calendarPeriod
-          - budget_filter.0.customPeriod
-      - !ruby/object:Api::Type::Array
-        name: services
+          - 'budget_filter.0.projects'
+          - 'budget_filter.0.resource_ancestors'
+          - 'budget_filter.0.credit_types_treatment'
+          - 'budget_filter.0.services'
+          - 'budget_filter.0.subaccounts'
+          - 'budget_filter.0.labels'
+          - 'budget_filter.0.calendarPeriod'
+          - 'budget_filter.0.customPeriod'
+        default_value: "INCLUDE_ALL_CREDITS"
+        enum_values:
+          - 'INCLUDE_ALL_CREDITS'
+          - 'EXCLUDE_ALL_CREDITS'
+          - 'INCLUDE_SPECIFIED_CREDITS'
+      - name: 'services'
+        type: Array
         description: |
           A set of services of the form services/{service_id},
           specifying that usage from only this set of services should be
@@ -194,38 +194,40 @@ properties:
           usage for all the services. The service names are available
           through the Catalog API:
           https://cloud.google.com/billing/v1/how-tos/catalog-api.
-        at_least_one_of:
-          - budget_filter.0.projects
-          - budget_filter.0.resource_ancestors
-          - budget_filter.0.credit_types_treatment
-          - budget_filter.0.services
-          - budget_filter.0.subaccounts
-          - budget_filter.0.labels
-          - budget_filter.0.calendarPeriod
-          - budget_filter.0.customPeriod
         default_from_api: true
-        item_type: Api::Type::String
-      - !ruby/object:Api::Type::Array
-        name: creditTypes
+        at_least_one_of:
+          - 'budget_filter.0.projects'
+          - 'budget_filter.0.resource_ancestors'
+          - 'budget_filter.0.credit_types_treatment'
+          - 'budget_filter.0.services'
+          - 'budget_filter.0.subaccounts'
+          - 'budget_filter.0.labels'
+          - 'budget_filter.0.calendarPeriod'
+          - 'budget_filter.0.customPeriod'
+        item_type:
+          type: String
+      - name: 'creditTypes'
+        type: Array
         description: |
           Optional. If creditTypesTreatment is INCLUDE_SPECIFIED_CREDITS,
           this is a list of credit types to be subtracted from gross cost to determine the spend for threshold calculations. See a list of acceptable credit type values.
           If creditTypesTreatment is not INCLUDE_SPECIFIED_CREDITS, this field must be empty.
 
           **Note:** If the field has a value in the config and needs to be removed, the field has to be an emtpy array in the config.
-        at_least_one_of:
-          - budget_filter.0.projects
-          - budget_filter.0.resource_ancestors
-          - budget_filter.0.credit_types_treatment
-          - budget_filter.0.services
-          - budget_filter.0.subaccounts
-          - budget_filter.0.labels
-          - budget_filter.0.calendarPeriod
-          - budget_filter.0.customPeriod
         default_from_api: true
-        item_type: Api::Type::String
-      - !ruby/object:Api::Type::Array
-        name: subaccounts
+        at_least_one_of:
+          - 'budget_filter.0.projects'
+          - 'budget_filter.0.resource_ancestors'
+          - 'budget_filter.0.credit_types_treatment'
+          - 'budget_filter.0.services'
+          - 'budget_filter.0.subaccounts'
+          - 'budget_filter.0.labels'
+          - 'budget_filter.0.calendarPeriod'
+          - 'budget_filter.0.customPeriod'
+        item_type:
+          type: String
+      - name: 'subaccounts'
+        type: Array
         description: |
           A set of subaccounts of the form billingAccounts/{account_id},
           specifying that usage from only this set of subaccounts should
@@ -235,162 +237,161 @@ properties:
           account and all subaccounts, if they exist.
 
           **Note:** If the field has a value in the config and needs to be removed, the field has to be an emtpy array in the config.
-        at_least_one_of:
-          - budget_filter.0.projects
-          - budget_filter.0.resource_ancestors
-          - budget_filter.0.credit_types_treatment
-          - budget_filter.0.services
-          - budget_filter.0.subaccounts
-          - budget_filter.0.labels
-          - budget_filter.0.calendarPeriod
-          - budget_filter.0.customPeriod
         default_from_api: true
-        item_type: Api::Type::String
-      - !ruby/object:Api::Type::KeyValuePairs
-        name: 'labels'
+        at_least_one_of:
+          - 'budget_filter.0.projects'
+          - 'budget_filter.0.resource_ancestors'
+          - 'budget_filter.0.credit_types_treatment'
+          - 'budget_filter.0.services'
+          - 'budget_filter.0.subaccounts'
+          - 'budget_filter.0.labels'
+          - 'budget_filter.0.calendarPeriod'
+          - 'budget_filter.0.customPeriod'
+        item_type:
+          type: String
+      - name: 'labels'
+        type: KeyValuePairs
         description: |
           A single label and value pair specifying that usage from only
           this set of labeled resources should be included in the budget.
-        at_least_one_of:
-          - budget_filter.0.projects
-          - budget_filter.0.resource_ancestors
-          - budget_filter.0.credit_types_treatment
-          - budget_filter.0.services
-          - budget_filter.0.subaccounts
-          - budget_filter.0.labels
-          - budget_filter.0.calendarPeriod
-          - budget_filter.0.customPeriod
         default_from_api: true
-        custom_expand: 'templates/terraform/custom_expand/billing_budget_budget_filter_labels.erb'
-        custom_flatten: 'templates/terraform/custom_flatten/billing_budget_budget_filter_labels.erb'
-      - !ruby/object:Api::Type::Enum
-        name: calendarPeriod
         at_least_one_of:
-          - budget_filter.0.projects
-          - budget_filter.0.resource_ancestors
-          - budget_filter.0.credit_types_treatment
-          - budget_filter.0.services
-          - budget_filter.0.subaccounts
-          - budget_filter.0.labels
-          - budget_filter.0.calendarPeriod
-          - budget_filter.0.customPeriod
+          - 'budget_filter.0.projects'
+          - 'budget_filter.0.resource_ancestors'
+          - 'budget_filter.0.credit_types_treatment'
+          - 'budget_filter.0.services'
+          - 'budget_filter.0.subaccounts'
+          - 'budget_filter.0.labels'
+          - 'budget_filter.0.calendarPeriod'
+          - 'budget_filter.0.customPeriod'
+        custom_flatten: 'templates/terraform/custom_flatten/billing_budget_budget_filter_labels.tmpl'
+        custom_expand: 'templates/terraform/custom_expand/billing_budget_budget_filter_labels.tmpl'
+      - name: 'calendarPeriod'
+        type: Enum
         description: |
           A CalendarPeriod represents the abstract concept of a recurring time period that has a
           canonical start. Grammatically, "the start of the current CalendarPeriod".
           All calendar times begin at 12 AM US and Canadian Pacific Time (UTC-8).
 
           Exactly one of `calendar_period`, `custom_period` must be provided.
-        values:
-          - :MONTH
-          - :QUARTER
-          - :YEAR
-          - :CALENDAR_PERIOD_UNSPECIFIED
-        diff_suppress_func:
-          'checkValAndDefaultStringSuppress("MONTH",
-          "budget_filter.0.custom_period.0.start_date")'
-      - !ruby/object:Api::Type::NestedObject
-        name: customPeriod
         at_least_one_of:
-          - budget_filter.0.projects
-          - budget_filter.0.resource_ancestors
-          - budget_filter.0.credit_types_treatment
-          - budget_filter.0.services
-          - budget_filter.0.subaccounts
-          - budget_filter.0.labels
-          - budget_filter.0.calendarPeriod
-          - budget_filter.0.customPeriod
+          - 'budget_filter.0.projects'
+          - 'budget_filter.0.resource_ancestors'
+          - 'budget_filter.0.credit_types_treatment'
+          - 'budget_filter.0.services'
+          - 'budget_filter.0.subaccounts'
+          - 'budget_filter.0.labels'
+          - 'budget_filter.0.calendarPeriod'
+          - 'budget_filter.0.customPeriod'
+        diff_suppress_func: 'checkValAndDefaultStringSuppress("MONTH", "budget_filter.0.custom_period.0.start_date")'
+        enum_values:
+          - 'MONTH'
+          - 'QUARTER'
+          - 'YEAR'
+          - 'CALENDAR_PERIOD_UNSPECIFIED'
+      - name: 'customPeriod'
+        type: NestedObject
         description: |
           Specifies to track usage from any start date (required) to any end date (optional).
           This time period is static, it does not recur.
 
           Exactly one of `calendar_period`, `custom_period` must be provided.
+        at_least_one_of:
+          - 'budget_filter.0.projects'
+          - 'budget_filter.0.resource_ancestors'
+          - 'budget_filter.0.credit_types_treatment'
+          - 'budget_filter.0.services'
+          - 'budget_filter.0.subaccounts'
+          - 'budget_filter.0.labels'
+          - 'budget_filter.0.calendarPeriod'
+          - 'budget_filter.0.customPeriod'
         properties:
-          - !ruby/object:Api::Type::NestedObject
-            name: startDate
-            required: true
+          - name: 'startDate'
+            type: NestedObject
             description: |
               A start date is required. The start date must be after January 1, 2017.
+            required: true
             properties:
-              - !ruby/object:Api::Type::Integer
-                name: year
-                required: true
+              - name: 'year'
+                type: Integer
                 description: |
                   Year of the date. Must be from 1 to 9999.
-                validation: !ruby/object:Provider::Terraform::Validation
-                  function: 'validation.IntBetween(1,9999)'
-              - !ruby/object:Api::Type::Integer
-                name: month
                 required: true
+                validation:
+                  function: 'validation.IntBetween(1,9999)'
+              - name: 'month'
+                type: Integer
                 description: |
                   Month of a year. Must be from 1 to 12.
-                validation: !ruby/object:Provider::Terraform::Validation
-                  function: 'validation.IntBetween(1,12)'
-              - !ruby/object:Api::Type::Integer
-                name: day
                 required: true
+                validation:
+                  function: 'validation.IntBetween(1,12)'
+              - name: 'day'
+                type: Integer
                 description: |
                   Day of a month. Must be from 1 to 31 and valid for the year and month.
-                validation: !ruby/object:Provider::Terraform::Validation
+                required: true
+                validation:
                   function: 'validation.IntBetween(1,31)'
-          - !ruby/object:Api::Type::NestedObject
-            name: endDate
+          - name: 'endDate'
+            type: NestedObject
             description: |
               Optional. The end date of the time period. Budgets with elapsed end date won't be processed.
               If unset, specifies to track all usage incurred since the startDate.
             properties:
-              - !ruby/object:Api::Type::Integer
-                name: year
-                required: true
+              - name: 'year'
+                type: Integer
                 description: |
                   Year of the date. Must be from 1 to 9999.
-                validation: !ruby/object:Provider::Terraform::Validation
-                  function: 'validation.IntBetween(1,9999)'
-              - !ruby/object:Api::Type::Integer
-                name: month
                 required: true
+                validation:
+                  function: 'validation.IntBetween(1,9999)'
+              - name: 'month'
+                type: Integer
                 description: |
                   Month of a year. Must be from 1 to 12.
-                validation: !ruby/object:Provider::Terraform::Validation
-                  function: 'validation.IntBetween(1,12)'
-              - !ruby/object:Api::Type::Integer
-                name: day
                 required: true
+                validation:
+                  function: 'validation.IntBetween(1,12)'
+              - name: 'day'
+                type: Integer
                 description: |
                   Day of a month. Must be from 1 to 31 and valid for the year and month.
-                validation: !ruby/object:Provider::Terraform::Validation
+                required: true
+                validation:
                   function: 'validation.IntBetween(1,31)'
-  - !ruby/object:Api::Type::NestedObject
-    name: amount
-    required: true
+  - name: 'amount'
+    type: NestedObject
     description: |
       The budgeted amount for each usage period.
+    required: true
     update_mask_fields:
       - 'amount.specifiedAmount.currencyCode'
       - 'amount.specifiedAmount.units'
       - 'amount.specifiedAmount.nanos'
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: specifiedAmount
-        exactly_one_of:
-          - amount.0.specified_amount
-          - amount.0.last_period_amount
+      - name: 'specifiedAmount'
+        type: NestedObject
         description: |
           A specified amount to use as the budget. currencyCode is
           optional. If specified, it must match the currency of the
           billing account. The currencyCode is provided on output.
+        exactly_one_of:
+          - 'amount.0.specified_amount'
+          - 'amount.0.last_period_amount'
         properties:
-          - !ruby/object:Api::Type::String
-            name: currencyCode
+          - name: 'currencyCode'
+            type: String
             description: |
               The 3-letter currency code defined in ISO 4217.
             default_from_api: true
-          - !ruby/object:Api::Type::String
-            name: units
+          - name: 'units'
+            type: String
             description: |
               The whole units of the amount. For example if currencyCode
               is "USD", then 1 unit is one US dollar.
-          - !ruby/object:Api::Type::Integer
-            name: nanos
+          - name: 'nanos'
+            type: Integer
             description: |
               Number of nano (10^-9) units of the amount.
               The value must be between -999,999,999 and +999,999,999
@@ -399,49 +400,50 @@ properties:
               negative. If units is negative, nanos must be negative or
               zero. For example $-1.75 is represented as units=-1 and
               nanos=-750,000,000.
-      - !ruby/object:Api::Type::Boolean
-        name: 'lastPeriodAmount'
-        exactly_one_of:
-          - amount.0.specified_amount
-          - amount.0.last_period_amount
+      - name: 'lastPeriodAmount'
+        type: Boolean
         description: |
           Configures a budget amount that is automatically set to 100% of
           last period's spend.
           Boolean. Set value to true to use. Do not set to false, instead
           use the `specified_amount` block.
-        custom_expand: 'templates/terraform/custom_expand/bool_to_object.go.erb'
-        custom_flatten: 'templates/terraform/custom_flatten/object_to_bool.go.erb'
-  - !ruby/object:Api::Type::Array
-    name: thresholdRules
+        exactly_one_of:
+          - 'amount.0.specified_amount'
+          - 'amount.0.last_period_amount'
+        custom_flatten: 'templates/terraform/custom_flatten/object_to_bool.go.tmpl'
+        custom_expand: 'templates/terraform/custom_expand/bool_to_object.go.tmpl'
+  - name: 'thresholdRules'
+    type: Array
     description: |
       Rules that trigger alerts (notifications of thresholds being
       crossed) when spend exceeds the specified percentages of the
       budget.
-    item_type: !ruby/object:Api::Type::NestedObject
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::Double
-          name: thresholdPercent
-          required: true
+        - name: 'thresholdPercent'
+          type: Double
           description: |
             Send an alert when this threshold is exceeded. This is a
             1.0-based percentage, so 0.5 = 50%. Must be >= 0.
+          required: true
           send_empty_value: true
-        - !ruby/object:Api::Type::Enum
-          name: spendBasis
+        - name: 'spendBasis'
+          type: Enum
           description: |
             The type of basis used to determine if spend has passed
             the threshold.
-          default_value: :CURRENT_SPEND
-          values:
-            - :CURRENT_SPEND
-            - :FORECASTED_SPEND
-  - !ruby/object:Api::Type::NestedObject
-    name: allUpdatesRule
-    api_name: notificationsRule
+          default_value: "CURRENT_SPEND"
+          enum_values:
+            - 'CURRENT_SPEND'
+            - 'FORECASTED_SPEND'
+  - name: 'allUpdatesRule'
+    type: NestedObject
     description: |
       Defines notifications that are sent on every update to the
       billing account's spend, regardless of the thresholds defined
       using threshold rules.
+    api_name: notificationsRule
     update_mask_fields:
       - 'notificationsRule.pubsubTopic'
       - 'notificationsRule.schemaVersion'
@@ -449,59 +451,60 @@ properties:
       - 'notificationsRule.disableDefaultIamRecipients'
       - 'notificationsRule.enableProjectLevelRecipients'
     properties:
-      - !ruby/object:Api::Type::String
-        name: pubsubTopic
-        at_least_one_of:
-          - all_updates_rule.0.pubsub_topic
-          - all_updates_rule.0.monitoring_notification_channels
+      - name: 'pubsubTopic'
+        type: String
         description: |
           The name of the Cloud Pub/Sub topic where budget related
           messages will be published, in the form
           projects/{project_id}/topics/{topic_id}. Updates are sent
           at regular intervals to the topic.
-      - !ruby/object:Api::Type::String
-        name: schemaVersion
-        default_value: '1.0'
+        at_least_one_of:
+          - 'all_updates_rule.0.pubsub_topic'
+          - 'all_updates_rule.0.monitoring_notification_channels'
+      - name: 'schemaVersion'
+        type: String
         description: |
           The schema version of the notification. Only "1.0" is
           accepted. It represents the JSON schema as defined in
           https://cloud.google.com/billing/docs/how-to/budgets#notification_format.
-        custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
-      - !ruby/object:Api::Type::Array
-        name: monitoringNotificationChannels
-        max_size: 5
-        at_least_one_of:
-          - all_updates_rule.0.pubsub_topic
-          - all_updates_rule.0.monitoring_notification_channels
+        custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
+        default_value: "1.0"
+      - name: 'monitoringNotificationChannels'
+        type: Array
         description: |
           The full resource name of a monitoring notification
           channel in the form
           projects/{project_id}/notificationChannels/{channel_id}.
           A maximum of 5 channels are allowed.
-        item_type: Api::Type::String
-      - !ruby/object:Api::Type::Boolean
-        name: disableDefaultIamRecipients
-        default_value: false
+        at_least_one_of:
+          - 'all_updates_rule.0.pubsub_topic'
+          - 'all_updates_rule.0.monitoring_notification_channels'
+        item_type:
+          type: String
+        max_size: 5
+      - name: 'disableDefaultIamRecipients'
+        type: Boolean
         description: |
           Boolean. When set to true, disables default notifications sent
           when a threshold is exceeded. Default recipients are
           those with Billing Account Administrators and Billing
           Account Users IAM roles for the target account.
-      - !ruby/object:Api::Type::Boolean
-        name: enableProjectLevelRecipients
         default_value: false
+      - name: 'enableProjectLevelRecipients'
+        type: Boolean
         description: |
           When set to true, and when the budget has a single project configured,
           notifications will be sent to project level recipients of that project.
           This field will be ignored if the budget has multiple or no project configured.
 
           Currently, project level recipients are the users with Owner role on a cloud project.
-  - !ruby/object:Api::Type::Enum
-    name: ownershipScope
+        default_value: false
+  - name: 'ownershipScope'
+    type: Enum
     description: |
       The ownership scope of the budget. The ownership scope and users'
       IAM permissions determine who has full access to the budget's data.
-    values:
-      - :OWNERSHIP_SCOPE_UNSPECIFIED
-      - :ALL_USERS
-      - :BILLING_ACCOUNT
+    enum_values:
+      - 'OWNERSHIP_SCOPE_UNSPECIFIED'
+      - 'ALL_USERS'
+      - 'BILLING_ACCOUNT'

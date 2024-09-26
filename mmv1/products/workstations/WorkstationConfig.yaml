@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,65 +11,61 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'WorkstationConfig'
-self_link: 'projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs/{{workstation_config_id}}'
-base_url: 'projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs'
-create_url: 'projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs?workstationConfigId={{workstation_config_id}}'
-update_verb: :PATCH
-update_mask: true
-min_version: beta
 description:
   'A set of configuration options describing how a workstation will be run.
   Workstation configurations are intended to be shared across multiple
   workstations.'
-references: !ruby/object:Api::Resource::ReferenceLinks
+min_version: 'beta'
+references:
   guides:
     'Workstations': 'https://cloud.google.com/workstations/docs/'
   api: 'https://cloud.google.com/workstations/docs/reference/rest/v1beta/projects.locations.workstationClusters.workstationConfigs/create'
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  method_name_separator: ':'
-  fetch_iam_policy_verb: :GET
-  parent_resource_attribute: workstation_config_id
-  import_format:
-    [
-      'projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs/{{workstation_config_id}}',
-      '{{workstation_config_id}}',
-    ]
-  min_version: beta
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs'
+self_link: 'projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs/{{workstation_config_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs?workstationConfigId={{workstation_config_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs/{{workstation_config_id}}'
+timeouts:
+  insert_minutes: 30
+  update_minutes: 30
+  delete_minutes: 30
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-    timeouts: !ruby/object:Api::Timeouts
+    timeouts:
       insert_minutes: 30
       update_minutes: 30
       delete_minutes: 30
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error'
     message: 'message'
-import_format:
-  [
-    'projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs/{{workstation_config_id}}',
-  ]
-autogen_async: true
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_attribute: 'workstation_config_id'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs/{{workstation_config_id}}'
+    - '{{workstation_config_id}}'
+  min_version: 'beta'
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'workstation_config_basic'
-    min_version: beta
+  - name: 'workstation_config_basic'
     primary_resource_id: 'default'
-    primary_resource_name:
-      'fmt.Sprintf("tf-test-workstation-cluster%s", context["random_suffix"]),
-      fmt.Sprintf("tf-test-workstation-config%s", context["random_suffix"])'
+    primary_resource_name: 'fmt.Sprintf("tf-test-workstation-cluster%s", context["random_suffix"]), fmt.Sprintf("tf-test-workstation-config%s", context["random_suffix"])'
+    min_version: 'beta'
     vars:
       workstation_cluster_name: 'workstation-cluster'
       workstation_config_name: 'workstation-config'
@@ -77,143 +73,153 @@ examples:
       value_short_name: 'valuename'
       org_id: '123456789'
     test_vars_overrides:
-      key_short_name: '"tf-test-key-" + acctest.RandString(t, 10)'
-      value_short_name: '"tf-test-value-" + acctest.RandString(t, 10)'
-      org_id: 'envvar.GetTestOrgFromEnv(t)'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'workstation_config_container'
-    min_version: beta
+      'key_short_name': '"tf-test-key-" + acctest.RandString(t, 10)'
+      'value_short_name': '"tf-test-value-" + acctest.RandString(t, 10)'
+      'org_id': 'envvar.GetTestOrgFromEnv(t)'
+  - name: 'workstation_config_container'
     primary_resource_id: 'default'
+    min_version: 'beta'
     vars:
       workstation_cluster_name: 'workstation-cluster'
       workstation_config_name: 'workstation-config'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'workstation_config_persistent_directories'
-    min_version: beta
+  - name: 'workstation_config_persistent_directories'
     primary_resource_id: 'default'
+    min_version: 'beta'
     vars:
       workstation_cluster_name: 'workstation-cluster'
       workstation_config_name: 'workstation-config'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'workstation_config_source_snapshot'
-    min_version: beta
+  - name: 'workstation_config_source_snapshot'
     primary_resource_id: 'default'
+    min_version: 'beta'
     vars:
       workstation_cluster_name: 'workstation-cluster'
       workstation_config_name: 'workstation-config'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'workstation_config_shielded_instance_config'
-    min_version: beta
+  - name: 'workstation_config_shielded_instance_config'
     primary_resource_id: 'default'
+    min_version: 'beta'
     vars:
       workstation_cluster_name: 'workstation-cluster'
       workstation_config_name: 'workstation-config'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'workstation_config_accelerators'
-    min_version: beta
+  - name: 'workstation_config_accelerators'
     primary_resource_id: 'default'
+    min_version: 'beta'
     vars:
       workstation_cluster_name: 'workstation-cluster'
       workstation_config_name: 'workstation-config'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'workstation_config_boost'
-    min_version: beta
+  - name: 'workstation_config_boost'
     primary_resource_id: 'default'
+    min_version: 'beta'
     vars:
       workstation_cluster_name: 'workstation-cluster'
       workstation_config_name: 'workstation-config'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'workstation_config_encryption_key'
-    min_version: beta
+  - name: 'workstation_config_encryption_key'
     primary_resource_id: 'default'
+    min_version: 'beta'
     vars:
       account_id: 'my-account'
       workstation_cluster_name: 'workstation-cluster'
       workstation_config_name: 'workstation-config'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'workstationConfigId'
-    required: true
-    immutable: true
-    url_param_only: true
+  - name: 'workstationConfigId'
+    type: String
     description: |
       The ID to be assigned to the workstation cluster config.
-  - !ruby/object:Api::Type::String
-    name: 'workstationClusterId'
+    min_version: 'beta'
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
+  - name: 'workstationClusterId'
+    type: String
     description: |
       The ID of the parent workstation cluster.
-  - !ruby/object:Api::Type::String
-    name: 'location'
-    immutable: true
-    required: true
+    min_version: 'beta'
     url_param_only: true
+    required: true
+    immutable: true
+  - name: 'location'
+    type: String
     description: |
       The location where the workstation cluster config should reside.
+    min_version: 'beta'
+    url_param_only: true
+    required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    output: true
+  - name: 'name'
+    type: String
     description: |
       Full name of this resource.
-  - !ruby/object:Api::Type::String
-    name: 'uid'
+    min_version: 'beta'
     output: true
+  - name: 'uid'
+    type: String
     description: |
       The system-generated UID of the resource.
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
+    min_version: 'beta'
+    output: true
+  - name: 'displayName'
+    type: String
     description: |
       Human-readable name for this resource.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+    min_version: 'beta'
+  - name: 'labels'
+    type: KeyValueLabels
     description:
       'Client-specified labels that are applied to the resource and that are
       also propagated to the underlying Compute Engine resources.'
-  - !ruby/object:Api::Type::KeyValueAnnotations
-    name: 'annotations'
+    min_version: 'beta'
+  - name: 'annotations'
+    type: KeyValueAnnotations
     description: 'Client-specified annotations. This is distinct from labels.'
-  - !ruby/object:Api::Type::Fingerprint
-    name: 'etag'
+    min_version: 'beta'
+  - name: 'etag'
+    type: Fingerprint
     description: |
       Checksum computed by the server.
       May be sent on update and delete requests to ensure that the client has an up-to-date value before proceeding.
-  - !ruby/object:Api::Type::Time
-    name: 'createTime'
+    min_version: 'beta'
+    output: true
+  - name: 'createTime'
+    type: Time
     description: |
       Time when this resource was created.
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'idleTimeout'
-    default_value: '1200s'
+  - name: 'idleTimeout'
+    type: String
     description: |
       How long to wait before automatically stopping an instance that hasn't recently received any user traffic. A value of 0 indicates that this instance should never time out from idleness. Defaults to 20 minutes.
       A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
-  - !ruby/object:Api::Type::String
-    name: 'runningTimeout'
-    default_value: '43200s'
+    min_version: 'beta'
+    default_value: "1200s"
+  - name: 'runningTimeout'
+    type: String
     description: |
       How long to wait before automatically stopping a workstation after it was started. A value of 0 indicates that workstations using this configuration should never time out from running duration. Must be greater than 0 and less than 24 hours if `encryption_key` is set. Defaults to 12 hours.
       A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
-  - !ruby/object:Api::Type::Array
-    name: 'replicaZones'
-    item_type: Api::Type::String
-    immutable: true
+    min_version: 'beta'
+    default_value: "43200s"
+  - name: 'replicaZones'
+    type: Array
     description: |
       Specifies the zones used to replicate the VM and disk resources within the region. If set, exactly two zones within the workstation cluster's region must be specified—for example, `['us-central1-a', 'us-central1-f']`.
       If this field is empty, two default zones within the region are used. Immutable after the workstation configuration is created.
+    min_version: 'beta'
+    immutable: true
     default_from_api: true
-  - !ruby/object:Api::Type::Boolean
-    name: 'enableAuditAgent'
+    item_type:
+      type: String
+  - name: 'enableAuditAgent'
+    type: Boolean
     description: |
       Whether to enable Linux `auditd` logging on the workstation. When enabled, a service account must also be specified that has `logging.buckets.write` permission on the project. Operating system audit logging is distinct from Cloud Audit Logs.
+    min_version: 'beta'
     ignore_read: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'host'
+  - name: 'host'
+    type: NestedObject
     description: |
       Runtime host for a workstation.
+    min_version: 'beta'
     default_from_api: true
     update_mask_fields:
       - 'host.gceInstance.machineType'
@@ -231,265 +237,317 @@ properties:
       - 'host.gceInstance.disableSsh'
       - 'host.gceInstance.vmTags'
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: 'gceInstance'
+      - name: 'gceInstance'
+        type: NestedObject
         description: |
           A runtime using a Compute Engine instance.
+        min_version: 'beta'
         default_from_api: true
         properties:
-          - !ruby/object:Api::Type::String
-            name: 'machineType'
+          - name: 'machineType'
+            type: String
             description: |-
               The name of a Compute Engine machine type.
+            min_version: 'beta'
             default_from_api: true
-          - !ruby/object:Api::Type::String
-            name: 'serviceAccount'
-            immutable: true
+          - name: 'serviceAccount'
+            type: String
             description: |-
               Email address of the service account that will be used on VM instances used to support this config. This service account must have permission to pull the specified container image. If not set, VMs will run without a service account, in which case the image must be publicly accessible.
+            min_version: 'beta'
+            immutable: true
             default_from_api: true
-          - !ruby/object:Api::Type::Array
-            name: 'serviceAccountScopes'
-            item_type: Api::Type::String
+          - name: 'serviceAccountScopes'
+            type: Array
             description: |-
               Scopes to grant to the service_account. Various scopes are automatically added based on feature usage. When specified, users of workstations under this configuration must have `iam.serviceAccounts.actAs` on the service account.
+            min_version: 'beta'
             default_from_api: true
-          - !ruby/object:Api::Type::Integer
-            name: 'poolSize'
+            item_type:
+              type: String
+          - name: 'poolSize'
+            type: Integer
             description: |-
               Number of instances to pool for faster workstation startup.
+            min_version: 'beta'
             default_from_api: true
-          - !ruby/object:Api::Type::Integer
-            name: 'bootDiskSizeGb'
-            immutable: true
+          - name: 'bootDiskSizeGb'
+            type: Integer
             description: |-
               Size of the boot disk in GB.
+            min_version: 'beta'
+            immutable: true
             default_from_api: true
-          - !ruby/object:Api::Type::Array
-            name: 'tags'
-            item_type: Api::Type::String
+          - name: 'tags'
+            type: Array
             description: |
               Network tags to add to the Compute Engine machines backing the Workstations.
-          - !ruby/object:Api::Type::Boolean
-            name: 'disablePublicIpAddresses'
+            min_version: 'beta'
+            item_type:
+              type: String
+          - name: 'disablePublicIpAddresses'
+            type: Boolean
             description: |
               Whether instances have no public IP address.
-          - !ruby/object:Api::Type::Boolean
-            name: 'disableSsh'
-            default_value: true
-            send_empty_value: true
+            min_version: 'beta'
+          - name: 'disableSsh'
+            type: Boolean
             description: |
               Whether to disable SSH access to the VM.
-          - !ruby/object:Api::Type::Boolean
-            name: 'enableNestedVirtualization'
+            min_version: 'beta'
+            send_empty_value: true
+            default_value: true
+          - name: 'enableNestedVirtualization'
+            type: Boolean
             description: |
               Whether to enable nested virtualization on the Compute Engine VMs backing the Workstations.
 
               See https://cloud.google.com/workstations/docs/reference/rest/v1beta/projects.locations.workstationClusters.workstationConfigs#GceInstance.FIELDS.enable_nested_virtualization
-          - !ruby/object:Api::Type::NestedObject
-            name: 'shieldedInstanceConfig'
+            min_version: 'beta'
+          - name: 'shieldedInstanceConfig'
+            type: NestedObject
             description: |
               A set of Compute Engine Shielded instance options.
+            min_version: 'beta'
             default_from_api: true
-            custom_flatten: 'templates/terraform/custom_flatten/workstations_config_shielded_instance.go.erb'
+            custom_flatten: 'templates/terraform/custom_flatten/workstations_config_shielded_instance.go.tmpl'
             properties:
-              - !ruby/object:Api::Type::Boolean
-                name: 'enableSecureBoot'
+              - name: 'enableSecureBoot'
+                type: Boolean
                 description: |
                   Whether the instance has Secure Boot enabled.
+                min_version: 'beta'
                 send_empty_value: true
-              - !ruby/object:Api::Type::Boolean
-                name: 'enableVtpm'
+              - name: 'enableVtpm'
+                type: Boolean
                 description: |
                   Whether the instance has the vTPM enabled.
+                min_version: 'beta'
                 send_empty_value: true
-              - !ruby/object:Api::Type::Boolean
-                name: 'enableIntegrityMonitoring'
+              - name: 'enableIntegrityMonitoring'
+                type: Boolean
                 description: |
                   Whether the instance has integrity monitoring enabled.
+                min_version: 'beta'
                 send_empty_value: true
-          - !ruby/object:Api::Type::NestedObject
-            name: 'confidentialInstanceConfig'
+          - name: 'confidentialInstanceConfig'
+            type: NestedObject
             description: |
               A set of Compute Engine Confidential VM instance options.
+            min_version: 'beta'
             default_from_api: true
-            custom_flatten: 'templates/terraform/custom_flatten/workstations_config_confidential_instance.go.erb'
+            custom_flatten: 'templates/terraform/custom_flatten/workstations_config_confidential_instance.go.tmpl'
             properties:
-              - !ruby/object:Api::Type::Boolean
-                name: 'enableConfidentialCompute'
+              - name: 'enableConfidentialCompute'
+                type: Boolean
                 # TODO(esu): Change this to required in next breaking release.
                 description: |
                   Whether the instance has confidential compute enabled.
+                min_version: 'beta'
                 send_empty_value: true
-          - !ruby/object:Api::Type::Array
-            name: 'accelerators'
+          - name: 'accelerators'
+            type: Array
             description: |
               An accelerator card attached to the instance.
-            item_type: !ruby/object:Api::Type::NestedObject
+            min_version: 'beta'
+            item_type:
+              type: NestedObject
               properties:
-                - !ruby/object:Api::Type::String
-                  name: 'type'
+                - name: 'type'
+                  type: String
                   description: |
                     Type of accelerator resource to attach to the instance, for example, "nvidia-tesla-p100".
+                  min_version: 'beta'
                   required: true
-                - !ruby/object:Api::Type::Integer
-                  name: 'count'
+                - name: 'count'
+                  type: Integer
                   description: |
                     Number of accelerator cards exposed to the instance.
+                  min_version: 'beta'
                   required: true
-          - !ruby/object:Api::Type::Array
-            name: 'boostConfigs'
+          - name: 'boostConfigs'
+            type: Array
             description: |
               A list of the boost configurations that workstations created using this workstation configuration are allowed to use.
-            item_type: !ruby/object:Api::Type::NestedObject
+            min_version: 'beta'
+            item_type:
+              type: NestedObject
               properties:
-                - !ruby/object:Api::Type::String
-                  name: 'id'
+                - name: 'id'
+                  type: String
                   description: |
                     The id to be used for the boost config.
+                  min_version: 'beta'
                   required: true
-                - !ruby/object:Api::Type::String
-                  name: 'machineType'
+                - name: 'machineType'
+                  type: String
                   description: |
                     The type of machine that boosted VM instances will use—for example, e2-standard-4. For more information about machine types that Cloud Workstations supports, see the list of available machine types https://cloud.google.com/workstations/docs/available-machine-types. Defaults to e2-standard-4.
-                - !ruby/object:Api::Type::Integer
-                  name: 'bootDiskSizeGb'
-                  immutable: true
+                  min_version: 'beta'
+                - name: 'bootDiskSizeGb'
+                  type: Integer
                   description: |-
                     Size of the boot disk in GB. The minimum boot disk size is `30` GB. Defaults to `50` GB.
+                  min_version: 'beta'
+                  immutable: true
                   default_from_api: true
-                - !ruby/object:Api::Type::Boolean
-                  name: 'enableNestedVirtualization'
+                - name: 'enableNestedVirtualization'
+                  type: Boolean
                   description: |
                     Whether to enable nested virtualization on the Compute Engine VMs backing boosted Workstations.
 
                     See https://cloud.google.com/workstations/docs/reference/rest/v1beta/projects.locations.workstationClusters.workstationConfigs#GceInstance.FIELDS.enable_nested_virtualization
+                  min_version: 'beta'
                   default_from_api: true
-                - !ruby/object:Api::Type::Integer
-                  name: 'poolSize'
+                - name: 'poolSize'
+                  type: Integer
                   description: |-
                     Number of instances to pool for faster workstation boosting.
+                  min_version: 'beta'
                   default_from_api: true
-                - !ruby/object:Api::Type::Array
-                  name: 'accelerators'
+                - name: 'accelerators'
+                  type: Array
                   description: |
                     An accelerator card attached to the boost instance.
-                  item_type: !ruby/object:Api::Type::NestedObject
+                  min_version: 'beta'
+                  item_type:
+                    type: NestedObject
                     properties:
-                      - !ruby/object:Api::Type::String
-                        name: 'type'
+                      - name: 'type'
+                        type: String
                         description: |
                           Type of accelerator resource to attach to the instance, for example, "nvidia-tesla-p100".
+                        min_version: 'beta'
                         required: true
-                      - !ruby/object:Api::Type::Integer
-                        name: 'count'
+                      - name: 'count'
+                        type: Integer
                         description: |
                           Number of accelerator cards exposed to the instance.
+                        min_version: 'beta'
                         required: true
-          - !ruby/object:Api::Type::KeyValuePairs
-            name: 'vmTags'
+          - name: 'vmTags'
+            type: KeyValuePairs
             description: |
               Resource manager tags to be bound to the VM instances backing the Workstations.
               Tag keys and values have the same definition as
               https://cloud.google.com/resource-manager/docs/tags/tags-overview
               Keys must be in the format `tagKeys/{tag_key_id}`, and
               values are in the format `tagValues/456`.
-  - !ruby/object:Api::Type::Array
-    name: 'persistentDirectories'
+            min_version: 'beta'
+  - name: 'persistentDirectories'
+    type: Array
     description: |
       Directories to persist across workstation sessions.
+    min_version: 'beta'
     default_from_api: true
-    item_type: !ruby/object:Api::Type::NestedObject
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'mountPath'
+        - name: 'mountPath'
+          type: String
           description: |
             Location of this directory in the running workstation.
-          default_from_api: true
+          min_version: 'beta'
           immutable: true
-        - !ruby/object:Api::Type::NestedObject
-          name: 'gcePd'
+          default_from_api: true
+        - name: 'gcePd'
+          type: NestedObject
           description: |
             A directory to persist across workstation sessions, backed by a Compute Engine regional persistent disk. Can only be updated if not empty during creation.
+          min_version: 'beta'
           default_from_api: true
           properties:
-            - !ruby/object:Api::Type::String
-              name: 'fsType'
+            - name: 'fsType'
+              type: String
               description: |
                 Type of file system that the disk should be formatted with. The workstation image must support this file system type. Must be empty if `sourceSnapshot` is set. Defaults to `ext4`.
-              default_from_api: true
+              min_version: 'beta'
               immutable: true
-            - !ruby/object:Api::Type::String
-              name: 'diskType'
+              default_from_api: true
+            - name: 'diskType'
+              type: String
               description: |
                 The type of the persistent disk for the home directory. Defaults to `pd-standard`.
-              default_from_api: true
+              min_version: 'beta'
               immutable: true
-            - !ruby/object:Api::Type::Integer
-              name: 'sizeGb'
+              default_from_api: true
+            - name: 'sizeGb'
+              type: Integer
               description: |-
                 The GB capacity of a persistent home directory for each workstation created with this configuration. Must be empty if `sourceSnapshot` is set.
                 Valid values are `10`, `50`, `100`, `200`, `500`, or `1000`. Defaults to `200`. If less than `200` GB, the `diskType` must be `pd-balanced` or `pd-ssd`.
-              default_from_api: true
+              min_version: 'beta'
               immutable: true
-            - !ruby/object:Api::Type::Enum
-              name: 'reclaimPolicy'
+              default_from_api: true
+            - name: 'reclaimPolicy'
+              type: Enum
               description: |
                 Whether the persistent disk should be deleted when the workstation is deleted. Valid values are `DELETE` and `RETAIN`. Defaults to `DELETE`.
-              values:
-                - :DELETE
-                - :RETAIN
-            - !ruby/object:Api::Type::String
-              name: 'sourceSnapshot'
+              min_version: 'beta'
+              enum_values:
+                - 'DELETE'
+                - 'RETAIN'
+            - name: 'sourceSnapshot'
+              type: String
               description: |
                 Name of the snapshot to use as the source for the disk. This can be the snapshot's `self_link`, `id`, or a string in the format of `projects/{project}/global/snapshots/{snapshot}`. If set, `sizeGb` and `fsType` must be empty. Can only be updated if it has an existing value.
+              min_version: 'beta'
               # TODO(esu): Add conflicting fields once complex lists are supported.
-  - !ruby/object:Api::Type::Array
-    name: 'ephemeralDirectories'
+  - name: 'ephemeralDirectories'
+    type: Array
     description: |
       Ephemeral directories which won't persist across workstation sessions.
+    min_version: 'beta'
     default_from_api: true
-    item_type: !ruby/object:Api::Type::NestedObject
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'mountPath'
+        - name: 'mountPath'
+          type: String
           description: |
             Location of this directory in the running workstation.
+          min_version: 'beta'
           default_from_api: true
-        - !ruby/object:Api::Type::NestedObject
-          name: 'gcePd'
+        - name: 'gcePd'
+          type: NestedObject
           description: |
             An EphemeralDirectory backed by a Compute Engine persistent disk.
+          min_version: 'beta'
           default_from_api: true
           properties:
-            - !ruby/object:Api::Type::String
-              name: 'diskType'
+            - name: 'diskType'
+              type: String
               description: |
                 Type of the disk to use. Defaults to `"pd-standard"`.
+              min_version: 'beta'
               default_from_api: true
-            - !ruby/object:Api::Type::String
-              name: 'sourceSnapshot'
+            - name: 'sourceSnapshot'
+              type: String
               description: |
                 Name of the snapshot to use as the source for the disk.
 
                 Must be empty if `sourceImage` is set.
                 Must be empty if `read_only` is false.
                 Updating `source_snapshot` will update content in the ephemeral directory after the workstation is restarted.
-            - !ruby/object:Api::Type::String
-              name: 'sourceImage'
+              min_version: 'beta'
+            - name: 'sourceImage'
+              type: String
               description: |
                 Name of the disk image to use as the source for the disk.
 
                 Must be empty `sourceSnapshot` is set.
                 Updating `sourceImage` will update content in the ephemeral directory after the workstation is restarted.
-            - !ruby/object:Api::Type::Boolean
-              name: 'readOnly'
+              min_version: 'beta'
+            - name: 'readOnly'
+              type: Boolean
               description: |
                 Whether the disk is read only. If true, the disk may be shared by multiple VMs and `sourceSnapshot` must be set.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'container'
+              min_version: 'beta'
+  - name: 'container'
+    type: NestedObject
     description: |
       Container that will be run for each workstation using this configuration when that workstation is started.
+    min_version: 'beta'
     default_from_api: true
     # Mask fields must be sent as distinct keys, else some fields will upsert rather than be replaced.
     update_mask_fields:
@@ -500,101 +558,124 @@ properties:
       - 'container.env'
       - 'container.runAsUser'
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'image'
+      - name: 'image'
+        type: String
         description: |
           Docker image defining the container. This image must be accessible by the config's service account.
+        min_version: 'beta'
         default_from_api: true
-      - !ruby/object:Api::Type::Array
-        name: 'command'
-        item_type: Api::Type::String
+      - name: 'command'
+        type: Array
         description: |
           If set, overrides the default ENTRYPOINT specified by the image.
-      - !ruby/object:Api::Type::Array
-        name: 'args'
-        item_type: Api::Type::String
+        min_version: 'beta'
+        item_type:
+          type: String
+      - name: 'args'
+        type: Array
         description: |
           Arguments passed to the entrypoint.
-      - !ruby/object:Api::Type::String
-        name: 'workingDir'
+        min_version: 'beta'
+        item_type:
+          type: String
+      - name: 'workingDir'
+        type: String
         description: |
           If set, overrides the default DIR specified by the image.
+        min_version: 'beta'
         # Allow unsetting to revert to container default.
         send_empty_value: true
-      - !ruby/object:Api::Type::KeyValuePairs
-        name: 'env'
+      - name: 'env'
+        type: KeyValuePairs
         description: |
           Environment variables passed to the container.
           The elements are of the form "KEY=VALUE" for the environment variable "KEY" being given the value "VALUE".
-      - !ruby/object:Api::Type::Integer
-        name: 'runAsUser'
+        min_version: 'beta'
+      - name: 'runAsUser'
+        type: Integer
         description: |
           If set, overrides the USER specified in the image with the given uid.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'encryptionKey'
-    immutable: true
+        min_version: 'beta'
+  - name: 'encryptionKey'
+    type: NestedObject
     description: |
       Encrypts resources of this workstation configuration using a customer-managed encryption key.
 
       If specified, the boot disk of the Compute Engine instance and the persistent disk are encrypted using this encryption key. If this field is not set, the disks are encrypted using a generated key. Customer-managed encryption keys do not protect disk metadata.
       If the customer-managed encryption key is rotated, when the workstation instance is stopped, the system attempts to recreate the persistent disk with the new version of the key. Be sure to keep older versions of the key until the persistent disk is recreated. Otherwise, data on the persistent disk will be lost.
       If the encryption key is revoked, the workstation session will automatically be stopped within 7 hours.
+    min_version: 'beta'
+    immutable: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'kmsKey'
+      - name: 'kmsKey'
+        type: String
         description: |
           The name of the Google Cloud KMS encryption key.
+        min_version: 'beta'
         required: true
-      - !ruby/object:Api::Type::String
-        name: 'kmsKeyServiceAccount'
+      - name: 'kmsKeyServiceAccount'
+        type: String
         description: |
           The service account to use with the specified KMS key.
+        min_version: 'beta'
         required: true
-  - !ruby/object:Api::Type::Array
-    name: 'readinessChecks'
+  - name: 'readinessChecks'
+    type: Array
     description: |
       Readiness checks to be performed on a workstation.
-    item_type: !ruby/object:Api::Type::NestedObject
+    min_version: 'beta'
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'path'
+        - name: 'path'
+          type: String
           description: |
             Path to which the request should be sent.
+          min_version: 'beta'
           required: true
-        - !ruby/object:Api::Type::Integer
-          name: 'port'
+        - name: 'port'
+          type: Integer
           description: |
             Port to which the request should be sent.
+          min_version: 'beta'
           required: true
-  - !ruby/object:Api::Type::Boolean
-    name: 'degraded'
+  - name: 'degraded'
+    type: Boolean
     description: |
       Whether this resource is in degraded mode, in which case it may require user action to restore full functionality. Details can be found in the conditions field.
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::Boolean
-    name: 'disableTcpConnections'
+  - name: 'disableTcpConnections'
+    type: Boolean
     description: |
       Disables support for plain TCP connections in the workstation. By default the service supports TCP connections via a websocket relay. Setting this option to true disables that relay, which prevents the usage of services that require plain tcp connections, such as ssh. When enabled, all communication must occur over https or wss.
-  - !ruby/object:Api::Type::Array
-    name: 'conditions'
+    min_version: 'beta'
+  - name: 'conditions'
+    type: Array
     description: |-
       Status conditions describing the current resource state.
+    min_version: 'beta'
     output: true
-    item_type: !ruby/object:Api::Type::NestedObject
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::Integer
-          name: 'code'
-          output: true
+        - name: 'code'
+          type: Integer
           description: |-
             The status code, which should be an enum value of google.rpc.Code.
-        - !ruby/object:Api::Type::String
-          name: 'message'
+          min_version: 'beta'
           output: true
+        - name: 'message'
+          type: String
           description: |-
             Human readable message indicating details about the current status.
-        - !ruby/object:Api::Type::Array
-          name: 'details'
+          min_version: 'beta'
           output: true
+        - name: 'details'
+          type: Array
           description: |
             A list of messages that carry the error details.
-          item_type: Api::Type::KeyValuePairs
+          min_version: 'beta'
+          output: true
+          item_type:
+            type: KeyValuePairs

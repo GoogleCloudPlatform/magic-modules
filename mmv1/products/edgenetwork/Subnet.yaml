@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,128 +11,147 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Subnet'
 description: |
   A Distributed Cloud Edge subnet, which provides L2 isolation within a network.
-references: !ruby/object:Api::Resource::ReferenceLinks
-  api: 'https://cloud.google.com/distributed-cloud/edge/latest/docs/reference/network/rest/v1/projects.locations.zones.subnets'
+references:
   guides:
     'Create and manage subnetworks': 'https://cloud.google.com/distributed-cloud/edge/latest/docs/subnetworks#api'
+  api: 'https://cloud.google.com/distributed-cloud/edge/latest/docs/reference/network/rest/v1/projects.locations.zones.subnets'
+docs:
 base_url: 'projects/{{project}}/locations/{{location}}/zones/{{zone}}/subnets'
 self_link: 'projects/{{project}}/locations/{{location}}/zones/{{zone}}/subnets/{{subnet_id}}'
 create_url: 'projects/{{project}}/locations/{{location}}/zones/{{zone}}/subnets?subnetId={{subnet_id}}'
 immutable: true
-autogen_async: true
-timeouts: !ruby/object:Api::Timeouts
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/zones/{{zone}}/subnets/{{subnet_id}}'
+  - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
   delete_minutes: 30
-import_format: ['projects/{{project}}/locations/{{location}}/zones/{{zone}}/subnets/{{subnet_id}}', '{{name}}']
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'edgenetwork_subnet'
+  - name: 'edgenetwork_subnet'
     primary_resource_id: 'example_subnet'
-    skip_test: true
     vars:
       edgenetwork_subnet_id: 'example-subnet'
       edgenetwork_network_id: 'example-network'
     test_env_vars:
-      location: :REGION
-      zone: :ZONE
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'edgenetwork_subnet_with_vlan_id'
+      location: 'REGION'
+      zone: 'ZONE'
+    exclude_test: true
+  - name: 'edgenetwork_subnet_with_vlan_id'
     primary_resource_id: 'example_subnet_with_vlan_id'
-    skip_test: true
     vars:
       edgenetwork_subnet_id: 'example-subnet-with-vlan-id'
       edgenetwork_network_id: 'example-network'
     test_env_vars:
-      location: :REGION
-      zone: :ZONE
+      location: 'REGION'
+      zone: 'ZONE'
+    exclude_test: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'location'
-    required: true
-    immutable: true
-    url_param_only: true
+  - name: 'location'
+    type: String
     description: |
       The Google Cloud region to which the target Distributed Cloud Edge zone belongs.
-  - !ruby/object:Api::Type::String
-    name: 'zone'
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
+  - name: 'zone'
+    type: String
     description: |
       The name of the target Distributed Cloud Edge zone.
-  - !ruby/object:Api::Type::String
-    name: 'subnet_id'
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
+  - name: 'subnet_id'
+    type: String
     description: |
       A unique ID that identifies this subnet.
+    url_param_only: true
+    required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    output: true
+  - name: 'name'
+    type: String
     description: |
       The canonical name of this resource, with format
       `projects/{{project}}/locations/{{location}}/zones/{{zone}}/subnets/{{subnet_id}}`
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
-    required: false
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       Labels associated with this resource.
-  - !ruby/object:Api::Type::String
-    name: 'description'
     required: false
+  - name: 'description'
+    type: String
     description: |
       A free-text description of the resource. Max length 1024 characters.
-  - !ruby/object:Api::Type::String
-    name: 'createTime'
-    output: true
+    required: false
+  - name: 'createTime'
+    type: String
     description: |
       The time when the subnet was created.
       A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine
       fractional digits. Examples: `2014-10-02T15:01:23Z` and `2014-10-02T15:01:23.045123456Z`.
-  - !ruby/object:Api::Type::String
-    name: 'updateTime'
     output: true
+  - name: 'updateTime'
+    type: String
     description: |
       The time when the subnet was last updated.
       A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine
       fractional digits. Examples: `2014-10-02T15:01:23Z` and `2014-10-02T15:01:23.045123456Z`.
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'network'
-    resource: 'Network'
-    imports: 'name'
-    required: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+    output: true
+  - name: 'network'
+    type: ResourceRef
     description: |
       The ID of the network to which this router belongs.
       Must be of the form: `projects/{{project}}/locations/{{location}}/zones/{{zone}}/networks/{{network_id}}`
-  - !ruby/object:Api::Type::Array
-    name: 'ipv4Cidr'
-    item_type: Api::Type::String
+    required: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Network'
+    imports: 'name'
+  - name: 'ipv4Cidr'
+    type: Array
     description: |
       The ranges of ipv4 addresses that are owned by this subnetwork, in CIDR format.
-  - !ruby/object:Api::Type::Array
-    name: 'ipv6Cidr'
-    item_type: Api::Type::String
+    item_type:
+      type: String
+  - name: 'ipv6Cidr'
+    type: Array
     description: |
       The ranges of ipv6 addresses that are owned by this subnetwork, in CIDR format.
-  - !ruby/object:Api::Type::Integer
-    name: 'vlanId'
-    default_from_api: true
+    item_type:
+      type: String
+  - name: 'vlanId'
+    type: Integer
     description: |
       VLAN ID for this subnetwork. If not specified, one is assigned automatically.
-  - !ruby/object:Api::Type::Enum
-    name: 'state'
-    output: true
-    values:
-      - :STATE_PENDING
-      - :STATE_PROVISIONING
-      - :STATE_RUNNING
-      - :STATE_SUSPENDED
-      - :STATE_DELETING
+    default_from_api: true
+  - name: 'state'
+    type: Enum
     description: |
       Current stage of the resource to the device by config push.
+    output: true
+    enum_values:
+      - 'STATE_PENDING'
+      - 'STATE_PROVISIONING'
+      - 'STATE_RUNNING'
+      - 'STATE_SUSPENDED'
+      - 'STATE_DELETING'

@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,35 +11,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'DicomStore'
 kind: 'healthcare#dicomStore'
-base_url: '{{dataset}}/dicomStores?dicomStoreId={{name}}'
-self_link: '{{dataset}}/dicomStores/{{name}}'
-update_verb: :PATCH
-update_mask: true
 description: |
   A DicomStore is a datastore inside a Healthcare dataset that conforms to the DICOM
   (https://www.dicomstandard.org/about/) standard for Healthcare information exchange
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Creating a DICOM store': 'https://cloud.google.com/healthcare/docs/how-tos/dicom'
   api: 'https://cloud.google.com/healthcare/docs/reference/rest/v1/projects.locations.datasets.dicomStores'
+docs:
 id_format: '{{dataset}}/dicomStores/{{name}}'
-import_format: ['{{dataset}}/dicomStores/{{name}}']
-skip_sweeper: true
+base_url: '{{dataset}}/dicomStores?dicomStoreId={{name}}'
+self_link: '{{dataset}}/dicomStores/{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - '{{dataset}}/dicomStores/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  decoder: 'templates/terraform/decoders/long_name_to_self_link.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/healthcare_dicom_store.go.tmpl'
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'healthcare_dicom_store_basic'
+  - name: 'healthcare_dicom_store_basic'
     primary_resource_id: 'default'
     vars:
       dataset_name: 'example-dataset'
       dicom_store_name: 'example-dicom-store'
       pubsub_topic: 'dicom-notifications'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'healthcare_dicom_store_bq_stream'
-    min_version: beta
+  - name: 'healthcare_dicom_store_bq_stream'
     primary_resource_id: 'default'
+    min_version: 'beta'
     vars:
       dataset_name: 'example-dataset'
       dicom_store_name: 'example-dicom-store'
@@ -47,35 +54,29 @@ examples:
       bq_dataset_name: 'dicom_bq_ds'
       bq_table_name: 'dicom_bq_tb'
     test_vars_overrides:
-      policyChanged:
-        ' acctest.BootstrapPSARoles(t, "service-", "gcp-sa-healthcare",
-        []string{"roles/bigquery.dataEditor", "roles/bigquery.jobUser"})'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  decoder: templates/terraform/decoders/long_name_to_self_link.go.erb
-  custom_import: templates/terraform/custom_import/healthcare_dicom_store.go.erb
+      'policyChanged': ' acctest.BootstrapPSARoles(t, "service-", "gcp-sa-healthcare", []string{"roles/bigquery.dataEditor", "roles/bigquery.jobUser"})'
 parameters:
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'dataset'
+  - name: 'dataset'
+    type: ResourceRef
     description: |
       Identifies the dataset addressed by this request. Must be in the format
       'projects/{project}/locations/{location}/datasets/{dataset}'
+    url_param_only: true
     required: true
     immutable: true
     resource: 'Dataset'
     imports: 'selfLink'
-    url_param_only: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       The resource name for the DicomStore.
 
       ** Changing this property may recreate the Dicom store (removing all data) **
     required: true
     immutable: true
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
-    required: false
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       User-supplied key-value pairs used to organize DICOM stores.
 
@@ -90,12 +91,13 @@ properties:
       An object containing a list of "key": value pairs.
       Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
 
-  - !ruby/object:Api::Type::NestedObject
-    name: notificationConfig
+    required: false
+  - name: 'notificationConfig'
+    type: NestedObject
     required: false
     properties:
-      - !ruby/object:Api::Type::String
-        name: pubsubTopic
+      - name: 'pubsubTopic'
+        type: String
         description: |
           The Cloud Pub/Sub topic that notifications of changes are published on. Supplied by the client.
           PubsubMessage.Data will contain the resource name. PubsubMessage.MessageId is the ID of this message.
@@ -104,34 +106,35 @@ properties:
           project. service-PROJECT_NUMBER@gcp-sa-healthcare.iam.gserviceaccount.com must have publisher permissions on the given
           Cloud Pub/Sub topic. Not having adequate permissions will cause the calls that send notifications to fail.
         required: true
-      - !ruby/object:Api::Type::Boolean
-        name: sendForBulkImport
-        required: false
+      - name: 'sendForBulkImport'
+        type: Boolean
         description: |
           Indicates whether or not to send Pub/Sub notifications on bulk import. Only supported for DICOM imports.
-  - !ruby/object:Api::Type::String
-    name: 'selfLink'
+        required: false
+  - name: 'selfLink'
+    type: String
     description: |
       The fully qualified name of this dataset
-    output: true
     ignore_read: true
-  - !ruby/object:Api::Type::Array
-    name: streamConfigs
-    required: false
-    min_version: beta
+    output: true
+  - name: 'streamConfigs'
+    type: Array
     description: |
       To enable streaming to BigQuery, configure the streamConfigs object in your DICOM store.
       streamConfigs is an array, so you can specify multiple BigQuery destinations. You can stream metadata from a single DICOM store to up to five BigQuery tables in a BigQuery dataset.
-    item_type: !ruby/object:Api::Type::NestedObject
+    min_version: 'beta'
+    required: false
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::NestedObject
-          name: bigqueryDestination
-          required: true
+        - name: 'bigqueryDestination'
+          type: NestedObject
           description: |
             BigQueryDestination to include a fully qualified BigQuery table URI where DICOM instance metadata will be streamed.
+          required: true
           properties:
-            - !ruby/object:Api::Type::String
-              name: tableUri
-              required: true
+            - name: 'tableUri'
+              type: String
               description: |
                 a fully qualified BigQuery table URI where DICOM instance metadata will be streamed.
+              required: true

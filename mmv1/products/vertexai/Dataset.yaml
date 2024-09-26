@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,94 +11,91 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
-name: Dataset
-base_url: projects/{{project}}/locations/{{region}}/datasets
-self_link: '{{name}}'
-update_verb: :PATCH
-update_mask: true
-references: !ruby/object:Api::Resource::ReferenceLinks
+---
+name: 'Dataset'
+description: |-
+  A collection of DataItems and Annotations on them.
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
   api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.datasets'
-async: !ruby/object:Api::OpAsync
-  actions:
-    - create
-    - delete
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+docs:
+id_format: '{{name}}'
+base_url: 'projects/{{project}}/locations/{{region}}/datasets'
+self_link: '{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+exclude_import: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete']
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
     resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
+  error:
     path: 'error'
     message: 'message'
-description: |-
-  A collection of DataItems and Annotations on them.
-autogen_async: false
-id_format: '{{name}}'
-exclude_import: true
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'vertex_ai_dataset'
-    skip_import_test: true
+  - name: 'vertex_ai_dataset'
     primary_resource_id: 'dataset'
     vars:
       display_name: 'terraform'
+    exclude_import_test: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: region
+  - name: 'region'
+    type: String
     description: The region of the dataset. eg us-central1
     url_param_only: true
     immutable: true
     default_from_api: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: The resource name of the Dataset. This value is set by Google.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
-    required: true
+  - name: 'displayName'
+    type: String
     description: |
       The user-defined name of the Dataset. The name can be up to 128 characters long and can be consist of any UTF-8 characters.
-  - !ruby/object:Api::Type::String
-    name: 'createTime'
-    output: true
+    required: true
+  - name: 'createTime'
+    type: String
     description: |
       The timestamp of when the dataset was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-  - !ruby/object:Api::Type::String
-    name: 'updateTime'
     output: true
+  - name: 'updateTime'
+    type: String
     description: |
       The timestamp of when the dataset was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       A set of key/value label pairs to assign to this Workflow.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'encryptionSpec'
-    immutable: true
+  - name: 'encryptionSpec'
+    type: NestedObject
     description: |
       Customer-managed encryption key spec for a Dataset. If set, this Dataset and all sub-resources of this Dataset will be secured by this key.
+    immutable: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'kmsKeyName'
+      - name: 'kmsKeyName'
+        type: String
         description: |
           Required. The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource.
           Has the form: projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key. The key needs to be in the same region as where the resource is created.
         immutable: true
-  - !ruby/object:Api::Type::String
-    name: 'metadataSchemaUri'
-    required: true
-    immutable: true
+  - name: 'metadataSchemaUri'
+    type: String
     description: |
       Points to a YAML file stored on Google Cloud Storage describing additional information about the Dataset. The schema is defined as an OpenAPI 3.0.2 Schema Object. The schema files that can be used here are found in gs://google-cloud-aiplatform/schema/dataset/metadata/.
+    required: true
+    immutable: true

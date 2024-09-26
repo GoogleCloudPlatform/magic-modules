@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,191 +11,188 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
-name: FeatureOnlineStore
-base_url: projects/{{project}}/locations/{{region}}/featureOnlineStores
-create_url: projects/{{project}}/locations/{{region}}/featureOnlineStores?featureOnlineStoreId={{name}}
-self_link: projects/{{project}}/locations/{{region}}/featureOnlineStores/{{name}}
-update_verb: :PATCH
-update_mask: true
-references: !ruby/object:Api::Resource::ReferenceLinks
+---
+name: 'FeatureOnlineStore'
+description: Vertex AI Feature Online Store provides a centralized repository for serving ML features and embedding indexes at low latency. The Feature Online Store is a top-level container.
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
-  api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featureOnlineStores
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featureOnlineStores'
+docs:
+base_url: 'projects/{{project}}/locations/{{region}}/featureOnlineStores'
+self_link: 'projects/{{project}}/locations/{{region}}/featureOnlineStores/{{name}}'
+create_url: 'projects/{{project}}/locations/{{region}}/featureOnlineStores?featureOnlineStoreId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
     resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
+  error:
     path: 'error'
     message: 'message'
-description: Vertex AI Feature Online Store provides a centralized repository for serving ML features and embedding indexes at low latency. The Feature Online Store is a top-level container.
-autogen_async: false
+custom_code:
+  pre_delete: 'templates/terraform/pre_delete/vertex_ai_force_delete.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: vertex_ai_feature_online_store
-    primary_resource_id: feature_online_store
+  - name: 'vertex_ai_feature_online_store'
+    primary_resource_id: 'feature_online_store'
     vars:
-      name: example_feature_online_store
+      name: 'example_feature_online_store'
     ignore_read_extra:
-      - force_destroy
-  - !ruby/object:Provider::Terraform::Examples
-    name: vertex_ai_featureonlinestore_with_optimized
-    primary_resource_id: featureonlinestore
+      - 'force_destroy'
+  - name: 'vertex_ai_featureonlinestore_with_optimized'
+    primary_resource_id: 'featureonlinestore'
     vars:
-      name: example_feature_online_store_optimized
+      name: 'example_feature_online_store_optimized'
     ignore_read_extra:
-      - force_destroy
-  - !ruby/object:Provider::Terraform::Examples
-    name: vertex_ai_featureonlinestore_with_beta_fields_bigtable
+      - 'force_destroy'
+  - name: 'vertex_ai_featureonlinestore_with_beta_fields_bigtable'
+    primary_resource_id: 'featureonlinestore'
+    min_version: 'beta'
+    vars:
+      name: 'example_feature_online_store_beta_bigtable'
+    ignore_read_extra:
+      - 'force_destroy'
     # currently failing
     skip_vcr: true
-    primary_resource_id: featureonlinestore
-    vars:
-      name: example_feature_online_store_beta_bigtable
-    ignore_read_extra:
-      - force_destroy
-    min_version: beta
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  pre_delete: templates/terraform/pre_delete/vertex_ai_force_delete.go.erb
 virtual_fields:
-  - !ruby/object:Api::Type::Boolean
-    name: force_destroy
+  - name: 'force_destroy'
     description:
       If set to true, any FeatureViews and Features for this FeatureOnlineStore will also be deleted.
+    type: Boolean
     default_value: false
 parameters:
-  - !ruby/object:Api::Type::String
-    name: region
+  - name: 'region'
+    type: String
     description: The region of feature online store. eg us-central1
     url_param_only: true
     immutable: true
     default_from_api: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description: The resource name of the Feature Online Store. This value may be up to 60 characters, and
       valid characters are [a-z0-9_]. The first character cannot be a number.
-    immutable: true
-    required: true
     url_param_only: true
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
-  - !ruby/object:Api::Type::String
-    name: createTime
-    output: true
+    required: true
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'createTime'
+    type: String
     description: The timestamp of when the feature online store was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-  - !ruby/object:Api::Type::String
-    name: updateTime
     output: true
+  - name: 'updateTime'
+    type: String
     description: The timestamp of when the feature online store was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-  - !ruby/object:Api::Type::String
-    name: etag
     output: true
-    ignore_read: true
+  - name: 'etag'
+    type: String
     description: Used to perform consistent read-modify-write updates.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: labels
-    description: The labels with user-defined metadata to organize your feature online stores.
-  - !ruby/object:Api::Type::String
-    name: state
+    ignore_read: true
     output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: The labels with user-defined metadata to organize your feature online stores.
+  - name: 'state'
+    type: String
     description: The state of the Feature Online Store. See the possible states in [this link](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featureOnlineStores#state).
-  - !ruby/object:Api::Type::NestedObject
-    name: bigtable
+    output: true
+  - name: 'bigtable'
+    type: NestedObject
     description: Settings for Cloud Bigtable instance that will be created to serve featureValues for all FeatureViews under this FeatureOnlineStore.
     exactly_one_of:
-      - bigtable
-      - optimized
+      - 'bigtable'
+      - 'optimized'
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: autoScaling
-        required: true
+      - name: 'autoScaling'
+        type: NestedObject
         description: Autoscaling config applied to Bigtable Instance.
+        required: true
         properties:
-          - !ruby/object:Api::Type::Integer
-            name: minNodeCount
-            required: true
+          - name: 'minNodeCount'
+            type: Integer
             description: The minimum number of nodes to scale down to. Must be greater than or equal to 1.
-          - !ruby/object:Api::Type::Integer
-            name: maxNodeCount
             required: true
+          - name: 'maxNodeCount'
+            type: Integer
             description: The maximum number of nodes to scale up to. Must be greater than or equal to minNodeCount, and less than or equal to 10 times of 'minNodeCount'.
-          - !ruby/object:Api::Type::Integer
-            name: cpuUtilizationTarget
-            default_from_api: true
+            required: true
+          - name: 'cpuUtilizationTarget'
+            type: Integer
             description:
               A percentage of the cluster's CPU capacity. Can be from 10% to 80%.
               When a cluster's CPU utilization exceeds the target that you have set,
               Bigtable immediately adds nodes to the cluster. When CPU utilization is substantially lower than the target, Bigtable removes nodes. If not set will default to 50%.
-  - !ruby/object:Api::Type::NestedObject
-    name: optimized
+            default_from_api: true
+  - name: 'optimized'
+    type: NestedObject
     description:
       Settings for the Optimized store that will be created to serve featureValues for all FeatureViews under this FeatureOnlineStore
-    conflicts:
-      - embeddingManagement
-    exactly_one_of:
-      - bigtable
-      - optimized
-    properties:
-      []  # Meant to be an empty object with no properties - see here : https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.featureOnlineStores#Optimized
       # The fields below are necessary to include the "Optimized" transformation in the payload
     send_empty_value: true
     allow_empty_object: true
-
-  - !ruby/object:Api::Type::NestedObject
-    name: dedicatedServingEndpoint
+    conflicts:
+      - embeddingManagement
+    exactly_one_of:
+      - 'bigtable'
+      - 'optimized'
+    properties:
+ # Meant to be an empty object with no properties - see here : https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.featureOnlineStores#Optimized
+      []
+  - name: 'dedicatedServingEndpoint'
+    type: NestedObject
     description: |
        The dedicated serving endpoint for this FeatureOnlineStore, which is different from common vertex service endpoint. Only need to be set when you choose Optimized storage type or enable EmbeddingManagement. Will use public endpoint by default.
     default_from_api: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: publicEndpointDomainName
+      - name: 'publicEndpointDomainName'
+        type: String
         description: |
           Domain name to use for this FeatureOnlineStore
         output: true
-      - !ruby/object:Api::Type::String
-        name: serviceAttachment
+      - name: 'serviceAttachment'
+        type: String
         description: |
           Name of the service attachment resource. Applicable only if private service connect is enabled and after FeatureViewSync is created.
         output: true
-      - !ruby/object:Api::Type::NestedObject
-        name: privateServiceConnectConfig
+      - name: 'privateServiceConnectConfig'
+        type: NestedObject
         description: |
           Private service connect config.
         properties:
-          - !ruby/object:Api::Type::Boolean
-            name: enablePrivateServiceConnect
-            required: true
+          - name: 'enablePrivateServiceConnect'
+            type: Boolean
             description: |
               If set to true, customers will use private service connection to send request. Otherwise, the connection will set to public endpoint.
-          - !ruby/object:Api::Type::Array
-            name: projectAllowlist
+            required: true
+          - name: 'projectAllowlist'
+            type: Array
             description: |
               A list of Projects from which the forwarding rule will target the service attachment.
-            item_type: Api::Type::String
-  - !ruby/object:Api::Type::NestedObject
-    name: embeddingManagement
+            item_type:
+              type: String
+  - name: 'embeddingManagement'
+    type: NestedObject
     description: |
       The settings for embedding management in FeatureOnlineStore. Embedding management can only be set for BigTable. It is enabled by default for optimized storagetype.
+    min_version: 'beta'
+    default_from_api: true
     conflicts:
       - optimized
-    min_version: beta
-    default_from_api: true
-    deprecation_message: >-
-              `embedding_management` is deprecated. This field is no longer needed anymore and embedding management is automatically enabled when specifying Optimized storage type
+    deprecation_message: '`embedding_management` is deprecated. This field is no longer needed anymore and embedding management is automatically enabled when specifying Optimized storage type'
     properties:
-      - !ruby/object:Api::Type::Boolean
-        name: enabled
+      - name: 'enabled'
+        type: Boolean
         description: |
           Enable embedding management.
         immutable: true

@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,9 +11,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Cluster'
-docs: !ruby/object:Provider::Terraform::Docs
+description: 'A managed alloydb cluster.'
+references:
+  guides:
+    'AlloyDB': 'https://cloud.google.com/alloydb/docs/'
+  api: 'https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.clusters/create'
+docs:
   note: |
     Users can promote a secondary cluster to a primary cluster with the help of `cluster_type`.
     To promote, users have to set the `cluster_type` property as `PRIMARY` and remove the `secondary_config` field from cluster configuration.
@@ -25,59 +30,53 @@ docs: !ruby/object:Provider::Terraform::Docs
       1. Refresh the state of the AlloyDB resources by running `terraform apply -refresh-only --auto-approve` .
       2. Manually update the terraform configuration file(s) to match the actual state of the resources by modifying the `cluster_type` and `secondary_config` fields.
       3. Verify the sync of terraform state by running `terraform plan` and ensure that the infrastructure matches the configuration and no changes are required.
-self_link: 'projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/clusters'
+self_link: 'projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}'
 create_url: 'projects/{{project}}/locations/{{location}}/clusters?clusterId={{cluster_id}}'
-update_verb: :PATCH
+update_verb: 'PATCH'
 update_mask: true
-description: 'A managed alloydb cluster.'
-references: !ruby/object:Api::Resource::ReferenceLinks
-  guides:
-    'AlloyDB': 'https://cloud.google.com/alloydb/docs/'
-  api: 'https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.clusters/create'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}'
+  - '{{cluster_id}}'
+timeouts:
+  insert_minutes: 30
+  update_minutes: 30
+  delete_minutes: 30
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-    timeouts: !ruby/object:Api::Timeouts
+    timeouts:
       insert_minutes: 30
       update_minutes: 30
       delete_minutes: 30
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error'
     message: 'message'
-import_format:
-  [
-    'projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}',
-    '{{cluster_id}}',
-  ]
+custom_code:
+  pre_create: 'templates/terraform/pre_create/alloydb_cluster.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/alloydb_cluster.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/alloydb_cluster.go.tmpl'
 # Skipping the sweeper because we need to force-delete clusters.
-skip_sweeper: true
-autogen_async: true
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'alloydb_cluster_basic'
+  - name: 'alloydb_cluster_basic'
     primary_resource_id: 'default'
     vars:
       alloydb_cluster_name: 'alloydb-cluster'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'alloydb_cluster_full'
+  - name: 'alloydb_cluster_full'
     primary_resource_id: 'full'
     vars:
       alloydb_cluster_name: 'alloydb-cluster-full'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'alloydb_cluster_restore'
+  - name: 'alloydb_cluster_restore'
     primary_resource_id: 'source'
-    skip_test: true
     vars:
       alloydb_cluster_name: 'alloydb-source-cluster'
       alloydb_backup_restored_cluster_name: 'alloydb-backup-restored'
@@ -86,20 +85,19 @@ examples:
       alloydb_instance_name: 'alloydb-instance'
       network_name: 'alloydb-network'
     test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedTestNetwork(t, "alloydb-instance-basic")'
+      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "alloydb-instance-basic")'
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'alloydb_secondary_cluster_basic'
+    exclude_test: true
+  - name: 'alloydb_secondary_cluster_basic'
     primary_resource_id: 'secondary'
     vars:
       alloydb_primary_cluster_name: 'alloydb-primary-cluster'
       alloydb_primary_instance_name: 'alloydb-primary-instance'
       alloydb_secondary_cluster_name: 'alloydb-secondary-cluster'
-    skip_test: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'alloydb_secondary_cluster_basic_test'
+    exclude_test: true
+  - name: 'alloydb_secondary_cluster_basic_test'
     primary_resource_id: 'secondary'
     vars:
       alloydb_primary_cluster_name: 'alloydb-primary-cluster'
@@ -107,483 +105,482 @@ examples:
       alloydb_secondary_cluster_name: 'alloydb-secondary-cluster'
       network_name: 'alloydb-network'
     test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
-    skip_docs: true
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  pre_create: templates/terraform/pre_create/alloydb_cluster.go.erb
-  pre_update: templates/terraform/pre_update/alloydb_cluster.go.erb
-  pre_delete: templates/terraform/pre_delete/alloydb_cluster.go.erb
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
+    exclude_docs: true
 virtual_fields:
-  - !ruby/object:Api::Type::String
-    name: 'deletion_policy'
+  - name: 'deletion_policy'
     description: |
       Policy to determine if the cluster should be deleted forcefully.
       Deleting a cluster forcefully, deletes the cluster and all its associated instances within the cluster.
       Deleting a Secondary cluster with a secondary instance REQUIRES setting deletion_policy = "FORCE" otherwise an error is returned. This is needed as there is no support to delete just the secondary instance, and the only way to delete secondary instance is to delete the associated secondary cluster forcefully which also deletes the secondary instance.
       Possible values: DEFAULT, FORCE
-    default_value: DEFAULT
+    type: String
+    default_value: "DEFAULT"
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'clusterId'
-    required: true
-    immutable: true
-    url_param_only: true
+  - name: 'clusterId'
+    type: String
     description: |
       The ID of the alloydb cluster.
-  - !ruby/object:Api::Type::String
-    name: 'location'
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
+  - name: 'location'
+    type: String
     description: |
       The location where the alloydb cluster should reside.
+    url_param_only: true
+    required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    output: true
+  - name: 'name'
+    type: String
     description: |
       The name of the cluster resource.
-  - !ruby/object:Api::Type::String
-    name: 'uid'
     output: true
+  - name: 'uid'
+    type: String
     description: |
       The system-generated UID of the resource.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
     description: 'User-defined labels for the alloydb cluster.'
-  - !ruby/object:Api::Type::NestedObject
-    name: 'encryptionConfig'
+  - name: 'encryptionConfig'
+    type: NestedObject
     description: |
       EncryptionConfig describes the encryption config of a cluster or a backup that is encrypted with a CMEK (customer-managed encryption key).
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'kmsKeyName'
+      - name: 'kmsKeyName'
+        type: String
         description: |
           The fully-qualified resource name of the KMS key. Each Cloud KMS key is regionalized and has the following format: projects/[PROJECT]/locations/[REGION]/keyRings/[RING]/cryptoKeys/[KEY_NAME].
         immutable: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'encryptionInfo'
+  - name: 'encryptionInfo'
+    type: NestedObject
     description: |
       EncryptionInfo describes the encryption information of a cluster or a backup.
     output: true
     properties:
-      - !ruby/object:Api::Type::Enum
-        name: 'encryptionType'
+      - name: 'encryptionType'
+        type: Enum
         description: 'Output only. Type of encryption.'
-        values:
-          - :TYPE_UNSPECIFIED
-          - :GOOGLE_DEFAULT_ENCRYPTION
-          - :CUSTOMER_MANAGED_ENCRYPTION
         output: true
-      - !ruby/object:Api::Type::Array
-        name: kmsKeyVersions
-        item_type: Api::Type::String
+        enum_values:
+          - 'TYPE_UNSPECIFIED'
+          - 'GOOGLE_DEFAULT_ENCRYPTION'
+          - 'CUSTOMER_MANAGED_ENCRYPTION'
+      - name: 'kmsKeyVersions'
+        type: Array
         description: |
           Output only. Cloud KMS key versions that are being used to protect the database or the backup.
         output: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'continuousBackupInfo'
+        item_type:
+          type: String
+  - name: 'continuousBackupInfo'
+    type: NestedObject
     description: |
       ContinuousBackupInfo describes the continuous backup properties of a cluster.
     output: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: enabledTime
+      - name: 'enabledTime'
+        type: String
         description: |
           When ContinuousBackup was most recently enabled. Set to null if ContinuousBackup is not enabled.
         output: true
-      - !ruby/object:Api::Type::Array
-        name: schedule
-        item_type: Api::Type::String
+      - name: 'schedule'
+        type: Array
         description: |
           Days of the week on which a continuous backup is taken. Output only field. Ignored if passed into the request.
         output: true
-      - !ruby/object:Api::Type::String
-        name: earliestRestorableTime
+        item_type:
+          type: String
+      - name: 'earliestRestorableTime'
+        type: String
         description: |
           The earliest restorable time that can be restored to. Output only field.
         output: true
-      - !ruby/object:Api::Type::NestedObject
-        name: 'encryptionInfo'
+      - name: 'encryptionInfo'
+        type: NestedObject
         description: |
           Output only. The encryption information for the WALs and backups required for ContinuousBackup.
         output: true
         properties:
-          - !ruby/object:Api::Type::String
-            name: 'encryptionType'
+          - name: 'encryptionType'
+            type: String
             description: 'Output only. Type of encryption.'
             output: true
-          - !ruby/object:Api::Type::Array
-            name: kmsKeyVersions
-            item_type: Api::Type::String
+          - name: 'kmsKeyVersions'
+            type: Array
             description: |
               Output only. Cloud KMS key versions that are being used to protect the database or the backup.
             output: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'networkConfig'
+            item_type:
+              type: String
+  - name: 'networkConfig'
+    type: NestedObject
     description: |
       Metadata related to network configuration.
     default_from_api: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: network
-        exactly_one_of:
-          - network_config.0.network
-          - psc_config.0.psc_enabled
+      - name: 'network'
+        type: String
         description: |
           The resource link for the VPC network in which cluster resources are created and from which they are accessible via Private IP. The network must belong to the same project as the cluster.
           It is specified in the form: "projects/{projectNumber}/global/networks/{network_id}".
+        exactly_one_of:
+          - 'network_config.0.network'
+          - 'psc_config.0.psc_enabled'
         diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
-      - !ruby/object:Api::Type::String
-        name: allocatedIpRange
+      - name: 'allocatedIpRange'
+        type: String
         description: |
           The name of the allocated IP range for the private IP AlloyDB cluster. For example: "google-managed-services-default".
           If set, the instance IPs for this cluster will be created in the allocated range.
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
+  - name: 'displayName'
+    type: String
     description: |
       User-settable and human-readable display name for the Cluster.
-  - !ruby/object:Api::Type::String
-    name: 'etag'
+  - name: 'etag'
+    type: String
     description: 'For Resource freshness validation (https://google.aip.dev/154)'
-  - !ruby/object:Api::Type::Boolean
-    name: 'reconciling'
-    output: true
+  - name: 'reconciling'
+    type: Boolean
     description: |
       Output only. Reconciling (https://google.aip.dev/128#reconciliation).
       Set to true if the current state of Cluster does not match the user's intended state, and the service is actively updating the resource to reconcile them.
       This can happen due to user-triggered updates or system actions like failover or maintenance.
-  - !ruby/object:Api::Type::String
-    name: 'state'
     output: true
+  - name: 'state'
+    type: String
     description: 'Output only. The current serving state of the cluster.'
-  - !ruby/object:Api::Type::KeyValueAnnotations
-    name: 'annotations'
+    output: true
+  - name: 'annotations'
+    type: KeyValueAnnotations
     description: |
       Annotations to allow client tools to store small amount of arbitrary data. This is distinct from labels. https://google.aip.dev/128
       An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
-  - !ruby/object:Api::Type::String
-    name: 'databaseVersion'
-    default_from_api: true
+  - name: 'databaseVersion'
+    type: String
     description: |
       The database engine major version. This is an optional field and it's populated at the Cluster creation time. This field cannot be changed after cluster creation.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'pscConfig'
+    default_from_api: true
+  - name: 'pscConfig'
+    type: NestedObject
     description: 'Configuration for Private Service Connect (PSC) for the cluster.'
     properties:
-      - !ruby/object:Api::Type::Boolean
-        name: 'pscEnabled'
+      - name: 'pscEnabled'
+        type: Boolean
         description: 'Create an instance that allows connections from Private Service Connect endpoints to the instance.'
-  - !ruby/object:Api::Type::NestedObject
-    name: 'initialUser'
+  - name: 'initialUser'
+    type: NestedObject
     description: |
       Initial user to setup during cluster creation.
-    custom_flatten: 'templates/terraform/custom_flatten/alloydb_cluster_input_user_flatten.go.erb'
     ignore_read: true
+    custom_flatten: 'templates/terraform/custom_flatten/alloydb_cluster_input_user_flatten.go.tmpl'
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'user'
+      - name: 'user'
+        type: String
         description: |
           The database username.
-      - !ruby/object:Api::Type::String
-        name: 'password'
+      - name: 'password'
+        type: String
         description: |
           The initial password for the user.
         required: true
         sensitive: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'restoreBackupSource'
-    ignore_read: true
-    immutable: true
-    conflicts:
-      - restore_continuous_backup_source
+  - name: 'restoreBackupSource'
+    type: NestedObject
     description: |
       The source when restoring from a backup. Conflicts with 'restore_continuous_backup_source', both can't be set together.
+    immutable: true
+    ignore_read: true
+    conflicts:
+      - restore_continuous_backup_source
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'backupName'
-        required: true
-        immutable: true
+      - name: 'backupName'
+        type: String
         description: |
           The name of the backup that this cluster is restored from.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'restoreContinuousBackupSource'
-    ignore_read: true
-    immutable: true
-    conflicts:
-      - restore_backup_source
+        required: true
+        immutable: true
+  - name: 'restoreContinuousBackupSource'
+    type: NestedObject
     description: |
       The source when restoring via point in time recovery (PITR). Conflicts with 'restore_backup_source', both can't be set together.
+    immutable: true
+    ignore_read: true
+    conflicts:
+      - restore_backup_source
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'cluster'
-        required: true
-        immutable: true
+      - name: 'cluster'
+        type: String
         description: |
           The name of the source cluster that this cluster is restored from.
-      - !ruby/object:Api::Type::String
-        name: 'pointInTime'
         required: true
         immutable: true
+      - name: 'pointInTime'
+        type: String
         description: |
           The point in time that this cluster is restored to, in RFC 3339 format.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'continuousBackupConfig'
-    default_from_api: true
+        required: true
+        immutable: true
+  - name: 'continuousBackupConfig'
+    type: NestedObject
     description: |
       The continuous backup config for this cluster.
 
       If no policy is provided then the default policy will be used. The default policy takes one backup a day and retains backups for 14 days.
+    default_from_api: true
     properties:
-      - !ruby/object:Api::Type::Boolean
-        name: enabled
-        send_empty_value: true
-        default_value: true
+      - name: 'enabled'
+        type: Boolean
         description: |
           Whether continuous backup recovery is enabled. If not set, defaults to true.
-      - !ruby/object:Api::Type::Integer
-        name: recoveryWindowDays
-        default_from_api: true
+        send_empty_value: true
+        default_value: true
+      - name: 'recoveryWindowDays'
+        type: Integer
         description: |
           The numbers of days that are eligible to restore from using PITR. To support the entire recovery window, backups and logs are retained for one day more than the recovery window.
 
           If not set, defaults to 14 days.
-      - !ruby/object:Api::Type::NestedObject
-        name: 'encryptionConfig'
+        default_from_api: true
+      - name: 'encryptionConfig'
+        type: NestedObject
         description: |
           EncryptionConfig describes the encryption config of a cluster or a backup that is encrypted with a CMEK (customer-managed encryption key).
         properties:
-          - !ruby/object:Api::Type::String
-            name: 'kmsKeyName'
+          - name: 'kmsKeyName'
+            type: String
             description: |
               The fully-qualified resource name of the KMS key. Each Cloud KMS key is regionalized and has the following format: projects/[PROJECT]/locations/[REGION]/keyRings/[RING]/cryptoKeys/[KEY_NAME].
-  - !ruby/object:Api::Type::NestedObject
-    name: 'automatedBackupPolicy'
+  - name: 'automatedBackupPolicy'
+    type: NestedObject
     description: |
       The automated backup policy for this cluster. AutomatedBackupPolicy is disabled by default.
     default_from_api: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'backupWindow'
-        default_from_api: true
+      - name: 'backupWindow'
+        type: String
         description: |
           The length of the time window during which a backup can be taken. If a backup does not succeed within this time window, it will be canceled and considered failed.
 
           The backup window must be at least 5 minutes long. There is no upper bound on the window. If not set, it will default to 1 hour.
 
           A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
-      - !ruby/object:Api::Type::String
-        name: 'location'
         default_from_api: true
+      - name: 'location'
+        type: String
         description: |
           The location where the backup will be stored. Currently, the only supported option is to store the backup in the same region as the cluster.
-      - !ruby/object:Api::Type::KeyValuePairs
-        name: 'labels'
+        default_from_api: true
+      - name: 'labels'
+        type: KeyValuePairs
         description:
           'Labels to apply to backups created using this configuration.'
-      - !ruby/object:Api::Type::NestedObject
-        name: 'encryptionConfig'
+      - name: 'encryptionConfig'
+        type: NestedObject
         description: |
           EncryptionConfig describes the encryption config of a cluster or a backup that is encrypted with a CMEK (customer-managed encryption key).
         properties:
-          - !ruby/object:Api::Type::String
-            name: 'kmsKeyName'
+          - name: 'kmsKeyName'
+            type: String
             description: |
               The fully-qualified resource name of the KMS key. Each Cloud KMS key is regionalized and has the following format: projects/[PROJECT]/locations/[REGION]/keyRings/[RING]/cryptoKeys/[KEY_NAME].
-      - !ruby/object:Api::Type::NestedObject
-        name: 'weeklySchedule'
+      - name: 'weeklySchedule'
+        type: NestedObject
         description: 'Weekly schedule for the Backup.'
         default_from_api: true
         properties:
-          - !ruby/object:Api::Type::Array
-            name: 'daysOfWeek'
-            min_size: 1
+          - name: 'daysOfWeek'
+            type: Array
             description: 'The days of the week to perform a backup. At least one day of the week must be provided.'
-            item_type: !ruby/object:Api::Type::Enum
-              name: 'daysOfWeek'
-              required: true
+            item_type:
+              type: Enum
               description: 'The days of the week to perform a backup. At least one day of the week must be provided.'
-              values:
-                - :MONDAY
-                - :TUESDAY
-                - :WEDNESDAY
-                - :THURSDAY
-                - :FRIDAY
-                - :SATURDAY
-                - :SUNDAY
-          - !ruby/object:Api::Type::Array
-            name: 'startTimes'
-            required: true
-            custom_flatten: 'templates/terraform/custom_flatten/alloydb_cluster_input_automated_backup_policy_start_times_flatten.go.erb'
+              enum_values:
+                - 'MONDAY'
+                - 'TUESDAY'
+                - 'WEDNESDAY'
+                - 'THURSDAY'
+                - 'FRIDAY'
+                - 'SATURDAY'
+                - 'SUNDAY'
+            min_size: 1
+          - name: 'startTimes'
+            type: Array
             description: |
               The times during the day to start a backup. At least one start time must be provided. The start times are assumed to be in UTC and to be an exact hour (e.g., 04:00:00).
-            item_type: !ruby/object:Api::Type::NestedObject
+            required: true
+            custom_flatten: 'templates/terraform/custom_flatten/alloydb_cluster_input_automated_backup_policy_start_times_flatten.go.tmpl'
+            item_type:
+              type: NestedObject
               properties:
-                - !ruby/object:Api::Type::Integer
-                  name: hours
+                - name: 'hours'
+                  type: Integer
                   description: |
                     Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
-                - !ruby/object:Api::Type::Integer
-                  name: minutes
+                - name: 'minutes'
+                  type: Integer
                   description: |
                     Minutes of hour of day. Currently, only the value 0 is supported.
-                - !ruby/object:Api::Type::Integer
-                  name: seconds
+                - name: 'seconds'
+                  type: Integer
                   description: |
                     Seconds of minutes of the time. Currently, only the value 0 is supported.
-                - !ruby/object:Api::Type::Integer
-                  name: nanos
+                - name: 'nanos'
+                  type: Integer
                   description: |
                     Fractions of seconds in nanoseconds. Currently, only the value 0 is supported.
-      - !ruby/object:Api::Type::NestedObject
-        name: 'timeBasedRetention'
+      - name: 'timeBasedRetention'
+        type: NestedObject
         description: |
           Time-based Backup retention policy. Conflicts with 'quantity_based_retention', both can't be set together.
         conflicts:
           - automated_backup_policy.0.quantity_based_retention
         properties:
-          - !ruby/object:Api::Type::String
-            name: 'retentionPeriod'
+          - name: 'retentionPeriod'
+            type: String
             description: |
               The retention period.
               A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
-      - !ruby/object:Api::Type::NestedObject
-        name: 'quantityBasedRetention'
-        conflicts:
-          - automated_backup_policy.0.time_based_retention
+      - name: 'quantityBasedRetention'
+        type: NestedObject
         description: |
           Quantity-based Backup retention policy to retain recent backups. Conflicts with 'time_based_retention', both can't be set together.
+        conflicts:
+          - automated_backup_policy.0.time_based_retention
         properties:
-          - !ruby/object:Api::Type::Integer
-            name: 'count'
+          - name: 'count'
+            type: Integer
             description: |
               The number of backups to retain.
-      - !ruby/object:Api::Type::Boolean
-        name: 'enabled'
-        default_from_api: true
+      - name: 'enabled'
+        type: Boolean
         description: |
           Whether automated backups are enabled.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'backupSource'
-    output: true
+        default_from_api: true
+  - name: 'backupSource'
+    type: NestedObject
     description: 'Cluster created from backup.'
-    properties:
-      - !ruby/object:Api::Type::String
-        name: 'backupName'
-        description: 'The name of the backup resource.'
-  - !ruby/object:Api::Type::NestedObject
-    name: 'migrationSource'
     output: true
-    description: 'Cluster created via DMS migration.'
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'hostPort'
+      - name: 'backupName'
+        type: String
+        description: 'The name of the backup resource.'
+  - name: 'migrationSource'
+    type: NestedObject
+    description: 'Cluster created via DMS migration.'
+    output: true
+    properties:
+      - name: 'hostPort'
+        type: String
         description:
           'The host and port of the on-premises instance in host:port format'
-      - !ruby/object:Api::Type::String
-        name: 'referenceId'
+      - name: 'referenceId'
+        type: String
         description:
           'Place holder for the external source identifier(e.g DMS job name)
           that created the cluster.'
-      - !ruby/object:Api::Type::String
-        name: 'sourceType'
+      - name: 'sourceType'
+        type: String
         description: 'Type of migration source.'
-  - !ruby/object:Api::Type::Enum
-    name: clusterType
-    values:
-      - :PRIMARY
-      - :SECONDARY
-    default_value: :PRIMARY
+  - name: 'clusterType'
+    type: Enum
     description: |
       The type of cluster. If not set, defaults to PRIMARY.
-  - !ruby/object:Api::Type::NestedObject
-    name: "secondaryConfig"
+    default_value: "PRIMARY"
+    enum_values:
+      - 'PRIMARY'
+      - 'SECONDARY'
+  - name: 'secondaryConfig'
+    type: NestedObject
     description: |
       Configuration of the secondary cluster for Cross Region Replication. This should be set if and only if the cluster is of type SECONDARY.
     properties:
-      - !ruby/object:Api::Type::String
-        name: "primaryClusterName"
-        required: true
+      - name: 'primaryClusterName'
+        type: String
         description: |
           Name of the primary cluster must be in the format
           'projects/{project}/locations/{location}/clusters/{cluster_id}'
-  - !ruby/object:Api::Type::NestedObject
-    name: 'maintenanceUpdatePolicy'
+        required: true
+  - name: 'maintenanceUpdatePolicy'
+    type: NestedObject
     description: |
       MaintenanceUpdatePolicy defines the policy for system updates.
     properties:
-      - !ruby/object:Api::Type::Array
-        name: 'maintenanceWindows'
+      - name: 'maintenanceWindows'
+        type: Array
         description: |
           Preferred windows to perform maintenance. Currently limited to 1.
-        item_type: !ruby/object:Api::Type::NestedObject
-          name: 'maintenanceWindow'
+        item_type:
           description: |
             specifies a preferred day and time for maintenance.
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::Enum
-              name: 'day'
-              required: true
+            - name: 'day'
+              type: Enum
               description: |
                 Preferred day of the week for maintenance, e.g. MONDAY, TUESDAY, etc.
-              values:
-                - :MONDAY
-                - :TUESDAY
-                - :WEDNESDAY
-                - :THURSDAY
-                - :FRIDAY
-                - :SATURDAY
-                - :SUNDAY
-            - !ruby/object:Api::Type::NestedObject
-              name: 'startTime'
               required: true
+              enum_values:
+                - 'MONDAY'
+                - 'TUESDAY'
+                - 'WEDNESDAY'
+                - 'THURSDAY'
+                - 'FRIDAY'
+                - 'SATURDAY'
+                - 'SUNDAY'
+            - name: 'startTime'
+              type: NestedObject
               description: |
                 Preferred time to start the maintenance operation on the specified day. Maintenance will start within 1 hour of this time.
+              required: true
               properties:
-                - !ruby/object:Api::Type::Integer
-                  name: hours
-                  required: true
+                - name: 'hours'
+                  type: Integer
                   description: |
                     Hours of day in 24 hour format. Should be from 0 to 23.
-                - !ruby/object:Api::Type::Integer
-                  name: minutes
+                  required: true
+                - name: 'minutes'
+                  type: Integer
                   description: |
                     Minutes of hour of day. Currently, only the value 0 is supported.
-                - !ruby/object:Api::Type::Integer
-                  name: seconds
+                - name: 'seconds'
+                  type: Integer
                   description: |
                     Seconds of minutes of the time. Currently, only the value 0 is supported.
-                - !ruby/object:Api::Type::Integer
-                  name: nanos
+                - name: 'nanos'
+                  type: Integer
                   description: |
                     Fractions of seconds in nanoseconds. Currently, only the value 0 is supported.
-  - !ruby/object:Api::Type::Enum
-    name: 'subscriptionType'
-    values:
-      - :TRIAL
-      - :STANDARD
-    default_from_api: true
+  - name: 'subscriptionType'
+    type: Enum
     description: |
       The subscrition type of cluster.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'trialMetadata'
+    default_from_api: true
+    enum_values:
+      - 'TRIAL'
+      - 'STANDARD'
+  - name: 'trialMetadata'
+    type: NestedObject
     description: |
       Contains information and all metadata related to TRIAL clusters.
     output: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: startTime
+      - name: 'startTime'
+        type: String
         description: |
           Start time of the trial cluster.
-      - !ruby/object:Api::Type::String
-        name: endTime
+      - name: 'endTime'
+        type: String
         description: |
           End time of the trial cluster.
-      - !ruby/object:Api::Type::String
-        name: upgradeTime
+      - name: 'upgradeTime'
+        type: String
         description: |
           Upgrade time of the trial cluster to standard cluster.
-      - !ruby/object:Api::Type::String
-        name: graceEndTime
+      - name: 'graceEndTime'
+        type: String
         description: |
           Grace end time of the trial cluster.

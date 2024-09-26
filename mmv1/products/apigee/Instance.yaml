@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,165 +11,146 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Instance'
-base_url: 'instances'
-create_url: '{{org_id}}/instances'
-self_link: '{{org_id}}/instances/{{name}}'
-create_verb: :POST
-update_verb: :PATCH
-update_mask: true
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
-    base_url: '{{op_id}}'
-    wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
-    path: 'response'
-    resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
-    path: 'error'
-    message: 'message'
-immutable: false
 description: |
   An `Instance` is the runtime dataplane in Apigee.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Creating a runtime instance': 'https://cloud.google.com/apigee/docs/api-platform/get-started/create-instance'
   api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances/create'
-
-autogen_async: true
-import_format: ['{{org_id}}/instances/{{name}}', '{{org_id}}/{{name}}']
+docs:
+base_url: 'instances'
+self_link: '{{org_id}}/instances/{{name}}'
+create_url: '{{org_id}}/instances'
+update_verb: 'PATCH'
+update_mask: true
+immutable: false
 mutex: '{{org_id}}/apigeeInstances'
-error_retry_predicates: ['transport_tpg.IsApigeeRetryableError']
-examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'apigee_instance_basic'
-    vars:
-      instance_name: 'my-instance-name'
-    skip_test:
-      true
-      # This is a more verbose version of the above that creates all
-      # the resources needed for the acceptance test.
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'apigee_instance_basic_test'
-    primary_resource_id: 'apigee_instance'
-    test_env_vars:
-      org_id: :ORG_ID
-      billing_account: :BILLING_ACCT
-    skip_docs:
-      true
-      # Resource creation race
-    skip_vcr: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'apigee_instance_cidr_range'
-    vars:
-      instance_name: 'my-instance-name'
-    skip_test:
-      true
-      # This is a more verbose version of the above that creates all
-      # the resources needed for the acceptance test.
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'apigee_instance_cidr_range_test'
-    primary_resource_id: 'apigee_instance'
-    test_env_vars:
-      org_id: :ORG_ID
-      billing_account: :BILLING_ACCT
-    skip_docs:
-      true
-      # Resource creation race
-    skip_vcr: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'apigee_instance_ip_range'
-    vars:
-      instance_name: 'my-instance-name'
-    skip_test:
-      true
-      # This is a more verbose version of the above that creates all
-      # the resources needed for the acceptance test.
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'apigee_instance_ip_range_test'
-    primary_resource_id: 'apigee_instance'
-    test_env_vars:
-      org_id: :ORG_ID
-      billing_account: :BILLING_ACCT
-    skip_docs:
-      true
-      # Resource creation race
-    skip_vcr: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'apigee_instance_full'
-    vars:
-      instance_name: 'my-instance-name'
-    skip_test:
-      true
-      # This is a more verbose version of the above that creates all
-      # the resources needed for the acceptance test.
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'apigee_instance_full_test'
-    primary_resource_id: 'apigee_instance'
-    test_env_vars:
-      org_id: :ORG_ID
-      billing_account: :BILLING_ACCT
-    skip_docs: true
-    min_version:
-      beta
-      # Resource creation race
-    skip_vcr: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'apigee_instance_service_attachment_basic_test'
-    primary_resource_id: 'apigee_instance'
-    test_env_vars:
-      org_id: :ORG_ID
-      billing_account: :BILLING_ACCT
-    skip_docs:
-      true
-      # Resource creation race
-    skip_vcr: true
-timeouts: !ruby/object:Api::Timeouts
+import_format:
+  - '{{org_id}}/instances/{{name}}'
+  - '{{org_id}}/{{name}}'
+timeouts:
   insert_minutes: 60
   update_minutes: 20
   delete_minutes: 60
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/apigee_instance.go.erb
-  constants: templates/terraform/constants/apigee_instance.go.erb
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+  constants: 'templates/terraform/constants/apigee_instance.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/apigee_instance.go.tmpl'
+error_retry_predicates:
+
+  - 'transport_tpg.IsApigeeRetryableError'
+examples:
+  - name: 'apigee_instance_basic'
+    vars:
+      instance_name: 'my-instance-name'
+    exclude_test: true
+      # This is a more verbose version of the above that creates all
+      # the resources needed for the acceptance test.
+  - name: 'apigee_instance_basic_test'
+    primary_resource_id: 'apigee_instance'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    exclude_docs: true
+      # Resource creation race
+    skip_vcr: true
+  - name: 'apigee_instance_cidr_range'
+    vars:
+      instance_name: 'my-instance-name'
+    exclude_test: true
+      # This is a more verbose version of the above that creates all
+      # the resources needed for the acceptance test.
+  - name: 'apigee_instance_cidr_range_test'
+    primary_resource_id: 'apigee_instance'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    exclude_docs: true
+      # Resource creation race
+    skip_vcr: true
+  - name: 'apigee_instance_ip_range'
+    vars:
+      instance_name: 'my-instance-name'
+    exclude_test: true
+      # This is a more verbose version of the above that creates all
+      # the resources needed for the acceptance test.
+  - name: 'apigee_instance_ip_range_test'
+    primary_resource_id: 'apigee_instance'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    exclude_docs: true
+      # Resource creation race
+    skip_vcr: true
+  - name: 'apigee_instance_full'
+    vars:
+      instance_name: 'my-instance-name'
+    exclude_test: true
+      # This is a more verbose version of the above that creates all
+      # the resources needed for the acceptance test.
+  - name: 'apigee_instance_full_test'
+    primary_resource_id: 'apigee_instance'
+    min_version: 'beta'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    exclude_docs: true
+      # Resource creation race
+    skip_vcr: true
+  - name: 'apigee_instance_service_attachment_basic_test'
+    primary_resource_id: 'apigee_instance'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    exclude_docs: true
+      # Resource creation race
+    skip_vcr: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'orgId'
+  - name: 'orgId'
+    type: String
     description: |
       The Apigee Organization associated with the Apigee instance,
       in the format `organizations/{{org_name}}`.
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       Resource ID of the instance.
     required: true
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: 'location'
+  - name: 'location'
+    type: String
     description: |
       Required. Compute Engine location where the instance resides.
     required: true
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: 'peeringCidrRange'
+  - name: 'peeringCidrRange'
+    type: String
     description: |
       The size of the CIDR block range that will be reserved by the instance. For valid values,
       see [CidrRange](https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances#CidrRange) on the documentation.
-    default_from_api: true
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: 'ipRange'
+    default_from_api: true
+  - name: 'ipRange'
+    type: String
     description: |
       IP range represents the customer-provided CIDR block of length 22 that will be used for
       the Apigee instance creation. This optional range, if provided, should be freely
@@ -180,34 +161,34 @@ properties:
       Input format: "a.b.c.d/22"
     immutable: true
     ignore_read: true
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: |
       Description of the instance.
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
+  - name: 'displayName'
+    type: String
     description: |
       Display name of the instance.
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: 'diskEncryptionKeyName'
+  - name: 'diskEncryptionKeyName'
+    type: String
     description: |
       Customer Managed Encryption Key (CMEK) used for disk and volume encryption. Required for Apigee paid subscriptions only.
       Use the following format: `projects/([^/]+)/locations/([^/]+)/keyRings/([^/]+)/cryptoKeys/([^/]+)`
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: 'host'
+  - name: 'host'
+    type: String
     description: |
       Output only. Hostname or IP address of the exposed Apigee endpoint used by clients to connect to the service.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'port'
+  - name: 'port'
+    type: String
     description: |
       Output only. Port number of the exposed Apigee endpoint.
     output: true
-  - !ruby/object:Api::Type::Array
-    name: 'consumerAcceptList'
+  - name: 'consumerAcceptList'
+    type: Array
     description: |
       Optional. Customer accept list represents the list of projects (id/number) on customer
       side that can privately connect to the service attachment. It is an optional field
@@ -216,9 +197,10 @@ properties:
     required: false
     default_from_api: true
     diff_suppress_func: 'projectListDiffSuppress'
-    item_type: Api::Type::String
-  - !ruby/object:Api::Type::String
-    name: 'serviceAttachment'
+    item_type:
+      type: String
+  - name: 'serviceAttachment'
+    type: String
     description: |
       Output only. Resource name of the service attachment created for the instance in
       the format: projects/*/regions/*/serviceAttachments/* Apigee customers can privately

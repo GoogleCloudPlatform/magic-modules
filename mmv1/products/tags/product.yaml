@@ -1,4 +1,4 @@
-# Copyright 2021 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,31 +11,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Product
-name: Tags
+---
+name: 'Tags'
+display_name: 'Tags'
 versions:
-  - !ruby/object:Api::Product::Version
-    name: ga
-    base_url: https://cloudresourcemanager.googleapis.com/v3/
-  - !ruby/object:Api::Product::Version
-    name: beta
-    base_url: https://cloudresourcemanager.googleapis.com/v3/
+  - name: 'ga'
+    base_url: 'https://cloudresourcemanager.googleapis.com/v3/'
+  - name: 'beta'
+    base_url: 'https://cloudresourcemanager.googleapis.com/v3/'
 scopes:
-  - https://www.googleapis.com/auth/cloud-platform
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+  - 'https://www.googleapis.com/auth/cloud-platform'
+async:
+  type: "OpAsync"
+  operation:
     base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
     resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
+  error:
     path: 'error'
     message: 'message'
