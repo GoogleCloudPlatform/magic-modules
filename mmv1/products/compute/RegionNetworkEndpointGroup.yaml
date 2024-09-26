@@ -168,14 +168,14 @@ properties:
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Subnetwork'
     imports: 'selfLink'
-  - !ruby/object:Api::Type::NestedObject
-    name: 'pscData'
+  - name: 'pscData'
+    type: NestedObject
     description: |
       This field is only used for PSC NEGs.
 
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'producerPort'
+      - name: 'producerPort'
+        type: String
         ignore_read: true
         description: |
           The PSC producer port to use when consumer PSC NEG connects to a producer. If
