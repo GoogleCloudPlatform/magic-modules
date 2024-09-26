@@ -1618,9 +1618,13 @@ func (r Resource) TestExamples() []resource.Examples {
 }
 
 func (r Resource) VersionedProvider(exampleVersion string) bool {
-	vp := r.MinVersion
+	var vp string
 	if exampleVersion != "" {
 		vp = exampleVersion
+	} else if r.MinVersion == "" {
+		vp = r.ProductMetadata.lowestVersion().Name
+	} else {
+		vp = r.MinVersion
 	}
 	return vp != "" && vp != "ga"
 }
