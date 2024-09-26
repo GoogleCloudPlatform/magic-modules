@@ -1992,22 +1992,15 @@ func flattenHostMaintenancePolicy(c *container.HostMaintenancePolicy) []map[stri
 
 // This portion of nodePoolUpdate() is moved here to be shared with
 // node pool updates in `resource_container_cluster`
-func nodePoolNodeConfigUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *NodePoolInformation, prefix string, timeout time.Duration) error {
-	config := meta.(*transport_tpg.Config)
-	name := d.Get(prefix + "name").(string)
+func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Config, nodePoolInfo *NodePoolInformation, prefix, name string, timeout time.Duration) error {
+
+	// Nodepool write-lock will be acquired when update function is called.
+	npLockKey := nodePoolInfo.nodePoolLockKey(name)
 
 	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
-
-	// Acquire read-lock on cluster.
-	clusterLockKey := nodePoolInfo.clusterLockKey()
-	transport_tpg.MutexStore.RLock(clusterLockKey)
-	defer transport_tpg.MutexStore.RUnlock(clusterLockKey)
-
-	// Nodepool write-lock will be acquired when update function is called.
-	npLockKey := nodePoolInfo.nodePoolLockKey(name)
 
 	if d.HasChange(prefix + "node_config") {
 
