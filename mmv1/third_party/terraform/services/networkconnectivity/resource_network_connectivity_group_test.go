@@ -59,7 +59,7 @@ resource "google_network_connectivity_hub" "basic_hub" {
   }
 }
 
-resource "google_network_connectivity_group" "name" {
+resource "google_network_connectivity_group" "primary" {
   hub = google_network_connectivity_hub.basic_hub.id
   name = "default"
   auto_accept {
@@ -83,7 +83,7 @@ resource "google_network_connectivity_hub" "basic_hub" {
   }
 }
 
-resource "google_network_connectivity_group" "name" {
+resource "google_network_connectivity_group" "primary" {
   hub = google_network_connectivity_hub.basic_hub.id
   name = "default"
   auto_accept {
