@@ -266,11 +266,11 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		}
 
 		if err := vt.UploadLogs(vcr.UploadLogsOptions{
-			Head:           newBranch,
-			BuildID:        buildID,
+			Head:     newBranch,
+			BuildID:  buildID,
 			Parallel: true,
-			Mode:           vcr.Recording,
-			Version:        provider.Beta,
+			Mode:     vcr.Recording,
+			Version:  provider.Beta,
 		}); err != nil {
 			return fmt.Errorf("error uploading recording logs: %w", err)
 		}
