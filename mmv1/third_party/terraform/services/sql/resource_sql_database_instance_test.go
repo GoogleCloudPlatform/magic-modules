@@ -2101,7 +2101,7 @@ func TestAccSqlDatabaseInstance_SqlServerTimezone(t *testing.T) {
 	})
 }
 
-func TestAccSqlServerTimezone_update(t *testing.T) {
+func TestAccSqlDatabaseInstance_SqlServerTimezoneUpdate(t *testing.T) {
 	t.Parallel()
 
 	instanceName := "tf-test-" + acctest.RandString(t, 10)
