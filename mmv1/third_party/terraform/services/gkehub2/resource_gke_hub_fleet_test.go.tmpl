@@ -14,6 +14,147 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
+func TestAccGKEHub2Fleet_gkehubFleetWithComplianceConfig_update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix":   acctest.RandString(t, 10),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckGKEHub2FleetDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time":   {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_EnableComplianceConfigWithDefaultStandards(clusterName, networkName, subnetworkName),
+			},
+			{
+				ResourceName:      "google_gke_hub_fleet.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccContainerCluster_UpdateToEmptyStandardNotAllowed(clusterName, networkName, subnetworkName),
+				ExpectError: regexp.MustCompile(`Missing required argument`),
+			},
+			{
+				Config: testAccContainerCluster_UpdateToRepeatedStandardNotAllowed(clusterName, networkName, subnetworkName),
+				ExpectError: regexp.MustCompile(`Duplicate compliance standard .* found`),
+			},
+			{
+				Config: testAccContainerCluster_UpdateComplianceConfigToExplicitStandards(clusterName, networkName, subnetworkName),
+			},
+			{
+				ResourceName:      "google_gke_hub_fleet.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccContainerCluster_DisableComplianceConfig(clusterName, networkName, subnetworkName),
+			},
+			{
+				ResourceName:      "google_gke_hub_fleet.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccContainerCluster_EnableComplianceConfigWithDefaultStandards(context map[string]interface{}) string {
+	return gkeHubFleetProjectSetupForGA(context) + acctest.Nprintf(`
+resource "google_gke_hub_fleet" "default" {
+  project = google_project.project.project_id
+  display_name = "my production fleet"
+  default_cluster_config {
+		compliance_config {
+			mode = "ENABLED"
+		}
+	}
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
+}
+`, context)
+}
+
+func testAccContainerCluster_UpdateComplianceConfigToExplicitStandards(context map[string]interface{}) string {
+	return gkeHubFleetProjectSetupForGA(context) + acctest.Nprintf(`
+resource "google_gke_hub_fleet" "default" {
+  project = google_project.project.project_id
+  display_name = "my production fleet"
+  default_cluster_config {
+		compliance_config {
+			mode = "ENABLED"
+			compliance_standards {
+				standard = "pss-baseline"
+			}
+			compliance_standards {
+				standard = "cis-gke-v1.5.0"
+			}
+		}
+	}
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
+}
+`, context)
+}
+
+func testAccContainerCluster_UpdateToEmptyStandardNotAllowed(context map[string]interface{}) string {
+	return gkeHubFleetProjectSetupForGA(context) + acctest.Nprintf(`
+resource "google_gke_hub_fleet" "default" {
+  project = google_project.project.project_id
+  display_name = "my production fleet"
+  default_cluster_config {
+		compliance_config {
+			mode = "ENABLED"
+			compliance_standards {}
+		}
+	}
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
+}
+`, context)
+}
+
+func testAccContainerCluster_UpdateToRepeatedStandardNotAllowed(context map[string]interface{}) string {
+	return gkeHubFleetProjectSetupForGA(context) + acctest.Nprintf(`
+resource "google_gke_hub_fleet" "default" {
+  project = google_project.project.project_id
+  display_name = "my production fleet"
+  default_cluster_config {
+		compliance_config {
+			mode = "ENABLED"
+			compliance_standards {
+				standard = "pss-baseline"
+			}
+			compliance_standards {
+				standard = "pss-baseline"
+			}
+		}
+	}
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
+}
+`, context)
+}
+
+func testAccContainerCluster_DisableComplianceConfig(context map[string]interface{}) string {
+	return gkeHubFleetProjectSetupForGA(context) + acctest.Nprintf(`
+resource "google_gke_hub_fleet" "default" {
+  project = google_project.project.project_id
+  display_name = "my production fleet"
+  default_cluster_config {
+		compliance_config {
+			mode = "DISABLED"
+		}
+	}
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
+}
+`, context)
+}
+
 func TestAccGKEHub2Fleet_gkehubFleetBasicExample_update(t *testing.T) {
 	t.Parallel()
 
