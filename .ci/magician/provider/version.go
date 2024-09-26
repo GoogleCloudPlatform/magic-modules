@@ -6,9 +6,10 @@ const (
 	None Version = iota
 	GA
 	Beta
+	Alpha
 )
 
-const NumVersions = 2
+const NumVersions = 3
 
 func (v Version) String() string {
 	switch v {
@@ -16,6 +17,8 @@ func (v Version) String() string {
 		return "ga"
 	case Beta:
 		return "beta"
+	case Alpha:
+		return "alpha"
 	}
 	return "unknown"
 }
@@ -33,6 +36,8 @@ func (v Version) RepoName() string {
 		return "terraform-provider-google"
 	case Beta:
 		return "terraform-provider-google-beta"
+	case Alpha:
+		return "terraform-next"
 	}
 	return "unknown"
 }

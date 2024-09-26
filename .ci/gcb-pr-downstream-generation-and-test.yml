@@ -264,7 +264,7 @@ steps:
         - $COMMIT_SHA
         - $BUILD_ID
         - $PROJECT_ID
-        - "22"  # Build step
+        - "23"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
