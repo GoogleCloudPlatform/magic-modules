@@ -477,6 +477,7 @@ func formatComment(fileName string, tmplText string, data any) (string, error) {
 	funcs := template.FuncMap{
 		"join": strings.Join,
 		"add":  func(i, j int) int { return i + j },
+		"color": color,
 	}
 	tmpl, err := template.New(fileName).Funcs(funcs).Parse(tmplText)
 	if err != nil {
