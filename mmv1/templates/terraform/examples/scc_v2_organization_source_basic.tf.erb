@@ -1,5 +1,0 @@
-resource "google_scc_v2_organization_source" "<%= ctx[:primary_resource_id] %>" {
-  display_name = "<%= ctx[:vars]['source_display_name'] %>"
-  organization = "<%= ctx[:test_env_vars]['org_id'] %>"
-  description  = "My custom Cloud Security Command Center Finding Source"
-}

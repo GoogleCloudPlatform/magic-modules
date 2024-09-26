@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,106 +11,106 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'CapacityCommitment'
-base_url: projects/{{project}}/locations/{{location}}/capacityCommitments
-create_url: projects/{{project}}/locations/{{location}}/capacityCommitments?capacityCommitmentId={{capacity_commitment_id}}
-self_link: '{{name}}'
-update_verb: :PATCH
-update_mask: true
 description: |
   Capacity commitment is a way to purchase compute capacity for BigQuery jobs (in the form of slots) with some committed period of usage. Annual commitments renew by default. Commitments can be removed after their commitment end time passes.
 
   In order to remove annual commitment, its plan needs to be changed to monthly or flex first.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Introduction to Reservations': 'https://cloud.google.com/bigquery/docs/reservations-intro'
   api: 'https://cloud.google.com/bigquery/docs/reference/reservations/rest/v1/projects.locations.capacityCommitments'
+docs:
 id_format: '{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/capacityCommitments'
+self_link: '{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/capacityCommitments?capacityCommitmentId={{capacity_commitment_id}}'
+update_verb: 'PATCH'
+update_mask: true
 import_format:
-  [
-    'projects/{{project}}/locations/{{location}}/capacityCommitments/{{capacity_commitment_id}}',
-  ]
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/bigquery_reservation_capacity_commitment.go.erb
-  custom_import: templates/terraform/custom_import/bigquery_reservation_capacity_commitment_set_id.go.erb
+  - 'projects/{{project}}/locations/{{location}}/capacityCommitments/{{capacity_commitment_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  constants: 'templates/terraform/constants/bigquery_reservation_capacity_commitment.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/bigquery_reservation_capacity_commitment_set_id.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'bigquery_reservation_capacity_commitment_basic'
-    external_providers: ["random", "time"]
-    skip_docs: true
+  - name: 'bigquery_reservation_capacity_commitment_basic'
     primary_resource_id: 'commitment'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'bigquery_reservation_capacity_commitment_no_id'
     external_providers: ["random", "time"]
-    skip_docs: true
+    exclude_docs: true
+  - name: 'bigquery_reservation_capacity_commitment_no_id'
     primary_resource_id: 'commitment'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'bigquery_reservation_capacity_commitment_docs'
-    skip_test: true
+    external_providers: ["random", "time"]
+    exclude_docs: true
+  - name: 'bigquery_reservation_capacity_commitment_docs'
+    exclude_test: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'capacityCommitmentId'
-    url_param_only: true
-    immutable: true
+  - name: 'capacityCommitmentId'
+    type: String
     description: |
       The optional capacity commitment ID. Capacity commitment name will be generated automatically if this field is
       empty. This field must only contain lower case alphanumeric characters or dashes. The first and last character
       cannot be a dash. Max length is 64 characters. NOTE: this ID won't be kept if the capacity commitment is split
       or merged.
-  - !ruby/object:Api::Type::String
-    name: 'location'
     url_param_only: true
     immutable: true
-    default_value: US
+  - name: 'location'
+    type: String
     description: |
       The geographic location where the transfer config should reside.
       Examples: US, EU, asia-northeast1. The default value is US.
-  - !ruby/object:Api::Type::String
-    name: 'enforceSingleAdminProjectPerOrg'
     url_param_only: true
     immutable: true
+    default_value: "US"
+  - name: 'enforceSingleAdminProjectPerOrg'
+    type: String
     description: |
       If true, fail the request if another project in the organization has a capacity commitment.
+    url_param_only: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    output: true
+  - name: 'name'
+    type: String
     description: |
       The resource name of the capacity commitment, e.g., projects/myproject/locations/US/capacityCommitments/123
-  - !ruby/object:Api::Type::Integer
-    name: 'slotCount'
-    required: true
-    immutable: true
+    output: true
+  - name: 'slotCount'
+    type: Integer
     description: |
       Number of slots in this commitment.
-  - !ruby/object:Api::Type::String
-    name: 'plan'
     required: true
+    immutable: true
+  - name: 'plan'
+    type: String
     description: |
       Capacity commitment plan. Valid values are at https://cloud.google.com/bigquery/docs/reference/reservations/rpc/google.cloud.bigquery.reservation.v1#commitmentplan
-    diff_suppress_func: bigqueryReservationCapacityCommitmentPlanDiffSuppressFunc
-  - !ruby/object:Api::Type::String
-    name: 'state'
-    output: true
+    required: true
+    diff_suppress_func: 'bigqueryReservationCapacityCommitmentPlanDiffSuppressFunc'
+  - name: 'state'
+    type: String
     description: |
       State of the commitment
-  - !ruby/object:Api::Type::Time
-    name: 'commitmentStartTime'
     output: true
+  - name: 'commitmentStartTime'
+    type: Time
     description: |
       The start of the current commitment period. It is applicable only for ACTIVE capacity commitments.
-  - !ruby/object:Api::Type::Time
-    name: 'commitmentEndTime'
     output: true
+  - name: 'commitmentEndTime'
+    type: Time
     description: |
       The start of the current commitment period. It is applicable only for ACTIVE capacity commitments.
-  - !ruby/object:Api::Type::String
-    name: 'renewalPlan'
+    output: true
+  - name: 'renewalPlan'
+    type: String
     description: |
       The plan this capacity commitment is converted to after commitmentEndTime passes. Once the plan is changed, committed period is extended according to commitment plan. Only applicable for some commitment plans.
-  - !ruby/object:Api::Type::String
-    name: 'edition'
-    immutable: true
+  - name: 'edition'
+    type: String
     description: |
       The edition type. Valid values are STANDARD, ENTERPRISE, ENTERPRISE_PLUS
+    immutable: true

@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,107 +11,93 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Instance'
-base_url: projects/{{project}}/instances
-update_verb: :PATCH
 description: |
   An isolated set of Cloud Spanner resources on which databases can be
   hosted.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/spanner/'
   api: 'https://cloud.google.com/spanner/docs/reference/rest/v1/projects.instances'
-async: !ruby/object:Api::OpAsync
-  actions: ['create', 'update']
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
-    base_url: '{{op_id}}'
-    wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
-    path: 'response'
-    resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
-    path: 'error'
-    message: 'message'
-autogen_async: true
-timeouts: !ruby/object:Api::Timeouts
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
+docs:
 id_format: '{{project}}/{{name}}'
+base_url: 'projects/{{project}}/instances'
+update_verb: 'PATCH'
 import_format:
   - 'projects/{{project}}/instances/{{name}}'
   - '{{project}}/{{name}}'
   - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+  constants: 'templates/terraform/constants/spanner_instance.go.tmpl'
+  encoder: 'templates/terraform/encoders/spanner_instance.go.tmpl'
+  update_encoder: 'templates/terraform/encoders/spanner_instance_update.go.tmpl'
+  decoder: 'templates/terraform/decoders/spanner_instance.go.tmpl'
+  post_create: 'templates/terraform/post_create/sleep.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/spanner_instance.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/spanner_instance.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'spanner_instance_basic'
-    primary_resource_id:
-      'example'
+  - name: 'spanner_instance_basic'
+    primary_resource_id: 'example'
       # Randomness
     skip_vcr: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'spanner_instance_processing_units'
-    primary_resource_id:
-      'example'
+  - name: 'spanner_instance_processing_units'
+    primary_resource_id: 'example'
       # Randomness
     skip_vcr: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'spanner_instance_with_autoscaling'
-    primary_resource_id:
-      'example'
+  - name: 'spanner_instance_with_autoscaling'
+    primary_resource_id: 'example'
       # Randomness
     skip_vcr: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'spanner_instance_multi_regional'
-    primary_resource_id:
-      'example'
+  - name: 'spanner_instance_multi_regional'
+    primary_resource_id: 'example'
       # Randomness
     skip_vcr: true
 virtual_fields:
-  - !ruby/object:Api::Type::Boolean
-    name: 'force_destroy'
-    default_value: false
+  - name: 'force_destroy'
     description: |
       When deleting a spanner instance, this boolean option will delete all backups of this instance.
       This must be set to true if you created a backup manually in the console.
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  encoder: templates/terraform/encoders/spanner_instance.go.erb
-  update_encoder: templates/terraform/encoders/spanner_instance_update.go.erb
-  decoder: templates/terraform/decoders/spanner_instance.go.erb
-  post_create: templates/terraform/post_create/sleep.go.erb
-  pre_delete: 'templates/terraform/pre_delete/spanner_instance.go.erb'
-  constants: 'templates/terraform/constants/spanner_instance.go.erb'
-  pre_update: 'templates/terraform/pre_update/spanner_instance.go.erb'
+    type: Boolean
+    default_value: false
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       A unique identifier for the instance, which cannot be changed after
       the instance is created. The name must be between 6 and 30 characters
       in length.
       If not provided, a random string starting with `tf-` will be selected.
-    immutable: true
     required: true
-    validation: !ruby/object:Provider::Terraform::Validation
-      regex:
-        '^[a-z][-a-z0-9]*[a-z0-9]$'
+    immutable: true
         # This resource supports a sort of odd autogenerate-if-not-set
         # system, which is done in the encoder.  Consequently we have
         # to interpret "not set" as "use the name in state".
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'config'
-    resource: 'InstanceConfig'
-    imports: 'name'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    validation:
+      regex: '^[a-z][-a-z0-9]*[a-z0-9]$'
+  - name: 'config'
+    type: ResourceRef
     description: |
       The name of the instance's configuration (similar but not
       quite the same as a region) which defines the geographic placement and
@@ -119,63 +105,65 @@ properties:
       is stored. Values are typically of the form `regional-europe-west1` , `us-central` etc.
       In order to obtain a valid list please consult the
       [Configuration section of the docs](https://cloud.google.com/spanner/docs/instances).
-    immutable: true
     required: true
-    custom_expand: templates/terraform/custom_expand/spanner_instance_config.go.erb
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
+    immutable: true
+    custom_expand: 'templates/terraform/custom_expand/spanner_instance_config.go.tmpl'
+    resource: 'InstanceConfig'
+    imports: 'name'
+  - name: 'displayName'
+    type: String
     description: |
       The descriptive name for this instance as it appears in UIs. Must be
       unique per project and between 4 and 30 characters in length.
     required: true
-  - !ruby/object:Api::Type::Integer
-    name: 'num_nodes'
-    api_name: nodeCount
-    default_from_api: true
+  - name: 'num_nodes'
+    type: Integer
     description: |
       The number of nodes allocated to this instance. Exactly one of either node_count or processing_units
       must be present in terraform.
+    api_name: nodeCount
+    default_from_api: true
     exactly_one_of:
-      - num_nodes
-      - processing_units
-      - autoscaling_config
-  - !ruby/object:Api::Type::Integer
-    name: 'processingUnits'
+      - 'num_nodes'
+      - 'processing_units'
+      - 'autoscaling_config'
+  - name: 'processingUnits'
+    type: Integer
     description: |
       The number of processing units allocated to this instance. Exactly one of processing_units
       or node_count must be present in terraform.
-    exactly_one_of:
-      - num_nodes
-      - processing_units
-      - autoscaling_config
     default_from_api: true
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+    exactly_one_of:
+      - 'num_nodes'
+      - 'processing_units'
+      - 'autoscaling_config'
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       An object containing a list of "key": value pairs.
       Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
-  - !ruby/object:Api::Type::Enum
-    name: 'state'
+  - name: 'state'
+    type: Enum
     description: |
       Instance status: `CREATING` or `READY`.
     output: true
-    values:
-      - :READY
-      - :CREATING
-  - !ruby/object:Api::Type::NestedObject
-    name: 'autoscalingConfig'
+    enum_values:
+      - 'READY'
+      - 'CREATING'
+  - name: 'autoscalingConfig'
+    type: NestedObject
     description: |
       The autoscaling configuration. Autoscaling is enabled if this field is set.
       When autoscaling is enabled, num_nodes and processing_units are treated as,
       OUTPUT_ONLY fields and reflect the current compute capacity allocated to
       the instance.
     exactly_one_of:
-      - num_nodes
-      - processing_units
-      - autoscaling_config
+      - 'num_nodes'
+      - 'processing_units'
+      - 'autoscaling_config'
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: 'autoscalingLimits'
+      - name: 'autoscalingLimits'
+        type: NestedObject
         description: |
           Defines scale in controls to reduce the risk of response latency
           and outages due to abrupt scale-in events. Users can define the minimum and
@@ -184,69 +172,69 @@ properties:
           units to specify the limits, but should use the same unit to set both the
           min_limit and max_limit.
         properties:
-          - !ruby/object:Api::Type::Integer
-            name: 'minProcessingUnits'
+          - name: 'minProcessingUnits'
+            type: Integer
             description: |
               Specifies minimum number of processing units allocated to the instance.
               If set, this number should be multiples of 1000.
             exactly_one_of:
-              - min_processing_units
-              - min_nodes
-          - !ruby/object:Api::Type::Integer
-            name: 'maxProcessingUnits'
+              - 'min_processing_units'
+              - 'min_nodes'
+          - name: 'maxProcessingUnits'
+            type: Integer
             description: |
               Specifies maximum number of processing units allocated to the instance.
               If set, this number should be multiples of 1000 and be greater than or equal to
               min_processing_units.
             exactly_one_of:
-              - max_processing_units
-              - max_nodes
-          - !ruby/object:Api::Type::Integer
-            name: 'minNodes'
+              - 'max_processing_units'
+              - 'max_nodes'
+          - name: 'minNodes'
+            type: Integer
             description: |
               Specifies number of nodes allocated to the instance. If set, this number
               should be greater than or equal to 1.
             exactly_one_of:
-              - min_processing_units
-              - min_nodes
+              - 'min_processing_units'
+              - 'min_nodes'
             required_with:
-              - max_nodes
-          - !ruby/object:Api::Type::Integer
-            name: 'maxNodes'
+              - 'max_nodes'
+          - name: 'maxNodes'
+            type: Integer
             description: |
               Specifies maximum number of nodes allocated to the instance. If set, this number
               should be greater than or equal to min_nodes.
             exactly_one_of:
-              - max_processing_units
-              - max_nodes
+              - 'max_processing_units'
+              - 'max_nodes'
             required_with:
-              - min_nodes
-      - !ruby/object:Api::Type::NestedObject
-        name: 'autoscalingTargets'
+              - 'min_nodes'
+      - name: 'autoscalingTargets'
+        type: NestedObject
         description: |
           Defines scale in controls to reduce the risk of response latency
           and outages due to abrupt scale-in events
         properties:
-          - !ruby/object:Api::Type::Integer
-            name: 'highPriorityCpuUtilizationPercent'
+          - name: 'highPriorityCpuUtilizationPercent'
+            type: Integer
             description: |
               Specifies the target high priority cpu utilization percentage that the autoscaler
               should be trying to achieve for the instance.
               This number is on a scale from 0 (no utilization) to 100 (full utilization)..
-          - !ruby/object:Api::Type::Integer
-            name: 'storageUtilizationPercent'
+          - name: 'storageUtilizationPercent'
+            type: Integer
             description: |
               Specifies the target storage utilization percentage that the autoscaler
               should be trying to achieve for the instance.
               This number is on a scale from 0 (no utilization) to 100 (full utilization).
 
-  - !ruby/object:Api::Type::Enum
-    name: 'edition'
+  - name: 'edition'
+    type: Enum
     description: |
       The edition selected for this instance. Different editions provide different capabilities at different price points.
     default_from_api: true
-    values:
-      - :EDITION_UNSPECIFIED
-      - :STANDARD
-      - :ENTERPRISE
-      - :ENTERPRISE_PLUS
+    enum_values:
+      - 'EDITION_UNSPECIFIED'
+      - 'STANDARD'
+      - 'ENTERPRISE'
+      - 'ENTERPRISE_PLUS'

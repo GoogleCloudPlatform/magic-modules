@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,61 +11,60 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'NodeGroup'
 kind: 'compute#NodeGroup'
-base_url: projects/{{project}}/zones/{{zone}}/nodeGroups
-create_url: projects/{{project}}/zones/{{zone}}/nodeGroups?initialNodeCount=PRE_CREATE_REPLACE_ME
-update_verb: :PATCH
-update_mask: true
-has_self_link: true
 description: |
   Represents a NodeGroup resource to manage a group of sole-tenant nodes.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Sole-Tenant Nodes': 'https://cloud.google.com/compute/docs/nodes/'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/nodeGroups'
-collection_url_key: 'items'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+docs:
+base_url: 'projects/{{project}}/zones/{{zone}}/nodeGroups'
+has_self_link: true
+create_url: 'projects/{{project}}/zones/{{zone}}/nodeGroups?initialNodeCount=PRE_CREATE_REPLACE_ME'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
-    base_url: '{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'targetLink'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'status'
-    complete: 'DONE'
-    allowed:
-      - 'PENDING'
-      - 'RUNNING'
-      - 'DONE'
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error/errors'
     message: 'message'
+collection_url_key: 'items'
+custom_code:
+  pre_create: 'templates/terraform/pre_create/compute_node_group_url_replace.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'node_group_basic'
+  - name: 'node_group_basic'
     primary_resource_id: 'nodes'
     vars:
       group_name: 'soletenant-group'
       template_name: 'soletenant-tmpl'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'node_group_maintenance_interval'
-    min_version: beta
+  - name: 'node_group_maintenance_interval'
+    primary_resource_id: 'nodes'
+    min_version: 'beta'
+    vars:
+      group_name: 'soletenant-group'
+      template_name: 'soletenant-tmpl'
+  - name: 'node_group_autoscaling_policy'
     primary_resource_id: 'nodes'
     vars:
       group_name: 'soletenant-group'
       template_name: 'soletenant-tmpl'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'node_group_autoscaling_policy'
-    primary_resource_id: 'nodes'
-    vars:
-      group_name: 'soletenant-group'
-      template_name: 'soletenant-tmpl'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'node_group_share_settings'
+  - name: 'node_group_share_settings'
     primary_resource_id: 'nodes'
     vars:
       group_name: 'soletenant-group'
@@ -73,71 +72,69 @@ examples:
       guest_project_id: 'project-id'
       guest_project_name: 'project-name'
     test_env_vars:
-      org_id: :ORG_ID
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  pre_create: templates/terraform/pre_create/compute_node_group_url_replace.go.erb
+      org_id: 'ORG_ID'
 parameters:
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'zone'
-    resource: 'Zone'
-    imports: 'selfLink'
-    required: false
+  - name: 'zone'
+    type: ResourceRef
     description: |
       Zone where this node group is located
+    required: false
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Zone'
+    imports: 'selfLink'
 properties:
-  - !ruby/object:Api::Type::Time
-    name: 'creationTimestamp'
+  - name: 'creationTimestamp'
+    type: Time
     description: |
       Creation timestamp in RFC3339 text format.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: |
       An optional textual description of the resource.
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       Name of the resource.
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'nodeTemplate'
-    resource: 'NodeTemplate'
-    imports: 'selfLink'
-    required: true
+  - name: 'nodeTemplate'
+    type: ResourceRef
     description: |
       The URL of the node template to which this node group belongs.
-    update_verb: :POST
+    required: true
     update_url: 'projects/{{project}}/zones/{{zone}}/nodeGroups/{{name}}/setNodeTemplate'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
-  - !ruby/object:Api::Type::Integer
-    name: 'size'
+    update_verb: 'POST'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'NodeTemplate'
+    imports: 'selfLink'
+  - name: 'size'
+    type: Integer
     description: |
       The total number of nodes in the node group.
     output: true
-  - !ruby/object:Api::Type::Integer
-    name: 'initialSize'
+  - name: 'initialSize'
+    type: Integer
     description: |
       The initial number of nodes in the node group. One of `initial_size` or `autoscaling_policy` must be configured on resource creation.
     url_param_only: true
-  - !ruby/object:Api::Type::String
-    name: 'maintenancePolicy'
+  - name: 'maintenancePolicy'
+    type: String
     description: |
       Specifies how to handle instances when a node in the group undergoes maintenance. Set to one of: DEFAULT, RESTART_IN_PLACE, or MIGRATE_WITHIN_NODE_GROUP. The default value is DEFAULT.
-    default_value: DEFAULT
-  - !ruby/object:Api::Type::NestedObject
-    name: 'maintenanceWindow'
+    default_value: "DEFAULT"
+  - name: 'maintenanceWindow'
+    type: NestedObject
     description: |
       contains properties for the timeframe of maintenance
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'startTime'
-        required: true
+      - name: 'startTime'
+        type: String
         description: |
           instances.start time of the window. This must be in UTC format that resolves to one of 00:00, 04:00, 08:00, 12:00, 16:00, or 20:00. For example, both 13:00-5 and 08:00 are valid.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'autoscalingPolicy'
+        required: true
+  - name: 'autoscalingPolicy'
+    type: NestedObject
     description: |
       If you use sole-tenant nodes for your workloads, you can use the node
       group autoscaler to automatically manage the sizes of your node groups.
@@ -145,9 +142,8 @@ properties:
       One of `initial_size` or `autoscaling_policy` must be configured on resource creation.
     default_from_api: true
     properties:
-      - !ruby/object:Api::Type::Enum
-        name: 'mode'
-        required: true
+      - name: 'mode'
+        type: Enum
         description: |
           The autoscaling mode. Set to one of the following:
             - OFF: Disables the autoscaler.
@@ -155,62 +151,64 @@ properties:
             - ONLY_SCALE_OUT: Enables only scaling out.
             You must use this mode if your node groups are configured to
             restart their hosted VMs on minimal servers.
-        values:
-          - :OFF
-          - :ON
-          - :ONLY_SCALE_OUT
+        required: true
         default_from_api: true
-      - !ruby/object:Api::Type::Integer
-        name: 'minNodes'
+        enum_values:
+          - 'OFF'
+          - 'ON'
+          - 'ONLY_SCALE_OUT'
+      - name: 'minNodes'
+        type: Integer
         description: |
           Minimum size of the node group. Must be less
           than or equal to max-nodes. The default value is 0.
         default_from_api: true
-      - !ruby/object:Api::Type::Integer
-        name: 'maxNodes'
+      - name: 'maxNodes'
+        type: Integer
         description: |
           Maximum size of the node group. Set to a value less than or equal
           to 100 and greater than or equal to min-nodes.
         required: true
         default_from_api: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'shareSettings'
+  - name: 'shareSettings'
+    type: NestedObject
     description: |
       Share settings for the node group.
     default_from_api: true
     properties:
-      - !ruby/object:Api::Type::Enum
-        name: 'shareType'
-        required: true
+      - name: 'shareType'
+        type: Enum
         description: |
           Node group sharing type.
-        values:
-          - :ORGANIZATION
-          - :SPECIFIC_PROJECTS
-          - :LOCAL
-      - !ruby/object:Api::Type::Map
-        name: 'projectMap'
+        required: true
+        enum_values:
+          - 'ORGANIZATION'
+          - 'SPECIFIC_PROJECTS'
+          - 'LOCAL'
+      - name: 'projectMap'
+        type: Map
         description: |
           A map of project id and project config. This is only valid when shareType's value is SPECIFIC_PROJECTS.
-        key_name: id
+        key_name: 'id'
         key_description: |
           The project ID.
-        value_type: !ruby/object:Api::Type::NestedObject
+        value_type:
           name: projectConfig
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::String
-              name: 'projectId'
-              required: true
+            - name: 'projectId'
+              type: String
               description: |
                 The project id/number should be the same as the key of this project config in the project map.
-  - !ruby/object:Api::Type::Enum
-    name: 'maintenanceInterval'
-    min_version: beta
+              required: true
+  - name: 'maintenanceInterval'
+    type: Enum
     description: |
       Specifies the frequency of planned maintenance events. Set to one of the following:
         - AS_NEEDED: Hosts are eligible to receive infrastructure and hypervisor updates as they become available.
         - RECURRENT: Hosts receive planned infrastructure and hypervisor updates on a periodic basis, but not more frequently than every 28 days. This minimizes the number of planned maintenance operations on individual hosts and reduces the frequency of disruptions, both live migrations and terminations, on individual VMs.
-    values:
-      - :AS_NEEDED
-      - :RECURRENT
+    min_version: 'beta'
     default_from_api: true
+    enum_values:
+      - 'AS_NEEDED'
+      - 'RECURRENT'

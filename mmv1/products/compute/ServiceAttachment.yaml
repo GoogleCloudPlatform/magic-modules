@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,39 +11,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'ServiceAttachment'
 kind: 'compute#ServiceAttachment'
-base_url: projects/{{project}}/regions/{{region}}/serviceAttachments
-has_self_link: true
-update_verb: :PATCH
 description: |
   Represents a ServiceAttachment resource.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Configuring Private Service Connect to access services': 'https://cloud.google.com/vpc/docs/configure-private-service-connect-services'
   api: 'https://cloud.google.com/compute/docs/reference/beta/serviceAttachments'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+docs:
+base_url: 'projects/{{project}}/regions/{{region}}/serviceAttachments'
+has_self_link: true
+update_verb: 'PATCH'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
-    base_url: '{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'targetLink'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'status'
-    complete: 'DONE'
-    allowed:
-      - 'PENDING'
-      - 'RUNNING'
-      - 'DONE'
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error/errors'
     message: 'message'
+custom_code:
+  constants: 'templates/terraform/constants/compute_service_attachment.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/compute_service_attachment.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'service_attachment_basic'
+  - name: 'service_attachment_basic'
     primary_resource_id: 'psc_ilb_service_attachment'
     vars:
       service_attachment_name: 'my-psc-ilb'
@@ -55,8 +58,7 @@ examples:
       producer_forwarding_rule_name: 'producer-forwarding-rule'
       consumer_address_name: 'psc-ilb-consumer-address'
       consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'service_attachment_explicit_projects'
+  - name: 'service_attachment_explicit_projects'
     primary_resource_id: 'psc_ilb_service_attachment'
     vars:
       service_attachment_name: 'my-psc-ilb'
@@ -68,8 +70,7 @@ examples:
       producer_forwarding_rule_name: 'producer-forwarding-rule'
       consumer_address_name: 'psc-ilb-consumer-address'
       consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'service_attachment_explicit_networks'
+  - name: 'service_attachment_explicit_networks'
     primary_resource_id: 'psc_ilb_service_attachment'
     vars:
       service_attachment_name: 'my-psc-ilb'
@@ -82,8 +83,7 @@ examples:
       consumer_network_name: 'psc-ilb-consumer-network'
       consumer_address_name: 'psc-ilb-consumer-address'
       consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'service_attachment_reconcile_connections'
+  - name: 'service_attachment_reconcile_connections'
     primary_resource_id: 'psc_ilb_service_attachment'
     vars:
       service_attachment_name: 'my-psc-ilb'
@@ -95,25 +95,21 @@ examples:
       producer_forwarding_rule_name: 'producer-forwarding-rule'
       consumer_address_name: 'psc-ilb-consumer-address'
       consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/compute_service_attachment.go.erb
-  update_encoder: 'templates/terraform/update_encoder/compute_service_attachment.go.erb'
 parameters:
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'region'
-    resource: 'Region'
-    imports: 'name'
+  - name: 'region'
+    type: ResourceRef
     description: |
       URL of the region where the resource resides.
     required: false
     immutable: true
-    default_from_api: true
     ignore_read: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+    default_from_api: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Region'
+    imports: 'name'
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    required: true
+  - name: 'name'
+    type: String
     description: |
       Name of the resource. The name must be 1-63 characters long, and
       comply with RFC1035. Specifically, the name must be 1-63 characters
@@ -121,142 +117,147 @@ properties:
       which means the first character must be a lowercase letter, and all
       following characters must be a dash, lowercase letter, or digit,
       except the last character, which cannot be a dash.
+    required: true
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: |
       An optional description of this resource.
-  - !ruby/object:Api::Type::Fingerprint
-    name: 'fingerprint'
+  - name: 'fingerprint'
+    type: Fingerprint
     description: |
       Fingerprint of this resource. This field is used internally during
       updates of this resource.
-  - !ruby/object:Api::Type::String
-    name: 'connectionPreference'
-    required: true
+    output: true
+  - name: 'connectionPreference'
+    type: String
     description: |
       The connection preference to use for this service attachment. Valid
       values include "ACCEPT_AUTOMATIC", "ACCEPT_MANUAL".
-  - !ruby/object:Api::Type::Array
-    name: 'connectedEndpoints'
-    output: true
+    required: true
+  - name: 'connectedEndpoints'
+    type: Array
     description: |
       An array of the consumer forwarding rules connected to this service
       attachment.
-    item_type: !ruby/object:Api::Type::NestedObject
+    output: true
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'endpoint'
-          output: true
+        - name: 'endpoint'
+          type: String
           description: |
             The URL of the consumer forwarding rule.
-        - !ruby/object:Api::Type::String
-          name: 'status'
           output: true
+        - name: 'status'
+          type: String
           description: |
             The status of the connection from the consumer forwarding rule to
             this service attachment.
-        - !ruby/object:Api::Type::String
-          name: 'consumerNetwork'
           output: true
+        - name: 'consumerNetwork'
+          type: String
           description: |
             The url of the consumer network.
-        - !ruby/object:Api::Type::String
-          name: 'pscConnectionId'
           output: true
+        - name: 'pscConnectionId'
+          type: String
           description: |
             The PSC connection id of the connected endpoint.
-        - !ruby/object:Api::Type::Integer
-          name: 'propagatedConnectionCount'
-          min_version: 'beta'
           output: true
+        - name: 'propagatedConnectionCount'
+          type: Integer
           description: |
             The number of consumer Network Connectivity Center spokes that the connected Private Service Connect endpoint has propagated to.
-  - !ruby/object:Api::Type::String
-    name: targetService
+          min_version: 'beta'
+          output: true
+  - name: 'targetService'
+    type: String
+    description: |
+      The URL of a service serving the endpoint identified by this service attachment.
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    description: |
-      The URL of a service serving the endpoint identified by this service attachment.
-  - !ruby/object:Api::Type::Array
-    name: 'natSubnets'
-    required: true
-    send_empty_value: true
+  - name: 'natSubnets'
+    type: Array
     description: |
       An array of subnets that is provided for NAT in this service attachment.
-    item_type: !ruby/object:Api::Type::ResourceRef
+    required: true
+    send_empty_value: true
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
+    item_type:
       name: 'subnet'
-      resource: 'Subnetwork'
-      imports: 'selfLink'
+      type: ResourceRef
       description: |
         A subnet that is provided for NAT in this service attachment.
-    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
-  - !ruby/object:Api::Type::Boolean
-    name: 'enableProxyProtocol'
-    required: true
+      resource: 'Subnetwork'
+      imports: 'selfLink'
+  - name: 'enableProxyProtocol'
+    type: Boolean
     description: |
       If true, enable the proxy protocol which is for supplying client TCP/IP
       address data in TCP connections that traverse proxies on their way to
       destination servers.
-  - !ruby/object:Api::Type::Array
-    name: 'domainNames'
-    immutable: true
-    item_type: Api::Type::String
+    required: true
+  - name: 'domainNames'
+    type: Array
     description: |
       If specified, the domain name will be used during the integration between
       the PSC connected endpoints and the Cloud DNS. For example, this is a
       valid domain name: "p.mycompany.com.". Current max number of domain names
       supported is 1.
-  - !ruby/object:Api::Type::Array
-    name: 'consumerRejectLists'
-    item_type: Api::Type::String
-    send_empty_value: true
+    immutable: true
+    item_type:
+      type: String
+  - name: 'consumerRejectLists'
+    type: Array
     description: |
       An array of projects that are not allowed to connect to this service
       attachment.
-  - !ruby/object:Api::Type::Array
-    name: 'consumerAcceptLists'
+    send_empty_value: true
+    item_type:
+      type: String
+  - name: 'consumerAcceptLists'
+    type: Array
     description: |
       An array of projects that are allowed to connect to this service
       attachment.
-    send_empty_value: true
     is_set: true
+    send_empty_value: true
     set_hash_func: computeServiceAttachmentConsumerAcceptListsHash
-    item_type: !ruby/object:Api::Type::NestedObject
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'projectIdOrNum'
+        - name: 'projectIdOrNum'
+          type: String
           # TODO (laurensknoll): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
           description: |
             A project that is allowed to connect to this service attachment.
             Only one of project_id_or_num and network_url may be set.
-        - !ruby/object:Api::Type::String
-          name: 'networkUrl'
+        - name: 'networkUrl'
+          type: String
           # TODO (laurensknoll): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
           description: |
             The network that is allowed to connect to this service attachment.
             Only one of project_id_or_num and network_url may be set.
           diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
-        - !ruby/object:Api::Type::Integer
-          name: 'connectionLimit'
-          required: true
+        - name: 'connectionLimit'
+          type: Integer
           description: |
             The number of consumer forwarding rules the consumer project can
             create.
-  - !ruby/object:Api::Type::Boolean
-    name: reconcileConnections
-    default_from_api: true
-    send_empty_value: true
+          required: true
+  - name: 'reconcileConnections'
+    type: Boolean
     description: |
       This flag determines whether a consumer accept/reject list change can reconcile the statuses of existing ACCEPTED or REJECTED PSC endpoints.
 
       If false, connection policy update will only affect existing PENDING PSC endpoints. Existing ACCEPTED/REJECTED endpoints will remain untouched regardless how the connection policy is modified .
       If true, update will affect both PENDING and ACCEPTED/REJECTED PSC endpoints. For example, an ACCEPTED PSC endpoint will be moved to REJECTED if its project is added to the reject list.
-  - !ruby/object:Api::Type::Integer
-    name: 'propagatedConnectionLimit'
-    min_version: 'beta'
     default_from_api: true
+    send_empty_value: true
+  - name: 'propagatedConnectionLimit'
+    type: Integer
     description: |
       The number of consumer spokes that connected Private Service Connect endpoints can be propagated to through Network Connectivity Center.
       This limit lets the service producer limit how many propagated Private Service Connect connections can be established to this service attachment from a single consumer.
@@ -265,3 +266,5 @@ properties:
       If the connection preference of the service attachment is ACCEPT_AUTOMATIC, the limit applies to each project that contains a connected endpoint.
 
       If unspecified, the default propagated connection limit is 250.
+    min_version: 'beta'
+    default_from_api: true

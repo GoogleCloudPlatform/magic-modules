@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,70 +11,75 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Group'
-base_url: v3/projects/{{project}}/groups
-self_link: 'v3/{{name}}'
-update_verb: :PUT
 description: |
   The description of a dynamic collection of monitored resources. Each group
   has a filter that is matched against monitored resources and their
   associated metadata. If a group's filter matches an available monitored
   resource, then that resource is a member of that group.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/monitoring/groups/'
   api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.groups'
+docs:
 id_format: '{{name}}'
-import_format: ['{{name}}']
-mutex: stackdriver/groups/{{project}}
-error_retry_predicates: ['transport_tpg.IsMonitoringConcurrentEditError']
+base_url: 'v3/projects/{{project}}/groups'
+self_link: 'v3/{{name}}'
+mutex: 'stackdriver/groups/{{project}}'
+import_format:
+  - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
+  custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
+error_retry_predicates:
+
+  - 'transport_tpg.IsMonitoringConcurrentEditError'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'monitoring_group_basic'
+  - name: 'monitoring_group_basic'
     primary_resource_id: 'basic'
     vars:
       display_name: 'MonitoringGroup'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'monitoring_group_subgroup'
+  - name: 'monitoring_group_subgroup'
     primary_resource_id: 'subgroup'
     vars:
       display_name: 'MonitoringParentGroup'
       display_name2: 'MonitoringSubGroup'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/self_link_as_name.erb
-  post_create: templates/terraform/post_create/set_computed_name.erb
-
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: parentName
+  - name: 'parentName'
+    type: String
     # TODO chrisst - turn into self-reference if possible.
     description: |
       The name of the group's parent, if it has one. The format is
       "projects/{project_id_or_number}/groups/{group_id}". For
       groups with no parent, parentName is the empty string, "".
     diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description: |
       A unique identifier for this group. The format is
       "projects/{project_id_or_number}/groups/{group_id}".
     output: true
-  - !ruby/object:Api::Type::Boolean
-    name: isCluster
+  - name: 'isCluster'
+    type: Boolean
     description: |
       If true, the members of this group are considered to be a
       cluster. The system can perform additional analysis on
       groups that are clusters.
-  - !ruby/object:Api::Type::String
-    name: displayName
-    required: true
+  - name: 'displayName'
+    type: String
     description: |
       A user-assigned name for this group, used only for display
       purposes.
-  - !ruby/object:Api::Type::String
-    name: filter
     required: true
+  - name: 'filter'
+    type: String
     description: |
       The filter used to determine which monitored resources
       belong to this group.
+    required: true

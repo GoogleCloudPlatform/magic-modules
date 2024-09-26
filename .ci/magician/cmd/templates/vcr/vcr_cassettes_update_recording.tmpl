@@ -5,6 +5,7 @@ The provider crashed while running the VCR tests in RECORDING mode
 {{- else -}}
 #################################
 RECORDING Tests Report
+#################################
 
 {{if .RecordingResult.PassedTests}}
 Tests passed during RECORDING mode:
@@ -18,7 +19,7 @@ Tests failed during RECORDING mode:
 
 {{if .HasTerminatedTests}}Several tests got terminated during RECORDING mode{{end}}
 
-{{if .RecordingErr}}Errors occurred during RECORDING mode.{{end}}
+{{if .RecordingErr}}Errors occurred during RECORDING mode: {{.RecordingErr}}.{{end}}
 
 {{if .AllRecordingPassed}}All tests passed!{{end}}
 

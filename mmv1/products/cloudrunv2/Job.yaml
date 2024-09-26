@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,99 +11,82 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Job'
-base_url: projects/{{project}}/locations/{{location}}/jobs
-self_link: projects/{{project}}/locations/{{location}}/jobs/{{name}}
-create_url: projects/{{project}}/locations/{{location}}/jobs?jobId={{name}}
-update_verb: :PATCH
-references: !ruby/object:Api::Resource::ReferenceLinks
+description: |
+  A Cloud Run Job resource that references a container image which is run to completion.
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/run/docs/'
   api: 'https://cloud.google.com/run/docs/reference/rest/v2/projects.locations.jobs'
-description: |
-  A Cloud Run Job resource that references a container image which is run to completion.
-taint_resource_on_failed_create: true
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/jobs/{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/jobs'
+self_link: 'projects/{{project}}/locations/{{location}}/jobs/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/jobs?jobId={{name}}'
+update_verb: 'PATCH'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/jobs/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
     resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
+  error:
     path: 'error'
     message: 'message'
-iam_policy: !ruby/object:Api::Resource::IamPolicy
+iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
-  base_url: projects/{{project}}/locations/{{location}}/jobs/{{name}}
+  base_url: 'projects/{{project}}/locations/{{location}}/jobs/{{name}}'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
-    ['projects/{{project}}/locations/{{location}}/jobs/{{name}}', '{{name}}']
-id_format: 'projects/{{project}}/locations/{{location}}/jobs/{{name}}'
-import_format: ['projects/{{project}}/locations/{{location}}/jobs/{{name}}']
-autogen_async: true
-virtual_fields:
-  - !ruby/object:Api::Type::Boolean
-    name: 'deletion_protection'
-    default_value: true
-    description: |
-      Whether Terraform will be prevented from destroying the job. Defaults to true.
-      When a`terraform destroy` or `terraform apply` would delete the job,
-      the command will fail if this field is not set to false in Terraform state.
-      When the field is set to true or unset in Terraform state, a `terraform apply`
-      or `terraform destroy` that would delete the job will fail.
-      When the field is set to false, deleting the job is allowed.
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  pre_delete: 'templates/terraform/pre_delete/cloudrunv2_job_deletion_policy.go.erb'
+    - 'projects/{{project}}/locations/{{location}}/jobs/{{name}}'
+    - '{{name}}'
+custom_code:
+  pre_delete: 'templates/terraform/pre_delete/cloudrunv2_job_deletion_policy.go.tmpl'
+taint_resource_on_failed_create: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'cloudrunv2_job_basic'
+  - name: 'cloudrunv2_job_basic'
     primary_resource_id: 'default'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-job%s\",
-      context[\"random_suffix\"\
-      ])"
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-job%s", context["random_suffix"])'
     vars:
       cloud_run_job_name: 'cloudrun-job'
     ignore_read_extra:
       - 'deletion_protection'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'cloudrunv2_job_limits'
+  - name: 'cloudrunv2_job_limits'
     primary_resource_id: 'default'
     vars:
       cloud_run_job_name: 'cloudrun-job'
     ignore_read_extra:
       - 'deletion_protection'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'cloudrunv2_job_sql'
+  - name: 'cloudrunv2_job_sql'
     primary_resource_id: 'default'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
-      context[\"random_suffix\"\
-      ])"
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
     vars:
       cloud_run_job_name: 'cloudrun-job'
       secret_id: 'secret'
       cloud_run_sql_name: 'cloudrun-sql'
       deletion_protection: 'true'
     test_vars_overrides:
-      deletion_protection: 'false'
+      'deletion_protection': 'false'
     oics_vars_overrides:
-      deletion_protection: 'false'
+      'deletion_protection': 'false'
     ignore_read_extra:
       - 'deletion_protection'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'cloudrunv2_job_vpcaccess'
+  - name: 'cloudrunv2_job_vpcaccess'
     primary_resource_id: 'default'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
-      context[\"random_suffix\"\
-      ])"
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
     vars:
       cloud_run_job_name: 'cloudrun-job'
       vpc_access_connector_name: 'run-vpc'
@@ -111,84 +94,86 @@ examples:
       compute_network_name: 'run-network'
     ignore_read_extra:
       - 'deletion_protection'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'cloudrunv2_job_directvpc'
+  - name: 'cloudrunv2_job_directvpc'
     primary_resource_id: 'default'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-job%s\", context[\"random_suffix\"\
-      ])"
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-job%s", context["random_suffix"])'
     vars:
       cloud_run_job_name: 'cloudrun-job'
     ignore_read_extra:
       - 'deletion_protection'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'cloudrunv2_job_secret'
+  - name: 'cloudrunv2_job_secret'
     primary_resource_id: 'default'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
-      context[\"random_suffix\"\
-      ])"
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
     vars:
       cloud_run_job_name: 'cloudrun-job'
       secret_id: 'secret'
     ignore_read_extra:
       - 'deletion_protection'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'cloudrunv2_job_emptydir'
+  - name: 'cloudrunv2_job_emptydir'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-job%s", context["random_suffix"])'
     min_version: 'beta'
-    primary_resource_id: 'default'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-job%s\", context[\"random_suffix\"\
-      ])"
     vars:
       cloud_run_job_name: 'cloudrun-job'
     ignore_read_extra:
       - 'deletion_protection'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'cloudrunv2_job_run_job'
-    min_version: beta
+  - name: 'cloudrunv2_job_run_job'
     primary_resource_id: 'default'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-job%s\", context[\"random_suffix\"\
-      ])"
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-job%s", context["random_suffix"])'
+    min_version: 'beta'
     vars:
       cloud_run_job_name: 'cloudrun-job'
     ignore_read_extra:
       - 'deletion_protection'
+virtual_fields:
+  - name: 'deletion_protection'
+    description: |
+      Whether Terraform will be prevented from destroying the job. Defaults to true.
+      When a`terraform destroy` or `terraform apply` would delete the job,
+      the command will fail if this field is not set to false in Terraform state.
+      When the field is set to true or unset in Terraform state, a `terraform apply`
+      or `terraform destroy` that would delete the job will fail.
+      When the field is set to false, deleting the job is allowed.
+    type: Boolean
+    default_value: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'location'
-    required: true
-    immutable: true
-    url_param_only: true
+  - name: 'location'
+    type: String
     description: The location of the cloud run job
-properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
+properties:
+  - name: 'name'
+    type: String
     description: |
       Name of the Job.
+    url_param_only: true
+    required: true
+    immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
-  - !ruby/object:Api::Type::String
-    name: 'uid'
-    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.tmpl'
+  - name: 'uid'
+    type: String
     description: |
       Server assigned unique identifier for the Execution. The value is a UUID4 string and guaranteed to remain unchanged until the resource is deleted.
-  - !ruby/object:Api::Type::String
-    name: 'generation'
     output: true
+  - name: 'generation'
+    type: String
     description: |
       A number that monotonically increases every time the user modifies the desired state.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
     description: |-
       Unstructured key value map that can be used to organize and categorize objects. User-provided labels are shared with Google's billing system, so they can be used to filter, or break down billing charges by team, component,
       environment, state, etc. For more information, visit https://cloud.google.com/resource-manager/docs/creating-managing-labels or https://cloud.google.com/run/docs/configuring/labels.
 
       Cloud Run API v2 does not support labels with `run.googleapis.com`, `cloud.googleapis.com`, `serving.knative.dev`, or `autoscaling.knative.dev` namespaces, and they will be rejected.
       All system labels in v1 now have a corresponding field in v2 Job.
-  - !ruby/object:Api::Type::KeyValueAnnotations
-    name: 'annotations'
+  - name: 'annotations'
+    type: KeyValueAnnotations
     description: |-
       Unstructured key value map that may be set by external tools to store and arbitrary metadata. They are not queryable and should be preserved when modifying objects.
 
@@ -196,105 +181,105 @@ properties:
       All system annotations in v1 now have a corresponding field in v2 Job.
 
       This field follows Kubernetes annotations' namespacing, limits, and rules.
-  - !ruby/object:Api::Type::Time
-    name: 'createTime'
-    output: true
+  - name: 'createTime'
+    type: Time
     description: |-
       The creation time.
-  - !ruby/object:Api::Type::Time
-    name: 'updateTime'
     output: true
+  - name: 'updateTime'
+    type: Time
     description: |-
       The last-modified time.
-  - !ruby/object:Api::Type::Time
-    name: 'deleteTime'
     output: true
+  - name: 'deleteTime'
+    type: Time
     description: |-
       The deletion time.
-  - !ruby/object:Api::Type::Time
-    name: 'expireTime'
     output: true
+  - name: 'expireTime'
+    type: Time
     description: |-
       For a deleted resource, the time after which it will be permamently deleted.
-  - !ruby/object:Api::Type::String
-    name: 'creator'
     output: true
+  - name: 'creator'
+    type: String
     description: |-
       Email address of the authenticated creator.
-  - !ruby/object:Api::Type::String
-    name: 'lastModifier'
     output: true
+  - name: 'lastModifier'
+    type: String
     description: |-
       Email address of the last authenticated modifier.
-  - !ruby/object:Api::Type::String
-    name: 'client'
+    output: true
+  - name: 'client'
+    type: String
     description: |
       Arbitrary identifier for the API client.
-  - !ruby/object:Api::Type::String
-    name: 'clientVersion'
+  - name: 'clientVersion'
+    type: String
     description: |
       Arbitrary version identifier for the API client.
-  - !ruby/object:Api::Type::Enum
-    name: 'launchStage'
+  - name: 'launchStage'
+    type: Enum
     description: |
       The launch stage as defined by [Google Cloud Platform Launch Stages](https://cloud.google.com/products#product-launch-stages). Cloud Run supports ALPHA, BETA, and GA.
       If no value is specified, GA is assumed. Set the launch stage to a preview stage on input to allow use of preview features in that stage. On read (or output), describes whether the resource uses preview features.
 
       For example, if ALPHA is provided as input, but only BETA and GA-level features are used, this field will be BETA on output.
-    values:
-      - :UNIMPLEMENTED
-      - :PRELAUNCH
-      - :EARLY_ACCESS
-      - :ALPHA
-      - :BETA
-      - :GA
-      - :DEPRECATED
     default_from_api: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'binaryAuthorization'
+    enum_values:
+      - 'UNIMPLEMENTED'
+      - 'PRELAUNCH'
+      - 'EARLY_ACCESS'
+      - 'ALPHA'
+      - 'BETA'
+      - 'GA'
+      - 'DEPRECATED'
+  - name: 'binaryAuthorization'
+    type: NestedObject
     description: |
       Settings for the Binary Authorization feature.
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'breakglassJustification'
+      - name: 'breakglassJustification'
+        type: String
         description: |
           If present, indicates to use Breakglass using this justification. If useDefault is False, then it must be empty. For more information on breakglass, see https://cloud.google.com/binary-authorization/docs/using-breakglass
-      - !ruby/object:Api::Type::Boolean
-        name: 'useDefault'
+      - name: 'useDefault'
+        type: Boolean
         description: |
           If True, indicates to use the default project's binary authorization policy. If False, binary authorization will be disabled.
         conflicts:
           - policy
-      - !ruby/object:Api::Type::String
-        name: 'policy'
+      - name: 'policy'
+        type: String
         description: |
           The path to a binary authorization policy. Format: projects/{project}/platforms/cloudRun/{policy-name}
         conflicts:
           - use_default
-  - !ruby/object:Api::Type::String
-    name: 'startExecutionToken'
+  - name: 'startExecutionToken'
+    type: String
     description: |-
       A unique string used as a suffix creating a new execution upon job create or update. The Job will become ready when the execution is successfully started.
       The sum of job name and token length must be fewer than 63 characters.
+    min_version: 'beta'
     conflicts:
       - run_execution_token
-    min_version: beta
-  - !ruby/object:Api::Type::String
-    name: 'runExecutionToken'
+  - name: 'runExecutionToken'
+    type: String
     description: |-
       A unique string used as a suffix creating a new execution upon job create or update. The Job will become ready when the execution is successfully completed.
       The sum of job name and token length must be fewer than 63 characters.
+    min_version: 'beta'
     conflicts:
       - start_execution_token
-    min_version: beta
-  - !ruby/object:Api::Type::NestedObject
-    name: 'template'
-    required: true
+  - name: 'template'
+    type: NestedObject
     description: |
       The template used to create executions for this Job.
+    required: true
     properties:
-      - !ruby/object:Api::Type::KeyValuePairs
-        name: 'labels'
+      - name: 'labels'
+        type: KeyValuePairs
         description: |-
           Unstructured key value map that can be used to organize and categorize objects. User-provided labels are shared with Google's billing system, so they can be used to filter,
           or break down billing charges by team, component, environment, state, etc. For more information, visit https://cloud.google.com/resource-manager/docs/creating-managing-labels or
@@ -302,8 +287,8 @@ properties:
 
           Cloud Run API v2 does not support labels with `run.googleapis.com`, `cloud.googleapis.com`, `serving.knative.dev`, or `autoscaling.knative.dev` namespaces, and they will be rejected.
           All system labels in v1 now have a corresponding field in v2 ExecutionTemplate.
-      - !ruby/object:Api::Type::KeyValuePairs
-        name: 'annotations'
+      - name: 'annotations'
+        type: KeyValuePairs
         description: |-
           Unstructured key value map that may be set by external tools to store and arbitrary metadata. They are not queryable and should be preserved when modifying objects.
 
@@ -311,150 +296,157 @@ properties:
           All system annotations in v1 now have a corresponding field in v2 ExecutionTemplate.
 
           This field follows Kubernetes annotations' namespacing, limits, and rules.
-      - !ruby/object:Api::Type::Integer
-        name: 'parallelism'
+      - name: 'parallelism'
+        type: Integer
         description: |-
           Specifies the maximum desired number of tasks the execution should run at given time. Must be <= taskCount. When the job is run, if this field is 0 or unset, the maximum possible value will be used for that execution. The actual number of tasks running in steady state will be less than this number when there are fewer tasks waiting to be completed remaining, i.e. when the work left to do is less than max parallelism.
         default_from_api: true
-      - !ruby/object:Api::Type::Integer
-        name: 'taskCount'
+      - name: 'taskCount'
+        type: Integer
         description: |-
           Specifies the desired number of tasks the execution should run. Setting to 1 means that parallelism is limited to 1 and the success of that task signals the success of the execution. More info: https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/
         default_from_api: true
-      - !ruby/object:Api::Type::NestedObject
-        name: 'template'
-        required: true
+      - name: 'template'
+        type: NestedObject
         description: |
           Describes the task(s) that will be created when executing an execution
+        required: true
         properties:
-          - !ruby/object:Api::Type::Array
-            name: 'containers'
+          - name: 'containers'
+            type: Array
             description: |-
               Holds the single container that defines the unit of execution for this task.
             default_from_api: true
-            item_type: !ruby/object:Api::Type::NestedObject
+            item_type:
+              type: NestedObject
               properties:
-                - !ruby/object:Api::Type::String
-                  name: 'name'
+                - name: 'name'
+                  type: String
                   description: |-
                     Name of the container specified as a DNS_LABEL.
-                - !ruby/object:Api::Type::String
-                  name: 'image'
-                  required: true
+                - name: 'image'
+                  type: String
                   description: |-
                     URL of the Container image in Google Container Registry or Google Artifact Registry. More info: https://kubernetes.io/docs/concepts/containers/images
-                - !ruby/object:Api::Type::Array
-                  name: 'command'
+                  required: true
+                - name: 'command'
+                  type: Array
                   description: |-
                     Entrypoint array. Not executed within a shell. The docker image's ENTRYPOINT is used if this is not provided. Variable references $(VAR_NAME) are expanded using the container's environment. If a variable cannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded, regardless of whether the variable exists or not. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell
-                  item_type: Api::Type::String
-                - !ruby/object:Api::Type::Array
-                  name: 'args'
+                  item_type:
+                    type: String
+                - name: 'args'
+                  type: Array
                   description: |-
                     Arguments to the entrypoint. The docker image's CMD is used if this is not provided. Variable references are not supported in Cloud Run.
-                  item_type: Api::Type::String
-                - !ruby/object:Api::Type::Array
-                  name: 'env'
+                  item_type:
+                    type: String
+                - name: 'env'
+                  type: Array
                   description: |-
                     List of environment variables to set in the container.
                   is_set: true
-                  item_type: !ruby/object:Api::Type::NestedObject
+                  item_type:
+                    type: NestedObject
                     properties:
-                      - !ruby/object:Api::Type::String
-                        name: 'name'
-                        required: true
+                      - name: 'name'
+                        type: String
                         description: |-
                           Name of the environment variable. Must be a C_IDENTIFIER, and mnay not exceed 32768 characters.
-                      - !ruby/object:Api::Type::String
-                        name: 'value'
+                        required: true
+                      - name: 'value'
+                        type: String
                         description: |-
                           Literal value of the environment variable. Defaults to "" and the maximum allowed length is 32768 characters. Variable references are not supported in Cloud Run.
                         # exactly_one_of:
                         #   - template.0.template.0.containers.0.env.0.value
                         #   - template.0.template.0.containers.0.env.0.valueSource
-                      - !ruby/object:Api::Type::NestedObject
-                        name: 'valueSource'
+                      - name: 'valueSource'
+                        type: NestedObject
                         description: |-
                           Source for the environment variable's value.
                         # exactly_one_of:
                         #   - template.0.template.0.containers.0.env.0.value
                         #   - template.0.template.0.containers.0.env.0.valueSource
                         properties:
-                          - !ruby/object:Api::Type::NestedObject
-                            name: 'secretKeyRef'
+                          - name: 'secretKeyRef'
+                            type: NestedObject
                             description: |-
                               Selects a secret and a specific version from Cloud Secret Manager.
                             properties:
-                              - !ruby/object:Api::Type::String
-                                name: 'secret'
-                                required: true
+                              - name: 'secret'
+                                type: String
                                 description: |-
                                   The name of the secret in Cloud Secret Manager. Format: {secretName} if the secret is in the same project. projects/{project}/secrets/{secretName} if the secret is in a different project.
-                              - !ruby/object:Api::Type::String
-                                name: 'version'
                                 required: true
+                              - name: 'version'
+                                type: String
                                 description: |-
                                   The Cloud Secret Manager secret version. Can be 'latest' for the latest value or an integer for a specific version.
-                - !ruby/object:Api::Type::NestedObject
-                  name: 'resources'
+                                required: true
+                - name: 'resources'
+                  type: NestedObject
                   description: |-
                     Compute Resource requirements by this container. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#resources
                   default_from_api: true
                   properties:
-                    - !ruby/object:Api::Type::KeyValuePairs
-                      name: 'limits'
+                    - name: 'limits'
+                      type: KeyValuePairs
                       description: |-
                         Only memory and CPU are supported. Use key `cpu` for CPU limit and `memory` for memory limit. Note: The only supported values for CPU are '1', '2', '4', and '8'. Setting 4 CPU requires at least 2Gi of memory. The values of the map is string form of the 'quantity' k8s type: https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
                       default_from_api: true
-                - !ruby/object:Api::Type::Array
-                  name: 'ports'
+                - name: 'ports'
+                  type: Array
                   description: |-
                     List of ports to expose from the container. Only a single port can be specified. The specified ports must be listening on all interfaces (0.0.0.0) within the container to be accessible.
 
                     If omitted, a port number will be chosen and passed to the container through the PORT environment variable for the container to listen on
-                  item_type: !ruby/object:Api::Type::NestedObject
+                  item_type:
+                    type: NestedObject
                     properties:
-                      - !ruby/object:Api::Type::String
-                        name: 'name'
+                      - name: 'name'
+                        type: String
                         description: |-
                           If specified, used to specify which protocol to use. Allowed values are "http1" and "h2c".
-                      - !ruby/object:Api::Type::Integer
-                        name: 'containerPort'
+                      - name: 'containerPort'
+                        type: Integer
                         description: |-
                           Port number the container listens on. This must be a valid TCP port number, 0 < containerPort < 65536.
-                - !ruby/object:Api::Type::Array
-                  name: 'volumeMounts'
+                - name: 'volumeMounts'
+                  type: Array
                   description: |-
                     Volume to mount into the container's filesystem.
-                  item_type: !ruby/object:Api::Type::NestedObject
+                  item_type:
+                    type: NestedObject
                     properties:
-                      - !ruby/object:Api::Type::String
-                        name: 'name'
-                        required: true
+                      - name: 'name'
+                        type: String
                         description: |-
                           This must match the Name of a Volume.
-                      - !ruby/object:Api::Type::String
-                        name: 'mountPath'
                         required: true
+                      - name: 'mountPath'
+                        type: String
                         description: |-
                           Path within the container at which the volume should be mounted. Must not contain ':'. For Cloud SQL volumes, it can be left empty, or must otherwise be /cloudsql. All instances defined in the Volume will be available as /cloudsql/[instance]. For more information on Cloud SQL volumes, visit https://cloud.google.com/sql/docs/mysql/connect-run
-                - !ruby/object:Api::Type::String
-                  name: 'workingDir'
+                        required: true
+                - name: 'workingDir'
+                  type: String
                   description: |-
                     Container's working directory. If not specified, the container runtime's default will be used, which might be configured in the container image.
-          - !ruby/object:Api::Type::Array
-            name: 'volumes'
+          - name: 'volumes'
+            type: Array
             description: |-
               A list of Volumes to make available to containers.
-            item_type: !ruby/object:Api::Type::NestedObject
+            item_type:
+              type: NestedObject
               properties:
-                - !ruby/object:Api::Type::String
-                  name: 'name'
-                  required: true
+                - name: 'name'
+                  type: String
                   description: |-
                     Volume's name.
-                - !ruby/object:Api::Type::NestedObject
-                  name: 'secret'
+                  required: true
+                - name: 'secret'
+                  type: NestedObject
                   description: |-
                     Secret represents a secret that should populate this volume. More info: https://kubernetes.io/docs/concepts/storage/volumes#secret
                   # exactly_one_of:
@@ -464,37 +456,38 @@ properties:
                   #   - template.0.volumes.0.gcs
                   #   - template.0.volumes.0.nfs
                   properties:
-                    - !ruby/object:Api::Type::String
-                      name: 'secret'
-                      required: true
+                    - name: 'secret'
+                      type: String
                       description: |-
                         The name of the secret in Cloud Secret Manager. Format: {secret} if the secret is in the same project. projects/{project}/secrets/{secret} if the secret is in a different project.
-                    - !ruby/object:Api::Type::Integer
-                      name: 'defaultMode'
+                      required: true
+                    - name: 'defaultMode'
+                      type: Integer
                       description: |-
                         Integer representation of mode bits to use on created files by default. Must be a value between 0000 and 0777 (octal), defaulting to 0444. Directories within the path are not affected by this setting.
-                    - !ruby/object:Api::Type::Array
-                      name: 'items'
+                    - name: 'items'
+                      type: Array
                       description: |-
                         If unspecified, the volume will expose a file whose name is the secret, relative to VolumeMount.mount_path. If specified, the key will be used as the version to fetch from Cloud Secret Manager and the path will be the name of the file exposed in the volume. When items are defined, they must specify a path and a version.
-                      item_type: !ruby/object:Api::Type::NestedObject
+                      item_type:
+                        type: NestedObject
                         properties:
-                          - !ruby/object:Api::Type::String
-                            name: 'path'
-                            required: true
+                          - name: 'path'
+                            type: String
                             description: |-
                               The relative path of the secret in the container.
-                          - !ruby/object:Api::Type::String
-                            name: 'version'
                             required: true
+                          - name: 'version'
+                            type: String
                             description: |-
                               The Cloud Secret Manager secret version. Can be 'latest' for the latest value or an integer for a specific version
-                          - !ruby/object:Api::Type::Integer
-                            name: 'mode'
+                            required: true
+                          - name: 'mode'
+                            type: Integer
                             description: |-
                               Integer octal mode bits to use on this file, must be a value between 01 and 0777 (octal). If 0 or not set, the Volume's default mode will be used.
-                - !ruby/object:Api::Type::NestedObject
-                  name: 'cloudSqlInstance'
+                - name: 'cloudSqlInstance'
+                  type: NestedObject
                   description: |-
                     For Cloud SQL volumes, contains the specific instances that should be mounted. Visit https://cloud.google.com/sql/docs/mysql/connect-run for more information on how to connect Cloud SQL and Cloud Run.
                   # exactly_one_of:
@@ -504,16 +497,17 @@ properties:
                   #   - template.0.volumes.0.gcs
                   #   - template.0.volumes.0.nfs
                   properties:
-                    - !ruby/object:Api::Type::Array
-                      name: 'instances'
+                    - name: 'instances'
+                      type: Array
                       description: |-
                         The Cloud SQL instance connection names, as can be found in https://console.cloud.google.com/sql/instances. Visit https://cloud.google.com/sql/docs/mysql/connect-run for more information on how to connect Cloud SQL and Cloud Run. Format: {project}:{location}:{instance}
-                      item_type: Api::Type::String
-                - !ruby/object:Api::Type::NestedObject
-                  name: 'emptyDir'
+                      item_type:
+                        type: String
+                - name: 'emptyDir'
+                  type: NestedObject
                   description: |-
                     Ephemeral storage used as a shared volume.
-                  min_version: beta
+                  min_version: 'beta'
                   # exactly_one_of:
                   #   - template.0.template.0.volumes.0.secret
                   #   - template.0.template.0.volumes.0.cloudSqlInstance
@@ -521,19 +515,19 @@ properties:
                   #   - template.0.volumes.0.gcs
                   #   - template.0.volumes.0.nfs
                   properties:
-                    - !ruby/object:Api::Type::Enum
-                      name: 'medium'
+                    - name: 'medium'
+                      type: Enum
                       description: |-
                         The different types of medium supported for EmptyDir.
-                      values:
-                        - :MEMORY
-                      default_value: :MEMORY
-                    - !ruby/object:Api::Type::String
-                      name: 'sizeLimit'
+                      default_value: "MEMORY"
+                      enum_values:
+                        - 'MEMORY'
+                    - name: 'sizeLimit'
+                      type: String
                       description: |-
                           Limit on the storage usable by this EmptyDir volume. The size limit is also applicable for memory medium. The maximum usage on memory medium EmptyDir would be the minimum value between the SizeLimit specified here and the sum of memory limits of all containers in a pod. This field's values are of the 'Quantity' k8s type: https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/. The default is nil which means that the limit is undefined. More info: https://kubernetes.io/docs/concepts/storage/volumes/#emptydir.
-                - !ruby/object:Api::Type::NestedObject
-                  name: 'gcs'
+                - name: 'gcs'
+                  type: NestedObject
                   description: |-
                     Cloud Storage bucket mounted as a volume using GCSFuse.
                   # exactly_one_of:
@@ -543,17 +537,17 @@ properties:
                   #   - template.0.volumes.0.gcs
                   #   - template.0.volumes.0.nfs
                   properties:
-                    - !ruby/object:Api::Type::String
-                      name: 'bucket'
-                      required: true
+                    - name: 'bucket'
+                      type: String
                       description: |-
                         Name of the cloud storage bucket to back the volume. The resource service account must have permission to access the bucket.
-                    - !ruby/object:Api::Type::Boolean
-                      name: 'readOnly'
+                      required: true
+                    - name: 'readOnly'
+                      type: Boolean
                       description: |-
                         If true, mount this volume as read-only in all mounts. If false, mount this volume as read-write.
-                - !ruby/object:Api::Type::NestedObject
-                  name: 'nfs'
+                - name: 'nfs'
+                  type: NestedObject
                   description: |-
                     NFS share mounted as a volume.
                   # exactly_one_of:
@@ -563,228 +557,230 @@ properties:
                   #   - template.0.volumes.0.gcs
                   #   - template.0.volumes.0.nfs
                   properties:
-                    - !ruby/object:Api::Type::String
-                      name: 'server'
-                      required: true
+                    - name: 'server'
+                      type: String
                       description: |-
                         Hostname or IP address of the NFS server.
-                    - !ruby/object:Api::Type::String
-                      name: 'path'
+                      required: true
+                    - name: 'path'
+                      type: String
                       description: |-
                         Path that is exported by the NFS server.
-                    - !ruby/object:Api::Type::Boolean
-                      name: 'readOnly'
+                    - name: 'readOnly'
+                      type: Boolean
                       description: |-
                         If true, mount this volume as read-only in all mounts.
-          - !ruby/object:Api::Type::String
-            name: 'timeout'
+          - name: 'timeout'
+            type: String
             description: |-
               Max allowed time duration the Task may be active before the system will actively try to mark it failed and kill associated containers. This applies per attempt of a task, meaning each retry can run for the full timeout.
 
               A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
             default_from_api: true
-            validation: !ruby/object:Provider::Terraform::Validation
+            validation:
               regex: '^[0-9]+(?:\.[0-9]{1,9})?s$'
-          - !ruby/object:Api::Type::String
-            name: 'serviceAccount'
+          - name: 'serviceAccount'
+            type: String
             description: |-
               Email address of the IAM service account associated with the Task of a Job. The service account represents the identity of the running task, and determines what permissions the task has. If not provided, the task will use the project's default service account.
             default_from_api: true
-          - !ruby/object:Api::Type::Enum
-            name: 'executionEnvironment'
+          - name: 'executionEnvironment'
+            type: Enum
             description: |-
               The execution environment being used to host this Task.
-            values:
-              - :EXECUTION_ENVIRONMENT_GEN1
-              - :EXECUTION_ENVIRONMENT_GEN2
             default_from_api: true
-          - !ruby/object:Api::Type::String
-            name: 'encryptionKey'
+            enum_values:
+              - 'EXECUTION_ENVIRONMENT_GEN1'
+              - 'EXECUTION_ENVIRONMENT_GEN2'
+          - name: 'encryptionKey'
+            type: String
             description: |-
               A reference to a customer managed encryption key (CMEK) to use to encrypt this container image. For more information, go to https://cloud.google.com/run/docs/securing/using-cmek
-          - !ruby/object:Api::Type::NestedObject
-            name: 'vpcAccess'
+          - name: 'vpcAccess'
+            type: NestedObject
             description: |-
               VPC Access configuration to use for this Task. For more information, visit https://cloud.google.com/run/docs/configuring/connecting-vpc.
             properties:
-              - !ruby/object:Api::Type::String
-                name: 'connector'
+              - name: 'connector'
+                type: String
                 description: |-
                   VPC Access connector name. Format: projects/{project}/locations/{location}/connectors/{connector}, where {project} can be project id or number.
-              - !ruby/object:Api::Type::Enum
-                name: 'egress'
+              - name: 'egress'
+                type: Enum
                 description: |-
                   Traffic VPC egress settings.
-                values:
-                  - :ALL_TRAFFIC
-                  - :PRIVATE_RANGES_ONLY
                 default_from_api: true
-              - !ruby/object:Api::Type::Array
-                name: 'networkInterfaces'
+                enum_values:
+                  - 'ALL_TRAFFIC'
+                  - 'PRIVATE_RANGES_ONLY'
+              - name: 'networkInterfaces'
+                type: Array
                 description: |-
                   Direct VPC egress settings. Currently only single network interface is supported.
-                item_type: !ruby/object:Api::Type::NestedObject
+                item_type:
+                  type: NestedObject
                   properties:
-                    - !ruby/object:Api::Type::String
-                      name: 'network'
+                    - name: 'network'
+                      type: String
                       description: |-
                         The VPC network that the Cloud Run resource will be able to send traffic to. At least one of network or subnetwork must be specified. If both
                         network and subnetwork are specified, the given VPC subnetwork must belong to the given VPC network. If network is not specified, it will be
                         looked up from the subnetwork.
                       default_from_api: true
-                    - !ruby/object:Api::Type::String
-                      name: 'subnetwork'
+                    - name: 'subnetwork'
+                      type: String
                       description: |-
                         The VPC subnetwork that the Cloud Run resource will get IPs from. At least one of network or subnetwork must be specified. If both
                         network and subnetwork are specified, the given VPC subnetwork must belong to the given VPC network. If subnetwork is not specified, the
                         subnetwork with the same name with the network will be used.
                       default_from_api: true
-                    - !ruby/object:Api::Type::Array
-                      name: 'tags'
+                    - name: 'tags'
+                      type: Array
                       description: |-
                         Network tags applied to this Cloud Run job.
-                      item_type: Api::Type::String
-          - !ruby/object:Api::Type::Integer
-            name: 'maxRetries'
+                      item_type:
+                        type: String
+          - name: 'maxRetries'
+            type: Integer
             description: |-
               Number of retries allowed per Task, before marking this Task failed.
             send_empty_value: true
             default_value: 3
-  - !ruby/object:Api::Type::String
-    name: 'observedGeneration'
-    output: true
+  - name: 'observedGeneration'
+    type: String
     description: |
       The generation of this Job. See comments in reconciling for additional information on reconciliation process in Cloud Run.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'terminalCondition'
     output: true
+  - name: 'terminalCondition'
+    type: NestedObject
     description: |
       The Condition of this Job, containing its readiness status, and detailed error information in case it did not reach the desired state
+    output: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'type'
-        output: true
+      - name: 'type'
+        type: String
         description: |-
           type is used to communicate the status of the reconciliation process. See also: https://github.com/knative/serving/blob/main/docs/spec/errors.md#error-conditions-and-reporting Types common to all resources include: * "Ready": True when the Resource is ready.
-      - !ruby/object:Api::Type::String
-        name: 'state'
         output: true
+      - name: 'state'
+        type: String
         description: |-
           State of the condition.
-      - !ruby/object:Api::Type::String
-        name: 'message'
         output: true
+      - name: 'message'
+        type: String
         description: |-
           Human readable message indicating details about the current status.
-      - !ruby/object:Api::Type::Time
-        name: 'lastTransitionTime'
         output: true
+      - name: 'lastTransitionTime'
+        type: Time
         description: |-
           Last time the condition transitioned from one status to another.
 
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
-      - !ruby/object:Api::Type::String
-        name: 'severity'
         output: true
+      - name: 'severity'
+        type: String
         description: |-
           How to interpret failures of this condition, one of Error, Warning, Info
-      - !ruby/object:Api::Type::String
-        name: 'reason'
         output: true
+      - name: 'reason'
+        type: String
         description: |-
           A common (service-level) reason for this condition.
-      - !ruby/object:Api::Type::String
-        name: 'revisionReason'
         output: true
+      - name: 'revisionReason'
+        type: String
         description: |-
           A reason for the revision condition.
-      - !ruby/object:Api::Type::String
-        name: 'executionReason'
         output: true
+      - name: 'executionReason'
+        type: String
         description: |-
           A reason for the execution condition.
-  - !ruby/object:Api::Type::Array
-    name: 'conditions'
+        output: true
+  - name: 'conditions'
+    type: Array
     description: |-
       The Conditions of all other associated sub-resources. They contain additional diagnostics information in case the Job does not reach its desired state. See comments in reconciling for additional information on `reconciliation` process in Cloud Run.
     output: true
-    item_type: !ruby/object:Api::Type::NestedObject
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'type'
-          output: true
+        - name: 'type'
+          type: String
           description: |-
             type is used to communicate the status of the reconciliation process. See also: https://github.com/knative/serving/blob/main/docs/spec/errors.md#error-conditions-and-reporting Types common to all resources include: * "Ready": True when the Resource is ready.
-        - !ruby/object:Api::Type::String
-          name: 'state'
           output: true
+        - name: 'state'
+          type: String
           description: |-
             State of the condition.
-        - !ruby/object:Api::Type::String
-          name: 'message'
           output: true
+        - name: 'message'
+          type: String
           description: |-
             Human readable message indicating details about the current status.
-        - !ruby/object:Api::Type::Time
-          name: 'lastTransitionTime'
           output: true
+        - name: 'lastTransitionTime'
+          type: Time
           description: |-
             Last time the condition transitioned from one status to another.
 
             A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
-        - !ruby/object:Api::Type::String
-          name: 'severity'
           output: true
+        - name: 'severity'
+          type: String
           description: |-
             How to interpret failures of this condition, one of Error, Warning, Info
-        - !ruby/object:Api::Type::String
-          name: 'reason'
           output: true
+        - name: 'reason'
+          type: String
           description: |-
             A common (service-level) reason for this condition.
-        - !ruby/object:Api::Type::String
-          name: 'revisionReason'
           output: true
+        - name: 'revisionReason'
+          type: String
           description: |-
             A reason for the revision condition.
-        - !ruby/object:Api::Type::String
-          name: 'executionReason'
           output: true
+        - name: 'executionReason'
+          type: String
           description: |-
             A reason for the execution condition.
-  - !ruby/object:Api::Type::Integer
-    name: 'executionCount'
-    output: true
+          output: true
+  - name: 'executionCount'
+    type: Integer
     description: |
       Number of executions created for this job.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'latestCreatedExecution'
     output: true
+  - name: 'latestCreatedExecution'
+    type: NestedObject
     description: |
       Name of the last created execution.
+    output: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'name'
-        output: true
+      - name: 'name'
+        type: String
         description: |
           Name of the execution.
-      - !ruby/object:Api::Type::Time
-        name: 'createTime'
         output: true
+      - name: 'createTime'
+        type: Time
         description: |
           Creation timestamp of the execution.
 
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
-      - !ruby/object:Api::Type::Time
-        name: 'completionTime'
         output: true
+      - name: 'completionTime'
+        type: Time
         description: |
           Completion timestamp of the execution.
 
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
-  - !ruby/object:Api::Type::Boolean
-    name: 'reconciling'
-    output: true
+        output: true
+  - name: 'reconciling'
+    type: Boolean
     description: |
       Returns true if the Job is currently being acted upon by the system to bring it into the desired state.
 
@@ -793,8 +789,9 @@ properties:
       If reconciliation succeeded, the following fields will match: observedGeneration and generation, latest_succeeded_execution and latestCreatedExecution.
 
       If reconciliation failed, observedGeneration and latest_succeeded_execution will have the state of the last succeeded execution or empty for newly created Job. Additional information on the failure can be found in terminalCondition and conditions
-  - !ruby/object:Api::Type::String
-    name: 'etag'
     output: true
+  - name: 'etag'
+    type: String
     description: |
       A system-generated fingerprint for this version of the resource. May be used to detect modification conflict during updates.
+    output: true

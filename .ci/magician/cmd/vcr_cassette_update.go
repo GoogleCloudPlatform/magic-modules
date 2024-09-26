@@ -133,12 +133,12 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 	// upload replay build and test logs
 	buildLogPath := filepath.Join(rnr.GetCWD(), "testlogs", fmt.Sprintf("%s_test.log", vcr.Replaying.Lower()))
 	if _, err := uploadLogsToGCS(buildLogPath, bucketPrefix+"/logs/replaying/", rnr); err != nil {
-		return fmt.Errorf("error uploading replaying test log: %w", err)
+		fmt.Printf("Warning: error uploading replaying test log: %s\n", err)
 	}
 
 	testLogPath := vt.LogPath(vcr.Replaying, provider.Beta)
 	if _, err := uploadLogsToGCS(filepath.Join(testLogPath, "*"), bucketPrefix+"/logs/build-log/", rnr); err != nil {
-		return fmt.Errorf("error uploading replaying build log: %w", err)
+		fmt.Printf("Warning: error uploading replaying build log: %s\n", err)
 	}
 
 	replayingData := vcrCassetteUpdateReplayingResult{
@@ -169,17 +169,19 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 		// uploading cassettes failed because recording not work
 		buildLogPath := filepath.Join(rnr.GetCWD(), "testlogs", fmt.Sprintf("%s_test.log", vcr.Recording.Lower()))
 		if _, err := uploadLogsToGCS(buildLogPath, bucketPrefix+"/logs/recording/", rnr); err != nil {
-			return fmt.Errorf("error uploading recording test log: %w", err)
+			fmt.Printf("Warning: error uploading recording test log: %s\n", err)
 		}
 
 		testLogPath := vt.LogPath(vcr.Recording, provider.Beta)
 		if _, err := uploadLogsToGCS(filepath.Join(testLogPath, "*"), bucketPrefix+"/logs/build-log/", rnr); err != nil {
-			return fmt.Errorf("error uploading recording build log: %w", err)
+			fmt.Printf("Warning: error uploading recording build log: %s\n", err)
 		}
+
 		if len(recordingResult.PassedTests) > 0 {
 			cassettesPath := vt.CassettePath(provider.Beta)
-			if _, err := uploadCassettesToGCS(cassettesPath, "gs://ci-vcr-cassettes/beta/fixtures/", rnr); err != nil {
-				return fmt.Errorf("error uploading cassettes: %w", err)
+			if _, err := uploadCassettesToGCS(cassettesPath+"/*", "gs://ci-vcr-cassettes/beta/fixtures/", rnr); err != nil {
+				// There could be cases that the tests do not generate any cassettes.
+				fmt.Printf("Warning: error uploading cassettes: %s\n", err)
 			}
 		} else {
 			fmt.Println("No tests passed in recording mode, not uploading cassettes.")

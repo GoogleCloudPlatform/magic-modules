@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,107 +11,100 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
-name: IndexEndpoint
-base_url: projects/{{project}}/locations/{{region}}/indexEndpoints
-create_url: projects/{{project}}/locations/{{region}}/indexEndpoints
-self_link: projects/{{project}}/locations/{{region}}/indexEndpoints/{{name}}
-update_verb: :PATCH
-update_mask: true
-create_verb: :POST
-references: !ruby/object:Api::Resource::ReferenceLinks
-  api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.indexEndpoints/
-async: !ruby/object:Api::OpAsync
-  actions:
-    - create
-    - delete
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
-    base_url: '{{op_id}}'
-    wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
-    path: 'response'
-    resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: True
-    allowed:
-      - True
-      - False
-  error: !ruby/object:Api::OpAsync::Error
-    path: 'error'
-    message: 'message'
+---
+name: 'IndexEndpoint'
 description: |-
   An endpoint indexes are deployed into. An index endpoint can have multiple deployed indexes.
-autogen_async: false
+references:
+  guides:
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.indexEndpoints/'
+docs:
+base_url: 'projects/{{project}}/locations/{{region}}/indexEndpoints'
+self_link: 'projects/{{project}}/locations/{{region}}/indexEndpoints/{{name}}'
+create_url: 'projects/{{project}}/locations/{{region}}/indexEndpoints'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: "vertex_ai_index_endpoint"
-    primary_resource_id: "index_endpoint"
+  - name: 'vertex_ai_index_endpoint'
+    primary_resource_id: 'index_endpoint'
     vars:
-      address_name: "address-name"
-      network_name: "network-name"
-    skip_test: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: "vertex_ai_index_endpoint_test"
-    primary_resource_id: "index_endpoint"
+      address_name: 'address-name'
+      network_name: 'network-name'
+    exclude_test: true
+  - name: 'vertex_ai_index_endpoint_test'
+    primary_resource_id: 'index_endpoint'
     vars:
-      network_name: "network-name"
+      network_name: 'network-name'
     test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
-    skip_docs: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: "vertex_ai_index_endpoint_with_psc"
-    primary_resource_id: "index_endpoint"
-  - !ruby/object:Provider::Terraform::Examples
-    name: "vertex_ai_index_endpoint_with_false_psc"
-    primary_resource_id: "index_endpoint"
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
+    exclude_docs: true
+  - name: 'vertex_ai_index_endpoint_with_psc'
+    primary_resource_id: 'index_endpoint'
+  - name: 'vertex_ai_index_endpoint_with_false_psc'
+    primary_resource_id: 'index_endpoint'
     # It's not distinguishable if the psc is false or not set, so we need to skip the test.
-    skip_import_test: true
-    skip_docs: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: "vertex_ai_index_endpoint_with_public_endpoint"
-    primary_resource_id: "index_endpoint"
+    exclude_import_test: true
+    exclude_docs: true
+  - name: 'vertex_ai_index_endpoint_with_public_endpoint'
+    primary_resource_id: 'index_endpoint'
     test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedTestNetwork(t, "vertex-ai-index-endpoint")'
+      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "vertex-ai-index-endpoint")'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: region
+  - name: 'region'
+    type: String
     description: The region of the index endpoint. eg us-central1
     url_param_only: true
     immutable: true
 properties:
   # Intentionally deployedIndexes[] is not included because it's an output-only field and another terraform resource will manage a deployed index.
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: The resource name of the Index.
     output: true
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'displayName'
+    type: String
     description: The display name of the Index. The name can be up to 128 characters long and can consist of any UTF-8 characters.
     required: true
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: The description of the Index.
-  - !ruby/object:Api::Type::String
-    name: 'etag'
+  - name: 'etag'
+    type: String
     description: Used to perform consistent read-modify-write updates.
-    output: true
     ignore_read: true
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
     description: The labels with user-defined metadata to organize your Indexes.
-  - !ruby/object:Api::Type::String
-    name: 'createTime'
-    output: true
+  - name: 'createTime'
+    type: String
     description: The timestamp of when the Index was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-  - !ruby/object:Api::Type::String
-    name: 'updateTime'
     output: true
+  - name: 'updateTime'
+    type: String
     description: The timestamp of when the Index was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-  - !ruby/object:Api::Type::String
-    name: network
+    output: true
+  - name: 'network'
+    type: String
     description: |-
       The full name of the Google Compute Engine [network](https://cloud.google.com//compute/docs/networks-and-firewalls#networks) to which the index endpoint should be peered.
       Private services access must already be configured for the network. If left unspecified, the index endpoint is not peered with any network.
@@ -120,32 +113,33 @@ properties:
     immutable: true
     conflicts:
       - privateServiceConnectConfig
-  - !ruby/object:Api::Type::NestedObject
-    name: privateServiceConnectConfig
-    immutable: true
-    default_from_api: true
+  - name: 'privateServiceConnectConfig'
+    type: NestedObject
     description: |-
       Optional. Configuration for private service connect. `network` and `privateServiceConnectConfig` are mutually exclusive.
+    immutable: true
+    default_from_api: true
     conflicts:
       - network
-    custom_flatten: templates/terraform/custom_flatten/vertex_ai_index_endpoint_private_service_connect_config.go.erb
+    custom_flatten: 'templates/terraform/custom_flatten/vertex_ai_index_endpoint_private_service_connect_config.go.tmpl'
     properties:
-      - !ruby/object:Api::Type::Boolean
-        name: enablePrivateServiceConnect
+      - name: 'enablePrivateServiceConnect'
+        type: Boolean
         description: If set to true, the IndexEndpoint is created without private service access.
-        immutable: true
         required: true
-      - !ruby/object:Api::Type::Array
-        name: projectAllowlist
-        description: A list of Projects from which the forwarding rule will target the service attachment.
-        item_type: Api::Type::String
         immutable: true
-  - !ruby/object:Api::Type::Boolean
-    name: publicEndpointEnabled
+      - name: 'projectAllowlist'
+        type: Array
+        description: A list of Projects from which the forwarding rule will target the service attachment.
+        immutable: true
+        item_type:
+          type: String
+  - name: 'publicEndpointEnabled'
+    type: Boolean
+    description: If true, the deployed index will be accessible through public endpoint.
     immutable: true
     ignore_read: true
-    description: If true, the deployed index will be accessible through public endpoint.
-  - !ruby/object:Api::Type::String
-    name: publicEndpointDomainName
-    output: true
+  - name: 'publicEndpointDomainName'
+    type: String
     description: If publicEndpointEnabled is true, this field will be populated with the domain name to use for this index endpoint.
+    output: true

@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,202 +12,226 @@
 # limitations under the License.
 
 ---
-!ruby/object:Api::Resource
-name: "WorkstationCluster"
-self_link: "projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}"
-base_url: "projects/{{project}}/locations/{{location}}/workstationClusters"
-create_url: "projects/{{project}}/locations/{{location}}/workstationClusters?workstationClusterId={{workstation_cluster_id}}"
-update_verb: :PATCH
-update_mask: true
-min_version: beta
+name: 'WorkstationCluster'
 description: "A grouping of workstation configurations and the associated workstations in that region."
-references: !ruby/object:Api::Resource::ReferenceLinks
+min_version: 'beta'
+references:
   guides:
-    "Workstations": "https://cloud.google.com/workstations/docs/"
-  api: "https://cloud.google.com/workstations/docs/reference/rest/v1beta/projects.locations.workstationClusters/create"
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: "name"
-    base_url: "{{op_id}}"
+    'Workstations': 'https://cloud.google.com/workstations/docs/'
+  api: 'https://cloud.google.com/workstations/docs/reference/rest/v1beta/projects.locations.workstationClusters/create'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/workstationClusters'
+self_link: 'projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/workstationClusters?workstationClusterId={{workstation_cluster_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}'
+timeouts:
+  insert_minutes: 60
+  update_minutes: 60
+  delete_minutes: 60
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-    timeouts: !ruby/object:Api::Timeouts
+    timeouts:
       insert_minutes: 60
       update_minutes: 60
       delete_minutes: 60
-  result: !ruby/object:Api::OpAsync::Result
-    path: "response"
-  status: !ruby/object:Api::OpAsync::Status
-    path: "done"
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
-    path: "error"
-    message: "message"
-import_format:
-  [
-    "projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}",
-  ]
-autogen_async: true
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: "workstation_cluster_basic"
-    min_version: beta
-    primary_resource_id: "default"
+  - name: 'workstation_cluster_basic'
+    primary_resource_id: 'default'
+    min_version: 'beta'
     vars:
-      workstation_cluster_name: "workstation-cluster"
-  - !ruby/object:Provider::Terraform::Examples
-    name: "workstation_cluster_private"
-    min_version: beta
-    primary_resource_id: "default"
+      workstation_cluster_name: 'workstation-cluster'
+  - name: 'workstation_cluster_private'
+    primary_resource_id: 'default'
+    min_version: 'beta'
     vars:
-      workstation_cluster_name: "workstation-cluster-private"
-  - !ruby/object:Provider::Terraform::Examples
-    name: "workstation_cluster_custom_domain"
-    min_version: beta
-    primary_resource_id: "default"
+      workstation_cluster_name: 'workstation-cluster-private'
+  - name: 'workstation_cluster_custom_domain'
+    primary_resource_id: 'default'
+    min_version: 'beta'
     vars:
-      workstation_cluster_name: "workstation-cluster-custom-domain"
+      workstation_cluster_name: 'workstation-cluster-custom-domain'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: "workstationClusterId"
-    required: true
-    immutable: true
-    url_param_only: true
+  - name: 'workstationClusterId'
+    type: String
     description: |
       ID to use for the workstation cluster.
-  - !ruby/object:Api::Type::String
-    name: "location"
-    # TODO(esu): Change to required, as it's not possible for this field to be omitted on the API side.
-    immutable: true
+    min_version: 'beta'
     url_param_only: true
+    required: true
+    immutable: true
+  - name: 'location'
+    type: String
     description: |
       The location where the workstation cluster should reside.
+    min_version: 'beta'
+    url_param_only: true
+    # TODO(esu): Change to required, as it's not possible for this field to be omitted on the API side.
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: "name"
-    output: true
+  - name: 'name'
+    type: String
     description: |
       The name of the cluster resource.
-  - !ruby/object:Api::Type::String
-    name: "uid"
+    min_version: 'beta'
     output: true
+  - name: 'uid'
+    type: String
     description: |
       The system-generated UID of the resource.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: "labels"
+    min_version: 'beta'
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
     description:
       "Client-specified labels that are applied to the resource and that are
       also propagated to the underlying Compute Engine resources."
-  - !ruby/object:Api::Type::String
-    name: "network"
-    required: true
-    immutable: true
+    min_version: 'beta'
+  - name: 'network'
+    type: String
     description: |
       The relative resource name of the VPC network on which the instance can be accessed.
       It is specified in the following form: "projects/{projectNumber}/global/networks/{network_id}".
-  - !ruby/object:Api::Type::String
-    name: "subnetwork"
+    min_version: 'beta'
     required: true
     immutable: true
+  - name: 'subnetwork'
+    type: String
     description: |
       Name of the Compute Engine subnetwork in which instances associated with this cluster will be created.
       Must be part of the subnetwork specified for this cluster.
-  - !ruby/object:Api::Type::String
-    name: "controlPlaneIp"
+    min_version: 'beta'
+    required: true
+    immutable: true
+  - name: 'controlPlaneIp'
+    type: String
     description: |
       The private IP address of the control plane for this workstation cluster.
       Workstation VMs need access to this IP address to work with the service, so make sure that your firewall rules allow egress from the workstation VMs to this address.
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::String
-    name: "displayName"
+  - name: 'displayName'
+    type: String
     description: |
       Human-readable name for this resource.
-  - !ruby/object:Api::Type::Boolean
-    name: "degraded"
+    min_version: 'beta'
+  - name: 'degraded'
+    type: Boolean
     description: |
       Whether this resource is in degraded mode, in which case it may require user action to restore full functionality.
       Details can be found in the conditions field.
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::KeyValueAnnotations
-    name: "annotations"
+  - name: 'annotations'
+    type: KeyValueAnnotations
     description: "Client-specified annotations. This is distinct from labels."
-  - !ruby/object:Api::Type::Fingerprint
-    name: "etag"
+    min_version: 'beta'
+  - name: 'etag'
+    type: Fingerprint
     description: |
       Checksum computed by the server.
       May be sent on update and delete requests to ensure that the client has an up-to-date value before proceeding.
-  - !ruby/object:Api::Type::Time
-    name: "createTime"
+    min_version: 'beta'
+    output: true
+  - name: 'createTime'
+    type: Time
     description: |
       Time when this resource was created.
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::NestedObject
-    name: "privateClusterConfig"
+  - name: 'privateClusterConfig'
+    type: NestedObject
     description: |
       Configuration for private cluster.
+    min_version: 'beta'
     properties:
-      - !ruby/object:Api::Type::Boolean
-        name: "enablePrivateEndpoint"
-        immutable: true
-        required: true
+      - name: 'enablePrivateEndpoint'
+        type: Boolean
         description: |
           Whether Workstations endpoint is private.
-      - !ruby/object:Api::Type::String
-        name: "clusterHostname"
+        min_version: 'beta'
+        required: true
+        immutable: true
+      - name: 'clusterHostname'
+        type: String
         description: |
           Hostname for the workstation cluster.
           This field will be populated only when private endpoint is enabled.
           To access workstations in the cluster, create a new DNS zone mapping this domain name to an internal IP address and a forwarding rule mapping that address to the service attachment.
+        min_version: 'beta'
         output: true
-      - !ruby/object:Api::Type::String
-        name: "serviceAttachmentUri"
+      - name: 'serviceAttachmentUri'
+        type: String
         description: |
           Service attachment URI for the workstation cluster.
           The service attachment is created when private endpoint is enabled.
           To access workstations in the cluster, configure access to the managed service using (Private Service Connect)[https://cloud.google.com/vpc/docs/configure-private-service-connect-services].
+        min_version: 'beta'
         output: true
-      - !ruby/object:Api::Type::Array
-        name: "allowedProjects"
-        item_type: Api::Type::String
-        default_from_api: true
+      - name: 'allowedProjects'
+        type: Array
         description: |
           Additional project IDs that are allowed to attach to the workstation cluster's service attachment.
           By default, the workstation cluster's project and the VPC host project (if different) are allowed.
-  - !ruby/object:Api::Type::NestedObject
-    name: "domainConfig"
-    min_version: beta
+        min_version: 'beta'
+        default_from_api: true
+        item_type:
+          type: String
+  - name: 'domainConfig'
+    type: NestedObject
     description: |
       Configuration options for a custom domain.
+    min_version: 'beta'
     properties:
-      - !ruby/object:Api::Type::String
-        name: "domain"
-        immutable: true
-        required: true
+      - name: 'domain'
+        type: String
         description: |
           Domain used by Workstations for HTTP ingress.
 
-  - !ruby/object:Api::Type::Array
-    name: "conditions"
+        min_version: 'beta'
+        required: true
+        immutable: true
+  - name: 'conditions'
+    type: Array
     description: |-
       Status conditions describing the current resource state.
+    min_version: 'beta'
     output: true
-    item_type: !ruby/object:Api::Type::NestedObject
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::Integer
-          name: "code"
-          output: true
+        - name: 'code'
+          type: Integer
           description: |-
             The status code, which should be an enum value of google.rpc.Code.
-        - !ruby/object:Api::Type::String
-          name: "message"
+          min_version: 'beta'
           output: true
+        - name: 'message'
+          type: String
           description: |-
             Human readable message indicating details about the current status.
-        - !ruby/object:Api::Type::Array
-          name: "details"
+          min_version: 'beta'
+          output: true
+        - name: 'details'
+          type: Array
           description: |
             A list of messages that carry the error details.
-          item_type: Api::Type::KeyValuePairs
+          min_version: 'beta'
           output: true
+          item_type:
+            type: KeyValuePairs

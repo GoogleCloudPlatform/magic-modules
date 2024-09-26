@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,86 +11,103 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'WorkforcePool'
-base_url: locations/{{location}}/workforcePools
-self_link: locations/{{location}}/workforcePools/{{workforce_pool_id}}
-create_url: locations/{{location}}/workforcePools?workforcePoolId={{workforce_pool_id}}
-update_verb: :PATCH
-update_mask: true
 description: |
   Represents a collection of external workforces. Provides namespaces for
   federated users that can be referenced in IAM policies.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Manage pools': 'https://cloud.google.com/iam/docs/manage-workforce-identity-pools-providers#manage_pools'
   api: 'https://cloud.google.com/iam/docs/reference/rest/v1/locations.workforcePools'
-docs: !ruby/object:Provider::Terraform::Docs
+docs:
   note: |
     Ask your Google Cloud account team to request access to workforce identity federation for
     your billing/quota project. The account team notifies you when the project is granted access.
+base_url: 'locations/{{location}}/workforcePools'
+self_link: 'locations/{{location}}/workforcePools/{{workforce_pool_id}}'
+create_url: 'locations/{{location}}/workforcePools?workforcePoolId={{workforce_pool_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'locations/{{location}}/workforcePools/{{workforce_pool_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
 autogen_async: true
-import_format: ['locations/{{location}}/workforcePools/{{workforce_pool_id}}']
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'targetLink'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+  constants: 'templates/terraform/constants/iam_workforce_pool.go.tmpl'
+  decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/iam_workforce_pool.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'iam_workforce_pool_basic'
+  - name: 'iam_workforce_pool_basic'
     primary_resource_id: 'example'
     vars:
       workforce_pool_id: 'example-pool'
     test_env_vars:
-      org_id: :ORG_ID
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'iam_workforce_pool_full'
+      org_id: 'ORG_ID'
+  - name: 'iam_workforce_pool_full'
     primary_resource_id: 'example'
     vars:
       workforce_pool_id: 'example-pool'
     test_env_vars:
-      org_id: :ORG_ID
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/iam_workforce_pool.go.erb
-  decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.erb
-  test_check_destroy: templates/terraform/custom_check_destroy/iam_workforce_pool.go.erb
+      org_id: 'ORG_ID'
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'location'
+  - name: 'location'
+    type: String
     description: The location for the resource.
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
-  - !ruby/object:Api::Type::String
-    name: 'workforcePoolId'
+  - name: 'workforcePoolId'
+    type: String
     description: |
       The name of the pool. The ID must be a globally unique string of 6 to 63 lowercase letters,
       digits, or hyphens. It must start with a letter, and cannot have a trailing hyphen.
       The prefix `gcp-` is reserved for use by Google, and may not be specified.
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
-    validation: !ruby/object:Provider::Terraform::Validation
+    validation:
       function: 'ValidateWorkforcePoolId'
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       Output only. The resource name of the pool.
       Format: `locations/{location}/workforcePools/{workforcePoolId}`
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'parent'
+  - name: 'parent'
+    type: String
     description: |
       Immutable. The resource name of the parent. Format: `organizations/{org-id}`.
     required: true
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
+  - name: 'displayName'
+    type: String
     description:
       A user-specified display name of the pool in Google Cloud Console. Cannot
       exceed 32 characters.
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description:
       A user-specified description of the pool. Cannot exceed 256 characters.
-  - !ruby/object:Api::Type::Enum
-    name: 'state'
+  - name: 'state'
+    type: Enum
     description: |
       Output only. The state of the pool.
        * STATE_UNSPECIFIED: State unspecified.
@@ -103,45 +120,46 @@ properties:
          existing tokens to access resources. If the pool is undeleted, existing
          tokens grant access again.
     output: true
-    values:
-      - :STATE_UNSPECIFIED
-      - :ACTIVE
-      - :DELETED
-  - !ruby/object:Api::Type::Boolean
-    name: 'disabled'
+    enum_values:
+      - 'STATE_UNSPECIFIED'
+      - 'ACTIVE'
+      - 'DELETED'
+  - name: 'disabled'
+    type: Boolean
     description: |
       Whether the pool is disabled. You cannot use a disabled pool to exchange tokens,
       or use existing tokens to access resources. If the pool is re-enabled, existing tokens grant access again.
-  - !ruby/object:Api::Type::String
-    name: 'sessionDuration'
+  - name: 'sessionDuration'
+    type: String
     description: |
       Duration that the Google Cloud access tokens, console sign-in sessions,
       and `gcloud` sign-in sessions from this pool are valid.
       Must be greater than 15 minutes (900s) and less than 12 hours (43200s).
       If `sessionDuration` is not configured, minted credentials have a default duration of one hour (3600s).
       A duration in seconds with up to nine fractional digits, ending with '`s`'. Example: "`3.5s`".
-    default_value: '3600s'
-  - !ruby/object:Api::Type::NestedObject
-    name: 'accessRestrictions'
-    immutable: true
+    default_value: "3600s"
+  - name: 'accessRestrictions'
+    type: NestedObject
     description: |
       Configure access restrictions on the workforce pool users. This is an optional field. If specified web
       sign-in can be restricted to given set of services or programmatic sign-in can be disabled for pool users.
+    immutable: true
     properties:
-      - !ruby/object:Api::Type::Array
-        name: 'allowedServices'
+      - name: 'allowedServices'
+        type: Array
         description: |
           Services allowed for web sign-in with the workforce pool.
           If not set by default there are no restrictions.
-        item_type: !ruby/object:Api::Type::NestedObject
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::String
-              name: 'domain'
+            - name: 'domain'
+              type: String
               description: |
                 Domain name of the service.
                 Example: console.cloud.google
-      - !ruby/object:Api::Type::Boolean
-        name: 'disableProgrammaticSignin'
+      - name: 'disableProgrammaticSignin'
+        type: Boolean
         description: |
           Disable programmatic sign-in by disabling token issue via the Security Token API endpoint.
           See [Security Token Service API](https://cloud.google.com/iam/docs/reference/sts/rest).

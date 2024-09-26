@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,48 +11,48 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'TargetHttpsProxy'
 kind: 'compute#targetHttpsProxy'
-base_url: projects/{{project}}/global/targetHttpsProxies
-collection_url_key: 'items'
-has_self_link: true
-immutable: true
 description: |
   Represents a TargetHttpsProxy resource, which is used by one or more
   global forwarding rule to route incoming HTTPS requests to a URL map.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/compute/docs/load-balancing/http/target-proxies'
   api: 'https://cloud.google.com/compute/docs/reference/v1/targetHttpsProxies'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+docs:
+base_url: 'projects/{{project}}/global/targetHttpsProxies'
+has_self_link: true
+immutable: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
-    base_url: '{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'targetLink'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'status'
-    complete: 'DONE'
-    allowed:
-      - 'PENDING'
-      - 'RUNNING'
-      - 'DONE'
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error/errors'
     message: 'message'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  encoder: templates/terraform/encoders/compute_target_https_proxy.go.erb
+collection_url_key: 'items'
+custom_code:
+  encoder: 'templates/terraform/encoders/compute_target_https_proxy.go.tmpl'
   # update_encoder is usually the same as encoder by default. This resource is an uncommon case where the whole resource
   # is marked to be immutable, but we have a field specific update that overrides it (e.g certifiacteManagerCertificates).
   # This causes the encoder logic to not be applied during update.
-  update_encoder: templates/terraform/encoders/compute_target_https_proxy.go.erb
-  decoder: templates/terraform/decoders/compute_target_https_proxy.go.erb
+  update_encoder: 'templates/terraform/encoders/compute_target_https_proxy.go.tmpl'
+  decoder: 'templates/terraform/decoders/compute_target_https_proxy.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'target_https_proxy_basic'
+  - name: 'target_https_proxy_basic'
     primary_resource_id: 'default'
     vars:
       target_https_proxy_name: 'test-proxy'
@@ -60,8 +60,7 @@ examples:
       url_map_name: 'url-map'
       backend_service_name: 'backend-service'
       http_health_check_name: 'http-health-check'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'target_https_proxy_http_keep_alive_timeout'
+  - name: 'target_https_proxy_http_keep_alive_timeout'
     primary_resource_id: 'default'
     vars:
       target_https_proxy_name: 'test-http-keep-alive-timeout-proxy'
@@ -69,8 +68,7 @@ examples:
       url_map_name: 'url-map'
       backend_service_name: 'backend-service'
       http_health_check_name: 'http-health-check'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'target_https_proxy_mtls'
+  - name: 'target_https_proxy_mtls'
     primary_resource_id: 'default'
     min_version: 'beta'
     vars:
@@ -81,30 +79,30 @@ examples:
       http_health_check_name: 'http-health-check'
       server_tls_policy_name: 'my-tls-policy'
       trust_config_name: 'my-trust-config'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'target_https_proxy_certificate_manager_certificate'
+  - name: 'target_https_proxy_certificate_manager_certificate'
     primary_resource_id: 'default'
     vars:
       target_https_proxy_name: 'target-http-proxy'
       certificate_manager_certificate_name: 'my-certificate'
       url_map_name: 'url-map'
       backend_service_name: 'backend-service'
+parameters:
 properties:
-  - !ruby/object:Api::Type::Time
-    name: 'creationTimestamp'
+  - name: 'creationTimestamp'
+    type: Time
     description: 'Creation timestamp in RFC3339 text format.'
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: 'An optional description of this resource.'
     immutable: true
-  - !ruby/object:Api::Type::Integer
-    name: 'proxyId'
-    api_name: 'id'
+  - name: 'proxyId'
+    type: Integer
     description: 'The unique identifier for the resource.'
+    api_name: id
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       Name of the resource. Provided by the client when the resource is
       created. The name must be 1-63 characters long, and comply with
@@ -113,105 +111,107 @@ properties:
       first character must be a lowercase letter, and all following
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
-    immutable: true
     required: true
-  - !ruby/object:Api::Type::Enum
-    name: 'quicOverride'
+    immutable: true
+  - name: 'quicOverride'
+    type: Enum
     description: |
       Specifies the QUIC override policy for this resource. This determines
       whether the load balancer will attempt to negotiate QUIC with clients
       or not. Can specify one of NONE, ENABLE, or DISABLE. If NONE is
       specified, Google manages whether QUIC is used.
-    values:
-      - :NONE
-      - :ENABLE
-      - :DISABLE
-    update_verb: :POST
     update_url: 'projects/{{project}}/global/targetHttpsProxies/{{name}}/setQuicOverride'
-    default_value: :NONE
-    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
-  - !ruby/object:Api::Type::Enum
-    name: 'tlsEarlyData'
+    update_verb: 'POST'
+    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
+    default_value: "NONE"
+    enum_values:
+      - 'NONE'
+      - 'ENABLE'
+      - 'DISABLE'
+  - name: 'tlsEarlyData'
+    type: Enum
     description: |
       Specifies whether TLS 1.3 0-RTT Data (“Early Data”) should be accepted for this service.
       Early Data allows a TLS resumption handshake to include the initial application payload
       (a HTTP request) alongside the handshake, reducing the effective round trips to “zero”.
       This applies to TLS 1.3 connections over TCP (HTTP/2) as well as over UDP (QUIC/h3).
-    values:
-      - :STRICT
-      - :PERMISSIVE
-      - :DISABLED
     default_from_api: true
-  - !ruby/object:Api::Type::Array
-    name: 'certificateManagerCertificates'
+    enum_values:
+      - 'STRICT'
+      - 'PERMISSIVE'
+      - 'DISABLED'
+  - name: 'certificateManagerCertificates'
+    type: Array
     description: |
       URLs to certificate manager certificate resources that are used to authenticate connections between users and the load balancer.
       Certificate manager certificates only apply when the load balancing scheme is set to INTERNAL_MANAGED.
       For EXTERNAL and EXTERNAL_MANAGED, use certificate_map instead.
       sslCertificates and certificateManagerCertificates fields can not be defined together.
       Accepted format is `//certificatemanager.googleapis.com/projects/{project}/locations/{location}/certificates/{resourceName}` or just the self_link `projects/{project}/locations/{location}/certificates/{resourceName}`
-    update_verb: :POST
     update_url: 'projects/{{project}}/targetHttpsProxies/{{name}}/setSslCertificates'
-    item_type: Api::Type::String
-    custom_expand: 'templates/terraform/custom_expand/certificate_manager_certificate_construct_full_url.go.erb'
-    diff_suppress_func: 'tpgresource.CompareResourceNames'
+    update_verb: 'POST'
     conflicts:
       - ssl_certificates
-  - !ruby/object:Api::Type::Array
-    name: 'sslCertificates'
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
+    custom_expand: 'templates/terraform/custom_expand/certificate_manager_certificate_construct_full_url.go.tmpl'
+    item_type:
+      type: String
+  - name: 'sslCertificates'
+    type: Array
     description: |
       URLs to SslCertificate resources that are used to authenticate connections between users and the load balancer.
       Currently, you may specify up to 15 SSL certificates. sslCertificates do not apply when the load balancing scheme is set to INTERNAL_SELF_MANAGED.
       sslCertificates and certificateManagerCertificates can not be defined together.
-    update_verb: :POST
     update_url: 'projects/{{project}}/targetHttpsProxies/{{name}}/setSslCertificates'
-    item_type: !ruby/object:Api::Type::ResourceRef
-      name: 'sslCertificate'
-      resource: 'SslCertificate'
-      imports: 'selfLink'
-      description: 'The SSL certificate URL used by this TargetHttpsProxy'
-    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
+    update_verb: 'POST'
     conflicts:
       - certificate_manager_certificates
-  - !ruby/object:Api::Type::String
-    name: 'certificateMap'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
+    item_type:
+      name: 'sslCertificate'
+      type: ResourceRef
+      description: 'The SSL certificate URL used by this TargetHttpsProxy'
+      resource: 'SslCertificate'
+      imports: 'selfLink'
+  - name: 'certificateMap'
+    type: String
     description: |
       A reference to the CertificateMap resource uri that identifies a certificate map
       associated with the given target proxy. This field is only supported for EXTERNAL and EXTERNAL_MANAGED load balancing schemes.
       For INTERNAL_MANAGED, use certificate_manager_certificates instead.
       Accepted format is `//certificatemanager.googleapis.com/projects/{project}/locations/{location}/certificateMaps/{resourceName}`.
-    update_verb: :POST
     update_url: 'projects/{{project}}/global/targetHttpsProxies/{{name}}/setCertificateMap'
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'sslPolicy'
-    resource: 'SslPolicy'
-    imports: 'selfLink'
+    update_verb: 'POST'
+  - name: 'sslPolicy'
+    type: ResourceRef
     description: |
       A reference to the SslPolicy resource that will be associated with
       the TargetHttpsProxy resource. If not set, the TargetHttpsProxy
       resource will not have any SSL policy configured.
-    update_verb: :POST
     update_url: 'projects/{{project}}/global/targetHttpsProxies/{{name}}/setSslPolicy'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'urlMap'
-    resource: 'UrlMap'
+    update_verb: 'POST'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'SslPolicy'
     imports: 'selfLink'
+  - name: 'urlMap'
+    type: ResourceRef
     description: |
       A reference to the UrlMap resource that defines the mapping from URL
       to the BackendService.
     required: true
-    update_verb: :POST
     update_url: 'projects/{{project}}/targetHttpsProxies/{{name}}/setUrlMap'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
-  - !ruby/object:Api::Type::Boolean
-    name: 'proxyBind'
+    update_verb: 'POST'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'UrlMap'
+    imports: 'selfLink'
+  - name: 'proxyBind'
+    type: Boolean
     description: |
       This field only applies when the forwarding rule that references
       this target proxy has a loadBalancingScheme set to INTERNAL_SELF_MANAGED.
     default_from_api: true
-  - !ruby/object:Api::Type::Integer
-    name: 'httpKeepAliveTimeoutSec'
+  - name: 'httpKeepAliveTimeoutSec'
+    type: Integer
     description: |
       Specifies how long to keep a connection open, after completing a response,
       while there is no matching traffic (in seconds). If an HTTP keepalive is
@@ -222,10 +222,8 @@ properties:
       value is 600 seconds, the minimum allowed value is 5 seconds, and the
       maximum allowed value is 600 seconds. For Global external HTTP(S) load
       balancer (classic), this option is not available publicly.
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'serverTlsPolicy'
-    resource: 'ServerTlsPolicy'
-    imports: 'selfLink'
+  - name: 'serverTlsPolicy'
+    type: ResourceRef
     description: |
       A URL referring to a networksecurity.ServerTlsPolicy
       resource that describes how the proxy should authenticate inbound
@@ -241,6 +239,8 @@ properties:
       deleting or recreating a referenced ServerTlsPolicy resource, you will
       receive a resourceInUseByAnotherResource error. Use lifecycle.create_before_destroy
       within the ServerTlsPolicy resource to avoid this.
-    update_verb: :PATCH
     update_url: 'projects/{{project}}/global/targetHttpsProxies/{{name}}'
+    update_verb: 'PATCH'
     fingerprint_name: 'fingerprint'
+    resource: 'ServerTlsPolicy'
+    imports: 'selfLink'
