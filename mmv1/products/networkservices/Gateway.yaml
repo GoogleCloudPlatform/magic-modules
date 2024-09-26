@@ -55,7 +55,7 @@ custom_code:
   constants: 'templates/terraform/constants/network_services_gateway.go.tmpl'
   pre_create: 'templates/terraform/pre_create/network_services_gateway.go.tmpl'
   post_delete: 'templates/terraform/post_delete/network_services_gateway.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/network_services_gateway.tmpl'
+  pre_update: 'templates/terraform/pre_update/network_services_gateway.go.tmpl'
 examples:
   - name: 'network_services_gateway_basic'
     primary_resource_id: 'default'
@@ -95,7 +95,7 @@ examples:
       - 'delete_swg_autogen_router_on_destroy'
 virtual_fields:
   - name: 'delete_swg_autogen_router_on_destroy'
-	  description: |
+    description: |
       When deleting a gateway of type 'SECURE_WEB_GATEWAY', this boolean option will also delete auto generated router by the gateway creation.
       If there is no other gateway of type 'SECURE_WEB_GATEWAY' remaining for that region and network it will be deleted.
     type: Boolean
@@ -212,7 +212,7 @@ properties:
     immutable: true
     description: |
       The routing mode of the Gateway. This field is configurable only for gateways of type SECURE_WEB_GATEWAY. This field is required for gateways of type SECURE_WEB_GATEWAY.
-    custom_flatten: 'templates/terraform/custom_flatten/network_services_gateway_routing_mode.go.erb'
+    custom_flatten: 'templates/terraform/custom_flatten/network_services_gateway_routing_mode.go.tmpl'
     enum_values:
       - 'EXPLICIT_ROUTING_MODE'
       - 'NEXT_HOP_ROUTING_MODE'
