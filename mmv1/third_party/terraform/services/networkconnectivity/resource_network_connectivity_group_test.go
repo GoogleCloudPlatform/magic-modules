@@ -16,8 +16,8 @@ func TestAccNetworkConnectivityGroup_BasicGroup(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_name":  envvar.GetTestProjectFromEnv(),
-		"hub_random_suffix": acctest.RandString(t, 10),
+		"project_name":            envvar.GetTestProjectFromEnv(),
+		"hub_random_suffix":       acctest.RandString(t, 10),
 		"project_random_suffix_1": acctest.RandString(t, 10),
 		"project_random_suffix_2": acctest.RandString(t, 10),
 	}
