@@ -18,8 +18,10 @@ import (
 
 // Fields that should be ignored in import tests because they aren't returned
 // from GCP (and thus can't be imported)
-// TODO MAYBE
+// TODO remove cascdable_replica
 var ignoredReplicaConfigurationFields = []string{
+	"deletion_protection",
+	"root_password",
 	"replica_configuration.0.cascadable_replica",
 	"replica_configuration.0.ca_certificate",
 	"replica_configuration.0.client_certificate",
@@ -31,8 +33,7 @@ var ignoredReplicaConfigurationFields = []string{
 	"replica_configuration.0.ssl_cipher",
 	"replica_configuration.0.username",
 	"replica_configuration.0.verify_server_certificate",
-	"deletion_protection",
-	"root_password",
+	"replica_configuration.0.failover_target",
 }
 
 func TestAccSqlDatabaseInstance_basicInferredName(t *testing.T) {
@@ -2374,7 +2375,7 @@ func TestAccSqlDatabaseInstance_SwitchoverSuccess(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleSqlDatabaseInstanceConfig_SqlServerwithCascadableReplica(primaryName, replicaName),
-				// TODO: remove expectnonemptyplan
+				// TODO: remove when API change is rolled out.
 				ExpectNonEmptyPlan: true,
 			},
 			{
@@ -2390,41 +2391,38 @@ func TestAccSqlDatabaseInstance_SwitchoverSuccess(t *testing.T) {
 				ImportStateVerifyIgnore: ignoredReplicaConfigurationFields,
 			},
 			{
-				Config:             googleSqlDatabaseInstance_switchover(primaryName, replicaName),
+				Config: googleSqlDatabaseInstance_switchover(primaryName, replicaName),
+				// TODO: remove when API change is rolled out.
 				ExpectNonEmptyPlan: true,
 			},
 			{
-				RefreshState:       true,
+				RefreshState: true,
+				// TODO: remove when API change is rolled out.
 				ExpectNonEmptyPlan: true,
 				Check:              resource.ComposeTestCheckFunc(resource.TestCheckTypeSetElemAttr("google_sql_database_instance.original-replica", "replica_names.*", primaryName), checkSwitchoverOriginalReplicaConfigurations("google_sql_database_instance.original-replica"), checkSwitchoverOriginalPrimaryConfigurations("google_sql_database_instance.original-primary", replicaName)),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.original-primary",
 				ImportState:             true,
-				ImportStateVerify:       false,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: ignoredReplicaConfigurationFields,
 			},
 			{
-				ResourceName:            "google_sql_database_instance.original-replica",
-				ImportState:             true,
-				ImportStateVerify:       false,
-				ImportStateVerifyIgnore: ignoredReplicaConfigurationFields,
+				ResourceName:      "google_sql_database_instance.original-replica",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// original-replica is no longer a replica, but replica_configuration is O + C and cannot be unset
+				ImportStateVerifyIgnore: []string{"replica_configuration", "deletion_protection", "root_password"},
 			},
 			{
-				// Delete replicas first so PostTestDestroy doesn't fail when deleting instances which have replicas. We've already validated switchover behavior.
-				Config:             googleSqlDatabaseInstance_deleteReplicasAfterSwitchover(primaryName, replicaName),
+				// Delete replica first so PostTestDestroy doesn't fail when deleting instances which have replicas. We've already validated switchover behavior, the remaining steps are cleanup
+				Config: googleSqlDatabaseInstance_deleteReplicasAfterSwitchover(primaryName, replicaName),
+				// We delete replica, but haven't updated the master's replica_names
 				ExpectNonEmptyPlan: true,
 			},
 			{
-				// Remove replicas from primary's resource
-				Config:             googleSqlDatabaseInstance_removeReplicaFromPrimaryAfterSwitchover(replicaName),
-				ExpectNonEmptyPlan: false,
-			},
-			{
-				ResourceName:            "google_sql_database_instance.original-replica",
-				ImportState:             true,
-				ImportStateVerify:       false,
-				ImportStateVerifyIgnore: ignoredReplicaConfigurationFields,
+				// Remove replica from primary's resource
+				Config: googleSqlDatabaseInstance_removeReplicaFromPrimaryAfterSwitchover(replicaName),
 			},
 		},
 	})
@@ -3100,7 +3098,6 @@ resource "google_sql_database_instance" "original-primary" {
   region              = "us-central1"
   database_version    = "SQLSERVER_2019_ENTERPRISE"
   deletion_protection = false
-  replica_names = ["%s"]
 
   root_password = "sqlserver1"
   settings {
@@ -3126,7 +3123,7 @@ resource "google_sql_database_instance" "original-replica" {
   }
 }
 
-`, primaryName, replicaName, replicaName)
+`, primaryName, replicaName)
 }
 
 func googleSqlDatabaseInstance_switchover(primaryName string, replicaName string) string {

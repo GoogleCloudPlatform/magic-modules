@@ -125,15 +125,15 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 		Create: resourceSqlDatabaseInstanceCreate,
 		Read:   resourceSqlDatabaseInstanceRead,
 		Update: resourceSqlDatabaseInstanceUpdate,
-		Delete:        resourceSqlDatabaseInstanceDelete,
+		Delete: resourceSqlDatabaseInstanceDelete,
 		Importer: &schema.ResourceImporter{
 			State: resourceSqlDatabaseInstanceImport,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(40 * time.Minute),
-			Update: schema.DefaultTimeout(30 * time.Minute),
-			Delete: schema.DefaultTimeout(30 * time.Minute),
+			Create: schema.DefaultTimeout(90 * time.Minute),
+			Update: schema.DefaultTimeout(90 * time.Minute),
+			Delete: schema.DefaultTimeout(90 * time.Minute),
 		},
 
 		CustomizeDiff: customdiff.All(
@@ -897,29 +897,6 @@ is set to true. Defaults to ZONAL.`,
 					Type: schema.TypeString,
 				},
 				Description: `The replicas of the instance.`,
-			},
-			"replication_cluster": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Optional: true,
-				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"failover_dr_replica_name": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Optional:    true,
-							Description: `If the instance is a primary instance, then this field identifies the disaster recovery (DR) replica.`,
-						},
-						"dr_replica": {
-							Type:        schema.TypeBool,
-							Computed:    true,
-							Optional:    true,
-							Description: `Read-only field that indicates whether the replica is a DR replica.`,
-						},
-					},
-				},
-				Description: `A primary instance and disaster recovery (DR) replica pair.`,
 			},
 			"server_ca_cert": {
 				Type:      schema.TypeList,
@@ -2586,7 +2563,7 @@ func isSwitchoverRequested(d *schema.ResourceData) bool {
 	}
 	dbVersion, _ := d.GetChange("database_version")
 	if !strings.HasPrefix(dbVersion.(string), "SQLSERVER") {
-		// tflog.Warn(fmt.Sprintf("Switchover is only supported for SQL Server %q", dbVersion))
+		log.Printf("[WARN] Switchover is only supported for SQL Server %q", dbVersion)
 		return false
 	}
 	return true
@@ -2607,7 +2584,7 @@ func isReplicaPromoteRequested(_ context.Context, oldInstanceType interface{}, n
 func isSwitchoverFromOldPrimarySide(d *schema.ResourceDiff) bool {
 	dbVersion, _ := d.GetChange("database_version")
 	if !strings.HasPrefix(dbVersion.(string), "SQLSERVER") {
-		// tflog.Warn(fmt.Sprintf("Switchover is only supported for SQL Server %q", dbVersion))
+		log.Printf("[WARN] Switchover is only supported for SQL Server %q", dbVersion)
 		return false
 	}
 	oldInstanceType, newInstanceType := d.GetChange("instance_type")
