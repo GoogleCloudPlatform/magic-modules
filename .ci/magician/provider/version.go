@@ -23,6 +23,18 @@ func (v Version) String() string {
 	return "unknown"
 }
 
+func (v Version) ProviderName() string {
+	switch v {
+	case GA:
+		return "google"
+	case Beta:
+		return "google-beta"
+	case Alpha:
+		return "google-private"
+	}
+	return "unknown"
+}
+
 func (v Version) BucketPath() string {
 	if v == GA {
 		return ""

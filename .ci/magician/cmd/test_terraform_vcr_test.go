@@ -9,6 +9,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 
+	"magician/provider"
 	"magician/vcr"
 )
 
@@ -64,7 +65,7 @@ func TestModifiedPackagesFromDiffs(t *testing.T) {
 			all:      false,
 		},
 	} {
-		if packages, all := modifiedPackages(tc.diffs); !reflect.DeepEqual(packages, tc.packages) {
+		if packages, all := modifiedPackages(tc.diffs, provider.Beta); !reflect.DeepEqual(packages, tc.packages) {
 			t.Errorf("Unexpected packages found for test %s: %v, expected %v", tc.name, packages, tc.packages)
 		} else if all != tc.all {
 			t.Errorf("Unexpected value for all packages for test %s: %v, expected %v", tc.name, all, tc.all)
