@@ -60,7 +60,7 @@ properties:
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     required: true
     immutable: true
-    values:
+    enum_values:
       - 'default'
       - 'center'
       - 'edge'
