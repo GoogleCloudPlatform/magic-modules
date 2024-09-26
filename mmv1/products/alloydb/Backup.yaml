@@ -244,3 +244,12 @@ properties:
         description: |
           Output only. The length of the quantity-based queue, specified by the backup's retention policy.
         output: true
+  - name: 'tags'
+    type: KeyValuePairs
+    description: |
+      A map of resource manager tags.
+      Resource manager tag keys and values have the same definition as resource manager tags.
+      Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/{tag_value_id}.
+      The field is ignored (both PUT & PATCH) when empty.
+    immutable: true
+    ignore_read: true
