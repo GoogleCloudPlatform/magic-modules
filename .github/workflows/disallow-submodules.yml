@@ -1,11 +1,11 @@
-name: "No submodules"
+name: "Disallow submodules"
 permissions: read-all
 
 on:
   pull_request
 
 jobs:
-  no-submodules:
+  disallow-submodules:
     runs-on: ubuntu-22.04
     steps:
     - name: Checkout repository
