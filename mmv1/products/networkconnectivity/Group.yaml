@@ -31,13 +31,6 @@ async:
     wait_ms: 1000
   result:
     path: 'targetLink'
-  status:
-    path: 'status'
-    complete: 'DONE'
-    allowed:
-      - 'PENDING'
-      - 'RUNNING'
-      - 'DONE'
   error:
     path: 'error/errors'
     message: 'message'
