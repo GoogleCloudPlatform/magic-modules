@@ -158,20 +158,27 @@ func main() {
 	})
 
 	var providerToGenerate provider.Provider
-	var productsForVersion []*api.Product
 
-	ch := make(chan string, len(allProductFiles))
+	productFileChannel := make(chan string, len(allProductFiles))
+	productsForVersionChannel := make(chan *api.Product, len(allProductFiles))
 	for _, pf := range allProductFiles {
-		ch <- pf
+		productFileChannel <- pf
 	}
 
 	for i := 0; i < len(allProductFiles); i++ {
 		wg.Add(1)
-		go GenerateProduct(ch, providerToGenerate, &productsForVersion, startTime, productsToGenerate, *resourceToGenerate, *overrideDirectory, generateCode, generateDocs)
+		go GenerateProduct(productFileChannel, providerToGenerate, productsForVersionChannel, startTime, productsToGenerate, *resourceToGenerate, *overrideDirectory, generateCode, generateDocs)
 	}
 	wg.Wait()
 
-	close(ch)
+	close(productFileChannel)
+	close(productsForVersionChannel)
+
+	var productsForVersion []*api.Product
+
+	for p := range productsForVersionChannel {
+		productsForVersion = append(productsForVersion, p)
+	}
 
 	slices.SortFunc(productsForVersion, func(p1, p2 *api.Product) int {
 		return strings.Compare(strings.ToLower(p1.Name), strings.ToLower(p2.Name))
@@ -185,21 +192,19 @@ func main() {
 
 	if generateCode {
 		providerToGenerate.CompileCommonFiles(*outputPath, productsForVersion, "")
-
-		// TODO rewrite: product overrides
 	}
 }
 
-func GenerateProduct(productChannel chan string, providerToGenerate provider.Provider, productsForVersion *[]*api.Product, startTime time.Time, productsToGenerate []string, resourceToGenerate, overrideDirectory string, generateCode, generateDocs bool) {
+func GenerateProduct(productChannel chan string, providerToGenerate provider.Provider, productsForVersionChannel chan *api.Product, startTime time.Time, productsToGenerate []string, resourceToGenerate, overrideDirectory string, generateCode, generateDocs bool) {
 
 	defer wg.Done()
 	productName := <-productChannel
 
-	productYamlPath := path.Join(productName, "go_product.yaml")
+	productYamlPath := path.Join(productName, "product.yaml")
 
 	var productOverridePath string
 	if overrideDirectory != "" {
-		productOverridePath = filepath.Join(overrideDirectory, productName, "go_product.yaml")
+		productOverridePath = filepath.Join(overrideDirectory, productName, "product.yaml")
 	}
 
 	_, baseProductErr := os.Stat(productYamlPath)
@@ -242,11 +247,6 @@ func GenerateProduct(productChannel chan string, providerToGenerate provider.Pro
 	// Base resource loop
 	for _, resourceYamlPath := range resourceFiles {
 		if filepath.Base(resourceYamlPath) == "product.yaml" || filepath.Ext(resourceYamlPath) != ".yaml" {
-			continue
-		}
-
-		// Prepend "go_" to the Go yaml files' name to distinguish with the ruby yaml files
-		if filepath.Base(resourceYamlPath) == "go_product.yaml" || !strings.HasPrefix(filepath.Base(resourceYamlPath), "go_") {
 			continue
 		}
 
@@ -308,8 +308,6 @@ func GenerateProduct(productChannel chan string, providerToGenerate provider.Pro
 			resources = append(resources, resource)
 		}
 
-		// TODO rewrite: override resources
-
 		// Sort resources by name
 		sort.Slice(resources, func(i, j int) bool {
 			return resources[i].Name < resources[j].Name
@@ -322,7 +320,7 @@ func GenerateProduct(productChannel chan string, providerToGenerate provider.Pro
 
 	providerToGenerate = setProvider(*forceProvider, *version, productApi, startTime)
 
-	*productsForVersion = append(*productsForVersion, productApi)
+	productsForVersionChannel <- productApi
 
 	if !slices.Contains(productsToGenerate, productName) {
 		log.Printf("%s not specified, skipping generation", productName)

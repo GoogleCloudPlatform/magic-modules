@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,186 +11,177 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
-name: Featurestore
-base_url: projects/{{project}}/locations/{{region}}/featurestores
-create_url: projects/{{project}}/locations/{{region}}/featurestores?featurestoreId={{name}}
-self_link: 'projects/{{project}}/locations/{{region}}/featurestores/{{name}}'
-update_verb: :PATCH
-update_mask: true
-references: !ruby/object:Api::Resource::ReferenceLinks
+---
+name: 'Featurestore'
+description: |-
+  A collection of DataItems and Annotations on them.
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
   api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featurestores'
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  method_name_separator: ':'
-  fetch_iam_policy_verb: :POST
-  parent_resource_attribute: featurestore
-  import_format:
-    ['projects/{{project}}/locations/{{region}}/featurestores/{{name}}']
-  example_config_body: 'templates/terraform/iam/example_config_body/vertex_ai_featurestore.tf.erb'
-  min_version: beta
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+docs:
+base_url: 'projects/{{project}}/locations/{{region}}/featurestores'
+self_link: 'projects/{{project}}/locations/{{region}}/featurestores/{{name}}'
+create_url: 'projects/{{project}}/locations/{{region}}/featurestores?featurestoreId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
     resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
+  error:
     path: 'error'
     message: 'message'
-description: |-
-  A collection of DataItems and Annotations on them.
-autogen_async: false
-skip_sweeper: true
+iam_policy:
+  method_name_separator: ':'
+  fetch_iam_policy_verb: 'POST'
+  parent_resource_attribute: 'featurestore'
+  example_config_body: 'templates/terraform/iam/example_config_body/vertex_ai_featurestore.tf.tmpl'
+  import_format:
+    - 'projects/{{project}}/locations/{{region}}/featurestores/{{name}}'
+  min_version: 'beta'
+custom_code:
+  pre_delete: 'templates/terraform/pre_delete/vertex_ai_force_delete.go.tmpl'
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'vertex_ai_featurestore'
+  - name: 'vertex_ai_featurestore'
     primary_resource_id: 'featurestore'
-    primary_resource_name: "fmt.Sprintf(\"terraform%s\",
-      context[\"random_suffix\"\
-      ])"
+    primary_resource_name: 'fmt.Sprintf("terraform%s", context["random_suffix"])'
     vars:
       name: 'terraform'
       project: 'appeng-flex'
       kms_key_name: 'kms-name'
     test_env_vars:
-      org_id: :ORG_ID
-      billing_account: :BILLING_ACCT
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
     test_vars_overrides:
-      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     ignore_read_extra:
       - 'force_destroy'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'vertex_ai_featurestore_with_beta_fields'
+  - name: 'vertex_ai_featurestore_with_beta_fields'
     primary_resource_id: 'featurestore'
-    primary_resource_name: "fmt.Sprintf(\"terraform%s\",
-      context[\"random_suffix\"\
-      ])"
+    primary_resource_name: 'fmt.Sprintf("terraform%s", context["random_suffix"])'
+    min_version: 'beta'
     vars:
       name: 'terraform2'
       project: 'appeng-flex'
       kms_key_name: 'kms-name'
     test_env_vars:
-      org_id: :ORG_ID
-      billing_account: :BILLING_ACCT
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
     test_vars_overrides:
-      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     ignore_read_extra:
       - 'force_destroy'
-    min_version: beta
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'vertex_ai_featurestore_scaling'
+  - name: 'vertex_ai_featurestore_scaling'
     primary_resource_id: 'featurestore'
-    primary_resource_name: "fmt.Sprintf(\"terraform%s\",
-      context[\"random_suffix\"\
-      ])"
+    primary_resource_name: 'fmt.Sprintf("terraform%s", context["random_suffix"])'
     vars:
       name: 'terraform3'
       project: 'appeng-flex'
       kms_key_name: 'kms-name'
     test_env_vars:
-      org_id: :ORG_ID
-      billing_account: :BILLING_ACCT
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
     test_vars_overrides:
-      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     ignore_read_extra:
       - 'force_destroy'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  pre_delete: templates/terraform/pre_delete/vertex_ai_force_delete.go.erb
 virtual_fields:
-  - !ruby/object:Api::Type::Boolean
-    name: 'force_destroy'
+  - name: 'force_destroy'
     description:
       'If set to true, any EntityTypes and Features for this Featurestore will
       also be deleted'
+    type: Boolean
     default_value: false
 parameters:
-  - !ruby/object:Api::Type::String
-    name: region
+  - name: 'region'
+    type: String
     description: The region of the dataset. eg us-central1
     url_param_only: true
     immutable: true
     default_from_api: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description:
       The name of the Featurestore. This value may be up to 60 characters, and
       valid characters are [a-z0-9_]. The first character cannot be a number.
-    immutable: true
     url_param_only: true
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
-  - !ruby/object:Api::Type::String
-    name: 'etag'
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'etag'
+    type: String
     description: Used to perform consistent read-modify-write updates.
-    output: true
     ignore_read: true
-  - !ruby/object:Api::Type::String
-    name: 'createTime'
     output: true
+  - name: 'createTime'
+    type: String
     description: |
       The timestamp of when the featurestore was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-  - !ruby/object:Api::Type::String
-    name: 'updateTime'
     output: true
+  - name: 'updateTime'
+    type: String
     description: |
       The timestamp of when the featurestore was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       A set of key/value label pairs to assign to this Featurestore.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'onlineServingConfig'
+  - name: 'onlineServingConfig'
+    type: NestedObject
     description: |
       Config for online serving resources.
     properties:
-      - !ruby/object:Api::Type::Integer
-        name: 'fixedNodeCount'
-        exactly_one_of:
-          - online_serving_config.0.fixed_node_count
-          - online_serving_config.0.scaling
+      - name: 'fixedNodeCount'
+        type: Integer
         description: |
           The number of nodes for each cluster. The number of nodes will not scale automatically but can be scaled manually by providing different values when updating.
-      - !ruby/object:Api::Type::NestedObject
-        name: 'scaling'
         exactly_one_of:
-          - online_serving_config.0.fixed_node_count
-          - online_serving_config.0.scaling
+          - 'online_serving_config.0.fixed_node_count'
+          - 'online_serving_config.0.scaling'
+      - name: 'scaling'
+        type: NestedObject
         description: |
           Online serving scaling configuration. Only one of fixedNodeCount and scaling can be set. Setting one will reset the other.
+        exactly_one_of:
+          - 'online_serving_config.0.fixed_node_count'
+          - 'online_serving_config.0.scaling'
         properties:
-          - !ruby/object:Api::Type::Integer
-            name: 'minNodeCount'
-            required: true
+          - name: 'minNodeCount'
+            type: Integer
             description: |
               The minimum number of nodes to scale down to. Must be greater than or equal to 1.
-          - !ruby/object:Api::Type::Integer
-            name: 'maxNodeCount'
             required: true
+          - name: 'maxNodeCount'
+            type: Integer
             description: |
               The maximum number of nodes to scale up to. Must be greater than minNodeCount, and less than or equal to 10 times of 'minNodeCount'.
-  - !ruby/object:Api::Type::Integer
-    name: 'onlineStorageTtlDays'
-    min_version: beta
-    default_value: 4000
+            required: true
+  - name: 'onlineStorageTtlDays'
+    type: Integer
     description: |
       TTL in days for feature values that will be stored in online serving storage. The Feature Store online storage periodically removes obsolete feature values older than onlineStorageTtlDays since the feature generation time. Note that onlineStorageTtlDays should be less than or equal to offlineStorageTtlDays for each EntityType under a featurestore. If not set, default to 4000 days
-  - !ruby/object:Api::Type::NestedObject
-    name: 'encryptionSpec'
+    min_version: 'beta'
+    default_value: 4000
+  - name: 'encryptionSpec'
+    type: NestedObject
     description: |
       If set, both of the online and offline data storage will be secured by this key.
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'kmsKeyName'
-        required: true
+      - name: 'kmsKeyName'
+        type: String
         description: |
           The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource. Has the form: projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key. The key needs to be in the same region as where the compute resource is created.
+        required: true

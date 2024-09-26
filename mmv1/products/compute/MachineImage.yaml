@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,123 +11,131 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'MachineImage'
 kind: 'compute#machineImage'
-base_url: projects/{{project}}/global/machineImages
-collection_url_key: 'items'
-immutable: true
-has_self_link: true
 description: |
   Represents a Machine Image resource. Machine images store all the configuration,
   metadata, permissions, and data from one or more disks required to create a
   Virtual machine (VM) instance.
-references: !ruby/object:Api::Resource::ReferenceLinks
+min_version: 'beta'
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/compute/docs/machine-images'
   api: 'https://cloud.google.com/compute/docs/reference/rest/beta/machineImages'
-min_version: beta
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+docs:
+base_url: 'projects/{{project}}/global/machineImages'
+has_self_link: true
+immutable: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
-    base_url: '{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'targetLink'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'status'
-    complete: 'DONE'
-    allowed:
-      - 'PENDING'
-      - 'RUNNING'
-      - 'DONE'
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error/errors'
     message: 'message'
-iam_policy: !ruby/object:Api::Resource::IamPolicy
+collection_url_key: 'items'
+iam_policy:
   allowed_iam_role: 'roles/compute.admin'
   parent_resource_attribute: 'machine_image'
-  iam_conditions_request_type: :QUERY_PARAM
+  iam_conditions_request_type: 'QUERY_PARAM'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'machine_image_basic'
+  - name: 'machine_image_basic'
     primary_resource_id: 'image'
-    primary_resource_name:
-      'fmt.Sprintf("tf-test-my-image%s", context["random_suffix"])'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-image%s", context["random_suffix"])'
     vars:
       vm_name: 'my-vm'
       image_name: 'my-image'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'compute_machine_image_kms'
+  - name: 'compute_machine_image_kms'
     primary_resource_id: 'image'
-    primary_resource_name:
-      'fmt.Sprintf("tf-test-my-image%s", context["random_suffix"])'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-image%s", context["random_suffix"])'
     vars:
       vm_name: 'my-vm'
       image_name: 'my-image'
       key_name: 'key'
       keyring_name: 'keyring'
     test_vars_overrides:
-      policyChanged:
-        'acctest.BootstrapPSARole(t, "service-", "compute-system",
-        "roles/cloudkms.cryptoKeyEncrypterDecrypter")'
-
+      'policyChanged': 'acctest.BootstrapPSARole(t, "service-", "compute-system", "roles/cloudkms.cryptoKeyEncrypterDecrypter")'
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description: 'Name of the resource.'
+    min_version: 'beta'
     required: true
-  - !ruby/object:Api::Type::String
-    name: description
+  - name: 'description'
+    type: String
     description: 'A text description of the resource.'
-  - !ruby/object:Api::Type::ResourceRef
-    name: sourceInstance
+    min_version: 'beta'
+  - name: 'sourceInstance'
+    type: ResourceRef
     description:
       'The source instance used to create the machine image. You can provide
       this as a partial or full URL to the resource.'
+    min_version: 'beta'
+    required: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Instance'
     imports: 'selfLink'
-    required: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
-  - !ruby/object:Api::Type::Array
-    name: 'storageLocations'
+  - name: 'storageLocations'
+    type: Array
     description: |
       The regional or multi-regional Cloud Storage bucket location where the machine image is stored.
-    item_type: Api::Type::String
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::Boolean
-    name: guestFlush
+    item_type:
+      type: String
+  - name: 'guestFlush'
+    type: Boolean
     description: |
       Specify this to create an application consistent machine image by informing the OS to prepare for the snapshot process.
       Currently only supported on Windows instances using the Volume Shadow Copy Service (VSS).
-  - !ruby/object:Api::Type::NestedObject
-    name: 'machineImageEncryptionKey'
+    min_version: 'beta'
+  - name: 'machineImageEncryptionKey'
+    type: NestedObject
     description: |
       Encrypts the machine image using a customer-supplied encryption key.
 
       After you encrypt a machine image with a customer-supplied key, you must
       provide the same key if you use the machine image later (e.g. to create a
       instance from the image)
+    min_version: 'beta'
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'rawKey'
+      - name: 'rawKey'
+        type: String
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
-      - !ruby/object:Api::Type::String
-        name: 'sha256'
+        min_version: 'beta'
+      - name: 'sha256'
+        type: String
         description: |
           The RFC 4648 base64 encoded SHA-256 hash of the
           customer-supplied encryption key that protects this resource.
+        min_version: 'beta'
         output: true
-      - !ruby/object:Api::Type::String
-        name: 'kmsKeyName'
+      - name: 'kmsKeyName'
+        type: String
         description: |
           The name of the encryption key that is stored in Google Cloud KMS.
-        diff_suppress_func: tpgresource.CompareCryptoKeyVersions
-      - !ruby/object:Api::Type::String
-        name: 'kmsKeyServiceAccount'
+        min_version: 'beta'
+        diff_suppress_func: 'tpgresource.CompareCryptoKeyVersions'
+      - name: 'kmsKeyServiceAccount'
+        type: String
         description: |
           The service account used for the encryption request for the given KMS key.
           If absent, the Compute Engine Service Agent service account is used.
+        min_version: 'beta'

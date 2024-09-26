@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'SourceRepresentationInstance'
 kind: 'sql#instance'
 description: |
@@ -20,97 +20,115 @@ description: |
   Cloud Console and appears the same as a regular Cloud SQL instance, but it
   contains no data, requires no configuration or maintenance, and does not
   affect billing. You cannot update the source representation instance.
-base_url: projects/{{project}}/instances
+docs:
+base_url: 'projects/{{project}}/instances'
 immutable: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: 'projects/{{project}}/operations/{{op_id}}'
+    kind: 'sql#operation'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'targetLink'
+    resource_inside_response: false
+  error:
+    path: 'error/errors'
+    message: 'message'
+custom_code:
+  encoder: 'templates/terraform/encoders/sql_source_representation_instance.go.tmpl'
+  decoder: 'templates/terraform/decoders/sql_source_representation_instance.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'sql_source_representation_instance_basic'
+  - name: 'sql_source_representation_instance_basic'
     primary_resource_id: 'instance'
     vars:
       name: 'my-instance'
     ignore_read_extra:
       - 'password'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'sql_source_representation_instance_postgres'
+  - name: 'sql_source_representation_instance_postgres'
     primary_resource_id: 'instance'
     vars:
       name: 'my-instance'
     ignore_read_extra:
       - 'password'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  encoder: 'templates/terraform/encoders/sql_source_representation_instance.go.erb'
-  decoder: 'templates/terraform/decoders/sql_source_representation_instance.go.erb'
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       The name of the source representation instance. Use any valid Cloud SQL instance name.
     required: true
-  - !ruby/object:Api::Type::String
-    name: 'region'
+  - name: 'region'
+    type: String
     description: |
       The Region in which the created instance should reside.
       If it is not provided, the provider region is used.
     required: false
     default_from_api: true
-  - !ruby/object:Api::Type::Enum
-    name: 'databaseVersion'
+  - name: 'databaseVersion'
+    type: Enum
     description: |
       The MySQL version running on your source database server.
     required: true
-    values:
-      - :MYSQL_5_6
-      - :MYSQL_5_7
-      - :MYSQL_8_0
-      - :POSTGRES_9_6
-      - :POSTGRES_10
-      - :POSTGRES_11
-      - :POSTGRES_12
-      - :POSTGRES_13
-      - :POSTGRES_14
-  - !ruby/object:Api::Type::NestedObject
-    name: 'onPremisesConfiguration'
+    enum_values:
+      - 'MYSQL_5_6'
+      - 'MYSQL_5_7'
+      - 'MYSQL_8_0'
+      - 'POSTGRES_9_6'
+      - 'POSTGRES_10'
+      - 'POSTGRES_11'
+      - 'POSTGRES_12'
+      - 'POSTGRES_13'
+      - 'POSTGRES_14'
+  - name: 'onPremisesConfiguration'
+    type: NestedObject
     description: |
       Configuration specific to on-premises instances.
     required: true
     flatten_object: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'host'
+      - name: 'host'
+        type: String
         description: |
           The IPv4 address and port for the external server, or the the DNS address for the external server. If the external server is hosted on Cloud SQL, the port is 5432.
         required: true
-      - !ruby/object:Api::Type::Integer
-        name: 'port'
-        default_value: 3306
+      - name: 'port'
+        type: Integer
         description: |
           The externally accessible port for the source database server.
           Defaults to 3306.
-        validation: !ruby/object:Provider::Terraform::Validation
+        validation:
           function: 'validation.IntBetween(0, 65535)'
-      - !ruby/object:Api::Type::String
-        name: 'username'
+        default_value: 3306
+      - name: 'username'
+        type: String
         description: |
           The replication user account on the external server.
-      - !ruby/object:Api::Type::String
-        name: 'password'
+      - name: 'password'
+        type: String
         description: |
           The password for the replication user account.
         sensitive: true
-        custom_flatten: templates/terraform/custom_flatten/source_representation_instance_configuration_password.go.erb
-      - !ruby/object:Api::Type::String
-        name: 'dumpFilePath'
+        custom_flatten: 'templates/terraform/custom_flatten/source_representation_instance_configuration_password.go.tmpl'
+      - name: 'dumpFilePath'
+        type: String
         description: |
           A file in the bucket that contains the data from the external server.
-      - !ruby/object:Api::Type::String
-        name: 'caCertificate'
+      - name: 'caCertificate'
+        type: String
         description: |
           The CA certificate on the external server. Include only if SSL/TLS is used on the external server.
-      - !ruby/object:Api::Type::String
-        name: 'clientCertificate'
+      - name: 'clientCertificate'
+        type: String
         description: |
           The client certificate on the external server. Required only for server-client authentication. Include only if SSL/TLS is used on the external server.
-      - !ruby/object:Api::Type::String
-        name: 'clientKey'
+      - name: 'clientKey'
+        type: String
         description: |
           The private key file for the client certificate on the external server. Required only for server-client authentication. Include only if SSL/TLS is used on the external server.

@@ -11,30 +11,39 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Target'
 description: |
   The Cloud Deploy `Target` resource.
+exclude_resource: true
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/targets/{{name}}'
 base_url: 'projects/{{project}}/locations/{{location}}/targets'
 self_link: 'projects/{{project}}/locations/{{location}}/targets/{{name}}'
-exclude_resource: true
-id_format: 'projects/{{project}}/locations/{{location}}/targets/{{name}}'
 import_format:
   - 'projects/{{project}}/locations/{{location}}/targets/{{name}}'
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  parent_resource_attribute: 'name'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+iam_policy:
   method_name_separator: ':'
+  parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/locations/{{location}}/targets/{{name}}'
-  import_format: ['projects/{{project}}/locations/{{location}}/targets/{{name}}', '{{name}}']
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/targets/{{name}}'
+    - '{{name}}'
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'clouddeploy_target_basic'
+  - name: 'clouddeploy_target_basic'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cd-target%s", context["random_suffix"])'
     vars:
       target: 'cd-target'
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: "name"
+  - name: 'name'
+    type: String
     description: "Dummy property."
     required: true

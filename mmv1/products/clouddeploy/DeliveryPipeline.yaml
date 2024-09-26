@@ -11,36 +11,45 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'DeliveryPipeline'
 description: |
   A DeliveryPipeline defines a pipeline through which a Skaffold configuration can progress.
-references: !ruby/object:Api::Resource::ReferenceLinks
+exclude_resource: true
+references:
   guides:
     'Deploy an app to GKE using Cloud Deploy': 'https://cloud.google.com/deploy/docs/deploy-app-gke'
     'Deploy an app to Cloud Run using Cloud Deploy': 'https://cloud.google.com/deploy/docs/deploy-app-run'
     'Create a pipeline and release in the Google Cloud console': 'https://cloud.google.com/deploy/docs/deploy-app-in-console'
   api: 'https://cloud.google.com/deploy/docs/api/reference/rest/v1/projects.locations.deliveryPipelines'
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/deliveryPipelines/{{name}}'
 base_url: 'projects/{{project}}/locations/{{location}}/deliveryPipelines'
 self_link: 'projects/{{project}}/locations/{{location}}/deliveryPipelines/{{name}}'
-exclude_resource: true
-id_format: 'projects/{{project}}/locations/{{location}}/deliveryPipelines/{{name}}'
 import_format:
   - 'projects/{{project}}/locations/{{location}}/deliveryPipelines/{{name}}'
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  parent_resource_attribute: 'name'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+iam_policy:
   method_name_separator: ':'
+  parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/locations/{{location}}/deliveryPipelines/{{name}}'
-  import_format: ['projects/{{project}}/locations/{{location}}/deliveryPipelines/{{name}}', '{{name}}']
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/deliveryPipelines/{{name}}'
+    - '{{name}}'
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'clouddeploy_delivery_pipeline_basic'
+  - name: 'clouddeploy_delivery_pipeline_basic'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cd-delivery-pipeline%s", context["random_suffix"])'
     vars:
       delivery_pipeline: 'cd-delivery-pipeline'
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: "name"
+  - name: 'name'
+    type: String
     description: "Dummy property."
     required: true

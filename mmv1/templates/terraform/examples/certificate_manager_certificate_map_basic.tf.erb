@@ -1,8 +1,0 @@
-resource "google_certificate_manager_certificate_map" "<%= ctx[:primary_resource_id] %>" {
-  name        = "<%= ctx[:vars]['cert_map_name'] %>"
-  description = "My acceptance test certificate map"
-  labels      = {
-    "terraform" : true,
-    "acc-test"  : true,
-  }
-}

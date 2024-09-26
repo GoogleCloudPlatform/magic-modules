@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'ProjectSecurityHealthAnalyticsCustomModule'
 description: |
   Represents an instance of a Security Health Analytics custom module, including
@@ -19,195 +19,200 @@ description: |
   You can create a custom module at the organization, folder, or project level.
   Custom modules that you create at the organization or folder level are inherited
   by the child folders and projects.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Overview of custom modules for Security Health Analytics': 'https://cloud.google.com/security-command-center/docs/custom-modules-sha-overview'
   api: 'https://cloud.google.com/security-command-center/docs/reference/security-center-management/rest/v1/projects.locations.securityHealthAnalyticsCustomModules'
+docs:
 base_url: 'projects/{{project}}/locations/{{location}}/securityHealthAnalyticsCustomModules'
 self_link: 'projects/{{project}}/locations/{{location}}/securityHealthAnalyticsCustomModules/{{name}}'
-mutex: 'projects/{{project}}/locations/{{location}}/securityHealthAnalyticsCustomModules'
-update_verb: :PATCH
+update_verb: 'PATCH'
 update_mask: true
+mutex: 'projects/{{project}}/locations/{{location}}/securityHealthAnalyticsCustomModules'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: "scc_management_organization_project_security_health_analytics_custom_module_basic"
-    primary_resource_id: "example"
-    skip_test: true
+  - name: 'scc_management_organization_project_security_health_analytics_custom_module_basic'
+    primary_resource_id: 'example'
     vars:
-      display_name: basic_custom_module
-  - !ruby/object:Provider::Terraform::Examples
-    name: "scc_management_organization_project_security_health_analytics_custom_module_full"
-    primary_resource_id: "example"
-    skip_test: true
+      display_name: 'basic_custom_module'
+    exclude_test: true
+  - name: 'scc_management_organization_project_security_health_analytics_custom_module_full'
+    primary_resource_id: 'example'
     vars:
-      display_name: full_custom_module
-
+      display_name: 'full_custom_module'
+    exclude_test: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'location'
-    immutable: true
-    required: false
-    url_param_only: true
-    default_value: 'global'
+  - name: 'location'
+    type: String
     description: |
       Location ID of the parent organization. If not provided, 'global' will be used as the default location.
 
+    url_param_only: true
+    required: false
+    immutable: true
+    default_value: "global"
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    output: true
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+  - name: 'name'
+    type: String
     description: |
       The resource name of the custom module. Its format is "projects/{project}/locations/{location}/securityHealthAnalyticsCustomModules/{securityHealthAnalyticsCustomModule}".
       The id {securityHealthAnalyticsCustomModule} is server-generated and is not user settable. It will be a numeric id containing 1-20 digits.
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
-    immutable: true
-    required: false
-    # API error for invalid display names is just "INVALID_ARGUMENT" with no details
-    validation: !ruby/object:Provider::Terraform::Validation
-      function: 'verify.ValidateRegexp(`^[a-z][\w_]{0,127}$`)'
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'displayName'
+    type: String
     description: |
       The display name of the Security Health Analytics custom module. This
       display name becomes the finding category for all findings that are
       returned by this custom module. The display name must be between 1 and
       128 characters, start with a lowercase letter, and contain alphanumeric
       characters or underscores only.
-  - !ruby/object:Api::Type::Enum
-    name: 'enablementState'
     required: false
+    immutable: true
+    # API error for invalid display names is just "INVALID_ARGUMENT" with no details
+    validation:
+      function: 'verify.ValidateRegexp(`^[a-z][\w_]{0,127}$`)'
+  - name: 'enablementState'
+    type: Enum
     description: |
       The enablement state of the custom module.
-    values:
-      - :ENABLED
-      - :DISABLED
-  - !ruby/object:Api::Type::String
-    name: 'updateTime'
-    output: true
+    required: false
+    enum_values:
+      - 'ENABLED'
+      - 'DISABLED'
+  - name: 'updateTime'
+    type: String
     description: |
       The time at which the custom module was last updated.
 
       A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and
       up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
-  - !ruby/object:Api::Type::String
-    name: 'lastEditor'
     output: true
+  - name: 'lastEditor'
+    type: String
     description: |
       The editor that last updated the custom module.
-  - !ruby/object:Api::Type::String
-    name: 'ancestorModule'
     output: true
+  - name: 'ancestorModule'
+    type: String
     description: |
       If empty, indicates that the custom module was created in the organization,folder,
       or project in which you are viewing the custom module. Otherwise, ancestor_module
       specifies the organization or folder from which the custom module is inherited.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'customConfig'
-    required: false
+    output: true
+  - name: 'customConfig'
+    type: NestedObject
     description: |
       The user specified custom configuration for the module.
+    required: false
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: 'predicate'
-        required: true
+      - name: 'predicate'
+        type: NestedObject
         description: |
           The CEL expression to evaluate to produce findings. When the expression evaluates
           to true against a resource, a finding is generated.
+        required: true
         properties:
-          - !ruby/object:Api::Type::String
-            name: 'expression'
-            required: true
+          - name: 'expression'
+            type: String
             description: |
               Textual representation of an expression in Common Expression Language syntax.
-          - !ruby/object:Api::Type::String
-            name: 'title'
+            required: true
+          - name: 'title'
+            type: String
             description: |
               Title for the expression, i.e. a short string describing its purpose. This can
               be used e.g. in UIs which allow to enter the expression.
-          - !ruby/object:Api::Type::String
-            name: 'description'
+          - name: 'description'
+            type: String
             description: |
               Description of the expression. This is a longer text which describes the
               expression, e.g. when hovered over it in a UI.
-          - !ruby/object:Api::Type::String
-            name: 'location'
+          - name: 'location'
+            type: String
             description: |
               String indicating the location of the expression for error reporting, e.g. a
               file name and a position in the file.
-      - !ruby/object:Api::Type::NestedObject
-        name: 'customOutput'
+      - name: 'customOutput'
+        type: NestedObject
         description: |
           Custom output properties.
         properties:
-          - !ruby/object:Api::Type::Array
-            name: 'properties'
+          - name: 'properties'
+            type: Array
             description: |
               A list of custom output properties to add to the finding.
-            item_type: !ruby/object:Api::Type::NestedObject
+            item_type:
+              type: NestedObject
               properties:
-                - !ruby/object:Api::Type::String
-                  name: 'name'
+                - name: 'name'
+                  type: String
                   description: |
                     Name of the property for the custom output.
-                - !ruby/object:Api::Type::NestedObject
-                  name: 'valueExpression'
+                - name: 'valueExpression'
+                  type: NestedObject
                   description: |
                     The CEL expression for the custom output. A resource property can be specified
                     to return the value of the property or a text string enclosed in quotation marks.
                   properties:
-                    - !ruby/object:Api::Type::String
-                      name: 'expression'
-                      required: true
+                    - name: 'expression'
+                      type: String
                       description: |
                         Textual representation of an expression in Common Expression Language syntax.
-                    - !ruby/object:Api::Type::String
-                      name: 'title'
+                      required: true
+                    - name: 'title'
+                      type: String
                       description: |
                         Title for the expression, i.e. a short string describing its purpose. This can
                         be used e.g. in UIs which allow to enter the expression.
-                    - !ruby/object:Api::Type::String
-                      name: 'description'
+                    - name: 'description'
+                      type: String
                       description: |
                         Description of the expression. This is a longer text which describes the
                         expression, e.g. when hovered over it in a UI.
-                    - !ruby/object:Api::Type::String
-                      name: 'location'
+                    - name: 'location'
+                      type: String
                       description: |
                         String indicating the location of the expression for error reporting, e.g. a
                         file name and a position in the file.
-      - !ruby/object:Api::Type::NestedObject
-        name: 'resourceSelector'
-        required: true
+      - name: 'resourceSelector'
+        type: NestedObject
         description: |
           The resource types that the custom module operates on. Each custom module
           can specify up to 5 resource types.
+        required: true
         properties:
-          - !ruby/object:Api::Type::Array
-            name: 'resourceTypes'
-            required: true
+          - name: 'resourceTypes'
+            type: Array
             description: |
               The resource types to run the detector on.
-            item_type: Api::Type::String
-      - !ruby/object:Api::Type::Enum
-        name: 'severity'
-        required: true
+            required: true
+            item_type:
+              type: String
+      - name: 'severity'
+        type: Enum
         description: |
           The severity to assign to findings generated by the module.
-        values:
-          - :CRITICAL
-          - :HIGH
-          - :MEDIUM
-          - :LOW
-      - !ruby/object:Api::Type::String
-        name: 'description'
+        required: true
+        enum_values:
+          - 'CRITICAL'
+          - 'HIGH'
+          - 'MEDIUM'
+          - 'LOW'
+      - name: 'description'
+        type: String
         description: |
           Text that describes the vulnerability or misconfiguration that the custom
           module detects. This explanation is returned with each finding instance to
           help investigators understand the detected issue. The text must be enclosed in quotation marks.
-      - !ruby/object:Api::Type::String
-        name: 'recommendation'
-        required: true
+      - name: 'recommendation'
+        type: String
         description: |
           An explanation of the recommended steps that security teams can take to resolve
           the detected issue. This explanation is returned with each finding generated by
           this module in the nextSteps property of the finding JSON.
+        required: true

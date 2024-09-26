@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,129 +11,118 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Environment'
-base_url: 'environments'
-create_url: '{{org_id}}/environments'
-self_link: '{{org_id}}/environments/{{name}}'
-update_url: '{{org_id}}/environments/{{name}}'
-update_verb: :PATCH
-update_mask: true
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
-    base_url: '{{op_id}}'
-    wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
-    path: 'response'
-    resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
-    path: 'error'
-    message: 'message'
 description: |
   An `Environment` in Apigee.
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  method_name_separator: ':'
-  parent_resource_attribute: 'env_id'
-  import_format: ['{{%org_id}}/environments/{{name}}', '{{name}}']
-  base_url: '{{org_id}}/environments/{{name}}'
-  self_link: '{{org_id}}/environments/{{name}}'
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Creating an environment': 'https://cloud.google.com/apigee/docs/api-platform/get-started/create-environment'
   api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments/create'
-
+docs:
+base_url: 'environments'
+self_link: '{{org_id}}/environments/{{name}}'
+create_url: '{{org_id}}/environments'
+update_url: '{{org_id}}/environments/{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - '{{org_id}}/environments/{{name}}'
+  - '{{org_id}}/{{name}}'
+timeouts:
+  insert_minutes: 30
+  update_minutes: 20
+  delete_minutes: 30
 autogen_async: true
-import_format: ['{{org_id}}/environments/{{name}}', '{{org_id}}/{{name}}']
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_attribute: 'env_id'
+  base_url: '{{org_id}}/environments/{{name}}'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  self_link: '{{org_id}}/environments/{{name}}'
+  import_format:
+    - '{{%org_id}}/environments/{{name}}'
+    - '{{name}}'
+custom_code:
+  custom_import: 'templates/terraform/custom_import/apigee_environment.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'apigee_environment_basic'
+  - name: 'apigee_environment_basic'
     vars:
       environment_name: 'my-environment'
-    skip_test:
-      true
+    exclude_test: true
       # This is a more verbose version of the above that creates all
       # the resources needed for the acceptance test.
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'apigee_environment_basic_test'
+  - name: 'apigee_environment_basic_test'
     primary_resource_id: 'apigee_environment'
-    primary_resource_name: "fmt.Sprintf(\"organizations/tf-test%s\",
-      context[\"random_suffix\"\
-      ]), fmt.Sprintf(\"tf-test%s\", context[\"random_suffix\"])"
+    primary_resource_name: 'fmt.Sprintf("organizations/tf-test%s", context["random_suffix"]), fmt.Sprintf("tf-test%s", context["random_suffix"])'
     test_env_vars:
-      org_id: :ORG_ID
-      billing_account: :BILLING_ACCT
-    skip_docs:
-      true
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    exclude_docs: true
       # Resource creation race
     skip_vcr: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'apigee_environment_basic_deployment_apiproxy_type_test'
+  - name: 'apigee_environment_basic_deployment_apiproxy_type_test'
     primary_resource_id: 'apigee_environment'
-    primary_resource_name: "fmt.Sprintf(\"organizations/tf-test%s\",
-      context[\"random_suffix\"\
-      ]), fmt.Sprintf(\"tf-test%s\", context[\"random_suffix\"])"
+    primary_resource_name: 'fmt.Sprintf("organizations/tf-test%s", context["random_suffix"]), fmt.Sprintf("tf-test%s", context["random_suffix"])'
     test_env_vars:
-      org_id: :ORG_ID
-      billing_account: :BILLING_ACCT
-    skip_docs:
-      true
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    exclude_docs: true
       # Resource creation race
     skip_vcr: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'apigee_environment_patch_update_test'
+  - name: 'apigee_environment_patch_update_test'
     primary_resource_id: 'apigee_environment'
-    primary_resource_name: "fmt.Sprintf(\"organizations/tf-test%s\",
-      context[\"random_suffix\"\
-      ]), fmt.Sprintf(\"tf-test%s\", context[\"random_suffix\"])"
+    primary_resource_name: 'fmt.Sprintf("organizations/tf-test%s", context["random_suffix"]), fmt.Sprintf("tf-test%s", context["random_suffix"])'
+    min_version: 'beta'
     test_env_vars:
-      org_id: :ORG_ID
-      billing_account: :BILLING_ACCT
-    skip_docs: true
-    min_version: beta
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    exclude_docs: true
       # Resource creation race
     skip_vcr: true
-timeouts: !ruby/object:Api::Timeouts
-  insert_minutes: 30
-  delete_minutes: 30
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/apigee_environment.go.erb
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'orgId'
+  - name: 'orgId'
+    type: String
     description: |
       The Apigee Organization associated with the Apigee environment,
       in the format `organizations/{{org_name}}`.
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       The resource ID of the environment.
     required: true
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
+  - name: 'displayName'
+    type: String
     description: |
       Display name of the environment.
     required: false
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: |
       Description of the environment.
     required: false
     immutable: true
-  - !ruby/object:Api::Type::Enum
-    name: 'deploymentType'
+  - name: 'deploymentType'
+    type: Enum
     description: |
       Optional. Deployment type supported by the environment. The deployment type can be
       set when creating the environment and cannot be changed. When you enable archive
@@ -142,62 +131,62 @@ properties:
       Managing the deployment of API proxy or shared flow revisions;
       Creating, updating, or deleting resource files;
       Creating, updating, or deleting target servers.
-    values:
+    immutable: true
+    default_from_api: true
+    enum_values:
       - 'DEPLOYMENT_TYPE_UNSPECIFIED'
       - 'PROXY'
       - 'ARCHIVE'
-    immutable: true
-    default_from_api: true
-  - !ruby/object:Api::Type::Enum
-    name: 'apiProxyType'
+  - name: 'apiProxyType'
+    type: Enum
     description: |
       Optional. API Proxy type supported by the environment. The type can be set when creating
       the Environment and cannot be changed.
-    values:
+    immutable: true
+    default_from_api: true
+    enum_values:
       - 'API_PROXY_TYPE_UNSPECIFIED'
       - 'PROGRAMMABLE'
       - 'CONFIGURABLE'
-    immutable: true
-    default_from_api: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'nodeConfig'
+  - name: 'nodeConfig'
+    type: NestedObject
     description: |
       NodeConfig for setting the min/max number of nodes associated with the environment.
     default_from_api: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'minNodeCount'
+      - name: 'minNodeCount'
+        type: String
         description: |
           The minimum total number of gateway nodes that the is reserved for all instances that
           has the specified environment. If not specified, the default is determined by the
           recommended minimum number of nodes for that gateway.
-      - !ruby/object:Api::Type::String
-        name: 'maxNodeCount'
+      - name: 'maxNodeCount'
+        type: String
         description: |
           The maximum total number of gateway nodes that the is reserved for all instances that
           has the specified environment. If not specified, the default is determined by the
           recommended maximum number of nodes for that gateway.
-      - !ruby/object:Api::Type::String
-        name: 'currentAggregateNodeCount'
+      - name: 'currentAggregateNodeCount'
+        type: String
         description: |
           The current total number of gateway nodes that each environment currently has across
           all instances.
         output: true
-  - !ruby/object:Api::Type::Enum
-    name: 'type'
+  - name: 'type'
+    type: Enum
     description: |
       Types that can be selected for an Environment. Each of the types are
       limited by capability and capacity. Refer to Apigee's public documentation
       to understand about each of these types in details.
       An Apigee org can support heterogeneous Environments.
     default_from_api: true
-    values:
+    enum_values:
       - 'ENVIRONMENT_TYPE_UNSPECIFIED'
       - 'BASE'
       - 'INTERMEDIATE'
       - 'COMPREHENSIVE'
-  - !ruby/object:Api::Type::String
-    name: 'forwardProxyUri'
+  - name: 'forwardProxyUri'
+    type: String
     description: |
       Optional. URI of the forward proxy to be applied to the runtime instances in this environment. Must be in the format of {scheme}://{hostname}:{port}. Note that the scheme must be one of "http" or "https", and the port must be supplied.
     required: false

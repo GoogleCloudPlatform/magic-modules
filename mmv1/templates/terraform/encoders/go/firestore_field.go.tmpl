@@ -1,9 +1,0 @@
-
-// We've added project / database / collection / field as split fields of the name, but
-// the API doesn't expect them.  Make sure we remove them from any requests.
-
-delete(obj, "project")
-delete(obj, "database")
-delete(obj, "collection")
-delete(obj, "field")
-return obj, nil

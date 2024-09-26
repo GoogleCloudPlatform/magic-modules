@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'WebResource'
 description: |
   A web resource is a website or domain with verified ownership. Once your
@@ -23,78 +23,84 @@ description: |
   the web resource is destroyed. The Google Site Verification API checks that the
   verification data exists at creation time and does not exist at destruction time
   and will fail if the required condition is not met.
-base_url: webResource
-self_link: webResource/{{web_resource_id}}
-create_url: webResource?verificationMethod={{verification_method}}
-delete_url: webResource/{{web_resource_id}}
-id_format: webResource/{{web_resource_id}}
-immutable: true
-identity:
-  - web_resource_id
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Getting Started': 'https://developers.google.com/site-verification/v1/getting_started'
   api: 'https://developers.google.com/site-verification/v1'
-timeouts: !ruby/object:Api::Timeouts
+docs:
+id_format: 'webResource/{{web_resource_id}}'
+base_url: 'webResource'
+self_link: 'webResource/{{web_resource_id}}'
+create_url: 'webResource?verificationMethod={{verification_method}}'
+delete_url: 'webResource/{{web_resource_id}}'
+immutable: true
+timeouts:
   insert_minutes: 60
-error_retry_predicates: ['transport_tpg.IsSiteVerificationRetryableError']
-examples:
-  - !ruby/object:Provider::Terraform::Examples
-    skip_test: true
-    name: "site_verification_domain_record"
-    primary_resource_id: "example"
-    vars:
-      managed_zone: "example.com"
-      domain: "www.example.com"
-      dns_name: "www.example.com."
+  update_minutes: 20
+  delete_minutes: 20
+identity:
+  - web_resource_id
+custom_code:
+error_retry_predicates:
+
+  - 'transport_tpg.IsSiteVerificationRetryableError'
 supports_indirect_user_project_override: true
+examples:
+  - name: 'site_verification_domain_record'
+    primary_resource_id: 'example'
+    vars:
+      managed_zone: 'example.com'
+      domain: 'www.example.com'
+      dns_name: 'www.example.com.'
+    exclude_test: true
 parameters:
-  - !ruby/object:Api::Type::Enum
-    name: 'verification_method'
-    required: true
-    immutable: true
-    url_param_only: true
+  - name: 'verification_method'
+    type: Enum
     description: |
       The verification method for the Site Verification system to use to verify
       this site or domain.
-    values:
-      - :ANALYTICS
-      - :DNS_CNAME
-      - :DNS_TXT
-      - :FILE
-      - :META
-      - :TAG_MANAGER
+    url_param_only: true
+    required: true
+    immutable: true
+    enum_values:
+      - 'ANALYTICS'
+      - 'DNS_CNAME'
+      - 'DNS_TXT'
+      - 'FILE'
+      - 'META'
+      - 'TAG_MANAGER'
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'web_resource_id'
-    output: true
-    api_name: id
+  - name: 'web_resource_id'
+    type: String
     description: |
       The string used to identify this web resource.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'site'
-    required: true
+    api_name: id
+    output: true
+  - name: 'site'
+    type: NestedObject
     description: |
       Container for the address and type of a site for which a verification token will be verified.
+    required: true
     properties:
-      - !ruby/object:Api::Type::Enum
-        name: 'type'
-        required: true
+      - name: 'type'
+        type: Enum
         description: |
           The type of resource to be verified.
-        values:
-          - :INET_DOMAIN
-          - :SITE
-      - !ruby/object:Api::Type::String
-        name: 'identifier'
         required: true
+        enum_values:
+          - 'INET_DOMAIN'
+          - 'SITE'
+      - name: 'identifier'
+        type: String
         description: |
           The site identifier. If the type is set to SITE, the identifier is a URL. If the type is
           set to INET_DOMAIN, the identifier is a domain name.
-  - !ruby/object:Api::Type::Array
-    name: 'owners'
+        required: true
+  - name: 'owners'
+    type: Array
     description: |
       The email addresses of all direct, verified owners of this exact property. Indirect owners —
       for example verified owners of the containing domain—are not included in this list.
     output: true
-    item_type: Api::Type::String
+    item_type:
+      type: String

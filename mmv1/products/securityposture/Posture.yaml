@@ -11,165 +11,172 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Posture'
 description: |
   A Posture represents a collection of policy set including its name, state, description
   and policy sets. A policy set includes set of policies along with their definition.
   A posture can be created at the organization level.
   Every update to a deployed posture creates a new posture revision with an updated revision_id.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Create and deploy a posture': 'https://cloud.google.com/security-command-center/docs/how-to-use-security-posture'
-import_format: ['{{%parent}}/locations/{{location}}/postures/{{posture_id}}']
+docs:
 base_url: '{{parent}}/locations/{{location}}/postures'
 self_link: '{{parent}}/locations/{{location}}/postures/{{posture_id}}'
 create_url: '{{parent}}/locations/{{location}}/postures?postureId={{posture_id}}'
 update_url: '{{parent}}/locations/{{location}}/postures/{{posture_id}}?revisionId={{revision_id}}'
-update_verb: :PATCH
+update_verb: 'PATCH'
 update_mask: true
 delete_url: '{{parent}}/locations/{{location}}/postures/{{posture_id}}'
+import_format:
+  - '{{%parent}}/locations/{{location}}/postures/{{posture_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
 autogen_async: true
 # Sets parameters for handling operations returned by the API.
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/posture.go.erb
-custom_diff: [
-  'revisionIdCustomizeDiff',
-]
+  result:
+    resource_inside_response: false
+custom_code:
+  constants: 'templates/terraform/constants/posture.go.tmpl'
+custom_diff:
+  - 'revisionIdCustomizeDiff'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'securityposture_posture_basic'
+  - name: 'securityposture_posture_basic'
     primary_resource_id: 'posture1'
     vars:
-      posture_id: "posture_example"
+      posture_id: 'posture_example'
     test_env_vars:
-      org_id: :ORG_TARGET
+      org_id: 'ORG_TARGET'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'parent'
+  - name: 'parent'
+    type: String
     description: |
       The parent of the resource, an organization. Format should be `organizations/{organization_id}`.
-    immutable: true
     url_param_only: true
     required: true
-  - !ruby/object:Api::Type::String
-    name: 'location'
+    immutable: true
+  - name: 'location'
+    type: String
     description: "Location of the resource, eg: global."
-    immutable: true
     url_param_only: true
     required: true
-  - !ruby/object:Api::Type::String
-    name: 'postureId'
-    required: true
     immutable: true
-    url_param_only: true
+  - name: 'postureId'
+    type: String
     description: |
       Id of the posture. It is an immutable field.
+    url_param_only: true
+    required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       Name of the posture.
     output: true
-  - !ruby/object:Api::Type::Enum
-    name: 'state'
+  - name: 'state'
+    type: Enum
     description: |
       State of the posture. Update to state field should not be triggered along with
       with other field updates.
     required: true
-    values:
-      - :DEPRECATED
-      - :DRAFT
-      - :ACTIVE
-  - !ruby/object:Api::Type::String
-    name: 'revisionId'
+    enum_values:
+      - 'DEPRECATED'
+      - 'DRAFT'
+      - 'ACTIVE'
+  - name: 'revisionId'
+    type: String
     description: |
       Revision_id of the posture.
     immutable: true
     output: true
-  - !ruby/object:Api::Type::Time
-    name: 'createTime'
+  - name: 'createTime'
+    type: Time
     description: |
       Time the Posture was created in UTC.
     output: true
-  - !ruby/object:Api::Type::Time
-    name: 'updateTime'
+  - name: 'updateTime'
+    type: Time
     description: |
       Time the Posture was updated in UTC.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: |
       Description of the posture.
-  - !ruby/object:Api::Type::Fingerprint
-    name: 'etag'
+  - name: 'etag'
+    type: Fingerprint
     description: 'For Resource freshness validation (https://google.aip.dev/154)'
     output: true
-  - !ruby/object:Api::Type::Boolean
-    name: reconciling
+  - name: 'reconciling'
+    type: Boolean
     description: |
       If set, there are currently changes in flight to the posture.
     output: true
-  - !ruby/object:Api::Type::Array
-    name: 'policySets'
-    required: true
+  - name: 'policySets'
+    type: Array
     description: |
       List of policy sets for the posture.
-    item_type: !ruby/object:Api::Type::NestedObject
-      name: 'PolicySet'
+    required: true
+    item_type:
       description: |
         Set of security policies.
-      required: true
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'policySetId'
+        - name: 'policySetId'
+          type: String
           description: |
             ID of the policy set.
           required: true
-        - !ruby/object:Api::Type::String
-          name: 'description'
+        - name: 'description'
+          type: String
           description: |
             Description of the policy set.
-        - !ruby/object:Api::Type::Array
-          name: 'policies'
+        - name: 'policies'
+          type: Array
           description: |
             List of security policy
           required: true
-          item_type: !ruby/object:Api::Type::NestedObject
-            name: 'Policy'
+          item_type:
             description: |
               Description of a security policy.
+            type: NestedObject
             properties:
-              - !ruby/object:Api::Type::String
-                name: 'policyId'
+              - name: 'policyId'
+                type: String
                 description: |
                   ID of the policy.
                 required: true
-              - !ruby/object:Api::Type::String
-                name: 'description'
+              - name: 'description'
+                type: String
                 description: |
                   Description of the policy.
-              - !ruby/object:Api::Type::Array
-                name: 'complianceStandards'
+              - name: 'complianceStandards'
+                type: Array
                 description: 'Mapping for policy to security standards and controls.'
-                item_type: !ruby/object:Api::Type::NestedObject
-                  name: 'ComplianceStandard'
+                item_type:
                   description: |
                     Set of security controls corresponding to the policy.
+                  type: NestedObject
                   properties:
-                    - !ruby/object:Api::Type::String
-                      name: 'standard'
+                    - name: 'standard'
+                      type: String
                       description: |
                         Mapping of compliance standards for the policy.
-                    - !ruby/object:Api::Type::String
-                      name: 'control'
+                    - name: 'control'
+                      type: String
                       description: |
                         Mapping of security controls for the policy.
-              - !ruby/object:Api::Type::NestedObject
-                name: 'constraint'
+              - name: 'constraint'
+                type: NestedObject
                 description: 'Policy constraint definition.It can have the definition of one of following constraints:
                 orgPolicyConstraint
                 orgPolicyConstraintCustom
@@ -177,340 +184,345 @@ properties:
                 securityHealthAnalyticsCustomModule'
                 required: true
                 properties:
-                  - !ruby/object:Api::Type::NestedObject
-                    name: 'orgPolicyConstraint'
+                  - name: 'orgPolicyConstraint'
+                    type: NestedObject
                     description: |
                       Organization policy canned constraint definition.
                     properties:
-                      - !ruby/object:Api::Type::String
-                        name: 'cannedConstraintId'
+                      - name: 'cannedConstraintId'
+                        type: String
                         description: 'Organization policy canned constraint Id'
                         required: true
-                      - !ruby/object:Api::Type::Array
-                        name: 'policyRules'
+                      - name: 'policyRules'
+                        type: Array
                         description: 'Definition of policy rules'
                         required: true
-                        item_type: !ruby/object:Api::Type::NestedObject
-                          name: 'PolicyRule'
+                        item_type:
                           description: |
                             A message that holds specific allowed and denied values.
                             This message can define specific values and subtrees of the Resource
                             Manager resource hierarchy (`Organizations`, `Folders`, `Projects`) that
                             are allowed or denied. It can have a CEL expressions and one of the following
-                            fields: values, allow_all, deny_all, enforce.
+                          type: NestedObject
                           properties:
-                            - !ruby/object:Api::Type::NestedObject
-                              name: 'values'
+                            - name: 'values'
+                              type: NestedObject
                               description: |
                                 List of values to be used for this policy rule. This field can be set only in policies for list constraints.
                               properties:
-                                - !ruby/object:Api::Type::Array
-                                  name: 'allowedValues'
+                                - name: 'allowedValues'
+                                  type: Array
                                   description: 'List of values allowed at this resource.'
-                                  item_type: Api::Type::String
-                                - !ruby/object:Api::Type::Array
-                                  name: 'deniedValues'
+                                  item_type:
+                                    type: String
+                                - name: 'deniedValues'
+                                  type: Array
                                   description: 'List of values denied at this resource.'
-                                  item_type: Api::Type::String
-                            - !ruby/object:Api::Type::Boolean
-                              name: 'allowAll'
+                                  item_type:
+                                    type: String
+                            - name: 'allowAll'
+                              type: Boolean
                               description: |
                                 Setting this to true means that all values are allowed. This field can be set only in policies for list constraints.
                               default_value: false
-                            - !ruby/object:Api::Type::Boolean
-                              name: 'denyAll'
+                            - name: 'denyAll'
+                              type: Boolean
                               description: |
                                 Setting this to true means that all values are denied. This field can be set only in policies for list constraints.
                               default_value: false
-                            - !ruby/object:Api::Type::Boolean
-                              name: 'enforce'
+                            - name: 'enforce'
+                              type: Boolean
                               description: |
                                 If `true`, then the policy is enforced. If `false`, then any configuration is acceptable.
                                 This field can be set only in policies for boolean constraints.
-                            - !ruby/object:Api::Type::NestedObject
-                              name: 'condition'
+                            - name: 'condition'
+                              type: NestedObject
                               description: |
                                 Represents a textual expression in the Common Expression Language (CEL) syntax. CEL is a C-like expression language.
                                 This page details the objects and attributes that are used to the build the CEL expressions for
                                 custom access levels - https://cloud.google.com/access-context-manager/docs/custom-access-level-spec.
                               properties:
-                                - !ruby/object:Api::Type::String
-                                  name: 'expression'
-                                  required: true
+                                - name: 'expression'
+                                  type: String
                                   description:
                                     Textual representation of an expression in Common Expression
                                     Language syntax.
-                                - !ruby/object:Api::Type::String
-                                  name: 'title'
+                                  required: true
+                                - name: 'title'
+                                  type: String
                                   description:
                                     Title for the expression, i.e. a short string describing its
                                     purpose.
-                                - !ruby/object:Api::Type::String
-                                  name: 'description'
+                                - name: 'description'
+                                  type: String
                                   description: Description of the expression
-                                - !ruby/object:Api::Type::String
-                                  name: 'location'
+                                - name: 'location'
+                                  type: String
                                   description:
                                     String indicating the location of the expression for error
                                     reporting, e.g. a file name and a position in the file
-                  - !ruby/object:Api::Type::NestedObject
-                    name: 'orgPolicyConstraintCustom'
+                  - name: 'orgPolicyConstraintCustom'
+                    type: NestedObject
                     description: |
                       Organization policy custom constraint policy definition.
                     properties:
-                      - !ruby/object:Api::Type::NestedObject
-                        name: 'customConstraint'
+                      - name: 'customConstraint'
+                        type: NestedObject
                         description: 'Organization policy custom constraint definition.'
                         properties:
-                          - !ruby/object:Api::Type::String
-                            name: 'name'
-                            required: true
-                            custom_flatten: 'templates/terraform/custom_flatten/securityposture_custom_constraint_name.go.erb'
+                          - name: 'name'
+                            type: String
                             description: |
                               Immutable. The name of the custom constraint. This is unique within the organization.
-                          - !ruby/object:Api::Type::String
-                            name: 'displayName'
+                            required: true
+                            custom_flatten: 'templates/terraform/custom_flatten/securityposture_custom_constraint_name.go.tmpl'
+                          - name: 'displayName'
+                            type: String
                             description: |
                               A human-friendly name for the constraint.
-                          - !ruby/object:Api::Type::String
-                            name: 'description'
+                          - name: 'description'
+                            type: String
                             description: |
                               A human-friendly description of the constraint to display as an error message when the policy is violated.
-                          - !ruby/object:Api::Type::String
-                            name: 'condition'
-                            required: true
+                          - name: 'condition'
+                            type: String
                             description: |
                               A CEL condition that refers to a supported service resource, for example `resource.management.autoUpgrade == false`. For details about CEL usage, see [Common Expression Language](https://cloud.google.com/resource-manager/docs/organization-policy/creating-managing-custom-constraints#common_expression_language).
-                          - !ruby/object:Api::Type::Enum
-                            name: 'actionType'
                             required: true
+                          - name: 'actionType'
+                            type: Enum
                             description: |
                               The action to take if the condition is met.
-                            values:
-                              - :ALLOW
-                              - :DENY
-                          - !ruby/object:Api::Type::Array
-                            name: 'methodTypes'
-                            min_size: 1
                             required: true
+                            enum_values:
+                              - 'ALLOW'
+                              - 'DENY'
+                          - name: 'methodTypes'
+                            type: Array
                             description: |
                               A list of RESTful methods for which to enforce the constraint. Can be `CREATE`, `UPDATE`, or both. Not all Google Cloud services support both methods. To see supported methods for each service, find the service in [Supported services](https://cloud.google.com/resource-manager/docs/organization-policy/custom-constraint-supported-services).
-                            item_type: Api::Type::String
-                          - !ruby/object:Api::Type::Array
-                            name: 'resourceTypes'
-                            min_size: 1
                             required: true
+                            item_type:
+                              type: String
+                            min_size: 1
+                          - name: 'resourceTypes'
+                            type: Array
                             description: |
                               Immutable. The fully qualified name of the Google Cloud REST resource containing the object and field you want to restrict. For example, `container.googleapis.com/NodePool`.
-                            item_type: Api::Type::String
-                      - !ruby/object:Api::Type::Array
-                        name: 'policyRules'
+                            required: true
+                            item_type:
+                              type: String
+                            min_size: 1
+                      - name: 'policyRules'
+                        type: Array
                         description: 'Definition of policy rules'
                         required: true
-                        item_type: !ruby/object:Api::Type::NestedObject
-                          name: 'PolicyRule'
+                        item_type:
                           description: |
                             A message that holds specific allowed and denied values.
                             This message can define specific values and subtrees of the Resource
                             Manager resource hierarchy (`Organizations`, `Folders`, `Projects`) that
                             are allowed or denied. It can have a CEL expressions and one of the following
-                            fields: values, allow_all, deny_all, enforce.
+                          type: NestedObject
                           properties:
-                            - !ruby/object:Api::Type::NestedObject
-                              name: 'values'
+                            - name: 'values'
+                              type: NestedObject
                               description: |
                                 List of values to be used for this policy rule. This field can be set only in policies for list constraints.
                               properties:
-                                - !ruby/object:Api::Type::Array
-                                  name: 'allowedValues'
+                                - name: 'allowedValues'
+                                  type: Array
                                   description: 'List of values allowed at this resource.'
-                                  item_type: Api::Type::String
-                                - !ruby/object:Api::Type::Array
-                                  name: 'deniedValues'
+                                  item_type:
+                                    type: String
+                                - name: 'deniedValues'
+                                  type: Array
                                   description: 'List of values denied at this resource.'
-                                  item_type: Api::Type::String
-                            - !ruby/object:Api::Type::Boolean
-                              name: 'allowAll'
+                                  item_type:
+                                    type: String
+                            - name: 'allowAll'
+                              type: Boolean
                               description: |
                                 Setting this to true means that all values are allowed. This field can be set only in policies for list constraints.
                               default_value: false
-                            - !ruby/object:Api::Type::Boolean
-                              name: 'denyAll'
+                            - name: 'denyAll'
+                              type: Boolean
                               description: |
                                 Setting this to true means that all values are denied. This field can be set only in policies for list constraints.
                               default_value: false
-                            - !ruby/object:Api::Type::Boolean
-                              name: 'enforce'
+                            - name: 'enforce'
+                              type: Boolean
                               description: |
                                 If `true`, then the policy is enforced. If `false`, then any configuration is acceptable.
                                 This field can be set only in policies for boolean constraints.
-                            - !ruby/object:Api::Type::NestedObject
-                              name: 'condition'
+                            - name: 'condition'
+                              type: NestedObject
                               description: |
                                 Represents a textual expression in the Common Expression Language (CEL) syntax. CEL is a C-like expression language.
                                 This page details the objects and attributes that are used to the build the CEL expressions for
                                 custom access levels - https://cloud.google.com/access-context-manager/docs/custom-access-level-spec.
                               properties:
-                                - !ruby/object:Api::Type::String
-                                  name: 'expression'
-                                  required: true
+                                - name: 'expression'
+                                  type: String
                                   description:
                                     Textual representation of an expression in Common Expression
                                     Language syntax.
-                                - !ruby/object:Api::Type::String
-                                  name: 'title'
+                                  required: true
+                                - name: 'title'
+                                  type: String
                                   description:
                                     Title for the expression, i.e. a short string describing its
                                     purpose.
-                                - !ruby/object:Api::Type::String
-                                  name: 'description'
+                                - name: 'description'
+                                  type: String
                                   description: Description of the expression
-                                - !ruby/object:Api::Type::String
-                                  name: 'location'
+                                - name: 'location'
+                                  type: String
                                   description:
                                     String indicating the location of the expression for error
                                     reporting, e.g. a file name and a position in the file
-                  - !ruby/object:Api::Type::NestedObject
-                    name: 'securityHealthAnalyticsModule'
+                  - name: 'securityHealthAnalyticsModule'
+                    type: NestedObject
                     description: 'Security Health Analytics built-in detector definition.'
                     properties:
-                      - !ruby/object:Api::Type::String
-                        name: 'moduleName'
+                      - name: 'moduleName'
+                        type: String
                         description: 'The name of the module eg: BIGQUERY_TABLE_CMEK_DISABLED.'
                         required: true
-                      - !ruby/object:Api::Type::Enum
-                        name: 'moduleEnablementState'
+                      - name: 'moduleEnablementState'
+                        type: Enum
                         description: 'The state of enablement for the module at its level of the resource hierarchy.'
-                        values:
-                          - :ENABLEMENT_STATE_UNSPECIFIED
-                          - :ENABLED
-                          - :DISABLED
-                  - !ruby/object:Api::Type::NestedObject
-                    name: 'securityHealthAnalyticsCustomModule'
+                        enum_values:
+                          - 'ENABLEMENT_STATE_UNSPECIFIED'
+                          - 'ENABLED'
+                          - 'DISABLED'
+                  - name: 'securityHealthAnalyticsCustomModule'
+                    type: NestedObject
                     description: 'Definition of Security Health Analytics Custom Module.'
                     properties:
-                      - !ruby/object:Api::Type::String
-                        name: 'id'
+                      - name: 'id'
+                        type: String
                         description: 'A server generated id of custom module.'
                         output: true
-                      - !ruby/object:Api::Type::String
-                        name: 'displayName'
+                      - name: 'displayName'
+                        type: String
                         description: |
                           The display name of the Security Health Analytics custom module. This
                           display name becomes the finding category for all findings that are
                           returned by this custom module.
-                      - !ruby/object:Api::Type::Enum
-                        name: 'moduleEnablementState'
+                      - name: 'moduleEnablementState'
+                        type: Enum
                         description: 'The state of enablement for the module at its level of the resource hierarchy.'
-                        values:
-                          - :ENABLEMENT_STATE_UNSPECIFIED
-                          - :ENABLED
-                          - :DISABLED
-                      - !ruby/object:Api::Type::NestedObject
-                        name: 'config'
+                        enum_values:
+                          - 'ENABLEMENT_STATE_UNSPECIFIED'
+                          - 'ENABLED'
+                          - 'DISABLED'
+                      - name: 'config'
+                        type: NestedObject
                         description: 'Custom module details.'
                         required: true
                         properties:
-                          - !ruby/object:Api::Type::NestedObject
-                            name: 'predicate'
+                          - name: 'predicate'
+                            type: NestedObject
                             description: |
                               The CEL expression to evaluate to produce findings.When the expression
                               evaluates to true against a resource, a finding is generated.
                             required: true
                             properties:
-                              - !ruby/object:Api::Type::String
-                                name: 'expression'
-                                required: true
+                              - name: 'expression'
+                                type: String
                                 description:
                                   Textual representation of an expression in Common Expression
                                   Language syntax.
-                              - !ruby/object:Api::Type::String
-                                name: 'title'
+                                required: true
+                              - name: 'title'
+                                type: String
                                 description:
                                   Title for the expression, i.e. a short string describing its
                                   purpose.
-                              - !ruby/object:Api::Type::String
-                                name: 'description'
+                              - name: 'description'
+                                type: String
                                 description: Description of the expression
-                              - !ruby/object:Api::Type::String
-                                name: 'location'
+                              - name: 'location'
+                                type: String
                                 description:
                                   String indicating the location of the expression for error
                                   reporting, e.g. a file name and a position in the file
-                          - !ruby/object:Api::Type::NestedObject
-                            name: 'customOutput'
+                          - name: 'customOutput'
+                            type: NestedObject
                             description: |
                               Custom output properties. A set of optional name-value pairs that define custom source properties to
                               return with each finding that is generated by the custom module. The custom
                               source properties that are defined here are included in the finding JSON
                               under `sourceProperties`.
                             properties:
-                              - !ruby/object:Api::Type::Array
-                                name: 'properties'
+                              - name: 'properties'
+                                type: Array
                                 description: 'A list of custom output properties to add to the finding.'
-                                item_type: !ruby/object:Api::Type::NestedObject
-                                  name: 'Property'
+                                item_type:
                                   description: 'An individual name-value pair that defines a custom source property.'
+                                  type: NestedObject
                                   properties:
-                                    - !ruby/object:Api::Type::String
-                                      name: 'name'
+                                    - name: 'name'
+                                      type: String
                                       description: 'Name of the property for the custom output.'
                                       required: true
-                                    - !ruby/object:Api::Type::NestedObject
-                                      name: 'valueExpression'
+                                    - name: 'valueExpression'
+                                      type: NestedObject
                                       description: |
                                         The CEL expression for the custom output. A resource property can be
                                         specified to return the value of the property or a text string enclosed
                                         in quotation marks.
                                       properties:
-                                        - !ruby/object:Api::Type::String
-                                          name: 'expression'
-                                          required: true
+                                        - name: 'expression'
+                                          type: String
                                           description:
                                             Textual representation of an expression in Common Expression
                                             Language syntax.
-                                        - !ruby/object:Api::Type::String
-                                          name: 'title'
+                                          required: true
+                                        - name: 'title'
+                                          type: String
                                           description:
                                             Title for the expression, i.e. a short string describing its
                                             purpose.
-                                        - !ruby/object:Api::Type::String
-                                          name: 'description'
+                                        - name: 'description'
+                                          type: String
                                           description: Description of the expression
-                                        - !ruby/object:Api::Type::String
-                                          name: 'location'
+                                        - name: 'location'
+                                          type: String
                                           description:
                                             String indicating the location of the expression for error
                                             reporting, e.g. a file name and a position in the file
-                          - !ruby/object:Api::Type::NestedObject
-                            name: 'resourceSelector'
+                          - name: 'resourceSelector'
+                            type: NestedObject
                             description: |
                               The resource types that the custom module operates on. Each custom module
                               can specify up to 5 resource types.
                             required: true
                             properties:
-                              - !ruby/object:Api::Type::Array
-                                name: 'resourceTypes'
+                              - name: 'resourceTypes'
+                                type: Array
                                 description: 'The resource types to run the detector on.'
-                                item_type: Api::Type::String
                                 required: true
-                          - !ruby/object:Api::Type::Enum
-                            name: 'severity'
+                                item_type:
+                                  type: String
+                          - name: 'severity'
+                            type: Enum
                             description: 'The severity to assign to findings generated by the module.'
                             required: true
-                            values:
-                              - :SEVERITY_UNSPECIFIED
-                              - :CRITICAL
-                              - :HIGH
-                              - :MEDIUM
-                              - :LOW
-                          - !ruby/object:Api::Type::String
-                            name: 'description'
+                            enum_values:
+                              - 'SEVERITY_UNSPECIFIED'
+                              - 'CRITICAL'
+                              - 'HIGH'
+                              - 'MEDIUM'
+                              - 'LOW'
+                          - name: 'description'
+                            type: String
                             description: |
                               Text that describes the vulnerability or misconfiguration that the custom
                               module detects.
-                          - !ruby/object:Api::Type::String
-                            name: 'recommendation'
+                          - name: 'recommendation'
+                            type: String
                             description: |
                               An explanation of the recommended steps that security teams can take to
                               resolve the detected issue

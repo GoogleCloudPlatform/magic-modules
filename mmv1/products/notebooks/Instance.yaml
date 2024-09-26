@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,13 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Instance'
-# This resource should not be removed until the 2025 major release or later.
-# Check instance availability first before fully removing.
-deprecation_message: >-
-  `google_notebook_instance` is deprecated and will be removed in a future major release.
-  Use `google_workbench_instance` instead.
 description: |
   A Cloud AI Platform Notebook instance.
 
@@ -25,112 +20,115 @@ description: |
   ~> **Note:** Due to limitations of the Notebooks Instance API, many fields
   in this resource do not properly detect drift. These fields will also not
   appear in state once imported.
-base_url: projects/{{project}}/locations/{{location}}/instances
-create_url: projects/{{project}}/locations/{{location}}/instances?instanceId={{name}}
-self_link: projects/{{project}}/locations/{{location}}/instances/{{name}}
-create_verb: :POST
-immutable: true
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/ai-platform-notebooks'
   api: 'https://cloud.google.com/ai-platform/notebooks/docs/reference/rest'
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  method_name_separator: ':'
-  fetch_iam_policy_verb: :GET
-  parent_resource_attribute: 'instance_name'
-  import_format:
-    [
-      'projects/{{project}}/locations/{{location}}/instances/{{instance_name}}',
-      '{{instance_name}}',
-    ]
-  base_url: projects/{{project}}/locations/{{location}}/instances/{{instance_name}}
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/instances'
+self_link: 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/instances?instanceId={{name}}'
+immutable: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
 autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_attribute: 'instance_name'
+  base_url: 'projects/{{project}}/locations/{{location}}/instances/{{instance_name}}'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/instances/{{instance_name}}'
+    - '{{instance_name}}'
+custom_code:
+  constants: 'templates/terraform/constants/notebooks_instance.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/notebooks_instance.go.tmpl'
+  post_create: 'templates/terraform/post_create/notebooks_instance.go.tmpl'
+  post_update: 'templates/terraform/post_update/notebooks_instance.go.tmpl'
+schema_version: 1
+state_upgraders: true
+# This resource should not be removed until the 2025 major release or later.
+# Check instance availability first before fully removing.
+deprecation_message: '`google_notebook_instance` is deprecated and will be removed in a future major release. Use `google_workbench_instance` instead.'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'notebook_instance_basic'
+  - name: 'notebook_instance_basic'
     primary_resource_id: 'instance'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\",
-      context[\"\
-      random_suffix\"])"
+    primary_resource_name: 'fmt.Sprintf("tf-test-notebooks-instance%s", context["random_suffix"])'
     region_override: 'us-west1-a'
     vars:
       instance_name: 'notebooks-instance'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'notebook_instance_basic_stopped'
+  - name: 'notebook_instance_basic_stopped'
     primary_resource_id: 'instance'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\",
-      context[\"\
-      random_suffix\"])"
+    primary_resource_name: 'fmt.Sprintf("tf-test-notebooks-instance%s", context["random_suffix"])'
     region_override: 'us-west1-a'
     vars:
       instance_name: 'notebooks-instance'
     ignore_read_extra:
       - 'desired_state'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'notebook_instance_basic_container'
+  - name: 'notebook_instance_basic_container'
     primary_resource_id: 'instance'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\",
-      context[\"\
-      random_suffix\"])"
+    primary_resource_name: 'fmt.Sprintf("tf-test-notebooks-instance%s", context["random_suffix"])'
     region_override: 'us-west1-a'
     vars:
       instance_name: 'notebooks-instance'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'notebook_instance_basic_gpu'
+  - name: 'notebook_instance_basic_gpu'
     primary_resource_id: 'instance'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\",
-      context[\"\
-      random_suffix\"])"
+    primary_resource_name: 'fmt.Sprintf("tf-test-notebooks-instance%s", context["random_suffix"])'
     region_override: 'us-west1-a'
     vars:
       instance_name: 'notebooks-instance'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'notebook_instance_full'
+  - name: 'notebook_instance_full'
     primary_resource_id: 'instance'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\",
-      context[\"\
-      random_suffix\"])"
+    primary_resource_name: 'fmt.Sprintf("tf-test-notebooks-instance%s", context["random_suffix"])'
     region_override: 'us-west1-a'
     vars:
       instance_name: 'notebooks-instance'
       key_name: 'my-crypto-key'
-    test_vars_overrides:
-      key_name: 'acctest.BootstrapKMSKeyInLocation(t, "global").CryptoKey.Name'
     test_env_vars:
-      service_account: :SERVICE_ACCT
+      service_account: 'SERVICE_ACCT'
+    test_vars_overrides:
+      'key_name': 'acctest.BootstrapKMSKeyInLocation(t, "global").CryptoKey.Name'
 virtual_fields:
-  - !ruby/object:Api::Type::String
-    name: desired_state
+  - name: 'desired_state'
     description: |
       Desired state of the Notebook Instance. Set this field to `ACTIVE` to start the Instance, and `STOPPED` to stop the Instance.
-    default_value: ACTIVE
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/notebooks_instance.go.erb
-  update_encoder: templates/terraform/update_encoder/notebooks_instance.go.erb
-  post_create: templates/terraform/post_create/notebooks_instance.go.erb
-  post_update: templates/terraform/post_update/notebooks_instance.go.erb
-state_upgraders: true
-schema_version: 1
+    type: String
+    default_value: "ACTIVE"
 parameters:
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'location'
+  - name: 'location'
+    type: ResourceRef
     description: 'A reference to the zone where the machine resides.'
+    url_param_only: true
+    required: true
+    immutable: true
     resource: 'Location'
     imports: 'selfLink'
-    required: true
-    immutable: true
-    url_param_only: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       The name specified for the Notebook instance.
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-  - !ruby/object:Api::Type::String
-    name: 'machineType'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'machineType'
+    type: String
     description: |
       A reference to a machine type which defines VM kind.
     required: true
@@ -140,23 +138,23 @@ properties:
     # update_verb: :PATCH
     # update_url: 'projects/{{project}}/locations/{{location}}/instances/{{name}}:setMachineType'
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
-  - !ruby/object:Api::Type::String
-    name: 'postStartupScript'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'postStartupScript'
+    type: String
     description: |
       Path to a Bash script that automatically runs after a
       notebook instance fully boots up. The path must be a URL
       or Cloud Storage path (gs://path-to-file/file-name).
-  - !ruby/object:Api::Type::String
-    name: 'proxyUri'
+  - name: 'proxyUri'
+    type: String
     description: |
       The proxy endpoint that is used to access the Jupyter notebook.
       Only returned when the resource is in a `PROVISIONED` state. If
       needed you can utilize `terraform apply -refresh-only` to await
       the population of this value.
     output: true
-  - !ruby/object:Api::Type::Array
-    name: 'instanceOwners'
+  - name: 'instanceOwners'
+    type: Array
     description: |
       The list of owners of this instance after creation.
       Format: alias@example.com.
@@ -164,9 +162,10 @@ properties:
       If not specified, all of the service account users of
       your VM instance's service account can use the instance.
     ignore_read: true
-    item_type: Api::Type::String
-  - !ruby/object:Api::Type::String
-    name: 'serviceAccount'
+    item_type:
+      type: String
+  - name: 'serviceAccount'
+    type: String
     description: |
       The service account on this instance, giving access to other
       Google Cloud services. You can use any service account within
@@ -174,18 +173,19 @@ properties:
       permission to use the instance. If not specified,
       the Compute Engine default service account is used.
     default_from_api: true
-  - !ruby/object:Api::Type::Array
-    name: 'serviceAccountScopes'
+  - name: 'serviceAccountScopes'
+    type: Array
     description: |
       Optional. The URIs of service account scopes to be included in Compute Engine instances.
       If not specified, the following scopes are defined:
       - https://www.googleapis.com/auth/cloud-platform
       - https://www.googleapis.com/auth/userinfo.email
-    item_type: Api::Type::String
     default_from_api: true
-    diff_suppress_func: NotebooksInstanceScopesDiffSuppress
-  - !ruby/object:Api::Type::NestedObject
-    name: 'acceleratorConfig'
+    diff_suppress_func: 'NotebooksInstanceScopesDiffSuppress'
+    item_type:
+      type: String
+  - name: 'acceleratorConfig'
+    type: NestedObject
     description: |
       The hardware accelerator used on this instance. If you use accelerators,
       make sure that your configuration has enough vCPUs and memory to support the
@@ -196,258 +196,260 @@ properties:
     # update_verb: :PATCH
     # update_url: 'projects/{{project}}/locations/{{location}}/instances/{{name}}:setAccelerator'
     properties:
-      - !ruby/object:Api::Type::Enum
-        name: 'type'
-        values:
-          - ACCELERATOR_TYPE_UNSPECIFIED
-          - NVIDIA_TESLA_K80
-          - NVIDIA_TESLA_P100
-          - NVIDIA_TESLA_V100
-          - NVIDIA_TESLA_P4
-          - NVIDIA_TESLA_T4
-          - NVIDIA_TESLA_T4_VWS
-          - NVIDIA_TESLA_P100_VWS
-          - NVIDIA_TESLA_P4_VWS
-          - NVIDIA_TESLA_A100
-          - TPU_V2
-          - TPU_V3
-        required: true
+      - name: 'type'
+        type: Enum
         description: |
           Type of this accelerator.
-      - !ruby/object:Api::Type::Integer
-        name: 'coreCount'
         required: true
+        enum_values:
+          - 'ACCELERATOR_TYPE_UNSPECIFIED'
+          - 'NVIDIA_TESLA_K80'
+          - 'NVIDIA_TESLA_P100'
+          - 'NVIDIA_TESLA_V100'
+          - 'NVIDIA_TESLA_P4'
+          - 'NVIDIA_TESLA_T4'
+          - 'NVIDIA_TESLA_T4_VWS'
+          - 'NVIDIA_TESLA_P100_VWS'
+          - 'NVIDIA_TESLA_P4_VWS'
+          - 'NVIDIA_TESLA_A100'
+          - 'TPU_V2'
+          - 'TPU_V3'
+      - name: 'coreCount'
+        type: Integer
         description: |
           Count of cores of this accelerator.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'shieldedInstanceConfig'
+        required: true
+  - name: 'shieldedInstanceConfig'
+    type: NestedObject
     description: |
       A set of Shielded Instance options. Check [Images using supported Shielded VM features]
       Not all combinations are valid
     default_from_api: true
     properties:
-      - !ruby/object:Api::Type::Boolean
-        name: 'enableIntegrityMonitoring'
+      - name: 'enableIntegrityMonitoring'
+        type: Boolean
         description: |
           Defines whether the instance has integrity monitoring enabled. Enables monitoring and attestation of the
           boot integrity of the instance. The attestation is performed against the integrity policy baseline.
           This baseline is initially derived from the implicitly trusted boot image when the instance is created.
           Enabled by default.
         default_value: true
-      - !ruby/object:Api::Type::Boolean
-        name: 'enableSecureBoot'
+      - name: 'enableSecureBoot'
+        type: Boolean
         description: |
           Defines whether the instance has Secure Boot enabled. Secure Boot helps ensure that the system only runs
           authentic software by verifying the digital signature of all boot components, and halting the boot process
           if signature verification fails.
           Disabled by default.
-      - !ruby/object:Api::Type::Boolean
-        name: 'enableVtpm'
+      - name: 'enableVtpm'
+        type: Boolean
         description: |
           Defines whether the instance has the vTPM enabled.
           Enabled by default.
         default_value: true
-  - !ruby/object:Api::Type::Enum
-    name: 'nicType'
+  - name: 'nicType'
+    type: Enum
     description: |
       The type of vNIC driver.
-    values:
-      - UNSPECIFIED_NIC_TYPE
-      - VIRTIO_NET
-      - GVNIC
-  - !ruby/object:Api::Type::NestedObject
-    name: 'reservationAffinity'
+    enum_values:
+      - 'UNSPECIFIED_NIC_TYPE'
+      - 'VIRTIO_NET'
+      - 'GVNIC'
+  - name: 'reservationAffinity'
+    type: NestedObject
     description: |
       Reservation Affinity for consuming Zonal reservation.
     properties:
-      - !ruby/object:Api::Type::Enum
-        name: 'consumeReservationType'
-        required: true
+      - name: 'consumeReservationType'
+        type: Enum
         description: |
           The type of Compute Reservation.
-        values:
-          - NO_RESERVATION
-          - ANY_RESERVATION
-          - SPECIFIC_RESERVATION
-      - !ruby/object:Api::Type::String
-        name: 'key'
+        required: true
+        enum_values:
+          - 'NO_RESERVATION'
+          - 'ANY_RESERVATION'
+          - 'SPECIFIC_RESERVATION'
+      - name: 'key'
+        type: String
         description: |
           Corresponds to the label key of reservation resource.
-      - !ruby/object:Api::Type::Array
-        name: 'values'
+      - name: 'values'
+        type: Array
         description: |
           Corresponds to the label values of reservation resource.
-        item_type: Api::Type::String
-  - !ruby/object:Api::Type::String
-    name: 'state'
+        item_type:
+          type: String
+  - name: 'state'
+    type: String
     description: |
       The state of this instance.
     output: true
-  - !ruby/object:Api::Type::Boolean
-    name: 'installGpuDriver'
+  - name: 'installGpuDriver'
+    type: Boolean
     description: |
       Whether the end user authorizes Google Cloud to install GPU driver
       on this instance. If this field is empty or set to false, the GPU driver
       won't be installed. Only applicable to instances with GPUs.
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: 'customGpuDriverPath'
+  - name: 'customGpuDriverPath'
+    type: String
     description: |
       Specify a custom Cloud Storage path where the GPU driver is stored.
       If not specified, we'll automatically choose from official GPU drivers.
-  - !ruby/object:Api::Type::Enum
-    name: 'bootDiskType'
-    values:
-      - DISK_TYPE_UNSPECIFIED
-      - PD_STANDARD
-      - PD_SSD
-      - PD_BALANCED
-      - PD_EXTREME
+  - name: 'bootDiskType'
+    type: Enum
     description: |
       Possible disk types for notebook instances.
     ignore_read: true
-  - !ruby/object:Api::Type::Integer
-    name: 'bootDiskSizeGb'
+    enum_values:
+      - 'DISK_TYPE_UNSPECIFIED'
+      - 'PD_STANDARD'
+      - 'PD_SSD'
+      - 'PD_BALANCED'
+      - 'PD_EXTREME'
+  - name: 'bootDiskSizeGb'
+    type: Integer
     description: |
       The size of the boot disk in GB attached to this instance,
       up to a maximum of 64000 GB (64 TB). The minimum recommended value is 100 GB.
       If not specified, this defaults to 100.
     ignore_read: true
-  - !ruby/object:Api::Type::Enum
-    name: 'dataDiskType'
-    values:
-      - DISK_TYPE_UNSPECIFIED
-      - PD_STANDARD
-      - PD_SSD
-      - PD_BALANCED
-      - PD_EXTREME
+  - name: 'dataDiskType'
+    type: Enum
     description: |
       Possible disk types for notebook instances.
     ignore_read: true
-  - !ruby/object:Api::Type::Integer
-    name: 'dataDiskSizeGb'
+    enum_values:
+      - 'DISK_TYPE_UNSPECIFIED'
+      - 'PD_STANDARD'
+      - 'PD_SSD'
+      - 'PD_BALANCED'
+      - 'PD_EXTREME'
+  - name: 'dataDiskSizeGb'
+    type: Integer
     description: |
       The size of the data disk in GB attached to this instance,
       up to a maximum of 64000 GB (64 TB).
       You can choose the size of the data disk based on how big your notebooks and data are.
       If not specified, this defaults to 100.
     ignore_read: true
-  - !ruby/object:Api::Type::Boolean
-    name: 'noRemoveDataDisk'
+  - name: 'noRemoveDataDisk'
+    type: Boolean
     description: |
       If true, the data disk will not be auto deleted when deleting the instance.
     ignore_read: true
-  - !ruby/object:Api::Type::Enum
-    name: 'diskEncryption'
-    values:
-      - DISK_ENCRYPTION_UNSPECIFIED
-      - GMEK
-      - CMEK
+  - name: 'diskEncryption'
+    type: Enum
     description: |
       Disk encryption method used on the boot and data disks, defaults to GMEK.
-    diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("DISK_ENCRYPTION_UNSPECIFIED")'
     default_from_api: true
-  - !ruby/object:Api::Type::String
-    name: 'kmsKey'
+    diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("DISK_ENCRYPTION_UNSPECIFIED")'
+    enum_values:
+      - 'DISK_ENCRYPTION_UNSPECIFIED'
+      - 'GMEK'
+      - 'CMEK'
+  - name: 'kmsKey'
+    type: String
     description: |
       The KMS key used to encrypt the disks, only applicable if diskEncryption is CMEK.
       Format: projects/{project_id}/locations/{location}/keyRings/{key_ring_id}/cryptoKeys/{key_id}
-    diff_suppress_func: NotebooksInstanceKmsDiffSuppress
-  - !ruby/object:Api::Type::Boolean
-    name: 'noPublicIp'
+    diff_suppress_func: 'NotebooksInstanceKmsDiffSuppress'
+  - name: 'noPublicIp'
+    type: Boolean
     description: |
       No public IP will be assigned to this instance.
-  - !ruby/object:Api::Type::Boolean
-    name: 'noProxyAccess'
+  - name: 'noProxyAccess'
+    type: Boolean
     description: |
       The notebook instance will not register with the proxy..
-  - !ruby/object:Api::Type::String
-    name: 'network'
+  - name: 'network'
+    type: String
     description: |
       The name of the VPC that this instance is in.
       Format: projects/{project_id}/global/networks/{network_id}
-    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
     default_from_api: true
-  - !ruby/object:Api::Type::String
-    name: 'subnet'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+  - name: 'subnet'
+    type: String
     description: |
       The name of the subnet that this instance is in.
       Format: projects/{project_id}/regions/{region}/subnetworks/{subnetwork_id}
-    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
     default_from_api: true
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       Labels to apply to this instance. These can be later modified by the setLabels method.
       An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
-    update_verb: :PATCH
     update_url: 'projects/{{project}}/locations/{{location}}/instances/{{name}}:setLabels'
-  - !ruby/object:Api::Type::Array
-    name: 'tags'
+    update_verb: 'PATCH'
+  - name: 'tags'
+    type: Array
     description: |
       The Compute Engine tags to add to instance.
-    item_type: Api::Type::String
     default_from_api: true
-    diff_suppress_func: NotebooksInstanceTagsDiffSuppress
-  - !ruby/object:Api::Type::KeyValuePairs
-    name: 'metadata'
+    diff_suppress_func: 'NotebooksInstanceTagsDiffSuppress'
+    item_type:
+      type: String
+  - name: 'metadata'
+    type: KeyValuePairs
     description: |
       Custom metadata to apply to this instance.
       An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
     # This was added as part of https://github.com/GoogleCloudPlatform/magic-modules/pull/3761 to
     # avoid detecting drift, since this field is partially server-managed.
     ignore_read: true
-    update_verb: :PATCH
     update_url: 'projects/{{project}}/locations/{{location}}/instances/{{name}}:updateMetadataItems'
-  - !ruby/object:Api::Type::Time
-    name: 'createTime'
+    update_verb: 'PATCH'
+  - name: 'createTime'
+    type: Time
     description: 'Instance creation time'
-    output: true
     default_from_api: true
-  - !ruby/object:Api::Type::Time
-    name: 'updateTime'
+    output: true
+  - name: 'updateTime'
+    type: Time
     description: 'Instance update time.'
-    output: true
     default_from_api: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'vmImage'
-    exactly_one_of:
-      - vm_image
-      - container_image
+    output: true
+  - name: 'vmImage'
+    type: NestedObject
     description: |
       Use a Compute Engine VM image to start the notebook instance.
     ignore_read: true
+    exactly_one_of:
+      - 'vm_image'
+      - 'container_image'
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'project'
+      - name: 'project'
+        type: String
         description: |
           The name of the Google Cloud project that this VM image belongs to.
           Format: projects/{project_id}
         required: true
-      - !ruby/object:Api::Type::String
-        name: 'imageFamily'
+      - name: 'imageFamily'
+        type: String
         description: |
           Use this VM image family to find the image; the newest image in this family will be used.
-      - !ruby/object:Api::Type::String
-        name: 'imageName'
+      - name: 'imageName'
+        type: String
         description: |
           Use VM image name to find the image.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'containerImage'
-    exactly_one_of:
-      - vm_image
-      - container_image
+  - name: 'containerImage'
+    type: NestedObject
     description: |
       Use a container image to start the notebook instance.
     ignore_read: true
+    exactly_one_of:
+      - 'vm_image'
+      - 'container_image'
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'repository'
+      - name: 'repository'
+        type: String
         description: |
           The path to the container image repository.
           For example: gcr.io/{project_id}/{imageName}
         required: true
-      - !ruby/object:Api::Type::String
-        name: 'tag'
+      - name: 'tag'
+        type: String
         description: |
           The tag of the container image. If not specified, this defaults to the latest tag.

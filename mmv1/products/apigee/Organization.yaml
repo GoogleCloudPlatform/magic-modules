@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,272 +11,252 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Organization'
-base_url: 'organizations'
-create_url: 'organizations?parent=projects/{{project_id}}'
-delete_url: 'organizations/{{name}}?retention={{retention}}'
-self_link: 'organizations/{{name}}'
-async: !ruby/object:Api::OpAsync
-  actions: ['create', 'update']
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
-    base_url: '{{op_id}}'
-    wait_ms: 1000
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 45
-      update_minutes: 45
-      delete_minutes: 45
-  result: !ruby/object:Api::OpAsync::Result
-    path: 'response'
-    resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
-    path: 'error'
-    message: 'message'
 description: |
   An `Organization` is the top-level container in Apigee.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Creating an API organization': 'https://cloud.google.com/apigee/docs/api-platform/get-started/create-org'
   api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations'
-
+docs:
+base_url: 'organizations'
+self_link: 'organizations/{{name}}'
+create_url: 'organizations?parent=projects/{{project_id}}'
+delete_url: 'organizations/{{name}}?retention={{retention}}'
+timeouts:
+  insert_minutes: 45
+  update_minutes: 45
+  delete_minutes: 45
 autogen_async: true
+async:
+  actions: ['create', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+    timeouts:
+      insert_minutes: 45
+      update_minutes: 45
+      delete_minutes: 45
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+  encoder: 'templates/terraform/encoders/apigee_organization.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/apigee_organization.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'apigee_organization_cloud_basic'
-    skip_test:
-      true
+  - name: 'apigee_organization_cloud_basic'
+    exclude_test: true
   # This is a more verbose version of the above that creates all
   # the resources needed for the acceptance test.
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'apigee_organization_cloud_basic_test'
+  - name: 'apigee_organization_cloud_basic_test'
     primary_resource_id: 'org'
     test_env_vars:
-      org_id: :ORG_ID
-      billing_account: :BILLING_ACCT
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
     ignore_read_extra:
-      - properties
-    skip_docs:
-      true
+      - 'properties'
+    exclude_docs: true
     # Resource creation race
     skip_vcr: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'apigee_organization_cloud_basic_disable_vpc_peering'
-    skip_test:
-      true
+  - name: 'apigee_organization_cloud_basic_disable_vpc_peering'
+    exclude_test: true
   # This is a more verbose version of the above that creates all
   # the resources needed for the acceptance test.
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'apigee_organization_cloud_basic_disable_vpc_peering_test'
+  - name: 'apigee_organization_cloud_basic_disable_vpc_peering_test'
     primary_resource_id: 'org'
     test_env_vars:
-      org_id: :ORG_ID
-      billing_account: :BILLING_ACCT
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
     ignore_read_extra:
-      - properties
-    skip_docs:
-      true
+      - 'properties'
+    exclude_docs: true
     # Resource creation race
     skip_vcr: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'apigee_organization_cloud_full'
-    skip_test:
-      true
+  - name: 'apigee_organization_cloud_full'
+    exclude_test: true
   # This is a more verbose version of the above that creates all
   # the resources needed for the acceptance test. While all Apigee
   # resources in this test are in the GA API, we depend on a service
   # identity resource which is only available in the beta provider.
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'apigee_organization_cloud_full_test'
+  - name: 'apigee_organization_cloud_full_test'
     primary_resource_id: 'org'
+    min_version: 'beta'
     test_env_vars:
-      org_id: :ORG_ID
-      billing_account: :BILLING_ACCT
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
     ignore_read_extra:
-      - properties
-    skip_docs: true
-    min_version:
-      beta
+      - 'properties'
+    exclude_docs: true
     # Resource creation race
     skip_vcr: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'apigee_organization_cloud_full_disable_vpc_peering'
-    skip_test:
-      true
+  - name: 'apigee_organization_cloud_full_disable_vpc_peering'
+    exclude_test: true
   # This is a more verbose version of the above that creates all
   # the resources needed for the acceptance test. While all Apigee
   # resources in this test are in the GA API, we depend on a service
   # identity resource which is only available in the beta provider.
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'apigee_organization_cloud_full_disable_vpc_peering_test'
+  - name: 'apigee_organization_cloud_full_disable_vpc_peering_test'
     primary_resource_id: 'org'
+    min_version: 'beta'
     test_env_vars:
-      org_id: :ORG_ID
-      billing_account: :BILLING_ACCT
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
     ignore_read_extra:
-      - properties
-    skip_docs: true
-    min_version:
-      beta
+      - 'properties'
+    exclude_docs: true
     # Resource creation race
     skip_vcr: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'apigee_organization_retention_test'
+  - name: 'apigee_organization_retention_test'
     primary_resource_id: 'org'
+    min_version: 'beta'
     test_env_vars:
-      org_id: :ORG_ID
-      billing_account: :BILLING_ACCT
-    skip_docs: true
-    min_version:
-      beta
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    exclude_docs: true
     # Resource creation race
     skip_vcr: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'apigee_organization_drz_test'
+  - name: 'apigee_organization_drz_test'
     primary_resource_id: 'org'
+    min_version: 'beta'
     test_env_vars:
-      org_id: :ORG_ID
-      billing_account: :BILLING_ACCT
-    skip_docs: true
-    min_version:
-      beta
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    exclude_docs: true
       # Resource creation race
     skip_vcr: true
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/apigee_organization.go.erb
-  encoder: templates/terraform/encoders/apigee_organization.go.erb
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'projectId'
+  - name: 'projectId'
+    type: String
     description: |
       The project ID associated with the Apigee organization.
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
-  - !ruby/object:Api::Type::Enum
-    name: 'retention'
+  - name: 'retention'
+    type: Enum
     description: |
       Optional. This setting is applicable only for organizations that are soft-deleted (i.e., BillingType
       is not EVALUATION). It controls how long Organization data will be retained after the initial delete
       operation completes. During this period, the Organization may be restored to its last known state.
       After this period, the Organization will no longer be able to be restored.
-    values:
+    url_param_only: true
+    required: false
+    default_value: "DELETION_RETENTION_UNSPECIFIED"
+    enum_values:
       - 'DELETION_RETENTION_UNSPECIFIED'
       - 'MINIMUM'
-    default_value: :DELETION_RETENTION_UNSPECIFIED
-    required: false
-    url_param_only: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       Output only. Name of the Apigee organization.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
+  - name: 'displayName'
+    type: String
     description: |
       The display name of the Apigee organization.
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: |
       Description of the Apigee organization.
-  - !ruby/object:Api::Type::String
-    name: 'analyticsRegion'
+  - name: 'analyticsRegion'
+    type: String
     description: |
       Primary GCP region for analytics data storage. For valid values, see [Create an Apigee organization](https://cloud.google.com/apigee/docs/api-platform/get-started/create-org).
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: 'apiConsumerDataLocation'
+  - name: 'apiConsumerDataLocation'
+    type: String
     description: |
       This field is needed only for customers using non-default data residency regions.
       Apigee stores some control plane data only in single region.
       This field determines which single region Apigee should use.
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: 'apiConsumerDataEncryptionKeyName'
+  - name: 'apiConsumerDataEncryptionKeyName'
+    type: String
     description: |
       Cloud KMS key name used for encrypting API consumer data.
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: 'controlPlaneEncryptionKeyName'
+  - name: 'controlPlaneEncryptionKeyName'
+    type: String
     description: |
       Cloud KMS key name used for encrypting control plane data that is stored in a multi region.
       Only used for the data residency region "US" or "EU".
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: 'authorizedNetwork'
+  - name: 'authorizedNetwork'
+    type: String
     description: |
       Compute Engine network used for Service Networking to be peered with Apigee runtime instances.
       See [Getting started with the Service Networking API](https://cloud.google.com/service-infrastructure/docs/service-networking/getting-started).
       Valid only when `RuntimeType` is set to CLOUD. The value can be updated only when there are no runtime instances. For example: "default".
-  - !ruby/object:Api::Type::Boolean
-    name: 'disableVpcPeering'
+  - name: 'disableVpcPeering'
+    type: Boolean
     description: |
       Flag that specifies whether the VPC Peering through Private Google Access should be
       disabled between the consumer network and Apigee. Required if an `authorizedNetwork`
       on the consumer project is not provided, in which case the flag should be set to `true`.
       Valid only when `RuntimeType` is set to CLOUD. The value must be set before the creation
       of any Apigee runtime instance and can be updated only when there are no runtime instances.
-  - !ruby/object:Api::Type::Enum
-    name: 'runtimeType'
+  - name: 'runtimeType'
+    type: Enum
     description: |
       Runtime type of the Apigee organization based on the Apigee subscription purchased.
-    values:
+    immutable: true
+    default_value: "CLOUD"
+    enum_values:
       - 'CLOUD'
       - 'HYBRID'
-    default_value: :CLOUD
-    immutable: true
-  - !ruby/object:Api::Type::String
-    name: 'subscriptionType'
+  - name: 'subscriptionType'
+    type: String
     description: |
       Output only. Subscription type of the Apigee organization.
       Valid values include trial (free, limited, and for evaluation purposes only) or paid (full subscription has been purchased).
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'billingType'
+  - name: 'billingType'
+    type: String
     description: |
       Billing type of the Apigee organization. See [Apigee pricing](https://cloud.google.com/apigee/pricing).
     immutable: true
     default_from_api: true
-  - !ruby/object:Api::Type::String
-    name: 'caCertificate'
+  - name: 'caCertificate'
+    type: String
     description: |
       Output only. Base64-encoded public certificate for the root CA of the Apigee organization.
       Valid only when `RuntimeType` is CLOUD. A base64-encoded string.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'runtimeDatabaseEncryptionKeyName'
+  - name: 'runtimeDatabaseEncryptionKeyName'
+    type: String
     description: |
       Cloud KMS key name used for encrypting the data that is stored and replicated across runtime instances.
       Update is not allowed after the organization is created.
       If not specified, a Google-Managed encryption key will be used.
       Valid only when `RuntimeType` is CLOUD. For example: `projects/foo/locations/us/keyRings/bar/cryptoKeys/baz`.
     immutable: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'properties'
+  - name: 'properties'
+    type: NestedObject
     description: Properties defined in the Apigee organization profile.
     default_from_api: true
     properties:
-      - !ruby/object:Api::Type::Array
-        name: 'property'
+      - name: 'property'
+        type: Array
         description: List of all properties in the object.
-        custom_flatten: 'templates/terraform/custom_flatten/apigee_organization_property.go.erb'
-        item_type: !ruby/object:Api::Type::NestedObject
+        custom_flatten: 'templates/terraform/custom_flatten/apigee_organization_property.go.tmpl'
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::String
-              name: 'name'
+            - name: 'name'
+              type: String
               description: Name of the property.
-            - !ruby/object:Api::Type::String
-              name: 'value'
+            - name: 'value'
+              type: String
               description: Value of the property.
-  - !ruby/object:Api::Type::String
-    name: 'apigeeProjectId'
+  - name: 'apigeeProjectId'
+    type: String
     description: |
       Output only. Project ID of the Apigee Tenant Project.
     output: true
