@@ -13,12 +13,12 @@ import (
 func TestAccFwProvider_request_reason(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
 		// Configuring the provider using inputs
-		"config takes precedence over environment variables":                                          TestAccFwProvider_request_reason_configPrecedenceOverEnvironmentVariables,
-		"when request_reason is unset in the config, environment variables are used in a given order": TestAccFwProvider_request_reason_precedenceOrderEnvironmentVariables, // CLOUDSDK_CORE_REQUEST_REASON
+		"config takes precedence over environment variables":                                          testAccFwProvider_request_reason_configPrecedenceOverEnvironmentVariables,
+		"when request_reason is unset in the config, environment variables are used in a given order": testAccFwProvider_request_reason_precedenceOrderEnvironmentVariables, // CLOUDSDK_CORE_REQUEST_REASON
 
 		// Schema-level validation
 		// TODO: https://github.com/hashicorp/terraform-provider-google/issues/19643
-		"when request_reason is set to an empty string in the config the value is not ignored, and there isn't any validation about this that raises an error": TestAccFwProvider_request_reason_emptyStringValidation,
+		"when request_reason is set to an empty string in the config the value is not ignored, and there isn't any validation about this that raises an error": testAccFwProvider_request_reason_emptyStringValidation,
 
 		// Usage
 		// We cannot test the impact of this field in an acc test, as it sets the X-Goog-Request-Reason value for audit logging purposes in GCP
@@ -37,7 +37,7 @@ func TestAccFwProvider_request_reason(t *testing.T) {
 	}
 }
 
-func TestAccFwProvider_request_reason_configPrecedenceOverEnvironmentVariables(t *testing.T) {
+func testAccFwProvider_request_reason_configPrecedenceOverEnvironmentVariables(t *testing.T) {
 	acctest.SkipIfVcr(t) // Test doesn't interact with API
 
 	envReason := "environment-variables"
@@ -65,7 +65,7 @@ func TestAccFwProvider_request_reason_configPrecedenceOverEnvironmentVariables(t
 	})
 }
 
-func TestAccFwProvider_request_reason_precedenceOrderEnvironmentVariables(t *testing.T) {
+func testAccFwProvider_request_reason_precedenceOrderEnvironmentVariables(t *testing.T) {
 	acctest.SkipIfVcr(t) // Test doesn't interact with API
 	/*
 		These are all the ENVs for request_reason
@@ -94,7 +94,7 @@ func TestAccFwProvider_request_reason_precedenceOrderEnvironmentVariables(t *tes
 	})
 }
 
-func TestAccFwProvider_request_reason_emptyStringValidation(t *testing.T) {
+func testAccFwProvider_request_reason_emptyStringValidation(t *testing.T) {
 	acctest.SkipIfVcr(t) // Test doesn't interact with API
 
 	envReason := "environment-variables"
