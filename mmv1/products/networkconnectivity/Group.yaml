@@ -1,4 +1,3 @@
-!ruby/object:Api::Resource
 # Copyright 2023 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the License);
 # you may not use this file except in compliance with the License.
@@ -20,30 +19,30 @@ self_link: projects/{{project}}/locations/global/hubs/{{hub}}/groups/{{name}}
 create_verb: :PATCH
 update_verb: :PATCH
 update_mask: true
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/network-connectivity/docs/network-connectivity-center/concepts/overview'
   api: 'https://cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1beta/projects.locations.global.hubs.groups'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+async:
+  type: 'OpAsync'
+  operation:
     path: 'name'
     base_url: '{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'targetLink'
-  status: !ruby/object:Api::OpAsync::Status
+  status:
     path: 'status'
     complete: 'DONE'
     allowed:
       - 'PENDING'
       - 'RUNNING'
       - 'DONE'
-  error: !ruby/object:Api::OpAsync::Error
+  error:
     path: 'error/errors'
     message: 'message'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'network_connectivity_group_basic'
+  - name: 'network_connectivity_group_basic'
     primary_resource_id: 'primary'
     vars:
       hub_name: "hub1"
@@ -51,8 +50,8 @@ examples:
       auto_accept_project_2_name: "bar"
 description: The NetworkConnectivity Group resource
 parameters:
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'hub'
+  - name: 'hub'
+    type: ResourceRef
     resource: 'Hub'
     imports: 'name'
     description: |
@@ -62,8 +61,8 @@ parameters:
     url_param_only: true
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
 properties:
-  - !ruby/object:Api::Type::Enum
-    name: name
+  - name: name
+    type: Enum
     description: 'The name of the group. Group names must be unique. They use the following form: `projects/{projectNumber}/locations/global/hubs/{hub}/groups/{groupId}`'
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     required: true
@@ -72,26 +71,26 @@ properties:
       - default
       - center
       - edge
-  - !ruby/object:Api::Type::String
-    name: createTime
+  - name: createTime
+    type: String
     description: Output only. The time the hub was created.
     output: true
-  - !ruby/object:Api::Type::String
-    name: updateTime
+  - name: updateTime
+    type: String
     description: Output only. The time the hub was last updated.
     output: true
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: labels
+  - name: labels
+    type: KeyValueLabels
     description: Optional labels in key:value format. For more information about labels, see [Requirements for labels](https://cloud.google.com/resource-manager/docs/creating-managing-labels#requirements).
-  - !ruby/object:Api::Type::String
-    name: description
+  - name: description
+    type: KeyValueLabels
     description: An optional description of the hub.
-  - !ruby/object:Api::Type::String
-    name: uid
+  - name: uid
+    type: String
     description: Output only. The Google-generated UUID for the group. This value is unique across all group resources. If a group is deleted and another with the same name is created, the new route table is assigned a different uniqueId.
     output: true
-  - !ruby/object:Api::Type::String
-    name: state
+  - name: state
+    type: String
     description: Output only. The current lifecycle state of this hub.
     output: true
     exactly_one_of:
@@ -100,19 +99,20 @@ properties:
       - ACTIVE
       - DELETING
     default_value: null
-  - !ruby/object:Api::Type::NestedObject
-    name: autoAccept
+  - name: autoAccept
+    type: NestedObject
     description: Optional. The auto-accept setting for this group.
     immutable: true
     properties:
-      - !ruby/object:Api::Type::Array
-        name: autoAcceptProjects
+      - name: autoAcceptProjects
+        type: Array
         description: 'A list of project ids or project numbers for which you want to enable auto-accept. The auto-accept setting is applied to spokes being created or updated in these projects.'
         min_version: ga
         required: true
         immutable: true
-        item_type: Api::Type::String
-  - !ruby/object:Api::Type::String
-    name: routeTable
+        item_type:
+          type: String
+  - name: routeTable
+    type: String
     description: 'Output only. The name of the route table that corresponds to this group. They use the following form: `projects/{projectNumber}/locations/global/hubs/{hubId}/routeTables/{route_table_id}`'
     output: true
