@@ -53,6 +53,7 @@ async:
     message: 'message'
 custom_code:
   constants: 'templates/terraform/constants/network_services_gateway.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/network_services_gateway.go.tmpl'
   post_delete: 'templates/terraform/post_delete/network_services_gateway.go.tmpl'
   pre_update: 'templates/terraform/pre_update/network_services_gateway.tmpl'
 examples:
@@ -94,16 +95,11 @@ examples:
       - 'delete_swg_autogen_router_on_destroy'
 virtual_fields:
   - name: 'delete_swg_autogen_router_on_destroy'
-    type: Boolean
-    default_value: false
-	description: |
+	  description: |
       When deleting a gateway of type 'SECURE_WEB_GATEWAY', this boolean option will also delete auto generated router by the gateway creation.
       If there is no other gateway of type 'SECURE_WEB_GATEWAY' remaining for that region and network it will be deleted.
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  pre_create: 'templates/terraform/pre_create/network_services_gateway.go.erb'
-  post_delete: 'templates/terraform/post_delete/network_services_gateway.go.erb'
-  pre_update: 'templates/terraform/pre_update/network_services_gateway.erb'
-  constants: 'templates/terraform/constants/network_services_gateway.go.erb'
+    type: Boolean
+    default_value: false
 parameters:
   - name: 'name'
     type: String
@@ -211,12 +207,12 @@ properties:
       This feature only applies to gateways of type 'SECURE_WEB_GATEWAY'.
     item_type:
       type: String
-  - !ruby/object:Api::Type::Enum
-    name: 'routingMode'
+  - name: 'routingMode'
+    type: Enum
     immutable: true
     description: |
       The routing mode of the Gateway. This field is configurable only for gateways of type SECURE_WEB_GATEWAY. This field is required for gateways of type SECURE_WEB_GATEWAY.
     custom_flatten: 'templates/terraform/custom_flatten/network_services_gateway_routing_mode.go.erb'
-    values:
-      - :EXPLICIT_ROUTING_MODE
-      - :NEXT_HOP_ROUTING_MODE
+    enum_values:
+      - 'EXPLICIT_ROUTING_MODE'
+      - 'NEXT_HOP_ROUTING_MODE'
