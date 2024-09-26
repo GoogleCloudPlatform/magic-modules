@@ -1,0 +1,14 @@
+resource "google_endpoints_service" "<%= ctx[:primary_resource_id] %>" {
+  service_name = "<%= ctx[:vars]["name"] %>.endpoints.<%= ctx[:test_env_vars]["project_name"] %>.cloud.goog"
+  project = "<%= ctx[:test_env_vars]["project_name"] %>"
+  grpc_config = <<EOF
+type: google.api.Service
+config_version: 3
+name: <%= ctx[:vars]["name"] %>.endpoints.<%= ctx[:test_env_vars]["project_name"] %>.cloud.goog
+usage:
+  rules:
+  - selector: endpoints.examples.bookstore.Bookstore.ListShelves
+    allow_unregistered_calls: true
+EOF
+  protoc_output_base64 = "${filebase64("test-fixtures/test_api_descriptor.pb")}"
+}

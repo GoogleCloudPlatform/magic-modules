@@ -1,4 +1,5 @@
-# Copyright 2024 Google Inc.
+# Copyright 2023 Google Inc.
+
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,92 +13,97 @@
 # limitations under the License.
 
 ---
-name: 'ManagedZone'
+!ruby/object:Api::Resource
+name: "ManagedZone"
 description: |
   An Integration connectors Managed Zone.
-references:
+references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation': 'https://cloud.google.com/integration-connectors/docs'
-  api: 'https://cloud.google.com/integration-connectors/docs/reference/rest/v1/projects.locations.global.managedZones'
-docs:
-base_url: 'projects/{{project}}/locations/global/managedZones'
-self_link: 'projects/{{project}}/locations/global/managedZones/{{name}}'
-create_url: 'projects/{{project}}/locations/global/managedZones?managedZoneId={{name}}'
-update_verb: 'PATCH'
-update_mask: true
-timeouts:
+    "Official Documentation": "https://cloud.google.com/integration-connectors/docs"
+  api: "https://cloud.google.com/integration-connectors/docs/reference/rest/v1/projects.locations.global.managedZones"
+base_url: projects/{{project}}/locations/global/managedZones
+self_link: projects/{{project}}/locations/global/managedZones/{{name}}
+timeouts: !ruby/object:Api::Timeouts
   insert_minutes: 5
   update_minutes: 5
   delete_minutes: 5
+create_url: projects/{{project}}/locations/global/managedZones?managedZoneId={{name}}
+update_verb: :PATCH
+update_mask: true
 autogen_async: true
-async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
-    path: 'name'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "integration_connectors_managed_zone"
+    primary_resource_id: "testmanagedzone"
+    test_env_vars:
+      org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
+    vars:
+      managed_zone_name: "test"
+      # Resource creation race
+    skip_vcr: true
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: "name"
+    base_url: "{{op_id}}"
     wait_ms: 1000
-    timeouts:
+    timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 5
       update_minutes: 5
       delete_minutes: 5
-  result:
-    path: 'response'
+  result: !ruby/object:Api::OpAsync::Result
+    path: "response"
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
-custom_code:
-examples:
-  - name: 'integration_connectors_managed_zone'
-    primary_resource_id: 'testmanagedzone'
-    vars:
-      managed_zone_name: 'test'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-      # Resource creation race
-    skip_vcr: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: "done"
+    complete: true
+    allowed:
+      - "true"
+      - "false"
+  error: !ruby/object:Api::OpAsync::Error
+    path: "error"
+    message: "message"
+
 parameters:
-  - name: 'name'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: "name"
+    required: true
+    immutable: true
+    url_param_only: true
     description: |
       Name of Managed Zone needs to be created.
 
-    url_param_only: true
-    required: true
-    immutable: true
 properties:
-  - name: 'createTime'
-    type: Time
+  - !ruby/object:Api::Type::Time
+    name: "createTime"
     description: |
       Time the Namespace was created in UTC.
     output: true
-  - name: 'updateTime'
-    type: Time
+  - !ruby/object:Api::Type::Time
+    name: "updateTime"
     description: |
       Time the Namespace was updated in UTC.
     output: true
-  - name: 'description'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: "description"
     description: |
       Description of the resource.
-  - name: 'labels'
-    type: KeyValueLabels
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: "labels"
     description: |
       Resource labels to represent user provided metadata.
-  - name: 'dns'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: "dns"
+    required: true
     description: |
       DNS Name of the resource.
+  - !ruby/object:Api::Type::String
+    name: "targetProject"
     required: true
-  - name: 'targetProject'
-    type: String
     description: |
       The name of the Target Project.
+  - !ruby/object:Api::Type::String
+    name: "targetVpc"
     required: true
-  - name: 'targetVpc'
-    type: String
     description: |
       The name of the Target Project VPC Network.
-    required: true

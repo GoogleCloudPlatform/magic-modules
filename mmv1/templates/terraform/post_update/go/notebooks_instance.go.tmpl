@@ -1,0 +1,21 @@
+name := d.Get("name").(string)
+state := d.Get("state").(string)
+desired_state := d.Get("desired_state").(string)
+
+if state != desired_state {
+  verb := "start"
+  if desired_state == "STOPPED" {
+    verb = "stop"
+  }
+  pRes, err := modifyNotebooksInstanceState(config, d, project, billingProject, userAgent, verb)
+  if err != nil {
+    return err
+  }
+
+  if err := waitForNotebooksOperation(config, d, project, billingProject, userAgent, pRes); err != nil {
+    return fmt.Errorf("Error waiting to modify Notebook Instance state: %s", err)
+  }
+
+} else {
+  log.Printf("[DEBUG] Notebook Instance %q has state %q.", name, state)
+}

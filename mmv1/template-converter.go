@@ -172,7 +172,12 @@ func convertHandwrittenFiles(folder, handwrittenTempFiles string) int {
 			log.Fatalf("Cannot open the file: %v", file)
 		}
 		data = replace(data)
-		goTemplate := strings.Replace(file, ".erb", ".tmpl", 1)
+		goTemplate := ""
+		if strings.Contains(string(data), "{{") {
+			goTemplate = strings.Replace(file, ".erb", ".tmpl", 1)
+		} else {
+			goTemplate = strings.Replace(file, ".erb", "", 1)
+		}
 		outPath := path.Join(goDir, goTemplate)
 		if len(tempSlice) > 1 {
 			outPath = outPath + ".temp"

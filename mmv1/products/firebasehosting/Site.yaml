@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2023 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,61 +11,55 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
+--- !ruby/object:Api::Resource
 name: 'Site'
+min_version: beta
+base_url: projects/{{project}}/sites
+self_link: projects/{{project}}/sites/{{site_id}}
+create_url: projects/{{project}}/sites?siteId={{site_id}}
+update_verb: :PATCH
+update_mask: true
 description: 'A `Site` represents a Firebase Hosting site.'
-min_version: 'beta'
-references:
+references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://firebase.google.com/docs/hosting'
   api: 'https://firebase.google.com/docs/reference/hosting/rest/v1beta1/projects.sites'
-docs:
-base_url: 'projects/{{project}}/sites'
-self_link: 'projects/{{project}}/sites/{{site_id}}'
-create_url: 'projects/{{project}}/sites?siteId={{site_id}}'
-update_verb: 'PATCH'
-update_mask: true
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_create: templates/terraform/pre_create/firebasehosting_site.go.erb
 import_format:
-  - 'projects/{{project}}/sites/{{site_id}}'
-  - 'sites/{{site_id}}'
-  - '{{site_id}}'
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-custom_code:
-  pre_create: 'templates/terraform/pre_create/firebasehosting_site.go.tmpl'
+  ['projects/{{project}}/sites/{{site_id}}', 'sites/{{site_id}}', '{{site_id}}']
 examples:
-  - name: 'firebasehosting_site_basic'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'firebasehosting_site_basic'
+    min_version: 'beta'
     primary_resource_id: 'default'
-    min_version: 'beta'
     vars:
-      site_id: 'site-no-app'
+      site_id: site-no-app
     test_env_vars:
-      project_id: 'PROJECT_NAME'
-  - name: 'firebasehosting_site_full'
-    primary_resource_id: 'full'
+      project_id: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'firebasehosting_site_full'
     min_version: 'beta'
+    primary_resource_id: 'full'
     vars:
-      site_id: 'site-with-app'
+      site_id: site-with-app
       display_name: 'Test web app for Firebase Hosting'
     test_env_vars:
-      project_id: 'PROJECT_NAME'
+      project_id: :PROJECT_NAME
     test_vars_overrides:
-      'display_name': '"tf-test Test web app for Firebase Hosting"'
+      display_name: '"tf-test Test web app for Firebase Hosting"'
 parameters:
-  - name: 'site_id'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'site_id'
     description: |
       Required. Immutable. A globally unique identifier for the Hosting site. This identifier is
       used to construct the Firebase-provisioned subdomains for the site, so it must also be a valid
       domain name label.
-    min_version: 'beta'
-    url_param_only: true
     immutable: true
+    url_param_only: true
 properties:
-  - name: 'name'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: name
     description: |
       Output only. The fully-qualified resource name of the Hosting site, in
       the format: projects/PROJECT_IDENTIFIER/sites/SITE_ID PROJECT_IDENTIFIER: the
@@ -74,17 +68,14 @@ properties:
       [`ProjectId`](https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects#FirebaseProject.FIELDS.project_id).
       Learn more about using project identifiers in Google's
       [AIP 2510 standard](https://google.aip.dev/cloud/2510).
-    min_version: 'beta'
     output: true
-  - name: 'appId'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: appId
     description: |
       Optional. The [ID of a Web App](https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects.webApps#WebApp.FIELDS.app_id)
       associated with the Hosting site.
-    min_version: 'beta'
-  - name: 'defaultUrl'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: defaultUrl
+    output: true
     description:
       The default URL for the site in the form of https://{name}.web.app
-    min_version: 'beta'
-    output: true

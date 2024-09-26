@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2023 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,144 +11,142 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
-name: 'VpnConnection'
-description: "A VPN connection"
-references:
-  guides:
-    'Google Distributed Cloud Edge': 'https://cloud.google.com/distributed-cloud/edge/latest/docs'
-  api: 'https://cloud.google.com/distributed-cloud/edge/latest/docs/reference/container/rest/v1/projects.locations.vpnConnections'
-docs:
-base_url: 'projects/{{project}}/locations/{{location}}/vpnConnections'
+--- !ruby/object:Api::Resource
+name: "VpnConnection"
+base_url: "projects/{{project}}/locations/{{location}}/vpnConnections"
+create_url: "projects/{{project}}/locations/{{location}}/vpnConnections?vpnConnectionId={{name}}"
 self_link: 'projects/{{project}}/locations/{{location}}/vpnConnections/{{name}}'
-create_url: 'projects/{{project}}/locations/{{location}}/vpnConnections?vpnConnectionId={{name}}'
-timeouts:
-  insert_minutes: 30
-  update_minutes: 30
-  delete_minutes: 30
-autogen_async: true
-async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
-    path: 'name'
+description: "A VPN connection"
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    "Google Distributed Cloud Edge": "https://cloud.google.com/distributed-cloud/edge/latest/docs"
+  api: "https://cloud.google.com/distributed-cloud/edge/latest/docs/reference/container/rest/v1/projects.locations.vpnConnections"
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: "name"
+    base_url: "{{op_id}}"
     wait_ms: 1000
-    timeouts:
+    timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 30
       update_minutes: 30
       delete_minutes: 30
-  result:
-    path: 'response'
-    resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
-custom_code:
+  result: !ruby/object:Api::OpAsync::Result
+    path: "response"
+  status: !ruby/object:Api::OpAsync::Status
+    path: "done"
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: "error"
+    message: "message"
+autogen_async: true
 examples:
   # Skip the vpnconnection test as we only have limited machine resources, and the vpn connection is not a critical feature.
-  - name: 'edgecontainer_vpn_connection'
-    primary_resource_id: 'default'
-    exclude_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: "edgecontainer_vpn_connection"
+    primary_resource_id: "default"
+    skip_test: true
 parameters:
-  - name: 'name'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: "name"
+    required: true
+    immutable: true
+    url_param_only: true
     description: |
       The resource name of VPN connection
-    url_param_only: true
+  - !ruby/object:Api::Type::String
+    name: "location"
     required: true
     immutable: true
-  - name: 'location'
-    type: String
+    url_param_only: true
     description: |
       Google Cloud Platform location.
-    url_param_only: true
-    required: true
-    immutable: true
 properties:
-  - name: 'createTime'
-    type: Time
+  - !ruby/object:Api::Type::Time
+    name: createTime
     description: |
       The time when the VPN connection was created.
     output: true
-  - name: 'updateTime'
-    type: Time
+  - !ruby/object:Api::Type::Time
+    name: updateTime
     description: |
       The time when the VPN connection was last updated.
     output: true
-  - name: 'labels'
-    type: KeyValueLabels
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: "labels"
     description: "Labels associated with this resource."
     immutable: true
-  - name: 'natGatewayIp'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: "natGatewayIp"
+    immutable: true
     description: |
       NAT gateway IP, or WAN IP address. If a customer has multiple NAT IPs, the customer needs to configure NAT such that only one external IP maps to the GMEC Anthos cluster.
       This is empty if NAT is not used.
-    immutable: true
-  - name: 'cluster'
-    type: String
-    description: |
-      The canonical Cluster name to connect to. It is in the form of projects/{project}/locations/{location}/clusters/{cluster}.
+  - !ruby/object:Api::Type::String
+    name: "cluster"
     required: true
     immutable: true
-  - name: 'vpc'
-    type: String
+    description: |
+      The canonical Cluster name to connect to. It is in the form of projects/{project}/locations/{location}/clusters/{cluster}.
+  - !ruby/object:Api::Type::String
+    name: "vpc"
+    immutable: true
     description: |
       The network ID of VPC to connect to.
-    immutable: true
-  - name: 'vpcProject'
-    type: NestedObject
+  - !ruby/object:Api::Type::NestedObject
+    name: vpcProject
     description: Project detail of the VPC network. Required if VPC is in a different project than the cluster project.
     properties:
-      - name: 'projectId'
-        type: String
+      - !ruby/object:Api::Type::String
+        name: "projectId"
+        immutable: true
         description: |
           The project of the VPC to connect to. If not specified, it is the same as the cluster project.
-        immutable: true
-  - name: 'enableHighAvailability'
-    type: Boolean
+  - !ruby/object:Api::Type::Boolean
+    name: "enableHighAvailability"
+    default_from_api: true
+    immutable: true
     description: |
       Whether this VPN connection has HA enabled on cluster side. If enabled, when creating VPN connection we will attempt to use 2 ANG floating IPs.
-    immutable: true
-    default_from_api: true
-  - name: 'router'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: "router"
     description: |
       The VPN connection Cloud Router name.
-  - name: 'details'
-    type: NestedObject
+  - !ruby/object:Api::Type::NestedObject
+    name: "details"
     output: true
     properties:
-      - name: 'state'
-        type: String
+      - !ruby/object:Api::Type::String
+        name: "state"
+        output: true
         description: |
           The current connection state.
+      - !ruby/object:Api::Type::String
+        name: "error"
         output: true
-      - name: 'error'
-        type: String
         description: |
           The error message. This is only populated when state=ERROR.
+      - !ruby/object:Api::Type::NestedObject
+        name: "cloudRouter"
         output: true
-      - name: 'cloudRouter'
-        type: NestedObject
         description: |
           The Cloud Router info.
-        output: true
         properties:
-          - name: 'name'
-            type: String
+          - !ruby/object:Api::Type::String
+            output: true
+            name: "name"
             description: |
               The associated Cloud Router name.
-            output: true
-      - name: 'cloudVpns'
-        type: NestedObject
+      - !ruby/object:Api::Type::NestedObject
+        name: "cloudVpns"
+        output: true
         description: |
           Each connection has multiple Cloud VPN gateways.
-        output: true
         properties:
-          - name: 'gateway'
-            type: String
+          - !ruby/object:Api::Type::String
+            output: true
+            name: "gateway"
             description: |
               The created Cloud VPN gateway name.
-            output: true

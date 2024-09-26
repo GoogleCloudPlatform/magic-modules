@@ -1,0 +1,29 @@
+resource "google_deployment_manager_deployment" "<%= ctx[:primary_resource_id] %>" {
+  name = "<%= ctx[:vars]['deployment_name'] %>"
+  target {
+    config {
+      content = <<EOF
+imports:
+- path: service_account.jinja
+- path: vm.jinja
+
+resources:
+- name: &SA_NAME my-vm-account
+  type: service_account.jinja
+- name: my-vm
+  type: vm.jinja
+  properties:
+    serviceAccountId: *SA_NAME
+EOF
+
+    imports {
+      name = "vm.jinja"
+      content = file("path/to/vm.jinja")
+    }
+
+    imports {
+      name = "service_account.jinja"
+      content = file("path/to/service_account.jinja")
+    }
+  }
+}

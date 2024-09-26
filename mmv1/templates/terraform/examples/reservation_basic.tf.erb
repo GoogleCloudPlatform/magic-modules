@@ -1,0 +1,12 @@
+resource "google_compute_reservation" "<%= ctx[:primary_resource_id] %>" {
+  name = "<%= ctx[:vars]['reservation_name'] %>"
+  zone = "us-central1-a"
+
+  specific_reservation {
+    count = 1
+    instance_properties {
+      min_cpu_platform = "Intel Cascade Lake"
+      machine_type     = "n2-standard-2"
+    }
+  }
+}

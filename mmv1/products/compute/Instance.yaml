@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2023 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,88 +11,87 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
+--- !ruby/object:Api::Resource
 name: 'Instance'
 kind: 'compute#instance'
+base_url: projects/{{project}}/zones/{{zone}}/instances
+collection_url_key: 'items'
+immutable: true
+has_self_link: true
 description: |
   An instance is a virtual machine (VM) hosted on Google's infrastructure.
-exclude_resource: true
-docs:
-base_url: 'projects/{{project}}/zones/{{zone}}/instances'
-has_self_link: true
-immutable: true
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
+    base_url: '{{op_id}}'
     wait_ms: 1000
-  result:
+  result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
-    resource_inside_response: false
-  error:
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'status'
+    complete: 'DONE'
+    allowed:
+      - 'PENDING'
+      - 'RUNNING'
+      - 'DONE'
+  error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
-collection_url_key: 'items'
-iam_policy:
+iam_policy: !ruby/object:Api::Resource::IamPolicy
   allowed_iam_role: 'roles/compute.osLogin'
   parent_resource_attribute: 'instance_name'
-  iam_conditions_request_type: 'QUERY_PARAM'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
-custom_code:
+  iam_conditions_request_type: :QUERY_PARAM
+exclude_resource: true
 examples:
-  - name: 'instance_basic'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'instance_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
     vars:
       instance_name: 'my-instance'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\",
+        context[\"random_suffix\"\
+        ])"
 parameters:
-  - name: 'zone'
-    type: ResourceRef
-    description: 'A reference to the zone where the machine resides.'
-    required: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'zone'
     resource: 'Zone'
     imports: 'name'
+    description: 'A reference to the zone where the machine resides.'
+    required: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
-  - name: 'canIpForward'
-    type: Boolean
+  - !ruby/object:Api::Type::Boolean
+    name: 'canIpForward'
     description: |
       Allows this instance to send and receive packets with non-matching
       destination or source IPs. This is required if you plan to use this
       instance to forward routes.
-  - name: 'cpuPlatform'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'cpuPlatform'
     description: The CPU platform used by this instance.
     output: true
-  - name: 'creationTimestamp'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'creationTimestamp'
     description: Creation timestamp in RFC3339 text format.
     output: true
-  - name: 'deletionProtection'
-    type: Boolean
+  - !ruby/object:Api::Type::Boolean
+    name: 'deletionProtection'
     description: Whether the resource should be protected against deletion.
-    update_url: '/projects/{{project}}/zones/{{zone}}/instances/{resourceId}/setDeletionProtection'
     # The code for this update is custom because MM doesn't support
     # sending empty bodies + the new option as a request parameter.
-    update_verb: 'POST'
-  - name: 'disks'
-    type: Array
+    update_verb: :POST
+    update_url: /projects/{{project}}/zones/{{zone}}/instances/{resourceId}/setDeletionProtection
+  - !ruby/object:Api::Type::Array
+    name: 'disks'
     description: |
       An array of disks that are associated with the instances that are
       created from this template.
     immutable: true
-    item_type:
-      type: NestedObject
+    item_type: !ruby/object:Api::Type::NestedObject
       properties:
-        - name: 'autoDelete'
-          type: Boolean
+        - !ruby/object:Api::Type::Boolean
+          name: 'autoDelete'
           description: |
             Specifies whether the disk will be auto-deleted when the
             instance is deleted (but not when the disk is detached from
@@ -101,54 +100,54 @@ properties:
             Tip: Disks should be set to autoDelete=true
             so that leftover disks are not left behind on machine
             deletion.
-        - name: 'boot'
-          type: Boolean
+        - !ruby/object:Api::Type::Boolean
+          name: 'boot'
           description: |
             Indicates that this is a boot disk. The virtual machine will
             use the first partition of the disk for its root filesystem.
-        - name: 'deviceName'
-          type: String
+        - !ruby/object:Api::Type::String
+          name: 'deviceName'
           description: |
             Specifies a unique device name of your choice that is
             reflected into the /dev/disk/by-id/google-* tree of a Linux
             operating system running within the instance. This name can
             be used to reference the device for mounting, resizing, and
             so on, from within the instance.
-        - name: 'diskEncryptionKey'
-          type: NestedObject
+        - !ruby/object:Api::Type::NestedObject
+          name: 'diskEncryptionKey'
           description: |
             Encrypts or decrypts a disk using a customer-supplied
             encryption key.
           properties:
-            - name: 'rawKey'
-              type: String
+            - !ruby/object:Api::Type::String
+              name: 'rawKey'
               description: |
                 Specifies a 256-bit customer-supplied encryption key,
                 encoded in RFC 4648 base64 to either encrypt or decrypt
                 this resource.
-            - name: 'rsaEncryptedKey'
-              type: String
+            - !ruby/object:Api::Type::String
+              name: 'rsaEncryptedKey'
               description: |
                 Specifies an RFC 4648 base64 encoded, RSA-wrapped
                 2048-bit customer-supplied encryption key to either
                 encrypt or decrypt this resource.
-            - name: 'sha256'
-              type: String
+            - !ruby/object:Api::Type::String
+              name: 'sha256'
               description: |
                 The RFC 4648 base64 encoded SHA-256 hash of the
                 customer-supplied encryption key that protects this
                 resource.
               output: true
-        - name: 'index'
-          type: Integer
+        - !ruby/object:Api::Type::Integer
+          name: 'index'
           description: |
             Assigns a zero-based index to this disk, where 0 is
             reserved for the boot disk. For example, if you have many
             disks attached to an instance, each disk would have a
             unique index number. If not specified, the server will
             choose an appropriate value.
-        - name: 'initializeParams'
-          type: NestedObject
+        - !ruby/object:Api::Type::NestedObject
+          name: 'initializeParams'
           description: |
             Specifies the parameters for a new disk that will be
             created alongside the new instance. Use initialization
@@ -156,34 +155,34 @@ properties:
             the new instance.
           immutable: true
           properties:
-            - name: 'diskName'
-              type: String
+            - !ruby/object:Api::Type::String
+              name: 'diskName'
               description: |
                 Specifies the disk name. If not specified, the default
                 is to use the name of the instance.
-            - name: 'diskSizeGb'
-              type: Integer
+            - !ruby/object:Api::Type::Integer
+              name: 'diskSizeGb'
               description: Specifies the size of the disk in base-2 GB.
             # diskStorageType - deprecated
-            - name: 'diskType'
-              type: ResourceRef
+            - !ruby/object:Api::Type::ResourceRef
+              name: 'diskType'
               description: |
                 Reference to a disk type.
                 Specifies the disk type to use to create the instance.
                 If not specified, the default is pd-standard.
-              custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
               resource: 'DiskType'
               imports: 'selfLink'
-            - name: 'sourceImage'
-              type: String
+              custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+            - !ruby/object:Api::Type::String
+              name: 'sourceImage'
               description: |
                 The source image to create this disk. When creating a
                 new instance, one of initializeParams.sourceImage or
                 disks.source is required.  To create a disk with one of
                 the public operating system images, specify the image
                 by its family name.
-            - name: 'provisionedIops'
-              type: Integer
+            - !ruby/object:Api::Type::Integer
+              name: 'provisionedIops'
               description: |
                 Indicates how many IOPS to provision for the disk. This
                 sets the number of I/O operations per second that the
@@ -192,8 +191,8 @@ properties:
                 delete and recreate the disk, hyperdisk allows for an update of
                 IOPS every 4 hours. To update your hyperdisk more frequently,
                 you'll need to manually delete and recreate it.
-            - name: 'provisionedThroughput'
-              type: Integer
+            - !ruby/object:Api::Type::Integer
+              name: 'provisionedThroughput'
               description: |
                 Indicates how much throughput to provision for the disk.
                 This sets the number of throughput mb per second that
@@ -202,14 +201,14 @@ properties:
                 to delete and recreate the disk, hyperdisk allows for an update
                 of throughput every 4 hours. To update your hyperdisk more
                 frequently, you'll need to manually delete and recreate it.
-            - name: 'enableConfidentialCompute'
-              type: Boolean
+            - !ruby/object:Api::Type::Boolean
+              name: 'enableConfidentialCompute'
               description: |
                 Whether this disk is using confidential compute mode.
                 Note: Only supported on hyperdisk skus, disk_encryption_key
                 is required when setting to true.
-            - name: 'sourceImageEncryptionKey'
-              type: NestedObject
+            - !ruby/object:Api::Type::NestedObject
+              name: 'sourceImageEncryptionKey'
               description: |
                 The customer-supplied encryption key of the source
                 image. Required if the source image is protected by a
@@ -220,54 +219,56 @@ properties:
                 instances in a managed instance group if the source
                 images are encrypted with your own keys.
               properties:
-                - name: 'rawKey'
-                  type: String
+                - !ruby/object:Api::Type::String
+                  name: 'rawKey'
                   description: |
                     Specifies a 256-bit customer-supplied encryption
                     key, encoded in RFC 4648 base64 to either encrypt
                     or decrypt this resource.
-                - name: 'sha256'
-                  type: String
+                - !ruby/object:Api::Type::String
+                  name: 'sha256'
                   description: |
                     The RFC 4648 base64 encoded SHA-256 hash of the
                     customer-supplied encryption key that protects this
                     resource.
                   output: true
-            - name: 'storagePool'
-              type: String
+            - !ruby/object:Api::Type::String
+              name: 'storagePool'
+              required: false
+              immutable: true
               description: |
                 The URL of the storage pool in which the new disk is created.
                 For example:
                 * https://www.googleapis.com/compute/v1/projects/{project}/zones/{zone}/storagePools/{storagePool}
                 * /projects/{project}/zones/{zone}/storagePools/{storagePool}
-              required: false
-              immutable: true
-        - name: 'interface'
-          type: Enum
+        - !ruby/object:Api::Type::Enum
+          name: 'interface'
           description: |
             Specifies the disk interface to use for attaching this
             disk, which is either SCSI or NVME. The default is SCSI.
             Persistent disks must always use SCSI and the request will
             fail if you attempt to attach a persistent disk in any
             other format than SCSI.
-          enum_values:
-            - 'SCSI'
-            - 'NVME'
+          values:
+            - :SCSI
+            - :NVME
         # Ignoring kind - It's a constant and we don't need it.
         # TODO(alexstephen): Place in licenses - it's a Array of
         # ResourceRefs
-        - name: 'mode'
-          type: Enum
+        - !ruby/object:Api::Type::Enum
+          name: 'mode'
           description: |
             The mode in which to attach this disk, either READ_WRITE or
             READ_ONLY. If not specified, the default is to attach the
             disk in READ_WRITE mode.
-          enum_values:
-            - 'READ_WRITE'
-            - 'READ_ONLY'
+          values:
+            - :READ_WRITE
+            - :READ_ONLY
         # This is the name, not selfLink of a disk.
-        - name: 'source'
-          type: ResourceRef
+        - !ruby/object:Api::Type::ResourceRef
+          name: 'source'
+          resource: 'Disk'
+          imports: 'selfLink'
           description: |
             Reference to a disk. When creating a new instance,
             one of initializeParams.sourceImage or disks.source is required.
@@ -275,72 +276,66 @@ properties:
             If desired, you can also attach existing non-root
             persistent disks using this property. This field is only
             applicable for persistent disks.
-          custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-          resource: 'Disk'
-          imports: 'selfLink'
-        - name: 'type'
-          type: Enum
+          custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+        - !ruby/object:Api::Type::Enum
+          name: 'type'
           description: |
             Specifies the type of the disk, either SCRATCH or
             PERSISTENT. If not specified, the default is PERSISTENT.
-          enum_values:
-            - 'SCRATCH'
-            - 'PERSISTENT'
-        - name: 'licenses'
-          type: Array
+          values:
+            - :SCRATCH
+            - :PERSISTENT
+        - !ruby/object:Api::Type::Array
+          name: 'licenses'
           description: 'Any applicable publicly visible licenses.'
+          item_type: Api::Type::String
           output: true
-          item_type:
-            type: String
-  - name: 'guestAccelerators'
-    type: Array
+  - !ruby/object:Api::Type::Array
+    name: 'guestAccelerators'
     description: |
       List of the type and count of accelerator cards attached to the
       instance
-    item_type:
-      type: NestedObject
+    item_type: !ruby/object:Api::Type::NestedObject
       properties:
-        - name: 'acceleratorCount'
-          type: Integer
+        - !ruby/object:Api::Type::Integer
+          name: 'acceleratorCount'
           description: |
             The number of the guest accelerator cards exposed to this
             instance.
         # TODO(alexstephen): Change to ResourceRef once AcceleratorType is
         # created.
-        - name: 'acceleratorType'
-          type: String
+        - !ruby/object:Api::Type::String
+          name: 'acceleratorType'
           description: |
             Full or partial URL of the accelerator type resource to expose
             to this instance.
-  - name: 'hostname'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'hostname'
     description: |
       The hostname of the instance to be created. The specified hostname
       must be RFC1035 compliant. If hostname is not specified, the default
       hostname is [INSTANCE_NAME].c.[PROJECT_ID].internal when using the
       global DNS, and [INSTANCE_NAME].[ZONE].c.[PROJECT_ID].internal when
       using zonal DNS.
-  - name: 'id'
-    type: Integer
+  - !ruby/object:Api::Type::Integer
+    name: 'id'
     description: |
       The unique identifier for the resource. This identifier is defined by
       the server.
     output: true
-  - name: 'labelFingerprint'
-    type: Fingerprint
+  - !ruby/object:Api::Type::Fingerprint
+    name: 'labelFingerprint'
     description: |
       The fingerprint used for optimistic locking of this resource.  Used
       internally during updates.
-    output: true
     update_url: 'projects/{{project}}/zones/{{zone}}/instances/{{name}}/setLabels'
-    update_verb: 'POST'
-    key_expander: ''
-  - name: 'labels'
-    type: KeyValueLabels
+    update_verb: :POST
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
     description: |
       Labels to apply to this instance.  A list of key->value pairs.
+    update_verb: :POST
     update_url: 'projects/{{project}}/zones/{{zone}}/instances/{{name}}/setLabels'
-    update_verb: 'POST'
   # TODO(nelsonjr): Implement updating metadata *after* resource is created.
 
   # Expose instance 'metadata' as a simple name/value pair hash. However the API
@@ -361,28 +356,28 @@ properties:
   # adding the 'fingerprint' of the last metadata to allow update.
   #
   # To comply with the API please add an encoder: and decoder: to the provider.
-  - name: 'metadata'
-    type: KeyValuePairs
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: 'metadata'
     description: |
       The metadata key/value pairs to assign to instances that are
       created from this template. These pairs can consist of custom
       metadata or predefined keys.
-  - name: 'machineType'
-    type: ResourceRef
-    description: 'A reference to a machine type which defines VM kind.'
-    update_url: 'projects/{{project}}/zones/{{zone}}/instances/{{name}}/setMachineType'
-    update_verb: 'POST'
-    # TODO(alexstephen): Add metadata
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'machineType'
     resource: 'MachineType'
     imports: 'selfLink'
-  - name: 'minCpuPlatform'
-    type: String
+    description: 'A reference to a machine type which defines VM kind.'
+    update_url: projects/{{project}}/zones/{{zone}}/instances/{{name}}/setMachineType
+    update_verb: :POST
+    # TODO(alexstephen): Add metadata
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+  - !ruby/object:Api::Type::String
+    name: 'minCpuPlatform'
     description: |
       Specifies a minimum CPU platform for the VM instance. Applicable
       values are the friendly names of CPU platforms
-  - name: 'name'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'name'
     description: |
       The name of the resource, provided by the client when initially
       creating the resource. The resource name must be 1-63 characters long,
@@ -392,37 +387,37 @@ properties:
       lowercase letter, and all following characters must be a dash,
       lowercase letter, or digit, except the last character, which cannot
       be a dash.
-  - name: 'networkInterfaces'
-    type: Array
+  - !ruby/object:Api::Type::Array
+    name: 'networkInterfaces'
     description: |
       An array of configurations for this interface. This specifies
       how this interface is configured to interact with other
       network services, such as connecting to the internet. Only
       one network interface is supported per instance.
-    item_type:
-      type: NestedObject
+    item_type: !ruby/object:Api::Type::NestedObject
       properties:
-        - name: 'accessConfigs'
-          type: Array
+        - !ruby/object:Api::Type::Array
+          name: 'accessConfigs'
           description: |
             An array of configurations for this interface. Currently, only
             one access config, ONE_TO_ONE_NAT, is supported. If there are no
             accessConfigs specified, then this instance will have no
             external internet access.
-          item_type:
-            type: NestedObject
+          item_type: !ruby/object:Api::Type::NestedObject
             properties:
               # 'kind' is not needed for object convergence
-              - name: 'name'
-                type: String
+              - !ruby/object:Api::Type::String
+                name: 'name'
                 description: |
                   The name of this access configuration. The
                   default and recommended name is External NAT but you can
                   use any arbitrary string you would like. For example, My
                   external IP or Network Access.
                 required: true
-              - name: 'natIP'
-                type: ResourceRef
+              - !ruby/object:Api::Type::ResourceRef
+                name: 'natIP'
+                resource: 'Address'
+                imports: 'address'
                 description: |
                   Reference to an address.
                   An external IP address associated with this instance.
@@ -431,31 +426,29 @@ properties:
                   from a shared ephemeral IP address pool. If you specify a
                   static external IP address, it must live in the same
                   region as the zone of the instance.
-                custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-                resource: 'Address'
-                imports: 'address'
-              - name: 'type'
-                type: Enum
+                custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+              - !ruby/object:Api::Type::Enum
+                name: 'type'
                 description: |
                   The type of configuration. The default and only option is
                   ONE_TO_ONE_NAT.
+                values:
+                  - :ONE_TO_ONE_NAT
                 required: true
-                enum_values:
-                  - 'ONE_TO_ONE_NAT'
-              - name: 'setPublicPtr'
-                type: Boolean
+              - !ruby/object:Api::Type::Boolean
+                name: 'setPublicPtr'
                 description: |
                   Specifies whether a public DNS PTR record should be
                   created to map the external IP address of the instance
                   to a DNS domain name.
-              - name: 'publicPtrDomainName'
-                type: String
+              - !ruby/object:Api::Type::String
+                name: 'publicPtrDomainName'
                 description: |
                   The DNS domain name for the public PTR record. You can
                   set this field only if the setPublicPtr field is
                   enabled.
-              - name: 'networkTier'
-                type: Enum
+              - !ruby/object:Api::Type::Enum
+                name: 'networkTier'
                 description: |
                   This signifies the networking tier used for configuring
                   this access configuration. If an AccessConfig is
@@ -464,20 +457,19 @@ properties:
                   AccessConfig with a valid external IP address is
                   specified, it must match that of the networkTier
                   associated with the Address resource owning that IP.
-                enum_values:
-                  - 'PREMIUM'
-                  - 'STANDARD'
-        - name: 'aliasIpRanges'
-          type: Array
+                values:
+                  - :PREMIUM
+                  - :STANDARD
+        - !ruby/object:Api::Type::Array
+          name: 'aliasIpRanges'
           description: |
             An array of alias IP ranges for this network interface. Can
             only be specified for network interfaces on subnet-mode
             networks.
-          item_type:
-            type: NestedObject
+          item_type: !ruby/object:Api::Type::NestedObject
             properties:
-              - name: 'ipCidrRange'
-                type: String
+              - !ruby/object:Api::Type::String
+                name: 'ipCidrRange'
                 description: |
                   The IP CIDR range represented by this alias IP range.
                   This IP CIDR range must belong to the specified
@@ -485,50 +477,52 @@ properties:
                   system or used by other network interfaces. This range
                   may be a single IP address (e.g. 10.2.3.4), a netmask
                   (e.g. /24) or a CIDR format string (e.g. 10.1.2.0/24).
-              - name: 'subnetworkRangeName'
-                type: String
+              - !ruby/object:Api::Type::String
+                name: 'subnetworkRangeName'
                 description: |
                   Optional subnetwork secondary range name specifying
                   the secondary range from which to allocate the IP
                   CIDR range for this alias IP range. If left
                   unspecified, the primary range of the subnetwork will
                   be used.
-        - name: 'internalIpv6PrefixLength'
-          type: String
+        - !ruby/object:Api::Type::String
+          name: 'internalIpv6PrefixLength'
           description: |
             The prefix length of the primary internal IPv6 range.
-        - name: 'ipv6Address'
-          type: String
+        - !ruby/object:Api::Type::String
+          name: 'ipv6Address'
           description: |
             An IPv6 internal network address for this network interface.
             If not specified, Google Cloud will automatically assign an
             internal IPv6 address from the instance's subnetwork.
-        - name: 'name'
-          type: String
+        - !ruby/object:Api::Type::String
+          name: 'name'
           description: |
             The name of the network interface, generated by the
             server. For network devices, these are eth0, eth1, etc
           output: true
-        - name: 'network'
-          type: ResourceRef
+        - !ruby/object:Api::Type::ResourceRef
+          name: 'network'
+          resource: 'Network'
+          imports: 'selfLink'
           description: |
             Specifies the title of an existing network.  When creating
             an instance, if neither the network nor the subnetwork is specified,
             the default network global/networks/default is used; if the network
             is not specified but the subnetwork is specified, the network is
             inferred.
-          custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-          resource: 'Network'
-          imports: 'selfLink'
-        - name: 'networkIP'
-          type: String
+          custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+        - !ruby/object:Api::Type::String
+          name: 'networkIP'
           description: |
             An IPv4 internal network address to assign to the
             instance for this network interface. If not specified
             by the user, an unused internal IP is assigned by the
             system.
-        - name: 'subnetwork'
-          type: ResourceRef
+        - !ruby/object:Api::Type::ResourceRef
+          name: 'subnetwork'
+          resource: 'Subnetwork'
+          imports: 'selfLink'
           description: |
             Reference to a VPC network.
             If the network resource is in legacy mode, do not
@@ -537,114 +531,110 @@ properties:
             the network is in custom subnet mode, then this field
             should be specified.
           # networkInterfaces.kind is not necessary for convergence.
-          custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-          resource: 'Subnetwork'
+          custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+        - !ruby/object:Api::Type::ResourceRef
+          name: 'networkAttachment'
+          resource: 'networkAttachment'
           imports: 'selfLink'
-        - name: 'networkAttachment'
-          type: ResourceRef
           description: |
             The URL of the network attachment that this interface should connect to in the following format:
             projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}.
-          resource: 'networkAttachment'
-          imports: 'selfLink'
-  - name: 'scheduling'
-    type: NestedObject
+  - !ruby/object:Api::Type::NestedObject
+    name: 'scheduling'
     description: Sets the scheduling options for this instance.
     properties:
-      - name: 'automaticRestart'
-        type: Boolean
+      - !ruby/object:Api::Type::Boolean
+        name: 'automaticRestart'
         description: |
           Specifies whether the instance should be automatically restarted
           if it is terminated by Compute Engine (not terminated by a user).
           You can only set the automatic restart option for standard
           instances. Preemptible instances cannot be automatically
           restarted.
-      - name: 'onHostMaintenance'
-        type: String
+      - !ruby/object:Api::Type::String
+        name: 'onHostMaintenance'
         description: |
           Defines the maintenance behavior for this instance. For standard
           instances, the default behavior is MIGRATE. For preemptible
           instances, the default and only possible behavior is TERMINATE.
           For more information, see Setting Instance Scheduling Options.
-      - name: 'preemptible'
-        type: Boolean
+      - !ruby/object:Api::Type::Boolean
+        name: 'preemptible'
         description: |
           Defines whether the instance is preemptible. This can only be set
           during instance creation, it cannot be set or changed after the
           instance has been created.
-  - name: 'serviceAccounts'
-    type: Array
+  - !ruby/object:Api::Type::Array
+    name: 'serviceAccounts'
     description: |
       A list of service accounts, with their specified scopes, authorized
       for this instance. Only one service account per VM instance is
       supported.
-    item_type:
-      type: NestedObject
+    item_type: !ruby/object:Api::Type::NestedObject
       properties:
-        - name: 'email'
-          type: String
+        - !ruby/object:Api::Type::String
+          name: 'email'
           description: Email address of the service account.
-        - name: 'scopes'
-          type: Array
+        - !ruby/object:Api::Type::Array
+          name: scopes
           description: |
             The list of scopes to be made available for this service
             account.
-          item_type:
-            type: String
-  - name: 'shieldedInstanceConfig'
-    type: NestedObject
+          item_type: Api::Type::String
+  - !ruby/object:Api::Type::NestedObject
+    name: 'shieldedInstanceConfig'
     description:
       Configuration for various parameters related to shielded instances.
-    update_url: 'projects/{{project}}/instances/{{name}}/updateShieldedInstanceConfig'
     # The code for this update method is custom because MM does not support
     # sending just the nested properties
-    update_verb: 'PATCH'
+    update_verb: :PATCH
+    update_url: projects/{{project}}/instances/{{name}}/updateShieldedInstanceConfig
     properties:
-      - name: 'enableSecureBoot'
-        type: Boolean
+      - !ruby/object:Api::Type::Boolean
+        name: 'enableSecureBoot'
         description: Defines whether the instance has Secure Boot enabled.
-        update_url: 'projects/{{project}}/instances/{{name}}/updateShieldedInstanceConfig'
-        update_verb: 'PATCH'
-      - name: 'enableVtpm'
-        type: Boolean
+        update_verb: :PATCH
+        update_url: projects/{{project}}/instances/{{name}}/updateShieldedInstanceConfig
+      - !ruby/object:Api::Type::Boolean
+        name: 'enableVtpm'
         description: Defines whether the instance has the vTPM enabled
-        update_url: 'projects/{{project}}/instances/{{name}}/updateShieldedInstanceConfig'
-        update_verb: 'PATCH'
-      - name: 'enableIntegrityMonitoring'
-        type: Boolean
+        update_verb: :PATCH
+        update_url: projects/{{project}}/instances/{{name}}/updateShieldedInstanceConfig
+      - !ruby/object:Api::Type::Boolean
+        name: 'enableIntegrityMonitoring'
         description:
           Defines whether the instance has integrity monitoring enabled.
-        update_url: 'projects/{{project}}/instances/{{name}}/updateShieldedInstanceConfig'
-        update_verb: 'PATCH'
-  - name: 'confidentialInstanceConfig'
-    type: NestedObject
+        update_verb: :PATCH
+        update_url: projects/{{project}}/instances/{{name}}/updateShieldedInstanceConfig
+  - !ruby/object:Api::Type::NestedObject
+    name: 'confidentialInstanceConfig'
     description:
       'Configuration for confidential computing (requires setting the machine
         type to any of the n2d-* types and a boot disk of type pd-ssd).'
     properties:
-      - name: 'enableConfidentialCompute'
-        type: Boolean
+      - !ruby/object:Api::Type::Boolean
+        name: 'enableConfidentialCompute'
         description: Enables confidential computing with AMD SEV.
         at_least_one_of:
-          - 'confidential_instance_config.0.enable_confidential_compute'
-          - 'confidential_instance_config.0.confidential_instance_type'
-        deprecation_message: '`enableConfidentialCompute` is deprecated and will be removed in a future major release. Use `confidentialInstanceType: SEV` instead.'
-      - name: 'confidentialInstanceType'
-        type: Enum
+          - confidential_instance_config.0.enable_confidential_compute
+          - confidential_instance_config.0.confidential_instance_type
+        deprecation_message: "`enableConfidentialCompute` is deprecated and will be removed in a future major release. Use `confidentialInstanceType: SEV` instead."
+      - !ruby/object:Api::Type::Enum
+        name: 'confidentialInstanceType'
         description: |
           The confidential computing technology the instance uses.
           SEV is an AMD feature. TDX is an Intel feature. One of the following
           values is required: SEV, SEV_SNP, TDX. If SEV_SNP, min_cpu_platform =
           "AMD Milan" is currently required. TDX is only available in beta.
+        values:
+          - :SEV
+          - :SEV_SNP
+          - :TDX
         at_least_one_of:
-          - 'confidential_instance_config.0.enable_confidential_compute'
-          - 'confidential_instance_config.0.confidential_instance_type'
-        enum_values:
-          - 'SEV'
-          - 'SEV_SNP'
-          - 'TDX'
-  - name: 'status'
-    type: Enum
+          - confidential_instance_config.0.enable_confidential_compute
+          - confidential_instance_config.0.confidential_instance_type
+  - !ruby/object:Api::Type::Enum
+    name: 'status'
     description: |
       The status of the instance. One of the following values:
       PROVISIONING, STAGING, RUNNING, STOPPING, SUSPENDING, SUSPENDED,
@@ -656,20 +646,20 @@ properties:
     # This is incorrect because you can make actions on the Instance (start, stop)
     # In an idempotent world, the best way to express these actions is to
     # change the status value.
-    enum_values:
-      - 'PROVISIONING'
-      - 'STAGING'
-      - 'RUNNING'
-      - 'STOPPING'
-      - 'SUSPENDING'
-      - 'SUSPENDED'
-      - 'TERMINATED'
-  - name: 'statusMessage'
-    type: String
+    values:
+      - :PROVISIONING
+      - :STAGING
+      - :RUNNING
+      - :STOPPING
+      - :SUSPENDING
+      - :SUSPENDED
+      - :TERMINATED
+  - !ruby/object:Api::Type::String
+    name: 'statusMessage'
     description: An optional, human-readable explanation of the status.
     output: true
-  - name: 'tags'
-    type: NestedObject
+  - !ruby/object:Api::Type::NestedObject
+    name: 'tags'
     description: |
       A list of tags to apply to this instance. Tags are used to identify
       valid sources or targets for network firewalls and are specified by
@@ -678,8 +668,8 @@ properties:
       RFC1035.
     properties:
       # TODO(alexstephen) Investigate bytes type
-      - name: 'fingerprint'
-        type: String
+      - !ruby/object:Api::Type::String
+        name: 'fingerprint'
         description: |
           Specifies a fingerprint for this request, which is essentially a
           hash of the metadata's contents and used for optimistic locking.
@@ -687,10 +677,9 @@ properties:
           changes after every request to modify or update metadata. You
           must always provide an up-to-date fingerprint hash in order to
           update or change metadata.
-      - name: 'items'
-        type: Array
+      - !ruby/object:Api::Type::Array
+        name: 'items'
         description: |
           An array of tags. Each tag must be 1-63 characters long, and
           comply with RFC1035.
-        item_type:
-          type: String
+        item_type: Api::Type::String

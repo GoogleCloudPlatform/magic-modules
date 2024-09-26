@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2023 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,85 +11,81 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
+--- !ruby/object:Api::Resource
 name: 'Group'
+base_url: 'groups?initialGroupConfig={{initial_group_config}}'
+update_url: '{{name}}'
+self_link: '{{name}}'
+update_verb: :PATCH
+update_mask: true
 description: |
   A Cloud Identity resource representing a Group.
-references:
+references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/identity/docs/how-to/setup'
   api: 'https://cloud.google.com/identity/docs/reference/rest/v1beta1/groups'
-docs:
+async: !ruby/object:Provider::Terraform::PollAsync
+  check_response_func_existence: transport_tpg.PollCheckForExistenceWith403
+  check_response_func_absence: transport_tpg.PollCheckForAbsenceWith403
+  target_occurrences: 10
+  actions: ['create', 'update', 'delete']
+docs: !ruby/object:Provider::Terraform::Docs
   warning: |
     If you are using User ADCs (Application Default Credentials) with this resource,
     you must specify a `billing_project` and set `user_project_override` to true
     in the provider configuration. Otherwise the Cloud Identity API will return a 403 error.
     Your account must have the `serviceusage.services.use` permission on the
     `billing_project` you defined.
-base_url: 'groups?initialGroupConfig={{initial_group_config}}'
-self_link: '{{name}}'
-update_url: '{{name}}'
-update_verb: 'PATCH'
-update_mask: true
-import_format:
-  - '{{name}}'
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-async:
-  type: 'PollAsync'
-  check_response_func_existence: 'transport_tpg.PollCheckForExistenceWith403'
-  check_response_func_absence: 'transport_tpg.PollCheckForAbsenceWith403'
-  suppress_error: false
-  target_occurrences: 10
-  actions: ['create', 'update', 'delete']
-custom_code:
-  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
-  custom_import: 'templates/terraform/custom_import/cloud_identity_group_import.go.tmpl'
-exclude_sweeper: true
+import_format: ['{{name}}']
+skip_sweeper: true
 examples:
-  - name: 'cloud_identity_groups_basic'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloud_identity_groups_basic'
+    # Has a handwritten test due to CloudIdentityGroup-related tests needing to run synchronously
+    skip_test: true
     primary_resource_id: 'cloud_identity_group_basic'
     vars:
       id_group: 'my-identity-group'
     test_env_vars:
-      org_domain: 'ORG_DOMAIN'
-      cust_id: 'CUST_ID'
-    # Has a handwritten test due to CloudIdentityGroup-related tests needing to run synchronously
-    exclude_test: true
+      org_domain: :ORG_DOMAIN
+      cust_id: :CUST_ID
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  post_create: templates/terraform/post_create/set_computed_name.erb
+  custom_import: templates/terraform/custom_import/cloud_identity_group_import.go.erb
 parameters:
-  - name: 'initialGroupConfig'
-    type: Enum
+  - !ruby/object:Api::Type::Enum
+    name: 'initialGroupConfig'
     description: |
       The initial configuration options for creating a Group.
 
       See the
       [API reference](https://cloud.google.com/identity/docs/reference/rest/v1beta1/groups/create#initialgroupconfig)
       for possible values.
-    url_param_only: true
-    immutable: true
-    default_value: "EMPTY"
-    enum_values:
+    values:
       - 'INITIAL_GROUP_CONFIG_UNSPECIFIED'
       - 'WITH_INITIAL_OWNER'
       - 'EMPTY'
+    default_value: :EMPTY
+    url_param_only: true
+    immutable: true
 properties:
-  - name: 'name'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    output: true
     description: |
       Resource name of the Group in the format: groups/{group_id}, where group_id
       is the unique ID assigned to the Group.
-    output: true
-  - name: 'groupKey'
-    type: NestedObject
-    description: |
-      EntityKey of the Group.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'groupKey'
     required: true
     immutable: true
+    description: |
+      EntityKey of the Group.
     properties:
-      - name: 'id'
-        type: String
+      - !ruby/object:Api::Type::String
+        name: 'id'
+        required: true
+        immutable: true
         description: |
           The ID of the entity.
 
@@ -100,10 +96,9 @@ properties:
           to the Identity Source's requirements.
 
           Must be unique within a namespace.
-        required: true
+      - !ruby/object:Api::Type::String
+        name: 'namespace'
         immutable: true
-      - name: 'namespace'
-        type: String
         description: |
           The namespace in which the entity exists.
 
@@ -113,35 +108,34 @@ properties:
           If specified, the EntityKey represents an external-identity-mapped group.
           The namespace must correspond to an identity source created in Admin Console
           and must be in the form of `identitysources/{identity_source_id}`.
-        immutable: true
-  - name: 'parent'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'parent'
+    required: true
+    immutable: true
     description: |
       The resource name of the entity under which this Group resides in the
       Cloud Identity resource hierarchy.
 
       Must be of the form identitysources/{identity_source_id} for external-identity-mapped
       groups or customers/{customer_id} for Google Groups.
-    required: true
-    immutable: true
-  - name: 'displayName'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'displayName'
     description: |
       The display name of the Group.
-  - name: 'description'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'description'
     description: |
       An extended description to help users determine the purpose of a Group.
       Must not be longer than 4,096 characters.
-  - name: 'additionalGroupKeys'
-    type: Array
-    description: 'Additional group keys associated with the Group'
+  - !ruby/object:Api::Type::Array
+    name: 'additionalGroupKeys'
     output: true
-    item_type:
-      type: NestedObject
+    description: 'Additional group keys associated with the Group'
+    item_type: !ruby/object:Api::Type::NestedObject
       properties:
-        - name: 'id'
-          type: String
+        - !ruby/object:Api::Type::String
+          name: 'id'
+          output: true
           description: |
             The ID of the entity.
 
@@ -152,9 +146,9 @@ properties:
             to the Identity Source's requirements.
 
             Must be unique within a namespace.
+        - !ruby/object:Api::Type::String
+          name: 'namespace'
           output: true
-        - name: 'namespace'
-          type: String
           description: |
             The namespace in which the entity exists.
 
@@ -164,19 +158,19 @@ properties:
             If specified, the EntityKey represents an external-identity-mapped group.
             The namespace must correspond to an identity source created in Admin Console
             and must be in the form of `identitysources/{identity_source_id}`.
-          output: true
-  - name: 'createTime'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'createTime'
+    output: true
     description: |
       The time when the Group was created.
+  - !ruby/object:Api::Type::String
+    name: 'updateTime'
     output: true
-  - name: 'updateTime'
-    type: String
     description: |
       The time when the Group was last updated.
-    output: true
-  - name: 'labels'
-    type: KeyValuePairs
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: 'labels'
+    required: true
     description: |
       One or more label entries that apply to the Group. Currently supported labels contain a key with an empty value.
 
@@ -187,4 +181,3 @@ properties:
       Dynamic groups have a label with a key of cloudidentity.googleapis.com/groups.dynamic.
 
       Identity-mapped groups for Cloud Search have a label with a key of system/groups/external and an empty value.
-    required: true

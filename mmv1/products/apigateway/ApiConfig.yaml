@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2023 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,278 +11,241 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
+--- !ruby/object:Api::Resource
 name: 'ApiConfig'
+min_version: beta
+create_url: projects/{{project}}/locations/global/apis/{{api}}/configs?apiConfigId={{api_config_id}}
+self_link: projects/{{project}}/locations/global/apis/{{api}}/configs/{{api_config_id}}
+base_url: projects/{{project}}/locations/global/apis/{{api}}/configs
+read_query_params: '?view=FULL'
+update_verb: :PATCH
+update_mask: true
 description: |
   An API Configuration is an association of an API Controller Config and a Gateway Config
-min_version: 'beta'
-references:
+identity:
+  - apiConfigId
+references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/api-gateway/docs/creating-api-config'
   api: 'https://cloud.google.com/api-gateway/docs/reference/rest/v1beta/projects.locations.apis.configs'
-docs:
+docs: !ruby/object:Provider::Terraform::Docs
   optional_properties: |
     * `api_config_id_prefix` - (Optional) Creates a unique name beginning with the
      specified prefix. If this and api_config_id are unspecified, a random value is chosen for the name.
-base_url: 'projects/{{project}}/locations/global/apis/{{api}}/configs'
-self_link: 'projects/{{project}}/locations/global/apis/{{api}}/configs/{{api_config_id}}'
-create_url: 'projects/{{project}}/locations/global/apis/{{api}}/configs?apiConfigId={{api_config_id}}'
-update_verb: 'PATCH'
-update_mask: true
-
-read_query_params: '?view=FULL'
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
 autogen_async: true
-async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
-  result:
-    path: 'response'
-    resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
-identity:
-  - apiConfigId
-iam_policy:
-  exclude_import_test: true
-  method_name_separator: ':'
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  skip_import_test: true
   allowed_iam_role: 'roles/apigateway.viewer'
-  parent_resource_attribute: 'api_config'
-  base_url: 'projects/{{project}}/locations/global/apis/{{api}}/configs/{{api_config}}'
-  example_config_body: 'templates/terraform/iam/example_config_body/api_gateway_api_config.tf.tmpl'
+  parent_resource_attribute: api_config
+  base_url: projects/{{project}}/locations/global/apis/{{api}}/configs/{{api_config}}
+  example_config_body: 'templates/terraform/iam/example_config_body/api_gateway_api_config.tf.erb'
+  method_name_separator: ':'
   import_format:
-    - 'projects/{{project}}/locations/global/apis/{{api}}/configs/{{api_config}}'
-    - '{{project}}/{{api}}/{{api_config}}'
-    - '{{api}}/{{api_config}}'
-    - '{{api_config}}'
-custom_code:
-  extra_schema_entry: 'templates/terraform/extra_schema_entry/api_config.tmpl'
-  encoder: 'templates/terraform/encoders/api_config.go.tmpl'
+    [
+      'projects/{{project}}/locations/global/apis/{{api}}/configs/{{api_config}}',
+      '{{project}}/{{api}}/{{api_config}}',
+      '{{api}}/{{api_config}}',
+      '{{api_config}}',
+    ]
 examples:
-  - name: 'apigateway_api_config_basic'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'apigateway_api_config_basic'
+    min_version: beta
     primary_resource_id: 'api_cfg'
     # Need to pass 2 ids into a Sprintf - parent resource id also needed to identify primary resource
     primary_resource_name: 'fmt.Sprintf("tf-test-my-api%s", context["random_suffix"]), fmt.Sprintf("tf-test-my-config%s", context["random_suffix"])'
-    min_version: 'beta'
     vars:
       api_id: 'my-api'
       config_id: 'my-config'
-  - name: 'apigateway_api_config_full'
+  - !ruby/object:Provider::Terraform::Examples
+    skip_docs: true
+    min_version: beta
+    name: 'apigateway_api_config_full'
     primary_resource_id: 'api_cfg'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-api%s", context["random_suffix"])'
-    min_version: 'beta'
+    primary_resource_name:
+      'fmt.Sprintf("tf-test-my-api%s", context["random_suffix"])'
     vars:
       api_id: 'my-api'
       config_id: 'my-config'
-    exclude_docs: true
-  - name: 'apigateway_api_config_grpc'
+  - !ruby/object:Provider::Terraform::Examples
+    min_version: beta
+    name: 'apigateway_api_config_grpc'
     primary_resource_id: 'api_cfg'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-api%s", context["random_suffix"])'
-    min_version: 'beta'
+    primary_resource_name:
+      'fmt.Sprintf("tf-test-my-api%s", context["random_suffix"])'
     vars:
       api_id: 'my-api'
       config_id: 'my-config'
     ignore_read_extra:
       - 'grpc_services.0.file_descriptor_set'
-  - name: 'apigateway_api_config_grpc_full'
+  - !ruby/object:Provider::Terraform::Examples
+    skip_docs: true
+    min_version: beta
+    name: 'apigateway_api_config_grpc_full'
     primary_resource_id: 'api_cfg'
-    min_version: 'beta'
     vars:
       api_id: 'my-api'
       config_id: 'my-config'
-    exclude_docs: true
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  extra_schema_entry: templates/terraform/extra_schema_entry/api_config.erb
+  encoder: 'templates/terraform/encoders/api_config.go.erb'
 parameters:
-  - name: 'api'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: api
     description: |
       The API to attach the config to.
-    min_version: 'beta'
-    url_param_only: true
     required: true
     immutable: true
-  - name: 'apiConfigId'
-    type: String
+    url_param_only: true
+  - !ruby/object:Api::Type::String
+    name: apiConfigId
     description: |
       Identifier to assign to the API Config. Must be unique within scope of the parent resource(api).
-    min_version: 'beta'
-    url_param_only: true
     immutable: true
+    url_param_only: true
     default_from_api: true
 properties:
-  - name: 'name'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'name'
     description: The resource name of the API Config.
-    min_version: 'beta'
     output: true
-  - name: 'displayName'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'displayName'
     description: |
       A user-visible name for the API.
-    min_version: 'beta'
     default_from_api: true
-  - name: 'serviceConfigId'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'serviceConfigId'
+    output: true
     description: |
       The ID of the associated Service Config (https://cloud.google.com/service-infrastructure/docs/glossary#config).
-    min_version: 'beta'
-    output: true
-  - name: 'labels'
-    type: KeyValueLabels
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
     description: |
       Resource labels to represent user-provided metadata.
-    min_version: 'beta'
-  - name: 'gatewayConfig'
-    type: NestedObject
+  - !ruby/object:Api::Type::NestedObject
+    name: 'gatewayConfig'
+    immutable: true
     description: |
       Immutable. Gateway specific configuration.
       If not specified, backend authentication will be set to use OIDC authentication using the default compute service account
-    min_version: 'beta'
-    immutable: true
     ignore_read: true
     properties:
-      - name: 'backendConfig'
-        type: NestedObject
+      - !ruby/object:Api::Type::NestedObject
+        name: 'backendConfig'
+        required: true
         description: |
           Backend settings that are applied to all backends of the Gateway.
-        min_version: 'beta'
-        required: true
         properties:
-          - name: 'googleServiceAccount'
-            type: String
+          - !ruby/object:Api::Type::String
+            name: 'googleServiceAccount'
+            immutable: true
+            required: true
             description: |
               Google Cloud IAM service account used to sign OIDC tokens for backends that have authentication configured
               (https://cloud.google.com/service-infrastructure/docs/service-management/reference/rest/v1/services.configs#backend).
-            min_version: 'beta'
-            required: true
-            immutable: true
-  - name: 'openapiDocuments'
-    type: Array
+  - !ruby/object:Api::Type::Array
+    name: 'openapiDocuments'
     description: |
       OpenAPI specification documents. If specified, grpcServices and managedServiceConfigs must not be included.
-    min_version: 'beta'
     exactly_one_of:
-      - 'openapi_documents'
-      - 'grpc_services'
-    item_type:
-      type: NestedObject
+      - openapi_documents
+      - grpc_services
+    item_type: !ruby/object:Api::Type::NestedObject
       properties:
-        - name: 'document'
-          type: NestedObject
-          description: The OpenAPI Specification document file.
-          min_version: 'beta'
+        - !ruby/object:Api::Type::NestedObject
+          name: 'document'
           required: true
+          description: The OpenAPI Specification document file.
           properties:
-            - name: 'path'
-              type: String
+            - !ruby/object:Api::Type::String
+              name: 'path'
+              required: true
+              immutable: true
               description: |
                 The file path (full or relative path). This is typically the path of the file when it is uploaded.
-              min_version: 'beta'
+            - !ruby/object:Api::Type::String
+              name: 'contents'
               required: true
               immutable: true
-            - name: 'contents'
-              type: String
               description: |
                 Base64 encoded content of the file.
-              min_version: 'beta'
-              required: true
-              immutable: true
-              validation:
+              validation: !ruby/object:Provider::Terraform::Validation
                 function: 'verify.ValidateBase64String'
-  - name: 'grpcServices'
-    type: Array
+  - !ruby/object:Api::Type::Array
+    name: 'grpcServices'
     description: |
       gRPC service definition files. If specified, openapiDocuments must not be included.
-    min_version: 'beta'
-    ignore_read: true
     exactly_one_of:
-      - 'openapi_documents'
-      - 'grpc_services'
+      - openapi_documents
+      - grpc_services
     required_with:
-      - 'managed_service_configs'
-    item_type:
-      type: NestedObject
+      - managed_service_configs
+    ignore_read: true
+    item_type: !ruby/object:Api::Type::NestedObject
       properties:
-        - name: 'fileDescriptorSet'
-          type: NestedObject
+        - !ruby/object:Api::Type::NestedObject
+          name: 'fileDescriptorSet'
+          required: true
+          immutable: true
           description: |
             Input only. File descriptor set, generated by protoc.
             To generate, use protoc with imports and source info included. For an example test.proto file, the following command would put the value in a new file named out.pb.
 
             $ protoc --include_imports --include_source_info test.proto -o out.pb
-          min_version: 'beta'
-          required: true
-          immutable: true
           properties:
-            - name: 'path'
-              type: String
+            - !ruby/object:Api::Type::String
+              name: 'path'
+              required: true
+              immutable: true
               description: |
                 The file path (full or relative path). This is typically the path of the file when it is uploaded.
-              min_version: 'beta'
+            - !ruby/object:Api::Type::String
+              name: 'contents'
               required: true
               immutable: true
-            - name: 'contents'
-              type: String
               description: |
                 Base64 encoded content of the file.
-              min_version: 'beta'
-              required: true
-              immutable: true
-              validation:
+              validation: !ruby/object:Provider::Terraform::Validation
                 function: 'verify.ValidateBase64String'
-        - name: 'source'
-          type: Array
+        - !ruby/object:Api::Type::Array
+          name: 'source'
           description: |
             Uncompiled proto files associated with the descriptor set, used for display purposes (server-side compilation is not supported). These should match the inputs to 'protoc' command used to generate fileDescriptorSet.
-          min_version: 'beta'
-          item_type:
-            type: NestedObject
+          item_type: !ruby/object:Api::Type::NestedObject
             properties:
-              - name: 'path'
-                type: String
+              - !ruby/object:Api::Type::String
+                name: 'path'
+                required: true
+                immutable: true
                 description: |
                   The file path (full or relative path). This is typically the path of the file when it is uploaded.
-                min_version: 'beta'
+              - !ruby/object:Api::Type::String
+                name: 'contents'
                 required: true
                 immutable: true
-              - name: 'contents'
-                type: String
                 description: |
                   Base64 encoded content of the file.
-                min_version: 'beta'
-                required: true
-                immutable: true
-                validation:
+                validation: !ruby/object:Provider::Terraform::Validation
                   function: 'verify.ValidateBase64String'
-  - name: 'managedServiceConfigs'
-    type: Array
+  - !ruby/object:Api::Type::Array
+    name: 'managedServiceConfigs'
     description: |
       Optional. Service Configuration files. At least one must be included when using gRPC service definitions. See https://cloud.google.com/endpoints/docs/grpc/grpc-service-config#service_configuration_overview for the expected file contents.
       If multiple files are specified, the files are merged with the following rules: * All singular scalar fields are merged using "last one wins" semantics in the order of the files uploaded. * Repeated fields are concatenated. * Singular embedded messages are merged using these rules for nested fields.
-    min_version: 'beta'
     required_with:
-      - 'grpc_services'
-    item_type:
-      type: NestedObject
+      - grpc_services
+    item_type: !ruby/object:Api::Type::NestedObject
       properties:
-        - name: 'path'
-          type: String
+        - !ruby/object:Api::Type::String
+          name: 'path'
+          required: true
+          immutable: true
           description: |
             The file path (full or relative path). This is typically the path of the file when it is uploaded.
-          min_version: 'beta'
+        - !ruby/object:Api::Type::String
+          name: 'contents'
           required: true
           immutable: true
-        - name: 'contents'
-          type: String
           description: |
             Base64 encoded content of the file.
-          min_version: 'beta'
-          required: true
-          immutable: true

@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2023 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,93 +11,96 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
+--- !ruby/object:Api::Resource
 name: 'Cluster'
+base_url: projects/{{project}}/locations/{{location}}/attachedClusters
+create_url: projects/{{project}}/locations/{{location}}/attachedClusters?attached_cluster_id={{name}}
+delete_url: projects/{{project}}/locations/{{location}}/attachedClusters/{{name}}
+update_url: projects/{{project}}/locations/{{location}}/attachedClusters/{{name}}
+self_link: projects/{{project}}/locations/{{location}}/attachedClusters/{{name}}
+update_verb: :PATCH
+update_mask: true
+delete_verb: :DELETE
 description: |
   An Anthos cluster running on customer owned infrastructure.
-references:
+references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'API reference': 'https://cloud.google.com/anthos/clusters/docs/multi-cloud/reference/rest/v1/projects.locations.attachedClusters'
     'Multicloud overview': 'https://cloud.google.com/anthos/clusters/docs/multi-cloud'
   api: 'https://cloud.google.com/anthos/clusters/docs/multi-cloud/reference/rest'
-docs:
-id_format: 'projects/{{project}}/locations/{{location}}/attachedClusters/{{name}}'
-base_url: 'projects/{{project}}/locations/{{location}}/attachedClusters'
-self_link: 'projects/{{project}}/locations/{{location}}/attachedClusters/{{name}}'
-create_url: 'projects/{{project}}/locations/{{location}}/attachedClusters?attached_cluster_id={{name}}'
-update_url: 'projects/{{project}}/locations/{{location}}/attachedClusters/{{name}}'
-update_verb: 'PATCH'
-update_mask: true
-delete_url: 'projects/{{project}}/locations/{{location}}/attachedClusters/{{name}}'
-import_format:
-  - 'projects/{{project}}/locations/{{location}}/attachedClusters/{{name}}'
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  operation:
-    full_url: 'https://{{location}}-gkemulticloud.googleapis.com/v1/{{op_id}}'
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
+    full_url: 'https://{{location}}-gkemulticloud.googleapis.com/v1/{{op_id}}'
     wait_ms: 1000
-  result:
+  result: !ruby/object:Api::OpAsync::Result
     path: 'response'
     resource_inside_response: true
-  error:
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: 'true'
+    allowed:
+      - 'true'
+      - 'false'
+  error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
-custom_code:
-  constants: 'templates/terraform/constants/containerattached_cluster_diff.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/containerattached_update.go.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/container_attached_deletion_policy.go.tmpl'
+autogen_async: false
+id_format: 'projects/{{project}}/locations/{{location}}/attachedClusters/{{name}}'
+import_format:
+  ['projects/{{project}}/locations/{{location}}/attachedClusters/{{name}}']
 examples:
-  - name: 'container_attached_cluster_basic'
-    primary_resource_id: 'primary'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'container_attached_cluster_basic'
     primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
+    primary_resource_id: 'primary'
     vars:
       name: 'basic'
-  - name: 'container_attached_cluster_full'
-    primary_resource_id: 'primary'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'container_attached_cluster_full'
     primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
+    primary_resource_id: 'primary'
     vars:
       name: 'basic'
-  - name: 'container_attached_cluster_ignore_errors'
-    primary_resource_id: 'primary'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'container_attached_cluster_ignore_errors'
     primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
+    primary_resource_id: 'primary'
     vars:
       name: 'basic'
     ignore_read_extra:
       - 'deletion_policy'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/containerattached_cluster_diff.go.erb
+  pre_update: templates/terraform/pre_update/containerattached_update.go.erb
+  pre_delete: templates/terraform/pre_delete/container_attached_deletion_policy.go.erb
 virtual_fields:
-  - name: 'deletion_policy'
+  - !ruby/object:Api::Type::String
+    name: 'deletion_policy'
     description: 'Policy to determine what flags to send on delete. Possible values: DELETE, DELETE_IGNORE_ERRORS'
-    type: String
-    default_value: "DELETE"
-parameters:
+    default_value: DELETE
 properties:
-  - name: 'location'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: location
     description: |
       The location for the resource
-    url_param_only: true
-    required: true
     immutable: true
-  - name: 'name'
-    type: String
+    required: true
+    url_param_only: true
+  - !ruby/object:Api::Type::String
+    name: name
     description: |
       The name of this resource.
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-  - name: 'description'
-    type: String
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+  - !ruby/object:Api::Type::String
+    name: description
     description: |
       A human readable description of this attached cluster. Cannot be longer
       than 255 UTF-8 encoded bytes.
-  - name: 'oidcConfig'
-    type: NestedObject
+  - !ruby/object:Api::Type::NestedObject
+    name: oidcConfig
     description: |
       OIDC discovery information of the target cluster.
 
@@ -112,93 +115,93 @@ properties:
       `issuer_url` and `jwks`.
     required: true
     properties:
-      - name: 'issuerUrl'
-        type: String
+      - !ruby/object:Api::Type::String
+        name: issuerUrl
         description: |
           A JSON Web Token (JWT) issuer URI. `issuer` must start with `https://`
         required: true
         immutable: true
-      - name: 'jwks'
-        type: String
+      - !ruby/object:Api::Type::String
+        name: jwks
         description: |
           OIDC verification keys in JWKS format (RFC 7517).
         immutable: true
-  - name: 'platformVersion'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: platformVersion
     description: |
       The platform version for the cluster (e.g. `1.23.0-gke.1`).
     required: true
-  - name: 'distribution'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: distribution
     description: |
       The Kubernetes distribution of the underlying attached cluster. Supported values:
       "eks", "aks", "generic". The generic distribution provides the ability to register
       or migrate any CNCF conformant cluster.
     required: true
     immutable: true
-  - name: 'clusterRegion'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: clusterRegion
     description: |
       Output only. The region where this cluster runs.
 
       For EKS clusters, this is an AWS region. For AKS clusters,
       this is an Azure region.
     output: true
-  - name: 'fleet'
-    type: NestedObject
+  - !ruby/object:Api::Type::NestedObject
+    name: fleet
     description: |
       Fleet configuration.
     required: true
     properties:
-      - name: 'membership'
-        type: String
+      - !ruby/object:Api::Type::String
+        name: membership
         description: |
           The name of the managed Hub Membership resource associated to this
           cluster. Membership names are formatted as
           projects/<project-number>/locations/global/membership/<cluster-id>.
         output: true
-      - name: 'project'
-        type: String
+      - !ruby/object:Api::Type::String
+        name: project
         description: |
           The number of the Fleet host project where this cluster will be registered.
         required: true
         immutable: true
-        validation:
+        validation: !ruby/object:Provider::Terraform::Validation
           regex: '^projects/[0-9]+$'
-  - name: 'state'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: state
     description: |
       The current state of the cluster. Possible values:
       STATE_UNSPECIFIED, PROVISIONING, RUNNING, RECONCILING, STOPPING, ERROR,
       DEGRADED
     output: true
-  - name: 'uid'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: uid
     description: |
       A globally unique identifier for the cluster.
     output: true
-  - name: 'reconciling'
-    type: Boolean
+  - !ruby/object:Api::Type::Boolean
+    name: reconciling
     description: |
       If set, there are currently changes in flight to the cluster.
     output: true
-  - name: 'createTime'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: createTime
     description: |
       Output only. The time at which this cluster was created.
     output: true
-  - name: 'updateTime'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: updateTime
     description: |
       The time at which this cluster was last updated.
     output: true
-  - name: 'kubernetesVersion'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: kubernetesVersion
     description: |
       The Kubernetes version of the cluster.
     output: true
-  - name: 'annotations'
-    type: KeyValueAnnotations
+  - !ruby/object:Api::Type::KeyValueAnnotations
+    name: 'annotations'
     description: |
       Optional. Annotations on the cluster. This field has the same
       restrictions as Kubernetes annotations. The total size of all keys and
@@ -206,27 +209,27 @@ properties:
       and name (required), separated by a slash (/). Prefix must be a DNS subdomain.
       Name must be 63 characters or less, begin and end with alphanumerics,
       with dashes (-), underscores (_), dots (.), and alphanumerics between.
-  - name: 'workloadIdentityConfig'
-    type: NestedObject
+  - !ruby/object:Api::Type::NestedObject
+    name: workloadIdentityConfig
     description: |
       Workload Identity settings.
     output: true
     properties:
-      - name: 'identityProvider'
-        type: String
+      - !ruby/object:Api::Type::String
+        name: identityProvider
         description: |
           The ID of the OIDC Identity Provider (IdP) associated to
           the Workload Identity Pool.
-      - name: 'issuerUri'
-        type: String
+      - !ruby/object:Api::Type::String
+        name: issuerUri
         description: |
           The OIDC issuer URL for this cluster.
-      - name: 'workloadPool'
-        type: String
+      - !ruby/object:Api::Type::String
+        name: workloadPool
         description: |
           The Workload Identity Pool associated to the cluster.
-  - name: 'loggingConfig'
-    type: NestedObject
+  - !ruby/object:Api::Type::NestedObject
+    name: loggingConfig
     description: |
       Logging configuration.
     # If the user doesn't specify a loggingConfig, the server will supply a default value. Instead of
@@ -237,52 +240,52 @@ properties:
     # case needs to be ignored.
     send_empty_value: true
     allow_empty_object: true
+    custom_expand: 'templates/terraform/custom_expand/containerattached_cluster_empty_logging.go.erb'
     diff_suppress_func: 'suppressAttachedClustersLoggingConfigDiff'
-    custom_expand: 'templates/terraform/custom_expand/containerattached_cluster_empty_logging.go.tmpl'
     properties:
-      - name: 'componentConfig'
-        type: NestedObject
+      - !ruby/object:Api::Type::NestedObject
+        name: componentConfig
         description: |
           The configuration of the logging components
         send_empty_value: true
         allow_empty_object: true
         properties:
-          - name: 'enableComponents'
-            type: Array
+          - !ruby/object:Api::Type::Array
+            name: enableComponents
             description: |
               The components to be enabled.
             send_empty_value: true
             allow_empty_object: true
-            item_type:
-              type: Enum
+            item_type: !ruby/object:Api::Type::Enum
+              name: 'component'
               description: |
                 The components of the logging configuration.
-              enum_values:
-                - 'SYSTEM_COMPONENTS'
-                - 'WORKLOADS'
-  - name: 'errors'
-    type: Array
+              values:
+                - :SYSTEM_COMPONENTS
+                - :WORKLOADS
+  - !ruby/object:Api::Type::Array
+    name: errors
     description: |
       A set of errors found in the cluster.
     output: true
-    item_type:
+    item_type: !ruby/object:Api::Type::NestedObject
+      name: attachedClusterError
       description: |
         Describes errors found on attached clusters.
-      type: NestedObject
       properties:
-        - name: 'message'
-          type: String
+        - !ruby/object:Api::Type::String
+          name: message
           description: |
             Human-friendly description of the error.
-  - name: 'authorization'
-    type: NestedObject
+  - !ruby/object:Api::Type::NestedObject
+    name: authorization
     description: |
       Configuration related to the cluster RBAC settings.
-    custom_flatten: 'templates/terraform/custom_flatten/containerattached_cluster_authorization_user.go.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/containerattached_cluster_authorization_user.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/containerattached_cluster_authorization_user.go.erb'
+    custom_flatten: 'templates/terraform/custom_flatten/containerattached_cluster_authorization_user.go.erb'
     properties:
-      - name: 'adminUsers'
-        type: Array
+      - !ruby/object:Api::Type::Array
+        name: adminUsers
         description: |
           Users that can perform operations as a cluster admin. A managed
           ClusterRoleBinding will be created to grant the `cluster-admin` ClusterRole
@@ -290,10 +293,9 @@ properties:
 
           For more info on RBAC, see
           https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles
-        item_type:
-          type: String
-      - name: 'adminGroups'
-        type: Array
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::Array
+        name: adminGroups
         description: |
           Groups that can perform operations as a cluster admin. A managed
           ClusterRoleBinding will be created to grant the `cluster-admin` ClusterRole
@@ -301,70 +303,69 @@ properties:
 
           For more info on RBAC, see
           https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles
-        item_type:
-          type: String
-  - name: 'monitoringConfig'
-    type: NestedObject
+        item_type: Api::Type::String
+  - !ruby/object:Api::Type::NestedObject
+    name: monitoringConfig
     description: |
       Monitoring configuration.
-    default_from_api: true
     allow_empty_object: true
+    default_from_api: true
     properties:
-      - name: 'managedPrometheusConfig'
-        type: NestedObject
+      - !ruby/object:Api::Type::NestedObject
+        name: managedPrometheusConfig
         description: |
           Enable Google Cloud Managed Service for Prometheus in the cluster.
         allow_empty_object: true
         properties:
-          - name: 'enabled'
-            type: Boolean
+          - !ruby/object:Api::Type::Boolean
+            name: enabled
             description: |
               Enable Managed Collection.
-  - name: 'binaryAuthorization'
-    type: NestedObject
+  - !ruby/object:Api::Type::NestedObject
+    name: binaryAuthorization
     description: |
       Binary Authorization configuration.
-    default_from_api: true
     allow_empty_object: true
+    default_from_api: true
     properties:
-      - name: 'evaluationMode'
-        type: Enum
+      - !ruby/object:Api::Type::Enum
+        name: evaluationMode
         description: |
           Configure Binary Authorization evaluation mode.
-        enum_values:
-          - 'DISABLED'
-          - 'PROJECT_SINGLETON_POLICY_ENFORCE'
-  - name: 'proxyConfig'
-    type: NestedObject
+        values:
+          - :DISABLED
+          - :PROJECT_SINGLETON_POLICY_ENFORCE
+  - !ruby/object:Api::Type::NestedObject
+    name: proxyConfig
     description: |
       Support for proxy configuration.
     properties:
-      - name: 'kubernetesSecret'
-        type: NestedObject
+      - !ruby/object:Api::Type::NestedObject
+        name: kubernetesSecret
         description: |
           The Kubernetes Secret resource that contains the HTTP(S) proxy configuration.
         properties:
-          - name: 'name'
-            type: String
+          - !ruby/object:Api::Type::String
+            name: name
+            required: true
             description: |
               Name of the kubernetes secret containing the proxy config.
+          - !ruby/object:Api::Type::String
+            name: namespace
             required: true
-          - name: 'namespace'
-            type: String
             description: |
               Namespace of the kubernetes secret containing the proxy config.
-            required: true
-  - name: 'securityPostureConfig'
-    type: NestedObject
+  - !ruby/object:Api::Type::NestedObject
+    name: securityPostureConfig
     description: |
       Enable/Disable Security Posture API features for the cluster.
     default_from_api: true
     properties:
-      - name: 'vulnerabilityMode'
-        type: Enum
+      - !ruby/object:Api::Type::Enum
+        name: vulnerabilityMode
+        required: true
         description: |
           Sets the mode of the Kubernetes security posture API's workload vulnerability scanning.
-        required: true
-        enum_values:
-          - 'VULNERABILITY_DISABLED'
-          - 'VULNERABILITY_ENTERPRISE'
+        values:
+          - :VULNERABILITY_DISABLED
+          - :VULNERABILITY_ENTERPRISE

@@ -12,10 +12,12 @@
 # limitations under the License.
 
 ---
-name: 'Memorystore'
-display_name: 'Memorystore'
+!ruby/object:Api::Product
 versions:
-  - name: 'beta'
-    base_url: 'https://memorystore.googleapis.com/v1beta/'
+  - !ruby/object:Api::Product::Version
+    base_url: https://memorystore.googleapis.com/v1beta/
+    name: beta
+name: Memorystore
+display_name: Memorystore
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform

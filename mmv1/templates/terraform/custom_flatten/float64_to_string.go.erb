@@ -1,0 +1,9 @@
+func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData) interface{} {
+  transformed := make(map[string]string)
+	data := v.(map[string]interface{})
+	for key := range data {
+		transformed[key] = fmt.Sprintf("%f", data[key])
+	}
+	log.Printf("transformed = %#v", transformed)
+	return transformed
+}

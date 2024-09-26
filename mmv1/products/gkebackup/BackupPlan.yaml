@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2023 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,65 +11,52 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
+--- !ruby/object:Api::Resource
 name: 'BackupPlan'
+base_url: 'projects/{{project}}/locations/{{location}}/backupPlans'
+create_url: projects/{{project}}/locations/{{location}}/backupPlans?backupPlanId={{name}}
+update_verb: :PATCH
+update_mask: true
 description: |
   Represents a Backup Plan instance.
-references:
+references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke'
   api: 'https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke/reference/rest/v1/projects.locations.backupPlans'
-docs:
-base_url: 'projects/{{project}}/locations/{{location}}/backupPlans'
-create_url: 'projects/{{project}}/locations/{{location}}/backupPlans?backupPlanId={{name}}'
-update_verb: 'PATCH'
-update_mask: true
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-autogen_async: true
-async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
-  result:
-    path: 'response'
-    resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
-iam_policy:
+iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
   parent_resource_attribute: 'name'
-  base_url: 'projects/{{project}}/locations/{{location}}/backupPlans/{{name}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  base_url: projects/{{project}}/locations/{{location}}/backupPlans/{{name}}
   import_format:
-    - 'projects/{{project}}/locations/{{location}}/backupPlans/{{name}}'
-    - '{{name}}'
-custom_code:
+    [
+      'projects/{{project}}/locations/{{location}}/backupPlans/{{name}}',
+      '{{name}}',
+    ]
+timeouts: !ruby/object:Api::Timeouts
+autogen_async: true
 examples:
-  - name: 'gkebackup_backupplan_basic'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'gkebackup_backupplan_basic'
     primary_resource_id: 'basic'
-    primary_resource_name: 'fmt.Sprintf("tf-test-basic-plan%s", context["random_suffix"])'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-basic-plan%s\",
+      context[\"random_suffix\"\
+      ])"
     vars:
       name: 'basic-plan'
       cluster_name: 'basic-cluster'
       deletion_protection: 'true'
       network_name: 'default'
       subnetwork_name: 'default'
-    test_env_vars:
-      project: 'PROJECT_NAME'
     test_vars_overrides:
-      'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      deletion_protection: 'false'
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      subnetwork_name: 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'gkebackup_backupplan_autopilot'
+      deletion_protection: 'false'
+    test_env_vars:
+      project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'gkebackup_backupplan_autopilot'
     primary_resource_id: 'autopilot'
     vars:
       name: 'autopilot-plan'
@@ -78,12 +65,13 @@ examples:
       network_name: 'default'
       subnetwork_name: 'default'
     test_vars_overrides:
-      'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      deletion_protection: 'false'
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      subnetwork_name: 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'gkebackup_backupplan_cmek'
+      deletion_protection: 'false'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'gkebackup_backupplan_cmek'
     primary_resource_id: 'cmek'
     vars:
       name: 'cmek-plan'
@@ -92,15 +80,16 @@ examples:
       deletion_protection: 'true'
       network_name: 'default'
       subnetwork_name: 'default'
-    test_env_vars:
-      project: 'PROJECT_NAME'
     test_vars_overrides:
-      'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      deletion_protection: 'false'
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      subnetwork_name: 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'gkebackup_backupplan_full'
+      deletion_protection: 'false'
+    test_env_vars:
+      project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'gkebackup_backupplan_full'
     primary_resource_id: 'full'
     vars:
       name: 'full-plan'
@@ -108,15 +97,16 @@ examples:
       deletion_protection: 'true'
       network_name: 'default'
       subnetwork_name: 'default'
-    test_env_vars:
-      project: 'PROJECT_NAME'
     test_vars_overrides:
-      'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      deletion_protection: 'false'
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      subnetwork_name: 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'gkebackup_backupplan_permissive'
+      deletion_protection: 'false'
+    test_env_vars:
+      project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'gkebackup_backupplan_permissive'
     primary_resource_id: 'permissive'
     vars:
       name: 'permissive-plan'
@@ -124,15 +114,16 @@ examples:
       deletion_protection: 'true'
       network_name: 'default'
       subnetwork_name: 'default'
-    test_env_vars:
-      project: 'PROJECT_NAME'
     test_vars_overrides:
-      'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      deletion_protection: 'false'
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      subnetwork_name: 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'gkebackup_backupplan_rpo_daily_window'
+      deletion_protection: 'false'
+    test_env_vars:
+      project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'gkebackup_backupplan_rpo_daily_window'
     primary_resource_id: 'rpo_daily_window'
     vars:
       name: 'rpo-daily-window'
@@ -140,15 +131,16 @@ examples:
       deletion_protection: 'true'
       network_name: 'default'
       subnetwork_name: 'default'
-    test_env_vars:
-      project: 'PROJECT_NAME'
     test_vars_overrides:
-      'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      deletion_protection: 'false'
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      subnetwork_name: 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'gkebackup_backupplan_rpo_weekly_window'
+      deletion_protection: 'false'
+    test_env_vars:
+      project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'gkebackup_backupplan_rpo_weekly_window'
     primary_resource_id: 'rpo_weekly_window'
     vars:
       name: 'rpo-weekly-window'
@@ -156,53 +148,53 @@ examples:
       deletion_protection: 'true'
       network_name: 'default'
       subnetwork_name: 'default'
-    test_env_vars:
-      project: 'PROJECT_NAME'
     test_vars_overrides:
-      'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      deletion_protection: 'false'
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      subnetwork_name: 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
-      'deletion_protection': 'false'
+      deletion_protection: 'false'
+    test_env_vars:
+      project: :PROJECT_NAME
 parameters:
-  - name: 'location'
-    type: String
-    description: |
-      The region of the Backup Plan.
+  - !ruby/object:Api::Type::String
+    name: 'location'
     url_param_only: true
     required: true
     immutable: true
+    description: |
+      The region of the Backup Plan.
 properties:
-  - name: 'name'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: name
+    required: true
+    immutable: true
     description: |
       The full name of the BackupPlan Resource.
-    required: true
-    immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.tmpl'
-  - name: 'uid'
-    type: String
+    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+  - !ruby/object:Api::Type::String
+    name: uid
+    output: true
     description: |
       Server generated, unique identifier of UUID format.
-    output: true
-  - name: 'description'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: description
     description: |
       User specified descriptive string for this BackupPlan.
-  - name: 'cluster'
-    type: String
-    description: |
-      The source cluster from which Backups will be created via this BackupPlan.
+  - !ruby/object:Api::Type::String
+    name: 'cluster'
     required: true
     immutable: true
-  - name: 'retentionPolicy'
-    type: NestedObject
+    description: |
+      The source cluster from which Backups will be created via this BackupPlan.
+  - !ruby/object:Api::Type::NestedObject
+    name: retentionPolicy
     description:
       RetentionPolicy governs lifecycle of Backups created under this plan.
     properties:
-      - name: 'backupDeleteLockDays'
-        type: Integer
+      - !ruby/object:Api::Type::Integer
+        name: backupDeleteLockDays
         description: |
           Minimum age for a Backup created via this BackupPlan (in days).
           Must be an integer value between 0-90 (inclusive).
@@ -211,8 +203,8 @@ properties:
           Updating this field of a BackupPlan does not affect existing Backups.
           Backups created after a successful update will inherit this new value.
         default_from_api: true
-      - name: 'backupRetainDays'
-        type: Integer
+      - !ruby/object:Api::Type::Integer
+        name: backupRetainDays
         description: |
           The default maximum age of a Backup created via this BackupPlan.
           This field MUST be an integer value >= 0 and <= 365. If specified,
@@ -227,53 +219,53 @@ properties:
           If rpo_config is defined, then this must be
           <= 360 * targetRpoMinutes/(1440minutes/day)
         default_from_api: true
-      - name: 'locked'
-        type: Boolean
+      - !ruby/object:Api::Type::Boolean
+        name: locked
         description: |
           This flag denotes whether the retention policy of this BackupPlan is locked.
           If set to True, no further update is allowed on this policy, including
           the locked field itself.
         default_from_api: true
-  - name: 'labels'
-    type: KeyValueLabels
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
     description: |
       Description: A set of custom labels supplied by the user.
       A list of key->value pairs.
       Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
-  - name: 'backupSchedule'
-    type: NestedObject
+  - !ruby/object:Api::Type::NestedObject
+    name: backupSchedule
     description:
       Defines a schedule for automatic Backup creation via this BackupPlan.
     properties:
-      - name: 'cronSchedule'
-        type: String
+      - !ruby/object:Api::Type::String
+        name: cronSchedule
         description: |
           A standard cron string that defines a repeating schedule for
           creating Backups via this BackupPlan.
           This is mutually exclusive with the rpoConfig field since at most one
           schedule can be defined for a BackupPlan.
           If this is defined, then backupRetainDays must also be defined.
-      - name: 'paused'
-        type: Boolean
+      - !ruby/object:Api::Type::Boolean
+        name: paused
         description: |
           This flag denotes whether automatic Backup creation is paused for this BackupPlan.
         default_from_api: true
-      - name: 'rpoConfig'
-        type: NestedObject
+      - !ruby/object:Api::Type::NestedObject
+        name: rpoConfig
         description: |
           Defines the RPO schedule configuration for this BackupPlan. This is mutually
           exclusive with the cronSchedule field since at most one schedule can be defined
           for a BackupPLan. If this is defined, then backupRetainDays must also be defined.
         properties:
-          - name: 'targetRpoMinutes'
-            type: Integer
+          - !ruby/object:Api::Type::Integer
+            name: targetRpoMinutes
+            required: true
             description: |
               Defines the target RPO for the BackupPlan in minutes, which means the target
               maximum data loss in time that is acceptable for this BackupPlan. This must be
               at least 60, i.e., 1 hour, and at most 86400, i.e., 60 days.
-            required: true
-          - name: 'exclusionWindows'
-            type: Array
+          - !ruby/object:Api::Type::Array
+            name: exclusionWindows
             description: |
               User specified time windows during which backup can NOT happen for this BackupPlan.
               Backups should start and finish outside of any given exclusion window. Note: backup
@@ -283,33 +275,33 @@ properties:
               only allow <=1 recurrence (daily or weekly) exclusion window for a BackupPlan while no
               restriction on number of single occurrence windows.
             # Exclusion Window Object
-            item_type:
-              type: NestedObject
+            item_type: !ruby/object:Api::Type::NestedObject
               properties:
-                - name: 'startTime'
-                  type: NestedObject
+                - !ruby/object:Api::Type::NestedObject
+                  name: startTime
+                  required: true
                   description: |
                     Specifies the start time of the window using time of the day in UTC.
-                  required: true
                   properties:
-                    - name: 'hours'
-                      type: Integer
+                    - !ruby/object:Api::Type::Integer
+                      name: hours
                       description: |
                         Hours of day in 24 hour format.
-                    - name: 'minutes'
-                      type: Integer
+                    - !ruby/object:Api::Type::Integer
+                      name: minutes
                       description: |
                         Minutes of hour of day.
-                    - name: 'seconds'
-                      type: Integer
+                    - !ruby/object:Api::Type::Integer
+                      name: seconds
                       description: |
                         Seconds of minutes of the time.
-                    - name: 'nanos'
-                      type: Integer
+                    - !ruby/object:Api::Type::Integer
+                      name: nanos
                       description: |
                         Fractions of seconds in nanoseconds.
-                - name: 'duration'
-                  type: String
+                - !ruby/object:Api::Type::String
+                  name: duration
+                  required: true
                   description: |
                     Specifies duration of the window in seconds with up to nine fractional digits,
                     terminated by 's'. Example: "3.5s". Restrictions for duration based on the
@@ -319,61 +311,61 @@ properties:
                       - weekly window:
                         - days of week includes all seven days of a week: duration < 24 hours
                         - all other weekly window: duration < 168 hours (i.e., 24 * 7 hours)
-                  required: true
-                  validation:
+                  validation: !ruby/object:Provider::Terraform::Validation
                     function: 'verify.ValidateDuration()'
-                - name: 'singleOccurrenceDate'
-                  type: NestedObject
+                - !ruby/object:Api::Type::NestedObject
+                  name: singleOccurrenceDate
                   # TODO (cmfeng): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                   description: |
                     No recurrence. The exclusion window occurs only once and on this date in UTC.
                     Only one of singleOccurrenceDate, daily and daysOfWeek may be set.
                   properties:
-                    - name: 'year'
-                      type: Integer
+                    - !ruby/object:Api::Type::Integer
+                      name: year
                       description: |
                         Year of the date.
-                    - name: 'month'
-                      type: Integer
+                    - !ruby/object:Api::Type::Integer
+                      name: month
                       description: |
                         Month of a year.
-                    - name: 'day'
-                      type: Integer
+                    - !ruby/object:Api::Type::Integer
+                      name: day
                       description: |
                         Day of a month.
-                - name: 'daily'
-                  type: Boolean
+                - !ruby/object:Api::Type::Boolean
+                  name: daily
                   # TODO (cmfeng): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                   description: |
                     The exclusion window occurs every day if set to "True".
                     Specifying this field to "False" is an error.
                     Only one of singleOccurrenceDate, daily and daysOfWeek may be set.
-                - name: 'daysOfWeek'
-                  type: NestedObject
+                - !ruby/object:Api::Type::NestedObject
+                  name: daysOfWeek
                   # TODO (cmfeng): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                   description: |
                     The exclusion window occurs on these days of each week in UTC.
                     Only one of singleOccurrenceDate, daily and daysOfWeek may be set.
                   properties:
-                    - name: 'daysOfWeek'
-                      type: Array
+                    - !ruby/object:Api::Type::Array
+                      name: daysOfWeek
                       description: |
                         A list of days of week.
-                      item_type:
-                        type: Enum
+                      item_type: !ruby/object:Api::Type::Enum
+                        name: dayOfWeek
                         description: |
                           The day of the week.
-                        enum_values:
-                          - 'MONDAY'
-                          - 'TUESDAY'
-                          - 'WEDNESDAY'
-                          - 'THURSDAY'
-                          - 'FRIDAY'
-                          - 'SATURDAY'
-                          - 'SUNDAY'
+                        values:
+                          - :MONDAY
+                          - :TUESDAY
+                          - :WEDNESDAY
+                          - :THURSDAY
+                          - :FRIDAY
+                          - :SATURDAY
+                          - :SUNDAY
             # Exclusion Window Object - End
-  - name: 'etag'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: etag
+    output: true
     description: |
       etag is used for optimistic concurrency control as a way to help prevent simultaneous
       updates of a backup plan from overwriting each other. It is strongly suggested that
@@ -381,112 +373,109 @@ properties:
       in order to avoid race conditions: An etag is returned in the response to backupPlans.get,
       and systems are expected to put that etag in the request to backupPlans.patch or
       backupPlans.delete to ensure that their change will be applied to the same version of the resource.
-    output: true
-  - name: 'deactivated'
-    type: Boolean
+  - !ruby/object:Api::Type::Boolean
+    name: deactivated
     description: |
       This flag indicates whether this BackupPlan has been deactivated.
       Setting this field to True locks the BackupPlan such that no further updates will be allowed
       (except deletes), including the deactivated field itself. It also prevents any new Backups
       from being created via this BackupPlan (including scheduled Backups).
     default_from_api: true
-  - name: 'backupConfig'
-    type: NestedObject
+  - !ruby/object:Api::Type::NestedObject
+    name: backupConfig
     description: |
       Defines the configuration of Backups created via this BackupPlan.
     properties:
-      - name: 'includeVolumeData'
-        type: Boolean
+      - !ruby/object:Api::Type::Boolean
+        name: includeVolumeData
         description: |
           This flag specifies whether volume data should be backed up when PVCs are
           included in the scope of a Backup.
         default_from_api: true
-      - name: 'includeSecrets'
-        type: Boolean
+      - !ruby/object:Api::Type::Boolean
+        name: includeSecrets
         description: |
           This flag specifies whether Kubernetes Secret resources should be included
           when they fall into the scope of Backups.
         default_from_api: true
-      - name: 'encryptionKey'
-        type: NestedObject
+      - !ruby/object:Api::Type::NestedObject
+        name: encryptionKey
         description: |
           This defines a customer managed encryption key that will be used to encrypt the "config"
           portion (the Kubernetes resources) of Backups created via this plan.
         properties:
-          - name: 'gcpKmsEncryptionKey'
-            type: String
+          - !ruby/object:Api::Type::String
+            name: gcpKmsEncryptionKey
+            required: true
             description: |
               Google Cloud KMS encryption key. Format: projects/*/locations/*/keyRings/*/cryptoKeys/*
-            required: true
-      - name: 'allNamespaces'
-        type: Boolean
+      - !ruby/object:Api::Type::Boolean
+        name: allNamespaces
         description: |
           If True, include all namespaced resources.
         exactly_one_of:
-          - 'backupConfig.0.allNamespaces'
-          - 'backupConfig.0.selectedNamespaces'
-          - 'backupConfig.0.selectedApplications'
-      - name: 'selectedNamespaces'
-        type: NestedObject
+          - backupConfig.0.allNamespaces
+          - backupConfig.0.selectedNamespaces
+          - backupConfig.0.selectedApplications
+      - !ruby/object:Api::Type::NestedObject
+        name: selectedNamespaces
         description: |
           If set, include just the resources in the listed namespaces.
         exactly_one_of:
-          - 'backupConfig.0.allNamespaces'
-          - 'backupConfig.0.selectedNamespaces'
-          - 'backupConfig.0.selectedApplications'
+          - backupConfig.0.allNamespaces
+          - backupConfig.0.selectedNamespaces
+          - backupConfig.0.selectedApplications
         properties:
-          - name: 'namespaces'
-            type: Array
+          - !ruby/object:Api::Type::Array
+            name: namespaces
+            required: true
             description: |
               A list of Kubernetes Namespaces.
-            required: true
-            item_type:
-              type: String
-      - name: 'selectedApplications'
-        type: NestedObject
+            item_type: Api::Type::String
+      - !ruby/object:Api::Type::NestedObject
+        name: selectedApplications
         description: |
           A list of namespaced Kubernetes Resources.
         exactly_one_of:
-          - 'backupConfig.0.allNamespaces'
-          - 'backupConfig.0.selectedNamespaces'
-          - 'backupConfig.0.selectedApplications'
+          - backupConfig.0.allNamespaces
+          - backupConfig.0.selectedNamespaces
+          - backupConfig.0.selectedApplications
         properties:
-          - name: 'namespacedNames'
-            type: Array
+          - !ruby/object:Api::Type::Array
+            name: namespacedNames
+            required: true
             description: |
               A list of namespaced Kubernetes resources.
-            required: true
-            item_type:
-              type: NestedObject
+            item_type: !ruby/object:Api::Type::NestedObject
               properties:
-                - name: 'namespace'
-                  type: String
+                - !ruby/object:Api::Type::String
+                  name: namespace
+                  required: true
                   description: |
                     The namespace of a Kubernetes Resource.
+                - !ruby/object:Api::Type::String
+                  name: name
                   required: true
-                - name: 'name'
-                  type: String
                   description: |
                     The name of a Kubernetes Resource.
-                  required: true
-      - name: 'permissiveMode'
-        type: Boolean
+      - !ruby/object:Api::Type::Boolean
+        name: permissiveMode
         description: |
           This flag specifies whether Backups will not fail when
           Backup for GKE detects Kubernetes configuration that is
           non-standard or requires additional setup to restore.
-  - name: 'protectedPodCount'
-    type: Integer
+  - !ruby/object:Api::Type::Integer
+    name: protectedPodCount
+    output: true
     description: |
       The number of Kubernetes Pods backed up in the last successful Backup created via this BackupPlan.
+  - !ruby/object:Api::Type::String
+    name: state
     output: true
-  - name: 'state'
-    type: String
     description: |
       The State of the BackupPlan.
+  - !ruby/object:Api::Type::String
+    name: stateReason
     output: true
-  - name: 'stateReason'
-    type: String
     description: |
       Detailed description of why BackupPlan is in its current state.
-    output: true

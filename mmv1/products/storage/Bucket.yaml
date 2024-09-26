@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2023 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,9 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
+--- !ruby/object:Api::Resource
 name: 'Bucket'
 kind: 'storage#bucket'
+base_url: b?project={{project}}
+self_link: b/{{name}}?projection=full
+collection_url_key: items
 description: |
   The Buckets resource represents a bucket in Google Cloud Storage. There is
   a single global namespace shared by all buckets. For more information, see
@@ -24,47 +27,37 @@ description: |
   use in fine-grained manipulation of an existing bucket's access controls.
 
   A bucket is always owned by the project team owners group.
-exclude_resource: true
-docs:
-base_url: 'b?project={{project}}'
-self_link: 'b/{{name}}?projection=full'
-import_format:
-  - '{{name}}'
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-collection_url_key: 'items'
-iam_policy:
+iam_policy: !ruby/object:Api::Resource::IamPolicy
   exclude_tgc: true
-  fetch_iam_policy_method: 'iam'
-  set_iam_policy_verb: 'PUT'
-  set_iam_policy_method: 'iam'
-  wrapped_policy_obj: false
   allowed_iam_role: 'roles/storage.objectViewer'
   admin_iam_role: 'roles/storage.admin'
   parent_resource_attribute: 'bucket'
-  iam_conditions_request_type: 'QUERY_PARAM'
   base_url: 'b/{{name}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
-  custom_diff_suppress: 'templates/terraform/iam/storage_bucket_diff_suppress.go.tmpl'
-  import_format:
-    - 'b/{{name}}'
-    - '{{name}}'
-custom_code:
+  import_format: ['b/{{name}}', '{{name}}']
+  iam_conditions_request_type: :QUERY_PARAM
+  fetch_iam_policy_method: 'iam'
+  set_iam_policy_method: 'iam'
+  set_iam_policy_verb: :PUT
+  wrapped_policy_obj: false
+  custom_diff_suppress: 'templates/terraform/iam/storage_bucket_diff_suppress.go.erb'
+exclude_resource: true
+import_format: ['{{name}}']
 examples:
-  - name: 'storage_bucket_basic'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'storage_bucket_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-bucket%s", context["random_suffix"])'
     vars:
       name: 'my-bucket'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-bucket%s\",
+      context[\"random_suffix\"\
+      ])"
 parameters:
-  - name: 'project'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'project'
     description: 'A valid API project identifier.'
     immutable: true
-  - name: 'predefinedDefaultObjectAcl'
-    type: Enum
+  - !ruby/object:Api::Type::Enum
+    name: 'predefinedDefaultObjectAcl'
     description: |
       Apply a predefined set of default object access controls to this
       bucket.
@@ -81,37 +74,36 @@ parameters:
           members get access according to their roles.
         - "publicRead": Object owner gets OWNER access, and allUsers get
           READER access.
+    values:
+      - :authenticatedRead
+      - :bucketOwnerFullControl
+      - :bucketOwnerRead
+      - :private
+      - :projectPrivate
+      - :publicRead
     immutable: true
-    enum_values:
-      - 'authenticatedRead'
-      - 'bucketOwnerFullControl'
-      - 'bucketOwnerRead'
-      - 'private'
-      - 'projectPrivate'
-      - 'publicRead'
 properties:
-  - name: 'acl'
-    type: Array
+  - !ruby/object:Api::Type::Array
+    name: 'acl'
     description: 'Access controls on the bucket.'
-    item_type:
-      type: NestedObject
+    item_type: !ruby/object:Api::Type::NestedObject
       properties:
-        - name: 'bucket'
-          type: ResourceRef
-          description: 'The name of the bucket.'
-          required: true
+        - !ruby/object:Api::Type::ResourceRef
+          name: 'bucket'
           resource: 'Bucket'
           imports: 'name'
-        - name: 'domain'
-          type: String
+          description: 'The name of the bucket.'
+          required: true
+        - !ruby/object:Api::Type::String
+          name: 'domain'
           description: 'The domain associated with the entity.'
           output: true
-        - name: 'email'
-          type: String
+        - !ruby/object:Api::Type::String
+          name: 'email'
           description: 'The email address associated with the entity.'
           output: true
-        - name: 'entity'
-          type: String
+        - !ruby/object:Api::Type::String
+          name: 'entity'
           description: |
             The entity holding the permission, in one of the following forms:
               user-userId
@@ -129,100 +121,96 @@ properties:
               To refer to all members of the Google Apps for Business domain
               example.com, the entity would be domain-example.com.
           required: true
-        - name: 'entityId'
-          type: String
+        - !ruby/object:Api::Type::String
+          name: 'entityId'
           description: 'The ID for the entity'
         # | 'etag' is not applicable for state convergence.
-        - name: 'id'
-          type: String
+        - !ruby/object:Api::Type::String
+          name: 'id'
           description: 'The ID of the access-control entry.'
           output: true
-        - name: 'projectTeam'
-          type: NestedObject
+        - !ruby/object:Api::Type::NestedObject
+          name: 'projectTeam'
           description: 'The project team associated with the entity'
           properties:
-            - name: 'projectNumber'
-              type: String
+            - !ruby/object:Api::Type::String
+              name: 'projectNumber'
               description: 'The project team associated with the entity'
-            - name: 'team'
-              type: Enum
+            - !ruby/object:Api::Type::Enum
+              name: 'team'
               description: 'The team.'
-              enum_values:
-                - 'editors'
-                - 'owners'
-                - 'viewers'
-        - name: 'role'
-          type: Enum
+              values:
+                - :editors
+                - :owners
+                - :viewers
+        - !ruby/object:Api::Type::Enum
+          name: 'role'
           description: 'The access permission for the entity.'
-          enum_values:
-            - 'OWNER'
-            - 'READER'
-            - 'WRITER'
-  - name: 'cors'
-    type: Array
+          values:
+            - :OWNER
+            - :READER
+            - :WRITER
+  - !ruby/object:Api::Type::Array
+    name: 'cors'
     description: |
       The bucket's Cross-Origin Resource Sharing (CORS) configuration.
-    item_type:
-      type: NestedObject
+    item_type: !ruby/object:Api::Type::NestedObject
       properties:
-        - name: 'maxAgeSeconds'
-          type: Integer
+        - !ruby/object:Api::Type::Integer
+          name: 'maxAgeSeconds'
           description: |
             The value, in seconds, to return in the Access-Control-Max-Age
             header used in preflight responses.
-        - name: 'method'
-          type: Array
+        - !ruby/object:Api::Type::Array
+          name: 'method'
           description: |
             The list of HTTP methods on which to include CORS response
             headers, (GET, OPTIONS, POST, etc) Note: "*" is permitted in the
             list of methods, and means "any method".
-          item_type:
-            type: String
-        - name: 'origin'
-          type: Array
+          item_type: Api::Type::String
+        - !ruby/object:Api::Type::Array
+          name: 'origin'
           description: |
             The list of Origins eligible to receive CORS response headers.
             Note: "*" is permitted in the list of origins, and means "any
             Origin".
-          item_type:
-            type: String
-        - name: 'responseHeader'
-          type: Array
+          item_type: Api::Type::String
+        - !ruby/object:Api::Type::Array
+          name: 'responseHeader'
           description: |
             The list of HTTP headers other than the simple response headers
             to give permission for the user-agent to share across domains.
-          item_type:
-            type: String
-  - name: 'defaultEventBasedHold'
-    type: Boolean
+          item_type: Api::Type::String
+  - !ruby/object:Api::Type::Boolean
+    name: 'defaultEventBasedHold'
     description: |
       Whether or not to automatically apply an eventBasedHold to new objects
       added to the bucket.
-  - name: 'defaultObjectAcl'
-    type: Array
+  - !ruby/object:Api::Type::Array
+    name: 'defaultObjectAcl'
     description: |
       Default access controls to apply to new objects when no ACL is
       provided.
     immutable: true
-    item_type:
-      type: NestedObject
+    item_type: !ruby/object:Api::Type::NestedObject
       properties:
-        - name: 'bucket'
-          type: ResourceRef
-          description: 'The name of the bucket.'
-          required: true
+        - !ruby/object:Api::Type::ResourceRef
+          name: 'bucket'
           resource: 'Bucket'
           imports: 'name'
-        - name: 'domain'
-          type: String
+          description: 'The name of the bucket.'
+          required: true
+        - !ruby/object:Api::Type::String
+          name: 'domain'
           description: 'The domain associated with the entity.'
           output: true
-        - name: 'email'
-          type: String
+        - !ruby/object:Api::Type::String
+          name: 'email'
           description: 'The email address associated with the entity.'
           output: true
-        - name: 'entity'
-          type: String
+        - !ruby/object:Api::Type::String
+          name: 'entity'
+          required: true
           description: |
             The entity holding the permission, in one of the following forms:
               * user-{{userId}}
@@ -233,201 +221,198 @@ properties:
               * project-team-{{projectId}}
               * allUsers
               * allAuthenticatedUsers
-          required: true
-        - name: 'entityId'
-          type: String
-          description: 'The ID for the entity'
+        - !ruby/object:Api::Type::String
+          name: 'entityId'
           output: true
+          description: 'The ID for the entity'
         # | 'etag' is not applicable for state convergence.
-        - name: 'generation'
-          type: Integer
+        - !ruby/object:Api::Type::Integer
+          name: 'generation'
           description:
             'The content generation of the object, if applied to an object.'
           output: true
-        - name: 'id'
-          type: String
+        - !ruby/object:Api::Type::String
+          name: 'id'
           description: 'The ID of the access-control entry.'
           output: true
-        - name: 'object'
-          type: String
+        - !ruby/object:Api::Type::String
+          name: 'object'
           description: 'The name of the object, if applied to an object.'
           required: false
-        - name: 'projectTeam'
-          type: NestedObject
+        - !ruby/object:Api::Type::NestedObject
+          name: 'projectTeam'
           description: 'The project team associated with the entity'
           output: true
           properties:
-            - name: 'projectNumber'
-              type: String
+            - !ruby/object:Api::Type::String
+              name: 'projectNumber'
               description: 'The project team associated with the entity'
-            - name: 'team'
-              type: Enum
+            - !ruby/object:Api::Type::Enum
+              name: 'team'
               description: 'The team.'
-              enum_values:
-                - 'editors'
-                - 'owners'
-                - 'viewers'
-        - name: 'role'
-          type: Enum
+              values:
+                - :editors
+                - :owners
+                - :viewers
+        - !ruby/object:Api::Type::Enum
+          name: 'role'
           description: 'The access permission for the entity.'
           required: true
-          enum_values:
-            - 'OWNER'
-            - 'READER'
+          values:
+            - :OWNER
+            - :READER
   # | 'etag' is not applicable for state convergence.
-  - name: 'id'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'id'
     description: |
       The ID of the bucket. For buckets, the id and name properities are the
       same.
     output: true
-  - name: 'lifecycle'
-    type: NestedObject
+  - !ruby/object:Api::Type::NestedObject
+    name: 'lifecycle'
     description: |
       The bucket's lifecycle configuration.
 
       See https://developers.google.com/storage/docs/lifecycle for more
       information.
     properties:
-      - name: 'rule'
-        type: Array
+      - !ruby/object:Api::Type::Array
+        name: 'rule'
         description: |
           A lifecycle management rule, which is made of an action to take
           and the condition(s) under which the action will be taken.
-        item_type:
-          type: NestedObject
+        item_type: !ruby/object:Api::Type::NestedObject
           properties:
-            - name: 'action'
-              type: NestedObject
+            - !ruby/object:Api::Type::NestedObject
+              name: 'action'
               description: 'The action to take.'
               properties:
-                - name: 'storageClass'
-                  type: String
+                - !ruby/object:Api::Type::String
+                  name: 'storageClass'
                   description: |
                     Target storage class. Required iff the type of the
                     action is SetStorageClass.
-                - name: 'type'
-                  type: Enum
+                - !ruby/object:Api::Type::Enum
+                  name: 'type'
                   description: |
                     Type of the action. Currently, only Delete and
                     SetStorageClass are supported.
-                  enum_values:
+                  values:
                     - 'Delete'
                     - 'SetStorageClass'
-            - name: 'condition'
-              type: NestedObject
+            - !ruby/object:Api::Type::NestedObject
+              name: 'condition'
               description: |
                 The condition(s) under which the action will be taken.
               properties:
-                - name: 'ageDays'
-                  type: Integer
+                - !ruby/object:Api::Type::Integer
+                  name: 'ageDays'
+                  api_name: 'age'
                   description: |
                     Age of an object (in days). This condition is satisfied
                     when an object reaches the specified age.
-                  api_name: age
-                - name: 'createdBefore'
-                  type: Time
+                - !ruby/object:Api::Type::Time
+                  name: 'createdBefore'
                   description: |
                     A date in RFC 3339 format with only the date part (for
                     instance, "2013-01-15"). This condition is satisfied
                     when an object is created before midnight of the
                     specified date in UTC.
-                - name: 'customTimeBefore'
-                  type: Time
+                - !ruby/object:Api::Type::Time
+                  name: 'customTimeBefore'
                   description: |
                     A date in the RFC 3339 format YYYY-MM-DD. This condition
                     is satisfied when the customTime metadata for the object
                     is set to an earlier date than the date used in
                     this lifecycle condition.
-                - name: 'daysSinceCustomTime'
-                  type: Integer
+                - !ruby/object:Api::Type::Integer
+                  name: 'daysSinceCustomTime'
                   description: |
                     Days since the date set in the customTime metadata for the
                     object. This condition is satisfied when the current date
                     and time is at least the specified number of days after
                     the customTime.
-                - name: 'daysSinceNoncurrentTime'
-                  type: Integer
+                - !ruby/object:Api::Type::Integer
+                  name: 'daysSinceNoncurrentTime'
                   description: |
                     Relevant only for versioned objects. This condition is
                     satisfied when an object has been noncurrent for more than
                     the specified number of days.
-                - name: 'isLive'
-                  type: Boolean
+                - !ruby/object:Api::Type::Boolean
+                  name: 'isLive'
                   description: |
                     Relevant only for versioned objects.  If the value is
                     true, this condition matches live objects; if the value
                     is false, it matches archived objects.
-                - name: 'matchesStorageClass'
-                  type: Array
+                - !ruby/object:Api::Type::Array
+                  name: 'matchesStorageClass'
                   description: |
                     Objects having any of the storage classes specified by
                     this condition will be matched. Values include
                     MULTI_REGIONAL, REGIONAL, NEARLINE, COLDLINE, ARCHIVE,
                     STANDARD, and DURABLE_REDUCED_AVAILABILITY.
-                  item_type:
-                    type: String
-                - name: 'noncurrentTimeBefore'
-                  type: Time
+                  item_type: Api::Type::String
+                - !ruby/object:Api::Type::Time
+                  name: 'noncurrentTimeBefore'
                   description: |
                     Relevant only for versioned objects. A date in the
                     RFC 3339 format YYYY-MM-DD. This condition is satisfied
                     for objects that became noncurrent on a date prior to the
                     one specified in this condition.
-                - name: 'numNewerVersions'
-                  type: Integer
+                - !ruby/object:Api::Type::Integer
+                  name: 'numNewerVersions'
                   description: |
                     Relevant only for versioned objects. If the value is N,
                     this condition is satisfied when there are at least N
                     versions (including the live version) newer than this
                     version of the object.
-  - name: 'location'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'location'
     description: |
       The location of the bucket. Object data for objects in the bucket
       resides in physical storage within this region. Defaults to US. See
       the developer's guide for the authoritative list.
-  - name: 'logging'
-    type: NestedObject
+  - !ruby/object:Api::Type::NestedObject
+    name: 'logging'
     description: |
       The bucket's logging configuration, which defines the destination
       bucket and optional name prefix for the current bucket's logs.
     properties:
-      - name: 'logBucket'
-        type: String
+      - !ruby/object:Api::Type::String
+        name: 'logBucket'
         description: |
           The destination bucket where the current bucket's logs should be
           placed.
-      - name: 'logObjectPrefix'
-        type: String
+      - !ruby/object:Api::Type::String
+        name: 'logObjectPrefix'
         description: 'A prefix for log object names.'
-  - name: 'metageneration'
-    type: Integer
+  - !ruby/object:Api::Type::Integer
+    name: 'metageneration'
     description: 'The metadata generation of this bucket.'
-  - name: 'name'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'name'
     description: 'The name of the bucket'
-    validation:
+    validation: !ruby/object:Provider::Terraform::Validation
       function: 'verify.ValidateGCSName'
-  - name: 'owner'
-    type: NestedObject
+  - !ruby/object:Api::Type::NestedObject
+    name: 'owner'
     description: |
       The owner of the bucket. This is always the project team's owner
       group.
     properties:
-      - name: 'entity'
-        type: String
+      - !ruby/object:Api::Type::String
+        name: 'entity'
         description: 'The entity, in the form project-owner-projectId.'
-      - name: 'entityId'
-        type: String
+      - !ruby/object:Api::Type::String
+        name: 'entityId'
         description: 'The ID for the entity.'
         output: true
-  - name: 'projectNumber'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'projectNumber'
     description: 'The project number of the project the bucket belongs to.'
     output: true
-  - name: 'storageClass'
-    type: Enum
+  - !ruby/object:Api::Type::Enum
+    name: 'storageClass'
     description: |
       The bucket's default storage class, used whenever no storageClass is
       specified for a newly-created object. This defines how objects in the
@@ -436,81 +421,81 @@ properties:
       COLDLINE, ARCHIVE, and DURABLE_REDUCED_AVAILABILITY. If this value is
       not specified when the bucket is created, it will default to
       STANDARD. For more information, see storage classes.
-    enum_values:
-      - 'MULTI_REGIONAL'
-      - 'REGIONAL'
-      - 'STANDARD'
-      - 'NEARLINE'
-      - 'COLDLINE'
-      - 'ARCHIVE'
-      - 'DURABLE_REDUCED_AVAILABILITY'
-  - name: 'timeCreated'
-    type: Time
+    values:
+      - :MULTI_REGIONAL
+      - :REGIONAL
+      - :STANDARD
+      - :NEARLINE
+      - :COLDLINE
+      - :ARCHIVE
+      - :DURABLE_REDUCED_AVAILABILITY
+  - !ruby/object:Api::Type::Time
+    name: 'timeCreated'
     description: 'The creation time of the bucket in RFC 3339 format.'
     output: true
-  - name: 'updated'
-    type: Time
+  - !ruby/object:Api::Type::Time
+    name: 'updated'
     description: 'The modification time of the bucket in RFC 3339 format.'
     output: true
-  - name: 'versioning'
-    type: NestedObject
+  - !ruby/object:Api::Type::NestedObject
+    name: 'versioning'
     description: "The bucket's versioning configuration."
     properties:
-      - name: 'enabled'
-        type: Boolean
+      - !ruby/object:Api::Type::Boolean
+        name: 'enabled'
         description: |
           While set to true, versioning is fully enabled for this bucket.
-  - name: 'website'
-    type: NestedObject
+  - !ruby/object:Api::Type::NestedObject
+    name: 'website'
     description: |
       The bucket's website configuration, controlling how the service
       behaves when accessing bucket contents as a web site. See the Static
       Website Examples for more information.
     properties:
-      - name: 'mainPageSuffix'
-        type: String
+      - !ruby/object:Api::Type::String
+        name: 'mainPageSuffix'
         description: |
           If the requested object path is missing, the service will ensure
           the path has a trailing '/', append this suffix, and attempt to
           retrieve the resulting object. This allows the creation of
           index.html objects to represent directory pages.
-      - name: 'notFoundPage'
-        type: String
+      - !ruby/object:Api::Type::String
+        name: 'notFoundPage'
         description: |
           If the requested object path is missing, and any mainPageSuffix
           object is missing, if applicable, the service will return the
           named object from this bucket as the content for a 404 Not Found
           result.
-  - name: 'labels'
-    type: KeyValueLabels
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
     description: |
       Labels applied to this bucket.  A list of key->value pairs.
-  - name: 'encryption'
-    type: NestedObject
+  - !ruby/object:Api::Type::NestedObject
+    name: 'encryption'
     description: |
       Encryption configuration for the bucket
     properties:
-      - name: 'defaultKmsKeyName'
-        type: String
+      - !ruby/object:Api::Type::String
+        name: 'defaultKmsKeyName'
         description: |
           A Cloud KMS key that will be used to encrypt objects inserted into this bucket,
           if no encryption method is specified.
-  - name: 'retentionPolicy'
-    type: NestedObject
+  - !ruby/object:Api::Type::NestedObject
+    name: 'retentionPolicy'
     description: |
       Retention policy for the bucket
     properties:
-      - name: 'effectiveTime'
-        type: Time
+      - !ruby/object:Api::Type::Time
+        name: 'effectiveTime'
         description: |
           The time from which the retention policy was effective
-      - name: 'isLocked'
-        type: Boolean
+      - !ruby/object:Api::Type::Boolean
+        name: 'isLocked'
         description: |
           If the retention policy is locked. If true, the retention policy cannot be removed and the period cannot
           be reduced.
-      - name: 'retentionPeriod'
-        type: Integer
+      - !ruby/object:Api::Type::Integer
+        name: 'retentionPeriod'
         description: |
           The period of time, in seconds, that objects in the bucket must be retained and cannot be deleted,
           overwritten, or made noncurrent.

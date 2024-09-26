@@ -42,8 +42,8 @@ type Resource struct {
 	//
 	//	references:
 	//  	guides:
-	//			'Guide name': 'official_documentation_url'
-	//		api: 'rest_api_reference_url/version'
+    //			'Guide name': 'official_documentation_url'
+  	//		api: 'rest_api_reference_url/version'
 	//
 	References resource.ReferenceLinks
 
@@ -190,7 +190,7 @@ type Resource struct {
 	//
 	//	import_format:
 	//		- example_import_one
-	//		- example_import_two
+    //		- example_import_two
 	//
 	ImportFormat []string `yaml:"import_format"`
 
@@ -760,7 +760,7 @@ func getLabelsFieldNote(title string) string {
 }
 
 func (r Resource) StateMigrationFile() string {
-	return fmt.Sprintf("templates/terraform/state_migrations/%s_%s.go.tmpl", google.Underscore(r.ProductMetadata.Name), google.Underscore(r.Name))
+	return fmt.Sprintf("templates/terraform/state_migrations/go/%s_%s.go.tmpl", google.Underscore(r.ProductMetadata.Name), google.Underscore(r.Name))
 }
 
 // ====================

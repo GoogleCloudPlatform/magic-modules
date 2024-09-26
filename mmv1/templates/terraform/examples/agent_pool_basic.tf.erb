@@ -1,0 +1,19 @@
+data "google_storage_transfer_project_service_account" "default" {
+  project = "<%= ctx[:test_env_vars]['project_id'] %>"
+}
+
+resource "google_project_iam_member" "pubsub_editor_role" {
+  project = "<%= ctx[:test_env_vars]['project_id'] %>"
+  role    = "roles/pubsub.editor"
+  member  = "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}"
+}
+
+resource "google_storage_transfer_agent_pool" "<%= ctx[:primary_resource_id] %>" {
+  name         = "<%= ctx[:vars]['agent-pool-name'] %>"
+  display_name = "Source A to destination Z"
+  bandwidth_limit {
+    limit_mbps = "120"
+  }
+
+  depends_on = [google_project_iam_member.pubsub_editor_role]
+}

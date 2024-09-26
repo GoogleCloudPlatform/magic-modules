@@ -1,0 +1,26 @@
+resource "google_bigquery_dataset" "<%= ctx[:primary_resource_id] %>" {
+  dataset_id                  = "<%= ctx[:vars]['dataset_id'] %>"
+  friendly_name               = "test"
+  description                 = "This is a test description"
+  location                    = "EU"
+  default_table_expiration_ms = 3600000
+  max_time_travel_hours       = "72"
+
+  labels = {
+    env = "default"
+  }
+
+  access {
+    role          = "OWNER"
+    user_by_email = google_service_account.bqowner.email
+  }
+
+  access {
+    role   = "READER"
+    domain = "hashicorp.com"
+  }
+}
+
+resource "google_service_account" "bqowner" {
+  account_id = "<%= ctx[:vars]['account_name'] %>"
+}

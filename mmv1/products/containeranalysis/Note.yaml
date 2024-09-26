@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2023 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,121 +11,113 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
+--- !ruby/object:Api::Resource
 name: 'Note'
+base_url: projects/{{project}}/notes?noteId={{name}}
+self_link: projects/{{project}}/notes/{{name}}
+update_verb: :PATCH
+update_mask: true
 description: |
   A Container Analysis note is a high-level piece of metadata that
   describes a type of analysis that can be done for a resource.
-references:
+references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/container-analysis/'
     'Creating Attestations (Occurrences)': 'https://cloud.google.com/binary-authorization/docs/making-attestations'
   api: 'https://cloud.google.com/container-analysis/api/reference/rest/'
-docs:
-id_format: 'projects/{{project}}/notes/{{name}}'
-base_url: 'projects/{{project}}/notes?noteId={{name}}'
-self_link: 'projects/{{project}}/notes/{{name}}'
-update_verb: 'PATCH'
-update_mask: true
-mutex: 'projects/{{project}}/notes/{{name}}'
-import_format:
-  - 'projects/{{project}}/notes/{{name}}'
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-iam_policy:
+iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
-  fetch_iam_policy_verb: 'POST'
-  allowed_iam_role: 'roles/containeranalysis.notes.occurrences.viewer'
+  fetch_iam_policy_verb: :POST
   parent_resource_attribute: 'note'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
-  import_format:
-    - 'projects/{{project}}/notes/{{name}}'
-    - '{{name}}'
-custom_code:
-  encoder: 'templates/terraform/encoders/containeranalysis_attestation_field_name.go.tmpl'
-  decoder: 'templates/terraform/decoders/containeranalysis_attestation_field_name.go.tmpl'
+  import_format: ['projects/{{project}}/notes/{{name}}', '{{name}}']
+  allowed_iam_role: 'roles/containeranalysis.notes.occurrences.viewer'
+mutex: 'projects/{{project}}/notes/{{name}}'
+id_format: 'projects/{{project}}/notes/{{name}}'
+import_format: ['projects/{{project}}/notes/{{name}}']
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  encoder: templates/terraform/encoders/containeranalysis_attestation_field_name.go.erb
+  decoder: templates/terraform/decoders/containeranalysis_attestation_field_name.go.erb
 examples:
-  - name: 'container_analysis_note_basic'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'container_analysis_note_basic'
     primary_resource_id: 'note'
-    primary_resource_name: 'fmt.Sprintf("tf-test-attestor-note%s", context["random_suffix"])'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-attestor-note%s\",
+      context[\"random_suffix\"\
+      ])"
     vars:
       note_name: 'attestor-note'
-  - name: 'container_analysis_note_attestation_full'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'container_analysis_note_attestation_full'
     primary_resource_id: 'note'
     vars:
       note_name: 'attestor-note'
-parameters:
 properties:
-  - name: 'name'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: name
     description: |
       The name of the note.
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-  - name: 'shortDescription'
-    type: String
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+  - !ruby/object:Api::Type::String
+    name: shortDescription
     description: |
       A one sentence description of the note.
-  - name: 'longDescription'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: longDescription
     description: |
       A detailed description of the note
-  - name: 'kind'
-    type: Enum
+  - !ruby/object:Api::Type::Enum
+    name: 'kind'
     description: |
       The type of analysis this note describes
+    values:
+      - NOTE_KIND_UNSPECIFIED
+      - VULNERABILITY
+      - BUILD
+      - IMAGE
+      - PACKAGE
+      - DEPLOYMENT
+      - DISCOVERY
+      - ATTESTATION
+      - UPGRADE
     output: true
-    enum_values:
-      - 'NOTE_KIND_UNSPECIFIED'
-      - 'VULNERABILITY'
-      - 'BUILD'
-      - 'IMAGE'
-      - 'PACKAGE'
-      - 'DEPLOYMENT'
-      - 'DISCOVERY'
-      - 'ATTESTATION'
-      - 'UPGRADE'
-  - name: 'relatedUrl'
-    type: Array
+  - !ruby/object:Api::Type::Array
+    name: relatedUrl
     description: |
       URLs associated with this note and related metadata.
     is_set: true
-    item_type:
-      type: NestedObject
+    item_type: !ruby/object:Api::Type::NestedObject
       properties:
-        - name: 'url'
-          type: String
+        - !ruby/object:Api::Type::String
+          name: url
           description: |
             Specific URL associated with the resource.
           required: true
-        - name: 'label'
-          type: String
+        - !ruby/object:Api::Type::String
+          name: label
           description: |
             Label to describe usage of the URL
-  - name: 'expirationTime'
-    type: Time
+  - !ruby/object:Api::Type::Time
+    name: expirationTime
     description: |
       Time of expiration for this note. Leave empty if note does not expire.
-  - name: 'createTime'
-    type: Time
+  - !ruby/object:Api::Type::Time
+    name: createTime
     description: The time this note was created.
     output: true
-  - name: 'updateTime'
-    type: Time
+  - !ruby/object:Api::Type::Time
+    name: updateTime
     description: The time this note was last updated.
     output: true
-  - name: 'relatedNoteNames'
-    type: Array
+  - !ruby/object:Api::Type::Array
+    name: relatedNoteNames
     description: |
       Names of other notes related to this note.
     is_set: true
-    item_type:
-      type: String
-  - name: 'attestationAuthority'
-    type: NestedObject
+    item_type: Api::Type::String
+  - !ruby/object:Api::Type::NestedObject
+    name: attestationAuthority
     description: |
       Note kind that represents a logical attestation "role" or "authority".
       For example, an organization might have one AttestationAuthority for
@@ -138,8 +130,8 @@ properties:
       project.
     required: true
     properties:
-      - name: 'hint'
-        type: NestedObject
+      - !ruby/object:Api::Type::NestedObject
+        name: hint
         description: |
           This submessage provides human-readable hints about the purpose of
           the AttestationAuthority. Because the name of a Note acts as its
@@ -151,8 +143,8 @@ properties:
           Attestations to verify.
         required: true
         properties:
-          - name: 'humanReadableName'
-            type: String
+          - !ruby/object:Api::Type::String
+            name: humanReadableName
             description: |
               The human readable name of this Attestation Authority, for
               example "qa".

@@ -1,5 +1,5 @@
-# Copyright 2024 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the "License");
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the License);
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -11,495 +11,493 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
+--- !ruby/object:Api::Resource
 name: 'Datascan'
-description: |
-  Represents a user-visible job which provides the insights for the related data source.
-# User-provided label cannot start with goog-
-exclude_attribution_label: true
-references:
-  guides:
-    'Official Documentation': 'https://cloud.google.com/dataplex/docs'
-  api: 'https://cloud.google.com/dataplex/docs/reference/rest'
-docs:
 base_url: 'projects/{{project}}/locations/{{location}}/dataScans'
 self_link: 'projects/{{project}}/locations/{{location}}/dataScans/{{data_scan_id}}'
 create_url: 'projects/{{project}}/locations/{{location}}/dataScans?dataScanId={{data_scan_id}}'
-update_verb: 'PATCH'
+update_verb: :PATCH
 update_mask: true
-
-read_query_params: '?view=FULL'
+# User-provided label cannot start with goog-
+skip_attribution_label: true
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/dataScans/{{data_scan_id}}'
-  - '{{data_scan_id}}'
-timeouts:
-  insert_minutes: 5
-  update_minutes: 5
-  delete_minutes: 5
-autogen_async: true
-async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
+  [
+    'projects/{{project}}/locations/{{location}}/dataScans/{{data_scan_id}}',
+    '{{data_scan_id}}',
+  ]
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
+    base_url: '{{op_id}}'
     wait_ms: 1000
-    timeouts:
+    timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 5
       update_minutes: 5
       delete_minutes: 5
-  result:
+  result: !ruby/object:Api::OpAsync::Result
     path: 'response'
-    resource_inside_response: false
-  error:
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
-iam_policy:
+autogen_async: true
+read_query_params: '?view=FULL'
+description: |
+  Represents a user-visible job which provides the insights for the related data source.
+iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
   parent_resource_attribute: 'data_scan_id'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  fetch_iam_policy_verb: :GET
   import_format:
-    - 'projects/{{project}}/locations/{{location}}/dataScans/{{data_scan_id}}'
-    - '{{data_scan_id}}'
-custom_code:
+    [
+      'projects/{{project}}/locations/{{location}}/dataScans/{{data_scan_id}}',
+      '{{data_scan_id}}',
+    ]
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/dataplex/docs'
+  api: 'https://cloud.google.com/dataplex/docs/reference/rest'
 examples:
-  - name: 'dataplex_datascan_basic_profile'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dataplex_datascan_basic_profile'
     primary_resource_id: 'basic_profile'
-    primary_resource_name: 'fmt.Sprintf("tf-test-dataprofile-basic%s", context["random_suffix"])'
-    vars:
-      datascan_name: 'dataprofile-basic'
+    primary_resource_name:
+      'fmt.Sprintf("tf-test-dataprofile-basic%s", context["random_suffix"])'
     test_env_vars:
-      project_name: 'PROJECT_NAME'
-  - name: 'dataplex_datascan_full_profile'
+      project_name: :PROJECT_NAME
+    vars:
+      datascan_name: dataprofile-basic
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dataplex_datascan_full_profile'
     primary_resource_id: 'full_profile'
-    vars:
-      dataset_name: 'dataplex_dataset'
-      datascan_name: 'dataprofile-full'
     test_env_vars:
-      project_name: 'PROJECT_NAME'
-  - name: 'dataplex_datascan_basic_quality'
+      project_name: :PROJECT_NAME
+    vars:
+      dataset_name: dataplex_dataset
+      datascan_name: dataprofile-full
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dataplex_datascan_basic_quality'
     primary_resource_id: 'basic_quality'
-    vars:
-      datascan_name: 'dataquality-basic'
     test_env_vars:
-      project_name: 'PROJECT_NAME'
-  - name: 'dataplex_datascan_full_quality'
+      project_name: :PROJECT_NAME
+    vars:
+      datascan_name: dataquality-basic
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dataplex_datascan_full_quality'
     primary_resource_id: 'full_quality'
-    vars:
-      datascan_name: 'dataquality-full'
     test_env_vars:
-      project_name: 'PROJECT_NAME'
+      project_name: :PROJECT_NAME
+    vars:
+      datascan_name: dataquality-full
 parameters:
-  - name: 'location'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'location'
+    immutable: true
+    required: true
+    url_param_only: true
     description: |
       The location where the data scan should reside.
-    url_param_only: true
-    required: true
+  - !ruby/object:Api::Type::String
+    name: 'dataScanId'
     immutable: true
-  - name: 'dataScanId'
-    type: String
+    required: true
+    url_param_only: true
     description: |
       DataScan identifier. Must contain only lowercase letters, numbers and hyphens. Must start with a letter. Must end with a number or a letter.
-    url_param_only: true
-    required: true
-    immutable: true
 properties:
-  - name: 'name'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    output: true
     description: |
       The relative resource name of the scan, of the form: projects/{project}/locations/{locationId}/dataScans/{datascan_id}, where project refers to a project_id or project_number and locationId refers to a GCP region.
+  - !ruby/object:Api::Type::String
+    name: 'uid'
     output: true
-  - name: 'uid'
-    type: String
     description: |
       System generated globally unique ID for the scan. This ID will be different if the scan is deleted and re-created with the same name.
-    output: true
-  - name: 'description'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'description'
     description: |
       Description of the scan.
-  - name: 'displayName'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'displayName'
     description: |
       User friendly display name.
-  - name: 'labels'
-    type: KeyValueLabels
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
     description: |
       User-defined labels for the scan. A list of key->value pairs.
-  - name: 'state'
-    type: Enum
+  - !ruby/object:Api::Type::Enum
+    name: 'state'
+    output: true
     description: |
       Current state of the DataScan.
+    values:
+      - :STATE_UNSPECIFIED
+      - :ACTIVE
+      - :CREATING
+      - :DELETING
+      - :ACTION_REQUIRED
+  - !ruby/object:Api::Type::String
+    name: 'createTime'
     output: true
-    enum_values:
-      - 'STATE_UNSPECIFIED'
-      - 'ACTIVE'
-      - 'CREATING'
-      - 'DELETING'
-      - 'ACTION_REQUIRED'
-  - name: 'createTime'
-    type: String
     description: |
       The time when the scan was created.
+  - !ruby/object:Api::Type::String
+    name: 'updateTime'
     output: true
-  - name: 'updateTime'
-    type: String
     description: |
       The time when the scan was last updated.
-    output: true
-  - name: 'data'
-    type: NestedObject
-    description: |
-      The data source for DataScan.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'data'
     required: true
     immutable: true
+    description: |
+      The data source for DataScan.
     properties:
-      - name: 'entity'
-        type: String
-        description: |
-          The Dataplex entity that represents the data source(e.g. BigQuery table) for Datascan.
+      - !ruby/object:Api::Type::String
+        name: 'entity'
         immutable: true
         exactly_one_of:
-          - 'data.0.entity'
-          - 'data.0.resource'
-      - name: 'resource'
-        type: String
+          - data.0.entity
+          - data.0.resource
+        description: |
+          The Dataplex entity that represents the data source(e.g. BigQuery table) for Datascan.
+      - !ruby/object:Api::Type::String
+        name: 'resource'
+        immutable: true
+        exactly_one_of:
+          - data.0.entity
+          - data.0.resource
         description: |
           The service-qualified full resource name of the cloud resource for a DataScan job to scan against. The field could be:
           (Cloud Storage bucket for DataDiscoveryScan)BigQuery table of type "TABLE" for DataProfileScan/DataQualityScan.
-        immutable: true
-        exactly_one_of:
-          - 'data.0.entity'
-          - 'data.0.resource'
-  - name: 'executionSpec'
-    type: NestedObject
+  - !ruby/object:Api::Type::NestedObject
+    name: 'executionSpec'
+    required: true
     description: |
       DataScan execution settings.
-    required: true
     properties:
-      - name: 'trigger'
-        type: NestedObject
+      - !ruby/object:Api::Type::NestedObject
+        name: 'trigger'
+        required: true
         description: |
           Spec related to how often and when a scan should be triggered.
-        required: true
         properties:
-          - name: 'onDemand'
-            type: NestedObject
+          - !ruby/object:Api::Type::NestedObject
+            name: 'onDemand'
+            allow_empty_object: true
+            send_empty_value: true
+            exactly_one_of:
+              - execution_spec.0.trigger.0.on_demand
+              - execution_spec.0.trigger.0.schedule
             description: |
               The scan runs once via dataScans.run API.
-            send_empty_value: true
-            allow_empty_object: true
-            exactly_one_of:
-              - 'execution_spec.0.trigger.0.on_demand'
-              - 'execution_spec.0.trigger.0.schedule'
-            properties:
-              []
-          - name: 'schedule'
-            type: NestedObject
+            properties: []
+          - !ruby/object:Api::Type::NestedObject
+            name: 'schedule'
             description: |
               The scan is scheduled to run periodically.
             exactly_one_of:
-              - 'execution_spec.0.trigger.0.on_demand'
-              - 'execution_spec.0.trigger.0.schedule'
+              - execution_spec.0.trigger.0.on_demand
+              - execution_spec.0.trigger.0.schedule
             properties:
-              - name: 'cron'
-                type: String
+              - !ruby/object:Api::Type::String
+                name: 'cron'
+                required: true
                 description:
                   Cron schedule for running scans periodically. This field is
                   required for Schedule scans.
-                required: true
-      - name: 'field'
-        type: String
+      - !ruby/object:Api::Type::String
+        name: 'field'
+        immutable: true
         description: |
           The unnested field (of type Date or Timestamp) that contains values which monotonically increase over time. If not specified, a data scan will run for all data in the table.
-        immutable: true
-  - name: 'executionStatus'
-    type: NestedObject
+  - !ruby/object:Api::Type::NestedObject
+    name: 'executionStatus'
+    output: true
     description: |
       Status of the data scan execution.
-    output: true
     properties:
-      - name: 'latestJobEndTime'
-        type: String
+      - !ruby/object:Api::Type::String
+        name: 'latestJobEndTime'
+        output: true
         description: |
           The time when the latest DataScanJob started.
+      - !ruby/object:Api::Type::String
+        name: 'latestJobStartTime'
         output: true
-      - name: 'latestJobStartTime'
-        type: String
         description: |
           The time when the latest DataScanJob ended.
-        output: true
-  - name: 'type'
-    type: Enum
+  - !ruby/object:Api::Type::Enum
+    name: 'type'
+    output: true
     description: |
       The type of DataScan.
-    output: true
-    enum_values:
-      - 'DATA_SCAN_TYPE_UNSPECIFIED'
-      - 'DATA_QUALITY'
-      - 'DATA_PROFILE'
-  - name: 'dataQualitySpec'
-    type: NestedObject
+    values:
+      - :DATA_SCAN_TYPE_UNSPECIFIED
+      - :DATA_QUALITY
+      - :DATA_PROFILE
+  - !ruby/object:Api::Type::NestedObject
+    name: 'dataQualitySpec'
+    exactly_one_of:
+      - data_quality_spec
+      - data_profile_spec
     description: |
       DataQualityScan related setting.
-    exactly_one_of:
-      - 'data_quality_spec'
-      - 'data_profile_spec'
     properties:
-      - name: 'samplingPercent'
-        type: Double
+      - !ruby/object:Api::Type::Double
+        name: 'samplingPercent'
         description: |
           The percentage of the records to be selected from the dataset for DataScan.
           Value can range between 0.0 and 100.0 with up to 3 significant decimal digits.
           Sampling is not applied if `sampling_percent` is not specified, 0 or 100.
-      - name: 'rowFilter'
-        type: String
+      - !ruby/object:Api::Type::String
+        name: 'rowFilter'
         description: |
           A filter applied to all rows in a single DataScan job. The filter needs to be a valid SQL expression for a WHERE clause in BigQuery standard SQL syntax. Example: col1 >= 0 AND col2 < 10
-      - name: 'postScanActions'
-        type: NestedObject
+      - !ruby/object:Api::Type::NestedObject
+        name: 'postScanActions'
         description: |
           Actions to take upon job completion.
         properties:
-          - name: 'bigqueryExport'
-            type: NestedObject
+          - !ruby/object:Api::Type::NestedObject
+            name: 'bigqueryExport'
             description: |
               If set, results will be exported to the provided BigQuery table.
             properties:
-              - name: 'resultsTable'
-                type: String
+              - !ruby/object:Api::Type::String
+                name: 'resultsTable'
                 description: |
                   The BigQuery table to export DataQualityScan results to.
                   Format://bigquery.googleapis.com/projects/PROJECT_ID/datasets/DATASET_ID/tables/TABLE_ID
-      - name: 'rules'
-        type: Array
+      - !ruby/object:Api::Type::Array
+        name: 'rules'
+        min_size: 1
         description: |
           The list of rules to evaluate against a data source. At least one rule is required.
-        item_type:
-          type: NestedObject
+        item_type: !ruby/object:Api::Type::NestedObject
           properties:
-            - name: 'column'
-              type: String
+            - !ruby/object:Api::Type::String
+              name: 'column'
               description: |
                 The unnested column which this rule is evaluated against.
-            - name: 'ignoreNull'
-              type: Boolean
+            - !ruby/object:Api::Type::Boolean
+              name: 'ignoreNull'
               description: |
                 Rows with null values will automatically fail a rule, unless ignoreNull is true. In that case, such null rows are trivially considered passing. Only applicable to ColumnMap rules.
-            - name: 'dimension'
-              type: String
+            - !ruby/object:Api::Type::String
+              name: 'dimension'
+              required: true
               description: |
                 The dimension a rule belongs to. Results are also aggregated at the dimension level. Supported dimensions are ["COMPLETENESS", "ACCURACY", "CONSISTENCY", "VALIDITY", "UNIQUENESS", "INTEGRITY"]
-              required: true
-            - name: 'threshold'
-              type: Double
+            - !ruby/object:Api::Type::Double
+              name: 'threshold'
               description: |
                 The minimum ratio of passing_rows / total_rows required to pass this rule, with a range of [0.0, 1.0]. 0 indicates default value (i.e. 1.0).
-            - name: 'name'
-              type: String
+            - !ruby/object:Api::Type::String
+              name: 'name'
               description: |
                 A mutable name for the rule.
                 The name must contain only letters (a-z, A-Z), numbers (0-9), or hyphens (-).
                 The maximum length is 63 characters.
                 Must start with a letter.
                 Must end with a number or a letter.
-            - name: 'description'
-              type: String
+            - !ruby/object:Api::Type::String
+              name: 'description'
               description: |
                 Description of the rule.
                 The maximum length is 1,024 characters.
-            - name: 'rangeExpectation'
-              type: NestedObject
+            - !ruby/object:Api::Type::NestedObject
+              name: 'rangeExpectation'
               description: |
                 ColumnMap rule which evaluates whether each column value lies between a specified range.
               properties:
-                - name: 'minValue'
-                  type: String
+                - !ruby/object:Api::Type::String
+                  name: 'minValue'
                   description: |
                     The minimum column value allowed for a row to pass this validation. At least one of minValue and maxValue need to be provided.
-                - name: 'maxValue'
-                  type: String
+                - !ruby/object:Api::Type::String
+                  name: 'maxValue'
                   description: |
                     The maximum column value allowed for a row to pass this validation. At least one of minValue and maxValue need to be provided.
-                - name: 'strictMinEnabled'
-                  type: Boolean
+                - !ruby/object:Api::Type::Boolean
+                  name: 'strictMinEnabled'
+                  default_value: false
                   description: |
                     Whether each value needs to be strictly greater than ('>') the minimum, or if equality is allowed.
                     Only relevant if a minValue has been defined. Default = false.
+                - !ruby/object:Api::Type::Boolean
+                  name: 'strictMaxEnabled'
                   default_value: false
-                - name: 'strictMaxEnabled'
-                  type: Boolean
                   description: |
                     Whether each value needs to be strictly lesser than ('<') the maximum, or if equality is allowed.
                     Only relevant if a maxValue has been defined. Default = false.
-                  default_value: false
-            - name: 'nonNullExpectation'
-              type: NestedObject
+            - !ruby/object:Api::Type::NestedObject
+              name: 'nonNullExpectation'
+              allow_empty_object: true
+              send_empty_value: true
               description: |
                 ColumnMap rule which evaluates whether each column value is null.
-              send_empty_value: true
-              allow_empty_object: true
-              properties:
-                []
-            - name: 'setExpectation'
-              type: NestedObject
+              properties: []
+            - !ruby/object:Api::Type::NestedObject
+              name: 'setExpectation'
               description: |
                 ColumnMap rule which evaluates whether each column value is contained by a specified set.
               properties:
-                - name: 'values'
-                  type: Array
+                - !ruby/object:Api::Type::Array
+                  name: 'values'
+                  required: true
                   description: |
                     Expected values for the column value.
-                  required: true
-                  item_type:
-                    type: String
-            - name: 'regexExpectation'
-              type: NestedObject
+                  item_type: Api::Type::String
+            - !ruby/object:Api::Type::NestedObject
+              name: 'regexExpectation'
               description: |
                 ColumnMap rule which evaluates whether each column value matches a specified regex.
               properties:
-                - name: 'regex'
-                  type: String
+                - !ruby/object:Api::Type::String
+                  name: 'regex'
+                  required: true
                   description: |
                     A regular expression the column value is expected to match.
-                  required: true
-            - name: 'uniquenessExpectation'
-              type: NestedObject
+            - !ruby/object:Api::Type::NestedObject
+              name: 'uniquenessExpectation'
+              allow_empty_object: true
+              send_empty_value: true
               description: |
                 Row-level rule which evaluates whether each column value is unique.
-              send_empty_value: true
-              allow_empty_object: true
-              properties:
-                []
-            - name: 'statisticRangeExpectation'
-              type: NestedObject
+              properties: []
+            - !ruby/object:Api::Type::NestedObject
+              name: 'statisticRangeExpectation'
               description: |
                 ColumnAggregate rule which evaluates whether the column aggregate statistic lies between a specified range.
               properties:
-                - name: 'statistic'
-                  type: Enum
+                - !ruby/object:Api::Type::Enum
+                  name: 'statistic'
+                  required: true
                   description: |
                     column statistics.
-                  required: true
-                  enum_values:
-                    - 'STATISTIC_UNDEFINED'
-                    - 'MEAN'
-                    - 'MIN'
-                    - 'MAX'
-                - name: 'minValue'
-                  type: String
+                  values:
+                    - :STATISTIC_UNDEFINED
+                    - :MEAN
+                    - :MIN
+                    - :MAX
+                - !ruby/object:Api::Type::String
+                  name: 'minValue'
                   description: |
                     The minimum column statistic value allowed for a row to pass this validation.
                     At least one of minValue and maxValue need to be provided.
-                - name: 'maxValue'
-                  type: String
+                - !ruby/object:Api::Type::String
+                  name: 'maxValue'
                   description: |
                     The maximum column statistic value allowed for a row to pass this validation.
                     At least one of minValue and maxValue need to be provided.
-                - name: 'strictMinEnabled'
-                  type: Boolean
+                - !ruby/object:Api::Type::Boolean
+                  name: 'strictMinEnabled'
+                  default_value: false
                   description: |
                     Whether column statistic needs to be strictly greater than ('>') the minimum, or if equality is allowed.
                     Only relevant if a minValue has been defined. Default = false.
+                - !ruby/object:Api::Type::Boolean
+                  name: 'strictMaxEnabled'
                   default_value: false
-                - name: 'strictMaxEnabled'
-                  type: Boolean
                   description: |
                     Whether column statistic needs to be strictly lesser than ('<') the maximum, or if equality is allowed.
                     Only relevant if a maxValue has been defined. Default = false.
-                  default_value: false
-            - name: 'rowConditionExpectation'
-              type: NestedObject
+            - !ruby/object:Api::Type::NestedObject
+              name: 'rowConditionExpectation'
               description: |
                 Table rule which evaluates whether each row passes the specified condition.
               properties:
-                - name: 'sqlExpression'
-                  type: String
+                - !ruby/object:Api::Type::String
+                  name: 'sqlExpression'
+                  required: true
                   description: |
                     The SQL expression.
-                  required: true
-            - name: 'tableConditionExpectation'
-              type: NestedObject
+            - !ruby/object:Api::Type::NestedObject
+              name: 'tableConditionExpectation'
               description: |
                 Table rule which evaluates whether the provided expression is true.
               properties:
-                - name: 'sqlExpression'
-                  type: String
+                - !ruby/object:Api::Type::String
+                  name: 'sqlExpression'
+                  required: true
                   description: |
                     The SQL expression.
-                  required: true
-            - name: 'sqlAssertion'
-              type: NestedObject
+            - !ruby/object:Api::Type::NestedObject
+              name: 'sqlAssertion'
               description: |
                 Table rule which evaluates whether any row matches invalid state.
               properties:
-                - name: 'sqlStatement'
-                  type: String
+                - !ruby/object:Api::Type::String
+                  name: 'sqlStatement'
+                  required: true
                   description: |
                     The SQL statement.
-                  required: true
-        min_size: 1
-  - name: 'dataProfileSpec'
-    type: NestedObject
+  - !ruby/object:Api::Type::NestedObject
+    name: 'dataProfileSpec'
+    allow_empty_object: true
+    send_empty_value: true
+    exactly_one_of:
+      - data_quality_spec
+      - data_profile_spec
     description: |
       DataProfileScan related setting.
-    send_empty_value: true
-    allow_empty_object: true
-    exactly_one_of:
-      - 'data_quality_spec'
-      - 'data_profile_spec'
     properties:
-      - name: 'samplingPercent'
-        type: Double
+      - !ruby/object:Api::Type::Double
+        name: 'samplingPercent'
         description: |
           The percentage of the records to be selected from the dataset for DataScan.
           Value can range between 0.0 and 100.0 with up to 3 significant decimal digits.
           Sampling is not applied if `sampling_percent` is not specified, 0 or 100.
-      - name: 'rowFilter'
-        type: String
+      - !ruby/object:Api::Type::String
+        name: 'rowFilter'
         description: |
           A filter applied to all rows in a single DataScan job. The filter needs to be a valid SQL expression for a WHERE clause in BigQuery standard SQL syntax. Example: col1 >= 0 AND col2 < 10
-      - name: 'postScanActions'
-        type: NestedObject
+      - !ruby/object:Api::Type::NestedObject
+        name: 'postScanActions'
         description: |
           Actions to take upon job completion.
         properties:
-          - name: 'bigqueryExport'
-            type: NestedObject
+          - !ruby/object:Api::Type::NestedObject
+            name: 'bigqueryExport'
             description: |
               If set, results will be exported to the provided BigQuery table.
             properties:
-              - name: 'resultsTable'
-                type: String
+              - !ruby/object:Api::Type::String
+                name: 'resultsTable'
                 description: |
                   The BigQuery table to export DataProfileScan results to.
                   Format://bigquery.googleapis.com/projects/PROJECT_ID/datasets/DATASET_ID/tables/TABLE_ID
-      - name: 'includeFields'
-        type: NestedObject
+      - !ruby/object:Api::Type::NestedObject
+        name: 'includeFields'
         description: |
           The fields to include in data profile.
           If not specified, all fields at the time of profile scan job execution are included, except for ones listed in `exclude_fields`.
         properties:
-          - name: 'fieldNames'
-            type: Array
+          - !ruby/object:Api::Type::Array
+            name: 'fieldNames'
             description: |
               Expected input is a list of fully qualified names of fields as in the schema.
               Only top-level field names for nested fields are supported.
               For instance, if 'x' is of nested field type, listing 'x' is supported but 'x.y.z' is not supported. Here 'y' and 'y.z' are nested fields of 'x'.
-            item_type:
-              type: String
-      - name: 'excludeFields'
-        type: NestedObject
+            item_type: Api::Type::String
+      - !ruby/object:Api::Type::NestedObject
+        name: 'excludeFields'
         description: |
           The fields to exclude from data profile.
           If specified, the fields will be excluded from data profile, regardless of `include_fields` value.
         properties:
-          - name: 'fieldNames'
-            type: Array
+          - !ruby/object:Api::Type::Array
+            name: 'fieldNames'
             description: |
               Expected input is a list of fully qualified names of fields as in the schema.
               Only top-level field names for nested fields are supported.
               For instance, if 'x' is of nested field type, listing 'x' is supported but 'x.y.z' is not supported. Here 'y' and 'y.z' are nested fields of 'x'.
-            item_type:
-              type: String
+            item_type: Api::Type::String

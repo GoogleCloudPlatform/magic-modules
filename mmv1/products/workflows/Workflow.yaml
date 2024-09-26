@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2023 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,93 +11,78 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
+--- !ruby/object:Api::Resource
 name: 'Workflow'
 description: |
   Workflow program to be executed by Workflows.
-references:
+references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Managing Workflows': 'https://cloud.google.com/workflows/docs/creating-updating-workflow'
   api: 'https://cloud.google.com/workflows/docs/reference/rest/v1/projects.locations.workflows'
-docs:
+base_url: projects/{{project}}/locations/{{region}}/workflows
+create_url: projects/{{project}}/locations/{{region}}/workflows?workflowId={{name}}
+self_link: 'projects/{{project}}/locations/{{region}}/workflows/{{name}}'
+update_verb: :PATCH
+update_mask: true
+docs: !ruby/object:Provider::Terraform::Docs
   optional_properties: |
     * `name_prefix` - (Optional) Creates a unique name beginning with the
      specified prefix. If this and name are unspecified, a random value is chosen for the name.
-id_format: 'projects/{{project}}/locations/{{region}}/workflows/{{name}}'
-base_url: 'projects/{{project}}/locations/{{region}}/workflows'
-self_link: 'projects/{{project}}/locations/{{region}}/workflows/{{name}}'
-create_url: 'projects/{{project}}/locations/{{region}}/workflows?workflowId={{name}}'
-update_verb: 'PATCH'
-update_mask: true
-exclude_import: true
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
 autogen_async: true
-async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
-  result:
-    path: 'response'
-    resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
-custom_code:
-  extra_schema_entry: 'templates/terraform/extra_schema_entry/workflow.tmpl'
-  encoder: 'templates/terraform/encoders/workflow.go.tmpl'
+id_format: 'projects/{{project}}/locations/{{region}}/workflows/{{name}}'
+exclude_import: true
 schema_version: 1
 state_upgraders: true
 examples:
-  - name: 'workflow_basic'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'workflow_basic'
     primary_resource_id: 'example'
     vars:
       name: 'workflow'
       account_id: 'my-account'
-    exclude_import_test: true
+    skip_import_test: true
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  extra_schema_entry: templates/terraform/extra_schema_entry/workflow.erb
+  encoder: templates/terraform/encoders/workflow.go.erb
+
 parameters:
-  - name: 'region'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: region
     description: The region of the workflow.
     url_param_only: true
     immutable: true
 properties:
-  - name: 'name'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'name'
     description: Name of the Workflow.
     immutable: true
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-  - name: 'description'
-    type: String
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+  - !ruby/object:Api::Type::String
+    name: 'description'
     description: |
       Description of the workflow provided by the user. Must be at most 1000 unicode characters long.
     default_from_api: true
-  - name: 'createTime'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'createTime'
+    output: true
     description: |
       The timestamp of when the workflow was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+  - !ruby/object:Api::Type::String
+    name: 'updateTime'
     output: true
-  - name: 'updateTime'
-    type: String
     description: |
       The timestamp of when the workflow was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+  - !ruby/object:Api::Type::String
+    name: 'state'
     output: true
-  - name: 'state'
-    type: String
     description: State of the workflow deployment.
-    output: true
-  - name: 'labels'
-    type: KeyValueLabels
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
     description: |
       A set of key/value label pairs to assign to this Workflow.
-  - name: 'serviceAccount'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'serviceAccount'
     description: |
       Name of the service account associated with the latest workflow version. This service
       account represents the identity of the workflow and determines what permissions the workflow has.
@@ -108,33 +93,33 @@ properties:
       Modifying this field for an existing workflow results in a new workflow revision.
     default_from_api: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-  - name: 'sourceContents'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'sourceContents'
     description: |
       Workflow code to be executed. The size limit is 128KB.
-  - name: 'revisionId'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'revisionId'
+    output: true
     description: |
       The revision of the workflow. A new one is generated if the service account or source contents is changed.
-    output: true
-  - name: 'cryptoKeyName'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'cryptoKeyName'
     description: |
       The KMS key used to encrypt workflow and execution data.
 
       Format: projects/{project}/locations/{location}/keyRings/{keyRing}/cryptoKeys/{cryptoKey}
-  - name: 'callLogLevel'
-    type: Enum
+  - !ruby/object:Api::Type::Enum
+    name: 'callLogLevel'
     description: |
       Describes the level of platform logging to apply to calls and call responses during
       executions of this workflow. If both the workflow and the execution specify a logging level,
       the execution level takes precedence.
-    enum_values:
-      - 'CALL_LOG_LEVEL_UNSPECIFIED'
-      - 'LOG_ALL_CALLS'
-      - 'LOG_ERRORS_ONLY'
-      - 'LOG_NONE'
-  - name: 'userEnvVars'
-    type: KeyValuePairs
+    values:
+      - :CALL_LOG_LEVEL_UNSPECIFIED
+      - :LOG_ALL_CALLS
+      - :LOG_ERRORS_ONLY
+      - :LOG_NONE
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: 'userEnvVars'
     description: |
       User-defined environment variables associated with this workflow revision. This map has a maximum length of 20. Each string can take up to 4KiB. Keys cannot be empty strings and cannot start with “GOOGLE” or “WORKFLOWS".

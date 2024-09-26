@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2023 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,9 +11,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
+--- !ruby/object:Api::Resource
 name: 'GlobalNetworkEndpointGroup'
 kind: 'compute#networkEndpointGroup'
+base_url: 'projects/{{project}}/global/networkEndpointGroups'
+immutable: true
+has_self_link: true
+collection_url_key: 'items'
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/load-balancing/docs/negs/internet-neg-concepts'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/beta/networkEndpointGroups'
 description: |
   A global network endpoint group contains endpoints that reside outside of Google Cloud.
   Currently a global network endpoint group can only support a single endpoint.
@@ -21,47 +29,38 @@ description: |
   Recreating a global network endpoint group that's in use by another resource will give a
   `resourceInUseByAnotherResource` error. Use `lifecycle.create_before_destroy`
   to avoid this type of error.
-references:
-  guides:
-    'Official Documentation': 'https://cloud.google.com/load-balancing/docs/negs/internet-neg-concepts'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/beta/networkEndpointGroups'
-docs:
-base_url: 'projects/{{project}}/global/networkEndpointGroups'
-has_self_link: true
-immutable: true
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
+    base_url: '{{op_id}}'
     wait_ms: 1000
-  result:
+  result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
-    resource_inside_response: false
-  error:
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'status'
+    complete: 'DONE'
+    allowed:
+      - 'PENDING'
+      - 'RUNNING'
+      - 'DONE'
+  error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
-collection_url_key: 'items'
-custom_code:
 examples:
-  - name: 'global_network_endpoint_group'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'global_network_endpoint_group'
     primary_resource_id: 'neg'
     vars:
       neg_name: 'my-lb-neg'
-  - name: 'global_network_endpoint_group_ip_address'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'global_network_endpoint_group_ip_address'
     primary_resource_id: 'neg'
     vars:
       neg_name: 'my-lb-neg'
-parameters:
 properties:
-  - name: 'name'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'name'
     description: |
       Name of the resource; provided by the client when the resource is
       created. The name must be 1-63 characters long, and comply with
@@ -71,23 +70,23 @@ properties:
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
     required: true
-    validation:
+    validation: !ruby/object:Provider::Terraform::Validation
       function: 'verify.ValidateGCEName'
-  - name: 'description'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'description'
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
-  - name: 'networkEndpointType'
-    type: Enum
+  - !ruby/object:Api::Type::Enum
+    name: 'networkEndpointType'
+    required: true
     description: |
       Type of network endpoints in this network endpoint group.
-    required: true
-    enum_values:
-      - 'INTERNET_IP_PORT'
-      - 'INTERNET_FQDN_PORT'
-  - name: 'defaultPort'
-    type: Integer
+    values:
+      - :INTERNET_IP_PORT
+      - :INTERNET_FQDN_PORT
+  - !ruby/object:Api::Type::Integer
+    name: 'defaultPort'
     description: |
       The default port used if the port number is not specified in the
       network endpoint.

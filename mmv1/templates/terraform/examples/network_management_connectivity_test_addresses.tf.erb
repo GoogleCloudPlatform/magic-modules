@@ -1,0 +1,44 @@
+resource "google_network_management_connectivity_test" "<%= ctx[:primary_resource_id] %>" {
+  name = "<%= ctx[:vars]['primary_resource_name'] %>"
+  source {
+      ip_address = google_compute_address.source-addr.address
+      project_id = google_compute_address.source-addr.project
+      network = google_compute_network.vpc.id
+      network_type = "GCP_NETWORK"
+  }
+
+  destination {
+      ip_address = google_compute_address.dest-addr.address
+      project_id = google_compute_address.dest-addr.project
+      network = google_compute_network.vpc.id
+  }
+
+  protocol = "UDP"
+}
+
+resource "google_compute_network" "vpc" {
+  name = "<%= ctx[:vars]['network'] %>"
+}
+
+resource "google_compute_subnetwork" "subnet" {
+  name          = "<%= ctx[:vars]['network'] %>-subnet"
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.vpc.id
+}
+
+resource "google_compute_address" "source-addr" {
+  name         = "<%= ctx[:vars]['source_addr'] %>"
+  subnetwork   = google_compute_subnetwork.subnet.id
+  address_type = "INTERNAL"
+  address      = "10.0.42.42"
+  region       = "us-central1"
+}
+
+resource "google_compute_address" "dest-addr" {
+  name         = "<%= ctx[:vars]['dest_addr'] %>"
+  subnetwork   = google_compute_subnetwork.subnet.id
+  address_type = "INTERNAL"
+  address      = "10.0.43.43"
+  region       = "us-central1"
+}

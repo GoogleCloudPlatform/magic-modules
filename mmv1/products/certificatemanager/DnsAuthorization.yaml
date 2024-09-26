@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2023 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,88 +11,88 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
+--- !ruby/object:Api::Resource
 name: 'DnsAuthorization'
+base_url: 'projects/{{project}}/locations/{{location}}/dnsAuthorizations'
+create_url: 'projects/{{project}}/locations/{{location}}/dnsAuthorizations?dnsAuthorizationId={{name}}'
+self_link: 'projects/{{project}}/locations/{{location}}/dnsAuthorizations/{{name}}'
+update_verb: :PATCH
+update_mask: true
 description: |
   DnsAuthorization represents a HTTP-reachable backend for a DnsAuthorization.
-docs:
-base_url: 'projects/{{project}}/locations/{{location}}/dnsAuthorizations'
-self_link: 'projects/{{project}}/locations/{{location}}/dnsAuthorizations/{{name}}'
-create_url: 'projects/{{project}}/locations/{{location}}/dnsAuthorizations?dnsAuthorizationId={{name}}'
-update_verb: 'PATCH'
-update_mask: true
-import_format:
-  - 'projects/{{project}}/locations/{{location}}/dnsAuthorizations/{{name}}'
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-autogen_async: true
-async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
+    base_url: '{{op_id}}'
     wait_ms: 1000
-  result:
+  result: !ruby/object:Api::OpAsync::Result
     path: 'response'
-    resource_inside_response: false
-  error:
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
-custom_code:
+docs: !ruby/object:Provider::Terraform::Docs
+autogen_async: true
+import_format:
+  ['projects/{{project}}/locations/{{location}}/dnsAuthorizations/{{name}}']
 schema_version: 1
 state_upgraders: true
 examples:
-  - name: 'certificate_manager_dns_authorization_basic'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'certificate_manager_dns_authorization_basic'
     primary_resource_id: 'default'
     vars:
       dns_auth_name: 'dns-auth'
       zone_name: 'my-zone'
       subdomain: 'subdomain'
-  - name: 'certificate_manager_dns_authorization_regional'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'certificate_manager_dns_authorization_regional'
     primary_resource_id: 'default'
     vars:
       dns_auth_name: 'dns-auth'
       zone_name: 'my-zone'
       subdomain: 'subdomain'
 parameters:
-  - name: 'name'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    required: true
+    immutable: true
+    url_param_only: true
     description: |
       Name of the resource; provided by the client when the resource is created.
       The name must be 1-64 characters long, and match the regular expression [a-zA-Z][a-zA-Z0-9_-]* which means the first character must be a letter,
       and all following characters must be a dash, underscore, letter or digit.
-    url_param_only: true
-    required: true
-    immutable: true
-  - name: 'location'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'location'
     description: |
       The Certificate Manager location. If not specified, "global" is used.
-    url_param_only: true
+    default_value: global
     immutable: true
-    default_value: "global"
+    url_param_only: true
 properties:
-  - name: 'description'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'description'
     description: |
       A human-readable description of the resource.
-  - name: 'labels'
-    type: KeyValueLabels
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
     description:
       'Set of label tags associated with the DNS Authorization resource.'
-  - name: 'domain'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'domain'
+    immutable: true
+    required: true
     description: |
       A domain which is being authorized. A DnsAuthorization resource covers a
       single domain and its wildcard, e.g. authorization for "example.com" can
       be used to issue certificates for "example.com" and "*.example.com".
-    required: true
-    immutable: true
-  - name: 'type'
-    type: Enum
+  - !ruby/object:Api::Type::Enum
+    name: type
     description: |
       type of DNS authorization. If unset during the resource creation, FIXED_RECORD will
       be used for global resources, and PER_PROJECT_RECORD will be used for other locations.
@@ -103,31 +103,31 @@ properties:
       of Google-managed certificates with DNS authorization across multiple
       projects.
     immutable: true
+    values:
+      - :FIXED_RECORD
+      - :PER_PROJECT_RECORD
     default_from_api: true
-    enum_values:
-      - 'FIXED_RECORD'
-      - 'PER_PROJECT_RECORD'
-  - name: 'dnsResourceRecord'
-    type: NestedObject
+  - !ruby/object:Api::Type::NestedObject
+    name: 'dnsResourceRecord'
+    output: true
     description: |
       The structure describing the DNS Resource Record that needs to be added
       to DNS configuration for the authorization to be usable by
       certificate.
-    output: true
     properties:
-      - name: 'name'
-        type: String
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        output: true
         description: |
           Fully qualified name of the DNS Resource Record.
           E.g. `_acme-challenge.example.com`.
+      - !ruby/object:Api::Type::String
+        name: 'type'
         output: true
-      - name: 'type'
-        type: String
         description: |
           Type of the DNS Resource Record.
+      - !ruby/object:Api::Type::String
+        name: 'data'
         output: true
-      - name: 'data'
-        type: String
         description: |
           Data of the DNS Resource Record.
-        output: true

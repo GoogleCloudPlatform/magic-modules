@@ -1,0 +1,37 @@
+resource "google_data_loss_prevention_job_trigger" "<%= ctx[:primary_resource_id] %>" {
+	parent = "projects/<%= ctx[:test_env_vars]['project'] %>"
+	description = "Description"
+	display_name = "Displayname"
+
+	triggers {
+		schedule {
+			recurrence_period_duration = "86400s"
+		}
+	}
+
+	inspect_job {
+		inspect_template_name = "fake"
+		actions {
+			save_findings {
+				output_config {
+					table {
+						project_id = "project"
+						dataset_id = "dataset"
+					}
+				}
+			}
+		}
+		storage_config {
+			big_query_options {
+				table_reference {
+				    project_id = "project"
+				    dataset_id = "dataset"
+				    table_id = "table_to_scan"
+				}
+
+				rows_limit_percent = 50
+				sample_method = "RANDOM_START"
+			}
+		}
+	}
+}

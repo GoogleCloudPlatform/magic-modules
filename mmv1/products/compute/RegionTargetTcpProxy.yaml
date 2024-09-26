@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2023 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,75 +11,74 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
+--- !ruby/object:Api::Resource
 name: 'RegionTargetTcpProxy'
+base_url: projects/{{project}}/regions/{{region}}/targetTcpProxies
+has_self_link: true
+immutable: true
 description: |
   Represents a RegionTargetTcpProxy resource, which is used by one or more
   forwarding rules to route incoming TCP requests to a regional TCP proxy load
   balancer.
-references:
+references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/load-balancing/docs/tcp/internal-proxy'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionTargetTcpProxies'
-docs:
-base_url: 'projects/{{project}}/regions/{{region}}/targetTcpProxies'
-has_self_link: true
-immutable: true
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
+    base_url: '{{op_id}}'
     wait_ms: 1000
-  result:
+  result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
-    resource_inside_response: false
-  error:
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'status'
+    complete: 'DONE'
+    allowed:
+      - 'PENDING'
+      - 'RUNNING'
+      - 'DONE'
+  error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
-custom_code:
 examples:
-  - name: 'region_target_tcp_proxy_basic'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'region_target_tcp_proxy_basic'
     primary_resource_id: 'default'
     vars:
       region_target_tcp_proxy_name: 'test-proxy'
       region_backend_service_name: 'backend-service'
       health_check_name: 'health-check'
 parameters:
-  - name: 'region'
-    type: ResourceRef
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'region'
+    resource: 'Region'
+    imports: 'name'
+    required: false
+    immutable: true
     description: |
       The Region in which the created target TCP proxy should reside.
       If it is not provided, the provider region is used.
-    required: false
-    immutable: true
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Region'
-    imports: 'name'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
-  - name: 'creationTimestamp'
-    type: Time
+  - !ruby/object:Api::Type::Time
+    name: 'creationTimestamp'
     description: 'Creation timestamp in RFC3339 text format.'
     output: true
-  - name: 'description'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'description'
     description: 'An optional description of this resource.'
     immutable: true
-  - name: 'proxyId'
-    type: Integer
+  - !ruby/object:Api::Type::Integer
+    name: 'proxyId'
+    api_name: 'id'
     description: 'The unique identifier for the resource.'
-    api_name: id
     output: true
-  - name: 'name'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'name'
     description: |
       Name of the resource. Provided by the client when the resource is
       created. The name must be 1-63 characters long, and comply with
@@ -88,28 +87,28 @@ properties:
       first character must be a lowercase letter, and all following
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
-    required: true
     immutable: true
-  - name: 'proxyHeader'
-    type: Enum
+    required: true
+  - !ruby/object:Api::Type::Enum
+    name: 'proxyHeader'
     description: |
       Specifies the type of proxy header to append before sending data to
       the backend.
-    default_value: "NONE"
-    enum_values:
-      - 'NONE'
-      - 'PROXY_V1'
-  - name: 'backendService'
-    type: ResourceRef
-    description: |
-      A reference to the BackendService resource.
-    api_name: service
-    required: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    values:
+      - :NONE
+      - :PROXY_V1
+    default_value: :NONE
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'backendService'
+    api_name: 'service'
     resource: 'RegionBackendService'
     imports: 'selfLink'
-  - name: 'proxyBind'
-    type: Boolean
+    description: |
+      A reference to the BackendService resource.
+    required: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+  - !ruby/object:Api::Type::Boolean
+    name: 'proxyBind'
     description: |
       This field only applies when the forwarding rule that references
       this target proxy has a loadBalancingScheme set to INTERNAL_SELF_MANAGED.

@@ -1,165 +1,163 @@
-# Copyright 2024 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the "License");
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
+# distributed under the License is distributed on an 'AS IS' BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
+--- !ruby/object:Api::Resource
 name: 'ClientTlsPolicy'
+base_url: 'projects/{{project}}/locations/{{location}}/clientTlsPolicies'
+create_url: 'projects/{{project}}/locations/{{location}}/clientTlsPolicies?clientTlsPolicyId={{name}}'
+update_verb: :PATCH
+update_mask: true
 description: |
   ClientTlsPolicy is a resource that specifies how a client should authenticate connections to backends of a service. This resource itself does not affect configuration unless it is attached to a backend service resource.
-references:
+references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Service Security': 'https://cloud.google.com/traffic-director/docs/security-use-cases'
   api: 'https://cloud.google.com/traffic-director/docs/reference/network-security/rest/v1beta1/projects.locations.clientTlsPolicies'
-docs:
-base_url: 'projects/{{project}}/locations/{{location}}/clientTlsPolicies'
-create_url: 'projects/{{project}}/locations/{{location}}/clientTlsPolicies?clientTlsPolicyId={{name}}'
-update_verb: 'PATCH'
-update_mask: true
-import_format:
-  - 'projects/{{project}}/locations/{{location}}/clientTlsPolicies/{{name}}'
-timeouts:
-  insert_minutes: 30
-  update_minutes: 30
-  delete_minutes: 30
-autogen_async: true
-async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
+    base_url: '{{op_id}}'
     wait_ms: 1000
-    timeouts:
+    timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 30
       update_minutes: 30
       delete_minutes: 30
-  result:
+  result: !ruby/object:Api::OpAsync::Result
     path: 'response'
-    resource_inside_response: false
-  error:
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
-custom_code:
+autogen_async: true
+import_format:
+  ['projects/{{project}}/locations/{{location}}/clientTlsPolicies/{{name}}']
 examples:
-  - name: 'network_security_client_tls_policy_basic'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'network_security_client_tls_policy_basic'
+    # Currently failing
+    skip_vcr: true
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-client-tls-policy'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'network_security_client_tls_policy_advanced'
     # Currently failing
     skip_vcr: true
-  - name: 'network_security_client_tls_policy_advanced'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-client-tls-policy'
-    # Currently failing
-    skip_vcr: true
 parameters:
-  - name: 'name'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    required: true
+    url_param_only: true
+    immutable: true
     description: |
       Name of the ClientTlsPolicy resource.
-    url_param_only: true
-    required: true
-    immutable: true
-  - name: 'location'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'location'
+    default_value: 'global'
     description: |
       The location of the client tls policy.
       The default value is `global`.
     url_param_only: true
-    default_value: "global"
 properties:
-  - name: 'createTime'
-    type: Time
+  - !ruby/object:Api::Type::Time
+    name: 'createTime'
     description: |
       Time the ClientTlsPolicy was created in UTC.
     output: true
-  - name: 'updateTime'
-    type: Time
+  - !ruby/object:Api::Type::Time
+    name: 'updateTime'
     description: |
       Time the ClientTlsPolicy was updated in UTC.
     output: true
-  - name: 'labels'
-    type: KeyValueLabels
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
     description: Set of label tags associated with the ClientTlsPolicy resource.
-  - name: 'description'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'description'
     description: |
       A free-text description of the resource. Max length 1024 characters.
-  - name: 'sni'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'sni'
     description: |
       Server Name Indication string to present to the server during TLS handshake. E.g: "secure.example.com".
-  - name: 'clientCertificate'
-    type: NestedObject
+  - !ruby/object:Api::Type::NestedObject
+    name: 'clientCertificate'
     description: |
       Defines a mechanism to provision client identity (public and private keys) for peer to peer authentication. The presence of this dictates mTLS.
     properties:
-      - name: 'grpcEndpoint'
-        type: NestedObject
+      - !ruby/object:Api::Type::NestedObject
+        name: 'grpcEndpoint'
         description: |
           gRPC specific configuration to access the gRPC server to obtain the cert and private key.
         exactly_one_of:
-          - 'grpc_endpoint'
-          - 'certificate_provider_instance'
+          - grpc_endpoint
+          - certificate_provider_instance
         properties:
-          - name: 'targetUri'
-            type: String
+          - !ruby/object:Api::Type::String
+            name: 'targetUri'
             description: |
               The target URI of the gRPC endpoint. Only UDS path is supported, and should start with "unix:".
             required: true
-      - name: 'certificateProviderInstance'
-        type: NestedObject
+      - !ruby/object:Api::Type::NestedObject
+        name: 'certificateProviderInstance'
         description: |
           The certificate provider instance specification that will be passed to the data plane, which will be used to load necessary credential information.
         exactly_one_of:
-          - 'grpc_endpoint'
-          - 'certificate_provider_instance'
+          - grpc_endpoint
+          - certificate_provider_instance
         properties:
-          - name: 'pluginInstance'
-            type: String
+          - !ruby/object:Api::Type::String
+            name: 'pluginInstance'
             description: |
               Plugin instance name, used to locate and load CertificateProvider instance configuration. Set to "google_cloud_private_spiffe" to use Certificate Authority Service certificate provider instance.
             required: true
-  - name: 'serverValidationCa'
-    type: Array
+  - !ruby/object:Api::Type::Array
+    name: 'serverValidationCa'
     description: |
       Defines the mechanism to obtain the Certificate Authority certificate to validate the server certificate. If empty, client does not validate the server certificate.
-    item_type:
-      type: NestedObject
+    item_type: !ruby/object:Api::Type::NestedObject
       properties:
-        - name: 'grpcEndpoint'
-          type: NestedObject
+        - !ruby/object:Api::Type::NestedObject
+          name: 'grpcEndpoint'
           description: |
             gRPC specific configuration to access the gRPC server to obtain the cert and private key.
           exactly_one_of:
-            - 'grpc_endpoint'
-            - 'certificate_provider_instance'
+            - grpc_endpoint
+            - certificate_provider_instance
           properties:
-            - name: 'targetUri'
-              type: String
+            - !ruby/object:Api::Type::String
+              name: 'targetUri'
               description: |
                 The target URI of the gRPC endpoint. Only UDS path is supported, and should start with "unix:".
               required: true
-        - name: 'certificateProviderInstance'
-          type: NestedObject
+        - !ruby/object:Api::Type::NestedObject
+          name: 'certificateProviderInstance'
           description: |
             The certificate provider instance specification that will be passed to the data plane, which will be used to load necessary credential information.
           exactly_one_of:
-            - 'grpc_endpoint'
-            - 'certificate_provider_instance'
+            - grpc_endpoint
+            - certificate_provider_instance
           properties:
-            - name: 'pluginInstance'
-              type: String
+            - !ruby/object:Api::Type::String
+              name: 'pluginInstance'
               description: |
                 Plugin instance name, used to locate and load CertificateProvider instance configuration. Set to "google_cloud_private_spiffe" to use Certificate Authority Service certificate provider instance.
               required: true

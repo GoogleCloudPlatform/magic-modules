@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2023 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,9 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
+--- !ruby/object:Api::Resource
 name: 'BackendBucket'
 kind: 'compute#backendBucket'
+base_url: projects/{{project}}/global/backendBuckets
+collection_url_key: 'items'
+has_self_link: true
 description: |
   Backend buckets allow you to use Google Cloud Storage buckets with HTTP(S)
   load balancing.
@@ -22,70 +25,69 @@ description: |
   backend bucket rather than a backend service. It can send requests for
   static content to a Cloud Storage bucket and requests for dynamic content
   to a virtual machine instance.
-references:
+references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Using a Cloud Storage bucket as a load balancer backend': 'https://cloud.google.com/compute/docs/load-balancing/http/backend-bucket'
   api: 'https://cloud.google.com/compute/docs/reference/v1/backendBuckets'
-docs:
-base_url: 'projects/{{project}}/global/backendBuckets'
-has_self_link: true
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
+    base_url: '{{op_id}}'
     wait_ms: 1000
-  result:
+  result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
-    resource_inside_response: false
-  error:
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'status'
+    complete: 'DONE'
+    allowed:
+      - 'PENDING'
+      - 'RUNNING'
+      - 'DONE'
+  error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
-collection_url_key: 'items'
-iam_policy:
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  min_version: beta
   parent_resource_attribute: 'name'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
-    - 'projects/{{project}}/global/backendBuckets/{{name}}'
-    - '{{name}}'
-  min_version: 'beta'
-custom_code:
-  encoder: 'templates/terraform/encoders/compute_backend_bucket.go.tmpl'
-  post_create: 'templates/terraform/post_create/compute_backend_bucket_security_policy.go.tmpl'
-  post_update: 'templates/terraform/post_create/compute_backend_bucket_security_policy.go.tmpl'
+    ['projects/{{project}}/global/backendBuckets/{{name}}', '{{name}}']
 examples:
-  - name: 'backend_bucket_basic'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'backend_bucket_basic'
     primary_resource_id: 'image_backend'
-    primary_resource_name: 'fmt.Sprintf("tf-test-image-backend-bucket%s", context["random_suffix"])'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-image-backend-bucket%s\",
+      context[\"\
+      random_suffix\"])"
     vars:
       backend_bucket_name: 'image-backend-bucket'
       bucket_name: 'image-store-bucket'
-  - name: 'backend_bucket_full'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'backend_bucket_full'
     primary_resource_id: 'image_backend_full'
+    skip_docs: true
     vars:
       backend_bucket_name: 'image-backend-bucket-full'
       bucket_name: 'image-store-bucket-full'
-    exclude_docs: true
-  - name: 'backend_bucket_security_policy'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'backend_bucket_security_policy'
     primary_resource_id: 'image_backend'
     vars:
       backend_bucket_name: 'image-backend-bucket'
       bucket_name: 'image-store-bucket'
-  - name: 'backend_bucket_query_string_whitelist'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'backend_bucket_query_string_whitelist'
     primary_resource_id: 'image_backend'
     vars:
       backend_bucket_name: 'image-backend-bucket'
-  - name: 'backend_bucket_include_http_headers'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'backend_bucket_include_http_headers'
     primary_resource_id: 'image_backend'
     vars:
       backend_bucket_name: 'image-backend-bucket'
-  - name: 'external_cdn_lb_with_backend_bucket'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'external_cdn_lb_with_backend_bucket'
+    primary_resource_type: 'google_compute_backend_bucket'
     primary_resource_id: 'default'
     vars:
       my_bucket: 'my-bucket'
@@ -97,59 +99,62 @@ examples:
       http_lb_proxy: 'http-lb-proxy'
       http_lb: 'http-lb'
       cat_backend_bucket: 'cat-backend-bucket'
-    exclude_docs: true
-  - name: 'backend_bucket_bypass_cache'
+    skip_docs: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'backend_bucket_bypass_cache'
     primary_resource_id: 'image_backend'
+    skip_docs: true
     vars:
       backend_bucket_name: 'image-backend-bucket'
       bucket_name: 'image-store-bucket'
-    exclude_docs: true
-  - name: 'backend_bucket_coalescing'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'backend_bucket_coalescing'
     primary_resource_id: 'image_backend'
+    skip_docs: true
     vars:
       backend_bucket_name: 'image-backend-bucket'
       bucket_name: 'image-store-bucket'
-    exclude_docs: true
-parameters:
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  encoder: 'templates/terraform/encoders/compute_backend_bucket.go.erb'
+  post_create: 'templates/terraform/post_create/compute_backend_bucket_security_policy.go.erb'
+  post_update: 'templates/terraform/post_create/compute_backend_bucket_security_policy.go.erb'
 properties:
-  - name: 'bucketName'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'bucketName'
     description: 'Cloud Storage bucket name.'
     required: true
-  - name: 'cdnPolicy'
-    type: NestedObject
+  - !ruby/object:Api::Type::NestedObject
+    name: 'cdnPolicy'
     description: 'Cloud CDN configuration for this Backend Bucket.'
     default_from_api: true
     properties:
-      - name: 'cacheKeyPolicy'
-        type: NestedObject
+      - !ruby/object:Api::Type::NestedObject
+        name: 'cacheKeyPolicy'
         description: 'The CacheKeyPolicy for this CdnPolicy.'
         properties:
-          - name: 'queryStringWhitelist'
-            type: Array
+          - !ruby/object:Api::Type::Array
+            send_empty_value: true
+            name: 'queryStringWhitelist'
+            at_least_one_of:
+              - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+              - cdn_policy.0.cache_key_policy.0.include_http_headers
             description: |
               Names of query string parameters to include in cache keys.
               Default parameters are always included. '&' and '=' will
               be percent encoded and not treated as delimiters.
+            item_type: Api::Type::String
+          - !ruby/object:Api::Type::Array
             send_empty_value: true
+            name: 'includeHttpHeaders'
             at_least_one_of:
-              - 'cdn_policy.0.cache_key_policy.0.query_string_whitelist'
-              - 'cdn_policy.0.cache_key_policy.0.include_http_headers'
-            item_type:
-              type: String
-          - name: 'includeHttpHeaders'
-            type: Array
+              - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+              - cdn_policy.0.cache_key_policy.0.include_http_headers
             description: |
               Allows HTTP request headers (by name) to be used in the
               cache key.
-            send_empty_value: true
-            at_least_one_of:
-              - 'cdn_policy.0.cache_key_policy.0.query_string_whitelist'
-              - 'cdn_policy.0.cache_key_policy.0.include_http_headers'
-            item_type:
-              type: String
-      - name: 'signedUrlCacheMaxAgeSec'
-        type: Integer
+            item_type: Api::Type::String
+      - !ruby/object:Api::Type::Integer
+        name: 'signedUrlCacheMaxAgeSec'
         description: |
           Maximum number of seconds the response to a signed URL request will
           be considered fresh. After this time period,
@@ -160,114 +165,111 @@ properties:
           max-age=[TTL]" header, regardless of any existing Cache-Control
           header. The actual headers served in responses will not be altered.
         send_empty_value: true
-      - name: 'defaultTtl'
-        type: Integer
+      - !ruby/object:Api::Type::Integer
+        name: 'defaultTtl'
         description: |
           Specifies the default TTL for cached content served by this origin for responses
           that do not have an existing valid TTL (max-age or s-max-age).
         default_from_api: true
         send_empty_value: true
-      - name: 'maxTtl'
-        type: Integer
+      - !ruby/object:Api::Type::Integer
+        name: 'maxTtl'
         description: |
           Specifies the maximum allowed TTL for cached content served by this origin.
         default_from_api: true
-      - name: 'clientTtl'
-        type: Integer
+      - !ruby/object:Api::Type::Integer
+        name: 'clientTtl'
         description: |
           Specifies the maximum allowed TTL for cached content served by this origin.
         default_from_api: true
         send_empty_value: true
-      - name: 'negativeCaching'
-        type: Boolean
+      - !ruby/object:Api::Type::Boolean
+        name: 'negativeCaching'
+        send_empty_value: true
         description: |
           Negative caching allows per-status code TTLs to be set, in order to apply fine-grained caching for common errors or redirects.
         default_from_api: true
-        send_empty_value: true
-      - name: 'negativeCachingPolicy'
-        type: Array
+      - !ruby/object:Api::Type::Array
+        name: 'negativeCachingPolicy'
         description: |
           Sets a cache TTL for the specified HTTP status code. negativeCaching must be enabled to configure negativeCachingPolicy.
           Omitting the policy and leaving negativeCaching enabled will use Cloud CDN's default cache TTLs.
-        item_type:
-          type: NestedObject
+        item_type: !ruby/object:Api::Type::NestedObject
           properties:
-            - name: 'code'
-              type: Integer
+            - !ruby/object:Api::Type::Integer
+              name: 'code'
               description: |
                 The HTTP status code to define a TTL against. Only HTTP status codes 300, 301, 308, 404, 405, 410, 421, 451 and 501
                 can be specified as values, and you cannot specify a status code more than once.
-            - name: 'ttl'
-              type: Integer
+            - !ruby/object:Api::Type::Integer
+              name: 'ttl'
               description: |
                 The TTL (in seconds) for which to cache responses with the corresponding status code. The maximum allowed value is 1800s
                 (30 minutes), noting that infrequently accessed objects may be evicted from the cache before the defined TTL.
               send_empty_value: true
-      - name: 'cacheMode'
-        type: Enum
+      - !ruby/object:Api::Type::Enum
+        name: 'cacheMode'
         description: |
           Specifies the cache setting for all responses from this backend.
           The possible values are: USE_ORIGIN_HEADERS, FORCE_CACHE_ALL and CACHE_ALL_STATIC
+        values:
+          - :USE_ORIGIN_HEADERS
+          - :FORCE_CACHE_ALL
+          - :CACHE_ALL_STATIC
         default_from_api: true
-        enum_values:
-          - 'USE_ORIGIN_HEADERS'
-          - 'FORCE_CACHE_ALL'
-          - 'CACHE_ALL_STATIC'
-      - name: 'serveWhileStale'
-        type: Integer
+      - !ruby/object:Api::Type::Integer
+        name: 'serveWhileStale'
+        send_empty_value: true
         description: |
           Serve existing content from the cache (if available) when revalidating content with the origin, or when an error is encountered when refreshing the cache.
         default_from_api: true
+      - !ruby/object:Api::Type::Boolean
+        name: 'requestCoalescing'
         send_empty_value: true
-      - name: 'requestCoalescing'
-        type: Boolean
         description: |
           If true then Cloud CDN will combine multiple concurrent cache fill requests into a small number of requests to the origin.
-        send_empty_value: true
-      - name: 'bypassCacheOnRequestHeaders'
-        type: Array
+      - !ruby/object:Api::Type::Array
+        name: 'bypassCacheOnRequestHeaders'
         description: |
           Bypass the cache when the specified request headers are matched - e.g. Pragma or Authorization headers. Up to 5 headers can be specified. The cache is bypassed for all cdnPolicy.cacheMode settings.
-        item_type:
-          type: NestedObject
+        max_size: 5
+        item_type: !ruby/object:Api::Type::NestedObject
           properties:
-            - name: 'headerName'
-              type: String
+            - !ruby/object:Api::Type::String
+              name: 'headerName'
               description: |
                 The header field name to match on when bypassing cache. Values are case-insensitive.
-        max_size: 5
-  - name: 'compressionMode'
-    type: Enum
+  - !ruby/object:Api::Type::Enum
+    name: 'compressionMode'
     description: |
       Compress text responses using Brotli or gzip compression, based on the client's Accept-Encoding header.
-    enum_values:
-      - 'AUTOMATIC'
-      - 'DISABLED'
-  - name: 'edgeSecurityPolicy'
-    type: String
+    values:
+      - :AUTOMATIC
+      - :DISABLED
+  - !ruby/object:Api::Type::String
+    name: 'edgeSecurityPolicy'
     description: |
       The security policy associated with this backend bucket.
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-  - name: 'customResponseHeaders'
-    type: Array
+  - !ruby/object:Api::Type::Array
+    name: 'customResponseHeaders'
     description: |
       Headers that the HTTP/S load balancer should add to proxied responses.
-    item_type:
-      type: String
-  - name: 'creationTimestamp'
-    type: Time
+    item_type: Api::Type::String
+  - !ruby/object:Api::Type::Time
+    name: 'creationTimestamp'
     description: 'Creation timestamp in RFC3339 text format.'
     output: true
-  - name: 'description'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'description'
     description: |
       An optional textual description of the resource; provided by the
       client when the resource is created.
-  - name: 'enableCdn'
-    type: Boolean
+  - !ruby/object:Api::Type::Boolean
+    name: 'enableCdn'
     description: 'If true, enable Cloud CDN for this BackendBucket.'
-  - name: 'name'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'name'
     description: |
       Name of the resource. Provided by the client when the resource is
       created. The name must be 1-63 characters long, and comply with
@@ -276,7 +278,7 @@ properties:
       the first character must be a lowercase letter, and all following
       characters must be a dash, lowercase letter, or digit, except the
       last character, which cannot be a dash.
-    required: true
     immutable: true
-    validation:
+    required: true
+    validation: !ruby/object:Provider::Terraform::Validation
       regex: '^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$'

@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2023 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,104 +11,100 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
+--- !ruby/object:Api::Resource
 name: 'PrivateConnection'
-description: |
-  The PrivateConnection resource is used to establish private connectivity between Database Migration Service and a customer's network.
-references:
+base_url: 'projects/{{project}}/locations/{{location}}/privateConnections'
+create_url: 'projects/{{project}}/locations/{{location}}/privateConnections?privateConnectionId={{private_connection_id}}'
+self_link: 'projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}'
+references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/database-migration/docs/oracle-to-postgresql/create-private-connectivity-configuration'
   api: 'https://cloud.google.com/database-migration/docs/reference/rest/v1/projects.locations.privateConnections'
-docs:
-id_format: 'projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}'
-base_url: 'projects/{{project}}/locations/{{location}}/privateConnections'
-self_link: 'projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/privateConnections?privateConnectionId={{private_connection_id}}'
-immutable: true
-import_format:
-  - 'projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}'
-timeouts:
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+timeouts: !ruby/object:Api::Timeouts
   insert_minutes: 60
-  update_minutes: 20
   delete_minutes: 60
 autogen_async: true
-async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
-  result:
-    resource_inside_response: false
-custom_code:
+description: |
+  The PrivateConnection resource is used to establish private connectivity between Database Migration Service and a customer's network.
+immutable: true
+id_format: projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}
+import_format:
+  [
+    'projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}',
+  ]
 examples:
-  - name: 'database_migration_service_private_connection'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'database_migration_service_private_connection'
     primary_resource_id: 'default'
     vars:
       private_connection_id: 'my-connection'
       network_name: 'my-network'
 parameters:
-  - name: 'privateConnectionId'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: privateConnectionId
     description: |
       The private connectivity identifier.
-    url_param_only: true
     required: true
     immutable: true
-  - name: 'location'
-    type: String
+    url_param_only: true
+  - !ruby/object:Api::Type::String
+    name: 'location'
     description: |
       The name of the location this private connection is located in.
-    url_param_only: true
     required: true
     immutable: true
+    url_param_only: true
 properties:
-  - name: 'name'
-    type: String
-    description: The resource's name.
+  - !ruby/object:Api::Type::String
+    name: 'name'
     output: true
-  - name: 'labels'
-    type: KeyValueLabels
+    description: The resource's name.
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
     description: Labels.
-  - name: 'displayName'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'displayName'
     description: Display name.
     default_from_api: true
-  - name: 'state'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'state'
     description: |
       State of the PrivateConnection.
     output: true
-  - name: 'error'
-    type: NestedObject
+  - !ruby/object:Api::Type::NestedObject
+    name: 'error'
+    output: true
     description: |
       The PrivateConnection error in case of failure.
-    output: true
     properties:
-      - name: 'message'
-        type: String
+      - !ruby/object:Api::Type::String
+        name: 'message'
         description: |
           A message containing more information about the error that occurred.
-      - name: 'details'
-        type: KeyValuePairs
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'details'
         description: |
           A list of messages that carry the error details.
-  - name: 'vpcPeeringConfig'
-    type: NestedObject
+  - !ruby/object:Api::Type::NestedObject
+    name: 'vpcPeeringConfig'
+    required: true
     description: |
       The VPC Peering configuration is used to create VPC peering
       between databasemigrationservice and the consumer's VPC.
-    required: true
     properties:
-      - name: 'vpcName'
-        type: String
+      - !ruby/object:Api::Type::String
+        name: 'vpcName'
+        required: true
         description: |
           Fully qualified name of the VPC that Database Migration Service will peer to.
           Format: projects/{project}/global/{networks}/{name}
+      - !ruby/object:Api::Type::String
+        name: 'subnet'
         required: true
-      - name: 'subnet'
-        type: String
         description: |
           A free subnet for peering. (CIDR of /29)
-        required: true

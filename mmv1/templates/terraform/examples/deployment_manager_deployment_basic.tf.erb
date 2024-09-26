@@ -1,0 +1,14 @@
+resource "google_deployment_manager_deployment" "<%= ctx[:primary_resource_id] %>" {
+  name = "<%= ctx[:vars]['deployment_name'] %>"
+
+  target {
+    config {
+      content = file("path/to/config.yml")
+    }
+  }
+
+  labels {
+    key = "foo"
+    value = "bar"
+  }
+}

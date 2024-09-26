@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2023 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,48 +11,38 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
+--- !ruby/object:Api::Resource
 name: 'FirewallRule'
 description: |
   A single firewall rule that is evaluated against incoming traffic
   and provides an action to take on matched requests.
-references:
+base_url: 'apps/{{project}}/firewall/ingressRules'
+self_link: 'apps/{{project}}/firewall/ingressRules/{{priority}}'
+update_verb: :PATCH
+update_mask: true
+references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/appengine/docs/standard/python/creating-firewalls#creating_firewall_rules'
   api: 'https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps.firewall.ingressRules'
-docs:
-base_url: 'apps/{{project}}/firewall/ingressRules'
-self_link: 'apps/{{project}}/firewall/ingressRules/{{priority}}'
-update_verb: 'PATCH'
-update_mask: true
-mutex: 'apps/{{project}}'
-import_format:
-  - 'apps/{{project}}/firewall/ingressRules/{{priority}}'
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-async:
-  type: 'PollAsync'
-  check_response_func_existence: 'transport_tpg.PollCheckForExistence'
-  check_response_func_absence: 'transport_tpg.PollCheckForAbsence'
-  suppress_error: false
-  target_occurrences: 1
-  actions: ['create']
 collection_url_key: 'ingressRules'
-custom_code:
-exclude_sweeper: true
+import_format: ['apps/{{project}}/firewall/ingressRules/{{priority}}']
+mutex: 'apps/{{project}}'
+async: !ruby/object:Provider::Terraform::PollAsync
+  check_response_func_existence: transport_tpg.PollCheckForExistence
+  actions: ['create']
+skip_sweeper: true
 examples:
-  - name: 'app_engine_firewall_rule_basic'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'app_engine_firewall_rule_basic'
     primary_resource_id: 'rule'
     vars:
       project_id: 'ae-project'
     test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
+      org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
 parameters:
-  - name: 'priority'
-    type: Integer
+  - !ruby/object:Api::Type::Integer
+    name: 'priority'
     description: |
       A positive integer that defines the order of rule evaluation.
       Rules with the lowest priority are evaluated first.
@@ -61,22 +51,22 @@ parameters:
       IPv6 traffic when no previous rule matches. Only the action of
       this rule can be modified by the user.
 properties:
-  - name: 'description'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'description'
     description: |
       An optional string description of this rule.
     required: false
-  - name: 'sourceRange'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'sourceRange'
     description: |
       IP address or range, defined using CIDR notation, of requests that this rule applies to.
     required: true
-  - name: 'action'
-    type: Enum
+  - !ruby/object:Api::Type::Enum
+    name: 'action'
     description: |
       The action to take if this rule matches.
     required: true
-    enum_values:
-      - 'UNSPECIFIED_ACTION'
-      - 'ALLOW'
-      - 'DENY'
+    values:
+      - UNSPECIFIED_ACTION
+      - ALLOW
+      - DENY

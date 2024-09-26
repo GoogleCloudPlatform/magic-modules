@@ -1,4 +1,5 @@
-# Copyright 2024 Google Inc.
+# Copyright 2023 Google Inc.
+
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,94 +13,99 @@
 # limitations under the License.
 
 ---
-name: 'EndpointAttachment'
+!ruby/object:Api::Resource
+name: "EndpointAttachment"
 description: |
   An Integration connectors Endpoint Attachment.
-references:
+references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation': 'https://cloud.google.com/integration-connectors/docs/create-endpoint-attachment'
-  api: 'https://cloud.google.com/integration-connectors/docs/reference/rest/v1/projects.locations.endpointAttachments'
-docs:
-base_url: 'projects/{{project}}/locations/{{location}}/endpointAttachments'
-self_link: 'projects/{{project}}/locations/{{location}}/endpointAttachments/{{name}}'
-create_url: 'projects/{{project}}/locations/{{location}}/endpointAttachments?endpointAttachmentId={{name}}'
-update_verb: 'PATCH'
-update_mask: true
-timeouts:
+    "Official Documentation": "https://cloud.google.com/integration-connectors/docs/create-endpoint-attachment"
+  api: "https://cloud.google.com/integration-connectors/docs/reference/rest/v1/projects.locations.endpointAttachments"
+base_url: projects/{{project}}/locations/{{location}}/endpointAttachments
+self_link: projects/{{project}}/locations/{{location}}/endpointAttachments/{{name}}
+timeouts: !ruby/object:Api::Timeouts
   insert_minutes: 5
   update_minutes: 5
   delete_minutes: 5
+create_url: projects/{{project}}/locations/{{location}}/endpointAttachments?endpointAttachmentId={{name}}
+update_verb: :PATCH
+update_mask: true
 autogen_async: true
-async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
-    path: 'name'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "integration_connectors_endpoint_attachment"
+    primary_resource_id: "sampleendpointattachment"
+    vars:
+      endpoint_attachment_name: "test-endpoint-attachment"
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: "name"
+    base_url: "{{op_id}}"
     wait_ms: 1000
-    timeouts:
+    timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 5
       update_minutes: 5
       delete_minutes: 5
-  result:
-    path: 'response'
+  result: !ruby/object:Api::OpAsync::Result
+    path: "response"
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
-custom_code:
-examples:
-  - name: 'integration_connectors_endpoint_attachment'
-    primary_resource_id: 'sampleendpointattachment'
-    vars:
-      endpoint_attachment_name: 'test-endpoint-attachment'
+  status: !ruby/object:Api::OpAsync::Status
+    path: "done"
+    complete: true
+    allowed:
+      - "true"
+      - "false"
+  error: !ruby/object:Api::OpAsync::Error
+    path: "error"
+    message: "message"
+
 parameters:
-  - name: 'location'
-    type: String
-    description: |
-      Location in which Endpoint Attachment needs to be created.
-    url_param_only: true
+  - !ruby/object:Api::Type::String
+    name: "location"
     required: true
     immutable: true
-  - name: 'name'
-    type: String
+    url_param_only: true
+    description: |
+      Location in which Endpoint Attachment needs to be created.
+  - !ruby/object:Api::Type::String
+    name: "name"
+    required: true
+    immutable: true
+    url_param_only: true
     description: |
       Name of Endpoint Attachment needs to be created.
 
-    url_param_only: true
-    required: true
-    immutable: true
 properties:
-  - name: 'createTime'
-    type: Time
+  - !ruby/object:Api::Type::Time
+    name: "createTime"
     description: |
       Time the Namespace was created in UTC.
     output: true
-  - name: 'updateTime'
-    type: Time
+  - !ruby/object:Api::Type::Time
+    name: "updateTime"
     description: |
       Time the Namespace was updated in UTC.
     output: true
-  - name: 'description'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: "description"
     description: |
       Description of the resource.
-  - name: 'labels'
-    type: KeyValueLabels
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: "labels"
     description: |
       Resource labels to represent user provided metadata.
-  - name: 'serviceAttachment'
-    type: String
-    description: |
-      The path of the service attachment.
+  - !ruby/object:Api::Type::String
+    name: "serviceAttachment"
     required: true
     immutable: true
-  - name: 'endpointIp'
-    type: String
+    description: |
+      The path of the service attachment.
+  - !ruby/object:Api::Type::String
+    name: "endpointIp"
     description: |
       The Private Service Connect connection endpoint ip.
     output: true
-  - name: 'endpointGlobalAccess'
-    type: Boolean
+  - !ruby/object:Api::Type::Boolean
+    name: "endpointGlobalAccess"
     description: |
       Enable global access for endpoint attachment.

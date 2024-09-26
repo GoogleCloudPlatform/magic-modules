@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2023 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,66 +11,69 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
+--- !ruby/object:Api::Resource
 name: 'ManagedZone'
 kind: 'dns#managedZone'
+base_url: 'projects/{{project}}/managedZones'
+update_verb: :PUT
 description: |
   A zone is a subtree of the DNS namespace under one administrative
   responsibility. A ManagedZone is a resource that represents a DNS zone
   hosted by the Cloud DNS service.
-references:
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  method_name_separator: ':'
+  fetch_iam_policy_verb: :POST
+  parent_resource_attribute: 'managed_zone'
+  set_iam_policy_verb: :POST
+  import_format:
+    [
+      'projects/{{project}}/managedZones/{{managed_zone}}',
+      '{{project}}/{{managed_zone}}',
+    ]
+references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Managing Zones': 'https://cloud.google.com/dns/zones/'
   api: 'https://cloud.google.com/dns/api/v1/managedZones'
-docs:
 id_format: 'projects/{{project}}/managedZones/{{name}}'
-base_url: 'projects/{{project}}/managedZones'
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-iam_policy:
-  method_name_separator: ':'
-  fetch_iam_policy_verb: 'POST'
-  parent_resource_attribute: 'managed_zone'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
-  import_format:
-    - 'projects/{{project}}/managedZones/{{managed_zone}}'
-    - '{{project}}/{{managed_zone}}'
-custom_code:
-  update_encoder: 'templates/terraform/update_encoder/managed_dns_zone.go.tmpl'
-  pre_delete: 'templates/terraform/pre_delete/managed_dns_zone.go.tmpl'
 examples:
-  - name: 'dns_managed_zone_quickstart'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dns_managed_zone_quickstart'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-example-zone-googlecloudexample%s", context["random_suffix"])'
+    primary_resource_name:
+      "fmt.Sprintf(\"tf-test-example-zone-googlecloudexample%s\"\
+      , context[\"random_suffix\"])"
+    skip_docs: true
     vars:
       dns_compute_instance: 'dns-compute-instance'
       allow_http_traffic: 'allow-http-traffic'
       example_zone_googlecloudexample: 'example-zone-googlecloudexample'
-      dns_name: 'googlecloudexample.net.'
+      dns_name: "googlecloudexample.net."
     test_vars_overrides:
-      'dns_name': '"m-z.gcp.tfacc.hashicorptest.com."'
+      dns_name: '"m-z.gcp.tfacc.hashicorptest.com."'
     ignore_read_extra:
       - 'force_destroy'
-    exclude_docs: true
-  - name: 'dns_record_set_basic'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dns_record_set_basic'
     primary_resource_id: 'parent-zone'
+    skip_docs: true
     vars:
       sample_zone: 'sample-zone'
-    exclude_docs: true
-  - name: 'dns_managed_zone_basic'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dns_managed_zone_basic'
     primary_resource_id: 'example-zone'
     external_providers: ["random", "time"]
       # Randomness from random provider
     skip_vcr: true
-  - name: 'dns_managed_zone_private'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dns_managed_zone_private'
     primary_resource_id: 'private-zone'
     vars:
       zone_name: 'private-zone'
       network_1_name: 'network-1'
       network_2_name: 'network-2'
-  - name: 'dns_managed_zone_private_multiproject'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dns_managed_zone_private_multiproject'
+    skip_docs: true
     primary_resource_id: 'private-zone'
     vars:
       zone_name: 'private-zone'
@@ -79,17 +82,18 @@ examples:
       project_1_name: 'project-1'
       project_2_name: 'project-2'
     test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-  - name: 'dns_managed_zone_private_forwarding'
+      org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dns_managed_zone_private_forwarding'
     primary_resource_id: 'private-zone'
+    skip_test: true
     vars:
       zone_name: 'private-zone'
       network_1_name: 'network-1'
       network_2_name: 'network-2'
-    exclude_test: true
-  - name: 'dns_managed_zone_private_gke'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dns_managed_zone_private_gke'
     primary_resource_id: 'private-zone-gke'
     vars:
       zone_name: 'private-zone'
@@ -97,117 +101,121 @@ examples:
       cluster_1_name: 'cluster-1'
       deletion_protection: 'true'
     test_vars_overrides:
-      'deletion_protection': 'false'
+      deletion_protection: 'false'
     oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'dns_managed_zone_private_peering'
+      deletion_protection: 'false'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dns_managed_zone_private_peering'
     primary_resource_id: 'peering-zone'
     vars:
       zone_name: 'peering-zone'
       network_source_name: 'network-source'
       network_target_name: 'network-target'
-  - name: 'dns_managed_zone_service_directory'
-    primary_resource_id: 'sd-zone'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dns_managed_zone_service_directory'
     min_version: 'beta'
+    primary_resource_id: 'sd-zone'
     vars:
       zone_name: 'peering-zone'
       network_name: 'network'
-  - name: 'dns_managed_zone_cloud_logging'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dns_managed_zone_cloud_logging'
     primary_resource_id: 'cloud-logging-enabled-zone'
     vars:
       zone_name: 'cloud-logging-enabled-zone'
 virtual_fields:
-  - name: 'force_destroy'
+  - !ruby/object:Api::Type::Boolean
+    name: 'force_destroy'
     description: 'Set this true to delete all records in the zone.'
-    type: Boolean
     default_value: false
-parameters:
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  update_encoder: templates/terraform/update_encoder/managed_dns_zone.go.erb
+  pre_delete: templates/terraform/pre_delete/managed_dns_zone.go.erb
 properties:
-  - name: 'description'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'description'
     description: |
       A textual description field. Defaults to 'Managed by Terraform'.
     required: false
-    validation:
+    default_value: 'Managed by Terraform'
+    validation: !ruby/object:Provider::Terraform::Validation
       function: 'validation.StringIsNotEmpty'
-    default_value: "Managed by Terraform"
-  - name: 'dnsName'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'dnsName'
     description: |
       The DNS name of this managed zone, for instance "example.com.".
-    required: true
     immutable: true
-  - name: 'dnssecConfig'
-    type: NestedObject
+    required: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'dnssecConfig'
     description: DNSSEC configuration
     default_from_api: true
     properties:
-      - name: 'kind'
-        type: String
-        description: Identifies what kind of resource this is
+      - !ruby/object:Api::Type::String
+        name: 'kind'
         at_least_one_of:
-          - 'dnssec_config.0.kind'
-          - 'dnssec_config.0.non_existence'
-          - 'dnssec_config.0.state'
-          - 'dnssec_config.0.default_key_specs'
-        default_value: "dns#managedZoneDnsSecConfig"
-      - name: 'nonExistence'
-        type: Enum
+          - dnssec_config.0.kind
+          - dnssec_config.0.non_existence
+          - dnssec_config.0.state
+          - dnssec_config.0.default_key_specs
+        description: Identifies what kind of resource this is
+        default_value: 'dns#managedZoneDnsSecConfig'
+      - !ruby/object:Api::Type::Enum
+        name: 'nonExistence'
+        at_least_one_of:
+          - dnssec_config.0.kind
+          - dnssec_config.0.non_existence
+          - dnssec_config.0.state
+          - dnssec_config.0.default_key_specs
         description: |
           Specifies the mechanism used to provide authenticated denial-of-existence responses.
           non_existence can only be updated when the state is `off`.
-        default_from_api: true
-        at_least_one_of:
-          - 'dnssec_config.0.kind'
-          - 'dnssec_config.0.non_existence'
-          - 'dnssec_config.0.state'
-          - 'dnssec_config.0.default_key_specs'
-        enum_values:
+        values:
           - 'nsec'
           - 'nsec3'
-      - name: 'state'
-        type: Enum
-        description: Specifies whether DNSSEC is enabled, and what mode it is in
+        default_from_api: true
+      - !ruby/object:Api::Type::Enum
+        name: 'state'
         at_least_one_of:
-          - 'dnssec_config.0.kind'
-          - 'dnssec_config.0.non_existence'
-          - 'dnssec_config.0.state'
-          - 'dnssec_config.0.default_key_specs'
-        enum_values:
+          - dnssec_config.0.kind
+          - dnssec_config.0.non_existence
+          - dnssec_config.0.state
+          - dnssec_config.0.default_key_specs
+        description: Specifies whether DNSSEC is enabled, and what mode it is in
+        values:
           - 'off'
           - 'on'
           - 'transfer'
-      - name: 'defaultKeySpecs'
-        type: Array
+      - !ruby/object:Api::Type::Array
+        name: 'defaultKeySpecs'
+        at_least_one_of:
+          - dnssec_config.0.kind
+          - dnssec_config.0.non_existence
+          - dnssec_config.0.state
+          - dnssec_config.0.default_key_specs
         description: |
           Specifies parameters that will be used for generating initial DnsKeys
           for this ManagedZone. If you provide a spec for keySigning or zoneSigning,
           you must also provide one for the other.
           default_key_specs can only be updated when the state is `off`.
         default_from_api: true
-        at_least_one_of:
-          - 'dnssec_config.0.kind'
-          - 'dnssec_config.0.non_existence'
-          - 'dnssec_config.0.state'
-          - 'dnssec_config.0.default_key_specs'
-        item_type:
-          type: NestedObject
+        item_type: !ruby/object:Api::Type::NestedObject
           properties:
-            - name: 'algorithm'
-              type: Enum
+            - !ruby/object:Api::Type::Enum
+              name: 'algorithm'
               description:
                 String mnemonic specifying the DNSSEC algorithm of this key
-              enum_values:
+              values:
                 - 'ecdsap256sha256'
                 - 'ecdsap384sha384'
                 - 'rsasha1'
                 - 'rsasha256'
                 - 'rsasha512'
-            - name: 'keyLength'
-              type: Integer
+            - !ruby/object:Api::Type::Integer
+              name: 'keyLength'
               description: Length of the keys in bits
-            - name: 'keyType'
-              type: Enum
+            - !ruby/object:Api::Type::Enum
+              name: 'keyType'
               description: |
                 Specifies whether this is a key signing key (KSK) or a zone
                 signing key (ZSK). Key signing keys have the Secure Entry
@@ -215,82 +223,80 @@ properties:
                 resource record sets of type DNSKEY. Zone signing keys do
                 not have the Secure Entry Point flag set and will be used
                 to sign all other types of resource record sets.
-              enum_values:
+              values:
                 - 'keySigning'
                 - 'zoneSigning'
-            - name: 'kind'
-              type: String
+            - !ruby/object:Api::Type::String
+              name: 'kind'
               description: 'Identifies what kind of resource this is'
-              default_value: "dns#dnsKeySpec"
-  - name: 'managedZoneID'
-    type: Integer
+              default_value: 'dns#dnsKeySpec'
+  - !ruby/object:Api::Type::Integer
+    name: 'managedZoneID'
+    api_name: 'id'
     description: Unique identifier for the resource; defined by the server.
-    api_name: id
     output: true
-  - name: 'name'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'name'
     description: |
       User assigned name for this resource.
       Must be unique within the project.
-    required: true
     immutable: true
-  - name: 'nameServers'
-    type: Array
+    required: true
+  - !ruby/object:Api::Type::Array
+    name: 'nameServers'
     description: |
       Delegate your managed_zone to these virtual name servers;
       defined by the server
+    item_type: Api::Type::String
     output: true
-    item_type:
-      type: String
-  - name: 'creationTime'
-    type: Time
+  - !ruby/object:Api::Type::Time
+    name: 'creationTime'
     description: |
       The time that this resource was created on the server.
       This is in RFC3339 text format.
     output: true
-  - name: 'labels'
-    type: KeyValueLabels
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
     description: |
       A set of key/value label pairs to assign to this ManagedZone.
-  - name: 'visibility'
-    type: Enum
+  - !ruby/object:Api::Type::Enum
+    name: 'visibility'
+    immutable: true
     description: |
       The zone's visibility: public zones are exposed to the Internet,
       while private zones are visible only to Virtual Private Cloud resources.
-    immutable: true
+    values:
+      - :private
+      - :public
+    default_value: :public
     diff_suppress_func: 'tpgresource.CaseDiffSuppress'
-    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
-    default_value: "public"
-    enum_values:
-      - 'private'
-      - 'public'
-  - name: 'privateVisibilityConfig'
-    type: NestedObject
+    custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
+  - !ruby/object:Api::Type::NestedObject
+    name: 'privateVisibilityConfig'
+    at_least_one_of:
+      - gke_clusters
+      - networks
     description: |
       For privately visible zones, the set of Virtual Private Cloud
       resources that the zone is visible from. At least one of `gke_clusters` or `networks` must be specified.
     send_empty_value: true
-    at_least_one_of:
-      - 'gke_clusters'
-      - 'networks'
-    custom_expand: 'templates/terraform/custom_expand/dns_managed_zone_private_visibility_config.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/dns_managed_zone_private_visibility_config.go.erb'
     properties:
-      - name: 'gkeClusters'
-        type: Array
+      - !ruby/object:Api::Type::Array
+        name: 'gkeClusters'
         description:
           'The list of Google Kubernetes Engine clusters that can see this zone.'
-        item_type:
-          type: NestedObject
+        item_type: !ruby/object:Api::Type::NestedObject
           properties:
-            - name: 'gkeClusterName'
-              type: String
+            - !ruby/object:Api::Type::String
+              name: 'gkeClusterName'
               description: |
                 The resource name of the cluster to bind this ManagedZone to.
                 This should be specified in the format like
                 `projects/*/locations/*/clusters/*`
               required: true
-      - name: 'networks'
-        type: Array
+      - !ruby/object:Api::Type::Array
+        name: 'networks'
         description: |
           The list of VPC networks that can see this zone. Until the provider updates to use the Terraform 0.12 SDK in a future release, you
           may experience issues with this resource while updating. If you've defined a `networks` block and
@@ -311,34 +317,33 @@ properties:
             schema.SerializeResourceForHash(&buf, raw, dnsManagedZonePrivateVisibilityConfigNetworksSchema())
             return tpgresource.Hashcode(buf.String())
           }
-        item_type:
-          type: NestedObject
+        item_type: !ruby/object:Api::Type::NestedObject
           properties:
             # TODO(drebes): Make 'networkUrl' a ResourceRef once cross-module references
             # are possible.
-            - name: 'networkUrl'
-              type: String
+            - !ruby/object:Api::Type::String
+              name: 'networkUrl'
               description: |
                 The id or fully qualified URL of the VPC network to bind to.
                 This should be formatted like `projects/{project}/global/networks/{network}` or
                 `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
               required: true
               diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-  - name: 'forwardingConfig'
-    type: NestedObject
+  - !ruby/object:Api::Type::NestedObject
+    name: 'forwardingConfig'
     description: |
       The presence for this field indicates that outbound forwarding is enabled
       for this zone. The value of this field contains the set of destinations
       to forward to.
     properties:
-      - name: 'targetNameServers'
-        type: Array
+      - !ruby/object:Api::Type::Array
+        name: 'targetNameServers'
+        required: true
         description: |
           List of target name servers to forward to. Cloud DNS will
           select the best available name server if more than
           one target is given.
         is_set: true
-        required: true
         set_hash_func: |-
           func(v interface{}) int {
             raw := v.(map[string]interface{})
@@ -349,88 +354,87 @@ properties:
             schema.SerializeResourceForHash(&buf, raw, dnsManagedZoneForwardingConfigTargetNameServersSchema())
             return tpgresource.Hashcode(buf.String())
           }
-        item_type:
-          type: NestedObject
+        item_type: !ruby/object:Api::Type::NestedObject
           properties:
-            - name: 'ipv4Address'
-              type: String
-              description: 'IPv4 address of a target name server.'
+            - !ruby/object:Api::Type::String
+              name: 'ipv4Address'
               required: true
-            - name: 'forwardingPath'
-              type: Enum
+              description: 'IPv4 address of a target name server.'
+            - !ruby/object:Api::Type::Enum
+              name: 'forwardingPath'
               description: |
                 Forwarding path for this TargetNameServer. If unset or `default` Cloud DNS will make forwarding
                 decision based on address ranges, i.e. RFC1918 addresses go to the VPC, Non-RFC1918 addresses go
                 to the Internet. When set to `private`, Cloud DNS will always send queries through VPC for this target
-              enum_values:
-                - 'default'
-                - 'private'
-  - name: 'peeringConfig'
-    type: NestedObject
+              values:
+                - :default
+                - :private
+  - !ruby/object:Api::Type::NestedObject
+    name: 'peeringConfig'
     description: |
       The presence of this field indicates that DNS Peering is enabled for this
       zone. The value of this field contains the network to peer with.
     properties:
-      - name: 'targetNetwork'
-        type: NestedObject
-        description: 'The network with which to peer.'
+      - !ruby/object:Api::Type::NestedObject
+        name: 'targetNetwork'
         required: true
+        description: 'The network with which to peer.'
         properties:
           # TODO(drebes): Make 'networkUrl' a ResourceRef once cross-module references
           # are possible.
-          - name: 'networkUrl'
-            type: String
+          - !ruby/object:Api::Type::String
+            name: 'networkUrl'
+            required: true
             description: |
               The id or fully qualified URL of the VPC network to forward queries to.
               This should be formatted like `projects/{project}/global/networks/{network}` or
               `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
-            required: true
+            custom_expand: templates/terraform/custom_expand/network_full_url.erb
             diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-            custom_expand: 'templates/terraform/custom_expand/network_full_url.tmpl'
-  - name: 'reverseLookup'
-    type: Boolean
+  - !ruby/object:Api::Type::Boolean
+    name: 'reverseLookup'
+    api_name: reverseLookupConfig
+    min_version: beta
+    immutable: true
     description: |
       Specifies if this is a managed reverse lookup zone. If true, Cloud DNS will resolve reverse
       lookup queries using automatically configured records for VPC resources. This only applies
       to networks listed under `private_visibility_config`.
-    api_name: reverseLookupConfig
-    min_version: 'beta'
+    custom_flatten: templates/terraform/custom_flatten/object_to_bool.go.erb
+    custom_expand: templates/terraform/custom_expand/bool_to_object.go.erb
+  - !ruby/object:Api::Type::NestedObject
+    min_version: beta
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/object_to_bool.go.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/bool_to_object.go.tmpl'
-  - name: 'serviceDirectoryConfig'
-    type: NestedObject
+    name: 'serviceDirectoryConfig'
     description:
       The presence of this field indicates that this zone is backed by Service
       Directory. The value of this field contains information related to the
       namespace associated with the zone.
-    min_version: 'beta'
-    immutable: true
     properties:
-      - name: 'namespace'
-        type: NestedObject
-        description: 'The namespace associated with the zone.'
+      - !ruby/object:Api::Type::NestedObject
+        name: 'namespace'
         required: true
+        description: 'The namespace associated with the zone.'
         properties:
-          - name: 'namespaceUrl'
-            type: String
+          - !ruby/object:Api::Type::String
+            name: 'namespaceUrl'
+            required: true
             description: |
               The fully qualified or partial URL of the service directory namespace that should be
               associated with the zone. This should be formatted like
               `https://servicedirectory.googleapis.com/v1/projects/{project}/locations/{location}/namespaces/{namespace_id}`
               or simply `projects/{project}/locations/{location}/namespaces/{namespace_id}`
               Ignored for `public` visibility zones.
-            required: true
-            custom_flatten: 'templates/terraform/custom_flatten/full_to_relative_path.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/sd_full_url.tmpl'
-  - name: 'cloudLoggingConfig'
-    type: NestedObject
+            custom_expand: 'templates/terraform/custom_expand/sd_full_url.erb'
+            custom_flatten: 'templates/terraform/custom_flatten/full_to_relative_path.erb'
+  - !ruby/object:Api::Type::NestedObject
+    name: 'cloudLoggingConfig'
     description: 'Cloud logging configuration'
     default_from_api: true
     properties:
-      - name: 'enableLogging'
-        type: Boolean
+      - !ruby/object:Api::Type::Boolean
+        name: 'enableLogging'
+        required: true
         description:
           'If set, enable query logging for this ManagedZone. False by default,
           making logging opt-in.'
-        required: true

@@ -1,0 +1,10 @@
+resource "google_compute_health_check" "https-health-check" {
+  name = "<%= ctx[:vars]['health_check_name'] %>"
+
+  timeout_sec        = 1
+  check_interval_sec = 1
+
+  https_health_check {
+    port = "443"
+  }
+}

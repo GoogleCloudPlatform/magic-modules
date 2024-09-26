@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2023 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,41 +11,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
+--- !ruby/object:Api::Resource
 name: 'AccessBoundaryPolicy'
+base_url: policies/{{parent}}/accessboundarypolicies
+create_url: policies/{{parent}}/accessboundarypolicies?policyId={{name}}
 description: |
   Represents a collection of access boundary policies to apply to a given resource.
   **NOTE**: This is a private feature and users should contact GCP support
   if they would like to test it.
-docs:
-id_format: '{{parent}}/{{name}}'
-base_url: 'policies/{{parent}}/accessboundarypolicies'
-create_url: 'policies/{{parent}}/accessboundarypolicies?policyId={{name}}'
-import_format:
-  - '{{parent}}/{{name}}'
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
 autogen_async: true
-async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
-  result:
-    path: 'targetLink'
-    resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
-custom_code:
 # Skipping sweeper since this is a child resource
-exclude_sweeper: true
+skip_sweeper: true
+import_format: ['{{parent}}/{{name}}']
+id_format: '{{parent}}/{{name}}'
 examples:
-  - name: 'iam_access_boundary_policy_basic'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'iam_access_boundary_policy_basic'
+    skip_test: true
     primary_resource_id: 'example'
     vars:
       policy_name: 'my-ab-policy'
@@ -53,85 +35,80 @@ examples:
       project_id: 'my-project'
       access_level_title: 'chromeos_no_lock'
     test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_test: true
-parameters:
+      org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
 properties:
-  - name: 'name'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'name'
     description: |
       The name of the policy.
-    url_param_only: true
     required: true
     immutable: true
-  - name: 'parent'
-    type: String
+    url_param_only: true
+  - !ruby/object:Api::Type::String
+    name: 'parent'
     description: |
       The attachment point is identified by its URL-encoded full resource name.
-    url_param_only: true
     required: true
     immutable: true
-  - name: 'displayName'
-    type: String
+    url_param_only: true
+  - !ruby/object:Api::Type::String
+    name: 'displayName'
     description: |
       The display name of the rule.
-  - name: 'etag'
-    type: Fingerprint
+  - !ruby/object:Api::Type::Fingerprint
+    name: 'etag'
     description: |
       The hash of the resource. Used internally during updates.
-    output: true
-  - name: 'rules'
-    type: Array
+  - !ruby/object:Api::Type::Array
+    name: 'rules'
+    required: true
     description: |
       Rules to be applied.
-    required: true
-    item_type:
-      type: NestedObject
+    item_type: !ruby/object:Api::Type::NestedObject
       properties:
-        - name: 'description'
-          type: String
+        - !ruby/object:Api::Type::String
+          name: 'description'
           description: |
             The description of the rule.
-        - name: 'accessBoundaryRule'
-          type: NestedObject
+        - !ruby/object:Api::Type::NestedObject
+          name: 'accessBoundaryRule'
           description: |
             An access boundary rule in an IAM policy.
           properties:
-            - name: 'availableResource'
-              type: String
+            - !ruby/object:Api::Type::String
+              name: 'availableResource'
               description:
                 The full resource name of a Google Cloud resource entity.
-            - name: 'availablePermissions'
-              type: Array
+            - !ruby/object:Api::Type::Array
+              name: 'availablePermissions'
               description:
                 A list of permissions that may be allowed for use on the
                 specified resource.
-              item_type:
-                type: String
-            - name: 'availabilityCondition'
-              type: NestedObject
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::NestedObject
+              name: 'availabilityCondition'
               description:
                 The availability condition further constrains the access allowed
                 by the access boundary rule.
               properties:
-                - name: 'expression'
-                  type: String
+                - !ruby/object:Api::Type::String
+                  name: 'expression'
                   description: |
                     Textual representation of an expression in Common Expression Language syntax.
                   required: true
-                - name: 'title'
-                  type: String
+                - !ruby/object:Api::Type::String
+                  name: 'title'
                   description: |
                     Title for the expression, i.e. a short string describing its purpose.
                     This can be used e.g. in UIs which allow to enter the expression.
-                - name: 'description'
-                  type: String
+                - !ruby/object:Api::Type::String
+                  name: 'description'
                   description: |
                     Description of the expression. This is a longer text which describes the expression,
                     e.g. when hovered over it in a UI.
-                - name: 'location'
-                  type: String
+                - !ruby/object:Api::Type::String
+                  name: 'location'
                   description: |
                     String indicating the location of the expression for error reporting,
                     e.g. a file name and a position in the file.

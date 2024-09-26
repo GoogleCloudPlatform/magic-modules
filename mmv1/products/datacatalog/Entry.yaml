@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2023 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,8 +11,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
-name: 'Entry'
+--- !ruby/object:Api::Resource
+name: "Entry"
+base_url: '{{entry_group}}/entries'
+create_url: '{{entry_group}}/entries?entryId={{entry_id}}'
+self_link: '{{name}}'
+update_verb: :PATCH
+update_mask: true
 description: |
   Entry Metadata. A Data Catalog Entry resource represents another resource in Google Cloud Platform
   (such as a BigQuery dataset or a Pub/Sub topic) or outside of Google Cloud Platform. Clients can use
@@ -20,66 +25,58 @@ description: |
 
   An Entry resource contains resource details, such as its schema. An Entry can also be used to attach
   flexible metadata, such as a Tag.
-references:
+references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation': 'https://cloud.google.com/data-catalog/docs'
-  api: 'https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.entryGroups.entries'
-docs:
-base_url: '{{entry_group}}/entries'
-self_link: '{{name}}'
-create_url: '{{entry_group}}/entries?entryId={{entry_id}}'
-update_verb: 'PATCH'
-update_mask: true
-import_format:
-  - '{{name}}'
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-custom_code:
-  custom_import: 'templates/terraform/custom_import/data_catalog_entry.go.tmpl'
+    'Official Documentation': https://cloud.google.com/data-catalog/docs
+  api: https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.entryGroups.entries
+import_format: ['{{name}}']
 supports_indirect_user_project_override: true
 examples:
-  - name: 'data_catalog_entry_basic'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'data_catalog_entry_basic'
     primary_resource_id: 'basic_entry'
     vars:
       entry_id: 'my_entry'
       entry_group_id: 'my_group'
-  - name: 'data_catalog_entry_fileset'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'data_catalog_entry_fileset'
     primary_resource_id: 'basic_entry'
     vars:
       entry_id: 'my_entry'
       entry_group_id: 'my_group'
-  - name: 'data_catalog_entry_full'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'data_catalog_entry_full'
     primary_resource_id: 'basic_entry'
     vars:
       entry_id: 'my_entry'
       entry_group_id: 'my_group'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_import: templates/terraform/custom_import/data_catalog_entry.go.erb
 parameters:
-  - name: 'entryGroup'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: entryGroup
+    required: true
+    url_param_only: true
+    immutable: true
     description: |
       The name of the entry group this entry is in.
-    url_param_only: true
+  - !ruby/object:Api::Type::String
+    name: entryId
     required: true
+    url_param_only: true
     immutable: true
-  - name: 'entryId'
-    type: String
     description: |
       The id of the entry to create.
-    url_param_only: true
-    required: true
-    immutable: true
 properties:
-  - name: 'name'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: name
     description: |
       The Data Catalog resource name of the entry in URL format.
       Example: projects/{project_id}/locations/{location}/entryGroups/{entryGroupId}/entries/{entryId}.
       Note that this Entry and its child resources may not actually be stored in the location in this name.
     output: true
-  - name: 'linkedResource'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: linkedResource
     description: |
       The resource this metadata entry refers to.
       For Google Cloud Platform resources, linkedResource is the full name of the resource.
@@ -88,42 +85,44 @@ properties:
       Output only when Entry is of type in the EntryType enum. For entries with userSpecifiedType,
       this field is optional and defaults to an empty string.
     default_from_api: true
-  - name: 'displayName'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: displayName
     description: |
       Display information such as title and description. A short name to identify the entry,
       for example, "Analytics Data - Jan 2011".
-  - name: 'description'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: description
     description: |
       Entry description, which can consist of several sentences or paragraphs that describe entry contents.
     # This is a string instead of a NestedObject because schemas contain ColumnSchemas, which can contain nested ColumnSchemas.
     # We'll have people provide the json blob for the schema instead.
-  - name: 'schema'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: schema
     description: |
       Schema of the entry (e.g. BigQuery, GoogleSQL, Avro schema), as a json string. An entry might not have any schema
       attached to it. See
       https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.entryGroups.entries#schema
       for what fields this schema can contain.
-    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
-    validation:
+    custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
+    custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
+    state_func:
+      'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
+      return s }'
+    validation: !ruby/object:Provider::Terraform::Validation
       function: 'validation.StringIsJSON'
-  - name: 'type'
-    type: Enum
+  - !ruby/object:Api::Type::Enum
+    name: type
     description: |
       The type of the entry. Only used for Entries with types in the EntryType enum.
       Currently, only FILESET enum value is allowed. All other entries created through Data Catalog must use userSpecifiedType.
+    values:
+      - :FILESET
     immutable: true
     exactly_one_of:
-      - 'type'
-      - 'user_specified_type'
-    enum_values:
-      - 'FILESET'
-  - name: 'userSpecifiedType'
-    type: String
+      - type
+      - user_specified_type
+  - !ruby/object:Api::Type::String
+    name: userSpecifiedType
     description: |
       Entry type if it does not fit any of the input-allowed values listed in EntryType enum above.
       When creating an entry, users should check the enum values first, if nothing matches the entry
@@ -131,30 +130,30 @@ properties:
       userSpecifiedType strings must begin with a letter or underscore and can only contain letters,
       numbers, and underscores; are case insensitive; must be at least 1 character and at most 64 characters long.
     exactly_one_of:
-      - 'type'
-      - 'user_specified_type'
-    validation:
+      - type
+      - user_specified_type
+    validation: !ruby/object:Provider::Terraform::Validation
       regex: '^[A-z_][A-z0-9_]{0,63}$'
-  - name: 'integratedSystem'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: integratedSystem
     description: |
       This field indicates the entry's source system that Data Catalog integrates with, such as BigQuery or Pub/Sub.
     output: true
-  - name: 'userSpecifiedSystem'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: userSpecifiedSystem
     description: |
       This field indicates the entry's source system that Data Catalog does not integrate with.
       userSpecifiedSystem strings must begin with a letter or underscore and can only contain letters, numbers,
       and underscores; are case insensitive; must be at least 1 character and at most 64 characters long.
-    validation:
+    validation: !ruby/object:Provider::Terraform::Validation
       regex: '^[A-z_][A-z0-9_]{0,63}$'
-  - name: 'gcsFilesetSpec'
-    type: NestedObject
+  - !ruby/object:Api::Type::NestedObject
+    name: gcsFilesetSpec
     description: |
       Specification that applies to a Cloud Storage fileset. This is only valid on entries of type FILESET.
     properties:
-      - name: 'filePatterns'
-        type: Array
+      - !ruby/object:Api::Type::Array
+        name: filePatterns
         description: |
           Patterns to identify a set of files in Google Cloud Storage.
           See [Cloud Storage documentation](https://cloud.google.com/storage/docs/gsutil/addlhelp/WildcardNames)
@@ -169,83 +168,81 @@ properties:
           * gs://bucket_name/a/*/b: matches all files in bucket_name that match a/*/b pattern, such as a/c/b, a/d/b
           * gs://another_bucket/a.txt: matches gs://another_bucket/a.txt
         required: true
-        item_type:
-          type: String
-      - name: 'sampleGcsFileSpecs'
-        type: Array
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::Array
+        name: sampleGcsFileSpecs
         description: |
           Sample files contained in this fileset, not all files contained in this fileset are represented here.
         output: true
-        item_type:
-          type: NestedObject
+        item_type: !ruby/object:Api::Type::NestedObject
           properties:
-            - name: 'filePath'
-              type: String
+            - !ruby/object:Api::Type::String
+              name: filePath
               description: |
                 The full file path
               output: true
-            - name: 'sizeBytes'
-              type: Integer
+            - !ruby/object:Api::Type::Integer
+              name: sizeBytes
               description: |
                 The size of the file, in bytes.
               output: true
-  - name: 'bigqueryTableSpec'
-    type: NestedObject
+  - !ruby/object:Api::Type::NestedObject
+    name: bigqueryTableSpec
     description: |
       Specification that applies to a BigQuery table. This is only valid on entries of type TABLE.
     output: true
     properties:
-      - name: 'tableSourceType'
-        type: String
+      - !ruby/object:Api::Type::String
+        name: tableSourceType
         description: |
           The table source type.
         output: true
-      - name: 'viewSpec'
-        type: NestedObject
+      - !ruby/object:Api::Type::NestedObject
+        name: viewSpec
         description: |
           Table view specification. This field should only be populated if tableSourceType is BIGQUERY_VIEW.
         output: true
         properties:
-          - name: 'viewQuery'
-            type: String
+          - !ruby/object:Api::Type::String
+            name: viewQuery
             description: |
               The query that defines the table view.
             output: true
-      - name: 'tableSpec'
-        type: NestedObject
+      - !ruby/object:Api::Type::NestedObject
+        name: tableSpec
         description: |
           Spec of a BigQuery table. This field should only be populated if tableSourceType is BIGQUERY_TABLE.
         output: true
         properties:
-          - name: 'groupedEntry'
-            type: String
+          - !ruby/object:Api::Type::String
+            name: groupedEntry
             description: |
               If the table is a dated shard, i.e., with name pattern [prefix]YYYYMMDD, groupedEntry is the
               Data Catalog resource name of the date sharded grouped entry, for example,
               projects/{project_id}/locations/{location}/entrygroups/{entryGroupId}/entries/{entryId}.
               Otherwise, groupedEntry is empty.
             output: true
-  - name: 'bigqueryDateShardedSpec'
-    type: NestedObject
+  - !ruby/object:Api::Type::NestedObject
+    name: bigqueryDateShardedSpec
     description: |
       Specification for a group of BigQuery tables with name pattern [prefix]YYYYMMDD.
       Context: https://cloud.google.com/bigquery/docs/partitioned-tables#partitioning_versus_sharding.
     output: true
     properties:
-      - name: 'dataset'
-        type: String
+      - !ruby/object:Api::Type::String
+        name: dataset
         description: |
           The Data Catalog resource name of the dataset entry the current table belongs to, for example,
           projects/{project_id}/locations/{location}/entrygroups/{entryGroupId}/entries/{entryId}
         output: true
-      - name: 'tablePrefix'
-        type: String
+      - !ruby/object:Api::Type::String
+        name: tablePrefix
         description: |
           The table name prefix of the shards. The name of any given shard is [tablePrefix]YYYYMMDD,
           for example, for shard MyTable20180101, the tablePrefix is MyTable.
         output: true
-      - name: 'shardCount'
-        type: Integer
+      - !ruby/object:Api::Type::Integer
+        name: shardCount
         description: |
           Total number of shards.
         output: true

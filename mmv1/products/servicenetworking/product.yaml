@@ -11,11 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
-name: 'ServiceNetworking'
-display_name: 'Service Networking'
+--- !ruby/object:Api::Product
+name: ServiceNetworking
+display_name: Service Networking
 versions:
-  - name: 'ga'
-    base_url: 'https://servicenetworking.googleapis.com/v1/'
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://servicenetworking.googleapis.com/v1/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform

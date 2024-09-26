@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2023 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,26 +11,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
+--- !ruby/object:Api::Resource
 name: 'ResponsePolicy'
 kind: 'dns#responsePolicy'
 description: |
   A Response Policy is a collection of selectors that apply to queries
   made against one or more Virtual Private Cloud networks.
-docs:
 base_url: 'projects/{{project}}/responsePolicies'
 self_link: 'projects/{{project}}/responsePolicies/{{response_policy_name}}'
-update_verb: 'PATCH'
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
+update_verb: :PATCH
 identity:
   - responsePolicyName
-custom_code:
-  pre_delete: 'templates/terraform/pre_delete/response_policy_detach_network_gke.tmpl'
 examples:
-  - name: 'dns_response_policy_basic'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dns_response_policy_basic'
     primary_resource_id: 'example-response-policy'
     vars:
       response_policy_name: 'example-response-policy'
@@ -39,51 +33,52 @@ examples:
       cluster_1_name: 'cluster-1'
       deletion_protection: 'true'
     test_vars_overrides:
-      'deletion_protection': 'false'
+      deletion_protection: 'false'
     oics_vars_overrides:
-      'deletion_protection': 'false'
-parameters:
+      deletion_protection: 'false'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_delete: templates/terraform/pre_delete/response_policy_detach_network_gke.erb
 properties:
-  - name: 'responsePolicyName'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'responsePolicyName'
     description:
       The user assigned name for this Response Policy, such as
       `myresponsepolicy`.
-    required: true
     immutable: true
-  - name: 'description'
-    type: String
+    required: true
+  - !ruby/object:Api::Type::String
+    name: 'description'
     description: |
       The description of the response policy, such as `My new response policy`.
+    default_value: 'Managed by Terraform'
     required: false
-    default_value: "Managed by Terraform"
-  - name: 'networks'
-    type: Array
+    update_verb: :PATCH
+  - !ruby/object:Api::Type::Array
+    name: 'networks'
     description:
       'The list of network names specifying networks to which this policy is
       applied.'
+    update_verb: :PATCH
     send_empty_value: true
-    item_type:
-      type: NestedObject
+    item_type: !ruby/object:Api::Type::NestedObject
       properties:
-        - name: 'networkUrl'
-          type: String
+        - !ruby/object:Api::Type::String
+          name: 'networkUrl'
+          required: true
           description: |
             The fully qualified URL of the VPC network to bind to.
             This should be formatted like
             `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
-          required: true
+          custom_expand: templates/terraform/custom_expand/network_full_url.erb
           diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-          custom_expand: 'templates/terraform/custom_expand/network_full_url.tmpl'
-  - name: 'gkeClusters'
-    type: Array
+  - !ruby/object:Api::Type::Array
+    name: 'gkeClusters'
     description:
       'The list of Google Kubernetes Engine clusters that can see this zone.'
-    item_type:
-      type: NestedObject
+    item_type: !ruby/object:Api::Type::NestedObject
       properties:
-        - name: 'gkeClusterName'
-          type: String
+        - !ruby/object:Api::Type::String
+          name: 'gkeClusterName'
           description: |
             The resource name of the cluster to bind this ManagedZone to.
             This should be specified in the format like

@@ -1,0 +1,19 @@
+resource "google_service_account" "service_account" {
+  account_id   = "<%= ctx[:vars]['account_id'] %>"
+  display_name = "Test Service Account"
+}
+
+resource "google_beyondcorp_app_connector" "<%= ctx[:primary_resource_id] %>" {
+  name = "<%= ctx[:vars]['app_connector_name'] %>"
+  region = "us-central1"
+  display_name = "<%= ctx[:vars]['display_name'] %>"
+  principal_info {
+    service_account {
+     email = google_service_account.service_account.email
+    }
+  }
+  labels = {
+    foo = "bar"
+    bar = "baz"
+  }
+}

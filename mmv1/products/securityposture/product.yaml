@@ -11,11 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
-name: 'Securityposture'
-display_name: 'Security Posture'
+--- !ruby/object:Api::Product
+name: Securityposture
+display_name: Security Posture
 versions:
-  - name: 'ga'
-    base_url: 'https://securityposture.googleapis.com/v1/'
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://securityposture.googleapis.com/v1/
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform

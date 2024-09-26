@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2023 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,79 +11,81 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
+--- !ruby/object:Api::Resource
 name: 'Router'
 kind: 'compute#router'
-description: |
-  Represents a Router resource.
-references:
-  guides:
-    'Google Cloud Router': 'https://cloud.google.com/router/docs/'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/routers'
-docs:
-base_url: 'projects/{{project}}/regions/{{region}}/routers'
-has_self_link: true
+base_url: projects/{{project}}/regions/{{region}}/routers
+collection_url_key: 'items'
 # Since Terraform has separate resources for router, router interface, and
 # router peer, calling PUT on the router will delete the interface and peer.
 # Use patch instead.
-update_verb: 'PATCH'
-mutex: 'router/{{region}}/{{name}}'
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
+update_verb: :PATCH
+has_self_link: true
+description: |
+  Represents a Router resource.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Google Cloud Router': 'https://cloud.google.com/router/docs/'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/routers'
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
+    base_url: '{{op_id}}'
     wait_ms: 1000
-  result:
+  result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
-    resource_inside_response: false
-  error:
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'status'
+    complete: 'DONE'
+    allowed:
+      - 'PENDING'
+      - 'RUNNING'
+      - 'DONE'
+  error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
-collection_url_key: 'items'
-custom_code:
-  constants: 'templates/terraform/constants/router.go.tmpl'
-custom_diff:
-  - 'resourceComputeRouterCustomDiff'
+mutex: router/{{region}}/{{name}}
 examples:
-  - name: 'router_basic'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'router_basic'
     primary_resource_id: 'foobar'
     vars:
       router_name: 'my-router'
       network_name: 'my-network'
     ignore_read_extra:
-      - 'advertisedIpRanges'
-  - name: 'compute_router_encrypted_interconnect'
+      - advertisedIpRanges
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'compute_router_encrypted_interconnect'
     primary_resource_id: 'encrypted-interconnect-router'
     vars:
       router_name: 'test-router'
       network_name: 'test-network'
     ignore_read_extra:
-      - 'advertisedIpRanges'
+      - advertisedIpRanges
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/router.go.erb
+custom_diff: [
+  'resourceComputeRouterCustomDiff',
+]
 parameters:
-  - name: 'region'
-    type: ResourceRef
+  - !ruby/object:Api::Type::ResourceRef
+    name: region
+    resource: Region
+    imports: name
     description: Region where the router resides.
-    required: false
     immutable: true
+    required: false
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Region'
-    imports: 'name'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
-  - name: 'creationTimestamp'
-    type: Time
+  - !ruby/object:Api::Type::Time
+    name: 'creationTimestamp'
     description: 'Creation timestamp in RFC3339 text format.'
     output: true
-  - name: 'name'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: name
     description: |
       Name of the resource. The name must be 1-63 characters long, and
       comply with RFC1035. Specifically, the name must be 1-63 characters
@@ -91,17 +93,19 @@ properties:
       which means the first character must be a lowercase letter, and all
       following characters must be a dash, lowercase letter, or digit,
       except the last character, which cannot be a dash.
-    required: true
     immutable: true
-    validation:
+    required: true
+    validation: !ruby/object:Provider::Terraform::Validation
       function: 'verify.ValidateGCEName'
-  - name: 'description'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: description
     description: |
       An optional description of this resource.
     send_empty_value: true
-  - name: 'network'
-    type: ResourceRef
+  - !ruby/object:Api::Type::ResourceRef
+    name: network
+    resource: Network
+    imports: 'selfLink'
     description: |
       A reference to the network to which this router belongs.
     required: true
@@ -113,35 +117,33 @@ properties:
   # these fields to the Terraform resource (and then within that, decide
   # whether to deprecate router_interface and router_peer or leave them
   # alone).
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Network'
-    imports: 'selfLink'
-  - name: 'bgp'
-    type: NestedObject
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+  - !ruby/object:Api::Type::NestedObject
+    name: bgp
     description: |
       BGP information specific to this router.
     send_empty_value: true
     properties:
-      - name: 'asn'
-        type: Integer
+      - !ruby/object:Api::Type::Integer
+        name: asn
         description: |
           Local BGP Autonomous System Number (ASN). Must be an RFC6996
           private ASN, either 16-bit or 32-bit. The value will be fixed for
           this router resource. All VPN tunnels that link to this router
           will have the same local ASN.
         required: true
-        validation:
+        validation: !ruby/object:Provider::Terraform::Validation
           function: 'verify.ValidateRFC6996Asn'
-      - name: 'advertiseMode'
-        type: Enum
+      - !ruby/object:Api::Type::Enum
+        name: advertiseMode
         description: |
           User-specified flag to indicate which mode to use for advertisement.
-        default_value: "DEFAULT"
-        enum_values:
-          - 'DEFAULT'
-          - 'CUSTOM'
-      - name: 'advertisedGroups'
-        type: Array
+        values:
+          - :DEFAULT
+          - :CUSTOM
+        default_value: :DEFAULT
+      - !ruby/object:Api::Type::Array
+        name: advertisedGroups
         description: |
           User-specified list of prefix groups to advertise in custom mode.
           This field can only be populated if advertiseMode is CUSTOM and
@@ -150,12 +152,10 @@ properties:
           blank to advertise no custom groups.
 
           This enum field has the one valid value: ALL_SUBNETS
+        item_type: Api::Type::String  # TODO(#324): enum?
         send_empty_value: true
- # TODO(#324): enum?
-        item_type:
-          type: String
-      - name: 'advertisedIpRanges'
-        type: Array
+      - !ruby/object:Api::Type::Array
+        name: advertisedIpRanges
         description: |
           User-specified list of individual IP ranges to advertise in
           custom mode. This field can only be populated if advertiseMode
@@ -163,24 +163,23 @@ properties:
           ranges will be advertised in addition to any specified groups.
           Leave this field blank to advertise no custom IP ranges.
         send_empty_value: true
-        custom_flatten: 'templates/terraform/custom_flatten/compute_router_range.go.tmpl'
-        item_type:
-          type: NestedObject
+        custom_flatten: 'templates/terraform/custom_flatten/compute_router_range.go.erb'
+        item_type: !ruby/object:Api::Type::NestedObject
           properties:
-            - name: 'range'
-              type: String
+            - !ruby/object:Api::Type::String
+              name: range
+              required: true
               description: |
                 The IP range to advertise. The value must be a
                 CIDR-formatted string.
-              required: true
               send_empty_value: true
-            - name: 'description'
-              type: String
+            - !ruby/object:Api::Type::String
+              name: description
               description: |
                 User-specified description for the IP range.
               send_empty_value: true
-      - name: 'keepaliveInterval'
-        type: Integer
+      - !ruby/object:Api::Type::Integer
+        name: keepaliveInterval
         description: |
           The interval in seconds between BGP keepalive messages that are sent
           to the peer. Hold time is three times the interval at which keepalive
@@ -193,18 +192,18 @@ properties:
           between the two peers. If set, this value must be between 20 and 60.
           The default is 20.
         default_value: 20
-      - name: 'identifierRange'
-        type: String
+      - !ruby/object:Api::Type::String
+        name: identifierRange
+        default_from_api: true
         description: |
           Explicitly specifies a range of valid BGP Identifiers for this Router.
           It is provided as a link-local IPv4 range (from 169.254.0.0/16), of
           size at least /30, even if the BGP sessions are over IPv6. It must
           not overlap with any IPv4 BGP session ranges. Other vendors commonly
           call this router ID.
-        default_from_api: true
-  - name: 'encryptedInterconnectRouter'
-    type: Boolean
+  - !ruby/object:Api::Type::Boolean
+    name: encryptedInterconnectRouter
+    immutable: true
     description: |
       Indicates if a router is dedicated for use with encrypted VLAN
       attachments (interconnectAttachments).
-    immutable: true

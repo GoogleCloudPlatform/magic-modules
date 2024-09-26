@@ -1,214 +1,191 @@
-# Copyright 2024 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the "License");
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
+# distributed under the License is distributed on an 'AS IS' BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
+--- !ruby/object:Api::Resource
 name: 'TcpRoute'
+base_url: 'projects/{{project}}/locations/global/tcpRoutes'
+create_url: 'projects/{{project}}/locations/global/tcpRoutes?tcpRouteId={{name}}'
+self_link: 'projects/{{project}}/locations/global/tcpRoutes/{{name}}'
+min_version: beta
+update_verb: :PATCH
+update_mask: true
 description: |
   TcpRoute is the resource defining how TCP traffic should be routed by a Mesh/Gateway resource.
-min_version: 'beta'
-references:
+references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Setup TCP Services': 'https://cloud.google.com/traffic-director/docs/set-up-tcp-route'
   api: 'https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1beta1/projects.locations.tcpRoutes'
-docs:
-base_url: 'projects/{{project}}/locations/global/tcpRoutes'
-self_link: 'projects/{{project}}/locations/global/tcpRoutes/{{name}}'
-create_url: 'projects/{{project}}/locations/global/tcpRoutes?tcpRouteId={{name}}'
-update_verb: 'PATCH'
-update_mask: true
-import_format:
-  - 'projects/{{project}}/locations/global/tcpRoutes/{{name}}'
-timeouts:
-  insert_minutes: 30
-  update_minutes: 30
-  delete_minutes: 30
-autogen_async: true
-async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
+    base_url: '{{op_id}}'
     wait_ms: 1000
-    timeouts:
+    timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 30
       update_minutes: 30
       delete_minutes: 30
-  result:
+  result: !ruby/object:Api::OpAsync::Result
     path: 'response'
-    resource_inside_response: false
-  error:
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
-custom_code:
+autogen_async: true
+import_format: ['projects/{{project}}/locations/global/tcpRoutes/{{name}}']
 examples:
-  - name: 'network_services_tcp_route_basic'
+  - !ruby/object:Provider::Terraform::Examples
+    min_version: beta
+    name: 'network_services_tcp_route_basic'
     primary_resource_id: 'default'
-    min_version: 'beta'
     vars:
       resource_name: 'my-tcp-route'
       backend_service_name: 'my-backend-service'
       http_health_check_name: 'backend-service-health-check'
-  - name: 'network_services_tcp_route_actions'
+  - !ruby/object:Provider::Terraform::Examples
+    min_version: beta
+    name: 'network_services_tcp_route_actions'
     primary_resource_id: 'default'
-    min_version: 'beta'
     vars:
       resource_name: 'my-tcp-route'
       backend_service_name: 'my-backend-service'
       http_health_check_name: 'backend-service-health-check'
-  - name: 'network_services_tcp_route_mesh_basic'
+  - !ruby/object:Provider::Terraform::Examples
+    min_version: beta
+    name: 'network_services_tcp_route_mesh_basic'
     primary_resource_id: 'default'
-    min_version: 'beta'
     vars:
       resource_name: 'my-tcp-route'
       backend_service_name: 'my-backend-service'
       http_health_check_name: 'backend-service-health-check'
-  - name: 'network_services_tcp_route_gateway_basic'
+  - !ruby/object:Provider::Terraform::Examples
+    min_version: beta
+    name: 'network_services_tcp_route_gateway_basic'
     primary_resource_id: 'default'
-    min_version: 'beta'
     vars:
       resource_name: 'my-tcp-route'
       backend_service_name: 'my-backend-service'
       http_health_check_name: 'backend-service-health-check'
 parameters:
-  - name: 'name'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    required: true
+    url_param_only: true
+    immutable: true
     description: |
       Name of the TcpRoute resource.
-    min_version: 'beta'
-    url_param_only: true
-    required: true
-    immutable: true
 properties:
-  - name: 'selfLink'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'selfLink'
     description: |
       Server-defined URL of this resource.
-    min_version: 'beta'
     output: true
-  - name: 'createTime'
-    type: Time
+  - !ruby/object:Api::Type::Time
+    name: 'createTime'
     description: |
       Time the TcpRoute was created in UTC.
-    min_version: 'beta'
     output: true
-  - name: 'updateTime'
-    type: Time
+  - !ruby/object:Api::Type::Time
+    name: 'updateTime'
     description: |
       Time the TcpRoute was updated in UTC.
-    min_version: 'beta'
     output: true
-  - name: 'labels'
-    type: KeyValueLabels
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
     description: Set of label tags associated with the TcpRoute resource.
-    min_version: 'beta'
-  - name: 'description'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'description'
     description: |
       A free-text description of the resource. Max length 1024 characters.
-    min_version: 'beta'
-  - name: 'meshes'
-    type: Array
+  - !ruby/object:Api::Type::Array
+    name: meshes
+    item_type: Api::Type::String
     description: |
       Meshes defines a list of meshes this TcpRoute is attached to, as one of the routing rules to route the requests served by the mesh.
       Each mesh reference should match the pattern: projects/*/locations/global/meshes/<mesh_name>
       The attached Mesh should be of a type SIDECAR
-    min_version: 'beta'
     send_empty_value: true
-    item_type:
-      type: String
-  - name: 'gateways'
-    type: Array
+  - !ruby/object:Api::Type::Array
+    name: gateways
+    item_type: Api::Type::String
     description: |
       Gateways defines a list of gateways this TcpRoute is attached to, as one of the routing rules to route the requests served by the gateway.
       Each gateway reference should match the pattern: projects/*/locations/global/gateways/<gateway_name>
-    min_version: 'beta'
     send_empty_value: true
-    item_type:
-      type: String
-  - name: 'rules'
-    type: Array
+  - !ruby/object:Api::Type::Array
+    name: rules
     description: |
       Rules that define how traffic is routed and handled. At least one RouteRule must be supplied.
       If there are multiple rules then the action taken will be the first rule to match.
-    min_version: 'beta'
     required: true
     send_empty_value: true
-    item_type:
-      type: NestedObject
+    item_type: !ruby/object:Api::Type::NestedObject
       properties:
-        - name: 'matches'
-          type: Array
+        - !ruby/object:Api::Type::Array
+          name: matches
           description: |
             RouteMatch defines the predicate used to match requests to a given action. Multiple match types are "OR"ed for evaluation.
             If no routeMatch field is specified, this rule will unconditionally match traffic.
-          min_version: 'beta'
           send_empty_value: true
-          item_type:
-            type: NestedObject
+          item_type: !ruby/object:Api::Type::NestedObject
             properties:
-              - name: 'address'
-                type: String
+              - !ruby/object:Api::Type::String
+                name: address
                 description: |
                   Must be specified in the CIDR range format. A CIDR range consists of an IP Address and a prefix length to construct the subnet mask.
                   By default, the prefix length is 32 (i.e. matches a single IP address). Only IPV4 addresses are supported. Examples: "10.0.0.1" - matches against this exact IP address. "10.0.0.0/8" - matches against any IP address within the 10.0.0.0 subnet and 255.255.255.0 mask. "0.0.0.0/0" - matches against any IP address'.
-                min_version: 'beta'
                 required: true
-              - name: 'port'
-                type: String
+              - !ruby/object:Api::Type::String
+                name: port
                 description: |
                   Specifies the destination port to match against.
-                min_version: 'beta'
                 required: true
-        - name: 'action'
-          type: NestedObject
+        - !ruby/object:Api::Type::NestedObject
+          name: action
           description: |
             A detailed rule defining how to route traffic.
-          min_version: 'beta'
           required: true
           properties:
-            - name: 'destinations'
-              type: Array
+            - !ruby/object:Api::Type::Array
+              name: destinations
               description: |
                 The destination services to which traffic should be forwarded. At least one destination service is required.
-              min_version: 'beta'
-              item_type:
-                type: NestedObject
+              item_type: !ruby/object:Api::Type::NestedObject
                 properties:
-                  - name: 'serviceName'
-                    type: String
+                  - !ruby/object:Api::Type::String
+                    name: serviceName
                     description: |
                       The URL of a BackendService to route traffic to.
-                    min_version: 'beta'
-                  - name: 'weight'
-                    type: Integer
+                  - !ruby/object:Api::Type::Integer
+                    name: weight
                     description: |
                       Specifies the proportion of requests forwarded to the backend referenced by the serviceName field. This is computed as: weight/Sum(weights in this destination list). For non-zero values, there may be some epsilon from the exact proportion defined here depending on the precision an implementation supports.
                       If only one serviceName is specified and it has a weight greater than 0, 100% of the traffic is forwarded to that backend.
                       If weights are specified for any one service name, they need to be specified for all of them.
                       If weights are unspecified for all services, then, traffic is distributed in equal proportions to all of them.
-                    min_version: 'beta'
-            - name: 'originalDestination'
-              type: Boolean
+            - !ruby/object:Api::Type::Boolean
+              name: originalDestination
               description: |
                 If true, Router will use the destination IP and port of the original connection as the destination of the request.
-              min_version: 'beta'
-            - name: 'idleTimeout'
-              type: String
+            - !ruby/object:Api::Type::String
+              name: idleTimeout
               description: |
                 Specifies the idle timeout for the selected route. The idle timeout is defined as the period in which there are no bytes sent or received on either the upstream or downstream connection. If not set, the default idle timeout is 30 seconds. If set to 0s, the timeout will be disabled.
 
                 A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
-              min_version: 'beta'
-              validation:
+              validation: !ruby/object:Provider::Terraform::Validation
                 regex: '^(0|[1-9][0-9]*)(\.[0-9]{1,9})?s$'

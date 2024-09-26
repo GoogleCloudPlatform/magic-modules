@@ -1,0 +1,9 @@
+resource "google_vertex_ai_tensorboard" "<%= ctx[:primary_resource_id] %>" {
+  display_name = "<%= ctx[:vars]['display_name'] %>"
+  description  = "sample description"
+  labels       = {
+    "key1" : "value1",
+    "key2" : "value2"
+  }
+  region       = "us-central1"
+}

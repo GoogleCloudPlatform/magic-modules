@@ -1,0 +1,16 @@
+resource "google_firebase_hosting_site" "default" {
+  provider = google-beta
+  project  = "<%= ctx[:test_env_vars]['project_id'] %>"
+  site_id = "<%= ctx[:vars]['site_id'] %>"
+}
+
+resource "google_firebase_hosting_channel" "full" {
+  provider = google-beta
+  site_id = google_firebase_hosting_site.default.site_id
+  channel_id = "<%= ctx[:vars]['channel_id'] %>"
+  ttl = "86400s"
+  retained_release_count = 20
+  labels = {
+    "some-key": "some-value"
+  }
+}

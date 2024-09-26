@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2023 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,9 +11,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
+--- !ruby/object:Api::Resource
 name: 'InstanceGroupManager'
 kind: 'compute#instanceGroupManager'
+base_url: projects/{{project}}/zones/{{zone}}/instanceGroupManagers
+collection_url_key: 'items'
+has_self_link: true
+# Used as a resource reference
+exclude: true
 description: |
   Creates a managed instance group using the information that you specify in
   the request. After the group is created, it schedules an action to create
@@ -23,70 +28,62 @@ description: |
   verify the status of the individual instances.
 
   A managed instance group can have up to 1000 VM instances per group.
-# Used as a resource reference
-exclude: true
-docs:
-base_url: 'projects/{{project}}/zones/{{zone}}/instanceGroupManagers'
-has_self_link: true
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
+    base_url: '{{op_id}}'
     wait_ms: 1000
-  result:
+  result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
-    resource_inside_response: false
-  error:
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'status'
+    complete: 'DONE'
+    allowed:
+      - 'PENDING'
+      - 'RUNNING'
+      - 'DONE'
+  error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
-collection_url_key: 'items'
-custom_code:
 parameters:
-  - name: 'zone'
-    type: ResourceRef
-    description: 'The zone the managed instance group resides.'
-    required: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'zone'
     resource: 'Zone'
     imports: 'name'
+    description: 'The zone the managed instance group resides.'
+    required: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
-  - name: 'baseInstanceName'
-    type: String
+  - !ruby/object:Api::Type::String
+    name: 'baseInstanceName'
     description: |
       The base instance name to use for instances in this group. The value
       must be 1-58 characters long. Instances are named by appending a
       hyphen and a random four-character string to the base instance name.
       The base instance name must comply with RFC1035.
     required: true
-  - name: 'creationTimestamp'
-    type: Time
+  - !ruby/object:Api::Type::Time
+    name: 'creationTimestamp'
     description: |
       The creation timestamp for this managed instance group in RFC3339
       text format.
     output: true
-  - name: 'currentActions'
-    type: NestedObject
+  - !ruby/object:Api::Type::NestedObject
+    name: 'currentActions'
     description: |
       The list of instance actions and the number of instances in this
       managed instance group that are scheduled for each of those actions.
-    output: true
     properties:
-      - name: 'abandoning'
-        type: Integer
+      - !ruby/object:Api::Type::Integer
+        name: 'abandoning'
         description: |
           The total number of instances in the managed instance group that
           are scheduled to be abandoned. Abandoning an instance removes it
           from the managed instance group without deleting it.
         output: true
-      - name: 'creating'
-        type: Integer
+      - !ruby/object:Api::Type::Integer
+        name: 'creating'
         description: |
           The number of instances in the managed instance group that are
           scheduled to be created or are currently being created. If the
@@ -97,28 +94,28 @@ properties:
           populated; instead, the creatingWithoutRetries field will be
           populated.
         output: true
-      - name: 'creatingWithoutRetries'
-        type: Integer
+      - !ruby/object:Api::Type::Integer
+        name: 'creatingWithoutRetries'
         description: |
           The number of instances that the managed instance group will
           attempt to create. The group attempts to create each instance only
           once. If the group fails to create any of these instances, it
           decreases the group's targetSize value accordingly.
         output: true
-      - name: 'deleting'
-        type: Integer
+      - !ruby/object:Api::Type::Integer
+        name: 'deleting'
         description: |
           The number of instances in the managed instance group that are
           scheduled to be deleted or are currently being deleted.
         output: true
-      - name: 'none'
-        type: Integer
+      - !ruby/object:Api::Type::Integer
+        name: 'none'
         description: |
           The number of instances in the managed instance group that are
           running and have no scheduled actions.
         output: true
-      - name: 'recreating'
-        type: Integer
+      - !ruby/object:Api::Type::Integer
+        name: 'recreating'
         description: |
           The number of instances in the managed instance group that are
           scheduled to be recreated or are currently being being recreated.
@@ -126,97 +123,96 @@ properties:
           and creates a new disk from the image that is defined in the
           instance template.
         output: true
-      - name: 'refreshing'
-        type: Integer
+      - !ruby/object:Api::Type::Integer
+        name: 'refreshing'
         description: |
           The number of instances in the managed instance group that are
           being reconfigured with properties that do not require a restart
           or a recreate action. For example, setting or removing target
           pools for the instance.
         output: true
-      - name: 'restarting'
-        type: Integer
+      - !ruby/object:Api::Type::Integer
+        name: 'restarting'
         description: |
           The number of instances in the managed instance group that are
           scheduled to be restarted or are currently being restarted.
         output: true
-  - name: 'description'
-    type: String
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'description'
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
     immutable: true
   # fingerprint ignored as it is an internal locking detail
-  - name: 'id'
-    type: Integer
+  - !ruby/object:Api::Type::Integer
+    name: 'id'
     description: 'A unique identifier for this resource'
     output: true
-  - name: 'instanceGroup'
-    type: ResourceRef
-    description: 'The instance group being managed'
-    output: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'instanceGroup'
     resource: 'InstanceGroup'
     imports: 'selfLink'
-  - name: 'instanceTemplate'
-    type: ResourceRef
+    description: 'The instance group being managed'
+    output: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'instanceTemplate'
+    resource: 'InstanceTemplate'
+    imports: 'selfLink'
     description: |
       The instance template that is specified for this managed instance
       group. The group uses this template to create all new instances in the
       managed instance group.
     required: true
   # kind is internal transport detail
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'InstanceTemplate'
-    imports: 'selfLink'
-  - name: 'name'
-    type: String
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+  - !ruby/object:Api::Type::String
+    name: 'name'
     description: |
       The name of the managed instance group. The name must be 1-63
       characters long, and comply with RFC1035.
     required: true
   # TODO(nelsonjr): Make namedPorts a NameValue(name[string], port[integer])
-  - name: 'namedPorts'
-    type: Array
+  - !ruby/object:Api::Type::Array
+    name: 'namedPorts'
     description:
       Named ports configured for the Instance Groups complementary to this
       Instance Group Manager.
-    item_type:
-      type: NestedObject
+    item_type: !ruby/object:Api::Type::NestedObject
       properties:
-        - name: 'name'
-          type: String
+        - !ruby/object:Api::Type::String
+          name: 'name'
           description: |
             The name for this named port. The name must be 1-63 characters
             long, and comply with RFC1035.
-        - name: 'port'
-          type: Integer
+        - !ruby/object:Api::Type::Integer
+          name: 'port'
           description:
             The port number, which can be a value between 1 and 65535.
-  - name: 'region'
-    type: ResourceRef
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'region'
+    resource: 'Region'
+    imports: 'selfLink'
     description: |
       The region this managed instance group resides
       (for regional resources).
     output: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Region'
-    imports: 'selfLink'
-  - name: 'targetPools'
-    type: Array
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+  - !ruby/object:Api::Type::Array
+    name: 'targetPools'
     description: |
       TargetPool resources to which instances in the instanceGroup field are
       added. The target pools automatically apply to all of the instances in
       the managed instance group.
-    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
-    item_type:
+    item_type: !ruby/object:Api::Type::ResourceRef
       name: 'targetPool'
-      type: ResourceRef
       description: 'The targetPool to receive managed instances.'
       resource: 'TargetPool'
       imports: 'selfLink'
-  - name: 'targetSize'
-    type: Integer
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
+  - !ruby/object:Api::Type::Integer
+    name: 'targetSize'
     description: |
       The target number of running instances for this managed instance
       group. Deleting or abandoning instances reduces this number. Resizing
