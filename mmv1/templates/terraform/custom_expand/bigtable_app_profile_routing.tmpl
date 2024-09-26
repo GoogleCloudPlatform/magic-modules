@@ -24,7 +24,7 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
 	}
 
     	if _, ok := d.GetOkExists("row_affinity"); ok {
-        	obj.Affinity = bigtableadmin.MultiClusterRoutingUseAny.RowAffinity{}   
+        	obj.RowAffinity = bigtableadmin.RowAffinity{}   
 	}
 
 	return obj, nil
