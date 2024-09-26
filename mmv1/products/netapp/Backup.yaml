@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Backup'
 description: |
   NetApp Volumes supports volume backups, which are copies of your volumes
@@ -28,30 +28,38 @@ description: |
   You can create manual and scheduled backups. Manual backups can be taken
   from a volume or from an existing volume snapshot. Scheduled backups
   require a backup policy.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Documentation': 'https://cloud.google.com/netapp/volumes/docs/protect-data/about-volume-backups'
   api: 'https://cloud.google.com/netapp/volumes/docs/reference/rest/v1/projects.locations.backupVaults.backups'
-base_url: projects/{{project}}/locations/{{location}}/backupVaults/{{vault_name}}/backups
-self_link: projects/{{project}}/locations/{{location}}/backupVaults/{{vault_name}}/backups/{{name}}
-create_url: projects/{{project}}/locations/{{location}}/backupVaults/{{vault_name}}/backups?backupId={{name}}
-create_verb: :POST
-update_url: projects/{{project}}/locations/{{location}}/backupVaults/{{vault_name}}/backups/{{name}}
-update_verb: :PATCH
-update_mask: true
-# Skipping the sweeper since we need to sweep multiple regions
-skip_sweeper: true
-delete_url: projects/{{project}}/locations/{{location}}/backupVaults/{{vault_name}}/backups/{{name}}
-delete_verb: :DELETE
-autogen_async: true
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    base_url: '{{op_id}}'
+docs:
 id_format: 'projects/{{project}}/locations/{{location}}/backupVaults/{{vault_name}}/backups/{{name}}'
-import_format: ['projects/{{project}}/locations/{{location}}/backupVaults/{{vault_name}}/backups/{{name}}']
+base_url: 'projects/{{project}}/locations/{{location}}/backupVaults/{{vault_name}}/backups'
+self_link: 'projects/{{project}}/locations/{{location}}/backupVaults/{{vault_name}}/backups/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/backupVaults/{{vault_name}}/backups?backupId={{name}}'
+update_url: 'projects/{{project}}/locations/{{location}}/backupVaults/{{vault_name}}/backups/{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+delete_url: 'projects/{{project}}/locations/{{location}}/backupVaults/{{vault_name}}/backups/{{name}}'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/backupVaults/{{vault_name}}/backups/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+custom_code:
+# Skipping the sweeper since we need to sweep multiple regions
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'netapp_backup'
+  - name: 'netapp_backup'
     primary_resource_id: 'test_backup'
     vars:
       pool_name: 'backup-pool'
@@ -59,77 +67,77 @@ examples:
       backup_vault_name: 'backup-vault'
       backup_name: 'test-backup'
     test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'location'
-    required: true
-    immutable: true
-    url_param_only: true
+  - name: 'location'
+    type: String
     description: |
       Location of the backup.
-  - !ruby/object:Api::Type::String
-    name: 'vault_name'
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
+  - name: 'vault_name'
+    type: String
     description: |
       Name of the backup vault to store the backup in.
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    description: |
-      The resource name of the backup. Needs to be unique per location.
+    url_param_only: true
     required: true
     immutable: true
+  - name: 'name'
+    type: String
+    description: |
+      The resource name of the backup. Needs to be unique per location.
     url_param_only: true
+    required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'state'
+  - name: 'state'
+    type: String
     description: |
       The state of the Backup Vault. Possible Values : [STATE_UNSPECIFIED, CREATING, UPLOADING, READY, DELETING, ERROR, UPDATING]
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: |
       A description of the backup with 2048 characters or less. Requests with longer descriptions will be rejected.
     required: false
-  - !ruby/object:Api::Type::String
-    name: 'volumeUsageBytes'
+  - name: 'volumeUsageBytes'
+    type: String
     description: |
       Size of the file system when the backup was created. When creating a new volume from the backup, the volume capacity will have to be at least as big.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'backupType'
+  - name: 'backupType'
+    type: String
     description: |
       Type of backup, manually created or created by a backup policy. Possible Values : [TYPE_UNSPECIFIED, MANUAL, SCHEDULED]
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'sourceVolume'
+  - name: 'sourceVolume'
+    type: String
     description: |
       ID of volumes this backup belongs to. Format: `projects/{{projects_id}}/locations/{{location}}/volumes/{{name}}``
     immutable: true
-    diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
-  - !ruby/object:Api::Type::String
-    name: 'createTime'
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+  - name: 'createTime'
+    type: String
     description: |
       Create time of the backup. A timestamp in RFC3339 UTC "Zulu" format. Examples: "2023-06-22T09:13:01.617Z".
     output: true
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: labels
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       Labels as key value pairs. Example: `{ "owner": "Bob", "department": "finance", "purpose": "testing" }`.
     required: false
-  - !ruby/object:Api::Type::String
-    name: 'chainStorageBytes'
+  - name: 'chainStorageBytes'
+    type: String
     description: |
       Backups of a volume build incrementally on top of each other. They form a "backup chain".
       Total size of all backups in a chain in bytes = baseline backup size + sum(incremental backup size)
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'sourceSnapshot'
+  - name: 'sourceSnapshot'
+    type: String
     description: |
       If specified, backup will be created from the given snapshot. If not specified,
       there will be a new snapshot taken to initiate the backup creation.
       Format: `projects/{{projectId}}/locations/{{location}}/volumes/{{volumename}}/snapshots/{{snapshotname}}``
     required: false
-    diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
