@@ -12,7 +12,9 @@ jobs:
       uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
     - name: Check for submodules
       run: |
-        if [[ $(git submodule status --recursive) ]]; then
+        output=$(git submodule status --recursive 2>&1)
+        if [ ! -z $output ]; then
+          echo $output
           echo "Submodules are not allowed"
           exit 1
         else
