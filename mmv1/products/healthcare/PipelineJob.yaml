@@ -17,7 +17,7 @@ kind: 'healthcare#pipelineJob'
 description: |
   PipelineJobs are Long Running Operations on Healthcare API to Map or Reconcile
   incoming data into FHIR format
-references: 
+references:
   guides:
     'Creating a PipelineJob': 'https://cloud.google.com/healthcare-api/private/healthcare-data-engine/docs/reference/rest/v1/projects.locations.datasets.pipelineJobs#PipelineJob'
   api: 'https://cloud.google.com/healthcare-api/healthcare-data-engine/docs/reference/rest/v1/projects.locations.datasets.pipelineJobs'
