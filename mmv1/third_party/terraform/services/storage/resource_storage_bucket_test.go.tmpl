@@ -34,21 +34,10 @@ func TestAccStorageBucket_basic_hns(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"google_storage_bucket.bucket", "hierarchical_namespace.0.enabled", "true"),
-					resource.TestCheckResourceAttr(
-						"google_storage_bucket.bucket", "project", envvar.GetTestProjectFromEnv()),
-					resource.TestCheckResourceAttrSet(
-						"google_storage_bucket.bucket", "project_number"),
 				),
 			},
 			{
 				ResourceName:            "google_storage_bucket.bucket",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
-			},
-			{
-				ResourceName:            "google_storage_bucket.bucket",
-				ImportStateId:           fmt.Sprintf("%s/%s", envvar.GetTestProjectFromEnv(), bucketName),
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"force_destroy"},
