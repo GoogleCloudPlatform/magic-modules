@@ -104,7 +104,6 @@ properties:
     type: Enum
     description: |
       The type of usage set for this InternalRange.
-    values:
     required: true
     enum_values:
       - 'FOR_VPC'
@@ -164,6 +163,7 @@ properties:
           The project for the source resource should match the project for the
           InternalRange.
           An example /projects/{project}/regions/{region}/subnetworks/{subnet}
+        requred: true
       - name: 'target'
         type: String
         description: |
@@ -171,3 +171,4 @@ properties:
           different, as in the cases when migrating to peer networks. The resource
           may not exist yet.
           For example /projects/{project}/regions/{region}/subnetworks/{subnet}
+        required: true
