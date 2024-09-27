@@ -170,7 +170,7 @@ properties:
         type: NestedObject
         description: |
           Settings for ingestion from Amazon Kinesis Data Streams.
-        exactly_one_of:
+        conflicts:
           - 'aws_kinesis'
           - 'cloud_storage'
         properties:
@@ -204,7 +204,7 @@ properties:
       - name: 'cloudStorage'
         type: NestedObject
         description: Settings for ingestion from Cloud Storage.
-        exactly_one_of:
+        conflicts:
           - 'aws_kinesis'
           - 'cloud_storage'
         properties:
