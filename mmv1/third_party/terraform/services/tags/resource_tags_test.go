@@ -104,7 +104,7 @@ resource "google_compute_network" "tag_network" {
 resource "google_tags_tag_key" "key" {
 	  parent = "organizations/%{org_id}"
 	  short_name = "foo%{random_suffix}"
-	  description = "For foo%{random_suffix} resources. UPDATED"
+	  description = "For foo%{random_suffix} resources."
 	  purpose = "GCE_FIREWALL"
 	  # purpose_data expects either a selfLinkWithId (not a property of google_compute_network) or the format <project-name>/<vpc-name>.
 	  # selfLink is not sufficient and will result in an error, so we build a string to match the second option.
