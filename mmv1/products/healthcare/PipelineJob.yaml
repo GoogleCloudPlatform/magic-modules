@@ -164,7 +164,7 @@ properties:
               Describes the streaming FHIR data source.
             required: false
       - name: fhirStoreDestination
-        type: Boolean
+        type: String
         conflicts:
           - reconciliationDestination
         description: |
@@ -179,7 +179,7 @@ properties:
           Format: project/{projectID}/locations/{locationID}/datasets/{datasetName}/fhirStores/{fhirStoreID}.
         required: false
       - name: reconciliationDestination
-        type: String
+        type: Boolean
         conflicts:
           - fhirStoreDestination
         description: |
